@@ -103,7 +103,7 @@ A readout the aircraft computes from a write takes longer: the Fenix's FCU headi
 A flag does two things, once per entry per flight:
 
 - The run's log gets a line at info carrying the entry, the value wanted, and the reading, as the EFB app's button that marks the moment writes one ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
-- The [notification banner](../product/03-v1-scope.md#notification-banner) shows a notice naming the entry, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app."
+- The [notification banner](../product/03-v1-scope.md#notification-banner) shows a notification naming the entry, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app."
 
 With one attempt, nothing repeats a write function's actions ([what the open questions still hold](05-units.md#what-the-open-questions-still-hold)).
 

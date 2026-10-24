@@ -21,7 +21,7 @@ What we found about passing control between pilots, by the take-control key and 
 - No CPU figure was found for the keyword spotter or Parakeet 110M on a desktop CPU, and no accent figure for any keyword spotter or grammar recognizer.
 
 **Changed:** the user moved the voice phrases from v1 to Soon, as a nice-to-have v1 can ship without (user, 2026-10-17), so node 6.12 picks neither, and the voice pick starts from this entry: Silero VAD and sherpa-onnx, with Parakeet, Moonshine, and the keyword spotter calibrated against our own voices and room noise, as [the product plan](../product/plan.md#6-probes-that-retire-architecture-risks) defers calibration to the build.
-The recorded lines go too, with the take-control key's cue and notice marking a pass ([take-control](01-take-control.md#a-pass)).
+The recorded lines go too, with the take-control key's cue and notification marking a pass ([take-control](01-take-control.md#a-pass)).
 
 **Affects:** [03-v1-scope](../product/03-v1-scope.md)'s voice phrases and take-control key, [the product plan](../product/plan.md)'s picks, [04-room-for-later](../product/04-room-for-later.md), [04-core-helper](../core/04-core-helper.md)'s speech, the code map's `voice` unit, and the spine's item on telling speech from noise.
 

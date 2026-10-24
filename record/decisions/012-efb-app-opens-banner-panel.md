@@ -6,7 +6,7 @@ Decided by the user on 2026-10-09, in node 1.5 of the [architecture plan](../are
 
 ## Context
 
-Dual Input's notices show on the banner, a see-through in-game panel of ours, and Dual Input opens the banner's panel itself, with no click from the pilot ([notification banner](../areas/product/03-v1-scope.md#notification-banner)).
+Dual Input's notifications show on the banner, a see-through in-game panel of ours, and Dual Input opens the banner's panel itself, with no click from the pilot ([notification banner](../areas/product/03-v1-scope.md#notification-banner)).
 `Coherent.call("TOOLBAR_BUTTON_TOGGLE", "PANEL_CROSSCHECK_P05", open)` opened and closed our panel when run in the toolbar's page and in the EFB's page, and did nothing in the Baron's tablet page or in `VLogic`, and mainUi has no `Coherent` to call it with (measured on MSFS 2024, 2026-10-04, [interface log](../areas/interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
 Closing the panel destroys its page (same entry), so the code that opens it lives in another page.
 [Node 1.5](../areas/architecture/plan.md#15-a-flight-with-dual-inputs-rust-pieces) asked which page that is, and with it whether the toolbar script is one of Dual Input's components at all.

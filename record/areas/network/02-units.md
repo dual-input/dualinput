@@ -18,7 +18,7 @@ This answers node 6.4 of the [architecture plan](../architecture/plan.md#64-the-
 
 | Unit | Tier | Holds | Runs |
 | --- | --- | --- | --- |
-| `network` | Platform | Each member's link and its connection, their timers, the channels' handlers, the heartbeat and clock offsets, the endpoint key, the backend's requests, and the network's notices; it raises `LinkUp`, `LinkLost`, `MemberLeft`, `MemberOut`, and `BackendAnswered` | On the loop |
+| `network` | Platform | Each member's link and its connection, their timers, the channels' handlers, the heartbeat and clock offsets, the endpoint key, the backend's requests, and the network's notifications; it raises `LinkUp`, `LinkLost`, `MemberLeft`, `MemberOut`, and `BackendAnswered` | On the loop |
 | `transport` | Engine | iroh's endpoint, its connections and streams, the newest-only slots and ATC audio's queue, pacing through a relay, and the send stamp | On tokio at the core's edge, and in any program that links it |
 | The message crate's `net` module | Engine | The kinds of delivery, the first message's header, and the transport's commands and events, while each channel's constant lives in its owner's module | Wherever the message crate does |
 | `src/backend/`'s sessions | Backend | Invite codes, sessions, members, and wrong codes, in D1 | On Cloudflare Workers |
@@ -83,8 +83,8 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 - Until then, the network drops the connection's one-off packets and keeps its other streams' bytes in arrival order, since QUIC keeps no order across streams ([the link between two cores](01-between-machines.md#the-link-between-two-cores)).
   The first message has no timeout, so a connection whose first message never comes stays open until it closes; the bench never saw a timeout fire, since a core that sends no first message closes its own connection first (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 - So the version check at join is the network's, at the backend and at the first message.
-  The session crate shows the backend's refusal, which reaches it in `BackendAnswered`, and the network shows a connection refused for its code, version, or hash, and an endpoint that failed to bind, as notices of its own ([notices](../core/02-clients-and-panel-bridge.md#what-a-unit-registers-and-calls)).
-  A core whose connection closes with a refusal's code shows the refusal's notice, as it does when it refuses the other core's first message itself, because the close can arrive before the first message the other core sent ahead of it.
+  The session crate shows the backend's refusal, which reaches it in `BackendAnswered`, and the network shows a connection refused for its code, version, or hash, and an endpoint that failed to bind, as notifications of its own ([notifications](../core/02-clients-and-panel-bridge.md#what-a-unit-registers-and-calls)).
+  A core whose connection closes with a refusal's code shows the refusal's notification, as it does when it refuses the other core's first message itself, because the close can arrive before the first message the other core sent ahead of it.
 
 ### Links
 
@@ -287,7 +287,7 @@ On iroh's relay a lost packet only holds back the packets behind it until TCP re
 - Two relays, with the two cores homed at different ones: both directions cross the dialed core's home relay ([p05]).
 - Both cores redialing at once after a cut, each pair of dials in either order: both sides keep the same connection, and the replay arrives whole.
 - A joiner whose first dials fail redials every 2s and links once the proxy lets it through.
-- A wrong code, version, or hash closes the connection with the code naming which, and the refused side shows a notice.
+- A wrong code, version, or hash closes the connection with the code naming which, and the refused side shows a notification.
 - A take-control during a cut, with the ex-PF changing the sim rate and pause alone: after the return, every machine holds the new PF's values.
 - A PF's Leave mid-flight: the PM holds control within 1s, and its core raises `MemberLeft` and stops dialing; a PF's quit does the same, tells the backend, and exits within 01-loop-and-edge's 3s for a quit.
 - A burst of one-off packets: QUIC's queue never holds more than 3,486 bytes, and a flight sample never goes out after a newer one.

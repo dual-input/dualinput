@@ -24,8 +24,8 @@ The desktop app works while the core may not be running, and the services off th
 | Core | A process of its own, out of sight, started by the desktop app | SimConnect, the session, the network, the profile engine and plugins, sim awareness, recording, audio, the take-control input, the figure's hand, AI traffic, the checks, and the pilot's settings |
 | Core helper | A process of its own, which the core starts and restarts | The core's Windows input and audio work: reading the keyboard, flight hardware, and mouse through Raw Input, capturing the ATC app, and playing sound; it captures the microphone and runs the speech recognizer only once the voice phrases, a Soon pick, are built |
 | Desktop app | A process of its own, from the pilot's login, as a tray icon that shows its window when the pilot opens it | Noticing the sim's start and stop from the operating system, starting the core with the sim and again if it exits, updates, and the firewall rule; in its window, editing the settings the core keeps, the report page, and the session's view |
-| EFB app | The EFB's document in the sim | The controls a pilot needs in flight, the EFB's opening onto it when a notice is clicked, and the banner panel's opening |
-| Banner panel | An in-game panel of ours | Notices |
+| EFB app | The EFB's document in the sim | The controls a pilot needs in flight, the EFB's opening onto it when a notification is clicked, and the banner panel's opening |
+| Banner panel | An in-game panel of ours | Notifications |
 | Menu script | The main menu's document, through our copy of BlurPage | Go to, through the world map's requests, and reports of which menu page is up |
 | Panel bridge | Every cockpit panel, through our `VCockpit.js` override | Pointer sync, and the modules that features name |
 | WASM module | The sim, as a standalone module from boot | The figures' placement, the aircraft's hold and writes, and the undoing of our state in the sim when the core goes quiet |
@@ -74,7 +74,7 @@ So the core tells every component below when a session starts.
 | WASM module | Runs, and does nothing each frame | Places the figures, holds the aircraft in preflight, and on a following machine writes the aircraft |
 | Panel bridge | Runs in every cockpit panel, loads no modules, and captures nothing | Runs pointer sync, and loads the modules that features name |
 | EFB app | Offers to start a session or enter a code | Shows the session's controls, and opens the banner panel in each flight |
-| Banner panel | Closed, so it has no page | Open through each flight, showing and hiding its own content, the session's notices among it |
+| Banner panel | Closed, so it has no page | Open through each flight, showing and hiding its own content, the session's notifications among it |
 | Menu script | Answers the core when asked, and watches nothing | Reports which menu page is up, and runs Go to |
 
 The core's masking group holds `K:SIM_RATE_INCR`, which it listens to and doesn't mask, and takes its priority as the sim starts ([flight-controls log](../flight-controls/log.md#2026-10-07-a-group-that-takes-its-priority-as-the-sim-starts-held-open-by-an-event-it-only-listens-to-masks-ahead-of-accu-sim-once-it-adds-the-axis)).
@@ -108,7 +108,7 @@ While a session is held, the core stays up through a sim restart, so it can tell
 ## Communication
 
 Every link between our components ends at the core, except the desktop app's to the release host ([tentative decisions](decisions.md#every-link-between-our-components-ends-at-the-core)).
-v1's features need no other: a click on a notice in the banner panel, for one, opens the EFB onto our app by way of the core, and a panel's action meant for the WASM module goes to the core over a WebSocket, then to the module through a SimConnect client data area, which this document calls a data slot.
+v1's features need no other: a click on a notification in the banner panel, for one, opens the EFB onto our app by way of the core, and a panel's action meant for the WASM module goes to the core over a WebSocket, then to the module through a SimConnect client data area, which this document calls a data slot.
 A page here is a document the sim runs in Coherent GT, one of those the inspector lists; the documents WebView2 draws in the desktop app's window are always called the desktop app's pages.
 
 ```text
@@ -128,7 +128,7 @@ A page here is a document the sim runs in Coherent GT, one of those the inspecto
 | Desktop app to core | The desktop app starts the core's process, and reads the port file the core writes in its data folder | The port file's process ID and creation time | It can't while the app's window is closed, since the app opens its socket only then |
 | Desktop app and core | WebSocket on 127.0.0.1, found through the port file, while the app's window is open | The core's state one way, commands the other | Messages every 2s |
 | EFB app and menu script, and core | WebSocket, found through the CommBus, whether or not a session runs | The EFB's controls and state, the banner's opening, Go to, and which menu page is up | The same, and a first message naming the component and its version |
-| Banner panel and core | The same, while the panel is open | Notices, and a click on one | The same |
+| Banner panel and core | The same, while the panel is open | Notifications, and a click on one | The same |
 | Panel bridge and core | The same, from every cockpit panel when a session starts, kept open only by the panels the profile names | Pointer presses, `H:` events, `instrument()` readings, and the locks' renewals | The same; no panel's first message ever arriving means our panel bridge didn't load, as when another package's `VCockpit.js` wins |
 | Core and WASM module | Data slots, one for each kind of message | Each routine's feed, such as the pose and velocities and the figures' poses, and the module's version and counter | A counter the module writes every second |
 | Core and core helper | The core starts the core helper's process and talks to it over the helper's standard input and output | Only a bound press, the next press while the pilot binds one, the mouse while the sim's main window is in front, Opus frames, and, once the voice phrases are built, a phrase heard, one way, so the microphone's audio never crosses ([what runs where](../core/04-core-helper.md#what-runs-where)); what to capture and what to play the other | The helper's process exiting, or its `Hello` differing in version or hash, since it sends no `Alive` ([the helper's life](../core/04-core-helper.md#the-helpers-life)) |
@@ -201,7 +201,7 @@ The WASM module can't open a socket, so it reaches the core through data slots, 
   Its socket to the core is open while its window is open, and the core writes it no file beyond the port file ([one program from login](../install/01-installing-and-updating.md#one-program-from-login)).
 - The desktop app starts the core when the port file names no running process with that ID and creation time, and waits for the file to be written again.
 - The core starts the desktop app's program when the app's window isn't open and the pilot presses the EFB app's button that brings it to the front, and the running app opens its window ([EFB app](../product/03-v1-scope.md#efb-app); [one program from login](../install/01-installing-and-updating.md#one-program-from-login)).
-  The Rejoin button the desktop app would show after a sim crash isn't in v1, which picked only the crew's notice that a pilot's sim crashed ([the product plan](../product/plan.md#3-v1-or-later); [ideas](../product/ideas.md#telling-the-crew-a-sim-crashed)).
+  The Rejoin button the desktop app would show after a sim crash isn't in v1, which picked only the crew's notification that a pilot's sim crashed ([the product plan](../product/plan.md#3-v1-or-later); [ideas](../product/ideas.md#telling-the-crew-a-sim-crashed)).
 
 ### Between machines
 
@@ -224,7 +224,7 @@ Every link but one tells the core when its component goes quiet: a page's or the
 The core can't tell whether the desktop app runs while its window is closed, because the app opens its socket to the core only while the window is open.
 Each page's first message names the component and its version, and the WASM module leaves its version in a slot, so the core logs a page from an older package by name, and names each component it expected and never heard from.
 The core logs every connection, first message, and close, and the recording keeps them, so a bug report shows which component stopped and when ([ideas](../product/ideas.md#component-health)).
-Trouble that costs the pilot a feature raises a notice from the unit that sees it, and the rest goes to the log and the recording ([trouble](../interface/01-apps.md#trouble)).
+Trouble that costs the pilot a feature raises a notification from the unit that sees it, and the rest goes to the log and the recording ([trouble](../interface/01-apps.md#trouble)).
 
 [links]: ../interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one
 [coverage]: ../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel

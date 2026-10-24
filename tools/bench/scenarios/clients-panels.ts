@@ -10,18 +10,10 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import { BenchRun, type Core } from "../cores.ts"
+import { announcing, BenchRun, type Core } from "../cores.ts"
 import { BARON, load } from "../flights.ts"
 import { app, BenchNetwork, host } from "../network.ts"
 import { FakePage } from "../pages.ts"
-
-/** A core on a stub sim, with the bench's backend, which its session needs. */
-async function announcing(run: BenchRun, name: string, net: BenchNetwork): Promise<Core> {
-  const core = await run.core(name, net.core())
-  core.act({ act: "watch", process: run.stub().id })
-  await core.hear("stage Starting aircraft none")
-  return core
-}
 
 /** A fake cockpit panel's bridge, named as the sim names a panel. */
 function panel(core: Core, name: string, instruments: string[]): FakePage {
@@ -45,7 +37,7 @@ test("panels connect only in a session, each of 20 is answered within 1s of the 
   const run = new BenchRun("clients-panels", t)
   const net = await BenchNetwork.start()
   t.after(() => net.stop())
-  const core = await announcing(run, "a", net)
+  const core = await announcing(run, "a", net.core())
   // As many cockpit panels as the Black Square Baron 58P has, 3 of them with a display the
   // profile's panel module takes (record/areas/interface/log.md, 2026-10-04), and the last
   // two each holding an instrument keyed GNS_DISABLED, as two of the Baron's do.
@@ -93,7 +85,7 @@ test("a panel module's messages reach its feature and come back, and a reloaded 
   const run = new BenchRun("clients-panel-reload", t)
   const net = await BenchNetwork.start()
   t.after(() => net.stop())
-  const core = await announcing(run, "a", net)
+  const core = await announcing(run, "a", net.core())
   await host(core, "Host")
   const first = panel(core, "VCockpit60", ["PFD_0|side=0"])
   t.after(() => first.close())
@@ -118,7 +110,7 @@ test("a slice 20 panels watch reaches each under 30 messages a second, though it
   const run = new BenchRun("clients-panel-rate", t)
   const net = await BenchNetwork.start()
   t.after(() => net.stop())
-  const core = await announcing(run, "a", net)
+  const core = await announcing(run, "a", net.core())
   await host(core, "Host")
   const panels = Array.from({ length: 20 }, (_, i) => panel(core, `VCockpit${i + 60}`, [`GAUGE_${i}`]))
   t.after(() => panels.forEach((p) => p.close()))
@@ -140,43 +132,43 @@ test("a slice 20 panels watch reaches each under 30 messages a second, though it
   core.checkHandlers("a run with 20 panels in rounds")
 })
 
-test("no cockpit panel within 10s of the profile loading raises the clients crate's trouble notice, cleared once one connects", { timeout: 60_000 }, async (t) => {
+test("no cockpit panel within 10s of the profile loading raises the clients crate's trouble notification, cleared once one connects", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-no-panel", t)
   const net = await BenchNetwork.start()
   t.after(() => net.stop())
-  const core = await announcing(run, "a", net)
-  const efb = new FakePage(core, { component: "efb" })
+  const core = await announcing(run, "a", net.core())
+  const efb = new FakePage(core, { component: "efb-app" })
   t.after(() => efb.close())
-  efb.client.watch("notices", () => {})
-  await efb.until(() => efb.slice("notices") !== undefined, "the notices")
+  efb.client.watch("notifications", () => {})
+  await efb.until(() => efb.slice("notifications") !== undefined, "the notifications")
   await host(core, "Host")
   core.clients({ act: "picks", picks: ["PFD"] })
   await load(core, BARON)
-  const ids = () => ((efb.slice("notices") ?? []) as { id: string }[]).map((n) => n.id)
+  const ids = () => ((efb.slice("notifications") ?? []) as { id: string }[]).map((n) => n.id)
   await sleep(9_000)
-  assert.deepEqual(ids(), [], "the notice came before 10s")
-  await efb.until(() => ids().includes("clients.no-panel"), "the trouble notice", 3_000)
+  assert.deepEqual(ids(), [], "the notification came before 10s")
+  await efb.until(() => ids().includes("clients.no-panel"), "the trouble notification", 3_000)
   const p = panel(core, "VCockpit60", ["CLOCK"])
   t.after(() => p.close())
-  await efb.until(() => !ids().includes("clients.no-panel"), "the notice clearing")
+  await efb.until(() => !ids().includes("clients.no-panel"), "the notification clearing")
 })
 
-test("a module from another build while a test routine is fed raises the sim service's trouble notice for our package", { timeout: 60_000 }, async (t) => {
-  const run = new BenchRun("clients-package-notice", t)
+test("a module from another build while a test routine is fed raises the sim service's trouble notification for our package", { timeout: 60_000 }, async (t) => {
+  const run = new BenchRun("clients-package-notification", t)
   const net = await BenchNetwork.start()
   t.after(() => net.stop())
-  const core = await announcing(run, "a", net)
+  const core = await announcing(run, "a", net.core())
   await core.hear("module Running")
-  const efb = new FakePage(core, { component: "efb" })
+  const efb = new FakePage(core, { component: "efb-app" })
   t.after(() => efb.close())
-  efb.client.watch("notices", () => {})
-  const ids = () => ((efb.slice("notices") ?? []) as { id: string }[]).map((n) => n.id)
+  efb.client.watch("notifications", () => {})
+  const ids = () => ((efb.slice("notifications") ?? []) as { id: string }[]).map((n) => n.id)
   core.act({ act: "module-from", slots_hash: "1" })
   await core.hear("module Differs")
   await sleep(500)
-  assert.deepEqual(ids(), [], "no routine is fed yet, so no notice")
+  assert.deepEqual(ids(), [], "no routine is fed yet, so no notification")
   core.call({ call: "feed", routine: "PROBE", mode: 3 })
-  await efb.until(() => ids().includes("sim-service.package"), "the package's trouble notice")
+  await efb.until(() => ids().includes("sim-service.package"), "the package's trouble notification")
   core.call({ call: "end", routine: "PROBE" })
-  await efb.until(() => !ids().includes("sim-service.package"), "the notice clearing once no routine is fed")
+  await efb.until(() => !ids().includes("sim-service.package"), "the notification clearing once no routine is fed")
 })

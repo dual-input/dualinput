@@ -121,13 +121,13 @@ test("a connection with another session's code closes with its code, and the ref
   const before = a.heard().length
   const wrong = await run.core("b", net.core())
   const desktop = await app(wrong)
-  await desktop.until(() => desktop.notices().some((n) => n.id === "network.refused"), "a refusal's notice", 20_000)
+  await desktop.until(() => desktop.notifications().some((n) => n.id === "network.refused"), "a refusal's notification", 20_000)
   // Each core checks the other's first message, so whichever reads first refuses: the host,
   // or the core with the other code.
   const refuser = [a, wrong].find((c) => /the network refused a connection conn=\d+ code=10/.test(c.log()))
   assert.ok(refuser, "one side should refuse the other code with code 10")
   const refused = refuser === a ? wrong : a
-  const said = /a notice was raised id="network\.refused" .*refused this one's connection/
+  const said = /a notification was raised id="network\.refused" .*refused this one's connection/
   for (const started = Date.now(); !said.test(refused.log()); await sleep(50)) {
     assert.ok(Date.now() - started < 5_000, "the refused side should say it was refused")
   }

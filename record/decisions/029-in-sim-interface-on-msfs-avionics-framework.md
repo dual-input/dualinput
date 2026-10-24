@@ -6,7 +6,7 @@ Decided by the user on 2026-10-09, in node 1.6 of the [architecture plan](../are
 
 ## Context
 
-Two of our components draw an interface in the sim's Coherent GT: the EFB app, which holds what a pilot needs during a flight, and the banner panel, which shows notices ([01-spine](../areas/architecture/01-spine.md#components)).
+Two of our components draw an interface in the sim's Coherent GT: the EFB app, which holds what a pilot needs during a flight, and the banner panel, which shows notifications ([01-spine](../areas/architecture/01-spine.md#components)).
 Node 1.6 had to pick what they build on, and node 1.6.1 asked how the MSFS Avionics Framework is published, licensed, and versioned, so we'd know whether to bundle our own pinned copy or use the one the sim provides ([architecture plan](../areas/architecture/plan.md#161-coherent-gts-javascript-as-documented-and-as-others-build-for-it)).
 
 - The framework is Microsoft's, Asobo's, and Working Title's library for glass cockpits in Coherent GT, and the SDK says many of MSFS 2024's own aircraft use it (documented, [06-01](../learn/foundations/06-01-the-engine-and-instruments.md#the-msfs-avionics-framework-and-working-title-avionics)).

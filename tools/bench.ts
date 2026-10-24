@@ -58,24 +58,33 @@ main(() => {
 })
 
 /**
- * Builds the core with its `stand-in` feature, the stand-in core helper, and the bench relay, into
- * target/bench, and returns the paths Cargo wrote them to. A build with the feature in
- * target/ would replace the dualinput-core.exe a plain `cargo build` writes there, and a
- * developer's next build would replace the bench's.
+ * Builds the core with its `stand-in` feature, the stand-in core helper, the stand-in desktop
+ * app, and the bench relay, into target/bench, and returns the paths Cargo wrote them to. A
+ * build with the feature in target/ would replace the dualinput-core.exe a plain `cargo build`
+ * writes there, and a developer's next build would replace the bench's.
  */
 function buildBench(release: boolean): { core: string; helper: string; relay: string; builder: string } {
-  const args = [
-    ...["-p", "dualinput-core", "-p", "stand-in-core-helper", "-p", "bench-relay", "-p", "dualinput-profile-builder"],
-    ...["--features", "dualinput-core/stand-in", "--target-dir", path.join("target", "bench")],
-  ]
+  const programs = ["dualinput-core", "stand-in-core-helper", "stand-in-desktop-app", "bench-relay", "dualinput-profile-builder"] as const
+  const args = [...programs.flatMap((p) => ["-p", p]), ...["--features", "dualinput-core/stand-in", "--target-dir", path.join("target", "bench")]]
   args.push("--profile", release ? "release" : "release-with-checks")
-  const built = buildPrograms(args, ["dualinput-core", "stand-in-core-helper", "bench-relay", "dualinput-profile-builder"])
+  const built = buildPrograms(args, programs)
+  // The core starts the desktop app's program from its own folder, by the name a release's
+  // folder gives it, so the stand-in goes beside the bench's core under that name.
+  // `PROGRAM` in src/apps/core/src/edges/desktop_app.rs names the same file, so change both
+  // together.
+  copyIfChanged(built["stand-in-desktop-app"], path.join(path.dirname(built["dualinput-core"]), "dualinput-desktop.exe"))
   return {
     core: built["dualinput-core"],
     helper: built["stand-in-core-helper"],
     relay: built["bench-relay"],
     builder: built["dualinput-profile-builder"],
   }
+}
+
+/** Copies `from` to `to` unless `to` already holds the same bytes, so a run that built nothing copies nothing. */
+function copyIfChanged(from: string, to: string): void {
+  if (fs.existsSync(to) && fs.readFileSync(to).equals(fs.readFileSync(from))) return
+  fs.copyFileSync(from, to)
 }
 
 /**

@@ -25,7 +25,7 @@ The split between reading and writing matches how profiles are already written: 
 
 | Field | What it says |
 | --- | --- |
-| `name` | The control's name for people, used in the Dual Input IDE, the preflight checklist, and notices |
+| `name` | The control's name for people, used in the Dual Input IDE, the preflight checklist, and notifications |
 | `watch` | Where the value comes from: a variable, a plugin's value, or a map that counts events into a shadow value |
 | `default` | A shadow value's starting value |
 | `write` | How to change the control, required on every entry: a name, `toggle`, `inc` and `dec`, a plugin's write method, a write function, or `none` for a watch-only entry |

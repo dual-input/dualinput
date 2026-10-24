@@ -103,7 +103,7 @@ Its 12 tests pass on them, and so do the 10 cases of the bench's four network sc
   A core that sent no first message never linked, but the host's 10s timeout never fired: the silent core took the host's first message, so its own link came up, heard nothing for 5s, and redialed, closing each connection before the host's 10s ran out.
 - **Plain HTTP:** a core reached the bench's relay over `http://` with a test token, which settles [left open](02-units.md#left-open)'s item.
 
-Not in this run: QUIC's queue holding no more than 3,486 bytes, which the transport keeps by handing a packet over only when the queue has room for it; a refusal for another version or hash, and the refused side's notice, which the network crate's tests cover; and the backend's requests, which its tests run against a local D1 in `tools/check.ts`.
+Not in this run: QUIC's queue holding no more than 3,486 bytes, which the transport keeps by handing a packet over only when the queue has room for it; a refusal for another version or hash, and the refused side's notification, which the network crate's tests cover; and the backend's requests, which its tests run against a local D1 in `tools/check.ts`.
 
 The first runs measured lateness and offsets through a proxy that waited a timer tick, about 15.6ms on Windows, on every read, which gave every probe a p99 of about 20ms and the offsets 3.8ms; the table and the offsets above come after its fix.
 

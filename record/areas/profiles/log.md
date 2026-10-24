@@ -35,7 +35,7 @@ The build changed or settled ten things the record didn't say:
 - The profile engine depends on no crate of ours, where the code map allows it the message crate.
 - The case of a job's result arriving after its member left the flight runs as a fetch the bench's site holds back, since the read of a cached bundle finishes too quickly to hold.
 - The bench's site serves what the builder's `publish` lays out, from the tree's profiles at each bench run; a core the scenario gives no site fetches from a closed port on this PC, so no bench core reaches the internet; and the bench's start of a core merges into a settings file already in its data folder, where it replaced it.
-- The clients' test unit keeps only its picks of instruments, and the clients' scenarios load the tree's 58P profile through a flight in the Baron; the session's scenarios fly the Baron too, so their cores load the profile and raise the clients crate's notice that no panel connected.
+- The clients' test unit keeps only its picks of instruments, and the clients' scenarios load the tree's 58P profile through a flight in the Baron; the session's scenarios fly the Baron too, so their cores load the profile and raise the clients crate's notification that no panel connected.
 - A profile's file is named for its developer and aircraft, as `bksq-baronpro.yaml`, which reviews check by eye (user, 2026-10-24; [the repository](01-format-and-delivery.md#the-repository)).
 
 The code review found the rest:

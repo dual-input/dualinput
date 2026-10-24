@@ -227,7 +227,7 @@ An EFB app loaded the sim's way, rather than code in the EFB's document, is untr
 
 - **The debrief timeline** plays a flight back from the recording ([flight recorder and debrief](ideas.md#flight-recorder-and-debrief)).
   v1 gives it no format, and it's built only if it fits without pressing on other design (user, 2026-10-16).
-- **Telemetry** sends the event v1 raises when a write never lands, the one that marks the recording and puts a notice on the banner ([02-live-sync](../sync/02-live-sync.md#checking-that-a-write-landed)), carrying nothing that identifies the pilot ([telemetry](ideas.md#telemetry)).
+- **Telemetry** sends the event v1 raises when a write never lands, the one that marks the recording and puts a notification on the banner ([02-live-sync](../sync/02-live-sync.md#checking-that-a-write-landed)), carrying nothing that identifies the pilot ([telemetry](ideas.md#telemetry)).
 - **Plugin tests:** what they need from the recording is left to the plugins' design (user, 2026-10-16).
 
 **v1 builds** a recording that's a replay log of every input the core takes, and after v1 each run gains an index of its sessions, the one record a later version reads (user, 2026-10-21; [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).

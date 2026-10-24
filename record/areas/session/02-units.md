@@ -20,7 +20,7 @@ The flying machine is the PF's, and a following machine is any other pilot's.
 | Unit | Tier | Holds | Runs |
 | --- | --- | --- | --- |
 | `session` | Platform | The members, the session's keys and their stamps, control, the session file, joining and leaving, preflight and `Hold`, the match check and its items, the display name setting, and when the core exits | On the loop |
-| `rate-and-pause` | Feature | Active pause, the simulation rate, the pause menu's notice, and the match check's time of day | Its crate in the core, and a part in the EFB app |
+| `rate-and-pause` | Feature | Active pause, the simulation rate, the pause menu's notification, and the match check's time of day | Its crate in the core, and a part in the EFB app |
 | `go-to` | Feature | The PF's spot and the Go to button | Its crate in the core, and a section in the desktop app |
 | The menu script | Platform outside the core | Reporting the menu's page, and running the world map's requests | In mainUi, through our copy of BlurPage, in `src/sim-package/pages` |
 
@@ -55,7 +55,7 @@ Every core works this out the same way, with one function of the session crate's
 
 - A change of any member's answer raises `FlightChanged { member, in_flight }`.
 - Nothing of the flight acts on a member out of it: the cockpit stream applies nothing on its machine ([the cockpit stream](../sync/04-order-and-recovery.md#the-cockpit-stream)), the profile loader loads nothing for another aircraft, and control can't pass to it.
-- A pilot who joins in another aircraft joins and is out of the flight, with a notice to load the session's aircraft, such as "Load the Baron 58P to fly with James", and the crew sees "Adam is in the A320" (user, 2026-10-16).
+- A pilot who joins in another aircraft joins and is out of the flight, with a notification to load the session's aircraft, such as "Load the Baron 58P to fly with James", and the crew sees "Adam is in the A320" (user, 2026-10-16).
   Nothing has to know the session's aircraft before a join, and a pilot cut off for 30 minutes, or who pressed Leave by mistake, types the code again from their flight.
 - Before the PF has loaded a flight, the session has no aircraft and nobody is in the flight, and a joiner sees "James hasn't loaded a flight yet".
 - Once preflight has ended, a core that sees no member in the flight leaves the session, so the session ends ([the PF](01-roles-and-members.md#the-pf)).
@@ -119,14 +119,14 @@ Seat claims ride avatars' poses, so the session crate holds none ([the pose](../
 - The session file is JSON in the data folder, through serde_json, holding what [the session file](../architecture/01-spine.md#the-session-file-and-a-core-that-restarts) and [02-units](../network/02-units.md#requests-the-session-crate-makes) put in it, and the run of the sim it last saw.
 - The session crate writes it as a job, where [02-units](../network/02-units.md#requests-the-session-crate-makes) orders it, again when the crew or the sim's run changes, and deletes it when the session ends for this core.
 - A core that starts and finds it raises the restart count, writes it, and asks `Open` with the crew it holds.
-- The run of the sim tells the crew's notice whether a restarted core's sim kept running, and how its last run ended tells a close from a crash ([a crash and a close](../core/03-sim-seam-and-wasm-module.md#a-crash-and-a-close)).
+- The run of the sim tells the crew's notification whether a restarted core's sim kept running, and how its last run ended tells a close from a crash ([a crash and a close](../core/03-sim-seam-and-wasm-module.md#a-crash-and-a-close)).
 
 ## Joining and leaving
 
 | Command | The session crate |
 | --- | --- |
 | Host | Draws the session's ID and this pilot's ID with `cx.new_id()`, asks `Host`, and on the code, writes the file and asks `Open` with no crew |
-| Join, with a code | Draws this pilot's ID and asks `Join`; on the backend's answer, writes the file and asks `Open` with the crew; on a refusal, shows it as a notice, naming whose version is older ([its requests](../network/02-units.md#its-requests)) |
+| Join, with a code | Draws this pilot's ID and asks `Join`; on the backend's answer, writes the file and asks `Open` with the crew; on a refusal, shows it as a notification, naming whose version is older ([its requests](../network/02-units.md#its-requests)) |
 | The code box selected, in the EFB app | Reads the clipboard as a job, which hands up only an invite code ([what stays out](../recording/01-recording-and-bug-reports.md#what-stays-out)), and joins with it at once |
 | Leave | Un-readies during preflight, passes control if this pilot holds it, and asks `Leave` as [leaving](../network/01-between-machines.md#leaving) orders it |
 | Quit, from any client, the desktop app's tray among them ([quit](../interface/01-apps.md#quit)) | Leaves as above with the quit code, asks `clients` for `bye`, and puts out the exit, as [quitting](../core/01-loop-and-edge.md#quitting) requires |
@@ -175,7 +175,7 @@ me.on::<FlightChanged>(|me, _, cx| cx.set_match(rate_and_pause::TIME_OF_DAY, me.
   The session crate's slice carries them, each with its level and its item's words ([slices and commands](../interface/01-apps.md#slices-and-commands)).
 - A feature that a difference breaks reads the result and turns itself off for the session.
 - The aircraft's folder and preset aren't an item: another aircraft puts a pilot out of the flight ([in the flight](#in-the-flight)).
-- Traffic feeds no item in this table: a receiving machine raises notices for other traffic and for missing copies, and a page lists the machine's traffic packs when asked ([notices](../traffic-atc/01-traffic-and-atc.md#notices)); whether it also feeds one is [left open](#left-open).
+- Traffic feeds no item in this table: a receiving machine raises notifications for other traffic and for missing copies, and a page lists the machine's traffic packs when asked ([notifications](../traffic-atc/01-traffic-and-atc.md#notifications)); whether it also feeds one is [left open](#left-open).
 
 | Item | Owner | Compared | Level |
 | --- | --- | --- | --- |

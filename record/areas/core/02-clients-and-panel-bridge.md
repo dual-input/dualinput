@@ -3,8 +3,11 @@
 ```text
 Purpose:     How the core's clients reach it and talk to it, and how a cockpit panel loads what features run there.
 Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, 01-loop-and-edge.md, ../architecture/decisions.md, log.md
-Decides:     The core's WebSocket library and its Origin check; the client protocol's messages; how a unit's state, commands, and messages reach the clients; notices and settings; the moments the clients crate raises; what a client whose version differs gets; how page-client finds, joins, and rejoins the core; how our VCockpit.js loads the bridge and the bridge loads panel modules; what v1 builds for clients beyond the PC; and the budgets (node 6.2).
+Decides:     The core's WebSocket library and its Origin check; the client protocol's messages; how a unit's state, commands, and messages reach the clients; notifications and settings; the moments the clients crate raises; what a client whose version differs gets; how page-client finds, joins, and rejoins the core; how our VCockpit.js loads the bridge and the bridge loads panel modules; what v1 builds for clients beyond the PC; and the budgets (node 6.2).
 ```
+
+> **Note**
+> Since 2026-10-24, `clients`' own slice `banner` says whether a banner page's socket is open, not the notifications' slice that [what a unit registers and calls](#what-a-unit-registers-and-calls) gives it to (user, 2026-10-24; [interface log](../interface/log.md#2026-10-24-the-apps-wiring-calls-notices-notifications-gives-the-banners-socket-a-slice-of-its-own-and-passes-a-development-cores-data-folder-to-the-desktop-app)).
 
 The core serves every client over one protocol of JSON messages on a WebSocket, through tokio-websockets, which iroh already brings into the core.
 A client opens with a `hello` that names it and its version, and from then on each side sends `alive` every 2s, while only the core closes a socket that goes quiet.
@@ -19,7 +22,7 @@ The spine's [communication](../architecture/01-spine.md#communication), decision
 | Unit | Holds |
 | --- | --- |
 | `src/apps/core`'s edge | The WebSocket server, its `Origin` check, and a tokio task for each socket; a socket opening, a text message, and a close come in as inputs, and "send this text" and "close this socket" go out as outputs |
-| `clients`, on the loop | The protocol, the table of clients, the keepalive, client state, commands, messages to clients, notices, settings, and which panel modules each panel loads; it raises a client joining or leaving, a panel's socket replaced, and a setting changed |
+| `clients`, on the loop | The protocol, the table of clients, the keepalive, client state, commands, messages to clients, notifications, settings, and which panel modules each panel loads; it raises a client joining or leaving, a panel's socket replaced, and a setting changed |
 | `page-client`, in TypeScript | Hearing the core's announcement, connecting, the `hello`, the keepalive, handing each message to whoever registered its tag, and giving its page the connection's state |
 | `panel-bridge`, in TypeScript | Our two blocks in `VCockpit.js`, a record of each instrument, loading panel modules, locks and overlays, and `window.DUALINPUT_BRIDGE_UNLOCK()` |
 
@@ -64,7 +67,7 @@ Each message is JSON with a `t` tag, defined in the message crate's clients modu
 
 ## A client whose version differs
 
-A `hello` whose version or hash differs from the core's is logged by the client's name, with both versions, and nothing more: the core goes on talking to it (user, 2026-10-15), and no notice shows ([trouble](../interface/01-apps.md#trouble)).
+A `hello` whose version or hash differs from the core's is logged by the client's name, with both versions, and nothing more: the core goes on talking to it (user, 2026-10-15), and no notification shows ([trouble](../interface/01-apps.md#trouble)).
 The watcher updates the Community package with Dual Input while the sim is closed ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), so we expect a mismatch to mean a developer's stale package (inference).
 This settles, for the WebSocket clients, the spine's item in [left open](../architecture/01-spine.md#left-open) on what the core does beyond logging; our WASM module, whose data slots are structs the module reads in place ([messages and their types](../architecture/01-spine.md#messages-and-their-types)), is [6.3](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module)'s.
 
@@ -75,7 +78,7 @@ This settles, for the WebSocket clients, the spine's item in [left open](../arch
 me.client_state::<TakeControlView>("take-control", view);   // a slice, built by `view` from the unit's state and the platform's
 me.command("take-control.request", TakeControl::request);   // a command, called by name
 cx.send(To::Component("menu-script"), body);                  // a message to a client
-cx.notice(id, Notice { level, text, action });                // a notice, and cx.clear_notice(id)
+clients::notify(cx, id, level, text, action);                 // a notification, and clients::clear_notification(cx, id)
 ```
 
 - **Client state:** while any client is connected, `clients` runs a timer every 50ms, a starting value, and each time it fires, `clients` builds each slice some client shows, and sends each client the slices whose value differs from the one it last sent that client.
@@ -83,11 +86,11 @@ cx.notice(id, Notice { level, text, action });                // a notice, and c
   The timer bounds the work however many inputs arrive, and needs no unit to mark what changed.
   A slice no unit registered, such as a deleted feature's, is ignored.
 - **Commands:** `clients` calls a command's handler by name, through the kernel, once its own handler returns ([01-loop-and-edge](01-loop-and-edge.md#hooks)); a name no unit registered answers "unknown".
-  `clients` holds a command for a notice clicked outside its action, and one that brings the desktop app forward ([the apps](../interface/01-apps.md#slices-and-commands)).
+  `clients` holds a command for a notification clicked outside its action, and one that brings the desktop app forward ([the apps](../interface/01-apps.md#slices-and-commands)).
 - **Messages to a client:** `cx.send` puts out a `unit` message to every client of a component, to a panel module, or to an app's part, by its unit's name, and a client's `unit` message reaches the unit that registered its name ([the apps](../interface/01-apps.md#slices-and-commands)).
   Unlike a slice, a message goes once, so a client that connects later never gets it: a menu script that reconnects never gets a world-map request the sim service sent before it.
-- **Notices:** a notice's ID is its unit's own, its feature writes its text, its level is information, a warning, or trouble, and its action, if it has one, is the command a click on it sends.
-  The notices are a slice of `clients`' own, which also says whether a banner page's socket is open, and where each notice shows waits for the apps' stage ([left to the apps' stage](../interface/01-apps.md#left-to-the-apps-stage)).
+- **Notifications:** a notification's ID is its unit's own, its feature writes its text, its level is information, a warning, or trouble, and its action, if it has one, is the command a click on it sends.
+  The notifications are a slice of `clients`' own, which also says whether a banner page's socket is open, and where each notification shows waits for the apps' stage ([left to the apps' stage](../interface/01-apps.md#left-to-the-apps-stage)).
 - **Settings:** a unit registers each setting with a key, a type, a default, a label, and what an app needs that its type doesn't say, and `clients` keeps them in `settings.json` in the data folder, whose bytes come with the core's first input ([01-loop-and-edge](01-loop-and-edge.md#starting-and-stopping)).
   - A change writes the whole file again, as a job.
   - A stored value that doesn't fit its type gives way to the default, and the core logs it.
@@ -116,7 +119,7 @@ Whether a reloaded panel keeps its name is [left open](#left-open).
 - A panel module's rule picks instruments, given the loaded profile, as pointer sync's takes the instruments its profile's [`displays`](../profiles/01-format-and-delivery.md#displays) names.
 - An instrument's key is its identifier, or its tag's name if it has none, followed by `|` and the query of its `url` attribute where it has one, as FS Copilot's `Channel.keyFor` joins them (FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/channel.js`), the key the profile's `displays` names.
 - Once the profile has loaded and a panel's `hello` has arrived, `clients` answers the panel with `load`, naming the modules its instruments get and each one's instruments, or with `none`; a profile that unloads sends `stop`.
-- `clients` raises a trouble notice when no cockpit panel's `hello` comes within 10s of the profile loading ([trouble](../interface/01-apps.md#trouble)).
+- `clients` raises a trouble notification when no cockpit panel's `hello` comes within 10s of the profile loading ([trouble](../interface/01-apps.md#trouble)).
 - A panel told `none` stays closed until an announcement brings another port or says the session ended, so it connects once a session.
 
 ## page-client

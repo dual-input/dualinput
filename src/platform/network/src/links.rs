@@ -190,7 +190,7 @@ impl Network {
             Event::Bound(Ok(endpoint)) => {
                 tracing::info!("the network's endpoint is bound");
                 me.endpoint = Some(endpoint);
-                clients::clear_notice(cx, "bind");
+                clients::clear_notification(cx, "bind");
                 let lost: Vec<_> = me
                     .links
                     .iter()
@@ -208,7 +208,7 @@ impl Network {
             }
             Event::Bound(Err(error)) => {
                 tracing::error!(error, "the network's endpoint didn't bind");
-                clients::notice(
+                clients::notify(
                     cx,
                     "bind",
                     Level::Trouble,
@@ -251,8 +251,8 @@ impl Network {
             Event::Closed { conn, code } => {
                 let closed = me.conns.remove(&conn);
                 // A close can overtake the first message the other side sent before it, so the
-                // refused side shows the refusal from the close too, under the same notice its
-                // own check raises. A refused connection never joined a link, so this comes
+                // refused side shows the refusal from the close too, under the same notification
+                // its own check raises. A refused connection never joined a link, so this comes
                 // before the link is looked up.
                 if let Ok(
                     refused @ (codes::WRONG_CODE | codes::WRONG_VERSION | codes::WRONG_HASH),
@@ -263,7 +263,7 @@ impl Network {
                         codes::WRONG_VERSION => "it runs another version of Dual Input",
                         _ => "its build's messages differ from this one's",
                     };
-                    clients::notice(
+                    clients::notify(
                         cx,
                         "refused",
                         Level::Warning,
@@ -453,7 +453,7 @@ impl Network {
             Ok((header, keys)) => return self.take(conn, header, keys.to_vec(), cx),
         };
         tracing::warn!(conn, code, reason, "the network refused a connection");
-        clients::notice(
+        clients::notify(
             cx,
             "refused",
             Level::Warning,
@@ -550,7 +550,7 @@ impl Network {
         tracing::info!(conn, again, restart = from.restart, "a member's link is up");
         cx.raise(LinkUp { member, again });
         // A link that came up shows this PC isn't refused, whatever an earlier connection was.
-        clients::clear_notice(cx, "refused");
+        clients::clear_notification(cx, "refused");
         self.link_came_up(cx);
         if let Some(channel) = self.opener.as_ref().map(|o| o.channel) {
             self.deliver(from, channel, keys, cx);

@@ -78,7 +78,7 @@ The cores and the desktop app reach the local backend, relays, profiles' site, a
 
 A scenario asserts on what a pilot's surroundings see:
 
-- what the fake pages are told: slices, notices, verdicts, and orders
+- what the fake pages are told: slices, notifications, verdicts, and orders
 - what the stand-in's aircraft holds, and every call each core made of the stand-in
 - each core's recording, and its replay ([replays](#replays))
 - each process's exit code, and its log

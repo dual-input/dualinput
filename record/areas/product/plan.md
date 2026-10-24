@@ -62,10 +62,10 @@ The picks, picked on 2026-10-02:
   - The take-control key, from [Voice handover](ideas.md#voice-handover)
   - Recording and bug reports, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
   - Dual Input's controls as an app on the sim's EFB, from [Dual Input's interface in the EFB and on a tablet](ideas.md#dual-inputs-interface-in-the-efb-and-on-a-tablet), because [01-aims](01-aims.md) requires that a pilot in VR can use Dual Input without taking the headset off
-  - The [notification banner](ideas.md#notification-banner), split from Dual Input objects in the cockpit and moved to v1 on 2026-10-03, because a notice can't depend on the EFB being open
+  - The [notification banner](ideas.md#notification-banner), split from Dual Input objects in the cockpit and moved to v1 on 2026-10-03, because a notification can't depend on the EFB being open
   - [Avatar sync](ideas.md#avatar-sync), moved from Soon on 2026-10-03, which in v1 takes the 58P's seats and the spots of its controls from the profile, set without the Dual Input IDE
   - [Plugins](ideas.md#plugins) for aircraft, with one for the 58P, picked on 2026-10-04, because the code that serves one aircraft needs a home outside Dual Input's own code from the first aircraft on
-  - The crew's notice that a pilot's sim crashed, from [Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed), picked on 2026-10-07, and free to move to Soon if telling a crash from a quit proves hard (user)
+  - The crew's notification that a pilot's sim crashed, from [Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed), picked on 2026-10-07, and free to move to Soon if telling a crash from a quit proves hard (user)
 - **Soon:**
   - [Ground operations sync](ideas.md#ground-operations-sync)
   - [Soft takeover](ideas.md#soft-takeover-on-handover), moved from v1 on 2026-10-03, because it needs masking, which is too large a job for v1
@@ -152,7 +152,7 @@ Exit: each risk below has a log entry that answers it, or is deferred with a rea
   Moved to Soon with the voice phrases on 2026-10-17, and the [control log](../control/log.md#2026-10-17-research-puts-silero-vad-and-sherpa-onnx-ahead-for-recognizing-the-voice-phrases-on-the-pilots-pc-and-the-voice-phrases-move-to-soon) holds the research that probe starts from.
 - Whether masking holds back the Baron's mixture levers, which the Baron takes through its own input events, such as `BKSQ_TurbochargedMixtureController_1` (read in its [study](../aircraft/black-square-baron-pro/study.md)); soft takeover depends on it.
   Answered on 2026-10-06: masking holds back a lever bound in MSFS and not one SPAD.neXt drives, so soft takeover needs another way for those pilots ([flight-controls log](../flight-controls/log.md#2026-10-06-masking-holds-back-a-mixture-lever-bound-in-msfs-and-not-one-spadnext-drives-because-spadnext-sets-the-input-event-itself)).
-- Whether a click on a [notification banner](03-v1-scope.md#notification-banner) notice opens Dual Input's EFB app when the app is on neither the EFB's dock nor the first page of its app list, and whether the app's own code runs while the EFB is closed.
+- Whether a click on a notification on the [notification banner](03-v1-scope.md#notification-banner) opens Dual Input's EFB app when the app is on neither the EFB's dock nor the first page of its app list, and whether the app's own code runs while the EFB is closed.
   The probe fills the EFB with far more apps than its dock and the first page of its app list hold.
   The chain ran only from a stand-in we put into the EFB's document through the sim's inspector, pressing GSX's button on the dock ([interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
   Answered on 2026-10-06: [interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed).

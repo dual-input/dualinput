@@ -44,7 +44,7 @@ Either way:
 
 - If they were the PF, their core passes control on, at once if it watched the sim close, as for a PF who goes to the main menu ([the connection](../product/03-v1-scope.md#the-connection)), and once the crew's first message has passed if it found the run gone, since only then does it know the current control value, so a PF back from a PC crash never returns holding control.
   Control passes only to a pilot still in the flight, in v1 the PM, and with more crew one whose cockpit is up to date where there is one; if no pilot is in the flight once preflight has ended, the session ends ([roles and members](../session/01-roles-and-members.md#the-pf)).
-- The crew's notice says their sim closed, or crashed once the core can tell the two apart, which is open for sim awareness ([01-spine](../architecture/01-spine.md#left-open)).
+- The crew's notification says their sim closed, or crashed once the core can tell the two apart, which is open for sim awareness ([01-spine](../architecture/01-spine.md#left-open)).
 - Once they're in a flight again, their core rejoins them under the same pilot ID, with no code to type, and their cockpit catches up state from the flying machine ([catch-up](#catch-up)).
 - They're told that their displays' pages, their FMS, and anything else the profile can't read may differ from the PF's.
 
@@ -137,12 +137,12 @@ This replaces [01-between-machines](../network/01-between-machines.md#control)'s
 Every machine other than the new PF's that applied a message the change drops catches up state from the new PF once its replay ends, skipping what already matches: the ex-PF always, and with more crew, a pilot who got the message live.
 
 - The ex-PF's aircraft follows the new PF's from the moment control settles, as the warning the new PF saw said it would ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)).
-- The notice tells the ex-PF that what they changed alone is undone, and that pages and FMS entries they made alone may differ from the new PF's.
+- The notification tells the ex-PF that what they changed alone is undone, and that pages and FMS entries they made alone may differ from the new PF's.
 
 ## A core that restarts
 
 A core that crashes while its sim keeps running comes back as a [sim that closed](#a-sim-that-closed) does: the desktop app starts it again ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)), it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, whose catch-up starts at once, since the sim is still in the flight.
-Dual Input aims for a core that never crashes, so a crash is a bug to report and fix rather than a state to recover from, and the crew's notice asks for a bug report (user, 2026-10-12).
+Dual Input aims for a core that never crashes, so a crash is a bug to report and fix rather than a state to recover from, and the crew's notification asks for a bug report (user, 2026-10-12).
 
 Two things differ from a late join after a load, because the aircraft didn't reload:
 
@@ -159,7 +159,7 @@ The IDE shows every entry live while the profile is written, where an author can
 
 - A machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Dual Input's write, and it also received another machine's change to it or firing of it, a replayed one included.
 - It then stops syncing that entry for the rest of the load, sending no change to it and applying none, and each aircraft drives its own copy, as it would anyway.
-- It marks the recording and shows the once-a-flight notice that a write never landed shows ([02-live-sync](02-live-sync.md#checking-that-a-write-landed)), so the profile reaches us in a bug report.
+- It marks the recording and shows the once-a-flight notification that a write never landed shows ([02-live-sync](02-live-sync.md#checking-that-a-write-landed)), so the profile reaches us in a bug report.
 
 A pilot who turns a knob changes the entry on their own machine only, and the other machines' aircraft only take the writes, so the test never catches a pilot.
 It leaves PF-owned entries out: only the flying machine sends them, and every following machine [puts them back](#putting-back), so a PM's hand resting on a throttle would otherwise trip it.
@@ -192,7 +192,7 @@ Seat claims ride avatars' poses rather than the session channel, since avatars, 
 ## Known limits
 
 - After a core restart, each shadow value takes the flying machine's, so it's right only if its pilot didn't touch that control while the core was down ([01-profile-entries](01-profile-entries.md#keeping-a-shadow-value)).
-- After a sim closes, a pilot's pages, FMS, and avionics state come back as their aircraft loaded, and the notice says so.
+- After a sim closes, a pilot's pages, FMS, and avionics state come back as their aircraft loaded, and the notification says so.
 - A PF-owned entry the aircraft drives itself isn't caught at runtime, only by its author in the IDE.
 
 ## Left open

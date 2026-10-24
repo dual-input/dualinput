@@ -154,15 +154,15 @@ test("a joiner in another aircraft is a member out of the flight, and enters it 
   await join(b.core, code, b.name)
   let s = await until(b, (s) => s.members.length === 2 && s.preflight.phase === "ended", "the session, after preflight")
   assert.equal(me(s)?.in_flight, false, "a joiner in another aircraft is out of the flight")
-  await b.app.until(() => b.app.notices().some((n) => n.id === "session.load" && n.text === "Load the Baron 58P to fly with James"), "the notice to load the session's aircraft")
-  await a.app.until(() => a.app.notices().some((n) => n.text === "Adam is in the PA-24 Comanche"), "the crew's notice")
+  await b.app.until(() => b.app.notifications().some((n) => n.id === "session.load" && n.text === "Load the Baron 58P to fly with James"), "the notification to load the session's aircraft")
+  await a.app.until(() => a.app.notifications().some((n) => n.text === "Adam is in the PA-24 Comanche"), "the crew's notification")
 
   await toMenu(b)
   await load(b, BARON)
   s = await until(b, (s) => me(s)?.in_flight === true, "the joiner in the flight")
   assert.match(b.core.log(), /preflight ended, and the session's keys take this much/, "the late joiner raised PreflightEnded")
   assert.equal(await frozen(b), false, "a late joiner skips preflight's hold")
-  await b.app.until(() => !b.app.notices().some((n) => n.id === "session.load"), "the notice clearing")
+  await b.app.until(() => !b.app.notifications().some((n) => n.id === "session.load"), "the notification clearing")
 })
 
 test("a pilot flying who loads the wrong aircraft in preflight returns to the menu holding control, and the right one becomes the session's", { timeout: 90_000 }, async (t) => {
@@ -456,7 +456,7 @@ test("a quit sent from the EFB app's socket takes effect, and a core with no ses
   const a = await run.core("a")
   a.act({ act: "watch", process: run.stub().id })
   await a.hear("stage Starting aircraft none")
-  const efb = new FakePage(a, { component: "efb" })
+  const efb = new FakePage(a, { component: "efb-app" })
   t.after(() => efb.close())
   await efb.until(() => efb.client.connected, "the EFB app connecting")
   await efb.client.command("session.quit", null)
@@ -471,7 +471,7 @@ test("a quit sent from the EFB app's socket takes effect, and a core with no ses
   assert.match(b.log(), /the sim closed, no session is held, and no desktop app is connected, so the core exits/)
 })
 
-test("a module from another build while Hold is fed raises the sim service's trouble notice for our package", { timeout: 90_000 }, async (t) => {
+test("a module from another build while Hold is fed raises the sim service's trouble notification for our package", { timeout: 90_000 }, async (t) => {
   const net = await BenchNetwork.start()
   t.after(() => net.stop())
   const run = new BenchRun("session-hold-package", t)
@@ -480,7 +480,7 @@ test("a module from another build while Hold is fed raises the sim service's tro
   a.core.act({ act: "module-from", slots_hash: "1" })
   await a.core.hear("module Differs")
   await sleep(500)
-  assert.ok(!a.app.notices().some((n) => n.id === "sim-service.package"), "no routine is fed yet, so no notice")
+  assert.ok(!a.app.notifications().some((n) => n.id === "sim-service.package"), "no routine is fed yet, so no notification")
   await host(a.core, a.name)
-  await a.app.until(() => a.app.notices().some((n) => n.id === "sim-service.package"), "the package's trouble notice")
+  await a.app.until(() => a.app.notifications().some((n) => n.id === "sim-service.package"), "the package's trouble notification")
 })

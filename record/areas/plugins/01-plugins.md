@@ -133,7 +133,7 @@ An entry's value is a number or text ([a cockpit message](../sync/05-units.md#a-
 | A string | That text, under the 4 KB cap on a value ([decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)) |
 | Anything else: `undefined`, `null`, `NaN`, an object, an array, or a function, or a path or method that throws | An error |
 
-An error leaves the entry with no reading, and state sync shows its notice once for each load, as for a write that never lands, and marks the recording ([notices and marks](../sync/05-units.md#ready-notices-marks-and-the-checklist)).
+An error leaves the entry with no reading, and state sync shows its notification once for each load, as for a write that never lands, and marks the recording ([notifications and marks](../sync/05-units.md#ready-notifications-marks-and-the-checklist)).
 A wrong path, from a typo or an aircraft update that renamed a field, reads `undefined`, so an author sees it the first time the profile loads.
 
 ## Reading it in the panel
@@ -203,7 +203,7 @@ The first three turn on the sync engine's starting rules, and each changes the e
 - A profile whose write function recurses until its `RangeError`, called from two depths of the Rust stack, stops at the same depth both times, live and in a replay.
 - A run and two replays count the same interrupt checks in each call into JS.
 - A write function that calls `Math.random` or `queueMicrotask` fails its write, and a profile that names them fails its type check.
-- In the sim, on the 58P: `instrument-reads` reads each path in [the 58P's table](#the-58ps-state-in-its-gauges), and each entry's write moves the other machine's gauge; a path ending in `remove()` is refused, and one through `ownerDocument` fails; and a field renamed by hand in the inspector reads as an error with its notice.
+- In the sim, on the 58P: `instrument-reads` reads each path in [the 58P's table](#the-58ps-state-in-its-gauges), and each entry's write moves the other machine's gauge; a path ending in `remove()` is refused, and one through `ownerDocument` fails; and a field renamed by hand in the inspector reads as an error with its notification.
 
 ## Known limits
 

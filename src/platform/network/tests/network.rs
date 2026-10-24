@@ -40,7 +40,7 @@ enum Act {
     Quit,
     Host,
     Join(String),
-    /// Says whether the PC reaches the internet, and whether the refused notice is up.
+    /// Says whether the PC reaches the internet, and whether the refused notification is up.
     Peek,
     /// Opens with no crew under this code.
     OpenAs(String),
@@ -115,7 +115,7 @@ impl Session {
                 let internet = cx.read::<Network>().internet();
                 let refused = cx
                     .read::<clients::Clients>()
-                    .notice_up("network.refused")
+                    .notification_up("network.refused")
                     .is_some();
                 cx.out(Saw(format!("internet={internet:?} refused={refused}")));
             }
@@ -858,7 +858,7 @@ fn the_relays_only_setting_clears_the_endpoints_ip_transports() {
 /// A close can overtake the first message the other side sent before it, so a close with a
 /// refusal's code shows the refusal even on a connection no link took.
 #[test]
-fn a_close_with_a_refusals_code_shows_the_refused_notice() {
+fn a_close_with_a_refusals_code_shows_the_refused_notification() {
     let mut core = Core::new();
     core.act(Act::Open {
         crew: vec![(THEM, 0, [7; 32])],

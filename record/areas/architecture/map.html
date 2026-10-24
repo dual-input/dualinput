@@ -295,7 +295,7 @@ table.ref-t { width: 100%; min-width: 980px; }
           <rect class="box" x="476" y="82" width="170" height="80" rx="8"/>
           <text class="nm" x="488" y="106">Banner panel</text>
           <text class="sb" x="488" y="126">an in-game panel</text>
-          <text class="sb" x="488" y="142">the session's notices</text>
+          <text class="sb" x="488" y="142">the session's notifications</text>
         </g>
         <g class="node" data-id="bridge" tabindex="0" role="button" aria-label="Panel bridge">
           <rect class="box" x="664" y="82" width="228" height="80" rx="8"/>
@@ -566,7 +566,7 @@ const COMP = {
   },
   session: {
     kind: "Inside the core", name: "Session and roles",
-    does: ["Holds the session channel's keys: the control value, each member's entry, Ready, the countdown, seats, the traffic and ATC host, the sim rate and pause, the match check, and notices such as a sim crash.", "Control is one value, a generation and the PF's pilot ID. Every change of PF raises the generation, and of two at the same generation the lower pilot ID wins.", "Every other key carries a stamp: the control value, then a number, then the pilot ID. A core that takes control writes every session-wide key again.", "Two roles in v1: the PF, which passes only to a pilot in the flight, and the traffic and ATC host, which any pilot can take at any time.", "Keeps the session file: session ID, invite code, pilot ID, restart count, the sim's run, the endpoint key, the crew's endpoint IDs, and the relay list."],
+    does: ["Holds the session channel's keys: the control value, each member's entry, Ready, the countdown, seats, the traffic and ATC host, the sim rate and pause, the match check, and notifications such as a sim crash.", "Control is one value, a generation and the PF's pilot ID. Every change of PF raises the generation, and of two at the same generation the lower pilot ID wins.", "Every other key carries a stamp: the control value, then a number, then the pilot ID. A core that takes control writes every session-wide key again.", "Two roles in v1: the PF, which passes only to a pilot in the flight, and the traffic and ATC host, which any pilot can take at any time.", "Keeps the session file: session ID, invite code, pilot ID, restart count, the sim's run, the endpoint key, the crew's endpoint IDs, and the relay list."],
     life: ["The pilot ID is drawn at start or join, and kept through every rejoin.", "The restart count goes up by 1 each time the core starts while the session file exists, and reaches the disk before any link opens.", "Preflight happens only at a session's start. Once it has ended, a session with nobody in the flight ends."],
     links: [["Other cores", "the session channel, a stream from each sender"], ["Backend", "the invite code, and a place in the crew renewed every 10 minutes"]],
     refs: ["022", "023", "035", "036", "044"]
@@ -679,7 +679,7 @@ const COMP = {
   banner: {
     kind: "In the sim", name: "Banner panel",
     runs: "An in-game panel of ours.", built: "FSComponent, from our own pinned copy of @microsoft/msfs-sdk.",
-    does: ["Shows the session's notices.", "A click on a notice opens the EFB onto our app, by way of the core.", "While a link is lost, lists each crew member's link and whether this PC reaches the internet."],
+    does: ["Shows the session's notifications.", "A click on a notification opens the EFB onto our app, by way of the core.", "While a link is lost, lists each crew member's link and whether this PC reaches the internet."],
     life: ["Closed, with no page, until the EFB app's code opens it, and connected only while open."],
     links: [["Core", "a WebSocket while it's open"], ["EFB app", "opens and closes it"]],
     refs: ["008", "012", "029", "037"]
@@ -1082,10 +1082,10 @@ const ROWS = [
   ["banner", "Banner panel", [
     N,
     ["Closed, with no page.", ["012"]],
-    ["Opened by the EFB app's code when there's a notice, and connected while open.", ["012"]],
+    ["Opened by the EFB app's code when there's a notification, and connected while open.", ["012"]],
     S, S, S,
     ["Lists each crew member's link and whether this PC reaches the internet.", ["037"]],
-    ["Shows the crew's notice that a pilot's sim crashed, and for a core crash asks for a bug report.", ["041"]],
+    ["Shows the crew's notification that a pilot's sim crashed, and for a core crash asks for a bug report.", ["041"]],
     ["Closed.", []]
   ]],
   ["menu", "Menu script", [

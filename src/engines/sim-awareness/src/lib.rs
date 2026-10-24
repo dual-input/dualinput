@@ -158,7 +158,7 @@ impl SimAwareness {
                 if self.run.is_none() {
                     // The last run's page, aircraft, departure, and pause describe a sim that
                     // has gone, so a new run starts with none, and the new sim reports its
-                    // own. How the last run ended stays, for the crew's notice that their sim
+                    // own. How the last run ended stays, for the crew's notification that their sim
                     // closed or crashed (record/areas/sync/04-order-and-recovery.md).
                     *self = SimAwareness {
                         stage: Stage::Starting,

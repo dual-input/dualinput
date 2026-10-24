@@ -207,7 +207,7 @@ Which of the slice the apps show is the apps' design ([slices and commands](../i
 
 ### The aircraft's facts
 
-The sim service holds the loaded aircraft's facts, aircraft awareness, beside sim awareness's aircraft path: the package that holds the aircraft's folder, its folder on disk, where it's installed (`Community`, `Community2024`, an `Official` folder, or `StreamedPackages`), its `package_version` where its `manifest.json` has one, the livery, `A:LIVERY NAME` (user, 2026-10-18), and the title, `A:TITLE`, which names the aircraft in the crew's notices, such as "Load the L1011-500 Cabin w/ Lounge to fly with James", since the path, such as `pa24-250/presets/a2a/pa24-250`, holds folder names, not a name a pilot knows, and `A:TITLE` gave each of the L-1011's presets its own title (measured on MSFS 2024, 2026-10-21, [core log][session]).
+The sim service holds the loaded aircraft's facts, aircraft awareness, beside sim awareness's aircraft path: the package that holds the aircraft's folder, its folder on disk, where it's installed (`Community`, `Community2024`, an `Official` folder, or `StreamedPackages`), its `package_version` where its `manifest.json` has one, the livery, `A:LIVERY NAME` (user, 2026-10-18), and the title, `A:TITLE`, which names the aircraft in the crew's notifications, such as "Load the L1011-500 Cabin w/ Lounge to fly with James", since the path, such as `pa24-250/presets/a2a/pa24-250`, holds folder names, not a name a pilot knows, and `A:TITLE` gave each of the L-1011's presets its own title (measured on MSFS 2024, 2026-10-21, [core log][session]).
 
 - A job finds the package in the packages folders the sim service reads from `UserCfg.opt` ([packages on disk](#packages-on-disk)), searching them as [the session's match check](../session/02-units.md#the-match-check) describes.
   It runs while a session is held: at each aircraft load, and when a session starts with an aircraft already loaded, since every v1 reader is in a session.
@@ -238,7 +238,7 @@ Without our copy of BlurPage, which brings the menu script ([preflight](../produ
 - It ends as a crash when the sim's process exits with no quit message before it.
   Every sim crash in our aircraft harness closed its node-simconnect connection with no quit message before it ([core log][crashes]); we haven't seen a `SimConnect.dll` connection through a crash.
 - A lost connection alone ends no run.
-- The exit code goes in the log either way, and the session's notice to the crew reads `ended` ([a sim that closed](../sync/04-order-and-recovery.md#a-sim-that-closed)).
+- The exit code goes in the log either way, and the session's notification to the crew reads `ended` ([a sim that closed](../sync/04-order-and-recovery.md#a-sim-that-closed)).
 - No run of ours has recorded a clean close; if node 7's test finds one sends no quit message, the exit code decides instead, since the edge already holds the process (user, 2026-10-15).
 
 ## Our WASM module
@@ -306,13 +306,13 @@ The routine host then runs its frame, as the code map's [routines in our WASM mo
 | Stopped | Its counter has been still for 3s spent in Flying, unpaused, with a routine live |
 
 - The module's first write reads Running.
-- On Stopped, the sim service raises its trouble notice, and the core unfreezes the aircraft through the platform's connection, as the code map's [when the module stops](../architecture/02-code-map.md#when-the-module-stops) has it.
+- On Stopped, the sim service raises its trouble notification, and the core unfreezes the aircraft through the platform's connection, as the code map's [when the module stops](../architecture/02-code-map.md#when-the-module-stops) has it.
   It unfreezes once the last routine that holds the freeze ends, as its pilot takes control or leaves, by sending the three unfreeze events in that input with no read of the flags first (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 - The 3s of Stopped count from the counter's last tick, at each feed, end, status write, `SimChanged`, and the 200ms rewrite.
 - The 3s count only while all three hold, so an aircraft unpaused after a long pause isn't taken as stopped before the module's next write.
 - "Unpaused" means `Pause_EX1` reads 0: the pause menu raised 8, active pause and the pilot's pause key 4, and `K:PAUSE_SET` 1 (measured on MSFS 2024, 2026-10-03, [environment log](../environment/log.md#2026-10-03-the-pause-menu-is-the-sim-pause-and-lets-the-clock-run-active-pause-stops-it-and-only-simconnect-raised-a-full-pause)), and whether the module's update runs in each pause is unmeasured ([when the module stops](../architecture/02-code-map.md#when-the-module-stops)).
 - "A routine live" takes the place of the code map's "in a session", since the session sits above the sim service, which can't read it, and a module with no routine live froze nothing.
-- While any routine is fed, the module's status of Missing or Differs raises the trouble notice for our package, and Stopped raises a trouble notice of its own (user, 2026-10-18).
+- While any routine is fed, the module's status of Missing or Differs raises the trouble notification for our package, and Stopped raises a trouble notification of its own (user, 2026-10-18).
   The module's status stops raising either once the module runs or no routine is fed ([the apps](../interface/01-apps.md#trouble)).
 
 ## The announcement
@@ -340,7 +340,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the `AircraftLoaded` state's aircraft, by the menu script's master page.
 - The quit message, then the process exiting, ends the run as a close, and nothing opens between the two; the process exiting with no quit message ends it as a crash; a loss with no quit message, then an open that succeeds, changes no stage, and each feature hears its own connection's loss.
 - A feed whose slots hash differs runs no routine, and the sim service reports the module as differing.
-- The counter still for 3s in Flying, unpaused, with a routine live, takes the module as stopped and raises its notice, and the core unfreezes the aircraft when the last routine that holds the freeze ends; still while Loading, while paused, with no routine live, or for under 3s since a pause ended, it does nothing.
+- The counter still for 3s in Flying, unpaused, with a routine live, takes the module as stopped and raises its notification, and the core unfreezes the aircraft when the last routine that holds the freeze ends; still while Loading, while paused, with no routine live, or for under 3s since a pause ended, it does nothing.
 - After a `RESET`, `Figure`'s `Z:` writes still land.
 
 In the sim:

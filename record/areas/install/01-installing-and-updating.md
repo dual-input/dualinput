@@ -10,7 +10,7 @@ Dual Input has no watcher: the desktop app runs from login as a tray icon, at 2.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.
 The app applies an update only while the sim is closed, no session is held, and the core has exited, and Install now quits the core to get there.
 At its start and at each sim close, an installed app writes our Community package wherever it's missing or of another version, and on its first run it adds the firewall rule.
-The core searches no other package for files that override ours, and checks nothing of our own package on disk: the clients crate's notice when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause, the module's status raises our package's trouble notice, and Dual Input turns no package off.
+The core searches no other package for files that override ours, and checks nothing of our own package on disk: the clients crate's notification when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause, the module's status raises our package's trouble notification, and Dual Input turns no package off.
 
 This answers node 6.17 of the [architecture plan](../architecture/plan.md#617-installing-and-updating).
 [Installing and updating](../product/03-v1-scope.md#installing-and-updating), decisions [002](../../decisions/002-core-starts-with-every-sim-run.md) and [003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), and the spine's [desktop app and the core](../architecture/01-spine.md#the-desktop-app-and-the-core) give the rules this design builds on, with the desktop app doing what they give the watcher, and this document holds only what they leave out.
@@ -35,7 +35,7 @@ The research behind it is in this area's [log](log.md).
 | --- | --- |
 | Velopack's Setup.exe and Update.exe | Not ours: the installer, and the swap of one release's programs for the next ([the installer and the updater](#the-installer-and-the-updater)) |
 | `src/apps/desktop` | The tray icon and the window, and in its Rust side the watcher's jobs: noticing the sim, starting the core and starting it again, checking for, downloading, and applying updates, writing our Community package, the firewall rule, and the 24 hours of figures |
-| `sim-service` | The packages folders, and our package's trouble notice |
+| `sim-service` | The packages folders, and our package's trouble notification |
 
 ## The installer and the updater
 
@@ -170,13 +170,13 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 - The sim most likely doesn't mount a package that the profile's `Content.xml`, under `%APPDATA%\Microsoft Flight Simulator 2024\`, marks `UserDisabled` (unverified); that file names each package `communityfs24-` or `communityfs20-` and its folder's name, lowercased (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
 - The core searches no other package for files that override ours, since ours won over FS Copilot's against the mount order such a search assumed.
   Which copy won shows when the pages that need it say hello or don't: the panel bridge within 10s of the profile loading ([trouble](../interface/01-apps.md#trouble)), and the menu script, without which Go to is unavailable ([go to](../session/02-units.md#go-to)).
-  When no cockpit panel connects, the clients crate's notice names another package's `VCockpit.js` as the likeliest cause (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+  When no cockpit panel connects, the clients crate's notification names another package's `VCockpit.js` as the likeliest cause (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 - Dual Input turns no package off: removing or turning off a package that overrides our files is the pilot's, however they keep their mods, and the offer [installing and updating](../product/03-v1-scope.md#installing-and-updating) makes to disable it moves to Later (user, 2026-10-18).
 
 ### Our own package
 
 - The core checks nothing of our own package on disk, since the module's status of Missing or Differs covers it ([the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status); user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
-- The sim service raises one trouble notice for our package from either status, and Stopped raises a notice of its own (user, 2026-10-18).
+- The sim service raises one trouble notification for our package from either status, and Stopped raises a notification of its own (user, 2026-10-18).
 
 ## The firewall rule
 
@@ -268,7 +268,7 @@ These need no sim:
 
 ## Left open
 
-- A sim started in the seconds Update.exe takes to swap `current\` boots with the old package beside a new core, whose module then differs from the core and raises its trouble notice until the sim closes; nothing guards against it.
+- A sim started in the seconds Update.exe takes to swap `current\` boots with the old package beside a new core, whose module then differs from the core and raises its trouble notification until the sim closes; nothing guards against it.
 
 ## Left to the apps' stage
 
@@ -278,7 +278,7 @@ These wait for the apps' stage of step 8, with [the apps' list](../interface/01-
 - How the app's setting to start with Windows follows Windows' own switch for its Run value, which Settings and Task Manager keep under `StartupApproved` (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
 - How the window shows the update's states, Install now, and Check now, and what Install now says while it waits.
 - How the app offers the firewall fix, and what it shows while no `UserCfg.opt` exists.
-- The words of our package's trouble notice, and of the join check's refusal when the host is the one behind, which tells them to leave the session first.
+- The words of our package's trouble notification, and of the join check's refusal when the host is the one behind, which tells them to leave the session first.
 
 ## What this changes elsewhere
 

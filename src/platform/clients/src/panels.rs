@@ -6,7 +6,7 @@
 use std::time::Duration;
 
 use kernel::{Cx, TimerId, View};
-use messages::clients::{Level, Notice, PanelModule, ToClient, component};
+use messages::clients::{Level, Notification, PanelModule, ToClient, component};
 
 use crate::Clients;
 
@@ -15,8 +15,8 @@ use crate::Clients;
 /// (record/areas/interface/01-apps.md, "Trouble").
 const NO_PANEL: Duration = Duration::from_secs(10);
 
-/// The clients crate's own notice for it, under its unit's name.
-const NO_PANEL_NOTICE: &str = "clients.no-panel";
+/// The clients crate's own notification for it, under its unit's name.
+const NO_PANEL_NOTIFICATION: &str = "clients.no-panel";
 
 pub(crate) struct PanelModuleRule {
     pub(crate) name: &'static str,
@@ -96,10 +96,10 @@ impl Clients {
         tracing::warn!(
             "no cockpit panel said hello within 10s of the profile loading, so our panel bridge didn't load"
         );
-        me.notices.insert(
-            NO_PANEL_NOTICE.into(),
-            Notice {
-                id: NO_PANEL_NOTICE.into(),
+        me.notifications.insert(
+            NO_PANEL_NOTIFICATION.into(),
+            Notification {
+                id: NO_PANEL_NOTIFICATION.into(),
                 level: Level::Trouble,
                 text: "Dual Input's panel bridge didn't load in the cockpit, so features that run in its panels are off. Another package's VCockpit.js is the likeliest cause.".into(),
                 action: None,
@@ -108,9 +108,9 @@ impl Clients {
     }
 
     fn clear_no_panel(&mut self) {
-        if self.notices.remove(NO_PANEL_NOTICE).is_some() {
+        if self.notifications.remove(NO_PANEL_NOTIFICATION).is_some() {
             tracing::info!(
-                "a cockpit panel connected, so the panel bridge's trouble notice cleared"
+                "a cockpit panel connected, so the panel bridge's trouble notification cleared"
             );
         }
     }

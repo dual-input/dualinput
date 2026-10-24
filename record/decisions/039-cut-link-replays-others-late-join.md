@@ -62,7 +62,7 @@ A change of control's clock includes everything a PF did before its own handover
 - The pacing holds for every cockpit message, live or replayed: each waits the gap its sender left before it, capped at 2s, counted from when the one before it applied, so it waits only what's left.
 - A pilot whose sim run ends, which their core sees as the sim closes or finds at start after a PC crash, has left the flight.
   If they were the PF, control passes on, at once or once the crew's first message has passed, to a pilot still in the flight.
-- The pilot comes back as a late joiner under the same pilot ID, with a catch-up of state and a notice that pages, FMS, and avionics state may differ.
+- The pilot comes back as a late joiner under the same pilot ID, with a catch-up of state and a notification that pages, FMS, and avionics state may differ.
 - Each change of control carries its maker's vector clock, and every machine that applied a message the change drops catches up state from the new PF.
 - Control can't pass to a pilot while their own replay or catch-up runs over a link that's up, by key, button, or voice; when the PF leaves, it passes anyway, to a pilot still in the flight, an up-to-date one where there is one.
 - It replaces node 2's rules that a sim crash passes nothing and that control drops the superseded PF's messages that reach a receiver in a replay, and settles how a replay is paced and how an ex-PF and a crashed PF come back ([architecture plan](../areas/architecture/plan.md#3-sync-and-the-session)).

@@ -3,6 +3,30 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-24: The apps' wiring calls notices notifications, gives the banner's socket a slice of its own, and passes a development core's data folder to the desktop app
+
+**Asked:** what the names and behaviors [stage 11a](../build/plan.md#11a-the-apps-wiring)'s wiring needs, and the record leaves open, should be: the message crate's names, where the slice that says whether a banner page's socket is open goes, what the core passes the desktop app's program, how the bench sees that start, and what a click does when its notice has cleared or no EFB app is connected.
+
+**Expected:** the answers we proposed, which the user took, adding two of their own: the rename, and the pause in the time before an app hides a notification.
+One of ours, a slice of its own for the banner's socket, departs from [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#what-a-unit-registers-and-calls), which has the notifications' slice say it.
+
+**Found:** the user's calls, on 2026-10-24:
+
+- Notices are called notifications, in the code and in the record, as "a lot more understandable".
+- The message crate names the EFB app's component `efb-app` and the banner's `banner`, the commands `clients.notification-clicked` and `clients.bring-desktop-forward`, and the order `EfbAppOrder`, whose one value is `{ "t": "open-efb" }`.
+- Whether a banner page's socket is open is a slice of `clients`' own, `banner`, rather than part of the notifications' slice.
+  Its one reader we know of, the EFB app's code that calls the toolbar until the banner connects, has no need of the notifications.
+- The core starts `dualinput-desktop.exe` with `--data <folder>` when it runs on a data folder other than the pilot's, and with no argument otherwise, so the EFB app's button, on a development core, opens the desktop app on that core's data folder.
+- A notification's unit can clear it while the pilot's click is on its way, and the click still opens the EFB, since the pilot asked to look.
+  An app that hides a notification after a time pauses that time while the pointer is over it, so the notification stays as the pilot reaches for it.
+- With no EFB app connected, a click's command is still taken, and the log says no EFB app got the order.
+  A failed start of the desktop app's program goes to the run's log, since the command is answered before the start.
+- The bench copies a stand-in program beside the bench core as `dualinput-desktop.exe`, which writes down each start's arguments.
+
+**Changed:** the code and the record say notification, and stage 11a builds the rest.
+
+**Affects:** [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s notifications, which its note of 2026-10-24 amends; [01-apps](01-apps.md)' notifications and bringing the desktop app forward.
+
 ## 2026-10-24: The sim's EFB styles its apps' controls through `--efb-` variables sized from a 516 by 716 base, and an app gets the controls by bundling the SDK's EFB API
 
 **Asked:** what the sim's own EFB stylesheet defines that Dual Input's EFB app and banner could reuse, since their CSS is written by hand for Coherent GT rather than built with Tailwind (user, 2026-10-24)?
@@ -240,7 +264,7 @@ The EFB's document and the XHR were tried from scratch scripts, with no run file
 
 ## 2026-10-06: Our EFB app's own code opens the EFB onto it, wherever it sits in a crowded EFB, and runs while the EFB is closed
 
-**Asked:** a click on a notice opens our EFB app ([entry below](#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)), but that chain ran from a stand-in put into the EFB's document through the inspector, pressing GSX's button on the dock.
+**Asked:** a click on a notification opens our EFB app ([entry below](#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)), but that chain ran from a stand-in put into the EFB's document through the inspector, pressing GSX's button on the dock.
 Does it work when our app is on neither the dock nor the first page of the app list, and does the app's own code run while the EFB is closed ([the plan](../product/plan.md)'s step 6)?
 
 **Expected:** the EFB's document opens an app when it hears `OPEN_BY_KEY(app, page, args)` (read in fs-base-efb, `html_ui/efb_ui/efb_os/efb_os.js`), and the sim's `engine.trigger` calls the document's own handlers before it reaches the sim (read in mainUi's `coui://html_UI/JS/AsoboCoherent.js`), so our app's code could fire it.
@@ -255,7 +279,7 @@ Does it work when our app is on neither the dock nor the first page of the app l
   - closed after use, with our app still the EFB's current one: the view got the page key and showed, with no onResume, since closing the EFB doesn't pause the app on screen.
 - The view drew black, because our app never loaded its stylesheet, as Navigraph's does in `install()`.
 
-**Changed:** a click on a notice opens Dual Input's EFB app wherever the app sits in the EFB, from the app's own code, with no button to find and no list to page through.
+**Changed:** a click on a notification opens Dual Input's EFB app wherever the app sits in the EFB, from the app's own code, with no button to find and no list to page through.
 The click reaches the app through the core, and an EFB app loaded the sim's way reaches the core on 127.0.0.1 by HTTP, as code in the EFB's document did ([entry below](#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves)).
 
 **Affects:** the [EFB app](../product/03-v1-scope.md#efb-app) and the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
@@ -339,7 +363,7 @@ What we haven't run is an EFB app loaded the sim's way, rather than code in the 
 
 ## 2026-10-04: A click on a notice in our panel opens the EFB onto another app, whether the EFB was open or closed
 
-**Asked:** can a notice on our panel open the EFB onto a given app, after the toolbar's calls put nothing on screen ([entry below](#2026-10-04-code-in-the-efbs-document-switches-the-efb-to-another-app-but-no-call-we-found-puts-the-efb-on-screen))?
+**Asked:** can a notification on our panel open the EFB onto a given app, after the toolbar's calls put nothing on screen ([entry below](#2026-10-04-code-in-the-efbs-document-switches-the-efb-to-another-app-but-no-call-we-found-puts-the-efb-on-screen))?
 
 **Expected:** the sim's own flow events would do it, since its interface opens the EFB onto a page with `LaunchFlowEvent("UI_EFB_OPEN", "")` and `LaunchFlowEvent("UI_EFB_OPEN_PAGE", "", "<app>", "<page>")` (read in fs-base-ui, `html_ui/Global/pkg/base.bundle.js`, and fs-base-efb-app-atlas, `AtlasApp.js`).
 
@@ -350,14 +374,14 @@ What we haven't run is an EFB app loaded the sim's way, rather than code in the 
 - `Coherent.call("TOGGLE_EFB")`, the call behind the toolbar's `ToolBarListener.toggleEFB` (read in fs-base-ui, `html_ui/Global/lib.js`), opens and closes the EFB from our panel's document and from the EFB's own.
 - The EFB's document hears `OPEN_BY_KEY(app, page, args)` from the sim and opens that app (read in fs-base-efb, `html_ui/efb_ui/efb_os/efb_os.js`), so the sim has some way to open the EFB onto an app, which we haven't found.
 - The chain, installed through the inspector, with a stand-in for our EFB app in the EFB's document:
-  1. A click on the notice raises `L:CROSSCHECK_P05_EFB_APP`.
+  1. A click on the notification raises `L:CROSSCHECK_P05_EFB_APP`.
   2. The stand-in, polling it every 200ms, calls `TOGGLE_EFB` only if the action bar says the EFB is closed, then presses GSX's dock button.
   3. With the EFB open on Atlas, it stayed open and switched to GSX; with it closed after the pilot left it on Atlas, it opened onto GSX.
   4. GSX's button was pressed 73ms to 240ms after each of five clicks.
 - A first version that called `TOGGLE_EFB` from the panel closed an open EFB, as a toggle does.
 - ChasePlane keeps its full-screen overlay closed in VR, reading `globalVars.vrMode` in the toolbar's document (read in p42-util-chaseplane 2026.39.1.16, `HTML_UI/icons/toolbar/P42_PANEL_CHASEPLANE_OVERLAY.svg`).
 
-**Changed:** the hybrid works: notices on our panel, and a click on one opens our EFB app, whatever state the EFB is in.
+**Changed:** the hybrid works: notifications on our panel, and a click on one opens our EFB app, whatever state the EFB is in.
 It rests on two things only measured with code installed through the inspector: our EFB app's code running while the EFB is closed, and pressing our app's button, which may be off the dock and off the app list's first page.
 
 **Affects:** the [EFB app](../product/03-v1-scope.md#efb-app) and the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
@@ -395,7 +419,7 @@ Putting the column back on the right when code opens it is untested.
 
 ## 2026-10-04: Code in the EFB's document switches the EFB to another app, but no call we found puts the EFB on screen
 
-**Asked:** can a notice on our panel open the EFB on Dual Input's own app, so the EFB app holds the controls and the panel only shows notices?
+**Asked:** can a notification on our panel open the EFB on Dual Input's own app, so the EFB app holds the controls and the panel only shows notifications?
 
 **Expected:** the EFB is a toolbar panel, so the toolbar call would open it, and the EFB's code would have a way to pick an app.
 
@@ -408,7 +432,7 @@ Putting the column back on the right when code opens it is untested.
 - Pressing an app's button from code works: mouse events on GSX's dock button switched the EFB's view to `GSX_EFB`, and on IniJetways in the home page's app list to `MultiJetwayControllerApp`, while the EFB was closed.
   The app list pages, so an app off its first page needs paging first.
 
-**Changed:** the hybrid, with notices on our panel and controls in an EFB app, would need a way to put the EFB on screen that we haven't found; switching it to our app once it's open is solved, by a trick.
+**Changed:** the hybrid, with notifications on our panel and controls in an EFB app, would need a way to put the EFB on screen that we haven't found; switching it to our app once it's open is solved, by a trick.
 
 **Affects:** the [EFB app](../product/03-v1-scope.md#efb-app) and the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
 
@@ -416,7 +440,7 @@ Putting the column back on the right when code opens it is untested.
 
 ## 2026-10-04: An in-game panel's size is a percent of the screen's height, capped at 150% of it, so ours can't span a wide screen, though Parallel 42's panels do
 
-**Asked:** can p05's always-open panel ([entry below](#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)) cover the whole screen, as ChasePlane's overlay does, so its notices can go anywhere on it?
+**Asked:** can p05's always-open panel ([entry below](#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)) cover the whole screen, as ChasePlane's overlay does, so its notifications can go anywhere on it?
 
 **Expected:** `defaultWidth="100"` and `defaultHeight="100"` would fill the screen, since the template's sizes are percents of the screen.
 
@@ -438,7 +462,7 @@ Putting the column back on the right when code opens it is untested.
 - Flow ships a second panel for VR, `PANEL_FLOW_VR`, named "//42 Flow - Popout", which the toolbar lists as `"Invisible"`.
 - The sim's frame script tells the sim the frame's rectangle with `Coherent.trigger("UPDATE_PANEL_RECT", this.panelID, rect.left, rect.right, rect.top, bottom)` (read in fs-base-ui 0.1.10, `html_ui/templates/ingameUi/ingameUi.js`).
 
-**Changed:** p05 uses the full-height column 48 wide on the right, which is where the scope puts notices.
+**Changed:** p05 uses the full-height column 48 wide on the right, which is where the scope puts notifications.
 Full screen would take guessed definition attributes, each costing a Build and Mount, or Parallel 42's toolbar file, through which we found no size call.
 Whether clicks on the column's clear part reach the cockpit is untested; if they don't, reporting only the card's rectangle with `UPDATE_PANEL_RECT` might let them through (unverified).
 
@@ -463,7 +487,7 @@ Whether clicks on the column's clear part reach the cockpit is untested; if they
 - `Coherent.call("TOOLBAR_BUTTON_TOGGLE", "PANEL_CROSSCHECK_P05", open)` opened and closed the panel when run in the toolbar's page and in the "Electronic Flight Bag" page, and did nothing in the Baron's tablet page or in `VLogic`; `mainUi` has no `Coherent` to call it with.
 - Closing the panel destroyed its page, and opening it made a new one.
 - An open panel kept serving its first `p05.js` after a Build and Mount, and after closing and opening it, until `location.reload(true)` through the inspector.
-- Kept open, the page slid the card and six notices in and out with CSS transitions, driven through `window.CROSSCHECK_P05` from the inspector, and a screenshot showed the card and a notice with sharp text.
+- Kept open, the page slid the card and six notifications in and out with CSS transitions, driven through `window.CROSSCHECK_P05` from the inspector, and a screenshot showed the card and a notification with sharp text.
 - The sim blurs whatever lies behind the panel's painted pixels: under a see-through pink layer, the instruments showed as a smooth blur, not tinted pink.
   A pink background on the page's `html` element never showed, and a full-size element of the page did.
 
@@ -494,17 +518,17 @@ The panel that had loaded the broken KTX2 at the end of the eviction run showed 
 ## 2026-10-04: The sim lets go of a texture somewhere between 30s and 3.5 minutes after its object is removed
 
 **Asked:** does the sim ever let go of a loaded texture, so that a texture file can carry a new picture again ([entry below](#2026-10-04-a-picture-written-over-a-texture-file-before-the-sim-first-loads-it-shows-on-the-next-spawn-and-once-loaded-the-sim-keeps-it))?
-Every notice with new content, such as a seat that James holds now and Greg later, needs a texture the sim will read afresh.
+Every notification with new content, such as a seat that James holds now and Greg later, needs a texture the sim will read afresh.
 
 **Expected:** no prediction.
 
-**Found:** p04 wrote a notice stamped with the time over `CROSSCHECK_P02_Baked2`'s texture, which had loaded the 10:25:14 notice, and spawned the panel, three times:
+**Found:** p04 wrote a notification stamped with the time over `CROSSCHECK_P02_Baked2`'s texture, which had loaded the 10:25:14 notification, and spawned the panel, three times:
 
-- After the panel had been gone about 3.5 minutes, since 10:25:22: the new notice, drawn at 10:29:02, showed.
-- After it had been gone 30s: the notice drawn at 10:29:07 didn't show, and the panel kept 10:29:02.
+- After the panel had been gone about 3.5 minutes, since 10:25:22: the new notification, drawn at 10:29:02, showed.
+- After it had been gone 30s: the notification drawn at 10:29:07 didn't show, and the panel kept 10:29:02.
 - After 120s: no result, because the sim wasn't in front and the screenshot caught the desktop instead; the screenshot tool saves nothing in that case since ([shot.mjs](../../../experiments/tools/shot.mjs)).
 
-**Changed:** a texture file can carry a new picture once its panel has been gone long enough, between 30s and 3.5 minutes, so a banner can reuse a pool of texture files rather than spend one per notice for a whole flight.
+**Changed:** a texture file can carry a new picture once its panel has been gone long enough, between 30s and 3.5 minutes, so a banner can reuse a pool of texture files rather than spend one per notification for a whole flight.
 The exact time, and whether anything other than time lets a texture go, are untested.
 
 **Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
@@ -513,14 +537,14 @@ The exact time, and whether anything other than time lets a texture go, are unte
 
 ## 2026-10-04: A picture written over a texture file before the sim first loads it shows on the next spawn, and once loaded the sim keeps it
 
-**Asked:** can the floating panel's picture change while the sim runs, by writing over its texture file, so that Dual Input's app could draw any notice and the banner show it?
+**Asked:** can the floating panel's picture change while the sim runs, by writing over its texture file, so that Dual Input's app could draw any notification and the banner show it?
 
 **Expected:** a fresh spawn would read the file again.
 
-**Found:** in the Black Square Baron 58P, parked, p04 wrote a notice, "You've lost the connection", stamped with the time it was drawn, as an uncompressed DDS of the same size over the texture file in both copies of the package, the one Build and Mount mounted and the one in Community:
+**Found:** in the Black Square Baron 58P, parked, p04 wrote a notification, "You've lost the connection", stamped with the time it was drawn, as an uncompressed DDS of the same size over the texture file in both copies of the package, the one Build and Mount mounted and the one in Community:
 
 - Over the card's texture, which the panel had loaded: the panel kept showing the card, 1s and 5s after the write while it was up, and after it was removed and spawned again 4s later.
-- Over `CROSSCHECK_P02_Baked2`'s texture, which had never loaded, since the sim had refused our KTX2 there ([entry below](#2026-10-04-a-texture-we-write-ourselves-shows-on-our-panel-an-uncompressed-dds-shipped-by-a-copy-asset-group-with-its-ktx2json)), padded with zeros to that file's size: the first spawn after the write showed the notice with its stamp, 10:25:14, written 1.5s before the spawn.
+- Over `CROSSCHECK_P02_Baked2`'s texture, which had never loaded, since the sim had refused our KTX2 there ([entry below](#2026-10-04-a-texture-we-write-ourselves-shows-on-our-panel-an-uncompressed-dds-shipped-by-a-copy-asset-group-with-its-ktx2json)), padded with zeros to that file's size: the first spawn after the write showed the notification with its stamp, 10:25:14, written 1.5s before the spawn.
 - The package builder logged no error during either run.
 
 **Changed:** the sim reads a texture file the first time it needs it, sees a mounted file's new contents, and doesn't keep a failed load, but keeps a loaded texture after its object is removed.
@@ -638,7 +662,7 @@ The aircraft's own preset lists its attachments, and the user ruled out adding o
 
 The WASM drawing calls don't help either: each takes a gauge's `FsContext`, such as `fsRenderCreateTexture(FsContext ctx, …)`, which a standalone module doesn't have (read in MSFS 2024 SDK 1.7.3, `MSFS_Render.h`).
 
-**Changed:** a floating object of ours can't carry an interactive HTML panel, so the user split the job (2026-10-04): the floating banner shows notices and the pre-flight summary with no interaction, and the EFB app and the desktop app take the input.
+**Changed:** a floating object of ours can't carry an interactive HTML panel, so the user split the job (2026-10-04): the floating banner shows notifications and the pre-flight summary with no interaction, and the EFB app and the desktop app take the input.
 
 **Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner) and the [EFB app](../product/03-v1-scope.md#efb-app) in the v1 scope.
 
@@ -667,7 +691,7 @@ How to get a texture into a package is open, and the baked card is parked.
 
 ## 2026-10-04: SimConnect_Text reports its texts as displayed, and the pilot didn't catch any of them
 
-**Asked:** does `SimConnect_Text` show the pilot a notice, as a candidate for the [notification banner](../product/03-v1-scope.md#notification-banner), and can its menu type carry a choice such as "Disconnect and take control"?
+**Asked:** does `SimConnect_Text` show the pilot a notification, as a candidate for the [notification banner](../product/03-v1-scope.md#notification-banner), and can its menu type carry a choice such as "Disconnect and take control"?
 
 **Expected:** a line of text on screen for the print and scroll types, and a menu with two choices for the menu type.
 
@@ -681,7 +705,7 @@ The pilot, watching the screen at each beep, didn't catch anything appear; they 
 
 The MSFS 2020 SDK calls `SimConnect_Text` "deprecated and cannot be used in Microsoft Flight Simulator" ([SimConnect_Text](https://docs.flightsimulator.com/html/Programming_Tools/SimConnect/API_Reference/General/SimConnect_Text.htm)); we found no MSFS 2024 page for it, and the function is still in the 2024 SDK's `SimConnect.h` (read in MSFS 2024 SDK 1.7.3).
 
-**Changed:** we dropped `SimConnect_Text` as a banner candidate without testing further, because an object of our own carrying an HTML gauge gives us control of how a notice looks and where it sits (decided by the user, 2026-10-04).
+**Changed:** we dropped `SimConnect_Text` as a banner candidate without testing further, because an object of our own carrying an HTML gauge gives us control of how a notification looks and where it sits (decided by the user, 2026-10-04).
 Whether the sim draws the texts somewhere stays unknown.
 
 **Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope, and the step 6 banner probe in the [plan](../product/plan.md#6-probes-that-retire-architecture-risks).

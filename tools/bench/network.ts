@@ -150,7 +150,7 @@ const apps = new WeakMap<Core, FakeApp>()
 export async function app(core: Core): Promise<FakeApp> {
   let app = apps.get(core)
   if (!app) {
-    app = await FakeApp.open(core, ["session", "notices"])
+    app = await FakeApp.open(core, ["session", "notifications"])
     apps.set(core, app)
   }
   return app

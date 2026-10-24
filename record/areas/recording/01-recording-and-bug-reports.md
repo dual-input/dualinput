@@ -143,7 +143,7 @@ After v1, each pilot uploads their part of a report to R2 through our Worker, si
 
 A Worker takes a request body of up to 100 MB on the free plan (documented, [Workers limits](https://developers.cloudflare.com/workers/platform/limits/)).
 A run's `inputs.zst` reaches that after about 2 hours 15 minutes at p10's 45 MB an hour (arithmetic).
-The page refuses a file over 100 MB with a notice, and we fetch it from that pilot by hand.
+The page refuses a file over 100 MB with a notification, and we fetch it from that pilot by hand.
 
 ### What the backend admits
 
@@ -159,7 +159,7 @@ The page refuses a file over 100 MB with a notice, and we fetch it from that pil
 ### Asking a missing pilot
 
 After v1, when the core starts and holds a session from the last 30 days that it hasn't uploaded, the recording crate asks `POST /v1/reports/asked` with those sessions' IDs, and the Worker answers which of them hold a part from another endpoint, from R2's listing of each `reports/<session>/`.
-For each, the recording crate shows a notice offering to send this pilot's part, whose action uploads it, as [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports) suggests.
+For each, the recording crate shows a notification offering to send this pilot's part, whose action uploads it, as [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports) suggests.
 
 ### On our end
 

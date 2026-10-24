@@ -170,7 +170,7 @@ An aircraft that drops them gets a field naming the call for the whole aircraft 
 
 | Field | Required | What it says |
 | --- | --- | --- |
-| `name` | Yes | The control's name for people, used in the IDE, notices, the PF's checklist, and the recording |
+| `name` | Yes | The control's name for people, used in the IDE, notifications, the PF's checklist, and the recording |
 | `watch` | Yes | A variable or an `instrument()` value, which every machine reads, or a map that counts events into a [shadow value](#counting-into-a-shadow-value) |
 | `write` | Yes | How to change the control ([writing](#writing)) |
 | `default` | With a counting `watch` | The shadow value's starting value |

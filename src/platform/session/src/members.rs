@@ -97,7 +97,7 @@ impl Session {
         held.crew.remove(&member);
         held.was_in.remove(&member);
         held.store.forget(member);
-        clients::clear_notice(cx, &notice_id(&member));
+        clients::clear_notification(cx, &notification_id(&member));
         if held.flight.remove(&member) == Some(true) {
             cx.raise(FlightChanged {
                 member,
@@ -256,17 +256,17 @@ pub(crate) fn flight_changes(me: &mut Session, cx: &mut Cx) -> bool {
     true
 }
 
-/// The notice for each other member out of the flight, by its pilot ID.
-fn notice_id(member: &PilotId) -> String {
+/// The notification for each other member out of the flight, by its pilot ID.
+fn notification_id(member: &PilotId) -> String {
     format!("out-{}", hex(member))
 }
 
 /// What the crew hears of members out of the flight once the session has an aircraft: a
 /// member whose sim closed or crashed, one in another aircraft, and one that left the flight
-/// (record/areas/product/03-v1-scope.md, "The connection"); and this pilot's own notice to
+/// (record/areas/product/03-v1-scope.md, "The connection"); and this pilot's own notification to
 /// load the session's aircraft, such as "Load the L1011-500 Cabin w/ Lounge to fly with
 /// James" (record/areas/session/02-units.md, "In the flight").
-pub(crate) fn notices(me: &mut Session, cx: &Cx) {
+pub(crate) fn notifications(me: &mut Session, cx: &Cx) {
     let Some(held) = &me.held else {
         return;
     };
@@ -291,14 +291,14 @@ pub(crate) fn notices(me: &mut Session, cx: &Cx) {
             .as_ref()
             .is_some_and(|s| flying(s.stage) && !me.in_flight(&mine));
     match (elsewhere, me.pf(), &pf_status) {
-        (true, Some(pf), Some(status)) if pf != mine => clients::notice(
+        (true, Some(pf), Some(status)) if pf != mine => clients::notify(
             cx,
             "load",
             Level::Warning,
             &format!("Load the {} to fly with {}", named(status), name(&pf)),
             None,
         ),
-        _ => clients::clear_notice(cx, "load"),
+        _ => clients::clear_notification(cx, "load"),
     }
     let mut came_in = Vec::new();
     for member in me.members().into_iter().filter(|m| *m != mine) {
@@ -339,8 +339,10 @@ pub(crate) fn notices(me: &mut Session, cx: &Cx) {
             _ => None,
         };
         match text {
-            Some((level, text)) => clients::notice(cx, &notice_id(&member), level, &text, None),
-            None => clients::clear_notice(cx, &notice_id(&member)),
+            Some((level, text)) => {
+                clients::notify(cx, &notification_id(&member), level, &text, None)
+            }
+            None => clients::clear_notification(cx, &notification_id(&member)),
         }
     }
     if let Some(held) = &mut me.held {
@@ -348,11 +350,11 @@ pub(crate) fn notices(me: &mut Session, cx: &Cx) {
     }
 }
 
-/// Clears every notice of the session's, as it ends.
-pub(crate) fn clear_notices(held: &crate::Held, cx: &Cx) {
-    clients::clear_notice(cx, "load");
+/// Clears every notification of the session's, as it ends.
+pub(crate) fn clear_notifications(held: &crate::Held, cx: &Cx) {
+    clients::clear_notification(cx, "load");
     for member in held.others.keys().chain(held.left.iter()) {
-        clients::clear_notice(cx, &notice_id(member));
+        clients::clear_notification(cx, &notification_id(member));
     }
 }
 

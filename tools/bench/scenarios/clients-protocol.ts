@@ -9,30 +9,18 @@ import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import { HASH, VERSION } from "../../../src/engines/messages/ts/stamp.ts"
-import { BenchRun, type Core, OFFLINE_SITE } from "../cores.ts"
+import { announcing, BenchRun, OFFLINE_SITE } from "../cores.ts"
 import { FakePage, RawSocket } from "../pages.ts"
-
-/** A core whose stand-in sim runs, so its platform's connection is open and it announces itself. */
-async function announcing(run: BenchRun, name: string, settings?: unknown): Promise<Core> {
-  if (settings !== undefined) {
-    fs.mkdirSync(path.join(run.folder, name), { recursive: true })
-    fs.writeFileSync(path.join(run.folder, name, "settings.json"), JSON.stringify(settings))
-  }
-  const core = await run.core(name)
-  core.act({ act: "watch", process: run.stub().id })
-  await core.hear("stage Starting aircraft none")
-  return core
-}
 
 const hello = (component: string, version = VERSION) => JSON.stringify({ t: "hello", component, version, hash: HASH })
 
 test("a fake page that heard the stand-in's announcement connects, and the core answers its commands", { timeout: 30_000 }, async (t) => {
   const run = new BenchRun("clients-connect", t)
   const core = await announcing(run, "a")
-  const page = new FakePage(core, { component: "efb" })
+  const page = new FakePage(core, { component: "efb-app" })
   t.after(() => page.close())
   await page.until(() => page.client.connected, "the page connecting")
-  assert.match(core.log(), /a client joined.*component="efb"|component="efb".*a client joined/)
+  assert.match(core.log(), /a client joined.*component="efb-app"|component="efb-app".*a client joined/)
   await assert.rejects(page.client.command("nobody.knows", null), /unknown/)
   // The case from the loop's design: a command's handler reads the clients crate's settings
   // while the clients crate dispatches it, here a setting changed from the page's socket.
@@ -67,7 +55,7 @@ test("a client of another version is logged with both versions and still served,
   const old = new RawSocket(core.port())
   t.after(() => old.close())
   await old.open()
-  old.send(hello("efb", "0.0.1"))
+  old.send(hello("efb-app", "0.0.1"))
   old.send("{ this isn't JSON")
   old.send(JSON.stringify({ t: "command", id: 1, name: "nobody.knows", args: null }))
   await old.until(() => old.received.some((m) => m.t === "answer"), "the command's answer")
@@ -80,7 +68,7 @@ test("a client of another version is logged with both versions and still served,
 
 test("a settings file keeps a key no unit registered through the core's write of it", { timeout: 30_000 }, async (t) => {
   const run = new BenchRun("clients-settings", t)
-  const core = await announcing(run, "a", { "gone.feature": 3, "bench.flag": false })
+  const core = await announcing(run, "a", { settings: { "gone.feature": 3, "bench.flag": false } })
   const page = new FakePage(core, { component: "desktop" })
   t.after(() => page.close())
   await page.until(() => page.client.connected, "the page connecting")
@@ -94,7 +82,7 @@ test("a settings file keeps a key no unit registered through the core's write of
 test("a slice that changes 100 times a second reaches a page at most once a round", { timeout: 30_000 }, async (t) => {
   const run = new BenchRun("clients-rounds", t)
   const core = await announcing(run, "a")
-  const page = new FakePage(core, { component: "efb" })
+  const page = new FakePage(core, { component: "efb-app" })
   t.after(() => page.close())
   page.client.watch("bench", () => {})
   await page.until(() => page.slice("bench") !== undefined, "the slice's first value")

@@ -245,8 +245,8 @@ impl SimService {
             );
         }
         // Every moment that can change the status or whether a routine is live runs this,
-        // so the notices follow both from here.
-        self.module_notices(cx);
+        // so the notifications follow both from here.
+        self.module_notifications(cx);
     }
 
     /// Turns off all three freezes through the platform's connection, as a client outside the

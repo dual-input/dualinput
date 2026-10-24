@@ -2,11 +2,11 @@
 import type { Level } from "./Level.ts";
 
 /**
- * A notice a unit raises for the apps to show, in the slice `notices`.
+ * A notification a unit raises for the apps to show, in the slice `notifications`.
  */
-export type Notice = { 
+export type Notification = { 
 /**
- * The raising unit's name, then `.` and its own ID for the notice.
+ * The raising unit's name, then `.` and its own ID for the notification.
  */
 id: string, level: Level, 
 /**
@@ -14,6 +14,6 @@ id: string, level: Level,
  */
 text: string, 
 /**
- * The command a click on the notice sends, if any.
+ * The command a click on the notification sends, if any.
  */
 action?: string, };

@@ -49,7 +49,7 @@ What we found building and testing the session, newest entry first.
 **Changed:** the bench's scenarios build with a profile of their own, `release-with-checks`, optimized like a release, with overflow checks and debug assertions on (user, 2026-10-23).
 On it, all 15 of the session's cases passed, with slowest inputs of 477µs and 380µs, and a change to one file of the session crate rebuilt in 6s.
 The late joiner's check waits for this pilot's entry in the slice.
-The faster build showed a second race in a case, the network's wrong-code refusal: the core with the other code read the host's first message first and refused it, as [the network's units](../network/02-units.md) allow either side to, where the case expected the host to refuse; it accepts either side, and checks the other side's notice.
+The faster build showed a second race in a case, the network's wrong-code refusal: the core with the other code read the host's first message first and refused it, as [the network's units](../network/02-units.md) allow either side to, where the case expected the host to refuse; it accepts either side, and checks the other side's notification.
 
 The whole bench on that profile then failed the countdown case once more: of the 15,558 inputs of the 8 cores that logged their run's stats as they exited, one went over 1ms, at 1,049µs, in an input that wrote no log line, so did none of the work that logs, on a core busy 0.19% of its run, and the next slowest took 832µs.
 So a scenario's check of the 1ms allows each core one input over it, if under 2ms (user, 2026-10-23).
@@ -86,7 +86,7 @@ The build changed six things the record didn't say:
 - The bench's stand-ins for the session crate went, since the crate is built: the network's and the clients' scenarios host and join through its commands, and the case of a connection that sends no first message stays the network crate's own test, since the session crate always sends one.
 - A core whose sim closes with no session held and no desktop app connected exits, so the scenarios that close their stand-in's sim keep a fake desktop app open, as a pilot's open window would.
 - The pilot flying writes its own Ready off when it loses a link in preflight too, as the design has every member do, so after a cut both pilots click Ready again.
-- Aircraft awareness reads `A:TITLE` for the crew's notices, since the path holds folder names, not a name a pilot knows ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts)).
+- Aircraft awareness reads `A:TITLE` for the crew's notifications, since the path holds folder names, not a name a pilot knows ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts)).
 - The countdown case un-readies at 2.5s, not the design's 2.9s, since the slice's 50ms rounds and the trip to the pilot flying's core would make 2.9s a race with the countdown's 3s.
 - Of stage 7's leave case, the bench checks the handover, `MemberLeft`, and a quit's exit within 3s, and the network crate's own tests check that a leave stops the other core's dials and tells the backend.
 

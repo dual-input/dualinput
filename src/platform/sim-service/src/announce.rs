@@ -2,7 +2,7 @@
 //! platform's connection opening, and at once when the session crate calls `announce`, a
 //! CommBus call for JavaScript with the clients crate's port and whether a session runs, so
 //! every page in the sim finds the core (record/areas/core/03-sim-seam-and-wasm-module.md,
-//! "The announcement"); the slice of client state `sim`; and the module's trouble notices.
+//! "The announcement"); the slice of client state `sim`; and the module's trouble notifications.
 
 use std::time::Duration;
 
@@ -23,11 +23,11 @@ use crate::module::Status;
 /// "Finding the core").
 const EVERY: Duration = Duration::from_secs(2);
 
-/// The one trouble notice for our package, which the check of our package on disk raises
+/// The one trouble notification for our package, which the check of our package on disk raises
 /// too, and the module's own for a module that stopped (record/areas/interface/01-apps.md,
 /// "Trouble").
-const PACKAGE_NOTICE: &str = "package";
-const STOPPED_NOTICE: &str = "module-stopped";
+const PACKAGE_NOTIFICATION: &str = "package";
+const STOPPED_NOTIFICATION: &str = "module-stopped";
 
 /// The session crate calls this as a session starts or ends, and the core announces it at
 /// once, on the same input, since a cockpit panel connects only to an announcement that
@@ -40,7 +40,7 @@ pub fn announce(cx: &Cx, session: bool) {
 pub(crate) struct Announcing {
     session: bool,
     timer: Option<TimerId>,
-    /// Which of the module's trouble notices are raised.
+    /// Which of the module's trouble notifications are raised.
     package: bool,
     stopped: bool,
 }
@@ -115,9 +115,9 @@ impl SimService {
     }
 
     /// While any routine is fed, a module that's missing or from another build raises the one
-    /// trouble notice for our package, and a module that stopped raises its own; each clears
+    /// trouble notification for our package, and a module that stopped raises its own; each clears
     /// once the module runs or no routine is fed (user, 2026-10-18).
-    pub(crate) fn module_notices(&mut self, cx: &Cx) {
+    pub(crate) fn module_notifications(&mut self, cx: &Cx) {
         let live = self.module.live();
         let status = self.module.status;
         let package = live && matches!(status, Status::Missing | Status::Differs);
@@ -125,29 +125,29 @@ impl SimService {
         if package != self.announcing.package {
             self.announcing.package = package;
             if package {
-                clients::notice(
+                clients::notify(
                     cx,
-                    PACKAGE_NOTICE,
+                    PACKAGE_NOTIFICATION,
                     Level::Trouble,
                     "Dual Input's package in the sim is missing or from another version, so it can't hold or fly the aircraft. Install Dual Input again with the sim closed.",
                     None,
                 );
             } else {
-                clients::clear_notice(cx, PACKAGE_NOTICE);
+                clients::clear_notification(cx, PACKAGE_NOTIFICATION);
             }
         }
         if stopped != self.announcing.stopped {
             self.announcing.stopped = stopped;
             if stopped {
-                clients::notice(
+                clients::notify(
                     cx,
-                    STOPPED_NOTICE,
+                    STOPPED_NOTIFICATION,
                     Level::Trouble,
                     "Dual Input's module in the sim stopped, so it can't fly or hold the aircraft. A frozen aircraft stays frozen until you take control or leave the session. Restart the sim to bring the module back.",
                     None,
                 );
             } else {
-                clients::clear_notice(cx, STOPPED_NOTICE);
+                clients::clear_notification(cx, STOPPED_NOTIFICATION);
             }
         }
     }

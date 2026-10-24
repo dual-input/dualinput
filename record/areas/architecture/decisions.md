@@ -94,7 +94,7 @@ Numbered as [decision 008](../../decisions/008-every-link-ends-at-core.md) on 20
   Apart from the announcements through which the sim's pages find the core and learn whether a session runs ([below](#the-sims-pages-find-the-core-over-the-commbus-and-talk-to-it-over-a-websocket)), the core uses the CommBus and `L:` variables only to reach the aircraft's state; soft takeover, a Soon pick, would add a hold flag for each lever as an `L:` variable for the pilot's binding tool to read, and whether such a tool can make a binding wait on one is unverified ([ideas](../product/ideas.md#soft-takeover-on-handover)).
   Settled in node 1.2 by the user, 2026-10-08.
 - **Because:**
-  - Each of v1's features needs only links that end at the core: a click on a notice in the banner panel, for one, opens the EFB onto our app by way of the core ([01-spine](01-spine.md#communication)).
+  - Each of v1's features needs only links that end at the core: a click on a notification in the banner panel, for one, opens the EFB onto our app by way of the core ([01-spine](01-spine.md#communication)).
   - One hub gives one place that logs every link, which component health needs ([ideas](../product/ideas.md#component-health)), and one owner of the session.
 - **Leaves out:** a direct link that a later feature might need for speed.
   A panel's action meant for the WASM module takes a WebSocket and then a data slot, and nothing in v1 needs it faster.
@@ -635,7 +635,7 @@ Numbered as [decision 039](../../decisions/039-cut-link-replays-others-late-join
 
 - **Decided:** after a cut link, with the sim and the core still running, a pilot gets a replay of every missed change in causal order, each after the gap the PF left, capped at 2s, except that of each run of changes to a PF-owned entry with only PF-owned changes between them, it applies only the last, in its place.
   That pacing holds for every cockpit message, live or replayed: each waits the gap its sender left before it, capped at 2s, counted from when the one before it applied, so it waits only what's left, and the core alone paces, with our panel bridge playing each press when the core hands it over.
-  A pilot whose sim run ends, which their core sees as the sim closes or finds at start after a PC crash, has left the flight: if they were the PF, control passes on, at once or once the crew's first message has passed, to a pilot still in the flight, and the pilot comes back as a late joiner under the same pilot ID, with a catch-up of state and a notice that pages, FMS, and avionics state may differ.
+  A pilot whose sim run ends, which their core sees as the sim closes or finds at start after a PC crash, has left the flight: if they were the PF, control passes on, at once or once the crew's first message has passed, to a pilot still in the flight, and the pilot comes back as a late joiner under the same pilot ID, with a catch-up of state and a notification that pages, FMS, and avionics state may differ.
   Each change of control carries its maker's vector clock, a receiver drops the superseded PF's messages made under the value it lost only where that clock doesn't include them, live or in a replay, and every machine that applied one catches up state from the new PF.
   Control can't pass to a pilot while their own replay or catch-up runs over a link that's up, by key, button, or voice; when the PF leaves, it passes anyway, to a pilot still in the flight, an up-to-date one where there is one.
   This changes node 2's rules that a sim crash passes nothing and that control drops the superseded PF's messages that reach a receiver in a replay, and settles how a replay is paced and how an ex-PF and a crashed PF come back ([architecture plan](plan.md#3-sync-and-the-session)).
@@ -671,7 +671,7 @@ Numbered as [decision 040](../../decisions/040-catch-up-first-final-value-order.
 
 Numbered as [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md) on 2026-10-13.
 
-- **Decided:** a core that crashes while its sim keeps running comes back as a sim that closed does: the desktop app starts it again, it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, and the crew's notice asks for a bug report.
+- **Decided:** a core that crashes while its sim keeps running comes back as a sim that closed does: the desktop app starts it again, it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, and the crew's notification asks for a bug report.
   Because the aircraft didn't reload, each shadow value starts at the flying machine's, and the aircraft counts as settled at once.
   The recording's minimal mode keeps the cockpit stream, from which catch-up takes its order.
   This answers the spine's question of how a restarted core recovers, and what it keeps beyond the session file ([01-spine](01-spine.md#left-open)).
@@ -704,7 +704,7 @@ Numbered as [decision 042](../../decisions/042-vector-clock-records-what-applied
 
 Numbered as [decision 043](../../decisions/043-driven-entries-and-putting-back.md) on 2026-10-13.
 
-- **Decided:** a machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Dual Input's write, and another machine's change or firing arrived, a replayed one included; it then stops sending and applying that entry for the rest of the load, marks the recording, and shows the once-a-flight notice of a write that never lands.
+- **Decided:** a machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Dual Input's write, and another machine's change or firing arrived, a replayed one included; it then stops sending and applying that entry for the rest of the load, marks the recording, and shows the once-a-flight notification of a write that never lands.
   When a machine's sim reports a change Dual Input didn't write that the machine may not send, it writes back the value it holds: a PF-owned entry on a following machine, any entry during its own catch-up, and the simulation rate on any machine but the flying one.
   Settled in node 3 by the user, 2026-10-11, and the test's reach to event entries by the user, 2026-10-13 ([04-order-and-recovery](../sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself)).
 - **Because:**
@@ -807,7 +807,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## A feature reaches other features only through the platform, and blocks a request only through a guard
 
-- **Decided:** each feature's crate exposes one `register` function, which the core's `main` calls from one list, and through which the feature declares the platform's moments it handles, its session keys, channels, cockpit stream kinds, catch-up steps, guards, client state and commands, settings, notices, items for the match check, and the core helper's input and audio it needs.
+- **Decided:** each feature's crate exposes one `register` function, which the core's `main` calls from one list, and through which the feature declares the platform's moments it handles, its session keys, channels, cockpit stream kinds, catch-up steps, guards, client state and commands, settings, notifications, items for the match check, and the core helper's input and audio it needs.
   A handler writes only its own feature's state, reads the platform's, and acts through an outbox, asking the platform for any change to the platform's state, which the platform decides before the next input.
   Features reach each other only through moments the platform raises, and no feature raises one of its own.
   A feature that can block a request the platform decides, such as taking control or claiming a role's key, registers a guard, a quick check that allows the request or denies it with a reason, and any denial refuses it.
@@ -897,7 +897,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   The sim service writes each feed on the feature's own connection and writes the last one again every 200ms until the feature feeds another or ends the routine, and the routine host makes a routine new at its first feed.
   Preflight's hold and the plugins' mechanisms are the platform's own routines, which live in the routine host and are fed on the platform's connection.
   Each frame a routine asks for what it wants, and the routine host freezes the aircraft while any routine asks, and unfreezes it, if it froze it, once none does, so no routine keeps a flag the routine host must clear; following asks for the freeze in every frame it runs, with a pose to write or not.
-  The platform ends each of a feature's routines before it closes the feature's connection, and when the module's counter hasn't moved for 3s in a flight that's neither loading nor paused, while a routine of ours is live, the core takes the module as stopped and raises its notice, and unfreezes the aircraft through its own connection once the last routine that holds the freeze ends, as the pilot takes control or leaves, rather than handing the pilot a flying aircraft unasked (user, 2026-10-23; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+  The platform ends each of a feature's routines before it closes the feature's connection, and when the module's counter hasn't moved for 3s in a flight that's neither loading nor paused, while a routine of ours is live, the core takes the module as stopped and raises its notification, and unfreezes the aircraft through its own connection once the last routine that holds the freeze ends, as the pilot takes control or leaves, rather than handing the pilot a flying aircraft unasked (user, 2026-10-23; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
   The module never learns the session's state, so routines' slots replace [decision 017](../../decisions/017-core-writes-control-slot-every-200ms.md)'s control slot, which carries that state, and a numbered decision makes the change once step 8's decisions are numbered; the module still leaves its version in a slot and writes a counter every second.
   Settled in node 5.3 by the user, 2026-10-15 ([02-code-map](02-code-map.md#routines-in-our-wasm-module)).
 - **Because:**
@@ -1211,14 +1211,14 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** each feature registers its bindings, captures, playback streams, phrases, and the mouse with `core-helper-service`, each off until the feature turns it on, and its sounds, which the service sends after each `Hello`; the service runs the helper while anything is on, and sends it every want whole after its `Hello` and at each change.
   A want the helper can't carry out it reports, and runs the rest, and the service shows a warning naming the feature.
-  When the helper exits while something is wanted, the service starts it again 2s later, for as long as something is wanted, and shows a trouble notice naming the features whose wants are on once 5s pass with no matching `Hello`; a helper whose version or hash differs is killed and counts as down.
+  When the helper exits while something is wanted, the service starts it again 2s later, for as long as something is wanted, and shows a trouble notification naming the features whose wants are on once 5s pass with no matching `Hello`; a helper whose version or hash differs is killed and counts as down.
   The helper sends no `Alive`, and the core kills no silent helper, since the writer thread that sent `Alive` kept sending while any other thread hung, so the kill caught only a deadlock of our own writer (the design review after node 6, user, 2026-10-18).
   The helper exits when its standard input closes.
   Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#the-helpers-life)).
 - **Because:**
   - A started-again helper gets everything in one round, as the session crate sends its keys whole on every `LinkUp` ([02-units](../network/02-units.md#moments)).
   - Take-control turns its binding on only in a session, and the next press and the lists are on only while the desktop app binds a key or lists devices, so [decision 019](../../decisions/019-input-and-audio-run-in-helper.md)'s rule for when the helper runs holds without the service knowing what a session is.
-  - Starting it again every 2s adds no mechanism beyond the notice, which the pilot needs either way.
+  - Starting it again every 2s adds no mechanism beyond the notification, which the pilot needs either way.
 - **Leaves out:** whether a Windows program with no console reads a piped standard input, which p08's helper never had (read in `experiments/areas/architecture/p08-flight.mjs`), and whether it closes when the core crashes, which the helper's first build and a bench case settle.
 
 ## Messages on the core helper's pipe are postcard after a 4-byte length
@@ -1306,7 +1306,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Every core works out who is in the flight from each member's own key, and a pilot in another aircraft joins out of the flight
 
-- **Decided:** each member writes its sim's stage, aircraft, and pause flags, how its last sim run ended, and its links, as a session key of its own, and every core counts a member in the flight while that key says Ready to fly or Flying in the session's aircraft; a pilot in another aircraft joins and waits out of the flight with a notice, which replaces the rule that such a pilot can't join; control passes, preflight counts, and the session ends by that one rule.
+- **Decided:** each member writes its sim's stage, aircraft, and pause flags, how its last sim run ended, and its links, as a session key of its own, and every core counts a member in the flight while that key says Ready to fly or Flying in the session's aircraft; a pilot in another aircraft joins and waits out of the flight with a notification, which replaces the rule that such a pilot can't join; control passes, preflight counts, and the session ends by that one rule.
   Settled in node 6.7 by the user, 2026-10-16 ([the session's units](../session/02-units.md#in-the-flight)).
 - **Because:** refusing every join from a flight would make a pilot cut off for 30 minutes, or who pressed Leave by mistake, quit their flight to come back, and refusing only another aircraft would need the session's aircraft before the join (user, 2026-10-16).
 - **Leaves out:** nothing.
@@ -1480,9 +1480,9 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A lock lifting under a held press would let its release act on a control behind it and go unsent.
 - **Leaves out:** the look and words of the visible lock and the flash's color, for [6.16](plan.md#616-the-apps) and the build.
 
-## The take-control input takes control on its down or held 1s, and a pass plays a cue and a notice with no recorded line
+## The take-control input takes control on its down or held 1s, and a pass plays a cue and a notification with no recorded line
 
-- **Decided:** a bound key or button takes control on its down, or, set as a long press, once held 1s, before its release, and has no default binding; a bound key counts only while a window of the sim is in front, and the desktop app asks the pilot to keep the input unbound in the sim; outside the flight or before preflight's end it does nothing; a press the guards refuse plays a refusal cue and shows each denial's reason; a press while the link to the PF is lost takes control at once and shows the warning after, the apps' buttons showing it before; and a pass plays the control-passed cue on every machine in the flight, with a notice naming the new PF and no recorded line.
+- **Decided:** a bound key or button takes control on its down, or, set as a long press, once held 1s, before its release, and has no default binding; a bound key counts only while a window of the sim is in front, and the desktop app asks the pilot to keep the input unbound in the sim; outside the flight or before preflight's end it does nothing; a press the guards refuse plays a refusal cue and shows each denial's reason; a press while the link to the PF is lost takes control at once and shows the warning after, the apps' buttons showing it before; and a pass plays the control-passed cue on every machine in the flight, with a notification naming the new PF and no recorded line.
   This changes [03-v1-scope](../product/03-v1-scope.md#take-control-key)'s take-control key, under which the new PF hears "you have control" and the old one "they have control" (user, 2026-10-17).
   Settled in node 6.12 by the user, 2026-10-17 ([take-control](../control/01-take-control.md)).
 - **Because:**
@@ -1491,7 +1491,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A long press keeps a brushed button from taking control.
   - A pilot pressing hardware in VR gets no other sign of a refusal before looking at the banner.
   - Good neutral voice lines are hard to come by, and the cue and the banner already mark the pass (user, 2026-10-17).
-- **Leaves out:** the cues' sounds, which the build makes; and the notices' words, for [6.16](plan.md#616-the-apps).
+- **Leaves out:** the cues' sounds, which the build makes; and the notifications' words, for [6.16](plan.md#616-the-apps).
 
 ## A pilot's own core works out their figure, and Figure draws every figure on arrival, each frame
 
@@ -1558,11 +1558,11 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A tug about 5m long spans about 3 pixels at 1km on a 1,920 by 1,080 screen at a 90° field of view, which the sim measures as the view's height (arithmetic).
 - **Leaves out:** the titles beyond `ASO_Pushback_`, which the build adds.
 
-## A receiving machine tells its pilot of other traffic and of missing copies by notices, and a page lists the machine's traffic packs on demand, so the match check has no traffic item
+## A receiving machine tells its pilot of other traffic and of missing copies by notifications, and a page lists the machine's traffic packs on demand, so the match check has no traffic item
 
-- **Decided:** while another member holds traffic's key and its pilot is in the flight, a receiving machine counts every 10s the aircraft and helicopters within 200km that are neither its pilot's nor its copies, and raises a notice after two counts above 0; it raises another while any of the traffic host's aircraft and helicopters shows as a stand-in or not at all; and when a page asks, a job lists this machine's traffic packs, from a list of known folder names in traffic's crate starting with `fsltl-traffic-base`, with each one's manifest version, into traffic's slice.
+- **Decided:** while another member holds traffic's key and its pilot is in the flight, a receiving machine counts every 10s the aircraft and helicopters within 200km that are neither its pilot's nor its copies, and raises a notification after two counts above 0; it raises another while any of the traffic host's aircraft and helicopters shows as a stand-in or not at all; and when a page asks, a job lists this machine's traffic packs, from a list of known folder names in traffic's crate starting with `fsltl-traffic-base`, with each one's manifest version, into traffic's slice.
   This changes [the session's units](../session/02-units.md#the-match-check), whose match check has an item of traffic's for traffic packs, injectors, and multiplayer, and [traffic sync](../product/03-v1-scope.md#traffic-sync), which puts them in the match check's list.
-  Settled in node 6.14 by the user, 2026-10-17 ([notices](../traffic-atc/01-traffic-and-atc.md#notices); [traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs)).
+  Settled in node 6.14 by the user, 2026-10-17 ([notifications](../traffic-atc/01-traffic-and-atc.md#notifications); [traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs)).
 - **Because:**
   - The count catches the sim's own AI traffic and any injector by what shows, as FS Copilot's receiver counted aircraft (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficReceiver.cs`, `ForeignPoll`), and the stand-ins catch the packs that differ by what the copies do.
   - Folder names and manifests take no reading of the 2,690 `aircraft.cfg` and `livery.cfg` files that finding each title's package would, and traffic packs rarely rename their folders (user, 2026-10-17).
@@ -1583,7 +1583,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## v1 builds no plugins, and a profile reads a gauge's JavaScript through `instrument()` and writes it only through the gauge's H: events
 
 - **Decided:** v1 builds no plugins crate, plugin API, `plugin:` key, `plugin.state` or `plugin.write` form, `ops` module, or `Mechanisms` routine.
-  A state entry may watch `instrument(key, path)`, a value in a gauge's JavaScript, which state sync's panel module `instrument-reads` reads every 250ms in the gauge's panel: a path of own data properties from the instrument, ending in a number, text, or boolean, with no method call (the design review after node 6, user, 2026-10-18); a boolean reads as 1 or 0, and any other value is an error for the entry, with state sync's notice; and the engine holds a write to such an entry until its first reading.
+  A state entry may watch `instrument(key, path)`, a value in a gauge's JavaScript, which state sync's panel module `instrument-reads` reads every 250ms in the gauge's panel: a path of own data properties from the instrument, ending in a number, text, or boolean, with no method call (the design review after node 6, user, 2026-10-18); a boolean reads as 1 or 0, and any other value is an error for the entry, with state sync's notification; and the engine holds a write to such an entry until its first reading.
   A profile writes a gauge's state only through the gauge's H: events, in write functions that check the mode another entry syncs, and the Baron 58P's tablet failures and its ADF's elapsed seconds stay out of v1.
   This changes [decision 020](../../decisions/020-plugin-code-runs-only-in-core.md), whose 58P plugin reads its gauges through our panel bridge, and [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md), whose aircraft gets a second runtime for its plugin, once step 8's decisions are numbered; and [03-v1-scope](../product/03-v1-scope.md#plugins), [04-room-for-later](../product/04-room-for-later.md#plugins), [01-format-and-delivery](../profiles/01-format-and-delivery.md#plugins), and [the code map](02-code-map.md#the-units), which build the 58P's plugin, its hooks, `ops`, and `Mechanisms` in v1.
   Settled in node 6.15 by the user, 2026-10-17 ([plugins and the sandbox](../plugins/01-plugins.md)).
@@ -1616,7 +1616,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Decided:** a feature's `efb/` and `desktop/` folders each export one part, named for its unit in the core, with a `start` and a `stop` for code with no screen and views keyed by the places its app names, and each app lists its parts, one line each.
   A part reaches the core only through `watch`, `command`, and the `unit` messages it trades with its own unit, and imports only its app's shell and the message crate's types.
   The banner's page shows the EFB app's parts' views for places of its own.
-  The shells reach a feature's state only through the notices, the settings, the match check's differences, each with its level and its item's words, and the role keys' labels, and the map check fails a platform unit whose source names a feature's module of the message crate.
+  The shells reach a feature's state only through the notifications, the settings, the match check's differences, each with its level and its item's words, and the role keys' labels, and the map check fails a platform unit whose source names a feature's module of the message crate.
   Settled in node 6.16 by the user, 2026-10-17 ([the apps](../interface/01-apps.md#a-features-parts)).
 - **Because:**
   - Deleting a feature leaves everything else building, its section in each app included ([tiers](02-code-map.md#tiers)), and one line per part is how the core's `main` lists features.
@@ -1638,14 +1638,14 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The banner stays open through a session's flights and shows or hides its own content, and the EFB app's code opens it in each flight
 
-- **Decided:** in each flight of a session, the EFB app's code opens the banner panel, calling `TOOLBAR_BUTTON_TOGGLE` again after a wait the cases in the sim set until a banner page's socket opens, which `clients`' slice reports; the panel then stays open, and the banner's page shows and hides its notices and the preflight summary itself, from the slices it watches, so the session's slice carries no wanted state; a pilot who closes it from its toolbar button keeps it closed until the next flight; the EFB app's code closes it once when the session ends or the core says `bye`.
-  A click on a notice outside its action sends `clients`' command, which sends the EFB app the order that opens the EFB onto our app.
+- **Decided:** in each flight of a session, the EFB app's code opens the banner panel, calling `TOOLBAR_BUTTON_TOGGLE` again after a wait the cases in the sim set until a banner page's socket opens, which `clients`' slice reports; the panel then stays open, and the banner's page shows and hides its notifications and the preflight summary itself, from the slices it watches, so the session's slice carries no wanted state; a pilot who closes it from its toolbar button keeps it closed until the next flight; the EFB app's code closes it once when the session ends or the core says `bye`.
+  A click on a notification outside its action sends `clients`' command, which sends the EFB app the order that opens the EFB onto our app.
   This changes [decision 012](../../decisions/012-efb-app-opens-banner-panel.md), whose EFB app opens the panel when the session has something to show and closes it, once step 8's decisions are numbered; it was settled in node 6.16 as the core saying whether the banner should be open, and changed in the design review after node 6 (user, 2026-10-18; [the banner](../interface/01-apps.md#the-banner)).
 - **Because:**
   - The interface log's 2026-10-04 run left the panel open and showed and hid its elements by CSS without toggling the panel ([interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), and opening and closing on each change of a wanted state could reopen a banner that had just closed, if the call toggles rather than sets, which is unverified.
   - The call opened our panel from the EFB's document (measured on MSFS 2024, 2026-10-04 and 2026-10-09, [interface log](../interface/log.md#2026-10-09-installed-from-the-community-folder-our-toolbar-script-loads-at-the-flight-load-and-it-and-our-efb-apps-code-each-open-the-banner-when-the-client-asks-over-the-commbus)), and a closed panel's socket stayed open for the 35s a run watched ([interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)), so the socket `clients` closes 8s after the page's last message says whether it's up.
-  - When a notice shows is a screen decision, which belongs in the banner's page, not the core's protocol.
-- **Leaves out:** whether clicks reach the cockpit through the panel's see-through part, which a case in the sim checks and which, if they don't, brings the banner's shape back to design; where it sits, how it shows in VR, and where a click on a notice lands in the EFB app, which the apps' stage settles.
+  - When a notification shows is a screen decision, which belongs in the banner's page, not the core's protocol.
+- **Leaves out:** whether clicks reach the cockpit through the panel's see-through part, which a case in the sim checks and which, if they don't, brings the banner's shape back to design; where it sits, how it shows in VR, and where a click on a notification lands in the EFB app, which the apps' stage settles.
 
 ## Dual Input has no watcher, and the desktop app runs from login as a tray icon doing its jobs
 
@@ -1713,10 +1713,10 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## The sim service warns of packages that override our files and checks our own, and Dual Input turns no package off
 
 > **Note**
-> Since 2026-10-23, the sim service searches no other package for files that override ours and checks nothing of our own package on disk: our `VCockpit.js` won over FS Copilot's on 2026-10-22, against the mount order this rested on, the clients crate's notice when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause, and the module's Missing and Differs cover our own package (user, 2026-10-23; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+> Since 2026-10-23, the sim service searches no other package for files that override ours and checks nothing of our own package on disk: our `VCockpit.js` won over FS Copilot's on 2026-10-22, against the mount order this rested on, the clients crate's notification when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause, and the module's Missing and Differs cover our own package (user, 2026-10-23; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 > It still reads the packages folders from `UserCfg.opt` for the session crate's search, and Dual Input still turns no package off.
 
-- **Decided:** the sim service reads the packages folders from `UserCfg.opt`, and gives them to the session crate's search for an aircraft's package; at the core's start and at each sim start it searches other packages' `layout.json` in `Community` and `Community2024` for the paths ours lists outside our own folders, `VCockpit.js` and BlurPage's component, without regard to letter case, since FS Copilot's lists its `VCockpit.js` in lowercase (read in the FS Copilot fork, `FsCopilot.Bridge/Packages/fscopilot-bridge/layout.json`), skipping a package the sim's `Content.xml` marks `UserDisabled`, and raises a warning notice for each package found, which the match check shows as one item; and it checks that our own package is there, at the core's version, and not off in the sim, raising a trouble notice otherwise, one notice with the module's status of Missing or Differs (the design review after node 6, user, 2026-10-18).
+- **Decided:** the sim service reads the packages folders from `UserCfg.opt`, and gives them to the session crate's search for an aircraft's package; at the core's start and at each sim start it searches other packages' `layout.json` in `Community` and `Community2024` for the paths ours lists outside our own folders, `VCockpit.js` and BlurPage's component, without regard to letter case, since FS Copilot's lists its `VCockpit.js` in lowercase (read in the FS Copilot fork, `FsCopilot.Bridge/Packages/fscopilot-bridge/layout.json`), skipping a package the sim's `Content.xml` marks `UserDisabled`, and raises a warning notification for each package found, which the match check shows as one item; and it checks that our own package is there, at the core's version, and not off in the sim, raising a trouble notification otherwise, one notification with the module's status of Missing or Differs (the design review after node 6, user, 2026-10-18).
   Removing or turning off a package the warning names is the pilot's, and the offer to disable it, which [installing and updating](../product/03-v1-scope.md#installing-and-updating) gives the desktop app, moves to Later (user, 2026-10-18).
   Settled in node 6.17 by the user, 2026-10-18 ([how package trouble shows](../install/01-installing-and-updating.md#how-package-trouble-shows)).
 - **Because:**

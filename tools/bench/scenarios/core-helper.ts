@@ -87,30 +87,30 @@ test("the core killed, the helper exits within 1s", { timeout: 60_000 }, async (
   assert.equal(helper.latest!.lines.at(-1)?.line, "closed", "its standard input closed with the core")
 })
 
-test("a helper of another build is logged, killed, and started again, and the trouble notice shows 5s after it went down", { timeout: 60_000 }, async (t) => {
+test("a helper of another build is logged, killed, and started again, and the trouble notification shows 5s after it went down", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("core-helper-other-build", t)
   const { core, helper } = await started(run, "a", { "bench.input": KEY_A })
   t.after(() => helper.close())
   core.act({ act: "watch", process: run.stub().id })
   await core.hear("stage Starting aircraft none")
-  const efb = new FakePage(core, { component: "efb" })
+  const efb = new FakePage(core, { component: "efb-app" })
   t.after(() => efb.close())
-  efb.client.watch("notices", () => {})
-  await efb.until(() => efb.slice("notices") !== undefined, "the notices")
-  const ids = () => ((efb.slice("notices") ?? []) as { id: string }[]).map((n) => n.id)
+  efb.client.watch("notifications", () => {})
+  await efb.until(() => efb.slice("notifications") !== undefined, "the notifications")
+  const ids = () => ((efb.slice("notifications") ?? []) as { id: string }[]).map((n) => n.id)
 
   helper.helloAs = { version: "0.0.0" }
   core.helper({ act: "binding", on: true })
   await helper.until(() => helper.runs.length === 1, "its first run")
   const first = helper.latest!.connected
-  await efb.until(() => ids().includes("core-helper.down"), "the trouble notice", 10_000)
+  await efb.until(() => ids().includes("core-helper.down"), "the trouble notification", 10_000)
   const shown = performance.now() - first
-  assert.ok(shown > 4_500 && shown < 7_000, `the trouble notice showed ${shown.toFixed(0)}ms after the helper went down`)
+  assert.ok(shown > 4_500 && shown < 7_000, `the trouble notification showed ${shown.toFixed(0)}ms after the helper went down`)
   assert.ok(helper.runs.length >= 2, "the core started it again")
   assert.match(core.log(), /a core helper of another build said hello, so the core killed it/)
 
   helper.helloAs = {}
-  await efb.until(() => !ids().includes("core-helper.down"), "the notice clearing at a matching hello", 10_000)
+  await efb.until(() => !ids().includes("core-helper.down"), "the notification clearing at a matching hello", 10_000)
   assert.ok(binds(helper.latest, KEY_A))
 })
 
@@ -156,7 +156,7 @@ test("a sound plays while the helper runs, and a play while it's stopped is drop
   assert.match(core.log(), /a sound wasn't played, since the core helper isn't running/)
 })
 
-/** A core with the stand-in, announcing so a fake page joins it, and a page that watches the notices and the helper's slice. */
+/** A core with the stand-in, announcing so a fake page joins it, and a page that watches the notifications and the helper's slice. */
 async function withPage(t: TestContext, scenario: string) {
   const run = new BenchRun(scenario, t)
   const { core, helper } = await started(run, "a")
@@ -165,22 +165,22 @@ async function withPage(t: TestContext, scenario: string) {
   await core.hear("stage Starting aircraft none")
   const page = new FakePage(core, { component: "desktop" })
   t.after(() => page.close())
-  page.client.watch("notices", () => {})
+  page.client.watch("notifications", () => {})
   page.client.watch("core-helper", () => {})
-  await page.until(() => page.slice("notices") !== undefined, "the notices")
-  const notices = () => (page.slice("notices") ?? []) as { id: string; text: string }[]
-  return { core, helper, page, notices }
+  await page.until(() => page.slice("notifications") !== undefined, "the notifications")
+  const notifications = () => (page.slice("notifications") ?? []) as { id: string; text: string }[]
+  return { core, helper, page, notifications }
 }
 
 test("a want the helper can't carry out warns, naming the feature, until the want goes off, and the device list ends at its answer or its failure", { timeout: 60_000 }, async (t) => {
-  const { core, helper, page, notices } = await withPage(t, "core-helper-failed")
+  const { core, helper, page, notifications } = await withPage(t, "core-helper-failed")
   core.helper({ act: "mouse", on: true })
   await helper.until(() => helper.latest?.wants().at(-1)?.mouse === true, "wants the mouse")
   helper.latest!.act({ act: "failed", want: "Mouse", error: "Raw Input refused the mouse" })
-  await page.until(() => notices().some((n) => n.id === "core-helper.failed.mouse"), "the mouse's warning")
-  assert.match(notices().find((n) => n.id === "core-helper.failed.mouse")!.text, /bench-helper's mouse isn't working/)
+  await page.until(() => notifications().some((n) => n.id === "core-helper.failed.mouse"), "the mouse's warning")
+  assert.match(notifications().find((n) => n.id === "core-helper.failed.mouse")!.text, /bench-helper's mouse isn't working/)
   core.helper({ act: "mouse", on: false })
-  await page.until(() => !notices().some((n) => n.id === "core-helper.failed.mouse"), "the warning clearing with the mouse off")
+  await page.until(() => !notifications().some((n) => n.id === "core-helper.failed.mouse"), "the warning clearing with the mouse off")
   await helper.until(() => helper.latest!.closed !== undefined, "its exit with nothing wanted")
 
   await page.client.command("core-helper.list", null)
@@ -196,7 +196,7 @@ test("a want the helper can't carry out warns, naming the feature, until the wan
 })
 
 test("a capture's program and frames reach its feature, and a missing output device warns until the helper plays on it", { timeout: 60_000 }, async (t) => {
-  const { core, helper, page, notices } = await withPage(t, "core-helper-capture")
+  const { core, helper, page, notifications } = await withPage(t, "core-helper-capture")
   core.helper({ act: "capture", programs: ["BeyondATC"] })
   await helper.until(() => helper.latest?.wants().at(-1)?.captures.length === 1, "wants a capture")
   const capture = helper.latest!.wants().at(-1)!.captures[0]!
@@ -209,9 +209,9 @@ test("a capture's program and frames reach its feature, and a missing output dev
   await page.client.command("clients.set-setting", { key: "core-helper.output", value: { id: "headset", name: "Headset" } })
   await helper.until(() => helper.latest!.wants().length >= 2, "the wants with the picked device")
   helper.latest!.act({ act: "in-use", output: { id: "speakers", name: "Speakers" } })
-  await page.until(() => notices().some((n) => n.id === "core-helper.missing-output"), "the missing headset's warning")
+  await page.until(() => notifications().some((n) => n.id === "core-helper.missing-output"), "the missing headset's warning")
   helper.latest!.act({ act: "in-use", output: { id: "headset-2", name: "Headset" } })
-  await page.until(() => !notices().some((n) => n.id === "core-helper.missing-output"), "the warning clearing once it plays on a device of the headset's name")
+  await page.until(() => !notifications().some((n) => n.id === "core-helper.missing-output"), "the warning clearing once it plays on a device of the headset's name")
 })
 
 test("a helper that won't start is tried again while a want is on, even after a want went on and off before the start failed", { timeout: 60_000 }, async (t) => {

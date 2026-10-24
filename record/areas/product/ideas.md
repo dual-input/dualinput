@@ -353,11 +353,11 @@ That makes the interface a client of Dual Input's app on whichever screen it run
 
 ### Notification banner
 
-Dual Input's notices, such as "James is in the pause menu", latency trouble, lost packets, and a lost connection, slide in at the side of the screen.
+Dual Input's notifications, such as "James is in the pause menu", latency trouble, lost packets, and a lost connection, slide in at the side of the screen.
 A pilot sees them whether or not the EFB is open, and a click on one opens Dual Input's EFB app at what it's about.
 
-- **Tech:** a see-through in-game panel of ours, kept open, takes clicks and slides notices in and out (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), and a script its toolbar icon puts into the sim's toolbar opened it with no click after two of three Build and Mounts (same date, [interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
-  A click on a notice opens our EFB app wherever it sits in the EFB, as the [EFB app](03-v1-scope.md#efb-app) scope describes.
+- **Tech:** a see-through in-game panel of ours, kept open, takes clicks and slides notifications in and out (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), and a script its toolbar icon puts into the sim's toolbar opened it with no click after two of three Build and Mounts (same date, [interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
+  A click on a notification opens our EFB app wherever it sits in the EFB, as the [EFB app](03-v1-scope.md#efb-app) scope describes.
   A banner on an object of ours, held in front of the pilot's view, smeared in motion and was sometimes cut into by the cockpit (judged by the pilot in MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-a-banner-drawn-on-an-object-of-ours-smears-in-motion-and-is-clipped-behind-the-cockpit-so-we-parked-it-for-an-in-game-panel)).
   The pilot caught none of three `SimConnect_Text` texts, though the sim reported two as displayed (same date, [interface log](../interface/log.md#2026-10-04-simconnect_text-reports-its-texts-as-displayed-and-the-pilot-didnt-catch-any-of-them)).
 - **Open questions:** how the panel shows in VR, and whether clicks on its empty part reach the cockpit.
@@ -370,7 +370,7 @@ What matters is that the answer is there when something stops working, not a row
 - **Tech:** the core is the hub most components already report to ([architecture's spine](../architecture/01-spine.md#components)).
   The WASM module hears from the core every second in a session ([architecture's spine](../architecture/01-spine.md#what-moves-them)), and FS Copilot's app re-sent its state to every panel every 2s, so a panel could take silence to mean the app was gone (read in the FS Copilot fork, `FsCopilot/Connection/PanelServer.cs`), so silence from a component is something the core can name and log.
   Another package's `VCockpit.js` override winning the mount order would show as a panel bridge that never connects ([installing and updating](03-v1-scope.md#installing-and-updating)).
-- **Open questions:** what counts as trouble for each component, and where the pilot sees it: the desktop app, the EFB app for a pilot in VR, or a notice on the banner when it costs them a feature.
+- **Open questions:** what counts as trouble for each component, and where the pilot sees it: the desktop app, the EFB app for a pilot in VR, or a notification on the banner when it costs them a feature.
 
 ### Dual Input objects in the cockpit
 

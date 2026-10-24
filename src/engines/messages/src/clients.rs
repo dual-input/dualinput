@@ -51,6 +51,10 @@ pub mod component {
     pub const MENU_SCRIPT: &str = "menu-script";
     /// The desktop app, while its window is open.
     pub const DESKTOP: &str = "desktop";
+    /// Our app in the sim's EFB.
+    pub const EFB_APP: &str = "efb-app";
+    /// The banner's page, in the panel the EFB app's code opens in each flight of a session.
+    pub const BANNER: &str = "banner";
 }
 
 /// A client's first message.
@@ -139,16 +143,16 @@ pub struct PanelModule {
     pub instruments: Vec<String>,
 }
 
-/// A notice a unit raises for the apps to show, in the slice `notices`.
+/// A notification a unit raises for the apps to show, in the slice `notifications`.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "clients/")]
-pub struct Notice {
-    /// The raising unit's name, then `.` and its own ID for the notice.
+pub struct Notification {
+    /// The raising unit's name, then `.` and its own ID for the notification.
     pub id: String,
     pub level: Level,
     /// In the raising feature's own words.
     pub text: String,
-    /// The command a click on the notice sends, if any.
+    /// The command a click on the notification sends, if any.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[ts(optional)]
     pub action: Option<String>,
@@ -164,8 +168,43 @@ pub enum Level {
     Trouble,
 }
 
-/// The slice `notices`.
-pub const NOTICES: &str = "notices";
+/// The slice `notifications`: every notification up, as a list.
+pub const NOTIFICATIONS: &str = "notifications";
+
+/// The slice `banner`: `true` while a banner page's socket is open, which the clients crate
+/// closes 8s after the page's last message. A closed panel's page is gone while its socket
+/// stays open, so the clients crate's close of that socket, not the page's own close, says the
+/// banner is gone, and the EFB app's code calls the toolbar again until the slice is `true`
+/// (record/areas/interface/01-apps.md, "The banner").
+pub const BANNER: &str = "banner";
+
+/// The command for a click on a notification outside its action, from any client, with
+/// `NotificationClicked` as its arguments. It sends the EFB app `EfbAppOrder::OpenEfb`.
+pub const NOTIFICATION_CLICKED: &str = "clients.notification-clicked";
+
+/// The arguments of `NOTIFICATION_CLICKED`.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "clients/")]
+pub struct NotificationClicked {
+    /// The notification's full ID, as the slice `notifications` gives it.
+    pub id: String,
+}
+
+/// The command for the EFB app's button that brings the desktop app forward, with `null` as
+/// its arguments. The core starts the desktop app's program whether or not a desktop app is
+/// connected, and the program's one running copy opens its window, so the desktop app gets no
+/// message for it (record/areas/interface/01-apps.md, "Bringing the desktop app forward").
+pub const BRING_DESKTOP_FORWARD: &str = "clients.bring-desktop-forward";
+
+/// What the clients crate orders the EFB app to do, in a `unit` message from `clients`, such as
+/// `{"t":"open-efb"}`.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(tag = "t", rename_all = "kebab-case")]
+#[ts(export, export_to = "clients/")]
+pub enum EfbAppOrder {
+    /// Opens the EFB onto our app, after a click on a notification outside its action.
+    OpenEfb,
+}
 
 /// The slice `settings`: each setting an app may offer.
 pub const SETTINGS: &str = "settings";

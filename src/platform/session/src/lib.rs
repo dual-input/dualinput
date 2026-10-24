@@ -650,7 +650,7 @@ impl Session {
         }
         preflight::hold(self, cx);
         preflight::ended(self, cx);
-        members::notices(self, cx);
+        members::notifications(self, cx);
         members::end_if_nobody_flies(self, cx);
     }
 }

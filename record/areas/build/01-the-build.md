@@ -264,7 +264,7 @@ Each is a starting value:
 In the sim:
 
 - From our `PANEL_PATCH` package, the figure spawns, and our BlurPage copy, the banner's in-game panel, and the EFB app load.
-- With FS Copilot's package installed, its `VCockpit.js` wins over ours, and the clients crate's notice when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause; in this case's one run, ours won instead ([installing log](../install/log.md#2026-10-22-our-vcockpitjs-won-over-fs-copilots-though-fscopilot-bridge-sorts-after-dualinput-with-the-same-order-hint)).
+- With FS Copilot's package installed, its `VCockpit.js` wins over ours, and the clients crate's notification when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause; in this case's one run, ours won instead ([installing log](../install/log.md#2026-10-22-our-vcockpitjs-won-over-fs-copilots-though-fscopilot-bridge-sorts-after-dualinput-with-the-same-order-hint)).
   With YourControls' installed, ours wins.
 
 On a desk:

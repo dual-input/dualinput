@@ -5,8 +5,8 @@
 //! asks the transport, at the core's edge, to carry them out
 //! (record/areas/network/02-units.md, "The network crate").
 //!
-//! Register it after the clients crate, whose settings, slice, and notices it uses, and before
-//! every unit that registers a channel.
+//! Register it after the clients crate, whose settings, slice, and notifications it uses, and
+//! before every unit that registers a channel.
 
 mod backend;
 mod clock;
@@ -337,7 +337,7 @@ impl Network {
         me.forget(cx);
         me.session = None;
         me.endpoint = None;
-        clients::clear_notice(cx, "refused");
+        clients::clear_notification(cx, "refused");
         if let Some(heartbeat) = me.heartbeat.take() {
             cx.cancel_timer(heartbeat);
         }

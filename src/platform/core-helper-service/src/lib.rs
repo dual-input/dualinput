@@ -5,7 +5,7 @@
 //! while any is on, sends it every want whole after each start and each change, and starts
 //! it again 2s after it exits (record/areas/core/04-core-helper.md).
 //!
-//! Register it after the clients crate, whose settings, slice, command, and notices it uses,
+//! Register it after the clients crate, whose settings, slice, command, and notifications it uses,
 //! and before every feature that registers a want with it.
 
 mod edge;
@@ -59,7 +59,7 @@ pub struct CoreHelper {
     runs: u32,
     /// The wants the running helper was last sent.
     sent: Option<Wants>,
-    /// The 5s timer that raises the trouble notice while the helper is down.
+    /// The 5s timer that raises the trouble notification while the helper is down.
     trouble: Option<TimerId>,
     listed: HelperSlice,
     /// The warning raised for each want the helper reported it couldn't carry out.
@@ -107,7 +107,7 @@ impl CoreHelper {
         }
     }
 
-    /// The names of the features with a want on, each once, for the trouble notice.
+    /// The names of the features with a want on, each once, for the trouble notification.
     fn owners(&self) -> Vec<&'static str> {
         let mut owners: Vec<&'static str> = self
             .bindings
@@ -154,7 +154,7 @@ pub fn register(r: &mut Registry) {
         .command(LIST, CoreHelper::list);
 }
 
-/// The name of the unit whose handler calls the service, for its notices.
+/// The name of the unit whose handler calls the service, for its notifications.
 fn caller() -> &'static str {
     kernel::running_unit().unwrap_or("core")
 }
@@ -325,7 +325,7 @@ impl CoreHelper {
     fn setting_changed(me: &mut CoreHelper, changed: &SettingChanged, cx: &mut Cx) {
         if changed.key == OUTPUT {
             // The helper's next `InUse` says whether the new pick is connected.
-            clients::clear_notice(cx, "missing-output");
+            clients::clear_notification(cx, "missing-output");
             me.changed(cx);
         } else if me.bindings.iter().any(|b| b.setting == changed.key) {
             me.changed(cx);
@@ -348,7 +348,7 @@ impl CoreHelper {
                 if self.running()
                     && in_use.is_some_and(|u| u.id != picked.id && u.name != picked.name) =>
             {
-                clients::notice(
+                clients::notify(
                     cx,
                     "missing-output",
                     Level::Warning,
@@ -359,7 +359,7 @@ impl CoreHelper {
                     None,
                 );
             }
-            _ => clients::clear_notice(cx, "missing-output"),
+            _ => clients::clear_notification(cx, "missing-output"),
         }
     }
 }

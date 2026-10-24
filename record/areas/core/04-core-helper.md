@@ -19,7 +19,7 @@ Decisions [004](../../decisions/004-core-works-out-figures-hand.md), [006](../..
 
 | Unit | Tier | Holds | Runs |
 | --- | --- | --- | --- |
-| `core-helper-service` | Platform | What each feature registered and which of it is on, the helper's life, the pipe's messages, the output device's setting and, with the voice phrases, the microphone's, the slice that lists devices and programs, and the helper's notices | On the loop |
+| `core-helper-service` | Platform | What each feature registered and which of it is on, the helper's life, the pipe's messages, the output device's setting and, with the voice phrases, the microphone's, the slice that lists devices and programs, and the helper's notifications | On the loop |
 | `src/apps/core-helper` | App | Raw Input, the audio devices, capture, Opus, playback, sounds, and, with the voice phrases, speech | A process of its own, which the core starts |
 | The message crate's `core_helper` module | Engine | `ToHelper` and `FromHelper`, and the types inside them | Wherever the message crate does |
 | `src/apps/core`'s edge | App | Starting the helper's process, reading and writing its pipe, and killing it | On tokio, as [threads](01-loop-and-edge.md#threads) has it |
@@ -141,7 +141,7 @@ pub enum FromHelper {
   The service logs it and shows a warning naming the feature whose want failed, until that want goes off or the helper starts again.
 - **Stopping:** once nothing is wanted, the service puts out a stop, the edge closes the helper's standard input, and the helper exits; the edge kills it if it hasn't within 1s.
 - **Starting again:** when the helper exits while something is wanted, whatever its code, or the edge kills it, the service starts it again 2s later, through a timer, for as long as something is wanted (user, 2026-10-16).
-  If no matching `Hello` has come 5s after it went down, the service shows a trouble notice naming the features whose wants are on, and clears it at the next matching `Hello`.
+  If no matching `Hello` has come 5s after it went down, the service shows a trouble notification naming the features whose wants are on, and clears it at the next matching `Hello`.
 - **The core exiting** closes the helper's standard input, so the helper exits with the core, a crash included (unverified; a bench case kills the core).
 
 ## Inside the helper
@@ -276,7 +276,7 @@ The bench's stand-in helper speaks the real pipe's messages, and the core starts
 
 - The helper is killed in a session, and within 3s it runs again, with the take-control key bound as before.
 - The core is killed, and the helper exits within 1s.
-- A helper of another build is logged, killed, and started again, and the trouble notice shows after 5s.
+- A helper of another build is logged, killed, and started again, and the trouble notification shows after 5s.
 - A bound key held for 2s crosses as one press and one release.
 - A key nobody bound, typed into another program, never crosses the pipe, which the recording shows.
 - While the desktop app binds a key, with a switch on a throttle quadrant held on, only the button the pilot presses crosses, and then nothing.

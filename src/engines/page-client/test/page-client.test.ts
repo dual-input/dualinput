@@ -87,7 +87,7 @@ function started(options: { sessionOnly?: boolean; panel?: string; instruments?:
   const page = new FakePage()
   const client = new PageClient(
     {
-      component: options.sessionOnly ? "panel-bridge" : "efb",
+      component: options.sessionOnly ? "panel-bridge" : "efb-app",
       sessionOnly: options.sessionOnly,
       panel: options.panel === undefined ? undefined : () => options.panel,
       instruments: options.instruments && (() => options.instruments!),

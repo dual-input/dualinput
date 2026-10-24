@@ -44,7 +44,7 @@ One put-back rule replaces three: catch-up's, the simulation rate's, and the PF-
 ## What it commits us to
 
 - An entry the test catches stops syncing for the rest of the load, and each aircraft drives its own copy, as it would anyway.
-- The machine marks the recording and shows the once-a-flight notice of a write that never lands, so the profile reaches us in a bug report.
+- The machine marks the recording and shows the once-a-flight notification of a write that never lands, so the profile reaches us in a bug report.
 - The 3s and the 30s are starting values, and the decision leaves tuning them to v1's recordings.
 - A machine writes back at once, and sends nothing, when its sim reports a change it may not send: a PF-owned entry, unless it's the flying machine; any entry while its own catch-up runs, which also undoes the aircraft restoring its saved state; and the simulation rate, unless it's the flying machine.
 - The pitch axis fired no event inside a dead zone set in MSFS (measured on MSFS 2024, 2026-10-01, [flight-controls log](../areas/flight-controls/log.md#2026-10-01-inside-a-dead-zone-set-in-msfs-the-axis-fires-no-event)), so with a dead zone a machine puts a lever back only while the PM's hand moves it; the throttle, propeller, and mixture axes are unmeasured, and a jittering axis with no dead zone would be put back for as long as it jitters ([04-order-and-recovery](../areas/sync/04-order-and-recovery.md#putting-back)).

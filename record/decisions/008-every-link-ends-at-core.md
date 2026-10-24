@@ -10,7 +10,7 @@ Decided by the user on 2026-10-08, in node 1.2 of the [architecture plan](../are
 Dual Input runs as the watcher, the core, and the core's helper on each pilot's PC, with the desktop app when the pilot opens it, five pieces of code inside the sim, and three services off the pilots' machines ([01-spine](../areas/architecture/01-spine.md#components)), and [node 1.2](../areas/architecture/plan.md#12-communication) had to say how they reach each other.
 Some of them could reach each other without the core.
 The CommBus joins modules, panel JavaScript, and SimConnect clients ([05-02](../learn/foundations/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)).
-In one probe, a click on a notice in our panel raised `L:CROSSCHECK_P05_EFB_APP`, which a stand-in for our EFB app polled every 200ms to open the EFB onto an app (measured on MSFS 2024, 2026-10-04, [interface log](../areas/interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
+In one probe, a click on a notification in our panel raised `L:CROSSCHECK_P05_EFB_APP`, which a stand-in for our EFB app polled every 200ms to open the EFB onto an app (measured on MSFS 2024, 2026-10-04, [interface log](../areas/interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
 The EFB app speaks the same protocol as a browser, rather than reach Dual Input through something only a sim panel has, such as `L:` variables ([04-room-for-later](../areas/product/04-room-for-later.md#one-protocol-for-every-client)).
 
 ## Options
@@ -23,7 +23,7 @@ The EFB app speaks the same protocol as a browser, rather than reach Dual Input 
 ## Decision
 
 Option 2.
-Each of v1's features needs only links that end at the core: a click on a notice in the banner panel, for one, opens the EFB onto our app by way of the core ([01-spine](../areas/architecture/01-spine.md#communication)).
+Each of v1's features needs only links that end at the core: a click on a notification in the banner panel, for one, opens the EFB onto our app by way of the core ([01-spine](../areas/architecture/01-spine.md#communication)).
 One hub gives one place that logs every link, which component health needs, and one owner of the session.
 
 ## What it commits us to

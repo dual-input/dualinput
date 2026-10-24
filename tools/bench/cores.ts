@@ -275,6 +275,14 @@ export class Core {
 
 export type StandInReport = Extract<FromCore, { kind: "stand-in" }>
 
+/** Starts a core in `run` whose stand-in sim runs, so its platform's connection is open and it announces itself, and the fake pages join it. */
+export async function announcing(run: BenchRun, name: string, options: CoreOptions = {}): Promise<Core> {
+  const core = await run.core(name, options)
+  core.act({ act: "watch", process: run.stub().id })
+  await core.hear("stage Starting aircraft none")
+  return core
+}
+
 /** A port nothing listens on, where a core finds no profiles' site. */
 export const OFFLINE_SITE = "http://127.0.0.1:1"
 

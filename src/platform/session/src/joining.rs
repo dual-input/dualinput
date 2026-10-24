@@ -77,7 +77,7 @@ pub(crate) fn host(me: &mut Session, (): (), cx: &mut Cx) -> Result<(), String> 
     let session = cx.new_id().to_string();
     tracing::info!(session, "this pilot hosts a session");
     // A refusal speaks of the attempt it refused, so the next attempt clears it.
-    clients::clear_notice(cx, "refused");
+    clients::clear_notification(cx, "refused");
     me.asking = Some(Asking::Host {
         session: session.clone(),
         me: my.clone(),
@@ -95,7 +95,7 @@ pub(crate) fn join(me: &mut Session, args: Join, cx: &mut Cx) -> Result<(), Stri
     }
     let my = me_now(cx)?;
     tracing::info!(code, "this pilot joins a session");
-    clients::clear_notice(cx, "refused");
+    clients::clear_notification(cx, "refused");
     me.asking = Some(Asking::Join {
         code: code.clone(),
         me: my.clone(),
@@ -197,12 +197,12 @@ pub(crate) fn answered(me: &mut Session, answered: &BackendAnswered, cx: &mut Cx
                 Refusal::Other(words) => format!("The backend refused: {words}"),
             };
             tracing::info!(text, "the backend refused the session");
-            clients::notice(cx, "refused", Level::Warning, &text, None);
+            clients::notify(cx, "refused", Level::Warning, &text, None);
         }
         (Asked::Host | Asked::Join, Answer::NoAnswer(why)) => {
             me.asking = None;
             tracing::warn!(why, "the backend didn't answer");
-            clients::notice(
+            clients::notify(
                 cx,
                 "refused",
                 Level::Warning,
@@ -543,7 +543,7 @@ impl Session {
         }
         sim_service::aircraft_awareness(cx, false);
         sim_service::announce(cx, false);
-        crate::members::clear_notices(&held, cx);
+        crate::members::clear_notifications(&held, cx);
         cx.raise(SessionEnded);
         self.settle(cx);
     }

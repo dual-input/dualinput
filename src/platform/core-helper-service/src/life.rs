@@ -15,7 +15,7 @@ use crate::{CoreHelper, PROGRAM, PipeOut, PipeUp};
 /// (user, 2026-10-16).
 const AGAIN: Duration = Duration::from_secs(2);
 
-/// How long after the helper goes down the trouble notice shows, if no matching `Hello` has
+/// How long after the helper goes down the trouble notification shows, if no matching `Hello` has
 /// come by then.
 const TROUBLE: Duration = Duration::from_secs(5);
 
@@ -109,7 +109,7 @@ impl CoreHelper {
     }
 
     /// The helper exited, didn't start, or was killed, so it counts as down. While
-    /// something is wanted, it starts again 2s later, and the trouble notice shows if no
+    /// something is wanted, it starts again 2s later, and the trouble notification shows if no
     /// matching `Hello` comes within 5s of the first time it went down.
     fn went_down(&mut self, cx: &Cx) {
         self.sent = None;
@@ -145,14 +145,14 @@ impl CoreHelper {
             owners.join(", ")
         );
         tracing::warn!(text, "the core helper is down");
-        clients::notice(cx, "down", Level::Trouble, &text, None);
+        clients::notify(cx, "down", Level::Trouble, &text, None);
     }
 
     fn clear_trouble(&mut self, cx: &Cx) {
         if let Some(timer) = self.trouble.take() {
             cx.cancel_timer(timer);
         }
-        clients::clear_notice(cx, "down");
+        clients::clear_notification(cx, "down");
     }
 
     /// The edge's input: the helper started, didn't, sent a message, or exited.
@@ -355,7 +355,7 @@ impl CoreHelper {
                 if output.is_some()
                     && let Some(id) = self.failed.remove(&WantId::Output)
                 {
-                    clients::clear_notice(cx, &id);
+                    clients::clear_notification(cx, &id);
                 }
                 self.listed.in_use = output;
                 self.check_output(cx);
@@ -383,7 +383,7 @@ impl CoreHelper {
         };
         self.clear_trouble(cx);
         for id in std::mem::take(&mut self.failed).into_values() {
-            clients::clear_notice(cx, &id);
+            clients::clear_notification(cx, &id);
         }
         for sound in &self.sounds {
             cx.out(PipeOut::Send {
@@ -446,7 +446,7 @@ impl CoreHelper {
             WantId::Output => "failed.output".into(),
             WantId::Lists => "failed.lists".into(),
         };
-        clients::notice(
+        clients::notify(
             cx,
             &id,
             Level::Warning,
@@ -475,7 +475,7 @@ impl CoreHelper {
             .collect();
         for want in off {
             if let Some(id) = self.failed.remove(&want) {
-                clients::clear_notice(cx, &id);
+                clients::clear_notification(cx, &id);
             }
         }
     }

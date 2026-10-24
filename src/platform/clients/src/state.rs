@@ -5,7 +5,7 @@
 use std::collections::BTreeMap;
 
 use kernel::{Cx, TimerId, View};
-use messages::clients::{NOTICES, SETTINGS};
+use messages::clients::{BANNER, NOTIFICATIONS, SETTINGS};
 use serde_json::Value;
 
 use crate::{Clients, ROUND};
@@ -65,8 +65,11 @@ impl Clients {
     /// A slice's value as JSON text, or `None` for a slice no unit registered.
     fn build(&self, slice: &str, cx: &Cx) -> Option<String> {
         let text = match slice {
-            NOTICES => serde_json::to_string(&self.notices.values().collect::<Vec<_>>()),
+            NOTIFICATIONS => {
+                serde_json::to_string(&self.notifications.values().collect::<Vec<_>>())
+            }
             SETTINGS => serde_json::to_string(&self.settings.slice()),
+            BANNER => serde_json::to_string(&self.banner_open()),
             _ => {
                 let registered = self.slices.iter().find(|s| s.name == slice)?;
                 (registered.build)(&cx.view())

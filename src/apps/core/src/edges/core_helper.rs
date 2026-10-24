@@ -107,15 +107,7 @@ pub fn start(
 /// The program to start: the helper beside the core, or the one the development setting
 /// names, which a relative path finds from the core's folder.
 fn program_path(program: &str) -> PathBuf {
-    let folder = std::env::current_exe()
-        .ok()
-        .and_then(|exe| exe.parent().map(PathBuf::from))
-        .unwrap_or_default();
-    if program.is_empty() {
-        folder.join(PROGRAM)
-    } else {
-        folder.join(program)
-    }
+    super::beside_core(if program.is_empty() { PROGRAM } else { program })
 }
 
 /// Starts the helper, then writes to it and watches it until it exits.

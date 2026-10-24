@@ -1,7 +1,7 @@
 //! The test unit that stands in for a feature that uses the clients crate, before one is
-//! built: a slice, a setting, a command, and a panel module that echoes its panel's messages,
-//! which the clients crate answers each cockpit panel with once the profile loader has loaded
-//! a profile (record/areas/build/02-testing.md, "Its place").
+//! built: a slice, a setting, a command, a notification, and a panel module that echoes its
+//! panel's messages, which the clients crate answers each cockpit panel with once the profile
+//! loader has loaded a profile (record/areas/build/02-testing.md, "Its place").
 
 use std::time::Duration;
 
@@ -68,6 +68,9 @@ impl BenchClients {
                     until: cx.now() + for_ms * 1_000,
                 });
                 cx.timer(every, BenchClients::churn);
+            }
+            ClientsAct::Notify { id, text } => {
+                clients::notify(cx, &id, clients::Level::Information, &text, None)
             }
         }
     }

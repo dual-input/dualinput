@@ -21,7 +21,7 @@ The tentative decisions behind it start at [decisions.md](decisions.md#dual-inpu
 
 | Tier | What it is | Examples |
 | --- | --- | --- |
-| Platform | The services every feature uses: in the core, and in the sim through the panel bridge and our WASM module, which load what features and plugins run there by name ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)) | The kernel, the session and its keys, control, channels, the cockpit stream, catch-up, the client protocol, settings, notices, recording, the sim service, the routine host, the panel bridge, the apps' shells |
+| Platform | The services every feature uses: in the core, and in the sim through the panel bridge and our WASM module, which load what features and plugins run there by name ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)) | The kernel, the session and its keys, control, channels, the cockpit stream, catch-up, the client protocol, settings, notifications, recording, the sim service, the routine host, the panel bridge, the apps' shells |
 | Engines | Libraries that know nothing of the app, so another program can link them, such as the [Dual Input IDE](../product/ideas.md#dual-input-ide) | The message crate, the profile engine, the sync engine, the sandbox, the transport, the recording format, the sim client, sim awareness, the sim edge, the stand-in sim |
 | Features | Each one thing a pilot gets | Pointer sync, avatars, traffic, ATC audio, the take-control key, rate and pause, Go to, which points the world map at the PF's spot |
 
@@ -101,7 +101,7 @@ The platform is split this way, and named the platform rather than the host, bec
 | Unit | Owns | Raises | Uses, of ours |
 | --- | --- | --- | --- |
 | kernel | The loop, the registry, moments, requests and their guards, the outbox, timers, jobs, and the store of each unit's state | | messages |
-| clients | The client protocol: each client's socket and first message, client state and commands, which panel modules each panel loads, lock renewals, settings, and notices | A client joining or leaving, a panel's socket replaced, and a setting changed ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#the-moments-clients-raises-and-the-calls-it-takes)) | kernel |
+| clients | The client protocol: each client's socket and first message, client state and commands, which panel modules each panel loads, lock renewals, settings, and notifications | A client joining or leaving, a panel's socket replaced, and a setting changed ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#the-moments-clients-raises-and-the-calls-it-takes)) | kernel |
 | sim-service | The sim service, sim awareness, masking, the module's version and counter and the unfreeze, and the CommBus event that announces the core's port ([what the platform keeps](#what-the-platform-keeps)), and the world map's requests, which the menu script runs for whichever feature asks; aircraft awareness, the loaded aircraft's package, folder, install location, version, and livery, which a job of its own finds while a session is held, and which the session crate's match check and avatars read there ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md); user, 2026-10-18); and the packages folders, read from `UserCfg.opt` ([packages on disk](../core/03-sim-seam-and-wasm-module.md#packages-on-disk)) | `SimChanged`, for each change of the sim's state, a load among them, and `AircraftChanged` | kernel, clients, sim-client, sim-awareness |
 | network | Each link's state, the channels, the heartbeat, clock offsets, coming back, the backend's invite codes, and the version check at join, at the backend and in each connection's first message ([02-units](../network/02-units.md#the-first-message)) | `LinkUp`, `LinkLost`, `MemberLeft`, `MemberOut`, and `BackendAnswered` ([moments](../network/02-units.md#moments)) | kernel, clients |
 | core-helper-service | Starting the core helper and starting it again; the bindings, captures, and sounds features register with it, the next press, the mouse, and playback streams; the output device setting; and the slice of devices and programs ([04-core-helper](../core/04-core-helper.md#what-a-feature-registers-and-calls)); and phrases and the microphone setting with the voice phrases, a Soon pick | | kernel, clients |
@@ -121,7 +121,7 @@ v1 builds no plugins, so the platform has no plugins crate ([plugins and the san
 ### Features
 
 Each feature is a folder in `src/features/`, its crate in the core named for it and its routines' crate named for it with `-routines`.
-A feature's section in an app is one part, which the app's list names in one line, and the shells reach a feature only through the notices, the settings, the match check's differences, and the role keys' labels ([a feature's parts](../interface/01-apps.md#a-features-parts)).
+A feature's section in an app is one part, which the app's list names in one line, and the shells reach a feature only through the notifications, the settings, the match check's differences, and the role keys' labels ([a feature's parts](../interface/01-apps.md#a-features-parts)).
 
 | Unit | Parts, as v1's scope suggests and node 6 settles | Uses, beyond the kernel and the message crate |
 | --- | --- | --- |
@@ -269,7 +269,7 @@ pub fn register(r: &mut Registry) {
 | Catch-up steps | A step, the steps it runs after ([04-room-for-later](../product/04-room-for-later.md#a-catch-up-pipeline)), and its payload, which it gives on the flying machine and takes on the catching-up one ([catch-up](../sync/05-units.md#catch-up)) | State sync's catching up state |
 | Guards | A check on a request the platform decides, [below](#guards) | State sync holds Ready until the aircraft has settled ([settling after a load](../sync/03-catch-up.md#settling-after-a-load)) |
 | Client state and commands | A slice of state the apps show, and the commands they send | The take-control key's command to take control |
-| Settings, notices, and items for the match check | Each one | The take-control binding; "Couldn't sync the beacon" |
+| Settings, notifications, and items for the match check | Each one | The take-control binding; "Couldn't sync the beacon" |
 | The core helper's input and audio | The bindings, captures, and sounds it needs | The take-control key; capturing the ATC app |
 
 A role is a session key a feature declares, whose value names the member who holds the role: traffic's key names the traffic host, and ATC audio's names the ATC host.
@@ -285,7 +285,7 @@ A handler gets three things:
 
 - its own feature's state, which it alone writes
 - the platform's state, read-only: the session and its keys, its members, control, each link's state, preflight, the loaded profile's blocks, the settings, sim awareness, and each request's verdict from the [guards](#guards)
-- an outbox, for sends on channels, calls to the sim, work in the sim, requests to the core helper, client state, notices, timers, jobs, and requests to the platform
+- an outbox, for sends on channels, calls to the sim, work in the sim, requests to the core helper, client state, notifications, timers, jobs, and requests to the platform
 
 A feature never changes the platform's state itself: it asks, and the platform decides.
 The take-control key asks for control, and the platform's [guards](#guards) decide whether the pilot gets it.
@@ -540,7 +540,7 @@ The module never learns the session's state, so routines' slots replace the cont
 
 A module whose code hits an error goes `DIRTY`, and the sim stops running it (documented, [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#debugging-crashes-required-exports)), so one routine's error would stop every routine, and with them the routine host, which would unfreeze the aircraft; whether a Rust panic, which traps, puts our module there is unverified, since our records hold no module crash.
 So the core unfreezes it.
-When the module's counter hasn't moved for 3s, in a flight that's neither loading nor paused, while a routine of ours is live, the core takes the module as stopped and raises its notice.
+When the module's counter hasn't moved for 3s, in a flight that's neither loading nor paused, while a routine of ours is live, the core takes the module as stopped and raises its notification.
 It unfreezes the aircraft when the last routine that holds the freeze ends, as its pilot takes control or leaves (user, 2026-10-23; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 To unfreeze it, the platform's connection sends `K:FREEZE_LATITUDE_LONGITUDE_SET`, `K:FREEZE_ALTITUDE_SET`, and `K:FREEZE_ATTITUDE_SET`, each with 0, in the input that ends the routine, with no read of the flags first, so a quit's exit, which takes no input after it, still carries them out; a client outside the sim released a frozen Baron that way (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-freezing-holds-the-pose-but-not-the-velocities-so-a-follower-has-to-write-them-all)).
 The core takes a freeze then to be ours, since a module with no routine live froze nothing ([the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
@@ -599,7 +599,7 @@ FS Copilot's panel code, by contrast, replaces `EventTarget.prototype.addEventLi
 | The profile unloads, or the session ends | The platform ends each of the feature's routines, then closes its connection | The core stops each panel module, and a panel left with none closes its socket |
 | The core hangs | 1s with no write leaves every routine unfed | Each visible lock turns into a warning 8s to 10s after its last renewal |
 | The core exits | The same | Its socket closes, and the bridge stops every panel module and drops every lock |
-| Our own code in the sim stops | The module goes `DIRTY`, the core raises its notice, and the core unfreezes the aircraft when the last routine that holds the freeze ends | A bridge that never loaded sends no first message, and the core reports it ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) |
+| Our own code in the sim stops | The module goes `DIRTY`, the core raises its notification, and the core unfreezes the aircraft when the last routine that holds the freeze ends | A bridge that never loaded sends no first message, and the core reports it ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) |
 | A person steps in | Nothing to call | `window.DUALINPUT_BRIDGE_UNLOCK()` |
 
 ### Budgets for work in the sim
@@ -617,7 +617,7 @@ Each is a starting value, which [node 7](plan.md#7-testing) measures:
 - Through a 20s gap in the flying machine's data, the following aircraft stays frozen, carried for 2s and then held.
 - A routine fed again after its end mark starts with nothing from its last feeding.
 - With the core killed, the following aircraft unfreezes within 1s of the last write, plus a frame.
-- With the module stopped by an error, from a test routine built to panic, the module goes `DIRTY`, the core raises its notice within 3s of the counter's last tick, and the core unfreezes the aircraft when the last routine that holds the freeze ends, while the counter stalling through a flight load or a pause raises no notice and unfreezes nothing.
+- With the module stopped by an error, from a test routine built to panic, the module goes `DIRTY`, the core raises its notification within 3s of the counter's last tick, and the core unfreezes the aircraft when the last routine that holds the freeze ends, while the counter stalling through a flight load or a pause raises no notification and unfreezes nothing.
 - A panel module that fails to parse, or throws in `start`, leaves the other panel modules in its panel running.
 - With the core suspended, a locked display's overlay turns into a warning within 10s, and `window.DUALINPUT_BRIDGE_UNLOCK()` removes it at once.
 - With the core's socket closed, every lock drops and every panel module stops at once.

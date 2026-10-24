@@ -1,6 +1,6 @@
 # 041: A core that crashes comes back as a late joiner
 
-A core that crashes while its sim keeps running comes back as a sim that closed does: the watcher restarts it, it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, and the crew's notice asks for a bug report.
+A core that crashes while its sim keeps running comes back as a sim that closed does: the watcher restarts it, it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, and the crew's notification asks for a bug report.
 Because the aircraft didn't reload, each shadow value starts at the flying machine's, and the aircraft counts as settled at once.
 Decided by the user on 2026-10-11 and 2026-10-12, in node 3 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#a-core-that-crashes-comes-back-as-a-late-joiner).
 

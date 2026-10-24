@@ -14,14 +14,14 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 >
 > Since 2026-10-17, v1 has no plugins, so the engine watches no plugin value and makes no `Plugin` action, and [reaching the sim](#reaching-the-sim)'s row for a plugin's value goes, which settles [left open](#left-open)'s item on plugins.
 > State sync instead reads each `instrument()` a state entry watches, a value in a gauge's JavaScript, through a second panel module, `instrument-reads`, and the engine holds a write to such an entry, live and in catch-up, until its first reading arrives, which catch-up's `step_made` waits for ([reading it in the panel](../plugins/01-plugins.md#reading-it-in-the-panel)).
-> Since 2026-10-17, the PF's checklist shows through state sync's part in the apps, wherever the apps' design puts it, beside the banner's preflight summary included, since the banner shows the EFB app's parts' views; where the cockpit stream's slice shows, and the words of state sync's Ready reason and notices, wait for the apps' stage ([the apps](../interface/01-apps.md#a-features-parts)).
+> Since 2026-10-17, the PF's checklist shows through state sync's part in the apps, wherever the apps' design puts it, beside the banner's preflight summary included, since the banner shows the EFB app's parts' views; where the cockpit stream's slice shows, and the words of state sync's Ready reason and notifications, wait for the apps' stage ([the apps](../interface/01-apps.md#a-features-parts)).
 >
 > Since 2026-10-18, the design review after node 6 changes this document in two places (user, 2026-10-18):
 >
 > - In [writing](#writing), every entry holds its writes, live and in catch-up, until its first reading arrives, as the note of 2026-10-17 has an `instrument()` entry do, and `step_made` waits for held writes; a counted or event entry, which gets no reading, is exempt, and a read the sim refuses drops the held writes.
-> - A write function at its limit stops its entry only on its own machine, which skips arriving changes to the entry, sends none, and shows its pilot state sync's notice, so [kinds](#kinds) has no `STOPPED`, where [write functions](#write-functions) stops the entry on every machine; the function runs only on a receiving machine, and the entry is still read from the sim.
+> - A write function at its limit stops its entry only on its own machine, which skips arriving changes to the entry, sends none, and shows its pilot state sync's notification, so [kinds](#kinds) has no `STOPPED`, where [write functions](#write-functions) stops the entry on every machine; the function runs only on a receiving machine, and the entry is still read from the sim.
 >
-> Since 2026-10-23, a recording holds no marks, so state sync logs at info each write flagged, each watch-only entry whose values differ, and an aircraft that never went quiet, with what [Ready, notices, marks, and the checklist](#ready-notices-marks-and-the-checklist) has its mark carry; and the cockpit stream doesn't depend on the recording crate, where [the units](#the-units) has it (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
+> Since 2026-10-23, a recording holds no marks, so state sync logs at info each write flagged, each watch-only entry whose values differ, and an aircraft that never went quiet, with what [Ready, notifications, marks, and the checklist](#ready-notifications-marks-and-the-checklist) has its mark carry; and the cockpit stream doesn't depend on the recording crate, where [the units](#the-units) has it (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
 >
 > Since 2026-10-23, [settling and the driven-entry test](#settling-and-the-driven-entry-test) calls an aircraft settled 30s after Ready to fly, with no quiet window, cap, or rule for an entry that changes more than 5 times, so no aircraft that never went quiet is logged; the driven-entry test stays ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
 
@@ -43,7 +43,7 @@ The flying machine is the PF's, and a following machine is any other pilot's.
 | --- | --- | --- | --- |
 | `sync-engine` | Engine | For one loaded profile: the state object, each entry's stamp, the write functions in the profile's QuickJS-ng runtime, shadow values, pending writes and echo tokens, the check, the settle rule, the driven-entry test, putting back, the conflict rule, and catch-up's order | On the loop, in the IDE, and on the bench |
 | `cockpit-stream` | Platform | The vector clock, holding a message until what it depends on has applied, copies, kinds, held values, pacing, kept messages and replays, changes of control, catch-up's pipeline and its exchange, and the guard on control | On the loop |
-| `state-sync` | Feature | One sync engine for the loaded profile, its watches and writes through the sim service, its cockpit kinds and catch-up step, the guard on Ready, notices, marks, and the PF's checklist | Its crate in the core, the routine `HEvents` in our WASM module, and the panel module `h-events` |
+| `state-sync` | Feature | One sync engine for the loaded profile, its watches and writes through the sim service, its cockpit kinds and catch-up step, the guard on Ready, notifications, marks, and the PF's checklist | Its crate in the core, the routine `HEvents` in our WASM module, and the panel module `h-events` |
 
 Each depends on what the code map's [units](../architecture/02-code-map.md#the-units) give it: the sync engine on the profile engine, the sandbox, and the message crate; the cockpit stream on the kernel, the network, the recording crate, and the session; and state sync on the cockpit stream, the session, the sim service, the profile loader, the plugins crate, `clients`, and the sync engine.
 
@@ -115,7 +115,7 @@ A rule that remembered written values for a time would have swallowed that turn 
 ### Checking a write
 
 - A write gets one attempt, as the bench starts ([checking a write](../profiles/01-format-and-delivery.md#checking-a-write)).
-- A value still pending 1.5s after its write, or after a stepping write's last step, is flagged: the engine drops it and hands state sync a `Flag` with the entry, the value wanted, and the reading ([notices and marks](#ready-notices-marks-and-the-checklist)).
+- A value still pending 1.5s after its write, or after a stepping write's last step, is flagged: the engine drops it and hands state sync a `Flag` with the entry, the value wanted, and the reading ([notifications and marks](#ready-notifications-marks-and-the-checklist)).
   The 1.5s covers the slowest readout we've timed, the Fenix's battery lamp at 1.2s in one run ([sync log](log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)), since the engine can't tell which entries read a computed readout.
 - A `toggle` whose lamp lights after the check flips once and is flagged, and nothing flips it a second time.
 - A shadow value has nothing to read, so its writes go unchecked ([counting into a shadow value](../profiles/01-format-and-delivery.md#counting-into-a-shadow-value)).
@@ -341,10 +341,10 @@ State sync hears `H:` events in one cockpit panel, through its panel module `h-e
 - Stock `VCockpit.js` skips an instrument when the event names a target other than its `Guid`, or when its `urlConfig.noEvent` is set, so whether an event sent to one instrument reaches a document other than that instrument's is unverified, and a case in the sim settles it.
 - One panel's handler hears each event once, where a handler in every panel would hear it once in each.
 
-### Ready, notices, marks, and the checklist
+### Ready, notifications, marks, and the checklist
 
 - State sync's guard on `Ready` denies it until the engine says the aircraft has settled, and allows it while no profile is loaded ([preflight](../session/02-units.md#preflight)); the wording of its reason is [6.16](../architecture/plan.md#616-the-apps)'s.
-- A flagged write, an entry the driven-entry test stops, and an entry a write function's limit stops each show one notice, once per entry for each load, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app." ([checking that a write landed](02-live-sync.md#checking-that-a-write-landed)).
+- A flagged write, an entry the driven-entry test stops, and an entry a write function's limit stops each show one notification, once per entry for each load, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app." ([checking that a write landed](02-live-sync.md#checking-that-a-write-landed)).
 - It marks the recording through `cx.recording().mark` for each of those, for a watch-only entry whose values differ, and for an aircraft that never went quiet (marks); a flagged write's mark carries the entry, the value wanted, the reading, and 0 retries.
 - The PF's checklist, each counting entry's `name` and `default`, is a slice of client state while preflight runs, which [6.16](../architecture/plan.md#616-the-apps) shows beside the preflight summary.
 
@@ -401,7 +401,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A restarted core: settled at once, and its shadows take the flying machine's values.
 - An entry the stand-in changes every 3s on both machines: it stops syncing within 30s on both.
 - The PM's throttle on a following machine: put back at once, and nothing sent; moved for 3s, put back throughout, and nothing flagged.
-- An event entry that watches an `H:` event and writes an input event: the `H:` event its write makes the aircraft fire isn't sent back; and when the stand-in fires it 2s after the write, past the token, the driven-entry test stops the entry within 30s, with its notice.
+- An event entry that watches an `H:` event and writes an input event: the `H:` event its write makes the aircraft fire isn't sent back; and when the stand-in fires it 2s after the write, past the token, the driven-entry test stops the entry within 30s, with its notification.
 - A write function stuck past 100ms: its entry stops on both machines.
 - An input event reported twice a frame apart: one goes out; the same report 261ms later goes out; at 4 fps, where a frame passes 200ms, both go out.
 - A token nothing uses: it expires after 1s, and the pilot's press after that goes out.

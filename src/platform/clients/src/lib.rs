@@ -2,13 +2,15 @@
 //! cockpit panel's bridge among them, and the desktop app. It speaks the client protocol over
 //! the WebSockets the core's edge holds, and gives every other unit three ways to reach the
 //! clients: slices of state it sends on a timer to the clients that show them, commands the
-//! clients send it, and `unit` messages to a client by name. It also keeps the notices, the
-//! pilot's settings, and which panel modules each cockpit panel loads
-//! (record/areas/core/02-clients-and-panel-bridge.md).
+//! clients send it, and `unit` messages to a client by name. It also keeps the notifications,
+//! the pilot's settings, and which panel modules each cockpit panel loads
+//! (record/areas/core/02-clients-and-panel-bridge.md), and what the apps alone need of it
+//! (record/areas/interface/01-apps.md).
 //!
 //! Register it before every unit that uses it, since each registers its slices, commands,
 //! and settings into the clients crate's state.
 
+mod apps;
 mod edge;
 mod hooks;
 mod panels;
@@ -16,6 +18,7 @@ mod settings;
 mod sockets;
 mod state;
 
+pub use apps::StartDesktopApp;
 pub use edge::{SocketOut, SocketUp, Sockets};
 pub use hooks::{ClientsUnit, SettingDef};
 pub use messages::clients::Level;
@@ -24,7 +27,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
 
 use kernel::{Cx, Handler, Moment, Registry, Started, TimerId};
-use messages::clients::{Hello, Notice, ToClient};
+use messages::clients::{Hello, Notification, ToClient};
 use serde::Serialize;
 use serde_json::Value;
 
@@ -102,7 +105,7 @@ pub struct Clients {
     commands: BTreeMap<&'static str, Handler<CommandCall>>,
     unit_messages: BTreeMap<&'static str, Handler<UnitCall>>,
     panel_modules: Vec<panels::PanelModuleRule>,
-    notices: BTreeMap<String, Notice>,
+    notifications: BTreeMap<String, Notification>,
     settings: Settings,
     profile: panels::Profile,
     round: Option<TimerId>,
@@ -163,16 +166,27 @@ impl Clients {
         self.sockets.values().filter(|c| c.hello.is_some()).count()
     }
 
-    /// The notice up under its full ID, the raising unit's name, `.`, and its own ID, as
-    /// `network.refused`.
-    pub fn notice_up(&self, id: &str) -> Option<&Notice> {
-        self.notices.get(id)
+    /// The component `socket`'s client named in its `hello`, or nothing before it.
+    pub(crate) fn component_of(&self, socket: u64) -> String {
+        self.sockets
+            .get(&socket)
+            .map_or("", Client::component)
+            .to_string()
+    }
+
+    /// The notification up under its full ID, the raising unit's name, `.`, and its own ID,
+    /// as `network.refused`.
+    pub fn notification_up(&self, id: &str) -> Option<&Notification> {
+        self.notifications.get(id)
     }
 }
 
+/// The clients crate's unit name, which its own `unit` messages to the EFB app carry.
+const UNIT: &str = "clients";
+
 /// Registers the clients crate.
 pub fn register(r: &mut Registry) {
-    let mut me = r.unit::<Clients>("clients");
+    let mut me = r.unit::<Clients>(UNIT);
     me.on::<Started>(Clients::started)
         .start_file(settings::FILE, Clients::settings_file);
     me.source::<Sockets>(Clients::socket);
@@ -186,24 +200,24 @@ pub fn send<B: Serialize>(cx: &Cx, to: To, unit: &str, body: &B) {
     }
 }
 
-/// Raises a notice, or changes the one already raised under `id`, which is the running
-/// unit's own: the notice's full ID is the unit's name, `.`, and `id`.
-pub fn notice(cx: &Cx, id: &str, level: Level, text: &str, action: Option<&str>) {
-    let notice = Notice {
-        id: notice_id(id),
+/// Raises a notification, or changes the one already raised under `id`, which is the running
+/// unit's own: the notification's full ID is the unit's name, `.`, and `id`.
+pub fn notify(cx: &Cx, id: &str, level: Level, text: &str, action: Option<&str>) {
+    let notification = Notification {
+        id: notification_id(id),
         level,
         text: text.to_string(),
         action: action.map(str::to_string),
     };
-    cx.call(Clients::raise_notice, notice);
+    cx.call(Clients::raise_notification, notification);
 }
 
-/// Clears the running unit's notice `id`, if it's raised.
-pub fn clear_notice(cx: &Cx, id: &str) {
-    cx.call(Clients::clear, notice_id(id));
+/// Clears the running unit's notification `id`, if it's raised.
+pub fn clear_notification(cx: &Cx, id: &str) {
+    cx.call(Clients::clear, notification_id(id));
 }
 
-fn notice_id(id: &str) -> String {
+fn notification_id(id: &str) -> String {
     format!("{}.{id}", kernel::running_unit().unwrap_or("core"))
 }
 
@@ -335,16 +349,17 @@ impl Clients {
         }
     }
 
-    fn raise_notice(me: &mut Clients, notice: Notice, _: &mut Cx) {
-        if me.notices.get(&notice.id) != Some(&notice) {
-            tracing::info!(id = notice.id, level = ?notice.level, text = notice.text, "a notice was raised");
-            me.notices.insert(notice.id.clone(), notice);
+    fn raise_notification(me: &mut Clients, notification: Notification, _: &mut Cx) {
+        if me.notifications.get(&notification.id) != Some(&notification) {
+            tracing::info!(id = notification.id, level = ?notification.level, text = notification.text, "a notification was raised");
+            me.notifications
+                .insert(notification.id.clone(), notification);
         }
     }
 
     fn clear(me: &mut Clients, id: String, _: &mut Cx) {
-        if me.notices.remove(&id).is_some() {
-            tracing::info!(id, "a notice was cleared");
+        if me.notifications.remove(&id).is_some() {
+            tracing::info!(id, "a notification was cleared");
         }
     }
 

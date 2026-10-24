@@ -23,7 +23,7 @@ A v1 session runs in this order, and each step's rules are in the section it lin
 3. Each pilot loads a flight at the PF's stand, or at a runway of the PF's departure airport while the PF's engines run, which Dual Input shows them, and once they're in it, Dual Input moves their aircraft to the PF's position and holds every aircraft still for [preflight](#preflight).
 4. In preflight, each pilot works through the [preflight match check](#preflight-match-check)'s list, takes a seat ([avatar sync](#avatar-sync)), and clicks Ready, and the PF also checks the profile's starting values.
 5. When every pilot is ready, a countdown ends [preflight](#preflight): every other pilot's cockpit takes the PF's value for every control the profile can read or track, and the aircraft is free to move.
-6. The crew flies, passing control by the [take-control key](#take-control-key), with [notices](#notification-banner) for what needs their attention.
+6. The crew flies, passing control by the [take-control key](#take-control-key), with [notifications](#notification-banner) for what needs their attention.
 7. A pilot who drops out reconnects or rejoins as a late joiner, and the others fly on ([the connection](#the-connection)).
 8. Each pilot leaves with Leave session, the session ends with the last, and each machine keeps its recording for a [bug report](#recording-and-bug-reports).
 
@@ -179,7 +179,7 @@ A change either pilot makes in the cockpit shows up in the other pilot's cockpit
 - A cockpit that missed changes, or never had them, catches up ([catch-up](../sync/03-catch-up.md)).
   When [preflight](#preflight) ends, when a pilot joins late, and when one rejoins after a sim restart, it takes the flying machine's value for every control the profile can read, or can track by counting the events that change it.
   After a short outage with the sim still running, it replays the changes it missed, in order.
-- Dual Input checks that each write it makes lands, and when one never does, it logs it and shows a notice on the [notification banner](#notification-banner) ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed); user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
+- Dual Input checks that each write it makes lands, and when one never does, it logs it and shows a notification on the [notification banner](#notification-banner) ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed); user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
 
 **Not in v1:**
 
@@ -358,9 +358,9 @@ The connection carries everything between the crew's machines, directly when it 
   A pilot whose Dual Input crashed while their sim kept running comes back as a late joiner too, as one whose sim crashed does; Dual Input aims for a core that never crashes, and asks for a bug report when one does (user, 2026-10-12; [04-order-and-recovery](../sync/04-order-and-recovery.md#a-core-that-restarts)).
 - A sim that closes, by a crash or by its pilot, counts as leaving the flight, and its pilot comes back as a late joiner, since a closed sim's pages, FMS, and avionics state can't be restored (user, 2026-10-11; [04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed)).
   A PF's crash passes control to the PM at once.
-  When a pilot's sim crashes, their core stays up, and the others' notice says that pilot's sim crashed rather than that their connection dropped, such as "James's sim crashed. Dual Input rejoins him once he's back in a flight." ([Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed); user, 2026-10-07).
+  When a pilot's sim crashes, their core stays up, and the others' notification says that pilot's sim crashed rather than that their connection dropped, such as "James's sim crashed. Dual Input rejoins him once he's back in a flight." ([Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed); user, 2026-10-07).
   How the core tells a crash from a pilot closing the sim is open (same entry).
-- A pilot who leaves the flight but not the session, by going to the sim's main menu or loading another flight, drops out of flying: control passes to the PM if they were the PF, and the others get a notice.
+- A pilot who leaves the flight but not the session, by going to the sim's main menu or loading another flight, drops out of flying: control passes to the PM if they were the PF, and the others get a notification.
   Once they're in a flight again, Dual Input rejoins them as a late joiner.
 - A pilot leaves the session with Leave session, in the [EFB app](#efb-app) or the desktop app, and closing Dual Input from the tray or for an update counts as a Leave, while a Windows shutdown or logoff ends it with no quit, so the crew sees a lost link ([leaving](../network/01-between-machines.md#leaving)).
 
@@ -451,7 +451,7 @@ During [preflight](#preflight), and when a late joiner is in a flight, Dual Inpu
 **Rules:**
 
 - Two pilots fly together only in the same aircraft, the same SimObjects folder and preset, so a different variant, such as the Baron's 58P against its base model, counts as a different aircraft (user, 2026-10-12; [01-format-and-delivery](../profiles/01-format-and-delivery.md#the-aircraft-and-its-variants)).
-  A pilot in a flight with another aircraft, whether they joined in it or loaded it later, stays in the session but out of the flight, as at the main menu, with a notice to load the session's aircraft, and once they load the flying machine's aircraft, they rejoin as a late joiner (user, 2026-10-16; [in the flight](../session/02-units.md#in-the-flight)).
+  A pilot in a flight with another aircraft, whether they joined in it or loaded it later, stays in the session but out of the flight, as at the main menu, with a notification to load the session's aircraft, and once they load the flying machine's aircraft, they rejoin as a late joiner (user, 2026-10-16; [in the flight](../session/02-units.md#in-the-flight)).
 - No other difference stops the flight: versions, liveries, and add-ons stop nothing.
   An error says something will likely go wrong, and a warning says it might: a different aircraft version can be an error, and a different livery a warning.
   A developer's update that fixes textures changes the version without touching anything Dual Input syncs, and making a pilot spend 10 minutes updating for it would only get in the way.
@@ -484,7 +484,7 @@ The AI traffic in one pilot's sim, usually injected by an ATC add-on such as Bey
   A pilot takes the role by hand, with a "Share my traffic and ATC" switch, and any pilot can take it at any time by turning theirs on (user, 2026-10-11 and 2026-10-13; [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host)).
 - Aircraft, and ground objects only within 1km of the traffic host's aircraft and only when their title is on a list, which starts with the sim's pushback tugs and takes others, GSX's among them, as the build finds them, accepting that ground objects may show issues in v1 (user, 2026-10-17; [traffic and ATC's design](../traffic-atc/01-traffic-and-atc.md)).
 - A radius as a setting, up to the SDK's 200km cap, which is the default (FS Copilot fork, same file, "Reading").
-- A notice on a receiving machine while its sim shows aircraft that aren't the traffic host's, and another while any of the traffic host's aircraft is missing or shown as a stand-in, and a page that lists the machine's traffic packs when asked; the [preflight match check](#preflight-match-check)'s list names no traffic source, traffic pack, or multiplayer.
+- A notification on a receiving machine while its sim shows aircraft that aren't the traffic host's, and another while any of the traffic host's aircraft is missing or shown as a stand-in, and a page that lists the machine's traffic packs when asked; the [preflight match check](#preflight-match-check)'s list names no traffic source, traffic pack, or multiplayer.
 
 **Not in v1:**
 
@@ -497,7 +497,7 @@ The AI traffic in one pilot's sim, usually injected by an ATC add-on such as Bey
 
 - A receiving pilot runs the same traffic packs as the host and no others, and the same scenery.
   With other packs, aircraft go missing or fall back to generic models, and a frozen object isn't clamped to the ground, so with other scenery it floats or sinks (FS Copilot fork, same file, "Model matching"; measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "Baseline: BeyondATC's own traffic scores 0.56").
-  Two groups of FS Copilot testers missed this and flew with airliners missing (from our experience with FS Copilot), which is why a receiving machine raises a notice while any of the traffic host's aircraft is missing or shown as a stand-in.
+  Two groups of FS Copilot testers missed this and flew with airliners missing (from our experience with FS Copilot), which is why a receiving machine raises a notification while any of the traffic host's aircraft is missing or shown as a stand-in.
 - The copies move smoothly.
   Frozen and written every frame from samples at 2Hz, our fork's copies scored 0.17 median jitter against 0.56 for BeyondATC's own traffic, on one PC (measured on MSFS 2024, 2026-09-06, same log, "Jitter measured, not eyeballed"), and ran well between two machines (from our experience with FS Copilot).
   BeyondATC has since released an update for smoother AI traffic, which we haven't compared (reported by the user, 2026-10-03).
@@ -510,7 +510,7 @@ The AI traffic in one pilot's sim, usually injected by an ATC add-on such as Bey
 
 **Depends on:**
 
-- The [notification banner](#notification-banner), for traffic's notices.
+- The [notification banner](#notification-banner), for traffic's notifications.
 - [The connection](#the-connection).
 
 **Open questions:**
@@ -679,7 +679,7 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 - An app of its own, built on the sim's EFB framework, not the desktop app reused.
   Shipping EFB apps are written that way: A2A's tablet is TSX bundled by esbuild on Asobo's EFB API and the MSFS Avionics Framework, and it registers with `Efb.use` (read in a2a-aircraft-aerostar600 1.0.6, `A2ATabletApp.js`).
 - What a pilot needs during a flight: the take-control button, the crew and the connection's state, the Ready button beside the match check's warnings and errors, Go without for each pilot who drops out during [preflight](#preflight), the box for an invite code, Leave session, and a button for a bug report that logs the moment the pilot pressed it, which the recording also holds as an input (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
-- Opening onto what a notice on the [notification banner](#notification-banner) is about when the pilot clicks the notice anywhere but on its action, whether the EFB was open on another app or closed.
+- Opening onto what a notification on the [notification banner](#notification-banner) is about when the pilot clicks it anywhere but on its action, whether the EFB was open on another app or closed.
   The core passes the click to the app, whose own code runs while the EFB is closed: it opens the EFB if it's closed and fires `OPEN_BY_KEY` with its own name, which opened a crowded EFB onto our app whether the EFB was closed, open on another app, or closed after use, with our app on neither the dock nor the first page of the app list (measured on MSFS 2024, 2026-10-06, [interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)).
 - A button that brings the desktop app to the front while Dual Input's core is running.
 - How it looks is for a design later.
@@ -693,7 +693,7 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 **Rules:**
 
 - The EFB app shows the core's state and sends it commands, and decides nothing itself, so two interfaces don't mean two implementations.
-- Any client changes any setting and can watch the notices, so whether the EFB app offers settings and shows notices is for [the apps' design](../interface/01-apps.md) (user, 2026-10-17).
+- Any client changes any setting and can watch the notifications, so whether the EFB app offers settings and shows notifications is for [the apps' design](../interface/01-apps.md) (user, 2026-10-17).
 
 **Depends on:**
 
@@ -705,14 +705,14 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 
 ### Notification banner
 
-Dual Input's notices slide in at the right of the screen, on a see-through in-game panel, the kind of window the sim's toolbar opens, so the pilot sees them whether or not the EFB is open.
-A notice can carry one action of its own, such as Ready on the preflight summary, and a click anywhere else on it opens the [EFB app](#efb-app) at what the notice is about.
+Dual Input's notifications slide in at the right of the screen, on a see-through in-game panel, the kind of window the sim's toolbar opens, so the pilot sees them whether or not the EFB is open.
+A notification can carry one action of its own, such as Ready on the preflight summary, and a click anywhere else on it opens the [EFB app](#efb-app) at what the notification is about.
 
 **In v1:**
 
-- The banner, in VR as on a monitor, for notices such as "James is in the pause menu", "You've lost the connection", and "You have control".
-- A notice when a synced control never matches after Dual Input's retries, once per control per flight, such as "Couldn't sync the beacon." ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
-- While a pilot's cockpit catches up, a "Catching up..." notice saying that switches they move now will be reset ([catch-up](../sync/03-catch-up.md#while-catch-up-runs)).
+- The banner, in VR as on a monitor, for notifications such as "James is in the pause menu", "You've lost the connection", and "You have control".
+- A notification when a synced control never matches after Dual Input's retries, once per control per flight, such as "Couldn't sync the beacon." ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
+- While a pilot's cockpit catches up, a "Catching up..." notification saying that switches they move now will be reset ([catch-up](../sync/03-catch-up.md#while-catch-up-runs)).
 - During [preflight](#preflight), a summary of who has joined, who's ready, and how many warnings and errors the [preflight match check](#preflight-match-check) found, with a Ready button, and for pilots other than the PF, a line telling them to touch nothing in the cockpit.
 - Dual Input opening the banner's panel itself when a flight loads, with no click from the pilot.
 
@@ -725,26 +725,26 @@ A notice can carry one action of its own, such as Ready on the preflight summary
 **Rules:**
 
 - The banner shows during preflight, and after that only when something needs the pilot's attention, such as a lost connection, a PF who dropped out, or control passing to them.
-- Between notices the panel draws nothing, because the sim blurs whatever lies behind the pixels a panel paints (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
-- A notice that asks the pilot to act says where: on the notice, in the EFB app, or in the desktop app.
+- Between notifications the panel draws nothing, because the sim blurs whatever lies behind the pixels a panel paints (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
+- A notification that asks the pilot to act says where: on the notification, in the EFB app, or in the desktop app.
 
 **Depends on:**
 
 - The [EFB app](#efb-app)'s code, which opens the banner's panel ([architecture's tentative decisions](../architecture/decisions.md#the-efb-apps-code-opens-the-banner-panel)).
   It and a script that Dual Input's toolbar icon puts into the sim's toolbar each opened the panel from our installed package after a flight load and mid-flight ([interface log](../interface/log.md#2026-10-09-installed-from-the-community-folder-our-toolbar-script-loads-at-the-flight-load-and-it-and-our-efb-apps-code-each-open-the-banner-when-the-client-asks-over-the-commbus)), and Dual Input ships no toolbar script, since it rests on Parallel 42's trick, not a sim feature: the toolbar runs markup it finds in an icon, and an update could stop that.
-- The [EFB app](#efb-app), which a click on a notice opens.
+- The [EFB app](#efb-app), which a click on a notification opens.
 
 **Open questions:**
 
 - Whether the EFB app's code opens the panel at every flight load: no run has had it open the panel during a load or after a second flight load ([architecture's spine](../architecture/01-spine.md#left-open)).
   It calls the toolbar again until the banner's page connects, and a check in the sim times it ([the apps' design](../interface/01-apps.md)).
   Our toolbar script left the panel closed after the first of three Build and Mounts, with no error, for a reason we don't know (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
-- How long a notice stays, and how notices come and go.
-- Which further notices v1 needs, such as connection trouble short of a drop.
+- How long a notification stays, and how notifications come and go.
+- Which further notifications v1 needs, such as connection trouble short of a drop.
 - How the banner looks and reads in VR, which nobody has tried, since our development machine has no headset.
   ChasePlane closes its own full-screen overlay when the toolbar's `globalVars.vrMode` is set (read in p42-util-chaseplane 2026.39.1.16, `HTML_UI/icons/toolbar/P42_PANEL_CHASEPLANE_OVERLAY.svg`), which suggests a panel like ours may not work in VR (unverified).
 - Whether clicks on the panel's empty part reach the cockpit beneath it, which nobody has tried.
-  If they don't, the full-height column blocks that part of the cockpit for the whole flight, and reporting only the notice's rectangle with `UPDATE_PANEL_RECT` might let them through (unverified, [interface log](../interface/log.md#2026-10-04-an-in-game-panels-size-is-a-percent-of-the-screens-height-capped-at-150-of-it-so-ours-cant-span-a-wide-screen-though-parallel-42s-panels-do)).
+  If they don't, the full-height column blocks that part of the cockpit for the whole flight, and reporting only the notification's rectangle with `UPDATE_PANEL_RECT` might let them through (unverified, [interface log](../interface/log.md#2026-10-04-an-in-game-panels-size-is-a-percent-of-the-screens-height-capped-at-150-of-it-so-ours-cant-span-a-wide-screen-though-parallel-42s-panels-do)).
 - How to keep the panel on the right when Dual Input opens it: opened from code, it sat at the left of the screen (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
 
 ## Tools
@@ -806,7 +806,7 @@ One installer puts Dual Input's app and its package in the sim's Community folde
   Beside the numbers it says what it does for them and what quitting costs, in concrete terms.
 - Dual Input searches no other Community package for one that overrides `VCockpit.js`, such as FS Copilot's or YourControls' (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
   The SDK says the package mounted later wins (documented, [02-01](../../learn/foundations/02-01-installs-and-packages.md)), so only one override runs, but ours won over FS Copilot's against the mount order a search would rely on (same entry).
-  A losing Dual Input's panel bridge never loads, so pointer sync and every module a feature names in a panel stop, with no error, and the notice when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause, without naming the package (same entry).
+  A losing Dual Input's panel bridge never loads, so pointer sync and every module a feature names in a panel stop, with no error, and the notification when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause, without naming the package (same entry).
   Removing that package is the pilot's ([packages that override our files](../install/01-installing-and-updating.md#packages-that-override-our-files)).
   FS Copilot treats YourControls' package as a conflict: its setup won't continue until the pilot removes it, and its app warns "Conflict detected with YourControls package." while YourControls' panel variable is set (read in the FS Copilot fork, `FsCopilot/ViewModels/SetupViewModel.cs` and `FsCopilot/ViewModels/MainViewModel.cs`; user, 2026-10-08).
   Its code doesn't say why they conflict, and both overriding `VCockpit.js` is the likely reason (unverified).

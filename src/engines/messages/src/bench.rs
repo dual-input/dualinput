@@ -178,6 +178,9 @@ pub enum ClientsAct {
     Picks { picks: Vec<String> },
     /// Changes the slice `bench` `per_second` times a second for `for_ms`.
     Churn { per_second: u32, for_ms: u64 },
+    /// Raises a notification with no action, as `bench-clients.<id>`, as a feature raises
+    /// one in its own words.
+    Notify { id: String, text: String },
 }
 
 /// What the bench does to the stand-in sim.

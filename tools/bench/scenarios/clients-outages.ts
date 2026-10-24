@@ -7,18 +7,11 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import { BenchRun, type Core, type CoreOptions } from "../cores.ts"
+import { announcing, BenchRun } from "../cores.ts"
 import { BARON, load } from "../flights.ts"
 import { BenchNetwork, host } from "../network.ts"
 import { FakePage } from "../pages.ts"
 import { resume, suspend } from "../suspend.ts"
-
-async function announcing(run: BenchRun, name: string, options: CoreOptions = {}): Promise<Core> {
-  const core = await run.core(name, options)
-  core.act({ act: "watch", process: run.stub().id })
-  await core.hear("stage Starting aircraft none")
-  return core
-}
 
 test("the core suspended for 12s leaves every page its socket, and each panel's modules carry on without loading again", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-suspended", t)
@@ -26,7 +19,7 @@ test("the core suspended for 12s leaves every page its socket, and each panel's 
   t.after(() => net.stop())
   const core = await announcing(run, "a", net.core())
   await host(core, "Host")
-  const efb = new FakePage(core, { component: "efb" })
+  const efb = new FakePage(core, { component: "efb-app" })
   const panel = new FakePage(core, { component: "panel-bridge", sessionOnly: true, panel: "VCockpit60", instruments: ["PFD_0"] })
   t.after(() => [efb, panel].forEach((p) => p.close()))
   await panel.until(() => panel.client.connected && efb.client.connected, "both pages connecting")
@@ -52,7 +45,7 @@ test("the core suspended for 12s leaves every page its socket, and each panel's 
 test("the core restarted on another port has every page connect again within 2s of its next announcement", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-restarted", t)
   const first = await announcing(run, "a")
-  const pages = [new FakePage(first, { component: "efb" }), new FakePage(first, { component: "menu-script" })]
+  const pages = [new FakePage(first, { component: "efb-app" }), new FakePage(first, { component: "menu-script" })]
   t.after(() => pages.forEach((p) => p.close()))
   await pages[0]!.until(() => pages.every((p) => p.client.connected), "every page connecting")
   const port = first.port()

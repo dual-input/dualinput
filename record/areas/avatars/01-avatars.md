@@ -25,11 +25,11 @@ Here a pose is everything one pilot's figure shows, and a target is where one of
 | `ray-cast` | Engine | A BVH for each mesh, and a cast through the nodes' transforms | Under `aircraft-model` |
 | `tools/profile-author` | Tool | The seat tool and the click tool | From the repository, with the sim running ([the authoring tool](#the-authoring-tool)) |
 
-- Avatars depends on the session, for control, the members, and who is in the flight; the network, for its channel, each link's state, and whether this PC reaches the internet; the sim service, which also gives the aircraft's package folder; the core helper's service, for the mouse; the cockpit stream, for `CockpitSent`; the profile loader, for the seats and the locations; `clients`, for its settings and notices; and `aircraft-model`.
+- Avatars depends on the session, for control, the members, and who is in the flight; the network, for its channel, each link's state, and whether this PC reaches the internet; the sim service, which also gives the aircraft's package folder; the core helper's service, for the mouse; the cockpit stream, for `CockpitSent`; the profile loader, for the seats and the locations; `clients`, for its settings and notifications; and `aircraft-model`.
   The code map's [features](../architecture/02-code-map.md#features) row lists all but the session and `clients`.
 - `msfs-gltf`, `msfs-rpn`, and `ray-cast` depend on nothing of ours, so they sit on the engines' bottom line beside `messages`, and `aircraft-model` on them.
 - The core records every input avatars takes: its camera read every frame, its `Frame` events, its poses' channel, its model's job, and its watches, among them the variables the posing code reads, the avatar on foot, and the aircraft's pose while its pilot is on foot.
-  A replay checks avatars' outputs, its notices among them (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+  A replay checks avatars' outputs, its notifications among them (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 - Avatars registers no guard, catch-up step, or cockpit kind.
 - The figure ships in our one package, `dualinput`, with the order hint `PANEL_PATCH` ([our package](../build/01-the-build.md#our-package)).
   `fspackagetool` compiles the figure's SimObject on a PC with the sim, closed, since it starts the sim to build, and the compiled model files are committed beside their source with the sources' hashes, which CI checks ([files compiled with the sim](../build/01-the-build.md#files-compiled-with-the-sim)).
@@ -113,7 +113,7 @@ The seats are the profile's `seats` ([seats](../profiles/01-format-and-delivery.
 - **Holding it:** a pilot keeps their seat until they take another, go on foot, or move their camera, inside, more than 0.8m behind its hip along its facing, a constant ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
   Outside, the pilot is in an outside view and keeps the seat, and the pose puts the figure's eye at the seat's eye, looking forward.
 - **Two at once:** when two pilots' cores take one seat within a trip, as both sims starting in the Pilot view makes likely (unverified), the PF keeps it, or else the lower pilot ID, and the other's core gives it up at once.
-- **Seeing a held seat:** while this pilot's camera is in another figure's seat, by the rule above, that figure hides, and a notice names the free seats; Ready doesn't wait for a seat ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
+- **Seeing a held seat:** while this pilot's camera is in another figure's seat, by the rule above, that figure hides, and a notification names the free seats; Ready doesn't wait for a seat ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
 - **In no seat:** inside, the figure is a head at the camera; on foot, which `E:IS AVATAR` on object 0 tells, since it swapped with `E:IS AIRCRAFT` when the pilot sat down ([log](log.md#2026-10-02-the-avatars-own-object-id-gives-its-position-speed-and-facing-every-sim-frame)), it walks.
   Each frame on foot, avatars reads `SIMCONNECT_OBJECT_ID_USER_AVATAR`'s position, `A:PLANE HEADING DEGREES TRUE`, and `A:IS CROUCH` (same entry), and turns the position into the aircraft's frame through the aircraft's pose and WGS 84's radii at its latitude ([log](log.md#2026-10-04-the-modules-sphere-earth-put-a-point-26m-forward-of-the-a350s-reference-point-14cm-off-and-wgs-84s-radii-account-for-all-of-it)).
 
@@ -251,7 +251,7 @@ impl Routine for Figure {
 The iniBuilds A380 and the Phenom 300E, both from the Marketplace, ship their files as `.fsc`, which we can't read ([log](log.md#2026-10-04-of-the-three-sidestick-airliners-we-could-read-only-the-fenix-marks-a-grip-and-each-sticks-grip-moves-with-its-own-two-animations)), so a Marketplace copy of the 58P may be unreadable too (unverified), and a streamed copy keeps no model on disk (unverified); the model's job then fails on that machine:
 
 - That machine's pilot brings no hand by a click, and on that machine a `Grip` or a `Thumb` draws as the hand at rest.
-- Seats, heads, on foot, and located changes still work, through the box around the seats' eyes ([a seat](#a-seat)), and a notice tells that pilot.
+- Seats, heads, on foot, and located changes still work, through the box around the seats' eyes ([a seat](#a-seat)), and a notification tells that pilot.
 - The crew's other machines draw as usual.
 
 This replaces [preflight match check](../product/03-v1-scope.md#preflight-match-check)'s example that avatar sync stays off when one pilot's copy lacks a model it needs, and whether a model its machine can't read becomes a match item is [left open](#left-open).
@@ -339,7 +339,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 
 [Node 7](../architecture/plan.md#7-testing) turns each into a test, with two cores, the stand-in sim, a stand-in core helper, and the routine host built natively:
 
-- Both pilots' cameras start in the 58P's Pilot seat: the PF keeps it, the other's figure gives it up, and that pilot's notice names the Copilot seat.
+- Both pilots' cameras start in the 58P's Pilot seat: the PF keeps it, the other's figure gives it up, and that pilot's notification names the Copilot seat.
 - A camera between the two seats, inside both radii: the seat whose eye is nearer takes it; with the other seat held, nothing changes.
 - A camera 0.9m behind the hip inside the cabin: a head; a chase view behind the tail: the figure seated, looking forward.
 - A left tap on the left side of the panel by the PF in the left seat: the left hand reaches, the right takes the yoke at once, and 650ms after the release the left takes the yoke and the right lets go 0.3s after it arrives.
@@ -353,7 +353,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A pose lost: the next one, within 33ms or 1s, carries the whole figure.
 - A link lost with this PC reaching the internet: that figure slumps and turns gray; with it not reaching: the other figures ease to rest in their colors, the PF's on its yoke, and the own figure turns gray.
 - The PF's sim crashing with the link up: the PF's figure slumps, turns gray, and lets go of its yoke at once.
-- The model's job failing: no hand from a click, grips drawn at rest, the notice, and the seats and heads as before.
+- The model's job failing: no hand from a click, grips drawn at rest, the notification, and the seats and heads as before.
 - The profile loading before `AircraftChanged` names the package folder: the model's job starts once the folder arrives.
 - A following machine's yoke moved through `Follow`'s events: the PF's hand stays on its horn, each frame.
 - The 58P's model taken on the loop within its budget, and a cast within its budget, measured.

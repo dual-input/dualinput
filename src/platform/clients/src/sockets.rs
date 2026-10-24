@@ -4,7 +4,10 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use kernel::{Cx, Input};
-use messages::clients::{FromClient, Hello, SET_SETTING, ToClient, component};
+use messages::clients::{
+    BRING_DESKTOP_FORWARD, FromClient, Hello, NOTIFICATION_CLICKED, SET_SETTING, ToClient,
+    component,
+};
 use serde_json::Value;
 
 use crate::panels::Answered;
@@ -161,19 +164,24 @@ impl Clients {
     }
 
     fn command(&mut self, socket: u64, id: u32, name: &str, args: Value, cx: &mut Cx) {
-        if name == SET_SETTING {
-            let result = self.set_setting(args, cx);
-            self.answer(socket, id, result, cx);
-        } else if let Some(handler) = self.commands.get(name) {
-            cx.call_handler(handler, CommandCall { socket, id, args });
-        } else {
-            tracing::info!(
-                socket,
-                command = name,
-                "a client sent a command no unit registered"
-            );
-            self.answer(socket, id, Err("unknown".into()), cx);
-        }
+        let result = match name {
+            SET_SETTING => self.set_setting(args, cx),
+            NOTIFICATION_CLICKED => self.notification_clicked(socket, args, cx),
+            BRING_DESKTOP_FORWARD => self.bring_desktop_forward(socket, args, cx),
+            _ => {
+                if let Some(handler) = self.commands.get(name) {
+                    cx.call_handler(handler, CommandCall { socket, id, args });
+                    return;
+                }
+                tracing::info!(
+                    socket,
+                    command = name,
+                    "a client sent a command no unit registered"
+                );
+                Err("unknown".into())
+            }
+        };
+        self.answer(socket, id, result, cx);
     }
 
     fn unit(&mut self, socket: u64, unit: &str, body: Value, cx: &mut Cx) {
@@ -185,11 +193,7 @@ impl Clients {
             );
             return;
         };
-        let component = self
-            .sockets
-            .get(&socket)
-            .map_or("", |c| c.component())
-            .to_string();
+        let component = self.component_of(socket);
         cx.call_handler(
             handler,
             UnitCall {

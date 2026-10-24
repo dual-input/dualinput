@@ -3,8 +3,10 @@
 // own page-client over the core's real WebSocket, sending the sim's Origin, so the core
 // can't tell a fake page from a real one (record/areas/build/02-testing.md, "The sim's pages").
 
+import type { EfbAppOrder } from "../../src/engines/messages/ts/clients/EfbAppOrder.ts"
 import type { FromClient } from "../../src/engines/messages/ts/clients/FromClient.ts"
-import type { Notice } from "../../src/engines/messages/ts/clients/Notice.ts"
+import type { Notification } from "../../src/engines/messages/ts/clients/Notification.ts"
+import type { NotificationClicked } from "../../src/engines/messages/ts/clients/NotificationClicked.ts"
 import type { ToClient } from "../../src/engines/messages/ts/clients/ToClient.ts"
 import type { JsonValue } from "../../src/engines/messages/ts/serde_json/JsonValue.ts"
 import type { MenuPage } from "../../src/engines/messages/ts/sim/MenuPage.ts"
@@ -137,6 +139,57 @@ export function fakeMenuScript(core: Core, master: MenuPage): FakePage {
 }
 
 /**
+ * The EFB app, as the bench fakes it: a page that joins as `efb-app`, watches whether a
+ * banner page's socket is open, as its code does to open the banner, keeps each order the
+ * clients crate sends it, and sends its button's command for the desktop app
+ * (record/areas/interface/01-apps.md). `component::EFB_APP` in
+ * src/engines/messages/src/clients.rs names its component too.
+ */
+export class FakeEfbApp extends FakePage {
+  /** Each order from the clients crate, oldest first. */
+  readonly orders: EfbAppOrder[] = []
+
+  constructor(core: Core) {
+    super(core, { component: "efb-app" })
+    this.client.onUnit("clients", (body) => this.orders.push(body as EfbAppOrder))
+    this.client.watch("banner", () => {})
+  }
+
+  /** Whether a banner page's socket is open, as the core last said. */
+  bannerOpen(): boolean {
+    return this.slice("banner") === true
+  }
+
+  /** Sends the command of the button that brings the desktop app forward. */
+  bringDesktopForward(): Promise<void> {
+    return this.client.command("clients.bring-desktop-forward", null)
+  }
+}
+
+/**
+ * The banner, as the bench fakes it: a page that joins as `banner`, watches the
+ * notifications, and sends the command for a click on one outside its action.
+ * `component::BANNER` in src/engines/messages/src/clients.rs names its component too.
+ */
+export class FakeBanner extends FakePage {
+  constructor(core: Core) {
+    super(core, { component: "banner" })
+    this.client.watch("notifications", () => {})
+  }
+
+  /** The notifications up, as the core last sent them. */
+  notifications(): Notification[] {
+    return (this.slice("notifications") ?? []) as Notification[]
+  }
+
+  /** Clicks the notification `id` outside its action. */
+  click(id: string): Promise<void> {
+    const args: NotificationClicked = { id }
+    return this.client.command("clients.notification-clicked", args)
+  }
+}
+
+/**
  * The desktop app, as the bench fakes it: a client that finds the core through its port file
  * and sends no Origin, as the desktop app's Rust side does (decision 013), says `alive` every
  * 2s, and sends commands, such as the session crate's Host and Join. While it's open the core
@@ -192,9 +245,9 @@ export class FakeApp {
     return states.at(-1)?.value as T | undefined
   }
 
-  /** The notices up, as the core last sent them. */
-  notices(): Notice[] {
-    return this.slice<Notice[]>("notices") ?? []
+  /** The notifications up, as the core last sent them. */
+  notifications(): Notification[] {
+    return this.slice<Notification[]>("notifications") ?? []
   }
 
   /** Waits until `ok` holds, checking every 20ms, for at most `ms`. */

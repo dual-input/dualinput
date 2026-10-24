@@ -3,7 +3,7 @@
 ```text
 Purpose:     How the traffic host's AI traffic appears in every other pilot's sim, and the ATC host's ATC app plays in every other pilot's headset.
 Depends on:  ../product/03-v1-scope.md, ../session/01-roles-and-members.md, ../session/02-units.md, ../architecture/02-code-map.md, ../core/03-sim-seam-and-wasm-module.md, ../core/04-core-helper.md, ../network/01-between-machines.md, ../network/02-units.md, ../recording/01-recording-and-bug-reports.md, ../flight-model/01-flight-model-sync.md, ../interface/01-apps.md, log.md
-Decides:     What the traffic host polls, how often, and which objects it carries; what an identity and a state carry, and when a state goes out; how a receiving machine creates, freezes, dresses, and removes each copy, and how traffic's routine draws them; the object-mirror engine; traffic's notices and its list of traffic packs; how ATC audio picks the ATC app, sends its frames, and plays them; the settings; the budgets; and the cases for the bench (node 6.14).
+Decides:     What the traffic host polls, how often, and which objects it carries; what an identity and a state carry, and when a state goes out; how a receiving machine creates, freezes, dresses, and removes each copy, and how traffic's routine draws them; the object-mirror engine; traffic's notifications and its list of traffic packs; how ATC audio picks the ATC app, sends its frames, and plays them; the settings; the budgets; and the cases for the bench (node 6.14).
 ```
 
 On the traffic host, traffic polls the sim's AI aircraft and helicopters within the radius setting, and the ground objects within 1km whose titles it allows, twice a second.
@@ -19,12 +19,12 @@ FS Copilot built both features, and this design carries over its measured mechan
 
 | Unit | Tier | Holds | Runs |
 | --- | --- | --- | --- |
-| `traffic` | Feature | On the traffic host, the objects it tracks and the gate's state for each; on a receiving machine, each sender's identities and newest states, each copy's object ID, and the notices' counts; the radius setting; and the list of known traffic packs | Its crate in the core, and its routine `Traffic`, in `traffic-routines`, in our WASM module |
+| `traffic` | Feature | On the traffic host, the objects it tracks and the gate's state for each; on a receiving machine, each sender's identities and newest states, each copy's object ID, and the notifications' counts; the radius setting; and the list of known traffic packs | Its crate in the core, and its routine `Traffic`, in `traffic-routines`, in our WASM module |
 | `object-mirror` | Engine | The gate, which decides which states the traffic host sends, and the playout, which gives a copy's pose at a time from its samples, both generic over the sample | Under traffic, in the core and in `Traffic`; natively on the bench |
 | `atc-audio` | Feature | The ATC app and ATC volume settings, the capture's state on the ATC host, and the playback stream on the other machines | Its crate in the core |
 | The message crate's `traffic` and `atc_audio` modules | Engine | The role keys, the channels and their messages, and `Traffic`'s slot | Wherever the message crate does |
 
-- Traffic depends on the session, for its key, the members, and who is in the flight; the sim service; the network, for its channels, each sender's clock offset, and `LinkUp`; `clients`, for its setting, notices, slice, and command; and `object-mirror`.
+- Traffic depends on the session, for its key, the members, and who is in the flight; the sim service; the network, for its channels, each sender's clock offset, and `LinkUp`; `clients`, for its setting, notifications, slice, and command; and `object-mirror`.
   ATC audio depends on the session, the core helper's service, the network, and `clients`.
 - `object-mirror` depends on nothing of ours, so it sits on the engines' bottom line beside `messages`; `traffic-routines` uses it, which the code map's rule on a routine's dependencies admits through this design's note there.
 - Neither writes its own role key: the apps' "Share my traffic and ATC" switch sends the one request that claims both ([the traffic and ATC switch](../architecture/02-code-map.md#the-traffic-and-atc-switch); [session keys](../session/02-units.md#session-keys)).
@@ -165,12 +165,12 @@ The gate is `object-mirror`'s, with FS Copilot's rules and thresholds (read in t
 - **Why 1s:** FS Copilot drew its copies at its samples' spacing plus 200ms, about 700ms at 2Hz, behind times it took from the traffic host's reads through an offset fitted to its least-delayed packets (read in `TrafficReceiver.cs`, `OnStates`, and `TrafficInterpolator.cs`, `Push`).
   `Traffic`'s 1s covers the 500ms between samples and up to 500ms of lateness, near the 534ms 99th percentile through a far relay at 3% loss ([the relays](../network/01-between-machines.md#the-relays)).
 
-### Notices
+### Notifications
 
-Traffic raises two notices on a receiving machine while another member holds its key and this pilot is in the flight; their words and where they show are the apps' design's:
+Traffic raises two notifications on a receiving machine while another member holds its key and this pilot is in the flight; their words and where they show are the apps' design's:
 
 - **Aircraft that aren't the traffic host's:** every 10s, traffic polls `AIRCRAFT` and `HELICOPTER` within 200km for `IS USER SIM` alone, and counts the objects that are neither this pilot's aircraft nor its copies, as FS Copilot's receiver counted aircraft (read in `FsCopilot/Simulation/TrafficReceiver.cs`, `ForeignPoll`), with helicopters added.
-  Two counts in a row above 0 raise the notice, with the count and the traffic host's name, since a copy whose create answers after the count's answer counts once as not ours, and a count of 0 clears it.
+  Two counts in a row above 0 raise the notification, with the count and the traffic host's name, since a copy whose create answers after the count's answer counts once as not ours, and a count of 0 clears it.
   It covers the sim's own AI traffic and any injector running on this machine; whether multiplayer's other pilots show as objects it counts is unverified.
 - **Copies missing or shown as stand-ins:** the count of the traffic host's aircraft and helicopters this machine shows as a stand-in or not at all, with the traffic host's name, raised while it's above 0.
   Two groups of FS Copilot's testers flew with airliners missing because their traffic packs differed (from our experience with FS Copilot), and a stand-in is the same mismatch caught one step later.
@@ -280,13 +280,13 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A traffic host who loses the role and takes it back: every identity goes out again, and the copies come back.
 - `LinkUp`: that member gets every identity, creates every copy within 500ms, and draws them once the clock offset arrives.
 - A state before its identity: kept up to 10s, and the copy created when the identity comes.
-- A create that throws: the stand-in; the stand-in throwing too: missing, and the notice counts it.
+- A create that throws: the stand-in; the stand-in throwing too: missing, and the notification counts it.
 - A copy with no state for 15s: removed, its identity kept, and created again at its next state.
 - The key moving to another member: every copy of the old traffic host's removed on every machine, and its identities forgotten.
 - The receiving pilot leaving the flight, or a flight load on their machine: every copy removed, and created again once they're back in the flight.
 - Two feeds within one module frame: `Traffic` takes both.
 - `Traffic` drawing samples 500ms apart: no hold at a sample's end; a copy past its newest sample carried 500ms, then held; a parked copy not written.
-- 40 aircraft in the receiving machine's sim that aren't copies, over two counts: the notice; the copies alone: none.
+- 40 aircraft in the receiving machine's sim that aren't copies, over two counts: the notification; the copies alone: none.
 - `LIST_PACKS` with `fsltl-traffic-base` in Community: the list names it with its manifest's version.
 - A capture listing `BeyondATC` then `SayIntentionsAI` with only SayIntentions running: it captures `SayIntentionsAI`.
 - Frames with 80ms ± 30ms of jitter: the depth settles at their 98th percentile; a frame later than its turn is dropped and concealed; a missing number whose stamp gap matches is concealed; a stamp 30ms past what consecutive numbers account for starts a new transmission; a 2-minute transmission whose stamps drift 12ms from the device stays one.
@@ -307,7 +307,7 @@ In the sim:
 ## Known limits
 
 - Copies are frozen, so the sim doesn't hold them to the ground, and a receiving pilot with other scenery sees them float or sink ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
-- Dual Input hides no other source's traffic: the notice asks the pilot to turn it off.
+- Dual Input hides no other source's traffic: the notification asks the pilot to turn it off.
 - A receiving pilot who runs an ATC app of their own hears two ATCs, since nothing finds one on a receiving machine.
 - GSX's vehicles and people, other than the pushback tugs the allowlist names, show only on the machine that runs them, until ground operations sync, and an AI aircraft's copy pushes back with no tug where its tug's title isn't on the allowlist.
 - On a following machine, copies are drawn 1s behind the traffic host, and the crew's aircraft 0.4s behind the PF, so the copies show 0.6s staler than the aircraft: a tug at 2kt to 3kt would sit 0.6m to 0.9m off the nose gear it pushes (arithmetic), and AI traffic's replies to the crew show that much later.

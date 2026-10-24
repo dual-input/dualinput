@@ -4,7 +4,7 @@
 
 use std::collections::BTreeMap;
 
-use clients::{Clients, ClientsUnit, SettingDef, SocketOut, SocketUp, Sockets};
+use clients::{Clients, ClientsUnit, SettingDef, SocketOut, SocketUp, Sockets, StartDesktopApp};
 use kernel::{
     CancelTimer, Cx, FIRST, Input, JOBS, Kernel, Output, Registry, SetTimer, SourceId, StartJob,
     TIMERS, TimerId, View, Work, first_input,
@@ -94,6 +94,8 @@ struct Core {
     now: u64,
     timers: BTreeMap<(u64, TimerId), ()>,
     jobs: Vec<StartJob>,
+    /// How many times the clients crate asked the edge to start the desktop app's program.
+    desktop_starts: usize,
 }
 
 const SECOND: u64 = 1_000_000;
@@ -118,6 +120,7 @@ impl Core {
             now: SECOND,
             timers: BTreeMap::new(),
             jobs: Vec::new(),
+            desktop_starts: 0,
         };
         let outputs = core.handle(FIRST, first_input([1; 32], files));
         (core, outputs)
@@ -155,6 +158,13 @@ impl Core {
             let value = match value.downcast::<StartJob>() {
                 Ok(job) => {
                     self.jobs.push(*job);
+                    continue;
+                }
+                Err(value) => value,
+            };
+            let value = match value.downcast::<StartDesktopApp>() {
+                Ok(_) => {
+                    self.desktop_starts += 1;
                     continue;
                 }
                 Err(value) => value,
@@ -243,7 +253,7 @@ fn answer(id: u32, error: Option<&str>) -> ToClient {
 #[test]
 fn a_client_gets_a_slice_at_once_then_at_most_once_a_round() {
     let (mut core, _) = Core::new(None);
-    core.join(1, "efb", &[]);
+    core.join(1, "efb-app", &[]);
     let out = core.say(1, json!({ "t": "watch", "slices": ["feature"] }));
     assert_eq!(
         to(1, &out),
@@ -275,7 +285,7 @@ fn a_client_gets_a_slice_at_once_then_at_most_once_a_round() {
 #[test]
 fn a_command_no_unit_registered_answers_unknown_and_one_whose_arguments_dont_read_an_error() {
     let (mut core, _) = Core::new(None);
-    core.join(1, "efb", &[]);
+    core.join(1, "efb-app", &[]);
     let out = core.say(
         1,
         json!({ "t": "command", "id": 7, "name": "nobody.knows", "args": {} }),
@@ -301,7 +311,7 @@ fn a_command_no_unit_registered_answers_unknown_and_one_whose_arguments_dont_rea
 #[test]
 fn a_commands_handler_reads_the_settings_while_the_clients_crate_dispatches_it() {
     let (mut core, _) = Core::new(Some(r#"{ "feature.loud": true }"#));
-    core.join(1, "efb", &[]);
+    core.join(1, "efb-app", &[]);
     let out = core.say(
         1,
         json!({ "t": "command", "id": 1, "name": "feature.read-setting", "args": null }),
@@ -348,7 +358,7 @@ fn a_message_that_doesnt_read_is_dropped_and_a_client_of_another_version_is_stil
     core.up(SocketUp::Opened { socket: 1 });
     core.say(
         1,
-        json!({ "t": "hello", "component": "efb", "version": "0.0.0", "hash": "another" }),
+        json!({ "t": "hello", "component": "efb-app", "version": "0.0.0", "hash": "another" }),
     );
     assert_eq!(
         core.up(SocketUp::Text {
@@ -367,7 +377,7 @@ fn a_message_that_doesnt_read_is_dropped_and_a_client_of_another_version_is_stil
 #[test]
 fn the_core_says_alive_every_2s_and_closes_a_socket_quiet_for_8s() {
     let (mut core, _) = Core::new(None);
-    core.join(1, "efb", &[]);
+    core.join(1, "efb-app", &[]);
     core.join(2, "banner", &[]);
     let out = core.advance_alive(core.now + 10 * SECOND, &[1]);
     assert!(
@@ -449,7 +459,7 @@ fn a_hello_whose_other_fields_dont_read_still_joins_on_its_component_version_and
     core.up(SocketUp::Opened { socket: 1 });
     core.say(
         1,
-        json!({ "t": "hello", "component": "efb", "version": "9.9.9", "hash": "another", "instruments": "not a list" }),
+        json!({ "t": "hello", "component": "efb-app", "version": "9.9.9", "hash": "another", "instruments": "not a list" }),
     );
     let out = core.say(
         1,
@@ -473,37 +483,123 @@ fn two_panels_that_hold_instruments_of_one_key_both_keep_their_sockets() {
 #[test]
 fn no_cockpit_panel_within_10s_of_the_profile_loading_raises_trouble_until_one_connects() {
     let (mut core, _) = Core::new(None);
-    core.join(1, "efb", &[]);
-    core.say(1, json!({ "t": "watch", "slices": ["notices"] }));
+    core.join(1, "efb-app", &[]);
+    core.say(1, json!({ "t": "watch", "slices": ["notifications"] }));
     core.handle_profile(true);
     let out = core.advance_alive(core.now + 10 * SECOND + 50_000, &[1]);
-    let notices: Vec<Value> = to(1, &out)
-        .into_iter()
-        .filter_map(|m| match m {
-            ToClient::State { value, .. } => Some(value),
-            _ => None,
-        })
-        .collect();
+    let notifications = states(1, &out);
     assert_eq!(
-        notices.last().map(|n| n[0]["id"].clone()),
+        notifications.last().map(|n| n[0]["id"].clone()),
         Some(json!("clients.no-panel"))
     );
     core.join_panel(2, "VCockpit02", &["CLOCK|"]);
     let out = core.advance(core.now + 50_000);
-    let notices: Vec<Value> = to(1, &out)
+    assert_eq!(states(1, &out), [json!([])]);
+}
+
+#[test]
+fn the_banner_slice_says_whether_a_banner_pages_socket_is_open() {
+    let (mut core, _) = Core::new(None);
+    core.join(1, "efb-app", &[]);
+    let out = core.say(1, json!({ "t": "watch", "slices": ["banner"] }));
+    assert_eq!(states(1, &out), [json!(false)]);
+    core.join(2, "banner", &[]);
+    let out = core.advance(core.now + 50_000);
+    assert_eq!(states(1, &out), [json!(true)]);
+    // A closed panel's page is gone while its socket stays open, so the banner is up until
+    // the core closes that socket, 8s after its last message.
+    let out = core.advance_alive(core.now + 10 * SECOND, &[1]);
+    assert!(out.contains(&SocketOut::Close {
+        socket: 2,
+        code: 1000
+    }));
+    assert_eq!(states(1, &out), [json!(false)]);
+}
+
+#[test]
+fn a_notification_clicked_outside_its_action_orders_the_efb_app_to_open_the_efb() {
+    let (mut core, _) = Core::new(None);
+    core.join(1, "efb-app", &[]);
+    core.join(2, "banner", &[]);
+    // `feature.gone` isn't up, as when a notification clears as its click arrives, and the
+    // EFB still opens, since the pilot asked to look.
+    let out = core.say(
+        2,
+        json!({ "t": "command", "id": 4, "name": "clients.notification-clicked", "args": { "id": "feature.gone" } }),
+    );
+    assert_eq!(to(2, &out), [answer(4, None)]);
+    assert_eq!(
+        to(1, &out),
+        [ToClient::Unit {
+            unit: "clients".into(),
+            body: json!({ "t": "open-efb" })
+        }]
+    );
+    let out = core.say(
+        2,
+        json!({ "t": "command", "id": 5, "name": "clients.notification-clicked", "args": null }),
+    );
+    assert!(matches!(
+        to(2, &out).as_slice(),
+        [ToClient::Answer {
+            id: 5,
+            error: Some(_)
+        }]
+    ));
+    assert_eq!(
+        to(1, &out),
+        [],
+        "a click whose arguments don't read orders nothing"
+    );
+}
+
+#[test]
+fn the_button_for_the_desktop_app_starts_its_program_whether_or_not_a_desktop_app_is_connected() {
+    let (mut core, _) = Core::new(None);
+    core.join(1, "efb-app", &[]);
+    let forward =
+        json!({ "t": "command", "id": 1, "name": "clients.bring-desktop-forward", "args": null });
+    let out = core.say(1, forward.clone());
+    assert_eq!(to(1, &out), [answer(1, None)]);
+    assert_eq!(core.desktop_starts, 1);
+    core.join(2, "desktop", &[]);
+    let out = core.say(1, forward);
+    assert_eq!(to(1, &out), [answer(1, None)]);
+    assert_eq!(
+        to(2, &out),
+        [],
+        "the desktop app gets no message, since its program's running copy opens its window"
+    );
+    assert_eq!(core.desktop_starts, 2);
+    let out = core.say(
+        1,
+        json!({ "t": "command", "id": 3, "name": "clients.bring-desktop-forward", "args": { "now": true } }),
+    );
+    assert!(matches!(
+        to(1, &out).as_slice(),
+        [ToClient::Answer {
+            id: 3,
+            error: Some(_)
+        }]
+    ));
+    assert_eq!(core.desktop_starts, 2);
+}
+
+/// The value of each `state` message sent to `socket`.
+fn states(socket: u64, outputs: &[SocketOut]) -> Vec<Value> {
+    to(socket, outputs)
         .into_iter()
         .filter_map(|m| match m {
             ToClient::State { value, .. } => Some(value),
             _ => None,
         })
-        .collect();
-    assert_eq!(notices, [json!([])]);
+        .collect()
 }
 
 #[test]
 fn a_page_keeps_its_socket_through_12s_in_which_the_core_itself_stopped() {
     let (mut core, _) = Core::new(None);
-    core.join(1, "efb", &[]);
+    core.join(1, "efb-app", &[]);
     // The core stops for 12s: its timers fire only after, all at once, stamped late.
     core.now += 12 * SECOND;
     let mut out = Vec::new();

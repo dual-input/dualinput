@@ -6,13 +6,6 @@ Depends on:  01-profile-entries.md, 02-live-sync.md, 03-catch-up.md, ../network/
 Decides:     What comes back after a link, a core, a sim, or a PC goes down; how a machine records what it applied, drops copies, and skips messages; catch-up's order and pipeline, when it ends, and when control can't pass; how every cockpit message is paced, and how often a state entry is sent; which messages a change of control drops, and who catches up after one; how a core that restarted recovers; how an entry the aircraft drives itself is caught; how a machine puts back a change it may not send; and when an aircraft that loaded before its session counts as settled.
 ```
 
-> **Note**
-> Since 2026-10-21, the core records every input, so [keys several members write](#keys-several-members-write)' reason for seat claims riding avatars' poses rather than the session channel, avatars being partly recorded, goes, and whether they move is open, as [avatars](../avatars/01-avatars.md)' note of 2026-10-21 says (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
->
-> Since 2026-10-23, a recording holds no marks, so a driven entry, in [entries the aircraft drives itself](#entries-the-aircraft-drives-itself), goes in the run's log at info rather than marking the recording (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
->
-> Since 2026-10-23, an aircraft whose session or profile starts after it loaded counts as settled 30s after its Ready to fly, in [an aircraft that loaded before its session](#an-aircraft-that-loaded-before-its-session), with no quiet window from the profile's load ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
-
 What comes back depends on what went down.
 A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.
 A pilot whose sim, core, or PC went down comes back as a late joiner, with the profile's entries caught up from the flying machine (user, 2026-10-11 and 2026-10-12).
@@ -159,7 +152,7 @@ The IDE shows every entry live while the profile is written, where an author can
 
 - A machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Dual Input's write, and it also received another machine's change to it or firing of it, a replayed one included.
 - It then stops syncing that entry for the rest of the load, sending no change to it and applying none, and each aircraft drives its own copy, as it would anyway.
-- It marks the recording and shows the once-a-flight notification that a write never landed shows ([02-live-sync](02-live-sync.md#checking-that-a-write-landed)), so the profile reaches us in a bug report.
+- It logs the entry at info in the run's log (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)), and shows the once-a-flight notification that a write never landed shows ([02-live-sync](02-live-sync.md#checking-that-a-write-landed)), so the profile reaches us in a bug report.
 
 A pilot who turns a knob changes the entry on their own machine only, and the other machines' aircraft only take the writes, so the test never catches a pilot.
 It leaves PF-owned entries out: only the flying machine sends them, and every following machine [puts them back](#putting-back), so a PM's hand resting on a throttle would otherwise trip it.
@@ -180,14 +173,15 @@ At a handover, the new flying machine may send the levers, so it stops putting t
 
 ## An aircraft that loaded before its session
 
-When a session starts, or its profile loads, after the pilot's Ready to fly, the 30s floor of [03-catch-up's settle rule](03-catch-up.md#settling-after-a-load) still counts from Ready to fly, and its 15s quiet window counts from when the profile loads, since nothing watched the entries before then.
-If Ready to fly came 1.5 minutes ago or more, the aircraft counts as settled at once ([01-spine](../architecture/01-spine.md#what-moves-them)).
+When a session starts, or its profile loads, after the pilot's Ready to fly, the aircraft counts as settled 30s after that Ready to fly, by [03-catch-up's settle rule](03-catch-up.md#settling-after-a-load), with no quiet window from the profile's load ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
+So if Ready to fly came 30s ago or more, the aircraft counts as settled at once.
 
 ## Keys several members write
 
 The session channel's stamp is all that active pause, the countdown, and Go without need: of two changes made at once, every machine keeps the same one, and a new PF's win ([01-between-machines](../network/01-between-machines.md#channels)).
 None needs the cockpit's causal order, since none acts on a page another change opened.
-Seat claims ride avatars' poses rather than the session channel, since avatars, partly recorded, writes no session key, and of two pilots who take one seat within a trip, the PF keeps it, or else the lower pilot ID ([a seat](../avatars/01-avatars.md#a-seat)).
+Seat claims ride avatars' poses rather than the session channel, and of two pilots who take one seat within a trip, the PF keeps it, or else the lower pilot ID ([a seat](../avatars/01-avatars.md#a-seat)).
+Whether they move to the session channel is [left open](#left-open).
 
 ## Known limits
 
@@ -198,5 +192,6 @@ Seat claims ride avatars' poses rather than the session channel, since avatars, 
 ## Left open
 
 - The driven-entry test's 3s and 30s, the 2s cap on a gap, and the 20 values a second a state entry is sent at most, which v1's recordings tune.
+- Whether seat claims move from avatars' poses to the session channel, as [avatars](../avatars/01-avatars.md#left-open) leaves open: the core records every input, so nothing about recording keeps them off the session channel (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 
 [2.2]: ../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does

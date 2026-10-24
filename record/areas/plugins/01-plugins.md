@@ -6,19 +6,6 @@ Depends on:  ../profiles/01-format-and-delivery.md, ../profiles/02-units.md, ../
 Decides:     That plugins come after v1; the `instrument()` name, what its path may reach, and the values it reads; how state sync reads it and writes a gauge's state through its H: events; the Baron 58P's entries for its gauges' state; and the sandbox's rules against randomness a replay can't repeat (node 6.15).
 ```
 
-> **Note**
-> Since 2026-10-18, an `instrument()` path reads own data properties only and ends in a number, text, or boolean, with no method call, where [what a path reaches](#what-a-path-reaches) lets it end in a no-argument method the panel's scripts wrote; so the `[native code]` check and its case go, and the 58P's radar range syncs in v1 only if a data field of Asobo's map holds it (user, 2026-10-18).
->
-> Since 2026-10-23, [the sandbox](#the-sandbox)'s time limit counts QuickJS-ng's interrupt checks, about 100ms of a call on our development machine, so a replay stops a call at the same check with nothing recorded, where the core's edge hands the sandbox a check that reads the clock ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
->
-> Since 2026-10-24, stage 12's build changes [the sandbox](#the-sandbox) in four places (user, 2026-10-24; [plugins log](log.md#2026-10-24-stage-12s-sandbox-stops-a-write-functions-endless-loop-at-100-interrupt-checks-and-needs-quickjs-ngs-promise-intrinsic-without-which-an-async-function-aborts-the-core-when-its-sandbox-is-dropped)):
->
-> - The context also takes rquickjs's `Promise` intrinsic, and the sandbox deletes the `Promise` and `AsyncDisposableStack` globals it adds, as it deletes `Math.random`, where the context has `Eval` and `RegExp` alone: without it, an async function, or `Array.fromAsync`, left an object behind that made QuickJS-ng abort the core when the profile's sandbox was dropped.
->   An async function a script makes from a string runs to its first `await` and never resumes, since nothing runs its jobs; TypeScript refuses one in a write function, which settles the "unverified with our builder" on the `queueMicrotask` item below.
-> - The time limit is 100 checks, set by a write function's own endless loop, which calls a name, such as `K('X')`, and `write()` each pass, and stops in about 100ms; a check's length turns on what a loop does between ticks, so an empty loop stops sooner and one that builds an object each pass later.
-> - A function that catches "out of memory" and keeps allocating meets the time limit only after about 2.5s, where the design has it meet the limit at 100ms, since each of its checks took about 25ms, for a reason we haven't traced.
-> - QuickJS-ng throws "out of memory in regexp execution" when a regex's stack outgrows the limit, and `null` when even the error object doesn't fit, as with a runaway of small objects, beside the "out of memory" the design names; the sandbox reads all three as the memory limit, so a script's own `throw null` does too.
-
 v1 builds no plugins.
 The Baron 58P's profile reads the settings that live only in its gauges' JavaScript through a name, `instrument()`, which a panel module of state sync's reads every 250ms.
 It writes them only through the gauges' own H: events, in write functions that check the mode another entry syncs.
@@ -67,9 +54,11 @@ The rest, with hypothetical entry keys and instrument keys derived from the code
 | `radar_profile` | `bksq_wradar1`, `weatherRadarMainMap.map.verticalMode` | 1 or 0 | A function: `H:bksq_wradar1_radarProfile` sets it only in mode 3, and `H:bksq_wradar1_radarMap` clears it in modes 0 to 3, while in mode 4 `radarMap` repairs engine 1 |
 | `radar_hold` | `bksq_wradar1`, `weatherRadarMainMap.map.radarHold` | 1 or 0 | A function: `H:bksq_wradar1_radarHold` only while `L:var_radarMode` is 3 or less, since on the systems page, mode 4, it refills the oxygen |
 | `radar_track` | `bksq_wradar1`, `weatherRadarMainMap.map.radarTrack` | degrees, −35 to 35 | A function: 2.5° steps of `H:bksq_wradar1_radarTrackLeft` and `Right`, only in mode 3 or less, since in mode 4 they repair engine 2 and set the battery voltage, and in mode 5 the right one resets every failure |
-| `radar_range` | `bksq_wradar1`, `weatherRadarMainMap.map.instrument.getWeatherRange()` | One of the ten ranges the radar gives its map, 4 to 160 (unit unverified) | A function: steps through the ten with `H:bksq_wradar1_radarRangeInc` and `Dec`, only in mode 3 or less |
+| `radar_range` | `bksq_wradar1`, a data field of Asobo's map, `weatherRadarMainMap.map.instrument`, if one holds the range | One of the ten ranges the radar gives its map, 4 to 160 (unit unverified) | A function: steps through the ten with `H:bksq_wradar1_radarRangeInc` and `Dec`, only in mode 3 or less |
 
 - Each field starts at its constructor's value at every load and is saved nowhere, so every machine's gauges start alike, and the readings matter for catch-up and a rejoin (read in the constructors in `KR87A.js`, `KAS297B.js`, and `bksq_wradar1.js`); the radar's range lives in Asobo's map, whose code we haven't read.
+- The radar's own code reads its range by calling `getWeatherRange()` on Asobo's map (read in `bksq_wradar1.js`, `bksq_wradar1_MapElement.onEvent`), and a path calls no method, so `radar_range` syncs in v1 only if a data field of the map holds the range (user, 2026-10-18).
+  Which field holds it is in Asobo's `MapInstrument.js`, which isn't among the sim's files on our disk.
 - Most fields change only in the gauge's event handler, but the KAS 297B clears its arming when vertical speed hold engages and takes the autopilot's target as its armed vertical speed whenever that changes, and the KR 87 counts its elapsed seconds each frame (read in `KAS297B.js` and `KR87A.js`, `Update`).
 - The KAS 297B takes vertical speed hold from PMS50's `L:PMS50_APGA_ACTIVE_VERTICAL_MODE` above 0 while `L:PMS50_APGA_RUNNING` is set, and from `A:AUTOPILOT VERTICAL HOLD` otherwise, so `kas_armed_vs`'s guard reads the same (read in `KAS297B.js`, `Update`).
 - The radar's events reach its map only while the map's mode is 3 or less, and in modes 4 and 5 the gauge's outer handler acts on them instead (read in `bksq_wradar1.js`, `bksq_wradar1.onEvent` and `bksq_wradar1_MapElement.onEvent`).
@@ -111,16 +100,13 @@ A mode lands before the value it guards when the pilot changed the mode first ([
 
 - It's a word, not a letter, because MSFS owns the single-letter namespaces, and a word of ours can't collide with one the sim adds later (user, 2026-10-17).
 - A state entry may watch it; a `write`, an event entry's `watch`, and an `ignore` may not, and each fails the load as a name of the wrong kind for its field ([what fails a load](../profiles/01-format-and-delivery.md#what-fails-a-load)).
-- A path is names and whole numbers separated by dots, and its last step may end in `()`; any other path fails the load.
+- A path is names and whole numbers separated by dots, with no method call; any other path fails the load (user, 2026-10-18).
 
 ### What a path reaches
 
-- Each step must be an own property of the object before it, which `Object.prototype.hasOwnProperty` tells, so a path stays in the gauge's own data, the fields its constructor set.
+- Each step must be an own data property of the object before it, so a path stays in the gauge's own data, the fields its constructor set, and the path ends in a number, text, or boolean (user, 2026-10-18).
   `__proto__` and `constructor` live on an object's prototypes, and so, in browsers, do the DOM's accessors such as `ownerDocument` and `children`, which in Coherent GT is unverified.
-- A last step ending in `()` calls a method with no arguments, found on the object's prototypes, as the radar's range needs `getWeatherRange()` on Asobo's map, the call the radar's own code makes (read in `bksq_wradar1.js`, `bksq_wradar1_MapElement.onEvent`).
-  Which field holds the range is in Asobo's `MapInstrument.js`, which isn't among the sim's files on our disk.
-- That method must be one the panel's own scripts wrote, the aircraft's or the sim's, never one built into Coherent GT: the module refuses a function whose source text holds `[native code]`, as a browser prints a built-in's, so a path can't call a DOM method such as `remove()` or `click()` (unverified in Coherent GT).
-- Profiles still reach no file and no network ([decision 020](../../decisions/020-plugin-code-runs-only-in-core.md)): a path reads, and calls only a method that takes nothing from the profile.
+- Profiles still reach no file and no network ([decision 020](../../decisions/020-plugin-code-runs-only-in-core.md)): a path only reads.
 
 ### Its values
 
@@ -131,9 +117,9 @@ An entry's value is a number or text ([a cockpit message](../sync/05-units.md#a-
 | A finite number | That number |
 | `true` or `false` | 1 or 0, so a `toggle` or a function compares it as it does a switch |
 | A string | That text, under the 4 KB cap on a value ([decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)) |
-| Anything else: `undefined`, `null`, `NaN`, an object, an array, or a function, or a path or method that throws | An error |
+| Anything else: `undefined`, `null`, `NaN`, an object, an array, or a function, or a path that throws | An error |
 
-An error leaves the entry with no reading, and state sync shows its notification once for each load, as for a write that never lands, and marks the recording ([notifications and marks](../sync/05-units.md#ready-notifications-marks-and-the-checklist)).
+An error leaves the entry with no reading, and state sync shows its notification once for each load, as for a write that never lands ([notifications](../sync/05-units.md#ready-notifications-log-lines-and-the-checklist)).
 A wrong path, from a typo or an aircraft update that renamed a field, reads `undefined`, so an author sees it the first time the profile loads.
 
 ## Reading it in the panel
@@ -155,7 +141,7 @@ State sync reads every `instrument()` through a panel module of its own, `instru
 
 ## The sandbox
 
-The sandbox gives each loaded profile one QuickJS-ng runtime, under [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)'s 64 MB and 100ms a call, and v1 builds no second runtime, since it has no plugin.
+The sandbox gives each loaded profile one QuickJS-ng runtime, under [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)'s 64 MB and [decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)'s time limit, about 100ms of a call on our development machine, and v1 builds no second runtime, since it has no plugin.
 Its contexts already leave out `Date` and `Performance` ([one loop](../architecture/02-code-map.md#one-loop)), and the QuickJS-ng read found three more things that would differ between a run and its replay:
 
 | What | Why it differs | The rule |
@@ -164,15 +150,21 @@ Its contexts already leave out `Date` and `Performance` ([one loop](../architect
 | The stack's limit | QuickJS-ng sets it from the stack pointer when the runtime was made, and rquickjs moves it only with its `parallel` feature, so a recursion's depth at its `RangeError` turns on the Rust stack's depth at the call (read in `quickjs.c`, `update_stack_limit`, and rquickjs-core 0.14.0, `src/runtime/raw.rs`; inferred, not run) | The sandbox pins the top with `JS_UpdateStackTop` at its one entry into JS, and sets 1 MB with `JS_SetMaxStackSize` |
 | A Rust `HashMap` handed into JS | rquickjs builds the object in the map's iteration order, which is randomly seeded (read in rquickjs-core 0.14.0, `src/value/convert/into.rs`) | The sync engine hands values in from a `Vec` or a `BTreeMap` only |
 
-- The context holds the base objects QuickJS-ng always adds, and of rquickjs's intrinsics only `Eval`, which compiling the write functions needs, and `RegExp`, the one more a level's declarations name ([the profiles' units](../profiles/02-units.md)).
+- The context holds the base objects QuickJS-ng always adds, and of rquickjs's intrinsics only `Eval`, which compiling the write functions needs, `RegExp`, the one more a level's declarations name ([the profiles' units](../profiles/02-units.md)), and `Promise`, whose two globals, `Promise` and `AsyncDisposableStack`, the sandbox deletes, as it deletes `Math.random`.
   So it has no `WeakRef` or `FinalizationRegistry`, whose callbacks follow the garbage collector (read in `quickjs.c`, `reset_weak_ref`), and no Map, Set, or Promise global.
-- The sandbox also deletes `queueMicrotask`, since nothing drains the jobs it queues; an `async` function queues jobs too, and TypeScript refuses one when no `Promise` is declared (unverified with our builder).
+  It takes `Promise` because without it, an async function, or `Array.fromAsync`, left an object behind that made QuickJS-ng abort the core when the profile's sandbox was dropped (user, 2026-10-24; [plugins log][stage 12]).
+- The sandbox also deletes `queueMicrotask`, since nothing drains the jobs it queues; an `async` function queues jobs too, and TypeScript refuses one in a write function, since no `Promise` is declared.
+  One a script makes from a string runs to its first `await` and never resumes, since nothing runs its jobs (user, 2026-10-24; [plugins log][stage 12]).
 - QuickJS-ng's hash seed, also taken from the wall clock, picks only a Map's or a Set's bucket, while every way to iterate one walks a list kept in insertion order (read in `quickjs.c`, `map_hash_key`, `js_map_forEach`, and `js_map_iterator_next`), so a script sees nothing of it, which settles the code map's item in [left open](../architecture/02-code-map.md#left-open).
   With no Map or Set in the context, nothing reads it anyway.
-- QuickJS-ng throws "out of memory" as an error a script can catch, so a write function that catches it carries on, and the host never learns it met the limit (read in `quickjs.c`, `JS_ThrowOutOfMemory`).
-  We accept that: the limits are for bugs, and a function that catches the error and keeps allocating meets the 100ms limit, whose interrupt no `catch` or `finally` in the script sees, and after which the runtime runs on (read in `quickjs.c`, `JS_ThrowInterrupted`; measured on our development machine, 2026-10-08, [architecture log](../architecture/log.md#2026-10-08-embedded-in-rust-quickjs-runs-100-write-functions-a-frame-in-75µs-idles-under-1-mb-and-holds-its-memory-and-time-limits-while-v8s-memory-limit-failed-until-turbofan-was-off)).
+- The time limit counts QuickJS-ng's interrupt checks, so a replay stops a call at the same check with nothing recorded ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
+  It's 100 checks, the count at which a write function's own endless loop, one that calls a name, such as `K('X')`, and `write()` each pass, stops in about 100ms; a check's length turns on what a loop does between ticks, so an empty loop stops sooner and one that builds an object each pass later (user, 2026-10-24; [plugins log][stage 12]).
 - The interrupt counter carries over between calls and starts at 0 in a new context, so where a call's first check lands depends on every call into JS since the context was made (read in `quickjs.c`, `js_poll_interrupts`).
   A replay makes the same calls, since the recording numbers each one, compiling the write functions at load among them, so a stop lands on the same call ([what a recording holds](../core/01-loop-and-edge.md#what-a-recording-holds)).
+- QuickJS-ng throws "out of memory" as an error a script can catch, so a write function that catches it carries on, and the host never learns it met the limit (read in `quickjs.c`, `JS_ThrowOutOfMemory`).
+  We accept that: the limits are for bugs, and a function that catches the error and keeps allocating meets the time limit, whose interrupt no `catch` or `finally` in the script sees, and after which the runtime runs on (read in `quickjs.c`, `JS_ThrowInterrupted`; measured on our development machine, 2026-10-08, [architecture log](../architecture/log.md#2026-10-08-embedded-in-rust-quickjs-runs-100-write-functions-a-frame-in-75µs-idles-under-1-mb-and-holds-its-memory-and-time-limits-while-v8s-memory-limit-failed-until-turbofan-was-off)).
+  It meets it only after about 2.6s, since each of its checks took about 25ms, for a reason we haven't traced (user, 2026-10-24; [plugins log][stage 12]).
+- Beside "out of memory", QuickJS-ng throws "out of memory in regexp execution" when a regex's stack outgrows the limit, and `null` when even the error object doesn't fit, as with a runaway of small objects; the sandbox reads all three as the memory limit, so a script's own `throw null` does too (user, 2026-10-24; [plugins log][stage 12]).
 
 ## What this answers
 
@@ -185,7 +177,7 @@ Its contexts already leave out `Date` and `Performance` ([one loop](../architect
 
 ## What this changes elsewhere
 
-Each doc this design changes carries a note at its top saying how, and the tentative decisions behind them are [v1 builds no plugins](../architecture/decisions.md#v1-builds-no-plugins-and-a-profile-reads-a-gauges-javascript-through-instrument-and-writes-it-only-through-the-gauges-h-events) and [the sandbox's rules](../architecture/decisions.md#the-sandbox-deletes-mathrandom-and-the-promise-globals-pins-the-stacks-top-at-each-call-into-js-and-builds-its-contexts-from-eval-regexp-and-promise).
+The tentative decisions behind what this design changes in other docs are [v1 builds no plugins](../architecture/decisions.md#v1-builds-no-plugins-and-a-profile-reads-a-gauges-javascript-through-instrument-and-writes-it-only-through-the-gauges-h-events) and [the sandbox's rules](../architecture/decisions.md#the-sandbox-deletes-mathrandom-and-the-promise-globals-pins-the-stacks-top-at-each-call-into-js-and-builds-its-contexts-from-eval-regexp-and-promise).
 
 ## Budgets
 
@@ -203,7 +195,7 @@ The first three turn on the sync engine's starting rules, and each changes the e
 - A profile whose write function recurses until its `RangeError`, called from two depths of the Rust stack, stops at the same depth both times, live and in a replay.
 - A run and two replays count the same interrupt checks in each call into JS.
 - A write function that calls `Math.random` or `queueMicrotask` fails its write, and a profile that names them fails its type check.
-- In the sim, on the 58P: `instrument-reads` reads each path in [the 58P's table](#the-58ps-state-in-its-gauges), and each entry's write moves the other machine's gauge; a path ending in `remove()` is refused, and one through `ownerDocument` fails; and a field renamed by hand in the inspector reads as an error with its notification.
+- In the sim, on the 58P: `instrument-reads` reads each path in [the 58P's table](#the-58ps-state-in-its-gauges), and each entry's write moves the other machine's gauge; a path through `ownerDocument` fails; and a field renamed by hand in the inspector reads as an error with its notification.
 
 ## Known limits
 
@@ -212,6 +204,8 @@ The first three turn on the sync engine's starting rules, and each changes the e
 
 ## Left open
 
-- Whether Coherent GT prints a built-in function's source as `[native code]`, and keeps the DOM's accessors on prototypes, which the case in the sim above settles.
-  If built-ins print otherwise, the module calls no method, and the radar's range waits for a field that holds it; if the accessors are own properties there, the module also refuses any step into a DOM node.
+- Whether Coherent GT keeps the DOM's accessors on prototypes, which the case in the sim above settles; if they're own data properties there, the module also refuses any step into a DOM node.
+- Whether a data field of Asobo's map holds the radar's range, without which `radar_range` doesn't sync in v1 ([the 58P's state](#the-58ps-state-in-its-gauges)).
+
+[stage 12]: log.md#2026-10-24-stage-12s-sandbox-stops-a-write-functions-endless-loop-at-100-interrupt-checks-and-needs-quickjs-ngs-promise-intrinsic-without-which-an-async-function-aborts-the-core-when-its-sandbox-is-dropped
 </content>

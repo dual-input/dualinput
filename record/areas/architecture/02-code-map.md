@@ -6,9 +6,6 @@ Depends on:  01-spine.md, decisions.md, log.md, ../network/01-between-machines.m
 Decides:     The tiers, the tests that keep each unit apart, every unit with its folder and what it may depend on, and the systems node 6 designs (node 5); how the platform runs its features, and what a feature registers with it, calls, and guards (node 5.1); where the core's code meets the sim, so a stand-in and a replay can take the sim's place, and which SimConnect connections the core holds (node 5.2); how a feature adds work to our WASM module and the panel bridge, and how that work ends (node 5.3); where each unit lives, how one repository builds every target, and how CI checks the map (node 5.4).
 ```
 
-> **Note**
-> Since 2026-10-24, the sandbox's context also takes rquickjs's `Promise` intrinsic and deletes the `Promise` and `AsyncDisposableStack` globals it adds, where [one loop](#one-loop) has the contexts hold `Eval` and `RegExp` alone, since without it an async function made QuickJS-ng abort the core when its sandbox was dropped ([plugins and the sandbox](../plugins/01-plugins.md)'s note of 2026-10-24).
-
 Dual Input's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
 A feature reads the platform's state, reaches other features only through moments the platform raises, and reaches the world only through outputs, and a feature that can block a request registers a guard rather than having the platform check on it.
@@ -228,7 +225,8 @@ A feature plugs in by registering what it handles, what it declares, and what it
   A timer's or a job's handler checks that what it was started for still holds, such as the aircraft a fetched profile was for.
 - Moments the platform raises queue on the loop and run before the next input, and a request the platform decides is decided before the next input too.
   A moment's handlers run in the order their features registered, and no feature relies on that order.
-- A profile's script and a plugin get no clock: their QuickJS-ng contexts hold, of the intrinsics rquickjs adds one by one (read in rquickjs-core 0.14.0, `src/context/builder.rs`), `Eval` and `RegExp` alone, so they leave out `Date` and `Performance`.
+- A profile's script and a plugin get no clock: their QuickJS-ng contexts hold, of the intrinsics rquickjs adds one by one (read in rquickjs-core 0.14.0, `src/context/builder.rs`), `Eval`, `RegExp`, and `Promise`, so they leave out `Date` and `Performance`.
+  Each context deletes the `Promise` and `AsyncDisposableStack` globals that `Promise` adds, and takes the intrinsic only because without it an async function made QuickJS-ng abort the core when its sandbox was dropped ([the sandbox](../plugins/01-plugins.md#the-sandbox); [plugins log](../plugins/log.md#2026-10-24-stage-12s-sandbox-stops-a-write-functions-endless-loop-at-100-interrupt-checks-and-needs-quickjs-ngs-promise-intrinsic-without-which-an-async-function-aborts-the-core-when-its-sandbox-is-dropped)).
   The sandbox deletes `Math.random`, which QuickJS-ng seeds from the wall clock ([5.1.1]), and `queueMicrotask`, and pins the stack's top at each call into JS ([the sandbox](../plugins/01-plugins.md#the-sandbox)).
   QuickJS-ng's hash seed, which it takes from the wall clock when it makes a context ([5.1.1]), changes nothing a script sees (same section).
   A script that has to wait asks the platform for a timer.

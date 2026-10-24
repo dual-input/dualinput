@@ -6,9 +6,6 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, 01-loo
 Decides:     The core's WebSocket library and its Origin check; the client protocol's messages; how a unit's state, commands, and messages reach the clients; notifications and settings; the moments the clients crate raises; what a client whose version differs gets; how page-client finds, joins, and rejoins the core; how our VCockpit.js loads the bridge and the bridge loads panel modules; what v1 builds for clients beyond the PC; and the budgets (node 6.2).
 ```
 
-> **Note**
-> Since 2026-10-24, `clients`' own slice `banner` says whether a banner page's socket is open, not the notifications' slice that [what a unit registers and calls](#what-a-unit-registers-and-calls) gives it to (user, 2026-10-24; [interface log](../interface/log.md#2026-10-24-the-apps-wiring-calls-notices-notifications-gives-the-banners-socket-a-slice-of-its-own-and-passes-a-development-cores-data-folder-to-the-desktop-app)).
-
 The core serves every client over one protocol of JSON messages on a WebSocket, through tokio-websockets, which iroh already brings into the core.
 A client opens with a `hello` that names it and its version, and from then on each side sends `alive` every 2s, while only the core closes a socket that goes quiet.
 A unit reaches the clients through slices of state, which the `clients` crate sends on a timer to the clients that show them, through commands the clients send it, and through messages of its own to a client by name.
@@ -90,7 +87,7 @@ clients::notify(cx, id, level, text, action);                 // a notification,
 - **Messages to a client:** `cx.send` puts out a `unit` message to every client of a component, to a panel module, or to an app's part, by its unit's name, and a client's `unit` message reaches the unit that registered its name ([the apps](../interface/01-apps.md#slices-and-commands)).
   Unlike a slice, a message goes once, so a client that connects later never gets it: a menu script that reconnects never gets a world-map request the sim service sent before it.
 - **Notifications:** a notification's ID is its unit's own, its feature writes its text, its level is information, a warning, or trouble, and its action, if it has one, is the command a click on it sends.
-  The notifications are a slice of `clients`' own, which also says whether a banner page's socket is open, and where each notification shows waits for the apps' stage ([left to the apps' stage](../interface/01-apps.md#left-to-the-apps-stage)).
+  The notifications are a slice of `clients`' own, and a second slice of its own, `banner`, says whether a banner page's socket is open (user, 2026-10-24; [interface log](../interface/log.md#2026-10-24-the-apps-wiring-calls-notices-notifications-gives-the-banners-socket-a-slice-of-its-own-and-passes-a-development-cores-data-folder-to-the-desktop-app)); where each notification shows waits for the apps' stage ([left to the apps' stage](../interface/01-apps.md#left-to-the-apps-stage)).
 - **Settings:** a unit registers each setting with a key, a type, a default, a label, and what an app needs that its type doesn't say, and `clients` keeps them in `settings.json` in the data folder, whose bytes come with the core's first input ([01-loop-and-edge](01-loop-and-edge.md#starting-and-stopping)).
   - A change writes the whole file again, as a job.
   - A stored value that doesn't fit its type gives way to the default, and the core logs it.

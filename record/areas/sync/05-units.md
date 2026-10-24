@@ -6,25 +6,6 @@ Depends on:  01-profile-entries.md, 02-live-sync.md, 03-catch-up.md, 04-order-an
 Decides:     What each of sync's three units holds and offers; a cockpit message's fields; how the cockpit stream holds, paces, keeps, replays, and drops messages; who asks for a catch-up, when, and where its order comes from; how the sync engine tells its own echo, checks a write, steps a knob that's still moving, and runs write functions; how state sync fires and hears `H:` events and hears `K:` events; which call sends an event; what 02-live-sync's and 03-catch-up's open questions still hold; the budgets; and the cases for the bench (node 6.9).
 ```
 
-> **Note**
-> Since 2026-10-17, the cockpit stream's state also says whether preflight's end started the catch-up that runs, which pointer sync reads to play rather than skip the gestures queued behind that one; and a pointer sync up, the one gesture message that answers `Unfinished`, is done once its panels are done with it, where [kinds](#kinds) has pointer sync's press finish at its release ([pointer sync](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
-> The stream's guard on `TakeControl`, in [catch-up](#catch-up), denies control only while this pilot's catch-up or replay runs over a link that's up, "over a link that's up" holding for both, as [04-order-and-recovery](04-order-and-recovery.md#catch-up) has it, so a pilot whose link to the PF is lost can take control during a catch-up ([take-control](../control/01-take-control.md#taking-control)).
->
-> Since 2026-10-17, a kind whose key names a profile entry declares so at registration, with how to read the entry's number from its body, and `CockpitSent` also carries the entry and its number, where [sending](#sending) has it carry the kind, the key, and the clock; state sync's `CHANGE`, `PF_CHANGE`, and `FIRED` declare theirs, so avatars reaches for a located entry without naming state sync's types ([avatars](../avatars/01-avatars.md#a-change-made-without-a-click)).
->
-> Since 2026-10-17, v1 has no plugins, so the engine watches no plugin value and makes no `Plugin` action, and [reaching the sim](#reaching-the-sim)'s row for a plugin's value goes, which settles [left open](#left-open)'s item on plugins.
-> State sync instead reads each `instrument()` a state entry watches, a value in a gauge's JavaScript, through a second panel module, `instrument-reads`, and the engine holds a write to such an entry, live and in catch-up, until its first reading arrives, which catch-up's `step_made` waits for ([reading it in the panel](../plugins/01-plugins.md#reading-it-in-the-panel)).
-> Since 2026-10-17, the PF's checklist shows through state sync's part in the apps, wherever the apps' design puts it, beside the banner's preflight summary included, since the banner shows the EFB app's parts' views; where the cockpit stream's slice shows, and the words of state sync's Ready reason and notifications, wait for the apps' stage ([the apps](../interface/01-apps.md#a-features-parts)).
->
-> Since 2026-10-18, the design review after node 6 changes this document in two places (user, 2026-10-18):
->
-> - In [writing](#writing), every entry holds its writes, live and in catch-up, until its first reading arrives, as the note of 2026-10-17 has an `instrument()` entry do, and `step_made` waits for held writes; a counted or event entry, which gets no reading, is exempt, and a read the sim refuses drops the held writes.
-> - A write function at its limit stops its entry only on its own machine, which skips arriving changes to the entry, sends none, and shows its pilot state sync's notification, so [kinds](#kinds) has no `STOPPED`, where [write functions](#write-functions) stops the entry on every machine; the function runs only on a receiving machine, and the entry is still read from the sim.
->
-> Since 2026-10-23, a recording holds no marks, so state sync logs at info each write flagged, each watch-only entry whose values differ, and an aircraft that never went quiet, with what [Ready, notifications, marks, and the checklist](#ready-notifications-marks-and-the-checklist) has its mark carry; and the cockpit stream doesn't depend on the recording crate, where [the units](#the-units) has it (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
->
-> Since 2026-10-23, [settling and the driven-entry test](#settling-and-the-driven-entry-test) calls an aircraft settled 30s after Ready to fly, with no quiet window, cap, or rule for an entry that changes more than 5 times, so no aircraft that never went quiet is logged; the driven-entry test stays ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
-
 The sync engine is one state machine for each loaded profile, with no I/O, so the IDE and the bench link it on their own.
 The cockpit stream, in the platform, carries every cockpit message in causal order, holds each state entry's newest value, paces what it applies, keeps what it sent for a replay, and runs catch-up, which the catching-up machine asks for.
 State sync is the feature that joins the engine to the sim, the stream, and the session.
@@ -43,9 +24,9 @@ The flying machine is the PF's, and a following machine is any other pilot's.
 | --- | --- | --- | --- |
 | `sync-engine` | Engine | For one loaded profile: the state object, each entry's stamp, the write functions in the profile's QuickJS-ng runtime, shadow values, pending writes and echo tokens, the check, the settle rule, the driven-entry test, putting back, the conflict rule, and catch-up's order | On the loop, in the IDE, and on the bench |
 | `cockpit-stream` | Platform | The vector clock, holding a message until what it depends on has applied, copies, kinds, held values, pacing, kept messages and replays, changes of control, catch-up's pipeline and its exchange, and the guard on control | On the loop |
-| `state-sync` | Feature | One sync engine for the loaded profile, its watches and writes through the sim service, its cockpit kinds and catch-up step, the guard on Ready, notifications, marks, and the PF's checklist | Its crate in the core, the routine `HEvents` in our WASM module, and the panel module `h-events` |
+| `state-sync` | Feature | One sync engine for the loaded profile, its watches and writes through the sim service, its cockpit kinds and catch-up step, the guard on Ready, notifications, log lines, and the PF's checklist | Its crate in the core, the routine `HEvents` in our WASM module, and the panel modules `h-events` and `instrument-reads` |
 
-Each depends on what the code map's [units](../architecture/02-code-map.md#the-units) give it: the sync engine on the profile engine, the sandbox, and the message crate; the cockpit stream on the kernel, the network, the recording crate, and the session; and state sync on the cockpit stream, the session, the sim service, the profile loader, the plugins crate, `clients`, and the sync engine.
+Each depends on what the code map's [units](../architecture/02-code-map.md#the-units) give it: the sync engine on the profile engine, the sandbox, and the message crate; the cockpit stream on the kernel, the network, and the session; and state sync on the cockpit stream, the session, the sim service, the profile loader, `clients`, and the sync engine.
 
 ## The sync engine
 
@@ -58,7 +39,7 @@ pub struct Ctx { pub at: Micros, pub flying: bool, pub catching_up: bool, pub pr
 impl Engine {
     pub fn load(profile: &Profile, variant: &str, runtime: Runtime, times: Load) -> Engine;  // compiles the write functions
     pub fn ready_to_fly(&mut self, at: Micros);                     // RTC_END, when it comes after the load
-    pub fn watches(&self) -> &[Watch];                              // variables, input events, K: and H: events, plugin values
+    pub fn watches(&self) -> &[Watch];                              // variables, input events, K: and H: events, instrument() values
     pub fn seen(&mut self, what: Seen, cx: Ctx) -> Vec<Out>;        // a reading or an occurrence on this machine
     pub fn arrived(&mut self, entry: &str, change: Arrived, cx: Ctx) -> (Applied, Vec<Out>);   // another machine's change or event
     pub fn frame(&mut self, cx: Ctx) -> Vec<Out>;                   // steps due, checks closing, the settle rule
@@ -68,8 +49,8 @@ impl Engine {
     pub fn settled(&self) -> bool;
 }
 
-pub enum Out { Act(Action), Send(Change), Withdraw(String), Flag(Flag), Mark(Mark), Stop(String) }
-pub enum Action { Set(Name, Value), Key(Name, Vec<f64>), Fire(Name), Plugin(String, Value) }
+pub enum Out { Act(Action), Send(Change), Withdraw(String), Flag(Flag), Stop(String) }
+pub enum Action { Set(Name, Value), Key(Name, Vec<f64>), Fire(Name) }
 ```
 
 - The engine takes the time and the roles in `Ctx` with each call, reads no clock, and makes no call itself: state sync carries out each `Out`.
@@ -79,7 +60,7 @@ pub enum Action { Set(Name, Value), Key(Name, Vec<f64>), Fire(Name), Plugin(Stri
 
 ### Watching and the state object
 
-- `watches` lists what each entry of the loaded variant reads or hears: an `L:` or `A:` variable, an input event, a `K:` event, an `H:` event, an `L:` variable watched as a pulse, or a plugin's value.
+- `watches` lists what each entry of the loaded variant reads or hears: an `L:` or `A:` variable, an input event, a `K:` event, an `H:` event, an `L:` variable watched as a pulse, or an `instrument()`, a value in a gauge's JavaScript, which state sync reads through its panel module `instrument-reads` ([reading it in the panel](../plugins/01-plugins.md#reading-it-in-the-panel)).
 - The state object holds each state entry's value as this machine reads it, and the engine keeps it in the runtime as the global `state`, setting an entry's property as its reading changes, so a write function sees this cockpit as it stands.
 - A reading equal to the entry's value in the state object changes nothing.
 - A counting entry's value is its shadow, which the occurrences it counts move, starting from `default` at the profile's load ([counting into a shadow value](../profiles/01-format-and-delivery.md#counting-into-a-shadow-value)).
@@ -93,9 +74,10 @@ The engine turns an entry's `write` into actions, as [writing](../profiles/01-fo
 | A name | One action with the value: a variable or input event set, or an event sent or fired |
 | `toggle` | One action of its name when the reading differs from the value wanted, and none when it matches |
 | `inc` and `dec` | A step at each pace from the count below, the shorter way round when `wrap` is true |
-| A plugin's write method | One `Plugin` call with the value |
 | A function | The `write()` calls of one run, in call order, and each chain's steps at its pace |
 
+- The engine holds every write to an entry, an `instrument()` entry included, live and in catch-up, until the entry's first reading arrives, and catch-up's `step_made` waits for held writes (user, 2026-10-18).
+  A counting entry or an event entry, which gets no reading, is exempt, and a read the sim refuses drops the held writes.
 - A stepping write counts from its own steps: it starts from the reading when it starts and adds each step it sends, and never reads the entry again until its last step, so a reading that lags a step behind never makes it step again.
   A new value for the entry while it steps aims again from that count, the shorter way round.
 - A pace in frames counts the sim's `Frame` events, which state sync hands the engine as `frame` calls, and a pace in ms counts their stamps ([pace](../profiles/01-format-and-delivery.md#pace)).
@@ -115,18 +97,19 @@ A rule that remembered written values for a time would have swallowed that turn 
 ### Checking a write
 
 - A write gets one attempt, as the bench starts ([checking a write](../profiles/01-format-and-delivery.md#checking-a-write)).
-- A value still pending 1.5s after its write, or after a stepping write's last step, is flagged: the engine drops it and hands state sync a `Flag` with the entry, the value wanted, and the reading ([notifications and marks](#ready-notifications-marks-and-the-checklist)).
+- A value still pending 1.5s after its write, or after a stepping write's last step, is flagged: the engine drops it and hands state sync a `Flag` with the entry, the value wanted, and the reading ([notifications and log lines](#ready-notifications-log-lines-and-the-checklist)).
   The 1.5s covers the slowest readout we've timed, the Fenix's battery lamp at 1.2s in one run ([sync log](log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)), since the engine can't tell which entries read a computed readout.
 - A `toggle` whose lamp lights after the check flips once and is flagged, and nothing flips it a second time.
 - A shadow value has nothing to read, so its writes go unchecked ([counting into a shadow value](../profiles/01-format-and-delivery.md#counting-into-a-shadow-value)).
-- A watch-only entry's value from another machine is compared with this machine's reading 1.5s after it arrives, and a difference marks the recording.
+- A watch-only entry's value from another machine is compared with this machine's reading 1.5s after it arrives, and state sync logs a difference at info ([notifications and log lines](#ready-notifications-log-lines-and-the-checklist)).
 
 ### Write functions
 
-- A function runs once for each value it's given, live or in catch-up, and never again when an entry it read changes.
+- A function runs only on a receiving machine, once for each value it's given, live or in catch-up, and never again when an entry it read changes.
 - Its value is pending whatever the run wrote, so a run that writes nothing, such as a transponder function that skips while the battery is off, is flagged when the reading never comes to match.
   The engine can't tell a deliberate skip from a function that's wrong, so it judges by the cockpit.
-- A run that hits the sandbox's 100ms limit fails that write, and the engine stops the entry for the rest of the load, as the code map's [budgets](../architecture/02-code-map.md#budgets) require.
+- A run that hits the sandbox's 100ms limit fails that write, and the engine stops the entry on its own machine for the rest of the load, as the code map's [budgets](../architecture/02-code-map.md#budgets) require (user, 2026-10-18).
+  That machine skips arriving changes to the entry, sends none, and shows its pilot state sync's notification, while state sync goes on reading the entry from the sim.
 
 ### Events
 
@@ -152,7 +135,8 @@ A rule that remembered written values for a time would have swallowed that turn 
 
 ### Settling and the driven-entry test
 
-- The settle rule counts from `RTC_END`, as [settling after a load](03-catch-up.md#settling-after-a-load) has it, and for a profile that loaded after it, as [an aircraft that loaded before its session](04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session) has it; until `RTC_END` comes, the aircraft hasn't settled.
+- The settle rule calls an aircraft settled 30s after `RTC_END`, as [settling after a load](03-catch-up.md#settling-after-a-load) has it, with no quiet window, cap, or rule for an entry that changes more than 5 times ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
+  The same holds for a profile that loaded after `RTC_END` ([an aircraft that loaded before its session](04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session)), and until `RTC_END` comes, the aircraft hasn't settled.
 - An aircraft whose Ready to fly this core missed counts as settled at once, and its shadows take the flying machine's values in catch-up rather than stepping to them ([a core that restarts](04-order-and-recovery.md#a-core-that-restarts)).
 - The driven-entry test runs as [entries the aircraft drives itself](04-order-and-recovery.md#entries-the-aircraft-drives-itself) has it.
 
@@ -188,7 +172,7 @@ pub enum Cockpit {                                    // the stream's one channe
     CatchUp { clock: VectorClock, control: Control, steps: Vec<(u16, Vec<u8>)> },
 }
 
-// state sync's module: CHANGE and PF_CHANGE carry a Value, FIRED an Option<Value>, STOPPED nothing
+// state sync's module: CHANGE and PF_CHANGE carry a Value, and FIRED an Option<Value>
 pub enum Value { Number(f64), Text(String) }
 ```
 
@@ -201,21 +185,23 @@ pub enum Value { Number(f64), Text(String) }
 me.cockpit_kind(state_sync::CHANGE, StateSync::apply).hold_newest();
 me.cockpit_kind(state_sync::PF_CHANGE, StateSync::apply).hold_newest().collapse_in_replay();
 me.cockpit_kind(state_sync::FIRED, StateSync::fire);
-me.cockpit_kind(state_sync::STOPPED, StateSync::stop);
 ```
 
-- A kind's handler answers each message `Done`, `Skipped`, or `Unfinished(handle)`; after `Unfinished`, no later message applies until its unit calls `cx.cockpit().applied(handle)`, as a stepping write does at its last step and pointer sync's press at its release.
+- A kind's handler answers each message `Done`, `Skipped`, or `Unfinished(handle)`; after `Unfinished`, no later message applies until its unit calls `cx.cockpit().applied(handle)`.
+  State sync calls it at a stepping write's last step, and pointer sync calls it for a gesture's up, the one gesture message that answers `Unfinished`, once its panels are done with it ([pointer sync](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
   The next message of the same kind and key goes to the handler at once, as a new value cuts a stepping write short ([one stream, in causal order](02-live-sync.md#one-stream-in-causal-order)), and the unfinished one counts as applied.
 - `hold_newest` makes the stream hold each key's newest message and send it at most 20 times a second, and send every held message before a message of any kind that doesn't hold, so a lever's value goes out before the starter press after it ([the cockpit stream](04-order-and-recovery.md#the-cockpit-stream)).
   Holding lives in the stream, not in state sync, because the press a held value goes out before is pointer sync's.
 - `collapse_in_replay` marks the PF-owned changes a replay collapses ([the replay](04-order-and-recovery.md#the-replay)).
-- State sync's `STOPPED` stops an entry on every machine when a write function hits its limit on one.
+- A kind whose key names a profile entry declares so at registration, with how to read the entry's number from its body.
+  State sync's `CHANGE`, `PF_CHANGE`, and `FIRED` declare theirs, so avatars reaches for a located entry without naming state sync's types ([avatars](../avatars/01-avatars.md#a-change-made-without-a-click)).
 - The stream's own kind, `CONTROL`, carries a change of control ([a change of control](#a-change-of-control)).
 
 ### Sending
 
 - `cx.cockpit().send(kind, key, body)` sends, or holds when the kind holds, and `cx.cockpit().withdraw(kind, key)` drops what's held for that key.
-- When a message goes, the stream adds 1 to its own counter, fills in the clock, the control value, and the gap, keeps the message, sends it `To::Crew`, and raises `CockpitSent { kind, key, clock }`, the code map's ["cockpit sent"](../architecture/02-code-map.md#what-a-handler-sees-and-does), which also hands state sync the stamp of its change.
+- When a message goes, the stream adds 1 to its own counter, fills in the clock, the control value, and the gap, keeps the message, sends it `To::Crew`, and raises `CockpitSent`, the code map's ["cockpit sent"](../architecture/02-code-map.md#what-a-handler-sees-and-does), which also hands state sync the stamp of its change.
+  `CockpitSent` carries the kind, the key, the clock, and, for a kind that declares an entry, the entry and its number.
 - It sends no message of a feature's kind before preflight ends or while this member is out of the flight ([in the flight](../session/02-units.md#in-the-flight)); its own `CONTROL`, `Replay`, and catch-up's messages go whatever the member's flight.
 
 ### Applying
@@ -268,15 +254,16 @@ cx.cockpit().step_done(state_sync::STATE);    // made, and the aircraft settled
 - The catching-up machine takes the answer's clock as [catch-up](04-order-and-recovery.md#catch-up) has it, so queued copies drop, and hands each step its payload in the pipeline's order.
   It applies the rest of its queue once every step has called `step_made`, and ends the catch-up once every step has called `step_done`.
 
-- The stream registers its guard on `TakeControl`, which denies this pilot control while their catch-up runs, or their replay runs over a link that's up ([guards](../architecture/02-code-map.md#guards)).
-- Whether a catch-up or a replay runs is a slice of client state, and where the banner shows it is [6.16](../architecture/plan.md#616-the-apps)'s.
+- The stream registers its guard on `TakeControl` ([guards](../architecture/02-code-map.md#guards)), which denies this pilot control only while their catch-up or replay runs over a link that's up, as [catch-up](04-order-and-recovery.md#catch-up) has it, so a pilot whose link to the PF is lost can take control during a catch-up ([take-control](../control/01-take-control.md#taking-control)).
+- Whether a catch-up or a replay runs is a slice of client state, and where it shows waits for the apps' stage ([the apps](../interface/01-apps.md#a-features-parts)).
+- The stream's state also says whether preflight's end started the catch-up that runs, which pointer sync reads to play the gestures queued behind that catch-up rather than skip them ([pointer sync](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
 
 ## State sync
 
 ### What it registers
 
 ```rust
-// a sketch; the hooks' names follow the platform's units, and the rule's is hypothetical
+// a sketch; the hooks' names follow the platform's units, and the rules' are hypothetical
 pub fn register(r: &mut Registry) {
     let me = r.unit::<StateSync>("state-sync");
     me.on::<ProfileLoaded>(StateSync::load);        // an engine, its watches, and HEvents when it fires H: events
@@ -286,6 +273,7 @@ pub fn register(r: &mut Registry) {
     me.on_sim(StateSync::on_sim);                   // readings, input events, K: events, and frames
     me.guard::<Ready>(StateSync::settled);
     me.panel_module("h-events", StateSync::h_events_panel);
+    me.panel_module("instrument-reads", StateSync::instrument_reads_panel);
     // the kinds and the catch-up step, above
 }
 ```
@@ -302,7 +290,7 @@ pub fn register(r: &mut Registry) {
 | Write an input event | `set_input` |
 | Send a `K:` event | `key`: the legacy call with one value or none, `_EX1` with more |
 | Fire an `H:` event | A feed of `HEvents`, [below](#h-events) |
-| A plugin's value, or its write method | The plugins crate, [6.15](../architecture/plan.md#615-plugins)'s |
+| Read an `instrument()`, a value in a gauge's JavaScript | State sync's panel module `instrument-reads` ([reading it in the panel](../plugins/01-plugins.md#reading-it-in-the-panel)) |
 
 - `listen(event)` is a call this design adds to the sim service: it maps the event, adds it to a group that never masks, and gives the group the highest priority, as FS Copilot hears a profile's `K:` entries ([04-02](../../learn/foundations/04-02-events.md)).
   Groups hear an event in priority order, and a group that asks for a priority already taken gets the next lower one free (documented, same chapter); a listener of ours at the highest priority heard all 88 elevator events a masking group of ours heard (measured on MSFS 2024, 2026-10-07, [flight-controls log](../flight-controls/log.md#2026-10-07-a-group-that-takes-its-priority-as-the-sim-starts-held-open-by-an-event-it-only-listens-to-masks-ahead-of-accu-sim-once-it-adds-the-axis)).
@@ -341,12 +329,15 @@ State sync hears `H:` events in one cockpit panel, through its panel module `h-e
 - Stock `VCockpit.js` skips an instrument when the event names a target other than its `Guid`, or when its `urlConfig.noEvent` is set, so whether an event sent to one instrument reaches a document other than that instrument's is unverified, and a case in the sim settles it.
 - One panel's handler hears each event once, where a handler in every panel would hear it once in each.
 
-### Ready, notifications, marks, and the checklist
+### Ready, notifications, log lines, and the checklist
 
-- State sync's guard on `Ready` denies it until the engine says the aircraft has settled, and allows it while no profile is loaded ([preflight](../session/02-units.md#preflight)); the wording of its reason is [6.16](../architecture/plan.md#616-the-apps)'s.
-- A flagged write, an entry the driven-entry test stops, and an entry a write function's limit stops each show one notification, once per entry for each load, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app." ([checking that a write landed](02-live-sync.md#checking-that-a-write-landed)).
-- It marks the recording through `cx.recording().mark` for each of those, for a watch-only entry whose values differ, and for an aircraft that never went quiet (marks); a flagged write's mark carries the entry, the value wanted, the reading, and 0 retries.
-- The PF's checklist, each counting entry's `name` and `default`, is a slice of client state while preflight runs, which [6.16](../architecture/plan.md#616-the-apps) shows beside the preflight summary.
+- State sync's guard on `Ready` denies it until the engine says the aircraft has settled, and allows it while no profile is loaded ([preflight](../session/02-units.md#preflight)).
+- A flagged write, an entry the driven-entry test stops, and an entry a write function's limit stops each show one notification, once per entry for each load, such as "Couldn't sync the beacon." ([checking that a write landed](02-live-sync.md#checking-that-a-write-landed)).
+- The words of the notifications and of the guard's reason wait for the apps' stage ([the apps](../interface/01-apps.md#a-features-parts)).
+- A recording holds no marks, so state sync logs at info each flagged write and each watch-only entry whose values differ, and a flagged write's line carries the entry, the value wanted, the reading, and 0 retries (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
+  An entry the driven-entry test stops goes in the run's log as [entries the aircraft drives itself](04-order-and-recovery.md#entries-the-aircraft-drives-itself) has it.
+- The PF's checklist, each counting entry's `name` and `default`, is a slice of client state while preflight runs.
+  It shows through state sync's part in the apps, wherever the apps' design puts it, including beside the banner's preflight summary, since the banner shows the EFB app's parts' views ([the apps](../interface/01-apps.md#a-features-parts)).
 
 ## What the code map changes in the sync docs
 
@@ -359,7 +350,7 @@ Nothing beyond the notes they carry: the code map names the units that carry the
 | [02-live-sync](02-live-sync.md#open-questions): whether the double-fire stays within 3 frames on other aircraft and below 21 fps | A case in the sim, and a bench case at 4 fps |
 | 02-live-sync: how many retries before a flag, and how long an unused token lasts | None, and 1s, as starting values the bench's cases tune |
 | 02-live-sync: keeping a `then` action or a function's actions from harm when a retry repeats them | Settled: with no retry, nothing repeats them |
-| [03-catch-up](03-catch-up.md#open-questions): whether the 30s floor can come down, and whether 5 changes tells a restore from an aircraft driving a control | v1's recordings |
+| [03-catch-up](03-catch-up.md#open-questions): whether the 30s floor can come down, and whether 5 changes tells a restore from an aircraft driving a control | v1's recordings, for the 30s; settled for the 5 changes, since the settle rule counts none ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)) |
 | 03-catch-up: which order catch-up applies state in | [Decision 040](../../decisions/040-catch-up-first-final-value-order.md), from the order [the engine keeps](#catch-ups-order); whether an interlock fails while reading back right is a case in the sim |
 
 ## Budgets
@@ -402,7 +393,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - An entry the stand-in changes every 3s on both machines: it stops syncing within 30s on both.
 - The PM's throttle on a following machine: put back at once, and nothing sent; moved for 3s, put back throughout, and nothing flagged.
 - An event entry that watches an `H:` event and writes an input event: the `H:` event its write makes the aircraft fire isn't sent back; and when the stand-in fires it 2s after the write, past the token, the driven-entry test stops the entry within 30s, with its notification.
-- A write function stuck past 100ms: its entry stops on both machines.
+- A write function stuck past 100ms: its entry stops on the machine that ran it, which skips arriving changes to the entry, sends none, and shows its pilot the notification.
 - An input event reported twice a frame apart: one goes out; the same report 261ms later goes out; at 4 fps, where a frame passes 200ms, both go out.
 - A token nothing uses: it expires after 1s, and the pilot's press after that goes out.
 
@@ -420,5 +411,4 @@ In the sim:
 ## Left open
 
 - What the bench's cases change in the engine's starting rules: retries, running a function again when an entry it read lands, a longer check for a computed readout, or stepping inside a routine; each changes the engine alone.
-- A plugin's values and write methods as entries, how a plugin's own `write()` reaches the engine so its echoes are known, and a value that's neither a number nor text: [6.15](../architecture/plan.md#615-plugins).
 - A replay from whoever kept a message, and a pass to the up-to-date pilot, with more than two pilots: the pick for larger crews.

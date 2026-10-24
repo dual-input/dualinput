@@ -37,8 +37,8 @@ pub enum ToCore {
     StandIn { act: StandInAct },
     /// Has the sim's test unit, which stands in for a feature, make a call of the sim.
     Sim { call: SimCall },
-    /// Has the clients' test unit, which stands in for the profile loader, and a feature with
-    /// a slice and a panel module, act.
+    /// Has the clients' test unit, which stands in for a feature with a slice and a panel
+    /// module, act.
     Clients { act: ClientsAct },
     /// Has the core helper's test unit, which stands in for the features that want things
     /// of the core helper, act.
@@ -172,9 +172,10 @@ pub enum StandInHelperLine {
 #[serde(tag = "act", rename_all = "kebab-case")]
 #[ts(export, export_to = "bench/")]
 pub enum ClientsAct {
-    /// Loads a profile whose panel module `bench-panel` takes each instrument whose key
-    /// starts with one of `picks`, or unloads it, as the profile loader does.
-    Profile { loaded: bool, picks: Vec<String> },
+    /// Has the unit's panel module, `bench-panel`, take each instrument whose key starts with
+    /// one of `picks`, once a profile loads, as a feature's rule picks instruments by its
+    /// profile's block.
+    Picks { picks: Vec<String> },
     /// Changes the slice `bench` `per_second` times a second for `for_ms`.
     Churn { per_second: u32, for_ms: u64 },
 }

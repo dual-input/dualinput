@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "aircraft": {
+      "additionalProperties": false,
+      "description": "The variants the profile covers, and a pace for the whole aircraft",
+      "properties": {
+        "pace": {
+          "description": "The spacing of every write's steps: 1 frame, <n> frames, or <n>ms",
+          "pattern": "^(1 frame|[1-9][0-9]* frames|[1-9][0-9]*ms)$",
+          "type": "string"
+        },
+        "variants": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ]
+          },
+          "description": "Each variant's short ID, and the SimObjects folders or presets it covers",
+          "minProperties": 1,
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "authors": {
+      "description": "Who wrote the profile, shown wherever it's credited",
+      "type": "string"
+    },
+    "events": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "ignore": {
+            "anyOf": [
+              {
+                "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                "type": "string"
+              },
+              {
+                "items": {
+                  "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "description": "The names this entry's action also fires"
+          },
+          "name": {
+            "description": "The event's name for people",
+            "type": "string"
+          },
+          "only": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "description": "The variant IDs the entry applies to"
+          },
+          "watch": {
+            "anyOf": [
+              {
+                "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                "type": "string"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "count": {
+                    "description": "A variable whose change is added to the shadow",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "dec": {
+                    "description": "An event that moves the shadow down a step",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "inc": {
+                    "description": "An event that moves the shadow up a step",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "range": {
+                    "description": "The count's bottom and top",
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "type": "array"
+                  },
+                  "set": {
+                    "description": "An event whose value becomes the shadow",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "step": {
+                    "description": "How far inc and dec move the shadow, 1 unless given",
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                  },
+                  "wrap": {
+                    "description": "Whether the count goes round at the ends of its range, or stops",
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            ],
+            "description": "A K:, H:, or B: event, or an L: variable, each rise from 0 one occurrence"
+          },
+          "write": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "toggle": {
+                    "description": "An event that flips the control, sent only when the wanted value differs from the local one",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "dec": {
+                    "description": "The event that steps the control down",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "inc": {
+                    "description": "The event that steps the control up",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "pace": {
+                    "description": "The spacing of the steps: 1 frame, <n> frames, or <n>ms",
+                    "pattern": "^(1 frame|[1-9][0-9]* frames|[1-9][0-9]*ms)$",
+                    "type": "string"
+                  },
+                  "range": {
+                    "description": "The control's bottom and top, required with wrap: true",
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "type": "array"
+                  },
+                  "step": {
+                    "description": "How far one event moves the control, 1 unless given",
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                  },
+                  "wrap": {
+                    "description": "true for a control that goes from its top straight back to its bottom, false for one that stops",
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            ],
+            "description": "What to do on the other machines: a name, a map, or a function"
+          }
+        },
+        "type": "object"
+      },
+      "description": "Event entries: occurrences every machine repeats",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "type": "object"
+    },
+    "import": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ],
+      "description": "The modules it uses, each by its path from profiles/ without .yaml"
+    },
+    "state": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "default": {
+            "description": "With a counting watch, the shadow value's starting value",
+            "type": "number"
+          },
+          "ignore": {
+            "anyOf": [
+              {
+                "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                "type": "string"
+              },
+              {
+                "items": {
+                  "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "description": "The names this entry's action also fires"
+          },
+          "name": {
+            "description": "The control's name for people",
+            "type": "string"
+          },
+          "only": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "description": "The variant IDs the entry applies to"
+          },
+          "owner": {
+            "description": "pilot_flying, or shared, the default",
+            "enum": [
+              "pilot_flying",
+              "shared"
+            ]
+          },
+          "watch": {
+            "anyOf": [
+              {
+                "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                "type": "string"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "count": {
+                    "description": "A variable whose change is added to the shadow",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "dec": {
+                    "description": "An event that moves the shadow down a step",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "inc": {
+                    "description": "An event that moves the shadow up a step",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "range": {
+                    "description": "The count's bottom and top",
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "type": "array"
+                  },
+                  "set": {
+                    "description": "An event whose value becomes the shadow",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "step": {
+                    "description": "How far inc and dec move the shadow, 1 unless given",
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                  },
+                  "wrap": {
+                    "description": "Whether the count goes round at the ends of its range, or stops",
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            ],
+            "description": "A variable or an instrument() value every machine reads, or a map that counts events"
+          },
+          "write": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "toggle": {
+                    "description": "An event that flips the control, sent only when the wanted value differs from the local one",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "dec": {
+                    "description": "The event that steps the control down",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "inc": {
+                    "description": "The event that steps the control up",
+                    "pattern": "^\\s*(L|A|B|K|H|instrument)\\s*\\(.*\\)\\s*$",
+                    "type": "string"
+                  },
+                  "pace": {
+                    "description": "The spacing of the steps: 1 frame, <n> frames, or <n>ms",
+                    "pattern": "^(1 frame|[1-9][0-9]* frames|[1-9][0-9]*ms)$",
+                    "type": "string"
+                  },
+                  "range": {
+                    "description": "The control's bottom and top, required with wrap: true",
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "type": "array"
+                  },
+                  "step": {
+                    "description": "How far one event moves the control, 1 unless given",
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                  },
+                  "wrap": {
+                    "description": "true for a control that goes from its top straight back to its bottom, false for one that stops",
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            ],
+            "description": "How to change the control: a name, a map, a function, or none"
+          }
+        },
+        "type": "object"
+      },
+      "description": "State entries: controls whose value every machine keeps the same",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "type": "object"
+    }
+  },
+  "title": "A Dual Input profile, at level 1 of the format",
+  "type": "object"
+}

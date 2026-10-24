@@ -112,7 +112,13 @@ export class Core {
   /** Starts a core on the data folder `data`, and ends it again if it doesn't answer as a bench core of this tree. */
   static async start(data: string, options: CoreOptions = {}): Promise<Core> {
     fs.mkdirSync(data, { recursive: true })
-    if (options.settings) fs.writeFileSync(path.join(data, "settings.json"), JSON.stringify(options.settings, null, 2))
+    // A core no scenario gave a profiles' site fetches from a closed port on this PC, so no
+    // bench core reaches the real site on the internet. A settings file the scenario wrote
+    // itself, or a core before this one, keeps its keys.
+    const file = path.join(data, "settings.json")
+    const written = fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, "utf8")) as Record<string, unknown>) : {}
+    const settings = { "profiles.site": OFFLINE_SITE, ...written, ...options.settings }
+    fs.writeFileSync(file, JSON.stringify(settings, null, 2))
     // A core started on this folder before, and killed, left its port behind.
     const portFile = path.join(data, "bench-port")
     fs.rmSync(portFile, { force: true })
@@ -159,7 +165,7 @@ export class Core {
     this.send({ kind: "sim", call })
   }
 
-  /** Has the clients' test unit, which stands in for the profile loader, act. */
+  /** Has the clients' test unit, which stands in for a feature with a panel module, act. */
   clients(act: ClientsAct): void {
     this.send({ kind: "clients", act })
   }
@@ -268,6 +274,9 @@ export class Core {
 }
 
 export type StandInReport = Extract<FromCore, { kind: "stand-in" }>
+
+/** A port nothing listens on, where a core finds no profiles' site. */
+export const OFFLINE_SITE = "http://127.0.0.1:1"
 
 export type CoreOptions = {
   /** The core's `settings.json`, written into its data folder before it starts. */

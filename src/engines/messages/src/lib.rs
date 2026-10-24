@@ -29,6 +29,7 @@ pub mod clients;
 pub mod core_helper;
 pub mod module;
 pub mod net;
+pub mod profiles;
 pub mod recording;
 pub mod session;
 pub mod sim;

@@ -359,9 +359,50 @@ Done on 2026-10-24.
 
 ## 10 Profiles
 
-Builds: the profile engine, `profile-build`, the profile loader, and `tools/profile-builder`, with the bench's local profiles' site ([01-format-and-delivery](../profiles/01-format-and-delivery.md), [the profiles' units](../profiles/02-units.md)).
-Publishing the profiles to their Pages site comes in [stage 22](#22-github).
+Builds:
+
+- `profile-engine`: the format's own blocks, `authors`, `aircraft`, `import`, `state`, and `events`, with every name call, every form of `write`, pace, counting into a shadow value, and `ignore` ([a profile](../profiles/01-format-and-delivery.md#a-profile) to [modules](../profiles/01-format-and-delivery.md#modules)); the checker, with each error [what fails a load](../profiles/01-format-and-delivery.md#what-fails-a-load) lists for those blocks, and the one warning a file alone shows, an `ignore` naming a variable a state entry watches; the tables of blocks and fields, each with the level it came in at, which the checker, the schema, and the declarations read; level 1, with its JSON Schema and its declarations generated into `levels/1/`; and `read`, `source`, `check`, `program`, `place`, `write`, a bundle's bytes, and its SHA-256 ([the profile engine](../profiles/02-units.md#the-profile-engine))
+- `profile-build`: modules merged, the type check and compile with TypeScript 6.0.3 inside QuickJS-ng, the level worked out, and the bundle read back ([the builder](../profiles/02-units.md#the-builder))
+- `tools/profile-builder`: `dualinput-profile-builder`, with `build`, `watch`, and `publish`, which lays out the Pages tree in a folder, adding to what the folder holds, at the levels it's told a release supports ([the builder program](../profiles/02-units.md#the-builder-program), [publishing](../profiles/02-units.md#publishing))
+- `profile-loader`: the index fetched with its ETag at each start, and the bundles it lacks; the cache; the local folder, a development setting; the pin, a `PilotFlying` key; the pinned bundle read and checked by a job, then `ProfileLoaded` and `ProfileUnloaded`; the match check's item; and the profiles' address, a development setting over the release's own ([fetching](../profiles/02-units.md#fetching) to [the match check's item](../profiles/02-units.md#the-match-checks-item))
+- the first profile, `profiles/aircraft/bksq-baronpro.yaml`, by `Dual Input`, covering the 58P alone, `bksq-aircraft-baronpropress`, with its `authors` and `aircraft` blocks, which stages 14, 17, and 19 fill; the base Baron and the 58TC join it later, a line each in `variants`, with `only` where they differ, such as the mixture (user, 2026-10-24)
+- the bench's local profiles' site, which serves the folder `publish` lays out, and which a scenario can hold back, cut, or add a bundle to ([what it touches](02-testing.md#what-it-touches)); and the bench's test unit that stood in for the profile loader keeps only its feature with a slice, a setting, a command, and a panel module, so the clients' scenarios load a profile through the loader
+- level 1's JavaScript for write functions: every global the sandbox's context defines, with every member it defines, typed by TypeScript 6.0.3's own library declarations, which `tools/javascript-types.ts` keeps to the list in `src/engines/profile-engine/javascript/sandbox.json` that p03 measured, so a write function gets the whole of the JavaScript the sandbox runs, and one that names what it lacks, such as `Date` or `Math.random`, fails its type check (user, 2026-10-24; [profiles log](../profiles/log.md))
+- `tools/check.ts`'s checks of the profiles: building the tree's profiles, and generating level 1's files and its JavaScript again and failing on a difference ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository))
+
+Each feature's module in the profile engine comes with its feature, since no level is released before v1: avatars' `seats`, `location`, and `deadband` in [stage 17](#17-avatars), and pointer sync's `displays`, with their checks, in [stage 19](#19-pointer-sync).
+The registration through which a feature's module adds a block or a field of an entry comes with its first user, avatars' module, so its shape fits a real block (user, 2026-10-24).
+The warnings only a running sim shows, a name the loaded aircraft doesn't know, a value that changes on its own, and a knob that went round on a `wrap: false` entry, are the IDE's.
+Publishing the profiles to their Pages site comes in [stage 22](#22-github), with CI's check that a released level's files match its release tag, since no tag holds a level before v1's release.
+
+Designs first: the profiles' address, which the profiles' units left until the domain's name was set; where the builder gets TypeScript 6.0.3's `typescript.js`, since the root's lockfile holds TypeScript 7.0.2; what the first profile covers; and the bundle the bench measures a load at, the largest we have, while the tree's one profile holds no entries.
+The user settled all four on 2026-10-24: `profiles.dualinput.app` ([where the core fetches from](../profiles/02-units.md#where-the-core-fetches-from)), an npm alias that `profile-build` embeds from ([TypeScript 6.0.3 inside QuickJS-ng](../profiles/02-units.md#typescript-603-inside-quickjs-ng)), the 58P alone, as its line above has it, and a fixture of 200 KB, above 1.5 times the size of FS Copilot's largest profile ([budgets](../profiles/02-units.md#budgets)).
+
 Needs: 9.
+
+Tests:
+
+- From [the profiles' cases](../profiles/02-units.md#cases-for-the-bench), on the bench, with two cores, the stand-in sim, the fake pages, and the local profiles' site:
+  - The PF's start fetch finishes after the session's aircraft is set: the pin goes from none to the bundle, every core in the flight loads it, and the match check shows it loaded.
+  - Control passes before preflight ends to a pilot whose cache holds an older bundle: the pin stays.
+  - A member whose cache lacks the pinned bundle fetches it by its hash and loads it, and the match check shows no difference.
+  - A member offline whose cache lacks the pin shows "Couldn't get the session's profile", loads nothing, and fetches it when it next enters the flight online.
+  - The PF pins a local bundle: a member with the same file loads it, and one without it fetches nothing and shows the error.
+  - The session's aircraft changes before preflight ends, and a member enters the new aircraft before the new pin arrives: it loads nothing, then loads the new bundle.
+  - A member leaves the flight and comes back: the profile unloads, and the same pin loads again, though the site published a newer bundle meanwhile.
+  - A session starts airborne with the PF's cache empty, and the PF's fetch finishes after preflight ended: the pin goes from none to the bundle.
+  - A cached bundle whose bytes don't match its name is deleted and fetched again.
+  - A job's result arrives after this member left the flight, and is dropped.
+  - A replay of a run with a load decodes the recorded profile, reads no file, and loads the same.
+- As the builder's own tests, from the same list: a bundle written and read back gives the profile it came from, scripts with blank lines at their ends included; the same files built twice give the same bytes; a profile at a level no release supports isn't published, and is published once a release supports the level; a bundle that fails its level's frozen schema fails; two profiles covering one preset fail; a script using syntax QuickJS-ng can't parse fails the build; and `publish` only adds files to its folder.
+- As `profile-engine`'s tests: each error and the warning the engine checks, reported at its file, line, and column.
+- From [the session's cases](../session/02-units.md#cases-for-the-bench): the PF loads the wrong aircraft in preflight, then the right one, and the pinned hash follows the aircraft; and a session in an aircraft with no published profile shows the loader's error, while the rest of that case, every feature that needs no profile running, comes with the last of those features.
+- [The profiles' budgets](../profiles/02-units.md#budgets): a build of 300 write functions within 2s at one level, in 128 MB, on an 8 MB stack; a load on the loop within a handler's 1ms at the largest bundle we have; and a start with nothing new published costing one answer of headers.
+
+This stage's close runs the whole bench ([working a stage](#working-a-stage)).
+
+Exit: on our development machine, `node tools/check.ts` and the whole `node tools/bench.ts` pass, the profiles' scenarios among them; `dualinput-profile-builder build profiles` builds the tree's profile to the same bytes twice; two bench cores pin a bundle from the local profiles' site, the joiner fetches it by its hash, both load it, and the match check shows it loaded; and the [profiles' log](../profiles/log.md) has an entry for the cases and budgets.
+Done on 2026-10-24.
 
 ## 11 The apps
 
@@ -376,6 +417,7 @@ Tests, from stage 5: in this stage's session in the sim, with a bench core runni
 
 Builds: the sandbox, with its time limit counted in QuickJS-ng's interrupt checks, set to about 100ms of a call on our development machine, which the plugins' log records ([plugins and the sandbox](../plugins/01-plugins.md), [decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
 It needs only stage 1, so it can be built any time before stage 13.
+Its context defines exactly the globals and members that `src/engines/profile-engine/javascript/sandbox.json` lists, which a test of the sandbox's checks, since level 1 of the profile format types write functions by that list ([stage 10](#10-profiles)).
 Needs: 1.
 
 ## 13 The sync engine and the cockpit stream
@@ -418,6 +460,7 @@ Tests, from stage 4, in this stage's session in the sim: `fsVarsAVarSet` holds t
 ## 17 Avatars
 
 Builds: the avatars feature, its routine `Figure`, the figure's SimObject, `aircraft-model`, `msfs-gltf`, `msfs-rpn`, `ray-cast`, `tools/profile-author`, and the Baron 58P profile's seats ([01-avatars](../avatars/01-avatars.md)).
+From stage 10, it also builds the profile engine's registration through which a feature's module adds a block or a field of an entry, with its checks, its lines in a bundle, its schema, and its declarations, and avatars' module, `seats`, `location`, and `deadband`, through it ([the profile engine](../profiles/02-units.md#the-profile-engine)).
 From stage 4, it also builds the sim service's `create_ai`, `remove`, `camera`, and `frames`, the routine host's `Z:` writes, and the stand-in's answers to each, with its faults for a create whose title the sim lacks and for several `Frame` events in one read ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [what it models](02-testing.md#what-it-models)).
 Needs: 6, 10, and 13.
 Tests, from stage 4: after a `RESET`, `Figure`'s `Z:` writes still land ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)); several `Frame` events in one read each reach the loop as an input of its own, and an AI create whose title the sim lacks has its exception reach the call ([the code map's cases](../architecture/02-code-map.md#cases-for-the-bench)); and in this stage's session in the sim, closing a connection removes the AI objects it created, as killing its client did ([a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load)).

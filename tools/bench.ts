@@ -15,6 +15,7 @@
 import fs from "node:fs"
 import path from "node:path"
 
+import { level } from "./bench/profiles.ts"
 import { buildPrograms } from "./lib/cargo.ts"
 import { writeMessageTypes } from "./lib/messages.ts"
 import { fromRoot, ROOT } from "./lib/repo.ts"
@@ -43,6 +44,8 @@ main(() => {
     DUALINPUT_BENCH_CORE: built.core,
     DUALINPUT_BENCH_STAND_IN_HELPER: built.helper,
     DUALINPUT_BENCH_RELAY: built.relay,
+    DUALINPUT_BENCH_BUILDER: built.builder,
+    DUALINPUT_BENCH_PROFILES: publishProfiles(built.builder),
   }
   if (what === "load") {
     run(process.execPath, [path.join("tools", "bench", "load.ts"), plays ?? "6"], { env })
@@ -60,12 +63,29 @@ main(() => {
  * target/ would replace the dualinput-core.exe a plain `cargo build` writes there, and a
  * developer's next build would replace the bench's.
  */
-function buildBench(release: boolean): { core: string; helper: string; relay: string } {
+function buildBench(release: boolean): { core: string; helper: string; relay: string; builder: string } {
   const args = [
-    ...["-p", "dualinput-core", "-p", "stand-in-core-helper", "-p", "bench-relay"],
+    ...["-p", "dualinput-core", "-p", "stand-in-core-helper", "-p", "bench-relay", "-p", "dualinput-profile-builder"],
     ...["--features", "dualinput-core/stand-in", "--target-dir", path.join("target", "bench")],
   ]
   args.push("--profile", release ? "release" : "release-with-checks")
-  const built = buildPrograms(args, ["dualinput-core", "stand-in-core-helper", "bench-relay"])
-  return { core: built["dualinput-core"], helper: built["stand-in-core-helper"], relay: built["bench-relay"] }
+  const built = buildPrograms(args, ["dualinput-core", "stand-in-core-helper", "bench-relay", "dualinput-profile-builder"])
+  return {
+    core: built["dualinput-core"],
+    helper: built["stand-in-core-helper"],
+    relay: built["bench-relay"],
+    builder: built["dualinput-profile-builder"],
+  }
+}
+
+/**
+ * Publishes the tree's profiles into target/bench/profiles, from nothing, as CI would publish
+ * them for a release of this tree, at every level the tree has, and returns the folder, which
+ * each scenario's profiles' site serves a copy of.
+ */
+function publishProfiles(builder: string): string {
+  const pages = path.join(ROOT, "target", "bench", "profiles")
+  fs.rmSync(pages, { recursive: true, force: true })
+  run(builder, ["publish", "--released", String(level()), "--profiles", "profiles", "--pages", pages])
+  return pages
 }

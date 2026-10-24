@@ -1,6 +1,7 @@
 // Cockpit panels and their modules, with a session hosted through the bench's local backend,
-// and the clients' test unit standing in for the profile loader: panels connect only in a
-// session, each is answered once the profile loads, a panel told none stays away, a reloaded
+// a flight in the Baron 58P, whose profile the loader loads from the bench's profiles' site,
+// and the clients' test unit standing in for a feature with a panel module: panels connect
+// only in a session, each is answered once the profile loads, a panel told none stays away, a reloaded
 // panel replaces its socket, and trouble shows when no panel connects
 // (record/areas/core/02-clients-and-panel-bridge.md, "Cases for the bench" and "Budgets";
 // record/areas/interface/01-apps.md, "Cases for the bench").
@@ -10,6 +11,7 @@ import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import { BenchRun, type Core } from "../cores.ts"
+import { BARON, load } from "../flights.ts"
 import { app, BenchNetwork, host } from "../network.ts"
 import { FakePage } from "../pages.ts"
 
@@ -39,7 +41,7 @@ function nextAnnouncement(core: Core, session: boolean): Promise<number> {
   })
 }
 
-test("panels connect only in a session, each of 20 is answered within 1s of the profile loading, and one told none stays away until the next session", { timeout: 60_000 }, async (t) => {
+test("panels connect only in a session, each of 20 is answered within 1s of the flight's load, the profile's among it, and one told none stays away until the next session", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-panels", t)
   const net = await BenchNetwork.start()
   t.after(() => net.stop())
@@ -62,12 +64,15 @@ test("panels connect only in a session, each of 20 is answered within 1s of the 
   assert.ok(ms < 500, `the announcement came ${ms.toFixed(0)}ms after the session started`)
   await panels[0]!.until(() => panels.every((p) => p.client.connected), "every panel connecting")
 
+  // The flight's load takes the profile's with it, so this measures more than the budget's
+  // span from the profile's load to the answers.
+  core.clients({ act: "picks", picks: ["PFD"] })
   const loading = performance.now()
-  core.clients({ act: "profile", loaded: true, picks: ["PFD"] })
+  await load(core, BARON)
   await panels[0]!.until(() => panels.every((p) => p.messages("load").length + p.messages("none").length > 0), "every panel's answer", 5_000)
   const answered = performance.now() - loading
-  console.log(`budget: 20 panels answered ${answered.toFixed(0)}ms after the profile loaded, against 1,000ms`)
-  assert.ok(answered < 1_000, `the panels were answered ${answered.toFixed(0)}ms after the profile loaded`)
+  console.log(`budget: 20 panels answered ${answered.toFixed(0)}ms after the flight's load began, the profile's among it, against 1,000ms from the profile's`)
+  assert.ok(answered < 1_000, `the panels were answered ${answered.toFixed(0)}ms after the flight's load began`)
   for (const [i, p] of panels.entries()) {
     if (i < 3) assert.deepEqual(p.messages("load"), [{ t: "load", modules: [{ name: "bench-panel", instruments: [`PFD_${i}|side=${i}`] }] }])
     else assert.deepEqual(p.messages("none"), [{ t: "none" }])
@@ -93,7 +98,8 @@ test("a panel module's messages reach its feature and come back, and a reloaded 
   const first = panel(core, "VCockpit60", ["PFD_0|side=0"])
   t.after(() => first.close())
   await first.until(() => first.client.connected, "the panel connecting")
-  core.clients({ act: "profile", loaded: true, picks: ["PFD"] })
+  core.clients({ act: "picks", picks: ["PFD"] })
+  await load(core, BARON)
   await first.until(() => first.messages("load").length === 1, "the panel's load")
   first.client.sendUnit("bench-panel", { n: 1 })
   await first.until(() => first.messages("unit").length === 1, "the module's echo")
@@ -144,7 +150,8 @@ test("no cockpit panel within 10s of the profile loading raises the clients crat
   efb.client.watch("notices", () => {})
   await efb.until(() => efb.slice("notices") !== undefined, "the notices")
   await host(core, "Host")
-  core.clients({ act: "profile", loaded: true, picks: ["PFD"] })
+  core.clients({ act: "picks", picks: ["PFD"] })
+  await load(core, BARON)
   const ids = () => ((efb.slice("notices") ?? []) as { id: string }[]).map((n) => n.id)
   await sleep(9_000)
   assert.deepEqual(ids(), [], "the notice came before 10s")

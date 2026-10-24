@@ -1,0 +1,10 @@
+[package]
+name = "dualinput-profile-builder"
+version.workspace = true
+edition.workspace = true
+publish = false
+description = "Checks each profile and builds its bundle, for authors and CI"
+
+[dependencies]
+profile-build = { path = "../../src/engines/profile-build" }
+profile-engine = { path = "../../src/engines/profile-engine" }

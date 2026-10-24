@@ -45,15 +45,27 @@ impl Item {
 
 /// Hands the session crate this core's value of an item, whenever it changes.
 pub fn set_match<T: Serialize>(cx: &Cx, item: MatchItem<T>, value: &T) {
-    cx.call(Session::match_value, (item.number, crate::encode(value)));
+    cx.call(
+        Session::match_value,
+        (item.number, Some(crate::encode(value))),
+    );
+}
+
+/// Takes this core's value of an item back while it isn't known, such as a profile still
+/// loading, so the crew sees no difference over it.
+pub fn clear_match<T>(cx: &Cx, item: MatchItem<T>) {
+    cx.call(Session::match_value, (item.number, None));
 }
 
 impl Session {
-    fn match_value(me: &mut Session, (number, bytes): (u16, Vec<u8>), cx: &mut Cx) {
-        if me.mine.get(&number) == Some(&bytes) {
+    fn match_value(me: &mut Session, (number, bytes): (u16, Option<Vec<u8>>), cx: &mut Cx) {
+        if me.mine.get(&number) == bytes.as_ref() {
             return;
         }
-        me.mine.insert(number, bytes);
+        match bytes {
+            Some(bytes) => me.mine.insert(number, bytes),
+            None => me.mine.remove(&number),
+        };
         write_mine(me, cx);
     }
 }

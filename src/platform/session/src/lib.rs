@@ -20,7 +20,7 @@ mod preflight;
 mod slice;
 mod store;
 
-pub use matching::{Found, set_match};
+pub use matching::{Found, clear_match, set_match};
 pub use messages::session::{Control, Key, MatchItem, Phase, Preflight, Writer};
 
 use std::collections::{BTreeMap, BTreeSet};

@@ -158,6 +158,7 @@ The L-1011's fuel pump click flips `L:SWITCH_FUEL_PUMP_1_1` and fires `H:FUEL`, 
 ### Pace
 
 A pace is written the same way in YAML and in a chain: `1 frame`, `<number> frames`, or `<number>ms`, as in `pace: 2 frames` and `.every('2 frames')`, and TypeScript checks the string in a chain.
+TypeScript's type for it, `` `${number} frames` ``, also passes paces the format refuses, such as `'0ms'`, `'1.5 frames'`, or one built at runtime, so the sync engine fails a write whose chain's pace doesn't read as one (user, 2026-10-24).
 A pace spaces the steps of an `inc` and `dec` map and the actions of a chain, one step a frame unless a pace says otherwise: `aircraft:`'s `pace` sets it for the whole aircraft, a map's `pace` for one entry, and `.every()` for one chain, each overriding the one before.
 The A350 takes at most one command every 2 frames (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)), so its profile would set `pace: 2 frames` once.
 
@@ -427,13 +428,14 @@ Profiles and modules live as flat files in `profiles/` in Dual Input's own publi
 ```text
 profiles/
   aircraft/
-    baron-pro.yaml
-    pa24.yaml
+    bksq-baronpro.yaml
+    a2a-pa24.yaml
   modules/
     gns-430.yaml
     gtn-650-750.yaml
 ```
 
+- A profile's file is named for its developer, then its aircraft, with the developer's prefix as the developer's packages carry it, so Black Square's Baron Pro, in `bksq-aircraft-baronpro`, is `bksq-baronpro.yaml` (user, 2026-10-24).
 - Each profile's latest version is always at its one path, and git keeps the rest.
 - Nobody outside the core team gets write access, so no `CODEOWNERS` file names a profile's maintainers: the core team reviews and merges each pull request, and the profile's authors can review it too.
 - An author finds a profile by browsing `profiles/aircraft/`, or by searching the repository for the aircraft's SimObjects folder, which the profile lists under `variants`, and the desktop app can link to the file of the profile it loaded.

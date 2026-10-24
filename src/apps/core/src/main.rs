@@ -15,6 +15,7 @@ const UNITS: &[fn(&mut Registry)] = &[
     network::register,
     recording::register,
     session::register,
+    profile_loader::register,
 ];
 
 fn main() -> ExitCode {

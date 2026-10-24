@@ -1,7 +1,7 @@
-//! The test unit that stands in for what uses the clients crate before it's built: the
-//! profile loader's load and unload, and a feature with a slice, a setting, a command, and a
-//! panel module that echoes its panel's messages (record/areas/build/02-testing.md, "Its
-//! place").
+//! The test unit that stands in for a feature that uses the clients crate, before one is
+//! built: a slice, a setting, a command, and a panel module that echoes its panel's messages,
+//! which the clients crate answers each cockpit panel with once the profile loader has loaded
+//! a profile (record/areas/build/02-testing.md, "Its place").
 
 use std::time::Duration;
 
@@ -14,14 +14,14 @@ use serde_json::{Value, json};
 /// Names the source the bench's lines for this unit come in under.
 pub struct Acts;
 
-/// The unit's panel module, whose rule takes the instruments the bench's profile picks.
+/// The unit's panel module, whose rule takes the instruments the bench picks.
 pub const PANEL_MODULE: &str = "bench-panel";
 
 #[derive(Default)]
 pub struct BenchClients {
-    /// The prefixes of the instruments the loaded profile's panel module takes, while one is
-    /// loaded.
-    picks: Option<Vec<String>>,
+    /// The prefixes of the instruments the unit's panel module takes, as a feature's rule takes
+    /// the ones its profile's block names.
+    picks: Vec<String>,
     counter: u64,
     churn: Option<Churn>,
 }
@@ -60,14 +60,7 @@ impl BenchClients {
             return;
         };
         match act {
-            ClientsAct::Profile { loaded, picks } => {
-                me.picks = loaded.then_some(picks);
-                if loaded {
-                    clients::profile_loaded(cx);
-                } else {
-                    clients::profile_unloaded(cx);
-                }
-            }
+            ClientsAct::Picks { picks } => me.picks = picks,
             ClientsAct::Churn { per_second, for_ms } => {
                 let every = Duration::from_secs(1) / per_second.max(1);
                 me.churn = Some(Churn {
@@ -99,9 +92,7 @@ impl BenchClients {
     }
 
     fn rule(view: &View, instruments: &[String]) -> Vec<String> {
-        let Some(picks) = &view.read::<BenchClients>().picks else {
-            return Vec::new();
-        };
+        let picks = &view.read::<BenchClients>().picks;
         instruments
             .iter()
             .filter(|i| picks.iter().any(|p| i.starts_with(p.as_str())))

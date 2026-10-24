@@ -8,6 +8,7 @@ import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import { BenchRun, type Core, type CoreOptions } from "../cores.ts"
+import { BARON, load } from "../flights.ts"
 import { BenchNetwork, host } from "../network.ts"
 import { FakePage } from "../pages.ts"
 import { resume, suspend } from "../suspend.ts"
@@ -29,7 +30,8 @@ test("the core suspended for 12s leaves every page its socket, and each panel's 
   const panel = new FakePage(core, { component: "panel-bridge", sessionOnly: true, panel: "VCockpit60", instruments: ["PFD_0"] })
   t.after(() => [efb, panel].forEach((p) => p.close()))
   await panel.until(() => panel.client.connected && efb.client.connected, "both pages connecting")
-  core.clients({ act: "profile", loaded: true, picks: ["PFD"] })
+  core.clients({ act: "picks", picks: ["PFD"] })
+  await load(core, BARON)
   await panel.until(() => panel.messages("load").length === 1, "the panel's load")
 
   suspend(core.process.pid!)

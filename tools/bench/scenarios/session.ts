@@ -10,21 +10,11 @@ import path from "node:path"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import type { Played } from "../../../src/engines/messages/ts/bench/Played.ts"
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
 import { BenchRun, type Core, type CoreOptions, type Stub } from "../cores.ts"
+import { type Aircraft, BARON, load as loadFlight, PA24, toMenu as endFlight } from "../flights.ts"
 import { app, BenchNetwork, host, join } from "../network.ts"
 import { type FakeApp, FakePage, fakeMenuScript } from "../pages.ts"
-
-// SimConnect's numbers for the flow events, in SDK 1.8.1's SimConnect.h.
-const RTC_START = 10
-const RTC_END = 11
-const FLIGHT_END = 15
-
-/** The Baron 58P, the session's aircraft in most cases, and the PA-24, another. */
-const BARON = { cfg: String.raw`SimObjects\Airplanes\bksq-aircraft-baronpropress\aircraft.cfg`, path: "bksq-aircraft-baronpropress" }
-const PA24 = { cfg: String.raw`SimObjects\Airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.cfg`, path: "pa24-250/presets/a2a/pa24-250" }
-type Aircraft = typeof BARON
 
 const FREEZES = ["IS LATITUDE LONGITUDE FREEZE ON", "IS ALTITUDE FREEZE ON", "IS ATTITUDE FREEZE ON"]
 
@@ -45,25 +35,10 @@ async function startSim(p: Pilot): Promise<void> {
 }
 
 /** Loads a flight in `aircraft`, on the ground unless `airborne`, through to Flying. */
-async function load(p: Pilot, aircraft: Aircraft, { airborne = false, title = "Baron 58P", livery = "N515MR" } = {}): Promise<void> {
-  const after = p.core.heard().length
-  p.core.act({ act: "set", numbers: [["A:SIM ON GROUND", airborne ? 0 : 1]], texts: [["A:TITLE", title], ["A:LIVERY NAME", livery]] })
-  const signals: Played[] = [
-    { after_ms: 0, signal: { signal: "flight-loaded", path: "x.FLT" } },
-    { after_ms: 20, signal: { signal: "aircraft-loaded", path: aircraft.cfg } },
-    { after_ms: 20, signal: { signal: "flow", event: RTC_START } },
-    { after_ms: 20, signal: { signal: "flow", event: RTC_END } },
-  ]
-  p.core.act({ act: "play", signals })
-  await p.core.hear(`stage Flying aircraft ${aircraft.path}`, { after })
-}
+const load = (p: Pilot, aircraft: Aircraft, options?: Parameters<typeof loadFlight>[2]): Promise<void> => loadFlight(p.core, aircraft, options)
 
 /** Ends the flight, as the pause menu's End flight does, to the main menu. */
-async function toMenu(p: Pilot): Promise<void> {
-  const after = p.core.heard().length
-  p.core.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "flow", event: FLIGHT_END } }] })
-  await p.core.hear(/^stage Menu /, { after })
-}
+const toMenu = (p: Pilot): Promise<void> => endFlight(p.core)
 
 function slice(p: Pilot): SessionSlice {
   const s = p.app.slice<SessionSlice>("session")

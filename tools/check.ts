@@ -34,10 +34,15 @@ const checks: [string, () => void][] = [
   ["the stock files against stock.json", checkStockFiles],
   ["the Coherent GT check on our code in the sim", () => checkPages(buildPages())],
   ["the map check", () => run(process.execPath, [path.join("tools", "map-check.ts")])],
+  ["the profiles' level files", checkLevels],
+  ["the profiles' build", () => run("cargo", [...BUILDER, "build", "profiles"])],
   // The tools' tests, and our TypeScript's own, such as page-client's and the backend's, the
   // backend's on a local D1, on Node's test runner.
   ["the TypeScript tests", () => run(process.execPath, ["--test", ...typeScriptTests()])],
 ]
+
+/** The profile builder, run from the tree. */
+const BUILDER = ["run", "--quiet", "--package", "dualinput-profile-builder", "--"]
 
 main(() => {
   for (const [name, check] of checks) {
@@ -62,6 +67,26 @@ function checkMessageTypes(): void {
     throw new Failed(
       `the messages' generated files differed from what the message crate generates, and are written again: ${changed.join(", ")}`,
     )
+  }
+}
+
+/**
+ * Each level of the profile format has a JSON Schema and declarations that the profile engine
+ * generates, committed in levels/, which a release freezes, and level 1's declarations open with
+ * the JavaScript tools/javascript-types.ts generates. This writes them all again and fails if any
+ * file changed, leaving the new files in place, as checkMessageTypes does.
+ */
+function checkLevels(): void {
+  const engine = path.join(ROOT, "src", "engines", "profile-engine")
+  const generated = () => [...find(path.join(engine, "levels"), ""), path.join(engine, "javascript", "javascript.d.ts")]
+  const read = () => new Map(generated().map((f) => [fromRoot(f), fs.readFileSync(f, "utf8")]))
+  const before = read()
+  run(process.execPath, [path.join("tools", "javascript-types.ts")])
+  run("cargo", [...BUILDER, "levels"])
+  const after = read()
+  const changed = [...new Set([...before.keys(), ...after.keys()])].filter((f) => before.get(f) !== after.get(f)).sort()
+  if (changed.length) {
+    throw new Failed(`the profile format's level files differed from what the engine generates, and are written again: ${changed.join(", ")}`)
   }
 }
 

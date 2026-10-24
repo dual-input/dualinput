@@ -1,0 +1,136 @@
+p03: a QuickJS-ng context made as the sandbox's design makes one, rquickjs 0.14.0
+
+GLOBAL AggregateError function
+  OWN length name prototype
+  PROTOTYPE constructor message name
+GLOBAL Array function
+  OWN Symbol(Symbol.species) from fromAsync isArray length name of prototype
+  PROTOTYPE Symbol(Symbol.iterator) Symbol(Symbol.unscopables) at concat constructor copyWithin entries every fill filter find findIndex findLast findLastIndex flat flatMap forEach includes indexOf join keys lastIndexOf length map pop push reduce reduceRight reverse shift slice some sort splice toLocaleString toReversed toSorted toSpliced toString unshift values with
+GLOBAL BigInt function
+  OWN asIntN asUintN length name prototype
+  PROTOTYPE Symbol(Symbol.toStringTag) constructor toString valueOf
+GLOBAL Boolean function
+  OWN length name prototype
+  PROTOTYPE constructor toString valueOf
+GLOBAL DisposableStack function
+  OWN length name prototype
+  PROTOTYPE Symbol(Symbol.dispose) Symbol(Symbol.toStringTag) adopt constructor defer dispose disposed move use
+GLOBAL Error function
+  OWN captureStackTrace isError length name prepareStackTrace prototype stackTraceLimit
+  PROTOTYPE constructor message name stack toString
+GLOBAL EvalError function
+  OWN length name prototype
+  PROTOTYPE constructor message name
+GLOBAL Function function
+  OWN length name prototype
+  PROTOTYPE Symbol(Symbol.hasInstance) apply arguments bind call caller columnNumber constructor fileName length lineNumber name toString
+GLOBAL Infinity number
+  OWN 
+  PROTOTYPE 
+GLOBAL InternalError function
+  OWN length name prototype
+  PROTOTYPE constructor message name
+GLOBAL Iterator function
+  OWN concat from length name prototype zip zipKeyed
+  PROTOTYPE Symbol(Symbol.dispose) Symbol(Symbol.iterator) Symbol(Symbol.toStringTag) chunks constructor drop every filter find flatMap forEach includes join map reduce some take toArray windows
+GLOBAL Math object
+  OWN E LN10 LN2 LOG10E LOG2E PI SQRT1_2 SQRT2 Symbol(Symbol.toStringTag) abs acos acosh asin asinh atan atan2 atanh cbrt ceil clz32 cos cosh exp expm1 f16round floor fround hypot imul log log10 log1p log2 max min pow round sign sin sinh sqrt sumPrecise tan tanh trunc
+  PROTOTYPE 
+GLOBAL NaN number
+  OWN 
+  PROTOTYPE 
+GLOBAL Number function
+  OWN EPSILON MAX_SAFE_INTEGER MAX_VALUE MIN_SAFE_INTEGER MIN_VALUE NEGATIVE_INFINITY NaN POSITIVE_INFINITY isFinite isInteger isNaN isSafeInteger length name parseFloat parseInt prototype
+  PROTOTYPE constructor toExponential toFixed toLocaleString toPrecision toString valueOf
+GLOBAL Object function
+  OWN assign create defineProperties defineProperty entries freeze fromEntries getOwnPropertyDescriptor getOwnPropertyDescriptors getOwnPropertyNames getOwnPropertySymbols getPrototypeOf groupBy hasOwn is isExtensible isFrozen isSealed keys length name preventExtensions prototype seal setPrototypeOf values
+  PROTOTYPE __defineGetter__ __defineSetter__ __lookupGetter__ __lookupSetter__ __proto__ constructor hasOwnProperty isPrototypeOf propertyIsEnumerable toLocaleString toString valueOf
+GLOBAL RangeError function
+  OWN length name prototype
+  PROTOTYPE constructor message name
+GLOBAL ReferenceError function
+  OWN length name prototype
+  PROTOTYPE constructor message name
+GLOBAL Reflect object
+  OWN Symbol(Symbol.toStringTag) apply construct defineProperty deleteProperty get getOwnPropertyDescriptor getPrototypeOf has isExtensible ownKeys preventExtensions set setPrototypeOf
+  PROTOTYPE 
+GLOBAL RegExp function
+  OWN Symbol(Symbol.species) escape length name prototype
+  PROTOTYPE Symbol(Symbol.match) Symbol(Symbol.matchAll) Symbol(Symbol.replace) Symbol(Symbol.search) Symbol(Symbol.split) compile constructor dotAll exec flags global hasIndices ignoreCase multiline source sticky test toString unicode unicodeSets
+GLOBAL String function
+  OWN fromCharCode fromCodePoint length name prototype raw
+  PROTOTYPE Symbol(Symbol.iterator) anchor at big blink bold charAt charCodeAt codePointAt concat constructor endsWith fixed fontcolor fontsize includes indexOf isWellFormed italics lastIndexOf length link localeCompare match matchAll normalize padEnd padStart repeat replace replaceAll search slice small split startsWith strike sub substr substring sup toLocaleLowerCase toLocaleUpperCase toLowerCase toString toUpperCase toWellFormed trim trimEnd trimLeft trimRight trimStart valueOf
+GLOBAL SuppressedError function
+  OWN length name prototype
+  PROTOTYPE constructor message name
+GLOBAL Symbol function
+  OWN asyncDispose asyncIterator dispose for hasInstance isConcatSpreadable iterator keyFor length match matchAll name prototype replace search species split toPrimitive toStringTag unscopables
+  PROTOTYPE Symbol(Symbol.toPrimitive) Symbol(Symbol.toStringTag) constructor description toString valueOf
+GLOBAL Symbol(Symbol.toStringTag) undefined
+  OWN 
+  PROTOTYPE 
+GLOBAL SyntaxError function
+  OWN length name prototype
+  PROTOTYPE constructor message name
+GLOBAL TypeError function
+  OWN length name prototype
+  PROTOTYPE constructor message name
+GLOBAL URIError function
+  OWN length name prototype
+  PROTOTYPE constructor message name
+GLOBAL decodeURI function
+  OWN length name
+  PROTOTYPE 
+GLOBAL decodeURIComponent function
+  OWN length name
+  PROTOTYPE 
+GLOBAL encodeURI function
+  OWN length name
+  PROTOTYPE 
+GLOBAL encodeURIComponent function
+  OWN length name
+  PROTOTYPE 
+GLOBAL escape function
+  OWN length name
+  PROTOTYPE 
+GLOBAL eval function
+  OWN length name
+  PROTOTYPE 
+GLOBAL globalThis object
+  OWN AggregateError Array BigInt Boolean DisposableStack Error EvalError Function Infinity InternalError Iterator Math NaN Number Object RangeError ReferenceError Reflect RegExp String SuppressedError Symbol Symbol(Symbol.toStringTag) SyntaxError TypeError URIError decodeURI decodeURIComponent encodeURI encodeURIComponent escape eval globalThis isFinite isNaN names out parseFloat parseInt tried undefined unescape
+  PROTOTYPE 
+GLOBAL isFinite function
+  OWN length name
+  PROTOTYPE 
+GLOBAL isNaN function
+  OWN length name
+  PROTOTYPE 
+GLOBAL names function
+  OWN length name prototype
+  PROTOTYPE constructor
+GLOBAL out object
+  OWN AggregateError Array BigInt Boolean DisposableStack Error EvalError Function Infinity InternalError Iterator Math NaN Number Object RangeError ReferenceError Reflect RegExp String SuppressedError Symbol Symbol(Symbol.toStringTag) SyntaxError TypeError URIError decodeURI decodeURIComponent encodeURI encodeURIComponent escape eval globalThis isFinite isNaN names
+  PROTOTYPE 
+GLOBAL parseFloat function
+  OWN length name
+  PROTOTYPE 
+GLOBAL parseInt function
+  OWN length name
+  PROTOTYPE 
+GLOBAL tried undefined
+  OWN 
+  PROTOTYPE 
+GLOBAL undefined undefined
+  OWN 
+  PROTOTYPE 
+GLOBAL unescape function
+  OWN length name
+  PROTOTYPE 
+TRIED a regex literal: true
+TRIED JSON: undefined
+TRIED a generator: 1
+TRIED for of over an array: 3
+TRIED spread: 5
+TRIED Symbol.iterator: function
+TRIED BigInt: function
+TRIED Math.random: undefined

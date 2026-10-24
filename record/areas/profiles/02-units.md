@@ -20,6 +20,9 @@ Decides:     Which compiler builds a bundle, and where it runs; the YAML parser;
 > Since 2026-10-21, v1 uploads no bug report, so the upload that [a bundle's bytes](#a-bundles-bytes) has use sha2 comes after v1, and how a run's folder, which a pilot sends by hand, carries a local bundle's text, which [in the recording](#in-the-recording) has a bug report carry, is open (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 >
 > Since 2026-10-23, the loader tells the recording crate nothing, where [in the recording](#in-the-recording) has it tell the loaded bundle's hash and whether it's local, since v1 writes no index of a run (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
+>
+> Since 2026-10-24, a level's declarations open with the JavaScript the sandbox runs, TypeScript 6.0.3's own library declarations kept to the globals and members the sandbox's context defines, where [levels](#levels) has the ten global types TypeScript needs ([profiles log](log.md#2026-10-24-the-sandboxs-context-runs-quickjs-ngs-base-objects-past-es2020-without-json-map-set-date-or-promise-and-level-1-types-write-functions-by-exactly-what-it-runs)).
+> They name neither `instrument()`, which only a watch takes and the engine reads without TypeScript, so a write function that calls it fails its type check, nor `aircraft`, which the format never defined, since `only` covers what differs between variants (user, 2026-10-24).
 
 The core loads bundles and never builds one.
 A published bundle comes from our Pages site under its hash, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.
@@ -129,6 +132,7 @@ The builder runs TypeScript's own compiler, `typescript.js` 6.0.3, in a QuickJS-
 - It's the smallest option that type-checks: `typescript.js` is 9.1 MB, 1.2 MB under zstd, against 24.5 MB, 7.7 MB under zstd, for tsgo 7.0.2's program ([log][p02]).
 - It runs in process through its own API, so the IDE's Rust side can link `profile-build` as it is, while TypeScript 7.0 "does not yet expose a stable programmatic API", and 7.1 is expected to ship a new, different one (documented, [Announcing TypeScript 7.0](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)), so a builder on tsgo would drive its command line and read its output.
 - Pinned at 6.0.3 exactly, its output stays put, and as of Microsoft's post of 2025-12-02, TypeScript 6.0's patches are to be "infrequent, and only issued when absolutely necessary" (documented, [Progress on TypeScript 7](https://devblogs.microsoft.com/typescript/progress-on-typescript-7-december-2025/)); checking small scripts against our declarations needs nothing TypeScript adds after it.
+- The root's `package.json` names it under an alias of its own, `typescript-6`, beside the TypeScript 7.0.2 our own type checks run, so the lockfile pins its bytes, and `profile-build` embeds `typescript.js` from `node_modules` as it compiles, so building it takes `npm ci` first, as a new PC's steps run (user, 2026-10-24).
 
 oxc and swc strip types, adding 2.2 MB and 6.2 MB to a release build, and type-check nothing, so a builder on either would skip the check [what fails a load](01-format-and-delivery.md#what-fails-a-load) requires ([log][p02]).
 
@@ -168,7 +172,7 @@ CI's profiles job runs on each merge to `main` that changes `profiles/` or eithe
 {
   "profiles": [
     {
-      "path": "aircraft/baron-pro",
+      "path": "aircraft/bksq-baronpro",
       "bundles": [
         { "level": 1, "hash": "a1b2…", "published": "2026-10-20T14:02:11Z", "variants": ["bksq-aircraft-baronpro", "bksq-aircraft-baronproturbo", "bksq-aircraft-baronpropress"] },
         { "level": 2, "hash": "c3d4…", "published": "2026-11-05T09:40:57Z", "variants": ["bksq-aircraft-baronpro", "bksq-aircraft-baronproturbo", "bksq-aircraft-baronpropress"] }
@@ -187,7 +191,7 @@ The hashes and dates are [levels](01-format-and-delivery.md#levels)' hypothetica
 
 ### Where the core fetches from
 
-The core fetches from a subdomain of ours pointed at the Pages site: `index.json` and `bundles/<hash>.yaml` at its root (user, 2026-10-16).
+The core fetches from a subdomain of ours pointed at the Pages site, `profiles.dualinput.app`: `index.json` and `bundles/<hash>.yaml` at its root (user, 2026-10-16; the name, user, 2026-10-24).
 A core that's never updated fetches from the address it shipped with, so the address has to outlive a move off Pages.
 
 ## Fetching
@@ -282,6 +286,7 @@ Each is a starting value:
 - **A build:** at most 2s for a profile at one level, in at most 128 MB, on an 8 MB stack; 300 write functions took about 660ms after the compiler's 240ms load, with 57 MB, and passed on a 1 MB stack ([log][p02]).
   CI loads the compiler once, and type-checks a profile at a second level only when its scripts, not its YAML, need the higher one, so 50 profiles of 300 write functions take about 35s (arithmetic), inside CI's [20 minutes](../architecture/02-code-map.md#budgets-for-the-workspace).
 - **A load on the loop:** decoding the job's result and resolving the variant stay within a handler's 1ms ([budgets](../architecture/02-code-map.md#budgets)) at the largest bundle we have, which the bench measures.
+  Until a profile of ours is larger, that's a bench fixture of 200 KB with 300 write functions, above 1.5 times FS Copilot's largest, below, since ours carry more blocks in a wordier format (user, 2026-10-24).
 - **A start with nothing new:** one answer of headers ([log][p01]).
 - **A bundle's size:** no cap.
   FS Copilot's largest profile with its modules merged, the iFly 737 MAX8's, is 114,855 bytes, and the median of its 56 is 33,700 (read on disk, FS Copilot fork, `Definitions/`), while ours also carry seats, possibly hundreds on an airliner, and plugins of any length, so they run larger (user, 2026-10-16).
@@ -319,7 +324,6 @@ The builder's own tests, which CI runs, take these:
 - Which TypeScript the IDE's editor runs, which may move the builder to TypeScript 7: the IDE's design.
 - Test sessions, in which the author's core sends each new bundle to the crew: the IDE's dev loop, as [testing an edit](01-format-and-delivery.md#testing-an-edit) has them.
 - Expiring superseded bundles, if the Pages site nears 1 GB, since a pin needs only recent ones.
-- The domain's name, until it's set.
 
 [p01]: log.md#2026-10-16-github-pages-answers-a-repeat-fetch-of-an-unchanged-file-with-a-304-and-no-body-and-compresses-what-it-sends-when-asked
 [p02]: log.md#2026-10-16-typescript-603s-compiler-type-checks-and-compiles-inside-quickjs-ng-as-under-node-in-09s-for-300-write-functions-on-a-1-mb-stack

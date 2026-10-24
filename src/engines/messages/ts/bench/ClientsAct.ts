@@ -3,4 +3,4 @@
 /**
  * What the clients' test unit does.
  */
-export type ClientsAct = { "act": "profile", loaded: boolean, picks: Array<string>, } | { "act": "churn", per_second: number, for_ms: number, };
+export type ClientsAct = { "act": "picks", picks: Array<string>, } | { "act": "churn", per_second: number, for_ms: number, };

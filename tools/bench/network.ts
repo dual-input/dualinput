@@ -1,6 +1,7 @@
 // The bench's network: local relays, each behind a proxy that holds back or cuts one core's
-// connection on its own, and the backend on a local D1, which the cores' settings name in
-// place of Dual Input's own (record/areas/network/02-units.md, "Cases for the bench").
+// connection on its own, the backend on a local D1, and the profiles' site, which the cores'
+// settings name in place of Dual Input's own (record/areas/network/02-units.md, "Cases for the
+// bench").
 //
 // The relays take a test token, not a production one, so the bench needs no access to the
 // private repository of the relays' tokens.
@@ -12,6 +13,7 @@ import type { SessionSlice } from "../../src/engines/messages/ts/session/Session
 import { type LocalBackend, startBackend } from "../lib/backend.ts"
 import type { Core, CoreOptions } from "./cores.ts"
 import { FakeApp } from "./pages.ts"
+import { ProfilesSite } from "./profiles.ts"
 
 export const TOKEN = "bench-token"
 /** The production cap, 256 KiB/s, which src/relays/relays.toml gives each relay. */
@@ -99,25 +101,29 @@ export class BenchRelay {
   }
 }
 
-/** The relays and the backend one scenario's cores share. */
+/** The relays, the backend, and the profiles' site one scenario's cores share. */
 export class BenchNetwork {
   readonly relays: BenchRelay[]
   readonly backend: LocalBackend
+  readonly profiles: ProfilesSite
 
-  private constructor(relays: BenchRelay[], backend: LocalBackend) {
+  private constructor(relays: BenchRelay[], backend: LocalBackend, profiles: ProfilesSite) {
     this.relays = relays
     this.backend = backend
+    this.profiles = profiles
   }
 
-  static async start(relays = 1): Promise<BenchNetwork> {
+  /** Starts the network, with a profiles' site that serves the tree's profiles, or none when emptySite. */
+  static async start(relays = 1, { emptySite = false } = {}): Promise<BenchNetwork> {
     const started = await Promise.all(Array.from({ length: relays }, () => BenchRelay.start()))
-    return new BenchNetwork(started, await startBackend())
+    return new BenchNetwork(started, await startBackend(), await ProfilesSite.start({ empty: emptySite }))
   }
 
   /**
-   * A core's settings: the bench's backend, its relays in place of Dual Input's, and everything
-   * through the relays, since two cores on one PC would otherwise link directly and never
-   * cross a relay (record/areas/network/01-between-machines.md, "Two cores on one PC").
+   * A core's settings: the bench's backend, relays, and profiles' site in place of Dual Input's,
+   * and everything through the relays, since two cores on one PC would otherwise link directly
+   * and never cross a relay (record/areas/network/01-between-machines.md, "Two cores on one
+   * PC").
    */
   core(relays: BenchRelay[] = this.relays): CoreOptions {
     return {
@@ -125,6 +131,7 @@ export class BenchNetwork {
         "network.backend": this.backend.url,
         "network.relays": relays.map((r) => ({ url: r.url, token: TOKEN, cap: CAP })),
         "network.relays-only": true,
+        "profiles.site": this.profiles.url,
       },
     }
   }
@@ -132,6 +139,7 @@ export class BenchNetwork {
   async stop(): Promise<void> {
     await Promise.all(this.relays.map((r) => r.stop()))
     await this.backend.stop()
+    await this.profiles.stop()
   }
 }
 

@@ -26,6 +26,7 @@ futures-util = { version = "0.3.34", default-features = false, features = ["sink
 kernel = { path = "../../platform/kernel" }
 messages = { path = "../../engines/messages" }
 network = { path = "../../platform/network" }
+profile-loader = { path = "../../platform/profile-loader" }
 recording = { path = "../../platform/recording" }
 recording-format = { path = "../../engines/recording-format" }
 # The edge's fetches, through the reqwest and rustls iroh already builds, with ring, iroh's

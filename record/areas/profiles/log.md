@@ -1,10 +1,79 @@
 # Profiles: log
 
-What our experiments found about building profiles' bundles and delivering them to pilots, newest entry first.
+What our experiments and the build found about building profiles' bundles and delivering them to pilots, newest entry first.
 TypeScript's own compiler type-checks and compiles inside the QuickJS-ng we embed, with the same results as under Node, in about 0.66s for a profile of 300 write functions once it's loaded, which takes 0.24s.
 GitHub Pages answers a repeat fetch of an unchanged file with a 304 and no body.
-The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs) and [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
-Neither needs the sim.
+The sandbox's context runs QuickJS-ng's base objects and lacks JSON, Map, Set, Date, and Promise, which level 1's declarations follow.
+The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), and [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
+None needs the sim.
+
+## 2026-10-24: Stage 10's profiles pass the stage's bench cases, load a 221 KB bundle in one input under 730µs, and build one of 300 write functions in 1.7s
+
+**Asked:** do [stage 10](../build/plan.md#10-profiles)'s cases and budgets hold on its code: [the profiles' cases for the bench](02-units.md#cases-for-the-bench), the builder's own, two of the session's, and the budgets for a build, a load, and a start with nothing new?
+
+**Expected:** each case as designed, and each budget inside, with the load the closest, since it decodes the whole profile on the loop.
+
+**Found:** on our development machine, with the bench's profile `release-with-checks`, the PC holding no game and a torrent client using about 1.5% of a core:
+
+- All 13 cases of `tools/bench/scenarios/profiles.ts` passed, each ending in a replay of every core's recording that matched its run, the first case's replay logging the same load as the run.
+  They covered the 11 cases, a bundle whose fetch failed at start fetched again at Host, which the code review added, the session's case of a wrong aircraft whose pin follows the aircraft, and its case of an aircraft with no profile, which shows "No profile for this aircraft" as an error.
+- The whole bench ran 77 cases and failed 1, a clients case comparing a settings file it wrote with the core's write of it, which the bench's start of a core had written over (below); with that fixed, its scenario passed, and the 30 cases of the scenarios that start a core again on its data folder passed too.
+  After the code review's fixes, `node tools/check.ts` passed, and the profiles' scenario, the one they reach, passed its 13 cases.
+- **A load on the loop:** the 221,156-byte bundle of 300 write functions loaded in an input under 730µs, the run's slowest being the core's start, at 699µs to 730µs over three runs, against the code map's 1ms.
+  Its first run took 1,055µs in that one input, which `resolve` spent in part copying every entry's JavaScript for this pilot's variant; it moves them instead.
+- **A build:** the builder built that profile in 1,714ms to 1,782ms over four runs, its process's start and the compiler's 280ms load included, against 2s, inside the 128 MB QuickJS-ng holds the compiler to, on an 8 MB stack.
+  TypeScript's type check took 642ms of it, as p02's 300 functions did; compiling each script in a call of its own took 1.2s more, until the builder compiled every script in one call.
+- **A start with nothing new:** the second start of a core on its data folder fetched only `index.json`, answered with a 304 and no body.
+
+The build changed or settled ten things the record didn't say:
+
+- The builder program's `publish` takes `--released <level>`, the highest level a release supports, which stage 22's workflow reads from the release tags, `--pages <folder>`, and `--profiles <folder>`; and a `levels` command writes each level's files, which `tools/check.ts` runs and compares, as it does the messages' types.
+- The local folder is listed at start, at each session, whenever the session's aircraft changes, and when its setting changes, where [the local folder](02-units.md#the-local-folder) lists it at each choice and lookup; a new local bundle takes effect when the design says it does.
+- The pilot flying's choice waits for the cache's folder and the local folder to be listed, so a bundle already on disk isn't pinned as none first.
+- A pin the session crate refuses is asked for again in a later input, not once ever.
+- The match check's item reads "No profile for this aircraft", "Couldn't get the session's profile:" and the members' names, and "The pilots loaded different profiles", until the apps' stage words it; the session crate gains `clear_match`, so a member whose profile is loading shows no value.
+- The profile engine depends on no crate of ours, where the code map allows it the message crate.
+- The case of a job's result arriving after its member left the flight runs as a fetch the bench's site holds back, since the read of a cached bundle finishes too quickly to hold.
+- The bench's site serves what the builder's `publish` lays out, from the tree's profiles at each bench run; a core the scenario gives no site fetches from a closed port on this PC, so no bench core reaches the internet; and the bench's start of a core merges into a settings file already in its data folder, where it replaced it.
+- The clients' test unit keeps only its picks of instruments, and the clients' scenarios load the tree's 58P profile through a flight in the Baron; the session's scenarios fly the Baron too, so their cores load the profile and raise the clients crate's notice that no panel connected.
+- A profile's file is named for its developer and aircraft, as `bksq-baronpro.yaml`, which reviews check by eye (user, 2026-10-24; [the repository](01-format-and-delivery.md#the-repository)).
+
+The code review found the rest:
+
+- A bundle whose fetch failed at start was never fetched again, so a pilot offline at sim start flew with "No profile for this aircraft" until the core restarted; a new session fetches it again, as [fetching](02-units.md#fetching) has it.
+- `publish` took a bare folder in one profile and a preset in it in another for two aircraft; it refuses them, since a folder covers every preset in it.
+- The index's ETag could go out with an index that never loaded; it goes out only with one, and is written once the index is.
+- A bundle published again after a newer one at a higher level kept that level on the newer one; it replaces it.
+- The registration through which a feature's module adds a block or a field of an entry comes with avatars' module in stage 17, its first user, so its shape fits a real block, where stage 10's lines had it here (user, 2026-10-24).
+- TypeScript's type for a chain's pace passes paces the format refuses, so the sync engine fails a write whose chain's pace doesn't read as one (user, 2026-10-24; [pace](01-format-and-delivery.md#pace)).
+
+**Changed:** nothing beyond the lists above.
+
+**Affects:** [the profiles' units](02-units.md), [the format](01-format-and-delivery.md)'s pace and repository, and [the build plan](../build/plan.md)'s stages 10 and 17.
+
+**Evidence:** [results/2026-10-24-stage-10-whole-bench.txt](results/2026-10-24-stage-10-whole-bench.txt).
+
+## 2026-10-24: The sandbox's context runs QuickJS-ng's base objects, past ES2020, without JSON, Map, Set, Date, or Promise, and level 1 types write functions by exactly what it runs
+
+**Asked:** what a write function can use in the sandbox, whose context holds QuickJS-ng's base objects and, of rquickjs's intrinsics, `Eval` and `RegExp` alone ([the sandbox](../plugins/01-plugins.md#the-sandbox)), so level 1's declarations, the scripts' whole world under `noLib`, can name exactly that.
+Building stage 10, the declarations held only the ten global types TypeScript needs, as empty interfaces, so a write function couldn't type-check `Math.round` or an array's `map`.
+
+**Expected:** ES2020's built-ins, less the intrinsics the context leaves out.
+
+**Found:** p03 made a context that way, through rquickjs 0.14.0, deleted `Math.random` and `queueMicrotask` as the sandbox does, and listed every global with its own properties and its prototype's ([results](../../../experiments/areas/profiles/results/p03-sandbox-globals-2026-10-24-11-03-31.txt)):
+
+- It defines `Object`, `Function`, `Array`, `String`, `Number`, `Boolean`, `Symbol`, `BigInt`, `Math`, `Reflect`, `RegExp`, `Iterator`, `DisposableStack`, `Error` and its kinds, and the global functions such as `parseInt`, `isNaN`, and `encodeURIComponent`.
+- Their members run past ES2020: `Object.groupBy`, `Array.prototype.toSorted`, `String.prototype.isWellFormed`, the iterator helpers, and `Math.sumPrecise`.
+- It lacks `JSON`, `Map`, `Set`, `WeakMap`, `Date`, `Promise`, `Proxy`, the typed arrays, and `WeakRef`.
+- A regex literal, a generator, `for of`, and spread ran.
+
+**Changed:** level 1's declarations open with every global the context defines, and only the members it defines, typed by TypeScript 6.0.3's own library declarations, so a write function gets the whole of the JavaScript the sandbox runs, and one that names what it lacks fails its type check (user, 2026-10-24).
+`tools/javascript-types.ts` generates them from TypeScript's libraries and p03's list, which `src/engines/profile-engine/javascript/sandbox.json` keeps, dropping each member or type that names a missing global, as `Array.fromAsync` names `Promise`.
+The file is 3,174 lines, and marks itself as a default library, so TypeScript allows its `intrinsic` types and skips checking it on each build.
+Stage 12's sandbox gets a test that its context defines exactly that list.
+After the JavaScript come the names, `write()`, and the chain, and neither `instrument()`, which a write function may not call, nor `aircraft`, which [the profiles' units](02-units.md#levels) listed but the format never defined (user, 2026-10-24).
+
+**Affects:** [the profiles' units](02-units.md#levels), whose declarations held the ten global types; [the build plan](../build/plan.md)'s stages 10 and 12.
 
 ## 2026-10-16: TypeScript 6.0.3's compiler type-checks and compiles inside QuickJS-ng, as under Node, in 0.9s for 300 write functions, on a 1 MB stack
 

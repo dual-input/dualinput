@@ -1,0 +1,725 @@
+{
+  "AggregateError": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "constructor",
+      "message",
+      "name"
+    ]
+  },
+  "Array": {
+    "type": "function",
+    "own": [
+      "Symbol(Symbol.species)",
+      "from",
+      "fromAsync",
+      "isArray",
+      "length",
+      "name",
+      "of",
+      "prototype"
+    ],
+    "prototype": [
+      "Symbol(Symbol.iterator)",
+      "Symbol(Symbol.unscopables)",
+      "at",
+      "concat",
+      "constructor",
+      "copyWithin",
+      "entries",
+      "every",
+      "fill",
+      "filter",
+      "find",
+      "findIndex",
+      "findLast",
+      "findLastIndex",
+      "flat",
+      "flatMap",
+      "forEach",
+      "includes",
+      "indexOf",
+      "join",
+      "keys",
+      "lastIndexOf",
+      "length",
+      "map",
+      "pop",
+      "push",
+      "reduce",
+      "reduceRight",
+      "reverse",
+      "shift",
+      "slice",
+      "some",
+      "sort",
+      "splice",
+      "toLocaleString",
+      "toReversed",
+      "toSorted",
+      "toSpliced",
+      "toString",
+      "unshift",
+      "values",
+      "with"
+    ]
+  },
+  "BigInt": {
+    "type": "function",
+    "own": [
+      "asIntN",
+      "asUintN",
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "Symbol(Symbol.toStringTag)",
+      "constructor",
+      "toString",
+      "valueOf"
+    ]
+  },
+  "Boolean": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "constructor",
+      "toString",
+      "valueOf"
+    ]
+  },
+  "DisposableStack": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "Symbol(Symbol.dispose)",
+      "Symbol(Symbol.toStringTag)",
+      "adopt",
+      "constructor",
+      "defer",
+      "dispose",
+      "disposed",
+      "move",
+      "use"
+    ]
+  },
+  "Error": {
+    "type": "function",
+    "own": [
+      "captureStackTrace",
+      "isError",
+      "length",
+      "name",
+      "prepareStackTrace",
+      "prototype",
+      "stackTraceLimit"
+    ],
+    "prototype": [
+      "constructor",
+      "message",
+      "name",
+      "stack",
+      "toString"
+    ]
+  },
+  "EvalError": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "constructor",
+      "message",
+      "name"
+    ]
+  },
+  "Function": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "Symbol(Symbol.hasInstance)",
+      "apply",
+      "arguments",
+      "bind",
+      "call",
+      "caller",
+      "columnNumber",
+      "constructor",
+      "fileName",
+      "length",
+      "lineNumber",
+      "name",
+      "toString"
+    ]
+  },
+  "Infinity": {
+    "type": "number",
+    "own": [],
+    "prototype": []
+  },
+  "InternalError": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "constructor",
+      "message",
+      "name"
+    ]
+  },
+  "Iterator": {
+    "type": "function",
+    "own": [
+      "concat",
+      "from",
+      "length",
+      "name",
+      "prototype",
+      "zip",
+      "zipKeyed"
+    ],
+    "prototype": [
+      "Symbol(Symbol.dispose)",
+      "Symbol(Symbol.iterator)",
+      "Symbol(Symbol.toStringTag)",
+      "chunks",
+      "constructor",
+      "drop",
+      "every",
+      "filter",
+      "find",
+      "flatMap",
+      "forEach",
+      "includes",
+      "join",
+      "map",
+      "reduce",
+      "some",
+      "take",
+      "toArray",
+      "windows"
+    ]
+  },
+  "Math": {
+    "type": "object",
+    "own": [
+      "E",
+      "LN10",
+      "LN2",
+      "LOG10E",
+      "LOG2E",
+      "PI",
+      "SQRT1_2",
+      "SQRT2",
+      "Symbol(Symbol.toStringTag)",
+      "abs",
+      "acos",
+      "acosh",
+      "asin",
+      "asinh",
+      "atan",
+      "atan2",
+      "atanh",
+      "cbrt",
+      "ceil",
+      "clz32",
+      "cos",
+      "cosh",
+      "exp",
+      "expm1",
+      "f16round",
+      "floor",
+      "fround",
+      "hypot",
+      "imul",
+      "log",
+      "log10",
+      "log1p",
+      "log2",
+      "max",
+      "min",
+      "pow",
+      "round",
+      "sign",
+      "sin",
+      "sinh",
+      "sqrt",
+      "sumPrecise",
+      "tan",
+      "tanh",
+      "trunc"
+    ],
+    "prototype": []
+  },
+  "NaN": {
+    "type": "number",
+    "own": [],
+    "prototype": []
+  },
+  "Number": {
+    "type": "function",
+    "own": [
+      "EPSILON",
+      "MAX_SAFE_INTEGER",
+      "MAX_VALUE",
+      "MIN_SAFE_INTEGER",
+      "MIN_VALUE",
+      "NEGATIVE_INFINITY",
+      "NaN",
+      "POSITIVE_INFINITY",
+      "isFinite",
+      "isInteger",
+      "isNaN",
+      "isSafeInteger",
+      "length",
+      "name",
+      "parseFloat",
+      "parseInt",
+      "prototype"
+    ],
+    "prototype": [
+      "constructor",
+      "toExponential",
+      "toFixed",
+      "toLocaleString",
+      "toPrecision",
+      "toString",
+      "valueOf"
+    ]
+  },
+  "Object": {
+    "type": "function",
+    "own": [
+      "assign",
+      "create",
+      "defineProperties",
+      "defineProperty",
+      "entries",
+      "freeze",
+      "fromEntries",
+      "getOwnPropertyDescriptor",
+      "getOwnPropertyDescriptors",
+      "getOwnPropertyNames",
+      "getOwnPropertySymbols",
+      "getPrototypeOf",
+      "groupBy",
+      "hasOwn",
+      "is",
+      "isExtensible",
+      "isFrozen",
+      "isSealed",
+      "keys",
+      "length",
+      "name",
+      "preventExtensions",
+      "prototype",
+      "seal",
+      "setPrototypeOf",
+      "values"
+    ],
+    "prototype": [
+      "__defineGetter__",
+      "__defineSetter__",
+      "__lookupGetter__",
+      "__lookupSetter__",
+      "__proto__",
+      "constructor",
+      "hasOwnProperty",
+      "isPrototypeOf",
+      "propertyIsEnumerable",
+      "toLocaleString",
+      "toString",
+      "valueOf"
+    ]
+  },
+  "RangeError": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "constructor",
+      "message",
+      "name"
+    ]
+  },
+  "ReferenceError": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "constructor",
+      "message",
+      "name"
+    ]
+  },
+  "Reflect": {
+    "type": "object",
+    "own": [
+      "Symbol(Symbol.toStringTag)",
+      "apply",
+      "construct",
+      "defineProperty",
+      "deleteProperty",
+      "get",
+      "getOwnPropertyDescriptor",
+      "getPrototypeOf",
+      "has",
+      "isExtensible",
+      "ownKeys",
+      "preventExtensions",
+      "set",
+      "setPrototypeOf"
+    ],
+    "prototype": []
+  },
+  "RegExp": {
+    "type": "function",
+    "own": [
+      "Symbol(Symbol.species)",
+      "escape",
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "Symbol(Symbol.match)",
+      "Symbol(Symbol.matchAll)",
+      "Symbol(Symbol.replace)",
+      "Symbol(Symbol.search)",
+      "Symbol(Symbol.split)",
+      "compile",
+      "constructor",
+      "dotAll",
+      "exec",
+      "flags",
+      "global",
+      "hasIndices",
+      "ignoreCase",
+      "multiline",
+      "source",
+      "sticky",
+      "test",
+      "toString",
+      "unicode",
+      "unicodeSets"
+    ]
+  },
+  "String": {
+    "type": "function",
+    "own": [
+      "fromCharCode",
+      "fromCodePoint",
+      "length",
+      "name",
+      "prototype",
+      "raw"
+    ],
+    "prototype": [
+      "Symbol(Symbol.iterator)",
+      "anchor",
+      "at",
+      "big",
+      "blink",
+      "bold",
+      "charAt",
+      "charCodeAt",
+      "codePointAt",
+      "concat",
+      "constructor",
+      "endsWith",
+      "fixed",
+      "fontcolor",
+      "fontsize",
+      "includes",
+      "indexOf",
+      "isWellFormed",
+      "italics",
+      "lastIndexOf",
+      "length",
+      "link",
+      "localeCompare",
+      "match",
+      "matchAll",
+      "normalize",
+      "padEnd",
+      "padStart",
+      "repeat",
+      "replace",
+      "replaceAll",
+      "search",
+      "slice",
+      "small",
+      "split",
+      "startsWith",
+      "strike",
+      "sub",
+      "substr",
+      "substring",
+      "sup",
+      "toLocaleLowerCase",
+      "toLocaleUpperCase",
+      "toLowerCase",
+      "toString",
+      "toUpperCase",
+      "toWellFormed",
+      "trim",
+      "trimEnd",
+      "trimLeft",
+      "trimRight",
+      "trimStart",
+      "valueOf"
+    ]
+  },
+  "SuppressedError": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "constructor",
+      "message",
+      "name"
+    ]
+  },
+  "Symbol": {
+    "type": "function",
+    "own": [
+      "asyncDispose",
+      "asyncIterator",
+      "dispose",
+      "for",
+      "hasInstance",
+      "isConcatSpreadable",
+      "iterator",
+      "keyFor",
+      "length",
+      "match",
+      "matchAll",
+      "name",
+      "prototype",
+      "replace",
+      "search",
+      "species",
+      "split",
+      "toPrimitive",
+      "toStringTag",
+      "unscopables"
+    ],
+    "prototype": [
+      "Symbol(Symbol.toPrimitive)",
+      "Symbol(Symbol.toStringTag)",
+      "constructor",
+      "description",
+      "toString",
+      "valueOf"
+    ]
+  },
+  "SyntaxError": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "constructor",
+      "message",
+      "name"
+    ]
+  },
+  "TypeError": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "constructor",
+      "message",
+      "name"
+    ]
+  },
+  "URIError": {
+    "type": "function",
+    "own": [
+      "length",
+      "name",
+      "prototype"
+    ],
+    "prototype": [
+      "constructor",
+      "message",
+      "name"
+    ]
+  },
+  "decodeURI": {
+    "type": "function",
+    "own": [
+      "length",
+      "name"
+    ],
+    "prototype": []
+  },
+  "decodeURIComponent": {
+    "type": "function",
+    "own": [
+      "length",
+      "name"
+    ],
+    "prototype": []
+  },
+  "encodeURI": {
+    "type": "function",
+    "own": [
+      "length",
+      "name"
+    ],
+    "prototype": []
+  },
+  "encodeURIComponent": {
+    "type": "function",
+    "own": [
+      "length",
+      "name"
+    ],
+    "prototype": []
+  },
+  "escape": {
+    "type": "function",
+    "own": [
+      "length",
+      "name"
+    ],
+    "prototype": []
+  },
+  "eval": {
+    "type": "function",
+    "own": [
+      "length",
+      "name"
+    ],
+    "prototype": []
+  },
+  "globalThis": {
+    "type": "object",
+    "own": [
+      "AggregateError",
+      "Array",
+      "BigInt",
+      "Boolean",
+      "DisposableStack",
+      "Error",
+      "EvalError",
+      "Function",
+      "Infinity",
+      "InternalError",
+      "Iterator",
+      "Math",
+      "NaN",
+      "Number",
+      "Object",
+      "RangeError",
+      "ReferenceError",
+      "Reflect",
+      "RegExp",
+      "String",
+      "SuppressedError",
+      "Symbol",
+      "Symbol(Symbol.toStringTag)",
+      "SyntaxError",
+      "TypeError",
+      "URIError",
+      "decodeURI",
+      "decodeURIComponent",
+      "encodeURI",
+      "encodeURIComponent",
+      "escape",
+      "eval",
+      "globalThis",
+      "isFinite",
+      "isNaN",
+      "parseFloat",
+      "parseInt",
+      "undefined",
+      "unescape"
+    ],
+    "prototype": []
+  },
+  "isFinite": {
+    "type": "function",
+    "own": [
+      "length",
+      "name"
+    ],
+    "prototype": []
+  },
+  "isNaN": {
+    "type": "function",
+    "own": [
+      "length",
+      "name"
+    ],
+    "prototype": []
+  },
+  "parseFloat": {
+    "type": "function",
+    "own": [
+      "length",
+      "name"
+    ],
+    "prototype": []
+  },
+  "parseInt": {
+    "type": "function",
+    "own": [
+      "length",
+      "name"
+    ],
+    "prototype": []
+  },
+  "undefined": {
+    "type": "undefined",
+    "own": [],
+    "prototype": []
+  },
+  "unescape": {
+    "type": "function",
+    "own": [
+      "length",
+      "name"
+    ],
+    "prototype": []
+  }
+}

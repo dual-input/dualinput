@@ -1,5 +1,34 @@
 # Installing and updating: log
 
+## 2026-10-25: An egui window in a Rust tray app takes 96 MB to 153 MB while open, and leaves 62 MB to 69 MB in the process once it closes, where Tauri's leaves 3.7 MB
+
+**Asked.**
+What a Rust tray app costs all day if it draws its few screens, such as the performance history's graph and the update's progress, with egui rather than Tauri's WebView2, since the user is weighing a Dual Input whose only window is its EFB app, leaving the tray app no other reason to carry Tauri (user, 2026-10-25).
+
+**Expected.**
+Less than Tauri's 72.7 MB with a window open, since egui draws in its own process with no browser, and about the tray's own memory once the window closes.
+
+**Found,** with [p02](../../../experiments/areas/install/p02-egui-tray.mjs), which measures as [p01](#2026-10-18-a-tauri-2-app-idles-as-a-tray-icon-in-22-mb-and-gives-back-webview2s-69-mb-once-its-window-is-destroyed-but-not-while-its-hidden) did, adding each process's GPU memory: an eframe 0.37.0 app with a `tray-icon` 0.26.1 icon and a 480×360 window showing a static `egui_plot` 0.38.0 graph, built once for each of eframe's renderers (measured on our development machine, 2026-10-25, with an NVIDIA GeForce RTX 4090 and AMD Radeon Graphics; results for [wgpu](../../../experiments/areas/install/results/p02-egui-tray-2026-10-25-14-10-14.txt) and [OpenGL](../../../experiments/areas/install/results/p02-egui-tray-glow-2026-10-25-14-17-45.txt)):
+
+| State | wgpu 30.0.1, eframe's default | glow 0.17.0, OpenGL | Tauri 2.12.1, from p01 |
+| --- | --- | --- | --- |
+| The tray icon alone, no window ever opened | 1.7 MB | 1.6 MB | 2.2 MB |
+| A window open | 153.2 MB, and 241.7 MB of GPU memory | 96.5 MB, and 29.2 MB of GPU memory | 72.7 MB over 7 processes |
+| The window hidden | 153.2 MB | 96.6 MB | 72.3 MB |
+| The window closed, the tray icon left | 62.6 MB | 68.6 MB | 3.7 MB |
+| The program on disk | 12.7 MB | 6.7 MB | 8.2 MB |
+
+- Memory is Task Manager's, the private working set, after 60s idle; p01 didn't read GPU memory.
+- Each egui app ran in one process, and used 0ms to 94ms of CPU in each 60s idle.
+- Closing the window kept 61 MB to 67 MB more than the tray alone, in either renderer, so what stays is what the process loaded for the GPU, such as its driver, rather than the window; WebView2 draws in processes of its own, which exit with the window.
+
+**What changed.**
+An egui window costs the tray app its memory for the rest of the day once a pilot has opened it, unless the window runs in a process that exits with it, such as the tray app started again to show one screen; the tray alone stays under 2 MB either way.
+Which the tray app's screens use is the user's call.
+
+**Docs affected.**
+[Installing and updating](01-installing-and-updating.md#one-program-from-login), if the tray app drops Tauri.
+
 ## 2026-10-22: Our VCockpit.js won over FS Copilot's, though fscopilot-bridge sorts after dualinput with the same order hint
 
 **Asked.**

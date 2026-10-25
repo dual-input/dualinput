@@ -1,0 +1,3 @@
+# cargo's build output, one folder per renderer.
+app/target/
+app/target-glow/

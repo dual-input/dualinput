@@ -1,0 +1,29 @@
+[package]
+name = "p02-egui-tray"
+version = "0.1.0"
+edition = "2021"
+
+# eframe's default features, but for the renderer, so a build picks wgpu, its
+# default, or glow, with --no-default-features --features glow. eframe's own
+# default turns on winit's, which only a direct dependency on winit can do here.
+[features]
+default = ["wgpu"]
+wgpu = ["eframe/wgpu"]
+glow = ["eframe/glow"]
+
+[dependencies]
+eframe = { version = "=0.37.0", default-features = false, features = ["accesskit", "clipboard", "default_fonts", "links"] }
+winit = "0.30.13"
+egui_plot = "=0.38.0"
+raw-window-handle = "0.6"
+tray-icon = "=0.26.1"
+tungstenite = "=0.30.0"
+windows-sys = { version = "=0.61.2", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_UI_WindowsAndMessaging"] }
+
+[profile.release]
+lto = true
+strip = true
+
+# A workspace of its own, so the repository's root workspace, which lists only
+# product and tool crates, doesn't claim this probe's app.
+[workspace]

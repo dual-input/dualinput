@@ -1,0 +1,20 @@
+p02-egui-tray, 2026-10-25T14:17:45.234Z
+Windows 10.0.26200, 16 logical processors; Node v22.23.1; rustc 1.95.0 (59807616e 2026-04-14)
+Crates, from egui-tray/app/Cargo.lock: eframe 0.37.0, egui 0.37.0, egui_plot 0.38.0, glow 0.17.0, winit 0.30.13, tray-icon 0.26.1, tungstenite 0.30.0; renderer glow (OpenGL); built with cargo build --release, LTO on and symbols stripped; the program is 6.7 MB
+GPU: Virtual Desktop Monitor (driver 13.50.53.699); AMD Radeon(TM) Graphics (driver 32.0.21030.2001); NVIDIA GeForce RTX 4090 (driver 32.0.16.1714)
+Each state: 15s to settle, sampled, 60s idle, sampled. CPU is the processor time the app's processes used during the idle 60s.
+Processes: the app's and every process under it by ParentProcessId.
+
+- The app connected 0.1s after start.
+- The tray icon alone, no window ever opened: 1 process; after 15s settling: Task Manager's memory 1.6 MB, working set 18.3 MB, private bytes 2.2 MB, GPU memory 0.0 MB dedicated and 0.0 MB shared; after 60s idle: Task Manager's memory 1.6 MB, working set 18.3 MB, private bytes 2.1 MB, GPU memory 0.0 MB dedicated and 0.0 MB shared; CPU over the 60s 0.00% of one processor (0ms)
+  - p02-egui-tray.exe (35140): Task Manager's memory 1.6 MB, working set 18.3 MB, private bytes 2.1 MB, GPU 0.0 MB dedicated and 0.0 MB shared, CPU 0ms
+- open: ok
+- A window open, showing a static graph: 1 process; after 15s settling: Task Manager's memory 96.6 MB, working set 151.1 MB, private bytes 169.7 MB, GPU memory 29.2 MB dedicated and 7.6 MB shared; after 60s idle: Task Manager's memory 96.5 MB, working set 151.1 MB, private bytes 169.6 MB, GPU memory 29.2 MB dedicated and 7.6 MB shared; CPU over the 60s 0.05% of one processor (31ms)
+  - p02-egui-tray.exe (35140): Task Manager's memory 96.5 MB, working set 151.1 MB, private bytes 169.6 MB, GPU 29.2 MB dedicated and 7.6 MB shared, CPU 31ms
+- hide: ok
+- The window hidden: 1 process; after 15s settling: Task Manager's memory 96.5 MB, working set 151.1 MB, private bytes 169.6 MB, GPU memory 29.2 MB dedicated and 7.6 MB shared; after 60s idle: Task Manager's memory 96.6 MB, working set 151.1 MB, private bytes 169.8 MB, GPU memory 29.2 MB dedicated and 7.6 MB shared; CPU over the 60s 0.03% of one processor (16ms)
+  - p02-egui-tray.exe (35140): Task Manager's memory 96.6 MB, working set 151.1 MB, private bytes 169.8 MB, GPU 29.2 MB dedicated and 7.6 MB shared, CPU 16ms
+- show: ok; close: ok
+- The window closed, the tray icon left: 1 process; after 15s settling: Task Manager's memory 68.6 MB, working set 115.6 MB, private bytes 96.4 MB, GPU memory 8.7 MB dedicated and 5.6 MB shared; after 60s idle: Task Manager's memory 68.6 MB, working set 115.9 MB, private bytes 96.5 MB, GPU memory 8.7 MB dedicated and 5.6 MB shared; CPU over the 60s 0.05% of one processor (31ms)
+  - p02-egui-tray.exe (35140): Task Manager's memory 68.6 MB, working set 115.9 MB, private bytes 96.5 MB, GPU 8.7 MB dedicated and 5.6 MB shared, CPU 31ms
+- Still running at the end: the app yes.

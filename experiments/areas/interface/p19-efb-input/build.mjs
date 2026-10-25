@@ -121,6 +121,14 @@ const APP_CLASS = `
       this._favoriteIndex = props.favoriteIndex !== undefined && props.favoriteIndex !== null ? props.favoriteIndex : -1;
       this.options = props.options || {};
       this._isReady = true;
+      // The EFB loads no app's CSS: each adds its own link, as efb_api's loadCss
+      // does for CIVA's install() (read in MSFS 2024's WTCivaApp.js).
+      if (!document.querySelector('link[href*="${APP.internal}.css"]')) {
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "coui://html_ui/efb_ui/efb_apps/${APP.internal}/${APP.internal}.css";
+        document.head.appendChild(link);
+      }
       Coherent.trigger("EFB_APP_INSTALLED", this.name, this.internalName, "${EFB_API_VERSION}", this.getVersion());
       return Promise.resolve();
     }

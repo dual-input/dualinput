@@ -30,6 +30,7 @@ pub mod cockpit;
 pub mod core_helper;
 pub mod module;
 pub mod net;
+pub mod pointer_sync;
 pub mod profiles;
 pub mod recording;
 pub mod session;

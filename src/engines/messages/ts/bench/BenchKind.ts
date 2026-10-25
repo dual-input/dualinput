@@ -3,4 +3,4 @@
 /**
  * The kinds of the cockpit stream's test unit.
  */
-export type BenchKind = "held" | "pilot-flying" | "event" | "press";
+export type BenchKind = "held" | "pilot-flying" | "event";

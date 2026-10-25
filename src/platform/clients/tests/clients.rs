@@ -39,6 +39,7 @@ impl Feature {
         .command("feature.bump", Feature::bump)
         .command("feature.read-setting", Feature::read_setting)
         .panel_module("feature-panel", Feature::rule)
+        .client_messages("feature-panel", Feature::echo)
         .setting(
             "feature.loud",
             SettingDef {
@@ -73,6 +74,11 @@ impl Feature {
             Some(true) => Ok(()),
             _ => Err("not loud".into()),
         }
+    }
+
+    /// Sends a panel module's message back to its own panel alone.
+    fn echo(_: &mut Feature, from: clients::Sender, body: Value, cx: &mut Cx) {
+        clients::send(cx, clients::To::Socket(from.socket), "feature-panel", &body);
     }
 
     fn rule(view: &View, instruments: &[String]) -> Vec<String> {
@@ -429,6 +435,28 @@ fn panels_get_their_modules_once_the_profile_loads_and_a_reloaded_panel_replaces
         [ToClient::Stop {
             modules: vec!["feature-panel".into()]
         }]
+    );
+}
+
+#[test]
+fn a_unit_message_to_one_socket_reaches_that_panel_alone() {
+    let (mut core, _) = Core::new(None);
+    core.join_panel(1, "VCockpit01", &["PFD_1|"]);
+    core.join_panel(2, "VCockpit02", &["PFD_2|"]);
+    core.handle_profile(true);
+    let out = core.say(
+        2,
+        json!({ "t": "unit", "unit": "feature-panel", "body": { "x": 1 } }),
+    );
+    let echo = ToClient::Unit {
+        unit: "feature-panel".into(),
+        body: json!({ "x": 1 }),
+    };
+    assert_eq!(to(2, &out), [echo]);
+    assert_eq!(
+        to(1, &out),
+        [],
+        "the other panel that loaded the module gets nothing"
     );
 }
 

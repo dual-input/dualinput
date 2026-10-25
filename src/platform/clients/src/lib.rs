@@ -93,6 +93,8 @@ pub enum To {
     Component(String),
     /// Every cockpit panel that loaded a panel module, by the module's name.
     PanelModule(String),
+    /// One client, by its socket, as a feature reaches only the panels that serve a display.
+    Socket(u64),
 }
 
 /// The clients crate's state.
@@ -342,6 +344,7 @@ impl Clients {
             let to_it = match &to {
                 To::Component(component) => client.component() == component,
                 To::PanelModule(module) => client.answered.loaded(module),
+                To::Socket(to) => socket == *to,
             };
             if to_it {
                 me.send_text(socket, text.clone(), cx);

@@ -1,18 +1,15 @@
-//! The test unit that stands in for state sync and pointer sync on the cockpit stream: a kind
-//! of each sort the stream offers, a held value, one a replay collapses, an event, and a press
-//! that's done only once its panel would have played it through, and a catch-up step that hands
-//! over the values it holds. It tells the bench, as lines of text, each message it applied and
-//! each the stream sent (record/areas/build/plan.md, "13 The sync engine and the cockpit
-//! stream").
+//! The test unit that stands in for state sync on the cockpit stream: its sorts of kind, a held
+//! value, one a replay collapses, and an event, and a catch-up step that hands over the values
+//! it holds. It tells the bench, as lines of text, each message it applied and each the stream
+//! sent, pointer sync's among them (record/areas/build/plan.md, "13 The sync engine and the
+//! cockpit stream").
 
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use cockpit_stream::{
-    Answer, Applying, CockpitCx, CockpitSent, CockpitStream, CockpitUnit, Delivered,
-};
+use cockpit_stream::{Answer, CockpitCx, CockpitSent, CockpitStream, CockpitUnit, Delivered};
 use kernel::{Cx, Input, Registry, TimerId, Verdict, View};
-use messages::bench::{BenchKind, CockpitAct, EVENT, HELD, PILOT_FLYING, PRESS, STEP, ToCore};
+use messages::bench::{BenchKind, CockpitAct, EVENT, HELD, PILOT_FLYING, STEP, ToCore};
 use messages::cockpit::CockpitKind;
 use session::{FlightChanged, Session, TakeControl};
 
@@ -20,9 +17,6 @@ use super::sim::Heard;
 
 /// Names the source the bench's lines for this unit come in under.
 pub struct Acts;
-
-/// How long a press takes to play through, as a panel plays a click from its down to its up.
-const PRESS_PLAYS: Duration = Duration::from_millis(200);
 
 #[derive(Default)]
 pub struct BenchCockpit {
@@ -32,7 +26,6 @@ pub struct BenchCockpit {
     ready: bool,
     settle: Duration,
     sending: BTreeMap<TimerId, Sending>,
-    pressing: BTreeMap<TimerId, (Applying, String)>,
 }
 
 struct Sending {
@@ -48,16 +41,15 @@ fn kind_of(kind: BenchKind) -> CockpitKind<f64> {
         BenchKind::Held => HELD,
         BenchKind::PilotFlying => PILOT_FLYING,
         BenchKind::Event => EVENT,
-        BenchKind::Press => PRESS,
     }
 }
 
+/// A kind's name in the bench's lines, `other` for a feature's, such as pointer sync's gesture.
 fn name_of(kind: u16) -> &'static str {
     match kind {
         k if k == HELD.number => "held",
         k if k == PILOT_FLYING.number => "pilot-flying",
         k if k == EVENT.number => "event",
-        k if k == PRESS.number => "press",
         _ => "other",
     }
 }
@@ -88,7 +80,6 @@ impl BenchCockpit {
         .collapse_in_replay()
         .entry(|v| Some(*v));
         me.cockpit_kind(EVENT, |me, d, cx| me.apply(BenchKind::Event, d, cx));
-        me.cockpit_kind(PRESS, BenchCockpit::press);
     }
 
     fn act(me: &mut BenchCockpit, input: &Input, cx: &mut Cx) {
@@ -177,24 +168,6 @@ impl BenchCockpit {
             short(&d.sender.pilot)
         )));
         Answer::Done
-    }
-
-    /// A press plays for 200ms before it counts as applied, and one that arrives during a
-    /// catch-up is skipped, unless preflight's end started the catch-up, as pointer sync's are.
-    fn press(me: &mut BenchCockpit, d: Delivered<f64>, cx: &mut Cx) -> Answer {
-        if cx.read::<CockpitStream>().catching_up() == Some(false) {
-            cx.out(Heard(format!("cockpit skipped press {}", d.key)));
-            return Answer::Skipped;
-        }
-        cx.out(Heard(format!("cockpit pressed {} {}", d.key, d.body)));
-        let timer = cx.timer(PRESS_PLAYS, |me: &mut BenchCockpit, id: TimerId, cx| {
-            if let Some((applying, key)) = me.pressing.remove(&id) {
-                cx.out(Heard(format!("cockpit released {key}")));
-                cx.cockpit().applied(applying);
-            }
-        });
-        me.pressing.insert(timer, (d.id, d.key));
-        Answer::Unfinished
     }
 
     fn give(me: &BenchCockpit, _: &View) -> Vec<u8> {

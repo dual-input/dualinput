@@ -2,3 +2,9 @@ authors: Dual Input
 aircraft:
   variants:
     press: bksq-aircraft-baronpropress
+
+# The tablet, the one display of the package's own that takes presses on its screen; its
+# radios and engine monitor take knobs and buttons, and the GTNs are other packages' (read in
+# bksq-aircraft-baronpro 0.1.1, record/areas/aircraft/black-square-baron-pro/study.md,
+# "Displays").
+displays: BlackSquareTablet

@@ -518,6 +518,7 @@ Tests:
 - From stage 3: [the loop under load](02-testing.md#the-loop-under-load) again, by hand, with the stand-in's sim inputs and state sync's write functions in place of the test unit's stand-ins for them, beside MSFS flying the iniBuilds A350, reading the queue at p99 against 11.2ms (user, 2026-10-25).
 - In this stage's session in the sim: the real core's loop stats after the 58P flight, its slowest inputs and its queue at p99 against 11.2ms, beside the real sim (user, 2026-10-25).
 - From stage 4, in this stage's session in the sim: a group on one connection keeps hearing an event while a group on another is cleared ([a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load)).
+- From stage 19, in this stage's session in the sim: [pointer sync's cases in the sim](../pointer-sync/01-pointer-sync.md#cases-for-the-bench), the A220's ND with a local profile that names its `DisplayUnits`.
 
 ## 15 Installing and updating
 
@@ -543,6 +544,7 @@ Tests:
 
 - From stage 4, in this stage's session in the sim: `fsVarsAVarSet` holds the pilot's own aircraft's pose; through a second flight load in one run of the sim, `Follow` starts new at its first feed ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)); and our module's update, every routine's frame and the routine host's work together, takes under 0.1ms a frame at p99 ([budgets for work in the sim](../architecture/02-code-map.md#budgets-for-work-in-the-sim)).
 - From stage 11a, on the bench: a restarted core with `Follow` fed, and whether the trouble notification for our package shows before the module's first status write ([the apps' cases](../interface/01-apps.md#cases-for-the-bench)).
+- From stage 19, in the first flight with friends: [pointer sync's cases with friends](../pointer-sync/01-pointer-sync.md#cases-for-the-bench), whether the two PCs give a display the same rect, and whether a drag looks smooth over a relayed link.
 
 ## 17 Avatars
 
@@ -565,10 +567,43 @@ Tests:
 
 ## 19 Pointer sync
 
-Builds: the pointer sync feature, its panel module, and the Baron 58P profile's displays ([pointer sync](../pointer-sync/01-pointer-sync.md)).
-From stage 5, it also builds the panel bridge's locks: the visible lock with its renewal and its warning, the unseen lock, and the hit test that looks past their overlays ([what the bridge owns](../architecture/02-code-map.md#what-the-bridge-owns), [locks](../pointer-sync/01-pointer-sync.md#locks)).
-Needs: 5 and 13.
-Tests, from stage 5: with the core suspended, a locked display's overlay turns into a warning within 10s, and `window.DUALINPUT_BRIDGE_UNLOCK()` removes it at once; and with the core's socket closed, every lock drops at once ([the code map's cases for work in the sim](../architecture/02-code-map.md#cases-for-the-bench-for-work-in-the-sim)).
+Builds:
+
+- the message crate's `pointer_sync` module: a gesture's `Down`, `Move`, `Held`, and `Up`, each point in fractions of the display's rect; its cockpit kind, `GESTURE`, keyed by its instrument's key; the panel module's messages, the instruments it serves, each gesture it captured, each one it's to play, and each up it's done with; and the visible lock's slice ([a gesture](../pointer-sync/01-pointer-sync.md#a-gesture), [what pointer sync registers](../pointer-sync/01-pointer-sync.md#what-pointer-sync-registers))
+- `src/features/pointer-sync/core`: the instruments each panel serves; a captured gesture sent on the cockpit stream under its instrument's whole key, so a profile's bare `FCP` keeps the A220's four FCPs apart, and a key whose query carries the livery plays nothing on another livery, a known limit (user, 2026-10-25); each arriving message handed to each panel serving an instrument of that key, on that panel's socket alone, and answered `Skipped` while a catch-up runs that preflight's end didn't start, or when no panel serves the key; an up applied once each of those panels is done with it, or its socket closed or was replaced, or its module stopped, or after 1s, which the run's log notes at info; and the visible lock's slice, from the session's control, the network's link to the PF, and the stream's replay and catch-up ([playing a gesture](../pointer-sync/01-pointer-sync.md#playing-a-gesture), [locks](../pointer-sync/01-pointer-sync.md#locks))
+- `clients`' `unit` message to one socket, which pointer sync's sends take
+- `src/features/pointer-sync/panel`: the panel module `pointer-sync`, which captures each gesture on the displays `load` names, in the capture phase, skipping every event we dispatched, with a move at most every 33ms and only 2px from the last, `Held` after each 1s with nothing sent, an up whose `click` says the pointer stayed within 4px, and an up with no click once its pilot has been still for 30s (user, 2026-10-25); and plays each arriving message at the bridge's hit test, one gesture at a time on a display, under an unseen lock it renews, ending a gesture whose lock lapsed and starting it again if more of it comes; and shows the visible lock the slice names, each lock waiting until its own pilot's gesture on the display has ended ([a gesture](../pointer-sync/01-pointer-sync.md#a-gesture), [playing a gesture](../pointer-sync/01-pointer-sync.md#playing-a-gesture), [timing](../pointer-sync/01-pointer-sync.md#timing))
+- pointer sync's module in the profile engine, `displays`, through the registration [stage 17](#17-avatars) built, with its check that a `WasmInstrument|` key fails; and the Baron 58P profile's tablet, `BlackSquareTablet` ([displays](../profiles/01-format-and-delivery.md#displays), [the Baron's displays](../aircraft/black-square-baron-pro/study.md#displays))
+- `tools/build.ts`'s build of each feature's panel module into our package, as `html_ui/DualInput/modules/` and the module's name, through the Coherent GT check ([panel modules](../core/02-clients-and-panel-bridge.md#panel-modules))
+- the bench's fake cockpit panel for pointer sync: the panel bridge and the `pointer-sync` module, run in Node over a fake document on a fake page's socket, whose pilot taps, drags, and holds; and the cockpit stream's test unit keeps only its kinds that stand in for state sync, so the `cockpit` scenario's press is a pointer sync tap ([the sim's pages](02-testing.md#the-sims-pages))
+
+From stage 5, it also builds the panel bridge's locks: the unseen lock, which lapses 2s after its module last renewed it, and which a press it took paints red-orange at about 60% opacity until that press's up, staying until then, or for 10s at most where the panel never hears the up; the visible lock with its words, which turns into a warning that blocks nothing once the core has been silent for 8s; the hit test that looks past every overlay; the mouse events a module dispatches, which no module captures; each lock dropped at once by its module's stop, the socket's close, and `window.DUALINPUT_BRIDGE_UNLOCK()`; and a rejoin for an instrument created after the `hello`, which stops the panel's modules so the new socket's `load` starts them again ([what the bridge owns](../architecture/02-code-map.md#what-the-bridge-owns), [locks](../pointer-sync/01-pointer-sync.md#locks)).
+The flash's color and the locks' words are the user's (user, 2026-10-17 and 2026-10-25), and the warning stays until the core speaks again or its socket closes (user, 2026-10-25).
+
+Needs: 5, 13, and stage 17's registration in the profile engine, which landed ahead of its stage (user, 2026-10-25).
+
+Tests:
+
+- From [pointer sync's cases](../pointer-sync/01-pointer-sync.md#cases-for-the-bench), on the bench, with two cores and the fake cockpit panel on each:
+  - A tap plays as `mousedown`, `mouseup`, and `click` at the same fractions; a 3s drag's moves reach the other panel while it's made, about 30 a second, with no `click`; and a press held still for 5s keeps the other display's lock through its `Held` messages, and still lasts 5s replayed after a cut.
+  - A state change sent while a display press is held applies between the down and the up on both machines.
+  - The sending core killed partway through a drag: the other display's lock lapses within 2s of the last move, the panel gets a `mouseup` on the document, and nothing more of that gesture plays; a tap whose up arrives 2.5s after its down lapses, starts again at the up, and clicks; and a 10s cut partway through a drag ends the gesture 2s after its last move, and the replay starts it again from its next move and plays every gesture after it.
+  - A press on a display under the unseen lock: the flash shows while it's held and goes at the up, the display gets nothing, nothing is sent, and a lock whose gesture ends meanwhile stays until that up; and the other pilot's `Down` while this pilot's button is down on the display locks it at this pilot's up, and their own `Up` goes out.
+  - An `Up` for a display with no gesture playing is answered at once, with no line in the run's log; an up the panel never answers applies after 1s, with a line at info; a panel module that throws partway through a gesture leaves no lock after 2s; and a receiving panel that reloads partway through a gesture has the up handed to the old socket count as applied, and ignores the rest.
+  - A `Down` during a late joiner's catch-up is skipped, and its moves and up after the catch-up are ignored; and a PF's press made once the PM has asked for preflight's end's catch-up plays on the PM's display while that catch-up runs, where one made before the ask reaches the PF drops on the PM, a known limit (user, 2026-10-25; [pointer sync log](../pointer-sync/log.md)).
+  - The PM's link to the PF cut: within 5s every display on the PM's machine locks and none on the PF's, taking control lifts it, and once the link returns it holds until the replay ends; a PF's Leave whose close reaches the PM before the handover locks the PM's displays until it takes control; a late joiner's displays lock until its catch-up ends; and a press in preflight acts on its own display and is sent nowhere.
+- As the panel module's own tests, over the fake document, from the same cases: two displays in one panel each send and play under their own key; a `mousedown` with a gesture open sends that gesture's `Up` with no click first; no event the module dispatches is captured or sent back; a press on one of the bridge's overlays starts no gesture, and an up that lands on one ends this pilot's gesture; and a gesture still for 30s ends with an up and no click.
+- As the bridge's own tests: a press a lock took whose up never comes holds the lock 10s at most; and a rejoin stops the panel's modules, which the new socket's `load` starts again with every instrument.
+- From stage 5, on the bench with the fake cockpit panel and as the bridge's own tests: with the core suspended, a visible lock turns into a warning within 10s of the core's last message, and `window.DUALINPUT_BRIDGE_UNLOCK()` removes it at once; and with the core's socket closed, every lock drops at once ([the code map's cases for work in the sim](../architecture/02-code-map.md#cases-for-the-bench-for-work-in-the-sim)).
+- As the profile engine's tests: a module's displays join its profile's, and a `WasmInstrument|` key fails the load.
+- As `clients`' own tests: a `unit` message to one socket reaches that panel alone.
+- [Pointer sync's budgets](../pointer-sync/01-pointer-sync.md#budgets), on the bench: a gesture's messages, about 30 a second while it moves and one a second while it's held, at their encoded size; and the messages to one panel through a drag, under 30 a second.
+
+Its cases in the sim move to [stage 14](#14-state-sync)'s session, the first with a bench core as the second pilot, which sets up a session in the 58P with our package installed, as they need, and its cases with friends move to [stage 16](#16-flight-model-sync)'s first flight with friends.
+The stage changes nothing every scenario runs on, so it closes on the scenarios it adds or changes, `pointer-sync` and `cockpit`.
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the panel module's and the bridge's tests and the `pointer-sync` scenario among them; on the bench, a tap on one core's fake panel plays as `mousedown`, `mouseup`, and `click` at the same fractions on the other's, and with the PM's link to the PF cut, the PM's displays lock until it's back and the replay has ended; and the [pointer sync log](../pointer-sync/log.md) has an entry for the cases and budgets.
+Done on 2026-10-25.
 
 ## 20 Take-control
 

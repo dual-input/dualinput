@@ -10,6 +10,7 @@
 //! (record/areas/profiles/01-format-and-delivery.md, "Levels").
 
 pub mod avatars;
+pub mod pointer_sync;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -40,12 +41,13 @@ pub(crate) struct Module {
 }
 
 /// Every feature's module, in the order a bundle writes their blocks.
-pub(crate) const MODULES: &[&Module] = &[&avatars::MODULE];
+pub(crate) const MODULES: &[&Module] = &[&avatars::MODULE, &pointer_sync::MODULE];
 
 /// Every feature's blocks, as a profile holds them.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Blocks {
     pub avatars: avatars::Blocks,
+    pub pointer_sync: pointer_sync::Blocks,
 }
 
 /// Every feature's fields of one entry.
@@ -59,6 +61,7 @@ impl Blocks {
     pub(crate) fn resolve(&self, variant: &str) -> Blocks {
         Blocks {
             avatars: self.avatars.resolve(variant),
+            pointer_sync: self.pointer_sync.resolve(variant),
         }
     }
 }

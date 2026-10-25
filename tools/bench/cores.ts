@@ -181,7 +181,7 @@ export class Core {
     this.send({ kind: "net", act })
   }
 
-  /** Has the cockpit stream's test unit, which stands in for state sync and pointer sync, act. */
+  /** Has the cockpit stream's test unit, which stands in for state sync, act. */
   cockpit(act: CockpitAct): void {
     this.send({ kind: "cockpit", act })
   }

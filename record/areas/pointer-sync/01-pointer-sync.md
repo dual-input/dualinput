@@ -1,5 +1,12 @@
 # Pointer sync
 
+> **Note**
+> Stage 19 changed four things here, and the [pointer sync log](log.md#2026-10-25-stage-19-builds-pointer-sync-and-a-pfs-press-made-before-the-pms-catch-up-ask-reaches-the-pf-drops-on-the-pm)'s entry gives each (user, 2026-10-25):
+> a display whose key carries the livery in its query, as the A220's `DisplayUnits|config=N324DU` does, plays nothing on another livery, a known limit, since the query is also what tells apart instruments of one identifier, such as its four FCPs;
+> a gesture whose pilot is still for 30s ends with an `Up` and no click;
+> the locks' words and the warning are settled;
+> and a PF's press made before the PM's catch-up ask reaches the PF drops on the PM, a known limit.
+
 ```text
 Purpose:     How a press or drag on a synced display reaches the crew's displays and plays there, and how a display takes no press while it can't sync one.
 Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architecture/02-code-map.md, ../architecture/coherent-gt.md, ../core/02-clients-and-panel-bridge.md, ../sync/03-catch-up.md, ../sync/04-order-and-recovery.md, ../sync/05-units.md, ../network/01-between-machines.md, ../network/02-units.md, ../profiles/01-format-and-delivery.md

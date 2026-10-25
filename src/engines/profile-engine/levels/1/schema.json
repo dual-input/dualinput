@@ -36,6 +36,26 @@
       "description": "Who wrote the profile, shown wherever it's credited",
       "type": "string"
     },
+    "displays": {
+      "anyOf": [
+        {
+          "not": {
+            "pattern": "^WasmInstrument(\\||$)"
+          },
+          "type": "string"
+        },
+        {
+          "items": {
+            "not": {
+              "pattern": "^WasmInstrument(\\||$)"
+            },
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ],
+      "description": "The instruments pointer sync plays presses into: an identifier, for every instrument that carries it, or a full key, identifier|query, for one"
+    },
     "events": {
       "additionalProperties": {
         "additionalProperties": false,

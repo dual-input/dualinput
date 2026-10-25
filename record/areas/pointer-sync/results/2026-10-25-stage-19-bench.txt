@@ -1,0 +1,36 @@
+node tools/bench.ts pointer-sync cockpit, on our development machine, 2026-10-25, with no game running
+
+# budget: James's run, with a lever changed 60 times a second: the slowest input took 509µs, 0 over 1ms, against 1,000µs for a handler with one pause under 2ms allowed
+# budget: Adam's run, with a lever changed 60 times a second: the slowest input took 180µs, 0 over 1ms, against 1,000µs for a handler with one pause under 2ms allowed
+ok 1 - a lever changed 60 times a second goes out at most 20 times a second, its last value before the press after it
+# budget: 120 changes over about 2s went out as 30 messages, against 20 a second
+ok 2 - a 60s cut replays at the sender's gaps, collapses runs of the pilot flying's changes, and denies take-control until it ends
+# the replay waited 2000ms for a gap of 3.2s, against its 2s cap
+ok 3 - a takeover during a cut drops the old pilot flying's solo changes, and the ex-pilot flying catches up from the new one
+ok 4 - a late joiner asks, is answered once the pilot flying can give, asks again after a cut, and drops the copies it queued
+ok 5 - control passing between two others during a catch-up has the catching-up core ask the new pilot flying
+ok 6 - a pilot flying who leaves the flight during the other's replay hands over everything it sent
+ok 7 - a member whose aircraft has no profile applies the change of control, ends its replay, and may take control
+ok 8 - a tap plays at the same fractions, a 3s drag's moves arrive while it's made, and a 5s hold keeps the lock, replayed after a cut too
+# budget: a 3s drag sent 64 moves, 21.3 a second, against about 30
+# budget: the drag brought 66 messages to the other panel, 22.0 a second, against under 30
+# the hold made during a cut replayed as a 5008ms press, against 5,000ms
+ok 9 - a state change sent while a display press is held goes out between its down and its up
+ok 10 - a 10s cut partway through a drag ends it, then replays it from its next message, and a late up starts its lapsed tap again and clicks
+ok 11 - the sending core killed partway through a drag: the other display's lock lapses within 2s of the last move, and nothing more plays
+# the lock lapsed 2016ms after the last move, against 2,000ms
+ok 12 - a press under another pilot's gesture flashes and reaches nothing, and another pilot's down while this pilot's button is down locks at this pilot's up
+ok 13 - an up no panel answers applies after 1s with a line in the log, one whose panel reloads applies at once, and a module that fails partway leaves no lock
+# the lock went 1999ms after the module failed, against 2,000ms
+ok 14 - a down during a late joiner's catch-up is skipped while its displays lock, a press in preflight goes nowhere, and the PF's press during preflight's end's catch-up plays
+ok 15 - the PM's displays lock with no link to the PF, until it takes control or its replay ends, and a PF's unheard Leave leaves them locked until then
+# the PM's displays locked 4999ms after the cut, as the link was lost 5s in
+ok 16 - with the core suspended, a visible lock turns into a warning within 10s, unlock removes it, and with the core's socket closed every lock drops at once
+# the locks turned into warnings 8094ms and 8094ms after the core's last message, against 10,000ms
+# tests 16
+# pass 16
+# fail 0
+# duration_ms 577940.0208
+
+cargo test -p pointer-sync, a_moves_cockpit_message_is_about_100_bytes:
+budget: a move's cockpit message is 106 bytes, against about 100

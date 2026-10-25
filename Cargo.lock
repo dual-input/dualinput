@@ -994,6 +994,7 @@ dependencies = [
  "kernel",
  "messages",
  "network",
+ "pointer-sync",
  "profile-loader",
  "recording",
  "recording-format",
@@ -3155,6 +3156,22 @@ dependencies = [
  "quick-xml",
  "serde",
  "time",
+]
+
+[[package]]
+name = "pointer-sync"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "cockpit-stream",
+ "kernel",
+ "messages",
+ "network",
+ "postcard",
+ "profile-engine",
+ "profile-loader",
+ "session",
+ "tracing",
 ]
 
 [[package]]

@@ -1,46 +1,8 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
-import type { Env, Socket } from "../../../engines/page-client/src/page-client.ts"
-import { PageClient } from "../../../engines/page-client/src/page-client.ts"
-import { Bridge, type BridgeEnv, keyFor, type PanelModuleDef } from "../src/bridge.ts"
-
-/** A cockpit panel's document, as the bridge and its page client see it. */
-class FakePanel implements Env, BridgeEnv {
-  socket: { s: Socket; sent: { t: string; [k: string]: unknown }[] } | null = null
-  scripts: { src: string; failed: () => void }[] = []
-  hear: (text: string) => void = () => {}
-  logs: string[] = []
-
-  connect(): Socket {
-    const sent: { t: string }[] = []
-    const s: Socket = { onopen: null, onmessage: null, onclose: null, send: (t) => sent.push(JSON.parse(t)), close: () => {} }
-    this.socket = { s, sent }
-    return s
-  }
-  every(): void {}
-  now(): number {
-    return 0
-  }
-  listen(hear: (text: string) => void): void {
-    this.hear = hear
-  }
-  log(message: string): void {
-    this.logs.push(message)
-  }
-  addScript(src: string, failed: () => void): void {
-    this.scripts.push({ src, failed })
-  }
-
-  /** The core announces a session, takes the panel's socket, and answers it with `message`. */
-  join(): void {
-    this.hear(JSON.stringify({ port: 1000, session: true }))
-    this.socket!.s.onopen!()
-  }
-  say(message: unknown): void {
-    this.socket!.s.onmessage!(JSON.stringify(message))
-  }
-}
+import { keyFor, type PanelModuleDef } from "../src/bridge.ts"
+import { started } from "./fake-panel.ts"
 
 function instrument(tag: string, identifier?: string, url?: string): Element {
   return {
@@ -48,15 +10,6 @@ function instrument(tag: string, identifier?: string, url?: string): Element {
     instrumentIdentifier: identifier,
     getAttribute: (name: string) => (name.toLowerCase() === "url" ? (url ?? null) : null),
   } as unknown as Element
-}
-
-function started(): { panel: FakePanel; bridge: Bridge } {
-  const panel = new FakePanel()
-  const keys = (): string[] => bridge.keys()
-  const client = new PageClient({ component: "panel-bridge", sessionOnly: true, instruments: keys }, panel)
-  const bridge = new Bridge(panel, client)
-  client.start()
-  return { panel, bridge }
 }
 
 /** A panel module that records what happened to it. */
@@ -125,12 +78,10 @@ test("a load naming a running module loads nothing again, and its messages reach
 test("a stop that leaves the panel no module closes its socket", () => {
   const { panel, bridge } = started()
   panel.join()
-  let closed = false
-  panel.socket!.s.close = () => (closed = true)
   panel.say({ t: "load", modules: [{ name: "a", instruments: [] }] })
   bridge.define("a", { start() {} })
   panel.say({ t: "stop", modules: ["a"] })
-  assert.equal(closed, true)
+  assert.equal(panel.socket!.closed, true)
   assert.equal(bridge.status().connection, "closed")
 })
 
@@ -141,4 +92,20 @@ test("an instrument created after the hello joins again, so the core's hello nam
   bridge.add(instrument("mfd", "MFD"))
   panel.socket!.s.onopen!()
   assert.deepEqual(panel.socket!.sent[0]!.instruments, ["PFD", "MFD"])
+})
+
+test("a rejoin stops the panel's modules, so the core's load on the new socket starts each again with its instruments", () => {
+  const { panel, bridge } = started()
+  bridge.add(instrument("pfd", "PFD"))
+  panel.join()
+  const log: string[] = []
+  panel.say({ t: "load", modules: [{ name: "a", instruments: ["PFD"] }] })
+  bridge.define("a", recorder(log, "a"))
+  bridge.add(instrument("mfd", "MFD"))
+  assert.deepEqual(log, ["a started with 1", "a stopped"])
+  panel.socket!.s.onopen!()
+  panel.say({ t: "load", modules: [{ name: "a", instruments: ["PFD", "MFD"] }] })
+  assert.equal(panel.scripts.length, 2, "the module's file loads again")
+  bridge.define("a", recorder(log, "a"))
+  assert.deepEqual(log.slice(2), ["a started with 2"])
 })

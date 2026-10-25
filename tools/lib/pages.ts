@@ -17,11 +17,31 @@ import { STOCK } from "./stock.ts"
 /** Where the build writes our code in the sim, with each bundle's map beside it. */
 export const PAGES = path.join(ROOT, "target", "sim-pages")
 
-/** Each bundle, by its entry, and where our package puts it. */
+/** Each bundle of the sim package's own, by its entry, and where our package puts it. */
 const BUNDLES: { entry: string; to: string }[] = [
   { entry: "src/sim-package/pages/bridge.ts", to: "html_ui/DualInput/bridge.js" },
   { entry: "src/sim-package/pages/menu.ts", to: "html_ui/DualInput/menu.js" },
 ]
+
+/**
+ * Each feature's panel modules: every `.ts` file directly in a feature's `panel/` folder is one,
+ * such as src/features/pointer-sync/panel/pointer-sync.ts, which the bridge loads as
+ * /DualInput/modules/pointer-sync.js once the core names it, so deleting a feature's folder
+ * takes its modules out of our package with no edit here
+ * (record/areas/core/02-clients-and-panel-bridge.md, "Panel modules").
+ */
+function panelModules(root = ROOT): { entry: string; to: string }[] {
+  const features = path.join(root, "src", "features")
+  if (!fs.existsSync(features)) return []
+  return fs.readdirSync(features).flatMap((feature) => {
+    const panel = path.join(features, feature, "panel")
+    if (!fs.existsSync(panel)) return []
+    return fs
+      .readdirSync(panel)
+      .filter((f) => f.endsWith(".ts") && fs.statSync(path.join(panel, f)).isFile())
+      .map((f) => ({ entry: `src/features/${feature}/panel/${f}`, to: `html_ui/DualInput/modules/${f.replace(/\.ts$/, ".js")}` }))
+  })
+}
 
 /** Our VCockpit.js, where our package puts it, so it takes the stock file's place in every cockpit panel. */
 const VCOCKPIT = "html_ui/Pages/VCockpit/Core/VCockpit.js"
@@ -55,8 +75,8 @@ export function buildPages(out = PAGES): Built[] {
   fs.rmSync(out, { recursive: true, force: true })
   fs.mkdirSync(out, { recursive: true })
   const built: Built[] = []
-  for (const { entry, to } of BUNDLES) {
-    const file = path.join(out, path.basename(to))
+  for (const { entry, to } of [...BUNDLES, ...panelModules()]) {
+    const file = path.join(out, to.replace(/^html_ui\/DualInput\//, ""))
     const result = esbuild.buildSync({
       entryPoints: [path.join(ROOT, entry)],
       bundle: true,

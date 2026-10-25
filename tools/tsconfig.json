@@ -2,10 +2,13 @@
 // error on TypeScript it can't strip, such as an enum or a parameter property.
 // `erasableSyntaxOnly` makes tsc flag those first. Node also needs every import to name its
 // .ts file, as in `./lib/run.ts` (https://nodejs.org/api/typescript.html).
+//
+// The bench's fake cockpit panel runs the panel bridge and its modules, which are typed against
+// the DOM, over a fake document, so the DOM's types are here too, though Node has no DOM.
 {
   "compilerOptions": {
     "target": "es2024",
-    "lib": ["es2024"],
+    "lib": ["es2024", "dom"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "allowImportingTsExtensions": true,

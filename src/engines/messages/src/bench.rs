@@ -46,14 +46,12 @@ pub enum ToCore {
     /// Has the network's test unit, which stands in for a feature with a channel of each
     /// delivery, act.
     Net { act: NetAct },
-    /// Has the cockpit stream's test unit, which stands in for state sync and pointer sync,
-    /// act.
+    /// Has the cockpit stream's test unit, which stands in for state sync, act.
     Cockpit { act: CockpitAct },
 }
 
-/// What the cockpit stream's test unit does. It registers a kind of each sort the stream offers,
-/// as state sync's and pointer sync's are, and a catch-up step that hands over the values it
-/// holds, by key.
+/// What the cockpit stream's test unit does. It registers state sync's sorts of kind, and a
+/// catch-up step that hands over the values it holds, by key.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
 #[serde(tag = "act", rename_all = "kebab-case")]
 #[ts(export, export_to = "bench/")]
@@ -90,14 +88,11 @@ pub enum BenchKind {
     PilotFlying,
     /// An event, as state sync's firing.
     Event,
-    /// A press, done once its panel plays it through, as pointer sync's gesture.
-    Press,
 }
 
 pub const HELD: crate::cockpit::CockpitKind<f64> = crate::cockpit::CockpitKind::new(1001);
 pub const PILOT_FLYING: crate::cockpit::CockpitKind<f64> = crate::cockpit::CockpitKind::new(1002);
 pub const EVENT: crate::cockpit::CockpitKind<f64> = crate::cockpit::CockpitKind::new(1003);
-pub const PRESS: crate::cockpit::CockpitKind<f64> = crate::cockpit::CockpitKind::new(1004);
 /// The test unit's catch-up step.
 pub const STEP: u16 = 1001;
 

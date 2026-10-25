@@ -16,7 +16,7 @@ declare global {
     }
     /** The instruments our VCockpit.js created before this file loaded, which it queued here. */
     DUALINPUT_BRIDGE_PENDING?: Element[]
-    /** Stops every panel module in this document, from the inspector or any console. */
+    /** Stops every panel module in this document and removes every lock, from the inspector or any console. */
     DUALINPUT_BRIDGE_UNLOCK?: () => void
     /** The sim's VCockpit.js keeps the panel's data here, its name, such as `VCockpit66`, among it (read in the sim's stock VCockpit.js, `ShowVCockpitPanel`). */
     globalPanelData?: { sName?: string } | null
@@ -33,12 +33,14 @@ export function startBridge(): void {
   const client = new PageClient({ component: COMPONENT, sessionOnly: true, panel, instruments: keys }, env)
   const bridge = new Bridge(
     {
+      document,
       addScript(src, failed) {
         const script = document.createElement("script")
         script.src = src
         script.onerror = failed
         document.head.appendChild(script)
       },
+      mouseEvent: (type, init) => new MouseEvent(type, Object.assign({ view: window }, init)),
       log: env.log,
     },
     client,

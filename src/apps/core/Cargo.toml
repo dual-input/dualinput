@@ -27,6 +27,7 @@ futures-util = { version = "0.3.34", default-features = false, features = ["sink
 kernel = { path = "../../platform/kernel" }
 messages = { path = "../../engines/messages" }
 network = { path = "../../platform/network" }
+pointer-sync = { path = "../../features/pointer-sync/core" }
 profile-loader = { path = "../../platform/profile-loader" }
 recording = { path = "../../platform/recording" }
 recording-format = { path = "../../engines/recording-format" }

@@ -1,5 +1,5 @@
 // The cockpit stream between bench cores in a session, in the flight after preflight, with the
-// test unit that stands in for state sync and pointer sync: a held value's rate, a cut's paced
+// test unit that stands in for state sync, and pointer sync's tap: a held value's rate, a cut's paced
 // and collapsed replay, a takeover during a cut, a late joiner's catch-up, control passing during
 // one, a pilot flying who leaves during a replay, and a member with no profile
 // (record/areas/sync/05-units.md, "Cases for the bench"; record/areas/build/plan.md, "13 The sync
@@ -15,6 +15,7 @@ import { BenchRun, type Core } from "../cores.ts"
 import { BARON, load, toMenu } from "../flights.ts"
 import { app, BenchNetwork, host, join } from "../network.ts"
 import type { FakeApp } from "../pages.ts"
+import { FakeCockpitPanel } from "../panel.ts"
 
 /** A pilot: a core with the bench's network, its fake desktop app, and its sim running. */
 type Pilot = { core: Core; app: FakeApp; name: string }
@@ -64,7 +65,7 @@ function act(p: Pilot, a: CockpitAct): void {
   p.core.cockpit(a)
 }
 
-function send(p: Pilot, kind: "held" | "pilot-flying" | "event" | "press", key: string, value: number, count = 1, every_ms = 0): void {
+function send(p: Pilot, kind: "held" | "pilot-flying" | "event", key: string, value: number, count = 1, every_ms = 0): void {
   act(p, { act: "send", kind, key, value, count, every_ms })
 }
 
@@ -115,21 +116,25 @@ test("a lever changed 60 times a second goes out at most 20 times a second, its 
   const run = new BenchRun("cockpit-held", t)
   const a = await pilot(run, net, "James")
   const b = await pilot(run, net, "Adam")
+  const [panelA, panelB] = [new FakeCockpitPanel(a.core), new FakeCockpitPanel(b.core)]
   await flying(a, b)
+  for (const panel of [panelA, panelB]) await panel.page.until(() => panel.loaded(), "pointer sync's module")
   const [fromA, fromB] = [a.core.heard().length, b.core.heard().length]
   send(a, "held", "lever", 1, 120, 16)
   await sleep(2_500)
   const sent = a.core.heard().slice(fromA).filter((l) => l.startsWith("cockpit sent held lever")).length
   t.diagnostic(`budget: 120 changes over about 2s went out as ${sent} messages, against 20 a second`)
   assert.ok(sent <= 42 && sent >= 30, `${sent} messages`)
-  // A held value and a press right behind it: the value goes out first.
+  // A held value and a pointer sync tap right behind it, within the 50ms the stream holds the
+  // value: the value goes out first.
   send(a, "held", "lever", 500)
-  send(a, "press", "starter", 1)
-  await b.core.hear("cockpit released starter", { after: fromB })
-  const lines = b.core.heard().slice(fromB)
-  const press = lines.indexOf("cockpit pressed starter 1")
+  await sleep(20)
+  panelA.tap(0.1, 0.1)
+  await panelB.page.until(() => panelB.events("click").length > 0, "the tap at B")
   assert.deepEqual(applied(b, "held", "lever", fromB).at(-1), 500)
-  assert.ok(lines.slice(0, press).some((l) => l.startsWith("cockpit applied held lever 500 ")), "the held value applies before the press")
+  const order = a.core.heard().slice(fromA).filter((l) => l.startsWith("cockpit sent ")).slice(-3)
+  assert.deepEqual(order.map((l) => l.split(" ")[2]), ["held", "other", "other"], "the held value goes out before the tap's down and up")
+  for (const panel of [panelA, panelB]) panel.close()
   // The loop's stats for the whole run, which the core logs as it exits
   // (record/areas/core/01-loop-and-edge.md, "Logging").
   for (const p of [a, b]) {

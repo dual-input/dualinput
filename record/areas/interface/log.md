@@ -40,6 +40,24 @@ What we haven't run: an EFB app of ours in landscape, the EFB popped out, the ta
 **Affects:** the EFB app's frames, which [stage 11b](../build/plan.md#11b-the-apps) designs.
 
 **Evidence:** `results/p21-efb-landscape-2026-10-30-17-36-53.txt`, with a screenshot of each layout, cropped to the EFB; `results/p21-efb-landscape-2026-10-30-17-32-58.txt`, the run before, measured the same sizes and saved no screenshots.
+## 2026-10-25: The SDK as npm ships it loads in a browser once four of the sim's globals have stand-ins
+
+**Asked:** can the UI import `@microsoft/msfs-sdk` the usual way and still run outside the sim, for development in a browser and tests, rather than taking FSComponent's modules apart from the package as p18's modules variant does ([entry below](#2026-10-25-fscomponent-runs-in-edge-when-a-bundle-takes-only-the-sdk-modules-it-needs-in-81-kb-while-the-sdk-as-npm-ships-it-throws-on-load-outside-the-sim))?
+The user prefers the usual import, since a new developer knows it (user, 2026-10-25).
+
+**Expected:** a few stand-ins, since the first load error named one global, `SimVar`.
+
+**Found:** adding a stand-in for each global the load next failed on took four: `SimVar`, `RunwayDesignator`, `Avionics`, and `BaseInstrument`.
+Each stand-in is a function whose every property is another stand-in, so the SDK's top-level code can assign to it, read from it, and extend it.
+With them defined before the bundle, the SDK's 2,466 KB npm build loaded in headless Edge 156 and passed all 10 of p18's checks, and without them it threw before any ran.
+
+**Changed:** the UI can import the SDK as npm ships it, and a page or test outside the sim defines the four stand-ins first.
+A stand-in answers any call with nothing, so code that reads the sim gets no data outside it, which only the UI's rendering needs.
+
+**Affects:** the apps' [tentative decisions](decisions.md), and how stage 11b builds the apps ([build plan](../build/plan.md#11b-the-apps)).
+
+**Evidence:** `results/p18-fscomponent-2026-10-25-14-34-47.txt`.
+
 ## 2026-10-25: The EFB's document can't make Go to's requests on the world map, and no add-on's script runs in the toolbar's there, so an EFB app's Go to still needs the menu script
 
 **Asked:** can code in the EFB's document choose the world map's departure airport and stand, as Go to needs, so an EFB app could run Go to without the menu script our copy of BlurPage brings in ([decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md))?

@@ -6,6 +6,8 @@
  *   - "bundle" imports @microsoft/msfs-sdk as npm ships it, one 4 MB module;
  *   - "modules" imports only the SDK's own modules app.tsx names, which the
  *     package's source map carries in full, as 459 compiled ES modules.
+ * The bundle is opened twice, once as it is and once after stand-ins for the
+ * sim's globals it reaches for as it loads (STAND_INS below).
  * For each, it runs the Coherent GT check on the bundle, since the same file has
  * to ship into the sim, counts how often the bundle names the sim's globals, and
  * opens the page in Edge, headless, with a fresh profile, since Edge is the
@@ -43,6 +45,24 @@ const serve = process.argv.includes("--serve")
 
 // What app.tsx imports from the SDK, so the modules variant can export just these.
 const NAMES = ["ArraySubject", "DisplayComponent", "FSComponent", "MappedSubject", "Subject", "SubscribableArrayEventType"]
+
+// The sim's globals npm's msfssdk.js reaches for as it loads, found one error
+// at a time in the browser pane (2026-10-25). The bundle's stand-ins page
+// defines each before app.js, so the SDK as npm ships it can load outside the sim.
+const STAND_INS = ["SimVar", "RunwayDesignator", "Avionics", "BaseInstrument"]
+
+// Each stand-in is a function, so it can be called, extended, or constructed,
+// and its every property is another stand-in. Runs in the page.
+const STAND_IN_SCRIPT = `function standIn(name) {
+  var f = function () {};
+  return new Proxy(f, {
+    get: function (t, k) { if (k in t) return t[k]; if (k === Symbol.toPrimitive) return function () { return 0 }; return standIn(name + "." + String(k)) },
+    set: function (t, k, v) { t[k] = v; return true },
+    construct: function () { return {} },
+    apply: function () { return undefined },
+  });
+}
+${JSON.stringify(STAND_INS)}.forEach(function (n) { window[n] = standIn(n) });`
 
 // The look's colors, as RGB triplets for p17's rgba(var(--x-rgb), alpha) form
 // (record/areas/interface/decisions.md). Neutral grays and shadcn's dark tokens.
@@ -142,6 +162,11 @@ async function buildVariant(name, css, sdkIndex) {
 <title>p18 FSComponent, ${name}</title><link rel="stylesheet" href="app.css"></head>
 <body style="margin: 0; background: #0a0a0a"><div id="dualinput-p18"></div><script src="app.js"></script></body></html>
 `)
+  if (!sdkIndex) fs.writeFileSync(path.join(dir, "stand-ins.html"), `<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>p18 FSComponent, ${name}, with stand-ins</title><link rel="stylesheet" href="app.css"></head>
+<body style="margin: 0; background: #0a0a0a"><div id="dualinput-p18"></div><script>${STAND_IN_SCRIPT}</script><script src="app.js"></script></body></html>
+`)
   const out = Object.values(js.metafile.outputs).find((o) => o.entryPoint)
   const sdkBytes = Object.entries(out.inputs).filter(([file]) => /msfs-sdk|sdk-modules/.test(file)).reduce((n, [, i]) => n + i.bytesInOutput, 0)
   const sdkModules = Object.keys(out.inputs).filter((file) => /sdk-modules/.test(file)).length
@@ -206,9 +231,10 @@ async function main() {
 
   const lines = [`p18-fscomponent, ${new Date().toISOString()}`, ""]
   lines.push(`The SDK's source map carries ${modules.count} modules; the modules variant exports ${NAMES.map((n) => `${n} from ${modules.owner[n]}`).join(", ")}.`)
-  for (const v of variants) {
-    const r = await inEdge(`/${v.name}/`, waitFor)
-    lines.push("", `${v.name}:`)
+  const pages = variants.flatMap((v) => v.name === "bundle" ? [[v, "index.html", ""], [v, "stand-ins.html", `, with stand-ins for ${STAND_INS.join(", ")}`]] : [[v, "index.html", ""]])
+  for (const [v, file, label] of pages) {
+    const r = await inEdge(`/${v.name}/${file}`, waitFor)
+    lines.push("", `${v.name}${label}:`)
     lines.push(`  bundle ${v.bundleKB} KB, of which the SDK ${v.sdkKB} KB${v.sdkModules ? ` from ${v.sdkModules} of its modules` : ""}; CSS ${v.cssKB} KB`)
     lines.push(`  sim globals the bundle names: ${Object.entries(v.names).map(([k, n]) => `${k} ${n}`).join(", ")}`)
     lines.push(`  Coherent GT check: exit ${v.check.exit}${v.check.output ? `\n    ${v.check.output.split("\n").join("\n    ")}` : ", no findings"}`)

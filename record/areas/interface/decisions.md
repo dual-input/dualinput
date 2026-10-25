@@ -88,19 +88,21 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - It changes only when a probe finds something new about the engine, so a tag there and a bump here cost little.
   - With colors written that way and autoprefixer's `-webkit-` forms, Coherent GT keeps 82% of Tailwind 3's utilities, and every common variant but `focus-visible` and `has-` ([interface log][p17]).
   - Tailwind 3 writes a color as `rgb()` with spaces, which the engine drops, and Tailwind 4 writes its CSS in `@layer` and oklch, which it drops whole ([architecture log][p13]).
-- **Leaves out:** where the lists of what p14 measured Coherent GT keeping live, so that our Coherent GT check and msfs-tailwind's test read one copy; and whether it later goes public.
+  The lists of what p14 measured Coherent GT keeping are the Coherent GT check's data, which [decision 031](../../decisions/031-coherent-gt-check-tool.md) gives a repository of its own, and msfs-tailwind's test reads them from the check's package, so the measurements have one home (user, 2026-10-25).
+- **Leaves out:** whether it later goes public.
 
 ## The kit and Dual Input's palette are one package in this repository
 
 - **Decided:** the kit's components, its reset, its stand-ins for the sim's globals, and Dual Input's palette are one npm package in this repository, which our code imports by its name.
   The palette is a second entry point of the package: the colors as hex, the CSS variables, and the Tailwind config that builds them on msfs-tailwind.
   So the banner and the desktop app's window take it without the components.
+  A feature's EFB part imports the kit directly, so the code map's rule on what a part imports names the kit beside its shell and the messages' types ([the code map's rules](../architecture/02-code-map.md#tiers)).
   Settled by the user on 2026-10-25.
 - **Because:**
   - The kit and the palette change with every screen stage 11b builds and every later stage that adds an EFB part, and a stage is reviewed as one diff of this repository ([working a stage](../build/plan.md#working-a-stage)).
   - Nothing but Dual Input uses them (user, 2026-10-25).
   - A package imported by its name moves to a repository of its own without a rewrite, if anything else ever needs it.
-- **Leaves out:** the package's folder and name, and whether a feature's EFB part imports it directly, which the map's rule for a part's imports would then name, or only through its shell.
+- **Leaves out:** the package's folder and name.
 
 ## Our pages import FSComponent from `@microsoft/msfs-sdk` as npm ships it
 

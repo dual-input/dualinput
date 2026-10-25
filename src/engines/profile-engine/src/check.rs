@@ -8,6 +8,7 @@
 use std::collections::BTreeMap;
 
 use crate::blocks::{self, Field};
+use crate::features::{self, EntryFields, Module};
 use crate::format::{
     Aircraft, Count, EventEntry, Owner, Pace, Profile, StateEntry, Steps, Variant, Watch, Write,
 };
@@ -63,10 +64,12 @@ pub(crate) fn check(files: &[File], level: u32, mode: Mode) -> (Checked, Report)
             aircraft: Aircraft::default(),
             state: Vec::new(),
             events: Vec::new(),
+            features: features::Blocks::default(),
         },
         scripts: Vec::new(),
         placed: Vec::new(),
         module: false,
+        variants_named: Vec::new(),
     };
     for file in files {
         c.top(file);
@@ -82,15 +85,18 @@ pub(crate) fn check(files: &[File], level: u32, mode: Mode) -> (Checked, Report)
     )
 }
 
-struct Checker {
+/// The walk, which a feature's module checks its blocks and fields through.
+pub(crate) struct Checker {
     level: u32,
     mode: Mode,
     report: Report,
-    profile: Profile,
+    pub(crate) profile: Profile,
     scripts: Vec<Script>,
     placed: Vec<Placed>,
     /// Whether the file being walked is a module.
     module: bool,
+    /// Each variant ID a feature's field named, which must be one of the profile's.
+    pub(crate) variants_named: Vec<(String, Place)>,
 }
 
 /// A stepping write's map, read before the entry's watch says whether it's counted.
@@ -110,22 +116,49 @@ enum WriteAt {
 }
 
 impl Checker {
-    fn error(&mut self, at: &Place, code: &str, message: impl Into<String>) {
+    pub(crate) fn error(&mut self, at: &Place, code: &str, message: impl Into<String>) {
         self.report
             .push(Diagnostic::error(at.clone(), code, message));
     }
 
     /// The field `key` names among `fields`, if this level has it and this file may use it.
-    fn field(
+    pub(crate) fn field(
         &mut self,
         fields: &'static [Field],
         key: &crate::tree::Key,
         module: bool,
         what: &str,
     ) -> Option<&'static Field> {
-        let Some(field) = blocks::find(fields, &key.text) else {
-            let known: Vec<_> = fields
+        self.field_in(&[fields], key, module, what)
+    }
+
+    /// The field `key` names among the format's own `fields` and each feature's that `of`
+    /// gives, so a feature's block or field fails above its level or in a module as the
+    /// format's own does.
+    fn field_with_features(
+        &mut self,
+        fields: &'static [Field],
+        of: fn(&Module) -> &'static [Field],
+        key: &crate::tree::Key,
+        module: bool,
+        what: &str,
+    ) -> Option<&'static Field> {
+        let mut tables = vec![fields];
+        tables.extend(features::MODULES.iter().map(|m| of(m)));
+        self.field_in(&tables, key, module, what)
+    }
+
+    fn field_in(
+        &mut self,
+        tables: &[&'static [Field]],
+        key: &crate::tree::Key,
+        module: bool,
+        what: &str,
+    ) -> Option<&'static Field> {
+        let Some(field) = tables.iter().find_map(|t| blocks::find(t, &key.text)) else {
+            let known: Vec<_> = tables
                 .iter()
+                .flat_map(|t| t.iter())
                 .filter(|f| f.level <= self.level && !(module && f.profile_only))
                 .map(|f| format!("`{}`", f.key))
                 .collect();
@@ -175,7 +208,11 @@ impl Checker {
         Some(field)
     }
 
-    fn map<'n>(&mut self, node: &'n Node, what: &str) -> Option<&'n [(crate::tree::Key, Node)]> {
+    pub(crate) fn map<'n>(
+        &mut self,
+        node: &'n Node,
+        what: &str,
+    ) -> Option<&'n [(crate::tree::Key, Node)]> {
         match &node.kind {
             Kind::Map(entries) => Some(entries),
             _ => {
@@ -189,7 +226,7 @@ impl Checker {
         }
     }
 
-    fn text(&mut self, node: &Node, what: &str) -> Option<String> {
+    pub(crate) fn text(&mut self, node: &Node, what: &str) -> Option<String> {
         match &node.kind {
             Kind::Str(t) if !t.text.trim().is_empty() => Some(t.text.clone()),
             Kind::Str(_) => {
@@ -207,7 +244,7 @@ impl Checker {
         }
     }
 
-    fn number(&mut self, node: &Node, what: &str) -> Option<f64> {
+    pub(crate) fn number(&mut self, node: &Node, what: &str) -> Option<f64> {
         match node.kind {
             Kind::Number(n) => Some(n),
             _ => {
@@ -222,7 +259,7 @@ impl Checker {
     }
 
     /// A field that takes a list also takes one item on its own.
-    fn items(node: &Node) -> Vec<&Node> {
+    pub(crate) fn items(node: &Node) -> Vec<&Node> {
         match &node.kind {
             Kind::Seq(items) => items.iter().collect(),
             _ => vec![node],
@@ -236,7 +273,9 @@ impl Checker {
         };
         let mut aircraft = false;
         for (key, node) in entries {
-            let Some(field) = self.field(blocks::TOP, key, file.module, "block") else {
+            let Some(field) =
+                self.field_with_features(blocks::TOP, |m| m.blocks, key, file.module, "block")
+            else {
                 continue;
             };
             match field.key {
@@ -264,7 +303,10 @@ impl Checker {
                 }
                 "state" => self.entries(node, false),
                 "events" => self.entries(node, true),
-                _ => unreachable!("every block in blocks::TOP is read above"),
+                other => match features::owner(other, |m| m.blocks) {
+                    Some((m, _)) => (m.check_block)(self, key, node),
+                    None => unreachable!("every block in blocks::TOP is read above"),
+                },
             }
         }
         if !file.module && !aircraft {
@@ -390,12 +432,13 @@ impl Checker {
         let Some(fields) = self.map(node, "An entry") else {
             return;
         };
-        let table = if event {
-            blocks::EVENT_ENTRY
+        let (table, of): (_, fn(&Module) -> &'static [Field]) = if event {
+            (blocks::EVENT_ENTRY, |m| m.event_fields)
         } else {
-            blocks::STATE_ENTRY
+            (blocks::STATE_ENTRY, |m| m.state_fields)
         };
         let module = self.module;
+        let mut entry_features = EntryFields::default();
         let mut placed = Placed {
             key: key.text.clone(),
             at: key.at.clone(),
@@ -412,7 +455,8 @@ impl Checker {
         let mut default: Option<(f64, Place)> = None;
         let mut owner = Owner::Shared;
         for (k, value) in fields {
-            let Some(field) = self.field(table, k, module, "field of an entry") else {
+            let Some(field) = self.field_with_features(table, of, k, module, "field of an entry")
+            else {
                 continue;
             };
             match field.key {
@@ -466,7 +510,10 @@ impl Checker {
                         }
                     }
                 }
-                _ => unreachable!("every field of an entry is read above"),
+                other => match features::owner(other, of) {
+                    Some((m, _)) => (m.check_field)(self, k, value, &mut entry_features),
+                    None => unreachable!("every field of an entry is read above"),
+                },
             }
         }
         let counted = count.is_some();
@@ -535,6 +582,7 @@ impl Checker {
                 write,
                 only,
                 ignore,
+                features: entry_features,
             });
             self.profile.events.len() - 1
         } else {
@@ -546,6 +594,7 @@ impl Checker {
                 owner,
                 only,
                 ignore,
+                features: entry_features,
             });
             self.profile.state.len() - 1
         };
@@ -882,6 +931,15 @@ impl Checker {
                     );
                     self.error(at, "variant-unknown", message);
                 }
+            }
+        }
+        for (id, at) in std::mem::take(&mut self.variants_named) {
+            if !variants.contains(&id) {
+                let message = format!(
+                    "`{id}` isn't one of this profile's variants: {}",
+                    variants.join(", ")
+                );
+                self.error(&at, "variant-unknown", message);
             }
         }
         // Each pair of entries watching one name, with the variants both apply to.

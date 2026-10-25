@@ -9,6 +9,7 @@
 mod blocks;
 mod bundle;
 mod check;
+pub mod features;
 mod format;
 mod index;
 mod levels;

@@ -56,6 +56,30 @@
             ],
             "description": "The names this entry's action also fires"
           },
+          "location": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array"
+              },
+              {
+                "additionalProperties": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "type": "array"
+                },
+                "type": "object"
+              }
+            ],
+            "description": "Where the control is, [x, y, z] in meters from the aircraft's reference point, or a map from variant ID to a point, for the figure's hand"
+          },
           "name": {
             "description": "The event's name for people",
             "type": "string"
@@ -208,10 +232,95 @@
       ],
       "description": "The modules it uses, each by its path from profiles/ without .yaml"
     },
+    "seats": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "eye": {
+            "description": "Where the eyes are, [up, forward] in meters from the hip, in the seat's own frame",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "facing": {
+            "description": "Which way the seat faces, in degrees from the nose, positive to the right, 0 unless given",
+            "type": "number"
+          },
+          "feet": {
+            "description": "Where the feet are, [up, forward] in meters from the hip, in the seat's own frame",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "hip": {
+            "description": "Where the figure's hip sits, [x, y, z] in meters from the aircraft's reference point",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "type": "array"
+          },
+          "knees": {
+            "description": "Where the knees are, [up, forward] in meters from the hip, in the seat's own frame",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "name": {
+            "description": "The seat's name, which a pilot reads",
+            "type": "string"
+          },
+          "only": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "description": "The variant IDs the seat applies to"
+          },
+          "take_radius": {
+            "description": "How near its eye the camera takes the seat, in meters, 0.4 unless given",
+            "exclusiveMinimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "hip",
+          "knees",
+          "feet",
+          "eye"
+        ],
+        "type": "object"
+      },
+      "description": "Where each seated figure sits, by the seat's key",
+      "type": "object"
+    },
     "state": {
       "additionalProperties": {
         "additionalProperties": false,
         "properties": {
+          "deadband": {
+            "description": "With a location, the smallest change of the entry's number, in its own units, that brings the hand",
+            "minimum": 0,
+            "type": "number"
+          },
           "default": {
             "description": "With a counting watch, the shadow value's starting value",
             "type": "number"
@@ -231,6 +340,30 @@
               }
             ],
             "description": "The names this entry's action also fires"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array"
+              },
+              {
+                "additionalProperties": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "type": "array"
+                },
+                "type": "object"
+              }
+            ],
+            "description": "Where the control is, [x, y, z] in meters from the aircraft's reference point, x left, y up, z forward, or a map from variant ID to a point, for the figure's hand"
           },
           "name": {
             "description": "The control's name for people",

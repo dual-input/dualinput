@@ -54,6 +54,9 @@ pub(crate) fn emit(p: &Profile) -> Vec<u8> {
             event_entry(&mut out, e);
         }
     }
+    for m in crate::features::MODULES {
+        (m.emit_blocks)(&p.features, &mut out);
+    }
     out.text.into_bytes()
 }
 
@@ -73,6 +76,9 @@ fn state_entry(out: &mut Out, e: &StateEntry) {
     }
     list(out, "only", e.only.iter().map(|s| scalar(s)));
     list(out, "ignore", e.ignore.iter().map(name));
+    for m in crate::features::MODULES {
+        (m.emit_fields)(&e.features, out);
+    }
 }
 
 fn event_entry(out: &mut Out, e: &EventEntry) {
@@ -82,6 +88,9 @@ fn event_entry(out: &mut Out, e: &EventEntry) {
     write(out, &e.write);
     list(out, "only", e.only.iter().map(|s| scalar(s)));
     list(out, "ignore", e.ignore.iter().map(name));
+    for m in crate::features::MODULES {
+        (m.emit_fields)(&e.features, out);
+    }
 }
 
 fn count(out: &mut Out, c: &Count) {
@@ -188,7 +197,7 @@ fn name(n: &Name) -> String {
 
 /// Text as a plain scalar where YAML reads it back as the same text, and double-quoted with
 /// JSON's escapes, which YAML's double quotes take too, where it wouldn't.
-fn scalar(s: &str) -> String {
+pub(crate) fn scalar(s: &str) -> String {
     let plain = !s.is_empty()
         && s.trim() == s
         && !s.starts_with(|c: char| "-?:,[]{}#&*!|>'\"%@`".contains(c))
@@ -204,13 +213,15 @@ fn scalar(s: &str) -> String {
     }
 }
 
+/// A bundle's text as it's written, a line at a time.
 #[derive(Default)]
-struct Out {
+pub(crate) struct Out {
     text: String,
 }
 
 impl Out {
-    fn line(&mut self, depth: usize, line: &str) {
+    /// A line at `depth`, two spaces each.
+    pub(crate) fn line(&mut self, depth: usize, line: &str) {
         for _ in 0..depth {
             self.text.push_str("  ");
         }

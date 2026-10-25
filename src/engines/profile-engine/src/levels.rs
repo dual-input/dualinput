@@ -6,6 +6,7 @@
 use serde_json::{Map, Value, json};
 
 use crate::blocks::{self, Field};
+use crate::features::{self, Module};
 
 /// Each part of the declarations, with the level it came in at.
 ///
@@ -116,23 +117,34 @@ pub fn schema(level: u32) -> String {
         _ => name.clone(),
     }));
     let write = json!({ "anyOf": [{ "type": "string" }, toggle, steps] });
-    let entry = |table: &[Field]| {
-        object(fields(table, &|key| match key {
-            "name" => json!({ "type": "string" }),
-            "watch" => json!({ "anyOf": [name.clone(), count.clone()] }),
-            "write" => write.clone(),
-            "default" => json!({ "type": "number" }),
-            "owner" => json!({ "enum": ["pilot_flying", "shared"] }),
-            "only" => text_or_texts.clone(),
-            "ignore" => name_or_names.clone(),
-            _ => json!({}),
-        }))
+    // Each feature's blocks or fields of one kind, `of` picking which, after the format's own.
+    let with_features = |own: Map<String, Value>, of: fn(&Module) -> &'static [Field]| {
+        let mut all = own;
+        for m in features::MODULES {
+            all.extend(fields(of(m), &|key| (m.schema)(key)));
+        }
+        all
     };
-    let entries = |table: &[Field]| {
+    let entry = |table: &[Field], of: fn(&Module) -> &'static [Field]| {
+        object(with_features(
+            fields(table, &|key| match key {
+                "name" => json!({ "type": "string" }),
+                "watch" => json!({ "anyOf": [name.clone(), count.clone()] }),
+                "write" => write.clone(),
+                "default" => json!({ "type": "number" }),
+                "owner" => json!({ "enum": ["pilot_flying", "shared"] }),
+                "only" => text_or_texts.clone(),
+                "ignore" => name_or_names.clone(),
+                _ => json!({}),
+            }),
+            of,
+        ))
+    };
+    let entries = |table: &[Field], of: fn(&Module) -> &'static [Field]| {
         json!({
             "type": "object",
             "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
-            "additionalProperties": entry(table),
+            "additionalProperties": entry(table, of),
         })
     };
     let aircraft = object(fields(blocks::AIRCRAFT, &|key| match key {
@@ -141,14 +153,17 @@ pub fn schema(level: u32) -> String {
         }
         _ => pace.clone(),
     }));
-    let top = object(fields(blocks::TOP, &|key| match key {
-        "authors" => json!({ "type": "string" }),
-        "aircraft" => aircraft.clone(),
-        "import" => text_or_texts.clone(),
-        "state" => entries(blocks::STATE_ENTRY),
-        "events" => entries(blocks::EVENT_ENTRY),
-        _ => json!({}),
-    }));
+    let top = object(with_features(
+        fields(blocks::TOP, &|key| match key {
+            "authors" => json!({ "type": "string" }),
+            "aircraft" => aircraft.clone(),
+            "import" => text_or_texts.clone(),
+            "state" => entries(blocks::STATE_ENTRY, |m| m.state_fields),
+            "events" => entries(blocks::EVENT_ENTRY, |m| m.event_fields),
+            _ => json!({}),
+        }),
+        |m| m.blocks,
+    ));
     let mut schema = json!({
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": format!("A Dual Input profile, at level {level} of the format"),

@@ -53,6 +53,7 @@ fn state(key: &str, watch: Name, write: Write) -> StateEntry {
         owner: Owner::Shared,
         only: Vec::new(),
         ignore: Vec::new(),
+        features: Default::default(),
     }
 }
 
@@ -64,6 +65,7 @@ fn event(key: &str, watch: Name, write: Write) -> EventEntry {
         write,
         only: Vec::new(),
         ignore: Vec::new(),
+        features: Default::default(),
     }
 }
 
@@ -73,6 +75,7 @@ fn profile(state: Vec<StateEntry>, events: Vec<EventEntry>) -> Resolved {
         pace: None,
         state,
         events,
+        features: Default::default(),
     }
 }
 

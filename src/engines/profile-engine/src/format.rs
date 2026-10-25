@@ -4,6 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::features::{Blocks, EntryFields};
 use crate::names::Name;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -12,6 +13,8 @@ pub struct Profile {
     pub aircraft: Aircraft,
     pub state: Vec<StateEntry>,
     pub events: Vec<EventEntry>,
+    /// Each feature's blocks, such as avatars' `seats`.
+    pub features: Blocks,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
@@ -38,6 +41,8 @@ pub struct StateEntry {
     /// The variants it applies to, or every variant when empty.
     pub only: Vec<String>,
     pub ignore: Vec<Name>,
+    /// Each feature's fields of it, such as avatars' `location`.
+    pub features: EntryFields,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -49,6 +54,7 @@ pub struct EventEntry {
     pub write: Write,
     pub only: Vec<String>,
     pub ignore: Vec<Name>,
+    pub features: EntryFields,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -167,6 +173,7 @@ impl Profile {
     pub fn resolve(self, variant: &str) -> Resolved {
         let applies = |only: &[String]| only.is_empty() || only.iter().any(|o| o == variant);
         Resolved {
+            features: self.features.resolve(variant),
             variant: variant.to_string(),
             pace: self.aircraft.pace,
             state: self
@@ -190,6 +197,8 @@ pub struct Resolved {
     pub pace: Option<Pace>,
     pub state: Vec<StateEntry>,
     pub events: Vec<EventEntry>,
+    /// Each feature's blocks as this variant has them.
+    pub features: Blocks,
 }
 
 #[cfg(test)]
@@ -211,6 +220,7 @@ mod tests {
             },
             state: Vec::new(),
             events: Vec::new(),
+            features: Blocks::default(),
         }
     }
 

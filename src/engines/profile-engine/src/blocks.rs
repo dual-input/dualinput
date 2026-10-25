@@ -2,10 +2,9 @@
 //! the levels' schemas, and their declarations all read, so a field is added in one place.
 //!
 //! The format's own blocks are read by the checker's own code. A feature's block, such as
-//! pointer sync's `displays`, or a field of an entry, such as avatars' `location`, comes in
-//! through a registration avatars' module brings, its first user (record/areas/build/plan.md,
-//! "17 Avatars"). A level only adds, so a line here never changes its level once a release has
-//! shipped it (record/areas/profiles/01-format-and-delivery.md, "Levels").
+//! pointer sync's `displays`, or a field of an entry, such as avatars' `location`, is its
+//! module's, in `features/`. A level only adds, so a line here never changes its level once a
+//! release has shipped it (record/areas/profiles/01-format-and-delivery.md, "Levels").
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct Field {

@@ -40,6 +40,41 @@ What we haven't run: an EFB app of ours in landscape, the EFB popped out, the ta
 **Affects:** the EFB app's frames, which [stage 11b](../build/plan.md#11b-the-apps) designs.
 
 **Evidence:** `results/p21-efb-landscape-2026-10-30-17-36-53.txt`, with a screenshot of each layout, cropped to the EFB; `results/p21-efb-landscape-2026-10-30-17-32-58.txt`, the run before, measured the same sizes and saved no screenshots.
+## 2026-10-25: Inside an EFB app, clicks, the wheel, hover, focus, and typing reach our elements and a 127.0.0.1 frame as mouse and keyboard events, Geist loads as TTF but not WOFF2, and p18's page renders there with Tailwind 3
+
+**Asked:** what an EFB app of ours gets from the pilot's mouse and keyboard, which font files it can load, and whether p18's page, FSComponent from the SDK's own modules, renders inside an app, for the one front end the user is weighing ([entry below](#2026-10-25-fscomponent-runs-in-edge-when-a-bundle-takes-only-the-sdk-modules-it-needs-in-81-kb-while-the-sdk-as-npm-ships-it-throws-on-load-outside-the-sim)).
+
+**Expected:** that a plain input wouldn't take typing, since the EFB's own text box cancels the press, focuses its input itself, and asks the sim for the keyboard with `Coherent.trigger("FOCUS_INPUT_FIELD", {...})` (read in MSFS 2024's `efb_os.js`, the text box's `onmousedown` and `onFocusIn`), as Fenix's EFB app's does (read in fnx-aircraft-320 2.4.0.4720, `FenixSimEfbApp.js`).
+
+**Found:** at the world map of MSFS 2024, p19 ran three times.
+The first put a panel into the EFB's document from outside, appended to its body over the app area, and the mouse's moves and wheel reached it but no press did: every `mousedown` and `click` landed on the EFB's own app tiles, so no field took focus and the keys went to `BODY`.
+The other two ran inside an EFB app of ours, `Dual Input P19`, which p19's `build.mjs` packages, where every step passed:
+
+| Step | What arrived |
+| --- | --- |
+| Click a box | `mousedown`, `mouseup`, and `click` on the box |
+| Wheel over a list with `overflow-y: auto` | `wheel` events, and the list scrolled 648px |
+| Click a plain input and type abc | `focus`, then `keydown`, `keypress`, and `input` for each key: "abc", with no call to the sim |
+| Click an input focused the EFB's way and type abc | the same, with `FOCUS_INPUT_FIELD` on focus and `UNFOCUS_INPUT_FIELD` on blur |
+| Click a box in a frame from 127.0.0.1 | `mousedown`, `mouseup`, and `click` in the frame |
+| Click the frame's input and type abc | "abc", after the frame posted `FOCUS` to the app, which called the trigger's five-argument form, as Fenix's frame does |
+
+- **Mouse events only:** `PointerEvent` is undefined, and no touch event came, though `TouchEvent` exists.
+- **Keys carry `keyCode` and `charCode`:** `key` is null, so A comes as `keyCode` 65 on `keydown` and 97 on `keypress`.
+- **`:hover` applies:** the box's background under the mouse read `rgb(42, 134, 182)`, its `:hover` color.
+- **The EFB loads no app's CSS:** each app adds its own link at install, as CIVA's does through efb_api's `loadCss` (read in MSFS 2024's `WTCivaApp.js`), and the second run, without one, drew everything unstyled.
+- **Fonts:** Geist Regular's TTF drew from the package's `coui://` path, from 127.0.0.1, and as a `data:` URL, and its WOFF2 drew from none, by each line's width against the monospace it falls back to.
+- **p18's page inside the app:** all 10 of its checks passed, beside the EFB's own copy of the SDK, and its Tailwind 3 CSS, scoped to `#dualinput-p18` and without Tailwind's reset, drew the cards, the chips, the primary button, and the bound bar, but no borders, since the reset is what sets `border-style`.
+- **Colors** read brighter in the screenshots than their hex, because the sim runs in HDR on our development machine (user, 2026-10-25).
+
+**Changed:** one front end on FSComponent and Tailwind 3 can be an EFB app, if its kit listens for mouse events and reads keys by `keyCode`, the app links its own CSS, its fonts ship as TTF, and the kit carries a reset scoped to its own root.
+A plain input takes typing, but whether the sim also acted on those keys we didn't see, so a text field should ask for the keyboard the way the EFB's own does.
+A frame from 127.0.0.1 inside an app also gets the pilot's input, so an app could still show a page the core serves, as Fenix's and Navigraph's apps show theirs.
+
+**Affects:** the apps' [tentative decisions](decisions.md), and how stage 11b builds the apps ([build plan](../build/plan.md#11b-the-apps)).
+
+**Evidence:** `results/p19-efb-input-2026-10-25-11-59-33.txt` (the panel from outside), `results/p19-efb-input-2026-10-25-12-22-00.txt` (the app, unstyled), and `results/p19-efb-input-2026-10-25-12-28-43.txt` with its screenshot of p18's page in the app.
+
 ## 2026-10-25: FSComponent runs in Edge when a bundle takes only the SDK modules it needs, in 81 KB, while the SDK as npm ships it throws on load outside the sim
 
 **Asked:** can a front end on the MSFS Avionics Framework also be the desktop app's, whose window WebView2 draws ([decision 028](../../decisions/028-desktop-pages-react-vite-tailwind.md)), so the EFB app, the banner, and the desktop window show one bundle?

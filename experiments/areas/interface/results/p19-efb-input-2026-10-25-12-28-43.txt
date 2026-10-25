@@ -1,0 +1,328 @@
+p19-efb-input, 2026-10-25T12:29:32.613Z
+
+EFB document: {"href":"coui://html_ui/efb_ui/efb_os/efb_ui.html","userAgent":"Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0","width":598,"height":793,"PointerEvent":"undefined","TouchEvent":"function","Coherent":"object"}
+App's screen: {"x":71,"y":57,"w":456,"h":644}; views [{"what":"onOpen","t":1792931293083},{"what":"onResume","t":1792931293083}]
+Frame: {"href":"http://127.0.0.1:47819/frame","userAgent":"Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0","width":418,"height":240,"PointerEvent":"undefined","TouchEvent":"function","Coherent":"undefined"}
+
+Steps:
+  click: done (3.5s)
+  wheel: done (1.9s)
+  plain: done (4.9s)
+  focused: done (7.2s)
+  frameClick: done (4.5s)
+  frameType: done (8.5s)
+
+Events per step (EFB document):
+  click: mouseout 11, mouseleave 15, mouseover 11, mouseenter 16, mousemove 94, mousedown 1, mouseup 1, click 1
+  wheel: mousemove 57, wheel 11, mouseout 7, mouseleave 8, mouseover 7, mouseenter 9
+  plain: mousemove 147, mouseout 2, mouseleave 3, mouseover 2, mouseenter 2, mousedown 1, focus 1, focusin 1, mouseup 1, click 1, keydown 3, keypress 3, beforeinput 3, input 3, keyup 3, change 1, blur 1, focusout 1
+  focused: mousemove 217, mouseout 2, mouseleave 2, mouseover 2, mouseenter 3, keydown 4, keypress 4, keyup 4, mousedown 1, focus 1, focusin 1, mouseup 1, click 1, beforeinput 3, input 3, change 1, blur 1, focusout 1
+  frameClick: mousemove 36, mouseout 7, mouseleave 9, mouseover 7, mouseenter 7, wheel 1
+  frameType: none
+
+Events per step (frame):
+  click: none
+  wheel: none
+  plain: none
+  focused: none
+  frameClick: mouseover 4, mouseenter 4, mousemove 102, mouseout 3, wheel 1, mouseleave 1, mousedown 1, mouseup 1, click 1
+  frameType: mousemove 243, mouseout 11, mouseleave 8, mouseover 11, mouseenter 9, mousedown 1, focus 1, focusin 1, mouseup 1, click 1, keydown 3, keypress 3, beforeinput 3, input 3, keyup 3
+
+Fields: plain "abc", focused "abc", frame "abc"; list scrolled to 648px; box's background under the mouse rgb(42, 134, 182)
+Triggers: [{"name":"FOCUS_INPUT_FIELD","args":[{"title":"Title","description":"","default_text":"","is_numeric":false,"is_efb":true}],"step":"setup","t":1792931295377},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FIELD"],"step":"setup","t":1792931295711},{"name":"FOCUS_INPUT_FIELD","args":[{"title":"Title","description":"","default_text":"","is_numeric":false,"is_efb":true}],"step":"setup","t":1792931296944},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FIELD"],"step":"setup","t":1792931297411},{"name":"FOCUS_INPUT_FIELD","args":[{"title":"Title","description":"","default_text":"","is_numeric":false,"is_efb":true}],"step":"setup","t":1792931303376},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FIELD"],"step":"setup","t":1792931303843},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FIELD"],"step":"click","t":1792931342844},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FIELD"],"step":"wheel","t":1792931344744},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FIELD"],"step":"plain","t":1792931349644},{"name":"FOCUS_INPUT_FIELD","args":[{"title":"Title","description":"","default_text":"","is_numeric":false,"is_efb":true}],"step":"focused","t":1792931353176},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FIELD"],"step":"focused","t":1792931356877},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FIELD"],"step":"focused","t":1792931356877},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FIELD"],"step":"frameClick","t":1792931361443},{"name":"FOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FRAME","","","",false],"step":"frameType","t":1792931366178},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FIELD"],"step":"frameType","t":1792931370012},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FRAME"],"step":"frameType","t":1792931370012},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P19_FRAME"],"step":"frameType","t":1792931370043}]
+SetInputTextFromOS: []
+
+Fonts (app): {"P19-Coui-TTF":{"width":423,"monospace":411,"drew":true},"P19-Coui-WOFF2":{"width":411,"monospace":411,"drew":false}}
+Fonts (frame): {"P19-Http-TTF":{"width":423,"monospace":411,"drew":true},"P19-Http-WOFF2":{"width":411,"monospace":411,"drew":false}}
+
+p18 in the app: 
+  sim globals {"SimVar":"object","Coherent":"object","BaseInstrument":"undefined"}
+    ok   renders the tree
+    ok   a click updates text bound to a MappedSubject (Pressed 3 times)
+    ok   a class bound to a subject follows it (inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-warning/15 text-warning)
+    ok   a class record toggles a class (rounded-md h-2 bg-primary ring-2 ring-ring)
+    ok   a style record binds a style (75%)
+    ok   an ArraySubject list adds and removes rows in order (Pilot 2,Pilot 3)
+    ok   typing reaches a subject (DLH4A)
+    ok   a subject reaches the field (BAW12)
+    ok   a binding outlives its removed element (a leak the kit must own) (after)
+    ok   1,000 rows render and clear (51.3ms for 1000 rows, 0 left after clear)
+  screenshot: experiments/areas/interface/results/p19-efb-input-2026-10-25-12-28-43/01-p18-in-app.jpg
+
+First events of each type, per step:
+  app   {"step":"setup","type":"mouseout","target":"rect","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":230,"y":307,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293094}
+  app   {"step":"setup","type":"mouseleave","target":"rect","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":230,"y":307,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293094}
+  app   {"step":"setup","type":"mouseleave","target":"svg","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":230,"y":307,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293094}
+  app   {"step":"setup","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":230,"y":307,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293094}
+  app   {"step":"setup","type":"mouseleave","target":"BUTTON","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":230,"y":307,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293094}
+  app   {"step":"setup","type":"mouseover","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":230,"y":307,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293094}
+  app   {"step":"setup","type":"mouseenter","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":230,"y":307,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293094}
+  app   {"step":"setup","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":230,"y":307,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293094}
+  app   {"step":"setup","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":230,"y":307,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293094}
+  app   {"step":"setup","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":230,"y":307,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293094}
+  app   {"step":"setup","type":"mousemove","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":230,"y":307,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293094}
+  app   {"step":"setup","type":"mouseout","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":228,"y":312,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293111}
+  app   {"step":"setup","type":"mouseover","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":228,"y":312,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293111}
+  app   {"step":"setup","type":"mousemove","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":228,"y":312,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293111}
+  app   {"step":"setup","type":"mousemove","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":223,"y":323,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293152}
+  app   {"step":"setup","type":"mousemove","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":218,"y":334,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293177}
+  app   {"step":"setup","type":"mouseout","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":217,"y":357,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293244}
+  app   {"step":"setup","type":"mouseover","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":217,"y":357,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293244}
+  app   {"step":"setup","type":"mouseout","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":217,"y":402,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293311}
+  app   {"step":"setup","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":217,"y":402,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931293311}
+  app   {"step":"setup","type":"mousedown","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":169,"y":350,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931294977}
+  app   {"step":"setup","type":"mouseup","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":169,"y":350,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295077}
+  app   {"step":"setup","type":"click","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":169,"y":350,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295077}
+  app   {"step":"setup","type":"mousedown","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":169,"y":355,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295377}
+  app   {"step":"setup","type":"focus","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295377}
+  app   {"step":"setup","type":"focusin","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295377}
+  app   {"step":"setup","type":"mouseup","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":169,"y":355,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295481}
+  app   {"step":"setup","type":"click","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":169,"y":355,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295481}
+  app   {"step":"setup","type":"mousedown","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":170,"y":324,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295711}
+  app   {"step":"setup","type":"blur","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295711}
+  app   {"step":"setup","type":"focusout","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295711}
+  app   {"step":"setup","type":"focus","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295711}
+  app   {"step":"setup","type":"focusin","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295711}
+  app   {"step":"setup","type":"mouseup","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":170,"y":324,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295810}
+  app   {"step":"setup","type":"click","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":170,"y":324,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931295810}
+  app   {"step":"setup","type":"mousedown","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":172,"y":287,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931296277}
+  app   {"step":"setup","type":"blur","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931296277}
+  app   {"step":"setup","type":"focusout","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931296277}
+  app   {"step":"setup","type":"mouseup","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":172,"y":287,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931296377}
+  app   {"step":"setup","type":"click","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":172,"y":287,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931296377}
+  app   {"step":"setup","type":"focus","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931296676}
+  app   {"step":"setup","type":"focusin","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931296676}
+  app   {"step":"setup","type":"blur","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931296944}
+  app   {"step":"setup","type":"focusout","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931296944}
+  app   {"step":"setup","type":"focus","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931296944}
+  app   {"step":"setup","type":"focusin","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931296944}
+  app   {"step":"setup","type":"blur","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931297411}
+  app   {"step":"setup","type":"focusout","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931297411}
+  app   {"step":"setup","type":"keydown","target":"BODY","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":34,"charCode":0,"key":null,"data":null,"t":1792931300509}
+  app   {"step":"setup","type":"keyup","target":"BODY","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":34,"charCode":0,"key":null,"data":null,"t":1792931300575}
+  app   {"step":"ready","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931331210}
+  app   {"step":"ready","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931331244}
+  app   {"step":"ready","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931331277}
+  app   {"step":"ready","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931331310}
+  app   {"step":"ready","type":"keydown","target":"BODY","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":34,"charCode":0,"key":null,"data":null,"t":1792931339208}
+  app   {"step":"ready","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339210}
+  app   {"step":"ready","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339210}
+  app   {"step":"ready","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339210}
+  app   {"step":"ready","type":"mouseover","target":"p19-frame","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339210}
+  app   {"step":"ready","type":"mouseenter","target":"p19-frame","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339210}
+  app   {"step":"ready","type":"keyup","target":"BODY","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":34,"charCode":0,"key":null,"data":null,"t":1792931339275}
+  app   {"step":"click","type":"mouseout","target":"p19-frame","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339343}
+  app   {"step":"click","type":"mouseleave","target":"p19-frame","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339343}
+  app   {"step":"click","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339343}
+  app   {"step":"click","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339343}
+  app   {"step":"click","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339343}
+  app   {"step":"click","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339343}
+  app   {"step":"click","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339376}
+  app   {"step":"click","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339410}
+  app   {"step":"click","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":489,"y":453,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931339443}
+  app   {"step":"click","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":541,"y":459,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931340044}
+  app   {"step":"click","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":541,"y":459,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931340044}
+  app   {"step":"click","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":541,"y":459,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931340044}
+  app   {"step":"click","type":"mouseleave","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":541,"y":459,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931340044}
+  app   {"step":"click","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":541,"y":459,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931340044}
+  app   {"step":"click","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":640,"y":434,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931340077}
+  app   {"step":"click","type":"mouseover","target":"HTML","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":591,"y":317,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931340510}
+  app   {"step":"click","type":"mouseenter","target":"HTML","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":591,"y":317,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931340510}
+  app   {"step":"click","type":"mouseout","target":"HTML","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":523,"y":282,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931340577}
+  app   {"step":"click","type":"mouseover","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":523,"y":282,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931340577}
+  app   {"step":"click","type":"mouseenter","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":523,"y":282,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931340577}
+  app   {"step":"click","type":"mousedown","target":"p19-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":339,"y":192,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931341043}
+  app   {"step":"click","type":"mouseup","target":"p19-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":339,"y":192,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931341110}
+  app   {"step":"click","type":"click","target":"p19-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":339,"y":192,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931341110}
+  app   {"step":"wheel","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":209,"y":289,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931342910}
+  app   {"step":"wheel","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":209,"y":289,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931342943}
+  app   {"step":"wheel","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":209,"y":289,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931342976}
+  app   {"step":"wheel","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":209,"y":289,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343010}
+  app   {"step":"wheel","type":"wheel","target":"DIV","trusted":true,"prevented":false,"cls":"WheelEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343643}
+  app   {"step":"wheel","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343677}
+  app   {"step":"wheel","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343677}
+  app   {"step":"wheel","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343677}
+  app   {"step":"wheel","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343677}
+  app   {"step":"wheel","type":"wheel","target":"DIV","trusted":true,"prevented":false,"cls":"WheelEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343677}
+  app   {"step":"wheel","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343710}
+  app   {"step":"wheel","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343710}
+  app   {"step":"wheel","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343710}
+  app   {"step":"wheel","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343710}
+  app   {"step":"wheel","type":"wheel","target":"DIV","trusted":true,"prevented":false,"cls":"WheelEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343710}
+  app   {"step":"wheel","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343743}
+  app   {"step":"wheel","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343743}
+  app   {"step":"wheel","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343743}
+  app   {"step":"wheel","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343743}
+  app   {"step":"wheel","type":"wheel","target":"DIV","trusted":true,"prevented":false,"cls":"WheelEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343776}
+  app   {"step":"wheel","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343810}
+  app   {"step":"wheel","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343810}
+  app   {"step":"wheel","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343810}
+  app   {"step":"wheel","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931343810}
+  app   {"step":"plain","type":"mousemove","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931344810}
+  app   {"step":"plain","type":"mousemove","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931344843}
+  app   {"step":"plain","type":"mousemove","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931344876}
+  app   {"step":"plain","type":"mousemove","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":190,"y":278,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931344910}
+  app   {"step":"plain","type":"mouseout","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":184,"y":242,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345277}
+  app   {"step":"plain","type":"mouseleave","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":184,"y":242,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345277}
+  app   {"step":"plain","type":"mouseleave","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":184,"y":242,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345277}
+  app   {"step":"plain","type":"mouseleave","target":"p19-focused-wrap","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":184,"y":242,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345277}
+  app   {"step":"plain","type":"mouseover","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":184,"y":242,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345277}
+  app   {"step":"plain","type":"mouseout","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":180,"y":225,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345310}
+  app   {"step":"plain","type":"mouseover","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":180,"y":225,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345310}
+  app   {"step":"plain","type":"mouseenter","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":180,"y":225,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345310}
+  app   {"step":"plain","type":"mouseenter","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":180,"y":225,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345310}
+  app   {"step":"plain","type":"mousedown","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":179,"y":218,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345510}
+  app   {"step":"plain","type":"focus","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345510}
+  app   {"step":"plain","type":"focusin","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345510}
+  app   {"step":"plain","type":"mouseup","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":179,"y":218,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345577}
+  app   {"step":"plain","type":"click","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":179,"y":218,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931345577}
+  app   {"step":"plain","type":"keydown","target":"p19-plain","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":65,"charCode":0,"key":null,"data":null,"t":1792931346642}
+  app   {"step":"plain","type":"keypress","target":"p19-plain","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":97,"charCode":97,"key":null,"data":null,"t":1792931346642}
+  app   {"step":"plain","type":"beforeinput","target":"p19-plain","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"a","t":1792931346642}
+  app   {"step":"plain","type":"input","target":"p19-plain","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"a","t":1792931346642}
+  app   {"step":"plain","type":"keyup","target":"p19-plain","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":65,"charCode":0,"key":null,"data":null,"t":1792931346709}
+  app   {"step":"plain","type":"keydown","target":"p19-plain","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":66,"charCode":0,"key":null,"data":null,"t":1792931347542}
+  app   {"step":"plain","type":"keypress","target":"p19-plain","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":98,"charCode":98,"key":null,"data":null,"t":1792931347542}
+  app   {"step":"plain","type":"beforeinput","target":"p19-plain","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"b","t":1792931347542}
+  app   {"step":"plain","type":"input","target":"p19-plain","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"b","t":1792931347542}
+  app   {"step":"plain","type":"keyup","target":"p19-plain","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":66,"charCode":0,"key":null,"data":null,"t":1792931347642}
+  app   {"step":"plain","type":"keydown","target":"p19-plain","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":67,"charCode":0,"key":null,"data":null,"t":1792931347942}
+  app   {"step":"plain","type":"keypress","target":"p19-plain","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":99,"charCode":99,"key":null,"data":null,"t":1792931347942}
+  app   {"step":"plain","type":"beforeinput","target":"p19-plain","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"c","t":1792931347942}
+  app   {"step":"plain","type":"input","target":"p19-plain","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"c","t":1792931347943}
+  app   {"step":"plain","type":"keyup","target":"p19-plain","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":67,"charCode":0,"key":null,"data":null,"t":1792931348009}
+  app   {"step":"plain","type":"change","target":"p19-plain","trusted":true,"prevented":false,"cls":"Event","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931349644}
+  app   {"step":"plain","type":"blur","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931349644}
+  app   {"step":"plain","type":"focusout","target":"p19-plain","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931349644}
+  app   {"step":"focused","type":"mousemove","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":179,"y":218,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931349710}
+  app   {"step":"focused","type":"mousemove","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":179,"y":218,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931349743}
+  app   {"step":"focused","type":"mousemove","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":179,"y":218,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931349776}
+  app   {"step":"focused","type":"mousemove","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":179,"y":218,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931349810}
+  app   {"step":"focused","type":"mouseout","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":169,"y":247,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931350210}
+  app   {"step":"focused","type":"mouseleave","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":169,"y":247,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931350211}
+  app   {"step":"focused","type":"mouseleave","target":"p19-plain","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":169,"y":247,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931350211}
+  app   {"step":"focused","type":"mouseover","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":169,"y":247,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931350211}
+  app   {"step":"focused","type":"mouseout","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":166,"y":255,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931350244}
+  app   {"step":"focused","type":"mouseover","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":166,"y":255,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931350244}
+  app   {"step":"focused","type":"mouseenter","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":166,"y":255,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931350244}
+  app   {"step":"focused","type":"mouseenter","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":166,"y":255,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931350244}
+  app   {"step":"focused","type":"mouseenter","target":"p19-focused-wrap","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":166,"y":255,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931350244}
+  app   {"step":"focused","type":"keydown","target":"BODY","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":65,"charCode":0,"key":null,"data":null,"t":1792931352075}
+  app   {"step":"focused","type":"keypress","target":"BODY","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":97,"charCode":97,"key":null,"data":null,"t":1792931352075}
+  app   {"step":"focused","type":"keyup","target":"BODY","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":65,"charCode":0,"key":null,"data":null,"t":1792931352175}
+  app   {"step":"focused","type":"mousedown","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":165,"y":262,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931353176}
+  app   {"step":"focused","type":"focus","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931353176}
+  app   {"step":"focused","type":"focusin","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931353176}
+  app   {"step":"focused","type":"mouseup","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":165,"y":262,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931353211}
+  app   {"step":"focused","type":"click","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":165,"y":262,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931353211}
+  app   {"step":"focused","type":"keydown","target":"p19-focused","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":65,"charCode":0,"key":null,"data":null,"t":1792931354308}
+  app   {"step":"focused","type":"keypress","target":"p19-focused","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":97,"charCode":97,"key":null,"data":null,"t":1792931354309}
+  app   {"step":"focused","type":"beforeinput","target":"p19-focused","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"a","t":1792931354309}
+  app   {"step":"focused","type":"input","target":"p19-focused","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"a","t":1792931354309}
+  app   {"step":"focused","type":"keyup","target":"p19-focused","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":65,"charCode":0,"key":null,"data":null,"t":1792931354375}
+  app   {"step":"focused","type":"keydown","target":"p19-focused","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":66,"charCode":0,"key":null,"data":null,"t":1792931354875}
+  app   {"step":"focused","type":"keypress","target":"p19-focused","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":98,"charCode":98,"key":null,"data":null,"t":1792931354875}
+  app   {"step":"focused","type":"beforeinput","target":"p19-focused","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"b","t":1792931354875}
+  app   {"step":"focused","type":"input","target":"p19-focused","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"b","t":1792931354876}
+  app   {"step":"focused","type":"keyup","target":"p19-focused","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":66,"charCode":0,"key":null,"data":null,"t":1792931354975}
+  app   {"step":"focused","type":"keydown","target":"p19-focused","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":67,"charCode":0,"key":null,"data":null,"t":1792931355208}
+  app   {"step":"focused","type":"keypress","target":"p19-focused","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":99,"charCode":99,"key":null,"data":null,"t":1792931355208}
+  app   {"step":"focused","type":"beforeinput","target":"p19-focused","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"c","t":1792931355208}
+  app   {"step":"focused","type":"input","target":"p19-focused","trusted":true,"prevented":false,"cls":"InputEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":"c","t":1792931355209}
+  app   {"step":"focused","type":"keyup","target":"p19-focused","trusted":true,"prevented":false,"cls":"KeyboardEvent","button":null,"x":null,"y":null,"keyCode":67,"charCode":0,"key":null,"data":null,"t":1792931355275}
+  app   {"step":"focused","type":"change","target":"p19-focused","trusted":true,"prevented":false,"cls":"Event","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931356877}
+  app   {"step":"focused","type":"blur","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931356877}
+  app   {"step":"focused","type":"focusout","target":"p19-focused","trusted":true,"prevented":false,"cls":"FocusEvent","button":null,"x":null,"y":null,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931356877}
+  app   {"step":"frameClick","type":"mousemove","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":165,"y":262,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931356943}
+  app   {"step":"frameClick","type":"mousemove","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":165,"y":262,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931356976}
+  app   {"step":"frameClick","type":"mousemove","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":165,"y":262,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357010}
+  app   {"step":"frameClick","type":"mousemove","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":165,"y":262,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357043}
+  app   {"step":"frameClick","type":"mouseout","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":162,"y":304,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357410}
+  app   {"step":"frameClick","type":"mouseleave","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":162,"y":304,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357411}
+  app   {"step":"frameClick","type":"mouseleave","target":"p19-focused","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":162,"y":304,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357411}
+  app   {"step":"frameClick","type":"mouseleave","target":"p19-focused-wrap","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":162,"y":304,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357411}
+  app   {"step":"frameClick","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":162,"y":304,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357411}
+  app   {"step":"frameClick","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":162,"y":304,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357411}
+  app   {"step":"frameClick","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":162,"y":304,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357411}
+  app   {"step":"frameClick","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":158,"y":339,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357444}
+  app   {"step":"frameClick","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":158,"y":339,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357444}
+  app   {"step":"frameClick","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":158,"y":339,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357444}
+  app   {"step":"frameClick","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":158,"y":339,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357444}
+  app   {"step":"frameClick","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":149,"y":377,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357477}
+  app   {"step":"frameClick","type":"mouseover","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":149,"y":377,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357477}
+  app   {"step":"frameClick","type":"mouseout","target":"p19-scroll","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":147,"y":393,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357510}
+  app   {"step":"frameClick","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":147,"y":393,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357510}
+  app   {"step":"frameClick","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":147,"y":393,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931357510}
+  app   {"step":"frameClick","type":"wheel","target":"p19-frame","trusted":true,"prevented":false,"cls":"WheelEvent","button":0,"x":114,"y":459,"keyCode":null,"charCode":null,"key":null,"data":null,"t":1792931358877}
+  frame {"step":"ready","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":14,"t":1792931339210}
+  frame {"step":"ready","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":14,"t":1792931339210}
+  frame {"step":"ready","type":"mouseenter","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":14,"t":1792931339210}
+  frame {"step":"ready","type":"mouseenter","target":"HTML","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":14,"t":1792931339210}
+  frame {"step":"ready","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":14,"t":1792931339210}
+  frame {"step":"ready","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":14,"t":1792931339243}
+  frame {"step":"ready","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":14,"t":1792931339278}
+  frame {"step":"ready","type":"mousemove","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":14,"t":1792931339310}
+  frame {"step":"ready","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":-90,"t":1792931339343}
+  frame {"step":"ready","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":-90,"t":1792931339343}
+  frame {"step":"ready","type":"mouseleave","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":-90,"t":1792931339343}
+  frame {"step":"ready","type":"mouseleave","target":"HTML","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":404,"y":-90,"t":1792931339343}
+  frame {"step":"frameClick","type":"mouseover","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":42,"y":1,"t":1792931358144}
+  frame {"step":"frameClick","type":"mouseenter","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":42,"y":1,"t":1792931358144}
+  frame {"step":"frameClick","type":"mouseenter","target":"HTML","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":42,"y":1,"t":1792931358144}
+  frame {"step":"frameClick","type":"mousemove","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":42,"y":1,"t":1792931358144}
+  frame {"step":"frameClick","type":"mousemove","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":37,"y":7,"t":1792931358177}
+  frame {"step":"frameClick","type":"mousemove","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":36,"y":8,"t":1792931358210}
+  frame {"step":"frameClick","type":"mousemove","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":36,"y":8,"t":1792931358243}
+  frame {"step":"frameClick","type":"mouseout","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":34,"y":10,"t":1792931358343}
+  frame {"step":"frameClick","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":34,"y":10,"t":1792931358343}
+  frame {"step":"frameClick","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":34,"y":10,"t":1792931358343}
+  frame {"step":"frameClick","type":"wheel","target":"DIV","trusted":true,"prevented":false,"cls":"WheelEvent","button":0,"x":29,"y":20,"t":1792931358877}
+  frame {"step":"frameClick","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":29,"y":24,"t":1792931358910}
+  frame {"step":"frameClick","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":29,"y":24,"t":1792931358910}
+  frame {"step":"frameClick","type":"mouseover","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":29,"y":24,"t":1792931358910}
+  frame {"step":"frameClick","type":"mouseout","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":44,"y":32,"t":1792931359044}
+  frame {"step":"frameClick","type":"mouseover","target":"p19-frame-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":44,"y":32,"t":1792931359044}
+  frame {"step":"frameClick","type":"mouseenter","target":"p19-frame-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":44,"y":32,"t":1792931359044}
+  frame {"step":"frameClick","type":"mousedown","target":"p19-frame-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":61,"y":43,"t":1792931359377}
+  frame {"step":"frameClick","type":"mouseup","target":"p19-frame-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":61,"y":44,"t":1792931359444}
+  frame {"step":"frameClick","type":"click","target":"p19-frame-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":61,"y":44,"t":1792931359444}
+  frame {"step":"frameType","type":"mousemove","target":"p19-frame-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":34,"y":86,"t":1792931361543}
+  frame {"step":"frameType","type":"mousemove","target":"p19-frame-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":34,"y":86,"t":1792931361577}
+  frame {"step":"frameType","type":"mousemove","target":"p19-frame-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":34,"y":86,"t":1792931361610}
+  frame {"step":"frameType","type":"mousemove","target":"p19-frame-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":34,"y":86,"t":1792931361643}
+  frame {"step":"frameType","type":"mouseout","target":"p19-frame-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":42,"y":88,"t":1792931362844}
+  frame {"step":"frameType","type":"mouseleave","target":"p19-frame-box","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":42,"y":88,"t":1792931362844}
+  frame {"step":"frameType","type":"mouseover","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":42,"y":88,"t":1792931362844}
+  frame {"step":"frameType","type":"mouseout","target":"BODY","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":44,"y":100,"t":1792931362877}
+  frame {"step":"frameType","type":"mouseover","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":44,"y":100,"t":1792931362877}
+  frame {"step":"frameType","type":"mouseenter","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":44,"y":100,"t":1792931362877}
+  frame {"step":"frameType","type":"mouseenter","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":44,"y":100,"t":1792931362877}
+  frame {"step":"frameType","type":"mouseout","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":49,"y":148,"t":1792931362910}
+  frame {"step":"frameType","type":"mouseleave","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":49,"y":148,"t":1792931362910}
+  frame {"step":"frameType","type":"mouseleave","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":49,"y":148,"t":1792931362910}
+  frame {"step":"frameType","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":49,"y":148,"t":1792931362910}
+  frame {"step":"frameType","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":49,"y":148,"t":1792931362910}
+  frame {"step":"frameType","type":"mouseenter","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":49,"y":148,"t":1792931362910}
+  frame {"step":"frameType","type":"mouseout","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":51,"y":179,"t":1792931362944}
+  frame {"step":"frameType","type":"mouseleave","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":51,"y":179,"t":1792931362944}
+  frame {"step":"frameType","type":"mouseover","target":"DIV","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":51,"y":179,"t":1792931362944}
+  frame {"step":"frameType","type":"mousedown","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":62,"y":109,"t":1792931366177}
+  frame {"step":"frameType","type":"focus","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"FocusEvent","t":1792931366177}
+  frame {"step":"frameType","type":"focusin","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"FocusEvent","t":1792931366177}
+  frame {"step":"frameType","type":"mouseup","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":62,"y":109,"t":1792931366244}
+  frame {"step":"frameType","type":"click","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"MouseEvent","button":0,"x":62,"y":109,"t":1792931366244}
+  frame {"step":"frameType","type":"keydown","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"KeyboardEvent","keyCode":65,"charCode":0,"t":1792931367275}
+  frame {"step":"frameType","type":"keypress","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"KeyboardEvent","keyCode":97,"charCode":97,"t":1792931367275}
+  frame {"step":"frameType","type":"beforeinput","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"InputEvent","data":"a","t":1792931367275}
+  frame {"step":"frameType","type":"input","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"InputEvent","data":"a","t":1792931367275}
+  frame {"step":"frameType","type":"keyup","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"KeyboardEvent","keyCode":65,"charCode":0,"t":1792931367375}
+  frame {"step":"frameType","type":"keydown","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"KeyboardEvent","keyCode":66,"charCode":0,"t":1792931367808}
+  frame {"step":"frameType","type":"keypress","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"KeyboardEvent","keyCode":98,"charCode":98,"t":1792931367808}
+  frame {"step":"frameType","type":"beforeinput","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"InputEvent","data":"b","t":1792931367808}
+  frame {"step":"frameType","type":"input","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"InputEvent","data":"b","t":1792931367809}
+  frame {"step":"frameType","type":"keyup","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"KeyboardEvent","keyCode":66,"charCode":0,"t":1792931367875}
+  frame {"step":"frameType","type":"keydown","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"KeyboardEvent","keyCode":67,"charCode":0,"t":1792931368175}
+  frame {"step":"frameType","type":"keypress","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"KeyboardEvent","keyCode":99,"charCode":99,"t":1792931368175}
+  frame {"step":"frameType","type":"beforeinput","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"InputEvent","data":"c","t":1792931368175}
+  frame {"step":"frameType","type":"input","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"InputEvent","data":"c","t":1792931368176}
+  frame {"step":"frameType","type":"keyup","target":"p19-frame-field","trusted":true,"prevented":false,"cls":"KeyboardEvent","keyCode":67,"charCode":0,"t":1792931368242}

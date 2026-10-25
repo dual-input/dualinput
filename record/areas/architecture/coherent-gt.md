@@ -1,8 +1,9 @@
 # Coherent GT's JavaScript and CSS
 
-What MSFS 2024's Coherent GT, the engine of its cockpit panels, EFB, toolbar, in-game panels, and menu, parses, provides, and draws.
+What MSFS 2024's Coherent GT, the engine of its cockpit panels, EFB, toolbar, in-game panels, and menu, parses, provides, and keeps.
 Its JavaScript was measured on MSFS 2024 SunRise 12.2.282174.999 in five documents on 2026-10-09: mainUi, the EFB's, the toolbar's, a cockpit panel, and an in-game panel of ours ([architecture log][p09]).
 Its CSS was measured on MSFS 2024, Steam build 26058316, in mainUi, the EFB's document, and the toolbar's on 2026-10-25, against Chromium 152 ([architecture log][p14]).
+No probe has measured the CSS of an in-game panel's document, where the banner runs; the three documents measured kept and dropped the same items, and differ only in the defaults their own stylesheets set, below.
 Its user agent says Chrome 49 and its makers last compared it to Safari 10.1.2, but its features match neither ([architecture log][research]), so these lists are the rule.
 Why our code is compiled to `es2017` is in the [spine](01-spine.md#compiling-our-code-in-the-sim).
 
@@ -50,17 +51,21 @@ TypeScript's DOM types declare each missing API, so code that uses one type-chec
 
 ## CSS
 
-The engine drops a declaration it can't read, and a whole rule when its selector or at-rule is one it can't read, with no error.
-p14 tested all of CSS as MDN's mdn-data 2.37.2 lists it, and its report names every item the engine drops that Chromium 152 keeps ([architecture log][p14]); this table gives the families.
-Tailwind 4's output sits in `@layer`s and gives its colors in oklch, so none of it draws here ([architecture log][p13]).
+The engine drops a declaration it can't parse, and a whole rule when it can't parse the rule's selector or at-rule, with no error.
+Our probe p14 tested each property, keyword, unit, selector, and at-rule MDN's mdn-data 2.37.2 lists, with function samples and value forms of ours, and its report names each one the engine drops that Chromium 152 keeps ([architecture log][p14]).
+A few entries below come from p13's layout tests alone, such as `opacity` as a percent, `column-gap`, and `display: contents` ([architecture log][p13]).
+Tailwind 4's output sits in `@layer`s and gives its colors in oklch, so none of it draws here (same entry).
 
-| | Draws | Dropped |
+Kept means the engine holds the declaration and, where p13 or p14 laid it out, places boxes where Chromium does.
+Neither probe looked at the paint, so a kept declaration can still paint unlike Chromium's, which only a screenshot shows.
+
+| | Kept | Dropped |
 | --- | --- | --- |
 | Colors | Hex of 3 to 8 digits; named colors, `transparent`, and `currentcolor`; `rgb()`, `rgba()`, `hsl()`, and `hsla()` with commas and a bare number for the hue; `color()`; a custom property holding a color, or an RGB triplet read as `rgba(var(--t), 0.5)` | `rgb()` and `hsl()` with spaces, a hue in `deg`, an alpha as a percent, `oklch()`, `oklab()`, `lab()`, `lch()`, `hwb()`, `color-mix()`, relative colors, `light-dark()`, and the system colors `Canvas` and `CanvasText` |
 | Spacing | `grid-gap`, `grid-row-gap`, and `grid-column-gap` in a grid; margins, put between flex items with `* + *` or `:not(:first-child)` | `gap`, `row-gap`, and `column-gap`, in a grid and in a flex row, though `CSS.supports` says yes to `column-gap` |
 | Flexbox | Wrapping, `order`, reversed directions, `justify-content` with `flex-start`, `flex-end`, `center`, `space-between`, `space-around`, and `space-evenly`, `align-items`, `align-self`, `align-content`, `flex` and its parts, and `-webkit-box` | `justify-content: end`, which parses and packs at the start |
 | Grid | Tracks with `repeat()`, `auto-fill`, `auto-fit`, `minmax()`, `fit-content()`, and named lines; `grid-template-areas`; `grid-auto-flow: dense`; spans and negative lines; `place-items`, `place-self`, `place-content`, `justify-items`, and `justify-self` | `subgrid` |
-| Layout | Floats; `position` but `sticky`, which parses only as `-webkit-sticky`; `inline-block`; `columns`; `writing-mode`; `direction`; `box-sizing`; widths of `fit-content`, `max-content`, `min-content`, and `-webkit-fill-available` | `inset` and every other logical property, such as `padding-inline` and `margin-block`; `aspect-ratio`; `display: contents`, `flow-root`, and `ruby`; `overflow: clip`; `contain` and `content-visibility`; container queries; anchor positioning |
+| Layout | Floats; `position` but `sticky`, which parses only as `-webkit-sticky`; `inline-block`; `columns`; `writing-mode`; `direction`; `box-sizing`; widths of `fit-content`, `max-content`, `min-content`, and `-webkit-fill-available` | `inset` and every other logical property, such as `padding-inline` and `margin-block`; `aspect-ratio`; `display: contents`, which parses but computes as `inline`, `flow-root`, and `ruby`; `overflow: clip`; `contain` and `content-visibility`; container queries; anchor positioning |
 | Values | `calc()`, nested too; custom properties with nested fallbacks; `initial`, `inherit`, `unset`, and `revert`; `!important`; `px`, `em`, `rem` at 16px, `ex`, `ch`, `%`, `vw`, `vh`, `vmin`, `vmax`, and the absolute lengths but `Q`; `deg`, `grad`, `rad`, and `turn`; `s` and `ms`; `fr` | `min()`, `max()`, `clamp()`, and every other math function; `env()`; `revert-layer`; `stretch`; the newer viewport units, such as `dvh` and `svh`; container units; `lh`, `rlh`, `cap`, and `ic`; the root font units but `rem` |
 | At-rules | `@media` with `min-` and `max-` features, `@supports` but its `selector()`, `@keyframes` and `@-webkit-keyframes`, `@font-face`, `@import`, `@namespace`, and `@page` | `@layer`, `@property`, `@container`, `@scope`, `@starting-style`, `@counter-style`, `@font-feature-values`, `@font-palette-values`, `@position-try`, `@view-transition`, `@supports selector()`, nesting, media range syntax, `not` and `or` inside a media condition, and `calc()` in a media query |
 | Selectors | Attribute selectors; the combinators; `:not()` with lists and complex selectors; `:nth-child()` with `of`; `:-webkit-any()`; `:hover`, `:focus`, `:focus-within`, `:checked`, `:disabled`, `:empty`, `:placeholder-shown`, `:dir()`, and `:lang()`; `::before`, `::after`, `::placeholder`, `::selection`, `::first-letter`, and `::-webkit-scrollbar` | `:is()`, `:where()`, `:has()`, `:focus-visible`, `:modal`, `:popover-open`, `:user-valid`, `:user-invalid`, `::marker`, `::backdrop`, `::part()`, `::file-selector-button`, and a top-level `&` |
@@ -73,10 +78,9 @@ Tailwind 4's output sits in `@layer`s and gives its colors in oklch, so none of 
   `(hover: none)` and `(prefers-reduced-motion: no-preference)` match, and `(hover: hover)`, `(pointer: fine)`, and `(any-pointer: fine)` don't, so a rule behind a hover or pointer query applies as on a touch screen, while `:hover` selectors work.
 - **Layout:** the engine places boxes on whole pixels where Chromium gives fractions, as `vw` and `space-evenly` showed, and a table cell given a width takes the table's whole width.
 - **Each document's defaults:** mainUi and the toolbar lay out a box with padding and a border as `border-box`, and the EFB's document as `content-box`, so our pages set `box-sizing` themselves.
-- **What a test of the CSSOM can't see:** p14 measured what the engine parses and lays out, not what it paints, so a declaration it keeps can still paint unlike Chromium's, which only a screenshot shows.
 - **Fonts:** mainUi and the toolbar declare Roboto as one family, `Roboto-Regular`, at weights 300 to 900, and Roboto Mono as `RobotoMono-Regular`.
   The EFB's document declares a family for each face, such as `Roboto-Bold` and `RobotoMono-Regular`, and sets its body in Verdana, so text there takes Roboto only from a rule that names a face.
-  What an in-game panel's document declares is unmeasured, and so is its CSS, though the three documents measured agreed on every item.
+  What an in-game panel's document declares is unmeasured.
 
 ## Re-measuring
 

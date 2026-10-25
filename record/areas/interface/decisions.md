@@ -11,13 +11,13 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - [Decision 028](../../decisions/028-desktop-pages-react-vite-tailwind.md) puts the desktop app's pages on React, Vite, and Tailwind, which shadcn's components are built with.
   - shadcn's Base UI variant has been its default since July 2026, beside Radix, which it still supports (documented, [shadcn's changelog](https://ui.shadcn.com/docs/changelog/2026-07-base-ui-default)).
   - Tailwind's spacing unit is 4px, as its theme sets `--spacing: 0.25rem` (read in tailwindcss 4.3.3, `theme.css`).
-- **Leaves out:** whether a check fails Tailwind's half steps and arbitrary values off the grid, such as `p-1.5` and `p-[7px]`, and which components the apps need that shadcn lacks, which their outline names.
+- **Leaves out:** whether a build check on the desktop app's pages fails Tailwind's half steps and arbitrary values that sit off the 4px grid, such as `p-1.5` (6px) and `p-[7px]`; and which components the apps need that shadcn lacks, which the apps' outline will name.
 
 ## The desktop app is dark only
 
 - **Decided:** the desktop app has one dark look and no light one, so it follows no Windows setting.
   Settled by the user on 2026-10-25.
-- **Because:** the user chose it, and it matches our pages in the sim, which can only be dark:
+- **Because:** the user chose it, and our pages in the sim can't follow a Windows setting either, and sit in an EFB that has only a dark look:
   - The sim's EFB is dark alone: `efb_os.css` holds no light theme and no `prefers-color-scheme` query (read in fs-base-efb 0.1.10, `efb_os.css`, 2026-10-25).
   - Coherent GT doesn't parse `prefers-color-scheme` ([architecture log][p13]).
 - **Leaves out:** the colors themselves, which a bench of mockups from the user's sketch explores.
@@ -29,19 +29,20 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   Settled by the user on 2026-10-25.
 - **Because:**
   - The user wants the whole interface in our control and our design, at the cost of a set of components to keep beside the desktop app's (user, 2026-10-25).
-  - The sim's look would have reached the EFB app alone: it comes from `efb_os.css`, which the EFB's document loads, and the banner is an in-game panel of its own, which no run has had load it ([interface log][efb-styles]).
+  - The sim's look would have reached only the EFB app: it comes from `efb_os.css`, which the EFB's document loads, while the banner is an in-game panel with a page of its own, and no run has had that page link `efb_os.css` ([interface log][efb-styles]).
   - shadcn's components are React, which decision 029 keeps out of the sim, and Tailwind 4's output and shadcn's theme draw nothing in Coherent GT ([architecture log][p13]).
-- **Leaves out:** how the kit's CSS is made, by hand or by a Tailwind build that writes only what the engine reads, as Working Title's CIVA app does ([architecture log][p14]); where the kit lives among our npm packages; and how one set of colors feeds both the kit and shadcn's theme.
+- **Leaves out:** how the kit's CSS is made: by hand, or by a Tailwind build like the one behind Working Title's CIVA app, which writes `rgba()` colors and no `@layer`, oklch, or `gap`, yet still writes 5 `:where(` selectors and 2 `inset:` declarations the engine drops ([architecture log][p14]); where the kit lives among our npm packages; and how one set of colors feeds both the kit and shadcn's theme.
 
 ## The Coherent GT check covers the CSS we ship into the sim
 
 - **Decided:** the check [decision 031](../../decisions/031-coherent-gt-check-tool.md) gives every JavaScript file we ship into the sim also checks every CSS file we ship there, and stage 11b builds it, since the kit is the first CSS we ship there.
-  It passes only what p14 measured the engine keeping, so CSS no run has tried fails until a probe measures it.
+  It passes only what our probe p14 measured the engine keeping, so CSS no run has tried fails until a probe measures it.
+  It also fails what the engine parses and then ignores, which a parse alone would pass: layout cases in p13 and p14 found three, `column-gap`, `justify-content: end`, and `display: contents`, which computes as `inline`.
   Settled by the user on 2026-10-25.
 - **Because:**
-  - Coherent GT drops what it can't read with no error, so a dropped `gap` shows only as a wrong layout in the sim, while the same CSS draws in a browser and in the desktop app ([architecture log][p13]).
-  - It drops 250 properties, 44 selectors, and 50 of our function samples that Chromium 152 keeps ([architecture log][p14]).
-  - The check already runs on every file we ship into the sim, after each edit and in `tools/check.ts`, from a data file that holds the reference's lists ([the Coherent GT check](../build/01-the-build.md#the-coherent-gt-check)).
+  - Coherent GT drops what it can't parse with no error, so a dropped `gap` shows only as a wrong layout in the sim, while the same CSS draws in a browser and in the desktop app ([architecture log][p13]).
+  - p14 found that it drops 250 properties, 44 selectors, and 50 of our function samples that Chromium 152 keeps ([architecture log][p14]).
+  - The check already runs on every JavaScript file we ship into the sim, after each edit and in `tools/check.ts`, from a data file that holds the lists in [Coherent GT's JavaScript and CSS](../architecture/coherent-gt.md) ([the Coherent GT check](../build/01-the-build.md#the-coherent-gt-check)).
   - A list of what the engine drops would pass everything no probe tried, which is where a silent drop hides, while a list of what it keeps fails that CSS where the developer writing it sees the failure.
 - **Leaves out:** its CSS parser; how its data comes from p14's results, so a run of p14 after a sim update refreshes it; and CSS written in a component's markup rather than a stylesheet, which the stage's design of the check settles.
 

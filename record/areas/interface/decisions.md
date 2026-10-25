@@ -36,12 +36,14 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 ## The Coherent GT check covers the CSS we ship into the sim
 
 - **Decided:** the check [decision 031](../../decisions/031-coherent-gt-check-tool.md) gives every JavaScript file we ship into the sim also checks every CSS file we ship there, and stage 11b builds it, since the kit is the first CSS we ship there.
+  It passes only what p14 measured the engine keeping, so CSS no run has tried fails until a probe measures it.
   Settled by the user on 2026-10-25.
 - **Because:**
   - Coherent GT drops what it can't read with no error, so a dropped `gap` shows only as a wrong layout in the sim, while the same CSS draws in a browser and in the desktop app ([architecture log][p13]).
   - It drops 250 properties, 44 selectors, and 50 of our function samples that Chromium 152 keeps ([architecture log][p14]).
   - The check already runs on every file we ship into the sim, after each edit and in `tools/check.ts`, from a data file that holds the reference's lists ([the Coherent GT check](../build/01-the-build.md#the-coherent-gt-check)).
-- **Leaves out:** its CSS parser; whether it passes only what p14 measured the engine keeping or fails what p14 measured it dropping; and CSS written in a component's markup rather than a stylesheet, which the stage's design of the check settles.
+  - A list of what the engine drops would pass everything no probe tried, which is where a silent drop hides, while a list of what it keeps fails that CSS where the developer writing it sees the failure.
+- **Leaves out:** its CSS parser; how its data comes from p14's results, so a run of p14 after a sim update refreshes it; and CSS written in a component's markup rather than a stylesheet, which the stage's design of the check settles.
 
 [p13]: ../architecture/log.md#2026-10-25-coherent-gt-drops-layer-oklch-color-mix-and-every-gap-but-grid-gap-so-tailwind-4s-output-cant-style-a-page-there
 [p14]: ../architecture/log.md#2026-10-25-coherent-gt-keeps-304-of-the-554-css-properties-chromium-152-keeps-and-lays-out-flexbox-and-grid-as-chromium-does-but-for-gap-justify-content-end-and-subgrid

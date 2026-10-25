@@ -24,6 +24,13 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["experiments/areas/interface/bench/node_modules/vite/bin/vite.js", "experiments/areas/interface/bench", "--port", "5183", "--strictPort", "--host"],
       "port": 5183
+    },
+    {
+      "name": "figure-viewer",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tools/figure-viewer/serve.ts"],
+      "port": 5182,
+      "url": "http://127.0.0.1:5182"
     }
   ]
 }

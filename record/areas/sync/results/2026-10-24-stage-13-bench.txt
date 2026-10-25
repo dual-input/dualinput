@@ -30,3 +30,61 @@ ok 7 - a member whose aircraft has no profile applies the change of control, end
 The size budgets, from the stream's and the engine's own tests:
 budget: a change took 95 bytes, so a 30-minute cut at 20 a second keeps 3420000 bytes, against 4,194,304
 budget: a catch-up's answer for 500 entries took 44638 bytes, against 65,536
+
+The rerun on 2026-10-25, with no game on the PC, the processor at 7% to 9% before it, and the bench at normal priority, from c763560 and 037e92e.
+`node tools/bench.ts cockpit session profiles`, its budget and result lines:
+# budget: James's run, with a lever changed 60 times a second: the slowest input took 268µs, 0 over 1ms, against 1,000µs for a handler with one pause under 2ms allowed
+# budget: Adam's run, with a lever changed 60 times a second: the slowest input took 133µs, 0 over 1ms, against 1,000µs for a handler with one pause under 2ms allowed
+ok 1 - a lever changed 60 times a second goes out at most 20 times a second, its last value before the press after it
+# budget: 120 changes over about 2s went out as 30 messages, against 20 a second
+ok 2 - a 60s cut replays at the sender's gaps, collapses runs of the pilot flying's changes, and denies take-control until it ends
+# the replay waited 2000ms for a gap of 3.2s, against its 2s cap
+ok 3 - a takeover during a cut drops the old pilot flying's solo changes, and the ex-pilot flying catches up from the new one
+ok 4 - a late joiner asks, is answered once the pilot flying can give, asks again after a cut, and drops the copies it queued
+ok 5 - control passing between two others during a catch-up has the catching-up core ask the new pilot flying
+ok 6 - a pilot flying who leaves the flight during the other's replay hands over everything it sent
+ok 7 - a member whose aircraft has no profile applies the change of control, ends its replay, and may take control
+ok 8 - the pilot flying's fetch finishing after the session's aircraft is set takes the pin from none to the bundle, which every core in the flight loads, and a replay loads the same
+ok 9 - a member whose cache holds an older bundle fetches the pinned one by its hash and loads it, and a pass of control before preflight ends keeps the pin
+ok 10 - a member offline whose cache lacks the pin shows the error, loads nothing, and fetches it when it next enters the flight online
+ok 11 - the pilot flying pins a local bundle: a member with the same file loads it, and one without it fetches nothing and shows the error
+ok 12 - the pilot flying loads the wrong aircraft, then the right one, and the pin follows; a member in the new aircraft before the new pin loads nothing for it, then the new bundle
+ok 13 - a member leaves the flight and comes back: the profile unloads, and the same pin loads again, though a newer bundle was published meanwhile
+ok 14 - a session that starts airborne with the pilot flying's cache empty pins the bundle once the fetch finishes, after preflight ended
+ok 15 - a bundle whose fetch failed at start is fetched again when the pilot hosts, and the pin goes from none to it
+ok 16 - a cached bundle whose bytes don't match its name is deleted and fetched again
+ok 17 - a fetch's result that arrives after this member left the flight loads nothing, and the bundle loads from the cache when it comes back
+ok 18 - a session in an aircraft with no published profile shows the loader's error
+# budget: a start with nothing new got [{"path":"/index.json","status":304}], against one answer of headers
+ok 19 - a start with nothing new published costs one answer of headers
+# budget: the builder checked and built a profile of 300 write functions in 1661ms, its compiler's load included, against 2,000ms for the build
+# budget: the bundle is 221,156 bytes
+# budget: a run that loaded a 221,156-byte bundle: the slowest input took 716µs, 0 over 1ms, against 1,000µs for a handler with one pause under 2ms allowed
+ok 20 - a 200 KB profile of 300 write functions builds within 2s, and its load takes a handler under 1ms
+ok 21 - a host who starts before the sim runs: the joiner sees no aircraft yet, then the session's once the host loads one
+ok 22 - a host who starts from a flight sets the aircraft at once, and preflight runs on the ground, or ends at once in the air
+ok 23 - a joiner in another aircraft is a member out of the flight, and enters it as a late joiner once it loads the session's aircraft
+ok 24 - a pilot flying who loads the wrong aircraft in preflight returns to the menu holding control, and the right one becomes the session's
+ok 25 - a pilot flying who leaves the session in preflight, with the other at the menu, passes control, and preflight runs once the new one is in a flight
+# budget: preflight ended on the two cores 0.3ms apart, against one network delay
+# budget: James's run: the slowest input took 194µs, 0 over 1ms, against 1,000µs for a handler with one pause under 2ms allowed
+# budget: Adam's run: the slowest input took 402µs, 0 over 1ms, against 1,000µs for a handler with one pause under 2ms allowed
+ok 26 - both pilots ready: the countdown ends preflight on both, each held until then; an un-ready inside it cancels it
+ok 27 - a lost link during the countdown cancels it, and a ready pilot whose sim crashes comes back unready
+ok 28 - going without a pilot whose sim kept running ends preflight, and that pilot raises PreflightEnded on return; nobody goes without the pilot flying
+ok 29 - a pilot flying who leaves the flight after preflight passes control, and the session ends once nobody is in the flight
+# budget: control reached the other pilot 50ms after the leave, against 1,000ms
+ok 30 - a pilot flying who leaves mid-flight hands control over within 1s and is a leave, not an outage; one who quits does the same, and exits
+ok 31 - a restarted core with a session file comes back under a higher restart count, announces the session, and passes control it held before it enters the flight
+ok 32 - the match check: a streamed copy against an installed one is a warning, and two streamed copies show nothing
+ok 33 - a connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the state's aircraft, by the menu script's master page
+ok 34 - a quit sent from the EFB app's socket takes effect, and a core with no session and no desktop app exits once its sim closes
+ok 35 - a module from another build while Hold is fed raises the sim service's trouble notification for our package
+# tests 35
+# pass 35
+# fail 0
+
+`cargo test -p sync-engine --release --test engine -- --ignored --nocapture an_engine_call_and_compiling`, three runs:
+timing: compiling 300 write functions took 2.30ms, against 10ms; the slowest arrival and frame of 3,000 took 105µs, against 1,000µs
+timing: compiling 300 write functions took 2.04ms, against 10ms; the slowest arrival and frame of 3,000 took 110µs, against 1,000µs
+timing: compiling 300 write functions took 2.14ms, against 10ms; the slowest arrival and frame of 3,000 took 85µs, against 1,000µs

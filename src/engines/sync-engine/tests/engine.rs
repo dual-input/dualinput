@@ -959,7 +959,7 @@ fn a_catch_up_answer_for_500_entries_takes_under_64_kb() {
 #[test]
 #[ignore = "a timing, measured by hand in a release build"]
 fn an_engine_call_and_compiling_300_write_functions_take_this_long() {
-    // cargo test -p sync-engine --release --test engine -- --ignored --nocapture timing
+    // cargo test -p sync-engine --release --test engine -- --ignored --nocapture an_engine_call_and_compiling
     let entries: Vec<StateEntry> = (0..300)
         .map(|i| {
             let name = l(&format!("SWITCH_{i}"));

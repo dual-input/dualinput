@@ -21,7 +21,10 @@ Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on 
   In the run with the lever, the slowest input took 345µs on the pilot flying's core, against a handler's 1ms.
 - The code review made 11 findings, the worst a stepping write that a put-back or a new value replaced, which lost its duty to tell the stream it was done and could hold the stream or a catch-up forever; each is fixed, with a test for each the engine's tests could reach.
 - A change of state sync's takes 95 bytes, so a 30-minute cut at 20 changes a second keeps 3.42 MB, against the [budget](05-units.md#budgets)'s 4 MB; a catch-up's answer for 500 entries takes 44,638 bytes, against 64 KB, near the doc's estimate of 90 bytes an entry.
-- An engine call's time and the compile of 300 write functions, which the budgets set by hand in a release build, wait for a run with no game on the PC.
+- Three timing cases failed in a run beside the game: the cockpit lever's, the session's countdown, and the profiles' build of 300 write functions.
+  On 2026-10-25, with no game on the PC and the bench at normal priority, `cockpit`, `session`, and `profiles` passed all 35 of their cases.
+  The lever's slowest input took 268µs, the countdown's 402µs, and the build 1,661ms, against 2,000ms.
+- The engine's release timing test, in three runs on 2026-10-25 with no game, compiled 300 write functions in 2.04ms to 2.30ms, against the [budget](05-units.md#budgets)'s 10ms, and took at most 110µs for an arrival and a frame of 3,000, against 1ms.
 
 **Changed:** the stage built five things the docs leave open or state two ways, each in its code's comments:
 

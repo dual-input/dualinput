@@ -31,11 +31,6 @@ impl Place {
     pub(crate) fn of(seat: &Seat) -> Place {
         let hip = v3::of(seat.hip);
         let facing = seat.facing as f32;
-        let [up, forward] = [seat.eye[0] as f32, seat.eye[1] as f32];
-        let eye = v3::add(
-            v3::add(hip, [0.0, up, 0.0]),
-            v3::scale(v3::facing(facing), forward),
-        );
         Place {
             key: seat.key.clone(),
             name: seat.name.clone(),
@@ -43,7 +38,7 @@ impl Place {
             knees: [seat.knees[0] as f32, seat.knees[1] as f32],
             feet: [seat.feet[0] as f32, seat.feet[1] as f32],
             facing,
-            eye,
+            eye: aircraft_model::frame::eye(hip, seat.eye[0] as f32, seat.eye[1] as f32, facing),
             radius: seat.take_radius.map_or(TAKE_RADIUS, |r| r as f32),
         }
     }

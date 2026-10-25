@@ -65,7 +65,7 @@ fn body_to_ned(p: &Pose) -> [[f64; 3]; 3] {
 
 /// The pose of an object at `at` in the aircraft's frame, x left, y up, z forward, turned
 /// `facing` degrees right of the aircraft's nose, by WGS 84's radii at the aircraft's
-/// latitude. `world_to_frame` in the avatars crate's ray.rs turns a point the other way, so
+/// latitude. `world_to_frame` in aircraft-model's frame.rs turns a point the other way, so
 /// change both together.
 pub(crate) fn place(a: &Pose, at: [f32; 3], facing: f32) -> Pose {
     let r = body_to_ned(a);

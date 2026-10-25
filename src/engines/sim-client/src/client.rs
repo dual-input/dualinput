@@ -142,36 +142,7 @@ impl<K: Clone> Client<K> {
         vars: &[Var],
         period: Period,
     ) -> (Watch, Vec<Op>) {
-        let mut ops = Vec::new();
-        let definition = match (period, self.once.get(vars)) {
-            (Period::Once, Some(&definition)) => definition,
-            _ => {
-                let definition = take(&mut self.next.definition);
-                for (datum, var) in vars.iter().enumerate() {
-                    let (name, unit, datatype) = match var {
-                        Var::Number { name, unit } => {
-                            (name, unit.clone(), SIMCONNECT_DATATYPE_FLOAT64)
-                        }
-                        Var::Text { name } => (name, String::new(), SIMCONNECT_DATATYPE_STRING256),
-                    };
-                    ops.push(self.set_up(
-                        by,
-                        Op::AddToDataDefinition {
-                            definition,
-                            name: sim_name(name, "A:").to_string(),
-                            unit,
-                            datatype,
-                            datum: datum as u32,
-                        },
-                    ));
-                }
-                self.definitions.insert(definition, vars.to_vec());
-                if period == Period::Once {
-                    self.once.insert(vars.to_vec(), definition);
-                }
-                definition
-            }
-        };
+        let (definition, mut ops) = self.definition(by, vars, period == Period::Once);
         let request = take(&mut self.next.request);
         let (period_id, flags) = match period {
             Period::Once => (SIMCONNECT_PERIOD_ONCE, SIMCONNECT_DATA_REQUEST_FLAG_TAGGED),
@@ -201,6 +172,57 @@ impl<K: Clone> Client<K> {
             },
             ops,
         )
+    }
+
+    /// Reads `vars` once on each object of `kind` within `radius` meters of the pilot's
+    /// aircraft, such as every object within 50m, which lists the C152's seat objects
+    /// `SEAT_C152_Pilot` and `SEAT_C152_Pax` (measured on MSFS 2024, 2026-10-02,
+    /// record/areas/avatars/log.md, "Seat objects place the other pilot in the cockpit"). The
+    /// sim answers once for each object, each answer naming its object, so the request stays
+    /// until the connection goes. Returns the request its answers carry, and the calls that
+    /// make it.
+    pub fn read_by_type(&mut self, by: &K, kind: i32, radius: u32, vars: &[Var]) -> (u32, Vec<Op>) {
+        let (definition, mut ops) = self.definition(by, vars, true);
+        let request = take(&mut self.next.request);
+        ops.push(Op::RequestDataOnSimObjectType {
+            request,
+            definition,
+            radius,
+            kind,
+        });
+        self.requests.insert(request, (definition, false));
+        (request, ops)
+    }
+
+    /// The data definition that names `vars`, tagged, and the calls that make it. A read
+    /// once `reuses` the definition of every earlier read of the same set.
+    fn definition(&mut self, by: &K, vars: &[Var], reuse: bool) -> (u32, Vec<Op>) {
+        if reuse && let Some(&definition) = self.once.get(vars) {
+            return (definition, Vec::new());
+        }
+        let definition = take(&mut self.next.definition);
+        let mut ops = Vec::new();
+        for (datum, var) in vars.iter().enumerate() {
+            let (name, unit, datatype) = match var {
+                Var::Number { name, unit } => (name, unit.clone(), SIMCONNECT_DATATYPE_FLOAT64),
+                Var::Text { name } => (name, String::new(), SIMCONNECT_DATATYPE_STRING256),
+            };
+            ops.push(self.set_up(
+                by,
+                Op::AddToDataDefinition {
+                    definition,
+                    name: sim_name(name, "A:").to_string(),
+                    unit,
+                    datatype,
+                    datum: datum as u32,
+                },
+            ));
+        }
+        self.definitions.insert(definition, vars.to_vec());
+        if reuse {
+            self.once.insert(vars.to_vec(), definition);
+        }
+        (definition, ops)
     }
 
     /// The values a watch's answer carries, each with its place in the watch's variables, or
@@ -490,6 +512,36 @@ mod tests {
         assert_eq!(first.definition, second.definition);
         assert_ne!(first.request, second.request);
         assert_eq!(client.setup().len(), 1, "only the definition is setup");
+    }
+
+    #[test]
+    fn a_read_by_type_hears_each_object_and_shares_a_read_onces_definition() {
+        let mut client = Client::<()>::default();
+        let vars = [Var::text("A:TITLE")];
+        let (watch, _) = client.watch(&(), &vars, Period::Once);
+        let (request, ops) = client.read_by_type(&(), 1, 50, &vars);
+        assert_eq!(
+            ops,
+            [Op::RequestDataOnSimObjectType {
+                request,
+                definition: watch.definition,
+                radius: 50,
+                kind: 1,
+            }]
+        );
+        for object in [0x10, 0x11] {
+            let mut bytes = 0u32.to_le_bytes().to_vec();
+            bytes.extend_from_slice(&[0; TEXT]);
+            let data = Data {
+                request,
+                object,
+                definition: watch.definition,
+                flags: 2,
+                count: 1,
+                bytes,
+            };
+            assert!(client.values(&data).is_some(), "object {object:#x}");
+        }
     }
 
     #[test]

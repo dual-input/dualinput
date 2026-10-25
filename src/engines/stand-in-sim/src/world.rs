@@ -85,15 +85,29 @@ impl World {
         self.reset = true;
     }
 
+    /// Every object's ID: the pilot's aircraft, the avatar, and the objects connections
+    /// created.
+    pub(crate) fn objects(&self) -> Vec<u32> {
+        [0, SIMCONNECT_OBJECT_ID_USER_AVATAR]
+            .into_iter()
+            .chain(self.objects.keys().copied())
+            .collect()
+    }
+
+    /// Creates an object of the SimObject `title`, which its `A:TITLE` reads, as the C152's
+    /// seat object's reads `SEAT_C152_Pilot` (measured on MSFS 2024, 2026-10-02,
+    /// record/areas/avatars/log.md, "Seat objects place the other pilot in the cockpit").
     pub(crate) fn create(&mut self, title: &str, connection: Connection) -> u32 {
         let id = FIRST_OBJECT + self.next_object;
         self.next_object += 1;
+        let mut vars = Aircraft::default();
+        vars.set_text("TITLE", title);
         self.objects.insert(
             id,
             Object {
                 title: title.to_string(),
                 connection,
-                vars: Aircraft::default(),
+                vars,
             },
         );
         id

@@ -12,7 +12,7 @@ use sim_client::{Connection, Op, SimCall, Tag, Up};
 use simconnect_types::{
     SIMCONNECT_COMM_BUS_BROADCAST_TO_JS, SIMCONNECT_DATA_REQUEST_FLAG_CHANGED,
     SIMCONNECT_DATATYPE_STRING256, SIMCONNECT_EXCEPTION_CREATE_OBJECT_FAILED,
-    SIMCONNECT_EXCEPTION_NAME_UNRECOGNIZED, SIMCONNECT_PERIOD_ONCE,
+    SIMCONNECT_EXCEPTION_NAME_UNRECOGNIZED, SIMCONNECT_PERIOD_ONCE, SIMCONNECT_SIMOBJECT_TYPE_USER,
 };
 use windows_sys::Win32::Foundation::{E_FAIL, FILETIME, S_OK, WAIT_OBJECT_0, WAIT_TIMEOUT};
 use windows_sys::Win32::System::Threading::{
@@ -430,6 +430,25 @@ impl Sim {
                             last: None,
                         },
                     );
+                }
+            }
+            Op::RequestDataOnSimObjectType {
+                request,
+                definition,
+                kind,
+                ..
+            } => {
+                // The stand-in has no positions to measure a radius by, so every object it
+                // holds is near.
+                let objects = if kind == SIMCONNECT_SIMOBJECT_TYPE_USER {
+                    vec![0]
+                } else {
+                    self.world.objects()
+                };
+                for object in objects {
+                    if let Some(data) = self.data(connection, request, definition, object) {
+                        self.send(connection, &Message::ObjectData(data));
+                    }
                 }
             }
             Op::SetDataOnSimObject {

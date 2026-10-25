@@ -146,6 +146,15 @@ pub enum Op {
         period: i32,
         flags: u32,
     },
+    /// `SimConnect_RequestDataOnSimObjectType`: the definition's values once on each object
+    /// of `kind`, a `SIMCONNECT_SIMOBJECT_TYPE`, within `radius` meters of the pilot's
+    /// aircraft.
+    RequestDataOnSimObjectType {
+        request: u32,
+        definition: u32,
+        radius: u32,
+        kind: i32,
+    },
     /// `SimConnect_SetDataOnSimObject`, one entry of the definition's values in order.
     SetDataOnSimObject {
         definition: u32,

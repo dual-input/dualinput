@@ -17,7 +17,8 @@ use simconnect_types::{
     SIMCONNECT_RECV_ID_CAMERA_DATA, SIMCONNECT_RECV_ID_CLIENT_DATA, SIMCONNECT_RECV_ID_EVENT,
     SIMCONNECT_RECV_ID_EVENT_FILENAME, SIMCONNECT_RECV_ID_EVENT_FRAME,
     SIMCONNECT_RECV_ID_EXCEPTION, SIMCONNECT_RECV_ID_FLOW_EVENT, SIMCONNECT_RECV_ID_OPEN,
-    SIMCONNECT_RECV_ID_QUIT, SIMCONNECT_RECV_ID_SIMOBJECT_DATA, SIMCONNECT_RECV_ID_SYSTEM_STATE,
+    SIMCONNECT_RECV_ID_QUIT, SIMCONNECT_RECV_ID_SIMOBJECT_DATA,
+    SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE, SIMCONNECT_RECV_ID_SYSTEM_STATE,
     SIMCONNECT_RECV_OPEN, SIMCONNECT_RECV_SIMOBJECT_DATA, SIMCONNECT_RECV_SYSTEM_STATE,
 };
 
@@ -49,7 +50,8 @@ pub enum Message {
     /// A system event that names a file, such as `AircraftLoaded` with the aircraft's
     /// `aircraft.cfg`.
     Filename { event: u32, file: String },
-    /// Values of a sim object, which `SimConnect_RequestDataOnSimObject` asked for.
+    /// Values of a sim object, which `SimConnect_RequestDataOnSimObject` or
+    /// `SimConnect_RequestDataOnSimObjectType` asked for.
     ObjectData(Data),
     /// A client data area's bytes, which `SimConnect_RequestClientData` asked for.
     ClientData(Data),
@@ -155,7 +157,11 @@ impl Message {
                     260,
                 )?,
             },
-            SIMCONNECT_RECV_ID_SIMOBJECT_DATA => Message::ObjectData(data(record)?),
+            // A by-type answer's struct adds nothing to an object's data, and its object
+            // field names which object it reads.
+            SIMCONNECT_RECV_ID_SIMOBJECT_DATA | SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE => {
+                Message::ObjectData(data(record)?)
+            }
             SIMCONNECT_RECV_ID_CLIENT_DATA => Message::ClientData(data(record)?),
             SIMCONNECT_RECV_ID_SYSTEM_STATE => {
                 type R = SIMCONNECT_RECV_SYSTEM_STATE;
@@ -495,6 +501,25 @@ mod tests {
         ] {
             assert_eq!(Message::read(&message.record()), Some(message));
         }
+    }
+
+    #[test]
+    fn a_by_type_answer_reads_as_its_objects_data() {
+        let data = Data {
+            request: 7,
+            object: 0x0102,
+            definition: 3,
+            flags: 2,
+            count: 1,
+            bytes: 2.5f64.to_le_bytes().to_vec(),
+        };
+        let mut record = Message::ObjectData(data.clone()).record();
+        put_u32(
+            &mut record,
+            offset_of!(SIMCONNECT_RECV, dwID),
+            SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE as u32,
+        );
+        assert_eq!(Message::read(&record), Some(Message::ObjectData(data)));
     }
 
     #[test]

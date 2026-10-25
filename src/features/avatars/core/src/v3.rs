@@ -32,12 +32,7 @@ pub(crate) fn unit(a: V3) -> V3 {
     if l > 0.0 { scale(a, 1.0 / l) } else { a }
 }
 
-/// The direction a seat or figure faces, `degrees` from the nose, positive to the right,
-/// which is toward −x.
-pub(crate) fn facing(degrees: f32) -> V3 {
-    let r = degrees.to_radians();
-    [-r.sin(), 0.0, r.cos()]
-}
+pub(crate) use aircraft_model::frame::facing;
 
 pub(crate) fn of(p: [f64; 3]) -> V3 {
     [p[0] as f32, p[1] as f32, p[2] as f32]

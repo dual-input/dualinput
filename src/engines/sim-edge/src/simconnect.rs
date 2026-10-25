@@ -12,7 +12,7 @@ use simconnect_types::{
     SIMCONNECT_DATA_INITPOSITION, SIMCONNECT_DATA_REQUEST_FLAG, SIMCONNECT_DATA_REQUEST_ID,
     SIMCONNECT_DATA_SET_FLAG, SIMCONNECT_DATA_SET_FLAG_DEFAULT, SIMCONNECT_DATATYPE,
     SIMCONNECT_EVENT_FLAG, SIMCONNECT_NOTIFICATION_GROUP_ID, SIMCONNECT_OBJECT_ID,
-    SIMCONNECT_PERIOD, SIMCONNECT_RECV, SIMCONNECT_UNUSED,
+    SIMCONNECT_PERIOD, SIMCONNECT_RECV, SIMCONNECT_SIMOBJECT_TYPE, SIMCONNECT_UNUSED,
 };
 use windows_sys::Win32::Foundation::{HANDLE, HWND};
 use windows_sys::core::HRESULT;
@@ -98,6 +98,13 @@ unsafe extern "system" {
         origin: DWORD,
         interval: DWORD,
         limit: DWORD,
+    ) -> HRESULT;
+    fn SimConnect_RequestDataOnSimObjectType(
+        handle: HANDLE,
+        request: SIMCONNECT_DATA_REQUEST_ID,
+        definition: SIMCONNECT_DATA_DEFINITION_ID,
+        radius: DWORD,
+        kind: SIMCONNECT_SIMOBJECT_TYPE,
     ) -> HRESULT;
     fn SimConnect_SetDataOnSimObject(
         handle: HANDLE,
@@ -240,6 +247,12 @@ pub(crate) unsafe fn make(handle: HANDLE, op: Op) -> HRESULT {
             } => SimConnect_RequestDataOnSimObject(
                 handle, request, definition, object, period, flags, 0, 0, 0,
             ),
+            Op::RequestDataOnSimObjectType {
+                request,
+                definition,
+                radius,
+                kind,
+            } => SimConnect_RequestDataOnSimObjectType(handle, request, definition, radius, kind),
             Op::SetDataOnSimObject {
                 definition,
                 object,

@@ -10,6 +10,7 @@
 mod behavior;
 mod build;
 mod files;
+pub mod frame;
 mod model;
 mod xml;
 mod yokes;

@@ -24,7 +24,9 @@ const EVERY: u64 = 33_000;
 /// And at least this often, so a link that comes up has the whole figure within a second.
 const AT_LEAST: u64 = 1_000_000;
 
-/// The figure's SimObject (record/areas/avatars/01-avatars.md, "Names").
+/// The figure's SimObject (record/areas/avatars/01-avatars.md, "Names"). tools/profile-author's
+/// seats.rs creates the figure by the same `TITLE` and freezes it by the same `FREEZES`, so
+/// change both together.
 const TITLE: &str = "DUALINPUT_FIGURE_PILOT";
 
 /// The sim's freeze events, which hold each figure where `Figure` writes it.

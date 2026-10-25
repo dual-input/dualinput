@@ -55,6 +55,8 @@ pub(crate) fn slot<'a>(yokes: &[Yoke], figures: impl Iterator<Item = Drawn<'a>>)
     slot
 }
 
+/// A yoke's grips and animations, as `Figure`'s slot holds them. `yoke` in
+/// tools/figure-viewer's slot.rs lays them out the same way, so change both together.
 fn yoke(y: &Yoke) -> YokeSlot {
     let mut slot: YokeSlot = bytemuck::Zeroable::zeroed();
     slot.present = 1;

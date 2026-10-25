@@ -27,9 +27,9 @@ use crate::connections::Origin;
 pub const USER_CFG: &str = "sim.user-cfg";
 
 /// Steam's `UserCfg.opt`, then the Microsoft Store's (record/areas/install/
-/// 01-installing-and-updating.md, "The packages folders"). `userCfgs` in tools/lib/install.ts
-/// and `sim_has_run` in src/apps/desktop/src/screens.rs name the same files, so change all three
-/// together.
+/// 01-installing-and-updating.md, "The packages folders"). `userCfgs` in tools/lib/install.ts,
+/// `sim_has_run` in src/apps/desktop/src/screens.rs, and `USER_CFGS` in tools/profile-author's
+/// cockpit.rs name the same files, so change all four together.
 const USER_CFGS: &str = r"%APPDATA%\Microsoft Flight Simulator 2024\UserCfg.opt;%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\UserCfg.opt";
 
 /// The facts changed, the search's result included.
@@ -489,7 +489,9 @@ impl SimService {
 /// package in `Community2024` over `Community`, and either over an Official one (documented,
 /// [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)).
 /// The Official folders hold a folder for each store, such as `Steam`, with the packages
-/// inside it (record/areas/aircraft/log.md, 2026-10-16).
+/// inside it (record/areas/aircraft/log.md, 2026-10-16). `ROOTS` in tools/profile-author's
+/// cockpit.rs holds the same folders, which its `package` searches the same way, so change
+/// both together.
 const ROOTS: [(&str, u8, Location); 4] = [
     ("Community2024", 1, Location::Community2024),
     ("Community", 1, Location::Community),
@@ -499,8 +501,8 @@ const ROOTS: [(&str, u8, Location); 4] = [
 
 /// The folder `UserCfg.opt`'s `InstalledPackagesPath` line names, matched by its name and a
 /// space, so a longer name such as `InstalledPackagesPathNextBoot` doesn't match.
-/// `packagesFolders` in tools/lib/install.ts reads the line the same way, so change both
-/// together.
+/// `packagesFolders` in tools/lib/install.ts and `packages_folders` in tools/profile-author's
+/// cockpit.rs read the line the same way, so change all three together.
 fn packages_folder(cfg: &str) -> Option<String> {
     let line = cfg
         .lines()

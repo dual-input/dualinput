@@ -6,7 +6,8 @@ publish = false
 
 # saphyr's tree carries a span on every node, so the checker points at the line and column
 # of each mistake, and it refuses a repeated key in a map (record/areas/profiles/02-units.md,
-# "The profile engine"). sha2 is the hash iroh already brings into the core.
+# "The profile engine"). tools/profile-author pins the same saphyr, so change both together.
+# sha2 is the hash iroh already brings into the core.
 [dependencies]
 saphyr = "=0.2.2"
 serde = { version = "1.0.228", features = ["derive"] }

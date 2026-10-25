@@ -83,7 +83,8 @@ impl MouseState {
 }
 
 /// The cursor's place in a client area `width` by `height` pixels, from its pixel in that
-/// area: −1 to 1, right and up.
+/// area: −1 to 1, right and up. `place` in tools/profile-author's screen.rs reads the cursor
+/// the same way, so change both together.
 pub fn place(x: i32, y: i32, width: u32, height: u32) -> (f32, f32) {
     let across = |p: i32, size: u32| {
         if size == 0 {

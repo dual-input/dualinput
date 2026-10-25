@@ -15,6 +15,8 @@ use windows::core::BOOL;
 use super::mouse;
 use crate::clock;
 
+/// tools/profile-author's screen.rs finds the main window by the same class and title, so
+/// change both together.
 const CLASS: &str = "AceApp";
 const MAIN_TITLE: &str = "Microsoft Flight Simulator 2024";
 

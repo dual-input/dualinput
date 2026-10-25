@@ -20,7 +20,8 @@ use crate::connections::Origin;
 
 /// How often the service writes each live routine's last feed again, so the routine host,
 /// which drops a routine 1s after its last write, keeps it running while the core runs. The
-/// timer runs from the core's start whether or not a routine is live.
+/// timer runs from the core's start whether or not a routine is live. tools/profile-author's
+/// seats.rs rewrites `Figure`'s slot as often, in its own `REWRITE`, so change both together.
 pub(crate) const REWRITE: Duration = Duration::from_millis(200);
 
 /// How long the module's counter stays still, in Flying, unpaused, with a routine live,

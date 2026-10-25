@@ -1,6 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
 
+import { COMPILED, OBJECT } from "./figure.ts"
 import type { Built } from "./pages.ts"
 import { ROOT } from "./repo.ts"
 import { Failed } from "./run.ts"
@@ -25,11 +26,11 @@ export function workspaceVersion(root = ROOT): string {
 
 /**
  * Lays out our package in `dir`: the WASM module in `wasm` as `modules/dualinput.wasm`, our
- * code in the sim from `pages`, each where it says, then the `layout.json` and
- * `manifest.json` that make the folder a package the sim mounts. It empties `dir` first, so
- * the package holds only what this build made.
+ * code in the sim from `pages`, each where it says, avatars' figure as fspackagetool compiled
+ * it, then the `layout.json` and `manifest.json` that make the folder a package the sim
+ * mounts. It empties `dir` first, so the package holds only what this build made.
  */
-export function layOutPackage(wasm: string, pages: Built[], dir = PACKAGE, version = workspaceVersion()): void {
+export function layOutPackage(wasm: string, pages: Built[], dir = PACKAGE, version = workspaceVersion(), figure = COMPILED): void {
   fs.rmSync(dir, { recursive: true, force: true })
   fs.mkdirSync(path.join(dir, "modules"), { recursive: true })
   fs.copyFileSync(wasm, path.join(dir, "modules", `${PACKAGE_NAME}.wasm`))
@@ -37,6 +38,8 @@ export function layOutPackage(wasm: string, pages: Built[], dir = PACKAGE, versi
     fs.mkdirSync(path.dirname(path.join(dir, to)), { recursive: true })
     fs.copyFileSync(file, path.join(dir, to))
   }
+  // Before its first compile the figure has no compiled/, which tools/check.ts reports.
+  if (fs.existsSync(figure)) fs.cpSync(figure, path.join(dir, OBJECT), { recursive: true })
 
   // layout.json lists every file with its size and last write as a Windows FILETIME, 100ns
   // ticks since 1601, written as a bare number though it's past what a JavaScript number

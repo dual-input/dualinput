@@ -9,10 +9,10 @@ use simconnect_types::{
     SIMCONNECT_CLIENT_DATA_PERIOD, SIMCONNECT_CLIENT_DATA_REQUEST_FLAG,
     SIMCONNECT_CLIENT_DATA_SET_FLAG, SIMCONNECT_CLIENT_DATA_SET_FLAG_DEFAULT,
     SIMCONNECT_CLIENT_EVENT_ID, SIMCONNECT_COMM_BUS_BROADCAST_TO, SIMCONNECT_DATA_DEFINITION_ID,
-    SIMCONNECT_DATA_REQUEST_FLAG, SIMCONNECT_DATA_REQUEST_ID, SIMCONNECT_DATA_SET_FLAG,
-    SIMCONNECT_DATA_SET_FLAG_DEFAULT, SIMCONNECT_DATATYPE, SIMCONNECT_EVENT_FLAG,
-    SIMCONNECT_NOTIFICATION_GROUP_ID, SIMCONNECT_OBJECT_ID, SIMCONNECT_PERIOD, SIMCONNECT_RECV,
-    SIMCONNECT_UNUSED,
+    SIMCONNECT_DATA_INITPOSITION, SIMCONNECT_DATA_REQUEST_FLAG, SIMCONNECT_DATA_REQUEST_ID,
+    SIMCONNECT_DATA_SET_FLAG, SIMCONNECT_DATA_SET_FLAG_DEFAULT, SIMCONNECT_DATATYPE,
+    SIMCONNECT_EVENT_FLAG, SIMCONNECT_NOTIFICATION_GROUP_ID, SIMCONNECT_OBJECT_ID,
+    SIMCONNECT_PERIOD, SIMCONNECT_RECV, SIMCONNECT_UNUSED,
 };
 use windows_sys::Win32::Foundation::{HANDLE, HWND};
 use windows_sys::core::HRESULT;
@@ -148,6 +148,19 @@ unsafe extern "system" {
         size: DWORD,
         data: *const c_char,
     ) -> HRESULT;
+    fn SimConnect_AICreateSimulatedObject_EX1(
+        handle: HANDLE,
+        title: *const c_char,
+        livery: *const c_char,
+        at: SIMCONNECT_DATA_INITPOSITION,
+        request: SIMCONNECT_DATA_REQUEST_ID,
+    ) -> HRESULT;
+    fn SimConnect_AIRemoveObject(
+        handle: HANDLE,
+        object: SIMCONNECT_OBJECT_ID,
+        request: SIMCONNECT_DATA_REQUEST_ID,
+    ) -> HRESULT;
+    fn SimConnect_CameraGet(handle: HANDLE, referential: DWORD) -> HRESULT;
 }
 
 /// Makes `op` as the one SimConnect call it names, on the connection `handle`, and returns
@@ -289,6 +302,36 @@ pub(crate) unsafe fn make(handle: HANDLE, op: Op) -> HRESULT {
                 let size = data.as_bytes_with_nul().len() as DWORD;
                 SimConnect_CallCommBusEvent(handle, name.as_ptr(), broadcast, size, data.as_ptr())
             }
+            Op::AICreateSimulatedObject {
+                title,
+                livery,
+                at,
+                request,
+            } => {
+                let title = c_string(&title);
+                let livery = c_string(&livery);
+                let at = SIMCONNECT_DATA_INITPOSITION {
+                    Latitude: at.latitude,
+                    Longitude: at.longitude,
+                    Altitude: at.altitude,
+                    Pitch: at.pitch,
+                    Bank: at.bank,
+                    Heading: at.heading,
+                    OnGround: DWORD::from(at.on_ground),
+                    Airspeed: at.airspeed,
+                };
+                SimConnect_AICreateSimulatedObject_EX1(
+                    handle,
+                    title.as_ptr(),
+                    livery.as_ptr(),
+                    at,
+                    request,
+                )
+            }
+            Op::AIRemoveObject { object, request } => {
+                SimConnect_AIRemoveObject(handle, object, request)
+            }
+            Op::CameraGet { referential } => SimConnect_CameraGet(handle, referential),
         }
     }
 }

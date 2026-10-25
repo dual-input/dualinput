@@ -2,6 +2,7 @@
 #![allow(clippy::unwrap_used, clippy::indexing_slicing)]
 
 use std::cell::RefCell;
+use std::collections::BTreeMap;
 
 use bytemuck::{Pod, Zeroable};
 use messages::module::RoutineId;
@@ -53,10 +54,31 @@ impl Routine for Note {
     }
 }
 
+/// The sim, with variables by name on each object and the IDs it hands out for them, which
+/// count on from a reset, so an ID from before one names nothing.
 #[derive(Default)]
 struct Aircraft {
     on: [bool; 3],
     sets: Vec<(Flag, bool)>,
+    /// Each object's variables, by the object, 0 for an `L:` one, and the name.
+    values: BTreeMap<(u32, String), f64>,
+    /// Each ID handed out since the last reset: a `Z:` variable's object, and the name.
+    ids: BTreeMap<i32, (Option<u32>, String)>,
+    next_id: i32,
+    reset: bool,
+    lookups: u32,
+}
+
+impl Aircraft {
+    fn key(&self, object: u32, space: Space, ids: Ids) -> Option<(u32, String)> {
+        let (own, name) = self.ids.get(&ids.var)?;
+        let object = match space {
+            Space::A => object,
+            Space::L => 0,
+            Space::Z => (*own)?,
+        };
+        Some((object, name.clone()))
+    }
 }
 
 impl Sim for Aircraft {
@@ -67,6 +89,76 @@ impl Sim for Aircraft {
     fn set_frozen(&mut self, flag: Flag, on: bool) {
         self.on[flag as usize] = on;
         self.sets.push((flag, on));
+    }
+
+    fn look_up(&mut self, object: u32, named: &Named) -> Option<Ids> {
+        self.lookups += 1;
+        let own = (named.space == Space::Z).then_some(object);
+        self.next_id += 1;
+        self.ids.insert(self.next_id, (own, named.name.clone()));
+        Some(Ids {
+            var: self.next_id,
+            unit: 0,
+        })
+    }
+
+    fn get(&mut self, object: u32, space: Space, ids: Ids) -> Option<f64> {
+        let key = self.key(object, space, ids)?;
+        self.values.get(&key).copied()
+    }
+
+    fn set(&mut self, object: u32, space: Space, ids: Ids, value: f64) {
+        if let Some(key) = self.key(object, space, ids) {
+            self.values.insert(key, value);
+        }
+    }
+
+    fn reset(&mut self) -> bool {
+        std::mem::take(&mut self.reset)
+    }
+}
+
+#[derive(Clone, Copy, Pod, Zeroable)]
+#[repr(C)]
+struct CopySlot {
+    object: u32,
+}
+
+/// Reads `A:PLANE LATITUDE` of the pilot's aircraft each frame and writes it, doubled, into
+/// `Z:COPY` on the object its feed names, with a `L:` name asked for twice.
+#[derive(Default)]
+struct Double {
+    object: u32,
+}
+
+const COPY: RoutineId = RoutineId {
+    name: "COPY",
+    freezes: false,
+};
+
+impl Routine for Double {
+    const ID: RoutineId = COPY;
+    type Slot = CopySlot;
+
+    fn on_slot(&mut self, slot: &CopySlot) {
+        self.object = slot.object;
+    }
+
+    fn frame(&mut self, _: &Frame, want: &mut Wants) {
+        let latitude = want.var("A:PLANE LATITUDE", "degrees").unwrap();
+        let copy = want.var("Z:COPY", "number").unwrap();
+        let shared = want.var("L:SHARED", "number").unwrap();
+        assert_eq!(want.var("L:SHARED", "number"), Some(shared));
+        assert_eq!(
+            want.var("SHARED", "number"),
+            None,
+            "a name needs its prefix"
+        );
+        let value = want.read(USER, latitude);
+        want.write(self.object, copy, value.unwrap_or(0.0) * 2.0);
+        // A write lands after every routine's frame, so this frame reads what was there.
+        let copied = want.read(self.object, copy);
+        HEARD.with(|h| h.borrow_mut().push(format!("read {copied:?}")));
     }
 }
 
@@ -169,7 +261,7 @@ fn the_host_releases_only_the_flags_it_set() {
     let mut host = host();
     let mut sim = Aircraft {
         on: [false, true, false],
-        sets: Vec::new(),
+        ..Aircraft::default()
     };
     host.written(messages::module::HOLD, &write(1, 0, HASH, 0, 0)[..24], 0);
     host.frame(1_000, &mut sim);
@@ -216,6 +308,53 @@ fn the_estimate_of_the_cores_counter_takes_the_largest_offset() {
     host.frame(1_300_000, &mut sim);
     let heard = heard();
     assert_eq!(heard.last().unwrap(), "frame at 10300100");
+}
+
+#[test]
+fn a_routine_reads_now_and_writes_after_every_frame_on_the_object_it_names() {
+    let mut host = Host::new(routines![Double], HASH, "0.1.0");
+    let mut sim = Aircraft::default();
+    sim.values.insert((USER, "PLANE LATITUDE".into()), 21.5);
+    let header = SlotHeader {
+        feeds: 1,
+        end: 0,
+        slots_hash: HASH,
+        counter: 0,
+    };
+    let mut bytes = bytemuck::bytes_of(&header).to_vec();
+    bytes.extend_from_slice(bytemuck::bytes_of(&CopySlot { object: 0x0101 }));
+    host.written(COPY, &bytes, 0);
+    host.frame(1_000, &mut sim);
+    host.frame(2_000, &mut sim);
+    assert_eq!(heard(), ["read None", "read Some(43.0)"]);
+    assert_eq!(sim.values.get(&(0x0101, "COPY".into())), Some(&43.0));
+    assert_eq!(sim.lookups, 2, "each ID looked up once, on its first read");
+}
+
+/// 03's case: after a `RESET`, `Figure`'s `Z:` writes still land
+/// (record/areas/core/03-sim-seam-and-wasm-module.md, "Cases for the bench").
+#[test]
+fn after_a_reset_the_host_looks_each_id_up_again_and_its_writes_land() {
+    let mut host = Host::new(routines![Double], HASH, "0.1.0");
+    let mut sim = Aircraft::default();
+    sim.values.insert((USER, "PLANE LATITUDE".into()), 1.0);
+    let header = SlotHeader {
+        feeds: 1,
+        end: 0,
+        slots_hash: HASH,
+        counter: 0,
+    };
+    let mut bytes = bytemuck::bytes_of(&header).to_vec();
+    bytes.extend_from_slice(bytemuck::bytes_of(&CopySlot { object: 7 }));
+    host.written(COPY, &bytes, 0);
+    host.frame(1_000, &mut sim);
+    sim.ids.clear();
+    sim.reset = true;
+    sim.values.insert((USER, "PLANE LATITUDE".into()), 5.0);
+    host.frame(2_000, &mut sim);
+    heard();
+    assert_eq!(sim.values.get(&(7, "COPY".into())), Some(&10.0));
+    assert_eq!(sim.lookups, 4);
 }
 
 #[test]

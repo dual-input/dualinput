@@ -12,8 +12,8 @@ use simconnect_types::{
     SIMCONNECT_PERIOD_SIM_FRAME,
 };
 
-use crate::Op;
 use crate::message::Data;
+use crate::{InitPosition, Op};
 
 /// A string variable's value takes this many bytes, `STRING256`'s.
 const TEXT: usize = 256;
@@ -56,12 +56,13 @@ pub enum Period {
     OnChange,
 }
 
-/// A watch on a connection: the definition that names its variables, and the request whose
-/// answers carry their values.
+/// A watch on a connection: the definition that names its variables, the request whose
+/// answers carry their values, and the object it reads, which a write through it writes.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Watch {
     pub request: u32,
     pub definition: u32,
+    pub object: u32,
 }
 
 /// A client data area on a connection, and the definition that covers it whole.
@@ -129,6 +130,18 @@ impl<K: Clone> Client<K> {
     /// Watches `vars` on the pilot's aircraft, tagged, so each value names its variable by
     /// its place in `vars`. Returns the watch, and the calls that make it.
     pub fn watch(&mut self, by: &K, vars: &[Var], period: Period) -> (Watch, Vec<Op>) {
+        self.watch_on(by, SIMCONNECT_OBJECT_ID_USER, vars, period)
+    }
+
+    /// Watches `vars` on the object `object`, such as `SIMCONNECT_OBJECT_ID_USER_AVATAR` or an
+    /// object the connection created.
+    pub fn watch_on(
+        &mut self,
+        by: &K,
+        object: u32,
+        vars: &[Var],
+        period: Period,
+    ) -> (Watch, Vec<Op>) {
         let mut ops = Vec::new();
         let definition = match (period, self.once.get(vars)) {
             (Period::Once, Some(&definition)) => definition,
@@ -170,7 +183,7 @@ impl<K: Clone> Client<K> {
         let op = Op::RequestDataOnSimObject {
             request,
             definition,
-            object: SIMCONNECT_OBJECT_ID_USER,
+            object,
             period: period_id,
             flags,
         };
@@ -184,6 +197,7 @@ impl<K: Clone> Client<K> {
             Watch {
                 request,
                 definition,
+                object,
             },
             ops,
         )
@@ -221,8 +235,8 @@ impl<K: Clone> Client<K> {
         Some(values)
     }
 
-    /// Writes `values` into a watch's variables on the pilot's aircraft, one for each, in
-    /// the watch's order. `None` when they don't match the watch's variables.
+    /// Writes `values` into a watch's variables on the object it reads, one for each, in the
+    /// watch's order. `None` when they don't match the watch's variables.
     pub fn write(&self, watch: Watch, values: &[Value]) -> Option<Op> {
         let vars = self.definitions.get(&watch.definition)?;
         if vars.len() != values.len() {
@@ -243,7 +257,7 @@ impl<K: Clone> Client<K> {
         }
         Some(Op::SetDataOnSimObject {
             definition: watch.definition,
-            object: SIMCONNECT_OBJECT_ID_USER,
+            object: watch.object,
             data,
         })
     }
@@ -251,15 +265,46 @@ impl<K: Clone> Client<K> {
     /// Sends the sim's event `name`, such as `K:FREEZE_ALTITUDE_SET`, with one value, to the
     /// pilot's aircraft, mapping it first if this connection hasn't.
     pub fn key(&mut self, by: &K, name: &str, data: u32) -> Vec<Op> {
+        self.key_on(by, SIMCONNECT_OBJECT_ID_USER, name, data)
+    }
+
+    /// Sends the sim's event `name` to the object `object`, as avatars freezes each figure
+    /// it creates.
+    pub fn key_on(&mut self, by: &K, object: u32, name: &str, data: u32) -> Vec<Op> {
         let (event, mut ops) = self.event(by, name);
         ops.push(Op::TransmitClientEvent {
-            object: SIMCONNECT_OBJECT_ID_USER,
+            object,
             event,
             data,
             group: SIMCONNECT_GROUP_PRIORITY_HIGHEST,
             flags: SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY,
         });
         ops
+    }
+
+    /// Creates an object of the SimObject `title`. Returns the request its object ID comes
+    /// back under. An object goes with its connection, so its creation is no setup.
+    pub fn create(&mut self, title: &str, livery: &str, at: InitPosition) -> (u32, Op) {
+        let request = take(&mut self.next.request);
+        let op = Op::AICreateSimulatedObject {
+            title: title.into(),
+            livery: livery.into(),
+            at,
+            request,
+        };
+        (request, op)
+    }
+
+    /// Removes an object the connection created.
+    pub fn remove(&mut self, object: u32) -> Op {
+        let request = take(&mut self.next.request);
+        Op::AIRemoveObject { object, request }
+    }
+
+    /// Subscribes to the sim's `Frame` event, whose messages carry the client event this
+    /// returns.
+    pub fn frames(&mut self, by: &K) -> (u32, Op) {
+        self.system_event(by, "Frame")
     }
 
     /// A notification group at `priority` that listens to `events` without masking them,

@@ -4,6 +4,8 @@
 //! FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `Update_StandAlone` and
 //! `interpolate`; not run).
 
+use crate::Sim;
+
 /// One of the sim's three freezes, each with its own variable and event.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Flag {
@@ -16,16 +18,6 @@ pub enum Flag {
 }
 
 const FLAGS: [Flag; 3] = [Flag::LatitudeLongitude, Flag::Altitude, Flag::Attitude];
-
-/// The sim, as the host reaches it: through the sim's own APIs in our module, and through
-/// the stand-in's aircraft on the bench (record/areas/core/03-sim-seam-and-wasm-module.md,
-/// "Wants and the sim's APIs").
-pub trait Sim {
-    /// Whether the pilot's aircraft has `flag` on.
-    fn frozen(&mut self, flag: Flag) -> bool;
-    /// Turns `flag` on or off on the pilot's aircraft.
-    fn set_frozen(&mut self, flag: Flag, on: bool);
-}
 
 /// Which of the three flags the host turned on.
 #[derive(Default)]

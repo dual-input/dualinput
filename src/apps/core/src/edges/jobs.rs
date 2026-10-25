@@ -5,13 +5,17 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
-use kernel::{Entry, Fetch, Fetched, JOBS, JobId, Method, StartJob, Work};
+use kernel::{Entry, Fetch, Fetched, Gathered, JOBS, JobId, Method, StartJob, Work};
 
 use crate::queue::Queue;
 
 /// A fetch with no answer by then is the job's error, so a job never waits on a server that
 /// stopped answering. The network keeps its own 10s for the backend's answer.
 const FETCH_WITHIN: Duration = Duration::from_secs(30);
+
+/// A gather whose `follow` still names new files after this many rounds of reads is the
+/// job's error, so a follow that names files without end can't hold a thread of the pool.
+const GATHER_ROUNDS: usize = 32;
 
 /// What every job needs besides itself.
 #[derive(Clone)]
@@ -131,7 +135,42 @@ fn run(jobs: &Jobs, start: &StartJob) -> Result<Vec<u8>, String> {
                 .map_err(|e| format!("couldn't start Explorer on {link}: {e}"))
         }
         Work::Fetch(_) => unreachable!("a fetch runs as a task, not on the blocking pool"),
+        Work::Gather { context } => {
+            let follow = start.job.follow.ok_or("a gather came with no follow")?;
+            gather(context, follow, |path| {
+                std::fs::read(resolve(&jobs.data, path)).ok()
+            })
+        }
     }
+}
+
+/// Reads what `follow` names, round after round, through `read`, until it names nothing new.
+fn gather(
+    context: &[u8],
+    follow: kernel::Follow,
+    read: impl Fn(&str) -> Option<Vec<u8>>,
+) -> Result<Vec<u8>, String> {
+    let mut files: Vec<(String, Option<Vec<u8>>)> = Vec::new();
+    for _ in 0..GATHER_ROUNDS {
+        let new: Vec<String> = follow(context, &files)
+            .into_iter()
+            .filter(|path| !files.iter().any(|(read, _)| read == path))
+            .collect();
+        if new.is_empty() {
+            return Ok(Gathered {
+                context: context.to_vec(),
+                files,
+            }
+            .encode());
+        }
+        for path in new {
+            let bytes = read(&path);
+            files.push((path, bytes));
+        }
+    }
+    Err(format!(
+        "a gather still named new files after {GATHER_ROUNDS} rounds of reads"
+    ))
 }
 
 /// Each folder `depth` levels under `folder` that holds `holding`, by its path. A folder that
@@ -528,6 +567,39 @@ mod tests {
             clipboard::set_text(&before).expect("the clipboard should take its text back");
         }
         assert_eq!(read.as_deref(), Some("KX7P3M"));
+    }
+
+    /// Names `a`, then whatever each file read names, one name to a file.
+    fn chain(_: &[u8], read: &[(String, Option<Vec<u8>>)]) -> Vec<String> {
+        let mut wanted = vec!["a".to_string()];
+        for (_, bytes) in read {
+            if let Some(next) = bytes.as_ref().filter(|b| !b.is_empty()) {
+                wanted.push(String::from_utf8_lossy(next).into_owned());
+            }
+        }
+        wanted
+    }
+
+    #[test]
+    fn a_gather_reads_each_file_named_until_none_is_new_and_marks_a_missing_one() {
+        let files = |path: &str| match path {
+            "a" => Some(b"b".to_vec()),
+            "b" => Some(b"c".to_vec()),
+            "c" => None,
+            _ => Some(Vec::new()),
+        };
+        let gathered = Gathered::decode(&gather(b"ctx", chain, files).unwrap()).unwrap();
+        assert_eq!(gathered.context, b"ctx");
+        assert_eq!(
+            gathered.files,
+            [
+                ("a".to_string(), Some(b"b".to_vec())),
+                ("b".to_string(), Some(b"c".to_vec())),
+                ("c".to_string(), None),
+            ]
+        );
+        let error = gather(b"", |_, read| vec![format!("{}", read.len())], |_| None).unwrap_err();
+        assert!(error.contains("32 rounds"), "{error}");
     }
 
     #[test]

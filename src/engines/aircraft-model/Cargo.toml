@@ -1,0 +1,25 @@
+[package]
+name = "aircraft-model"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# quick-xml reads the behavior files, where roxmltree refuses the Comanche's
+# A2A_Templates.xml for a `#` in its element names (record/areas/avatars/log.md, 2026-10-17);
+# its default features are empty. postcard and bytemuck lay the built model out as one
+# buffer the core's loop reads in place.
+[dependencies]
+bytemuck = { version = "1.25.2", features = ["derive"] }
+msfs-gltf = { path = "../msfs-gltf" }
+msfs-rpn = { path = "../msfs-rpn" }
+postcard = { version = "1.1.3", default-features = false, features = ["use-std"] }
+quick-xml = { version = "0.42", default-features = false }
+ray-cast = { path = "../ray-cast" }
+serde = { version = "1.0.229", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1.0.145"
+zstd = { version = "0.14.3", default-features = false }
+
+[lints]
+workspace = true

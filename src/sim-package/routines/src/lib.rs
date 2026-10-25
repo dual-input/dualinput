@@ -15,5 +15,5 @@
 use routine_host::{Kind, routines};
 
 pub fn list() -> Vec<Kind> {
-    routines![routine_host::Hold]
+    routines![routine_host::Hold, avatars_routines::Figure]
 }

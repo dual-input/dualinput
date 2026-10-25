@@ -163,7 +163,15 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     name: "a feature naming another feature's modules of the message crate and the profile engine",
     rules: ["feature-on-feature"],
     tree: rust([
-      { dir: "src/features/avatars/core", name: "avatars", source: "use messages::{ids, pointer_sync as p};\nuse profile_engine::pointer_sync::Displays;\n" },
+      { dir: "src/features/avatars/core", name: "avatars", source: "use messages::{ids, pointer_sync as p};\nuse profile_engine::features::pointer_sync::Displays;\n" },
+      { dir: "src/features/pointer-sync/core", name: "pointer-sync" },
+    ]),
+  },
+  {
+    name: "a feature naming another feature's module of the profile engine in a grouped use",
+    rules: ["feature-on-feature"],
+    tree: rust([
+      { dir: "src/features/avatars/core", name: "avatars", source: "use profile_engine::features::{avatars, pointer_sync};\n" },
       { dir: "src/features/pointer-sync/core", name: "pointer-sync" },
     ]),
   },

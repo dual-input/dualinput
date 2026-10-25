@@ -126,10 +126,37 @@ pub struct Job {
     /// encode it for.
     #[serde(skip)]
     pub then: Option<Then>,
+    /// A gather's engine function, which names the files to read next, as `Then` runs on the
+    /// edge and stays out of the hash.
+    #[serde(skip)]
+    pub follow: Option<Follow>,
 }
 
 /// An engine's work on what a job read: its result, or its error as text.
 pub type Then = fn(Vec<u8>) -> Result<Vec<u8>, String>;
+
+/// An engine's choice of the files a gather reads next, from the gather's context and the
+/// files it has read so far, each with its bytes, or none for one that doesn't exist. A
+/// gather ends when it names no file it hasn't read.
+pub type Follow = fn(&[u8], &[(String, Option<Vec<u8>>)]) -> Vec<String>;
+
+/// What a gather read: its context, and every file in the order it read them, with its
+/// bytes, or none for a file that doesn't exist or doesn't read.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Gathered {
+    pub context: Vec<u8>,
+    pub files: Vec<(String, Option<Vec<u8>>)>,
+}
+
+impl Gathered {
+    pub fn encode(&self) -> Vec<u8> {
+        postcard::to_stdvec(self).expect("postcard should encode the files a gather read")
+    }
+
+    pub fn decode(bytes: &[u8]) -> Option<Gathered> {
+        postcard::from_bytes(bytes).ok()
+    }
+}
 
 /// A path is relative to the core's data folder, or absolute, and may start with `%APPDATA%`
 /// or `%LOCALAPPDATA%`, which the edge fills in, as the sim's `UserCfg.opt` sits under one or
@@ -172,6 +199,11 @@ pub enum Work {
     /// Fetches a URL, as the network's requests to the backend do. The result is a
     /// `Fetched`, whatever its status, and a fetch that got no answer is the job's error.
     Fetch(Fetch),
+    /// Reads the files the job's `follow` names from `context`, then the files it names once
+    /// it has those, until it names none it hasn't read, as avatars' model job reads an
+    /// aircraft's `aircraft.cfg`, the `model.cfg` it names, and on to the model's buffers.
+    /// The result is a `Gathered`.
+    Gather { context: Vec<u8> },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -228,52 +260,42 @@ impl Entry {
 }
 
 impl Job {
-    pub fn read(path: impl Into<String>) -> Job {
+    fn of(work: Work) -> Job {
         Job {
-            work: Work::Read { path: path.into() },
+            work,
             then: None,
+            follow: None,
         }
+    }
+
+    pub fn read(path: impl Into<String>) -> Job {
+        Job::of(Work::Read { path: path.into() })
     }
 
     pub fn write(path: impl Into<String>, bytes: Vec<u8>) -> Job {
-        Job {
-            work: Work::Write {
-                path: path.into(),
-                bytes,
-            },
-            then: None,
-        }
+        Job::of(Work::Write {
+            path: path.into(),
+            bytes,
+        })
     }
 
     pub fn list(path: impl Into<String>) -> Job {
-        Job {
-            work: Work::List { path: path.into() },
-            then: None,
-        }
+        Job::of(Work::List { path: path.into() })
     }
 
     pub fn delete(path: impl Into<String>) -> Job {
-        Job {
-            work: Work::Delete { path: path.into() },
-            then: None,
-        }
+        Job::of(Work::Delete { path: path.into() })
     }
 
     pub fn find(roots: Vec<(String, u8)>, holding: impl Into<String>) -> Job {
-        Job {
-            work: Work::Find {
-                roots,
-                holding: holding.into(),
-            },
-            then: None,
-        }
+        Job::of(Work::Find {
+            roots,
+            holding: holding.into(),
+        })
     }
 
     pub fn invite_code() -> Job {
-        Job {
-            work: Work::InviteCode,
-            then: None,
-        }
+        Job::of(Work::InviteCode)
     }
 
     pub fn copy_text(text: impl Into<String>) -> Job {
@@ -308,9 +330,13 @@ impl Job {
     }
 
     pub fn fetch(fetch: Fetch) -> Job {
+        Job::of(Work::Fetch(fetch))
+    }
+
+    pub fn gather(context: Vec<u8>, follow: Follow) -> Job {
         Job {
-            work: Work::Fetch(fetch),
-            then: None,
+            follow: Some(follow),
+            ..Job::of(Work::Gather { context })
         }
     }
 

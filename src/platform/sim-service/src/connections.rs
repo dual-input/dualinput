@@ -2,7 +2,7 @@
 //! the next connection after a loss (record/areas/architecture/02-code-map.md, "A
 //! connection for each feature, for each load").
 
-use std::collections::{BTreeMap, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use kernel::{Cx, Handle, UnitId};
 use sim_client::{Client, Connection, Op, SimCall, Tag, Watch};
@@ -14,6 +14,36 @@ use crate::{SimEvent, SimService};
 /// (record/areas/core/03-sim-seam-and-wasm-module.md, "Its thread"). `KEPT` in
 /// src/engines/sim-edge/src/sent.rs is the edge's count, so change both together.
 const RECENT: usize = 4_096;
+
+/// The profile unloaded. The profile loader says so right after it raises `ProfileUnloaded`,
+/// so this runs once every unit has handled that moment: each feature's routines end, and
+/// each feature's connection closes, taking what the feature set up and created in the sim
+/// with it, so its first call after the next load opens an empty one
+/// (record/areas/architecture/02-code-map.md, "A connection for each feature, for each
+/// load"). A sim call a feature makes as it hears `ProfileUnloaded` runs after this, and
+/// opens its connection again, so a feature makes none then.
+pub fn profile_unloaded(cx: &Cx) {
+    cx.call(SimService::unloaded, ());
+}
+
+impl SimService {
+    fn unloaded(me: &mut SimService, _: (), cx: &mut Cx) {
+        let platform = me.me();
+        for routine in me.module.routines_of_features(platform) {
+            SimService::end(me, routine, cx);
+        }
+        let features: Vec<UnitId> = me
+            .holders
+            .values()
+            .map(|h| h.unit)
+            .filter(|&u| u != platform)
+            .collect();
+        for unit in features {
+            me.close(unit, cx);
+            me.module.closed(unit);
+        }
+    }
+}
 
 /// Who a call was made for: the unit, and the handle its call returned, which none of the
 /// platform's own calls has.
@@ -36,6 +66,15 @@ pub(crate) struct Holder {
     pub(crate) routes: BTreeMap<u32, (Handle, bool)>,
     /// Each watch by its handle, for a write into its variables.
     pub(crate) watches: BTreeMap<Handle, Watch>,
+    /// Each create's handle by its request, until the object's ID comes.
+    pub(crate) creates: BTreeMap<u32, Handle>,
+    /// The objects the connection created and hasn't removed.
+    pub(crate) objects: BTreeSet<u32>,
+    /// The camera calls waiting for their answers, oldest first.
+    pub(crate) cameras: VecDeque<Handle>,
+    /// Each `frames` call's handle by the client event its `Frame` messages carry, which
+    /// the next connection subscribes again with the rest of the setup.
+    pub(crate) frames: BTreeMap<u32, Handle>,
     /// The tag of the unit's next call, from the unit's own count, and each recent call's
     /// origin by its tag.
     next_tag: u64,
@@ -51,6 +90,10 @@ impl Holder {
             client: Client::default(),
             routes: BTreeMap::new(),
             watches: BTreeMap::new(),
+            creates: BTreeMap::new(),
+            objects: BTreeSet::new(),
+            cameras: VecDeque::new(),
+            frames: BTreeMap::new(),
             next_tag: 0,
             tags: BTreeMap::new(),
         }
@@ -207,6 +250,10 @@ impl SimService {
         for tag in conn.sent {
             holder.tags.remove(&tag);
         }
+        // The objects went with the connection, and the answers it was waiting for with them.
+        holder.creates.clear();
+        holder.objects.clear();
+        holder.cameras.clear();
         for (origin, _) in conn.pending {
             if let Some(call) = origin.handle {
                 self.tell(origin.unit, SimEvent::Failed { call }, cx);
@@ -215,6 +262,40 @@ impl SimService {
         if unit != self.me() {
             self.tell(unit, SimEvent::Lost, cx);
         }
+    }
+
+    /// Closes `unit`'s connection on purpose, as its profile unloads: removes each object it
+    /// created first, on the same connection, since the SDK says a close removes them but only
+    /// a killed client has been measured to (record/areas/architecture/02-code-map.md, "A
+    /// connection for each feature, for each load"), then forgets its setup. The unit hears
+    /// no loss, since it asked for nothing to outlive its profile.
+    pub(crate) fn close(&mut self, unit: UnitId, cx: &Cx) {
+        let Some(holder) = self.holders.get_mut(&unit.place()) else {
+            return;
+        };
+        let objects: Vec<u32> = std::mem::take(&mut holder.objects).into_iter().collect();
+        let origin = Origin { unit, handle: None };
+        let removes: Vec<Op> = objects
+            .into_iter()
+            .map(|o| holder.client.remove(o))
+            .collect();
+        let connection = holder.current.as_ref().map(|c| c.connection);
+        self.make(origin, removes, cx);
+        if let Some(connection) = connection {
+            cx.out(SimCall::Close { connection });
+        }
+        if let Some(conn) = self
+            .holders
+            .get_mut(&unit.place())
+            .and_then(|h| h.current.take())
+        {
+            for (origin, _) in conn.pending {
+                if let Some(call) = origin.handle {
+                    self.tell(origin.unit, SimEvent::Failed { call }, cx);
+                }
+            }
+        }
+        self.forget(unit);
     }
 
     /// Forgets `unit`'s setup, once its connection is gone, so its next call opens an empty

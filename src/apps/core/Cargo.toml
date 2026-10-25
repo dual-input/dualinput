@@ -18,6 +18,7 @@ stand-in = [
 ]
 
 [dependencies]
+avatars = { path = "../../features/avatars/core" }
 bytemuck = { version = "1.25.2", optional = true }
 clients = { path = "../../platform/clients" }
 cockpit-stream = { path = "../../platform/cockpit-stream" }

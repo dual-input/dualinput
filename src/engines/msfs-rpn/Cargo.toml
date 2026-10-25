@@ -1,0 +1,13 @@
+[package]
+name = "msfs-rpn"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# serde lets a compiled program travel inside the aircraft's model, which avatars' job builds
+# and hands up to the core's loop (record/areas/avatars/01-avatars.md, "Finding the files").
+[dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
+
+[lints]
+workspace = true

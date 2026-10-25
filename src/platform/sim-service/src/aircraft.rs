@@ -61,6 +61,10 @@ pub fn find_package(cx: &Cx, folder: String) {
 pub(crate) struct Awareness {
     on: bool,
     facts: Option<AircraftFacts>,
+    /// The package's folder on this PC, which avatars' model job reads from. It stays out of
+    /// the facts, which the match check hands the crew, since a path on disk can name the
+    /// pilot's home folder.
+    folder: Option<String>,
     /// The searches running, at most one for the facts and one for the name.
     searches: Vec<Search>,
     /// The once-read of the title and livery the platform's connection waits on.
@@ -118,6 +122,12 @@ impl SimService {
                     tail: None,
                 }),
         )
+    }
+
+    /// The loaded aircraft's package folder on this PC, such as
+    /// `<packages>\Community\bksq-aircraft-baronpro`, once the search has found one.
+    pub fn package_folder(&self) -> Option<&str> {
+        self.aware.folder.as_deref()
     }
 
     fn set_awareness(me: &mut SimService, on: bool, cx: &mut Cx) {
@@ -185,6 +195,7 @@ impl SimService {
             ..AircraftFacts::default()
         };
         self.aware.facts = Some(facts);
+        self.aware.folder = None;
         self.read_title(cx);
         self.read_tail(cx);
         if self.aware.on {
@@ -386,8 +397,7 @@ impl SimService {
                 .as_str()
                 .map(str::to_string)
         });
-        let name = package.rsplit('\\').next().unwrap_or(&package).to_string();
-        me.searched(finding, Some((name, location, version)), cx);
+        me.searched(finding, Some((package, location, version)), cx);
     }
 
     /// The name's read of `aircraft.cfg`, which tries its second place when the first isn't there.
@@ -424,8 +434,8 @@ impl SimService {
         me.searched(finding, None, cx);
     }
 
-    /// The search ended: a package, where it's installed, and its version, or none, which
-    /// counts as streamed, since a streamed package keeps no aircraft folder on disk
+    /// The search ended: a package's folder, where it's installed, and its version, or none,
+    /// which counts as streamed, since a streamed package keeps no aircraft folder on disk
     /// (record/areas/aircraft/log.md, 2026-10-16).
     fn searched(
         &mut self,
@@ -452,10 +462,14 @@ impl SimService {
         if facts.aircraft.as_ref() != Some(&aircraft) {
             return;
         }
-        let (package, location, version) = match package {
-            Some((name, location, version)) => (Some(name), location, version),
+        let (folder, location, version) = match package {
+            Some((folder, location, version)) => (Some(folder), location, version),
             None => (None, Location::Streamed, None),
         };
+        let package = folder
+            .as_deref()
+            .map(|f| f.rsplit('\\').next().unwrap_or(f).to_string());
+        self.aware.folder = folder;
         tracing::info!(
             package,
             ?location,

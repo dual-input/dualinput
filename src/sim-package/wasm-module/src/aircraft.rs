@@ -1,11 +1,14 @@
-//! The pilot's aircraft, as the routine host reaches it through the sim's Vars and Events
-//! APIs (record/areas/core/03-sim-seam-and-wasm-module.md, "Wants and the sim's APIs").
+//! The pilot's aircraft and the objects in the sim, as the routine host reaches them through
+//! the sim's Vars and Events APIs (record/areas/core/03-sim-seam-and-wasm-module.md, "Wants
+//! and the sim's APIs").
 
 use std::ffi::c_void;
 use std::ptr;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use routine_host::{Flag, Sim};
+use routine_host::{Flag, Ids, Named, Sim, Space};
+
+use crate::vars;
 
 use crate::bindings::{
     FS_OBJECT_ID_USER_AIRCRAFT, FS_VAR_ERROR_NONE, FS_VAR_UPDATE_OP_REMOVE, FS_VAR_UPDATE_OP_RESET,
@@ -48,19 +51,19 @@ pub(crate) fn stop_listening() {
 }
 
 /// The IDs the sim gave the freeze's variables and their unit.
-struct Ids {
+struct FreezeIds {
     bool_unit: FsUnitId,
     latitude_longitude: FsAVarId,
     altitude: FsAVarId,
     attitude: FsAVarId,
 }
 
-impl Ids {
+impl FreezeIds {
     /// Each ID from the sim, or None while any is missing, so the next read asks again.
-    fn look_up() -> Option<Ids> {
+    fn look_up() -> Option<FreezeIds> {
         // SAFETY: the sim reads each name, which outlives its call.
         let ids = unsafe {
-            Ids {
+            FreezeIds {
                 bool_unit: fsVarsGetUnitId(c"bool".as_ptr()),
                 latitude_longitude: fsVarsGetAVarId(c"IS LATITUDE LONGITUDE FREEZE ON".as_ptr()),
                 altitude: fsVarsGetAVarId(c"IS ALTITUDE FREEZE ON".as_ptr()),
@@ -85,26 +88,45 @@ impl Ids {
     }
 }
 
-/// The pilot's aircraft, with the IDs the sim gave its variables, each looked up once and
-/// kept until the sim removes or resets its variables.
+/// The pilot's aircraft and the objects in the sim, with the IDs the sim gave the freeze's
+/// variables, looked up once and kept until the sim removes or resets its variables.
 #[derive(Default)]
 pub(crate) struct Aircraft {
-    ids: Option<Ids>,
+    ids: Option<FreezeIds>,
 }
 
 impl Aircraft {
-    fn ids(&mut self) -> Option<&Ids> {
-        if FORGET.swap(false, Ordering::Relaxed) {
-            self.ids = None;
-        }
+    fn ids(&mut self) -> Option<&FreezeIds> {
         if self.ids.is_none() {
-            self.ids = Ids::look_up();
+            self.ids = FreezeIds::look_up();
         }
         self.ids.as_ref()
     }
 }
 
 impl Sim for Aircraft {
+    /// The routine host asks once a frame, before any routine runs, so the freeze's IDs go
+    /// at the same time as the host's own.
+    fn reset(&mut self) -> bool {
+        let reset = FORGET.swap(false, Ordering::Relaxed);
+        if reset {
+            self.ids = None;
+        }
+        reset
+    }
+
+    fn look_up(&mut self, object: u32, named: &Named) -> Option<Ids> {
+        vars::look_up(object, named)
+    }
+
+    fn get(&mut self, object: u32, space: Space, ids: Ids) -> Option<f64> {
+        vars::get(object, space, ids)
+    }
+
+    fn set(&mut self, object: u32, space: Space, ids: Ids, value: f64) {
+        vars::set(object, space, ids, value);
+    }
+
     /// A flag the sim can't read counts as off, so while a routine wants the freeze, the
     /// routine host sends it each frame rather than never sending it.
     fn frozen(&mut self, flag: Flag) -> bool {

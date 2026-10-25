@@ -39,10 +39,11 @@ import { fromRoot, ROOT } from "./lib/repo.ts"
 /**
  * The rules the check holds, each named in its findings.
  *
- * A feature has up to five parts, each in a folder of its own: its crate in the core
+ * A feature has up to six parts, each in a folder of its own: its crate in the core
  * (`core/`), routines that run in our WASM module on the routine host (`routines/`), panel
- * modules that run in cockpit panels on the panel bridge (`panel/`), and sections of the
- * EFB and desktop apps, on each app's shell (`efb/`, `desktop/`).
+ * modules that run in cockpit panels on the panel bridge (`panel/`), sections of the EFB
+ * and desktop apps, on each app's shell (`efb/`, `desktop/`), and a SimObject the sim
+ * compiles, such as avatars' figure (`figure/`).
  *
  * The message crate and the profile engine, which reads the aircraft profiles that say
  * what to sync, hold a module for each feature. So the crate graph can't show one feature
@@ -83,7 +84,9 @@ const CORE_PLATFORM_LINES = [
   ["kernel"],
 ]
 const OUTSIDE_PLATFORM = ["routine-host", "panel-bridge", "efb-shell", "banner", "desktop-shell"]
-const FEATURE_PARTS = ["core", "routines", "panel", "efb", "desktop"]
+// A feature's SimObject, such as avatars' figure, sits in a part of its own beside these,
+// its sources and the generator that writes them, which import nothing of ours.
+const FEATURE_PARTS = ["core", "routines", "panel", "efb", "desktop", "figure"]
 // The pages that draw with the kit.
 const PAGE_SHELLS = ["efb-shell", "banner", "desktop-shell"]
 
@@ -361,14 +364,20 @@ function checkRustSource(crate: Crate, features: Set<string>, findings: Finding[
   }
 }
 
-/** Each module named under `messages::` or `profile_engine::`, including those in a grouped `use` such as `messages::{ids, pointer_sync}`. */
+/**
+ * Each module named under `messages::` or `profile_engine::`, including those in a grouped `use`
+ * such as `messages::{ids, pointer_sync}`. A feature's module of the profile engine sits under
+ * `features::`, as `profile_engine::features::avatars`, so that path names the module after it.
+ */
 function namedModules(source: string): { crate: string; module: string }[] {
   const named: { crate: string; module: string }[] = []
-  for (const m of source.matchAll(/\b(messages|profile_engine)::(?:\{([^}]*)\}|(\w+))/g)) {
+  for (const m of source.matchAll(/\b(messages|profile_engine(?:::features)?)::(?:\{([^}]*)\}|(\w+))/g)) {
     const items = m[2] !== undefined ? m[2].split(",") : [m[3]!]
     for (const item of items) {
-      const module = item.trim().split(/[\s:]/)[0]
-      if (module) named.push({ crate: m[1]!, module })
+      const path = item.trim()
+      const crate = m[1]!.startsWith("profile_engine") ? "profile_engine" : m[1]!
+      const module = (crate === "profile_engine" ? path.replace(/^features::/, "") : path).split(/[\s:]/)[0]
+      if (module) named.push({ crate, module })
     }
   }
   return named

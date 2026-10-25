@@ -20,6 +20,7 @@ import { fromRoot, ROOT } from "./lib/repo.ts"
 import { Failed, main, run } from "./lib/run.ts"
 import { requireSdk } from "./lib/sdk.ts"
 import { stockMismatches } from "./lib/stock.ts"
+import { mismatches as figureMismatches } from "./lib/figure.ts"
 
 const checks: [string, () => void | Promise<void>][] = [
   ["Rustfmt", () => run("cargo", ["fmt", "--all", "--", "--check"])],
@@ -37,6 +38,7 @@ const checks: [string, () => void | Promise<void>][] = [
   ["each tsconfig's type check", typeCheck],
   ["the stock files against stock.json", checkStockFiles],
   ["the banner's panel against its source", checkPanel],
+  ["the figure's sources against source.json", checkFigure],
   ["the Coherent GT check on our code in the sim", async () => checkPages(await buildPages())],
   ["the map check", () => run(process.execPath, [path.join("tools", "map-check.ts")])],
   ["the profiles' level files", checkLevels],
@@ -136,6 +138,12 @@ function checkPanel(): void {
 function checkStockFiles(): void {
   const mismatched = stockMismatches()
   if (mismatched.length) throw new Failed(`src/sim-package/stock/ doesn't match its stock.json: ${mismatched.join(", ")}`)
+}
+
+/** Avatars' figure: its sources as the generator writes them, and compiled since they changed. */
+function checkFigure(): void {
+  const mismatched = figureMismatches()
+  if (mismatched.length) throw new Failed(`the figure's sources don't match:\n  ${mismatched.join("\n  ")}`)
 }
 
 /** Every file under `dir` whose name ends with `suffix`, outside node_modules and target. */

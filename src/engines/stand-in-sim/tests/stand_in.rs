@@ -7,8 +7,9 @@ use std::process::{Child, Command, Stdio};
 use std::sync::mpsc;
 use std::time::Duration;
 
-use sim_client::{Connection, SimCall, Up};
-use stand_in_sim::{Act, Aircraft, Module, StandIn};
+use sim_client::message::{Camera, Message};
+use sim_client::{Connection, InitPosition, Op, SimCall, Tag, Up};
+use stand_in_sim::{Act, Module, StandIn, World};
 
 const S_OK: i32 = 0;
 const E_FAIL: i32 = 0x8000_4005_u32 as i32;
@@ -23,7 +24,7 @@ impl Module for NoModule {
 
     fn written(&mut self, _: &str, _: &[u8], _: u64) {}
 
-    fn frame(&mut self, _: u64, _: &mut Aircraft) -> Vec<(String, Vec<u8>)> {
+    fn frame(&mut self, _: u64, _: &mut World) -> Vec<(String, Vec<u8>)> {
         Vec::new()
     }
 }
@@ -206,6 +207,95 @@ fn loses_a_connection_and_quits_on_the_others_when_asked() {
         }
     );
     quiet(&from);
+    process.kill();
+}
+
+/// The message an input carries, and the tag of the call it names.
+fn message(up: Up) -> (Message, Option<Tag>) {
+    let Up::Message { record, call, .. } = up else {
+        panic!("a message should come up, not {up:?}");
+    };
+    (Message::read(&record).unwrap(), call)
+}
+
+fn on(connection: Connection, tag: u64, op: Op) -> SimCall {
+    SimCall::On {
+        connection,
+        tag: Tag(tag),
+        op,
+    }
+}
+
+fn create(title: &str, request: u32) -> Op {
+    Op::AICreateSimulatedObject {
+        title: title.into(),
+        livery: String::new(),
+        at: InitPosition::default(),
+        request,
+    }
+}
+
+#[test]
+fn creates_objects_answers_the_camera_and_sends_frames_as_the_sim_would() {
+    let (stand_in, from) = started();
+    let mut process = Sim::start();
+    stand_in.act(Act::Watch {
+        process: process.id(),
+    });
+    stand_in.call(SimCall::FindProcess);
+    assert!(matches!(next(&from), Up::Found { .. }));
+    stand_in.act(Act::Frames { per_second: 0 });
+    stand_in.call(open("Dual Input", C1));
+    assert!(matches!(next(&from), Up::Opened { result: S_OK, .. }));
+    assert!(matches!(next(&from), Up::Message { .. }));
+
+    stand_in.call(on(C1, 1, create("DUALINPUT_FIGURE_PILOT", 9)));
+    let (assigned, _) = message(next(&from));
+    let Message::Assigned { request: 9, object } = assigned else {
+        panic!("the create's object ID should come under its request, not {assigned:?}");
+    };
+
+    stand_in.act(Act::Lack {
+        title: "MISSING".into(),
+    });
+    stand_in.call(on(C1, 2, create("MISSING", 10)));
+    let (refused, call) = message(next(&from));
+    assert!(matches!(refused, Message::Exception { .. }));
+    assert_eq!(call, Some(Tag(2)), "the exception names the create's call");
+
+    let camera = Camera {
+        position: [0.3, 0.8, -0.1],
+        referential: 1,
+        yaw: 20.0,
+        fov: 0.9,
+        ..Camera::default()
+    };
+    stand_in.act(Act::Camera(camera));
+    stand_in.call(on(C1, 3, Op::CameraGet { referential: 1 }));
+    assert_eq!(message(next(&from)).0, Message::Camera(camera));
+
+    stand_in.call(on(
+        C1,
+        4,
+        Op::SubscribeToSystemEvent {
+            event: 5,
+            name: "Frame".into(),
+        },
+    ));
+    stand_in.act(Act::FrameBurst { count: 3 });
+    for _ in 0..3 {
+        let (frame, _) = message(next(&from));
+        assert!(matches!(frame, Message::Frame { event: 5, .. }));
+    }
+
+    let report = stand_in.report().unwrap();
+    assert_eq!(report.objects.len(), 1);
+    assert_eq!(report.objects[0].id, object);
+    stand_in.call(SimCall::Close { connection: C1 });
+    assert!(
+        stand_in.report().unwrap().objects.is_empty(),
+        "a closed connection's objects go with it"
+    );
     process.kill();
 }
 

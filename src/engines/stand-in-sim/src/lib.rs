@@ -14,13 +14,16 @@
 
 mod aircraft;
 mod sim;
+mod world;
 
 pub use aircraft::Aircraft;
+pub use world::{Made, World};
 
 use std::sync::{Arc, mpsc};
 use std::thread::JoinHandle;
 use std::time::Duration;
 
+use sim_client::message::Camera;
 use sim_client::{Connection, Op, SimCall, Up};
 use windows_sys::Win32::Foundation::{CloseHandle, HANDLE};
 use windows_sys::Win32::System::Threading::{CreateEventW, SetEvent};
@@ -36,8 +39,9 @@ pub trait Module: Send {
     /// A connection wrote the area `slot`, which the module read at `clock`, in µs on the
     /// stand-in's clock.
     fn written(&mut self, slot: &str, bytes: &[u8], clock: u64);
-    /// One frame at `clock`. Returns each area the module wrote, by name, with its bytes.
-    fn frame(&mut self, clock: u64, aircraft: &mut Aircraft) -> Vec<(String, Vec<u8>)>;
+    /// One frame at `clock`, on the sim's aircraft and objects. Returns each area the module
+    /// wrote, by name, with its bytes.
+    fn frame(&mut self, clock: u64, world: &mut World) -> Vec<(String, Vec<u8>)>;
 }
 
 /// A signal of the sim's that a scenario plays, as the sim sends it around a flight load.
@@ -89,6 +93,24 @@ pub enum Act {
         numbers: Vec<(String, f64)>,
         texts: Vec<(String, String)>,
     },
+    /// Sets the variables of the pilot's avatar on foot, such as `PLANE LATITUDE` and
+    /// `IS CROUCH`, which a watch on `SIMCONNECT_OBJECT_ID_USER_AVATAR` reads.
+    SetAvatar { numbers: Vec<(String, f64)> },
+    /// Puts the camera where `Camera` says, in its referential, which `CameraGet` in that
+    /// referential answers with.
+    Camera(Camera),
+    /// Lacks the SimObject titled `title`, so a create naming it fails with an exception
+    /// tagged with the call. Which exception the sim sends is unverified, so the stand-in
+    /// sends `SIMCONNECT_EXCEPTION_CREATE_OBJECT_FAILED`, which the SDK lists among a
+    /// create's (record/areas/traffic-atc/log.md, 2026-10-17).
+    Lack { title: String },
+    /// Hands up `count` `Frame` events at once on each connection subscribed to it, as FS
+    /// Copilot's traffic thread got several in one read when the sim outpaced it (read in the
+    /// FS Copilot fork, `FsCopilot/Connection/SimTraffic.cs`).
+    FrameBurst { count: u32 },
+    /// Resets the sim's variables, as an aircraft change does: the module hears the reset,
+    /// and every ID the Vars API gave it names nothing.
+    ResetVars,
 }
 
 /// What the stand-in tells the bench when asked.
@@ -100,6 +122,8 @@ pub struct Report {
     pub calls: Vec<Called>,
     /// The aircraft's variables, each with its value as text.
     pub variables: Vec<(String, String)>,
+    /// The objects connections created and the sim still holds, with their variables.
+    pub objects: Vec<Made>,
     /// Whether the module stopped.
     pub module_stopped: bool,
 }

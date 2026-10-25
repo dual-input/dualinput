@@ -8,4 +8,5 @@ publish = false
 # build of the core both link it: the module builds only as a cdylib, which nothing else
 # can link (record/areas/build/02-testing.md, "Our WASM module").
 [dependencies]
+avatars-routines = { path = "../../features/avatars/routines" }
 routine-host = { path = "../../platform/routine-host" }

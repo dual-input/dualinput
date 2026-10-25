@@ -12,6 +12,9 @@ Decides:     What runs on a pilot's own machine and what on every machine; what 
 > [Seeing a held seat](#a-seat)'s notification says only "This seat is taken", held while this pilot's camera is in the seat, rather than naming the free seats, since a profile can list any number of them.
 > Which figures show is four switches: your figure's and the crew's, each inside the aircraft and on a walkaround.
 
+> **Note**
+> On 2026-10-25, stage 17 settled five of the items [left open](#left-open) ([log](log.md#2026-10-25-stage-17-settles-five-items-01-avatars-left-open-a-run-of-its-own-the-seat-in-the-pose-an-info-item-for-a-model-a-machine-cant-read-vr-as-a-known-limit-and-an-eye-on-what-the-figure-costs)): the figure runs on foot with a gait of its own past a speed; the seat stays in the pose; a model a machine can't read becomes a match-check item at a new level, `info`, saying avatar interaction isn't supported in that pilot's copy of the aircraft; VR stays a known limit for v1; and the figure's model and `Figure` keep its frame time down now, changing and writing a joint only when it moved past what shows.
+
 A pilot's own core works out their figure: it reads the camera every frame and the mouse through the core helper, takes a seat by where the camera is, casts each click's ray into the aircraft's own models, and decides where each hand goes and when.
 It sends the whole figure to the crew as a pose, at most every 33ms.
 On every machine, the `Figure` routine in our WASM module eases each hand toward its target, holds a hand on a yoke by that machine's own yoke, works out each figure's 27 joints, and places each figure in the moving cockpit, every frame.

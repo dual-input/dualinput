@@ -7,8 +7,9 @@
 use bytemuck::Pod;
 use kernel::{Cx, Handle, Unit, UnitId};
 use messages::module::RoutineId;
-use sim_client::message::Data;
-use sim_client::{Period, Value, Var};
+use sim_client::message::{Camera, Data};
+use sim_client::{InitPosition, Period, Value, Var};
+use simconnect_types::SIMCONNECT_OBJECT_ID_USER;
 
 use crate::connections::Origin;
 use crate::{SimEvent, SimService};
@@ -60,9 +61,17 @@ impl Sim<'_, '_> {
     /// Watches `vars` on the pilot's aircraft, as one tagged definition: their values
     /// arrive as `SimEvent::Values` with this handle.
     pub fn watch(&self, vars: &[Var], period: Period) -> Handle {
+        self.watch_on(SIMCONNECT_OBJECT_ID_USER, vars, period)
+    }
+
+    /// Watches `vars` on the object `object`, such as `SIMCONNECT_OBJECT_ID_USER_AVATAR`, the
+    /// pilot on foot, or an object the unit created.
+    pub fn watch_on(&self, object: u32, vars: &[Var], period: Period) -> Handle {
         let (handle, origin) = self.origin();
-        self.cx
-            .call(SimService::watch_for, (origin, vars.to_vec(), period));
+        self.cx.call(
+            SimService::watch_for,
+            (origin, object, vars.to_vec(), period),
+        );
         handle
     }
 
@@ -76,9 +85,54 @@ impl Sim<'_, '_> {
     /// Sends the sim's event `event`, such as `K:PAUSE_SET`, with one value, to the pilot's
     /// aircraft.
     pub fn key(&self, event: &str, value: u32) -> Handle {
+        self.key_on(SIMCONNECT_OBJECT_ID_USER, event, value)
+    }
+
+    /// Sends the sim's event `event` to the object `object`, as avatars freezes each figure
+    /// it creates.
+    pub fn key_on(&self, object: u32, event: &str, value: u32) -> Handle {
         let (handle, origin) = self.origin();
-        self.cx
-            .call(SimService::key_for, (origin, event.to_string(), value));
+        self.cx.call(
+            SimService::key_for,
+            (origin, object, event.to_string(), value),
+        );
+        handle
+    }
+
+    /// Creates an object of the SimObject titled `title`, such as `DUALINPUT_FIGURE_PILOT`, in
+    /// `livery`, at `at`. Its ID arrives as `SimEvent::Created` with this handle, or an
+    /// exception does, as for a title the sim lacks. The object goes with the unit's
+    /// connection.
+    pub fn create_ai(&self, title: &str, livery: &str, at: InitPosition) -> Handle {
+        let (handle, origin) = self.origin();
+        self.cx.call(
+            SimService::create_for,
+            (origin, title.to_string(), livery.to_string(), at),
+        );
+        handle
+    }
+
+    /// Removes an object the unit created.
+    pub fn remove(&self, object: u32) -> Handle {
+        let (handle, origin) = self.origin();
+        self.cx.call(SimService::remove_for, (origin, object));
+        handle
+    }
+
+    /// Reads the camera once, in `referential`, such as
+    /// `SIMCONNECT_POSITION_REFERENTIAL_SIMOBJECT`. It arrives as `SimEvent::Camera` with this
+    /// handle.
+    pub fn camera(&self, referential: u32) -> Handle {
+        let (handle, origin) = self.origin();
+        self.cx.call(SimService::camera_for, (origin, referential));
+        handle
+    }
+
+    /// Subscribes to the sim's `Frame` event, which arrives as `SimEvent::Frame` with this
+    /// handle once each frame the sim draws.
+    pub fn frames(&self) -> Handle {
+        let (handle, origin) = self.origin();
+        self.cx.call(SimService::frames_for, origin);
         handle
     }
 
@@ -116,13 +170,13 @@ impl ModuleCalls<'_, '_> {
 impl SimService {
     fn watch_for(
         me: &mut SimService,
-        (origin, vars, period): (Origin, Vec<Var>, Period),
+        (origin, object, vars, period): (Origin, u32, Vec<Var>, Period),
         cx: &mut Cx,
     ) {
         let Some(client) = me.client(origin, cx) else {
             return;
         };
-        let (watch, ops) = client.watch(&origin, &vars, period);
+        let (watch, ops) = client.watch_on(&origin, object, &vars, period);
         if let (Some(holder), Some(handle)) =
             (me.holders.get_mut(&origin.unit.place()), origin.handle)
         {
@@ -161,12 +215,107 @@ impl SimService {
         }
     }
 
-    fn key_for(me: &mut SimService, (origin, event, value): (Origin, String, u32), cx: &mut Cx) {
+    fn key_for(
+        me: &mut SimService,
+        (origin, object, event, value): (Origin, u32, String, u32),
+        cx: &mut Cx,
+    ) {
         let Some(client) = me.client(origin, cx) else {
             return;
         };
-        let ops = client.key(&origin, &event, value);
+        let ops = client.key_on(&origin, object, &event, value);
         me.make(origin, ops, cx);
+    }
+
+    fn create_for(
+        me: &mut SimService,
+        (origin, title, livery, at): (Origin, String, String, InitPosition),
+        cx: &mut Cx,
+    ) {
+        let Some(client) = me.client(origin, cx) else {
+            return;
+        };
+        let (request, op) = client.create(&title, &livery, at);
+        if let (Some(holder), Some(handle)) =
+            (me.holders.get_mut(&origin.unit.place()), origin.handle)
+        {
+            holder.creates.insert(request, handle);
+        }
+        me.make(origin, vec![op], cx);
+    }
+
+    fn remove_for(me: &mut SimService, (origin, object): (Origin, u32), cx: &mut Cx) {
+        let Some(client) = me.client(origin, cx) else {
+            return;
+        };
+        let op = client.remove(object);
+        if let Some(holder) = me.holders.get_mut(&origin.unit.place()) {
+            holder.objects.remove(&object);
+        }
+        me.make(origin, vec![op], cx);
+    }
+
+    fn camera_for(me: &mut SimService, (origin, referential): (Origin, u32), cx: &mut Cx) {
+        if me.client(origin, cx).is_none() {
+            return;
+        }
+        if let (Some(holder), Some(handle)) =
+            (me.holders.get_mut(&origin.unit.place()), origin.handle)
+        {
+            holder.cameras.push_back(handle);
+        }
+        me.make(origin, vec![sim_client::Op::CameraGet { referential }], cx);
+    }
+
+    fn frames_for(me: &mut SimService, origin: Origin, cx: &mut Cx) {
+        let Some(client) = me.client(origin, cx) else {
+            return;
+        };
+        let (event, op) = client.frames(&origin);
+        if let (Some(holder), Some(handle)) =
+            (me.holders.get_mut(&origin.unit.place()), origin.handle)
+        {
+            holder.frames.insert(event, handle);
+        }
+        me.make(origin, vec![op], cx);
+    }
+
+    /// An object a unit's create made: the create's handle, found by its request, hears the
+    /// object's ID.
+    pub(crate) fn assigned(&mut self, unit: UnitId, request: u32, object: u32, cx: &Cx) {
+        let Some(holder) = self.holders.get_mut(&unit.place()) else {
+            return;
+        };
+        let Some(call) = holder.creates.remove(&request) else {
+            return;
+        };
+        holder.objects.insert(object);
+        self.tell(unit, SimEvent::Created { call, object }, cx);
+    }
+
+    /// The camera's answer, which names no request, so it goes to the unit's oldest camera
+    /// call still waiting. A call the sim refused leaves the queue with its exception, so the
+    /// answers that follow still find their calls.
+    pub(crate) fn camera_read(&mut self, unit: UnitId, camera: Camera, cx: &Cx) {
+        let Some(call) = self
+            .holders
+            .get_mut(&unit.place())
+            .and_then(|h| h.cameras.pop_front())
+        else {
+            return;
+        };
+        self.tell(unit, SimEvent::Camera { call, camera }, cx);
+    }
+
+    pub(crate) fn frame(&mut self, unit: UnitId, event: u32, rate: f32, speed: f32, cx: &Cx) {
+        let Some(&call) = self
+            .holders
+            .get(&unit.place())
+            .and_then(|h| h.frames.get(&event))
+        else {
+            return;
+        };
+        self.tell(unit, SimEvent::Frame { call, rate, speed }, cx);
     }
 
     /// A watch's values: the platform's own once-reads, or a unit's watch, routed by the

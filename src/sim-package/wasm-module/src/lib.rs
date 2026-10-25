@@ -20,6 +20,7 @@
 mod aircraft;
 mod bindings;
 mod connection;
+mod vars;
 
 use std::cell::RefCell;
 

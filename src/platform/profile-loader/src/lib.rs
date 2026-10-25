@@ -364,6 +364,7 @@ impl Profiles {
                     tracing::info!("the profile unloaded");
                     cx.raise(ProfileUnloaded);
                     clients::profile_unloaded(cx);
+                    sim_service::profile_unloaded(cx);
                 }
                 Load::Reading { job, .. } => cx.cancel_job(job),
                 _ => {}

@@ -53,6 +53,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "aircraft-model"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "msfs-gltf",
+ "msfs-rpn",
+ "postcard",
+ "quick-xml",
+ "ray-cast",
+ "serde",
+ "serde_json",
+ "zstd",
+]
+
+[[package]]
 name = "allocator-api2"
 version = "0.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -246,6 +261,38 @@ name = "autocfg"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
+
+[[package]]
+name = "avatars"
+version = "0.1.0"
+dependencies = [
+ "aircraft-model",
+ "bytemuck",
+ "clients",
+ "cockpit-stream",
+ "core-helper-service",
+ "kernel",
+ "messages",
+ "network",
+ "postcard",
+ "profile-engine",
+ "profile-loader",
+ "serde_json",
+ "session",
+ "sim-service",
+ "simconnect-types",
+ "tracing",
+]
+
+[[package]]
+name = "avatars-routines"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "messages",
+ "routine-host",
+ "serde_json",
+]
 
 [[package]]
 name = "backon"
@@ -985,6 +1032,7 @@ dependencies = [
 name = "dualinput-core"
 version = "0.1.0"
 dependencies = [
+ "avatars",
  "bytemuck",
  "cc",
  "clients",
@@ -2399,6 +2447,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "msfs-gltf"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "msfs-rpn"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "msi"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3381,6 +3444,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ray-cast"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+]
+
+[[package]]
 name = "rcgen"
 version = "0.14.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3547,6 +3617,7 @@ dependencies = [
 name = "routines"
 version = "0.1.0"
 dependencies = [
+ "avatars-routines",
  "routine-host",
 ]
 

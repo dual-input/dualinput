@@ -157,9 +157,9 @@ pub fn start_job(
             Work::OpenLink { url, .. } => {
                 Err(format!("{url}: the droplet program opens no window"))
             }
-            // Only the session crate and the sim service ask these, and the droplet runs
-            // neither.
-            Work::Find { .. } | Work::InviteCode | Work::CopyText { .. } => {
+            // Only the session crate, the sim service, and avatars ask these, and the droplet
+            // runs none of them.
+            Work::Find { .. } | Work::InviteCode | Work::CopyText { .. } | Work::Gather { .. } => {
                 Err("the droplet program has no sim and no clipboard".to_string())
             }
             // The clients crate asks at its start, for a setup no droplet runs.

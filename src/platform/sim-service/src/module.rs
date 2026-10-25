@@ -81,6 +81,25 @@ impl ModuleWatch {
         self.feeds.values().any(|f| f.live)
     }
 
+    /// Every routine a feature has fed, the platform's own left out.
+    pub(crate) fn routines_of_features(&self, platform: UnitId) -> Vec<(UnitId, RoutineId)> {
+        self.feeds
+            .keys()
+            .filter(|(unit, _)| *unit != platform)
+            .copied()
+            .collect()
+    }
+
+    /// `unit`'s connection closed, and its slots' areas with it, so its next feed maps its
+    /// slot again on the next one.
+    pub(crate) fn closed(&mut self, unit: UnitId) {
+        for ((u, _), feed) in &mut self.feeds {
+            if *u == unit {
+                feed.area = None;
+            }
+        }
+    }
+
     /// The sim's process ended, and its module with it, so every routine ends, and the next
     /// run of the sim starts none its feature hasn't fed it, and reads Missing until its
     /// module writes.

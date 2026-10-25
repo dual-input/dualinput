@@ -152,6 +152,25 @@ impl Bench {
                 }
             }
             StandInAct::Set { numbers, texts } => Act::Set { numbers, texts },
+            StandInAct::SetAvatar { numbers } => Act::SetAvatar { numbers },
+            StandInAct::Camera {
+                referential,
+                position,
+                pitch,
+                yaw,
+                roll,
+                fov,
+            } => Act::Camera(sim_service::Camera {
+                position,
+                referential,
+                pitch,
+                yaw,
+                roll,
+                fov,
+            }),
+            StandInAct::Lack { title } => Act::Lack { title },
+            StandInAct::FrameBurst { count } => Act::FrameBurst { count },
+            StandInAct::ResetVars => Act::ResetVars,
             StandInAct::Stale { unit: name } => match unit(&name) {
                 Some(place) => Act::Stale { unit: place as u32 },
                 None => return tracing::warn!(name, "the bench named no unit of the core's"),
@@ -183,6 +202,16 @@ impl Bench {
                     opens: report.opened.iter().map(|c| (c.unit, c.open)).collect(),
                     calls,
                     variables: report.variables,
+                    objects: report
+                        .objects
+                        .into_iter()
+                        .map(|m| messages::bench::Made {
+                            id: m.id,
+                            title: m.title,
+                            unit: m.connection.unit,
+                            variables: m.variables,
+                        })
+                        .collect(),
                     module_stopped: report.module_stopped,
                 });
                 return;

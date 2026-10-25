@@ -265,6 +265,26 @@ pub enum StandInAct {
         numbers: Vec<(String, f64)>,
         texts: Vec<(String, String)>,
     },
+    /// Sets the variables of the pilot's avatar on foot, such as `A:PLANE LATITUDE`.
+    SetAvatar { numbers: Vec<(String, f64)> },
+    /// Puts the camera where `CameraGet` in `referential` finds it: 1 for `SIMOBJECT`, in
+    /// meters from the aircraft's reference point, x left, y up, z forward, and 2 for
+    /// `WORLD`, latitude and longitude in degrees and altitude in meters; its angles in
+    /// degrees, and its field of view, the view's height, in radians.
+    Camera {
+        referential: u32,
+        position: [f64; 3],
+        pitch: f32,
+        yaw: f32,
+        roll: f32,
+        fov: f64,
+    },
+    /// Lacks the SimObject titled `title`, so a create naming it fails.
+    Lack { title: String },
+    /// Hands up `count` `Frame` events at once on each connection subscribed to them.
+    FrameBurst { count: u32 },
+    /// Resets the sim's variables, as an aircraft change does.
+    ResetVars,
     /// Answers with a `FromCore::StandIn` line.
     Report,
 }
@@ -325,6 +345,24 @@ pub enum SimCall {
     End {
         routine: String,
     },
+    /// Creates an object of the SimObject titled `title`, at no place in particular.
+    Create {
+        title: String,
+    },
+    /// Subscribes to the sim's `Frame` event.
+    Frames,
+}
+
+/// An object a connection created, as the stand-in holds it.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "bench/")]
+pub struct Made {
+    pub id: u32,
+    pub title: String,
+    /// The place of the unit whose connection created it.
+    pub unit: u32,
+    /// Its variables, each with its value as text, a `Z:` one under its prefix.
+    pub variables: Vec<(String, String)>,
 }
 
 /// A line from the core besides its first.
@@ -345,6 +383,7 @@ pub enum FromCore {
         opens: Vec<(u32, u32)>,
         calls: Vec<Called>,
         variables: Vec<(String, String)>,
+        objects: Vec<Made>,
         module_stopped: bool,
     },
 }

@@ -23,15 +23,38 @@
 
 mod freeze;
 mod hold;
+mod vars;
 
-pub use freeze::{Flag, Sim};
+pub use freeze::Flag;
 pub use hold::Hold;
+pub use vars::{Ids, Named, Space, USER, VarRef};
 
 use bytemuck::Pod;
 use messages::module::slots::SlotHeader;
 use messages::module::{ModuleStatus, RoutineId};
 
 use crate::freeze::Freeze;
+use crate::vars::{Vars, Write};
+
+/// The sim, as the host reaches it: through the sim's own APIs in our module, and through
+/// the stand-in's objects on the bench (record/areas/core/03-sim-seam-and-wasm-module.md,
+/// "Wants and the sim's APIs").
+pub trait Sim {
+    /// Whether the pilot's aircraft has `flag` on.
+    fn frozen(&mut self, flag: Flag) -> bool;
+    /// Turns `flag` on or off on the pilot's aircraft.
+    fn set_frozen(&mut self, flag: Flag, on: bool);
+    /// The sim's IDs for `named` and its unit, a `Z:` variable's on `object`, or `None` when
+    /// the sim has no such variable or unit.
+    fn look_up(&mut self, object: u32, named: &Named) -> Option<Ids>;
+    /// The value of the variable `ids` names, in `space`, on `object`, or `None` when the
+    /// sim can't read it.
+    fn get(&mut self, object: u32, space: Space, ids: Ids) -> Option<f64>;
+    fn set(&mut self, object: u32, space: Space, ids: Ids, value: f64);
+    /// Whether the sim has removed or reset its variables since the last ask, after which
+    /// every ID it gave may name nothing, or another variable.
+    fn reset(&mut self) -> bool;
+}
 
 /// A slot that goes this long with no write from the core leaves its routine unfed, and the
 /// host drops it, in µs.
@@ -58,19 +81,41 @@ pub struct Frame {
     pub now: u64,
 }
 
-/// What the routines ask of the sim in one frame, which the host carries out once every
-/// routine's frame has run. A routine that needs a want this lacks adds it here
-/// (record/areas/architecture/02-code-map.md, "What a routine can ask for").
-#[derive(Default)]
-pub struct Wants {
+/// What the routines ask of the sim in one frame: reads, which the host makes at once, and
+/// the rest, which it carries out once every routine's frame has run. A routine that needs
+/// a want this lacks adds it here (record/areas/architecture/02-code-map.md, "What a
+/// routine can ask for").
+pub struct Wants<'f> {
     freeze: bool,
+    sim: &'f mut dyn Sim,
+    vars: &'f mut Vars,
+    writes: &'f mut Vec<Write>,
 }
 
-impl Wants {
+impl Wants<'_> {
     /// Freezes the pilot's aircraft for this frame. The host keeps it frozen while any
     /// routine asks, and unfreezes it in the first frame none does, if the host froze it.
     pub fn freeze(&mut self) {
         self.freeze = true;
+    }
+
+    /// The host's place for the variable `name`, such as `A:PLANE LATITUDE` or
+    /// `Z:DUALINPUT_FIGURE_HEAD_YAW`, in `unit`. A routine asks once and keeps the place.
+    /// `None` for a name with no `A:`, `L:`, or `Z:` prefix.
+    pub fn var(&mut self, name: &str, unit: &str) -> Option<VarRef> {
+        self.vars.place(name, unit)
+    }
+
+    /// The value of `var` on `object`, `USER` for the pilot's aircraft, read now.
+    pub fn read(&mut self, object: u32, var: VarRef) -> Option<f64> {
+        let space = self.vars.space(var)?;
+        let ids = self.vars.ids(var, object, self.sim)?;
+        self.sim.get(object, space, ids)
+    }
+
+    /// Writes `value` into `var` on `object`, once every routine's frame has run.
+    pub fn write(&mut self, object: u32, var: VarRef, value: f64) {
+        self.writes.push(Write { object, var, value });
     }
 }
 
@@ -136,6 +181,9 @@ pub struct Host {
     started: Option<u64>,
     status_written: Option<u64>,
     freeze: Freeze,
+    vars: Vars,
+    /// The frame's writes, kept from frame to frame so a frame allocates nothing.
+    writes: Vec<Write>,
 }
 
 impl Host {
@@ -159,6 +207,8 @@ impl Host {
             started: None,
             status_written: None,
             freeze: Freeze::default(),
+            vars: Vars::default(),
+            writes: Vec::new(),
         }
     }
 
@@ -215,11 +265,20 @@ impl Host {
     /// unfed, runs every other routine's frame, then carries out what they asked for on
     /// `sim`. Returns the status to write into the status slot, once a second.
     pub fn frame(&mut self, clock: u64, sim: &mut dyn Sim) -> Option<ModuleStatus> {
-        let mut want = Wants::default();
         let frame = Frame {
             now: self
                 .offset
                 .map_or(clock, |offset| clock.saturating_add_signed(offset)),
+        };
+        self.writes.clear();
+        if sim.reset() {
+            self.vars.forget();
+        }
+        let mut want = Wants {
+            freeze: false,
+            sim: &mut *sim,
+            vars: &mut self.vars,
+            writes: &mut self.writes,
         };
         for slot in &mut self.slots {
             if slot.running.is_some() && clock.saturating_sub(slot.written) > UNFED {
@@ -229,7 +288,15 @@ impl Host {
                 running.frame(&frame, &mut want);
             }
         }
-        self.freeze.carry_out(want.freeze, sim);
+        let freeze = want.freeze;
+        for w in &self.writes {
+            if let (Some(space), Some(ids)) =
+                (self.vars.space(w.var), self.vars.ids(w.var, w.object, sim))
+            {
+                sim.set(w.object, space, ids, w.value);
+            }
+        }
+        self.freeze.carry_out(freeze, sim);
         self.status(clock)
     }
 

@@ -1,0 +1,16 @@
+[package]
+name = "avatars-routines"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+bytemuck = "1.25.2"
+messages = { path = "../../../engines/messages" }
+routine-host = { path = "../../../platform/routine-host" }
+
+[build-dependencies]
+serde_json = "1.0.145"
+
+[lints]
+workspace = true

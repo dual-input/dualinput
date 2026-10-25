@@ -7,11 +7,12 @@ use std::panic::AssertUnwindSafe;
 use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
-use sim_client::message::{Data, Message};
+use sim_client::message::{Camera, Data, Message};
 use sim_client::{Connection, Op, SimCall, Tag, Up};
 use simconnect_types::{
     SIMCONNECT_COMM_BUS_BROADCAST_TO_JS, SIMCONNECT_DATA_REQUEST_FLAG_CHANGED,
-    SIMCONNECT_DATATYPE_STRING256, SIMCONNECT_EXCEPTION_NAME_UNRECOGNIZED, SIMCONNECT_PERIOD_ONCE,
+    SIMCONNECT_DATATYPE_STRING256, SIMCONNECT_EXCEPTION_CREATE_OBJECT_FAILED,
+    SIMCONNECT_EXCEPTION_NAME_UNRECOGNIZED, SIMCONNECT_PERIOD_ONCE,
 };
 use windows_sys::Win32::Foundation::{E_FAIL, FILETIME, S_OK, WAIT_OBJECT_0, WAIT_TIMEOUT};
 use windows_sys::Win32::System::Threading::{
@@ -19,7 +20,7 @@ use windows_sys::Win32::System::Threading::{
     PROCESS_SYNCHRONIZE, WaitForMultipleObjects, WaitForSingleObject,
 };
 
-use crate::{Act, Aircraft, Called, Message as ToThread, Module, Object, Report, Signal};
+use crate::{Act, Called, Message as ToThread, Module, Object, Report, Signal, World};
 
 /// What the sim's open message names, as MSFS 2024's did on three sim releases: SunRise
 /// 12.2, build 282174.999, and SimConnect 12.2.0.0 (measured,
@@ -60,12 +61,18 @@ pub(crate) struct Sim {
     conns: BTreeMap<Connection, Conn>,
     /// Each unit's last connection that's gone, for `Act::Stale`.
     gone: BTreeMap<u32, Connection>,
-    aircraft: Aircraft,
+    world: World,
+    /// Where the camera is in each referential a scenario put it.
+    cameras: BTreeMap<u32, Camera>,
+    /// The SimObject titles a create fails on.
+    lacking: BTreeSet<String>,
     /// The last `AircraftLoaded` path, which the `AircraftLoaded` state answers with.
     aircraft_path: String,
     rejected: BTreeSet<String>,
     open_reply: Duration,
     frame_every: Option<Duration>,
+    /// Frames a second, which each `Frame` event carries.
+    frame_rate: u32,
     next_frame: Instant,
     /// What's due later, such as a held-back open message or a played signal, in order.
     due: Vec<(Instant, Due)>,
@@ -100,6 +107,7 @@ struct Datum {
 
 struct Request {
     definition: u32,
+    object: u32,
     /// The data last sent, for a request that sends only what changed.
     last: Option<Vec<u8>>,
 }
@@ -122,11 +130,14 @@ impl Sim {
             quit: false,
             conns: BTreeMap::new(),
             gone: BTreeMap::new(),
-            aircraft: Aircraft::default(),
+            world: World::default(),
+            cameras: BTreeMap::new(),
+            lacking: BTreeSet::new(),
             aircraft_path: String::new(),
             rejected: BTreeSet::new(),
             open_reply: Duration::ZERO,
             frame_every: Some(Duration::from_secs(1) / FRAMES),
+            frame_rate: FRAMES,
             next_frame: started,
             due: Vec::new(),
             opened: Vec::new(),
@@ -186,6 +197,7 @@ impl Sim {
             SimCall::Close { connection } => {
                 if self.conns.remove(&connection).is_some() {
                     self.gone.insert(connection.unit, connection);
+                    self.world.remove_all(connection);
                 }
             }
             SimCall::On {
@@ -236,6 +248,7 @@ impl Sim {
                 if let Some(connection) = newest {
                     self.conns.remove(&connection);
                     self.gone.insert(unit, connection);
+                    self.world.remove_all(connection);
                     self.hand_up(Up::Lost { connection });
                 }
             }
@@ -260,6 +273,7 @@ impl Sim {
             Act::OpenReply { delay } => self.open_reply = delay,
             Act::Frames { per_second } => {
                 self.frame_every = (per_second > 0).then(|| Duration::from_secs(1) / per_second);
+                self.frame_rate = per_second;
                 self.next_frame = Instant::now();
             }
             Act::StopModule => self.module_stopped = true,
@@ -269,14 +283,35 @@ impl Sim {
             }
             Act::Set { numbers, texts } => {
                 for (name, value) in numbers {
-                    self.aircraft
+                    self.world
+                        .aircraft
                         .set_number(name.strip_prefix("A:").unwrap_or(&name), value);
                 }
                 for (name, value) in texts {
-                    self.aircraft
+                    self.world
+                        .aircraft
                         .set_text(name.strip_prefix("A:").unwrap_or(&name), &value);
                 }
             }
+            Act::SetAvatar { numbers } => {
+                for (name, value) in numbers {
+                    self.world
+                        .avatar
+                        .set_number(name.strip_prefix("A:").unwrap_or(&name), value);
+                }
+            }
+            Act::Camera(camera) => {
+                self.cameras.insert(camera.referential, camera);
+            }
+            Act::Lack { title } => {
+                self.lacking.insert(title);
+            }
+            Act::FrameBurst { count } => {
+                for _ in 0..count {
+                    self.frame_events();
+                }
+            }
+            Act::ResetVars => self.world.reset_vars(),
             Act::Stale { unit } => {
                 if let Some(&connection) = self.gone.get(&unit) {
                     self.hand_up(Up::Message {
@@ -298,7 +333,8 @@ impl Sim {
         Report {
             opened: self.opened.clone(),
             calls: self.calls.clone(),
-            variables: self.aircraft.variables(),
+            variables: self.world.aircraft.variables(),
+            objects: self.world.made(),
             module_stopped: self.module_stopped,
         }
     }
@@ -317,10 +353,17 @@ impl Sim {
             Op::MapClientEventToSimEvent { event, name } => {
                 conn.events.insert(event, name);
             }
-            Op::TransmitClientEvent { event, data, .. } => {
+            Op::TransmitClientEvent {
+                object,
+                event,
+                data,
+                ..
+            } => {
                 let name = conn.events.get(&event).cloned().unwrap_or_default();
-                if let Some((_, var)) = FREEZES.iter().find(|(e, _)| *e == name) {
-                    self.aircraft.set_number(var, f64::from(data));
+                if let Some((_, var)) = FREEZES.iter().find(|(e, _)| *e == name)
+                    && let Some(vars) = self.world.vars_mut(object)
+                {
+                    vars.set_number(var, f64::from(data));
                 }
             }
             Op::AddClientEventToNotificationGroup { .. }
@@ -370,12 +413,12 @@ impl Sim {
             Op::RequestDataOnSimObject {
                 request,
                 definition,
+                object,
                 period,
                 flags,
-                ..
             } => {
                 if period == SIMCONNECT_PERIOD_ONCE {
-                    if let Some(data) = self.data(connection, request, definition) {
+                    if let Some(data) = self.data(connection, request, definition, object) {
                         self.send(connection, &Message::ObjectData(data));
                     }
                 } else if flags & SIMCONNECT_DATA_REQUEST_FLAG_CHANGED != 0 {
@@ -383,14 +426,20 @@ impl Sim {
                         request,
                         Request {
                             definition,
+                            object,
                             last: None,
                         },
                     );
                 }
             }
             Op::SetDataOnSimObject {
-                definition, data, ..
+                definition,
+                object,
+                data,
             } => {
+                let Some(vars) = self.world.vars_mut(object) else {
+                    return;
+                };
                 let mut at = 0;
                 for d in conn.definitions.get(&definition).into_iter().flatten() {
                     if d.text {
@@ -398,15 +447,14 @@ impl Sim {
                             break;
                         };
                         let end = field.iter().position(|&b| b == 0).unwrap_or(256);
-                        self.aircraft
-                            .set_text(&d.name, &String::from_utf8_lossy(&field[..end]));
+                        vars.set_text(&d.name, &String::from_utf8_lossy(&field[..end]));
                         at += 256;
                     } else {
                         let Some(bytes) = data.get(at..at + 8) else {
                             break;
                         };
                         let value = f64::from_le_bytes(bytes.try_into().unwrap_or([0; 8]));
-                        self.aircraft.set_number(&d.name, value);
+                        vars.set_number(&d.name, value);
                         at += 8;
                     }
                 }
@@ -437,29 +485,58 @@ impl Sim {
                     (self.pages)(name, data);
                 }
             }
+            Op::AICreateSimulatedObject { title, request, .. } => {
+                if self.lacking.contains(&title) {
+                    let message = Message::Exception {
+                        exception: SIMCONNECT_EXCEPTION_CREATE_OBJECT_FAILED as u32,
+                        send_id: 0,
+                        index: 1,
+                    };
+                    self.send_tagged(connection, &message, tag);
+                } else {
+                    let object = self.world.create(&title, connection);
+                    self.send(connection, &Message::Assigned { request, object });
+                }
+            }
+            Op::AIRemoveObject { object, .. } => self.world.remove(object, connection),
+            Op::CameraGet { referential } => {
+                let camera = self.cameras.get(&referential).copied().unwrap_or(Camera {
+                    referential,
+                    ..Camera::default()
+                });
+                self.send(connection, &Message::Camera(camera));
+            }
         }
     }
 
-    /// A request's values, tagged, each with its datum's ID.
-    fn data(&self, connection: Connection, request: u32, definition: u32) -> Option<Data> {
+    /// A request's values, tagged, each with its datum's ID, or `None` for an object the sim
+    /// doesn't hold.
+    fn data(
+        &self,
+        connection: Connection,
+        request: u32,
+        definition: u32,
+        object: u32,
+    ) -> Option<Data> {
         let conn = self.conns.get(&connection)?;
         let datums = conn.definitions.get(&definition)?;
+        let vars = self.world.vars(object)?;
         let mut bytes = Vec::new();
         for d in datums {
             bytes.extend_from_slice(&d.datum.to_le_bytes());
             if d.text {
                 let mut field = [0u8; 256];
-                let text = self.aircraft.text(&d.name);
+                let text = vars.text(&d.name);
                 let n = text.len().min(255);
                 field[..n].copy_from_slice(&text.as_bytes()[..n]);
                 bytes.extend_from_slice(&field);
             } else {
-                bytes.extend_from_slice(&self.aircraft.number(&d.name).to_le_bytes());
+                bytes.extend_from_slice(&vars.number(&d.name).to_le_bytes());
             }
         }
         Some(Data {
             request,
-            object: 0,
+            object,
             definition,
             flags: 2,
             count: datums.len() as u32,
@@ -467,7 +544,8 @@ impl Sim {
         })
     }
 
-    /// One frame: the module's, unless it stopped, then each watch whose values changed.
+    /// One frame: the module's, unless it stopped, then the `Frame` events, then each watch
+    /// whose values changed.
     fn frame(&mut self) {
         self.next_frame += self.frame_every.unwrap_or(Duration::ZERO);
         if self.next_frame < Instant::now() {
@@ -475,10 +553,10 @@ impl Sim {
         }
         if !self.module_stopped {
             let clock = self.clock();
-            let (module, aircraft) = (&mut self.module, &mut self.aircraft);
+            let (module, world) = (&mut self.module, &mut self.world);
             // A panic in our module stops it in the sim, which marks it DIRTY and runs it no
             // more, while the sim runs on, so the stand-in stops it too.
-            match std::panic::catch_unwind(AssertUnwindSafe(|| module.frame(clock, aircraft))) {
+            match std::panic::catch_unwind(AssertUnwindSafe(|| module.frame(clock, world))) {
                 Ok(writes) => {
                     for (slot, bytes) in writes {
                         self.area_written(&slot, &bytes);
@@ -487,17 +565,18 @@ impl Sim {
                 Err(_) => self.module_stopped = true,
             }
         }
-        let changed: Vec<(Connection, u32, u32)> = self
+        self.frame_events();
+        let changed: Vec<(Connection, u32, u32, u32)> = self
             .conns
             .iter()
             .flat_map(|(&c, conn)| {
                 conn.requests
                     .iter()
-                    .map(move |(&r, q)| (c, r, q.definition))
+                    .map(move |(&r, q)| (c, r, q.definition, q.object))
             })
             .collect();
-        for (connection, request, definition) in changed {
-            let Some(data) = self.data(connection, request, definition) else {
+        for (connection, request, definition, object) in changed {
+            let Some(data) = self.data(connection, request, definition, object) else {
                 continue;
             };
             let Some(req) = self
@@ -511,6 +590,23 @@ impl Sim {
                 req.last = Some(data.bytes.clone());
                 self.send(connection, &Message::ObjectData(data));
             }
+        }
+    }
+
+    /// One `Frame` event on each connection subscribed to it.
+    fn frame_events(&mut self) {
+        let hearers: Vec<(Connection, u32)> = self
+            .conns
+            .iter()
+            .filter_map(|(&c, conn)| conn.system.get("Frame").map(|&event| (c, event)))
+            .collect();
+        for (connection, event) in hearers {
+            let message = Message::Frame {
+                event,
+                rate: self.frame_rate as f32,
+                speed: 1.0,
+            };
+            self.send(connection, &message);
         }
     }
 
@@ -680,6 +776,7 @@ impl Sim {
         }
         for connection in std::mem::take(&mut self.conns).into_keys() {
             self.gone.insert(connection.unit, connection);
+            self.world.remove_all(connection);
         }
         self.hand_up(Up::Exited { code });
     }

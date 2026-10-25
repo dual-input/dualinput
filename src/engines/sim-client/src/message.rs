@@ -8,13 +8,17 @@
 
 use std::mem::offset_of;
 
+use serde::{Deserialize, Serialize};
 use simconnect_types::{
-    DWORD, SIMCONNECT_RECV, SIMCONNECT_RECV_EVENT, SIMCONNECT_RECV_EVENT_FILENAME,
-    SIMCONNECT_RECV_EXCEPTION, SIMCONNECT_RECV_FLOW_EVENT, SIMCONNECT_RECV_ID_CLIENT_DATA,
-    SIMCONNECT_RECV_ID_EVENT, SIMCONNECT_RECV_ID_EVENT_FILENAME, SIMCONNECT_RECV_ID_EXCEPTION,
-    SIMCONNECT_RECV_ID_FLOW_EVENT, SIMCONNECT_RECV_ID_OPEN, SIMCONNECT_RECV_ID_QUIT,
-    SIMCONNECT_RECV_ID_SIMOBJECT_DATA, SIMCONNECT_RECV_ID_SYSTEM_STATE, SIMCONNECT_RECV_OPEN,
-    SIMCONNECT_RECV_SIMOBJECT_DATA, SIMCONNECT_RECV_SYSTEM_STATE,
+    DWORD, SIMCONNECT_DATA_CAMERA, SIMCONNECT_DATA_PBH, SIMCONNECT_DATA_XYZ, SIMCONNECT_RECV,
+    SIMCONNECT_RECV_ASSIGNED_OBJECT_ID, SIMCONNECT_RECV_CAMERA_DATA, SIMCONNECT_RECV_EVENT,
+    SIMCONNECT_RECV_EVENT_FILENAME, SIMCONNECT_RECV_EVENT_FRAME, SIMCONNECT_RECV_EXCEPTION,
+    SIMCONNECT_RECV_FLOW_EVENT, SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID,
+    SIMCONNECT_RECV_ID_CAMERA_DATA, SIMCONNECT_RECV_ID_CLIENT_DATA, SIMCONNECT_RECV_ID_EVENT,
+    SIMCONNECT_RECV_ID_EVENT_FILENAME, SIMCONNECT_RECV_ID_EVENT_FRAME,
+    SIMCONNECT_RECV_ID_EXCEPTION, SIMCONNECT_RECV_ID_FLOW_EVENT, SIMCONNECT_RECV_ID_OPEN,
+    SIMCONNECT_RECV_ID_QUIT, SIMCONNECT_RECV_ID_SIMOBJECT_DATA, SIMCONNECT_RECV_ID_SYSTEM_STATE,
+    SIMCONNECT_RECV_OPEN, SIMCONNECT_RECV_SIMOBJECT_DATA, SIMCONNECT_RECV_SYSTEM_STATE,
 };
 
 /// The version in the header of each message the sim hands over: every one of the 312,702
@@ -58,8 +62,36 @@ pub enum Message {
     },
     /// A flow event, such as `RTC_END` as the pilot presses Ready to fly.
     Flow { event: i32, path: String },
+    /// The system event `Frame`, once each frame the sim draws, with the frame rate in
+    /// frames a second and the sim's rate, 1 at normal speed.
+    Frame { event: u32, rate: f32, speed: f32 },
+    /// The object ID the sim gave an object a create asked for, under the create's request.
+    Assigned { request: u32, object: u32 },
+    /// `SimConnect_CameraGet`'s answer, which names no request.
+    Camera(Camera),
     /// A kind of message nothing of ours asks for yet.
     Other { id: u32 },
+}
+
+/// Where the camera is and where it looks, as `SimConnect_CameraGet` gives it.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct Camera {
+    /// In meters in `referential`'s frame: in `SIMCONNECT_POSITION_REFERENTIAL_SIMOBJECT`'s,
+    /// from the aircraft's reference point, x left, y up, and z forward, and in `WORLD`'s,
+    /// latitude and longitude in degrees and altitude in meters.
+    pub position: [f64; 3],
+    pub referential: u32,
+    /// In degrees. `SIMCONNECT_DATA_PBH` names its fields Pitch, Bank, and Heading, but its
+    /// Bank carries the yaw and its Heading the roll, so they're read here by what they
+    /// carry (measured on MSFS 2024, 2026-10-03, record/areas/avatars/log.md,
+    /// "SimConnect_CameraGet gives where the pilot looks, with ChasePlane driving the camera
+    /// or not").
+    pub pitch: f32,
+    pub yaw: f32,
+    pub roll: f32,
+    /// The view's height, in radians (measured on MSFS 2024, 2026-10-03,
+    /// record/areas/avatars/log.md, "The ray through the cursor needs no calibration").
+    pub fov: f64,
 }
 
 /// The values a request asked for, after the message's fixed fields.
@@ -141,6 +173,37 @@ impl Message {
                     path: text_at(record, offset_of!(R, FltPath), 256)?,
                 }
             }
+            SIMCONNECT_RECV_ID_EVENT_FRAME => {
+                type R = SIMCONNECT_RECV_EVENT_FRAME;
+                Message::Frame {
+                    event: u32_at(record, offset_of!(SIMCONNECT_RECV_EVENT, uEventID))?,
+                    rate: f32::from_bits(u32_at(record, offset_of!(R, fFrameRate))?),
+                    speed: f32::from_bits(u32_at(record, offset_of!(R, fSimSpeed))?),
+                }
+            }
+            SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID => {
+                type R = SIMCONNECT_RECV_ASSIGNED_OBJECT_ID;
+                Message::Assigned {
+                    request: u32_at(record, offset_of!(R, dwRequestID))?,
+                    object: u32_at(record, offset_of!(R, dwObjectID))?,
+                }
+            }
+            SIMCONNECT_RECV_ID_CAMERA_DATA => {
+                let at = CameraFields::new();
+                let angle = |o| u32_at(record, o).map(f32::from_bits);
+                Message::Camera(Camera {
+                    position: [
+                        f64_at(record, at.position)?,
+                        f64_at(record, at.position + 8)?,
+                        f64_at(record, at.position + 16)?,
+                    ],
+                    referential: u32_at(record, at.referential)?,
+                    pitch: angle(at.pbh)?,
+                    yaw: angle(at.pbh + 4)?,
+                    roll: angle(at.pbh + 8)?,
+                    fov: f64_at(record, at.fov)?,
+                })
+            }
             _ => Message::Other { id: id as u32 },
         })
     }
@@ -221,7 +284,57 @@ impl Message {
                 put_text(&mut r, offset_of!(R, FltPath), 256, path);
                 r
             }
+            Message::Frame { event, rate, speed } => {
+                type R = SIMCONNECT_RECV_EVENT_FRAME;
+                let mut r = fixed::<R>(SIMCONNECT_RECV_ID_EVENT_FRAME);
+                put_u32(&mut r, offset_of!(SIMCONNECT_RECV_EVENT, uEventID), *event);
+                put_u32(&mut r, offset_of!(R, fFrameRate), rate.to_bits());
+                put_u32(&mut r, offset_of!(R, fSimSpeed), speed.to_bits());
+                r
+            }
+            Message::Assigned { request, object } => {
+                type R = SIMCONNECT_RECV_ASSIGNED_OBJECT_ID;
+                let mut r = fixed::<R>(SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID);
+                put_u32(&mut r, offset_of!(R, dwRequestID), *request);
+                put_u32(&mut r, offset_of!(R, dwObjectID), *object);
+                r
+            }
+            Message::Camera(c) => {
+                let at = CameraFields::new();
+                let mut r = fixed::<SIMCONNECT_RECV_CAMERA_DATA>(SIMCONNECT_RECV_ID_CAMERA_DATA);
+                for (i, v) in c.position.iter().enumerate() {
+                    put_f64(&mut r, at.position + 8 * i, *v);
+                }
+                put_u32(&mut r, at.referential, c.referential);
+                for (i, v) in [c.pitch, c.yaw, c.roll].iter().enumerate() {
+                    put_u32(&mut r, at.pbh + 4 * i, v.to_bits());
+                }
+                put_f64(&mut r, at.fov, c.fov);
+                r
+            }
             Message::Other { id } => fixed::<SIMCONNECT_RECV>(*id as i32),
+        }
+    }
+}
+
+/// Where the camera's fields sit in `SIMCONNECT_RECV_CAMERA_DATA`, whose `CameraData` holds
+/// structs of its own.
+struct CameraFields {
+    position: usize,
+    referential: usize,
+    pbh: usize,
+    fov: usize,
+}
+
+impl CameraFields {
+    fn new() -> CameraFields {
+        type C = SIMCONNECT_DATA_CAMERA;
+        let base = offset_of!(SIMCONNECT_RECV_CAMERA_DATA, CameraData);
+        CameraFields {
+            position: base + offset_of!(C, Position) + offset_of!(SIMCONNECT_DATA_XYZ, x),
+            referential: base + offset_of!(C, PositionReferential),
+            pbh: base + offset_of!(C, Pbh) + offset_of!(SIMCONNECT_DATA_PBH, Pitch),
+            fov: base + offset_of!(C, Fov),
         }
     }
 }
@@ -281,6 +394,15 @@ fn u32_at(record: &[u8], offset: usize) -> Option<u32> {
 
 fn put_u32(record: &mut [u8], offset: usize, value: u32) {
     record[offset..offset + 4].copy_from_slice(&value.to_le_bytes());
+}
+
+fn f64_at(record: &[u8], offset: usize) -> Option<f64> {
+    let bytes = record.get(offset..offset + 8)?;
+    Some(f64::from_le_bytes(bytes.try_into().ok()?))
+}
+
+fn put_f64(record: &mut [u8], offset: usize, value: f64) {
+    record[offset..offset + 8].copy_from_slice(&value.to_le_bytes());
 }
 
 /// A field of `len` bytes holding text that ends at its first zero byte. SimConnect declares
@@ -352,6 +474,23 @@ mod tests {
                 event: 11,
                 path: String::new(),
             },
+            Message::Frame {
+                event: 4,
+                rate: 29.5,
+                speed: 1.0,
+            },
+            Message::Assigned {
+                request: 9,
+                object: 0x0101,
+            },
+            Message::Camera(Camera {
+                position: [0.22, 0.52, -2.21],
+                referential: 1,
+                pitch: -6.5,
+                yaw: 40.0,
+                roll: 0.1,
+                fov: 0.9,
+            }),
             Message::Other { id: 99 },
         ] {
             assert_eq!(Message::read(&message.record()), Some(message));

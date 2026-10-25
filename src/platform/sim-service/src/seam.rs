@@ -150,6 +150,11 @@ impl SimService {
                     tracing::warn!(exception, send_id, index, "a call of the platform's failed");
                 } else {
                     let call = origin.and_then(|o| o.handle);
+                    // A refused create or camera read gets no answer, so it stops waiting.
+                    if let (Some(call), Some(holder)) = (call, self.holders.get_mut(&to.place())) {
+                        holder.creates.retain(|_, c| *c != call);
+                        holder.cameras.retain(|c| *c != call);
+                    }
                     self.tell(
                         to,
                         SimEvent::Exception {
@@ -181,6 +186,9 @@ impl SimService {
                 Step::signal(cx, Step::Flow(Flow::from_sdk(event)));
             }
             Message::ObjectData(data) => self.values(unit, &data, cx),
+            Message::Assigned { request, object } => self.assigned(unit, request, object, cx),
+            Message::Camera(camera) => self.camera_read(unit, camera, cx),
+            Message::Frame { event, rate, speed } => self.frame(unit, event, rate, speed, cx),
             Message::ClientData(data) if platform && data.request == self.platform.status => {
                 self.status_read(&data.bytes, cx);
             }

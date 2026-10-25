@@ -177,6 +177,34 @@ pub enum Op {
         broadcast: u32,
         data: String,
     },
+    /// `SimConnect_AICreateSimulatedObject_EX1`: an object of the SimObject titled `title`,
+    /// such as our figure's `DUALINPUT_FIGURE_PILOT`, in `livery`, at `at`. Its object ID comes
+    /// back under `request`.
+    AICreateSimulatedObject {
+        title: String,
+        livery: String,
+        at: InitPosition,
+        request: u32,
+    },
+    /// `SimConnect_AIRemoveObject`.
+    AIRemoveObject { object: u32, request: u32 },
+    /// `SimConnect_CameraGet`, in the referential `referential`, such as
+    /// `SIMCONNECT_POSITION_REFERENTIAL_SIMOBJECT`.
+    CameraGet { referential: u32 },
+}
+
+/// Where an object starts, as `SIMCONNECT_DATA_INITPOSITION` gives it: degrees, feet, and
+/// knots.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct InitPosition {
+    pub latitude: f64,
+    pub longitude: f64,
+    pub altitude: f64,
+    pub pitch: f64,
+    pub bank: f64,
+    pub heading: f64,
+    pub on_ground: bool,
+    pub airspeed: u32,
 }
 
 #[cfg(test)]

@@ -17,8 +17,8 @@ mod registry;
 mod run;
 
 pub use edge::{
-    CancelTimer, Entry, Exit, FIRST, Fetch, Fetched, Handle, Input, JOBS, Job, JobId, Method,
-    SetTimer, SourceId, StartJob, TIMERS, Then, TimerId, Work, first_input,
+    CancelTimer, Entry, Exit, FIRST, Fetch, Fetched, Follow, Gathered, Handle, Input, JOBS, Job,
+    JobId, Method, SetTimer, SourceId, StartJob, TIMERS, Then, TimerId, Work, first_input,
 };
 pub use registry::{Handler, Registry, Unit, UnitId};
 pub use run::{Cx, Kernel, Output, Verdict, View, running_unit};

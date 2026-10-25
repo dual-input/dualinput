@@ -10,7 +10,8 @@ use messages::module::HOLD;
 use messages::module::slots::HoldSlot;
 use serde::Serialize;
 use sim_service::{
-    Period, SimAwareness, SimChanged, SimCx, SimEvent, SimService, SimUnit, Status, Value, Var,
+    InitPosition, Period, SimAwareness, SimChanged, SimCx, SimEvent, SimService, SimUnit, Status,
+    Value, Var,
 };
 
 use super::module::{PROBE, ProbeSlot};
@@ -30,6 +31,8 @@ const LOOK: Duration = Duration::from_millis(100);
 pub struct Probe {
     /// Its watches, in the order it made them, which the bench numbers them by.
     watches: Vec<Handle>,
+    /// Its creates, numbered the same way.
+    creates: Vec<Handle>,
     status: Status,
 }
 
@@ -74,6 +77,13 @@ impl Probe {
                 "PROBE" => cx.module().end(PROBE),
                 other => cx.out(Heard(format!("no routine {other}"))),
             },
+            SimCall::Create { title } => {
+                me.creates
+                    .push(cx.sim().create_ai(&title, "", InitPosition::default()));
+            }
+            SimCall::Frames => {
+                cx.sim().frames();
+            }
         }
     }
 
@@ -92,12 +102,21 @@ impl Probe {
             }
             SimEvent::Exception {
                 call, exception, ..
-            } => format!(
-                "exception {exception} for watch {:?}",
-                call.and_then(|c| watch(&c))
-            ),
+            } => match call.and_then(|c| me.creates.iter().position(|h| *h == c)) {
+                Some(create) => format!("exception {exception} for create {create}"),
+                None => format!(
+                    "exception {exception} for watch {:?}",
+                    call.and_then(|c| watch(&c))
+                ),
+            },
             SimEvent::Failed { .. } => "a call failed".to_string(),
             SimEvent::Lost => "lost".to_string(),
+            SimEvent::Created { call, object } => format!(
+                "created object {object} for create {:?}",
+                me.creates.iter().position(|h| *h == call)
+            ),
+            SimEvent::Camera { camera, .. } => format!("camera {}", camera.referential),
+            SimEvent::Frame { .. } => "frame".to_string(),
         };
         cx.out(Heard(heard));
     }

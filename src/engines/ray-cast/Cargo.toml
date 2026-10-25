@@ -1,0 +1,14 @@
+[package]
+name = "ray-cast"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# bytemuck lets a BVH's nodes sit in a flat buffer that the core's loop reads in place, as the
+# aircraft's model does (record/areas/avatars/01-avatars.md, "Finding the files"). It's already
+# the message crate's.
+[dependencies]
+bytemuck = { version = "1.25.2", features = ["derive"] }
+
+[lints]
+workspace = true

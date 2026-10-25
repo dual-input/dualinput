@@ -13,6 +13,27 @@ The 58P's and the Comanche's models are glTF with no compression, in vertex layo
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-25: Stage 17 settles five items 01-avatars left open: a run of its own, the seat in the pose, an info item for a model a machine can't read, VR as a known limit, and an eye on what the figure costs
+
+**Asked:** at the start of the build's stage for avatars ([stage 17](../build/plan.md#17-avatars)), the user decided the items [01-avatars](01-avatars.md#left-open) left to it that its code depends on, and how much the figure's cost weighs now.
+
+**Expected:** the design's defaults where it had them, a walk alone on foot, and the figure's cost left to the passenger feature that p28 measured for ([entry below](#2026-10-05-each-figure-poses-from-its-own-objects-variables-and-costs-frame-time-in-view-and-almost-none-out-of-view)).
+
+**Found:**
+
+- On foot, the figure runs with a gait of its own past a speed, rather than a walk whose stride and cadence rise with the avatar's speed (user, 2026-10-25).
+  Both are tuned by eye, off the sim in a viewer and then in this stage's session in the sim, as the item on how the legs step has it.
+- The seat stays in the pose, rather than moving to a session key, since a seat lasts only as long as the camera that took it, and a pose goes out at least every 1s (user, 2026-10-25).
+- A model a machine can't read is a match-check item, at a new level of its own, `info`, under the warning and the error: the crew sees in preflight that avatar interaction isn't supported in that pilot's copy of the aircraft, so a pilot learns why their clicks bring no hand before they fly (user, 2026-10-25).
+  The user chose `info` over a warning because the item states a limit rather than something gone wrong.
+- How avatars tells that a pilot is in VR stays a known limit for v1, since no headset is at hand to settle it (user, 2026-10-25).
+- The figure's cost is weighed now rather than in a later pass for many figures (user, 2026-10-25): a model with no more triangles, nodes, and materials than its look needs, with levels of detail; `Figure` changing a joint, and writing it, only when it moved past what shows; and its frame time measured in the sim against p28's figure.
+  Writes cost nothing p28 could measure, and drawing and animating changed joints cost the rest (same entry below), so the savings come from changing less and drawing less.
+
+**Changed:** the notes at the top of [01-avatars](01-avatars.md) give these, and [stage 17](../build/plan.md#17-avatars) builds them.
+
+**Affects:** [01-avatars](01-avatars.md), [the session's units](../session/02-units.md#the-match-check), whose match check gains the `info` level.
+
 ## 2026-10-17: The 58P's models need no glTF compression but carry MSFS's own vertex layouts, and no Rust crate reads them, their behavior files, and their code as the core needs
 
 **Asked:** for node 6.13's [aircraft-model engine](01-avatars.md#the-aircraft-model), what the 58P's and the Comanche's model files hold, and which Rust crates read glTF, behavior XML, and calculator code, and cast a ray, within the loop's rules ([one loop](../architecture/02-code-map.md#one-loop)).

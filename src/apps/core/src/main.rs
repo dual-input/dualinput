@@ -19,6 +19,7 @@ const UNITS: &[fn(&mut Registry)] = &[
     cockpit_stream::register,
     pointer_sync::register,
     take_control::register,
+    avatars::register,
 ];
 
 fn main() -> ExitCode {

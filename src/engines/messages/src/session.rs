@@ -377,13 +377,15 @@ pub struct Difference {
     pub note: Option<String>,
 }
 
-/// How much a difference matters: an error says something will likely go wrong, and a
-/// warning that it might. Neither stops the flight (record/areas/product/03-v1-scope.md,
-/// "Preflight match check").
+/// How much a difference matters: an error says something will likely go wrong, a warning
+/// that it might, and an info states a limit, such as avatars' for a model a machine can't
+/// read, with nothing gone wrong. None stops the flight (record/areas/product/03-v1-scope.md,
+/// "Preflight match check"; record/areas/session/02-units.md, "The match check").
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, TS)]
 #[serde(rename_all = "kebab-case")]
 #[ts(export, export_to = "session/")]
 pub enum Severity {
+    Info,
     Warning,
     Error,
 }

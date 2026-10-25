@@ -1,0 +1,17 @@
+p20-efb-go-to, 2026-10-25T13:32:34.691Z
+
+mainUi: {"title":"mainUi","engine":"object","Coherent":"undefined","RegisterViewListener":"undefined","store":"object"}
+EFB: {"title":"Electronic Flight Bag","engine":"object","Coherent":"object","RegisterViewListener":"function","store":"undefined"}
+Before: the departure was ; this run chooses KSEA.
+
+The airport, from the EFB's document:
+  engine.trigger, bare: the search (sent) answered nothing in 4s.
+  RegisterViewListener: registering
+  the listener is ready.
+  the EFB's own view listener: the search (sent) answered nothing in 4s.
+
+The stand, from the EFB's document:
+  skipped, with no airport chosen.
+
+After: {"isAirport":false,"title":"","stand":null,"taxiIndex":-1,"stands":0}
+Screenshot: ERR the sim isn't in front, so nothing was saved

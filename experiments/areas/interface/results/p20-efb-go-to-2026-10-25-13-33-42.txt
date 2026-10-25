@@ -1,0 +1,21 @@
+p20-efb-go-to, 2026-10-25T13:33:47.324Z
+
+mainUi: {"title":"mainUi","engine":"object","Coherent":"undefined","RegisterViewListener":"undefined","store":"object"}
+EFB: {"title":"Electronic Flight Bag","engine":"object","Coherent":"object","RegisterViewListener":"function","store":"undefined"}
+Before: the departure was ; this run chooses KSEA.
+
+The airport, from the EFB's document:
+  engine.trigger, bare: the search (sent) answered nothing in 4s.
+  RegisterViewListener: registering
+  the listener is ready.
+  the EFB's own view listener: the search (sent) answered nothing in 4s.
+
+The control, the airport from mainUi as p07 chose it:
+  engine.trigger, bare, from mainUi: the search answered 4 results, KSEA at index 0, database SEARCH.
+  engine.trigger, bare, from mainUi: the departure became KSEA in 203ms, as mainUi read it: 145 stands.
+
+The stand, from the EFB's document:
+  requestData didn't select GATE N 17 -- GATE MEDIUM (ID 38): the call rejected, the departure {"isAirport":true,"title":"TT:AIRPORTEK.KSEA.name","stand":null,"taxiIndex":-1,"stands":145}.
+
+After: {"isAirport":true,"title":"TT:AIRPORTEK.KSEA.name","stand":null,"taxiIndex":-1,"stands":145}
+Screenshot: experiments/areas/interface/results/p20-efb-go-to-2026-10-25-13-33-42/01-world-map.jpg

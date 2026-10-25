@@ -40,6 +40,37 @@ What we haven't run: an EFB app of ours in landscape, the EFB popped out, the ta
 **Affects:** the EFB app's frames, which [stage 11b](../build/plan.md#11b-the-apps) designs.
 
 **Evidence:** `results/p21-efb-landscape-2026-10-30-17-36-53.txt`, with a screenshot of each layout, cropped to the EFB; `results/p21-efb-landscape-2026-10-30-17-32-58.txt`, the run before, measured the same sizes and saved no screenshots.
+## 2026-10-25: The EFB's document can't make Go to's requests on the world map, and no add-on's script runs in the toolbar's there, so an EFB app's Go to still needs the menu script
+
+**Asked:** can code in the EFB's document choose the world map's departure airport and stand, as Go to needs, so an EFB app could run Go to without the menu script our copy of BlurPage brings in ([decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md))?
+The user is weighing a Dual Input whose only window is its EFB app (user, 2026-10-25).
+
+**Expected:** yes for the stand, since the [2026-10-05 entry](#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight) says the request selected one from "the document of Atlas, the EFB's map app".
+
+**Found:** p20 made each request from one document at Free flight's world map of MSFS 2024, and read the departure back from the store in `mainUi`, the menu's document, across three runs:
+
+| Document | Has | Airport, by the search | Airport, by its world location | Stand, by `requestData` |
+| --- | --- | --- | --- | --- |
+| `mainUi` | `engine` and the store | chosen in 203ms to 330ms | not tried | chosen in 30ms and 101ms |
+| The toolbar's, `Global/Panel.html` | `engine` and the store | no answer in 4s | chosen in 205ms | chosen in 30ms and 100ms |
+| The world map's `Global/atlas.html` | `engine` and the store | no answer in 4s | not tried | chosen in 24ms and 103ms |
+| The EFB's, `efb_ui.html` | `engine`, `Coherent`, and `common.js`, no store | no answer in 4s, sent bare or through a `RegisterViewListener` of its own | no change, sent with `engine.trigger` | `engine.call` rejected; `engine.trigger` changed nothing |
+
+- **The EFB's `engine.call` rejected `requestData`:** `NoSuchMethod: requestData not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result.`, and the same request sent with `engine.trigger` changed nothing in 3s.
+- **The airport search answers only `mainUi`.**
+  The other route, `requestData` on `game/worldmap/worldLocations/fromICAO` with KPDX, then on `game/currentFlight/setFreeflightDeparture` with the location's `uID`, 4452, chose KPDX from the toolbar's document.
+- **The 2026-10-05 entry's "Atlas, the EFB's map app" was the world map's own atlas page**, `Global/atlas.html`, whose title is `atlas`: it has `engine` and the store, as the EFB's document doesn't.
+- **At the world map, the toolbar's document had loaded only the sim's own 14 scripts**, with ChasePlane installed, whose worker its toolbar icon loads there in flight ([2026-10-04 entry](#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
+  So the way our banner's icon brings a script into the toolbar's document doesn't put one where Go to happens.
+- The EFB's document and `mainUi` both hear the CommBus (measured on MSFS 2024, 2026-10-08, `results/p14-commbus-pages-2026-10-08-14-05-05.txt`).
+
+**Changed:** an EFB app can't run Go to by itself: it asks the menu script, which BlurPage brings into `mainUi`, over the CommBus, so a Dual Input whose only window is its EFB app keeps BlurPage and [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md).
+The menu script may also choose the airport by its world location rather than through the search, which needs no listener.
+
+**Affects:** the apps' [tentative decisions](decisions.md), and Go to in [the v1 scope](../product/03-v1-scope.md#preflight).
+
+**Evidence:** `results/p20-efb-go-to-2026-10-25-13-36-25.txt`, the run with every route, and `results/p20-efb-go-to-2026-10-25-13-32-29.txt` and `-13-33-42.txt`, the two before it.
+
 ## 2026-10-25: Inside an EFB app, clicks, the wheel, hover, focus, and typing reach our elements and a 127.0.0.1 frame as mouse and keyboard events, Geist loads as TTF but not WOFF2, and p18's page renders there with Tailwind 3
 
 **Asked:** what an EFB app of ours gets from the pilot's mouse and keyboard, which font files it can load, and whether p18's page, FSComponent from the SDK's own modules, renders inside an app, for the one front end the user is weighing ([entry below](#2026-10-25-fscomponent-runs-in-edge-when-a-bundle-takes-only-the-sdk-modules-it-needs-in-81-kb-while-the-sdk-as-npm-ships-it-throws-on-load-outside-the-sim)).

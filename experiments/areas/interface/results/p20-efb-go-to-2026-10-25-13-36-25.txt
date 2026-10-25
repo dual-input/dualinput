@@ -1,0 +1,37 @@
+p20-efb-go-to, 2026-10-25T13:36:30.369Z
+
+mainUi (coui://html_UI/Global/mainUI.html): {"title":"mainUi","engine":"object","Coherent":"undefined","RegisterViewListener":"undefined","store":"object"}
+the EFB's document (coui://html_ui/efb_ui/efb_os/efb_ui.html): {"title":"Electronic Flight Bag","engine":"object","Coherent":"object","RegisterViewListener":"function","store":"undefined"}
+the toolbar's document (coui://html_UI/Global/Panel.html): {"title":"Toolbar","engine":"object","Coherent":"undefined","RegisterViewListener":"undefined","store":"object"}
+the world map's atlas page (coui://html_UI/Global/atlas.html): {"title":"atlas","engine":"object","Coherent":"undefined","RegisterViewListener":"undefined","store":"object"}
+Before: the departure was TT:AIRPORTEK.KPDX.name, stand GATE B 5 -- GATE MEDIUM; this run chooses KSEA.
+
+The airport:
+  the EFB's document, engine.trigger bare: the search (sent) answered nothing in 4s.
+  the EFB's document, RegisterViewListener: registering
+  the listener is ready.
+  the EFB's document, its own view listener: the search (sent) answered nothing in 4s.
+  the toolbar's document, engine.trigger bare: the search (sent) answered nothing in 4s.
+  the world map's atlas page, engine.trigger bare: the search (sent) answered nothing in 4s.
+  the control, mainUi as p07 chose it:
+  mainUi, engine.trigger bare: the search answered 4 results, KSEA at index 0, database SEARCH.
+  mainUi, engine.trigger bare: the departure became KSEA in 235ms, as mainUi read it: 145 stands.
+
+The stand, a different one from each document:
+  the EFB's document: requestData didn't select PARKING 195 -- RAMP CARGO (ID 55); the call rejected: NoSuchMethod: requestData not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result..
+  the toolbar's document: requestData selected PARKING 103 -- RAMP GA LARGE (ID 16) in 30ms, as mainUi read it; the call resolved.
+  the world map's atlas page: requestData selected GATE N 12 -- GATE MEDIUM (ID 34) in 24ms, as mainUi read it; the call resolved.
+  the control, mainUi: requestData selected GATE N 6 -- GATE MEDIUM (ID 42) in 30ms, as mainUi read it; the call resolved.
+
+The stand, from the EFB's document, sent with engine.trigger:
+  didn't select PARKING 204 -- RAMP CARGO (ID 64) in 3s (sent).
+
+The airport by its world location, KPDX:
+  the toolbar's document read the location: ok; its keys: __Type, uID, iCAO, title, dms, city, iconSize, windInfo, isNPC, isCustom, isAiport, nPCInfos, airportInfos
+  the toolbar's document, engine.call, setFreeflightDeparture(uID 4452): the departure became KPDX in 205ms.
+    (back to the first airport, from mainUi): the search answered 4 results, KSEA at index 0, database SEARCH.
+    (back to the first airport, from mainUi): the departure became KSEA in 208ms, as mainUi read it: 145 stands.
+  the EFB's document, engine.trigger, setFreeflightDeparture(uID 4452): the departure didn't become KPDX in 4s.
+
+After: {"isAirport":true,"title":"TT:AIRPORTEK.KSEA.name","stand":null,"taxiIndex":-1,"stands":145}
+Screenshot: experiments/areas/interface/results/p20-efb-go-to-2026-10-25-13-36-25/01-world-map.jpg

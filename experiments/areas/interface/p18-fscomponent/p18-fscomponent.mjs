@@ -14,7 +14,8 @@
  *   node experiments/areas/interface/p18-fscomponent/p18-fscomponent.mjs [--serve]
  *
  * --serve keeps serving after the report, so the browser pane can show
- * http://127.0.0.1:47818/modules/.
+ * http://127.0.0.1:47818/modules/. It also writes out/efb/app.css, the same CSS
+ * without Tailwind's reset, which p19's EFB app takes with the modules bundle.
  */
 
 import { spawn, spawnSync } from "node:child_process"
@@ -93,9 +94,13 @@ function extractModules() {
   return { dir, count: map.sources.length, owner }
 }
 
-async function buildCss() {
+// Every utility applies only inside #dualinput-p18. With no preflight, Tailwind's
+// reset, the CSS leaves the rest of a document alone, as p19's EFB app needs.
+async function buildCss({ preflight }) {
   const config = {
     content: [path.join(HERE, "app.tsx")],
+    important: "#dualinput-p18",
+    corePlugins: { preflight },
     theme: {
       colors,
       extend: {
@@ -135,7 +140,7 @@ async function buildVariant(name, css, sdkIndex) {
   fs.writeFileSync(path.join(dir, "index.html"), `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>p18 FSComponent, ${name}</title><link rel="stylesheet" href="app.css"></head>
-<body class="bg-background"><div id="root"></div><script src="app.js"></script></body></html>
+<body style="margin: 0; background: #0a0a0a"><div id="dualinput-p18"></div><script src="app.js"></script></body></html>
 `)
   const out = Object.values(js.metafile.outputs).find((o) => o.entryPoint)
   const sdkBytes = Object.entries(out.inputs).filter(([file]) => /msfs-sdk|sdk-modules/.test(file)).reduce((n, [, i]) => n + i.bytesInOutput, 0)
@@ -189,9 +194,11 @@ async function inEdge(page, waitFor) {
 
 async function main() {
   fs.rmSync(OUT, { recursive: true, force: true })
-  const css = await buildCss()
+  const css = await buildCss({ preflight: true })
   const modules = extractModules()
   const variants = [await buildVariant("bundle", css, null), await buildVariant("modules", css, path.join(modules.dir, "index.js"))]
+  fs.mkdirSync(path.join(OUT, "efb"), { recursive: true })
+  fs.writeFileSync(path.join(OUT, "efb", "app.css"), await buildCss({ preflight: false }))
 
   const waiting = new Map()
   const server = await startServer((r) => { const done = waiting.get(r.page); if (done) done(r) })

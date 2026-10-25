@@ -1,0 +1,2 @@
+# build.mjs writes the package under package/.
+package/

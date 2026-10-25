@@ -251,7 +251,6 @@ const errors: string[] = []
 window.addEventListener("error", (e) => errors.push(String(e.message)))
 
 function report(checks: Check[]) {
-  const w = window as any
   const result = {
     page: location.pathname,
     userAgent: navigator.userAgent,
@@ -262,15 +261,26 @@ function report(checks: Check[]) {
   w.DUALINPUT_P18_RESULT = result
   q("report").textContent = checks.map((c) => `${c.ok ? "ok  " : "FAIL"} ${c.name}${c.detail ? ` (${c.detail})` : ""}`).join("\n")
   const x = new XMLHttpRequest()
-  x.open("POST", "/result")
-  x.setRequestHeader("content-type", "application/json")
+  x.open("POST", w.DUALINPUT_P18_REPORT_URL || "/result")
+  // text/plain keeps a post from the EFB's coui:// page to 127.0.0.1 a simple
+  // request, with no preflight, as p09's EFB app posts.
+  x.setRequestHeader("content-type", "text/plain")
   x.send(JSON.stringify(result))
 }
 
-try {
-  FSComponent.render(app, document.getElementById("root"))
-  report(runChecks())
-} catch (e) {
-  errors.push(String((e as Error).stack || e))
-  report([])
+// The page's styles apply only inside #dualinput-p18, so p19's EFB app can host
+// it without restyling the EFB. That app sets DUALINPUT_P18_MANUAL before this
+// bundle runs and calls DUALINPUT_P18_START once it has a place for the page.
+function start(root: HTMLElement | null) {
+  try {
+    FSComponent.render(app, root)
+    report(runChecks())
+  } catch (e) {
+    errors.push(String((e as Error).stack || e))
+    report([])
+  }
 }
+
+const w = window as any
+w.DUALINPUT_P18_START = start
+if (!w.DUALINPUT_P18_MANUAL) start(document.getElementById("dualinput-p18"))

@@ -5,23 +5,18 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
+use aircraft_model::frame::{self, AircraftPose, View};
 use aircraft_model::{Aircraft, Hit, Model, Read, Scene};
 use sim_client::message::{Camera, Message};
 use sim_client::{Op, Period, Value, Var, Watch};
 use simconnect_types::SIMCONNECT_POSITION_REFERENTIAL_SIMOBJECT;
 
-use crate::ray::{self, AircraftPose};
 use crate::screen::Cursor;
 use crate::sim::{Events, Received, Sim};
 
-/// A ray meets nothing farther than this, in meters, avatars' `MOST` in
-/// src/features/avatars/core/src/mouse.rs.
+/// A mark meets nothing farther than this, in meters: a cockpit's controls sit within a
+/// meter or two of its camera, and an outside view's within the aircraft's length.
 const MOST: f32 = 20.0;
-
-/// The figure's hand's radius, which the model's yoke grips sit out by, avatars'
-/// `HAND_RADIUS` in src/features/avatars/core/src/hands.rs. The tool feeds no yoke, so it
-/// only keeps the build the core's.
-const HAND_RADIUS: f32 = 0.038;
 
 /// Steam's `UserCfg.opt`, then the Microsoft Store's, each naming the packages folder, as the
 /// sim service reads them in src/platform/sim-service/src/aircraft.rs, so change both
@@ -122,8 +117,9 @@ impl Cockpit {
             package: package.to_string_lossy().into_owned(),
             path: aircraft.path.clone(),
             title,
+            // The tool feeds `Figure` no yoke, so the grips these find stay unused.
             eyes: Vec::new(),
-            hand_radius: HAND_RADIUS,
+            hand_radius: 0.0,
         })?;
         let report = model.report();
         println!(
@@ -196,7 +192,13 @@ fn sim_var(var: &aircraft_model::Var) -> Var {
 /// What the cursor points at: the ray from the camera through it, into the interior while the
 /// camera is inside it and the exterior otherwise, with the model posed first.
 pub fn cast(model: &mut Model, camera: &Camera, cursor: &Cursor) -> Option<(Hit, Scene)> {
-    let ray = ray::cockpit(camera, cursor.x, cursor.y, cursor.aspect());
+    let view = View {
+        position: camera.position,
+        pitch: camera.pitch,
+        yaw: camera.yaw,
+        fov: camera.fov,
+    };
+    let ray = frame::cockpit(&view, cursor.x, cursor.y, cursor.aspect());
     let scene = if model.inside(ray.origin) {
         Scene::Interior
     } else {
@@ -359,7 +361,7 @@ mod tests {
             path: "fixture-plane".into(),
             title: None,
             eyes: Vec::new(),
-            hand_radius: HAND_RADIUS,
+            hand_radius: 0.0,
         };
         let mut read = BTreeMap::new();
         loop {

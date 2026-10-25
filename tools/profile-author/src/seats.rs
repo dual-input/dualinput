@@ -9,6 +9,7 @@
 use std::time::{Duration, Instant};
 
 use aircraft_model::Vec3;
+use aircraft_model::frame::{self, AircraftPose};
 use messages::avatars::slots::{
     BODY_SEATED, FIGURES, FigureSlot, FigureState, HAND_REST, HandSlot, PoseSlot, SHOWS_ALL,
 };
@@ -17,11 +18,11 @@ use messages::module::slots::SlotHeader;
 use messages::module::{ModuleStatus, STATUS};
 use profile_engine::features::avatars::Seat;
 use sim_client::message::{Camera, Message};
-use sim_client::{Area, InitPosition, Tag};
+use sim_client::{Area, InitPosition, Tag, Value, Var};
+use simconnect_types::SIMCONNECT_SIMOBJECT_TYPE_ALL;
 
 use crate::cockpit::{self, Cockpit};
 use crate::profile::{self, Facts, ProfileFile};
-use crate::ray;
 use crate::screen::{self, Cursor, Key};
 use crate::sim::{Event, Received};
 use crate::yaml;
@@ -58,6 +59,16 @@ const SAME_SEAT: f32 = 0.3;
 const SELECTED: u32 = 0;
 const OTHER: u32 = 1;
 
+/// Seat objects lie within this many meters of the aircraft, where p03 listed the C152's
+/// (measured on MSFS 2024, 2026-10-02, record/areas/avatars/log.md, "Seat objects place the
+/// other pilot in the cockpit").
+const NEAR: u32 = 50;
+
+/// How long the tool takes the sim's answers to the read of every object near, one answer
+/// for each, which p21 gave 2s (read in experiments/areas/avatars/p21-yoke-hands.mjs,
+/// `sim.byType`).
+const LISTING: Duration = Duration::from_secs(2);
+
 /// The seats to start from: the profile's own, then one for each seat object, then one for
 /// each `PILOT_` node, each seed skipped where a seat that applies to the loaded variant
 /// already sits.
@@ -72,7 +83,7 @@ pub fn seeds(
         seats
             .iter()
             .filter(|s| applies(s, variant))
-            .any(|s| distance(ray::of(s.hip), at) < SAME_SEAT)
+            .any(|s| distance(hip(s), at) < SAME_SEAT)
     };
     for (title, at) in objects {
         if taken(&seats, *at) {
@@ -155,6 +166,29 @@ fn distance(a: Vec3, b: Vec3) -> f32 {
     ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2) + (a[2] - b[2]).powi(2)).sqrt()
 }
 
+fn hip(seat: &Seat) -> Vec3 {
+    seat.hip.map(|c| c as f32)
+}
+
+/// A seat's eye in the aircraft's frame, as avatars places it.
+fn eye(seat: &Seat) -> Vec3 {
+    frame::eye(
+        hip(seat),
+        seat.eye[0] as f32,
+        seat.eye[1] as f32,
+        seat.facing as f32,
+    )
+}
+
+/// The eye a seat takes from a camera at `camera`: its height above the hip, and how far it
+/// sits ahead of the hip along the seat's facing, since a seat's eye doesn't go sideways.
+fn eye_at(seat: &Seat, camera: Vec3) -> [f64; 2] {
+    let f = frame::facing(seat.facing as f32);
+    let hip = hip(seat);
+    let ahead = (camera[0] - hip[0]) * f[0] + (camera[2] - hip[2]) * f[2];
+    [f64::from(camera[1] - hip[1]), f64::from(ahead)]
+}
+
 /// `Figure`'s slot for the figures drawn, each seat with its figure's object: seated at its
 /// hip, its head at its eye looking along its facing, and its hands at rest. The tool feeds no
 /// yoke, so no hand holds one.
@@ -175,14 +209,14 @@ pub fn slot(figures: &[(&Seat, u32)], selected: Option<&str>) -> FigureSlot {
             },
             shows: SHOWS_ALL,
             slumps: 0,
-            hip: ray::of(seat.hip),
+            hip: hip(seat),
             knees: seat.knees.map(|v| v as f32),
             feet: seat.feet.map(|v| v as f32),
             facing: seat.facing as f32,
             pose: PoseSlot {
                 body: BODY_SEATED,
-                eye: ray::eye(seat),
-                look: ray::facing(seat.facing),
+                eye: eye(seat),
+                look: frame::facing(seat.facing as f32),
                 at: [0.0; 3],
                 heading: 0.0,
                 crouch: 0,
@@ -397,15 +431,12 @@ pub fn run(file: ProfileFile) -> Result<(), String> {
     })?;
     println!("variant: {variant}");
     let nodes = cockpit.model.seat_seeds().to_vec();
-    let objects = seat_objects(&mut cockpit);
+    let objects = seat_objects(&mut cockpit)?;
     let seats = seeds(&facts.seats, &variant, &objects, &nodes);
     for s in &seats {
         let from = if facts.seats.iter().any(|f| f.key == s.key) {
             "from the profile"
-        } else if objects
-            .iter()
-            .any(|(_, at)| distance(*at, ray::of(s.hip)) < 1e-3)
-        {
+        } else if objects.iter().any(|(_, at)| distance(*at, hip(s)) < 1e-3) {
             "seeded from a seat object"
         } else {
             "seeded from a PILOT_ node"
@@ -452,13 +483,77 @@ pub fn run(file: ProfileFile) -> Result<(), String> {
     session.run()
 }
 
-/// The seat objects near the aircraft, each with its title and its place in the aircraft's
-/// frame.
-fn seat_objects(_cockpit: &mut Cockpit) -> Vec<(String, Vec3)> {
+/// The seat objects near the aircraft, which p21 told from the other objects by their titles'
+/// `SEAT_`, each with its title and its place in the aircraft's frame, through the aircraft's
+/// pose. In flight the sim reports a seat object a frame behind the aircraft, about 2m at
+/// 100 kt, so a seat object seeds a seat well only while the aircraft stands still (measured
+/// on MSFS 2024, 2026-10-03, record/areas/avatars/log.md, "Led by one frame, a WASM-written
+/// figure sits in the seat of a flying aircraft").
+fn seat_objects(cockpit: &mut Cockpit) -> Result<Vec<(String, Vec3)>, String> {
+    let vars = [
+        Var::text("A:TITLE"),
+        Var::number("A:PLANE LATITUDE", "degrees"),
+        Var::number("A:PLANE LONGITUDE", "degrees"),
+        Var::number("A:PLANE ALTITUDE", "feet"),
+    ];
+    let (request, ops) =
+        cockpit
+            .sim
+            .client
+            .read_by_type(&(), SIMCONNECT_SIMOBJECT_TYPE_ALL, NEAR, &vars);
+    cockpit.sim.make(ops);
+    let mut found = Vec::new();
+    let end = Instant::now() + LISTING;
+    while let Some(event) = cockpit
+        .events
+        .next(end.saturating_duration_since(Instant::now()))
+    {
+        let Event::Sim(up) = event else {
+            continue;
+        };
+        let Some(received) = cockpit.sim.receive(up)? else {
+            continue;
+        };
+        if cockpit.take(&received) {
+            continue;
+        }
+        let Received::Message(Message::ObjectData(d)) = &received else {
+            continue;
+        };
+        if d.request != request {
+            continue;
+        }
+        let values = cockpit.sim.client.values(d).unwrap_or_default();
+        found.extend(seat_object(values, &cockpit.pose));
+    }
+    let titles: Vec<&str> = found.iter().map(|(t, _)| t.as_str()).collect();
     println!(
-        "seat objects: not listed, since the sim client has no SimConnect_RequestDataOnSimObjectType yet; seeding from PILOT_ nodes"
+        "seat objects within {NEAR}m: {}",
+        if titles.is_empty() {
+            "none".to_string()
+        } else {
+            titles.join(", ")
+        }
     );
-    Vec::new()
+    Ok(found)
+}
+
+/// One object's answer to the read: its title and its place in the aircraft's frame, when
+/// it's a seat object.
+fn seat_object(values: Vec<(usize, Value)>, pose: &AircraftPose) -> Option<(String, Vec3)> {
+    let (mut title, mut at) = (String::new(), [0.0; 3]);
+    for (i, value) in values {
+        match (i, value) {
+            (0, Value::Text(t)) => title = t,
+            (1..=3, Value::Number(n)) => at[i - 1] = n,
+            _ => {}
+        }
+    }
+    if !title.to_ascii_uppercase().starts_with("SEAT_") {
+        return None;
+    }
+    let [lat, lon, alt] = at;
+    Some((title, frame::world_to_frame(pose, lat, lon, alt)))
 }
 
 impl Session {
@@ -598,7 +693,7 @@ impl Session {
                 println!("  the hip went where the cursor points, on {node}");
             }
             Asked::Eye => {
-                seat.eye = ray::eye_at(seat, ray::of(camera.position));
+                seat.eye = eye_at(seat, camera.position.map(|c| c as f32));
                 println!("  the eye went where the camera is");
             }
         }
@@ -917,6 +1012,59 @@ mod tests {
         );
         let back: FigureSlot = bytemuck::pod_read_unaligned(&bytes[size_of::<SlotHeader>()..]);
         assert_eq!(back.figures[1].object, 0x102);
+    }
+
+    /// The Baron's pilot's seat object sat 0.283m left of the reference point (measured on
+    /// MSFS 2024, 2026-10-03, record/areas/avatars/log.md, "One hand holds the yoke through
+    /// its whole travel").
+    #[test]
+    fn a_seat_object_is_told_by_its_title_and_placed_in_the_aircrafts_frame() {
+        let pose = AircraftPose {
+            latitude: 47.0,
+            longitude: 8.0,
+            altitude: 1_500.0,
+            heading: 90.0,
+            ..AircraftPose::default()
+        };
+        // Facing east, left of the aircraft is north.
+        let north = (0.283 / 6_367_000.0f64).to_degrees();
+        let values = |title: &str| {
+            vec![
+                (0, Value::Text(title.into())),
+                (1, Value::Number(47.0 + north)),
+                (2, Value::Number(8.0)),
+                (3, Value::Number(1_500.0)),
+            ]
+        };
+        let (title, at) = seat_object(values("SEAT_DEFAULT_Pilot"), &pose).unwrap();
+        assert_eq!(title, "SEAT_DEFAULT_Pilot");
+        assert!(
+            (at[0] - 0.283).abs() < 2e-3 && at[1].abs() < 1e-3 && at[2].abs() < 1e-3,
+            "{at:?}"
+        );
+        assert_eq!(seat_object(values("Black Square Baron 58P"), &pose), None);
+    }
+
+    #[test]
+    fn the_eye_a_camera_gives_a_seat_puts_the_seats_eye_at_the_camera() {
+        let mut s = existing();
+        s.eye = eye_at(&s, [0.25, 0.8, 0.1]);
+        assert!(
+            (s.eye[0] - 0.68).abs() < 1e-5 && (s.eye[1] - 0.15).abs() < 1e-5,
+            "{:?}",
+            s.eye
+        );
+        let e = eye(&s);
+        assert!(
+            (e[1] - 0.8).abs() < 1e-5 && (e[2] - 0.1).abs() < 1e-5,
+            "{e:?}"
+        );
+        s.facing = 90.0;
+        s.eye = eye_at(&s, [0.08, 0.8, -0.05]);
+        assert!(
+            (s.eye[1] - 0.2).abs() < 1e-5,
+            "facing right, the camera 0.2m toward −x is ahead"
+        );
     }
 
     #[test]

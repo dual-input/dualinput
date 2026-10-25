@@ -12,7 +12,6 @@
 mod cockpit;
 mod locations;
 mod profile;
-mod ray;
 mod screen;
 mod seats;
 mod sim;

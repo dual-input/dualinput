@@ -1,0 +1,435 @@
+p13-coherent-css, 2026-10-25T08:35:47.764Z
+Documents: mainUi (mainUi); EFB (Electronic Flight Bag); toolbar (Toolbar)
+User agents: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0
+mainUi: {"innerWidth":1874,"innerHeight":1054,"devicePixelRatio":1,"rootFontSize":"16px","bodyFontFamily":"Roboto-Regular, Arial, Meiryobui, NotoSansSC, NotoSansKR, Malgun, Mangal, Hirmalas, Virinda, Nirmalas, micross, sans-serif"}
+EFB: {"innerWidth":598,"innerHeight":793,"devicePixelRatio":1,"rootFontSize":"16px","bodyFontFamily":"Verdana"}
+toolbar: {"innerWidth":1119,"innerHeight":197,"devicePixelRatio":1,"rootFontSize":"16px","bodyFontFamily":"Roboto-Regular, Arial, Meiryobui, NotoSansSC, NotoSansKR, Malgun, Mangal, Hirmalas, Virinda, Nirmalas, micross, sans-serif"}
+
+Each test, by document: ✓ did what it should, ✗ didn't, then the value read back, and CSS.supports where asked (s:yes, s:no).
+
+layout:
+  flex
+      every document: ✓ 10
+  flex gap
+      every document: ✗ 10 s:no
+  flex: 1
+      every document: ✓ 80
+  inline-flex
+      every document: ✓ inline-flex
+  grid columns
+      every document: ✓ 10 s:yes
+  grid gap
+      every document: ✗ 10
+  grid-gap
+      every document: ✓ 14 s:yes
+  grid-column-gap
+      every document: ✓ 14 s:yes
+  column-gap in a grid
+      every document: ✗ 10 s:yes
+  column-gap in a flex row
+      every document: ✗ 10
+  position: -webkit-sticky
+      every document: ✓ -webkit-sticky
+  grid repeat(2, minmax(0, 1fr))
+      every document: ✓ 50
+  grid place-items: center
+      every document: ✓ 45
+  aspect-ratio
+      every document: ✗ 0 s:no
+  inset
+      every document: ✗ 0 s:no
+  position: sticky
+      every document: ✗ static
+  margin-inline-start
+      every document: ✗ 0
+  padding-inline
+      every document: ✗ 10
+  padding-block
+      every document: ✗ 0
+  box-sizing: border-box
+      every document: ✓ 20
+  display: contents
+      every document: ✗ inline
+  display: flow-root
+      every document: ✗ block
+
+values:
+  calc()
+      every document: ✓ 15
+  min()
+      every document: ✗ 400 s:no
+  max()
+      every document: ✗ 400
+  clamp()
+      every document: ✗ 400
+  rem (the value is 1rem in px)
+      every document: ✓ 16
+  em
+      every document: ✓ 20
+  vw (the value is 10vw in px)
+      mainUi: ✓ 187
+      EFB: ✗ 59
+      toolbar: ✗ 111
+  dvh
+      every document: ✗ 0 s:no
+  container query units
+      every document: ✗ 200
+
+variables:
+  var()
+      every document: ✓ 13 s:no
+  var() fallback
+      every document: ✓ 9
+  var() inherited
+      every document: ✓ 11
+  calc(var() * 4)
+      every document: ✓ 16
+
+at-rules:
+  @property
+      every document: ✗ 400
+  @layer
+      every document: ✗ 400
+  @layer order
+      every document: ✗ 400
+  @supports
+      every document: ✓ 3
+  @media (min-width)
+      every document: ✓ 8
+  @media range syntax
+      every document: ✗ 400
+  @container
+      every document: ✗ 200
+  @keyframes and animation
+      every document: ✓ p13
+  nesting with &
+      every document: ✗ 400
+  nesting without &
+      every document: ✗ 400
+
+selectors:
+  :is()
+      every document: ✗ 400
+  :where()
+      every document: ✗ 400
+  :not() with a list
+      every document: ✓ 4
+  :has()
+      every document: ✗ 400
+  :focus-visible
+      every document: ✗ 400
+  :focus-within
+      every document: ✓ 4
+  ::placeholder
+      every document: ✓ 4
+  ::-webkit-scrollbar
+      every document: ✓ 4
+  ::selection
+      every document: ✓ 4
+  ::marker
+      every document: ✗ 400
+  [data-state=open]
+      every document: ✓ 4
+  ::before with content
+      every document: ✓ 6
+
+colors:
+  #4fd3ea
+      every document: ✓ rgb(79, 211, 234) s:yes
+  #4fd3ea80
+      every document: ✓ rgba(79, 211, 234, 0.501961) s:yes
+  rgb(79, 211, 234)
+      every document: ✓ rgb(79, 211, 234) s:yes
+  rgb(79 211 234)
+      every document: ✗ rgb(9, 9, 9) s:no
+  rgb(79 211 234 / 50%)
+      every document: ✗ rgb(9, 9, 9) s:no
+  rgba(79, 211, 234, 0.5)
+      every document: ✓ rgba(79, 211, 234, 0.498039) s:yes
+  hsl(189, 79%, 61%)
+      every document: ✓ rgb(77, 211, 235) s:yes
+  hsl(189 79% 61%)
+      every document: ✗ rgb(9, 9, 9) s:no
+  hwb(189 30% 8%)
+      every document: ✗ rgb(9, 9, 9) s:no
+  oklch(0.8 0.12 210)
+      every document: ✗ rgb(9, 9, 9) s:no
+  oklch(80% 0.12 210 / 0.5)
+      every document: ✗ rgb(9, 9, 9) s:no
+  lab(78 -30 -20)
+      every document: ✗ rgb(9, 9, 9) s:no
+  color(display-p3 0.3 0.8 0.9)
+      every document: ✓ color(display-p3 0.3 0.8 0.9) s:yes
+  color-mix(in srgb, red 50%, blue)
+      every document: ✗ rgb(9, 9, 9) s:no
+  color-mix(in oklab, red 50%, blue)
+      every document: ✗ rgb(9, 9, 9) s:no
+  color-mix(in oklab, red 50%, transparent)
+      every document: ✗ rgb(9, 9, 9) s:no
+  rgb(from red r g b / 50%)
+      every document: ✗ rgb(9, 9, 9) s:no
+  light-dark(white, black)
+      every document: ✗ rgb(9, 9, 9) s:no
+  currentColor
+      mainUi: ✓ rgb(255, 255, 255) s:yes
+      EFB: ✓ rgb(0, 0, 0) s:yes
+      toolbar: ✓ rgb(255, 255, 255) s:yes
+  rgba(var() holding a triplet, 0.5), as efb_os.css writes
+      every document: ✓ rgba(1, 2, 3, 0.498039)
+  var() holding a color
+      every document: ✓ rgb(1, 2, 3)
+
+effects:
+  opacity: 50%
+      every document: ✗ 1 s:no
+  opacity: 0.5
+      every document: ✓ 0.5 s:yes
+  outline-offset under a solid outline
+      every document: ✓ 2px
+  filter: drop-shadow(0 1px 2px black)
+      every document: ✓ drop-shadow(rgb(0, 0, 0) 0px 1px 2px) s:yes
+  border-radius: 8px
+      every document: ✓ 8px s:yes
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5), inset 0 0 1px red
+      every document: ✓ rgba(0, 0, 0, 0.498039) 0px 1px 2px 0px, rgb(255, 0, 0) 0px 0px 1px 0px inset s:yes
+  outline-offset: 2px
+      every document: ✗ 0px s:yes
+  filter: blur(4px)
+      every document: ✓ blur(4px) s:yes
+  backdrop-filter: blur(4px)
+      every document: ✗  s:no
+  -webkit-backdrop-filter: blur(4px)
+      every document: ✗  s:no
+  mix-blend-mode: multiply
+      every document: ✓ multiply s:yes
+  clip-path: inset(2px)
+      every document: ✗ none s:no
+  mask-image: linear-gradient(black, transparent)
+      every document: ✗  s:no
+  -webkit-mask-image: linear-gradient(black, transparent)
+      every document: ✓ linear-gradient(black, transparent) s:yes
+  background-image: linear-gradient(red, blue)
+      every document: ✓ linear-gradient(red, blue) s:yes
+  background-image: radial-gradient(red, blue)
+      every document: ✓ radial-gradient(red, blue) s:yes
+  background-image: conic-gradient(red, blue)
+      every document: ✗ none s:no
+  background-clip: text
+      every document: ✗ border-box s:no
+  -webkit-background-clip: text
+      every document: ✓ text s:yes
+
+transforms:
+  transform: translateX()
+      every document: ✓ 10
+  translate property
+      every document: ✗ 0 s:no
+  scale property
+      every document: ✗ 10 s:no
+  rotate property
+      every document: ✗ 10 s:no
+
+motion:
+  transition: opacity 150ms ease
+      every document: ✓ 0.15s s:yes
+  will-change: transform
+      every document: ✓ transform s:yes
+  contain: layout
+      every document: ✗  s:no
+
+text:
+  font-variant-numeric: tabular-nums
+      every document: ✓ tabular-nums s:yes
+  font-feature-settings: "tnum"
+      every document: ✓ 'tnum' 1 s:yes
+  text-wrap: balance
+      every document: ✗  s:no
+  letter-spacing: 0.1em
+      mainUi: ✓ 2.342222213745117px s:yes
+      EFB: ✓ 1.600000023841858px s:yes
+      toolbar: ✓ 2.9244444370269775px s:yes
+  text-overflow: ellipsis
+      every document: ✓ ellipsis s:yes
+  -webkit-line-clamp: 2
+      every document: ✓ 2 s:yes
+  line-clamp: 2
+      every document: ✗  s:no
+  text-underline-offset: 3px
+      every document: ✗  s:no
+  text-decoration-thickness: 2px
+      every document: ✗  s:no
+  overflow-wrap: anywhere
+      every document: ✗ normal s:no
+  hyphens: auto
+      every document: ✗  s:no
+
+forms:
+  accent-color: red
+      every document: ✗  s:no
+  appearance: none
+      every document: ✗  s:no
+  -webkit-appearance: none
+      every document: ✓ none s:yes
+  field-sizing: content
+      every document: ✗  s:no
+  caret-color: red
+      every document: ✗  s:no
+
+interaction:
+  user-select: none
+      every document: ✗  s:no
+  -webkit-user-select: none
+      every document: ✓ none s:yes
+  cursor: pointer
+      every document: ✓ pointer s:yes
+  scrollbar-width: thin
+      every document: ✗  s:no
+  scrollbar-gutter: stable
+      every document: ✗  s:no
+  overscroll-behavior: contain
+      every document: ✗  s:no
+  touch-action: none
+      every document: ✗ auto s:no
+  color-scheme: dark
+      every document: ✗  s:no
+  object-fit: cover
+      every document: ✓ cover s:yes
+
+Media queries (parsed as, matches):
+  mainUi, (prefers-color-scheme: dark): not all, false
+  mainUi, (prefers-color-scheme: light): not all, false
+  mainUi, (prefers-reduced-motion: reduce): (prefers-reduced-motion: reduce), false
+  mainUi, (hover: hover): (hover: hover), false
+  mainUi, (pointer: fine): (pointer: fine), false
+  mainUi, (min-width: 1px): (min-width: 1px), true
+  mainUi, (width >= 1px): not all, false
+  mainUi, (min-resolution: 1dppx): (min-resolution: ), false
+  mainUi, (forced-colors: active): not all, false
+  EFB, (prefers-color-scheme: dark): not all, false
+  EFB, (prefers-color-scheme: light): not all, false
+  EFB, (prefers-reduced-motion: reduce): (prefers-reduced-motion: reduce), false
+  EFB, (hover: hover): (hover: hover), false
+  EFB, (pointer: fine): (pointer: fine), false
+  EFB, (min-width: 1px): (min-width: 1px), true
+  EFB, (width >= 1px): not all, false
+  EFB, (min-resolution: 1dppx): (min-resolution: ), false
+  EFB, (forced-colors: active): not all, false
+  toolbar, (prefers-color-scheme: dark): not all, false
+  toolbar, (prefers-color-scheme: light): not all, false
+  toolbar, (prefers-reduced-motion: reduce): (prefers-reduced-motion: reduce), false
+  toolbar, (hover: hover): (hover: hover), false
+  toolbar, (pointer: fine): (pointer: fine), false
+  toolbar, (min-width: 1px): (min-width: 1px), true
+  toolbar, (width >= 1px): not all, false
+  toolbar, (min-resolution: 1dppx): (min-resolution: ), false
+  toolbar, (forced-colors: active): not all, false
+
+Faces the pages' stylesheets declare:
+  mainUi: 28 @font-face rules; document.fonts present
+    ui-icon-font normal normal: url(coui://html_UI/Fonts/icons/icon.svg) format(svg), url(coui://html_UI/Fonts/icons/icon.ttf) format(truetype)
+    Simsun 400 normal: url(coui://html_UI/Fonts/simsun.ttc) format(truetype)
+    NotoSansSC 100 normal: url(coui://html_UI/Fonts/NotoSansSC-Light.otf) format(truetype)
+    NotoSansSC 400 normal: url(coui://html_UI/Fonts/NotoSansSC-Regular.ttf) format(truetype)
+    NotoSansSC 600 normal: url(coui://html_UI/Fonts/NotoSansSC-Medium.otf) format(truetype)
+    NotoSansSC 700 normal: url(coui://html_UI/Fonts/NotoSansSC-Bold.otf) format(truetype)
+    NotoSansSC 900 normal: url(coui://html_UI/Fonts/NotoSansSC-Black.ttf) format(truetype)
+    Malgun 100 normal: url(coui://html_UI/Fonts/malgunsl.ttf) format(truetype)
+    Malgun 400 normal: url(coui://html_UI/Fonts/malgun.ttf) format(truetype)
+    Malgun 700 normal: url(coui://html_UI/Fonts/malgunbd.ttf) format(truetype)
+    Meiryobui 400 normal: url(coui://html_UI/Fonts/RobotoMono-Medium+meiryobui.ttf)
+    Mangal 400 normal: url(coui://html_UI/Fonts/mangal.ttf)
+    Vrinda 400 normal: url(coui://html_UI/Fonts/vrinda.ttf)
+    Nirmalas 400 normal: url(coui://html_UI/Fonts/nirmalas.ttf)
+    micross 400 normal: url(coui://html_UI/Fonts/micross.ttf)
+    NotoSansKR 400 normal: url(coui://html_UI/Fonts/NotoSansKR-Regular.otf)
+    NotoSansKR 100 normal: url(coui://html_UI/Fonts/NotoSansKR-Light.otf)
+    NotoSansKR 600 normal: url(coui://html_UI/Fonts/NotoSansKR-Medium.otf)
+    NotoSansKR 700 normal: url(coui://html_UI/Fonts/NotoSansKR-Bold.otf)
+    NotoSansKR 900 normal: url(coui://html_UI/Fonts/NotoSansKR-Black.otf)
+    Roboto-Regular normal normal: url(coui://html_UI/Fonts/Roboto-Regular.ttf) format(truetype)
+    Roboto-Regular 300 normal: url(coui://html_UI/Fonts/Roboto-Light.ttf) format(truetype)
+    Roboto-Regular 600 normal: url(coui://html_UI/Fonts/Roboto-Medium.ttf) format(truetype)
+    Roboto-Regular 700 normal: url(coui://html_UI/Fonts/Roboto-Bold.ttf) format(truetype)
+    Roboto-Regular 900 normal: url(coui://html_UI/Fonts/Roboto-Black.ttf) format(truetype)
+    RobotoMono-Regular normal normal: url(coui://html_UI/Fonts/RobotoMono-Regular.ttf) format(truetype)
+    RobotoMono-Regular 700 normal: url(coui://html_UI/Fonts/RobotoMono-Bold.ttf) format(truetype)
+    RobotoMono-Regular 700 italic: url(coui://html_UI/Fonts/RobotoMono-BoldItalic.ttf) format(truetype)
+  EFB: 47 @font-face rules; document.fonts present
+    Roboto-Bold  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/Roboto-Bold.ttf)
+    Roboto-Regular  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/Roboto-Regular.ttf)
+    Roboto-Medium  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/Roboto-Medium.ttf)
+    Roboto-Light  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/Roboto-Light.ttf)
+    Roboto-BlackItalic  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/Roboto-BlackItalic.ttf)
+    Roboto-BoldItalic  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/Roboto-BoldItalic.ttf)
+    Roboto-MediumItalic  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/Roboto-MediumItalic.ttf)
+    Roboto-Italic  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/Roboto-Italic.ttf)
+    Roboto-LightItalic  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/Roboto-LightItalic.ttf)
+    Roboto-ThinItalic  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/Roboto-ThinItalic.ttf)
+    RobotoMono-Bold  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/RobotoMono-Bold.ttf)
+    RobotoMono-Regular  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/RobotoMono-Regular.ttf)
+    RobotoMono-Medium  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/RobotoMono-Medium.ttf)
+    RobotoMono-Light  : url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/RobotoMono-Light.ttf)
+    NotoSansSC 100 normal: url(coui://html_ui/efb_ui/efb_os/Assets/fonts/NotoSansSC/NotoSansSC-Light.otf) format(truetype)
+    NotoSansSC 400 normal: url(coui://html_ui/efb_ui/efb_os/Assets/fonts/NotoSansSC/NotoSansSC-Regular.ttf) format(truetype)
+    NotoSansSC 600 normal: url(coui://html_ui/efb_ui/efb_os/Assets/fonts/NotoSansSC/NotoSansSC-Medium.otf) format(truetype)
+    NotoSansSC 700 normal: url(coui://html_ui/efb_ui/efb_os/Assets/fonts/NotoSansSC/NotoSansSC-Bold.otf) format(truetype)
+    NotoSansSC 900 normal: url(coui://html_ui/efb_ui/efb_os/Assets/fonts/NotoSansSC/NotoSansSC-Black.ttf) format(truetype)
+    Malgun 100 normal: url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Malgun/malgunsl.ttf) format(truetype)
+    Malgun 400 normal: url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Malgun/malgun.ttf) format(truetype)
+    Malgun 700 normal: url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Malgun/malgunbd.ttf) format(truetype)
+    Meiryobui 400 normal: url(coui://html_ui/efb_ui/efb_os/Assets/fonts/Roboto/RobotoMono-Medium+meiryobui.ttf)
+    ClashGrotesk-Bold  : url(coui://html_ui/efb_ui/efb_apps/MultiJetwayControllerApp/Assets/Fonts/ClashGrotesk-Bold.otf) format(opentype)
+    ClashGrotesk-Extralight  : url(coui://html_ui/efb_ui/efb_apps/MultiJetwayControllerApp/Assets/Fonts/ClashGrotesk-Extralight.otf) format(opentype)
+    ClashGrotesk-Light  : url(coui://html_ui/efb_ui/efb_apps/MultiJetwayControllerApp/Assets/Fonts/ClashGrotesk-Light.otf) format(opentype)
+    ClashGrotesk-Medium  : url(coui://html_ui/efb_ui/efb_apps/MultiJetwayControllerApp/Assets/Fonts/ClashGrotesk-Medium.otf) format(opentype)
+    ClashGrotesk-Regular  : url(coui://html_ui/efb_ui/efb_apps/MultiJetwayControllerApp/Assets/Fonts/ClashGrotesk-Regular.otf) format(opentype)
+    ClashGrotesk-Semibold  : url(coui://html_ui/efb_ui/efb_apps/MultiJetwayControllerApp/Assets/Fonts/ClashGrotesk-Semibold.otf) format(opentype)
+    Inter 100 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/Inter-Thin.ttf)
+    Inter 200 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/Inter-ExtraLight.ttf)
+    Inter 300 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/Inter-Light.ttf)
+    Inter 400 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/Inter-Regular.ttf)
+    Inter 500 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/Inter-Medium.ttf)
+    Inter 600 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/Inter-SemiBold.ttf)
+    Inter 700 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/Inter-Bold.ttf)
+    Inter 800 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/Inter-ExtraBold.ttf)
+    Inter 900 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/Inter-Black.ttf)
+    JetBrainsMono 100 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/JetBrainsMono-Thin.ttf)
+    JetBrainsMono 200 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/JetBrainsMono-ExtraLight.ttf)
+    JetBrainsMono 300 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/JetBrainsMono-Light.ttf)
+    JetBrainsMono 400 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/JetBrainsMono-Regular.ttf)
+    JetBrainsMono 500 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/JetBrainsMono-Medium.ttf)
+    JetBrainsMono 600 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/JetBrainsMono-SemiBold.ttf)
+    JetBrainsMono 700 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/JetBrainsMono-Bold.ttf)
+    JetBrainsMono 800 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/JetBrainsMono-ExtraBold.ttf)
+    JetBrainsMono 900 : url(coui://html_ui/efb_ui/efb_apps/WTCivaApp/Assets/JetBrainsMono-Black.ttf)
+  toolbar: 28 @font-face rules; document.fonts present
+    ui-icon-font normal normal: url(coui://html_UI/Fonts/icons/icon.svg) format(svg), url(coui://html_UI/Fonts/icons/icon.ttf) format(truetype)
+    Simsun 400 normal: url(coui://html_UI/Fonts/simsun.ttc) format(truetype)
+    NotoSansSC 100 normal: url(coui://html_UI/Fonts/NotoSansSC-Light.otf) format(truetype)
+    NotoSansSC 400 normal: url(coui://html_UI/Fonts/NotoSansSC-Regular.ttf) format(truetype)
+    NotoSansSC 600 normal: url(coui://html_UI/Fonts/NotoSansSC-Medium.otf) format(truetype)
+    NotoSansSC 700 normal: url(coui://html_UI/Fonts/NotoSansSC-Bold.otf) format(truetype)
+    NotoSansSC 900 normal: url(coui://html_UI/Fonts/NotoSansSC-Black.ttf) format(truetype)
+    Malgun 100 normal: url(coui://html_UI/Fonts/malgunsl.ttf) format(truetype)
+    Malgun 400 normal: url(coui://html_UI/Fonts/malgun.ttf) format(truetype)
+    Malgun 700 normal: url(coui://html_UI/Fonts/malgunbd.ttf) format(truetype)
+    Meiryobui 400 normal: url(coui://html_UI/Fonts/RobotoMono-Medium+meiryobui.ttf)
+    Mangal 400 normal: url(coui://html_UI/Fonts/mangal.ttf)
+    Vrinda 400 normal: url(coui://html_UI/Fonts/vrinda.ttf)
+    Nirmalas 400 normal: url(coui://html_UI/Fonts/nirmalas.ttf)
+    micross 400 normal: url(coui://html_UI/Fonts/micross.ttf)
+    NotoSansKR 400 normal: url(coui://html_UI/Fonts/NotoSansKR-Regular.otf)
+    NotoSansKR 100 normal: url(coui://html_UI/Fonts/NotoSansKR-Light.otf)
+    NotoSansKR 600 normal: url(coui://html_UI/Fonts/NotoSansKR-Medium.otf)
+    NotoSansKR 700 normal: url(coui://html_UI/Fonts/NotoSansKR-Bold.otf)
+    NotoSansKR 900 normal: url(coui://html_UI/Fonts/NotoSansKR-Black.otf)
+    Roboto-Regular normal normal: url(coui://html_UI/Fonts/Roboto-Regular.ttf) format(truetype)
+    Roboto-Regular 300 normal: url(coui://html_UI/Fonts/Roboto-Light.ttf) format(truetype)
+    Roboto-Regular 600 normal: url(coui://html_UI/Fonts/Roboto-Medium.ttf) format(truetype)
+    Roboto-Regular 700 normal: url(coui://html_UI/Fonts/Roboto-Bold.ttf) format(truetype)
+    Roboto-Regular 900 normal: url(coui://html_UI/Fonts/Roboto-Black.ttf) format(truetype)
+    RobotoMono-Regular normal normal: url(coui://html_UI/Fonts/RobotoMono-Regular.ttf) format(truetype)
+    RobotoMono-Regular 700 normal: url(coui://html_UI/Fonts/RobotoMono-Bold.ttf) format(truetype)
+    RobotoMono-Regular 700 italic: url(coui://html_UI/Fonts/RobotoMono-BoldItalic.ttf) format(truetype)
+
+Passed: mainUi 60 of 129; EFB 59 of 129; toolbar 59 of 129

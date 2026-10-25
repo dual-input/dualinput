@@ -81,6 +81,13 @@ function pageCheck() {
   T("layout", "inline-flex", "#H .a{display:inline-flex}", A, function () { return cs(".a", "display") }, "inline-flex")
   T("layout", "grid columns", "#H .p{display:grid;grid-template-columns:10px 20px;width:100px} #H .p>div{height:5px}", PAB, left(".b"), near(10), ["display", "grid"])
   T("layout", "grid gap", "#H .p{display:grid;grid-template-columns:10px 20px;gap:4px;width:100px} #H .p>div{height:5px}", PAB, left(".b"), near(14))
+  // The sim's efb_os.css spaces its grids with grid-gap and never writes gap, so
+  // these try the older names and the one-axis properties.
+  T("layout", "grid-gap", "#H .p{display:grid;grid-template-columns:10px 20px;grid-gap:4px;width:100px} #H .p>div{height:5px}", PAB, left(".b"), near(14), ["grid-gap", "4px"])
+  T("layout", "grid-column-gap", "#H .p{display:grid;grid-template-columns:10px 20px;grid-column-gap:4px;width:100px} #H .p>div{height:5px}", PAB, left(".b"), near(14), ["grid-column-gap", "4px"])
+  T("layout", "column-gap in a grid", "#H .p{display:grid;grid-template-columns:10px 20px;column-gap:4px;width:100px} #H .p>div{height:5px}", PAB, left(".b"), near(14), ["column-gap", "4px"])
+  T("layout", "column-gap in a flex row", "#H .p{display:flex;column-gap:6px;width:100px} #H .p>div{width:10px;height:10px}", PAB, left(".b"), near(16))
+  T("layout", "position: -webkit-sticky", "#H .a{position:-webkit-sticky;top:0}", A, function () { return cs(".a", "position") }, function (v) { return v.indexOf("sticky") !== -1 })
   T("layout", "grid repeat(2, minmax(0, 1fr))", "#H .p{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100px} #H .p>div{height:5px}", PAB, left(".b"), near(50))
   T("layout", "grid place-items: center", "#H .p{display:grid;place-items:center;width:100px;height:100px} #H .a{width:10px;height:10px}", "<div class=p><div class=a></div></div>", left(".a"), near(45))
   T("layout", "aspect-ratio", "#H .a{width:40px;aspect-ratio:2/1}", A, height(".a"), near(20), ["aspect-ratio", "2 / 1"])
@@ -162,7 +169,8 @@ function pageCheck() {
   C("rgb(from red r g b / 50%)")
   C("light-dark(white, black)")
   C("currentColor")
-  T("colors", "var() holding a color", "#H .c{color:rgb(9, 9, 9)} #H .c.v{--k:rgb(1, 2, 3);color:var(--k)}", "<div class='c v'></div>", function () { return cs(".c", "color") }, "rgb(1, 2, 3)")
+  T("colors", "rgba(var() holding a triplet, 0.5), as efb_os.css writes", "#H .c{color:rgb(9, 9, 9)} #H .c.v{--t:1, 2, 3;color:rgba(var(--t), 0.5)}", "<div class='c v'></div>", function () { return cs(".c", "color") }, function (v) { return v.indexOf("1, 2, 3") !== -1 })
+  T("colors", "var() holding a color","#H .c{color:rgb(9, 9, 9)} #H .c.v{--k:rgb(1, 2, 3);color:var(--k)}", "<div class='c v'></div>", function () { return cs(".c", "color") }, "rgb(1, 2, 3)")
 
   // Properties: each test reads the property back after setting a value that
   // isn't its default.
@@ -171,6 +179,9 @@ function pageCheck() {
       function () { return cs(".a", read || prop) }, expect, [prop, value])
   }
   P("effects", "opacity", "50%", null, "0.5")
+  P("effects", "opacity", "0.5", null, "0.5")
+  T("effects", "outline-offset under a solid outline", "#H .a{outline:1px solid red;outline-offset:2px}", A, function () { return cs(".a", "outline-offset") }, "2px")
+  P("effects", "filter", "drop-shadow(0 1px 2px black)", null, function (v) { return v && v !== "none" })
   P("effects", "border-radius", "8px", "border-top-left-radius", "8px")
   P("effects", "box-shadow", "0 1px 2px rgba(0,0,0,0.5), inset 0 0 1px red", null, function (v) { return v && v !== "none" })
   P("effects", "outline-offset", "2px", null, "2px")

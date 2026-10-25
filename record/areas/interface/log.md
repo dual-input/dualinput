@@ -67,7 +67,7 @@ One of ours, a slice of its own for the banner's socket, departs from [02-client
 
 ## 2026-10-24: The sim's EFB styles its apps' controls through `--efb-` variables sized from a 516 by 716 base, and an app gets the controls by bundling the SDK's EFB API
 
-**Asked:** what the sim's own EFB stylesheet defines that Dual Input's EFB app and banner could reuse, since their CSS is written by hand for Coherent GT rather than built with Tailwind (user, 2026-10-24)?
+**Asked:** what the sim's own EFB stylesheet defines that Dual Input's EFB app and banner could reuse (user, 2026-10-24)?
 
 **Expected:** no prediction.
 
@@ -84,6 +84,7 @@ One of ours, a slice of its own for the banner's socket, departs from [02-client
   The SDK ships them as the EFB API, in the samples' `PackageSources\efb_api` folder, which an app installs with `npm install` (documented, [the EFB API](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/efb/electronic-flight-bag-api/)); no npm package publishes it, and our SDK 1.7.3 install has no samples.
 - What the sim's own CSS uses, it can draw: custom properties with fallbacks, `calc()` around `var()`, flexbox, grid with `grid-gap`, `gap`, and media queries on size and orientation.
   It uses no `hsl()`, `oklch()`, `color-mix()`, `rem`, `vh`, `@supports`, or `@keyframes`, so those stay for p13 to measure.
+  p13 found `gap` dropped, which `efb_os.css` never writes ([architecture log](../architecture/log.md#2026-10-25-coherent-gt-drops-layer-oklch-color-mix-and-every-gap-but-grid-gap-so-tailwind-4s-output-cant-style-a-page-there)).
 - The sim's menus and in-game panels have a theme of their own, 201 custom properties in `fs-base-ui` 0.1.10's `html_ui/SCSS/common.css`, such as `--color-yellow: #FFD300`, `--primaryColor`, `--accentColor`, and `--filterBlur`.
 
 **Changed:** our EFB app can build on the EFB API's controls and look like the sim's own apps, styled by `efb_os.css` with nothing of ours, and our hand-written CSS can read the `--efb-` variables and the sim's Roboto faces.

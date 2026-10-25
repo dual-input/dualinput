@@ -3,6 +3,43 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-25: Coherent GT drops `@layer`, oklch, `color-mix()`, and every `gap` but `grid-gap`, so Tailwind 4's output can't style a page there
+
+**Asked:** which CSS Coherent GT draws, so we know whether the EFB app and the banner can share the desktop app's styling, which shadcn on Base UI builds with Tailwind 4 (user, 2026-10-24)?
+
+**Expected:** most of Tailwind 4's output dropped, since Tailwind 4 needs Chrome 111 or Safari 16.4 (documented, [Tailwind's compatibility](https://tailwindcss.com/docs/compatibility)), and Coherent GT's makers last compared it to Safari 10.1 ([Coherent GT's JavaScript and CSS](coherent-gt.md)).
+The interface log's [entry of 2026-10-24](../interface/log.md#2026-10-24-the-sims-efb-styles-its-apps-controls-through---efb--variables-sized-from-a-516-by-716-base-and-an-app-gets-the-controls-by-bundling-the-sdks-efb-api) read `gap` as working, because the sim's stylesheet uses it.
+
+**Found:** on MSFS 2024, Steam build 26058316, at the main menu, p13 laid out elements under rules of its own in mainUi, the EFB's document, and the toolbar's, through the inspector, in two runs, the second adding nine tests:
+
+- Every test gave the same answer in all three documents, but `vw`, which rounds down to a whole pixel in the EFB's document and the toolbar's.
+- **Colors:** hex, with an alpha too, `rgb()` and `rgba()` with commas, `hsl()` with commas, `color(display-p3 ...)`, `currentColor`, a custom property holding a color, and `rgba(var(--t), 0.5)` with a triplet in `--t`, as `efb_os.css` writes, all draw.
+  The space-separated `rgb()` and `hsl()`, `oklch()`, `lab()`, `hwb()`, `color-mix()`, relative colors, and `light-dark()` are dropped.
+- **Spacing:** `grid-gap` and `grid-column-gap` space a grid, while `gap` and `column-gap` space nothing, in a grid or in a flex row, though `CSS.supports` says yes to `column-gap`.
+  So the interface log's reading of `gap` was wrong: `efb_os.css` writes `grid-gap` three times and `gap` never, and a flex row there is spaced by margins.
+- **Layout and values:** flexbox, grid with `repeat()` and `minmax()`, `place-items`, `box-sizing`, `calc()`, custom properties with fallbacks, `rem` at 16px, and `em` draw.
+  `aspect-ratio`, `inset`, the logical properties such as `padding-inline`, `min()`, `max()`, `clamp()`, `dvh`, container queries, `display: contents`, and `display: flow-root` don't, and `position: sticky` is taken only as `-webkit-sticky`.
+- **At-rules and selectors:** `@media (min-width: ...)`, `@supports`, `@keyframes`, `:not()` with a list, `:focus-within`, attribute selectors, `::before`, `::placeholder`, `::selection`, and `::-webkit-scrollbar` work.
+  `@layer`, `@property`, `@container`, nesting, `@media (width >= ...)`, `:is()`, `:where()`, `:has()`, `:focus-visible`, and `::marker` drop the rule that holds them.
+- **Effects:** `border-radius`, `box-shadow`, `filter` with `blur()` and `drop-shadow()`, linear and radial gradients, `-webkit-mask-image`, `mix-blend-mode`, `transform`, `transition`, `opacity` as a number, and `outline-offset` under an outline draw.
+  `backdrop-filter`, with or without `-webkit-`, `clip-path`, conic gradients, the `translate`, `scale`, and `rotate` properties, and `opacity` as a percent don't.
+- **Text and forms:** `font-variant-numeric`, `font-feature-settings`, `letter-spacing`, `text-overflow: ellipsis`, and `-webkit-line-clamp` work, and so do `-webkit-appearance` and `-webkit-user-select`.
+  `text-wrap`, `line-clamp`, `text-underline-offset`, `text-decoration-thickness`, `overflow-wrap: anywhere`, `hyphens`, `accent-color`, `caret-color`, and the unprefixed `appearance` and `user-select` don't.
+- **Media features:** `prefers-color-scheme` and `forced-colors` don't parse, and `(hover: hover)`, `(pointer: fine)`, and `(prefers-reduced-motion: reduce)` parse and don't match, so a rule behind any of them never applies.
+- **Fonts:** mainUi and the toolbar declare Roboto as one family, `Roboto-Regular`, at weights 300 to 900, with Roboto Mono.
+  The EFB's document declares a family for each face, such as `Roboto-Bold` and `RobotoMono-Regular`, and sets its body in Verdana, so our text there takes Roboto only from a rule that names a face.
+  It also holds Inter and JetBrains Mono from the sim's `WTCivaApp`, and Clash Grotesk from `MultiJetwayControllerApp`, other apps' fonts.
+
+Tailwind 4.3.3's `index.css` puts its theme, its base, and its utilities in `@layer`s, and its `theme.css` gives every default color in oklch (read in tailwindcss 4.3.3, in fsc-editor's `node_modules`), so Coherent GT drops all of its output, and shadcn's theme, whose colors are oklch too, with it.
+
+**Changed:** Tailwind 4's output and shadcn's theme can't style our pages in the sim as they are.
+Whether the EFB app and the banner get CSS written for the engine, or Tailwind's output through a step that lowers it, is stage 11b's design, which the user leads ([build plan](../build/plan.md#11b-the-apps)).
+Either way, a color the sim's pages share with the desktop app reaches them as hex or `rgb()` with commas, and a flex row there is spaced by margins.
+
+**Affects:** [Coherent GT's JavaScript and CSS](coherent-gt.md), which gains its CSS; the interface log's [entry of 2026-10-24](../interface/log.md#2026-10-24-the-sims-efb-styles-its-apps-controls-through---efb--variables-sized-from-a-516-by-716-base-and-an-app-gets-the-controls-by-bundling-the-sdks-efb-api), whose reading of `gap` this overturns; and stage 11b of the [build plan](../build/plan.md#11b-the-apps).
+
+**Evidence:** `experiments/areas/architecture/results/p13-coherent-css-2026-10-25-08-34-27.txt` and `p13-coherent-css-2026-10-25-08-35-47.txt`.
+
 ## 2026-10-23: A review against the simplicity rule cut eight guards, and kept every designed feature it questioned
 
 **Asked:** which mechanisms in the designs fail CLAUDE.md's rule of 2026-10-23, that every rule, mechanism, or special case is weighed against the simplicity it costs, and added only for a failure likely enough or bad enough to matter?

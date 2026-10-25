@@ -82,13 +82,13 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 - **Decided:** a Tailwind 3 preset of our own, msfs-tailwind, writes each color as `rgba()` around a custom property's RGB triplet, has autoprefixer add the `-webkit-` forms, and turns off the utilities Coherent GT drops.
   It lives in a private repository of its own, `dual-input/msfs-tailwind`, from its first commit in stage 11b, and Dual Input installs it with npm from GitHub, pinned to a tag ([build plan](../build/plan.md#11b-the-apps)).
+  The lists of what p14 measured Coherent GT keeping are the Coherent GT check's data, which [decision 031](../../decisions/031-coherent-gt-check-tool.md) gives a repository of its own, and msfs-tailwind's test reads them from the check's package, so the measurements have one home.
   Settled by the user on 2026-10-25.
 - **Because:**
   - It's a package for anyone building for Coherent GT, not a part of Dual Input (user, 2026-10-25).
   - It changes only when a probe finds something new about the engine, so a tag there and a bump here cost little.
   - With colors written that way and autoprefixer's `-webkit-` forms, Coherent GT keeps 82% of Tailwind 3's utilities, and every common variant but `focus-visible` and `has-` ([interface log][p17]).
   - Tailwind 3 writes a color as `rgb()` with spaces, which the engine drops, and Tailwind 4 writes its CSS in `@layer` and oklch, which it drops whole ([architecture log][p13]).
-  The lists of what p14 measured Coherent GT keeping are the Coherent GT check's data, which [decision 031](../../decisions/031-coherent-gt-check-tool.md) gives a repository of its own, and msfs-tailwind's test reads them from the check's package, so the measurements have one home (user, 2026-10-25).
 - **Leaves out:** whether it later goes public.
 
 ## The kit and Dual Input's palette are one package in this repository

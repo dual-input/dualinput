@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "p18's own dependencies: the MSFS Avionics Framework and Tailwind 3. Product code never imports from here.",
+  "dependencies": {
+    "@microsoft/msfs-sdk": "2.3.3",
+    "autoprefixer": "10.6.1",
+    "postcss": "8.5.31",
+    "tailwindcss": "3.4.19"
+  }
+}

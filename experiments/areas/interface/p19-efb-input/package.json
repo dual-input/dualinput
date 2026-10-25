@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "p19's own dependencies: Geist's font files, as TTF and WOFF2. Product code never imports from here.",
+  "dependencies": {
+    "geist": "1.8.2"
+  }
+}

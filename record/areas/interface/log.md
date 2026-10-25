@@ -40,6 +40,33 @@ What we haven't run: an EFB app of ours in landscape, the EFB popped out, the ta
 **Affects:** the EFB app's frames, which [stage 11b](../build/plan.md#11b-the-apps) designs.
 
 **Evidence:** `results/p21-efb-landscape-2026-10-30-17-36-53.txt`, with a screenshot of each layout, cropped to the EFB; `results/p21-efb-landscape-2026-10-30-17-32-58.txt`, the run before, measured the same sizes and saved no screenshots.
+## 2026-10-25: FSComponent runs in Edge when a bundle takes only the SDK modules it needs, in 81 KB, while the SDK as npm ships it throws on load outside the sim
+
+**Asked:** can a front end on the MSFS Avionics Framework also be the desktop app's, whose window WebView2 draws ([decision 028](../../decisions/028-desktop-pages-react-vite-tailwind.md)), so the EFB app, the banner, and the desktop window show one bundle?
+
+**Expected:** yes, since FSComponent only builds DOM nodes, though `@microsoft/msfs-sdk` is one 4 MB module for the sim's instruments.
+
+**Found:** p18 built one small app with FSComponent, `Subject`, `MappedSubject`, and `ArraySubject` from `@microsoft/msfs-sdk` 2.3.3, at ES2017 with Tailwind 3 tuned as p17 tuned it, two ways, and opened each in headless Edge 156, the engine WebView2 embeds:
+
+| Build | Bundle | Of it, the SDK | Coherent GT check | In Edge |
+| --- | --- | --- | --- | --- |
+| The SDK's `msfssdk.js`, as npm ships it | 2,466 KB | 2,455 KB | no findings | throws on load: `ReferenceError: SimVar is not defined` |
+| 16 of the SDK's own modules, from the package's source map | 94 KB | 81 KB | no findings | all 10 of the page's checks pass |
+
+- **The npm build throws** because its top-level code assigns `SimVar.GetSimVarValue`, and esbuild keeps 2.4 MB of it, since one module's top-level statements can't be shaken apart.
+- **The source map carries all 459 modules** as compiled ES modules, `../build/components/FSComponent.js` among them, and with a `package.json` marking them free of side effects, esbuild kept the 16 the app reaches, which name none of `SimVar`, `Coherent`, and `BaseInstrument`.
+- **The checks that pass:** text bound to a `MappedSubject` follows a click, a class bound to a subject follows it, a class record and a style record bind, a list driven by an `ArraySubject` adds and removes rows in order, typing reaches a subject and a subject reaches the field, and 1,000 rows render in 19.6ms and clear.
+- **FSComponent has no `onClick`:** it sets every JSX prop with `setAttribute`, so a component listens through a ref after it renders (read in `msfssdk.js`, `FSComponent.buildComponent`).
+- **A binding outlives its element:** FSComponent keeps no handle on the subscription a bound prop makes, so a removed element bound to a subject that lives on still updates, and holds memory until the subject goes.
+
+**Changed:** one bundle can run in the sim and in the desktop window if it imports the SDK's modules rather than its npm build, and a kit on it writes its own list component and its own event handling, and ties each binding to its component's life.
+Where the kit gets those modules, from the package's source map or from the [mirror's source](https://github.com/microsoft/msfs-avionics-mirror), is open, as is the user's choice of a front end.
+The same page in Coherent GT waits on p19, which shows it in the EFB.
+
+**Affects:** the apps' [tentative decisions](decisions.md), and how stage 11b builds the apps ([build plan](../build/plan.md#11b-the-apps)).
+
+**Evidence:** `results/p18-fscomponent-2026-10-25-11-33-44.txt`.
+
 ## 2026-10-25: By p14's measurements, Coherent GT keeps 82% of Tailwind 3's output with its colors written as rgba() and autoprefixer's -webkit- twins, and every common variant but focus-visible and has
 
 **Asked:** can Tailwind 3 style one front end that the EFB, the banner, and the desktop app's window all show, since Tailwind 4's output draws nothing in Coherent GT ([architecture log](../architecture/log.md#2026-10-25-coherent-gt-keeps-304-of-the-554-css-properties-chromium-152-keeps-and-lays-out-flexbox-and-grid-as-chromium-does-but-for-gap-justify-content-end-and-subgrid))?

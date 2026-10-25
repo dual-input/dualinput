@@ -1,0 +1,26 @@
+p18-fscomponent, 2026-10-25T11:33:23.277Z
+
+The SDK's source map carries 459 modules; the modules variant exports ArraySubject from ./sub/ArraySubject, DisplayComponent from ./components/FSComponent, FSComponent from ./components/FSComponent, MappedSubject from ./sub/MappedSubject, Subject from ./sub/Subject, SubscribableArrayEventType from ./sub/SubscribableArray.
+
+bundle:
+  bundle 2466 KB, of which the SDK 2454.8 KB; CSS 16.7 KB
+  sim globals the bundle names: SimVar 85, Coherent 64, BaseInstrument 5
+  Coherent GT check: exit 0, no findings
+  Edge: no result within 20s, so the page threw before its checks ran
+
+modules:
+  bundle 93.5 KB, of which the SDK 81 KB from 16 of its modules; CSS 16.7 KB
+  sim globals the bundle names: SimVar 2, Coherent 2, BaseInstrument 2
+  Coherent GT check: exit 0, no findings
+  Edge: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0
+  sim globals present: {"SimVar":"undefined","Coherent":"undefined","BaseInstrument":"undefined"}
+    ok   renders the tree
+    ok   a click updates text bound to a MappedSubject (Pressed 3 times)
+    ok   a class bound to a subject follows it (inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-warning/15 text-warning)
+    ok   a class record toggles a class (rounded-md h-2 bg-primary ring-2 ring-ring)
+    ok   a style record binds a style (75%)
+    ok   an ArraySubject list adds and removes rows in order (Pilot 2,Pilot 3)
+    ok   typing reaches a subject (DLH4A)
+    ok   a subject reaches the field (BAW12)
+    ok   a binding outlives its removed element (a leak the kit must own) (after)
+    ok   1,000 rows render and clear (19.6ms for 1000 rows, 0 left after clear)

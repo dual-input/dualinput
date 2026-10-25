@@ -1,0 +1,39 @@
+[package]
+name = "profile-author"
+version.workspace = true
+edition.workspace = true
+publish = false
+description = "Measures a profile's seats and its controls' locations in the sim, for the core team"
+
+# The tool runs beside the sim, off the core, on the engines the core uses for the same work:
+# sim-edge and sim-client for SimConnect, sim-awareness for the loaded aircraft's path,
+# aircraft-model for the cast, the message crate for `Figure`'s slot, and profile-engine to
+# check each edit. saphyr is the YAML reader profile-engine pins, which gives each key's line
+# and column, so the tool edits a profile's text in place and keeps its comments.
+# windows-sys reads the cursor, the keys, and the clock, and beeps, at the version sim-edge
+# takes.
+[dependencies]
+aircraft-model = { path = "../../src/engines/aircraft-model" }
+bytemuck = "1.25.2"
+messages = { path = "../../src/engines/messages" }
+profile-engine = { path = "../../src/engines/profile-engine" }
+saphyr = "=0.2.2"
+sim-awareness = { path = "../../src/engines/sim-awareness" }
+sim-client = { path = "../../src/engines/sim-client" }
+sim-edge = { path = "../../src/engines/sim-edge" }
+simconnect-types = { path = "../../src/engines/simconnect-types" }
+
+[dependencies.windows-sys]
+version = "0.61.2"
+features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_System_Diagnostics_Debug",
+    "Win32_System_Performance",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+]
+
+# The cast's test builds a small glTF of its own.
+[dev-dependencies]
+serde_json = "1.0.145"

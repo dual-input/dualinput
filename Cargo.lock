@@ -3357,6 +3357,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "profile-author"
+version = "0.1.0"
+dependencies = [
+ "aircraft-model",
+ "bytemuck",
+ "messages",
+ "profile-engine",
+ "saphyr",
+ "serde_json",
+ "sim-awareness",
+ "sim-client",
+ "sim-edge",
+ "simconnect-types",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "profile-build"
 version = "0.1.0"
 dependencies = [

@@ -6,6 +6,10 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/02-code-map.md, ../core/
 Decides:     How a pilot binds the key or button, as a single or a long press; how a press, or a button in the apps, asks for control; what a pilot gets when the guards refuse, and when the link to the PF is lost; what marks a pass on each machine; the budgets; and the cases for the bench (node 6.12).
 ```
 
+> **Note**
+> Stage 11b's tentative decision that [Dual Input's one full window is its EFB app](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app) moves take-control's section, which binds the input, from the desktop app to the EFB app, and the take-control button is the EFB app's alone (user, 2026-10-25).
+> Binding in the EFB happens with the sim's window in front, where a bound key counts.
+
 A pilot binds one keyboard key or flight-hardware button in the desktop app, as a single press, which takes control on its down, or a long press, which takes control once it has been held 1s.
 The press, or the take-control button in the EFB app or the desktop app, asks the session crate's `TakeControl`, whose guards decide, and a refused press plays a short refusal cue and shows the guards' reason on the banner.
 When control passes, every machine whose pilot is in the flight plays the control-passed cue and shows who has control, with no recorded line.

@@ -6,6 +6,11 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architec
 Decides:     That the desktop app does the watcher's jobs from a tray icon; what installs and updates Dual Input; where it lives on disk; when an update is checked for and when it applies; when our Community package is written; how the sim's start reaches the core; who adds and checks the firewall rule; how a package that overrides our files, and trouble with our own, shows in the core; what uninstalling removes; and what an unsigned v1 costs (node 6.17).
 ```
 
+> **Note**
+> Stage 11b's tentative decision that [Dual Input's one full window is its EFB app](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app) changes what the desktop app's window is for: it shows only the desktop app's own screens, the update's progress and the 24 hours of figures, and the app keeps Tauri for them (user, 2026-10-25).
+> So an open window keeps no core running, where [the sim and the core](#the-sim-and-the-core) and [one program from login](#one-program-from-login) have it hold one, and the core no longer starts the desktop app's program, since the EFB app has no button for it.
+> How the EFB app shows an update and asks for Install now, which the desktop app would carry out by closing the sim, installing, and starting the sim again, the apps' design settles later.
+
 Dual Input has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.
 The app applies an update only while the sim is closed, no session is held, and the core has exited, and Install now quits the core to get there.

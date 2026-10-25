@@ -6,6 +6,11 @@ Depends on:  01-roles-and-members.md, ../architecture/02-code-map.md, ../core/01
 Decides:     The session crate's members, session keys, control, session file, joining and leaving, preflight, match check, and what it raises; who is in the flight; which pilot's bundle a session pins; where the match check reads an aircraft's version; how rate and pause sets active pause and the simulation rate; how Go to picks a stand or a runway; what the menu script reports and runs; when the core exits; the budgets; and the cases for the bench (node 6.7).
 ```
 
+> **Note**
+> Stage 11b's tentative decision that [Dual Input's one full window is its EFB app](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app) moves go-to's section, with the PF's spot and the Go to button, from the desktop app to the EFB app, and its button still sends `go-to`'s command, which the core runs through the menu script, since the EFB's own document can't make the world map's requests ([interface log](../interface/log.md#2026-10-25-the-efbs-document-cant-make-go-tos-requests-on-the-world-map-and-no-add-ons-script-runs-in-the-toolbars-there-so-an-efb-apps-go-to-still-needs-the-menu-script); user, 2026-10-25).
+> Go to is offered only at Free flight's world map, so [the menu script](#the-menu-script)'s `free_flight` request and [the Go to budget](#budgets)'s start from the home page no longer hold.
+> An open desktop app window keeps no core running, so a connected desktop app no longer keeps the core from exiting, as [joining and leaving](#joining-and-leaving) has it.
+
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.
 The PF's core sets the session's aircraft, runs preflight's countdown, and ends preflight with a key, and its profile loader pins a local bundle that covers that aircraft, or else the one its cached index gives its level.

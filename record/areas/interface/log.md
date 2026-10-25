@@ -52,7 +52,7 @@ Each stand-in is a function whose every property is another stand-in, so the SDK
 With them defined before the bundle, the SDK's 2,466 KB npm build loaded in headless Edge 156 and passed all 10 of p18's checks, and without them it threw before any ran.
 
 **Changed:** the UI can import the SDK as npm ships it, and a page or test outside the sim defines the four stand-ins first.
-A stand-in answers any call with nothing, so code that reads the sim gets no data outside it, which only the UI's rendering needs.
+A stand-in answers any call with nothing, so code that reads the sim gets no data outside it, and outside the sim we need only the UI's rendering.
 
 **Affects:** the apps' [tentative decisions](decisions.md), and how stage 11b builds the apps ([build plan](../build/plan.md#11b-the-apps)).
 
@@ -80,9 +80,9 @@ The user is weighing a Dual Input whose only window is its EFB app (user, 2026-1
 - **The 2026-10-05 entry's "Atlas, the EFB's map app" was the world map's own atlas page**, `Global/atlas.html`, whose title is `atlas`: it has `engine` and the store, as the EFB's document doesn't.
 - **At the world map, the toolbar's document had loaded only the sim's own 14 scripts**, with ChasePlane installed, whose worker its toolbar icon loads there in flight ([2026-10-04 entry](#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
   So the way our banner's icon brings a script into the toolbar's document doesn't put one where Go to happens.
-- The EFB's document and `mainUi` both hear the CommBus (measured on MSFS 2024, 2026-10-08, `results/p14-commbus-pages-2026-10-08-14-05-05.txt`).
 
-**Changed:** an EFB app can't run Go to by itself: it asks the menu script, which BlurPage brings into `mainUi`, over the CommBus, so a Dual Input whose only window is its EFB app keeps BlurPage and [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md).
+**Changed:** an EFB app can't make Go to's requests itself, so its Go to button works as any client's does: it sends `go-to`'s command, and the core runs the world map's requests through the menu script, which our copy of BlurPage brings into `mainUi` ([Go to](../session/02-units.md#go-to)).
+So a Dual Input whose only window is its EFB app keeps BlurPage and [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md).
 The menu script may also choose the airport by its world location rather than through the search, which needs no listener.
 
 **Affects:** the apps' [tentative decisions](decisions.md), and Go to in [the v1 scope](../product/03-v1-scope.md#preflight).

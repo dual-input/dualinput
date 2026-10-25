@@ -6,6 +6,18 @@ Depends on:  ../core/02-clients-and-panel-bridge.md, ../architecture/02-code-map
 Decides:     How a feature's part plugs into each app and comes out; what a part may use; the slices and commands the apps need that no unit had; how any client changes a setting and quits; when and how the banner is opened and closed; how a click on a notification reaches the EFB app; what trouble in each component raises; what the apps learn when the core goes; and how the EFB app brings the desktop app forward (node 6.16).
 ```
 
+> **Note**
+> Stage 11b's [tentative decisions](decisions.md) change this design until the apps' design rewrites it (user, 2026-10-25):
+>
+> - Every screen a pilot uses Dual Input through is in the EFB app, and the desktop app's window shows only its own: the update's progress and the last 24 hours of CPU and memory use ([Dual Input's one full window](decisions.md#dual-inputs-one-full-window-is-its-efb-app)).
+>   So take-control's binding and Go to are the EFB app's parts, and no feature has a part in the desktop app.
+> - `desktop-shell` draws with the kit the EFB app draws with, FSComponent styled with Tailwind 3, not React and Tailwind 4 ([the kit](decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3)), so [what a part reaches](#what-a-part-reaches) says nothing of Vite or a Tailwind `@source` for a feature's `desktop/` folder.
+> - The kit imports `@microsoft/msfs-sdk` as npm ships it, and the EFB app draws with the EFB's own copy, while the desktop app's window bundles npm's ([FSComponent](decisions.md#our-pages-import-fscomponent-from-microsoftmsfs-sdk-as-npm-ships-it)).
+> - The banner's page draws its notifications and a few lines, such as the preflight countdown and a hint to open the EFB app, in plain markup with the kit's colors and no framework, so it isn't `efb-shell`'s, and [the banner](#the-banner) shows no part's view and no checklist ([the banner's decision](decisions.md#the-banner-draws-its-few-lines-in-plain-markup-with-the-kits-colors-and-no-framework)).
+> - The EFB app has no button that brings the desktop app forward, so [bringing the desktop app forward](#bringing-the-desktop-app-forward), its budget, and its cases go.
+> - An open desktop app window keeps no core running, so [when the core goes](#when-the-core-goes) no longer has the desktop app want a core while its window is open.
+> - How the EFB app shows an update and asks for Install now, which [slices and commands](#slices-and-commands) leaves to the desktop app's window, the apps' design settles later.
+
 A feature shows itself in each app through one part, which the app lists in one line, so deleting a feature deletes its folder and that line, and the platform's shells never name a feature.
 The apps reach the core only through slices of state, commands, and a part's `unit` messages, and any client sends any command, a setting's change and a quit among them.
 In each flight of a session, the EFB app's code opens the banner, calling the toolbar again until the banner's page connects, and the page shows and hides its own content while the panel stays open.

@@ -1,5 +1,9 @@
 # 029: Our interface in the sim is built on the MSFS Avionics Framework
 
+> **Note**
+> Stage 11b's tentative decision that [the banner draws its few lines in plain markup](../areas/interface/decisions.md#the-banner-draws-its-few-lines-in-plain-markup-with-the-kits-colors-and-no-framework) reverses this one's banner half: the banner draws with no framework and bundles no copy of it, and the apps' design will number the decision that confirms it.
+> The EFB app still draws with the framework, with the sim's own copy ([tentative decisions](../areas/interface/decisions.md#our-pages-import-fscomponent-from-microsoftmsfs-sdk-as-npm-ships-it)).
+
 The EFB app and the banner panel draw their interface with the MSFS Avionics Framework's FSComponent, in TypeScript, and the EFB app registers with the sim's EFB through Asobo's EFB API.
 The banner panel bundles our own copy of `@microsoft/msfs-sdk`, pinned to one exact version, not the copy the sim provides.
 Decided by the user on 2026-10-09, in node 1.6 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#our-interface-in-the-sim-is-built-on-the-msfs-avionics-framework).

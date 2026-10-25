@@ -124,7 +124,7 @@ The edge's job hands up only a string of six characters from the invite code's a
 - At 45 to 126 MB an hour, 1 GB holds roughly 8 to 22 hours (user, 2026-10-21; [recording log][every]).
 - The recording crate's slice lists the runs by their folders' names, which are their starts in UTC, with their sizes, and its command deletes a run (user, 2026-10-23).
   Of the folders named as runs, it takes the newest as the one in progress, which the slice shows and the delete refuses, and the edge opens a run's files so Windows refuses to delete them while the core writes them.
-  How the desktop app lists the runs is [the apps' design](../interface/01-apps.md#slices-and-commands).
+  How the EFB app lists the runs is [the apps' design](../interface/01-apps.md#slices-and-commands), since every screen a pilot uses Dual Input through is the EFB app's ([tentative decisions](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app)).
 
 ## A bug report
 

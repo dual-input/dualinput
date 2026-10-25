@@ -1,5 +1,8 @@
 # 028: The desktop app's pages are React, built with Vite and styled with Tailwind
 
+> **Note**
+> Two of stage 11b's tentative decisions reverse this one, and the apps' design will number the decision that confirms them: [Dual Input's one full window is its EFB app](../areas/interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app), so the desktop app's window shows only its own screens, and [the apps draw with a kit of our own components, styled with Tailwind 3](../areas/interface/decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3), so no screen of ours uses React, Vite, or Tailwind 4.
+
 The desktop app's pages are TypeScript and React, built with Vite and styled with Tailwind.
 They share no interface with the EFB app, only TypeScript logic and the types ts-rs generates from the message crate.
 Decided by the user on 2026-10-09, in node 1.6 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#the-desktop-apps-pages-are-react-built-with-vite-and-styled-with-tailwind).

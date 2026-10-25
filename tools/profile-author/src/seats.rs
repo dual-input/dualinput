@@ -24,7 +24,7 @@ use simconnect_types::SIMCONNECT_SIMOBJECT_TYPE_ALL;
 use crate::cockpit::{self, Cockpit};
 use crate::profile::{self, Facts, ProfileFile};
 use crate::screen::{self, Cursor, Key};
-use crate::sim::{Event, Received};
+use crate::sim::{Event, Received, SLOT_WRITE};
 use crate::yaml;
 
 /// Our figure's SimObject (record/areas/avatars/01-avatars.md, "Names").
@@ -69,9 +69,12 @@ const NEAR: u32 = 50;
 /// `sim.byType`).
 const LISTING: Duration = Duration::from_secs(2);
 
-/// The seats to start from: the profile's own, then one for each seat object, then one for
-/// each `PILOT_` node, each seed skipped where a seat that applies to the loaded variant
-/// already sits.
+/// The seats to start from. While any of the profile's seats applies to the loaded variant,
+/// they're the seats, so a seat the author dropped or moved stays as they left it. Otherwise
+/// each seat object seeds one, then each `PILOT_` node no seat object sits on. A seed takes
+/// `only` with the loaded variant when the profile holds other variants' seats, since a
+/// variant with a different cabin gets seats of its own
+/// (record/areas/profiles/01-format-and-delivery.md, "Seats").
 pub fn seeds(
     existing: &[Seat],
     variant: &str,
@@ -79,10 +82,13 @@ pub fn seeds(
     nodes: &[(String, Vec3)],
 ) -> Vec<Seat> {
     let mut seats = existing.to_vec();
+    if existing.iter().any(|s| applies(s, variant)) {
+        return seats;
+    }
+    let start = seats.len();
     let taken = |seats: &[Seat], at: Vec3| {
-        seats
+        seats[start..]
             .iter()
-            .filter(|s| applies(s, variant))
             .any(|s| distance(hip(s), at) < SAME_SEAT)
     };
     for (title, at) in objects {
@@ -110,6 +116,11 @@ pub fn seeds(
             (key.to_string(), name.to_string())
         };
         seats.push(seat(key, name, *at));
+    }
+    if start > 0 {
+        for s in &mut seats[start..] {
+            s.only = vec![variant.to_string()];
+        }
     }
     seats
 }
@@ -307,7 +318,7 @@ fn parse(line: &str) -> Result<Command, String> {
     };
     match words.as_slice() {
         [] => Err(String::new()),
-        ["seat", key] => Ok(Command::Select(key.to_string())),
+        ["seat", key] => Ok(Command::Select(snake(key))),
         ["name", _, ..] => Ok(Command::Name(rest())),
         ["key", key] => Ok(Command::Key(snake(key))),
         ["eye", "camera"] => Ok(Command::EyeAtCamera),
@@ -414,6 +425,8 @@ struct Session {
     figures: Vec<Figure>,
     area: Area,
     feeds: u32,
+    /// Until the sim refuses a write of the slot.
+    feeding: bool,
     /// The read of our WASM module's status, until it answers.
     status_read: Option<u32>,
     asked: Option<Asked>,
@@ -467,6 +480,7 @@ pub fn run(file: ProfileFile) -> Result<(), String> {
         figures: Vec::new(),
         area,
         feeds: 0,
+        feeding: true,
         status_read: Some(request),
         asked: None,
     };
@@ -477,7 +491,7 @@ pub fn run(file: ProfileFile) -> Result<(), String> {
             session.file.path.display()
         );
     }
-    session.create_figures();
+    session.sync_figures();
     println!("{HELP}");
     session.show_selected();
     session.run()
@@ -606,6 +620,9 @@ impl Session {
         match received {
             Received::Message(Message::Assigned { request, object }) => {
                 let Some(figure) = self.figures.iter_mut().find(|f| f.create == request) else {
+                    // Its seat went while the sim created it.
+                    let op = self.cockpit.sim.client.remove(object);
+                    self.cockpit.sim.make([op]);
                     return;
                 };
                 figure.object = Some(object);
@@ -638,7 +655,18 @@ impl Session {
                     self.camera(asked, &camera);
                 }
             }
-            Received::Refused { call } => {
+            // A module from another build may lay its slot out smaller, and SimConnect may
+            // then refuse each write of this build's larger slot (unverified), which the
+            // rewrite would print 5 times a second, so the tool stops at the first.
+            Received::Refused { what, .. } if what == SLOT_WRITE => {
+                if self.feeding {
+                    self.feeding = false;
+                    println!(
+                        "  the tool stops feeding Figure; build and install the package from this tree, then start the tool again"
+                    );
+                }
+            }
+            Received::Refused { call, .. } => {
                 if let Some(figure) = self
                     .figures
                     .iter_mut()
@@ -703,22 +731,25 @@ impl Session {
 
     fn command(&mut self, command: Command) -> Result<(), String> {
         if let Command::Select(key) = &command {
-            if !self.seats.iter().any(|s| &s.key == key) {
-                let key = snake(key);
+            let key = key.clone();
+            if !self.seats.iter().any(|s| s.key == key) {
                 let mut seat = seat(key.clone(), key.clone(), [0.0; 3]);
-                // A new seat starts at the selected seat's hip, until it's marked.
-                if let Some(s) = self.selected_seat() {
-                    seat.hip = s.hip;
+                // A new seat starts at the selected seat's hip, and applies to the variants it
+                // does, until it's marked; with none selected, the profile's seats are all
+                // other variants', as `seeds` takes them.
+                match self.selected_seat() {
+                    Some(s) => (seat.hip, seat.only) = (s.hip, s.only.clone()),
+                    None if !self.seats.is_empty() => seat.only = vec![self.variant.clone()],
+                    None => {}
                 }
                 self.seats.push(seat);
                 self.selected = Some(key);
                 self.changed();
-                self.create_figures();
                 println!(
                     "  added: press Page Down with the cursor on its cushion to place its hip"
                 );
             } else {
-                self.selected = Some(key.clone());
+                self.selected = Some(key);
                 self.feed(true);
             }
             self.show_selected();
@@ -788,13 +819,6 @@ impl Session {
             Command::Drop => {
                 let gone = self.seats.remove(at);
                 self.gone.push(gone.key.clone());
-                if let Some(i) = self.figures.iter().position(|f| f.key == gone.key) {
-                    let figure = self.figures.remove(i);
-                    if let Some(object) = figure.object {
-                        let op = self.cockpit.sim.client.remove(object);
-                        self.cockpit.sim.make([op]);
-                    }
-                }
                 self.selected = self
                     .seats
                     .iter()
@@ -829,12 +853,13 @@ impl Session {
         }
     }
 
-    /// Writes the profile and feeds `Figure` the change.
+    /// Writes the profile, and draws the change.
     fn changed(&mut self) {
         match self.write() {
             Ok(()) => self.gone.clear(),
             Err(e) => println!("  {e}"),
         }
+        self.sync_figures();
         self.feed(true);
     }
 
@@ -852,9 +877,20 @@ impl Session {
         self.file.write(&text)
     }
 
-    /// Creates a figure for each seat that applies to the loaded variant and has none, at the
-    /// aircraft's place, where `Figure` moves it once it's fed.
-    fn create_figures(&mut self) {
+    /// Keeps one figure for each seat that applies to the loaded variant, up to the slot's
+    /// eight: removes the figure of a seat dropped or left out of the variant, and creates each
+    /// one missing at the aircraft's place, where `Figure` moves it once it's fed. A figure
+    /// whose create is still out goes when its object comes.
+    fn sync_figures(&mut self) {
+        let (seats, variant) = (&self.seats, &self.variant);
+        let (kept, gone): (Vec<Figure>, Vec<Figure>) = std::mem::take(&mut self.figures)
+            .into_iter()
+            .partition(|f| seats.iter().any(|s| s.key == f.key && applies(s, variant)));
+        self.figures = kept;
+        for object in gone.into_iter().filter_map(|f| f.object) {
+            let op = self.cockpit.sim.client.remove(object);
+            self.cockpit.sim.make([op]);
+        }
         let pose = self.cockpit.pose;
         let at = InitPosition {
             latitude: pose.latitude,
@@ -892,9 +928,8 @@ impl Session {
             .figures
             .iter()
             .filter_map(|f| Some((self.seats.iter().find(|s| s.key == f.key)?, f.object?)))
-            .filter(|(s, _)| applies(s, &self.variant))
             .collect();
-        if drawn.is_empty() {
+        if drawn.is_empty() || !self.feeding {
             return;
         }
         if new {
@@ -919,7 +954,7 @@ mod tests {
     }
 
     #[test]
-    fn seeds_come_from_the_profile_then_seat_objects_then_pilot_nodes_each_once() {
+    fn seeds_come_from_seat_objects_then_pilot_nodes_each_once() {
         let objects = [
             ("SEAT_DEFAULT_Pilot".to_string(), [0.283, 0.13, -0.04]),
             ("SEAT_C152_Pax".to_string(), [-0.21, -0.13, 0.1]),
@@ -928,18 +963,26 @@ mod tests {
             ("PILOT_1".to_string(), [-0.282, 0.13, -0.05]),
             ("PILOT_2".to_string(), [-0.2, -0.12, 0.1]),
         ];
-        let seats = seeds(&[existing()], "press", &objects, &nodes);
+        let seats = seeds(&[], "press", &objects, &nodes);
         let keys: Vec<&str> = seats.iter().map(|s| s.key.as_str()).collect();
         assert_eq!(
             keys,
             ["pilot", "pax", "copilot"],
-            "the pilot's seat object sits on the profile's pilot, and PILOT_2 on the Pax object"
+            "PILOT_2 sits on the Pax object"
         );
         assert_eq!(seats[1].name, "Pax");
         assert_eq!(seats[2].hip, [-0.282f32, 0.13, -0.05].map(f64::from));
         assert_eq!(
             (seats[2].knees, seats[2].feet, seats[2].eye),
             (KNEES, FEET, EYE)
+        );
+        assert!(seats.iter().all(|s| s.only.is_empty()));
+
+        let kept = seeds(&[existing()], "press", &objects, &nodes);
+        assert_eq!(
+            kept,
+            vec![existing()],
+            "with a seat of its own, the profile's seats stand, so a seat dropped stays dropped"
         );
 
         let from_nodes = seeds(&[], "press", &[], &nodes[..1]);
@@ -957,7 +1000,7 @@ mod tests {
     }
 
     #[test]
-    fn a_seat_for_another_variant_holds_no_seed_back() {
+    fn a_seed_beside_another_variants_seat_is_the_loaded_variants_own() {
         let mut other = existing();
         other.only = vec!["base".into()];
         let objects = [("SEAT_DEFAULT_Pilot".to_string(), [0.283, 0.13, -0.04])];
@@ -966,6 +1009,11 @@ mod tests {
         assert_eq!(
             seats[1].key, "pilot_2",
             "the other variant's seat keeps its key"
+        );
+        assert_eq!(
+            seats[1].only,
+            ["press"],
+            "so the base variant keeps one seat at that spot"
         );
     }
 
@@ -1093,6 +1141,11 @@ mod tests {
         assert_eq!(
             parse("key First-Officer").unwrap(),
             Command::Key("first_officer".into())
+        );
+        assert_eq!(
+            parse("seat Pilot").unwrap(),
+            Command::Select("pilot".into()),
+            "a key typed in another case names the seat that has it, not a second one"
         );
         assert_eq!(parse("radius default").unwrap(), Command::Radius(None));
         assert!(parse("radius 0").is_err());

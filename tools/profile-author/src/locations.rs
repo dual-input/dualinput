@@ -145,8 +145,8 @@ impl Walk {
                     if self.cockpit.take(&received) {
                         continue;
                     }
-                    if let (Received::Message(Message::Camera(camera)), Some(cursor)) =
-                        (received, self.asked.take())
+                    if let Received::Message(Message::Camera(camera)) = received
+                        && let Some(cursor) = self.asked.take()
                     {
                         self.mark(&camera, &cursor);
                     }
@@ -157,7 +157,8 @@ impl Walk {
                 }) => {
                     println!("  Page Down and Page Up count only while the sim is in front");
                 }
-                Some(Event::Key { key: Key::Mark, .. }) if self.asked.is_none() => {
+                // A press while the last one's camera answer is out takes its place.
+                Some(Event::Key { key: Key::Mark, .. }) => {
                     match screen::cursor().filter(Cursor::over_window) {
                         Some(cursor) => {
                             self.asked = Some(cursor);
@@ -169,15 +170,19 @@ impl Walk {
                         }
                     }
                 }
+                // Moving to another entry drops a press still waiting for the camera, whose
+                // point is for the entry left.
                 Some(Event::Key { key: Key::Skip, .. }) => {
+                    self.asked = None;
                     println!("  skipped");
                     self.skipped += 1;
                     self.next();
                 }
-                Some(Event::Key { .. }) | None => {}
+                None => {}
                 Some(Event::Line(line)) => match line.trim() {
                     "quit" => return Ok(()),
                     "back" => {
+                        self.asked = None;
                         self.at = self.at.saturating_sub(1);
                         self.show();
                     }

@@ -63,12 +63,16 @@ impl Events {
     }
 }
 
+/// How a refusal names a write of `Figure`'s slot, the one client data area the tool writes.
+pub const SLOT_WRITE: &str = "a write of Figure's slot";
+
 /// What a message from the sim came to.
 pub enum Received {
     Message(Message),
-    /// The sim refused a call, which the tool has printed.
+    /// The sim refused a call, which the tool has printed, and `what` names.
     Refused {
         call: Option<Tag>,
+        what: String,
     },
 }
 
@@ -148,11 +152,12 @@ impl Sim {
                 }) => {
                     let what = call
                         .and_then(|c| self.calls.get(&c))
-                        .map_or("a call", String::as_str);
+                        .map_or("a call", String::as_str)
+                        .to_string();
                     println!(
                         "  the sim refused {what}: SimConnect exception {exception}, at argument {index}"
                     );
-                    Ok(Some(Received::Refused { call }))
+                    Ok(Some(Received::Refused { call, what }))
                 }
                 Some(message) => Ok(Some(Received::Message(message))),
                 None => Ok(None),
@@ -212,7 +217,7 @@ fn describe(op: &Op) -> String {
         Op::MapClientEventToSimEvent { name, .. } => format!("the event {name}"),
         Op::MapClientDataNameToId { name, .. } => format!("the client data area {name}"),
         Op::AICreateSimulatedObject { title, .. } => format!("a create of {title}"),
-        Op::SetClientData { .. } => "a write of Figure's slot".into(),
+        Op::SetClientData { .. } => SLOT_WRITE.into(),
         other => {
             let debug = format!("{other:?}");
             debug

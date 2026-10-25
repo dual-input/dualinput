@@ -27,16 +27,26 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Decided:** the apps' components take shadcn's Nova preset, with rounded corners and small type, on Tailwind's neutral grays at the steps shadcn's dark theme uses, such as `neutral-950` for the background.
   Their main color, shadcn's `primary`, is Tailwind's sky-300, `oklch(82.8% 0.111 230.318)`, which is `#74d4ff`.
   Their corner radius is shadcn's default of 0.625rem, 10px, and their font is Geist, with Geist Mono for codes.
-  Information, the lowest of a notification's three levels, takes Tailwind's slate-300, `oklch(86.9% 0.022 252.894)`, which is `#cad5e2`.
+  The status colors are Tailwind's 400 steps of amber, red, and green, each with its chroma held to 0.14, and slate-300 with its chroma raised to 0.05:
+
+  | For | Color | As hex, for the sim's pages | Contrast on `neutral-950` |
+  | --- | --- | --- | --- |
+  | Information, a notification's lowest level | `oklch(86.9% 0.05 252.894)` | `#bdd7f5` | 13.4:1 |
+  | Warning | `oklch(82.8% 0.14 84.429)` | `#f1be4d` | 11.5:1 |
+  | Trouble, which is shadcn's `destructive` too | `oklch(70.4% 0.14 22.216)` | `#ea7977` | 7.1:1 |
+  | Success, such as Ready | `oklch(79.2% 0.14 151.711)` | `#6fd58d` | 10.9:1 |
+
+  A status chip is soft: its color at 15% behind text in its color.
   Settled by the user on 2026-10-25, on a bench of mockups in `experiments/areas/interface/bench`, which draws the user's sketch of the desktop app in each of shadcn's eight presets, nine grays, and any main color.
 - **Because:**
   - The user kept `#7ad7ff` on the bench, then took sky-300, the Tailwind color nearest it, at `oklch(83.6% 0.105 227.9)` against sky-300's `oklch(82.8% 0.111 230.318)` (computed from the two colors).
   - It's the sim's EFB blue, `#00b4ff`, lightened: both have a hue of 198° in HSL (computed), at a lightness of 74% against the EFB's 50%.
   - Sky-300 has 11.9:1 contrast on `neutral-950` (computed), and a button filled with it takes dark text.
   - Coherent GT reads hex colors but not oklch ([architecture log][p13]), so our pages in the sim take it as `#74d4ff`.
-  - Slate-300 is a gray with a cool tint, so information stays apart from sky-300, where a blue of its own would read as a second main color, and the user found violet and purple ugly (user, 2026-10-25).
-    It has 13.3:1 contrast on `neutral-950` (computed).
-- **Leaves out:** the colors of warning, trouble, and success; whether the apps show the pilots' figure colors, and how those stay apart from the status colors; how one set of colors feeds both shadcn's theme and the kit our pages in the sim draw with; and whether those pages ship Geist, where the sim provides Roboto.
+  - Information takes a gray with a cool tint, so it stays apart from sky-300, where a blue of its own would read as a second main color, and the user found violet and purple ugly; its tint is raised from slate-300's 0.022 so it reads apart from the neutral grays too (user, 2026-10-25).
+  - Tailwind's 400 steps, at chroma up to 0.209 for green, were too rough beside sky-300's 0.111, and their solid chips too strong, so the user held their chroma to 0.14 and took soft chips (user, 2026-10-25).
+  - The hex values and contrasts are computed from the oklch colors.
+- **Leaves out:** whether the apps show the pilots' figure colors, and how those stay apart from the status colors; how one set of colors feeds both shadcn's theme and the kit our pages in the sim draw with; and whether those pages ship Geist, where the sim provides Roboto.
 
 ## The EFB app and the banner have Dual Input's own look, from a kit of our own components on the MSFS Avionics Framework
 

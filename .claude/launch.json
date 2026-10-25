@@ -6,6 +6,12 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["experiments/areas/avatars/figure/serve.mjs"],
       "port": 5181
+    },
+    {
+      "name": "style-bench",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["experiments/areas/interface/bench/node_modules/vite/bin/vite.js", "experiments/areas/interface/bench", "--port", "5183", "--strictPort"],
+      "port": 5183
     }
   ]
 }

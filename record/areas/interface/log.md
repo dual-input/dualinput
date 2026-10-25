@@ -40,6 +40,35 @@ What we haven't run: an EFB app of ours in landscape, the EFB popped out, the ta
 **Affects:** the EFB app's frames, which [stage 11b](../build/plan.md#11b-the-apps) designs.
 
 **Evidence:** `results/p21-efb-landscape-2026-10-30-17-36-53.txt`, with a screenshot of each layout, cropped to the EFB; `results/p21-efb-landscape-2026-10-30-17-32-58.txt`, the run before, measured the same sizes and saved no screenshots.
+## 2026-10-25: By p14's measurements, Coherent GT keeps 82% of Tailwind 3's output with its colors written as rgba() and autoprefixer's -webkit- twins, and every common variant but focus-visible and has
+
+**Asked:** can Tailwind 3 style one front end that the EFB, the banner, and the desktop app's window all show, since Tailwind 4's output draws nothing in Coherent GT ([architecture log](../architecture/log.md#2026-10-25-coherent-gt-keeps-304-of-the-554-css-properties-chromium-152-keeps-and-lays-out-flexbox-and-grid-as-chromium-does-but-for-gap-justify-content-end-and-subgrid))?
+The user is weighing that one front end, on the MSFS Avionics Framework, against the two the apps' design has: shadcn's on the desktop and a kit of our own in the sim (user, 2026-10-25).
+
+**Expected:** most of it kept, since Working Title's CIVA app ships Tailwind-made CSS in the sim (read in workingtitle-instruments-civa 1.1.0, `WTCivaApp.css`), and Tailwind 3 compiles its layers away.
+
+**Found:** with no sim, p17 built Tailwind 3.4.19, then autoprefixer 10.6.1 for Chrome 49 and Safari 10, and graded every declaration against p14's results from MSFS 2024's main menu, counting a value the engine parses and ignores in layout, such as `gap`, as dropped:
+
+| Build | Declarations | Kept | Covered by a kept `-webkit-` twin | Dropped | Untested |
+| --- | --- | --- | --- | --- | --- |
+| Every utility, through a safelist of everything | 28,327 | 22,400 | 704 | 4,890 | 333 |
+| shadcn Nova's components, unported | 759 | 597 | 4 | 141 | 17 |
+
+- **Colors:** Tailwind 3 writes a hex color as `rgb()` with spaces and a slash, which the engine drops, so the config writes each color as `rgba(var(--primary-rgb), <alpha-value>)`, and `bg-primary/80` comes out as `rgba(var(--primary-rgb), 0.8)`, which it keeps.
+- **Autoprefixer** turned 576 dropped declarations into covered ones, such as `user-select` beside `-webkit-user-select` and `text-decoration-line` beside its `-webkit-` form, so `select-none` and `underline` work.
+- **Dropped utilities fall in about 25 families:** the logical ones (`ps-`, `me-`, `start-`, `border-s-`, `rounded-e-`); `gap-`, `gap-x-`, and `gap-y-`; `inset-`; `aspect-`; `backdrop-`; `accent-` and `caret-`; the `scroll-` margins, paddings, and snaps; `overscroll-`; `contain-`; `decoration-` thickness, color, and style; `underline-offset-`; `text-wrap` and `text-balance`; `h-dvh` and the other new viewport units; `sticky`; `flow-root`; `contents`; `grid-cols-subgrid`; `overflow-clip`; and `touch-none`.
+- **Variants:** `hover`, `focus`, `focus-within`, `active`, `disabled`, `checked`, `first`, `last`, `odd`, `even`, `group-hover`, `peer-checked`, `before`, `after`, `aria-*`, `data-[...]`, `supports-[...]`, `motion-safe`, `motion-reduce`, the breakpoints, `print`, `portrait`, `landscape`, and `*` are kept.
+  `focus-visible`, `has-[...]`, `marker`, `dark`, `contrast-more`, `forced-colors`, `rtl`, and `ltr` are dropped, the last two for the `:where()` they write; `file` is untested.
+- **Nova's classes:** of its 558 class names, Tailwind 3 builds 354, and the 204 it doesn't know are Tailwind 4's own syntax: bare data variants such as `data-open:`, `has-data-*`, `in-data-*`, `not-*`, `**:`, a custom property as `p-(--card-spacing)`, `ring-3`, `outline-hidden`, `rounded-4xl`, and container queries.
+  Of what it builds, the 141 dropped declarations are mostly `:has()`, `:focus-visible`, `gap`, `dark:`, `min()`, and `inset`.
+
+**Changed:** Tailwind 3 can style a page in the sim if the config writes colors as `rgba()` around a triplet, autoprefixer adds the `-webkit-` twins, and the Coherent GT check fails the dropped families, which `space-x-`, `space-y-`, and `top-0 left-0` replace.
+Porting Nova to it rewrites much of each component's class list, since 37% of Nova's class names are Tailwind 4's syntax and much of its state styling rests on `:has()` and `:focus-visible`.
+Both read the engine's parse and layout, not its paint, and the user's choice of a front end is still open.
+
+**Affects:** the apps' [tentative decisions](decisions.md), and how stage 11b builds the apps ([build plan](../build/plan.md#11b-the-apps)).
+
+**Evidence:** `results/p17-tailwind3-2026-10-25-11-05-39.txt` and `.json`.
 
 ## 2026-10-24: The apps' wiring calls notices notifications, gives the banner's socket a slice of its own, and passes a development core's data folder to the desktop app
 

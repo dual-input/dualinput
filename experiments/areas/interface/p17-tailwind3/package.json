@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "p17's own dependencies: Tailwind 3, apart from the bench's Tailwind 4. Product code never imports from here.",
+  "dependencies": {
+    "autoprefixer": "10.6.1",
+    "postcss": "8.5.31",
+    "tailwindcss": "3.4.19"
+  }
+}

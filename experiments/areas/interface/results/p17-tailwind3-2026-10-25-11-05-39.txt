@@ -1,0 +1,212 @@
+p17-tailwind3, 2026-10-25T11:05:39.666Z, tailwindcss 3.4.19, autoprefixer 10.6.1 for chrome 49 and safari 10
+Graded against experiments/areas/architecture/results/p14-coherent-css-full-2026-10-25-09-20-25.json, Coherent GT at the main menu.
+Builds: Nova's components 44 KB, every utility 2104 KB, variants 18 KB.
+Autoprefixer's -webkit- twins turned 576 dropped declarations of every utility into covered ones.
+
+1. shadcn Nova's components, unported: 759 declarations, 597 kept, 4 covered by a -webkit- twin, 141 dropped, 17 untested
+  dropped:
+    selector ::backdrop: 1 rule, such as ::backdrop
+    selector :has(): 15 rules, such as .has-[>[data-slot=field]]:w-full:has(>[data-slot=field])  .has-[>svg]:grid-cols-[auto_1fr]:has(>svg)  .has-[>[data-slot=field]]:flex-col:has(>[data-slot=field])  .has-[>[data-slot=field-content]]:items-start:has(>[data-slot=field-content])  .has-[>[data-slot=checkbox-group]]:gap-3:has(>[data-slot=checkbox-group])  .has-[>[data-slot=radio-group]]:gap-3:has(>[data-slot=radio-group])  .has-[>svg]:gap-x-2:has(>svg)  .has-[>[data-slot=field]]:rounded-lg:has(>[data-slot=field])
+    @media (prefers-color-scheme): 12 rules, such as .dark:border-input  .dark:bg-destructive/20  .dark:bg-input/30  .dark:text-muted-foreground  .dark:after:mix-blend-lighten::after  .dark:hover:bg-destructive/30:hover  .dark:hover:bg-input/50:hover  .dark:hover:bg-muted/50:hover
+    property gap: 11 rules, such as .gap-0.5  .gap-1  .gap-1.5  .gap-2  .gap-3  .gap-4  .gap-5  .gap-[--spacing(var(--gap))]
+    selector :focus-visible: 8 rules, such as .focus-visible:z-10:focus-visible  .focus-visible:border-destructive/40:focus-visible  .focus-visible:border-ring:focus-visible  .focus-visible:outline-1:focus-visible  .focus-visible:outline-ring:focus-visible  .focus-visible:ring-[3px]:focus-visible  .focus-visible:ring-destructive/20:focus-visible  .focus-visible:ring-ring/50:focus-visible
+    selector ::file-selector-button: 7 rules, such as .file:inline-flex::file-selector-button  .file:h-6::file-selector-button  .file:border-0::file-selector-button  .file:bg-transparent::file-selector-button  .file:text-sm::file-selector-button  .file:font-medium::file-selector-button  .file:text-foreground::file-selector-button
+    selector :where(): 3 rules, such as abbr:where([title])  button,
+input:where([type='button']),
+input:where([type='reset']),
+input:where([type='submit'])  [hidden]:where(:not([hidden="until-found"]))
+    property font-variation-settings: 3 rules, such as html,
+:host  code,
+kbd,
+samp,
+pre  button,
+input,
+optgroup,
+select,
+textarea
+    property inset: 3 rules, such as .inset-0  .after:-inset-2::after  .after:inset-0::after
+    function min(): 3 rules, such as .rounded-[min(var(--radius-md)2c 10px)]  .rounded-[min(var(--radius-md)2c 12px)]  .data-[size=sm]:rounded-[min(var(--radius-md)2c 10px)][data-size="sm"]
+    property text-wrap: 2 rules, such as .text-balance  .md:text-pretty
+    property text-underline-offset: 2 rules, such as .underline-offset-4  .[&>a]:underline-offset-4>a
+    property aspect-ratio: 1 rule, such as .aspect-square
+    touch-action: none: 1 rule, such as .touch-none
+    property scroll-margin-top: 1 rule, such as .scroll-my-1
+    property scroll-margin-bottom: 1 rule, such as .scroll-my-1
+    function color-mix(): 1 rule, such as .hover:bg-[color-mix(in_oklch2c var(--secondary)2c var(--foreground)_5%)]:hover
+  untested:
+    selector ::-webkit-file-upload-button: 8 rules, such as ::-webkit-file-upload-button  .file:inline-flex::-webkit-file-upload-button  .file:h-6::-webkit-file-upload-button  .file:border-0::-webkit-file-upload-button  .file:bg-transparent::-webkit-file-upload-button  .file:text-sm::-webkit-file-upload-button  .file:font-medium::-webkit-file-upload-button  .file:text-foreground::-webkit-file-upload-button
+    property -webkit-text-size-adjust: 1 rule, such as html,
+:host
+    selector :-moz-focusring: 1 rule, such as :-moz-focusring
+    selector :-moz-ui-invalid: 1 rule, such as :-moz-ui-invalid
+    selector ::-webkit-inner-spin-button: 1 rule, such as ::-webkit-inner-spin-button,
+::-webkit-outer-spin-button
+    selector ::-webkit-search-decoration: 1 rule, such as ::-webkit-search-decoration
+    property svg: 1 rule, such as .*:[svg:not([class*='size-'])] > *
+
+  Nova's 558 class names: 354 Tailwind 3 builds, 204 it doesn't know, which are Tailwind 4's alone or need porting:
+    **:data-[slot=kbd]:isolate  **:data-[slot=kbd]:relative  **:data-[slot=kbd]:rounded-sm  **:data-[slot=kbd]:z-50  *:[a]:hover:text-foreground  *:[a]:underline  *:[a]:underline-offset-3  *:[img:first-child]:rounded-t-xl  *:[img:last-child]:rounded-b-xl  *:[span]:last:flex  *:[span]:last:gap-2  *:[span]:last:items-center  *:[svg:not([class*='size-'])]:size-4  *:[svg:not([class*='size-'])]:size-6  *:[svg]:row-span-2  *:[svg]:text-current  *:[svg]:translate-y-0.5  @container/card-header  @container/field-group  @md/field-group:*:data-[slot=field-label]:flex-auto  @md/field-group:*:w-auto  @md/field-group:flex-row  @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px  @md/field-group:has-[>[data-slot=field-content]]:items-start  @md/field-group:items-center  active:not-aria-[haspopup]:translate-y-px  active:ring-3  animate-caret-blink  aria-invalid:aria-checked:border-primary  aria-invalid:border-destructive  aria-invalid:ring-3  aria-invalid:ring-destructive/20  aria-label=  cn-input-otp  dark:aria-invalid:border-destructive/50  dark:aria-invalid:ring-destructive/40  dark:data-[active=true]:aria-invalid:ring-destructive/40  dark:data-active:bg-input/30  dark:data-active:border-input  dark:data-active:text-foreground  dark:data-checked:bg-primary  dark:data-checked:bg-primary-foreground  dark:data-unchecked:bg-foreground  dark:data-unchecked:bg-input/80  dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent  dark:group-data-[variant=line]/tabs-list:data-active:border-transparent  dark:has-aria-invalid:ring-destructive/40  dark:has-data-checked:bg-primary/10  dark:has-data-checked:border-primary/20  dark:in-data-[slot=tooltip-content]:bg-background/10  data-[active=true]:aria-invalid:border-destructive  data-[active=true]:aria-invalid:ring-destructive/20  data-[active=true]:ring-3  data-[side=bottom]:slide-in-from-top-2  data-[side=inline-end]:slide-in-from-left-2  data-[side=inline-end]:top-1/2!  data-[side=inline-start]:slide-in-from-right-2  data-[side=inline-start]:top-1/2!  data-[side=left]:slide-in-from-right-2  data-[side=left]:top-1/2!  data-[side=right]:slide-in-from-left-2  data-[side=right]:top-1/2!  data-[side=top]:slide-in-from-bottom-2  data-[size=sm]:has-data-[slot=card-footer]:pb-0  data-[size=sm]:rounded-[min(var(--radius-md),10px)]  data-[state=delayed-open]:animate-in  data-[state=delayed-open]:fade-in-0  data-[state=delayed-open]:zoom-in-95  data-[variant=destructive]:*:[svg]:text-destructive  data-active:bg-background  data-active:text-foreground  data-checked:bg-primary  data-checked:border-primary  data-checked:text-primary-foreground  data-closed:animate-out  data-closed:fade-out-0  data-closed:overflow-hidden  data-closed:zoom-out-95  data-disabled:cursor-not-allowed  data-disabled:opacity-50  data-disabled:pointer-events-none  data-horizontal:border-t  data-horizontal:border-t-transparent  data-horizontal:flex-col  data-horizontal:h-1  data-horizontal:h-2.5  data-horizontal:h-full  data-horizontal:h-px  data-horizontal:w-full  data-inset:pl-7  data-open:animate-in  data-open:bg-accent  data-open:fade-in-0  data-open:text-accent-foreground  data-open:zoom-in-95  data-placeholder:text-muted-foreground  data-popup-open:bg-accent  data-popup-open:text-accent-foreground  data-unchecked:bg-input  data-vertical:border-l  data-vertical:border-l-transparent  data-vertical:flex-col  data-vertical:h-full  data-vertical:items-stretch  data-vertical:min-h-40  data-vertical:self-stretch  data-vertical:w-1  data-vertical:w-2.5  data-vertical:w-auto  data-vertical:w-full  data-vertical:w-px  focus-visible:outline-hidden  focus-visible:ring-3  focus:**:text-accent-foreground  font-heading  gap-(--card-spacing)  group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)]  group-data-[size=default]/switch:data-unchecked:translate-x-0  group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)]  group-data-[size=sm]/switch:data-unchecked:translate-x-0  group-data-[spacing=0]/toggle-group:has-data-[icon=inline-end]:pr-1.5  group-data-[spacing=0]/toggle-group:has-data-[icon=inline-start]:pl-1.5  group-data-[variant=default]/tabs-list:data-active:shadow-sm  group-data-[variant=line]/tabs-list:data-active:after:opacity-100  group-data-[variant=line]/tabs-list:data-active:bg-transparent  group-data-[variant=line]/tabs-list:data-active:shadow-none  group-data-horizontal/tabs:after:bottom-[-5px]  group-data-horizontal/tabs:after:h-0.5  group-data-horizontal/tabs:after:inset-x-0  group-data-horizontal/tabs:h-8  group-data-horizontal/toggle-group:data-[spacing=0]:data-[variant=outline]:border-l-0  group-data-horizontal/toggle-group:data-[spacing=0]:data-[variant=outline]:first:border-l  group-data-horizontal/toggle-group:data-[spacing=0]:first:rounded-l-lg  group-data-horizontal/toggle-group:data-[spacing=0]:last:rounded-r-lg  group-data-vertical/tabs:after:-right-1  group-data-vertical/tabs:after:inset-y-0  group-data-vertical/tabs:after:w-0.5  group-data-vertical/tabs:flex-col  group-data-vertical/tabs:h-fit  group-data-vertical/tabs:justify-start  group-data-vertical/tabs:w-full  group-data-vertical/toggle-group:data-[spacing=0]:data-[variant=outline]:border-t-0  group-data-vertical/toggle-group:data-[spacing=0]:data-[variant=outline]:first:border-t  group-data-vertical/toggle-group:data-[spacing=0]:first:rounded-t-lg  group-data-vertical/toggle-group:data-[spacing=0]:last:rounded-b-lg  group-has-[:focus-visible]/field-label:data-checked:border-primary  group-has-[:focus-visible]/field-label:not-data-checked:border-input  group-has-data-[size=lg]/avatar-group:[&>svg]:size-5  group-has-data-[size=lg]/avatar-group:size-10  group-has-data-[size=sm]/avatar-group:[&>svg]:size-3  group-has-data-[size=sm]/avatar-group:size-6  group-has-data-horizontal/field:text-balance  group-has-disabled/field:opacity-50  group/avatar-group  group/card-header  group/field-content  group/radio-group-item  has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px  has-[>[data-slot=field]]:has-[:focus-visible]:ring-3  has-[>[data-slot=field]]:not-has-[:disabled,[data-disabled]]:hover:bg-muted/50  has-aria-invalid:border-destructive  has-aria-invalid:ring-3  has-aria-invalid:ring-destructive/20  has-data-[icon=inline-end]:pr-1  has-data-[icon=inline-end]:pr-1.5  has-data-[icon=inline-end]:pr-2  has-data-[icon=inline-start]:pl-1  has-data-[icon=inline-start]:pl-1.5  has-data-[icon=inline-start]:pl-2  has-data-[slot=alert-action]:pr-18  has-data-[slot=alert-action]:relative  has-data-[slot=alert-dialog-media]:gap-x-4  has-data-[slot=alert-dialog-media]:grid-rows-[auto_auto_1fr]  has-data-[slot=card-action]:grid-cols-[1fr_auto]  has-data-[slot=card-description]:grid-rows-[auto_auto]  has-data-[slot=card-footer]:pb-0  has-data-[slot=kbd]:pr-1.5  has-data-checked:bg-primary/5  has-data-checked:border-primary/30  has-disabled:opacity-50  hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]  hover:ring-3  in-data-[slot=button-group]:rounded-lg  in-data-[slot=tooltip-content]:bg-background/20  in-data-[slot=tooltip-content]:text-background  max-h-(--available-height)  not-data-[variant=destructive]:focus:**:text-accent-foreground  nth-last-2:-mt-1  origin-(--transform-origin)  outline-hidden  p-(--card-spacing)  peer/field-label  px-(--card-spacing)  py-(--card-spacing)  rounded-4xl  rounded-[min(var(--radius-md),10px)]  rounded-[min(var(--radius-md),12px)]  size?:  sm:group-data-[size=default]/alert-dialog-content:group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2  sm:group-data-[size=default]/alert-dialog-content:has-data-[slot=alert-dialog-media]:grid-rows-[auto_1fr]  supports-backdrop-filter:backdrop-blur-xs  transition-[color,box-shadow]  variant?:  w-(--anchor-width)
+
+2. Every utility Tailwind 3 makes, without variants: 28327 declarations, 22400 kept, 704 covered by a -webkit- twin, 4890 dropped, 333 untested
+  dropped:
+    property accent-color: 618 rules, such as .accent-accent  .accent-accent-foreground  .accent-accent-foreground/0  .accent-accent-foreground/10  .accent-accent-foreground/100
+    property border-inline-end-color: 617 rules, such as .border-e-accent  .border-e-accent-foreground  .border-e-accent-foreground/0  .border-e-accent-foreground/10  .border-e-accent-foreground/100
+    property border-inline-start-color: 617 rules, such as .border-s-accent  .border-s-accent-foreground  .border-s-accent-foreground/0  .border-s-accent-foreground/10  .border-s-accent-foreground/100
+    property caret-color: 617 rules, such as .caret-accent  .caret-accent-foreground  .caret-accent-foreground/0  .caret-accent-foreground/10  .caret-accent-foreground/100
+    rgb() with spaces or a slash: 336 rules, such as .divide-transparent/0 > :not([hidden]) ~ :not([hidden])  .divide-transparent/10 > :not([hidden]) ~ :not([hidden])  .divide-transparent/100 > :not([hidden]) ~ :not([hidden])  .divide-transparent/15 > :not([hidden]) ~ :not([hidden])  .divide-transparent/20 > :not([hidden]) ~ :not([hidden])
+    property scroll-margin-left: 140 rules, such as .-scroll-mx-0  .-scroll-mx-0.5  .-scroll-mx-1  .-scroll-mx-1.5  .-scroll-mx-10
+    property scroll-margin-right: 140 rules, such as .-scroll-mx-0  .-scroll-mx-0.5  .-scroll-mx-1  .-scroll-mx-1.5  .-scroll-mx-10
+    property scroll-margin-top: 140 rules, such as .-scroll-my-0  .-scroll-my-0.5  .-scroll-my-1  .-scroll-my-1.5  .-scroll-my-10
+    property scroll-margin-bottom: 140 rules, such as .-scroll-my-0  .-scroll-my-0.5  .-scroll-my-1  .-scroll-my-1.5  .-scroll-my-10
+    property inset: 85 rules, such as .-inset-0  .-inset-0.5  .-inset-1  .-inset-1.5  .-inset-1/2
+    property inset-inline-end: 85 rules, such as .-end-0  .-end-0.5  .-end-1  .-end-1.5  .-end-1/2
+    property inset-inline-start: 85 rules, such as .-start-0  .-start-0.5  .-start-1  .-start-1.5  .-start-1/2
+    property backdrop-filter: 73 rules, such as .backdrop-blur  .backdrop-blur-0  .backdrop-blur-2xl  .backdrop-blur-3xl  .backdrop-blur-lg
+    property margin-inline-end: 71 rules, such as .-me-0  .-me-0.5  .-me-1  .-me-1.5  .-me-10
+    property margin-inline-start: 71 rules, such as .-ms-0  .-ms-0.5  .-ms-1  .-ms-1.5  .-ms-10
+    property scroll-margin: 70 rules, such as .-scroll-m-0  .-scroll-m-0.5  .-scroll-m-1  .-scroll-m-1.5  .-scroll-m-10
+    property scroll-margin-inline-end: 70 rules, such as .-scroll-me-0  .-scroll-me-0.5  .-scroll-me-1  .-scroll-me-1.5  .-scroll-me-10
+    property scroll-margin-inline-start: 70 rules, such as .-scroll-ms-0  .-scroll-ms-0.5  .-scroll-ms-1  .-scroll-ms-1.5  .-scroll-ms-10
+    property scroll-padding-left: 70 rules, such as .scroll-px-0  .scroll-px-0.5  .scroll-px-1  .scroll-px-1.5  .scroll-px-10
+    property scroll-padding-right: 70 rules, such as .scroll-px-0  .scroll-px-0.5  .scroll-px-1  .scroll-px-1.5  .scroll-px-10
+    property scroll-padding-top: 70 rules, such as .scroll-py-0  .scroll-py-0.5  .scroll-py-1  .scroll-py-1.5  .scroll-py-10
+    property scroll-padding-bottom: 70 rules, such as .scroll-py-0  .scroll-py-0.5  .scroll-py-1  .scroll-py-1.5  .scroll-py-10
+    selector ::backdrop: 1 rule, such as ::backdrop
+    property scroll-padding: 35 rules, such as .scroll-p-0  .scroll-p-0.5  .scroll-p-1  .scroll-p-1.5  .scroll-p-10
+    property scroll-padding-inline-end: 35 rules, such as .scroll-pe-0  .scroll-pe-0.5  .scroll-pe-1  .scroll-pe-1.5  .scroll-pe-10
+    property scroll-padding-inline-start: 35 rules, such as .scroll-ps-0  .scroll-ps-0.5  .scroll-ps-1  .scroll-ps-1.5  .scroll-ps-10
+    property gap: 35 rules, such as .gap-0  .gap-0.5  .gap-1  .gap-1.5  .gap-10
+    column-gap, parsed and ignored: 35 rules, such as .gap-x-0  .gap-x-0.5  .gap-x-1  .gap-x-1.5  .gap-x-10
+    property row-gap: 35 rules, such as .gap-y-0  .gap-y-0.5  .gap-y-1  .gap-y-1.5  .gap-y-10
+    property padding-inline-end: 35 rules, such as .pe-0  .pe-0.5  .pe-1  .pe-1.5  .pe-10
+    property padding-inline-start: 35 rules, such as .ps-0  .ps-0.5  .ps-1  .ps-1.5  .ps-10
+    property text-decoration-color: 21 rules, such as .decoration-transparent/0  .decoration-transparent/10  .decoration-transparent/100  .decoration-transparent/15  .decoration-transparent/20
+    property border-start-end-radius: 18 rules, such as .rounded-e  .rounded-e-2xl  .rounded-e-3xl  .rounded-e-full  .rounded-e-lg
+    property border-end-end-radius: 18 rules, such as .rounded-e  .rounded-e-2xl  .rounded-e-3xl  .rounded-e-full  .rounded-e-lg
+    property border-start-start-radius: 18 rules, such as .rounded-s  .rounded-s-2xl  .rounded-s-3xl  .rounded-s-full  .rounded-s-lg
+    property border-end-start-radius: 18 rules, such as .rounded-s  .rounded-s-2xl  .rounded-s-3xl  .rounded-s-full  .rounded-s-lg
+    property contain: 8 rules, such as .contain-none  .contain-content  .contain-strict  .contain-size  .contain-inline-size
+    property text-decoration-thickness: 7 rules, such as .decoration-0  .decoration-1  .decoration-2  .decoration-4  .decoration-8
+    selector :where(): 3 rules, such as abbr:where([title])  button,
+input:where([type='button']),
+input:where([type='reset']),
+input:where([type='submit'])  [hidden]:where(:not([hidden="until-found"]))
+    property text-underline-offset: 6 rules, such as .underline-offset-0  .underline-offset-1  .underline-offset-2  .underline-offset-4  .underline-offset-8
+    property border-inline-end-width: 5 rules, such as .border-e  .border-e-0  .border-e-2  .border-e-4  .border-e-8
+    property border-inline-start-width: 5 rules, such as .border-s  .border-s-0  .border-s-2  .border-s-4  .border-s-8
+    property scroll-snap-type: 4 rules, such as .snap-none  .snap-x  .snap-y  .snap-both
+    property scroll-snap-align: 4 rules, such as .snap-start  .snap-end  .snap-center  .snap-align-none
+    property text-wrap: 4 rules, such as .text-wrap  .text-nowrap  .text-balance  .text-pretty
+    property font-variation-settings: 3 rules, such as html,
+:host  code,
+kbd,
+samp,
+pre  button,
+input,
+optgroup,
+select,
+textarea
+    property aspect-ratio: 3 rules, such as .aspect-auto  .aspect-square  .aspect-video
+    unit dvh: 3 rules, such as .h-dvh  .max-h-dvh  .min-h-dvh
+    unit lvh: 3 rules, such as .h-lvh  .max-h-lvh  .min-h-lvh
+    unit svh: 3 rules, such as .h-svh  .max-h-svh  .min-h-svh
+    property overscroll-behavior: 3 rules, such as .overscroll-auto  .overscroll-contain  .overscroll-none
+    property overscroll-behavior-y: 3 rules, such as .overscroll-y-auto  .overscroll-y-contain  .overscroll-y-none
+    property overscroll-behavior-x: 3 rules, such as .overscroll-x-auto  .overscroll-x-contain  .overscroll-x-none
+    property scroll-snap-stop: 2 rules, such as .snap-normal  .snap-always
+    property scroll-behavior: 2 rules, such as .scroll-auto  .scroll-smooth
+    property forced-color-adjust: 2 rules, such as .forced-color-adjust-auto  .forced-color-adjust-none
+    position: sticky: 1 rule, such as .sticky
+    float: inline-start: 1 rule, such as .float-start
+    float: inline-end: 1 rule, such as .float-end
+    clear: inline-start: 1 rule, such as .clear-start
+    clear: inline-end: 1 rule, such as .clear-end
+    -webkit-line-clamp: none: 1 rule, such as .line-clamp-none
+    display: flow-root: 1 rule, such as .flow-root
+    display: contents, parsed and ignored: 1 rule, such as .contents
+    unit dvw: 1 rule, such as .w-dvw
+    unit lvw: 1 rule, such as .w-lvw
+    unit svw: 1 rule, such as .w-svw
+    touch-action: none: 1 rule, such as .touch-none
+    break-before: all: 1 rule, such as .break-before-all
+    break-after: all: 1 rule, such as .break-after-all
+    grid-template-columns: subgrid: 1 rule, such as .grid-cols-subgrid
+    grid-template-rows: subgrid: 1 rule, such as .grid-rows-subgrid
+    overflow: clip: 1 rule, such as .overflow-clip
+    overflow-x: clip: 1 rule, such as .overflow-x-clip
+    overflow-y: clip: 1 rule, such as .overflow-y-clip
+    white-space: break-spaces: 1 rule, such as .whitespace-break-spaces
+  untested:
+    property -webkit-backdrop-filter: 73 rules, such as .backdrop-blur  .backdrop-blur-0  .backdrop-blur-2xl  .backdrop-blur-3xl  .backdrop-blur-lg
+    property -webkit-margin-end: 71 rules, such as .-me-0  .-me-0.5  .-me-1  .-me-1.5  .-me-10
+    property -webkit-margin-start: 71 rules, such as .-ms-0  .-ms-0.5  .-ms-1  .-ms-1.5  .-ms-10
+    property -webkit-column-gap: 35 rules, such as .gap-x-0  .gap-x-0.5  .gap-x-1  .gap-x-1.5  .gap-x-10
+    property -webkit-padding-end: 35 rules, such as .pe-0  .pe-0.5  .pe-1  .pe-1.5  .pe-10
+    property -webkit-padding-start: 35 rules, such as .ps-0  .ps-0.5  .ps-1  .ps-1.5  .ps-10
+    property -webkit-scroll-snap-type: 4 rules, such as .snap-none  .snap-x  .snap-y  .snap-both
+    selector ::-webkit-file-upload-button: 1 rule, such as ::-webkit-file-upload-button
+    property -moz-osx-font-smoothing: 2 rules, such as .antialiased  .subpixel-antialiased
+    property -webkit-text-size-adjust: 1 rule, such as html,
+:host
+    selector :-moz-focusring: 1 rule, such as :-moz-focusring
+    selector :-moz-ui-invalid: 1 rule, such as :-moz-ui-invalid
+    selector ::-webkit-inner-spin-button: 1 rule, such as ::-webkit-inner-spin-button,
+::-webkit-outer-spin-button
+    selector ::-webkit-search-decoration: 1 rule, such as ::-webkit-search-decoration
+
+3. Each variant on underline:
+  hover                      kept
+  focus                      kept
+  focus-visible              dropped, selector :focus-visible
+  focus-within               kept
+  active                     kept
+  visited                    kept
+  disabled                   kept
+  enabled                    kept
+  checked                    kept
+  indeterminate              kept
+  required                   kept
+  invalid                    kept
+  read-only                  kept
+  placeholder-shown          kept
+  empty                      kept
+  target                     kept
+  first                      kept
+  last                       kept
+  only                       kept
+  odd                        kept
+  even                       kept
+  first-of-type              kept
+  group-hover                kept
+  peer-checked               kept
+  placeholder                kept
+  file                       untested, selector ::-webkit-file-upload-button
+  marker                     dropped, selector ::marker
+  selection                  kept
+  before                     kept
+  after                      kept
+  open                       kept
+  aria-checked               kept
+  aria-[expanded=true]       kept
+  data-[state=open]          kept
+  has-[:checked]             dropped, selector :has()
+  group-has-[:checked]       dropped, selector :has()
+  supports-[display:grid]    kept
+  motion-safe                kept
+  motion-reduce              kept
+  contrast-more              dropped, @media (prefers-contrast)
+  forced-colors              dropped, @media (forced-colors)
+  dark                       dropped, @media (prefers-color-scheme)
+  print                      kept
+  portrait                   kept
+  landscape                  kept
+  rtl                        dropped, selector :where()
+  ltr                        dropped, selector :where()
+  sm                         kept
+  md                         kept
+  lg                         kept
+  xl                         kept
+  2xl                        kept
+  max-md                     kept
+  min-[400px]                kept
+  *                          kept

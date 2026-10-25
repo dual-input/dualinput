@@ -93,8 +93,9 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 ## The kit and Dual Input's palette are one package in this repository
 
-- **Decided:** the kit's components, its reset, its stand-ins for the sim's globals, and Dual Input's palette are one npm package in this repository, which our code imports by its name.
-  The palette is a second entry point of the package: the colors as hex, the CSS variables, and the Tailwind config that builds them on msfs-tailwind.
+- **Decided:** the kit's components, its reset, its stand-ins for the sim's globals, and Dual Input's palette are one npm package in this repository, `@dualinput/ui`, in `src/packages/ui/`, which our code imports by that name.
+  `src/packages/` holds packages that are no tier's units, and the kit is its first.
+  The palette is a second entry point of the package, `@dualinput/ui/palette`: the colors as hex, the CSS variables, and the Tailwind config that builds them on msfs-tailwind.
   So the banner and the desktop app's window take it without the components.
   A feature's EFB part imports the kit directly, so the code map's rule on what a part imports names the kit beside its shell and the messages' types ([the code map's rules](../architecture/02-code-map.md#tiers)).
   Settled by the user on 2026-10-25.
@@ -102,7 +103,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - The kit and the palette change with every screen stage 11b builds and every later stage that adds an EFB part, and a stage is reviewed as one diff of this repository ([working a stage](../build/plan.md#working-a-stage)).
   - Nothing but Dual Input uses them (user, 2026-10-25).
   - A package imported by its name moves to a repository of its own without a rewrite, if anything else ever needs it.
-- **Leaves out:** the package's folder and name.
+  - npm's `@dualinput/` scope says whose package it is, where a bare `ui` would read as a third-party library, and npm's registry already has one by that name, `ui` 0.2.4 as of 2026-10-25; the package is never published, so the scope needs no account (user, 2026-10-25).
+- **Leaves out:** whether some of our engines or tools belong in `src/packages/` too, which a later review of the workspace may find (user, 2026-10-25).
 
 ## Our pages import FSComponent from `@microsoft/msfs-sdk` as npm ships it
 

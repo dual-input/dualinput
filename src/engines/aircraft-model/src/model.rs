@@ -437,6 +437,36 @@ impl Model {
         })
     }
 
+    /// Each mesh that shows in a scene as the model is posed, by the node it hangs on, with
+    /// its triangles in that node's own space, which `world` places in the aircraft's frame.
+    /// The core only casts into the model, so a tool reads this, as tools/figure-viewer draws
+    /// the 58P's cockpit around the figure.
+    pub fn shown(&self, scene: Scene) -> Vec<(u32, Vec<[Vec3; 3]>)> {
+        let Some(posed) = self.scenes[scene as usize].as_ref() else {
+            return Vec::new();
+        };
+        let large = self.large();
+        posed
+            .instances
+            .iter()
+            .filter(|inst| {
+                posed
+                    .shown
+                    .get(inst.node as usize)
+                    .copied()
+                    .unwrap_or(false)
+            })
+            .filter_map(|inst| {
+                let record = *posed.geometries.get(inst.geometry as usize)?;
+                let mesh = GeometryView { large, record };
+                let triangles = (0..record.triangles)
+                    .filter_map(|i| mesh.triangle(i))
+                    .collect();
+                Some((inst.node, triangles))
+            })
+            .collect()
+    }
+
     /// Whether `point`, in the aircraft's frame, is inside the interior model's box at rest.
     pub fn inside(&self, point: Vec3) -> bool {
         self.meta.interior.as_ref().is_some_and(|m| {

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figure viewer</title>
+<style>
+  :root {
+    --bg: #15171b; --panel: #1d2026; --line: #2c3038; --text: #e4e6ea; --dim: #9aa1ad;
+    --accent: #5b9cf0; --warn: #f0a33c; --over: #ef5b55; --ok: #59b876;
+  }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font: 12px/1.45 system-ui, sans-serif; }
+  #view { position: fixed; inset: 0 340px 0 0; }
+  #view canvas { display: block; }
+  #hud { position: fixed; left: 10px; bottom: 10px; padding: 6px 9px; background: rgba(21, 23, 27, 0.82); border-radius: 5px; font: 11px/1.45 ui-monospace, Consolas, monospace; white-space: pre; pointer-events: none; }
+  #panel { position: fixed; top: 0; right: 0; bottom: 0; width: 340px; box-sizing: border-box; overflow-x: hidden; overflow-y: auto; background: var(--panel); border-left: 1px solid var(--line); padding: 10px 12px 40px; }
+  #panel select { max-width: 100%; min-width: 0; }
+  h1 { font-size: 14px; margin: 0 0 2px; }
+  h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim); margin: 14px 0 6px; font-weight: 600; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0; }
+  .row > label { flex: 0 0 auto; color: var(--dim); }
+  .wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+  button, select, input[type=number] { background: #262a31; color: var(--text); border: 1px solid var(--line); border-radius: 4px; font: inherit; padding: 3px 7px; }
+  button { cursor: pointer; }
+  button:hover { border-color: #3d434d; }
+  button.on { background: #2b4366; border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #0d1626; font-weight: 600; }
+  button:disabled { opacity: 0.45; cursor: default; }
+  input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+  input[type=number] { width: 66px; padding: 2px 4px; }
+  #status { margin: 6px 0; padding: 6px 8px; border-radius: 4px; background: #232730; color: var(--dim); }
+  #status.pending { background: #3a2f1c; color: #f3cf96; }
+  #status.error { background: #3d1f1f; color: #f4b0ac; white-space: pre-wrap; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { text-align: right; padding: 2px 4px; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--dim); font-weight: 500; }
+  td.over { color: var(--over); font-weight: 600; }
+  td.ok { color: var(--ok); }
+  details { border-top: 1px solid var(--line); padding: 3px 0; }
+  summary { cursor: pointer; padding: 3px 0; color: var(--text); }
+  .num { display: grid; grid-template-columns: 92px 1fr 66px; align-items: center; gap: 6px; margin: 3px 0; }
+  .num label { color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .num.changed label { color: var(--warn); }
+  .note { color: var(--dim); margin: 4px 0; }
+</style>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+    }
+  }
+</script>
+</head>
+<body>
+<div id="view"></div>
+<div id="hud">loading the 58P…</div>
+<div id="panel">
+  <h1>Figure viewer</h1>
+  <div class="note">Avatars' figure from figure.json and model.ts, posed by what <code>Figure</code> wrote, frame by frame, in the Baron 58P.</div>
+  <div id="status">loading…</div>
+
+  <h2>Script</h2>
+  <div class="wrap" id="scripts"></div>
+  <div class="row" style="flex-wrap: nowrap">
+    <button id="play">Pause</button>
+    <input type="range" id="time" min="0" max="0" value="0">
+    <span id="clock">0.00s</span>
+  </div>
+  <div class="row">
+    <label>Speed</label>
+    <select id="speed"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="1" selected>1×</option></select>
+    <label><input type="checkbox" id="loop" checked> loop</label>
+    <label><input type="checkbox" id="targets" checked> targets</label>
+  </div>
+
+  <h2>View</h2>
+  <div class="wrap" id="views"></div>
+  <div class="row">
+    <label>Outside</label>
+    <select id="exterior"><option value="ghost" selected>ghost</option><option value="solid">solid</option><option value="off">off</option></select>
+    <label><input type="checkbox" id="cut"> cut the left wall away</label>
+  </div>
+
+  <h2>Figure</h2>
+  <div class="row">
+    <label>Detail</label>
+    <select id="lod"></select>
+    <label>Color</label>
+    <select id="color"></select>
+  </div>
+  <div class="row">
+    <label>Shows</label>
+    <select id="shows">
+      <option value="">as the script feeds it</option>
+      <option value="13">this pilot's own: no head, hands faded</option>
+      <option value="7">every part</option>
+      <option value="1">the body alone</option>
+    </select>
+  </div>
+
+  <h2>Cost</h2>
+  <table id="cost"></table>
+  <div class="note" id="frame-cost"></div>
+
+  <h2>Sizes</h2>
+  <div class="note">A change redraws the figure at once. Its poses stay those <code>Figure</code> ran with until you apply, which writes figure.json and runs the scripts again.</div>
+  <div class="row">
+    <button id="apply" class="primary" disabled>Apply</button>
+    <button id="revert" disabled>Revert</button>
+  </div>
+  <div id="sizes"></div>
+
+  <h2>Seat</h2>
+  <div class="note">The left seat, as a profile's <code>seats</code> lays it out. The 58P's profile has none yet, so it starts at the mirror of the cockpit's <code>PILOT_1</code> node. Apply runs the scripts in it.</div>
+  <div id="seat"></div>
+  <div class="row"><button id="seat-reset">Back to the starting seat</button></div>
+</div>
+<script type="module" src="/tools/figure-viewer/page/app.js"></script>
+</body>
+</html>

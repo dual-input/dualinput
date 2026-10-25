@@ -471,6 +471,58 @@ fn a_cast_meets_the_panel_through_the_invisible_shell_and_a_hidden_node_lets_it_
 }
 
 #[test]
+fn what_shows_is_each_visible_mesh_by_its_node_in_its_own_space() {
+    let mut model = model();
+    let panel = model
+        .vars()
+        .iter()
+        .position(|v| v.name == "test_PanelShown")
+        .unwrap();
+    let names = |model: &Model| {
+        let mut names: Vec<String> = model
+            .shown(Scene::Interior)
+            .iter()
+            .map(|(node, triangles)| {
+                assert_eq!(triangles.len(), 12, "a box's 12 triangles");
+                model.node_name(Scene::Interior, *node).unwrap().to_string()
+            })
+            .collect();
+        names.sort();
+        names
+    };
+    model.set(panel, 1.0);
+    model.pose();
+    assert_eq!(
+        names(&model),
+        [
+            "Panel",
+            "Switch_Battery",
+            "YokeButton_L",
+            "Yoke_L",
+            "Yoke_R"
+        ],
+        "the invisible shell stays out"
+    );
+    // The switch's box is 2cm by 6cm about its node, which sits on the panel.
+    let (node, switch) = model
+        .shown(Scene::Interior)
+        .into_iter()
+        .find(|(n, _)| model.node_name(Scene::Interior, *n) == Some("Switch_Battery"))
+        .unwrap();
+    assert!(switch.iter().flatten().all(|p| p[1].abs() <= 0.03));
+    assert_eq!(
+        model.world(Scene::Interior, node).unwrap().columns[3],
+        [0.3, 0.8, 0.95]
+    );
+    model.set(panel, 0.0);
+    model.pose();
+    assert!(
+        !names(&model).contains(&"Panel".to_string()),
+        "the panel hides"
+    );
+}
+
+#[test]
 fn a_switch_moves_with_its_variable_and_the_cast_follows_it() {
     let mut model = model();
     let battery = model

@@ -67,7 +67,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - The sim's look would have reached only the EFB app: it comes from `efb_os.css`, which the EFB's document loads, while the banner is an in-game panel with a page of its own, and no run has had that page link `efb_os.css` ([interface log][efb-styles]).
   - Tailwind 4's output and shadcn's theme draw nothing in Coherent GT ([architecture log][p13]), and a second front end for the desktop app's two screens would cost a second set of components (user, 2026-10-25).
   - A page of FSComponent components styled with Tailwind 3 passed its checks and drew in an EFB app of ours, and in Edge, the engine WebView2 embeds ([interface log][p19]; [interface log][p18]).
-- **Leaves out:** where the kit lives among our packages.
+- **Leaves out:** what [the kit's package](#the-kit-and-dual-inputs-palette-are-one-package-in-this-repository) leaves out.
 
 ## The banner draws its few lines in plain markup, with the kit's colors and no framework
 
@@ -81,12 +81,26 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 ## Tailwind 3 reaches the kit through msfs-tailwind, a preset of our own for Coherent GT
 
 - **Decided:** a Tailwind 3 preset of our own, msfs-tailwind, writes each color as `rgba()` around a custom property's RGB triplet, has autoprefixer add the `-webkit-` forms, and turns off the utilities Coherent GT drops.
-  Stage 11b builds it in this tree and moves it to a private repository, `dual-input/msfs-tailwind`, at its close ([build plan](../build/plan.md#11b-the-apps)).
+  It lives in a private repository of its own, `dual-input/msfs-tailwind`, from its first commit in stage 11b, and Dual Input installs it with npm from GitHub, pinned to a tag ([build plan](../build/plan.md#11b-the-apps)).
   Settled by the user on 2026-10-25.
 - **Because:**
+  - It's a package for anyone building for Coherent GT, not a part of Dual Input (user, 2026-10-25).
+  - It changes only when a probe finds something new about the engine, so a tag there and a bump here cost little.
   - With colors written that way and autoprefixer's `-webkit-` forms, Coherent GT keeps 82% of Tailwind 3's utilities, and every common variant but `focus-visible` and `has-` ([interface log][p17]).
   - Tailwind 3 writes a color as `rgb()` with spaces, which the engine drops, and Tailwind 4 writes its CSS in `@layer` and oklch, which it drops whole ([architecture log][p13]).
-- **Leaves out:** how Dual Input installs it from its private repository, such as npm's GitHub dependency pinned to a tag, and whether it later goes public.
+- **Leaves out:** where the lists of what p14 measured Coherent GT keeping live, so that our Coherent GT check and msfs-tailwind's test read one copy; and whether it later goes public.
+
+## The kit and Dual Input's palette are one package in this repository
+
+- **Decided:** the kit's components, its reset, its stand-ins for the sim's globals, and Dual Input's palette are one npm package in this repository, which our code imports by its name.
+  The palette is a second entry point of the package: the colors as hex, the CSS variables, and the Tailwind config that builds them on msfs-tailwind.
+  So the banner and the desktop app's window take it without the components.
+  Settled by the user on 2026-10-25.
+- **Because:**
+  - The kit and the palette change with every screen stage 11b builds and every later stage that adds an EFB part, and a stage is reviewed as one diff of this repository ([working a stage](../build/plan.md#working-a-stage)).
+  - Nothing but Dual Input uses them (user, 2026-10-25).
+  - A package imported by its name moves to a repository of its own without a rewrite, if anything else ever needs it.
+- **Leaves out:** the package's folder and name, and whether a feature's EFB part imports it directly, which the map's rule for a part's imports would then name, or only through its shell.
 
 ## Our pages import FSComponent from `@microsoft/msfs-sdk` as npm ships it
 

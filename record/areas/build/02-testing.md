@@ -189,6 +189,8 @@ One bench case drives one core through a busy flight at full rate: sim inputs re
 It measures the queue against the code map's one sim frame at p99, 11.2ms ([budgets](../architecture/02-code-map.md#budgets)), and replays the run to the same outputs.
 p10's loop ran a 600s capture of a flying machine that hosted traffic at EGLL, with made-up inputs at a session's rates beside it, and an input waited 92µs in the queue at p99, the loop was busy 0.5% of the time, and two replays matched the live run's outputs (measured on our development machine, 2026-10-16, [architecture log][p10]); the bench case repeats that load with the stand-in's inputs and v1's write functions.
 It runs on our development machine, since it measures timing, at the kernel's stage and again once state sync's write functions run.
+The second run goes beside MSFS on the same PC, flying the iniBuilds A350 at a busy airport with traffic, in focus, so the core shares the CPU with a heavy sim at the same priority, as a pilot's core does (user, 2026-10-25).
+The bench case gives the core its work, and the A350 only loads the PC, so it needs no profile of its own; the 58P, v1's first profile, loads the sim too lightly to show the sharing.
 
 At the kernel's stage, before the sim service, the sandbox, and the network exist, a test unit stands in for them, on the same load as p10's (user, 2026-10-20):
 

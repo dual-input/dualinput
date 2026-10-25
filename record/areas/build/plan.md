@@ -515,7 +515,8 @@ Needs: 11b and 13.
 
 Tests:
 
-- From stage 3: [the loop under load](02-testing.md#the-loop-under-load) again, by hand, with the stand-in's sim inputs and state sync's write functions in place of the test unit's stand-ins for them.
+- From stage 3: [the loop under load](02-testing.md#the-loop-under-load) again, by hand, with the stand-in's sim inputs and state sync's write functions in place of the test unit's stand-ins for them, beside MSFS flying the iniBuilds A350, reading the queue at p99 against 11.2ms (user, 2026-10-25).
+- In this stage's session in the sim: the real core's loop stats after the 58P flight, its slowest inputs and its queue at p99 against 11.2ms, beside the real sim (user, 2026-10-25).
 - From stage 4, in this stage's session in the sim: a group on one connection keeps hearing an event while a group on another is cleared ([a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load)).
 
 ## 15 Installing and updating

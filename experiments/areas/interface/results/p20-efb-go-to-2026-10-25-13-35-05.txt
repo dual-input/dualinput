@@ -1,0 +1,27 @@
+p20-efb-go-to, 2026-10-25T13:35:10.831Z
+
+mainUi (coui://html_UI/Global/mainUI.html): {"title":"mainUi","engine":"object","Coherent":"undefined","RegisterViewListener":"undefined","store":"object"}
+the EFB's document (coui://html_ui/efb_ui/efb_os/efb_ui.html): {"title":"Electronic Flight Bag","engine":"object","Coherent":"object","RegisterViewListener":"function","store":"undefined"}
+the toolbar's document (coui://html_UI/Global/Panel.html): {"title":"Toolbar","engine":"object","Coherent":"undefined","RegisterViewListener":"undefined","store":"object"}
+the world map's atlas page (coui://html_UI/Global/atlas.html): {"title":"atlas","engine":"object","Coherent":"undefined","RegisterViewListener":"undefined","store":"object"}
+Before: the departure was TT:AIRPORTEK.KSEA.name; this run chooses KPDX.
+
+The airport:
+  the EFB's document, engine.trigger bare: the search (sent) answered nothing in 4s.
+  the EFB's document, RegisterViewListener: registering
+  the listener is ready.
+  the EFB's document, its own view listener: the search (sent) answered nothing in 4s.
+  the toolbar's document, engine.trigger bare: the search (sent) answered nothing in 4s.
+  the world map's atlas page, engine.trigger bare: the search (sent) answered nothing in 4s.
+  the control, mainUi as p07 chose it:
+  mainUi, engine.trigger bare: the search answered 1 results, KPDX at index 0, database SEARCH.
+  mainUi, engine.trigger bare: the departure became KPDX in 330ms, as mainUi read it: 145 stands.
+
+The stand, a different one from each document:
+  the EFB's document: requestData didn't select SW PARKING 14 -- RAMP CARGO (ID 125); the call rejected: NoSuchMethod: requestData not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result..
+  the toolbar's document: requestData selected PARKING 11 -- RAMP CARGO (ID 73) in 100ms, as mainUi read it; the call resolved.
+  the world map's atlas page: requestData selected GATE E 7 -- GATE MEDIUM (ID 4) in 103ms, as mainUi read it; the call resolved.
+  the control, mainUi: requestData selected GATE B 5 -- GATE MEDIUM (ID 34) in 101ms, as mainUi read it; the call resolved.
+
+After: {"isAirport":true,"title":"TT:AIRPORTEK.KPDX.name","stand":"GATE B 5 -- GATE MEDIUM","taxiIndex":34,"stands":145}
+Screenshot: ERR the sim isn't in front, so nothing was saved

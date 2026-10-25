@@ -69,7 +69,7 @@ The menu script may also choose the airport by its world location rather than th
 
 **Affects:** the apps' [tentative decisions](decisions.md), and Go to in [the v1 scope](../product/03-v1-scope.md#preflight).
 
-**Evidence:** `results/p20-efb-go-to-2026-10-25-13-36-25.txt`, the run with every route, and `results/p20-efb-go-to-2026-10-25-13-32-29.txt` and `-13-33-42.txt`, the two before it.
+**Evidence:** `results/p20-efb-go-to-2026-10-25-13-36-25.txt`, the run with every route, and `results/p20-efb-go-to-2026-10-25-13-32-29.txt`, `-13-33-42.txt`, and `-13-35-05.txt`, the three before it.
 
 ## 2026-10-25: Inside an EFB app, clicks, the wheel, hover, focus, and typing reach our elements and a 127.0.0.1 frame as mouse and keyboard events, Geist loads as TTF but not WOFF2, and p18's page renders there with Tailwind 3
 

@@ -15,6 +15,7 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/pointer-sync/01-pointer-sync.md](areas/pointer-sync/01-pointer-sync.md): how a press or drag on a synced display reaches the crew's displays as it happens and plays there, and when a display takes no press because it can't sync one.
 - [areas/interface/log.md](areas/interface/log.md): what our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner, and reaching the sim's menu to set the world map.
 - [areas/interface/01-apps.md](areas/interface/01-apps.md): how the EFB app, the banner, and the desktop app connect to the core and to each feature's part, how any client changes a setting, and what trouble in each component raises.
+- [areas/interface/decisions.md](areas/interface/decisions.md): what the apps' design has settled for now about their look and the kit our pages in the sim draw with, and on what findings.
 - [areas/network/log.md](areas/network/log.md): what we found about connecting the crew's machines, directly or through our relay.
 - [areas/network/01-between-machines.md](areas/network/01-between-machines.md): how a session's cores reach each other through iroh, our relays, and the backend, and how each channel travels between them.
 - [areas/network/02-units.md](areas/network/02-units.md): the network crate's and the transport's interfaces, what runs on the loop and what at the edge, the backend on D1, and our relays and their configuration.

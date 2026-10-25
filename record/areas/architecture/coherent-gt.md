@@ -2,7 +2,7 @@
 
 What MSFS 2024's Coherent GT, the engine of its cockpit panels, EFB, toolbar, in-game panels, and menu, parses, provides, and draws.
 Its JavaScript was measured on MSFS 2024 SunRise 12.2.282174.999 in five documents on 2026-10-09: mainUi, the EFB's, the toolbar's, a cockpit panel, and an in-game panel of ours ([architecture log][p09]).
-Its CSS was measured on MSFS 2024, Steam build 26058316, in mainUi, the EFB's document, and the toolbar's on 2026-10-25 ([architecture log][p13]).
+Its CSS was measured on MSFS 2024, Steam build 26058316, in mainUi, the EFB's document, and the toolbar's on 2026-10-25, against Chromium 152 ([architecture log][p14]).
 Its user agent says Chrome 49 and its makers last compared it to Safari 10.1.2, but its features match neither ([architecture log][research]), so these lists are the rule.
 Why our code is compiled to `es2017` is in the [spine](01-spine.md#compiling-our-code-in-the-sim).
 
@@ -51,29 +51,38 @@ TypeScript's DOM types declare each missing API, so code that uses one type-chec
 ## CSS
 
 The engine drops a declaration it can't read, and a whole rule when its selector or at-rule is one it can't read, with no error.
+p14 tested all of CSS as MDN's mdn-data 2.37.2 lists it, and its report names every item the engine drops that Chromium 152 keeps ([architecture log][p14]); this table gives the families.
 Tailwind 4's output sits in `@layer`s and gives its colors in oklch, so none of it draws here ([architecture log][p13]).
 
 | | Draws | Dropped |
 | --- | --- | --- |
-| Colors | Hex, with or without alpha; `rgb()`, `rgba()`, and `hsl()` with commas; `color(display-p3 ...)`; `currentColor`; a custom property holding a color, or an RGB triplet read as `rgba(var(--t), 0.5)` | `rgb()` and `hsl()` with spaces, `oklch()`, `lab()`, `hwb()`, `color-mix()`, relative colors, `light-dark()` |
-| Spacing | `grid-gap` and `grid-column-gap` in a grid, and margins | `gap` and `column-gap`, in a grid and in a flex row, though `CSS.supports` says yes to `column-gap` |
-| Layout | Flexbox, `inline-flex`, grid with `repeat()` and `minmax()`, `place-items`, `box-sizing`, `position: -webkit-sticky` | `aspect-ratio`, `inset`, logical properties such as `padding-inline` and `margin-inline-start`, `position: sticky`, `display: contents`, `display: flow-root` |
-| Values | `calc()`, custom properties with fallbacks, `rem` at 16px, `em`, `vw`, which rounds down to a whole pixel in the EFB's and the toolbar's documents | `min()`, `max()`, `clamp()`, `dvh`, container query units |
-| At-rules | `@media (min-width: ...)`, `@supports`, `@keyframes` | `@layer`, `@property`, `@container`, nesting, `@media (width >= ...)` |
-| Selectors | `:not()` with a list, `:focus-within`, attribute selectors, `::before`, `::placeholder`, `::selection`, `::-webkit-scrollbar` | `:is()`, `:where()`, `:has()`, `:focus-visible`, `::marker` |
-| Effects | `border-radius`, `box-shadow`, `filter` with `blur()` or `drop-shadow()`, linear and radial gradients, `-webkit-mask-image`, `mix-blend-mode`, `transform`, `transition`, `opacity` as a number, `outline-offset` under an outline | `backdrop-filter` and `-webkit-backdrop-filter`, `clip-path`, conic gradients, the `translate`, `scale`, and `rotate` properties, `opacity` as a percent |
-| Text | `font-variant-numeric`, `font-feature-settings`, `letter-spacing`, `text-overflow: ellipsis`, `-webkit-line-clamp` | `text-wrap`, `line-clamp`, `text-underline-offset`, `text-decoration-thickness`, `overflow-wrap: anywhere`, `hyphens` |
-| Forms and interaction | `-webkit-appearance`, `-webkit-user-select`, `cursor`, `object-fit`, `will-change` | `appearance`, `user-select`, `accent-color`, `caret-color`, `field-sizing`, `touch-action`, `scrollbar-width`, `scrollbar-gutter`, `overscroll-behavior`, `color-scheme`, `contain` |
+| Colors | Hex of 3 to 8 digits; named colors, `transparent`, and `currentcolor`; `rgb()`, `rgba()`, `hsl()`, and `hsla()` with commas and a bare number for the hue; `color()`; a custom property holding a color, or an RGB triplet read as `rgba(var(--t), 0.5)` | `rgb()` and `hsl()` with spaces, a hue in `deg`, an alpha as a percent, `oklch()`, `oklab()`, `lab()`, `lch()`, `hwb()`, `color-mix()`, relative colors, `light-dark()`, and the system colors `Canvas` and `CanvasText` |
+| Spacing | `grid-gap`, `grid-row-gap`, and `grid-column-gap` in a grid; margins, put between flex items with `* + *` or `:not(:first-child)` | `gap`, `row-gap`, and `column-gap`, in a grid and in a flex row, though `CSS.supports` says yes to `column-gap` |
+| Flexbox | Wrapping, `order`, reversed directions, `justify-content` with `flex-start`, `flex-end`, `center`, `space-between`, `space-around`, and `space-evenly`, `align-items`, `align-self`, `align-content`, `flex` and its parts, and `-webkit-box` | `justify-content: end`, which parses and packs at the start |
+| Grid | Tracks with `repeat()`, `auto-fill`, `auto-fit`, `minmax()`, `fit-content()`, and named lines; `grid-template-areas`; `grid-auto-flow: dense`; spans and negative lines; `place-items`, `place-self`, `place-content`, `justify-items`, and `justify-self` | `subgrid` |
+| Layout | Floats; `position` but `sticky`, which parses only as `-webkit-sticky`; `inline-block`; `columns`; `writing-mode`; `direction`; `box-sizing`; widths of `fit-content`, `max-content`, `min-content`, and `-webkit-fill-available` | `inset` and every other logical property, such as `padding-inline` and `margin-block`; `aspect-ratio`; `display: contents`, `flow-root`, and `ruby`; `overflow: clip`; `contain` and `content-visibility`; container queries; anchor positioning |
+| Values | `calc()`, nested too; custom properties with nested fallbacks; `initial`, `inherit`, `unset`, and `revert`; `!important`; `px`, `em`, `rem` at 16px, `ex`, `ch`, `%`, `vw`, `vh`, `vmin`, `vmax`, and the absolute lengths but `Q`; `deg`, `grad`, `rad`, and `turn`; `s` and `ms`; `fr` | `min()`, `max()`, `clamp()`, and every other math function; `env()`; `revert-layer`; `stretch`; the newer viewport units, such as `dvh` and `svh`; container units; `lh`, `rlh`, `cap`, and `ic`; the root font units but `rem` |
+| At-rules | `@media` with `min-` and `max-` features, `@supports` but its `selector()`, `@keyframes` and `@-webkit-keyframes`, `@font-face`, `@import`, `@namespace`, and `@page` | `@layer`, `@property`, `@container`, `@scope`, `@starting-style`, `@counter-style`, `@font-feature-values`, `@font-palette-values`, `@position-try`, `@view-transition`, `@supports selector()`, nesting, media range syntax, `not` and `or` inside a media condition, and `calc()` in a media query |
+| Selectors | Attribute selectors; the combinators; `:not()` with lists and complex selectors; `:nth-child()` with `of`; `:-webkit-any()`; `:hover`, `:focus`, `:focus-within`, `:checked`, `:disabled`, `:empty`, `:placeholder-shown`, `:dir()`, and `:lang()`; `::before`, `::after`, `::placeholder`, `::selection`, `::first-letter`, and `::-webkit-scrollbar` | `:is()`, `:where()`, `:has()`, `:focus-visible`, `:modal`, `:popover-open`, `:user-valid`, `:user-invalid`, `::marker`, `::backdrop`, `::part()`, `::file-selector-button`, and a top-level `&` |
+| Effects | `border-radius`; `box-shadow`; `opacity` as a number; `filter` with every filter function; linear and radial gradients, their repeating forms, and `-webkit-gradient()`; `mix-blend-mode`; `transform` with every function, 3D too; `transition` and `animation` with `cubic-bezier()` and `steps()` | `backdrop-filter` in either form, conic gradients, the `translate`, `scale`, and `rotate` properties, `opacity` as a percent, `linear()` easing, and `transition-behavior` |
+| Text | The `font` shorthand, `font-variant-numeric`, `font-feature-settings`, `letter-spacing`, `text-overflow: ellipsis`, `-webkit-line-clamp`, and `counter()` and `attr()` in `content` | `text-wrap`, `line-clamp`, `text-underline-offset`, `text-decoration-thickness`, `text-decoration` with a style or a color, `overflow-wrap: anywhere`, `white-space: break-spaces` and the newer `white-space` values, `font-size: xxx-large`, `font-variation-settings`, and `font-palette` |
+| Forms and interaction | `cursor`, `object-fit`, and `will-change` | `accent-color`, `caret-color`, `field-sizing`, the values of `touch-action`, `scrollbar-width`, `scrollbar-color`, `scrollbar-gutter`, `overscroll-behavior`, `scroll-behavior`, the `scroll-snap-` properties, and `color-scheme` |
+| Only with `-webkit-` | `-webkit-user-select`, `-webkit-appearance`, `-webkit-aspect-ratio`, `-webkit-backface-visibility`, `-webkit-hyphens`, the `-webkit-mask-` properties, `-webkit-clip-path` with a shape, `-webkit-image-set()`, `-webkit-cross-fade()`, and the `-webkit-text-decoration-` properties | The same without the prefix, and `clip-path` with any shape or box, though `clip-path` itself parses |
 
-- **Media features:** `prefers-color-scheme` and `forced-colors` don't parse, and `(hover: hover)`, `(pointer: fine)`, and `(prefers-reduced-motion: reduce)` parse and never match, so a rule behind any of them never applies.
+- **Media features:** `prefers-color-scheme`, `forced-colors`, `prefers-contrast`, and `scripting` don't parse.
+  `(hover: none)` and `(prefers-reduced-motion: no-preference)` match, and `(hover: hover)`, `(pointer: fine)`, and `(any-pointer: fine)` don't, so a rule behind a hover or pointer query applies as on a touch screen, while `:hover` selectors work.
+- **Layout:** the engine places boxes on whole pixels where Chromium gives fractions, as `vw` and `space-evenly` showed, and a table cell given a width takes the table's whole width.
+- **Each document's defaults:** mainUi and the toolbar lay out a box with padding and a border as `border-box`, and the EFB's document as `content-box`, so our pages set `box-sizing` themselves.
+- **What a test of the CSSOM can't see:** p14 measured what the engine parses and lays out, not what it paints, so a declaration it keeps can still paint unlike Chromium's, which only a screenshot shows.
 - **Fonts:** mainUi and the toolbar declare Roboto as one family, `Roboto-Regular`, at weights 300 to 900, and Roboto Mono as `RobotoMono-Regular`.
   The EFB's document declares a family for each face, such as `Roboto-Bold` and `RobotoMono-Regular`, and sets its body in Verdana, so text there takes Roboto only from a rule that names a face.
-  What an in-game panel's document declares is unmeasured.
+  What an in-game panel's document declares is unmeasured, and so is its CSS, though the three documents measured agreed on every item.
 
 ## Re-measuring
 
-A sim update can change any of this, so re-run [p09](../../../experiments/areas/architecture/p09-coherent-syntax.mjs) after each one, with the sim in a flight, and [p13](../../../experiments/areas/architecture/p13-coherent-css.mjs), with the sim at the main menu.
+A sim update can change any of this, so re-run [p09](../../../experiments/areas/architecture/p09-coherent-syntax.mjs) after each one, with the sim in a flight, and [p14](../../../experiments/areas/architecture/p14-coherent-css-full.mjs), with the sim at the main menu, after its `--baseline` run in current Chromium.
 
+[p14]: log.md#2026-10-25-coherent-gt-keeps-304-of-the-554-css-properties-chromium-152-keeps-and-lays-out-flexbox-and-grid-as-chromium-does-but-for-gap-justify-content-end-and-subgrid
 [p13]: log.md#2026-10-25-coherent-gt-drops-layer-oklch-color-mix-and-every-gap-but-grid-gap-so-tailwind-4s-output-cant-style-a-page-there
 [p09]: log.md#2026-10-09-coherent-gt-parses-all-of-es2017-and-object-rest-but-no-other-syntax-from-es2018-on-has-no-built-in-from-es2018-on-of-its-own-but-weakref-and-runs-typescript-compiled-to-es2017-by-tsc-and-by-esbuild
 [research]: log.md#2026-10-09-coherent-gts-makers-last-placed-its-engine-near-safari-101-the-msfs-avionics-framework-and-flybywire-compile-to-es2017-nobody-maintains-a-rule-set-for-the-engine-and-working-title-ships-its-own-pinned-copy-of-the-framework

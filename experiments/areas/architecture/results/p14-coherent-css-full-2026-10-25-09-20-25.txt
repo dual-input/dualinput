@@ -1,0 +1,579 @@
+p14-coherent-css-full, 2026-10-25T09:20:25.766Z, mdn-data 2.37.2
+Documents: mainUi; EFB; toolbar
+Coherent GT: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0
+Baseline: experiments/areas/architecture/results/p14-coherent-css-full-chromium-2026-10-25-09-19-54.json, Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Claude/3.6556.2 Chrome/152.0.7977.167 Safari/537.36 MSIX
+Catalog: 602 properties, 3520 keywords, 121 functions, 69 values, 53 units, 160 selectors, 28 atRules, 56 media, 81 layout
+
+Each list names what the baseline keeps and Coherent GT drops, in every document unless a document is named.
+Items both drop are counted, not listed: a sample no engine reads, or a property only another engine has.
+
+Properties, set to inherit: 304 kept, 250 dropped by Coherent GT alone, 0 dropped in some documents, 48 dropped by both
+  accent-color
+  anchor-name
+  anchor-scope
+  animation-composition
+  animation-range
+  animation-range-end
+  animation-range-start
+  animation-timeline
+  animation-trigger
+  appearance  (-webkit-appearance kept)
+  aspect-ratio  (-webkit-aspect-ratio kept)
+  backdrop-filter
+  backface-visibility  (-webkit-backface-visibility kept)
+  baseline-source
+  block-size
+  border-block
+  border-block-color
+  border-block-end
+  border-block-end-color
+  border-block-end-style
+  border-block-end-width
+  border-block-start
+  border-block-start-color
+  border-block-start-style
+  border-block-start-width
+  border-block-style
+  border-block-width
+  border-end-end-radius
+  border-end-start-radius
+  border-inline
+  border-inline-color
+  border-inline-end
+  border-inline-end-color
+  border-inline-end-style
+  border-inline-end-width
+  border-inline-start
+  border-inline-start-color
+  border-inline-start-style
+  border-inline-start-width
+  border-inline-style
+  border-inline-width
+  border-shape
+  border-start-end-radius
+  border-start-start-radius
+  box-decoration-break  (-webkit-box-decoration-break kept)
+  caret-animation
+  caret-color
+  caret-shape
+  color-scheme
+  column-height
+  column-wrap
+  contain
+  contain-intrinsic-block-size
+  contain-intrinsic-height
+  contain-intrinsic-inline-size
+  contain-intrinsic-size
+  contain-intrinsic-width
+  container
+  container-name
+  container-type
+  content-visibility
+  corner-block-end-shape
+  corner-block-start-shape
+  corner-bottom-shape
+  corner-bottom-left-shape
+  corner-bottom-right-shape
+  corner-end-end-shape
+  corner-end-start-shape
+  corner-inline-end-shape
+  corner-inline-start-shape
+  corner-left-shape
+  corner-right-shape
+  corner-shape
+  corner-start-start-shape
+  corner-start-end-shape
+  corner-top-shape
+  corner-top-left-shape
+  corner-top-right-shape
+  counter-set
+  d
+  dynamic-range-limit
+  field-sizing
+  flex-line-count
+  font-language-override
+  font-optical-sizing
+  font-palette
+  font-size-adjust
+  font-synthesis-small-caps
+  font-synthesis-style
+  font-synthesis-weight
+  font-variant-emoji
+  font-variation-settings
+  forced-color-adjust
+  gap
+  hyphenate-character  (-webkit-hyphenate-character kept)
+  hyphenate-limit-chars
+  hyphens  (-webkit-hyphens kept)
+  image-orientation
+  initial-letter  (-webkit-initial-letter kept)
+  inline-size
+  inset
+  inset-block
+  inset-block-end
+  inset-block-start
+  inset-inline
+  inset-inline-end
+  inset-inline-start
+  interpolate-size
+  interactivity
+  interest-delay
+  interest-delay-end
+  interest-delay-start
+  margin-block
+  margin-block-end
+  margin-block-start
+  margin-inline
+  margin-inline-end
+  margin-inline-start
+  mask-clip  (-webkit-mask-clip kept)
+  mask-composite  (-webkit-mask-composite kept)
+  mask-image  (-webkit-mask-image kept)
+  mask-mode
+  mask-origin  (-webkit-mask-origin kept)
+  mask-position  (-webkit-mask-position kept)
+  mask-repeat  (-webkit-mask-repeat kept)
+  mask-size  (-webkit-mask-size kept)
+  math-depth
+  math-shift
+  math-style
+  max-block-size
+  max-inline-size
+  min-block-size
+  min-inline-size
+  object-view-box
+  offset
+  offset-anchor
+  offset-distance
+  offset-path
+  offset-position
+  offset-rotate
+  overflow-anchor
+  overflow-block
+  overflow-clip-margin
+  overflow-inline
+  overlay
+  overscroll-behavior
+  overscroll-behavior-block
+  overscroll-behavior-inline
+  overscroll-behavior-x
+  overscroll-behavior-y
+  padding-block
+  padding-block-end
+  padding-block-start
+  padding-inline
+  padding-inline-end
+  padding-inline-start
+  position-anchor
+  position-area
+  position-try
+  position-try-fallbacks
+  position-try-order
+  position-visibility
+  print-color-adjust  (-webkit-print-color-adjust kept)
+  reading-flow
+  reading-order
+  rotate
+  row-gap
+  ruby-align
+  ruby-overhang
+  ruby-position  (-webkit-ruby-position kept)
+  scale
+  scroll-behavior
+  scroll-initial-target
+  scroll-margin
+  scroll-margin-block
+  scroll-margin-block-end
+  scroll-margin-block-start
+  scroll-margin-bottom
+  scroll-margin-inline
+  scroll-margin-inline-end
+  scroll-margin-inline-start
+  scroll-margin-left
+  scroll-margin-right
+  scroll-margin-top
+  scroll-marker-group
+  scroll-padding
+  scroll-padding-block
+  scroll-padding-block-end
+  scroll-padding-block-start
+  scroll-padding-bottom
+  scroll-padding-inline
+  scroll-padding-inline-end
+  scroll-padding-inline-start
+  scroll-padding-left
+  scroll-padding-right
+  scroll-padding-top
+  scroll-snap-align
+  scroll-snap-stop
+  scroll-snap-type
+  scroll-target-group
+  scroll-timeline
+  scroll-timeline-axis
+  scroll-timeline-name
+  scrollbar-color
+  scrollbar-gutter
+  scrollbar-width
+  text-align-last
+  text-autospace
+  text-box
+  text-box-edge
+  text-box-trim
+  text-combine-upright
+  text-decoration-color  (-webkit-text-decoration-color kept)
+  text-decoration-line  (-webkit-text-decoration-line kept)
+  text-decoration-skip-ink
+  text-decoration-style  (-webkit-text-decoration-style kept)
+  text-decoration-thickness
+  text-fit
+  text-justify
+  text-orientation  (-webkit-text-orientation kept)
+  text-size-adjust
+  text-spacing-trim
+  text-underline-offset
+  text-underline-position  (-webkit-text-underline-position kept)
+  text-wrap
+  text-wrap-mode
+  text-wrap-style
+  timeline-scope
+  timeline-trigger
+  timeline-trigger-activation-range
+  timeline-trigger-activation-range-end
+  timeline-trigger-activation-range-start
+  timeline-trigger-active-range
+  timeline-trigger-active-range-end
+  timeline-trigger-active-range-start
+  timeline-trigger-name
+  timeline-trigger-source
+  transition-behavior
+  translate
+  trigger-scope
+  user-select  (-webkit-user-select kept)
+  view-timeline
+  view-timeline-axis
+  view-timeline-inset
+  view-timeline-name
+  view-transition-class
+  view-transition-name
+  view-transition-scope
+  white-space-collapse
+  window-drag
+
+Keywords of properties both know: 1947 kept, 109 dropped by Coherent GT alone, 0 dropped in some documents, 143 dropped by both
+  -webkit-line-clamp: none
+  align-self: anchor-center
+  all: revert-layer
+  animation-duration: auto
+  background-clip: border-area
+  background-clip: text
+  clear: inline-start
+  clear: inline-end
+  clip-path: content-box
+  clip-path: padding-box
+  clip-path: border-box
+  clip-path: margin-box
+  clip-path: fill-box
+  clip-path: stroke-box
+  clip-path: view-box
+  display: flow
+  display: flow-root
+  display: ruby
+  display: ruby-text
+  fill: context-fill
+  fill: context-stroke
+  flex: min-content
+  flex: max-content
+  flex: fit-content
+  flex: content
+  flex-basis: min-content
+  flex-basis: max-content
+  flex-basis: fit-content
+  flex-basis: content
+  flex-flow: balance
+  flex-wrap: balance
+  float: inline-start
+  float: inline-end
+  font: caption
+  font: icon
+  font: menu
+  font: message-box
+  font: small-caption
+  font: status-bar
+  font-size: xxx-large
+  font-size: math
+  grid-template-columns: subgrid
+  grid-template-rows: subgrid
+  justify-items: legacy
+  justify-self: anchor-center
+  line-break: anywhere
+  mask: left
+  mask: center
+  mask: right
+  mask: top
+  mask: bottom
+  mask: repeat-x
+  mask: repeat-y
+  mask: repeat
+  mask: space
+  mask: no-repeat
+  mask: fill-box
+  mask: stroke-box
+  mask: view-box
+  mask: add
+  mask: subtract
+  mask: intersect
+  mask: exclude
+  mask: alpha
+  mask: luminance
+  mask: match-source
+  mask: no-clip
+  overflow: clip
+  overflow-wrap: anywhere
+  overflow-x: clip
+  overflow-y: clip
+  place-self: anchor-center
+  position: sticky
+  quotes: auto
+  resize: block
+  resize: inline
+  rx: auto
+  ry: auto
+  stroke: context-fill
+  stroke: context-stroke
+  text-decoration: spelling-error
+  text-decoration: grammar-error
+  text-decoration: solid
+  text-decoration: double
+  text-decoration: dotted
+  text-decoration: dashed
+  text-decoration: wavy
+  text-decoration: transparent
+  text-decoration: auto
+  text-decoration: from-font
+  text-transform: math-auto
+  touch-action: none
+  touch-action: pan-x
+  touch-action: pan-left
+  touch-action: pan-right
+  touch-action: pan-y
+  touch-action: pan-up
+  touch-action: pan-down
+  touch-action: pinch-zoom
+  transform-box: content-box
+  transform-box: stroke-box
+  white-space: collapse
+  white-space: preserve
+  white-space: preserve-breaks
+  white-space: break-spaces
+  white-space: wrap
+  word-break: auto-phrase
+  writing-mode: sideways-rl
+  writing-mode: sideways-lr
+
+Functions: 61 kept, 50 dropped by Coherent GT alone, 0 dropped in some documents, 10 dropped by both
+  abs() in width: abs(-10px)
+  acos() in transform: rotate(acos(0.5))
+  alpha() in color: alpha(from red / 0.5)
+  anchor() in top: anchor(--p14 bottom)
+  anchor-size() in width: anchor-size(--p14 width)
+  asin() in transform: rotate(asin(0.5))
+  atan() in transform: rotate(atan(1))
+  atan2() in transform: rotate(atan2(1, 1))
+  calc-size() in height: calc-size(auto, size + 1px)
+  circle() in clip-path: circle(50%)
+  clamp() in width: clamp(1px, 2px, 3px)
+  color-mix() in color: color-mix(in srgb, red 50%, blue)
+  conic-gradient() in background-image: conic-gradient(red, blue)
+  cos() in width: calc(cos(0) * 10px)
+  ellipse() in clip-path: ellipse(50% 40%)
+  env() in width: env(safe-area-inset-left, 1px)
+  exp() in width: calc(exp(1) * 1px)
+  hwb() in color: hwb(120 30% 30%)
+  hypot() in width: hypot(3px, 4px)
+  image() in background-image: image(red)
+  image-set() in background-image: image-set("p14.png" 1x)
+  inset() in clip-path: inset(1px)
+  lab() in color: lab(50 20 30)
+  lch() in color: lch(50 30 120)
+  light-dark() in color: light-dark(white, black)
+  linear() in transition-timing-function: linear(0, 0.5, 1)
+  log() in width: calc(log(10) * 1px)
+  max() in width: max(1px, 2px)
+  min() in width: min(1px, 2px)
+  mod() in width: mod(7px, 3px)
+  oklab() in color: oklab(0.5 0.1 0.1)
+  oklch() in color: oklch(0.5 0.1 120)
+  paint() in background-image: paint(p14)
+  palette-mix() in font-palette: palette-mix(in lch, light, dark)
+  path() in clip-path: path("M0 0 L10 0 L10 10 Z")
+  path() in offset-path: path("M0 0 L10 10")
+  polygon() in clip-path: polygon(0 0, 10px 0, 10px 10px)
+  pow() in width: calc(pow(2, 3) * 1px)
+  ray() in offset-path: ray(45deg)
+  rect() in clip-path: rect(0 10px 10px 0)
+  rem() in width: rem(7px, 3px)
+  repeating-conic-gradient() in background-image: repeating-conic-gradient(red 0deg, red 10deg, blue 10deg, blue 20deg)
+  round() in width: round(nearest, 7px, 3px)
+  scroll() in animation-timeline: scroll()
+  sign() in width: calc(sign(-1) * -1px)
+  sin() in width: calc(sin(0) * 1px + 1px)
+  sqrt() in width: calc(sqrt(4) * 1px)
+  tan() in width: calc(tan(0) * 1px + 1px)
+  view() in animation-timeline: view()
+  xywh() in clip-path: xywh(0 0 10px 10px)
+
+Value forms: 50 kept, 17 dropped by Coherent GT alone, 0 dropped in some documents, 2 dropped by both
+  color: rgb(1 2 3)
+  color: rgb(1 2 3 / 0.5)
+  color: rgb(1 2 3 / 50%)
+  color: rgba(1, 2, 3, 50%)
+  color: hsl(120deg, 50%, 50%)
+  color: hsl(120 50% 50%)
+  color: hsl(120 50% 50% / 0.5)
+  color: rgb(from red r g b)
+  color: Canvas
+  color: CanvasText
+  color: revert-layer
+  width: stretch
+  transition-behavior: allow-discrete
+  grid-template-columns: subgrid
+  inset: 0
+  inset-inline: 0
+  margin-block: 1px
+
+Units: 25 kept, 28 dropped by Coherent GT alone, 0 dropped in some documents, 0 dropped by both
+  cap (1cap)
+  ic (1ic)
+  lh (1lh)
+  rlh (1rlh)
+  rex (1rex)
+  rch (1rch)
+  ric (1ric)
+  rcap (1rcap)
+  vi (1vi)
+  vb (1vb)
+  svw (1svw)
+  svh (1svh)
+  lvw (1lvw)
+  lvh (1lvh)
+  dvw (1dvw)
+  dvh (1dvh)
+  svi (1svi)
+  svb (1svb)
+  dvi (1dvi)
+  dvb (1dvb)
+  cqw (1cqw)
+  cqh (1cqh)
+  cqi (1cqi)
+  cqb (1cqb)
+  cqmin (1cqmin)
+  cqmax (1cqmax)
+  Q (1Q)
+  x ((min-resolution: 1x))
+  untested, with no property to hold them: Hz, kHz
+
+Selectors: 80 kept, 44 dropped by Coherent GT alone, 0 dropped in some documents, 36 dropped by both
+  &
+  .x:active-view-transition
+  .x:active-view-transition-type(p14)
+  .x:autofill
+  .x:current
+  .x:focus-visible
+  .x:fullscreen
+  .x:future
+  .x:has(.y)
+  .x:host-context(.y)
+  .x:is(.y)
+  .x:modal
+  .x:open
+  .x:past
+  .x:picture-in-picture
+  .x:popover-open
+  .x:state(p14)
+  .x:target-current
+  .x:user-invalid
+  .x:user-valid
+  .x:where(.y)
+  .x:xr-overlay
+  .x::backdrop
+  .x::checkmark
+  .x::cue
+  .x::cue(b)
+  .x::details-content
+  .x::file-selector-button
+  .x::grammar-error
+  .x::highlight(p14)
+  .x::marker
+  .x::part(p14)
+  .x::picker-icon
+  .x::picker(select)
+  .x::scroll-marker
+  .x::scroll-marker-group
+  .x::spelling-error
+  .x::target-text
+  .x::view-transition
+  .x::view-transition-group(p14)
+  .x::view-transition-image-pair(p14)
+  .x::view-transition-new(p14)
+  .x::view-transition-old(p14)
+  .x:is(.y, :hover)
+
+At-rules: 11 kept, 15 dropped by Coherent GT alone, 0 dropped in some documents, 2 dropped by both
+  @counter-style
+  @container
+  @font-feature-values
+  @font-palette-values
+  @layer
+  @layer statement
+  @position-try
+  @property
+  @scope
+  @starting-style
+  @supports selector()
+  @view-transition
+  nesting with &
+  nesting without &
+  nested @media
+
+Media queries: 38 kept, 18 dropped by Coherent GT alone, 0 dropped in some documents, 0 dropped by both
+  (dynamic-range: standard)
+  (video-dynamic-range: standard)
+  (prefers-color-scheme: dark)
+  (prefers-contrast: more)
+  (prefers-reduced-transparency: reduce)
+  (prefers-reduced-data: reduce)
+  (forced-colors: active)
+  (scripting: enabled)
+  (update: fast)
+  (overflow-block: scroll)
+  (overflow-inline: scroll)
+  (scan: progressive)
+  (display-mode: browser)
+  (width >= 1px)
+  (1px <= width <= 99999px)
+  (not (hover: hover))
+  ((min-width: 1px) or (hover: hover))
+  (min-width: calc(1px + 1px))
+
+Layout, against the baseline's measurements:
+  ✗ spacing, gap in a flex row: baseline [16], mainUi [10]; EFB [10]; toolbar [10]
+  ✗ spacing, row-gap in a wrapping flex row: baseline [15], mainUi [10]; EFB [10]; toolbar [10]
+  ✗ spacing, gap in a grid: baseline [14], mainUi [10]; EFB [10]; toolbar [10]
+  ✗ flex, justify-content: space-evenly: baseline [26.66], mainUi [26]; EFB [26]; toolbar [26]
+  ✗ flex, justify-content: end: baseline [80], mainUi [0]; EFB [0]; toolbar [0]
+  ✗ grid, subgrid: baseline [10], mainUi [0]; EFB [0]; toolbar [0]
+  ✗ display, table and table-cell: baseline [30], mainUi [100]; EFB [100]; toolbar [100]
+  ✗ sizing, content-box with padding and a border: baseline [32], mainUi [20]; EFB [32]; toolbar [20]
+  ✗ overflow, overflow: clip, computed: baseline ["clip"], mainUi ["visible"]; EFB ["visible"]; toolbar ["visible"]
+  72 of 81 measured as the baseline did
+
+Media queries that parse, and whether each matched:
+  mainUi: all yes; screen yes; print no; speech no; only screen yes; not print yes; not all and (min-width: 1px) no; (width: 100px) no; (min-width: 1px) yes; (max-width: 99999px) yes; (height: 100px) no; (min-height: 1px) yes; (aspect-ratio: 16/9) no; (min-aspect-ratio: 1/1) yes; (orientation: landscape) yes; (resolution: 1dppx) no; (-webkit-min-device-pixel-ratio: 1) yes; (-webkit-device-pixel-ratio: 1) yes; (device-width: 100px) no; (device-aspect-ratio: 16/9) no; (color) no; (min-color: 1) no; (color-index) no; (monochrome) no; (color-gamut: srgb) yes; (hover: hover) no; (hover: none) yes; (any-hover: hover) no; (pointer: fine) no; (pointer: none) no; (any-pointer: fine) no; (prefers-reduced-motion: reduce) no; (prefers-reduced-motion: no-preference) yes; (inverted-colors: none) yes; (grid: 0) yes; (min-width: 1px) and (max-width: 99999px) yes; (min-width: 1px), print yes; (min-width: 1em) yes
+  EFB: all yes; screen yes; print no; speech no; only screen yes; not print yes; not all and (min-width: 1px) no; (width: 100px) no; (min-width: 1px) yes; (max-width: 99999px) yes; (height: 100px) no; (min-height: 1px) yes; (aspect-ratio: 16/9) no; (min-aspect-ratio: 1/1) no; (orientation: landscape) no; (resolution: 1dppx) no; (-webkit-min-device-pixel-ratio: 1) yes; (-webkit-device-pixel-ratio: 1) yes; (device-width: 100px) no; (device-aspect-ratio: 16/9) no; (color) no; (min-color: 1) no; (color-index) no; (monochrome) no; (color-gamut: srgb) yes; (hover: hover) no; (hover: none) yes; (any-hover: hover) no; (pointer: fine) no; (pointer: none) no; (any-pointer: fine) no; (prefers-reduced-motion: reduce) no; (prefers-reduced-motion: no-preference) yes; (inverted-colors: none) yes; (grid: 0) yes; (min-width: 1px) and (max-width: 99999px) yes; (min-width: 1px), print yes; (min-width: 1em) yes
+  toolbar: all yes; screen yes; print no; speech no; only screen yes; not print yes; not all and (min-width: 1px) no; (width: 100px) no; (min-width: 1px) yes; (max-width: 99999px) yes; (height: 100px) no; (min-height: 1px) yes; (aspect-ratio: 16/9) no; (min-aspect-ratio: 1/1) yes; (orientation: landscape) yes; (resolution: 1dppx) no; (-webkit-min-device-pixel-ratio: 1) yes; (-webkit-device-pixel-ratio: 1) yes; (device-width: 100px) no; (device-aspect-ratio: 16/9) no; (color) no; (min-color: 1) no; (color-index) no; (monochrome) no; (color-gamut: srgb) yes; (hover: hover) no; (hover: none) yes; (any-hover: hover) no; (pointer: fine) no; (pointer: none) no; (any-pointer: fine) no; (prefers-reduced-motion: reduce) no; (prefers-reduced-motion: no-preference) yes; (inverted-colors: none) yes; (grid: 0) yes; (min-width: 1px) and (max-width: 99999px) yes; (min-width: 1px), print yes; (min-width: 1em) yes
+
+mainUi names 546 computed properties; these 323 aren't in mdn-data: --accentColor, --activeBackGroundColor, --activeBackgroundColor, --activeColor, --animationEffect, --animationTime, --animationTimeFast, --backgroundColorComponent, --backgroundColorContrastedComponent, --backgroundColorContrastedPanel, --backgroundColorDarkerPanel, --backgroundColorDoublePanel, --backgroundColorInput, --backgroundColorOverlay, --backgroundColorPanel, --backgroundColorSelfContrastedPanel, --backgroundColorValidation, --backgroundOpacity, --backgroundOpacityComponent, --backgroundOpacityPanel, --baseMargin, --basePadding, --blurAreaId, --blurredElementScreenPosX, --blurredElementScreenPosY, --coherentAA, --color-black, --color-black-op0, --color-black-op10, --color-black-op20, --color-black-op30, --color-black-op40, --color-black-op45, --color-black-op50, --color-black-op60, --color-blue, --color-blueish-darker-gray, --color-blueish-gray, --color-charcoal, --color-cyan, --color-dark-gray, --color-dark-gray-neuter, --color-dark-gray-vr, --color-darker-gray, --color-darker-gray-vr, --color-gray, --color-green, --color-green-darken, --color-green-dim, --color-green-market, --color-light-blueish-gray, --color-light-gray, --color-low-gray, --color-market-text, --color-off-white, --color-online, --color-orange, --color-red, --color-red-darken, --color-red-lighten, --color-transparent-white, --color-white, --color-white-op10, --color-white-op15, --color-white-op20, --color-white-op30, --color-white-op50, --color-yellow, --colorBorderThin, --colorCategoryAirliner, --colorCategoryBush, --colorCategoryExtreme, --colorCategoryFreelancer, --colorChallenges, --colorComlementary1_Content, --colorComplementary1, --colorComplementary2, --colorComplementary2_Content, --colorDiscovery, --colorFailure, --colorFocus, --colorGradient, --colorMarket, --colorMarket_Content, --colorPrimary, --colorPrimary_Content, --colorProfile, --colorRedBullGradient, --colorRedBullPrimary, --colorSecondary, --colorSecondary_Content, --colorSpecial, --colorSpecial_Content, --colorSuccess, --colorWarning, --contrastedTextColor, --contrastedTextHintColor, --copilotActivity, --currentPageHeight, --darkerTextColor, --defaultAnimation, --disabledBackGroundColor, --disabledColor, --disabledHoverBackgroundColor, --disabledHoverColor, --display, --doubleMargin, --editorRenderingInitialBezierSample, --editorRenderingMeanArcPointsDistance, --enabledBackGroundColor, --enabledBackgroundColor, --enabledColor, --enabledHoverBackGroundColor, --enabledHoverBackgroundColor, --enabledHoverColor, --filterBlur, --filterGrayscale, --filterShadow, --flowBarHeight, --font, --font-Default, --font-ja-JP, --font-ko-KR, --font-zh-CN, --fontGamertag, --fontMono, --fontSizeBig, --fontSizeDefault, --fontSizeDeviceButton, --fontSizeL, --fontSizeM, --fontSizeMedium, --fontSizeParagraph, --fontSizeS, --fontSizeXL, --fontSizeXS, --fontSizeXXL, --fontSizeXXXL, --fontSizeXXXXL, --fullPageWidth, --halfMargin, --halfPadding, --inputBarHeight, --inputThumbHalfSize, --inputThumbSize, --lineHeightDefault, --listSeparatorColor, --margin, --minimalBorderWidth, --minimalFontSize, --optionContentWidth, --optionLineHeight, --outlineColor, --outlineColorHover, --outlineColorInput, --outlineContrastedColor, --overWhiteListSeparatorColor, --pageHeight, --pageLeftPos, --pageMargin, --pageTop, --pageWidth, --popInHeight, --popInWidth, --primaryColor, --quartMargin, --quartPadding, --scaledPageWidth, --screenHeight, --selectedBackgroundColor, --selectedColor, --selectedHoverBackgroundColor, --selectedHoverColor, --sizeBig, --sizeDefault, --sizeDeviceButton, --sizeMedium, --sizeParagraph, --sizeXXL, --tableBackgroundColor, --tableBorderColor, --tableColor, --tableHeaderBackgroundColor, --tableHeaderBorderColor, --tableHeaderColor, --tableSeparatorColor, --textColor, --textColorGray, --textContraestedStrokeColor, --textErrorColor, --textShadow, --textStrokeColor, --textStrokeWidth, --textValidationColor, --threeHalfMargin, --touchMode, --tripleMargin, --uiScale, --unscaledScreenHeight, --useFilterGrayscale, --viewportHeight, --viewportHeightRatio, --viewportWidth, --viewportWidthRatio, -coherent-custom-effect, -coherent-custom-effect-param1, -coherent-custom-effect-param2, -coherent-custom-effect-param3, -coherent-custom-effect-param4, -coherent-custom-effect-param5, -coherent-custom-effect-param6, -coherent-custom-effect-param7, -coherent-custom-effect-param8, -coherent-custom-effect-string1, -coherent-custom-effect-string2, -coherent-custom-effect-string3, -coherent-custom-effect-string4, -coherent-layer-clip-aa, -webkit-aspect-ratio, -webkit-backface-visibility, -webkit-background-clip, -webkit-background-composite, -webkit-background-origin, -webkit-background-size, -webkit-border-fit, -webkit-border-horizontal-spacing, -webkit-border-image, -webkit-border-radius, -webkit-border-vertical-spacing, -webkit-box-align, -webkit-box-decoration-break, -webkit-box-direction, -webkit-box-flex, -webkit-box-flex-group, -webkit-box-lines, -webkit-box-ordinal-group, -webkit-box-orient, -webkit-box-pack, -webkit-box-shadow, -webkit-clip-path, -webkit-column-axis, -webkit-column-break-after, -webkit-column-break-before, -webkit-column-break-inside, -webkit-column-progression, -webkit-cursor-visibility, -webkit-flow-from, -webkit-flow-into, -webkit-font-kerning, -webkit-font-size-delta, -webkit-font-smoothing, -webkit-hyphenate-character, -webkit-hyphenate-limit-after, -webkit-hyphenate-limit-before, -webkit-hyphenate-limit-lines, -webkit-hyphens, -webkit-initial-letter, -webkit-line-align, -webkit-line-box-contain, -webkit-line-grid, -webkit-line-snap, -webkit-locale, -webkit-margin-after-collapse, -webkit-margin-before-collapse, -webkit-marquee-direction, -webkit-marquee-increment, -webkit-marquee-repetition, -webkit-marquee-style, -webkit-mask-box-image, -webkit-mask-box-image-outset, -webkit-mask-box-image-repeat, -webkit-mask-box-image-slice, -webkit-mask-box-image-source, -webkit-mask-box-image-width, -webkit-mask-source-type, -webkit-nbsp-mode, -webkit-print-color-adjust, -webkit-region-break-after, -webkit-region-break-before, -webkit-region-break-inside, -webkit-region-fragment, -webkit-rtl-ordering, -webkit-svg-shadow, -webkit-text-combine, -webkit-text-decoration-color, -webkit-text-decoration-line, -webkit-text-decoration-skip, -webkit-text-decoration-style, -webkit-text-decorations-in-effect, -webkit-text-emphasis-color, -webkit-text-emphasis-position, -webkit-text-emphasis-style, -webkit-text-orientation, -webkit-text-security, -webkit-text-underline-position, -webkit-text-zoom, -webkit-transform-style, -webkit-user-drag, alt, background-repeat-x, background-repeat-y, buffered-rendering, color-interpolation, color-profile, color-rendering, css-text, enable-background, glyph-orientation-horizontal, glyph-orientation-vertical, kerning, perspective-origin-x, perspective-origin-y, safe-area-inset-bottom, safe-area-inset-left, safe-area-inset-right, safe-area-inset-top, size, speak, src, transform-origin-x, transform-origin-y, transform-origin-z, unicode-range
+
+EFB names 473 computed properties; these 250 aren't in mdn-data: --accentColor, --backgroundColorComponent, --backgroundColorPanel, --backgroundOpacityComponent, --backgroundOpacityPanel, --base-height, --base-width, --border-height, --border-width, --civa-tw-backdrop-blur, --civa-tw-backdrop-brightness, --civa-tw-backdrop-contrast, --civa-tw-backdrop-grayscale, --civa-tw-backdrop-hue-rotate, --civa-tw-backdrop-invert, --civa-tw-backdrop-opacity, --civa-tw-backdrop-saturate, --civa-tw-backdrop-sepia, --civa-tw-blur, --civa-tw-border-spacing-x, --civa-tw-border-spacing-y, --civa-tw-brightness, --civa-tw-contain-layout, --civa-tw-contain-paint, --civa-tw-contain-size, --civa-tw-contain-style, --civa-tw-contrast, --civa-tw-drop-shadow, --civa-tw-gradient-from-position, --civa-tw-gradient-to-position, --civa-tw-gradient-via-position, --civa-tw-grayscale, --civa-tw-hue-rotate, --civa-tw-invert, --civa-tw-numeric-figure, --civa-tw-numeric-fraction, --civa-tw-numeric-spacing, --civa-tw-ordinal, --civa-tw-pan-x, --civa-tw-pan-y, --civa-tw-pinch-zoom, --civa-tw-ring-color, --civa-tw-ring-inset, --civa-tw-ring-offset-color, --civa-tw-ring-offset-shadow, --civa-tw-ring-offset-width, --civa-tw-ring-shadow, --civa-tw-rotate, --civa-tw-saturate, --civa-tw-scale-x, --civa-tw-scale-y, --civa-tw-scroll-snap-strictness, --civa-tw-sepia, --civa-tw-shadow, --civa-tw-shadow-colored, --civa-tw-skew-x, --civa-tw-skew-y, --civa-tw-slashed-zero, --civa-tw-translate-x, --civa-tw-translate-y, --currentPageHeight, --efb-background-overlays, --efb-background-overlays-base, --efb-background-primary, --efb-background-primary-base, --efb-background-secondary, --efb-background-secondary-base, --efb-background-special, --efb-background-special-base, --efb-border-radius, --efb-button-emergency-background, --efb-button-important, --efb-button-important-base, --efb-button-primary, --efb-button-primary-base, --efb-button-primary-raw-half-opacity, --efb-button-secondary, --efb-button-secondary-base, --efb-button-secondary-highlight, --efb-button-special, --efb-category-color-blue, --efb-category-color-green, --efb-category-color-grey, --efb-category-color-pink, --efb-category-color-red, --efb-component-active-outline-offset, --efb-component-disabled-layer, --efb-component-disabled-layer-base, --efb-component-disabled-opacity, --efb-component-hover-outline-color, --efb-component-hover-outline-offset, --efb-component-hover-outline-thickness, --efb-component-transition-delay, --efb-content, --efb-content-base, --efb-content-secondary, --efb-content-secondary-base, --efb-dark-border, --efb-dock-color, --efb-flight-plan-creation-breadcrumb-color, --efb-flight-plan-creation-breadcrumb-width, --efb-full-page-background, --efb-grayish-content, --efb-light-border, --efb-lighter-background, --efb-lighter-border, --efb-list-background, --efb-list-highlight, --efb-menu-border, --efb-panel-border-color, --efb-primary-color, --efb-runway-gradient, --font, --fontSizeBig, --fontSizeDefault, --fontSizeDeviceButton, --fontSizeMedium, --fontSizeParagraph, --fontSizeXXL, --minimalFontSize, --panel-height, --panel-width, --primaryColor, --screenHeight, --touchMode, --uiScale, --unscaledScreenHeight, --viewportHeight, --viewportHeightRatio, --viewportWidth, --viewportWidthRatio, -coherent-custom-effect, -coherent-custom-effect-param1, -coherent-custom-effect-param2, -coherent-custom-effect-param3, -coherent-custom-effect-param4, -coherent-custom-effect-param5, -coherent-custom-effect-param6, -coherent-custom-effect-param7, -coherent-custom-effect-param8, -coherent-custom-effect-string1, -coherent-custom-effect-string2, -coherent-custom-effect-string3, -coherent-custom-effect-string4, -coherent-layer-clip-aa, -webkit-aspect-ratio, -webkit-backface-visibility, -webkit-background-clip, -webkit-background-composite, -webkit-background-origin, -webkit-background-size, -webkit-border-fit, -webkit-border-horizontal-spacing, -webkit-border-image, -webkit-border-radius, -webkit-border-vertical-spacing, -webkit-box-align, -webkit-box-decoration-break, -webkit-box-direction, -webkit-box-flex, -webkit-box-flex-group, -webkit-box-lines, -webkit-box-ordinal-group, -webkit-box-orient, -webkit-box-pack, -webkit-box-shadow, -webkit-clip-path, -webkit-column-axis, -webkit-column-break-after, -webkit-column-break-before, -webkit-column-break-inside, -webkit-column-progression, -webkit-cursor-visibility, -webkit-flow-from, -webkit-flow-into, -webkit-font-kerning, -webkit-font-size-delta, -webkit-font-smoothing, -webkit-hyphenate-character, -webkit-hyphenate-limit-after, -webkit-hyphenate-limit-before, -webkit-hyphenate-limit-lines, -webkit-hyphens, -webkit-initial-letter, -webkit-line-align, -webkit-line-box-contain, -webkit-line-grid, -webkit-line-snap, -webkit-locale, -webkit-margin-after-collapse, -webkit-margin-before-collapse, -webkit-marquee-direction, -webkit-marquee-increment, -webkit-marquee-repetition, -webkit-marquee-style, -webkit-mask-box-image, -webkit-mask-box-image-outset, -webkit-mask-box-image-repeat, -webkit-mask-box-image-slice, -webkit-mask-box-image-source, -webkit-mask-box-image-width, -webkit-mask-source-type, -webkit-nbsp-mode, -webkit-print-color-adjust, -webkit-region-break-after, -webkit-region-break-before, -webkit-region-break-inside, -webkit-region-fragment, -webkit-rtl-ordering, -webkit-svg-shadow, -webkit-text-combine, -webkit-text-decoration-color, -webkit-text-decoration-line, -webkit-text-decoration-skip, -webkit-text-decoration-style, -webkit-text-decorations-in-effect, -webkit-text-emphasis-color, -webkit-text-emphasis-position, -webkit-text-emphasis-style, -webkit-text-orientation, -webkit-text-security, -webkit-text-underline-position, -webkit-text-zoom, -webkit-transform-style, -webkit-user-drag, alt, background-repeat-x, background-repeat-y, buffered-rendering, color-interpolation, color-profile, color-rendering, css-text, enable-background, glyph-orientation-horizontal, glyph-orientation-vertical, kerning, perspective-origin-x, perspective-origin-y, safe-area-inset-bottom, safe-area-inset-left, safe-area-inset-right, safe-area-inset-top, size, speak, src, transform-origin-x, transform-origin-y, transform-origin-z, unicode-range
+
+toolbar names 546 computed properties; these 323 aren't in mdn-data: --accentColor, --activeBackGroundColor, --activeBackgroundColor, --activeColor, --animationEffect, --animationTime, --animationTimeFast, --backgroundColorComponent, --backgroundColorContrastedComponent, --backgroundColorContrastedPanel, --backgroundColorDarkerPanel, --backgroundColorDoublePanel, --backgroundColorInput, --backgroundColorOverlay, --backgroundColorPanel, --backgroundColorSelfContrastedPanel, --backgroundColorValidation, --backgroundOpacity, --backgroundOpacityComponent, --backgroundOpacityPanel, --baseMargin, --basePadding, --blurAreaId, --blurredElementScreenPosX, --blurredElementScreenPosY, --coherentAA, --color-black, --color-black-op0, --color-black-op10, --color-black-op20, --color-black-op30, --color-black-op40, --color-black-op45, --color-black-op50, --color-black-op60, --color-blue, --color-blueish-darker-gray, --color-blueish-gray, --color-charcoal, --color-cyan, --color-dark-gray, --color-dark-gray-neuter, --color-dark-gray-vr, --color-darker-gray, --color-darker-gray-vr, --color-gray, --color-green, --color-green-darken, --color-green-dim, --color-green-market, --color-light-blueish-gray, --color-light-gray, --color-low-gray, --color-market-text, --color-off-white, --color-online, --color-orange, --color-red, --color-red-darken, --color-red-lighten, --color-transparent-white, --color-white, --color-white-op10, --color-white-op15, --color-white-op20, --color-white-op30, --color-white-op50, --color-yellow, --colorBorderThin, --colorCategoryAirliner, --colorCategoryBush, --colorCategoryExtreme, --colorCategoryFreelancer, --colorChallenges, --colorComlementary1_Content, --colorComplementary1, --colorComplementary2, --colorComplementary2_Content, --colorDiscovery, --colorFailure, --colorFocus, --colorGradient, --colorMarket, --colorMarket_Content, --colorPrimary, --colorPrimary_Content, --colorProfile, --colorRedBullGradient, --colorRedBullPrimary, --colorSecondary, --colorSecondary_Content, --colorSpecial, --colorSpecial_Content, --colorSuccess, --colorWarning, --contrastedTextColor, --contrastedTextHintColor, --copilotActivity, --currentPageHeight, --darkerTextColor, --defaultAnimation, --disabledBackGroundColor, --disabledColor, --disabledHoverBackgroundColor, --disabledHoverColor, --display, --doubleMargin, --editorRenderingInitialBezierSample, --editorRenderingMeanArcPointsDistance, --enabledBackGroundColor, --enabledBackgroundColor, --enabledColor, --enabledHoverBackGroundColor, --enabledHoverBackgroundColor, --enabledHoverColor, --filterBlur, --filterGrayscale, --filterShadow, --flowBarHeight, --font, --font-Default, --font-ja-JP, --font-ko-KR, --font-zh-CN, --fontGamertag, --fontMono, --fontSizeBig, --fontSizeDefault, --fontSizeDeviceButton, --fontSizeL, --fontSizeM, --fontSizeMedium, --fontSizeParagraph, --fontSizeS, --fontSizeXL, --fontSizeXS, --fontSizeXXL, --fontSizeXXXL, --fontSizeXXXXL, --fullPageWidth, --halfMargin, --halfPadding, --inputBarHeight, --inputThumbHalfSize, --inputThumbSize, --lineHeightDefault, --listSeparatorColor, --margin, --minimalBorderWidth, --minimalFontSize, --optionContentWidth, --optionLineHeight, --outlineColor, --outlineColorHover, --outlineColorInput, --outlineContrastedColor, --overWhiteListSeparatorColor, --pageHeight, --pageLeftPos, --pageMargin, --pageTop, --pageWidth, --popInHeight, --popInWidth, --primaryColor, --quartMargin, --quartPadding, --scaledPageWidth, --screenHeight, --selectedBackgroundColor, --selectedColor, --selectedHoverBackgroundColor, --selectedHoverColor, --sizeBig, --sizeDefault, --sizeDeviceButton, --sizeMedium, --sizeParagraph, --sizeXXL, --tableBackgroundColor, --tableBorderColor, --tableColor, --tableHeaderBackgroundColor, --tableHeaderBorderColor, --tableHeaderColor, --tableSeparatorColor, --textColor, --textColorGray, --textContraestedStrokeColor, --textErrorColor, --textShadow, --textStrokeColor, --textStrokeWidth, --textValidationColor, --threeHalfMargin, --touchMode, --tripleMargin, --uiScale, --unscaledScreenHeight, --useFilterGrayscale, --viewportHeight, --viewportHeightRatio, --viewportWidth, --viewportWidthRatio, -coherent-custom-effect, -coherent-custom-effect-param1, -coherent-custom-effect-param2, -coherent-custom-effect-param3, -coherent-custom-effect-param4, -coherent-custom-effect-param5, -coherent-custom-effect-param6, -coherent-custom-effect-param7, -coherent-custom-effect-param8, -coherent-custom-effect-string1, -coherent-custom-effect-string2, -coherent-custom-effect-string3, -coherent-custom-effect-string4, -coherent-layer-clip-aa, -webkit-aspect-ratio, -webkit-backface-visibility, -webkit-background-clip, -webkit-background-composite, -webkit-background-origin, -webkit-background-size, -webkit-border-fit, -webkit-border-horizontal-spacing, -webkit-border-image, -webkit-border-radius, -webkit-border-vertical-spacing, -webkit-box-align, -webkit-box-decoration-break, -webkit-box-direction, -webkit-box-flex, -webkit-box-flex-group, -webkit-box-lines, -webkit-box-ordinal-group, -webkit-box-orient, -webkit-box-pack, -webkit-box-shadow, -webkit-clip-path, -webkit-column-axis, -webkit-column-break-after, -webkit-column-break-before, -webkit-column-break-inside, -webkit-column-progression, -webkit-cursor-visibility, -webkit-flow-from, -webkit-flow-into, -webkit-font-kerning, -webkit-font-size-delta, -webkit-font-smoothing, -webkit-hyphenate-character, -webkit-hyphenate-limit-after, -webkit-hyphenate-limit-before, -webkit-hyphenate-limit-lines, -webkit-hyphens, -webkit-initial-letter, -webkit-line-align, -webkit-line-box-contain, -webkit-line-grid, -webkit-line-snap, -webkit-locale, -webkit-margin-after-collapse, -webkit-margin-before-collapse, -webkit-marquee-direction, -webkit-marquee-increment, -webkit-marquee-repetition, -webkit-marquee-style, -webkit-mask-box-image, -webkit-mask-box-image-outset, -webkit-mask-box-image-repeat, -webkit-mask-box-image-slice, -webkit-mask-box-image-source, -webkit-mask-box-image-width, -webkit-mask-source-type, -webkit-nbsp-mode, -webkit-print-color-adjust, -webkit-region-break-after, -webkit-region-break-before, -webkit-region-break-inside, -webkit-region-fragment, -webkit-rtl-ordering, -webkit-svg-shadow, -webkit-text-combine, -webkit-text-decoration-color, -webkit-text-decoration-line, -webkit-text-decoration-skip, -webkit-text-decoration-style, -webkit-text-decorations-in-effect, -webkit-text-emphasis-color, -webkit-text-emphasis-position, -webkit-text-emphasis-style, -webkit-text-orientation, -webkit-text-security, -webkit-text-underline-position, -webkit-text-zoom, -webkit-transform-style, -webkit-user-drag, alt, background-repeat-x, background-repeat-y, buffered-rendering, color-interpolation, color-profile, color-rendering, css-text, enable-background, glyph-orientation-horizontal, glyph-orientation-vertical, kerning, perspective-origin-x, perspective-origin-y, safe-area-inset-bottom, safe-area-inset-left, safe-area-inset-right, safe-area-inset-top, size, speak, src, transform-origin-x, transform-origin-y, transform-origin-z, unicode-range

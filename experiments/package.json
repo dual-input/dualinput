@@ -3,6 +3,7 @@
   "type": "module",
   "description": "Dependencies of the probes in experiments/. Product code never imports from here.",
   "dependencies": {
+    "mdn-data": "2.37.2",
     "node-simconnect": "4.2.0",
     "three": "0.186.1"
   }

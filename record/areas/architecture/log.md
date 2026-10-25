@@ -3,6 +3,48 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-25: Coherent GT keeps 304 of the 554 CSS properties Chromium 152 keeps, and lays out flexbox and grid as Chromium does but for `gap`, `justify-content: end`, and subgrid
+
+**Asked:** what of the whole of CSS Coherent GT keeps, so the Coherent GT check can pass only what the engine draws, rather than fail only what p13 tried (user, 2026-10-25)?
+
+**Expected:** p13's picture, of CSS from before about 2017 kept and most of what came after dropped, over far more items than p13 tried.
+
+**Found:** on MSFS 2024, Steam build 26058316, at the main menu, p14 tested the catalog MDN's mdn-data 2.37.2 gives, every property with each keyword its syntax names, every function with a sample of ours, every unit, selector, and at-rule, and media features listed by hand, through the CSSOM in mainUi, the EFB's document, and the toolbar's.
+It ran the same tests in Chromium 152 first, in the Claude app's browser pane, and counts an item against Coherent GT only when Chromium keeps it:
+
+| Tested | Kept | Dropped by Coherent GT alone | Dropped by both |
+| --- | --- | --- | --- |
+| 602 properties, set to `inherit` | 304 | 250 | 48 |
+| 2,199 keywords of properties both know | 1,947 | 109 | 143 |
+| 121 function samples | 61 | 50 | 10 |
+| 69 value forms | 50 | 17 | 2 |
+| 53 units | 25 | 28 | 0 |
+| 160 selectors | 80 | 44 | 36 |
+| 28 at-rules | 11 | 15 | 2 |
+| 56 media queries | 38 | 18 | 0 |
+
+- Every item gave the same answer in all three documents.
+- **Dropped by family:** the logical properties, among them `inset`, `margin-inline`, `padding-block`, and `inline-size`; `gap` and `row-gap`; the `translate`, `scale`, and `rotate` properties; container queries; anchor positioning; scroll-driven animations; view transitions; `@layer`, `@property`, `@scope`, `@starting-style`, `@counter-style`, and nesting; `:is()`, `:where()`, `:has()`, `:focus-visible`, `::marker`, and `::backdrop`; every math function but `calc()`, among them `min()`, `max()`, `clamp()`, `round()`, and the trigonometric ones; every color syntax newer than `rgba()` and `hsla()` with commas, among them oklch, oklab, lab, lch, hwb, `color-mix()`, `light-dark()`, relative colors, `hsl()` with a `deg` hue, and an alpha as a percent; the newer viewport, container, and font units, such as `dvh`, `cqw`, `lh`, and `cap`; `prefers-color-scheme`, `forced-colors`, and media range syntax; `accent-color`, `caret-color`, the `scrollbar-` properties, `overscroll-behavior`, `text-wrap`, `text-underline-offset`, and `text-decoration-thickness`; `backdrop-filter` in either form; and conic gradients.
+- **Kept only with `-webkit-`:** `user-select`, `appearance`, `aspect-ratio`, `backface-visibility`, `hyphens`, the `mask-` properties, `clip-path` with a shape such as `circle()`, `image-set()`, and `cross-fade()`; the unprefixed `clip-path` parses but drops every shape and box we gave it, and `position: sticky` parses only as `-webkit-sticky`.
+- **Kept that p13 hadn't tried:** grid's areas, named lines, `repeat()` with `auto-fill` and `auto-fit`, `dense`, spans, negative lines, `fit-content()`, `place-self`, `place-content`, and `justify-items`; flexbox's wrapping, `order`, reversed directions, `space-between`, `space-around`, `space-evenly`, and `align-content`; `:not()` with lists and complex selectors, `:nth-child(2 of .y)`, `:-webkit-any()`, `:focus-within`, `:placeholder-shown`, `:dir()`, and `:lang()`; `initial`, `inherit`, `unset`, and `revert`; nested `var()` fallbacks and `!important`; widths of `fit-content`, `max-content`, and `min-content`; `@import`, `@namespace`, `@page`, `@font-face`, `@keyframes`, and `@supports`; every filter and transform function, 3D ones too; `cubic-bezier()` and `steps()`; `counter()` and `attr()` in `content`; `-webkit-box`; `writing-mode`; `direction`; and `columns`.
+- **Layout:** 72 of 81 cases measured what Chromium measured.
+  Of the 9 that didn't, `gap` in a flex row, `gap` in a grid, and `row-gap` spaced nothing; `justify-content: end` packed at the start, while `flex-end` packs at the end; `subgrid` and `overflow: clip` were dropped; and a table cell given a width took the table's whole width.
+  `space-evenly` placed a box at 26px where Chromium placed it at 26.66px, as `vw` came out in whole pixels in p13.
+  In mainUi and the toolbar, a box with padding and a border measured as if `box-sizing: border-box` were set on it, and in the EFB's document it didn't, so those two documents' own stylesheets most likely set it on every element (unverified).
+- **Media:** in all three documents, `(hover: none)` matches, and `(hover: hover)`, `(pointer: fine)`, and `(any-pointer: fine)` don't, though `:hover` selectors parse.
+- **The engine's own names:** mainUi and the toolbar list 546 computed properties, and the EFB's document 473, among them `-coherent-custom-effect` and `-coherent-layer-clip-aa`, which no browser has.
+
+Working Title's CIVA app, which the sim ships, styles itself with CSS a Tailwind build made: the EFB's document holds its `--civa-tw-` variables, Tailwind's own `--tw-` set under a prefix.
+Its 61 KB `WTCivaApp.css` writes no `@layer`, oklch, `color-mix()`, or `gap`, and its colors are `rgba()` 213 times, while 5 `:where(` selectors and 2 `inset:` declarations in it are ones Coherent GT drops (read in workingtitle-instruments-civa 1.1.0, `WTCivaApp.css`).
+
+**Changed:** the Coherent GT check can pass only the CSS p14 measured the engine keeping, rather than fail only what p13 tried, since the engine drops 250 properties and 44 selectors that Chromium keeps, more than a hand list would hold.
+In the sim's pages, a flex row is spaced with margins between its items, the `-webkit-` form stands in where it works, and each page sets its own `box-sizing`.
+A Tailwind build that writes `rgba()` colors and no layers made CSS the engine mostly reads for Working Title, so how our kit's CSS is made stays open for stage 11b's design.
+
+**Affects:** [Coherent GT's JavaScript and CSS](coherent-gt.md), whose CSS section this rewrites; the [Coherent GT check](../build/01-the-build.md#the-coherent-gt-check), which stage 11b extends to CSS ([build plan](../build/plan.md#11b-the-apps)); and the interface's [tentative decisions](../interface/decisions.md).
+
+**Evidence:** `experiments/areas/architecture/results/p14-coherent-css-full-2026-10-25-09-20-25.txt` and `.json`, and Chromium's in `p14-coherent-css-full-chromium-2026-10-25-09-19-54.json`.
+
 ## 2026-10-25: Coherent GT drops `@layer`, oklch, `color-mix()`, and every `gap` but `grid-gap`, so Tailwind 4's output can't style a page there
 
 **Asked:** which CSS Coherent GT draws, so we know whether the EFB app and the banner can share the desktop app's styling, which shadcn on Base UI builds with Tailwind 4 (user, 2026-10-24)?

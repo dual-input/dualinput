@@ -66,8 +66,8 @@ export const FONTS: Record<string, { label: string; sans: string; mono: string }
 // The pilots' figure colors p24 showed, for the avatar swatches and the crew's dots.
 export const PILOT_COLORS = ["red", "blue", "green", "yellow", "purple", "teal", "pink", "orange"]
 
-// The user's pick of 2026-10-25 (record/areas/interface/decisions.md).
-export const DEFAULT_THEME: Theme = { preset: "nova", base: "neutral", accent: "sky", shade: 300, custom: "#00b4ff", radius: 0.625, font: "geist", info: "slate",
+// The user's pick of 2026-10-25, with Luma at a 4px radius from 2026-10-26 (record/areas/interface/decisions.md).
+export const DEFAULT_THEME: Theme = { preset: "luma", base: "neutral", accent: "sky", shade: 300, custom: "#00b4ff", radius: 0.25, font: "geist", info: "slate",
   infoChroma: 0.05, statusShade: 400, statusCap: 0.14, warningHue: "amber", troubleHue: "red", successHue: "green", chip: "soft" }
 
 const PALETTE: Record<string, Record<number, string>> = {}

@@ -29,11 +29,12 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - The sim's EFB is dark alone: `efb_os.css` holds no light theme and no `prefers-color-scheme` query (read in fs-base-efb 0.1.10, `efb_os.css`, 2026-10-25).
   - Coherent GT doesn't parse `prefers-color-scheme` ([architecture log][p13]).
 
-## The apps take shadcn's Nova look, on neutral grays, with Tailwind's sky-300 as the main color, 10px corners, and Geist
+## The apps take shadcn's Luma look at a 4px radius, on neutral grays, with Tailwind's sky-300 as the main color, and Geist
 
-- **Decided:** the kit's components copy the look of shadcn's Nova preset, with rounded corners and small type, on Tailwind's neutral grays at the steps shadcn's dark theme uses, such as `neutral-950` for the background.
+- **Decided:** the kit's components copy the look of shadcn's Luma preset, with pill-shaped switches, on Tailwind's neutral grays at the steps shadcn's dark theme uses, such as `neutral-950` for the background.
   Their main color, shadcn's `primary`, is Tailwind's sky-300, `oklch(82.8% 0.111 230.318)`, which is `#74d4ff`.
-  Their corner radius is shadcn's default of 0.625rem, 10px, and their font is Geist, with Geist Mono for codes, shipped as TTF.
+  Their radius, shadcn's `--radius`, is 0.25rem, 4px, from which Luma draws each component's corners: about 10px on buttons and cards, about 9px on inputs and badges, about 7px on tabs, and full pills on switches.
+  Their font is Geist, with Geist Mono for codes, shipped as TTF.
   The status colors are Tailwind's 400 steps of amber, red, and green, each with its chroma held to 0.14, and slate-300 with its chroma raised to 0.05:
 
   | For | Color | As hex, for Coherent GT | Contrast on `neutral-950` |
@@ -44,8 +45,10 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   | Success, such as Ready | `oklch(79.2% 0.14 151.711)` | `#6fd58d` | 10.9:1 |
 
   A status chip is soft: its color at 15% behind text in its color.
-  Settled by the user on 2026-10-25, on a bench of mockups in `experiments/areas/interface/bench`, which draws the user's sketch of an app's screen in each of shadcn's eight presets, nine grays, and any main color.
+  Settled by the user on 2026-10-25, and moved from Nova at 10px to Luma at 4px on 2026-10-26, on a bench of mockups in `experiments/areas/interface/bench`, which draws the user's sketch of an app's screen in each of shadcn's eight presets, nine grays, and any main color.
 - **Because:**
+  - Luma takes each corner from `--radius` by a step of its own, from `--radius-sm` at 0.6 times it to `--radius-4xl` at 2.6 times, which its buttons and cards use (read in the bench's `src/index.css` and `src/presets/luma/`), so at 4px those keep corners near the 10px they had under Nova.
+  - Luma's controls stand one step taller than Nova's, a small button 32px against 28px and a large one 40px against 36px (read in the bench's `src/presets/luma/button.tsx` and `src/presets/nova/button.tsx`).
   - The user kept `#7ad7ff` on the bench, `oklch(83.6% 0.105 227.9)`, then took the Tailwind color nearest it, sky-300, `oklch(82.8% 0.111 230.318)` (computed from the two colors).
   - `#7ad7ff` is the EFB's `--efb-primary-color`, `#00b4ff` ([interface log][efb-styles]), lightened: both have a hue of 198° in HSL, at a lightness of 74% against the EFB's 50% (computed).
   - Sky-300 has 11.9:1 contrast on `neutral-950` (computed), and a button filled with it takes dark text.
@@ -54,7 +57,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - Tailwind's 400 steps, at chroma up to 0.209 for green, were too rough beside sky-300's 0.111, and their solid chips too strong, so the user held their chroma to 0.14 and took soft chips (user, 2026-10-25).
   - Coherent GT drew Geist's TTF, from our package and from 127.0.0.1, and drew its WOFF2 from neither ([interface log][p19]).
   - The hex values and contrasts are computed from the oklch colors.
-- **Leaves out:** whether the apps show the pilots' figure colors, and how those stay apart from the status colors.
+- **Leaves out:** whether the apps show the pilots' figure colors, and how those stay apart from the status colors; and how many of Luma's class names Tailwind 3 builds, which p17 measured for Nova's alone ([interface log][p17]).
 
 ## The apps draw with a kit of our own components, styled with Tailwind 3
 

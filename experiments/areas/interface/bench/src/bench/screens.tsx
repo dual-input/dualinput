@@ -433,7 +433,7 @@ export function Components() {
   const ui = useUI()
   const { Button, Badge, Alert, AlertTitle, AlertDescription, ToggleGroup, ToggleGroupItem, Tabs, TabsList, TabsTrigger, TabsContent } = ui
   const { RadioGroup, RadioGroupItem, Checkbox, Switch, Skeleton, Spinner, Kbd, Input } = ui
-  const { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } = ui
+  const { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } = ui
   const { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } = ui
   return (
     <div className="flex flex-col gap-6 p-5">
@@ -550,9 +550,11 @@ export function Components() {
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>Menu</DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel>Session</DropdownMenuLabel>
-              <DropdownMenuItem>Copy the invite code</DropdownMenuItem>
-              <DropdownMenuItem>Mark the moment</DropdownMenuItem>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Session</DropdownMenuLabel>
+                <DropdownMenuItem>Copy the invite code</DropdownMenuItem>
+                <DropdownMenuItem>Mark the moment</DropdownMenuItem>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive">Leave</DropdownMenuItem>
             </DropdownMenuContent>

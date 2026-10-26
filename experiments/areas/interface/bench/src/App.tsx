@@ -1,11 +1,13 @@
-// The style bench: the sketch's window on the left, switches for preset, gray, main color,
-// radius, and font on the right, and a strip of kept combinations below to compare.
+// The style bench: a mockup on the left, either the EFB app from the sketches of 2026-10-26 or
+// the earlier desktop window, switches for preset, gray, main color, radius, font, and the
+// mockup's states on the right, and a strip of kept combinations below to compare.
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { UI } from "@/bench/ui"
 import { AppWindow, SCREENS, WINDOW, type Screen } from "@/bench/window"
+import { DEFAULT_EFB, EFB, EfbApp, type EfbState } from "@/bench/efb"
 import {
   BASES, CHIPS, color, DEFAULT_THEME, FONTS, HUES, INFO_CHROMAS, INFO_COLORS, PRESETS, RADII, STATUS_CAPS, STATUS_SHADES,
   SUCCESS_HUES, themeLabel, themeVars, TROUBLE_HUES, WARNING_HUES, type Theme,
@@ -81,12 +83,25 @@ export default function App() {
   // At first the window fits the screen's height, and a picked zoom holds from then on.
   const [zoom, setZoom] = useState(() => load("bench.zoom", Math.min(1, Math.floor(((window.innerHeight - 48) / WINDOW.height) * 20) / 20)))
   const [kept, setKept] = useState<{ id: number; theme: Theme }[]>(() => load("bench.kept", []))
+  // The EFB app from the sketches of 2026-10-26, or the desktop window from the sketch of 2026-10-25.
+  const [mockup, setMockup] = useState<"efb" | "desktop">(() => load("bench.mockup", "efb"))
+  const [efb, setEfb] = useState<EfbState>(() => ({ ...DEFAULT_EFB, ...load("bench.efb", {}) }))
   const set = (patch: Partial<Theme>) => setTheme((t) => ({ ...t, ...patch }))
+  const setE = (patch: Partial<EfbState>) => setEfb((s) => ({ ...s, ...patch }))
+  const width = mockup === "efb" ? EFB.width : WINDOW.width
+  const draw = (t: Theme, live: boolean) =>
+    mockup === "efb" ? (
+      <EfbApp theme={t} state={efb} onState={live ? setE : undefined} />
+    ) : (
+      <AppWindow theme={t} screen={screen} status={status} inSession={inSession} onScreen={live ? setScreen : undefined} onSession={live ? setInSession : undefined} />
+    )
 
   useEffect(() => save("bench.theme", theme), [theme])
   useEffect(() => save("bench.screen", screen), [screen])
   useEffect(() => save("bench.zoom", zoom), [zoom])
   useEffect(() => save("bench.kept", kept), [kept])
+  useEffect(() => save("bench.mockup", mockup), [mockup])
+  useEffect(() => save("bench.efb", efb), [efb])
 
   // Menus, dialogs, and toasts open in a portal at the document's root, outside the window,
   // so the root takes the window's theme too.
@@ -101,9 +116,7 @@ export default function App() {
     <TooltipProvider>
       <div className="flex min-h-svh flex-col gap-6 p-6">
         <div className="flex flex-wrap items-start gap-6">
-          <div style={{ zoom }}>
-            <AppWindow theme={theme} screen={screen} status={status} inSession={inSession} onScreen={setScreen} onSession={setInSession} />
-          </div>
+          <div style={{ zoom }}>{draw(theme, true)}</div>
 
           <aside className="flex w-80 flex-col gap-5 rounded-xl border bg-card p-4 text-card-foreground">
             <div className="flex items-center justify-between">
@@ -244,23 +257,115 @@ export default function App() {
 
             <div className="h-px bg-border" />
 
-            <Row label="Screen">
-              {SCREENS.map((s) => (
-                <Chip key={s.id} on={screen === s.id} onClick={() => setScreen(s.id)}>
-                  {s.label}
-                </Chip>
-              ))}
-            </Row>
-            <Row label="Status row">
-              {(["ok", "warning", "trouble"] as Status[]).map((s) => (
-                <Chip key={s} on={status === s} onClick={() => setStatus(s)}>
-                  {s === "ok" ? "all good" : s}
-                </Chip>
-              ))}
-              <Chip on={inSession} onClick={() => setInSession((v) => !v)}>
-                in a session
+            <Row label="Mockup">
+              <Chip on={mockup === "efb"} onClick={() => setMockup("efb")} title="The sketches of 2026-10-26">
+                EFB app
+              </Chip>
+              <Chip on={mockup === "desktop"} onClick={() => setMockup("desktop")} title="The sketch of 2026-10-25">
+                desktop window, earlier sketch
               </Chip>
             </Row>
+
+            {mockup === "efb" ? (
+              <>
+                <Row label="Screen">
+                  {(["setup", "home", "preflight"] as const).map((s) => (
+                    <Chip key={s} on={efb.screen === s} onClick={() => setE({ screen: s })}>
+                      {{ setup: "first-time setup", home: "home", preflight: "preflight" }[s]}
+                    </Chip>
+                  ))}
+                </Row>
+                {efb.screen === "home" && (
+                  <>
+                    <Row label="Visit">
+                      <Chip on={efb.firstTime} onClick={() => setE({ firstTime: true })}>
+                        first time
+                      </Chip>
+                      <Chip on={!efb.firstTime} onClick={() => setE({ firstTime: false })}>
+                        later
+                      </Chip>
+                    </Row>
+                    <Row label="Loaded aircraft">
+                      <Chip on={efb.aircraft === "supported"} onClick={() => setE({ aircraft: "supported" })}>
+                        supported
+                      </Chip>
+                      <Chip on={efb.aircraft === "unsupported"} onClick={() => setE({ aircraft: "unsupported" })}>
+                        unsupported
+                      </Chip>
+                    </Row>
+                    {!efb.firstTime && efb.aircraft === "supported" && (
+                      <Row label="Notes from the profile authors">
+                        <Chip on={efb.notes} onClick={() => setE({ notes: true })}>
+                          some
+                        </Chip>
+                        <Chip on={!efb.notes} onClick={() => setE({ notes: false })}>
+                          none
+                        </Chip>
+                      </Row>
+                    )}
+                  </>
+                )}
+                {efb.screen === "preflight" && (
+                  <>
+                    <Row label="Crew">
+                      <Chip on={efb.crew === "alone"} onClick={() => setE({ crew: "alone" })}>
+                        nobody joined yet
+                      </Chip>
+                      <Chip on={efb.crew === "full"} onClick={() => setE({ crew: "full" })}>
+                        James and Adam
+                      </Chip>
+                    </Row>
+                    {efb.crew === "full" && (
+                      <>
+                        <Row label="You are">
+                          <Chip on={efb.flying} onClick={() => setE({ flying: true })}>
+                            the pilot flying
+                          </Chip>
+                          <Chip on={!efb.flying} onClick={() => setE({ flying: false })}>
+                            not flying
+                          </Chip>
+                        </Row>
+                        <Row label="Adam">
+                          {(["ready", "not-ready", "other-aircraft", "link-lost"] as const).map((a) => (
+                            <Chip key={a} on={efb.adam === a} onClick={() => setE({ adam: a })}>
+                              {{ ready: "ready", "not-ready": "not ready", "other-aircraft": "in another aircraft", "link-lost": "link lost" }[a]}
+                            </Chip>
+                          ))}
+                        </Row>
+                      </>
+                    )}
+                    <Row label="Crew card">
+                      <Chip on={!efb.folded} onClick={() => setE({ folded: false })}>
+                        open
+                      </Chip>
+                      <Chip on={efb.folded} onClick={() => setE({ folded: true })}>
+                        folded, checklist expanded
+                      </Chip>
+                    </Row>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                <Row label="Screen">
+                  {SCREENS.map((s) => (
+                    <Chip key={s.id} on={screen === s.id} onClick={() => setScreen(s.id)}>
+                      {s.label}
+                    </Chip>
+                  ))}
+                </Row>
+                <Row label="Status row">
+                  {(["ok", "warning", "trouble"] as Status[]).map((s) => (
+                    <Chip key={s} on={status === s} onClick={() => setStatus(s)}>
+                      {s === "ok" ? "all good" : s}
+                    </Chip>
+                  ))}
+                  <Chip on={inSession} onClick={() => setInSession((v) => !v)}>
+                    in a session
+                  </Chip>
+                </Row>
+              </>
+            )}
             <Row label="Window zoom">
               {[0.5, 0.6, 0.75, 0.9, 1].map((z) => (
                 <Chip key={z} on={zoom === z} onClick={() => setZoom(z)}>
@@ -278,12 +383,12 @@ export default function App() {
               {kept.map((k) => (
                 <div key={k.id} className="flex shrink-0 flex-col gap-2">
                   {/* A div, since the window it holds has buttons of its own. */}
-                  <div role="button" tabIndex={0} onClick={() => setTheme(k.theme)} onKeyDown={(e) => e.key === "Enter" && setTheme(k.theme)} title="Load into the editor" className="cursor-pointer" style={{ width: WINDOW.width * 0.42 }}>
+                  <div role="button" tabIndex={0} onClick={() => setTheme(k.theme)} onKeyDown={(e) => e.key === "Enter" && setTheme(k.theme)} title="Load into the editor" className="cursor-pointer" style={{ width: width * 0.42 }}>
                     <div style={{ zoom: 0.42 }} className="pointer-events-none">
-                      <AppWindow theme={k.theme} screen={screen} status={status} inSession={inSession} />
+                      {draw(k.theme, false)}
                     </div>
                   </div>
-                  <div className="flex items-start justify-between gap-2" style={{ width: WINDOW.width * 0.42 }}>
+                  <div className="flex items-start justify-between gap-2" style={{ width: width * 0.42 }}>
                     <span className="text-[11px] leading-tight text-muted-foreground">{themeLabel(k.theme)}</span>
                     <button className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setKept((all) => all.filter((x) => x.id !== k.id))}>
                       remove

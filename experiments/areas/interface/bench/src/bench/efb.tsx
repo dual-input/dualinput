@@ -221,28 +221,26 @@ function NoNotes() {
 
 function Unsupported() {
   return (
-    <div className="flex flex-col gap-5 p-5">
-      <h1 className="pt-2 text-center text-xl font-semibold">Unsupported aircraft</h1>
-      <div className="flex flex-col gap-3 text-sm">
-        <p>{UNSUPPORTED} is currently not supported by Dual Input.</p>
-        <p>
-          You can switch to a supported aircraft from the list below or get your hands dirty building a profile for it (<SeeHow />).
-        </p>
-      </div>
-      <SupportedList />
-    </div>
+    <section className="flex flex-col gap-3 text-sm">
+      <h2 className="text-base font-semibold">Unsupported aircraft</h2>
+      <p>{UNSUPPORTED} is currently not supported by Dual Input.</p>
+      <p>
+        You can switch to a supported aircraft from the list below or get your hands dirty building a profile for it (<SeeHow />).
+      </p>
+    </section>
   )
 }
 
+// Host and Join stay in an unsupported aircraft, since a session there still flies it: flight-model
+// sync, control, traffic, and ATC run, and only what the profile names stays idle
+// (record/areas/product/03-v1-scope.md, Preflight match check).
 function Home({ s, name, onHost, onJoin }: { s: EfbState; name: string; onHost: () => void; onJoin: () => void }) {
   const supported = s.aircraft === "supported"
-  // The sketch of a later visit in an unsupported aircraft drops Host and Join.
-  if (!s.firstTime && !supported) return <Unsupported />
   return (
     <div className="flex h-full flex-col gap-6 p-5">
       <HostJoin onHost={onHost} onJoin={onJoin} />
-      {s.firstTime ? <Welcome name={name} supported={supported} /> : s.notes ? <Notes /> : <NoNotes />}
-      {s.firstTime && !supported && <SupportedList />}
+      {s.firstTime ? <Welcome name={name} supported={supported} /> : !supported ? <Unsupported /> : s.notes ? <Notes /> : <NoNotes />}
+      {!supported && <SupportedList />}
     </div>
   )
 }

@@ -8,9 +8,16 @@ import { Frame, LayoutGrid, Minus, Plus, Scan } from "lucide-react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { UI } from "@/bench/ui"
 import { DEFAULT_THEME, themeLabel, themeVars, type Theme } from "@/bench/theme"
-import { EFB, PreflightFrame } from "./preflight"
+import { EFB } from "./shell"
+import { PreflightFrame } from "./preflight"
+import { SetupFrame } from "./setup"
 
-const SECTIONS = [{ name: "Preflight", frames: [{ name: "Preflight, with the UI kit", draw: (t: Theme) => <PreflightFrame theme={t} /> }] }]
+// A frame that's taller than the EFB gets a line where the EFB's height ends.
+type FrameEntry = { name: string; tall?: boolean; draw: (t: Theme) => React.ReactNode }
+const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
+  { name: "Setup and home", frames: [{ name: "First-time setup", draw: (t) => <SetupFrame theme={t} /> }] },
+  { name: "Preflight", frames: [{ name: "Preflight, with the UI kit", tall: true, draw: (t) => <PreflightFrame theme={t} /> }] },
+]
 
 // The style bench saves its theme in this browser; the canvas only reads it.
 function savedTheme(): Theme {
@@ -170,12 +177,13 @@ export function Canvas() {
                             {f.name}
                           </span>
                           {f.draw(theme)}
-                          {/* Where the EFB's own height ends, since the frame grows to show every component. */}
-                          <div className="pointer-events-none absolute inset-x-0 border-t border-dashed border-sky-400/60" style={{ top: EFB.height }}>
-                            <span className="absolute top-0 left-full whitespace-nowrap text-sky-300/80" style={{ fontSize: fixed(11), paddingLeft: fixed(8), transform: "translateY(-50%)" }}>
-                              EFB height, {EFB.height}px
-                            </span>
-                          </div>
+                          {f.tall && (
+                            <div className="pointer-events-none absolute inset-x-0 border-t border-dashed border-sky-400/60" style={{ top: EFB.height }}>
+                              <span className="absolute top-0 left-full whitespace-nowrap text-sky-300/80" style={{ fontSize: fixed(11), paddingLeft: fixed(8), transform: "translateY(-50%)" }}>
+                                EFB height, {EFB.height}px
+                              </span>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

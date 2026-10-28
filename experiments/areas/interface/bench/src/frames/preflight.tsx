@@ -3,24 +3,12 @@
 // is judged on a real page. The crew, the aircraft, and the words are examples.
 import { useState } from "react"
 import { toast } from "sonner"
-import {
-  AlertTriangle, Check, CircleX, Copy, Diamond, Headset, Info, Keyboard, LogOut, PackageOpen, PersonStanding, Plane, Settings as Gear, Users, X,
-} from "lucide-react"
+import { AlertTriangle, Check, CircleX, Copy, Info, Keyboard, LogOut, PackageOpen, Settings as Gear, X } from "lucide-react"
 
-import { ThemeContext, UI, UIContext, useUI } from "@/bench/ui"
-import { color, PILOT_COLORS, themeVars, type Theme } from "@/bench/theme"
+import { useUI } from "@/bench/ui"
+import { color, PILOT_COLORS, type Theme } from "@/bench/theme"
 import { StatusChip } from "@/bench/screens"
-
-// The sim's EFB sizes its apps from a 516 by 716 base (record/areas/interface/log.md, 2026-10-24).
-export const EFB = { width: 516, height: 716 }
-
-const TABS = [
-  { id: "session", icon: Users, label: "Session" },
-  { id: "traffic", icon: Plane, label: "Traffic" },
-  { id: "atc", icon: Headset, label: "ATC audio" },
-  { id: "avatars", icon: PersonStanding, label: "Avatars" },
-  { id: "settings", icon: Gear, label: "Settings" },
-]
+import { AppFrame, Label } from "./shell"
 
 const CREW = [
   { name: "You", hue: "orange", chip: "Pilot flying", you: true },
@@ -33,42 +21,6 @@ const DEVICES = [
   { value: "headset", label: "Headset (USB Audio)" },
   { value: "speakers", label: "Speakers (Realtek)" },
 ]
-
-function Label({ children }: { children: React.ReactNode }) {
-  return <span className="text-xs text-muted-foreground">{children}</span>
-}
-
-function Header() {
-  const ok = (label: string) => (
-    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-      {label} <Check className="size-3.5 text-success" />
-    </span>
-  )
-  return (
-    <div className="flex h-11 shrink-0 items-center gap-2 px-4 select-none">
-      <Diamond className="size-4 text-primary" />
-      <span className="text-sm font-medium">Dual Input</span>
-      <span className="text-xs text-muted-foreground">v1.0.2</span>
-      <div className="ml-auto flex items-center gap-4">
-        {ok("Sim")}
-        {ok("Aircraft")}
-      </div>
-    </div>
-  )
-}
-
-function TabBar() {
-  return (
-    <nav className="flex h-14 shrink-0 border-t">
-      {TABS.map(({ id, icon: Icon, label }, i) => (
-        <button key={id} title={label} className={"relative flex flex-1 items-center justify-center outline-none hover:text-foreground " + (i === 0 ? "text-primary" : "text-muted-foreground")}>
-          {i === 0 && <span className="absolute inset-x-4 -top-px h-0.5 rounded-full bg-primary" />}
-          <Icon className="size-5" />
-        </button>
-      ))}
-    </nav>
-  )
-}
 
 function LeaveDialog({ trigger }: { trigger: React.ReactElement }) {
   const ui = useUI()
@@ -481,25 +433,15 @@ function UiKit() {
 // The frame grows with its content, so every component shows without scrolling; the canvas marks
 // where the EFB's own 716px height ends.
 export function PreflightFrame({ theme }: { theme: Theme }) {
-  const ui = UI[theme.preset] ?? UI.nova
   return (
-    <ThemeContext.Provider value={theme}>
-      <UIContext.Provider value={ui}>
-        <div
-          className="dark flex flex-col overflow-hidden rounded-xl border bg-background font-sans text-foreground shadow-2xl"
-          style={{ ...(themeVars(theme) as React.CSSProperties), width: EFB.width, minHeight: EFB.height }}
-        >
-          <Header />
-          <div className="flex flex-1 flex-col gap-6 p-5">
-            <SessionCard />
-            <section className="flex flex-col gap-4">
-              <h2 className="text-sm font-medium">UI kit, in place of the preflight checklist</h2>
-              <UiKit />
-            </section>
-          </div>
-          <TabBar />
-        </div>
-      </UIContext.Provider>
-    </ThemeContext.Provider>
+    <AppFrame theme={theme} status={{ aircraft: "supported" }}>
+      <div className="flex flex-1 flex-col gap-6 p-5">
+        <SessionCard />
+        <section className="flex flex-col gap-4">
+          <h2 className="text-sm font-medium">UI kit, in place of the preflight checklist</h2>
+          <UiKit />
+        </section>
+      </div>
+    </AppFrame>
   )
 }

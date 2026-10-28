@@ -1,6 +1,6 @@
 // What every frame of the EFB app shares: its size, the header, the tab bar, the small label,
 // and the frame that gives a page the theme and the preset's components.
-import { Check, CircleX, Diamond, Headset, PersonStanding, Plane, Settings as Gear, Users } from "lucide-react"
+import { Check, CircleX, Headset, PersonStanding, Plane, Settings as Gear, Users } from "lucide-react"
 
 import { ThemeContext, UI, UIContext } from "@/bench/ui"
 import { themeVars, type Theme } from "@/bench/theme"
@@ -16,6 +16,16 @@ const TABS = [
   { id: "settings", icon: Gear, label: "Settings" },
 ]
 
+// Dual Input's mark: two lines merging into one, two pilots' inputs flying one aircraft. The user
+// picked it on 2026-10-28, from the marks of the 2026-10-24 apps design page.
+export function Mark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" fill="none" className={className} aria-hidden>
+      <path d="M4 8.5C12 8.5 13.5 16 20.5 16M4 23.5C12 23.5 13.5 16 20.5 16H28" stroke="currentColor" strokeWidth={3.2} strokeLinecap="round" />
+    </svg>
+  )
+}
+
 export function Label({ children }: { children: React.ReactNode }) {
   return <span className="text-xs text-muted-foreground">{children}</span>
 }
@@ -26,7 +36,7 @@ export type HeaderStatus = { aircraft: "supported" | "unsupported" } | null
 export function Header({ status }: { status: HeaderStatus }) {
   return (
     <div className="flex h-11 shrink-0 items-center gap-2 px-4 select-none">
-      <Diamond className="size-4 text-primary" />
+      <Mark className="size-4 text-primary" />
       <span className="text-sm font-medium">Dual Input</span>
       <span className="text-xs text-muted-foreground">v1.0.2</span>
       {status && (

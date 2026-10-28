@@ -11,11 +11,19 @@ import { DEFAULT_THEME, themeLabel, themeVars, type Theme } from "@/bench/theme"
 import { EFB } from "./shell"
 import { PreflightFrame } from "./preflight"
 import { SetupFrame } from "./setup"
+import { HomeFirstTimeFrame } from "./home"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends.
 type FrameEntry = { name: string; tall?: boolean; draw: (t: Theme) => React.ReactNode }
 const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
-  { name: "Setup and home", frames: [{ name: "First-time setup", draw: (t) => <SetupFrame theme={t} /> }] },
+  {
+    name: "Setup and home",
+    frames: [
+      { name: "First-time setup", draw: (t) => <SetupFrame theme={t} /> },
+      { name: "Home, first time", draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" /> },
+      { name: "Home, first time, unsupported aircraft", draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="unsupported" /> },
+    ],
+  },
   { name: "Preflight", frames: [{ name: "Preflight, with the UI kit", tall: true, draw: (t) => <PreflightFrame theme={t} /> }] },
 ]
 

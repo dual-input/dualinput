@@ -10,18 +10,31 @@ import { UI } from "@/bench/ui"
 import { DEFAULT_THEME, themeLabel, themeVars, type Theme } from "@/bench/theme"
 import { EFB } from "./shell"
 import { PreflightFrame } from "./preflight"
-import { SetupFrame } from "./setup"
+import { SetupFlowFrame } from "./setup-check"
 import { HomeFirstTimeFrame } from "./home"
 
-// A frame that's taller than the EFB gets a line where the EFB's height ends.
-type FrameEntry = { name: string; tall?: boolean; draw: (t: Theme) => React.ReactNode }
+// A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
+// one gets a Replay button beside its name, which draws it afresh.
+type FrameEntry = { name: string; tall?: boolean; replay?: boolean; draw: (t: Theme) => React.ReactNode }
 const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
   {
-    name: "Setup and home",
+    name: "First-time setup",
     frames: [
-      { name: "First-time setup", draw: (t) => <SetupFrame theme={t} /> },
-      { name: "Home, first time", draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" /> },
-      { name: "Home, first time, unsupported aircraft", draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="unsupported" /> },
+      { name: "Every check passes", replay: true, draw: (t) => <SetupFlowFrame theme={t} /> },
+      { name: "Failed: Dual Input service", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="core" openOnFailure /> },
+      { name: "Failed: sim add-on", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="addon" openOnFailure /> },
+      { name: "Failed: PC offline", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="offline" openOnFailure /> },
+      { name: "Failed: our servers", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="servers" openOnFailure /> },
+      { name: "Failed: Windows Firewall", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="firewall" openOnFailure /> },
+      { name: "Crew card", replay: true, draw: (t) => <SetupFlowFrame theme={t} openOnCard /> },
+    ],
+  },
+  {
+    name: "Home",
+    frames: [
+      { name: "Home, first time", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" /> },
+      { name: "Home, first time: the aircraft check", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" openOnCheck /> },
+      { name: "Home, first time: the aircraft check, unsupported", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="unsupported" openOnCheck /> },
     ],
   },
   { name: "Preflight", frames: [{ name: "Preflight, with the UI kit", tall: true, draw: (t) => <PreflightFrame theme={t} /> }] },
@@ -45,6 +58,7 @@ export function Canvas() {
   const frames = useRef(new Map<string, HTMLDivElement>())
   const [view, setView] = useState({ x: 0, y: 0, z: 0.5 })
   const [current, setCurrent] = useState<string | null>(null)
+  const [runs, setRuns] = useState<Record<string, number>>({})
   const drag = useRef<{ x: number; y: number } | null>(null)
 
   // Fits an element of the world to the board. Rects come back on screen, so the world's place
@@ -183,8 +197,13 @@ export function Canvas() {
                         >
                           <span className={"absolute bottom-full left-0 whitespace-nowrap " + (current === f.name ? "text-sky-300" : "text-neutral-400")} style={{ fontSize: fixed(12), paddingBottom: fixed(6) }}>
                             {f.name}
+                            {f.replay && (
+                              <button className="text-sky-300 hover:underline" style={{ marginLeft: fixed(10) }} onClick={() => setRuns((r) => ({ ...r, [f.name]: (r[f.name] ?? 0) + 1 }))}>
+                                Replay
+                              </button>
+                            )}
                           </span>
-                          {f.draw(theme)}
+                          <div key={runs[f.name] ?? 0}>{f.draw(theme)}</div>
                           {f.tall && (
                             <div className="pointer-events-none absolute inset-x-0 border-t border-dashed border-sky-400/60" style={{ top: EFB.height }}>
                               <span className="absolute top-0 left-full whitespace-nowrap text-sky-300/80" style={{ fontSize: fixed(11), paddingLeft: fixed(8), transform: "translateY(-50%)" }}>

@@ -435,7 +435,7 @@ function UiKit() {
 export function PreflightFrame({ theme }: { theme: Theme }) {
   return (
     <AppFrame theme={theme} status={{ aircraft: "supported" }}>
-      <div className="flex flex-1 flex-col gap-6 p-5">
+      <div className="flex flex-1 flex-col gap-6 p-5 pt-2">
         <SessionCard />
         <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium">UI kit, in place of the preflight checklist</h2>

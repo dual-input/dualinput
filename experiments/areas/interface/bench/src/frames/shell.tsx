@@ -26,6 +26,21 @@ export function Mark({ className }: { className?: string }) {
   )
 }
 
+// The mark cut out of a sky-300 tile, sized in em so the tile stands as tall as a capital letter
+// beside it: Geist's capital D measured 0.75em tall. Set it on the text's baseline, which flexbox
+// takes from the tile's bottom edge only while the tile has no content in flow, so the mark sits
+// absolutely inside it. The stroke is heavier than the mark's own, since the mark inside is only
+// about 10px at text-xl.
+export function MarkTile() {
+  return (
+    <span className="relative inline-block shrink-0 rounded-[0.16em] bg-primary text-background" style={{ width: "0.75em", height: "0.75em" }}>
+      <svg viewBox="0 0 32 32" fill="none" aria-hidden className="absolute inset-0 m-auto" style={{ width: "0.5em", height: "0.5em" }}>
+        <path d="M4 8.5C12 8.5 13.5 16 20.5 16M4 23.5C12 23.5 13.5 16 20.5 16H28" stroke="currentColor" strokeWidth={4.5} strokeLinecap="round" />
+      </svg>
+    </span>
+  )
+}
+
 export function Label({ children }: { children: React.ReactNode }) {
   return <span className="text-xs text-muted-foreground">{children}</span>
 }
@@ -74,7 +89,7 @@ export function TabBar() {
 
 // A frame of the EFB app. It's the EFB's height at least, and grows past it for a page that
 // shows more than one screen holds, such as the preflight page with the UI kit.
-export function AppFrame({ theme, status, tabs = true, children }: { theme: Theme; status: HeaderStatus; tabs?: boolean; children: React.ReactNode }) {
+export function AppFrame({ theme, status, header = true, tabs = true, children }: { theme: Theme; status: HeaderStatus; header?: boolean; tabs?: boolean; children: React.ReactNode }) {
   const ui = UI[theme.preset] ?? UI.nova
   return (
     <ThemeContext.Provider value={theme}>
@@ -83,7 +98,7 @@ export function AppFrame({ theme, status, tabs = true, children }: { theme: Them
           className="dark flex flex-col overflow-hidden rounded-xl border bg-background font-sans text-foreground shadow-2xl"
           style={{ ...(themeVars(theme) as React.CSSProperties), width: EFB.width, minHeight: EFB.height }}
         >
-          <Header status={status} />
+          {header && <Header status={status} />}
           <div className="flex flex-1 flex-col">{children}</div>
           {tabs && <TabBar />}
         </div>

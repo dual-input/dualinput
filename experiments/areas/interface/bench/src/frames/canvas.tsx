@@ -8,31 +8,9 @@ import { Frame, LayoutGrid, Minus, Plus, Scan } from "lucide-react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { UI } from "@/bench/ui"
 import { DEFAULT_THEME, themeLabel, themeVars, type Theme } from "@/bench/theme"
-import { EFB, EfbApp, FRAME_GROUPS, FRAMES } from "./efb"
+import { EFB, PreflightFrame } from "./preflight"
 
-const GAP = 80
-const PAD = 80
-const TITLE = 40
-const LABEL = 32
-const SECTION_GAP = 200
-
-type Rect = { x: number; y: number; w: number; h: number }
-
-function layout() {
-  const sections: (Rect & { group: string })[] = []
-  const frames: (Rect & (typeof FRAMES)[number])[] = []
-  let y = 0
-  for (const group of FRAME_GROUPS) {
-    const list = FRAMES.filter((f) => f.group === group)
-    const w = PAD * 2 + list.length * EFB.width + (list.length - 1) * GAP
-    const h = TITLE + LABEL + EFB.height + PAD
-    sections.push({ group, x: 0, y, w, h })
-    list.forEach((f, i) => frames.push({ ...f, x: PAD + i * (EFB.width + GAP), y: y + TITLE + LABEL, w: EFB.width, h: EFB.height }))
-    y += h + SECTION_GAP
-  }
-  return { sections, frames, w: Math.max(...sections.map((s) => s.w)), h: y - SECTION_GAP }
-}
-const BOARD = layout()
+const SECTIONS = [{ name: "Preflight", frames: [{ name: "Preflight, with the UI kit", draw: (t: Theme) => <PreflightFrame theme={t} /> }] }]
 
 // The style bench saves its theme in this browser; the canvas only reads it.
 function savedTheme(): Theme {
@@ -48,47 +26,59 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 export function Canvas() {
   const [theme] = useState(savedTheme)
   const board = useRef<HTMLDivElement>(null)
-  const [view, setView] = useState({ x: 0, y: 0, z: 0.2 })
+  const world = useRef<HTMLDivElement>(null)
+  const frames = useRef(new Map<string, HTMLDivElement>())
+  const [view, setView] = useState({ x: 0, y: 0, z: 0.5 })
   const [current, setCurrent] = useState<string | null>(null)
   const drag = useRef<{ x: number; y: number } | null>(null)
 
-  const fit = useCallback((r: Rect, most = 1) => {
-    const el = board.current
-    if (!el) return
-    const { width, height } = el.getBoundingClientRect()
-    const z = Math.min(most, (width - 120) / r.w, (height - 120) / r.h)
-    setView({ z, x: (width - r.w * z) / 2 - r.x * z, y: (height - r.h * z) / 2 - r.y * z })
-  }, [])
-  const fitAll = useCallback(() => (setCurrent(null), fit({ x: 0, y: 0, w: BOARD.w, h: BOARD.h })), [fit])
+  // Fits an element of the world to the board. Rects come back on screen, so the world's place
+  // and zoom turn them back into the world's own units.
+  const fit = useCallback(
+    (el: HTMLElement | null | undefined, most = 1) => {
+      const b = board.current
+      if (!b || !el) return
+      const box = b.getBoundingClientRect()
+      const r = el.getBoundingClientRect()
+      const wx = (r.left - box.left - view.x) / view.z
+      const wy = (r.top - box.top - view.y) / view.z
+      const w = r.width / view.z
+      const h = r.height / view.z
+      const z = clamp(Math.min((box.width - 120) / w, (box.height - 120) / h), 0.05, most)
+      setView({ z, x: (box.width - w * z) / 2 - wx * z, y: (box.height - h * z) / 2 - wy * z })
+    },
+    [view]
+  )
 
   const zoomAt = useCallback((factor: number, px?: number, py?: number) => {
-    const el = board.current
-    if (!el) return
-    const rect = el.getBoundingClientRect()
-    const cx = px ?? rect.width / 2
-    const cy = py ?? rect.height / 2
+    const b = board.current
+    if (!b) return
+    const box = b.getBoundingClientRect()
+    const cx = px ?? box.width / 2
+    const cy = py ?? box.height / 2
     setView((v) => {
       const z = clamp(v.z * factor, 0.05, 4)
       return { z, x: cx - (cx - v.x) * (z / v.z), y: cy - (cy - v.y) * (z / v.z) }
     })
   }, [])
 
-  useLayoutEffect(() => fitAll(), [fitAll])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => fit(world.current), [])
 
   useEffect(() => {
-    const el = board.current
-    if (!el) return
+    const b = board.current
+    if (!b) return
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
       if (e.ctrlKey || e.metaKey) {
-        const rect = el.getBoundingClientRect()
-        zoomAt(Math.exp(-e.deltaY * 0.01), e.clientX - rect.left, e.clientY - rect.top)
+        const box = b.getBoundingClientRect()
+        zoomAt(Math.exp(-e.deltaY * 0.01), e.clientX - box.left, e.clientY - box.top)
       } else {
         setView((v) => ({ ...v, x: v.x - e.deltaX, y: v.y - e.deltaY }))
       }
     }
-    el.addEventListener("wheel", onWheel, { passive: false })
-    return () => el.removeEventListener("wheel", onWheel)
+    b.addEventListener("wheel", onWheel, { passive: false })
+    return () => b.removeEventListener("wheel", onWheel)
   }, [zoomAt])
 
   // Menus, dialogs, and toasts open in a portal at the document's root, outside every frame,
@@ -99,7 +89,8 @@ export function Canvas() {
   }, [theme])
 
   const Toaster = (UI[theme.preset] ?? UI.nova).Toaster
-  const onBoard = (e: React.PointerEvent) => e.target === e.currentTarget || (e.target as HTMLElement).dataset.board !== undefined
+  // Labels keep one size on screen whatever the zoom, as Figma draws frame and section names.
+  const fixed = (px: number) => px / view.z
 
   return (
     <TooltipProvider>
@@ -108,73 +99,90 @@ export function Canvas() {
           <div className="flex h-11 items-center gap-2 border-b border-white/10 px-4">
             <LayoutGrid className="size-4 text-neutral-400" />
             <span className="text-[13px] font-medium">EFB app</span>
-            <span className="text-[13px] text-neutral-500">/ Outline</span>
+            <span className="text-[13px] text-neutral-500">/ UI kit</span>
           </div>
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-2 pt-3">
             <span className="px-2 text-[11px] font-medium tracking-wider text-neutral-500 uppercase">Layers</span>
-            {BOARD.sections.map((s) => (
-              <div key={s.group} className="flex flex-col">
-                <button className="flex h-7 items-center gap-2 rounded-md px-2 text-left text-[13px] font-medium hover:bg-white/5" onClick={() => (setCurrent(null), fit(s))}>
-                  <LayoutGrid className="size-3.5 text-neutral-500" /> {s.group}
-                </button>
-                {BOARD.frames
-                  .filter((f) => f.group === s.group)
-                  .map((f) => (
-                    <button
-                      key={f.label}
-                      className={"flex h-7 items-center gap-2 rounded-md pr-2 pl-7 text-left text-[13px] " + (current === f.label ? "bg-sky-500/20 text-sky-200" : "text-neutral-300 hover:bg-white/5")}
-                      onClick={() => (setCurrent(f.label), fit({ x: f.x - 40, y: f.y - LABEL - 20, w: f.w + 80, h: f.h + LABEL + 60 }))}
-                    >
-                      <Frame className="size-3.5 shrink-0 text-neutral-500" />
-                      <span className="truncate">{f.label}</span>
-                    </button>
-                  ))}
+            {SECTIONS.map((s) => (
+              <div key={s.name} className="flex flex-col">
+                <span className="flex h-7 items-center gap-2 px-2 text-[13px] font-medium">
+                  <LayoutGrid className="size-3.5 text-neutral-500" /> {s.name}
+                </span>
+                {s.frames.map((f) => (
+                  <button
+                    key={f.name}
+                    className={"flex h-7 items-center gap-2 rounded-md pr-2 pl-7 text-left text-[13px] " + (current === f.name ? "bg-sky-500/20 text-sky-200" : "text-neutral-300 hover:bg-white/5")}
+                    onClick={() => (setCurrent(f.name), fit(frames.current.get(f.name)))}
+                  >
+                    <Frame className="size-3.5 shrink-0 text-neutral-500" />
+                    <span className="truncate">{f.name}</span>
+                  </button>
+                ))}
               </div>
             ))}
           </div>
           <p className="border-t border-white/10 p-4 text-[11px] leading-relaxed text-neutral-500">{themeLabel(theme)}</p>
         </aside>
 
-        <div
-          ref={board}
-          // Clip rather than hide, since focus can scroll a box whose overflow is hidden, which
-          // moved the zoom controls and the frames together.
-          className="relative min-w-0 flex-1 cursor-grab overflow-clip active:cursor-grabbing"
-          style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)", backgroundSize: `${24 * view.z}px ${24 * view.z}px`, backgroundPosition: `${view.x}px ${view.y}px` }}
-          onPointerDown={(e) => {
-            if (!onBoard(e)) return
-            drag.current = { x: e.clientX, y: e.clientY }
-            e.currentTarget.setPointerCapture(e.pointerId)
-          }}
-          onPointerMove={(e) => {
-            if (!drag.current) return
-            const dx = e.clientX - drag.current.x
-            const dy = e.clientY - drag.current.y
-            drag.current = { x: e.clientX, y: e.clientY }
-            setView((v) => ({ ...v, x: v.x + dx, y: v.y + dy }))
-          }}
-          onPointerUp={() => (drag.current = null)}
-        >
-          <div data-board className="absolute top-0 left-0 origin-top-left" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.z})`, width: BOARD.w, height: BOARD.h }}>
-            {BOARD.sections.map((s) => (
-              <div key={s.group} data-board className="absolute rounded-[24px] border border-white/10 bg-white/[0.03]" style={{ left: s.x, top: s.y, width: s.w, height: s.h }}>
-                {/* Above the section, at one size whatever the zoom, as Figma draws a section's name. */}
-                <span className="absolute bottom-full left-0 origin-bottom-left whitespace-nowrap" style={{ transform: `scale(${1 / view.z})`, paddingBottom: 10 }}>
-                  <span className="block rounded-md bg-white/10 px-2.5 py-1 text-[13px] font-medium text-neutral-200">{s.group}</span>
-                </span>
+        <div className="relative min-w-0 flex-1">
+          <div
+            ref={board}
+            // Clip rather than hide, since focus can scroll a box whose overflow is hidden.
+            className="absolute inset-0 cursor-grab overflow-clip active:cursor-grabbing"
+            style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)", backgroundSize: `${24 * view.z}px ${24 * view.z}px`, backgroundPosition: `${view.x}px ${view.y}px` }}
+            onPointerDown={(e) => {
+              if ((e.target as HTMLElement).closest("[data-frame]")) return
+              drag.current = { x: e.clientX, y: e.clientY }
+              e.currentTarget.setPointerCapture(e.pointerId)
+            }}
+            onPointerMove={(e) => {
+              if (!drag.current) return
+              const dx = e.clientX - drag.current.x
+              const dy = e.clientY - drag.current.y
+              drag.current = { x: e.clientX, y: e.clientY }
+              setView((v) => ({ ...v, x: v.x + dx, y: v.y + dy }))
+            }}
+            onPointerUp={() => (drag.current = null)}
+          >
+            {/* The board zooms with CSS zoom, which lays the frames out again at the new size, so
+                their text stays sharp where a scale transform would blur it. */}
+            <div className="absolute top-0 left-0" style={{ transform: `translate(${view.x}px, ${view.y}px)` }}>
+              <div ref={world} className="flex flex-col items-start gap-40 p-20" style={{ zoom: view.z }}>
+                {SECTIONS.map((s) => (
+                  <div key={s.name} className="relative rounded-3xl border border-white/10 bg-white/[0.03] px-20 pt-16 pb-20">
+                    <span className="absolute bottom-full left-0 whitespace-nowrap" style={{ paddingBottom: fixed(10) }}>
+                      <span className="block rounded-md bg-white/10 font-medium text-neutral-200" style={{ fontSize: fixed(13), padding: `${fixed(4)}px ${fixed(10)}px` }}>
+                        {s.name}
+                      </span>
+                    </span>
+                    <div className="flex items-start gap-20">
+                      {s.frames.map((f) => (
+                        <div
+                          key={f.name}
+                          ref={(el) => {
+                            if (el) frames.current.set(f.name, el)
+                          }}
+                          data-frame
+                          className="relative"
+                          style={{ width: EFB.width }}
+                        >
+                          <span className={"absolute bottom-full left-0 whitespace-nowrap " + (current === f.name ? "text-sky-300" : "text-neutral-400")} style={{ fontSize: fixed(12), paddingBottom: fixed(6) }}>
+                            {f.name}
+                          </span>
+                          {f.draw(theme)}
+                          {/* Where the EFB's own height ends, since the frame grows to show every component. */}
+                          <div className="pointer-events-none absolute inset-x-0 border-t border-dashed border-sky-400/60" style={{ top: EFB.height }}>
+                            <span className="absolute top-0 left-full whitespace-nowrap text-sky-300/80" style={{ fontSize: fixed(11), paddingLeft: fixed(8), transform: "translateY(-50%)" }}>
+                              EFB height, {EFB.height}px
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-            {BOARD.frames.map((f) => (
-              <div key={f.label} className="absolute" style={{ left: f.x, top: f.y, width: f.w, height: f.h }}>
-                <span
-                  className={"absolute bottom-full left-0 origin-bottom-left whitespace-nowrap " + (current === f.label ? "text-sky-300" : "text-neutral-400")}
-                  style={{ transform: `scale(${1 / view.z})`, fontSize: 12, paddingBottom: 6 }}
-                >
-                  {f.label}
-                </span>
-                <EfbApp theme={theme} state={f.state} />
-              </div>
-            ))}
+            </div>
           </div>
 
           <div className="absolute right-4 bottom-4 flex items-center gap-0.5 rounded-lg border border-white/10 bg-[#2a2a2a] p-1 text-[12px] shadow-lg">
@@ -188,7 +196,7 @@ export function Canvas() {
               <Plus className="size-3.5" />
             </button>
             <span className="mx-1 h-4 w-px bg-white/10" />
-            <button className="flex h-7 items-center gap-1.5 rounded-md px-2 hover:bg-white/10" title="Fit every frame" onClick={fitAll}>
+            <button className="flex h-7 items-center gap-1.5 rounded-md px-2 hover:bg-white/10" title="Fit every frame" onClick={() => (setCurrent(null), fit(world.current))}>
               <Scan className="size-3.5" /> Fit
             </button>
           </div>

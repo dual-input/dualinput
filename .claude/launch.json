@@ -12,6 +12,12 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["experiments/areas/interface/bench/node_modules/vite/bin/vite.js", "experiments/areas/interface/bench", "--port", "5183", "--strictPort"],
       "port": 5183
+    },
+    {
+      "name": "style-bench-lan",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["experiments/areas/interface/bench/node_modules/vite/bin/vite.js", "experiments/areas/interface/bench", "--port", "5183", "--strictPort", "--host"],
+      "port": 5183
     }
   ]
 }

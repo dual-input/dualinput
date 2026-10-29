@@ -201,7 +201,10 @@ export function Canvas() {
             className="absolute inset-0 cursor-grab overflow-clip active:cursor-grabbing"
             style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)", backgroundSize: `${24 * view.z}px ${24 * view.z}px`, backgroundPosition: `${view.x}px ${view.y}px` }}
             onPointerDown={(e) => {
-              if ((e.target as HTMLElement).closest("[data-frame]")) return
+              // React bubbles a press in a frame's popover or menu here too, though they open in a
+              // portal at the document's root, and capturing the pointer for a drag would take
+              // their buttons' clicks, so only a press on the board itself drags.
+              if (!e.currentTarget.contains(e.target as Node) || (e.target as HTMLElement).closest("[data-frame]")) return
               drag.current = { x: e.clientX, y: e.clientY }
               e.currentTarget.setPointerCapture(e.pointerId)
             }}

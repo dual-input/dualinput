@@ -147,20 +147,22 @@ function CheckRow({ check, state, leaving, delay = 0 }: { check: Check; state: C
   )
 }
 
-// Written out whole, since Tailwind finds a class only where its full name appears.
+// Written out whole, since Tailwind finds a class only where its full name appears. The kit's
+// focus ring is sky, and its ghost button's hover in the dark theme is gray through a dark: class,
+// which outranks a plain hover: one, so each is given in the box's color, dark: included.
 function toneOf(failure: Failure) {
   return failure.skippable
     ? {
         box: "border-warning/20 bg-warning/10",
-        text: "text-warning",
-        button: "bg-warning text-warning-foreground hover:bg-warning/90",
-        ghost: "text-warning hover:bg-warning/15 hover:text-warning",
+        text: "text-warning focus-visible:border-warning/40 focus-visible:ring-warning/30",
+        button: "bg-warning text-warning-foreground hover:bg-warning/90 focus-visible:border-warning/40 focus-visible:ring-warning/30",
+        ghost: "text-warning hover:bg-warning/15 hover:text-warning dark:hover:bg-warning/15 focus-visible:border-warning/40 focus-visible:ring-warning/30",
       }
     : {
         box: "border-destructive/20 bg-destructive/10",
-        text: "text-destructive",
-        button: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        ghost: "text-destructive hover:bg-destructive/15 hover:text-destructive",
+        text: "text-destructive focus-visible:border-destructive/40 focus-visible:ring-destructive/30",
+        button: "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/30",
+        ghost: "text-destructive hover:bg-destructive/15 hover:text-destructive dark:hover:bg-destructive/15 focus-visible:border-destructive/40 focus-visible:ring-destructive/30",
       }
 }
 

@@ -11,6 +11,7 @@ import { StatusChip } from "@/bench/screens"
 import { AppFrame, Label } from "./shell"
 import { FIGURE_COLORS } from "./figure-portrait"
 import { StandingFigure } from "./figure-standing"
+import { ConfirmButton } from "./confirm"
 
 // The loaded aircraft as the card names it: the maker from its package's manifest, the model,
 // and its tail number, which the sim reports as `A:ATC ID`.
@@ -29,7 +30,7 @@ const SUPPORTED = [
 const REFUSALS = {
   servers: { title: "Couldn't reach our servers", detail: "Dual Input needs them to connect you and your crew. Try again in a moment." },
   "no-code": { title: "No session has this code", detail: "Check it with your host and try again." },
-  "you-older": { title: "Your Dual Input is older than the host's", detail: "Your host has 1.0.3 while you have 1.0.2.", action: "Restart the sim to update" },
+  "you-older": { title: "Your Dual Input is older than the host's", detail: "Your host has 1.0.3 while you have 1.0.2.", action: { label: "Restart the sim to update", ask: "Restart the sim?", go: "Restart now" } },
   "host-older": { title: "The host's Dual Input is older than yours", detail: "Your host has 1.0.1 while you have 1.0.2. They need to update before you can join." },
   "too-many": { title: "Too many wrong codes", detail: "You are being rate limited because you've tried too many wrong codes in an hour. Joining is paused until 15:00. If you think this is a mistake, please contact us on our Discord." },
 }
@@ -528,18 +529,23 @@ function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
 }
 
 // A refusal from our servers, in the tinted box first-time setup's failures use, with the refusal's
-// own action where it has one.
+// own action where it has one, which asks first, since restarting the sim ends the pilot's flight.
 function Refused({ why }: { why: Refusal }) {
-  const { Button } = useUI()
-  const r: { title: string; detail: string; action?: string } = REFUSALS[why]
+  const r: { title: string; detail: string; action?: { label: string; ask: string; go: string } } = REFUSALS[why]
   return (
     <div className="flex animate-in flex-col gap-1 rounded-3xl border border-destructive/20 bg-destructive/10 px-5 py-4 duration-200 fade-in">
       <p className="text-sm font-medium text-destructive">{r.title}</p>
       <p className="text-sm text-foreground/75">{r.detail}</p>
       {r.action && (
-        <Button className="mt-2 self-start bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => toast(r.action)}>
-          {r.action}
-        </Button>
+        <div className="mt-2">
+          <ConfirmButton
+            label={r.action.label}
+            question={r.action.ask}
+            go={r.action.go}
+            onConfirm={() => toast("Restarting the sim to update")}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/30"
+          />
+        </div>
       )}
     </div>
   )

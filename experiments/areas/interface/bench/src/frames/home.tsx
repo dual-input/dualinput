@@ -3,7 +3,7 @@
 // later visits the profile authors' notes. The aircraft and the notes are examples.
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { ArrowRightLeft, BookOpen, Check, CircleCheck, ExternalLink, TriangleAlert } from "lucide-react"
+import { ArrowRightLeft, BookOpen, Check, CircleCheck, Copy, ExternalLink, LogOut, TriangleAlert } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
@@ -14,13 +14,16 @@ import { StandingFigure } from "./figure-standing"
 import { ConfirmButton, RESTART_SIM } from "./confirm"
 import { AircraftContext, AircraftPicker, LOADED, LOADED_UNSUPPORTED, PROFILES, type Aircraft } from "./aircraft"
 import { useScroller } from "./scroller"
+import { Cockpit, COCKPIT_WIDTH, Head } from "./cockpit"
 
 
-// How our servers can refuse: hosting when they don't answer, and joining with the four refusals the
-// backend's lookup gives (record/areas/network/02-units.md, Its requests). The words are drafts,
-// and the versions and the time are examples: the count of wrong codes is per clock hour, so the
-// pause ends on the next hour.
+// How hosting and joining can be refused: either one when the PC seems offline, which Windows
+// reports, with the words of the header's row and setup's check for it, and when our servers don't
+// answer; and joining with the four refusals the backend's lookup gives
+// (record/areas/network/02-units.md, Its requests). The words are drafts, and the versions and the
+// time are examples: the count of wrong codes is per clock hour, so the pause ends on the next hour.
 const REFUSALS = {
+  offline: { title: "Your PC seems offline", detail: "Dual Input needs the internet to connect you and your crew. Check your connection and try again?" },
   servers: { title: "Couldn't reach our servers", detail: "Dual Input needs them to connect you and your crew. Try again in a moment." },
   "no-code": { title: "No session has this code", detail: "Check it with your host and try again." },
   "you-older": { title: "Your Dual Input is older than the host's", detail: "Your host has 1.0.3 while you have 1.0.2.", action: { label: "Restart the sim to update", ...RESTART_SIM } },
@@ -30,6 +33,7 @@ const REFUSALS = {
 type Refusal = keyof typeof REFUSALS
 // When each refusal shows, for the sheet that lays them side by side.
 const REFUSED_WHEN: Record<Refusal, string> = {
+  offline: "Hosting or joining: the PC seems offline",
   servers: "Hosting or joining: our servers didn't answer",
   "no-code": "Joining: no session has the code",
   "you-older": "Joining: your version is older",
@@ -58,13 +62,89 @@ const SLOW_AFTER = 6000
 // fakes our servers: they answer after a moment, yes; or refusing, no, refusing a host as
 // unreachable and a join as naming no session, the refusal that also marks the code's slots; or
 // slow, answering a host only after SLOW_ANSWER_AFTER, and finding a join's code at once while the
-// host it names never answers, as when their sim has crashed and the backend still lists them. The
-// host's name is an example.
-export type Servers = "answering" | "refusing" | "slow"
+// host it names never answers, as when their sim has crashed and the backend still lists them; or
+// out of reach of a PC that's offline, which refuses either at once, since the request fails
+// without leaving it, after a moment that lets the press show. The host's name is an example.
+export type Servers = "answering" | "refusing" | "slow" | "offline"
 const DEMO_CODE = "K7R4XM"
 const DEMO_HOST = "James"
 const ANSWER_AFTER = 1000
 const SLOW_ANSWER_AFTER = 10000
+const OFFLINE_ANSWER_AFTER = 300
+// How long "Session started" holds before the card turns to the session, and how long a turn's
+// height takes to ease, in milliseconds.
+const SESSION_AFTER = 900
+const HALF_EASE = 300
+
+// Who's in the session besides this pilot, for a frame: nobody yet, or a crew bigger than v1's two
+// (record/areas/product/03-v1-scope.md), a Later pick drawn now, whose third and fourth pilots
+// show as heads. The names and colors are examples.
+type Pilot = { name: string; hue: string }
+const CREWS: Record<string, { crewmate?: Pilot; more: Pilot[] }> = {
+  alone: { more: [] },
+  "bigger-crew": {
+    crewmate: { name: "James", hue: "red" },
+    more: [
+      { name: "Adam", hue: "green" },
+      { name: "Mia", hue: "blue" },
+    ],
+  },
+}
+export type Crew = keyof typeof CREWS
+const hexOf = (hue: string) => FIGURE_COLORS.find((c) => c.name === hue)!.hex
+
+// The session's side of the card, from the moment Host succeeds, in place of the aircraft and Host
+// and Join: the cockpit, the host at the controls in the left seat, the invite code in the
+// windshield with Copy, and the right seat waiting for the crewmate the code brings, so the
+// picture shows what comes next. A tag under each seat names who's in it, the host as You, the
+// pilot flying, since the host starts as the PF. Leave, in the kit's tinted red, since it ends the
+// session for this pilot, sits under it all. The code and this pilot's color are examples.
+function SessionHalf({ crew = "alone", onLeave }: { crew?: Crew; onLeave: () => void }) {
+  const { Badge, Button, CardContent } = useUI()
+  const { crewmate, more } = CREWS[crew]
+  return (
+    <CardContent className="flex flex-col gap-4">
+      <Cockpit host={hexOf("orange")} crewmate={crewmate && hexOf(crewmate.hue)}>
+        {/* In the glass between the heads, above the glareshield, where the center pillar fades
+            out to leave it room. The Copy button sits beside it, so the code stays centered. */}
+        <div className="absolute top-[70px] left-0 flex w-full flex-col items-center gap-0.5">
+          <Label>Invite code</Label>
+          <div className="relative flex items-center">
+            <span className="font-mono text-2xl font-medium tracking-wider">
+              {DEMO_CODE.slice(0, 3)}-{DEMO_CODE.slice(3)}
+            </span>
+            <Button variant="ghost" size="icon-sm" className="absolute left-full ml-1" aria-label="Copy the invite code" onClick={() => toast("Copied the invite code")}>
+              <Copy />
+            </Button>
+          </div>
+        </div>
+      </Cockpit>
+      {/* A column under each seat, centered on it. */}
+      <div className="mx-auto grid grid-cols-2 text-center" style={{ width: COCKPIT_WIDTH }}>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-sm font-medium">You</span>
+          <Badge variant="secondary">Pilot flying</Badge>
+        </div>
+        {crewmate ? <span className="text-sm font-medium">{crewmate.name}</span> : <span className="text-sm text-muted-foreground">Waiting for your crewmate</span>}
+      </div>
+      {more.length > 0 && (
+        <div className="flex justify-center gap-5">
+          {more.map((p) => (
+            <div key={p.name} className="flex flex-col items-center gap-1">
+              <Head hex={hexOf(p.hue)} />
+              <span className="text-xs text-muted-foreground">{p.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="flex justify-end">
+        <Button variant="destructive" size="sm" onClick={onLeave}>
+          Leave <LogOut data-icon="inline-end" />
+        </Button>
+      </div>
+    </CardContent>
+  )
+}
 
 // The loaded aircraft on top, since a session flies the host's aircraft, then Host and the code
 // field to join with. Selecting the code field fills it from the clipboard and joins at once
@@ -75,8 +155,9 @@ const SLOW_ANSWER_AFTER = 10000
 // whole.
 // While our servers answer, the button that asked shows it's busy and the code field is locked, and
 // a refusal, or the line for an attempt taking long, opens under the control that asked: Host, or
-// the code.
-function StartCard({ aircraft, servers = "answering", play }: { aircraft: Aircraft; servers?: Servers; play?: Action }) {
+// the code. Once Host succeeds, the card turns to the session, which has no use for the aircraft,
+// and Leave turns it back; a frame can open on the session.
+function StartCard({ aircraft, servers = "answering", play, startIn = "start", crew }: { aircraft: Aircraft; servers?: Servers; play?: Action; startIn?: "start" | "session"; crew?: Crew }) {
   const { Badge, Button, Card, CardContent, Separator, Spinner, InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } = useUI()
   const [status, setStatus] = useState<Status>({ kind: "idle" })
   const [code, setCode] = useState("")
@@ -97,6 +178,36 @@ function StartCard({ aircraft, servers = "answering", play }: { aircraft: Aircra
   const later = (ms: number, f: () => void) => timers.current.push(window.setTimeout(f, ms))
   const busy = (change: { dialing?: boolean; slow?: boolean }) => setStatus((s) => (s.kind === "busy" ? { ...s, ...change } : s))
 
+  // The card turns between the aircraft with Host and Join, and the session, as the guide's pages
+  // turn: the side it leaves fades out, then the next fades in, rising 6px, as the card eases to
+  // its height. The height is measured after every render while a turn eases it, and in the
+  // session, since Coherent GT has no ResizeObserver; at rest on Host and Join, the card sets its
+  // own, since a refusal's room eases open there and a measured height would clip it.
+  const [half, setHalf] = useState(startIn)
+  const [turning, setTurning] = useState<"out" | "in" | null>(null)
+  const turnTo = (next: "start" | "session") => {
+    setTurning("out")
+    later(TURN.out, () => {
+      setHalf(next)
+      setTurning("in")
+    })
+    later(TURN.out + HALF_EASE, () => setTurning(null))
+  }
+  const halfBox = useRef<HTMLDivElement>(null)
+  const halfInner = useRef<HTMLDivElement>(null)
+  const [halfHeight, setHalfHeight] = useState<number>()
+  useLayoutEffect(() => {
+    const h = turning === "out" ? halfBox.current?.offsetHeight : turning === "in" || half === "session" ? halfInner.current?.offsetHeight : undefined
+    if (h !== halfHeight) setHalfHeight(h)
+  })
+  // Leave turns back to Host and Join, the code cleared; leaving needs no answer from our servers.
+  const leave = () => {
+    stop()
+    setStatus({ kind: "idle" })
+    setCode("")
+    turnTo("start")
+  }
+
   const attempt = (on: Action, from: HTMLElement) => {
     stop()
     from.dispatchEvent(new CustomEvent("figure-attempt", { bubbles: true }))
@@ -105,8 +216,10 @@ function StartCard({ aircraft, servers = "answering", play }: { aircraft: Aircra
     const answer = (why?: Refusal) => {
       from.dispatchEvent(new CustomEvent("figure-answer", { bubbles: true, detail: { ok: !why } }))
       setStatus(why ? { kind: "refused", on, why } : { kind: "done", on })
+      if (!why && on === "host") later(SESSION_AFTER, () => turnTo("session"))
     }
-    if (servers === "refusing") later(ANSWER_AFTER, () => answer(on === "host" ? "servers" : "no-code"))
+    if (servers === "offline") later(OFFLINE_ANSWER_AFTER, () => answer("offline"))
+    else if (servers === "refusing") later(ANSWER_AFTER, () => answer(on === "host" ? "servers" : "no-code"))
     else if (servers === "answering") later(ANSWER_AFTER, () => answer())
     else if (on === "host") later(SLOW_ANSWER_AFTER, () => answer())
     else later(ANSWER_AFTER, () => busy({ dialing: true }))
@@ -161,70 +274,86 @@ function StartCard({ aircraft, servers = "answering", play }: { aircraft: Aircra
     // The card's padding matches the page's 20px, where Luma's default card spacing is 24px.
     // It never shrinks, so the notes below are what gives way on a full page. It sits above what's
     // under it, so the figure's canvas can stay put as the card grows down over its empty top.
+    // The card's parts sit inside the part that turns, which spaces them as the card's own gap would.
     <Card className="relative z-10 shrink-0 [--card-spacing:--spacing(5)]">
-      <CardContent className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <Label>{aircraft.maker}</Label>
-          <span className="truncate text-lg leading-tight font-semibold">{aircraft.model}</span>
-          <span className="text-xs text-muted-foreground">{aircraft.tail}</span>
+      <div ref={halfBox} className="overflow-hidden transition-[height] ease-out" style={{ height: halfHeight, transitionDuration: `${HALF_EASE}ms` }}>
+        <div
+          ref={halfInner}
+          key={half}
+          className={"flex flex-col gap-(--card-spacing) " + (turning === "in" ? "animate-in fade-in slide-in-from-bottom-[6px]" : "")}
+          style={{ animationDuration: `${TURN.in}ms`, opacity: turning === "out" ? 0 : 1, transition: `opacity ${TURN.out}ms ease-out` }}
+        >
+          {half === "session" ? (
+            <SessionHalf crew={crew} onLeave={leave} />
+          ) : (
+            <>
+            <CardContent className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <Label>{aircraft.maker}</Label>
+                <span className="truncate text-lg leading-tight font-semibold">{aircraft.model}</span>
+                <span className="text-xs text-muted-foreground">{aircraft.tail}</span>
+              </div>
+              {aircraft.maturity ? <Badge variant={aircraft.maturity === "Stable" ? "secondary" : "outline"}>{aircraft.maturity}</Badge> : <StatusChip level="warning">Not supported yet</StatusChip>}
+            </CardContent>
+            <Separator />
+            <CardContent className="flex flex-col gap-4">
+              <div className="flex flex-col">
+                <Button ref={hostButton} size="lg" className="w-full" data-host data-figure-target data-figure-press disabled={working} onClick={(e: React.MouseEvent<HTMLElement>) => attempt("host", e.currentTarget)}>
+                  {status.kind === "busy" && status.on === "host" ? (
+                    <>
+                      <Spinner data-icon="inline-start" /> Starting your session…
+                    </>
+                  ) : status.kind === "done" && status.on === "host" ? (
+                    <>
+                      <Check data-icon="inline-start" /> Session started
+                    </>
+                  ) : (
+                    "Host a session"
+                  )}
+                </Button>
+                <UnderSlot>{under("host")}</UnderSlot>
+              </div>
+              <div className="flex items-center gap-3">
+                <Separator className="flex-1" />
+                <span className="text-xs text-muted-foreground">or join with a code</span>
+                <Separator className="flex-1" />
+              </div>
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between gap-3">
+                  <div data-figure-target onKeyDown={(e) => e.key === "Enter" && join(e.currentTarget)}>
+                    <InputOTP
+                      maxLength={6}
+                      value={code}
+                      disabled={working}
+                      onChange={(v: string) => {
+                        setCode(v.toUpperCase())
+                        if (joinRefused) setStatus({ kind: "idle" })
+                      }}
+                    >
+                      <InputOTPGroup>
+                        {[0, 1, 2].map((i) => (
+                          <InputOTPSlot key={i} index={i} className={"font-mono " + (badCode ? "border-destructive/60" : "")} />
+                        ))}
+                      </InputOTPGroup>
+                      <InputOTPSeparator />
+                      <InputOTPGroup>
+                        {[3, 4, 5].map((i) => (
+                          <InputOTPSlot key={i} index={i} className={"font-mono " + (badCode ? "border-destructive/60" : "")} />
+                        ))}
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+                  <Button ref={joinButton} variant="outline" disabled={code.length < 6 || working} data-figure-target data-figure-press onClick={(e: React.MouseEvent<HTMLElement>) => join(e.currentTarget)}>
+                    {status.kind === "busy" && status.on === "join" ? <Spinner /> : status.kind === "done" && status.on === "join" ? <Check /> : "Join"}
+                  </Button>
+                </div>
+                <UnderSlot>{under("join")}</UnderSlot>
+              </div>
+            </CardContent>
+            </>
+          )}
         </div>
-        {aircraft.maturity ? <Badge variant={aircraft.maturity === "Stable" ? "secondary" : "outline"}>{aircraft.maturity}</Badge> : <StatusChip level="warning">Not supported yet</StatusChip>}
-      </CardContent>
-      <Separator />
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-col">
-          <Button ref={hostButton} size="lg" className="w-full" data-host data-figure-target data-figure-press disabled={working} onClick={(e: React.MouseEvent<HTMLElement>) => attempt("host", e.currentTarget)}>
-            {status.kind === "busy" && status.on === "host" ? (
-              <>
-                <Spinner data-icon="inline-start" /> Starting your session…
-              </>
-            ) : status.kind === "done" && status.on === "host" ? (
-              <>
-                <Check data-icon="inline-start" /> Session started
-              </>
-            ) : (
-              "Host a session"
-            )}
-          </Button>
-          <UnderSlot>{under("host")}</UnderSlot>
-        </div>
-        <div className="flex items-center gap-3">
-          <Separator className="flex-1" />
-          <span className="text-xs text-muted-foreground">or join with a code</span>
-          <Separator className="flex-1" />
-        </div>
-        <div className="flex flex-col">
-          <div className="flex items-center justify-between gap-3">
-            <div data-figure-target onKeyDown={(e) => e.key === "Enter" && join(e.currentTarget)}>
-              <InputOTP
-                maxLength={6}
-                value={code}
-                disabled={working}
-                onChange={(v: string) => {
-                  setCode(v.toUpperCase())
-                  if (joinRefused) setStatus({ kind: "idle" })
-                }}
-              >
-                <InputOTPGroup>
-                  {[0, 1, 2].map((i) => (
-                    <InputOTPSlot key={i} index={i} className={"font-mono " + (badCode ? "border-destructive/60" : "")} />
-                  ))}
-                </InputOTPGroup>
-                <InputOTPSeparator />
-                <InputOTPGroup>
-                  {[3, 4, 5].map((i) => (
-                    <InputOTPSlot key={i} index={i} className={"font-mono " + (badCode ? "border-destructive/60" : "")} />
-                  ))}
-                </InputOTPGroup>
-              </InputOTP>
-            </div>
-            <Button ref={joinButton} variant="outline" disabled={code.length < 6 || working} data-figure-target data-figure-press onClick={(e: React.MouseEvent<HTMLElement>) => join(e.currentTarget)}>
-              {status.kind === "busy" && status.on === "join" ? <Spinner /> : status.kind === "done" && status.on === "join" ? <Check /> : "Join"}
-            </Button>
-          </div>
-          <UnderSlot>{under("join")}</UnderSlot>
-        </div>
-      </CardContent>
+      </div>
     </Card>
   )
 }
@@ -640,7 +769,7 @@ function NoNotes() {
 // The start card for the loaded aircraft, and under it the page's rest; a frame's servers and play
 // go to the card. A loaded aircraft with a maturity has a profile. The header shows what a frame
 // says of our servers, the firewall, and an update, and a frame can open it.
-function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; children: React.ReactNode }) {
+function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, session, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: Crew; children: React.ReactNode }) {
   return (
     <AppFrame
       theme={theme}
@@ -651,7 +780,7 @@ function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, ch
     >
       {/* None on top, since the header leaves as much room under its pill as above it. */}
       <div className="flex min-h-0 flex-1 flex-col gap-6 p-5 pt-0" data-home-page>
-        <StartCard aircraft={aircraft} servers={servers} play={play} />
+        <StartCard aircraft={aircraft} servers={servers} play={play} startIn={session ? "session" : "start"} crew={session} />
         {children}
       </div>
     </AppFrame>
@@ -723,14 +852,17 @@ export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck }: { theme: Th
 // Home on a later visit: the authors' notes, or the figure when there are none, and in an aircraft
 // Dual Input has no profile for, which has no notes to show, what a session there shares, with the
 // aircraft picker a press away. A frame also says how our servers, faked, answer, and can play
-// hosting or joining by itself, what the header shows and whether it opens out, and how the link to
-// the service stands.
-export function HomeLaterFrame({ theme, aircraft, notes, servers, play, header, headerOpen, core }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core }) {
+// hosting or joining by itself, what the header shows and whether it opens out, how the link to
+// the service stands, and whether it opens on a session already hosted, and with whom.
+export function HomeLaterFrame({ theme, aircraft, notes, servers, play, header, headerOpen, core, session }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: Crew }) {
   const { loaded, context } = useLoaded(aircraft)
   return (
     <AircraftContext.Provider value={context}>
-      <HomePage theme={theme} aircraft={loaded} servers={servers} play={play} header={header} headerOpen={headerOpen} core={core}>
-        {!loaded.maturity ? (
+      <HomePage theme={theme} aircraft={loaded} servers={servers} play={play} header={header} headerOpen={headerOpen} core={core} session={session}>
+        {/* A session's pilot sits in its cockpit, so the figure standing under the card, which
+            leaps off the page when a session starts, isn't there; what the page shows under the
+            session is to be designed. */}
+        {session ? null : !loaded.maturity ? (
           <UnsupportedAircraft />
         ) : notes ? (
           <AuthorsNotes notes={NOTES[notes]} />

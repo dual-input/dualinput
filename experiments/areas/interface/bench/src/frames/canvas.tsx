@@ -55,14 +55,24 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
     ],
   },
   // Our servers, faked, take Host and Join in the first frame, refuse them in the second, and are
-  // slow in the third.
+  // slow in the third; in the fourth the PC is offline, which the header shows too.
   {
     name: "Hosting and joining",
     frames: [
       { name: "Succeeds", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" play={play} /> },
       { name: "Refused", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="refusing" play={play} /> },
       { name: "Slow", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="slow" play={play} /> },
+      { name: "Offline", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="offline" header={{ offline: true }} play={play} /> },
       { name: "Every refusal", draw: (t) => <RefusalsFrame theme={t} /> },
+    ],
+  },
+  // The session page, which is home once Host or Join succeeds: hosted, with nobody else yet; and,
+  // for Later, a crew bigger than v1's two. Hosting and joining's Succeeds plays the way in.
+  {
+    name: "Session",
+    frames: [
+      { name: "Hosted, alone", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="alone" /> },
+      { name: "Later: a bigger crew", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="bigger-crew" /> },
     ],
   },
   // The header on home, open over what needs the pilot, or at rest; with nothing, as on every other

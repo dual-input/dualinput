@@ -8,7 +8,7 @@ import { ArrowRightLeft, BookOpen, Check, CircleCheck, ExternalLink, TriangleAle
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
 import { StatusChip } from "@/bench/screens"
-import { AppFrame, Label } from "./shell"
+import { AppFrame, InlineLink, Label, type Core, type HeaderStatus } from "./shell"
 import { FIGURE_COLORS } from "./figure-portrait"
 import { StandingFigure } from "./figure-standing"
 import { ConfirmButton, RESTART_SIM } from "./confirm"
@@ -226,23 +226,6 @@ function StartCard({ aircraft, servers = "answering", play }: { aircraft: Aircra
         </div>
       </CardContent>
     </Card>
-  )
-}
-
-// A link inside a sentence, which does what it's given; one given nothing, such as "see how", opens
-// nothing yet.
-function InlineLink({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
-  return (
-    <a
-      href="#"
-      onClick={(e) => {
-        e.preventDefault()
-        onClick?.()
-      }}
-      className="text-primary underline-offset-4 hover:underline"
-    >
-      {children}
-    </a>
   )
 }
 
@@ -655,12 +638,19 @@ function NoNotes() {
 }
 
 // The start card for the loaded aircraft, and under it the page's rest; a frame's servers and play
-// go to the card. A loaded aircraft with a maturity has a profile.
-function HomePage({ theme, aircraft, servers, play, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; children: React.ReactNode }) {
+// go to the card. A loaded aircraft with a maturity has a profile. The header shows what a frame
+// says of our servers, the firewall, and an update, and a frame can open it.
+function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; children: React.ReactNode }) {
   return (
-    <AppFrame theme={theme} status={{ aircraft: aircraft.maturity ? "supported" : "unsupported" }} fixed>
-      {/* 8px on top, since the header's own height already leaves room under its line. */}
-      <div className="flex min-h-0 flex-1 flex-col gap-6 p-5 pt-2" data-home-page>
+    <AppFrame
+      theme={theme}
+      status={header}
+      headerOpen={headerOpen}
+      core={core}
+      fixed
+    >
+      {/* None on top, since the header leaves as much room under its pill as above it. */}
+      <div className="flex min-h-0 flex-1 flex-col gap-6 p-5 pt-0" data-home-page>
         <StartCard aircraft={aircraft} servers={servers} play={play} />
         {children}
       </div>
@@ -733,12 +723,13 @@ export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck }: { theme: Th
 // Home on a later visit: the authors' notes, or the figure when there are none, and in an aircraft
 // Dual Input has no profile for, which has no notes to show, what a session there shares, with the
 // aircraft picker a press away. A frame also says how our servers, faked, answer, and can play
-// hosting or joining by itself.
-export function HomeLaterFrame({ theme, aircraft, notes, servers, play }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action }) {
+// hosting or joining by itself, what the header shows and whether it opens out, and how the link to
+// the service stands.
+export function HomeLaterFrame({ theme, aircraft, notes, servers, play, header, headerOpen, core }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core }) {
   const { loaded, context } = useLoaded(aircraft)
   return (
     <AircraftContext.Provider value={context}>
-      <HomePage theme={theme} aircraft={loaded} servers={servers} play={play}>
+      <HomePage theme={theme} aircraft={loaded} servers={servers} play={play} header={header} headerOpen={headerOpen} core={core}>
         {!loaded.maturity ? (
           <UnsupportedAircraft />
         ) : notes ? (
@@ -749,6 +740,18 @@ export function HomeLaterFrame({ theme, aircraft, notes, servers, play }: { them
       </HomePage>
     </AircraftContext.Provider>
   )
+}
+
+// Home while the service restarts after a crash: the window dims under the line that it's
+// reconnecting, and comes back as it was once the service does, here after this many milliseconds.
+const RECONNECTS_AFTER = 5000
+export function ReconnectingFrame({ theme }: { theme: Theme }) {
+  const [core, setCore] = useState<Core>("reconnecting")
+  useEffect(() => {
+    const t = window.setTimeout(() => setCore("connected"), RECONNECTS_AFTER)
+    return () => window.clearTimeout(t)
+  }, [])
+  return <HomeLaterFrame theme={theme} aircraft="supported" core={core} />
 }
 
 // Every refusal's message in a card like the start card, so each shows at the width and on the
@@ -773,7 +776,7 @@ function RefusalsSheet() {
 // The sheet takes the kit from the frame's context, so it's drawn inside the frame.
 export function RefusalsFrame({ theme }: { theme: Theme }) {
   return (
-    <AppFrame theme={theme} status={{ aircraft: "supported" }} header={false} tabs={false}>
+    <AppFrame theme={theme} header={false} tabs={false}>
       <RefusalsSheet />
     </AppFrame>
   )

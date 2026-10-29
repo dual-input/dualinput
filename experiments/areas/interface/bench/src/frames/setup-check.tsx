@@ -11,6 +11,7 @@ import type { Theme } from "@/bench/theme"
 import { AppFrame, Label, MarkTile } from "./shell"
 import { FIGURE_COLORS, FigurePortrait, HEAD_IN_PORTRAIT, unit, type V } from "./figure-portrait"
 import { ConfirmButton, RESTART_SIM } from "./confirm"
+import { FailureBox, SERVICE_NOT_RUNNING, toneOf, type Failure } from "./failure"
 
 const WINDOWS_USERNAME = "jordan"
 
@@ -28,14 +29,7 @@ const CHECK_HANDOFF = 450
 const FIX_WAIT = 1400
 
 // Its name throughout, since the icon beside it says how the check went. A failure stops the
-// sequence, so it has time for a title and a line of detail, shown under the check, and the action
-// that deals with it:
-// - fix: Dual Input fixes it, after the pilot agrees to Windows' prompt, and the sequence goes on;
-// - retry: the pilot fixes it outside Dual Input, then checks again;
-// - restart: only a restart of the sim fixes it, which the tray app carries out;
-// - wait: the pilot fixes it outside Dual Input, and the sequence goes on by itself once it's fixed.
-// A failure Dual Input can work around also offers Continue anyway.
-type Failure = { title: string; detail: string; action: { kind: "fix" | "retry" | "restart" | "wait"; label?: string; busy: string }; skippable?: boolean }
+// sequence, so it has time for its box under the check.
 type Check = { name: string; fail?: Failure }
 
 type CheckId = "core" | "addon" | "servers" | "firewall"
@@ -48,15 +42,7 @@ export type CheckFailure = "core" | "addon" | "offline" | "servers" | "firewall"
 const CHECK_OF: Record<CheckFailure, CheckId> = { core: "core", addon: "addon", offline: "servers", servers: "servers", firewall: "firewall" }
 
 const FAILURES: Record<CheckFailure, Failure> = {
-  // The EFB app reaches everything else through the core, so nothing can run without it. The EFB
-  // can't start a program, so the tray app starts the core; this shows only when the tray app
-  // isn't running either, since when it is, the EFB app asks it to start the core and the check
-  // simply runs longer.
-  core: {
-    title: "Service isn't running",
-    detail: "Open Dual Input from the Start menu.",
-    action: { kind: "wait", busy: "Waiting for the service to start" },
-  },
+  core: SERVICE_NOT_RUNNING,
   // The EFB app is part of the add-on, so the add-on loaded; it can only be from another version,
   // since the sim loads add-ons when it starts and Dual Input updates while it's closed.
   addon: {
@@ -148,22 +134,6 @@ function CheckRow({ check, state, leaving, delay = 0 }: { check: Check; state: C
   )
 }
 
-// Written out whole, since Tailwind finds a class only where its full name appears. The kit's
-// focus ring is sky, so it's given in the box's color too.
-function toneOf(failure: Failure) {
-  return failure.skippable
-    ? {
-        box: "border-warning/20 bg-warning/10",
-        text: "text-warning focus-visible:border-warning/40 focus-visible:ring-warning/30",
-        button: "bg-warning text-warning-foreground hover:bg-warning/90 focus-visible:border-warning/40 focus-visible:ring-warning/30",
-      }
-    : {
-        box: "border-destructive/20 bg-destructive/10",
-        text: "text-destructive focus-visible:border-destructive/40 focus-visible:ring-destructive/30",
-        button: "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/30",
-      }
-}
-
 function Checks({ checks, phase, onFix, onSkip }: { checks: Check[]; phase: Extract<Phase, { kind: "checks" }>; onFix: () => void; onSkip: () => void }) {
   const { Button, Spinner } = useUI()
   const { i, step } = phase
@@ -183,22 +153,8 @@ function Checks({ checks, phase, onFix, onSkip }: { checks: Check[]; phase: Extr
       <div className="grid w-full transition-[grid-template-rows] duration-300 ease-out" style={{ gridTemplateRows: phase.failed ? "1fr" : "0fr" }}>
       <div className="flex min-h-0 flex-col items-center gap-3 overflow-hidden text-center">
         <span className="h-3 shrink-0" />
-        {/* A failure sits in a tinted box: red for one that stops setup, amber for one Dual Input
-            can work around, which offers Continue anyway. Everything in it takes the box's color
-            or near-white, since the page's gray text and sky-300 buttons clash with the tint. */}
         {failing && (
-          <div className={"flex w-full max-w-80 animate-in flex-col items-center gap-3 rounded-3xl border px-5 py-4 text-center duration-200 fade-in " + toneOf(failing).box}>
-            <div className="flex flex-col gap-1">
-              <p className={"text-sm font-medium " + toneOf(failing).text}>{failing.title}</p>
-              <p className="text-sm text-foreground/75">{failing.detail}</p>
-            </div>
-            {/* A failure the pilot fixes outside Dual Input, which the sequence notices by itself,
-                shows that it's waiting rather than a button. */}
-            {failing.action.kind === "wait" && (
-              <span className="flex items-center gap-2 text-sm text-foreground/60">
-                <Spinner className="size-4" /> {failing.action.busy}
-              </span>
-            )}
+          <FailureBox failure={failing}>
             {/* Continue anyway is bare text, a link, so the fix is the box's one button; alone under
                 the waiting line, a button's unseen padding would also leave the box's bottom 8px
                 deeper than its top. */}
@@ -231,7 +187,7 @@ function Checks({ checks, phase, onFix, onSkip }: { checks: Check[]; phase: Extr
                 )}
               </div>
             )}
-          </div>
+          </FailureBox>
         )}
       </div>
       </div>
@@ -386,7 +342,7 @@ function SetupFlow({ failure, openOnFailure, openOnCard }: { failure?: CheckFail
 
 export function SetupFlowFrame({ theme, failure, openOnFailure, openOnCard }: { theme: Theme; failure?: CheckFailure; openOnFailure?: boolean; openOnCard?: boolean }) {
   return (
-    <AppFrame theme={theme} status={null} header={false} tabs={false}>
+    <AppFrame theme={theme} header={false} tabs={false}>
       <SetupFlow failure={failure} openOnFailure={openOnFailure} openOnCard={openOnCard} />
     </AppFrame>
   )

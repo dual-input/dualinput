@@ -52,7 +52,7 @@ export function AircraftPickerFrame({ theme, at = "world-map", noneInstalled }: 
   const [open, setOpen] = useState(true)
   return (
     <AircraftContext.Provider value={{ at, pick: () => {}, profiles: noneInstalled ? NONE_INSTALLED : PROFILES }}>
-      <AppFrame theme={theme} status={null} fixed>
+      <AppFrame theme={theme} fixed>
         <div className="flex-1" />
         <AircraftPicker open={open} onOpenChange={setOpen} />
       </AppFrame>

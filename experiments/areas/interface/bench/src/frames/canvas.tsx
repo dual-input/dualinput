@@ -8,10 +8,10 @@ import { Frame, LayoutGrid, Minus, Plus, Scan } from "lucide-react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { UI } from "@/bench/ui"
 import { DEFAULT_THEME, themeLabel, themeVars, type Theme } from "@/bench/theme"
-import { EFB } from "./shell"
+import { AppFrame, EFB, EveryIssueFrame } from "./shell"
 import { PreflightFrame } from "./preflight"
 import { SetupFlowFrame } from "./setup-check"
-import { HomeFirstTimeFrame, HomeLaterFrame, RefusalsFrame, type Action } from "./home"
+import { HomeFirstTimeFrame, HomeLaterFrame, ReconnectingFrame, RefusalsFrame, type Action } from "./home"
 import { AircraftPickerFrame } from "./aircraft"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
@@ -63,6 +63,27 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Refused", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="refusing" play={play} /> },
       { name: "Slow", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="slow" play={play} /> },
       { name: "Every refusal", draw: (t) => <RefusalsFrame theme={t} /> },
+    ],
+  },
+  // The header on home, open over what needs the pilot, or at rest; with nothing, as on every other
+  // frame, it's the mark alone.
+  {
+    name: "Header",
+    frames: [
+      { name: "An update", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ update: "1.0.3" }} headerOpen /> },
+      { name: "Needs attention", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ servers: "unreachable", firewall: "blocks", update: "1.0.3" }} headerOpen /> },
+      { name: "Needs attention, at rest", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ servers: "unreachable", firewall: "blocks", update: "1.0.3" }} /> },
+      { name: "Every issue", draw: (t) => <EveryIssueFrame theme={t} /> },
+    ],
+  },
+  // The app's window when its link to the service, the core, is lost, on any page: reconnecting
+  // after a crash, over home here, where the service comes back on its own; not running; and quit.
+  {
+    name: "Service",
+    frames: [
+      { name: "Reconnecting", replay: true, draw: (t) => <ReconnectingFrame theme={t} /> },
+      { name: "Not running", draw: (t) => <AppFrame theme={t} core="not-running" fixed /> },
+      { name: "Closed", draw: (t) => <AppFrame theme={t} core="closed" fixed /> },
     ],
   },
   {

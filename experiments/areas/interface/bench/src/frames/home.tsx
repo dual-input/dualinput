@@ -24,33 +24,53 @@ const SUPPORTED = [
 
 // How our servers can refuse: hosting when they don't answer, and joining with the four refusals the
 // backend's lookup gives (record/areas/network/02-units.md, Its requests). The words are drafts,
-// and the versions are examples.
+// and the versions and the time are examples: the count of wrong codes is per clock hour, so the
+// pause ends on the next hour.
 const REFUSALS = {
-  servers: { title: "Couldn't reach our servers", detail: "Your session didn't start. Try again in a moment." },
+  servers: { title: "Couldn't reach our servers", detail: "Dual Input needs them to connect you and your crew. Try again in a moment." },
   "no-code": { title: "No session has this code", detail: "Check it with your host and try again." },
-  "you-older": { title: "Your Dual Input is older than your host's", detail: "Your host has 1.0.3, and you have 1.0.2.", action: "Restart the sim to update" },
-  "host-older": { title: "Your host's Dual Input is older than yours", detail: "Your host has 1.0.1, and you have 1.0.2. They need to update before you can join." },
-  "too-many": { title: "Too many wrong codes", detail: "This network has tried too many codes this hour. Try again in an hour." },
+  "you-older": { title: "Your Dual Input is older than the host's", detail: "Your host has 1.0.3 while you have 1.0.2.", action: "Restart the sim to update" },
+  "host-older": { title: "The host's Dual Input is older than yours", detail: "Your host has 1.0.1 while you have 1.0.2. They need to update before you can join." },
+  "too-many": { title: "Too many wrong codes", detail: "You are being rate limited because you've tried too many wrong codes in an hour. Joining is paused until 15:00. If you think this is a mistake, please contact us on our Discord." },
 }
 type Refusal = keyof typeof REFUSALS
 // When each refusal shows, for the sheet that lays them side by side.
 const REFUSED_WHEN: Record<Refusal, string> = {
-  servers: "Hosting: our servers didn't answer",
+  servers: "Hosting or joining: our servers didn't answer",
   "no-code": "Joining: no session has the code",
   "you-older": "Joining: your version is older",
   "host-older": "Joining: the host's version is older",
   "too-many": "Joining: too many wrong codes",
 }
 export type Action = "host" | "join"
-type Status = { kind: "idle" } | { kind: "busy"; on: Action } | { kind: "done"; on: Action } | { kind: "refused"; on: Action; why: Refusal }
+// A join is dialing once our servers have found its code and it's reaching the crew; slow, once
+// the attempt has taken SLOW_AFTER.
+type Status =
+  | { kind: "idle" }
+  | { kind: "busy"; on: Action; dialing?: boolean; slow?: boolean }
+  | { kind: "done"; on: Action }
+  | { kind: "refused"; on: Action; why: Refusal }
+
+// A normal attempt is done well under 2s: one request to our servers, and for a join a connection,
+// which opened in a median of 24ms to 159ms from friends' homes to ours (record/areas/network/
+// 01-between-machines.md, The way through home routers). By 6s a joiner has redialed twice, so an
+// attempt that long shows a line saying so, with Cancel, under the control that asked. Wi-Fi and
+// carrier-grade NAT are unmeasured, so v1's recordings would tune it.
+const SLOW_AFTER = 6000
 
 // What the page's standing figure reacts to: an attempt to host or join, as a figure-attempt event,
-// and our servers' answer, as figure-answer with ok in its detail, both bubbling from the card. In
-// the app any join announces itself, the clipboard's included. The bench fakes our servers: they
-// answer after a moment, yes, or on a failing frame no, refusing a host as unreachable and a join
-// as naming no session, the refusal that also marks the code's slots.
+// our servers' answer, as figure-answer with ok in its detail, and Cancel, as figure-cancel, all
+// bubbling from the card. In the app any join announces itself, the clipboard's included. The bench
+// fakes our servers: they answer after a moment, yes; or refusing, no, refusing a host as
+// unreachable and a join as naming no session, the refusal that also marks the code's slots; or
+// slow, answering a host only after SLOW_ANSWER_AFTER, and finding a join's code at once while the
+// host it names never answers, as when their sim has crashed and the backend still lists them. The
+// host's name is an example.
+export type Servers = "answering" | "refusing" | "slow"
 const DEMO_CODE = "K7R4XM"
+const DEMO_HOST = "James"
 const ANSWER_AFTER = 1000
+const SLOW_ANSWER_AFTER = 10000
 
 // The loaded aircraft on top, since a session flies the host's aircraft, then Host and the code
 // field to join with. Selecting the code field fills it from the clipboard and joins at once
@@ -60,8 +80,9 @@ const ANSWER_AFTER = 1000
 // winds it up. A disabled button takes no pointer events, so the figure ignores Join until the code is
 // whole.
 // While our servers answer, the button that asked shows it's busy and the code field is locked, and
-// a refusal opens under the control that asked: Host, or the code.
-function StartCard({ supported, failing, play }: { supported: boolean; failing?: boolean; play?: Action }) {
+// a refusal, or the line for an attempt taking long, opens under the control that asked: Host, or
+// the code.
+function StartCard({ supported, servers = "answering", play }: { supported: boolean; servers?: Servers; play?: Action }) {
   const { Badge, Button, Card, CardContent, Separator, Spinner, InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } = useUI()
   const [status, setStatus] = useState<Status>({ kind: "idle" })
   const [code, setCode] = useState("")
@@ -72,16 +93,40 @@ function StartCard({ supported, failing, play }: { supported: boolean; failing?:
   const aircraft = supported ? LOADED : LOADED_UNSUPPORTED
   const working = status.kind === "busy" || status.kind === "done"
 
+  // An attempt's timers: its slow line's, and the fake servers' answers. A new attempt or Cancel
+  // clears them, so a timer from an attempt before can't reach this one.
+  const timers = useRef<number[]>([])
+  const stop = () => {
+    timers.current.forEach(clearTimeout)
+    timers.current = []
+  }
+  useEffect(() => stop, [])
+  const later = (ms: number, f: () => void) => timers.current.push(window.setTimeout(f, ms))
+  const busy = (change: { dialing?: boolean; slow?: boolean }) => setStatus((s) => (s.kind === "busy" ? { ...s, ...change } : s))
+
   const attempt = (on: Action, from: HTMLElement) => {
-    const answer: "ok" | Refusal = !failing ? "ok" : on === "host" ? "servers" : "no-code"
+    stop()
     from.dispatchEvent(new CustomEvent("figure-attempt", { bubbles: true }))
     setStatus({ kind: "busy", on })
-    setTimeout(() => {
-      from.dispatchEvent(new CustomEvent("figure-answer", { bubbles: true, detail: { ok: answer === "ok" } }))
-      setStatus(answer === "ok" ? { kind: "done", on } : { kind: "refused", on, why: answer })
-    }, ANSWER_AFTER)
+    later(SLOW_AFTER, () => busy({ slow: true }))
+    const answer = (why?: Refusal) => {
+      from.dispatchEvent(new CustomEvent("figure-answer", { bubbles: true, detail: { ok: !why } }))
+      setStatus(why ? { kind: "refused", on, why } : { kind: "done", on })
+    }
+    if (servers === "refusing") later(ANSWER_AFTER, () => answer(on === "host" ? "servers" : "no-code"))
+    else if (servers === "answering") later(ANSWER_AFTER, () => answer())
+    else if (on === "host") later(SLOW_ANSWER_AFTER, () => answer())
+    else later(ANSWER_AFTER, () => busy({ dialing: true }))
   }
   const join = (from: HTMLElement) => codeNow.current.length === 6 && attempt("join", from)
+  // Cancel stops the attempt here alone: a joiner registers with our servers only once it reaches
+  // the crew, and a session they start for a cancelled host after all lapses, since nobody renews
+  // it. The code stays.
+  const cancel = (from: HTMLElement) => {
+    stop()
+    from.dispatchEvent(new CustomEvent("figure-cancel", { bubbles: true }))
+    setStatus({ kind: "idle" })
+  }
 
   // A frame asked to play hosting or joining plays it a moment after it opens: for a join it types
   // the demo code, and then it presses its button and lets go on it, as a pilot's click does.
@@ -112,6 +157,13 @@ function StartCard({ supported, failing, play }: { supported: boolean; failing?:
   const refusedOn = (on: Action) => (status.kind === "refused" && status.on === on ? status.why : undefined)
   const joinRefused = refusedOn("join") !== undefined
   const badCode = refusedOn("join") === "no-code"
+  // Under each control, its refusal, or its slow line, which names the host once a join is dialing.
+  const under = (on: Action) => {
+    const why = refusedOn(on)
+    if (why) return <Refused why={why} />
+    if (status.kind === "busy" && status.on === on && status.slow)
+      return <SlowLine text={status.dialing ? `Still trying to reach ${DEMO_HOST}…` : "This is taking longer than usual."} onCancel={cancel} />
+  }
   return (
     // The card's padding matches the page's 20px, where Luma's default card spacing is 24px.
     // It never shrinks, so the notes below are what gives way on a full page. It sits above what's
@@ -141,7 +193,7 @@ function StartCard({ supported, failing, play }: { supported: boolean; failing?:
               "Host a session"
             )}
           </Button>
-          <RefusalSlot why={refusedOn("host")} />
+          <UnderSlot>{under("host")}</UnderSlot>
         </div>
         <div className="flex items-center gap-3">
           <Separator className="flex-1" />
@@ -177,7 +229,7 @@ function StartCard({ supported, failing, play }: { supported: boolean; failing?:
               {status.kind === "busy" && status.on === "join" ? <Spinner /> : status.kind === "done" && status.on === "join" ? <Check /> : "Join"}
             </Button>
           </div>
-          <RefusalSlot why={refusedOn("join")} />
+          <UnderSlot>{under("join")}</UnderSlot>
         </div>
       </CardContent>
     </Card>
@@ -493,22 +545,35 @@ function Refused({ why }: { why: Refusal }) {
   )
 }
 
-// The room under a control for its refusal, easing open to the refusal's height and shut to none,
-// still showing the refusal it had while it shuts. Coherent GT has no ResizeObserver, so the height
+// An attempt taking long: a line of text with Cancel at its end, and no box, since nothing has
+// failed; the button that asked keeps its spinner.
+function SlowLine({ text, onCancel }: { text: string; onCancel: (from: HTMLElement) => void }) {
+  return (
+    <p className="animate-in text-sm text-muted-foreground duration-200 fade-in">
+      {text}{" "}
+      <button className="font-medium text-primary underline-offset-4 hover:underline" onClick={(e) => onCancel(e.currentTarget)}>
+        Cancel
+      </button>
+    </p>
+  )
+}
+
+// The room under a control for its refusal or slow line, easing open to its height and shut to
+// none, still showing what it had while it shuts. Coherent GT has no ResizeObserver, so the height
 // is measured after every render, as the guide's is.
-function RefusalSlot({ why }: { why?: Refusal }) {
-  const last = useRef(why)
-  if (why) last.current = why
+function UnderSlot({ children }: { children?: React.ReactNode }) {
+  const last = useRef(children)
+  if (children) last.current = children
   const inner = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState(0)
   useLayoutEffect(() => {
-    const measured = why ? (inner.current?.offsetHeight ?? 0) : 0
+    const measured = children ? (inner.current?.offsetHeight ?? 0) : 0
     if (measured !== height) setHeight(measured)
   })
   return (
     <div className="overflow-hidden transition-[height] duration-300 ease-out" style={{ height }}>
       <div ref={inner} className="pt-3">
-        {last.current && <Refused why={last.current} />}
+        {last.current}
       </div>
     </div>
   )
@@ -531,13 +596,13 @@ function NoNotes() {
   )
 }
 
-// The start card, and under it the page's rest; a frame's failing and play go to the card.
-function HomePage({ theme, supported, failing, play, children }: { theme: Theme; supported: boolean; failing?: boolean; play?: Action; children: React.ReactNode }) {
+// The start card, and under it the page's rest; a frame's servers and play go to the card.
+function HomePage({ theme, supported, servers, play, children }: { theme: Theme; supported: boolean; servers?: Servers; play?: Action; children: React.ReactNode }) {
   return (
     <AppFrame theme={theme} status={{ aircraft: supported ? "supported" : "unsupported" }} fixed>
       {/* 8px on top, since the header's own height already leaves room under its line. */}
       <div className="flex min-h-0 flex-1 flex-col gap-6 p-5 pt-2" data-home-page>
-        <StartCard supported={supported} failing={failing} play={play} />
+        <StartCard supported={supported} servers={servers} play={play} />
         {children}
       </div>
     </AppFrame>
@@ -556,12 +621,12 @@ export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck }: { theme: Th
 }
 
 // Home on a later visit: the authors' notes, or the figure when there are none, and in an aircraft
-// Dual Input doesn't support, the guide's last page, which has no notes to show. On a failing
-// frame our servers refuse every attempt, and a frame can play hosting or joining by itself.
-export function HomeLaterFrame({ theme, aircraft, notes, failing, play }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; failing?: boolean; play?: Action }) {
+// Dual Input doesn't support, the guide's last page, which has no notes to show. A frame says how
+// our servers, faked, answer, and can play hosting or joining by itself.
+export function HomeLaterFrame({ theme, aircraft, notes, servers, play }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action }) {
   const supported = aircraft === "supported"
   return (
-    <HomePage theme={theme} supported={supported} failing={failing} play={play}>
+    <HomePage theme={theme} supported={supported} servers={servers} play={play}>
       {!supported ? (
         <section className="flex flex-col gap-1.5">
           <AircraftCheck supported={false} />

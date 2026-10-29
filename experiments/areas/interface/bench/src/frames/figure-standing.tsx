@@ -286,7 +286,8 @@ const spring = (s: Spring, target: number, k: number, d: number, dt: number) => 
   s.x += s.v * dt
 }
 // A press on Host or Join winds it up too, before any attempt: held while the button is held, and
-// let go anywhere but the button, it straightens back up over CANCEL seconds, nothing attempted.
+// let go anywhere but the button, it straightens back up over CANCEL seconds, nothing attempted. A
+// cancelled attempt straightens it up the same way.
 const CANCEL = 0.35
 // The leap's time, held at the wind-up's end while pressed or waiting; how long it has held; the
 // answer, or the press before it; how long it has been deflating from a refusal, or straightening up
@@ -465,8 +466,9 @@ const unspin = (o: V): V => [o[0] * Math.cos(YAW) + o[2] * Math.sin(YAW), o[1], 
 
 // The figure fills its canvas, which the page sizes; it finds Host as the element marked data-host
 // inside the element marked data-home-page around it, and the things it locks on to as the elements
-// marked data-figure-target, and listens there to the cursor, to focus, and to the figure-attempt
-// and figure-answer events the page sends when the pilot hosts or joins and our servers answer.
+// marked data-figure-target, and listens there to the cursor, to focus, and to the figure-attempt,
+// figure-answer, and figure-cancel events the page sends when the pilot hosts or joins, our servers
+// answer, and the pilot cancels an attempt that's taking long.
 export function StandingFigure({ hex }: { hex: string }) {
   const canvas = useRef<HTMLCanvasElement>(null)
 
@@ -576,10 +578,15 @@ export function StandingFigure({ hex }: { hex: string }) {
       cheer.answer = ok ? "ok" : "no"
       if (!ok) cheer.deflating = 0
     }
+    // A cancelled attempt straightens it back up from the crouch, as a press let go elsewhere does.
+    const onCancel = () => {
+      if (!fresh() && cheer?.answer !== "ok") cheer!.canceling = 0
+    }
     page?.addEventListener("mousemove", onMove)
     page?.addEventListener("mouseleave", onLeave)
     page?.addEventListener("figure-attempt", onAttempt)
     page?.addEventListener("figure-answer", onAnswer)
+    page?.addEventListener("figure-cancel", onCancel)
     for (const [t, type, fn] of listeners) t.addEventListener(type, fn)
 
     // The direction from the head toward a point on the page, as if the page were a window a little
@@ -733,6 +740,7 @@ export function StandingFigure({ hex }: { hex: string }) {
       page?.removeEventListener("mouseleave", onLeave)
       page?.removeEventListener("figure-attempt", onAttempt)
       page?.removeEventListener("figure-answer", onAnswer)
+      page?.removeEventListener("figure-cancel", onCancel)
       for (const [t, type, fn] of listeners) t.removeEventListener(type, fn)
       for (const b of presses) b.removeEventListener("mousedown", onPress)
       window.removeEventListener("mouseup", onRelease)

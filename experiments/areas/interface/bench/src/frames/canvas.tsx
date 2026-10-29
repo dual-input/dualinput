@@ -2,7 +2,7 @@
 // zooms, with a layers list that jumps to a frame. The wheel pans, Ctrl or Cmd with the wheel
 // zooms at the pointer, and dragging the empty board pans. The frames draw in the style bench's
 // theme as it was last saved, so a change made there shows here on reload.
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Frame, LayoutGrid, Minus, Plus, Scan } from "lucide-react"
 
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -42,10 +42,11 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Home, first time: the aircraft check, unsupported", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="unsupported" openOnCheck /> },
       { name: "Home, later visit, with the authors' notes", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" notes="short" /> },
       { name: "Home, later visit, a long note", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" notes="long" /> },
-      // Our servers, faked, take Host and Join here, and in the next frame refuse them, so these are
-      // also where hosting and joining work and fail.
+      // Our servers, faked, take Host and Join here, in the next frame refuse them, and in the one
+      // after are slow, so these are also where hosting and joining work, fail, and take long.
       { name: "Home, later visit, no notes", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" play={play} /> },
-      { name: "Hosting and joining refused", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" failing play={play} /> },
+      { name: "Hosting and joining refused", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="refusing" play={play} /> },
+      { name: "Hosting and joining slow", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="slow" play={play} /> },
       { name: "Every refusal", draw: (t) => <RefusalsFrame theme={t} /> },
       { name: "Home, later visit, unsupported aircraft", draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" /> },
     ],
@@ -66,12 +67,32 @@ function savedTheme(): Theme {
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 
+// A frame's content, drawn again only when its theme or what it plays changes. The canvas renders
+// on every step of a pan or zoom, and drawing every frame again with it took 12ms a step on the
+// development PC with 20 frames, a third of a 165Hz display's frame rate.
+const FrameBody = memo(function FrameBody({ entry, theme, play }: { entry: FrameEntry; theme: Theme; play?: Action }) {
+  return <>{entry.draw(theme, play)}</>
+})
+
+// CSS zoom lays every frame out again, about 100ms a step on the development PC with 20 frames, so
+// while the zoom changes a scale transform carries it, and the board is laid out at the new zoom
+// once the zoom has rested this long. The transform's layer keeps the raster it started with, since
+// rasterizing the board again at each new scale took 12ms a step; the text is soft until it rests.
+const SETTLE = 200
+
 export function Canvas() {
   const [theme] = useState(savedTheme)
   const board = useRef<HTMLDivElement>(null)
   const world = useRef<HTMLDivElement>(null)
   const frames = useRef(new Map<string, HTMLDivElement>())
   const [view, setView] = useState({ x: 0, y: 0, z: 0.5 })
+  // The zoom the board is laid out at, which follows the view's once it rests.
+  const [laidOut, setLaidOut] = useState(view.z)
+  useEffect(() => {
+    if (view.z === laidOut) return
+    const t = window.setTimeout(() => setLaidOut(view.z), SETTLE)
+    return () => clearTimeout(t)
+  }, [view.z, laidOut])
   const [current, setCurrent] = useState<string | null>(null)
   const [runs, setRuns] = useState<Record<string, number>>({})
   const [playing, setPlaying] = useState<Record<string, Action | undefined>>({})
@@ -194,9 +215,10 @@ export function Canvas() {
             onPointerUp={() => (drag.current = null)}
           >
             {/* The board zooms with CSS zoom, which lays the frames out again at the new size, so
-                their text stays sharp where a scale transform would blur it. */}
-            <div className="absolute top-0 left-0" style={{ transform: `translate(${view.x}px, ${view.y}px)` }}>
-              <div ref={world} className="flex flex-col items-start gap-40 p-20" style={{ zoom: view.z }}>
+                their text stays sharp where a scale transform would blur it; the transform carries
+                only a zoom still under way. */}
+            <div className="absolute top-0 left-0 origin-top-left" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.z / laidOut})`, willChange: view.z !== laidOut ? "transform" : undefined }}>
+              <div ref={world} className="flex flex-col items-start gap-40 p-20" style={{ zoom: laidOut }}>
                 {SECTIONS.map((s) => (
                   <div key={s.name} className="relative rounded-3xl border border-white/10 bg-white/[0.03] px-20 pt-16 pb-20">
                     <span className="absolute bottom-full left-0 whitespace-nowrap" style={{ paddingBottom: fixed(10) }}>
@@ -229,7 +251,9 @@ export function Canvas() {
                                 </button>
                               ))}
                           </span>
-                          <div key={runs[f.name] ?? 0}>{f.draw(theme, playing[f.name])}</div>
+                          <div key={runs[f.name] ?? 0}>
+                            <FrameBody entry={f} theme={theme} play={playing[f.name]} />
+                          </div>
                           {f.tall && (
                             <div className="pointer-events-none absolute inset-x-0 border-t border-dashed border-sky-400/60" style={{ top: EFB.height }}>
                               <span className="absolute top-0 left-full whitespace-nowrap text-sky-300/80" style={{ fontSize: fixed(11), paddingLeft: fixed(8), transform: "translateY(-50%)" }}>

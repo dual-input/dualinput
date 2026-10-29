@@ -11,16 +11,19 @@
 // figure viewer's branch, which isn't on main yet, so change them together.
 import { useEffect, useRef } from "react"
 
+// The vector math, the spec, the shapes, their ray tests and shading, and the passes' offsets and
+// presenting are exported for the standing figure in figure-standing.tsx, which draws the same
+// figure on foot.
 export type V = [number, number, number]
-const add = (a: V, b: V): V => [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
-const sub = (a: V, b: V): V => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
-const scale = (a: V, s: number): V => [a[0] * s, a[1] * s, a[2] * s]
-const dot = (a: V, b: V) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
-const cross = (a: V, b: V): V => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+export const add = (a: V, b: V): V => [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
+export const sub = (a: V, b: V): V => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+export const scale = (a: V, s: number): V => [a[0] * s, a[1] * s, a[2] * s]
+export const dot = (a: V, b: V) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+export const cross = (a: V, b: V): V => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
 export const unit = (a: V): V => scale(a, 1 / Math.hypot(a[0], a[1], a[2]))
-const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x)
+export const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x)
 
-const SPEC = {
+export const SPEC = {
   head: { radius: 0.1, eyeForward: 0.06 },
   nose: { radius: 0.038, length: 0.099, tip: 0.6 },
   chest: { radius: 0.134, at: 0.48 },
@@ -55,7 +58,7 @@ const at = (fwd: number, right: number, up: number): V => [-right, up, fwd]
 
 // A ball, or a stick that tapers from radius ra at a to rb at b, with rounded ends: an arm where
 // the radii match, and the nose where they don't. A hand is the one shape drawn below the portrait.
-type Shape = { ball: true; c: V; r: number; light?: boolean; hand?: boolean } | { ball: false; a: V; b: V; ra: number; rb: number }
+export type Shape = { ball: true; c: V; r: number; light?: boolean; hand?: boolean } | { ball: false; a: V; b: V; ra: number; rb: number }
 
 const COCKPIT_EYE = at(POSE.eye[0], POSE.eye[1], POSE.eye[2])
 const EYE = sub(COCKPIT_EYE, [0, NECK_DROP, 0])
@@ -126,9 +129,9 @@ const SKY: V = [0.42, 0.45, 0.52]
 const FLOOR: V = [0.16, 0.14, 0.13]
 const ROUGHNESS = 0.72
 
-let hitNormal: V = [0, 0, 0]
+export let hitNormal: V = [0, 0, 0]
 
-function hitBall(ro: V, rd: V, c: V, r: number) {
+export function hitBall(ro: V, rd: V, c: V, r: number) {
   const ox = ro[0] - c[0], oy = ro[1] - c[1], oz = ro[2] - c[2]
   const b = ox * rd[0] + oy * rd[1] + oz * rd[2]
   const h = b * b - (ox * ox + oy * oy + oz * oz - r * r)
@@ -137,7 +140,7 @@ function hitBall(ro: V, rd: V, c: V, r: number) {
 
 // A ray against a stick with rounded ends, after Inigo Quilez's round cone intersection
 // (iquilezles.org/articles/intersectors). It leaves the normal in hitNormal.
-function hitStick(ro: V, rd: V, s: Extract<Shape, { ball: false }>) {
+export function hitStick(ro: V, rd: V, s: Extract<Shape, { ball: false }>) {
   const { a, b, ra, rb } = s
   const ba = sub(b, a), oa = sub(ro, a), ob = sub(ro, b)
   const rr = ra - rb
@@ -202,7 +205,7 @@ function softShadow(ro: V, rd: V, c: V, r: number) {
   return x * x * (3 - 2 * x)
 }
 
-function shade(p: V, n: V, view: V, shapes: Shape[], self: number, albedo: V): V {
+export function shade(p: V, n: V, view: V, shapes: Shape[], self: number, albedo: V): V {
   const lit = dot(n, KEY.dir)
   const ro = add(p, scale(n, 1e-4))
   let ao = 1, shadow = 1
@@ -212,7 +215,8 @@ function shade(p: V, n: V, view: V, shapes: Shape[], self: number, albedo: V): V
     const o = s.ball ? s : nearestTo(s, p)
     const d = sub(o.c, p)
     const l2 = dot(d, d)
-    ao *= 1 - clamp01((dot(n, d) / Math.sqrt(l2)) * ((o.r * o.r) / l2))
+    // A shape more than about 20 radii away darkens the point by under 0.25%, so it's skipped.
+    if (o.r * o.r > 0.0025 * l2) ao *= 1 - clamp01((dot(n, d) / Math.sqrt(l2)) * ((o.r * o.r) / l2))
     if (lit > 0 && shadow > 0) {
       const q = s.ball ? s : nearestToRay(s, ro, KEY.dir)
       shadow = Math.min(shadow, softShadow(ro, KEY.dir, q.c, q.r))
@@ -239,7 +243,7 @@ function shade(p: V, n: V, view: V, shapes: Shape[], self: number, albedo: V): V
 
 // Keeps a color's hue while it rolls its brightest channel off toward white, so a lit side never
 // clips to a flat patch.
-function display(c: V): V {
+export function display(c: V): V {
   const m = Math.max(c[0], c[1], c[2])
   const k = m > 0.7 ? (0.7 + 0.3 * (1 - Math.exp(-(m - 0.7) / 0.3))) / m : 1
   return c.map((x) => {
@@ -249,7 +253,7 @@ function display(c: V): V {
 }
 
 const linear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
-function albedos(hex: string) {
+export function albedos(hex: string) {
   const n = parseInt(hex.slice(1), 16)
   const srgb = [16, 8, 0].map((s) => ((n >> s) & 255) / 255)
   return { main: srgb.map(linear) as V, light: srgb.map((c) => linear(c + (1 - c) * SPEC.lighten)) as V }
@@ -265,7 +269,7 @@ const HAND_SHADOWS = HANDS.map((h) => {
 
 // Where in its pixel each pass sends its ray: the center first, then the R2 sequence, which spreads
 // any number of rays evenly over the pixel, so the edges smooth a little more with every pass.
-function offset(pass: number): [number, number] {
+export function offset(pass: number): [number, number] {
   return pass === 0 ? [0.5, 0.5] : [(0.5 + pass * 0.7548776662) % 1, (0.5 + pass * 0.569840291) % 1]
 }
 
@@ -316,7 +320,7 @@ function pass(sum: Float32Array, size: number, shapes: Shape[], colors: { main: 
 
 // Draws the average of the passes so far. The backdrop stays clear, so the box behind the canvas
 // draws it.
-function present(ctx: CanvasRenderingContext2D, sum: Float32Array, size: number, passes: number) {
+export function present(ctx: CanvasRenderingContext2D, sum: Float32Array, size: number, passes: number) {
   const img = ctx.createImageData(size, sum.length / 4 / size)
   const px = img.data
   for (let o = 0; o < sum.length; o += 4) {

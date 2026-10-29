@@ -88,18 +88,19 @@ export function TabBar() {
 }
 
 // A frame of the EFB app. It's the EFB's height at least, and grows past it for a page that
-// shows more than one screen holds, such as the preflight page with the UI kit.
-export function AppFrame({ theme, status, header = true, tabs = true, children }: { theme: Theme; status: HeaderStatus; header?: boolean; tabs?: boolean; children: React.ReactNode }) {
+// shows more than one screen holds, such as the preflight page with the UI kit. A fixed frame
+// stays at the EFB's height, as the EFB's window does, for a page that scrolls part of itself.
+export function AppFrame({ theme, status, header = true, tabs = true, fixed, children }: { theme: Theme; status: HeaderStatus; header?: boolean; tabs?: boolean; fixed?: boolean; children: React.ReactNode }) {
   const ui = UI[theme.preset] ?? UI.nova
   return (
     <ThemeContext.Provider value={theme}>
       <UIContext.Provider value={ui}>
         <div
           className="dark flex flex-col overflow-hidden rounded-xl border bg-background font-sans text-foreground shadow-2xl"
-          style={{ ...(themeVars(theme) as React.CSSProperties), width: EFB.width, minHeight: EFB.height }}
+          style={{ ...(themeVars(theme) as React.CSSProperties), width: EFB.width, ...(fixed ? { height: EFB.height } : { minHeight: EFB.height }) }}
         >
           {header && <Header status={status} />}
-          <div className="flex flex-1 flex-col">{children}</div>
+          <div className="flex min-h-0 flex-1 flex-col">{children}</div>
           {tabs && <TabBar />}
         </div>
       </UIContext.Provider>

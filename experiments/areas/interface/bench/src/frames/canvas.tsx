@@ -11,11 +11,16 @@ import { DEFAULT_THEME, themeLabel, themeVars, type Theme } from "@/bench/theme"
 import { EFB } from "./shell"
 import { PreflightFrame } from "./preflight"
 import { SetupFlowFrame } from "./setup-check"
-import { HomeFirstTimeFrame } from "./home"
+import { HomeFirstTimeFrame, HomeLaterFrame, RefusalsFrame, type Action } from "./home"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
-// one gets a Replay button beside its name, which draws it afresh.
-type FrameEntry = { name: string; tall?: boolean; replay?: boolean; draw: (t: Theme) => React.ReactNode }
+// one gets a Replay button beside its name, which draws it afresh. A home page with Host and Join
+// also gets Play hosting and Play joining, which draw it afresh to play that by itself.
+type FrameEntry = { name: string; tall?: boolean; replay?: boolean; plays?: boolean; draw: (t: Theme, play?: Action) => React.ReactNode }
+const PLAYS: { play: Action; label: string }[] = [
+  { play: "host", label: "Play hosting" },
+  { play: "join", label: "Play joining" },
+]
 const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
   {
     name: "First-time setup",
@@ -35,9 +40,19 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Home, first time", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" /> },
       { name: "Home, first time: the aircraft check", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" openOnCheck /> },
       { name: "Home, first time: the aircraft check, unsupported", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="unsupported" openOnCheck /> },
+      { name: "Home, later visit, with the authors' notes", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" notes="short" /> },
+      { name: "Home, later visit, a long note", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" notes="long" /> },
+      // Our servers, faked, take Host and Join here, and in the next frame refuse them, so these are
+      // also where hosting and joining work and fail.
+      { name: "Home, later visit, no notes", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" play={play} /> },
+      { name: "Hosting and joining refused", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" failing play={play} /> },
+      { name: "Every refusal", draw: (t) => <RefusalsFrame theme={t} /> },
+      { name: "Home, later visit, unsupported aircraft", draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" /> },
     ],
   },
-  { name: "Preflight", frames: [{ name: "Preflight, with the UI kit", tall: true, draw: (t) => <PreflightFrame theme={t} /> }] },
+  // The preflight page from the sketch, with an example of every kit component in its checklist's
+  // place, kept as the kit's reference while preflight gets designed afresh.
+  { name: "All components", frames: [{ name: "All components", tall: true, draw: (t) => <PreflightFrame theme={t} /> }] },
 ]
 
 // The style bench saves its theme in this browser; the canvas only reads it.
@@ -59,6 +74,11 @@ export function Canvas() {
   const [view, setView] = useState({ x: 0, y: 0, z: 0.5 })
   const [current, setCurrent] = useState<string | null>(null)
   const [runs, setRuns] = useState<Record<string, number>>({})
+  const [playing, setPlaying] = useState<Record<string, Action | undefined>>({})
+  const rerun = (name: string, play?: Action) => {
+    setPlaying((p) => ({ ...p, [name]: play }))
+    setRuns((r) => ({ ...r, [name]: (r[name] ?? 0) + 1 }))
+  }
   const drag = useRef<{ x: number; y: number } | null>(null)
 
   // Fits an element of the world to the board. Rects come back on screen, so the world's place
@@ -198,12 +218,18 @@ export function Canvas() {
                           <span className={"absolute bottom-full left-0 whitespace-nowrap " + (current === f.name ? "text-sky-300" : "text-neutral-400")} style={{ fontSize: fixed(12), paddingBottom: fixed(6) }}>
                             {f.name}
                             {f.replay && (
-                              <button className="text-sky-300 hover:underline" style={{ marginLeft: fixed(10) }} onClick={() => setRuns((r) => ({ ...r, [f.name]: (r[f.name] ?? 0) + 1 }))}>
+                              <button className="text-sky-300 hover:underline" style={{ marginLeft: fixed(10) }} onClick={() => rerun(f.name)}>
                                 Replay
                               </button>
                             )}
+                            {f.plays &&
+                              PLAYS.map(({ play, label }) => (
+                                <button key={play} className="text-sky-300 hover:underline" style={{ marginLeft: fixed(10) }} onClick={() => rerun(f.name, play)}>
+                                  {label}
+                                </button>
+                              ))}
                           </span>
-                          <div key={runs[f.name] ?? 0}>{f.draw(theme)}</div>
+                          <div key={runs[f.name] ?? 0}>{f.draw(theme, playing[f.name])}</div>
                           {f.tall && (
                             <div className="pointer-events-none absolute inset-x-0 border-t border-dashed border-sky-400/60" style={{ top: EFB.height }}>
                               <span className="absolute top-0 left-full whitespace-nowrap text-sky-300/80" style={{ fontSize: fixed(11), paddingLeft: fixed(8), transform: "translateY(-50%)" }}>

@@ -3,7 +3,7 @@
 // later visits the profile authors' notes. The aircraft and the notes are examples.
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { Check, CircleCheck, CircleX } from "lucide-react"
+import { ArrowRightLeft, BookOpen, Check, CircleCheck, ExternalLink, TriangleAlert } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
@@ -12,16 +12,9 @@ import { AppFrame, Label } from "./shell"
 import { FIGURE_COLORS } from "./figure-portrait"
 import { StandingFigure } from "./figure-standing"
 import { ConfirmButton, RESTART_SIM } from "./confirm"
+import { AircraftContext, AircraftPicker, LOADED, LOADED_UNSUPPORTED, NONE_INSTALLED, PROFILES, type Aircraft, type At } from "./aircraft"
+import { useScroller } from "./scroller"
 
-// The loaded aircraft as the card names it: the maker from its package's manifest, the model,
-// and its tail number, which the sim reports as `A:ATC ID`.
-const LOADED = { maker: "Black Square", model: "Baron 58P", tail: "N58BK" }
-const LOADED_UNSUPPORTED = { maker: "Fenix", model: "A320", tail: "G-FNXA" }
-const SUPPORTED = [
-  { name: "Black Square Baron 58P", maturity: "Stable" },
-  { name: "Synaptic A220", maturity: "Stable" },
-  { name: "A2A Simulations PA24-250 Comanche", maturity: "Experimental" },
-]
 
 // How our servers can refuse: hosting when they don't answer, and joining with the four refusals the
 // backend's lookup gives (record/areas/network/02-units.md, Its requests). The words are drafts,
@@ -83,7 +76,7 @@ const SLOW_ANSWER_AFTER = 10000
 // While our servers answer, the button that asked shows it's busy and the code field is locked, and
 // a refusal, or the line for an attempt taking long, opens under the control that asked: Host, or
 // the code.
-function StartCard({ supported, servers = "answering", play }: { supported: boolean; servers?: Servers; play?: Action }) {
+function StartCard({ aircraft, servers = "answering", play }: { aircraft: Aircraft; servers?: Servers; play?: Action }) {
   const { Badge, Button, Card, CardContent, Separator, Spinner, InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } = useUI()
   const [status, setStatus] = useState<Status>({ kind: "idle" })
   const [code, setCode] = useState("")
@@ -91,7 +84,6 @@ function StartCard({ supported, servers = "answering", play }: { supported: bool
   codeNow.current = code
   const hostButton = useRef<HTMLButtonElement>(null)
   const joinButton = useRef<HTMLButtonElement>(null)
-  const aircraft = supported ? LOADED : LOADED_UNSUPPORTED
   const working = status.kind === "busy" || status.kind === "done"
 
   // An attempt's timers: its slow line's, and the fake servers' answers. A new attempt or Cancel
@@ -121,7 +113,7 @@ function StartCard({ supported, servers = "answering", play }: { supported: bool
   }
   const join = (from: HTMLElement) => codeNow.current.length === 6 && attempt("join", from)
   // Cancel stops the attempt here alone: a joiner registers with our servers only once it reaches
-  // the crew, and a session they start for a cancelled host after all lapses, since nobody renews
+  // the crew, and a session they start for a canceled host after all lapses, since nobody renews
   // it. The code stays.
   const cancel = (from: HTMLElement) => {
     stop()
@@ -176,7 +168,7 @@ function StartCard({ supported, servers = "answering", play }: { supported: bool
           <span className="truncate text-lg leading-tight font-semibold">{aircraft.model}</span>
           <span className="text-xs text-muted-foreground">{aircraft.tail}</span>
         </div>
-        {supported ? <Badge variant="secondary">{SUPPORTED[0].maturity}</Badge> : <StatusChip level="trouble">Not supported</StatusChip>}
+        {aircraft.maturity ? <Badge variant={aircraft.maturity === "Stable" ? "secondary" : "outline"}>{aircraft.maturity}</Badge> : <StatusChip level="warning">Not supported yet</StatusChip>}
       </CardContent>
       <Separator />
       <CardContent className="flex flex-col gap-4">
@@ -237,11 +229,18 @@ function StartCard({ supported, servers = "answering", play }: { supported: bool
   )
 }
 
-// A link inside a sentence. Neither opens anything yet: "supported aircraft" is to open a large
-// popup the user will design.
-function InlineLink({ children }: { children: React.ReactNode }) {
+// A link inside a sentence, which does what it's given; one given nothing, such as "see how", opens
+// nothing yet.
+function InlineLink({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
   return (
-    <a href="#" onClick={(e) => e.preventDefault()} className="text-primary underline-offset-4 hover:underline">
+    <a
+      href="#"
+      onClick={(e) => {
+        e.preventDefault()
+        onClick?.()
+      }}
+      className="text-primary underline-offset-4 hover:underline"
+    >
       {children}
     </a>
   )
@@ -272,8 +271,9 @@ const LEAVE_MS = 300
 const TURN = { out: 110, in: 170 }
 
 // The guide's last page: whether Dual Input supports the loaded aircraft, and when it doesn't, what
-// a session still shares in it and the way to the aircraft it does support.
+// a session still shares in it and the way to the aircraft it does support, the aircraft picker.
 function AircraftCheck({ supported }: { supported: boolean }) {
+  const [picking, setPicking] = useState(false)
   if (supported)
     return (
       <>
@@ -287,14 +287,76 @@ function AircraftCheck({ supported }: { supported: boolean }) {
   return (
     <>
       <h3 className="flex items-center gap-2 text-base font-semibold">
-        <CircleX className="size-4 shrink-0 text-destructive" />
+        <TriangleAlert className="size-4 shrink-0 text-warning" />
         Dual Input doesn't support this aircraft yet
       </h3>
       <p className="text-sm text-muted-foreground">Cockpit state won't sync but you can still fly it together, sharing its position, who's flying, traffic, and ATC.</p>
       <p className="pt-3 text-sm text-muted-foreground">
-        Alternatively, switch to a <InlineLink>supported aircraft</InlineLink>, or try your hand at building a profile for it (<InlineLink>see how</InlineLink>).
+        Alternatively, switch to a <InlineLink onClick={() => setPicking(true)}>supported aircraft</InlineLink>, or try your hand at building a profile for it (<InlineLink>see how</InlineLink>).
       </p>
+      <AircraftPicker open={picking} onOpenChange={setPicking} />
     </>
+  )
+}
+
+// What a session still does in an aircraft Dual Input has no profile for, in the user's words:
+// everything but the cockpit's state, which takes a profile.
+const SHARED_UNSUPPORTED = ["Share flight and physics", "Pass control between each other", "Share Traffic and ATC"]
+
+// Home on a later visit in an aircraft Dual Input has no profile for: what a session still does
+// there, as a list, then the two ways forward as text buttons, as Continue anyway is in setup, one
+// below the other under their own lead-in. Each lead-in sits close over what it leads to.
+// Switching opens the aircraft picker. Learning to build a profile is to open the pilot's browser,
+// so its button says it leaves the app, but the page it opens doesn't exist yet, so for now it's
+// disabled, and its tooltip says it's coming soon. A frame can open with the picker up.
+function UnsupportedAircraft({ openPicker }: { openPicker?: boolean }) {
+  const { Button, Tooltip, TooltipContent, TooltipTrigger } = useUI()
+  const [picking, setPicking] = useState(!!openPicker)
+  const leadIn = (text: string) => <p className="text-sm text-muted-foreground">{text}</p>
+  return (
+    <section className="flex flex-col gap-5">
+      <div className="flex flex-col gap-1.5">
+        <h3 className="flex items-center gap-2 text-base font-semibold">
+          <TriangleAlert className="size-4 shrink-0 text-warning" />
+          Dual Input has no profile for this aircraft yet
+        </h3>
+        {leadIn("You can still fly together and:")}
+        <ul className="flex flex-col gap-2 pt-1 text-sm">
+          {SHARED_UNSUPPORTED.map((what) => (
+            <li key={what} className="flex items-center gap-3">
+              <Check className="size-4 shrink-0 text-success" />
+              {what}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="flex flex-col items-start gap-1.5">
+        {leadIn("Other options:")}
+        {/* A second list, anchored as the first is: an icon in the checks' column, and their
+            rhythm, 8px between lines and 10px under the lead-in. Each link reaches 4px above and
+            below its text, so for a VR pointer, which wavers, the two are 28px targets that meet. */}
+        <div className="flex flex-col items-start">
+          <Button variant="link" className="h-auto gap-3 border-0 px-0 py-1" onClick={() => setPicking(true)}>
+            <ArrowRightLeft className="size-4" />
+            Switch to a supported aircraft
+          </Button>
+          {/* Disabled until its page exists. A disabled button takes no pointer events, so the
+              tooltip saying why hangs on a wrapper around it. */}
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <Button variant="link" disabled className="h-auto gap-3 border-0 px-0 py-1">
+                <BookOpen className="size-4" />
+                <span className="flex items-center gap-1.5">
+                  Learn how to build a profile <ExternalLink className="size-3.5" />
+                </span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Coming soon</TooltipContent>
+          </Tooltip>
+        </div>
+      </div>
+      <AircraftPicker open={picking} onOpenChange={setPicking} />
+    </section>
   )
 }
 
@@ -465,51 +527,7 @@ const NOTES = {
 // The notes scroll inside the slip when they run past the page, under a title that stays put, and a
 // fade at either end shows there's more that way.
 function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
-  const scroller = useRef<HTMLDivElement>(null)
-  const [above, setAbove] = useState(false)
-  const [below, setBelow] = useState(false)
-  const [dragging, setDragging] = useState(false)
-  const measure = () => {
-    const s = scroller.current
-    if (!s) return
-    setAbove(s.scrollTop > 1)
-    setBelow(s.scrollHeight - s.scrollTop - s.clientHeight > 1)
-  }
-  useLayoutEffect(measure)
-  // The start card easing open over a refusal shortens the notes without a render here, so they
-  // measure again when an easing on the page ends.
-  useEffect(() => {
-    const page = scroller.current?.closest("[data-home-page]")
-    page?.addEventListener("transitionend", measure)
-    return () => page?.removeEventListener("transitionend", measure)
-  })
-  // Dragging anywhere on the notes scrolls them, since the thin scrollbar is hard to hit with a mouse
-  // in the sim and harder with a VR pointer. Coherent GT has no PointerEvent, so the drag follows the
-  // mouse's events, from the window so it keeps going off the slip. It starts only past 4px, so a
-  // click still clicks, and leaves a press on the scrollbar to the scrollbar. The canvas can zoom the
-  // frame, so the drag is scaled to the notes' own pixels.
-  const startDrag = (e: React.MouseEvent) => {
-    const s = scroller.current
-    if (!s || e.button !== 0 || (e.target === s && e.nativeEvent.offsetX >= s.clientWidth)) return
-    const scale = s.getBoundingClientRect().height / s.offsetHeight || 1
-    const y0 = e.clientY
-    const top0 = s.scrollTop
-    let moved = false
-    const move = (m: MouseEvent) => {
-      const dy = (m.clientY - y0) / scale
-      if (!moved && Math.abs(dy) < 4) return
-      moved = true
-      setDragging(true)
-      s.scrollTop = top0 - dy
-    }
-    const up = () => {
-      window.removeEventListener("mousemove", move)
-      window.removeEventListener("mouseup", up)
-      setDragging(false)
-    }
-    window.addEventListener("mousemove", move)
-    window.addEventListener("mouseup", up)
-  }
+  const { ref, onScroll, onMouseDown, above, below, cursor } = useScroller()
   const fade = (to: "top" | "bottom", shown: boolean): React.CSSProperties => ({ background: `linear-gradient(to ${to === "top" ? "bottom" : "top"}, ${PAPER}, transparent)`, opacity: shown ? 1 : 0 })
   return (
     // Manila paper, turned a little off square, with a strip of tape at the top. It's darker than
@@ -532,12 +550,12 @@ function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
           scrollbar-color and scrollbar-width. */}
       <div className="relative -mr-3 flex min-h-0 flex-col">
         <div
-          ref={scroller}
-          onScroll={measure}
-          onMouseDown={startDrag}
+          ref={ref}
+          onScroll={onScroll}
+          onMouseDown={onMouseDown}
           className={
             "min-h-0 overflow-y-auto pt-2 pr-2 pb-4 select-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[rgb(28_27_26/0.3)] [&::-webkit-scrollbar-track]:mt-2 [&::-webkit-scrollbar-track]:mb-4 [&::-webkit-scrollbar-track]:bg-transparent " +
-            (dragging ? "cursor-grabbing" : above || below ? "cursor-grab" : "")
+            cursor
           }
         >
           <p>{notes.lead}</p>
@@ -636,13 +654,14 @@ function NoNotes() {
   )
 }
 
-// The start card, and under it the page's rest; a frame's servers and play go to the card.
-function HomePage({ theme, supported, servers, play, children }: { theme: Theme; supported: boolean; servers?: Servers; play?: Action; children: React.ReactNode }) {
+// The start card for the loaded aircraft, and under it the page's rest; a frame's servers and play
+// go to the card. A loaded aircraft with a maturity has a profile.
+function HomePage({ theme, aircraft, servers, play, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; children: React.ReactNode }) {
   return (
-    <AppFrame theme={theme} status={{ aircraft: supported ? "supported" : "unsupported" }} fixed>
+    <AppFrame theme={theme} status={{ aircraft: aircraft.maturity ? "supported" : "unsupported" }} fixed>
       {/* 8px on top, since the header's own height already leaves room under its line. */}
       <div className="flex min-h-0 flex-1 flex-col gap-6 p-5 pt-2" data-home-page>
-        <StartCard supported={supported} servers={servers} play={play} />
+        <StartCard aircraft={aircraft} servers={servers} play={play} />
         {children}
       </div>
     </AppFrame>
@@ -687,38 +706,49 @@ function Farewell({ onGone }: { onGone: () => void }) {
   )
 }
 
+// The aircraft a frame starts in, where the pilot is, and which supported aircraft they have,
+// which it keeps for the aircraft picker: picking one on the world map loads it, and home follows.
+// Frames are on the world map, with some of them installed, unless they say otherwise.
+function useLoaded(aircraft: "supported" | "unsupported", at: At, noneInstalled?: boolean) {
+  const [loaded, setLoaded] = useState(aircraft === "supported" ? LOADED : LOADED_UNSUPPORTED)
+  return { loaded, context: { at, pick: setLoaded, profiles: noneInstalled ? NONE_INSTALLED : PROFILES } }
+}
+
 // A frame for the aircraft check opens the guide on its last page.
-export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck }: { theme: Theme; aircraft: "supported" | "unsupported"; openOnCheck?: boolean }) {
-  const supported = aircraft === "supported"
+export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck, at = "world-map" }: { theme: Theme; aircraft: "supported" | "unsupported"; openOnCheck?: boolean; at?: At }) {
+  const { loaded, context } = useLoaded(aircraft, at)
   const [guiding, setGuiding] = useState(true)
   const [farewell, setFarewell] = useState(false)
   return (
-    <HomePage theme={theme} supported={supported}>
-      <div className="relative flex min-h-0 flex-1 flex-col">
-        {guiding && <WelcomeGuide supported={supported} startAt={openOnCheck ? PAGES - 1 : 0} onLeave={() => setFarewell(true)} onClose={() => setGuiding(false)} />}
-        {farewell && <Farewell onGone={() => setFarewell(false)} />}
-      </div>
-    </HomePage>
+    <AircraftContext.Provider value={context}>
+      <HomePage theme={theme} aircraft={loaded}>
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          {guiding && <WelcomeGuide supported={!!loaded.maturity} startAt={openOnCheck ? PAGES - 1 : 0} onLeave={() => setFarewell(true)} onClose={() => setGuiding(false)} />}
+          {farewell && <Farewell onGone={() => setFarewell(false)} />}
+        </div>
+      </HomePage>
+    </AircraftContext.Provider>
   )
 }
 
 // Home on a later visit: the authors' notes, or the figure when there are none, and in an aircraft
-// Dual Input doesn't support, the guide's last page, which has no notes to show. A frame says how
-// our servers, faked, answer, and can play hosting or joining by itself.
-export function HomeLaterFrame({ theme, aircraft, notes, servers, play }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action }) {
-  const supported = aircraft === "supported"
+// Dual Input has no profile for, which has no notes to show, what a session there shares, with the
+// aircraft picker a press away; a frame can open with it up. A frame also says how our servers,
+// faked, answer, and can play hosting or joining by itself.
+export function HomeLaterFrame({ theme, aircraft, notes, servers, play, at = "world-map", openPicker, noneInstalled }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; at?: At; openPicker?: boolean; noneInstalled?: boolean }) {
+  const { loaded, context } = useLoaded(aircraft, at, noneInstalled)
   return (
-    <HomePage theme={theme} supported={supported} servers={servers} play={play}>
-      {!supported ? (
-        <section className="flex flex-col gap-1.5">
-          <AircraftCheck supported={false} />
-        </section>
-      ) : notes ? (
-        <AuthorsNotes notes={NOTES[notes]} />
-      ) : (
-        <NoNotes />
-      )}
-    </HomePage>
+    <AircraftContext.Provider value={context}>
+      <HomePage theme={theme} aircraft={loaded} servers={servers} play={play}>
+        {!loaded.maturity ? (
+          <UnsupportedAircraft openPicker={openPicker} />
+        ) : notes ? (
+          <AuthorsNotes notes={NOTES[notes]} />
+        ) : (
+          <NoNotes />
+        )}
+      </HomePage>
+    </AircraftContext.Provider>
   )
 }
 

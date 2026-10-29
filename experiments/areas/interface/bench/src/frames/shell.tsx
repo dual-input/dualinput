@@ -1,6 +1,6 @@
 // What every frame of the EFB app shares: its size, the header, the tab bar, the small label,
 // and the frame that gives a page the theme and the preset's components.
-import { Check, CircleX, Headset, PersonStanding, Plane, Settings as Gear, Users } from "lucide-react"
+import { Check, Headset, PersonStanding, Plane, Settings as Gear, TriangleAlert, Users } from "lucide-react"
 
 import { ThemeContext, UI, UIContext } from "@/bench/ui"
 import { themeVars, type Theme } from "@/bench/theme"
@@ -46,6 +46,7 @@ export function Label({ children }: { children: React.ReactNode }) {
 }
 
 // The header's status: the sim, and whether Dual Input supports the loaded aircraft. Setup shows none.
+// An unsupported aircraft is amber, not red, since a session in it still flies; red is for failures.
 export type HeaderStatus = { aircraft: "supported" | "unsupported" } | null
 
 export function Header({ status }: { status: HeaderStatus }) {
@@ -64,8 +65,8 @@ export function Header({ status }: { status: HeaderStatus }) {
               Aircraft <Check className="size-3.5 text-success" />
             </span>
           ) : (
-            <span className="flex items-center gap-1 text-destructive">
-              Aircraft <CircleX className="size-3.5" />
+            <span className="flex items-center gap-1 text-muted-foreground">
+              Aircraft <TriangleAlert className="size-3.5 text-warning" />
             </span>
           )}
         </div>
@@ -90,13 +91,15 @@ export function TabBar() {
 // A frame of the EFB app. It's the EFB's height at least, and grows past it for a page that
 // shows more than one screen holds, such as the preflight page with the UI kit. A fixed frame
 // stays at the EFB's height, as the EFB's window does, for a page that scrolls part of itself.
+// It's marked data-app-frame, the app's window, which a popup opens inside.
 export function AppFrame({ theme, status, header = true, tabs = true, fixed, children }: { theme: Theme; status: HeaderStatus; header?: boolean; tabs?: boolean; fixed?: boolean; children: React.ReactNode }) {
   const ui = UI[theme.preset] ?? UI.nova
   return (
     <ThemeContext.Provider value={theme}>
       <UIContext.Provider value={ui}>
         <div
-          className="dark flex flex-col overflow-hidden rounded-xl border bg-background font-sans text-foreground shadow-2xl"
+          data-app-frame
+          className="dark relative flex flex-col overflow-hidden rounded-xl border bg-background font-sans text-foreground shadow-2xl"
           style={{ ...(themeVars(theme) as React.CSSProperties), width: EFB.width, ...(fixed ? { height: EFB.height } : { minHeight: EFB.height }) }}
         >
           {header && <Header status={status} />}

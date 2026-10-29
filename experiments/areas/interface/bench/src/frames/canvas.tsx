@@ -48,7 +48,10 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Hosting and joining refused", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="refusing" play={play} /> },
       { name: "Hosting and joining slow", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="slow" play={play} /> },
       { name: "Every refusal", draw: (t) => <RefusalsFrame theme={t} /> },
-      { name: "Home, later visit, unsupported aircraft", draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" /> },
+      { name: "Home, later visit, unsupported aircraft", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" /> },
+      { name: "Home, later visit, unsupported aircraft: the aircraft picker", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" openPicker /> },
+      { name: "Home, later visit, unsupported aircraft: the aircraft picker in a flight", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" at="flight" openPicker /> },
+      { name: "Home, later visit, unsupported aircraft: the aircraft picker, none installed", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" openPicker noneInstalled /> },
     ],
   },
   // The preflight page from the sketch, with an example of every kit component in its checklist's

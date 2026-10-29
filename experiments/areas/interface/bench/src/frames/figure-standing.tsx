@@ -306,11 +306,11 @@ const spring = (s: Spring, target: number, k: number, d: number, dt: number) => 
 }
 // A press on Host or Join winds it up too, before any attempt: held while the button is held, and
 // let go anywhere but the button, it straightens back up over CANCEL seconds, nothing attempted. A
-// cancelled attempt straightens it up the same way.
+// canceled attempt straightens it up the same way.
 const CANCEL = 0.35
 // The leap's time, held at the wind-up's end while pressed or waiting; how long it has held; the
 // answer, or the press before it; how long it has been deflating from a refusal, or straightening up
-// from a cancelled press; and how far the body and the head have fallen into the slump.
+// from a canceled press; and how far the body and the head have fallen into the slump.
 type Answer = "pressing" | "waiting" | "ok" | "no"
 type Cheer = { t: number; waited: number; answer: Answer; deflating: number; canceling: number; arm: Spring; arch: Spring; slump: Spring; flop: Spring }
 const newCheer = (answer: Answer): Cheer => ({
@@ -349,7 +349,8 @@ function stepCheer(s: Cheer, dt: number) {
     spring(s.arch, arch, 50, 10, h)
   }
 }
-// A pass over the figure took about 15ms in Chrome on the development PC. While it moves, it's posed
+// A pass over the figure took about 5ms in Chrome on the development PC, on home's 260 by 317 pixel
+// canvas; Coherent GT's time is unmeasured. While it moves, it's posed
 // every frame with one pass. At rest it moves only by breathing and shifting, by under 2px, so it's
 // posed at most this often then, with this many passes that smooth its edges.
 const IDLE_FRAME = 150
@@ -586,7 +587,7 @@ export function StandingFigure({ hex }: { hex: string }) {
     for (const b of presses) b.addEventListener("mousedown", onPress)
     window.addEventListener("mouseup", onRelease)
     // An attempt winds it up, if a press hasn't already, and the answer sets it leaping or
-    // deflating; a new attempt after a refusal or a cancelled press starts afresh.
+    // deflating; a new attempt after a refusal or a canceled press starts afresh.
     const onAttempt = () => {
       if (fresh()) cheer = newCheer("waiting")
       else if (cheer?.answer === "pressing") cheer.answer = "waiting"
@@ -597,7 +598,7 @@ export function StandingFigure({ hex }: { hex: string }) {
       cheer.answer = ok ? "ok" : "no"
       if (!ok) cheer.deflating = 0
     }
-    // A cancelled attempt straightens it back up from the crouch, as a press let go elsewhere does.
+    // A canceled attempt straightens it back up from the crouch, as a press let go elsewhere does.
     const onCancel = () => {
       if (!fresh() && cheer?.answer !== "ok") cheer!.canceling = 0
     }

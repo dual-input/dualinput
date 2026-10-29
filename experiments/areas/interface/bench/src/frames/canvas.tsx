@@ -12,6 +12,7 @@ import { EFB } from "./shell"
 import { PreflightFrame } from "./preflight"
 import { SetupFlowFrame } from "./setup-check"
 import { HomeFirstTimeFrame, HomeLaterFrame, RefusalsFrame, type Action } from "./home"
+import { AircraftPickerFrame } from "./aircraft"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
 // one gets a Replay button beside its name, which draws it afresh. A home page with Host and Join
@@ -34,30 +35,51 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Crew card", replay: true, draw: (t) => <SetupFlowFrame theme={t} openOnCard /> },
     ],
   },
+  // Sections hold what a frame shows, a page or a part several pages open, so a frame's name says
+  // only what sets it apart within its section.
   {
-    name: "Home",
+    name: "Home, first visit",
     frames: [
-      { name: "Home, first time", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" /> },
-      { name: "Home, first time: the aircraft check", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" openOnCheck /> },
-      { name: "Home, first time: the aircraft check, unsupported", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="unsupported" openOnCheck /> },
-      { name: "Home, later visit, with the authors' notes", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" notes="short" /> },
-      { name: "Home, later visit, a long note", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" notes="long" /> },
-      // Our servers, faked, take Host and Join here, in the next frame refuse them, and in the one
-      // after are slow, so these are also where hosting and joining work, fail, and take long.
-      { name: "Home, later visit, no notes", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" play={play} /> },
-      { name: "Hosting and joining refused", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="refusing" play={play} /> },
-      { name: "Hosting and joining slow", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="slow" play={play} /> },
+      { name: "The guide", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" /> },
+      { name: "On the aircraft check", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" openOnCheck /> },
+      { name: "On the aircraft check, unsupported", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="unsupported" openOnCheck /> },
+    ],
+  },
+  {
+    name: "Home, later visit",
+    frames: [
+      { name: "With the authors' notes", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" notes="short" /> },
+      { name: "A long note", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" notes="long" /> },
+      { name: "No notes", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" /> },
+      { name: "Unsupported aircraft", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" /> },
+    ],
+  },
+  // Our servers, faked, take Host and Join in the first frame, refuse them in the second, and are
+  // slow in the third.
+  {
+    name: "Hosting and joining",
+    frames: [
+      { name: "Succeeds", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" play={play} /> },
+      { name: "Refused", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="refusing" play={play} /> },
+      { name: "Slow", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="slow" play={play} /> },
       { name: "Every refusal", draw: (t) => <RefusalsFrame theme={t} /> },
-      { name: "Home, later visit, unsupported aircraft", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" /> },
-      { name: "Home, later visit, unsupported aircraft: the aircraft picker", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" openPicker /> },
-      { name: "Home, later visit, unsupported aircraft: the aircraft picker in a flight", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" at="flight" openPicker /> },
-      { name: "Home, later visit, unsupported aircraft: the aircraft picker, none installed", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" openPicker noneInstalled /> },
+    ],
+  },
+  {
+    name: "Aircraft picker",
+    frames: [
+      { name: "Installed aircraft", replay: true, draw: (t) => <AircraftPickerFrame theme={t} /> },
+      { name: "In a flight", replay: true, draw: (t) => <AircraftPickerFrame theme={t} at="flight" /> },
+      { name: "None installed", replay: true, draw: (t) => <AircraftPickerFrame theme={t} noneInstalled /> },
     ],
   },
   // The preflight page from the sketch, with an example of every kit component in its checklist's
   // place, kept as the kit's reference while preflight gets designed afresh.
   { name: "All components", frames: [{ name: "All components", tall: true, draw: (t) => <PreflightFrame theme={t} /> }] },
 ]
+
+// A frame's name is short and can repeat across sections, so the canvas knows a frame by both.
+const idOf = (s: { name: string }, f: FrameEntry) => `${s.name} / ${f.name}`
 
 // The style bench saves its theme in this browser; the canvas only reads it.
 function savedTheme(): Theme {
@@ -183,9 +205,9 @@ export function Canvas() {
                 </span>
                 {s.frames.map((f) => (
                   <button
-                    key={f.name}
-                    className={"flex h-7 items-center gap-2 rounded-md pr-2 pl-7 text-left text-[13px] " + (current === f.name ? "bg-sky-500/20 text-sky-200" : "text-neutral-300 hover:bg-white/5")}
-                    onClick={() => (setCurrent(f.name), fit(frames.current.get(f.name)))}
+                    key={idOf(s, f)}
+                    className={"flex h-7 items-center gap-2 rounded-md pr-2 pl-7 text-left text-[13px] " + (current === idOf(s, f) ? "bg-sky-500/20 text-sky-200" : "text-neutral-300 hover:bg-white/5")}
+                    onClick={() => (setCurrent(idOf(s, f)), fit(frames.current.get(idOf(s, f))))}
                   >
                     <Frame className="size-3.5 shrink-0 text-neutral-500" />
                     <span className="truncate">{f.name}</span>
@@ -235,30 +257,30 @@ export function Canvas() {
                     <div className="flex items-start gap-20">
                       {s.frames.map((f) => (
                         <div
-                          key={f.name}
+                          key={idOf(s, f)}
                           ref={(el) => {
-                            if (el) frames.current.set(f.name, el)
+                            if (el) frames.current.set(idOf(s, f), el)
                           }}
                           data-frame
                           className="relative"
                           style={{ width: EFB.width }}
                         >
-                          <span className={"absolute bottom-full left-0 whitespace-nowrap " + (current === f.name ? "text-sky-300" : "text-neutral-400")} style={{ fontSize: fixed(12), paddingBottom: fixed(6) }}>
+                          <span className={"absolute bottom-full left-0 whitespace-nowrap " + (current === idOf(s, f) ? "text-sky-300" : "text-neutral-400")} style={{ fontSize: fixed(12), paddingBottom: fixed(6) }}>
                             {f.name}
                             {f.replay && (
-                              <button className="text-sky-300 hover:underline" style={{ marginLeft: fixed(10) }} onClick={() => rerun(f.name)}>
+                              <button className="text-sky-300 hover:underline" style={{ marginLeft: fixed(10) }} onClick={() => rerun(idOf(s, f))}>
                                 Replay
                               </button>
                             )}
                             {f.plays &&
                               PLAYS.map(({ play, label }) => (
-                                <button key={play} className="text-sky-300 hover:underline" style={{ marginLeft: fixed(10) }} onClick={() => rerun(f.name, play)}>
+                                <button key={play} className="text-sky-300 hover:underline" style={{ marginLeft: fixed(10) }} onClick={() => rerun(idOf(s, f), play)}>
                                   {label}
                                 </button>
                               ))}
                           </span>
-                          <div key={runs[f.name] ?? 0}>
-                            <FrameBody entry={f} theme={theme} play={playing[f.name]} />
+                          <div key={runs[idOf(s, f)] ?? 0}>
+                            <FrameBody entry={f} theme={theme} play={playing[idOf(s, f)]} />
                           </div>
                           {f.tall && (
                             <div className="pointer-events-none absolute inset-x-0 border-t border-dashed border-sky-400/60" style={{ top: EFB.height }}>

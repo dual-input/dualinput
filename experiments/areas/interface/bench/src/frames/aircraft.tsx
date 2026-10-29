@@ -6,6 +6,8 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { Check, ChevronRight, XIcon } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
+import type { Theme } from "@/bench/theme"
+import { AppFrame } from "./shell"
 import { useScroller } from "./scroller"
 
 // An aircraft as home names it: the maker from its package's manifest, the model, and its tail
@@ -41,6 +43,22 @@ export const AircraftContext = createContext<{ at: At; pick: (a: Aircraft) => vo
 // The supported aircraft for a pilot who has none of them, as a pilot might early on, while there
 // are few profiles.
 export const NONE_INSTALLED = PROFILES.map((a) => ({ ...a, installed: false }))
+
+// The picker on its own, over a plain window of the app, since more than one page opens it: home
+// in an unsupported aircraft, and later Settings. It opens with the frame; a pick closes it, with
+// nothing behind it to follow the new aircraft, and Replay opens it again. A frame says where the
+// pilot is, and whether they have none of the supported aircraft.
+export function AircraftPickerFrame({ theme, at = "world-map", noneInstalled }: { theme: Theme; at?: At; noneInstalled?: boolean }) {
+  const [open, setOpen] = useState(true)
+  return (
+    <AircraftContext.Provider value={{ at, pick: () => {}, profiles: noneInstalled ? NONE_INSTALLED : PROFILES }}>
+      <AppFrame theme={theme} status={null} fixed>
+        <div className="flex-1" />
+        <AircraftPicker open={open} onOpenChange={setOpen} />
+      </AppFrame>
+    </AircraftContext.Provider>
+  )
+}
 
 // The world map showed a newly selected aircraft within 1s (record/areas/interface/log.md,
 // 2026-10-05), and the sim then reports it, which moves home on; the bench fakes the wait. Loaded,

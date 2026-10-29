@@ -12,7 +12,7 @@ import { AppFrame, Label } from "./shell"
 import { FIGURE_COLORS } from "./figure-portrait"
 import { StandingFigure } from "./figure-standing"
 import { ConfirmButton, RESTART_SIM } from "./confirm"
-import { AircraftContext, AircraftPicker, LOADED, LOADED_UNSUPPORTED, NONE_INSTALLED, PROFILES, type Aircraft, type At } from "./aircraft"
+import { AircraftContext, AircraftPicker, LOADED, LOADED_UNSUPPORTED, PROFILES, type Aircraft } from "./aircraft"
 import { useScroller } from "./scroller"
 
 
@@ -308,10 +308,10 @@ const SHARED_UNSUPPORTED = ["Share flight and physics", "Pass control between ea
 // below the other under their own lead-in. Each lead-in sits close over what it leads to.
 // Switching opens the aircraft picker. Learning to build a profile is to open the pilot's browser,
 // so its button says it leaves the app, but the page it opens doesn't exist yet, so for now it's
-// disabled, and its tooltip says it's coming soon. A frame can open with the picker up.
-function UnsupportedAircraft({ openPicker }: { openPicker?: boolean }) {
+// disabled, and its tooltip says it's coming soon.
+function UnsupportedAircraft() {
   const { Button, Tooltip, TooltipContent, TooltipTrigger } = useUI()
-  const [picking, setPicking] = useState(!!openPicker)
+  const [picking, setPicking] = useState(false)
   const leadIn = (text: string) => <p className="text-sm text-muted-foreground">{text}</p>
   return (
     <section className="flex flex-col gap-5">
@@ -706,17 +706,16 @@ function Farewell({ onGone }: { onGone: () => void }) {
   )
 }
 
-// The aircraft a frame starts in, where the pilot is, and which supported aircraft they have,
-// which it keeps for the aircraft picker: picking one on the world map loads it, and home follows.
-// Frames are on the world map, with some of them installed, unless they say otherwise.
-function useLoaded(aircraft: "supported" | "unsupported", at: At, noneInstalled?: boolean) {
+// The aircraft a frame starts in, which it keeps for the aircraft picker: picking one on the world
+// map, where home's frames are, loads it, and home follows.
+function useLoaded(aircraft: "supported" | "unsupported") {
   const [loaded, setLoaded] = useState(aircraft === "supported" ? LOADED : LOADED_UNSUPPORTED)
-  return { loaded, context: { at, pick: setLoaded, profiles: noneInstalled ? NONE_INSTALLED : PROFILES } }
+  return { loaded, context: { at: "world-map" as const, pick: setLoaded, profiles: PROFILES } }
 }
 
 // A frame for the aircraft check opens the guide on its last page.
-export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck, at = "world-map" }: { theme: Theme; aircraft: "supported" | "unsupported"; openOnCheck?: boolean; at?: At }) {
-  const { loaded, context } = useLoaded(aircraft, at)
+export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck }: { theme: Theme; aircraft: "supported" | "unsupported"; openOnCheck?: boolean }) {
+  const { loaded, context } = useLoaded(aircraft)
   const [guiding, setGuiding] = useState(true)
   const [farewell, setFarewell] = useState(false)
   return (
@@ -733,15 +732,15 @@ export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck, at = "world-m
 
 // Home on a later visit: the authors' notes, or the figure when there are none, and in an aircraft
 // Dual Input has no profile for, which has no notes to show, what a session there shares, with the
-// aircraft picker a press away; a frame can open with it up. A frame also says how our servers,
-// faked, answer, and can play hosting or joining by itself.
-export function HomeLaterFrame({ theme, aircraft, notes, servers, play, at = "world-map", openPicker, noneInstalled }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; at?: At; openPicker?: boolean; noneInstalled?: boolean }) {
-  const { loaded, context } = useLoaded(aircraft, at, noneInstalled)
+// aircraft picker a press away. A frame also says how our servers, faked, answer, and can play
+// hosting or joining by itself.
+export function HomeLaterFrame({ theme, aircraft, notes, servers, play }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action }) {
+  const { loaded, context } = useLoaded(aircraft)
   return (
     <AircraftContext.Provider value={context}>
       <HomePage theme={theme} aircraft={loaded} servers={servers} play={play}>
         {!loaded.maturity ? (
-          <UnsupportedAircraft openPicker={openPicker} />
+          <UnsupportedAircraft />
         ) : notes ? (
           <AuthorsNotes notes={NOTES[notes]} />
         ) : (

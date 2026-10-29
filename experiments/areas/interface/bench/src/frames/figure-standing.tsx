@@ -172,28 +172,47 @@ const smooth = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x))
 function pass(sum: Float32Array, w: number, h: number, tanH: number, shapes: Shape[], bx: { each: Box[]; all: Box }, colors: { main: V; light: V }, n: number) {
   const [ox, oy] = offset(n)
   const [x0, y0, x1, y1] = bx.all
+  const rox = VIEW.from[0], roy = VIEW.from[1], roz = VIEW.from[2]
+  const color: V = [0, 0, 0]
   for (let j = y0; j <= y1; j++) {
+    const up = (1 - ((j + oy) / h) * 2) * TAN_V
+    const upX = UP[0] * up, upY = UP[1] * up, upZ = UP[2] * up
     for (let i = x0; i <= x1; i++) {
-      const rd = unit(add(FWD, add(scale(RIGHT, (((i + ox) / w) * 2 - 1) * tanH), scale(UP, (1 - ((j + oy) / h) * 2) * TAN_V))))
-      let best = Infinity, self = -1, normal: V = [0, 0, 0]
+      const right = (((i + ox) / w) * 2 - 1) * tanH
+      const dx = FWD[0] + (RIGHT[0] * right + upX), dy = FWD[1] + (RIGHT[1] * right + upY), dz = FWD[2] + (RIGHT[2] * right + upZ)
+      const toUnit = 1 / Math.hypot(dx, dy, dz)
+      const rdx = dx * toUnit, rdy = dy * toUnit, rdz = dz * toUnit
+      let best = Infinity, self = -1, nx = 0, ny = 0, nz = 0
       for (let k = 0; k < shapes.length; k++) {
         const b = bx.each[k]
         if (i < b[0] || i > b[2] || j < b[1] || j > b[3]) continue
         const s = shapes[k]
-        const t = s.ball ? hitBall(VIEW.from, rd, s.c, s.r) : hitStick(VIEW.from, rd, s)
+        const t = s.ball ? hitBall(rox, roy, roz, rdx, rdy, rdz, s.c, s.r) : hitStick(rox, roy, roz, rdx, rdy, rdz, s)
         if (t > 0 && t < best) {
           best = t
           self = k
-          normal = s.ball ? scale(sub(add(VIEW.from, scale(rd, t)), s.c), 1 / s.r) : hitNormal
+          if (!s.ball) {
+            nx = hitNormal[0]
+            ny = hitNormal[1]
+            nz = hitNormal[2]
+          }
         }
       }
       if (self < 0) continue
       const s = shapes[self]
-      const c = display(shade(add(VIEW.from, scale(rd, best)), normal, scale(rd, -1), shapes, self, s.ball && s.light ? colors.light : colors.main))
+      const px = rox + rdx * best, py = roy + rdy * best, pz = roz + rdz * best
+      if (s.ball) {
+        const toUnit = 1 / s.r
+        nx = (px - s.c[0]) * toUnit
+        ny = (py - s.c[1]) * toUnit
+        nz = (pz - s.c[2]) * toUnit
+      }
+      shade(px, py, pz, nx, ny, nz, -rdx, -rdy, -rdz, shapes, self, s.ball && s.light ? colors.light : colors.main, color)
+      display(color)
       const o = (j * w + i) * 4
-      sum[o] += c[0]
-      sum[o + 1] += c[1]
-      sum[o + 2] += c[2]
+      sum[o] += color[0]
+      sum[o + 1] += color[1]
+      sum[o + 2] += color[2]
       sum[o + 3] += 1
     }
   }

@@ -10,6 +10,7 @@ import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
 import { AppFrame, Label, MarkTile } from "./shell"
 import { FIGURE_COLORS, FigurePortrait, HEAD_IN_PORTRAIT, unit, type V } from "./figure-portrait"
+import { ConfirmButton, RESTART_SIM } from "./confirm"
 
 const WINDOWS_USERNAME = "jordan"
 
@@ -148,21 +149,18 @@ function CheckRow({ check, state, leaving, delay = 0 }: { check: Check; state: C
 }
 
 // Written out whole, since Tailwind finds a class only where its full name appears. The kit's
-// focus ring is sky, and its ghost button's hover in the dark theme is gray through a dark: class,
-// which outranks a plain hover: one, so each is given in the box's color, dark: included.
+// focus ring is sky, so it's given in the box's color too.
 function toneOf(failure: Failure) {
   return failure.skippable
     ? {
         box: "border-warning/20 bg-warning/10",
         text: "text-warning focus-visible:border-warning/40 focus-visible:ring-warning/30",
         button: "bg-warning text-warning-foreground hover:bg-warning/90 focus-visible:border-warning/40 focus-visible:ring-warning/30",
-        ghost: "text-warning hover:bg-warning/15 hover:text-warning dark:hover:bg-warning/15 focus-visible:border-warning/40 focus-visible:ring-warning/30",
       }
     : {
         box: "border-destructive/20 bg-destructive/10",
         text: "text-destructive focus-visible:border-destructive/40 focus-visible:ring-destructive/30",
         button: "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/30",
-        ghost: "text-destructive hover:bg-destructive/15 hover:text-destructive dark:hover:bg-destructive/15 focus-visible:border-destructive/40 focus-visible:ring-destructive/30",
       }
 }
 
@@ -201,26 +199,33 @@ function Checks({ checks, phase, onFix, onSkip }: { checks: Check[]; phase: Extr
                 <Spinner className="size-4" /> {failing.action.busy}
               </span>
             )}
-            {/* Alone under the waiting line, Continue anyway is bare text, since a ghost button's
-                unseen padding would leave the box's bottom 8px deeper than its top. */}
+            {/* Continue anyway is bare text, a link, so the fix is the box's one button; alone under
+                the waiting line, a button's unseen padding would also leave the box's bottom 8px
+                deeper than its top. */}
             {failing.action.kind === "wait" && failing.skippable && (
               <Button variant="link" className={"h-auto border-0 p-0 " + toneOf(failing).text} onClick={onSkip}>
                 Continue anyway
               </Button>
             )}
             {failing.action.kind !== "wait" && (
-              <div className="flex items-center gap-2">
-                <Button className={toneOf(failing).button} onClick={onFix} disabled={phase.fixing}>
-                  {phase.fixing ? (
-                    <>
-                      <Spinner data-icon="inline-start" /> {failing.action.busy}
-                    </>
-                  ) : (
-                    failing.action.label
-                  )}
-                </Button>
+              // A link has no padding of its own, so it sits further from the button than a ghost button would.
+              <div className="flex items-center gap-4">
+                {/* A restart asks first, since it closes the sim; once agreed, the button shows it's busy as any fix's does. */}
+                {failing.action.kind === "restart" && !phase.fixing ? (
+                  <ConfirmButton label={failing.action.label!} {...RESTART_SIM} onConfirm={onFix} className={toneOf(failing).button} />
+                ) : (
+                  <Button className={toneOf(failing).button} onClick={onFix} disabled={phase.fixing}>
+                    {phase.fixing ? (
+                      <>
+                        <Spinner data-icon="inline-start" /> {failing.action.busy}
+                      </>
+                    ) : (
+                      failing.action.label
+                    )}
+                  </Button>
+                )}
                 {failing.skippable && !phase.fixing && (
-                  <Button variant="ghost" className={toneOf(failing).ghost} onClick={onSkip}>
+                  <Button variant="link" className={"h-auto border-0 p-0 " + toneOf(failing).text} onClick={onSkip}>
                     Continue anyway
                   </Button>
                 )}

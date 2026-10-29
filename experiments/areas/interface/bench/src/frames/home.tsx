@@ -11,7 +11,7 @@ import { StatusChip } from "@/bench/screens"
 import { AppFrame, Label } from "./shell"
 import { FIGURE_COLORS } from "./figure-portrait"
 import { StandingFigure } from "./figure-standing"
-import { ConfirmButton } from "./confirm"
+import { ConfirmButton, RESTART_SIM } from "./confirm"
 
 // The loaded aircraft as the card names it: the maker from its package's manifest, the model,
 // and its tail number, which the sim reports as `A:ATC ID`.
@@ -30,7 +30,7 @@ const SUPPORTED = [
 const REFUSALS = {
   servers: { title: "Couldn't reach our servers", detail: "Dual Input needs them to connect you and your crew. Try again in a moment." },
   "no-code": { title: "No session has this code", detail: "Check it with your host and try again." },
-  "you-older": { title: "Your Dual Input is older than the host's", detail: "Your host has 1.0.3 while you have 1.0.2.", action: { label: "Restart the sim to update", ask: "Restart the sim?", go: "Restart now" } },
+  "you-older": { title: "Your Dual Input is older than the host's", detail: "Your host has 1.0.3 while you have 1.0.2.", action: { label: "Restart the sim to update", ...RESTART_SIM } },
   "host-older": { title: "The host's Dual Input is older than yours", detail: "Your host has 1.0.1 while you have 1.0.2. They need to update before you can join." },
   "too-many": { title: "Too many wrong codes", detail: "You are being rate limited because you've tried too many wrong codes in an hour. Joining is paused until 15:00. If you think this is a mistake, please contact us on our Discord." },
 }
@@ -267,8 +267,9 @@ const GUIDE = [
   },
 ]
 const PAGES = GUIDE.length + 1
-// How long the guide takes to go once closed, in milliseconds.
+// How long the guide takes to go once closed, and a page turn's two halves, in milliseconds.
 const LEAVE_MS = 300
+const TURN = { out: 110, in: 170 }
 
 // The guide's last page: whether Dual Input supports the loaded aircraft, and when it doesn't, what
 // a session still shares in it and the way to the aircraft it does support.
@@ -299,8 +300,8 @@ function AircraftCheck({ supported }: { supported: boolean }) {
 
 // The welcome text's place on a pilot's first visit: three pages on how a session works, then the
 // aircraft check. Done and Skip guide close it for good, leaving the start card alone, as home is
-// on later visits.
-function WelcomeGuide({ supported, startAt = 0, onClose }: { supported: boolean; startAt?: number; onClose: () => void }) {
+// on later visits. It says when it starts to leave, and when it's gone.
+function WelcomeGuide({ supported, startAt = 0, onLeave, onClose }: { supported: boolean; startAt?: number; onLeave: () => void; onClose: () => void }) {
   const { Button, Card, CardContent } = useUI()
   const [page, setPage] = useState(startAt)
   const [back, setBack] = useState(false)
@@ -314,16 +315,43 @@ function WelcomeGuide({ supported, startAt = 0, onClose }: { supported: boolean;
     if (measured !== undefined && measured !== height) setHeight(measured)
   })
   const last = page === PAGES - 1
+  // A turn hands over: the page it leaves stays a moment and fades out, then the new one fades in,
+  // so the text never cuts, and never shows two pages at once, which read as trippy. Each drifts
+  // 6px the way the turn goes. A timer clears the old page, as one ends the guide, and a quicker
+  // turn takes the place of one still under way.
+  const [from, setFrom] = useState<{ page: number; back: boolean } | null>(null)
+  const turned = useRef<number>(undefined)
+  const [hasTurned, setHasTurned] = useState(false)
   const go = (to: number) => {
+    if (to === page) return
+    setHasTurned(true)
+    setFrom({ page, back: to < page })
     setBack(to < page)
     setPage(to)
+    window.clearTimeout(turned.current)
+    turned.current = window.setTimeout(() => setFrom(null), TURN.out)
   }
+  useEffect(() => () => window.clearTimeout(turned.current), [])
+  // What arrives with a turn waits, unseen, for the old page to go; the first page needs no wait.
+  // The wait turns on whether the guide has turned at all, not on the old page still showing,
+  // since changing a running animation's delay would jump it ahead.
+  const turnIn: React.CSSProperties = { animationDuration: `${TURN.in}ms`, animationDelay: hasTurned ? `${TURN.out}ms` : "0ms", animationFillMode: "backwards" }
+  const body = (p: number) =>
+    p === PAGES - 1 ? (
+      <AircraftCheck supported={supported} />
+    ) : (
+      <>
+        <h3 className="text-base font-semibold">{GUIDE[p].title}</h3>
+        <p className="text-sm text-muted-foreground">{GUIDE[p].body}</p>
+      </>
+    )
   // Closing, it sinks and fades the way it rose, and goes once that's over. A timer ends it rather
   // than the animation's end event, so it goes even where that event never comes.
   const [leaving, setLeaving] = useState(false)
   const close = () => {
     if (leaving) return
     setLeaving(true)
+    onLeave()
     window.setTimeout(onClose, LEAVE_MS)
   }
   const title = (
@@ -338,19 +366,23 @@ function WelcomeGuide({ supported, startAt = 0, onClose }: { supported: boolean;
   )
   const pageView = (
     <div className="overflow-hidden transition-[height] duration-300 ease-out" style={{ height }}>
-      <div ref={content}>
-        {/* Keyed by page, so each page slides in from the side it comes from. Pages before the
-            check share one height, the longest's, so the buttons stay put between them. */}
-        <div key={page} className={"flex min-h-28 animate-in flex-col gap-1.5 px-5 duration-200 fade-in " + (back ? "slide-in-from-left-3" : "slide-in-from-right-3")}>
-          {last ? (
-            <AircraftCheck supported={supported} />
-          ) : (
-            <>
-              <h3 className="text-base font-semibold">{GUIDE[page].title}</h3>
-              <p className="text-sm text-muted-foreground">{GUIDE[page].body}</p>
-            </>
-          )}
+      <div ref={content} className="relative">
+        {/* Keyed by page, so each page drifts in from the side it comes from. Pages before the
+            check share one height, the longest's, so the buttons stay put between them. The page
+            being left lies over it, out of the flow, so the card eases to the new page's height. */}
+        <div key={page} className={"flex min-h-28 animate-in flex-col gap-1.5 px-5 fade-in " + (back ? "slide-in-from-left-[6px]" : "slide-in-from-right-[6px]")} style={turnIn}>
+          {body(page)}
         </div>
+        {from && (
+          <div
+            key={`from-${from.page}`}
+            aria-hidden
+            className={"pointer-events-none absolute top-0 right-0 left-0 flex min-h-28 animate-out flex-col gap-1.5 px-5 fade-out " + (from.back ? "slide-out-to-right-[6px]" : "slide-out-to-left-[6px]")}
+            style={{ animationDuration: `${TURN.out}ms`, animationFillMode: "forwards" }}
+          >
+            {body(from.page)}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -368,8 +400,9 @@ function WelcomeGuide({ supported, startAt = 0, onClose }: { supported: boolean;
         ))}
       </div>
       <div className="flex items-center gap-2">
+        {/* Back fades in with the second page, as the pages do. */}
         {page > 0 && (
-          <Button variant="ghost" onClick={() => go(page - 1)}>
+          <Button variant="ghost" className="animate-in fade-in" style={turnIn} onClick={() => go(page - 1)}>
             Back
           </Button>
         )}
@@ -531,7 +564,7 @@ function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
 // A refusal from our servers, in the tinted box first-time setup's failures use, with the refusal's
 // own action where it has one, which asks first, since restarting the sim ends the pilot's flight.
 function Refused({ why }: { why: Refusal }) {
-  const r: { title: string; detail: string; action?: { label: string; ask: string; go: string } } = REFUSALS[why]
+  const r: { title: string; detail: string; action?: { label: string; question: string; go: string } } = REFUSALS[why]
   return (
     <div className="flex animate-in flex-col gap-1 rounded-3xl border border-destructive/20 bg-destructive/10 px-5 py-4 duration-200 fade-in">
       <p className="text-sm font-medium text-destructive">{r.title}</p>
@@ -540,7 +573,8 @@ function Refused({ why }: { why: Refusal }) {
         <div className="mt-2">
           <ConfirmButton
             label={r.action.label}
-            question={r.action.ask}
+            question={r.action.question}
+            align="start"
             go={r.action.go}
             onConfirm={() => toast("Restarting the sim to update")}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/30"
@@ -615,13 +649,55 @@ function HomePage({ theme, supported, servers, play, children }: { theme: Theme;
   )
 }
 
+// After the guide, whichever way it closed, a send-off on the page by itself, in the room the guide
+// leaves: it fades in as the guide goes, from a little low, holds, and fades out as it rises on.
+// Coherent GT has no @starting-style, so it mounts unseen and a transition brings it in two frames
+// later; timers end it, as they end the guide. In milliseconds.
+const FAREWELL = { delay: 150, in: 700, hold: 1500, out: 600 }
+function Farewell({ onGone }: { onGone: () => void }) {
+  const [phase, setPhase] = useState<"mounted" | "shown" | "going">("mounted")
+  useEffect(() => {
+    let frame = requestAnimationFrame(() => (frame = requestAnimationFrame(() => setPhase("shown"))))
+    const going = window.setTimeout(() => setPhase("going"), FAREWELL.delay + FAREWELL.in + FAREWELL.hold)
+    const gone = window.setTimeout(onGone, FAREWELL.delay + FAREWELL.in + FAREWELL.hold + FAREWELL.out)
+    return () => {
+      cancelAnimationFrame(frame)
+      clearTimeout(going)
+      clearTimeout(gone)
+    }
+    // It runs once, from its mounting.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const shown = phase === "shown"
+  return (
+    // Raised from the room's middle, where it would look low under the start card.
+    <div className="pointer-events-none absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center pb-16">
+      <p
+        className="text-lg font-medium text-foreground/90 transition-[opacity,transform] ease-out"
+        style={{
+          opacity: shown ? 1 : 0,
+          transform: `translateY(${phase === "mounted" ? 6 : phase === "shown" ? 0 : -4}px)`,
+          transitionDuration: `${phase === "going" ? FAREWELL.out : FAREWELL.in}ms`,
+          transitionDelay: shown ? `${FAREWELL.delay}ms` : "0ms",
+        }}
+      >
+        Have a nice flight!
+      </p>
+    </div>
+  )
+}
+
 // A frame for the aircraft check opens the guide on its last page.
 export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck }: { theme: Theme; aircraft: "supported" | "unsupported"; openOnCheck?: boolean }) {
   const supported = aircraft === "supported"
   const [guiding, setGuiding] = useState(true)
+  const [farewell, setFarewell] = useState(false)
   return (
     <HomePage theme={theme} supported={supported}>
-      {guiding && <WelcomeGuide supported={supported} startAt={openOnCheck ? PAGES - 1 : 0} onClose={() => setGuiding(false)} />}
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        {guiding && <WelcomeGuide supported={supported} startAt={openOnCheck ? PAGES - 1 : 0} onLeave={() => setFarewell(true)} onClose={() => setGuiding(false)} />}
+        {farewell && <Farewell onGone={() => setFarewell(false)} />}
+      </div>
     </HomePage>
   )
 }

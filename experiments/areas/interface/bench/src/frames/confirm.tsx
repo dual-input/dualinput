@@ -9,7 +9,13 @@ import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 
 import { useUI } from "@/bench/ui"
 
-export function ConfirmButton({ label, question, go, onConfirm, className }: { label: string; question: string; go: string; onConfirm: () => void; className?: string }) {
+// What a button that restarts the sim asks, wherever it is; the consequences are obvious to a
+// simmer, so it says nothing of them.
+export const RESTART_SIM = { question: "Restart the sim?", go: "Restart now" }
+
+// The popover lines up with the button as the button lines up in what holds it: centered over a
+// centered button, and from the start edge of one that starts its row, so neither juts out alone.
+export function ConfirmButton({ label, question, go, onConfirm, className, align = "center" }: { label: string; question: string; go: string; onConfirm: () => void; className?: string; align?: "center" | "start" }) {
   const { Button, Popover, PopoverTrigger, PopoverContent, PopoverTitle } = useUI()
   const [open, setOpen] = useState(false)
   const popup = useRef<HTMLDivElement>(null)
@@ -23,7 +29,7 @@ export function ConfirmButton({ label, question, go, onConfirm, className }: { l
         ref={popup}
         initialFocus={popup}
         side="top"
-        align="start"
+        align={align}
         sideOffset={11}
         // Its edge is a border, inside it, where the kit's ring draws outside and reads as a light
         // halo over the box under it. Its corners run parallel to the button's: the kit's button

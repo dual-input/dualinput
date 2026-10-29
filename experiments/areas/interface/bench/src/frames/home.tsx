@@ -159,12 +159,14 @@ const SIM_FLY_BUTTON = "bg-[#FFDE03] text-[#242934] hover:bg-[#FFDE03]/90 focus-
 // it where they are, where that says anything. The row's end is for each pilot's Ready once
 // preflight runs, and before it, when no pilot can give one, it's empty but for Join on the pilot
 // flying's row for a joiner out of the flight, since getting into that flight comes first.
-function CrewRow({ pilot }: { pilot: Pilot }) {
+// A row given pop pops its head in after that many milliseconds, fixed when the row first shows.
+function CrewRow({ pilot, pop }: { pilot: Pilot; pop?: number }) {
   const { Badge } = useUI()
+  const [popAfter] = useState(pop)
   const where = pilot.way ? { shows: WAYS[pilot.way].at, trouble: false } : pilot.at && WHERE[pilot.at]
   return (
     <li className="flex items-center gap-3">
-      <Head hex={hexOf(pilot.hue)} />
+      <Head hex={hexOf(pilot.hue)} pop={popAfter} />
       <div className="flex min-w-0 flex-col">
         <span className="flex items-center gap-2 text-sm font-medium">
           {pilot.name}
@@ -230,6 +232,12 @@ function JoinPf({ way }: { way: Way }) {
   )
 }
 
+// The heads pop in as the card turns to the session, one after another down the list, while the
+// figure that stood under the card leaps off the page, so the pilot seems to land in the crew; a
+// pilot who joins later pops in as their row appears. The first head's wait, and each next one's,
+// in milliseconds.
+const POP = { first: 120, stagger: 70 }
+
 // The session's side of the card, from the moment Host or Join succeeds, in place of the aircraft
 // and Host and Join: the invite code, with Copy, every pilot's to share, since it belongs to the
 // session; and Leave, in the kit's tinted red, since it ends the session for this pilot, asking
@@ -240,6 +248,10 @@ function JoinPf({ way }: { way: Way }) {
 function SessionHalf({ session, onLeave }: { session: Session; onLeave: () => void }) {
   const { Button, CardContent, Separator } = useUI()
   const { joined, crew } = session
+  const turnedIn = useRef(false)
+  useEffect(() => {
+    turnedIn.current = true
+  }, [])
   const me: Pilot = { name: "You", hue: "orange", flying: !joined }
   const leave = (
     <>
@@ -272,8 +284,8 @@ function SessionHalf({ session, onLeave }: { session: Session; onLeave: () => vo
       <CardContent className="flex flex-col gap-3">
         <Label>Crew</Label>
         <ul className="flex flex-col gap-2">
-          {[me, ...crew].map((p) => (
-            <CrewRow key={p.name} pilot={p} />
+          {[me, ...crew].map((p, i) => (
+            <CrewRow key={p.name} pilot={p} pop={turnedIn.current ? 0 : POP.first + i * POP.stagger} />
           ))}
           {crew.length === 0 && (
             <li className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -297,8 +309,9 @@ function SessionHalf({ session, onLeave }: { session: Session; onLeave: () => vo
 // While our servers answer, the button that asked shows it's busy and the code field is locked, and
 // a refusal, or the line for an attempt taking long, opens under the control that asked: Host, or
 // the code. Once Host or Join succeeds, the card turns to the session, the one hosted or the one
-// joined, which has no use for the aircraft, and Leave turns it back; a frame can open on a session.
-function StartCard({ aircraft, servers = "answering", play, session }: { aircraft: Aircraft; servers?: Servers; play?: Action; session?: SessionKey }) {
+// joined, which has no use for the aircraft, and Leave turns it back; a frame can open on a session,
+// and have a crewmate join it after joinsAfter milliseconds.
+function StartCard({ aircraft, servers = "answering", play, session, joinsAfter }: { aircraft: Aircraft; servers?: Servers; play?: Action; session?: SessionKey; joinsAfter?: number }) {
   const { Badge, Button, Card, CardContent, Separator, Spinner, InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } = useUI()
   const [status, setStatus] = useState<Status>({ kind: "idle" })
   const [code, setCode] = useState("")
@@ -317,7 +330,12 @@ function StartCard({ aircraft, servers = "answering", play, session }: { aircraf
   }
   useEffect(() => stop, [])
   const later = (ms: number, f: () => void) => timers.current.push(window.setTimeout(f, ms))
-  const busy = (change: { dialing?: boolean; slow?: boolean }) => setStatus((s) => (s.kind === "busy" ? { ...s, ...change } : s))
+  useEffect(() => {
+    if (joinsAfter) later(joinsAfter, () => setShown("crewmate"))
+    // It plays once, from the frame's opening.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const busy =(change: { dialing?: boolean; slow?: boolean }) => setStatus((s) => (s.kind === "busy" ? { ...s, ...change } : s))
 
   // The card turns between the aircraft with Host and Join, and the session, as the guide's pages
   // turn: the side it leaves fades out, then the next fades in, rising 6px, as the card eases to
@@ -915,7 +933,7 @@ function NoNotes() {
 // The start card for the loaded aircraft, and under it the page's rest; a frame's servers and play
 // go to the card. A loaded aircraft with a maturity has a profile. The header shows what a frame
 // says of our servers, the firewall, and an update, and a frame can open it.
-function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, session, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; children: React.ReactNode }) {
+function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, session, joinsAfter, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; joinsAfter?: number; children: React.ReactNode }) {
   return (
     <AppFrame
       theme={theme}
@@ -926,7 +944,7 @@ function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, se
     >
       {/* None on top, since the header leaves as much room under its pill as above it. */}
       <div className="flex min-h-0 flex-1 flex-col gap-6 p-5 pt-0" data-home-page>
-        <StartCard aircraft={aircraft} servers={servers} play={play} session={session} />
+        <StartCard aircraft={aircraft} servers={servers} play={play} session={session} joinsAfter={joinsAfter} />
         {children}
       </div>
     </AppFrame>
@@ -999,12 +1017,13 @@ export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck }: { theme: Th
 // Dual Input has no profile for, which has no notes to show, what a session there shares, with the
 // aircraft picker a press away. A frame also says how our servers, faked, answer, and can play
 // hosting or joining by itself, what the header shows and whether it opens out, how the link to
-// the service stands, and whether it opens on a session, which one, and with whom.
-export function HomeLaterFrame({ theme, aircraft, notes, servers, play, header, headerOpen, core, session }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey }) {
+// the service stands, and whether it opens on a session, which one, with whom, and whether a
+// crewmate joins it a while later.
+export function HomeLaterFrame({ theme, aircraft, notes, servers, play, header, headerOpen, core, session, joinsAfter }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; joinsAfter?: number }) {
   const { loaded, context } = useLoaded(aircraft)
   return (
     <AircraftContext.Provider value={context}>
-      <HomePage theme={theme} aircraft={loaded} servers={servers} play={play} header={header} headerOpen={headerOpen} core={core} session={session}>
+      <HomePage theme={theme} aircraft={loaded} servers={servers} play={play} header={header} headerOpen={headerOpen} core={core} session={session} joinsAfter={joinsAfter}>
         {/* A session's page ends at the card: the authors' notes are for before it (user,
             2026-10-29), and the figure leaps off the page when a session starts. */}
         {session ? null : !loaded.maturity ? (

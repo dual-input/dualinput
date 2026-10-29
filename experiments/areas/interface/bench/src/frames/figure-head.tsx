@@ -123,9 +123,12 @@ function headShapes(): Shape[] {
     { ball: false, a: scale(look, out), b: scale(look, R + SPEC.nose.length - rt), ra: r, rb: rt },
   ]
 }
-export function Head({ hex }: { hex: string }) {
+// A head given pop pops in when it first shows, after that many milliseconds, hidden until then
+// (index.css, head-pop).
+const POP_MS = 360
+export function Head({ hex, pop }: { hex: string; pop?: number }) {
   return (
-    <span className="relative inline-block shrink-0" style={{ width: HEAD_SIZE, height: HEAD_SIZE }}>
+    <span className="relative inline-block shrink-0" style={{ width: HEAD_SIZE, height: HEAD_SIZE, animation: pop === undefined ? undefined : `head-pop ${POP_MS}ms ${pop}ms both` }}>
       <Figures width={HEAD_SIZE} height={HEAD_SIZE} figures={[{ shapes: headShapes(), hex }]} cam={HEAD_CAMERA} />
     </span>
   )

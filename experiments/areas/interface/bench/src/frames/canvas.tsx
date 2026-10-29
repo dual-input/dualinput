@@ -22,6 +22,9 @@ const PLAYS: { play: Action; label: string }[] = [
   { play: "host", label: "Play hosting" },
   { play: "join", label: "Play joining" },
 ]
+// How long after its frame opens the crewmate joins, in milliseconds: long enough to take in the
+// card alone first.
+const CREWMATE_JOINS_AFTER = 2500
 const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
   {
     name: "First-time setup",
@@ -66,19 +69,21 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Every refusal", draw: (t) => <RefusalsFrame theme={t} /> },
     ],
   },
-  // The session page, which is home once Host or Join succeeds, before preflight: hosted, alone and
-  // once a crewmate has joined, with a sheet of where a crewmate can be; joined, with a sheet of a
-  // joiner's ways to the pilot flying; and, for Later, a crew bigger than v1's two. Hosting and
-  // joining's Succeeds plays the way in.
+  // The session page, which is home once Host or Join succeeds, before preflight: hosted, alone,
+  // as a crewmate joins, and once one has, with a sheet of where a crewmate can be; joined, with a
+  // sheet of a joiner's ways to the pilot flying; and, for Later, a crew bigger than v1's two. Each
+  // opens with its heads popping in, as the card turning to it does. Hosting and joining's Succeeds
+  // plays the way in.
   {
     name: "Session",
     frames: [
-      { name: "Hosted, alone", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="alone" /> },
-      { name: "Hosted, a crewmate joined", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="crewmate" /> },
+      { name: "Hosted, alone", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="alone" /> },
+      { name: "A crewmate joins", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="alone" joinsAfter={CREWMATE_JOINS_AFTER} /> },
+      { name: "Hosted, a crewmate joined", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="crewmate" /> },
       { name: "Every crewmate state", draw: (t) => <CrewmateStatesFrame theme={t} /> },
-      { name: "Joined", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="joined" /> },
+      { name: "Joined", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="joined" /> },
       { name: "Every way to the pilot flying", draw: (t) => <WaysFrame theme={t} /> },
-      { name: "Later: a bigger crew", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="bigger-crew" /> },
+      { name: "Later: a bigger crew", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="bigger-crew" /> },
     ],
   },
   // The header on home, open over what needs the pilot, or at rest; with nothing, as on every other

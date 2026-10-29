@@ -92,3 +92,15 @@
     color-scheme: dark;
   }
 }
+
+/* A pilot's head popping into the crew list: from nothing it swells fast well past its size, drops
+   under it, bounces once more, and rests, with no fade, which made it read as soft. Plain transforms,
+   with no custom property in the frames, since Coherent GT keeps transform and animation but no run
+   has tried var() in a keyframe. */
+@keyframes head-pop {
+  0% { transform: scale(0); animation-timing-function: cubic-bezier(0.2, 0.8, 0.4, 1); }
+  38% { transform: scale(1.25); animation-timing-function: ease-in-out; }
+  62% { transform: scale(0.9); animation-timing-function: ease-in-out; }
+  82% { transform: scale(1.05); animation-timing-function: ease-in-out; }
+  100% { transform: scale(1); }
+}

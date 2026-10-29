@@ -14,6 +14,12 @@ Decides:     The scope of every v1 feature.
 > - [Preflight](#preflight)'s Go to is offered from Free flight's world map, where the EFB opens, rather than also from the main menu's home page.
 > - [Installing and updating](#installing-and-updating) may let the pilot start an update from the EFB app, which restarts the sim; how the EFB app learns the update's state is the user's to settle.
 
+> **Note**
+> Stage 11b's tentative decision that [Join takes a joiner from the world map into the PF's flight, or only sets it up](../interface/decisions.md#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up) widens [preflight](#preflight)'s Go to until the apps' design confirms it (user, 2026-10-29).
+> From the world map it also sets the PF's aircraft and livery, and a press offers two answers: Set up only stops there, and Join now also starts the flight and presses Ready to fly.
+> So loading a pilot's flight for them, which preflight's "Not in v1" leaves out, is in v1 from the world map.
+> The Go to button is also unavailable, and says why, while the joiner lacks the PF's aircraft.
+
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
 It says what Dual Input does, not how: mechanisms are for the sync design in `record/areas/sync/` and the architecture, step 7, and screens and wording for a later pass.

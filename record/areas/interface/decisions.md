@@ -151,6 +151,39 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - The EFB's document has no `requestData` bound and hears no answer to the airport search, while the menu's document does both ([interface log][p20]).
   - The toolbar's document and the world map's `Global/atlas.html` also chose a stand, and the toolbar's chose the airport by its world location, but at the world map no add-on's script runs in the toolbar's document (same entry), and no run has tried one in the atlas page.
 
+## Join takes a joiner from the world map into the PF's flight, or only sets it up
+
+- **Decided:** Go to, which the EFB app labels Join, sits at the end of the pilot flying's (PF's) row in a joiner's crew list, offered at Free flight's world map, and a press asks first, in the kit's confirm popover, with two answers:
+  - Set up only: the menu script sets the PF's departure airport, their stand while their engines are off or a runway there while they run, their aircraft, and their livery where the joiner has it, and the joiner starts the flight.
+  - Join now: the same, then the script starts the flight and presses Ready to fly.
+    Its button takes the sim's own flight-button yellow, `#FFDE03` with `#242934` text, the world map's Start flight button's `--colorSpecial` and `--colorSpecial_Content` (read in fs-base-ui 0.1.10, `components/shared/variables.css`).
+
+  So loading a pilot's flight for them, which [03-v1-scope](../product/03-v1-scope.md#preflight) leaves out of v1, is in v1 from the world map, and Go to from any other page stays [an idea](../product/ideas.md#the-pfs-spot-on-the-world-map).
+  Join is disabled, and says why, while the PF has loaded no flight, while the PF's flight names no departure airport, while the joiner lacks the PF's aircraft, and while Dual Input has no copy of BlurPage.
+  Its words name the PF and never use he or she, since Dual Input doesn't know a pilot's pronouns (user, 2026-10-29).
+  A step that fails says which one ([Go to](../session/02-units.md#go-to)).
+  When the world map lists no stand matching the PF's, the airport stays selected with no stand ([the menu script](../session/02-units.md#the-menu-script)), and Join now goes on to the aircraft, the livery, and the flight's start, since Dual Input moves the joiner's aircraft to the PF at the same airport.
+  Settled by the user on 2026-10-29.
+- **Because:**
+  - v1 left it out on 2026-10-05 because Go to would have had to start from whatever page the pilot was on, which would add days to v1's build ([03-v1-scope](../product/03-v1-scope.md#preflight)).
+    Since [Dual Input's one full window is its EFB app](#dual-inputs-one-full-window-is-its-efb-app), and the EFB opens at Free flight's world map, Go to is offered only there, so it starts from one page.
+  - Every request Go to makes but the runway's ran in the menu's document, `mainUi`, at the world map: the airport search, the stand, the aircraft, the livery, and `launchFlight`, after which the flight loaded at the stand it was given ([interface log][p08]).
+    Our script, brought in by our copy of BlurPage, made those requests and pressed Ready to fly from a closed sim ([interface log][p10]).
+  - Set up only keeps a pilot's chance to set the fuel, the payload, or the weather before the flight starts (user, 2026-10-29).
+- **Leaves out:**
+  - Which entry of the joiner's `game/aircraft/aircraftList` is the PF's aircraft, which the session knows by its folder and preset, and which of `game/aircraft/configurator/liveries` is the PF's livery, which a sim session settles.
+  - The runway request, which no run has tried ([the menu script](../session/02-units.md#the-menu-script)).
+  - The words, which the apps' design settles.
+
+## A display name runs to 20 characters
+
+- **Decided:** the [display name](../session/02-units.md#members) holds at most 20 characters: the apps' name fields stop there, a Windows username the first-time setup fills in is cut to 20, and the session crate refuses a longer name from any app's settings command.
+  Settled by the user on 2026-10-29.
+- **Because:**
+  - Each place the app names a pilot, such as a crew row or Join's question, has room for a short name, and a name with no limit would overflow it.
+  - Windows holds a user account's name to the same 20 characters ("The name of the user account can have as many as 20 characters.", read in Windows 11 Pro's `net help user`, 2026-10-29), so the Windows username that setup's name field starts with (user, 2026-10-25) fits as it is.
+    Whether a Microsoft account's username keeps to it is unverified, which the cut covers.
+
 ## The Coherent GT check covers the CSS we ship into the sim
 
 - **Decided:** the check [decision 031](../../decisions/031-coherent-gt-check-tool.md) gives every JavaScript file we ship into the sim also checks every CSS file we ship there, and stage 11b builds it, since the kit is the first CSS we ship there.
@@ -165,6 +198,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Leaves out:** its CSS parser; how its data comes from p14's results, so a run of p14 after a sim update refreshes it; and CSS written in a component's markup rather than a stylesheet, which the stage's design of the check settles.
 
 [p02]: ../install/log.md#2026-10-25-an-egui-window-in-a-rust-tray-app-takes-96-mb-to-153-mb-while-open-and-leaves-62-mb-to-69-mb-in-the-process-once-it-closes-where-tauris-leaves-37-mb
+[p08]: log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight
+[p10]: log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly
 [p13]: ../architecture/log.md#2026-10-25-coherent-gt-drops-layer-oklch-color-mix-and-every-gap-but-grid-gap-so-tailwind-4s-output-cant-style-a-page-there
 [p14]: ../architecture/log.md#2026-10-25-coherent-gt-keeps-304-of-the-554-css-properties-chromium-152-keeps-and-lays-out-flexbox-and-grid-as-chromium-does-but-for-gap-justify-content-end-and-subgrid
 [p17]: log.md#2026-10-25-by-p14s-measurements-coherent-gt-keeps-82-of-tailwind-3s-output-with-its-colors-written-as-rgba-and-autoprefixers--webkit--twins-and-every-common-variant-but-focus-visible-and-has

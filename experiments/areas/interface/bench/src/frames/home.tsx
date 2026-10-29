@@ -14,7 +14,7 @@ import { StandingFigure } from "./figure-standing"
 import { ConfirmButton, RESTART_SIM } from "./confirm"
 import { AircraftContext, AircraftPicker, LOADED, LOADED_UNSUPPORTED, PROFILES, type Aircraft } from "./aircraft"
 import { useScroller } from "./scroller"
-import { Cockpit, COCKPIT_WIDTH, Head } from "./cockpit"
+import { EmptyHead, Head } from "./figure-head"
 
 
 // How hosting and joining can be refused: either one when the PC seems offline, which Windows
@@ -76,73 +76,214 @@ const OFFLINE_ANSWER_AFTER = 300
 const SESSION_AFTER = 900
 const HALF_EASE = 300
 
-// Who's in the session besides this pilot, for a frame: nobody yet, or a crew bigger than v1's two
-// (record/areas/product/03-v1-scope.md), a Later pick drawn now, whose third and fourth pilots
-// show as heads. The names and colors are examples.
-type Pilot = { name: string; hue: string }
-const CREWS: Record<string, { crewmate?: Pilot; more: Pilot[] }> = {
-  alone: { more: [] },
+// The kit's solid red, for a button whose action is hard to take back.
+const RED_BUTTON = "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/30"
+
+// Where a crewmate is before preflight, as the session's keys tell every core
+// (record/areas/session/02-units.md, Members and In the flight): their sim's stage, at the main menu
+// which page, and in a flight its aircraft, which before the session has one, or in another, leaves
+// them out of the flight; or their link lost, which Dual Input mends on its own, or their sim
+// crashed, after which it rejoins them once they're back in a flight. It shows under their name,
+// the two troubles in the warning color. The aircraft is an example.
+type Whereabouts = "closed" | "starting" | "menu" | "world-map" | "loading" | "aircraft" | "lost" | "crashed"
+const WHERE: Record<Whereabouts, { when: string; shows: string; trouble?: boolean }> = {
+  closed: { when: "Their sim isn't running", shows: "Sim not running" },
+  starting: { when: "Their sim is starting", shows: "Starting the sim" },
+  menu: { when: "At the sim's main menu", shows: "At the main menu" },
+  "world-map": { when: "At Free flight's world map", shows: "At the world map" },
+  loading: { when: "Loading a flight", shows: "Loading a flight" },
+  aircraft: { when: "In a flight before the session has an aircraft, or in another one", shows: "In the A320" },
+  lost: { when: "Their link is lost, and Dual Input is reconnecting them", shows: "Connection lost", trouble: true },
+  crashed: { when: "Their sim crashed, and Dual Input rejoins them once they're back in a flight", shows: "Sim crashed", trouble: true },
+}
+
+// A session as a frame opens on it, or as Host or Join turns the card to it: whether this pilot
+// joined it or hosts it, and who else is in it. The host starts as the pilot flying, so a joiner's
+// host, James, is flying, and James's row gives the joiner the way there. A crew bigger than v1's two
+// (record/areas/product/03-v1-scope.md) is a Later pick drawn now. The names, colors, and where
+// each pilot is are examples.
+type Pilot = { name: string; hue: string; at?: Whereabouts; flying?: boolean; way?: Way }
+type Session = { joined: boolean; crew: Pilot[] }
+const JAMES: Pilot = { name: DEMO_HOST, hue: "red" }
+const SESSIONS: Record<"alone" | "crewmate" | "bigger-crew" | "joined", Session> = {
+  alone: { joined: false, crew: [] },
+  crewmate: { joined: false, crew: [{ ...JAMES, at: "world-map" }] },
   "bigger-crew": {
-    crewmate: { name: "James", hue: "red" },
-    more: [
-      { name: "Adam", hue: "green" },
-      { name: "Mia", hue: "blue" },
+    joined: false,
+    crew: [
+      { ...JAMES, at: "world-map" },
+      { name: "Adam", hue: "green", at: "aircraft" },
+      { name: "Mia", hue: "blue", at: "loading" },
     ],
   },
+  joined: { joined: true, crew: [{ ...JAMES, flying: true, way: "stand" }] },
 }
-export type Crew = keyof typeof CREWS
+export type SessionKey = keyof typeof SESSIONS
 const hexOf = (hue: string) => FIGURE_COLORS.find((c) => c.name === hue)!.hex
 
-// The session's side of the card, from the moment Host succeeds, in place of the aircraft and Host
-// and Join: the cockpit, the host at the controls in the left seat, the invite code in the
-// windshield with Copy, and the right seat waiting for the crewmate the code brings, so the
-// picture shows what comes next. A tag under each seat names who's in it, the host as You, the
-// pilot flying, since the host starts as the PF. Leave, in the kit's tinted red, since it ends the
-// session for this pilot, sits under it all. The code and this pilot's color are examples.
-function SessionHalf({ crew = "alone", onLeave }: { crew?: Crew; onLeave: () => void }) {
-  const { Badge, Button, CardContent } = useUI()
-  const { crewmate, more } = CREWS[crew]
+// For a joiner not yet in the flight, where the pilot flying is, under their name, and Join at the
+// row's end (record/areas/interface/decisions.md, Join takes a joiner from the world map into the
+// PF's flight; record/areas/session/02-units.md, Go to). Join asks first: Set up only has the menu
+// script set the world map to the PF's airport, their stand while their engines are off or a runway
+// there while they run, so the joiner's run too, their aircraft, and their livery where the joiner
+// has it; Join now does the same, then starts the flight and presses Ready to fly. Once the joiner
+// is in it, Dual Input moves their aircraft to the PF's. It works only at Free flight's world map,
+// the EFB's one place outside a flight, so in a flight, without the PF's aircraft, or with the
+// script gone after a sim update, Join is disabled, and its tooltip says why. A toast says how it
+// went: what's left after Set up only; a stand the world map doesn't list, which leaves the airport
+// alone; or the step that failed. The words name pilots, never he or she, since Dual Input doesn't
+// know anyone's pronouns, and a tooltip or toast of one sentence has no period (user, 2026-10-29).
+// The airport, stand, and aircraft are examples.
+type Way = "stand" | "runway" | "no-stand" | "fails" | "no-flight" | "no-aircraft" | "other-aircraft" | "no-departure" | "no-script"
+const WAYS: Record<Way, { when: string; at: string; why?: string; setUp?: string; now?: string; outcome?: "warning" | "error" }> = {
+  stand: { when: "James is at a stand, engines off", at: "At EGLL, Parking 140", setUp: "Your departure is EGLL, Parking 140, in the Baron 58P. Start the flight when you're ready.", now: "Starting your flight at EGLL, Parking 140" },
+  runway: { when: "James's engines are running", at: "At EGLL, engines running", setUp: "Your departure is a runway at EGLL, in the Baron 58P, so your engines run. Start the flight when you're ready.", now: "Starting your flight on a runway at EGLL, engines running" },
+  "no-stand": { when: "Join finds no Parking 140 in EGLL's stands", at: "At EGLL, Parking 140", setUp: "Your departure is EGLL, in the Baron 58P, but its stands have no Parking 140. Pick James's stand on the world map, then start the flight.", now: "EGLL's stands have no Parking 140, so you'll start elsewhere there, and Dual Input moves you to James.", outcome: "warning" },
+  fails: { when: "Join's airport search fails", at: "At EGLL, Parking 140", setUp: "Join couldn't find EGLL on the world map. Try again, or set up the flight yourself.", now: "Join couldn't find EGLL on the world map. Try again, or set up the flight yourself.", outcome: "error" },
+  "no-flight": { when: "James hasn't loaded a flight", at: "Hasn't loaded a flight yet", why: "You can join once James is in a flight" },
+  "no-aircraft": { when: "You don't have James's aircraft", at: "At EGLL, Parking 140", why: "Install the Baron 58P to fly with James" },
+  "other-aircraft": { when: "You're in a flight in another aircraft", at: "At EGLL, Parking 140", why: "End this flight to join James from the world map" },
+  "no-departure": { when: "James's flight names no departure airport", at: "In the Baron 58P", why: "Can't detect departure airport. Start your flight anywhere and Dual Input will teleport you to James." },
+  "no-script": { when: "Join can't run, as after a sim update", at: "At EGLL, Parking 140", why: "Looks like something broke Join (perhaps a sim update, or corrupted Dual Input installation)." },
+}
+// How long the bench takes to set up the world map, in milliseconds: the airport search, then the
+// stand or runway, the aircraft, and the livery.
+const SET_UP_AFTER = 1200
+
+// Join now takes the sim's own flight-button yellow, so it reads as starting the flight, as the
+// world map's Start flight does: `--colorSpecial` and `--colorSpecial_Content` (read in fs-base-ui
+// 0.1.10, components/shared/variables.css).
+const SIM_FLY_BUTTON = "bg-[#FFDE03] text-[#242934] hover:bg-[#FFDE03]/90 focus-visible:border-[#FFDE03]/40 focus-visible:ring-[#FFDE03]/30"
+
+// A pilot in the crew list: their figure's head, their name with the pilot flying marked, and under
+// it where they are, where that says anything. The row's end is for each pilot's Ready once
+// preflight runs, and before it, when no pilot can give one, it's empty but for Join on the pilot
+// flying's row for a joiner out of the flight, since getting into that flight comes first.
+function CrewRow({ pilot }: { pilot: Pilot }) {
+  const { Badge } = useUI()
+  const where = pilot.way ? { shows: WAYS[pilot.way].at, trouble: false } : pilot.at && WHERE[pilot.at]
   return (
-    <CardContent className="flex flex-col gap-4">
-      <Cockpit host={hexOf("orange")} crewmate={crewmate && hexOf(crewmate.hue)}>
-        {/* In the glass between the heads, above the glareshield, where the center pillar fades
-            out to leave it room. The Copy button sits beside it, so the code stays centered. */}
-        <div className="absolute top-[70px] left-0 flex w-full flex-col items-center gap-0.5">
+    <li className="flex items-center gap-3">
+      <Head hex={hexOf(pilot.hue)} />
+      <div className="flex min-w-0 flex-col">
+        <span className="flex items-center gap-2 text-sm font-medium">
+          {pilot.name}
+          {pilot.flying && <Badge variant="secondary">Pilot flying</Badge>}
+        </span>
+        {where && <span className={"text-xs " + (where.trouble ? "text-warning" : "text-muted-foreground")}>{where.shows}</span>}
+      </div>
+      {pilot.way && (
+        <span className="ml-auto">
+          <JoinPf way={pilot.way} />
+        </span>
+      )}
+    </li>
+  )
+}
+
+// Join, on the pilot flying's row. A press asks first, in the confirm popover, since Join now
+// starts a flight: the question names the pilot flying, the row already says where they are, and
+// the two answers say how far to go. It names no aircraft, whose name can run long. While the script works, Join shows a spinner. Where Join can't
+// go, it's disabled, and a tooltip says why; a disabled button takes no pointer events, so the
+// tooltip hangs on a wrapper.
+function JoinPf({ way }: { way: Way }) {
+  const { Button, Spinner, Tooltip, TooltipContent, TooltipTrigger } = useUI()
+  const w = WAYS[way]
+  const [busy, setBusy] = useState(false)
+  const timer = useRef(0)
+  useEffect(() => () => clearTimeout(timer.current), [])
+  const go = (now: boolean) => {
+    setBusy(true)
+    timer.current = window.setTimeout(() => {
+      setBusy(false)
+      const show = w.outcome === "error" ? toast.error : w.outcome === "warning" ? toast.warning : toast
+      show(now ? w.now : w.setUp)
+    }, SET_UP_AFTER)
+  }
+  if (w.why)
+    return (
+      <Tooltip>
+        <TooltipTrigger render={<span className="inline-flex" />}>
+          <Button size="sm" disabled>
+            Join
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-60">{w.why}</TooltipContent>
+      </Tooltip>
+    )
+  return (
+    <ConfirmButton
+      label={
+        <>
+          {busy && <Spinner data-icon="inline-start" />}
+          Join
+        </>
+      }
+      question={`Join ${DEMO_HOST}?`}
+      also={{ label: "Set up only", onSelect: () => go(false) }}
+      go="Join now"
+      onConfirm={() => go(true)}
+      trigger={{ size: "sm", disabled: busy, asking: "data-popup-open:bg-primary/20 data-popup-open:text-primary data-popup-open:hover:bg-primary/20" }}
+      className={SIM_FLY_BUTTON}
+      align="end"
+    />
+  )
+}
+
+// The session's side of the card, from the moment Host or Join succeeds, in place of the aircraft
+// and Host and Join: the invite code, with Copy, every pilot's to share, since it belongs to the
+// session; and Leave, in the kit's tinted red, since it ends the session for this pilot, asking
+// first once anyone else is in it. Then the crew, each pilot by their figure's head, this pilot first
+// as You. The host is the pilot flying when a session starts, and alone, a row waits for the
+// crewmate the code brings, so the list shows what comes next; v1 sessions are two pilots, so that
+// row fills and goes with the first join. This pilot's color is an example.
+function SessionHalf({ session, onLeave }: { session: Session; onLeave: () => void }) {
+  const { Button, CardContent, Separator } = useUI()
+  const { joined, crew } = session
+  const me: Pilot = { name: "You", hue: "orange", flying: !joined }
+  const leave = (
+    <>
+      Leave <LogOut data-icon="inline-end" />
+    </>
+  )
+  return (
+    <>
+      <CardContent className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
           <Label>Invite code</Label>
-          <div className="relative flex items-center">
+          <div className="flex items-center gap-1">
             <span className="font-mono text-2xl font-medium tracking-wider">
               {DEMO_CODE.slice(0, 3)}-{DEMO_CODE.slice(3)}
             </span>
-            <Button variant="ghost" size="icon-sm" className="absolute left-full ml-1" aria-label="Copy the invite code" onClick={() => toast("Copied the invite code")}>
+            <Button variant="ghost" size="icon-sm" aria-label="Copy the invite code" onClick={() => toast("Copied the invite code")}>
               <Copy />
             </Button>
           </div>
         </div>
-      </Cockpit>
-      {/* A column under each seat, centered on it. */}
-      <div className="mx-auto grid grid-cols-2 text-center" style={{ width: COCKPIT_WIDTH }}>
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-sm font-medium">You</span>
-          <Badge variant="secondary">Pilot flying</Badge>
-        </div>
-        {crewmate ? <span className="text-sm font-medium">{crewmate.name}</span> : <span className="text-sm text-muted-foreground">Waiting for your crewmate</span>}
-      </div>
-      {more.length > 0 && (
-        <div className="flex justify-center gap-5">
-          {more.map((p) => (
-            <div key={p.name} className="flex flex-col items-center gap-1">
-              <Head hex={hexOf(p.hue)} />
-              <span className="text-xs text-muted-foreground">{p.name}</span>
-            </div>
+        {crew.length > 0 ? (
+          <ConfirmButton label={leave} question="Leave the session?" go="Leave" onConfirm={onLeave} trigger={{ variant: "destructive", size: "sm" }} className={RED_BUTTON} align="end" />
+        ) : (
+          <Button variant="destructive" size="sm" onClick={onLeave}>
+            {leave}
+          </Button>
+        )}
+      </CardContent>
+      <Separator />
+      <CardContent className="flex flex-col gap-3">
+        <Label>Crew</Label>
+        <ul className="flex flex-col gap-2">
+          {[me, ...crew].map((p) => (
+            <CrewRow key={p.name} pilot={p} />
           ))}
-        </div>
-      )}
-      <div className="flex justify-end">
-        <Button variant="destructive" size="sm" onClick={onLeave}>
-          Leave <LogOut data-icon="inline-end" />
-        </Button>
-      </div>
-    </CardContent>
+          {crew.length === 0 && (
+            <li className="flex items-center gap-3 text-sm text-muted-foreground">
+              <EmptyHead />
+              Send the invite code for others to join
+            </li>
+          )}
+        </ul>
+      </CardContent>
+    </>
   )
 }
 
@@ -155,9 +296,9 @@ function SessionHalf({ crew = "alone", onLeave }: { crew?: Crew; onLeave: () => 
 // whole.
 // While our servers answer, the button that asked shows it's busy and the code field is locked, and
 // a refusal, or the line for an attempt taking long, opens under the control that asked: Host, or
-// the code. Once Host succeeds, the card turns to the session, which has no use for the aircraft,
-// and Leave turns it back; a frame can open on the session.
-function StartCard({ aircraft, servers = "answering", play, startIn = "start", crew }: { aircraft: Aircraft; servers?: Servers; play?: Action; startIn?: "start" | "session"; crew?: Crew }) {
+// the code. Once Host or Join succeeds, the card turns to the session, the one hosted or the one
+// joined, which has no use for the aircraft, and Leave turns it back; a frame can open on a session.
+function StartCard({ aircraft, servers = "answering", play, session }: { aircraft: Aircraft; servers?: Servers; play?: Action; session?: SessionKey }) {
   const { Badge, Button, Card, CardContent, Separator, Spinner, InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } = useUI()
   const [status, setStatus] = useState<Status>({ kind: "idle" })
   const [code, setCode] = useState("")
@@ -183,7 +324,8 @@ function StartCard({ aircraft, servers = "answering", play, startIn = "start", c
   // its height. The height is measured after every render while a turn eases it, and in the
   // session, since Coherent GT has no ResizeObserver; at rest on Host and Join, the card sets its
   // own, since a refusal's room eases open there and a measured height would clip it.
-  const [half, setHalf] = useState(startIn)
+  const [half, setHalf] = useState<"start" | "session">(session ? "session" : "start")
+  const [shown, setShown] = useState<SessionKey>(session ?? "alone")
   const [turning, setTurning] = useState<"out" | "in" | null>(null)
   const turnTo = (next: "start" | "session") => {
     setTurning("out")
@@ -216,7 +358,11 @@ function StartCard({ aircraft, servers = "answering", play, startIn = "start", c
     const answer = (why?: Refusal) => {
       from.dispatchEvent(new CustomEvent("figure-answer", { bubbles: true, detail: { ok: !why } }))
       setStatus(why ? { kind: "refused", on, why } : { kind: "done", on })
-      if (!why && on === "host") later(SESSION_AFTER, () => turnTo("session"))
+      if (!why)
+        later(SESSION_AFTER, () => {
+          setShown(on === "host" ? "alone" : "joined")
+          turnTo("session")
+        })
     }
     if (servers === "offline") later(OFFLINE_ANSWER_AFTER, () => answer("offline"))
     else if (servers === "refusing") later(ANSWER_AFTER, () => answer(on === "host" ? "servers" : "no-code"))
@@ -284,7 +430,7 @@ function StartCard({ aircraft, servers = "answering", play, startIn = "start", c
           style={{ animationDuration: `${TURN.in}ms`, opacity: turning === "out" ? 0 : 1, transition: `opacity ${TURN.out}ms ease-out` }}
         >
           {half === "session" ? (
-            <SessionHalf crew={crew} onLeave={leave} />
+            <SessionHalf session={SESSIONS[shown]} onLeave={leave} />
           ) : (
             <>
             <CardContent className="flex items-start justify-between gap-3">
@@ -419,8 +565,8 @@ const SHARED_UNSUPPORTED = ["Share flight and physics", "Pass control between ea
 // there, as a list, then the two ways forward as text buttons, as Continue anyway is in setup, one
 // below the other under their own lead-in. Each lead-in sits close over what it leads to.
 // Switching opens the aircraft picker. Learning to build a profile is to open the pilot's browser,
-// so its button says it leaves the app, but the page it opens doesn't exist yet, so for now it's
-// disabled, and its tooltip says it's coming soon.
+// so its button says it leaves the app, but the page it opens doesn't exist yet, so it's disabled
+// until it does, and its tooltip says it's coming soon.
 function UnsupportedAircraft() {
   const { Button, Tooltip, TooltipContent, TooltipTrigger } = useUI()
   const [picking, setPicking] = useState(false)
@@ -707,7 +853,7 @@ function Refused({ why }: { why: Refusal }) {
             align="start"
             go={r.action.go}
             onConfirm={() => toast("Restarting the sim to update")}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/30"
+            className={RED_BUTTON}
           />
         </div>
       )}
@@ -769,7 +915,7 @@ function NoNotes() {
 // The start card for the loaded aircraft, and under it the page's rest; a frame's servers and play
 // go to the card. A loaded aircraft with a maturity has a profile. The header shows what a frame
 // says of our servers, the firewall, and an update, and a frame can open it.
-function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, session, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: Crew; children: React.ReactNode }) {
+function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, session, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; children: React.ReactNode }) {
   return (
     <AppFrame
       theme={theme}
@@ -780,7 +926,7 @@ function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, se
     >
       {/* None on top, since the header leaves as much room under its pill as above it. */}
       <div className="flex min-h-0 flex-1 flex-col gap-6 p-5 pt-0" data-home-page>
-        <StartCard aircraft={aircraft} servers={servers} play={play} startIn={session ? "session" : "start"} crew={session} />
+        <StartCard aircraft={aircraft} servers={servers} play={play} session={session} />
         {children}
       </div>
     </AppFrame>
@@ -853,15 +999,14 @@ export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck }: { theme: Th
 // Dual Input has no profile for, which has no notes to show, what a session there shares, with the
 // aircraft picker a press away. A frame also says how our servers, faked, answer, and can play
 // hosting or joining by itself, what the header shows and whether it opens out, how the link to
-// the service stands, and whether it opens on a session already hosted, and with whom.
-export function HomeLaterFrame({ theme, aircraft, notes, servers, play, header, headerOpen, core, session }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: Crew }) {
+// the service stands, and whether it opens on a session, which one, and with whom.
+export function HomeLaterFrame({ theme, aircraft, notes, servers, play, header, headerOpen, core, session }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey }) {
   const { loaded, context } = useLoaded(aircraft)
   return (
     <AircraftContext.Provider value={context}>
       <HomePage theme={theme} aircraft={loaded} servers={servers} play={play} header={header} headerOpen={headerOpen} core={core} session={session}>
-        {/* A session's pilot sits in its cockpit, so the figure standing under the card, which
-            leaps off the page when a session starts, isn't there; what the page shows under the
-            session is to be designed. */}
+        {/* A session's page ends at the card: the authors' notes are for before it (user,
+            2026-10-29), and the figure leaps off the page when a session starts. */}
         {session ? null : !loaded.maturity ? (
           <UnsupportedAircraft />
         ) : notes ? (
@@ -910,6 +1055,52 @@ export function RefusalsFrame({ theme }: { theme: Theme }) {
   return (
     <AppFrame theme={theme} header={false} tabs={false}>
       <RefusalsSheet />
+    </AppFrame>
+  )
+}
+
+// Every place a crewmate can be before preflight, as their row in the host's crew list, and every
+// way a joiner can stand toward the pilot flying, as that pilot's row in theirs, each in a card
+// like the session's under a line saying when it shows.
+function SessionSheet({ children }: { children: React.ReactNode }) {
+  const { Card, CardContent } = useUI()
+  return (
+    <div className="p-5">
+      <Card className="[--card-spacing:--spacing(5)]">
+        <CardContent className="flex flex-col gap-6">{children}</CardContent>
+      </Card>
+    </div>
+  )
+}
+export function CrewmateStatesFrame({ theme }: { theme: Theme }) {
+  return (
+    <AppFrame theme={theme} header={false} tabs={false}>
+      <SessionSheet>
+        {(Object.keys(WHERE) as Whereabouts[]).map((at) => (
+          <div key={at} className="flex flex-col gap-2">
+            <Label>{WHERE[at].when}</Label>
+            <ul>
+              <CrewRow pilot={{ ...JAMES, at }} />
+            </ul>
+          </div>
+        ))}
+      </SessionSheet>
+    </AppFrame>
+  )
+}
+export function WaysFrame({ theme }: { theme: Theme }) {
+  return (
+    <AppFrame theme={theme} header={false} tabs={false}>
+      <SessionSheet>
+        {(Object.keys(WAYS) as Way[]).map((way) => (
+          <div key={way} className="flex flex-col gap-2">
+            <Label>{WAYS[way].when}</Label>
+            <ul>
+              <CrewRow pilot={{ ...JAMES, flying: true, way }} />
+            </ul>
+          </div>
+        ))}
+      </SessionSheet>
     </AppFrame>
   )
 }

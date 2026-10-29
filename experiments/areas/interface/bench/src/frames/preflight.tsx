@@ -9,6 +9,8 @@ import { useUI } from "@/bench/ui"
 import { color, PILOT_COLORS, type Theme } from "@/bench/theme"
 import { StatusChip } from "@/bench/screens"
 import { AppFrame, Label } from "./shell"
+import { FIGURE_COLORS } from "./figure-portrait"
+import { Head } from "./figure-head"
 
 const CREW = [
   { name: "You", hue: "orange", chip: "Pilot flying", you: true },
@@ -71,7 +73,7 @@ function SessionCard() {
         <ul className="flex flex-col gap-3">
           {CREW.map((m) => (
             <li key={m.name} className="flex items-center gap-3">
-              <span className="size-2.5 shrink-0 rounded-full" style={{ background: color(m.hue, 400) }} />
+              <Head hex={FIGURE_COLORS.find((c) => c.name === m.hue)!.hex} />
               <span className="text-sm font-medium">{m.name}</span>
               <Badge variant="secondary">{m.chip}</Badge>
               <span className="ml-auto">

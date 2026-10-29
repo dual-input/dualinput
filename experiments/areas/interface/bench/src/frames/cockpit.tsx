@@ -7,28 +7,25 @@
 // than two shows its other pilots' heads in a row under the picture.
 //
 // The pilots are the figure their crew sees in the sim, drawn by the portrait's ray tracer
-// (figure-portrait.tsx), so the lines and the figures have to line up: the camera is
-// orthographic, looking forward and a little down, so a point in the cockpit lands on the picture
-// by a fixed scale, and the seats, the pedestal, and the throttles are placed by projecting where
-// they stand in the cockpit. The windshield's lines are drawn by hand around them.
-import { useEffect, useId, useRef } from "react"
+// (figure-portrait.tsx) through an orthographic camera (figure-head.tsx), so the lines and the
+// figures have to line up: the camera looks forward and a little down, so a point in the cockpit
+// lands on the picture by a fixed scale, and the seats, the pedestal, and the throttles are placed
+// by projecting where they stand in the cockpit. The windshield's lines are drawn by hand around
+// them.
+import { useId } from "react"
 
-import { add, albedos, display, hitBall, hitNormal, hitStick, offset, present, scale, shade, SPEC, unit, type Shape, type V } from "./figure-portrait"
-
-// The render's axes, as the portrait's: x to the viewer's right, y up, and z toward the camera,
-// here from the floor between the seats at the pilots' hips. Forward, toward the nose, is -z.
-type Camera = { cx: number; cy: number; k: number; tilt: number }
+import { Figures, project, type Camera } from "./figure-head"
+import { add, scale, SPEC, type Shape, type V } from "./figure-portrait"
 
 // The picture, 436 by 250 pixels, the card's width inside its padding. The camera sits low, at
 // the pilots' shoulders, looking 8° down, close enough that a meter is 260 pixels across, so the
-// heads stand in front of the windshield, one toward each side, with the code between them.
+// heads stand in front of the windshield, one toward each side, with the code between them. Its
+// origin is the floor between the seats at the pilots' hips, and forward, toward the nose, is -z.
 const PICTURE = { width: 436, height: 250 }
 const CAMERA: Camera = { cx: 218, cy: 270, k: 260, tilt: (8 * Math.PI) / 180 }
 
-// Where a point in the cockpit lands on a camera's picture.
-function toPicture(p: V, cam: Camera = CAMERA): [number, number] {
-  return [cam.cx + cam.k * p[0], cam.cy - cam.k * (p[1] * Math.cos(cam.tilt) - p[2] * Math.sin(cam.tilt))]
-}
+// Where a point in the cockpit lands on the picture.
+const toPicture = (p: V) => project(p, CAMERA)
 
 // The cockpit, in meters: each seat's center across; a seat back, behind the pilot, as wide and
 // as high as it is, stopping short of the shoulders so the torso shows over it as shoulders do,
@@ -80,121 +77,6 @@ const lap = (seatX: number, side: number): V => [seatX + side * LAP.across, LAP.
 const PILOTS = {
   left: seatedPilot(-SEAT.across, [lap(-SEAT.across, -1), add(THROTTLES[0], ON_HANDLE)]),
   right: seatedPilot(SEAT.across, [lap(SEAT.across, -1), lap(SEAT.across, 1)]),
-}
-
-// One ray for every pixel inside box, a picture's pixels from its left, top, right, and bottom,
-// added into sum, as the portrait's pass does. Its rays run parallel, along the camera's view, from
-// a plane 10m behind the picture.
-function pass(sum: Float32Array, w: number, dpr: number, shapes: Shape[], tints: { main: V; light: V }[], cam: Camera, n: number, box: number[]) {
-  const [ox, oy] = offset(n)
-  const s = Math.sin(cam.tilt), c = Math.cos(cam.tilt)
-  const rdx = 0, rdy = -s, rdz = -c
-  const color: V = [0, 0, 0]
-  for (let j = box[1]; j < box[3]; j++) {
-    const up = (cam.cy - (j + oy) / dpr) / cam.k
-    const roy = up * c + 10 * s, roz = -up * s + 10 * c
-    for (let i = box[0]; i < box[2]; i++) {
-      const rox = ((i + ox) / dpr - cam.cx) / cam.k
-      let best = Infinity, self = -1, nx = 0, ny = 0, nz = 0
-      for (let k = 0; k < shapes.length; k++) {
-        const sh = shapes[k]
-        const t = sh.ball ? hitBall(rox, roy, roz, rdx, rdy, rdz, sh.c, sh.r) : hitStick(rox, roy, roz, rdx, rdy, rdz, sh)
-        if (t > 0 && t < best) {
-          best = t
-          self = k
-          if (!sh.ball) {
-            nx = hitNormal[0]
-            ny = hitNormal[1]
-            nz = hitNormal[2]
-          }
-        }
-      }
-      if (self < 0) continue
-      const sh = shapes[self]
-      const px = rox + rdx * best, py = roy + rdy * best, pz = roz + rdz * best
-      if (sh.ball) {
-        nx = (px - sh.c[0]) / sh.r
-        ny = (py - sh.c[1]) / sh.r
-        nz = (pz - sh.c[2]) / sh.r
-      }
-      shade(px, py, pz, nx, ny, nz, -rdx, -rdy, -rdz, shapes, self, sh.ball && sh.light ? tints[self].light : tints[self].main, color)
-      display(color)
-      const o = (j * w + i) * 4
-      sum[o] += color[0]
-      sum[o + 1] += color[1]
-      sum[o + 2] += color[2]
-      sum[o + 3] += 1
-    }
-  }
-}
-
-// How many rays a pixel gets, over as many frames as that takes, each frame keeping to the budget,
-// in milliseconds. The picture holds still, so it smooths once and stops.
-const PASSES = 16
-const FRAME_BUDGET = 8
-
-// Figures, each a list of shapes in one color, drawn by a camera onto a transparent canvas of the
-// given size in CSS pixels. Only the pixels the shapes can reach are traced.
-function Figures({ width, height, figures, cam }: { width: number; height: number; figures: { shapes: Shape[]; hex: string }[]; cam: Camera }) {
-  const canvas = useRef<HTMLCanvasElement>(null)
-  const key = figures.map((f) => f.hex + f.shapes.length).join()
-  useEffect(() => {
-    const el = canvas.current
-    const ctx = el?.getContext("2d")
-    if (!el || !ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const w = Math.round(width * dpr), h = Math.round(height * dpr)
-    el.width = w
-    el.height = h
-    const shapes = figures.flatMap((f) => f.shapes)
-    const tints = figures.flatMap((f) => f.shapes.map(() => albedos(f.hex)))
-    // The box around every shape, in canvas pixels, with a pixel to spare.
-    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity
-    for (const s of shapes)
-      for (const [p, r] of s.ball ? [[s.c, s.r] as const] : [[s.a, s.ra] as const, [s.b, s.rb] as const]) {
-        const [x, y] = toPicture(p, cam)
-        x0 = Math.min(x0, x - r * cam.k)
-        x1 = Math.max(x1, x + r * cam.k)
-        y0 = Math.min(y0, y - r * cam.k)
-        y1 = Math.max(y1, y + r * cam.k)
-      }
-    const box = [Math.max(0, Math.floor((x0 - 1) * dpr)), Math.max(0, Math.floor((y0 - 1) * dpr)), Math.min(w, Math.ceil((x1 + 1) * dpr)), Math.min(h, Math.ceil((y1 + 1) * dpr))]
-    const sum = new Float32Array(w * h * 4)
-    let passes = 0
-    let frame = 0
-    const tick = () => {
-      const start = performance.now()
-      while (passes < PASSES && (passes === 0 || performance.now() - start < FRAME_BUDGET)) pass(sum, w, dpr, shapes, tints, cam, passes++, box)
-      present(ctx, sum, w, passes)
-      if (passes < PASSES) frame = requestAnimationFrame(tick)
-    }
-    frame = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(frame)
-    // The figures redraw when who they are changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, width, height])
-  return <canvas ref={canvas} className="pointer-events-none absolute top-0 left-0" style={{ width, height }} />
-}
-
-// A pilot's head on its own, facing us and turned a little to the side, for the row under the
-// picture: its size in pixels.
-const HEAD_SIZE = 28
-const HEAD_CAMERA: Camera = { cx: HEAD_SIZE / 2, cy: HEAD_SIZE / 2, k: 115, tilt: 0 }
-function headShapes(): Shape[] {
-  const look = unit([0.4, -0.1, 1])
-  const R = SPEC.head.radius, r = SPEC.nose.radius, rt = r * SPEC.nose.tip
-  const out = Math.sqrt(R * R - r * r)
-  return [
-    { ball: true, c: [0, 0, 0], r: R },
-    { ball: false, a: scale(look, out), b: scale(look, R + SPEC.nose.length - rt), ra: r, rb: rt },
-  ]
-}
-export function Head({ hex }: { hex: string }) {
-  return (
-    <span className="relative inline-block shrink-0" style={{ width: HEAD_SIZE, height: HEAD_SIZE }}>
-      <Figures width={HEAD_SIZE} height={HEAD_SIZE} figures={[{ shapes: headShapes(), hex }]} cam={HEAD_CAMERA} />
-    </span>
-  )
 }
 
 // The lines: hairlines in the page's text color, at most this strong, each fading to nothing

@@ -120,14 +120,14 @@ Time, date, sim rate, pause, and weather match on both machines.
 ### The PF's spot on the world map
 
 When a pilot joins a session, Dual Input's Join takes their sim from wherever it is to the PF's airport and stand, in the PF's aircraft and livery, and on to Ready to fly.
-In v1, preflight's Go to button does only the world map's part, and the pilot starts the flight ([03-v1-scope](03-v1-scope.md#preflight)).
+In v1, the EFB app's Join does all of it from Free flight's world map, where the EFB opens, or sets the world map up and leaves the flight's start to the pilot ([interface's tentative decisions](../interface/decisions.md#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up)); a Join that starts from any other page stays here.
 It replaces loading the host's flight on every machine with `SimConnect_FlightLoad`, which [Ideas left out](#ideas-left-out) explains.
 
 - **Tech:** code in the menu's document, which we ran through the sim's inspector, makes the world map's own requests: the airport search sets the departure, `game/currentFlight/setDepartureTaxiIndex` the stand, `game/aircraft/configurator/setAircraftForConfigurator` the aircraft, `game/aircraft/configurator/saveVariationId` the livery, and `game/currentFlight/launchFlight` starts the flight, which loaded at the stand it was given (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)).
   A package of ours puts a script there through its own copy of the sim's BlurPage component, which the core would make on the pilot's machine from the sim's own file, so the copy never falls behind a sim update.
   From a closed sim, with nobody at it, that script went through Start, Free flight, the departure, stand, aircraft, and livery, Fly, and Ready to fly, 164.5s from the launch, 132s of it the sim's boot (measured on MSFS 2024, 2026-10-06, [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
   Join has to start from wherever the pilot is: it reads which page is up, takes the next step from there, confirms each step arrived, and shows an error when one fails or the page is one it doesn't know, since nothing we found takes the menu home without the sim in front (user, 2026-10-06; [interface log](../interface/log.md#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
-- **Next:** scope Join when the feature is built, after v1 (user, 2026-10-05).
+- **Next:** scope a Join from any page after v1 (user, 2026-10-05).
 
 ### Preflight match check
 

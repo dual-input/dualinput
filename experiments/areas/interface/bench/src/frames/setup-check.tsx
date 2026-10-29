@@ -14,6 +14,10 @@ import { ConfirmButton, RESTART_SIM } from "./confirm"
 import { FailureBox, SERVICE_NOT_RUNNING, toneOf, type Failure } from "./failure"
 
 const WINDOWS_USERNAME = "jordan"
+// A display name runs to 20 characters, so it fits every place the app shows it, such as the crew
+// rows and Join's question; a Windows account's name runs to 20 too, so the one the field starts
+// with always fits (record/areas/interface/decisions.md, A display name runs to 20 characters).
+const NAME_MAX = 20
 
 // How long each step of the sequence holds, in milliseconds.
 const WELCOME_HOLD = 1600
@@ -251,7 +255,7 @@ function CrewCard() {
           <div className="flex min-w-0 flex-1 flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label>Name</Label>
-              <Input ref={field} aria-label="Display name" value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} />
+              <Input ref={field} aria-label="Display name" maxLength={NAME_MAX} value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} />
             </div>
             <div className="flex flex-col gap-2">
               <Label>Color</Label>

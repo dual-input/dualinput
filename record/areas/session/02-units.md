@@ -11,6 +11,16 @@ Decides:     The session crate's members, session keys, control, session file, j
 > Go to is offered only at Free flight's world map, so [the menu script](#the-menu-script)'s `free_flight` request and [the Go to budget](#budgets)'s start from the home page no longer hold.
 > An open desktop app window keeps no core running, so a connected desktop app no longer keeps the core from exiting, as [joining and leaving](#joining-and-leaving) has it.
 
+> **Note**
+> Stage 11b's tentative decision that [Join takes a joiner from the world map into the PF's flight, or only sets it up](../interface/decisions.md#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up) widens [Go to](#go-to), which the EFB app labels Join (user, 2026-10-29).
+> From the world map it also selects the PF's aircraft, and the PF's livery where the joiner has it.
+> A press asks first, Set up only or Join now, and Join now also starts the flight and presses Ready to fly.
+> So [the menu script](#the-menu-script) also runs the world map's aircraft, livery, and `launchFlight` requests, and presses `Career_ConfirmationPage`'s `ReadyButton` (measured on MSFS 2024, 2026-10-05 and 2026-10-06, [interface log, 2026-10-05](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight), [2026-10-06](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
+> Go to is unavailable, and says so, while the joiner lacks the PF's aircraft.
+
+> **Note**
+> Stage 11b's tentative decision that [a display name runs to 20 characters](../interface/decisions.md#a-display-name-runs-to-20-characters) limits the display name setting in [members](#members) to 20 characters, and the session crate refuses a longer name from any app (user, 2026-10-29).
+
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.
 The PF's core sets the session's aircraft, runs preflight's countdown, and ends preflight with a key, and its profile loader pins a local bundle that covers that aircraft, or else the one its cached index gives its level.

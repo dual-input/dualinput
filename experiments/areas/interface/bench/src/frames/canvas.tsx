@@ -11,7 +11,7 @@ import { DEFAULT_THEME, themeLabel, themeVars, type Theme } from "@/bench/theme"
 import { AppFrame, EFB, EveryIssueFrame } from "./shell"
 import { PreflightFrame } from "./preflight"
 import { SetupFlowFrame } from "./setup-check"
-import { HomeFirstTimeFrame, HomeLaterFrame, ReconnectingFrame, RefusalsFrame, type Action } from "./home"
+import { CrewmateStatesFrame, HomeFirstTimeFrame, HomeLaterFrame, ReconnectingFrame, RefusalsFrame, WaysFrame, type Action } from "./home"
 import { AircraftPickerFrame } from "./aircraft"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
@@ -66,12 +66,18 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Every refusal", draw: (t) => <RefusalsFrame theme={t} /> },
     ],
   },
-  // The session page, which is home once Host or Join succeeds: hosted, with nobody else yet; and,
-  // for Later, a crew bigger than v1's two. Hosting and joining's Succeeds plays the way in.
+  // The session page, which is home once Host or Join succeeds, before preflight: hosted, alone and
+  // once a crewmate has joined, with a sheet of where a crewmate can be; joined, with a sheet of a
+  // joiner's ways to the pilot flying; and, for Later, a crew bigger than v1's two. Hosting and
+  // joining's Succeeds plays the way in.
   {
     name: "Session",
     frames: [
       { name: "Hosted, alone", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="alone" /> },
+      { name: "Hosted, a crewmate joined", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="crewmate" /> },
+      { name: "Every crewmate state", draw: (t) => <CrewmateStatesFrame theme={t} /> },
+      { name: "Joined", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="joined" /> },
+      { name: "Every way to the pilot flying", draw: (t) => <WaysFrame theme={t} /> },
       { name: "Later: a bigger crew", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="bigger-crew" /> },
     ],
   },

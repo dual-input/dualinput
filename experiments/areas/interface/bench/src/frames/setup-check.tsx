@@ -172,7 +172,7 @@ function Checks({ checks, phase, onFix, onSkip }: { checks: Check[]; phase: Extr
               <div className="flex items-center gap-4">
                 {/* A restart asks first, since it closes the sim; once agreed, the button shows it's busy as any fix's does. */}
                 {failing.action.kind === "restart" && !phase.fixing ? (
-                  <ConfirmButton label={failing.action.label!} {...RESTART_SIM} onConfirm={onFix} className={toneOf(failing).button} />
+                  <ConfirmButton label={failing.action.label!} {...RESTART_SIM} onConfirm={onFix} className={toneOf(failing).button} tone={toneOf(failing).tone} />
                 ) : (
                   <Button className={toneOf(failing).button} onClick={onFix} disabled={phase.fixing}>
                     {phase.fixing ? (

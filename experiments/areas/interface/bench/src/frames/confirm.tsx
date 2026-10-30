@@ -13,30 +13,34 @@ import { useUI } from "@/bench/ui"
 // simmer, so it says nothing of them.
 export const RESTART_SIM = { question: "Restart the sim?", go: "Restart now" }
 
+// While it asks, the button that opened it looks pressed in, the same way on every one: a solid
+// button softens to the tinted version of its color, as setup's restart does, so the solid color is
+// the action's own button alone, and a button already tinted at rest, as Leave is in the kit's
+// tinted red, fades to 60%. The tone names the button's color; Base UI marks an open popover's
+// trigger data-popup-open. Written out whole, since Tailwind finds a class only where its full name
+// appears.
+const PRESSED = {
+  destructive: "data-popup-open:bg-destructive/20 data-popup-open:text-destructive data-popup-open:hover:bg-destructive/20",
+  warning: "data-popup-open:bg-warning/20 data-popup-open:text-warning data-popup-open:hover:bg-warning/20",
+  primary: "data-popup-open:bg-primary/20 data-popup-open:text-primary data-popup-open:hover:bg-primary/20",
+}
+const PRESSED_TINTED = "data-popup-open:opacity-60"
+export type ConfirmTone = keyof typeof PRESSED
+
 // The popover lines up with the button as the button lines up in what holds it: centered over a
 // centered button, from the start edge of one that starts its row, and to the end edge of one that
 // ends it, so neither juts out alone. The button that asks looks like the action's own, by
 // className, or is one of the kit's variants and sizes, as Leave is in the kit's tinted red, while
 // the action's own button keeps className. A second, gentler answer can sit before the action's
 // own button, in the kit's outline, as Join's Set up only does before Join now.
-export function ConfirmButton({ label, question, go, onConfirm, also, className, trigger, align = "center" }: { label: React.ReactNode; question: string; go: string; onConfirm: () => void; also?: { label: string; onSelect: () => void }; className?: string; trigger?: { variant?: string; size?: string; disabled?: boolean; asking?: string }; align?: "center" | "start" | "end" }) {
+export function ConfirmButton({ label, question, go, onConfirm, also, className, trigger, tone = "destructive", align = "center" }: { label: React.ReactNode; question: string; go: string; onConfirm: () => void; also?: { label: string; onSelect: () => void }; className?: string; trigger?: { variant?: string; size?: string; disabled?: boolean }; tone?: ConfirmTone; align?: "center" | "start" | "end" }) {
   const { Button, Popover, PopoverTrigger, PopoverContent, PopoverTitle } = useUI()
   const [open, setOpen] = useState(false)
   const popup = useRef<HTMLDivElement>(null)
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      {/* While it asks, the button that opened it softens to the kit's tinted red, so the solid red
-          is the action's own button alone, or to the tint a trigger asks for; Base UI marks an open
-          popover's trigger data-popup-open. */}
       <PopoverTrigger
-        render={
-          <Button
-            variant={trigger?.variant}
-            size={trigger?.size}
-            disabled={trigger?.disabled}
-            className={(trigger ? "" : (className ?? "")) + " " + (trigger?.asking ?? "data-popup-open:bg-destructive/20 data-popup-open:text-destructive data-popup-open:hover:bg-destructive/20")}
-          />
-        }
+        render={<Button variant={trigger?.variant} size={trigger?.size} disabled={trigger?.disabled} className={(trigger ? "" : (className ?? "")) + " " + (trigger?.variant === "destructive" ? PRESSED_TINTED : PRESSED[tone])} />}
       >
         {label}
       </PopoverTrigger>

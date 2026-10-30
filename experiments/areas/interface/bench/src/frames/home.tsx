@@ -3,7 +3,7 @@
 // later visits the profile authors' notes. The aircraft and the notes are examples.
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { ArrowRightLeft, BookOpen, Check, CircleCheck, CircleX, Copy, ExternalLink, Hand, LogOut, Maximize2, Minimize2, TriangleAlert, X } from "lucide-react"
+import { ArrowRightLeft, BookOpen, Check, ChevronDown, ChevronUp, CircleCheck, CircleX, Copy, ExternalLink, Hand, Info, LogOut, TriangleAlert, X } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
@@ -13,8 +13,9 @@ import { FIGURE_COLORS } from "./figure-portrait"
 import { StandingFigure } from "./figure-standing"
 import { ConfirmButton, RESTART_SIM } from "./confirm"
 import { AircraftContext, AircraftPicker, LOADED, LOADED_UNSUPPORTED, PROFILES, type Aircraft } from "./aircraft"
-import { useScroller } from "./scroller"
+import { NO_SCROLLBAR, useScroller } from "./scroller"
 import { EmptyHead, Head } from "./figure-head"
+import { useShowPhase, type SessionPhase } from "./phase"
 
 
 // How hosting and joining can be refused: either one when the PC seems offline, which Windows
@@ -113,26 +114,69 @@ type Session = { joined: boolean; crew: Pilot[]; preflight?: Preflight }
 // `preflight` key (record/areas/session/02-units.md, Preflight and The match check;
 // record/areas/product/03-v1-scope.md, Preflight and Preflight match check): whether this pilot's
 // aircraft has settled after its load, which Ready waits for; whether this pilot starts ready; the
-// match check's differences, each in its item's words from this pilot's side, with whose fix it
-// is; and for the PF, the checklist of the controls Dual Input counts, each by its profile entry's
+// match check's differences, each in its item's words from this pilot's side, with a note on what
+// it can cause where that isn't plain; and for the PF, the checklist of the controls Dual Input counts, each by its profile entry's
 // ID, `name`, and `default` (record/areas/sync/05-units.md, Ready, notifications, log lines, and the
 // checklist), and a `description`, a field the profile format doesn't have yet.
-type Difference = { level: "error" | "warning"; says: string; fix?: string }
+type Difference = { level: "error" | "warning" | "info"; says: string; note?: string }
 type ChecklistItem = { id: string; name: string; default: string; description?: string }
 type Preflight = { settled: boolean; ready?: boolean; differences: Difference[]; checklist?: ChecklistItem[] }
-// The differences a version, a livery, and a time of day make, from each side; the versions and
-// the time are examples.
+// Every difference the match check can raise, from this pilot's side, with a crewmate, James
+// (record/areas/session/02-units.md, The match check; record/areas/profiles/02-units.md, The match
+// check's item): the aircraft's package and where it's installed, its version, the livery, the
+// session's profile, and the sim's date and time of day. Nothing here stops the flight, so a note
+// says what a difference can cause, and none gives advice or a command (user, 2026-10-30). A date
+// names only the crewmate's, which is the one this pilot can't see in their own sim. The words are drafts, and the
+// versions, stores, times, and dates are examples. A livery can set the aircraft's
+// equipment and units, as a Fenix A320 livery's `fnx_*` keys set its baro unit, ADIRS type, and
+// standby instrument (record/areas/aircraft/fenix-a320-family/study.md).
+const SWITCHES_THERE = "James's switches, knobs, and displays won't sync"
+const SWITCHES_HERE = "Your switches, knobs, and displays won't sync"
+const HEADS_UP = {
+  olderThere: { level: "error", says: "James has version 2.1.2 of the aircraft, you have 2.1.3" },
+  olderHere: { level: "error", says: "You have version 2.1.2 of the aircraft, James has 2.1.3" },
+  streamedThere: { level: "warning", says: "James's aircraft is streamed, and yours is installed", note: "The two copies may differ and some controls may not sync" },
+  streamedHere: { level: "warning", says: "Your aircraft is streamed, and James's is installed", note: "The two copies may differ and some controls may not sync" },
+  versionUnreadThere: { level: "warning", says: "James's aircraft is streamed, so its version can't be validated" },
+  versionUnreadHere: { level: "warning", says: "Your aircraft is streamed, so its version can't be validated" },
+  stores: { level: "warning", says: "James's aircraft is in Community, and yours is from the Marketplace", note: "The same version can differ between stores" },
+  packages: { level: "warning", says: "Your aircraft and James's come from different packages" },
+  livery: { level: "warning", says: "Different liveries may alter the aircraft's configuration and cause sync issues" },
+  noProfile: { level: "error", says: "No profile for this aircraft", note: "The cockpits won't sync" },
+  downloadThere: { level: "error", says: "James couldn't download this aircraft's profile", note: SWITCHES_THERE },
+  downloadHere: { level: "error", says: "Your PC couldn't download this aircraft's profile", note: SWITCHES_HERE },
+  unpublishedThere: { level: "error", says: "James doesn't have your unpublished profile for this aircraft", note: SWITCHES_THERE },
+  unpublishedHere: { level: "error", says: "James's profile for this aircraft is unpublished, so you don't have it", note: SWITCHES_HERE },
+  unpublished: { level: "info", says: "Unpublished profile" },
+  aheadThere: { level: "warning", says: "James's sim is 4 hours ahead of yours" },
+  aheadHere: { level: "warning", says: "Your sim is 4 hours ahead of James's" },
+  date: { level: "warning", says: "James's sim is on 2 March" },
+  versions: { level: "error", says: "James and Adam have version 2.1.2 of the aircraft, Mia has 2.1.1, you have 2.1.3" },
+} satisfies Record<string, Difference>
+// When each shows, for the frame of them all; a streamed copy against an installed one raises two.
+const HEADS_UP_CASES: { when: string; items: Difference[] }[] = [
+  { when: "James's version of the aircraft is older", items: [HEADS_UP.olderThere] },
+  { when: "Yours is older", items: [HEADS_UP.olderHere] },
+  { when: "Later: a crew of four on three versions", items: [HEADS_UP.versions] },
+  { when: "James's aircraft is streamed, and yours installed", items: [HEADS_UP.streamedThere, HEADS_UP.versionUnreadThere] },
+  { when: "Yours is streamed, and James's installed", items: [HEADS_UP.streamedHere, HEADS_UP.versionUnreadHere] },
+  { when: "Installed from different stores", items: [HEADS_UP.stores] },
+  { when: "From different packages", items: [HEADS_UP.packages] },
+  { when: "Different liveries", items: [HEADS_UP.livery] },
+  { when: "No profile covers the aircraft, for every pilot", items: [HEADS_UP.noProfile] },
+  { when: "James couldn't download the session's profile", items: [HEADS_UP.downloadThere] },
+  { when: "You couldn't", items: [HEADS_UP.downloadHere] },
+  { when: "The session runs your unpublished profile, which James lacks", items: [HEADS_UP.unpublishedThere] },
+  { when: "It runs James's, which you lack", items: [HEADS_UP.unpublishedHere] },
+  { when: "Every pilot loaded the session's profile, which isn't published yet, shown once", items: [HEADS_UP.unpublished] },
+  { when: "James's sim is more than 10 minutes ahead", items: [HEADS_UP.aheadThere] },
+  { when: "Yours is", items: [HEADS_UP.aheadHere] },
+  { when: "The sims are on different dates", items: [HEADS_UP.date] },
+]
+// The differences a version, a livery, and a time of day make, from each side.
 const DIFFERENCES: Record<"host" | "joiner", Difference[]> = {
-  host: [
-    { level: "error", says: "James has version 2.1.2 of the aircraft, and you have 2.1.3", fix: "James updates it" },
-    { level: "warning", says: "Different liveries", fix: "Each of you sees your own" },
-    { level: "warning", says: "James's sim is 4 hours ahead of yours", fix: "Set the same time in each sim" },
-  ],
-  joiner: [
-    { level: "error", says: "You have version 2.1.2 of the aircraft, and James has 2.1.3", fix: "You update it" },
-    { level: "warning", says: "Different liveries", fix: "Each of you sees your own" },
-    { level: "warning", says: "Your sim is 4 hours ahead of James's", fix: "Set the same time in each sim" },
-  ],
+  host: [HEADS_UP.olderThere, HEADS_UP.livery, HEADS_UP.aheadThere],
+  joiner: [HEADS_UP.olderHere, HEADS_UP.livery, HEADS_UP.aheadHere],
 }
 // The checklist's items are hypothetical. Every pilot's list holds the profile authors' items, for
 // what Dual Input can't sync and each pilot sets by hand, here from the authors' notes' example;
@@ -183,6 +227,8 @@ const SESSIONS: Record<"alone" | "crewmate" | "bigger-crew" | "joined" | "prefli
 // How long the countdown runs once every counted pilot is ready, in seconds.
 const COUNTDOWN = 3
 export type SessionKey = keyof typeof SESSIONS
+// The session a frame moves on to, after that many milliseconds.
+export type NextSession = { after: number; session: SessionKey }
 const hexOf = (hue: string) => FIGURE_COLORS.find((c) => c.name === hue)!.hex
 
 // For a joiner not yet in the flight, where the pilot flying is, under their name, and Join at the
@@ -223,25 +269,38 @@ const SIM_FLY_BUTTON = "bg-[#FFDE03] text-[#242934] hover:bg-[#FFDE03]/90 focus-
 // it where they are, where that says anything. The row's end is for each pilot's Ready once
 // preflight runs, and before it, when no pilot can give one, it's empty but for Join on the pilot
 // flying's row for a joiner out of the flight, since getting into that flight comes first.
-// Under the name, a pilot in the flight shows their link instead of where they are. The row's end
-// is the card's to give: during preflight, each pilot's Ready.
+// A pilot in the flight is "In the flight" under the name, and their link, its path and round trip,
+// is a quiet chip after the name, outside the pilot flying's: the round trip changes as it's
+// measured, and on the outside its changing width moves nothing else. The row's end is the card's
+// to give: during preflight, each pilot's Ready.
 // A row given pop pops its head in after that many milliseconds, fixed when the row first shows.
 function CrewRow({ pilot, pop, end }: { pilot: Pilot; pop?: number; end?: React.ReactNode }) {
   const { Badge } = useUI()
   const [popAfter] = useState(pop)
-  const under = pilot.way ? { shows: WAYS[pilot.way].at, trouble: false } : pilot.at ? WHERE[pilot.at] : pilot.link ? { shows: pilot.link, trouble: false } : undefined
+  const under = pilot.way ? { shows: WAYS[pilot.way].at, trouble: false } : pilot.at ? WHERE[pilot.at] : pilot.link ? { shows: "In the flight", trouble: false } : undefined
   const last = end ?? (pilot.way && <JoinPf way={pilot.way} />)
   return (
     <li className="flex items-center gap-3">
-      <Head hex={hexOf(pilot.hue)} pop={popAfter} />
-      <div className="flex min-w-0 flex-col">
+      <span data-fold-morph={`head-${pilot.name}`} className="flex shrink-0">
+        <Head hex={hexOf(pilot.hue)} pop={popAfter} />
+      </span>
+      <div data-fold-fade className="flex min-w-0 flex-col">
         <span className="flex items-center gap-2 text-sm font-medium">
           {pilot.name}
           {pilot.flying && <Badge variant="secondary">Pilot flying</Badge>}
+          {pilot.link && (
+            <Badge variant="outline" className="text-muted-foreground tabular-nums">
+              {pilot.link}
+            </Badge>
+          )}
         </span>
         {under && <span className={"text-xs " + (under.trouble ? "text-warning" : "text-muted-foreground")}>{under.shows}</span>}
       </div>
-      {last && <span className="ml-auto">{last}</span>}
+      {last && (
+        <span data-fold-fade className="ml-auto">
+          {last}
+        </span>
+      )}
     </li>
   )
 }
@@ -288,7 +347,8 @@ function JoinPf({ way }: { way: Way }) {
       also={{ label: "Set up only", onSelect: () => go(false) }}
       go="Join now"
       onConfirm={() => go(true)}
-      trigger={{ size: "sm", disabled: busy, asking: "data-popup-open:bg-primary/20 data-popup-open:text-primary data-popup-open:hover:bg-primary/20" }}
+      trigger={{ size: "sm", disabled: busy }}
+      tone="primary"
       className={SIM_FLY_BUTTON}
       align="end"
     />
@@ -298,8 +358,19 @@ function JoinPf({ way }: { way: Way }) {
 // This pilot's Ready, at the end of their row: outlined until pressed, then filled green with a
 // check, and pressed again it un-readies. Until the aircraft has settled after its load, about 30s after
 // Ready to fly (decision 048), it's disabled, and a tooltip says why.
+// Pressed, it eases to green as the check opens room for itself before the word and springs in,
+// and a ring of the green spreads from the button and fades (index.css, ready-pulse); un-readied,
+// the check shrinks away and the room closes. The check and the word are one child of the button,
+// so the kit's gap between an icon and its label stays out of the easing.
+const READY_EASE = { room: 200, check: 300, after: 60 }
 function ReadyButton({ ready, settled, onToggle }: { ready: boolean; settled: boolean; onToggle: () => void }) {
   const { Button, Tooltip, TooltipContent, TooltipTrigger } = useUI()
+  const was = useRef(ready)
+  const [pulses, setPulses] = useState(0)
+  useEffect(() => {
+    if (ready && !was.current) setPulses((n) => n + 1)
+    was.current = ready
+  }, [ready])
   if (!settled)
     return (
       <Tooltip>
@@ -312,96 +383,125 @@ function ReadyButton({ ready, settled, onToggle }: { ready: boolean; settled: bo
       </Tooltip>
     )
   return (
-    <Button size="sm" variant={ready ? "default" : "outline"} className={ready ? GREEN_BUTTON : undefined} onClick={onToggle}>
-      {ready && <Check data-icon="inline-start" />}
-      Ready
+    <Button size="sm" variant={ready ? "default" : "outline"} className={"relative " + (ready ? GREEN_BUTTON : "")} onClick={onToggle}>
+      {pulses > 0 && <span key={pulses} className="pointer-events-none absolute -inset-px rounded-[inherit] text-success" style={{ animation: "ready-pulse 600ms ease-out both" }} />}
+      <span className="inline-flex items-center">
+        <span className="inline-flex overflow-hidden transition-[width] ease-out" style={{ width: ready ? 20 : 0, transitionDuration: `${READY_EASE.room}ms` }}>
+          <Check
+            className="mr-1 size-4 shrink-0"
+            style={{
+              transform: ready ? "scale(1)" : "scale(0.3)",
+              opacity: ready ? 1 : 0,
+              transition: ready
+                ? `transform ${READY_EASE.check}ms cubic-bezier(0.34, 1.56, 0.64, 1) ${READY_EASE.after}ms, opacity ${READY_EASE.check}ms ease-out ${READY_EASE.after}ms`
+                : `transform 150ms ease-in, opacity 150ms ease-in`,
+            }}
+          />
+        </span>
+        Ready
+      </span>
     </Button>
   )
 }
 
-// For every pilot but the PF, the line preflight's rule asks for: catch-up sets only what the
-// profile holds, so a display a PM pages through now keeps that page (record/areas/product/
-// 03-v1-scope.md, Preflight, Rules). It asks gently, and leaves room for what the pilot's own
-// checklist asks them to set by hand.
-function TouchNothing({ checklist }: { checklist: boolean }) {
+// A number that rolls to its next value as a counter's wheel does: the old one slides up out of its
+// window as the new one slides up in from below.
+const ROLL_MS = 250
+function Rolling({ value }: { value: number }) {
+  const [leaving, setLeaving] = useState<number | null>(null)
+  const last = useRef(value)
+  useEffect(() => {
+    if (last.current === value) return
+    setLeaving(last.current)
+    last.current = value
+    const t = window.setTimeout(() => setLeaving(null), ROLL_MS)
+    return () => clearTimeout(t)
+  }, [value])
+  const timing = { animationDuration: `${ROLL_MS}ms` }
   return (
-    <p className="flex items-center gap-2 rounded-2xl bg-info/10 px-4 py-2.5 text-sm text-info">
-      <Hand className="size-4 shrink-0" />
-      {checklist ? "Until the flight starts, try to change only what the checklist asks for" : "Until the flight starts, try to leave the cockpit as it is"}
-    </p>
+    <span className="relative inline-flex overflow-hidden">
+      {leaving !== null && (
+        <span key={`out-${leaving}`} className="absolute inset-0 animate-out ease-in fade-out slide-out-to-top" style={{ ...timing, animationFillMode: "forwards" }}>
+          {leaving}
+        </span>
+      )}
+      <span key={value} className={leaving !== null ? "animate-in ease-out fade-in slide-in-from-bottom" : ""} style={timing}>
+        {value}
+      </span>
+    </span>
   )
 }
 
-// The countdown, under the crew where each pilot's Ready is, once every counted pilot is ready: the
-// seconds left beside a bar that drains over them (index.css, countdown-drain), and how to stop it.
-// It's green, as a pressed Ready is, since it runs because every Ready is, and the line on how to
-// stop it is the same green, fainter. In the folded card's row it's only the seconds and the bar,
-// between the crew and Ready, the button that stops it.
-function Countdown({ left, inRow }: { left: number; inRow?: boolean }) {
+// The countdown, once every counted pilot is ready: a ring just before this pilot's Ready, the
+// button that stops it, in the whole card and the folded one alike, with the seconds left rolling
+// inside it and its arc draining over them, so it takes no row of its own and moves nothing as it
+// comes and goes; Ready keeps its place at the row's end. It's green, as a pressed Ready is, since
+// it runs because every Ready is. It pops in from half its size and shrinks away when un-readying
+// stops it. It's an SVG stroke, since
+// Coherent GT draws no conic gradient (record/areas/architecture/coherent-gt.md); whether it
+// animates a stroke's dash offset is unmeasured. The arc's path counts 100 long (pathLength), as
+// index.css's countdown-ring takes it.
+const RING = { size: 28, stroke: 2.5, in: 200, out: 150 }
+function CountdownRing({ left }: { left: number | null }) {
+  const running = left !== null
+  const last = useRef(left ?? 0)
+  if (running) last.current = left
+  // It stays drawn while it shrinks away, and each run drains from full.
+  const [held, setHeld] = useState(running)
+  const [run, setRun] = useState(0)
+  useEffect(() => {
+    if (running) {
+      setHeld(true)
+      setRun((r) => r + 1)
+      return
+    }
+    const t = window.setTimeout(() => setHeld(false), RING.out)
+    return () => clearTimeout(t)
+  }, [running])
+  if (!running && !held) return null
+  const c = RING.size / 2
+  const r = c - RING.stroke / 2
   return (
-    <div className={"flex animate-in items-center gap-3 duration-200 fade-in " + (inRow ? "" : "rounded-2xl bg-success/10 px-4 py-2.5")}>
-      <span className="text-sm font-medium whitespace-nowrap text-success tabular-nums">Flight starts in {left}</span>
-      <div className="h-1 flex-1 overflow-hidden rounded-full bg-success/20">
-        <div className="h-full origin-left rounded-full bg-success" style={{ animation: `countdown-drain ${COUNTDOWN}s linear both` }} />
-      </div>
-      {!inRow && <span className="text-xs text-success/70">Un-ready to stop</span>}
-    </div>
+    <span
+      role="timer"
+      aria-label={`Flight starts in ${last.current}`}
+      className={"relative flex shrink-0 items-center justify-center text-success " + (running ? "animate-in fade-in zoom-in-50" : "")}
+      style={{
+        width: RING.size,
+        height: RING.size,
+        animationDuration: `${RING.in}ms`,
+        opacity: running ? 1 : 0,
+        transform: running ? "none" : "scale(0.5)",
+        transition: running ? undefined : `opacity ${RING.out}ms ease-in, transform ${RING.out}ms ease-in`,
+      }}
+    >
+      <svg className="absolute inset-0" width={RING.size} height={RING.size} viewBox={`0 0 ${RING.size} ${RING.size}`} fill="none">
+        <circle cx={c} cy={c} r={r} strokeWidth={RING.stroke} className="stroke-success/20" />
+        <circle
+          key={run}
+          cx={c}
+          cy={c}
+          r={r}
+          strokeWidth={RING.stroke}
+          strokeLinecap="round"
+          pathLength={100}
+          strokeDasharray={100}
+          transform={`rotate(-90 ${c} ${c})`}
+          className="stroke-current"
+          style={{ animation: `countdown-ring ${COUNTDOWN}s linear both` }}
+        />
+      </svg>
+      <span className="relative text-xs font-semibold tabular-nums">
+        <Rolling value={last.current} />
+      </span>
+    </span>
   )
 }
 
-// The session's phase: preflight from the moment the PF is in a flight on the ground
-// (record/areas/session/02-units.md, Preflight), so a joiner whose PF waits at a stand is in it
-// before they're in the flight, then syncing once its countdown ends. Before preflight there's
-// none, since the crew list already shows where everyone is. Preflight says what it is: sync
-// hasn't started yet, rather than paused, which would say it ran and stopped, and pause is the
-// sim's word too; syncing needs no explaining.
-type SessionPhase = "preflight" | "syncing"
-const PHASES: Record<SessionPhase, { name: string; text: string; line?: string }> = {
-  preflight: { name: "Preflight", text: "text-primary", line: "Sync starts once everyone's ready" },
-  syncing: { name: "Sync active", text: "text-success" },
-}
+// The session's phase, which the header shows (phase.tsx): preflight once the PF is in a flight on
+// the ground, or has a way for a joiner to reach them, then syncing once the countdown ends.
 const phaseOf = (session: Session, started: boolean): SessionPhase | undefined =>
   started ? "syncing" : session.preflight || session.crew.find((p) => p.flying)?.way ? "preflight" : undefined
-
-// The phase as a 20px line on the page right above the session card, on the page's left edge, in
-// line with the header's mark and the card's side: a dot in the phase's color, pulsing while
-// preflight waits on the crew, from the kit's ping, then its name in capitals, in the same color,
-// then, for a phase that needs it, a line saying what it is, muted, on one line.
-// When the phase changes, the new line uncovers the old from left to right over LIP_WIPE_MS, so the
-// flight's start shows as a sweep of green.
-const LIP_WIPE_MS = 600
-// Each face of the line has the page's background, so the face a new phase sweeps in covers the
-// old one.
-function LipFace({ phase, className = "", style }: { phase: SessionPhase; className?: string; style?: React.CSSProperties }) {
-  const p = PHASES[phase]
-  return (
-    <div className={"flex h-5 items-center gap-2 bg-background whitespace-nowrap " + className} style={style}>
-      <span className={"relative flex size-1.5 shrink-0 " + p.text}>
-        {phase === "preflight" && <span className="absolute inline-flex size-full animate-ping rounded-full bg-current opacity-75" />}
-        <span className="relative inline-flex size-1.5 rounded-full bg-current" />
-      </span>
-      <span className={"text-[10px] font-semibold tracking-widest uppercase " + p.text}>{p.name}</span>
-      {p.line && <span className="min-w-0 truncate text-xs text-muted-foreground">{p.line}</span>}
-    </div>
-  )
-}
-function PhaseLip({ phase }: { phase: SessionPhase }) {
-  const [leaving, setLeaving] = useState<SessionPhase | null>(null)
-  const last = useRef(phase)
-  useEffect(() => {
-    if (last.current === phase) return
-    setLeaving(last.current)
-    last.current = phase
-    const t = window.setTimeout(() => setLeaving(null), LIP_WIPE_MS)
-    return () => clearTimeout(t)
-  }, [phase])
-  return (
-    <div className="relative h-5 shrink-0">
-      {leaving && <LipFace phase={leaving} className="absolute inset-0" />}
-      <LipFace key={phase} phase={phase} className="absolute inset-0" style={leaving ? { animation: `lip-wipe ${LIP_WIPE_MS}ms ease-in-out both` } : undefined} />
-    </div>
-  )
-}
 
 // A pilot's head in the folded card's row, named for a screen reader, with a badge at its lower right once
 // there's something to say: a green check once they're ready, a red cross while they're out of
@@ -411,9 +511,11 @@ function StripHead({ pilot, ready }: { pilot: Pilot; ready: boolean }) {
   const out = pilot.at === "lost" || pilot.at === "crashed"
   return (
     <span className="relative inline-flex" aria-label={pilot.name}>
-      <Head hex={hexOf(pilot.hue)} />
+      <span data-fold-morph={`head-${pilot.name}`} className="flex">
+        <Head hex={hexOf(pilot.hue)} />
+      </span>
       {(ready || out) && (
-        <span className={"absolute -right-0.5 -bottom-0.5 flex size-3.5 items-center justify-center rounded-full ring-2 ring-card " + (ready ? "bg-success text-success-foreground" : "bg-destructive text-destructive-foreground")}>
+        <span data-fold-fade className={"absolute -right-0.5 -bottom-0.5 flex size-3.5 items-center justify-center rounded-full ring-2 ring-card " + (ready ? "bg-success text-success-foreground" : "bg-destructive text-destructive-foreground")}>
           {ready ? <Check className="size-2.5" strokeWidth={3} /> : <X className="size-2.5" strokeWidth={3} />}
         </span>
       )}
@@ -421,20 +523,193 @@ function StripHead({ pilot, ready }: { pilot: Pilot; ready: boolean }) {
   )
 }
 
-// The match check's differences, in a section of the session card: an error's icon in red and a
-// warning's in amber, the difference, and whose fix it is, muted.
-function Differences({ differences }: { differences: Difference[] }) {
+// The match check's differences, under the crew rows with no title of their own, since nearly
+// every one names a crewmate, and the record has them beside each Ready
+// (record/areas/product/03-v1-scope.md, Preflight match check). In preflight they're listed in
+// full, for the crew to weigh before Ready. Once the flight starts they still hold, and a late
+// joiner or a changed aircraft can raise new ones, but they're for looking up when something
+// won't sync, so the list folds to its counts: a count of each level, then a chevron, which open
+// it again. Open, the list takes the counts' place rather than sitting under them, since they'd
+// only repeat it, and the list itself folds it back, with an up chevron after its last line.
+// Whether a new difference in flight opens the list by itself waits for the flying page.
+// The counts are snug: the chevron beside them, in a tint that hugs them on hover, 8px around on
+// every side, its corners 6px, as the checklist rows' are, with the counts on the card's content
+// edge, and the press reaches 6px above the tint, unseen, to 42px tall, for a VR pointer. The
+// open list's tint covers the whole list, which has nothing else to press. Both forms start 12px
+// under the crew, their words 20px under it, the card's own spacing, so they read as a group of
+// their own; and each ends the card 8px into its bottom padding, so a tint's bottom sits as far
+// from the card's edge as its side does, 12px.
+// The counts and the list are one thing in two forms, so one turns into the other (morph): both
+// stay drawn, one over the other at the same corner, the one not showing hidden, and the box
+// between them eases to the height of the one showing, as a room does (EaseRoom).
+function CrewDifferences({ differences, started }: { differences: Difference[]; started: boolean }) {
+  const [open, setOpen] = useState(false)
+  const expanded = !started || open
+  const count = (level: Difference["level"]) => differences.filter((d) => d.level === level).length
+  const errors = count("error")
+  const warnings = count("warning")
+  const fold = () => setOpen(false)
+  const box = useRef<HTMLDivElement>(null)
+  const counts = useRef<HTMLButtonElement>(null)
+  const list = useRef<HTMLDivElement>(null)
+  // Its own height first, unmarked for stillEasing, which the measure below then pins, the same.
+  const [height, setHeight] = useState<number>()
+  useLayoutEffect(() => {
+    const shown = expanded ? list.current : counts.current
+    if (!shown) return
+    const h = shown.offsetHeight + parseFloat(getComputedStyle(shown).marginTop)
+    if (h !== height) setHeight(h)
+  })
+  useLayoutEffect(() => {
+    box.current?.dispatchEvent(new CustomEvent(EASE_EVENT, { bubbles: true }))
+  }, [height])
+  const painted = usePainted()
+  useLayoutEffect(() => {
+    if (!painted.current || !counts.current || !list.current) return
+    return expanded ? morph(counts.current, list.current, { inAfter: MORPH.inAfter.open }) : morph(list.current, counts.current, { inAfter: MORPH.inAfter.fold })
+    // It morphs when the form changes, from the one showing before.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expanded])
+  const hidden = "pointer-events-none absolute top-0 left-0 opacity-0"
+  return (
+    <div ref={box} data-ease-to={height} className="relative mt-3 -mb-2 transition-[height] ease-in-out" style={{ height, transitionDuration: `${MORPH.ms}ms` }}>
+      {started && (
+        <button
+          ref={counts}
+          type="button"
+          aria-hidden={expanded}
+          tabIndex={expanded ? -1 : 0}
+          aria-expanded={false}
+          aria-label={`${errors} errors and ${warnings} warnings between the crew's setups`}
+          onClick={() => setOpen(true)}
+          className={"group -mx-2 -mt-1.5 flex w-fit pt-1.5 text-sm outline-none " + (expanded ? hidden : "")}
+        >
+          <span className="flex items-center gap-3 rounded-[6px] p-2 group-hover:bg-muted/50 group-focus-visible:bg-muted/50">
+            {errors > 0 && (
+              <span className="flex items-center gap-1.5 text-destructive">
+                <CircleX data-morph="error" className="size-4" />
+                <span data-fade>{errors}</span>
+              </span>
+            )}
+            {warnings > 0 && (
+              <span className="flex items-center gap-1.5 text-warning">
+                <TriangleAlert data-morph="warning" className="size-4" />
+                <span data-fade>{warnings}</span>
+              </span>
+            )}
+            <ChevronDown data-fade className="-ml-1.5 size-4 text-muted-foreground" />
+          </span>
+        </button>
+      )}
+      <div
+        ref={list}
+        role={started ? "button" : undefined}
+        tabIndex={started && expanded ? 0 : undefined}
+        aria-hidden={!expanded}
+        aria-expanded={started ? true : undefined}
+        onClick={started ? fold : undefined}
+        onKeyDown={(e) => {
+          if (!started || (e.key !== "Enter" && e.key !== " ")) return
+          e.preventDefault()
+          fold()
+        }}
+        className={"-mx-2 rounded-[6px] p-2 outline-none " + (started ? "cursor-pointer hover:bg-muted/50 focus-visible:bg-muted/50 " : "") + (expanded ? "" : hidden + " right-0")}
+      >
+        <Differences differences={differences} marked after={started ? <ChevronUp className="ml-1.5 inline size-4 align-[-3px] text-muted-foreground" /> : undefined} />
+      </div>
+    </div>
+  )
+}
+
+// One form of a thing turning into another, as the differences' counts and list do, and the
+// session card's row and the whole card: what's marked to fade in the leaving form fades out, its
+// parts marked to glide that the arriving form also has glide to where it has them, and the
+// arriving form's own marked parts fade up in, a row of a list at a time, or top to bottom. A part
+// marked to fade never takes a gliding part inside it along. The leaving form stays shown over the
+// arriving one until the glide ends, then hides, and the arriving form's parts take over from the
+// gliding ones in the same spot. Opening the differences, the words start as the icons set off;
+// folding them, the counts wait for the icons to near them. It styles the elements directly, and
+// the cleanup it returns undoes it, so a press mid-morph starts the next from where things are.
+const MORPH = { ms: 320, out: 110, in: 180, stagger: 40, perPx: 0.4, inAfter: { open: 90, fold: 200 } }
+// The glide's curve, which a box easing its height around a morph takes too.
+const GLIDE = "cubic-bezier(0.4, 0, 0.2, 1)"
+type Morph = { inAfter: number; ms?: number; fade?: string; glide?: string; cascade?: "rows" | "top" }
+function morph(from: HTMLElement, to: HTMLElement, { inAfter, ms = MORPH.ms, fade = "data-fade", glide = "data-morph", cascade = "rows" }: Morph) {
+  const touched: (HTMLElement | SVGElement)[] = []
+  const set = (e: HTMLElement | SVGElement, s: Record<string, string>) => {
+    Object.assign(e.style, s)
+    touched.push(e)
+  }
+  // The canvas zooms the frames, so a distance on screen is turned back into the box's own pixels.
+  const scale = from.getBoundingClientRect().width / from.offsetWidth || 1
+  const fading = (form: HTMLElement) => [...form.querySelectorAll<HTMLElement>(`[${fade}]`)].filter((e) => !e.querySelector(`[${glide}]`))
+  set(from, { opacity: "1" })
+  fading(from).forEach((e) => set(e, { transition: `opacity ${MORPH.out}ms ease-in`, opacity: "0" }))
+  from.querySelectorAll<HTMLElement | SVGElement>(`[${glide}]`).forEach((part) => {
+    const target = to.querySelector<HTMLElement | SVGElement>(`[${glide}="${part.getAttribute(glide)}"]`)
+    if (!target) return set(part, { transition: `opacity ${MORPH.out}ms ease-in`, opacity: "0" })
+    const a = part.getBoundingClientRect()
+    const b = target.getBoundingClientRect()
+    set(target, { opacity: "0" })
+    set(part, { transition: `transform ${ms}ms ${GLIDE}`, transform: `translate(${(b.left - a.left) / scale}px, ${(b.top - a.top) / scale}px)` })
+  })
+  const top = to.getBoundingClientRect().top
+  const arriving = fading(to).map((e) => {
+    if (cascade === "top") return { e, delay: inAfter + Math.round(((e.getBoundingClientRect().top - top) / scale) * MORPH.perPx) }
+    const row = e.closest("li")
+    return { e, delay: inAfter + (row ? [...row.parentElement!.children].indexOf(row) : 0) * MORPH.stagger }
+  })
+  arriving.forEach(({ e }) => set(e, { transition: "none", opacity: "0", transform: "translateY(4px)" }))
+  void to.offsetHeight
+  arriving.forEach(({ e, delay }) => {
+    Object.assign(e.style, { transition: `opacity ${MORPH.in}ms ease-out ${delay}ms, transform ${MORPH.in}ms ease-out ${delay}ms`, opacity: "1", transform: "none" })
+  })
+  const undo = () => touched.forEach((e) => Object.assign(e.style, { opacity: "", transform: "", transition: "" }))
+  const end = window.setTimeout(undo, Math.max(ms, ...arriving.map(({ delay }) => delay + MORPH.in)))
+  return () => {
+    clearTimeout(end)
+    undo()
+  }
+}
+
+// Whether the frame has painted once: what a frame opens on shows at once, and a change after its
+// first paint eases.
+function usePainted() {
+  const painted = useRef(false)
+  useEffect(() => {
+    const f = requestAnimationFrame(() => (painted.current = true))
+    return () => cancelAnimationFrame(f)
+  }, [])
+  return painted
+}
+
+// The match check's differences, in a section of the session card: an error's icon in red, a
+// warning's in amber, and a note's muted, the difference, and what it can cause, muted. Anything
+// given to go after it ends the last line. Marked, the first icon of each level is one the counts
+// also have, and everything else fades, for a morph between the two.
+function Differences({ differences, after, marked }: { differences: Difference[]; after?: React.ReactNode; marked?: boolean }) {
+  const first = (i: number) => differences.findIndex((d) => d.level === differences[i].level) === i
   return (
     <ul className="flex flex-col gap-2 text-sm">
-      {differences.map((d) => (
+      {differences.map((d, i) => {
+        const mark = marked ? (first(i) ? { "data-morph": d.level } : { "data-fade": "" }) : {}
+        return (
         <li key={d.says} className="flex items-start gap-2">
-          {d.level === "error" ? <CircleX className="mt-0.5 size-4 shrink-0 text-destructive" /> : <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" />}
-          <span>
+          {d.level === "error" ? (
+            <CircleX {...mark} className="mt-0.5 size-4 shrink-0 text-destructive" />
+          ) : d.level === "warning" ? (
+            <TriangleAlert {...mark} className="mt-0.5 size-4 shrink-0 text-warning" />
+          ) : (
+            <Info {...mark} className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          )}
+          <span data-fade={marked ? "" : undefined}>
             {d.says}
-            {d.fix && <span className="text-muted-foreground"> · {d.fix}</span>}
+            {d.note && <span className="text-muted-foreground"> · {d.note}</span>}
+            {i === differences.length - 1 && after}
           </span>
         </li>
-      ))}
+        )
+      })}
     </ul>
   )
 }
@@ -454,26 +729,16 @@ function Differences({ differences }: { differences: Difference[] }) {
 // name takes the rest of the line, cut at its edge, and slides to show its end while the pointer
 // rests on it; the dots between keep at least three; and a description wraps under the name as
 // long as it runs. Rows go by the entry's ID, since two entries can share a name.
-// The button right after the title gives the checklist the page, folding the session card to a
-// row that keeps Ready, as the user's sketch of 2026-10-26 has it, and folds it back. It's sky,
-// the app's color for what can be pressed, and reaches past the title's line without making it
-// taller.
 const LEADER = ".".repeat(80)
-function Checklist({ items, expanded, onExpand }: { items: ChecklistItem[]; expanded: boolean; onExpand: () => void }) {
-  const { Button } = useUI()
+function Checklist({ items }: { items: ChecklistItem[] }) {
   const [done, setDone] = useState<string[]>([])
   const [pointed, setPointed] = useState<string | null>(null)
   const toggle = (id: string) => setDone((d) => (d.includes(id) ? d.filter((n) => n !== id) : [...d, id]))
   return (
     <section className="flex shrink-0 flex-col gap-2">
       <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-0.5">
-          <h3 className="text-[15px] font-semibold">Preflight Checklist</h3>
-          <Button variant="ghost" size="icon-sm" className="-my-1.5 text-primary hover:text-primary" aria-label={expanded ? "Show the whole session card" : "Give the checklist the page"} onClick={onExpand}>
-            {expanded ? <Minimize2 /> : <Maximize2 />}
-          </Button>
-        </div>
-        <p className="text-[13px] text-muted-foreground">Check these before you click Ready, so every cockpit starts in sync.</p>
+        <h3 className="text-base font-semibold">Preflight Checklist</h3>
+        <p className="text-sm text-muted-foreground">Check these before you click Ready, so every cockpit starts in sync.</p>
       </div>
       {/* The rows reach 8px past the text on either side, so their text lines up with the title
           while a hovered row's tint has room around it. */}
@@ -560,8 +825,7 @@ function ChecklistBox({ checked }: { checked: boolean }) {
 const POP = { first: 120, stagger: 70 }
 
 // The session's side of the card, from the moment Host or Join succeeds, in place of the aircraft
-// and Host and Join, under the session's phase, once there is one, which the card heads it with: the
-// invite code, with Copy, every pilot's to share, since it belongs to the session; and Leave, in
+// and Host and Join: the invite code, with Copy, every pilot's to share, since it belongs to the session; and Leave, in
 // the kit's tinted red, since it ends the session for this pilot, asking first once anyone else is
 // in it. Then the crew, each pilot by their figure's head, this pilot first
 // as You. The host is the pilot flying when a session starts, and alone, a row waits for the
@@ -570,14 +834,20 @@ const POP = { first: 120, stagger: 70 }
 // During preflight, each row ends with that pilot's Ready, this pilot's as their button. Every
 // pilot counts but those a ready pilot went without, and a pilot who dropped out is unready and
 // still counts, so the crew waits for them unless someone goes without them; the PF can't be gone
-// without. Once every counted pilot is ready, the countdown runs, and un-readying stops it. A
-// joiner's card says to touch nothing, and the match check's differences have a section of their
-// own. The flight starting, which the card hands up and the phase shows, is as far as these frames
-// go.
+// without. Once every counted pilot is ready, the countdown runs, and un-readying stops it. The
+// match check's differences follow the rows (CrewDifferences). The flight starting, which the card
+// hands up and the phase shows, is as far as these frames go.
 // While the checklist has the page, the card folds to one row for what a pilot working through it
 // watches: every pilot's head, badged ready or out, so they see whom they're waiting on, and their
-// own Ready at the end, with the countdown between once it runs. The code, Leave, Go without, and
+// own Ready at the end, with the countdown's ring before it once it runs. The code, Leave, Go without, and
 // the match check wait for the whole card.
+// The row and the whole card are one card in two forms, so one turns into the other (morph): both
+// stay drawn, one over the other, the one not showing hidden, and as the card's height eases, each
+// head glides between the row and its crew row, and Ready with its ring between the row's end and
+// this pilot's crew row, while the rest fades out, and the arriving form's own parts fade up in,
+// top to bottom. Unfolding, they start as the heads set off; folding, the row's badges wait for the
+// heads to near their places. The glide is longer than the differences', since it travels farther.
+const FOLD = { ms: 380, inAfter: { open: 100, fold: 220 } }
 function SessionHalf({ session, started, folded, onStarted, onLeave }: { session: Session; started: boolean; folded: boolean; onStarted: () => void; onLeave: () => void }) {
   const { Button, CardContent, Separator } = useUI()
   const { joined, crew, preflight } = session
@@ -605,9 +875,16 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
     // It hands up the moment the countdown ends, once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [left])
+  // This pilot's Ready, with the countdown's ring before it, in the whole card and the folded one.
+  const myReady = preflight && (
+    <span data-fold-morph="ready" className="flex items-center gap-2">
+      <CountdownRing left={left} />
+      <ReadyButton ready={ready} settled={preflight.settled} onToggle={() => setReady((r) => !r)} />
+    </span>
+  )
   const endOf = (p: Pilot, you: boolean): React.ReactNode => {
     if (!preflight || started) return undefined
-    if (you) return <ReadyButton ready={ready} settled={preflight.settled} onToggle={() => setReady((r) => !r)} />
+    if (you) return myReady
     if (goneWithout.includes(p.name)) return <span className="text-xs text-muted-foreground">Not counted</span>
     if ((p.at === "lost" || p.at === "crashed") && ready && !p.flying)
       return (
@@ -624,68 +901,77 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
       <Copy />
     </Button>
   )
-  if (folded && preflight)
-    return (
-      <CardContent className="flex items-center gap-4">
-        <div className="flex shrink-0 items-center gap-1.5">
-          {[me, ...crew].map((p, i) => (
-            <StripHead key={p.name} pilot={p} ready={i === 0 ? ready : !!p.ready} />
-          ))}
-        </div>
-        <div className="min-w-0 flex-1">{left !== null && <Countdown left={left} inRow />}</div>
-        <ReadyButton ready={ready} settled={preflight.settled} onToggle={() => setReady((r) => !r)} />
-      </CardContent>
-    )
+  const fullForm = useRef<HTMLDivElement>(null)
+  const rowForm = useRef<HTMLDivElement>(null)
+  const painted = usePainted()
+  useLayoutEffect(() => {
+    if (!painted.current || !fullForm.current || !rowForm.current) return
+    const fold = { ms: FOLD.ms, fade: "data-fold-fade", glide: "data-fold-morph", cascade: "top" } as const
+    return folded ? morph(fullForm.current, rowForm.current, { ...fold, inAfter: FOLD.inAfter.fold }) : morph(rowForm.current, fullForm.current, { ...fold, inAfter: FOLD.inAfter.open })
+    // It morphs when the form changes, from the one showing before.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [folded])
   const leave = (
     <>
       Leave <LogOut data-icon="inline-end" />
     </>
   )
+  const hidden = "pointer-events-none absolute top-0 right-0 left-0 opacity-0"
   return (
-    <>
-      <CardContent className="flex items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <Label>Invite code</Label>
-          <div className="flex items-center gap-1">
-            <span className="font-mono text-2xl font-medium tracking-wider">{code}</span>
-            {copy}
+    <div className="relative">
+      <div ref={fullForm} inert={folded} className={"flex flex-col gap-(--card-spacing) " + (folded ? hidden : "")}>
+        <CardContent data-fold-fade className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <Label>Invite code</Label>
+            <div className="flex items-center gap-1">
+              <span className="font-mono text-2xl font-medium tracking-wider">{code}</span>
+              {copy}
+            </div>
           </div>
-        </div>
-        {crew.length > 0 ? (
-          <ConfirmButton label={leave} question="Leave the session?" go="Leave" onConfirm={onLeave} trigger={{ variant: "destructive", size: "sm" }} className={RED_BUTTON} align="end" />
-        ) : (
-          <Button variant="destructive" size="sm" onClick={onLeave}>
-            {leave}
-          </Button>
-        )}
-      </CardContent>
-      <Separator />
-      <CardContent className="flex flex-col gap-3">
-        {preflight && joined && !started && <TouchNothing checklist={!!preflight.checklist?.length} />}
-        <Label>Crew</Label>
-        <ul className="flex flex-col gap-2">
-          {[me, ...crew].map((p, i) => (
-            <CrewRow key={p.name} pilot={p} pop={turnedIn.current ? 0 : POP.first + i * POP.stagger} end={endOf(p, i === 0)} />
-          ))}
-          {crew.length === 0 && (
-            <li className="flex items-center gap-3 text-sm text-muted-foreground/60">
-              <EmptyHead />
-              Send the invite code for others to join
-            </li>
+          {crew.length > 0 ? (
+            <ConfirmButton label={leave} question="Leave the session?" go="Leave" onConfirm={onLeave} trigger={{ variant: "destructive", size: "sm" }} className={RED_BUTTON} align="end" />
+          ) : (
+            <Button variant="destructive" size="sm" onClick={onLeave}>
+              {leave}
+            </Button>
           )}
-        </ul>
-        {left !== null && <Countdown left={left} />}
-      </CardContent>
-      {preflight && preflight.differences.length > 0 && (
-        <>
-          <Separator />
-          <CardContent className="flex flex-col gap-3">
-            <Label>Match check</Label>
-            <Differences differences={preflight.differences} />
+        </CardContent>
+        <Separator data-fold-fade />
+        <CardContent className="flex flex-col gap-3">
+          <Label data-fold-fade>Crew</Label>
+          <div className="flex flex-col">
+            <ul className="flex flex-col gap-2">
+              {[me, ...crew].map((p, i) => (
+                <CrewRow key={p.name} pilot={p} pop={turnedIn.current ? 0 : POP.first + i * POP.stagger} end={endOf(p, i === 0)} />
+              ))}
+              {crew.length === 0 && (
+                <li data-fold-fade className="flex items-center gap-3 text-sm text-muted-foreground/60">
+                  <EmptyHead />
+                  Send the invite code for others to join
+                </li>
+              )}
+            </ul>
+            {preflight && preflight.differences.length > 0 && (
+              <div data-fold-fade>
+                <CrewDifferences differences={preflight.differences} started={started} />
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </div>
+      {preflight && (
+        <div ref={rowForm} inert={!folded} className={folded ? "" : hidden}>
+          <CardContent className="flex items-center gap-4">
+            <div className="flex shrink-0 items-center gap-1.5">
+              {[me, ...crew].map((p, i) => (
+                <StripHead key={p.name} pilot={p} ready={i === 0 ? ready : !!p.ready} />
+              ))}
+            </div>
+            <span className="ml-auto">{myReady}</span>
           </CardContent>
-        </>
+        </div>
       )}
-    </>
+    </div>
   )
 }
 
@@ -700,10 +986,10 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
 // a refusal, or the line for an attempt taking long, opens under the control that asked: Host, or
 // the code. Once Host or Join succeeds, the card turns to the session, the one hosted or the one
 // joined, which has no use for the aircraft, and Leave turns it back; a frame can open on a session,
-// and have a crewmate join it after joinsAfter milliseconds. In preflight, the pilot's checklist
-// sits under the card until the flight starts, and can take the page, folding the card to a row; a
-// frame can open with it taken.
-function StartCard({ aircraft, servers = "answering", play, session, joinsAfter, checklistExpanded }: { aircraft: Aircraft; servers?: Servers; play?: Action; session?: SessionKey; joinsAfter?: number; checklistExpanded?: boolean }) {
+// and move on to another a while later, such as a crewmate joining, or preflight starting. In
+// preflight, the pilot's checklist sits under the card until the flight starts, and can take the
+// page, folding the card to a row; a frame can open with it taken.
+function StartCard({ aircraft, servers = "answering", play, session, next, checklistExpanded }: { aircraft: Aircraft; servers?: Servers; play?: Action; session?: SessionKey; next?: NextSession; checklistExpanded?: boolean }) {
   const { Badge, Button, Card, CardContent, Separator, Spinner, InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } = useUI()
   const [status, setStatus] = useState<Status>({ kind: "idle" })
   const [code, setCode] = useState("")
@@ -723,7 +1009,7 @@ function StartCard({ aircraft, servers = "answering", play, session, joinsAfter,
   useEffect(() => stop, [])
   const later = (ms: number, f: () => void) => timers.current.push(window.setTimeout(f, ms))
   useEffect(() => {
-    if (joinsAfter) later(joinsAfter, () => setShown("crewmate"))
+    if (next) later(next.after, () => setShown(next.session))
     // It plays once, from the frame's opening.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -740,14 +1026,8 @@ function StartCard({ aircraft, servers = "answering", play, session, joinsAfter,
   const checklist = half === "session" && !started ? SESSIONS[shown].preflight?.checklist : undefined
   const [expanded, setExpanded] = useState(!!checklistExpanded)
   const folded = expanded && !!checklist
-  // A session card that ends on the match check ends on a line of text, whose line box leaves room
-  // under the letters, so the card's turning part reaches 4px into its bottom padding to look as far
-  // from the edge as the icons are from the side. The trim goes on the turning part, not on what's
-  // inside it, since the turning part clips to its contents' height.
-  const endsOnText = half === "session" && !folded && !!SESSIONS[shown].preflight?.differences.length
-  // The session's phase sits above the card, outside the part that turns, so it stays put through a
-  // turn, and through the card folding to its row.
   const phase = half === "session" ? phaseOf(SESSIONS[shown], started) : undefined
+  useShowPhase(phase)
   const [turning, setTurning] = useState<"out" | "in" | null>(null)
   const turnTo = (next: "start" | "session") => {
     setTurning("out")
@@ -760,8 +1040,30 @@ function StartCard({ aircraft, servers = "answering", play, session, joinsAfter,
   const halfBox = useRef<HTMLDivElement>(null)
   const halfInner = useRef<HTMLDivElement>(null)
   const [halfHeight, setHalfHeight] = useState<number>()
+  // While the card folds or unfolds, its height eases on the glide's curve and for as long, so a
+  // head or Ready gliding between its row and the crew moves with the card's edge and is never cut
+  // off by it (SessionHalf). It's set in the same commit as the height it eases to.
+  const [folding, setFolding] = useState(false)
+  const wasFolded = useRef(folded)
   useLayoutEffect(() => {
-    const h = turning === "out" ? halfBox.current?.offsetHeight : turning === "in" || half === "session" ? halfInner.current?.offsetHeight : undefined
+    if (wasFolded.current === folded) return
+    wasFolded.current = folded
+    setFolding(true)
+    const t = window.setTimeout(() => setFolding(false), FOLD.ms)
+    return () => clearTimeout(t)
+  }, [folded])
+  // A room in the session that starts to ease, such as the countdown's, re-renders only itself, so
+  // it says so, and the card measures again, to the height the room is easing to, and eases with it.
+  const [, remeasure] = useState(0)
+  useEffect(() => {
+    const box = halfBox.current
+    const again = () => remeasure((n) => n + 1)
+    box?.addEventListener(EASE_EVENT, again)
+    return () => box?.removeEventListener(EASE_EVENT, again)
+  }, [])
+  useLayoutEffect(() => {
+    const inner = halfInner.current
+    const h = turning === "out" ? halfBox.current?.offsetHeight : (turning === "in" || half === "session") && inner ? inner.offsetHeight + stillEasing(inner) : undefined
     if (h !== halfHeight) setHalfHeight(h)
   })
   // Leave turns back to Host and Join, the code cleared; leaving needs no answer from our servers.
@@ -843,11 +1145,25 @@ function StartCard({ aircraft, servers = "answering", play, session, joinsAfter,
   // Before a session, the card never shrinks, so the notes below are what gives way on a full page.
   // In a session the page ends at the card, with the PF's checklist under it in preflight, and the
   // two can run past the page, so they scroll as one, out through the page's side and bottom padding
-  // to the window's edge and the tab bar, with fades and dragging as the aircraft picker has. The
-  // card's edge is a ring drawn outside its box, which the scroller would clip at the top, so the
-  // scroller starts 1px higher and pads that 1px back.
+  // to the window's edge and the tab bar, with dragging and no scrollbar, as the aircraft picker
+  // has. The card stays pinned at the top while the checklist scrolls under it, so Ready and the
+  // countdown never scroll away; it carries the page's background across the page's side
+  // padding, so nothing under it shows past its edges, and a fade under it once anything has gone
+  // under. A fade at the bottom says there's more below. The card's edge is a ring drawn outside
+  // its box, which the scroller would clip at the top, so the scroller starts 1px higher and pads
+  // that 1px back.
+  // Pinned whole, the card can leave the checklist a row's room, so it folds to its row as soon as
+  // the checklist scrolls, and only the circle on its bottom edge unfolds it: folding mostly lets the
+  // list fit, which takes the page back to its top, so unfolding there would fold and unfold in turn.
+  // The circle shows while the page can scroll, and while the card is folded, so a card folded onto a
+  // list that then fits can still unfold.
   const scroller = useScroller()
   const scrolls = half === "session"
+  const canFold = !!checklist && (folded || scroller.above || scroller.below)
+  const onScroll = () => {
+    scroller.onScroll()
+    if ((scroller.ref.current?.scrollTop ?? 0) > 2 && checklist && !expanded) setExpanded(true)
+  }
   const fade = (to: "top" | "bottom", shown: boolean): React.CSSProperties => ({ background: `linear-gradient(to ${to === "top" ? "bottom" : "top"}, var(--background), transparent)`, opacity: shown ? 1 : 0 })
   return (
     // The card's padding matches the page's 20px, where Luma's default card spacing is 24px.
@@ -857,23 +1173,29 @@ function StartCard({ aircraft, servers = "answering", play, session, joinsAfter,
     <div className={"relative flex flex-col " + (scrolls ? "-mx-5 -mt-px -mb-5 min-h-0" : "shrink-0")}>
     <div
       ref={scroller.ref}
-      onScroll={scroller.onScroll}
+      onScroll={onScroll}
       onMouseDown={scrolls ? scroller.onMouseDown : undefined}
       className={
         "flex flex-col gap-5 " +
-        (scrolls ? "min-h-0 overflow-y-auto px-5 pt-px pb-5 select-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-foreground/20 [&::-webkit-scrollbar-track]:bg-transparent " + scroller.cursor : "")
+        (scrolls ? "min-h-0 overflow-y-auto px-5 pt-px pb-5 select-none " + NO_SCROLLBAR + " " + scroller.cursor : "")
       }
     >
-    {/* The phase sits 8px above the card, closer than the page's gap between the card and what
-        follows, so it reads as the card's. */}
-    <div className="flex shrink-0 flex-col gap-2">
-    {phase && <PhaseLip phase={phase} />}
-    <Card className="relative z-10 shrink-0 [--card-spacing:--spacing(5)]">
-      <div ref={halfBox} className={"overflow-hidden transition-[height] ease-out " + (endsOnText ? "-mb-1" : "")} style={{ height: halfHeight, transitionDuration: `${HALF_EASE}ms` }}>
+    <div className={"flex shrink-0 flex-col " + (scrolls ? "pin-top z-20 -mx-5 bg-background px-5" : "")}>
+    {/* Only once something has gone under the card: hanging below it, inside the part that
+        scrolls, the fade would otherwise make a short page scroll by its overhang. */}
+    {scrolls && scroller.above && <div className="pointer-events-none absolute top-full right-0 left-0 h-6" style={fade("top", true)} />}
+    {/* The card's bottom padding sits inside the part that turns, so something reaching into it, as
+        the differences' folded row does, isn't cut off by the part's own edge. */}
+    <Card className="relative z-10 shrink-0 [--card-spacing:--spacing(5)]" style={{ paddingBottom: 0 }}>
+      <div
+        ref={halfBox}
+        className="overflow-hidden transition-[height] ease-out"
+        style={{ height: halfHeight, transitionDuration: `${folding ? FOLD.ms : HALF_EASE}ms`, transitionTimingFunction: folding ? GLIDE : undefined }}
+      >
         <div
           ref={halfInner}
           key={half}
-          className={"flex flex-col gap-(--card-spacing) " + (turning === "in" ? "animate-in fade-in slide-in-from-bottom-[6px]" : "")}
+          className={"flex flex-col gap-(--card-spacing) pb-(--card-spacing) " + (turning === "in" ? "animate-in fade-in slide-in-from-bottom-[6px]" : "")}
           style={{ animationDuration: `${TURN.in}ms`, opacity: turning === "out" ? 0 : 1, transition: `opacity ${TURN.out}ms ease-out` }}
         >
           {half === "session" ? (
@@ -904,7 +1226,7 @@ function StartCard({ aircraft, servers = "answering", play, session, joinsAfter,
                     "Host a session"
                   )}
                 </Button>
-                <UnderSlot>{under("host")}</UnderSlot>
+                <EaseRoom>{under("host")}</EaseRoom>
               </div>
               <div className="flex items-center gap-3">
                 <Separator className="flex-1" />
@@ -940,7 +1262,7 @@ function StartCard({ aircraft, servers = "answering", play, session, joinsAfter,
                     {status.kind === "busy" && status.on === "join" ? <Spinner /> : status.kind === "done" && status.on === "join" ? <Check /> : "Join"}
                   </Button>
                 </div>
-                <UnderSlot>{under("join")}</UnderSlot>
+                <EaseRoom>{under("join")}</EaseRoom>
               </div>
             </CardContent>
             </>
@@ -948,15 +1270,39 @@ function StartCard({ aircraft, servers = "answering", play, session, joinsAfter,
         </div>
       </div>
     </Card>
-    </div>
-    {checklist && <Checklist items={checklist} expanded={folded} onExpand={() => setExpanded((e) => !e)} />}
-    </div>
-    {scrolls && (
-      <>
-        <div className="pointer-events-none absolute top-0 right-0 left-0 z-20 h-6 transition-opacity duration-200" style={fade("top", scroller.above)} />
-        <div className="pointer-events-none absolute right-0 bottom-0 left-0 z-20 h-8 transition-opacity duration-200" style={fade("bottom", scroller.below)} />
-      </>
+    {/* Centered on the card's bottom edge by its offsets, without the translate property, which
+        Coherent GT drops (record/areas/architecture/coherent-gt.md). It's sky, the app's color for
+        what can be pressed, on the card's own color, its fill held on hover. Its edge is drawn
+        inside it, since a translucent ring outside would tint the card's half and the page's half
+        differently. In dark, the card's 10% ring over the page comes out the same gray as 5% over
+        the card's lighter fill, so the circle's edge is 5% in both themes. */}
+    {canFold && (
+      <Button
+        variant="outline"
+        size="icon-sm"
+        className="absolute -bottom-3.5 left-1/2 z-30 -ml-3.5 size-7 rounded-full border-0 bg-card text-primary inset-ring-1 inset-ring-foreground/5 hover:bg-card hover:text-primary dark:bg-card dark:hover:bg-card"
+        aria-label={folded ? "Show the whole session card" : "Fold the session card"}
+        onClick={() => setExpanded((e) => !e)}
+      >
+        {/* One chevron, turning as the card folds and unfolds. */}
+        <ChevronDown style={{ transform: folded ? "none" : "rotate(180deg)", transition: `transform ${FOLD.ms}ms ${GLIDE}` }} />
+      </Button>
     )}
+    </div>
+    {/* For every pilot, what preflight's rule asks for, between the card and the checklist, so it
+        shows whether or not their profile gives them one (record/areas/product/03-v1-scope.md,
+        Preflight, Rules): catch-up sets only what the profile holds, so a display a PM pages through
+        now keeps that page, and the PF's counted controls count from where the aircraft starts
+        them. */}
+    {half === "session" && !started && SESSIONS[shown].preflight && (
+      <p className="flex shrink-0 items-start gap-2 text-sm text-info">
+        <Hand className="mt-0.5 size-4 shrink-0" />
+        Avoid unnecessary cockpit interactions until the flight starts, since some might not sync.
+      </p>
+    )}
+    {checklist && <Checklist items={checklist} />}
+    </div>
+    {scrolls && <div className="pointer-events-none absolute right-0 bottom-0 left-0 z-20 h-8 transition-opacity duration-200" style={fade("bottom", scroller.below)} />}
     </div>
   )
 }
@@ -1258,21 +1604,9 @@ function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
       </h2>
       {/* The 8px between the title and the notes, and the 16px under them, are the scroller's own
           padding, so they scroll away with the notes: the fades start right at the underline and
-          the slip's bottom edge, and the scrollbar's track keeps to the text between. The scroller reaches
-          12px into the slip's 20px right padding, so its 6px scrollbar sits 8px from the slip's
-          edge, with the same 8px between it and the text. The scrollbar is
-          styled through ::-webkit-scrollbar, which Coherent GT keeps, where it drops
-          scrollbar-color and scrollbar-width. */}
-      <div className="relative -mr-3 flex min-h-0 flex-col">
-        <div
-          ref={ref}
-          onScroll={onScroll}
-          onMouseDown={onMouseDown}
-          className={
-            "min-h-0 overflow-y-auto pt-2 pr-2 pb-4 select-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[rgb(28_27_26/0.3)] [&::-webkit-scrollbar-track]:mt-2 [&::-webkit-scrollbar-track]:mb-4 [&::-webkit-scrollbar-track]:bg-transparent " +
-            cursor
-          }
-        >
+          the slip's bottom edge. */}
+      <div className="relative flex min-h-0 flex-col">
+        <div ref={ref} onScroll={onScroll} onMouseDown={onMouseDown} className={"min-h-0 overflow-y-auto pt-2 pb-4 select-none " + NO_SCROLLBAR + " " + cursor}>
           <p>{notes.lead}</p>
           <ul>
             {notes.items.map((note) => (
@@ -1286,9 +1620,8 @@ function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
               line out. */}
           {notes.authors && <p className="mt-1 text-right">— {notes.authors}</p>}
         </div>
-        {/* The fades stop short of the scrollbar and its gap. */}
-        <div className="pointer-events-none absolute top-0 right-3.5 left-0 h-12 transition-opacity duration-200" style={fade("top", above)} />
-        <div className="pointer-events-none absolute right-3.5 bottom-0 left-0 h-12 transition-opacity duration-200" style={fade("bottom", below)} />
+        <div className="pointer-events-none absolute top-0 right-0 left-0 h-12 transition-opacity duration-200" style={fade("top", above)} />
+        <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-12 transition-opacity duration-200" style={fade("bottom", below)} />
       </div>
     </section>
   )
@@ -1331,26 +1664,67 @@ function SlowLine({ text, onCancel }: { text: string; onCancel: (from: HTMLEleme
   )
 }
 
-// The room under a control for its refusal or slow line, easing open to its height and shut to
-// none, still showing what it had while it shuts. Coherent GT has no ResizeObserver, so the height
-// is measured after every render, as the guide's is.
-function UnderSlot({ children }: { children?: React.ReactNode }) {
+// A room that eases open for what comes and goes on a card: under a control for its refusal or slow
+// line. It keeps 12px from what it follows while open. It opens nearly empty, easing to its content's
+// height, and the content fades in as it finishes; to shut, the content fades out first, still
+// showing what it had, and the room eases shut as it goes, so the room's edge doesn't cut across
+// what it holds. The two overlap, since one after the other felt sluggish: the content starts when
+// the room's ease-out has it about 80% open. Coherent GT has no ResizeObserver, so the height is
+// measured after every render, as the guide's is, and an open room follows its content's height.
+// A box around it that sets its own height from what it holds, as the session card's turning part
+// does, would read the room's height mid-ease, so the room marks the height it's easing to and
+// says when that changes (stillEasing).
+// The room eases as long as the session card does (HALF_EASE), so a card growing around it keeps
+// pace.
+const ROOM = { ease: HALF_EASE, showAt: 160, in: 180, out: 120, shutAt: 80 }
+function EaseRoom({ children }: { children?: React.ReactNode }) {
+  const has = !!children
   const last = useRef(children)
   if (children) last.current = children
+  const outer = useRef<HTMLDivElement>(null)
   const inner = useRef<HTMLDivElement>(null)
-  const [height, setHeight] = useState(0)
+  // A room that has its content from the start, as the differences' list in preflight, is open at
+  // once: its own height first, unmarked for stillEasing, which the measure below then pins, the
+  // same, so nothing eases.
+  const [height, setHeight] = useState<number | undefined>(has ? undefined : 0)
+  const [shown, setShown] = useState(has)
   useLayoutEffect(() => {
-    const measured = children ? (inner.current?.offsetHeight ?? 0) : 0
+    if (!has) return
+    const measured = inner.current?.offsetHeight ?? 0
     if (measured !== height) setHeight(measured)
   })
+  useEffect(() => {
+    if (has) {
+      const t = window.setTimeout(() => setShown(true), ROOM.showAt)
+      return () => clearTimeout(t)
+    }
+    setShown(false)
+    const t = window.setTimeout(() => setHeight(0), ROOM.shutAt)
+    return () => clearTimeout(t)
+  }, [has])
+  useLayoutEffect(() => {
+    outer.current?.dispatchEvent(new CustomEvent(EASE_EVENT, { bubbles: true }))
+  }, [height])
   return (
-    <div className="overflow-hidden transition-[height] duration-300 ease-out" style={{ height }}>
+    <div ref={outer} data-ease-to={height} className="overflow-hidden transition-[height] ease-out" style={{ height, transitionDuration: `${ROOM.ease}ms` }}>
       <div ref={inner} className="pt-3">
-        {last.current}
+        <div
+          style={{
+            opacity: shown ? 1 : 0,
+            transform: shown ? "none" : "scale(0.97)",
+            transition: shown ? `opacity ${ROOM.in}ms ease-out, transform ${ROOM.in}ms ease-out` : `opacity ${ROOM.out}ms ease-in, transform ${ROOM.out}ms ease-in`,
+          }}
+        >
+          {last.current}
+        </div>
       </div>
     </div>
   )
 }
+const EASE_EVENT = "ease-to"
+// How much the rooms easing inside a box have still to grow, or to shrink where it's less than
+// none, so the box can set the height it will have rather than the one it has mid-ease.
+const stillEasing = (box: HTMLElement) => [...box.querySelectorAll<HTMLElement>("[data-ease-to]")].reduce((d, e) => d + Number(e.dataset.easeTo) - e.offsetHeight, 0)
 
 // A supported aircraft whose profile has no notes leaves the page's rest to the pilot's figure,
 // standing on the right, waiting for them to host; the guide and the start card's own words say
@@ -1372,7 +1746,7 @@ function NoNotes() {
 // The start card for the loaded aircraft, and under it the page's rest; a frame's servers and play
 // go to the card. A loaded aircraft with a maturity has a profile. The header shows what a frame
 // says of our servers, the firewall, and an update, and a frame can open it.
-function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, session, joinsAfter, checklistExpanded, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; joinsAfter?: number; checklistExpanded?: boolean; children: React.ReactNode }) {
+function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, session, next, checklistExpanded, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; next?: NextSession; checklistExpanded?: boolean; children: React.ReactNode }) {
   return (
     <AppFrame
       theme={theme}
@@ -1383,7 +1757,7 @@ function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, se
     >
       {/* None on top, since the header leaves as much room under its pill as above it. */}
       <div className="flex min-h-0 flex-1 flex-col gap-6 p-5 pt-0" data-home-page>
-        <StartCard aircraft={aircraft} servers={servers} play={play} session={session} joinsAfter={joinsAfter} checklistExpanded={checklistExpanded} />
+        <StartCard aircraft={aircraft} servers={servers} play={play} session={session} next={next} checklistExpanded={checklistExpanded} />
         {children}
       </div>
     </AppFrame>
@@ -1458,11 +1832,11 @@ export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck }: { theme: Th
 // hosting or joining by itself, what the header shows and whether it opens out, how the link to
 // the service stands, and whether it opens on a session, which one, with whom, whether a crewmate
 // joins it a while later, and whether the checklist has the page.
-export function HomeLaterFrame({ theme, aircraft, notes, servers, play, header, headerOpen, core, session, joinsAfter, checklistExpanded }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; joinsAfter?: number; checklistExpanded?: boolean }) {
+export function HomeLaterFrame({ theme, aircraft, notes, servers, play, header, headerOpen, core, session, next, checklistExpanded }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; next?: NextSession; checklistExpanded?: boolean }) {
   const { loaded, context } = useLoaded(aircraft)
   return (
     <AircraftContext.Provider value={context}>
-      <HomePage theme={theme} aircraft={loaded} servers={servers} play={play} header={header} headerOpen={headerOpen} core={core} session={session} joinsAfter={joinsAfter} checklistExpanded={checklistExpanded}>
+      <HomePage theme={theme} aircraft={loaded} servers={servers} play={play} header={header} headerOpen={headerOpen} core={core} session={session} next={next} checklistExpanded={checklistExpanded}>
         {/* A session's page ends at the card: the authors' notes are for before it (user,
             2026-10-29), and the figure leaps off the page when a session starts. */}
         {session ? null : !loaded.maturity ? (
@@ -1540,6 +1914,20 @@ export function CrewmateStatesFrame({ theme }: { theme: Theme }) {
             <ul>
               <CrewRow pilot={{ ...JAMES, at }} />
             </ul>
+          </div>
+        ))}
+      </SessionSheet>
+    </AppFrame>
+  )
+}
+export function HeadsUpFrame({ theme }: { theme: Theme }) {
+  return (
+    <AppFrame theme={theme} header={false} tabs={false}>
+      <SessionSheet>
+        {HEADS_UP_CASES.map((c) => (
+          <div key={c.when} className="flex flex-col gap-2">
+            <Label>{c.when}</Label>
+            <Differences differences={c.items} />
           </div>
         ))}
       </SessionSheet>

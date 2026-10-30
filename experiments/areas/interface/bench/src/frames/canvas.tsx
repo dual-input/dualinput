@@ -1,9 +1,10 @@
 // A Figma-like canvas for the EFB app's frames: sections of frames on a board that pans and
 // zooms, with a layers list that jumps to a frame. The wheel pans, Ctrl or Cmd with the wheel
-// zooms at the pointer, and dragging the empty board pans. The frames draw in the style bench's
-// theme as it was last saved, so a change made there shows here on reload.
+// zooms at the pointer, dragging the empty board pans, and double-clicking it zooms to 100% there.
+// The layers list hides and shows with its button or Ctrl+\, as Figma's panels do. The frames draw
+// in the style bench's theme as it was last saved, so a change made there shows here on reload.
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
-import { Frame, LayoutGrid, Minus, Plus, Scan } from "lucide-react"
+import { Frame, LayoutGrid, Minus, PanelLeftClose, PanelLeftOpen, Plus, Scan } from "lucide-react"
 
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { UI } from "@/bench/ui"
@@ -11,7 +12,7 @@ import { DEFAULT_THEME, themeLabel, themeVars, type Theme } from "@/bench/theme"
 import { AppFrame, EFB, EveryIssueFrame } from "./shell"
 import { PreflightFrame } from "./preflight"
 import { SetupFlowFrame } from "./setup-check"
-import { CrewmateStatesFrame, HomeFirstTimeFrame, HomeLaterFrame, ReconnectingFrame, RefusalsFrame, WaysFrame, type Action } from "./home"
+import { CrewmateStatesFrame, HeadsUpFrame, HomeFirstTimeFrame, HomeLaterFrame, ReconnectingFrame, RefusalsFrame, WaysFrame, type Action } from "./home"
 import { AircraftPickerFrame } from "./aircraft"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
@@ -22,8 +23,8 @@ const PLAYS: { play: Action; label: string }[] = [
   { play: "host", label: "Play hosting" },
   { play: "join", label: "Play joining" },
 ]
-// How long after its frame opens the crewmate joins, in milliseconds: long enough to take in the
-// card alone first.
+// How long after its frame opens the crewmate joins, or preflight starts, in milliseconds: long
+// enough to take in the card as it was first.
 const CREWMATE_JOINS_AFTER = 2500
 // A section holds one run of the app, from where it starts to what follows on from it, so a run
 // that continues another joins it rather than taking a section of its own. A frame's name says
@@ -65,25 +66,28 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
   // in a flight on the ground. Before preflight: hosted, alone, as a crewmate joins, and once one
   // has, with a sheet of where a crewmate can be; joined, with a sheet of a joiner's ways to the
   // pilot flying; and, for Later, a crew bigger than v1's two. Each opens with its heads popping in,
-  // as the card turning to it does. In preflight, on the host's side: alone, with the crewmate
+  // as the card turning to it does. Then preflight starting, as the host loads a flight; in
+  // preflight, on the host's side: alone, with the crewmate
   // loading, with them in the flight and ready, with the checklist given the page, while the host's
-  // aircraft settles, with the crewmate dropped out, and counting down; then on the joiner's side,
+  // aircraft settles, with a sheet of every match check message, with the crewmate dropped out, and counting down; then on the joiner's side,
   // and with the joiner's checklist given the page.
   {
     name: "Session",
     frames: [
       { name: "Hosted, alone", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="alone" /> },
-      { name: "A crewmate joins", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="alone" joinsAfter={CREWMATE_JOINS_AFTER} /> },
+      { name: "A crewmate joins", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="alone" next={{ after: CREWMATE_JOINS_AFTER, session: "crewmate" }} /> },
       { name: "Hosted, a crewmate joined", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="crewmate" /> },
       { name: "Every crewmate state", draw: (t) => <CrewmateStatesFrame theme={t} /> },
       { name: "Joined", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="joined" /> },
       { name: "Every way to the pilot flying", draw: (t) => <WaysFrame theme={t} /> },
       { name: "Later: a bigger crew", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="bigger-crew" /> },
+      { name: "Preflight starts", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="crewmate" next={{ after: CREWMATE_JOINS_AFTER, session: "preflight-loading" }} /> },
       { name: "Preflight, host alone", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-alone" /> },
       { name: "Preflight, crewmate loading", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-loading" /> },
       { name: "Preflight, crewmate ready", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-crew" /> },
       { name: "Preflight, checklist expanded", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-crew" checklistExpanded /> },
       { name: "Preflight, aircraft settling", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-settling" /> },
+      { name: "Every match check message", tall: true, draw: (t) => <HeadsUpFrame theme={t} /> },
       { name: "Preflight, crewmate dropped out", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-dropped" /> },
       { name: "Preflight, countdown", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-countdown" /> },
       { name: "Preflight, joiner", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-joined" /> },
@@ -131,12 +135,40 @@ function savedTheme(): Theme {
   }
 }
 
+// The canvas keeps where the board was panned and zoomed to, and whether the layers list shows, in
+// this browser too, so a reload opens where it was rather than fitting every frame again.
+type View = { x: number; y: number; z: number }
+const VIEW_KEY = "bench.canvas.view"
+const LAYERS_KEY = "bench.canvas.layers"
+function stored<T>(key: string, valid: (v: unknown) => v is T): T | undefined {
+  try {
+    const v: unknown = JSON.parse(localStorage.getItem(key) ?? "null")
+    return valid(v) ? v : undefined
+  } catch {
+    return undefined
+  }
+}
+function store(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // A browser that won't store it opens fitted, with the list hidden, next time.
+  }
+}
+const isView = (v: unknown): v is View => !!v && typeof v === "object" && ["x", "y", "z"].every((k) => Number.isFinite((v as Record<string, unknown>)[k])) && (v as View).z > 0
+const isBoolean = (v: unknown): v is boolean => typeof v === "boolean"
+// The layers list's width, w-60, which the board's place shifts by as it hides or shows.
+const LAYERS_WIDTH = 240
+
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 
-// A frame's content, drawn again only when its theme or what it plays changes. The canvas renders
-// on every step of a pan or zoom, and drawing every frame again with it took 12ms a step on the
-// development PC with 20 frames, a third of a 165Hz display's frame rate.
-const FrameBody = memo(function FrameBody({ entry, theme, play }: { entry: FrameEntry; theme: Theme; play?: Action }) {
+// A frame's content, drawn again only when its theme or what it plays changes, or the zoom the
+// board is laid out at. The canvas renders on every step of a pan or zoom, and drawing every frame
+// again with it took 12ms a step on the development PC with 20 frames, a third of a 165Hz display's
+// frame rate. Once the zoom rests, though, CSS zoom rounds the text's lines afresh, and a box that
+// measured its contents after a render, as the session card's turning part does, would keep the
+// height from the old zoom, cutting off its last 3px or leaving a gap under it.
+const FrameBody = memo(function FrameBody({ entry, theme, play }: { entry: FrameEntry; theme: Theme; play?: Action; zoom: number }) {
   return <>{entry.draw(theme, play)}</>
 })
 
@@ -151,7 +183,29 @@ export function Canvas() {
   const board = useRef<HTMLDivElement>(null)
   const world = useRef<HTMLDivElement>(null)
   const frames = useRef(new Map<string, HTMLDivElement>())
-  const [view, setView] = useState({ x: 0, y: 0, z: 0.5 })
+  const [savedView] = useState(() => stored(VIEW_KEY, isView))
+  const [view, setView] = useState<View>(savedView ?? { x: 0, y: 0, z: 0.5 })
+  useEffect(() => {
+    const t = window.setTimeout(() => store(VIEW_KEY, view), SETTLE)
+    return () => clearTimeout(t)
+  }, [view])
+  const [layers, setLayers] = useState(() => stored(LAYERS_KEY, isBoolean) ?? false)
+  // The frames stay where they are on screen as the list hides or shows beside the board.
+  const toggleLayers = useCallback(() => {
+    setLayers(!layers)
+    setView((v) => ({ ...v, x: v.x + (layers ? LAYERS_WIDTH : -LAYERS_WIDTH) }))
+  }, [layers])
+  useEffect(() => store(LAYERS_KEY, layers), [layers])
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "\\") {
+        e.preventDefault()
+        toggleLayers()
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [toggleLayers])
   // The zoom the board is laid out at, which follows the view's once it rests.
   const [laidOut, setLaidOut] = useState(view.z)
   useEffect(() => {
@@ -198,8 +252,10 @@ export function Canvas() {
     })
   }, [])
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useLayoutEffect(() => fit(world.current), [])
+  useLayoutEffect(() => {
+    if (!savedView) fit(world.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     const b = board.current
@@ -231,11 +287,14 @@ export function Canvas() {
   return (
     <TooltipProvider>
       <div className="fixed inset-0 flex bg-[#1b1b1b] font-sans text-neutral-200">
-        <aside className="flex w-60 shrink-0 flex-col border-r border-white/10 bg-[#232323]">
-          <div className="flex h-11 items-center gap-2 border-b border-white/10 px-4">
+        <aside className={"w-60 shrink-0 flex-col border-r border-white/10 bg-[#232323] " + (layers ? "flex" : "hidden")}>
+          <div className="flex h-11 items-center gap-2 border-b border-white/10 pr-2 pl-4">
             <LayoutGrid className="size-4 text-neutral-400" />
             <span className="text-[13px] font-medium">EFB app</span>
             <span className="text-[13px] text-neutral-500">/ UI kit</span>
+            <button className="ml-auto flex size-7 items-center justify-center rounded-md text-neutral-400 hover:bg-white/10 hover:text-neutral-200" title="Hide layers (Ctrl+\)" onClick={toggleLayers}>
+              <PanelLeftClose className="size-4" />
+            </button>
           </div>
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-2 pt-3">
             <span className="px-2 text-[11px] font-medium tracking-wider text-neutral-500 uppercase">Layers</span>
@@ -282,6 +341,11 @@ export function Canvas() {
               setView((v) => ({ ...v, x: v.x + dx, y: v.y + dy }))
             }}
             onPointerUp={() => (drag.current = null)}
+            onDoubleClick={(e) => {
+              if (!e.currentTarget.contains(e.target as Node) || (e.target as HTMLElement).closest("[data-frame]")) return
+              const box = e.currentTarget.getBoundingClientRect()
+              zoomAt(1 / view.z, e.clientX - box.left, e.clientY - box.top)
+            }}
           >
             {/* The board zooms with CSS zoom, which lays the frames out again at the new size, so
                 their text stays sharp where a scale transform would blur it; the transform carries
@@ -321,7 +385,7 @@ export function Canvas() {
                               ))}
                           </span>
                           <div key={runs[idOf(s, f)] ?? 0}>
-                            <FrameBody entry={f} theme={theme} play={playing[idOf(s, f)]} />
+                            <FrameBody entry={f} theme={theme} play={playing[idOf(s, f)]} zoom={laidOut} />
                           </div>
                           {f.tall && (
                             <div className="pointer-events-none absolute inset-x-0 border-t border-dashed border-sky-400/60" style={{ top: EFB.height }}>
@@ -339,6 +403,11 @@ export function Canvas() {
             </div>
           </div>
 
+          {!layers && (
+            <button className="absolute top-4 left-4 flex size-9 items-center justify-center rounded-lg border border-white/10 bg-[#2a2a2a] text-neutral-400 shadow-lg hover:text-neutral-200" title="Show layers (Ctrl+\)" onClick={toggleLayers}>
+              <PanelLeftOpen className="size-4" />
+            </button>
+          )}
           <div className="absolute right-4 bottom-4 flex items-center gap-0.5 rounded-lg border border-white/10 bg-[#2a2a2a] p-1 text-[12px] shadow-lg">
             <button className="flex size-7 items-center justify-center rounded-md hover:bg-white/10" title="Zoom out" onClick={() => zoomAt(1 / 1.25)}>
               <Minus className="size-3.5" />

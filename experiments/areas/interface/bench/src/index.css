@@ -106,15 +106,25 @@
   100% { transform: scale(1); }
 }
 
-/* The session card's phase lip: a new phase uncovers the old from left to right. Coherent GT takes
-   clip-path's shapes only -webkit- prefixed, so the frames give both. */
-@keyframes lip-wipe {
-  from { -webkit-clip-path: inset(0 100% 0 0); clip-path: inset(0 100% 0 0); }
-  to { -webkit-clip-path: inset(0 0 0 0); clip-path: inset(0 0 0 0); }
+/* Pins an element to the top of the box that scrolls it. Coherent GT parses sticky only as
+   -webkit-sticky (record/areas/architecture/coherent-gt.md), so both are given, the one it parses
+   last; whether it sticks there is unmeasured. */
+.pin-top {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
 }
 
-/* Preflight's countdown bar draining from full to empty over the countdown. */
-@keyframes countdown-drain {
-  from { transform: scaleX(1); }
-  to { transform: scaleX(0); }
+/* A ring that spreads from a button pressed into a good state, in its text color, and fades. */
+@keyframes ready-pulse {
+  from { box-shadow: 0 0 0 0 currentColor; opacity: 0.6; }
+  to { box-shadow: 0 0 0 8px currentColor; opacity: 0; }
+}
+
+/* Preflight's countdown ring draining from full to empty over the countdown: its arc's path counts
+   100 long (pathLength on the circle in frames/home.tsx, CountdownRing), dashed 100 on and 100 off,
+   so an offset of 100 leaves none of it showing. */
+@keyframes countdown-ring {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: 100; }
 }

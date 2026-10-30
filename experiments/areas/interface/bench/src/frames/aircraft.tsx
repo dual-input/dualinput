@@ -8,7 +8,7 @@ import { Check, ChevronRight, XIcon } from "lucide-react"
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
 import { AppFrame } from "./shell"
-import { useScroller } from "./scroller"
+import { NO_SCROLLBAR, useScroller } from "./scroller"
 
 // An aircraft as home names it: the maker from its package's manifest, the model, and its tail
 // number, which the sim reports as `A:ATC ID`; for one Dual Input has a profile for, the maturity
@@ -167,7 +167,7 @@ export function AircraftPicker({ open, onOpenChange }: { open: boolean; onOpenCh
                   ref={scroller.ref}
                   onScroll={scroller.onScroll}
                   onMouseDown={scroller.onMouseDown}
-                  className={"min-h-0 flex-1 overflow-y-auto px-5 pb-5 select-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-foreground/20 [&::-webkit-scrollbar-track]:bg-transparent " + scroller.cursor}
+                  className={"min-h-0 flex-1 overflow-y-auto px-5 pb-5 select-none " + NO_SCROLLBAR + " " + scroller.cursor}
                 >
                   {/* With none installed, the group is left out, and the list opens on the rest,
                       whose heading says why none can be picked. */}

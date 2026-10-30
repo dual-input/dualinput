@@ -24,11 +24,13 @@ export const SERVICE_NOT_RUNNING: Failure = {
 export function toneOf(failure: Failure) {
   return failure.skippable
     ? {
+        tone: "warning" as const,
         box: "border-warning/20 bg-warning/10",
         text: "text-warning focus-visible:border-warning/40 focus-visible:ring-warning/30",
         button: "bg-warning text-warning-foreground hover:bg-warning/90 focus-visible:border-warning/40 focus-visible:ring-warning/30",
       }
     : {
+        tone: "destructive" as const,
         box: "border-destructive/20 bg-destructive/10",
         text: "text-destructive focus-visible:border-destructive/40 focus-visible:ring-destructive/30",
         button: "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/30",

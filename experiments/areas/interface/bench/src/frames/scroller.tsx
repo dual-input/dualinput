@@ -1,6 +1,12 @@
 // A box in the EFB app that scrolls when it runs past its room, with what its fades need: whether
-// there's more above and below. Give it ref, onScroll, onMouseDown, and the cursor class.
+// there's more above and below. Give it ref, onScroll, onMouseDown, the cursor class, and
+// NO_SCROLLBAR.
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
+
+// The app's scrolling boxes draw no scrollbar: their fades say there's more above or below, and
+// dragging anywhere on one scrolls it, so a scrollbar would only take 6px of the box's width the
+// moment it overflowed. Coherent GT keeps ::-webkit-scrollbar, where it drops scrollbar-width.
+export const NO_SCROLLBAR = "[&::-webkit-scrollbar]:w-0"
 
 export function useScroller() {
   const ref = useRef<HTMLDivElement>(null)
@@ -21,15 +27,14 @@ export function useScroller() {
     page?.addEventListener("transitionend", measure)
     return () => page?.removeEventListener("transitionend", measure)
   })
-  // Dragging anywhere on the box scrolls it, since a thin scrollbar is hard to hit with a mouse in
-  // the sim and harder with a VR pointer. Coherent GT has no PointerEvent, so the drag follows the
-  // mouse's events, from the window so it keeps going off the box. It starts only past 4px, so a
-  // click still clicks, and leaves a press on the scrollbar to the scrollbar. The release that ends
-  // a drag would click a button under it, so the click after a drag is swallowed. The canvas can
-  // zoom the frame, so the drag is scaled to the box's own pixels.
+  // Dragging anywhere on the box scrolls it, which a mouse in the sim and a VR pointer can do where
+  // there's no wheel. Coherent GT has no PointerEvent, so the drag follows the mouse's events, from
+  // the window so it keeps going off the box. It starts only past 4px, so a click still clicks. The
+  // release that ends a drag would click a button under it, so the click after a drag is swallowed.
+  // The canvas can zoom the frame, so the drag is scaled to the box's own pixels.
   const onMouseDown = (e: React.MouseEvent) => {
     const s = ref.current
-    if (!s || e.button !== 0 || (e.target === s && e.nativeEvent.offsetX >= s.clientWidth)) return
+    if (!s || e.button !== 0) return
     const scale = s.getBoundingClientRect().height / s.offsetHeight || 1
     const y0 = e.clientY
     const top0 = s.scrollTop

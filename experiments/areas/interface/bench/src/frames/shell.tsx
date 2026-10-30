@@ -7,6 +7,7 @@ import { CircleArrowUp, CircleX, ExternalLink, Headset, PersonStanding, Plane, S
 import { ThemeContext, UI, UIContext, useUI } from "@/bench/ui"
 import { themeVars, type Theme } from "@/bench/theme"
 import { FailureBox, SERVICE_NOT_RUNNING } from "./failure"
+import { HeaderStart, PhaseContext, type SessionPhase } from "./phase"
 
 // The sim's EFB sizes its apps from a 516 by 716 base (record/areas/interface/log.md, 2026-10-24).
 export const EFB = { width: 516, height: 716 }
@@ -47,8 +48,12 @@ export function MarkTile() {
   )
 }
 
-export function Label({ children }: { children: React.ReactNode }) {
-  return <span className="text-xs text-muted-foreground">{children}</span>
+export function Label({ children, ...rest }: { children: React.ReactNode } & React.HTMLAttributes<HTMLSpanElement>) {
+  return (
+    <span className="text-xs text-muted-foreground" {...rest}>
+      {children}
+    </span>
+  )
 }
 
 // A link inside a sentence, which does what it's given; one given nothing, such as "see how", opens
@@ -167,12 +172,13 @@ function IssueRow({ issue }: { issue: Issue }) {
 const HEADER = { openAfter: 200, closeAfter: 300, grow: 260, shrink: 220, spring: "cubic-bezier(0.32, 1.18, 0.6, 1)", openWidth: 400, height: 54 }
 
 // The header: the mark and version, then each thing that needs the pilot as a word and an icon,
-// together in a pill. With nothing, it's the mark alone. Hovering the pill tints it, and resting
+// together in a pill. With nothing, it's the mark alone. While a session is in preflight or flying,
+// its phase stands where the mark and version are (phase.tsx). Hovering the pill tints it, and resting
 // there grows it from its top right corner, left and down, into an island of details over the
 // window, a row for each with its action, if it has one, while the window dims under it. A press
 // keeps it open, as does pressing anything in it, so its actions and their popovers don't close
 // under the pointer; then a press elsewhere or Escape closes it. The copy is drafts.
-export function Header({ status, startOpen }: { status: HeaderStatus; startOpen?: boolean }) {
+export function Header({ status, startOpen, phase }: { status: HeaderStatus; startOpen?: boolean; phase?: SessionPhase }) {
   const { Button } = useUI()
   const [hovered, setHovered] = useState(false)
   const [open, setOpen] = useState(!!startOpen)
@@ -216,11 +222,16 @@ export function Header({ status, startOpen }: { status: HeaderStatus; startOpen?
   }, [pinned])
 
   const brand = (
-    <>
-      <Mark className="size-4 text-primary" />
-      <span className="text-sm font-medium">Dual Input</span>
-      <span className="text-xs text-muted-foreground">v{VERSION}</span>
-    </>
+    <HeaderStart
+      phase={phase}
+      brand={
+        <div className="flex items-center gap-2">
+          <Mark className="size-4 text-primary" />
+          <span className="text-sm font-medium">Dual Input</span>
+          <span className="text-xs text-muted-foreground">v{VERSION}</span>
+        </div>
+      }
+    />
   )
   const rows = issuesOf(status, Button)
   const trouble = rows.some((r) => r.tone === "bad")
@@ -394,23 +405,27 @@ function ServiceDown({ closed }: { closed: boolean }) {
 // shows more than one screen holds, such as the preflight page with the UI kit. A fixed frame
 // stays at the EFB's height, as the EFB's window does, for a page that scrolls part of itself.
 // It's marked data-app-frame, the app's window, which a popup opens inside. A frame can open with
-// the header's details out, and say how its link to the service stands.
+// the header's details out, and say how its link to the service stands. A session page in it says
+// its phase, which the frame hands to the header.
 export function AppFrame({ theme, status = {}, header = true, tabs = true, fixed, headerOpen, core = "connected", children }: { theme: Theme; status?: HeaderStatus; header?: boolean; tabs?: boolean; fixed?: boolean; headerOpen?: boolean; core?: Core; children?: React.ReactNode }) {
   const ui = UI[theme.preset] ?? UI.nova
   const down = core === "not-running" || core === "closed"
+  const [phase, setPhase] = useState<SessionPhase>()
   return (
     <ThemeContext.Provider value={theme}>
       <UIContext.Provider value={ui}>
+      <PhaseContext.Provider value={setPhase}>
         <div
           data-app-frame
           className="dark relative flex flex-col overflow-hidden rounded-xl border bg-background font-sans text-foreground shadow-2xl"
           style={{ ...(themeVars(theme) as React.CSSProperties), width: EFB.width, ...(fixed ? { height: EFB.height } : { minHeight: EFB.height }) }}
         >
-          {header && <Header status={down ? {} : status} startOpen={headerOpen} />}
+          {header && <Header status={down ? {} : status} startOpen={headerOpen} phase={down ? undefined : phase} />}
           <div className="flex min-h-0 flex-1 flex-col">{down ? <ServiceDown closed={core === "closed"} /> : children}</div>
           {tabs && !down && <TabBar />}
           {!down && <Reconnecting on={core === "reconnecting"} />}
         </div>
+      </PhaseContext.Provider>
       </UIContext.Provider>
     </ThemeContext.Provider>
   )

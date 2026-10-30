@@ -2,16 +2,18 @@
  * Screenshots of the sim window's client area, for a probe to read afterward
  * instead of asking the pilot to watch.
  *
- * It copies the window's pixels from the screen with .NET's
- * Graphics.CopyFromScreen after SetProcessDPIAware, as p24 does (measured on
- * MSFS 2024, 2026-10-03, record/areas/avatars/log.md, "A probe can screenshot
- * the sim window"), so the sim must be in a window or borderless, in front and
- * uncovered. Each shot is saved as a JPEG 1,200 pixels wide with the top 100
- * pixels cut off, because Devmode's Project Editor shows the home folder's path
- * in its title bar there (CLAUDE.md, Nothing personal in the tree). It saves
- * nothing unless the sim's window is in front, since a copy of the screen
- * behind a minimized sim is whatever else is there. Look at a shot before
- * committing it.
+ * With the sim's window in front, it copies the window's pixels from the
+ * screen with .NET's Graphics.CopyFromScreen after SetProcessDPIAware, as p24
+ * does (measured on MSFS 2024, 2026-10-03, record/areas/avatars/log.md, "A
+ * probe can screenshot the sim window"). A copy of the screen behind a covered
+ * sim is whatever covers it, and Windows won't always bring the sim forward for
+ * a background process, so with the sim behind another window it asks the sim's
+ * window to draw itself, with PrintWindow and PW_RENDERFULLCONTENT, which drew
+ * the world map and the EFB with the sim covered (p21, 2026-10-30). The sim must
+ * be in a window or borderless, and not minimized. Each shot is saved as a JPEG
+ * 1,200 pixels wide with the top 100 pixels cut off, because Devmode's Project
+ * Editor shows the home folder's path in its title bar there (CLAUDE.md,
+ * Nothing personal in the tree). Look at a shot before committing it.
  *
  *   const shooter = startShooter(dir)
  *   const s = await shooter.shot("name")   // { file, width, height, brightness } or { error }
@@ -36,16 +38,22 @@ public static class CrosscheckShooter {
   [DllImport("user32.dll")] static extern bool ClientToScreen(IntPtr h, ref POINT p);
   [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
   [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+  [DllImport("user32.dll")] static extern bool IsIconic(IntPtr h);
+  [DllImport("user32.dll")] static extern bool PrintWindow(IntPtr h, IntPtr hdc, uint flags);
   public static string Take(IntPtr h, string file) {
-    // The copy is of the screen, so with the sim minimized or behind another
-    // window it caught the desktop and a chat app's member list (p04,
-    // 2026-10-04): nothing is saved unless the sim's window is in front.
-    if (GetForegroundWindow() != h) return "ERR the sim isn't in front, so nothing was saved";
+    // A copy of the screen behind a covered or minimized sim caught the desktop
+    // and a chat app's member list (p04, 2026-10-04), so a covered sim draws
+    // itself instead, and a minimized one has nothing to draw.
+    if (IsIconic(h)) return "ERR the sim is minimized, so nothing was saved";
+    bool front = GetForegroundWindow() == h;
     RECT r; GetClientRect(h, out r); POINT o = new POINT(); ClientToScreen(h, ref o);
     int w = r.R - r.L, hh = r.B - r.T;
     if (w <= 0 || hh <= 0) return "ERR no client area";
     using (Bitmap bmp = new Bitmap(w, hh, PixelFormat.Format24bppRgb)) {
-      using (Graphics g = Graphics.FromImage(bmp)) g.CopyFromScreen(o.X, o.Y, 0, 0, new Size(w, hh));
+      using (Graphics g = Graphics.FromImage(bmp)) {
+        if (front) g.CopyFromScreen(o.X, o.Y, 0, 0, new Size(w, hh));
+        else { IntPtr dc = g.GetHdc(); bool ok = PrintWindow(h, dc, 3); g.ReleaseHdc(dc); if (!ok) return "ERR PrintWindow failed with the sim covered"; }
+      }
       int top = Math.Min(${CROP_TOP}, hh - 1), ph = hh - top, pw = ${WIDTH}, phs = (int)Math.Round(ph * (double)pw / w);
       double sum = 0; long n = 0;
       using (Bitmap pv = new Bitmap(pw, phs)) {

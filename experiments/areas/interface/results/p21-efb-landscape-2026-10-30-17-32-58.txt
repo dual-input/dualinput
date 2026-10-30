@@ -1,0 +1,212 @@
+p21-efb-landscape, 2026-10-30T17:32:58.255Z
+
+To the world map:
+  5.6s, the menu: {"start":false,"home":false,"worldMap":false}
+  115.9s, the menu: {"start":true,"home":false,"worldMap":false}
+  pressed Start: {"found":true,"x":1684,"y":961}
+  125.0s, the menu: {"start":false,"home":true,"worldMap":false}
+  pressed Free flight: {"found":true,"x":562,"y":654}
+  134.1s, the menu: {"start":false,"home":false,"worldMap":true}
+
+In the EFB's document: installed
+Its stored settings: {"orientationMode":"","efbSize":"","mode":""}
+Before:
+    window 598 x 793; app area, PanelSize, 542 x 771; orientation Vertical; 2D false; popped out false; open false
+    --viewport 598 x 793; --panel 598 x 793; --border 28 x 11; --base 516 x 716
+    media: landscape false, max-width 516 false, max-height 716 false
+    under the center, innermost first:
+      div.list.main-list 39,125 520x498
+      div.transition-wrapper -565,125 1728x498
+      div.paging-list.first-page.app-launcher.last-page 11,77 576x677
+      div.homepage 0,0 598x755
+      div.efb-view._HomePageApp 0,0 598x755
+      div.efb-container 0,0 598x755
+      div.efb 0,0 598x793
+      div.panel-ui 0,0 598x793
+      body.contentLoaded 0,0 598x0
+The EFB is closed, so TOGGLE_EFB: called
+OPEN_BY_KEY SettingsApp: sent
+The sim's window: NO not in front
+
+Vertical, Small:
+  the orientation took SET_2D_ORIENTATION
+  the size took neither
+    window 598 x 793; app area, PanelSize, 456 x 679; orientation Vertical; 2D true; popped out false; open true
+    --viewport 598 x 793; --panel 504 x 699; --border 24 x 10; --base 516 x 716
+    media: landscape false, max-width 516 false, max-height 716 false
+    under the center, innermost first:
+      div.item-title 86,386 226x31
+      div.item 84,386 423x31
+      div.list.items 84,386 423x235
+      div.units-settings.category 84,336 423x285
+      div.settings-body.scroll-container 71,82 456x620
+      div.settings-main-page 71,57 456x644
+      div.settings-app 71,57 456x644
+      div.efb-view.SettingsApp 71,57 456x644
+      div.efb-container 71,57 456x644
+      div.efb 71,57 456x679
+      div.panel-ui.tablet-border 47,47 504x699
+      body.contentLoaded 0,0 598x0
+  screenshot: ERR the sim isn't in front, so nothing was saved
+
+Vertical, Medium:
+  the orientation took SET_2D_ORIENTATION
+  the size took SET_2D_SIZE
+    window 695 x 928; app area, PanelSize, 545 x 810; orientation Vertical; 2D true; popped out false; open true
+    --viewport 695 x 928; --panel 601 x 834; --border 28 x 12; --base 516 x 716
+    media: landscape false, max-width 516 false, max-height 716 false
+    under the center, innermost first:
+      div.item-title 94,439 275x38
+      div.item 91,440 507x36
+      div.list.items 91,440 507x270
+      div.units-settings.category 91,381 507x329
+      div.settings-body.scroll-container 75,88 545x740
+      div.settings-main-page 75,59 545x770
+      div.settings-app 75,59 545x770
+      div.efb-view.SettingsApp 75,59 545x770
+      div.efb-container 75,59 545x770
+      div.efb 75,59 545x810
+      div.panel-ui.tablet-border 47,47 601x834
+      body.contentLoaded 0,0 695x0
+  screenshot: ERR the sim isn't in front, so nothing was saved
+
+Vertical, Large:
+  the orientation took SET_2D_ORIENTATION
+  the size took SET_2D_SIZE
+    window 790 x 1060; app area, PanelSize, 632 x 940; orientation Vertical; 2D true; popped out false; open true
+    --viewport 790 x 1060; --panel 696 x 966; --border 32 x 13; --base 516 x 716
+    media: landscape false, max-width 516 false, max-height 716 false
+    under the center, innermost first:
+      div.item-title 101,494 318x43
+      div.item 97,495 588x41
+      div.list.items 97,495 588x305
+      div.units-settings.category 97,426 588x374
+      div.settings-body.scroll-container 79,93 632x858
+      div.settings-main-page 79,60 632x893
+      div.settings-app 79,60 632x893
+      div.efb-view.SettingsApp 79,60 632x893
+      div.efb-container 79,60 632x893
+      div.efb 79,60 632x940
+      div.panel-ui.tablet-border 47,47 696x966
+      body.contentLoaded 0,0 790x0
+  screenshot: ERR the sim isn't in front, so nothing was saved
+
+Horizontal, Small:
+  the orientation took SET_2D_ORIENTATION
+  the size took SET_2D_SIZE
+    window 793 x 598; app area, PanelSize, 679 x 456; orientation Horizontal; 2D true; popped out false; open true
+    --viewport 793 x 598; --panel 699 x 504; --border 10 x 24; --base 716 x 516
+    media: landscape true, max-width 516 false, max-height 716 true
+    under the center, innermost first:
+      div.item-title 79,278 439x39
+      div.item 77,282 633x31
+      div.items 77,146 633x201
+      div.general-settings.category.focus 77,96 633x251
+      div.settings-body.scroll-container 57,96 679x410
+      div.settings-main-page 57,71 679x421
+      div.settings-app 57,71 679x421
+      div.efb-view.SettingsApp 57,71 679x421
+      div.efb-container 57,71 679x421
+      div.efb 57,71 679x456
+      div.panel-ui.tablet-border 47,47 699x504
+      body.contentLoaded 0,0 793x0
+  screenshot: ERR the sim isn't in front, so nothing was saved
+
+Horizontal, Medium:
+  the orientation took SET_2D_ORIENTATION
+  the size took SET_2D_SIZE
+    window 928 x 695; app area, PanelSize, 810 x 545; orientation Horizontal; 2D true; popped out false; open true
+    --viewport 928 x 695; --panel 834 x 601; --border 12 x 28; --base 716 x 516
+    media: landscape true, max-width 516 false, max-height 716 true
+    under the center, innermost first:
+      div.item-title 86,312 529x45
+      div.item 83,316 756x36
+      div.items 83,160 756x231
+      div.general-settings.category.focus 83,104 756x287
+      div.settings-body.scroll-container 59,104 810x477
+      div.settings-main-page 59,75 810x505
+      div.settings-app 59,75 810x505
+      div.efb-view.SettingsApp 59,75 810x505
+      div.efb-container 59,75 810x505
+      div.efb 59,75 810x545
+      div.panel-ui.tablet-border 47,47 834x601
+      body.contentLoaded 0,0 928x0
+  screenshot: ERR the sim isn't in front, so nothing was saved
+
+Horizontal, Large:
+  the orientation took SET_2D_ORIENTATION
+  the size took SET_2D_SIZE
+    window 1060 x 790; app area, PanelSize, 940 x 632; orientation Horizontal; 2D true; popped out false; open true
+    --viewport 1060 x 790; --panel 966 x 696; --border 13 x 32; --base 716 x 516
+    media: landscape true, max-width 516 false, max-height 716 false
+    under the center, innermost first:
+      div.item-title 92,394 829x55
+      div.item 88,401 877x41
+      div.items 88,181 877x261
+      div.general-settings.category.focus 88,112 877x330
+      div.settings-body.scroll-container 60,112 940x553
+      div.settings-main-page 60,79 940x585
+      div.settings-app 60,79 940x585
+      div.efb-view.SettingsApp 60,79 940x585
+      div.efb-container 60,79 940x585
+      div.efb 60,79 940x632
+      div.panel-ui.tablet-border 47,47 966x696
+      body.contentLoaded 0,0 1060x0
+  screenshot: ERR the sim isn't in front, so nothing was saved
+
+The Settings app's lines about the layout: ["Tablet size","SMALL","MEDIUM","LARGE","Tablet orientation","VERTICAL","HORIZONTAL"]
+What an app would have heard, by kind: {"width":7,"height":7,"resize":20,"orientation":1}
+     266ms width 456
+     266ms height 679
+   12573ms resize [598,928]
+   12573ms resize [695,928]
+   12624ms resize [695,928]
+   12632ms width 545
+   12632ms height 810
+   14438ms resize [695,1060]
+   14438ms resize [790,1060]
+   14490ms resize [790,1060]
+   14498ms width 632
+   14498ms height 940
+   16007ms resize [790,790]
+   16015ms resize [790,790]
+   16028ms resize [1060,790]
+   16029ms resize [1060,790]
+   16045ms orientation 1
+   16045ms width 940
+   16045ms height 632
+   16353ms resize [1060,598]
+   16361ms resize [1060,598]
+   16374ms resize [793,598]
+   16382ms resize [793,598]
+   16390ms width 679
+   16390ms height 456
+   18205ms resize [793,695]
+   18205ms resize [928,695]
+   18258ms resize [928,695]
+   18266ms width 810
+   18266ms height 545
+   20072ms resize [928,790]
+   20072ms resize [1060,790]
+   20125ms resize [1060,790]
+   20133ms width 940
+   20133ms height 632
+
+Put back to orientation 0, size 0; stored now: {"orientationMode":"","efbSize":"","mode":""}
+    window 598 x 793; app area, PanelSize, 456 x 679; orientation Vertical; 2D true; popped out false; open true
+    --viewport 598 x 793; --panel 504 x 699; --border 24 x 10; --base 516 x 716
+    media: landscape false, max-width 516 false, max-height 716 false
+    under the center, innermost first:
+      div.item-title 86,386 226x31
+      div.item 84,386 423x31
+      div.list.items 84,386 423x235
+      div.units-settings.category 84,336 423x285
+      div.settings-body.scroll-container 71,82 456x620
+      div.settings-main-page 71,57 456x644
+      div.settings-app 71,57 456x644
+      div.efb-view.SettingsApp 71,57 456x644
+      div.efb-container 71,57 456x644
+      div.efb 71,57 456x679
+      div.panel-ui.tablet-border 47,47 504x699
+      body.contentLoaded 0,0 598x0
+Cleanup: cleaned

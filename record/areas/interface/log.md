@@ -3,6 +3,44 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-30: In landscape, an EFB app's view is its portrait view turned on its side, about 696 by 433 in the EFB's own units against 468 by 660
+
+**Asked:** what an EFB app's page gets when the pilot turns the EFB to landscape, at each of its sizes, since stage 11b's EFB app frames are drawn at a fixed 516 by 716, in portrait only (user, 2026-10-30).
+
+**Expected:** from the EFB's code, a layout that turns with the EFB's window: portrait when the window is no wider than tall, sized from a 516 by 716 base, and landscape from a 716 by 516 one, with the app area published as `window.PanelSize` and the orientation as `window.PanelInfo.orientation` (read in fs-base-efb 0.1.10, `efb_os.js`, `sizeUpdate`).
+The orientation setting applies only to the 2D EFB, not popped out.
+
+**Found:** on MSFS 2024, at Free flight's world map in a 1,874 by 1,316 window, p21 sent the EFB's own setting events, `SET_2D_ORIENTATION` and `SET_2D_SIZE`, from its document, and the EFB took every one, with the Settings app open:
+
+| Orientation | Size | The EFB's window | `PanelSize` | The app's view, `efb-view` | Scale, `--panel-width` over `--base-width` |
+| --- | --- | --- | --- | --- | --- |
+| Vertical | Small | 598 by 793 | 456 by 679 | 456 by 644 | 504 / 516 |
+| Vertical | Medium | 695 by 928 | 545 by 810 | 545 by 770 | 601 / 516 |
+| Vertical | Large | 790 by 1,060 | 632 by 940 | 632 by 893 | 696 / 516 |
+| Horizontal | Small | 793 by 598 | 679 by 456 | 679 by 421 | 699 / 716 |
+| Horizontal | Medium | 928 by 695 | 810 by 545 | 810 by 505 | 834 / 716 |
+| Horizontal | Large | 1,060 by 790 | 940 by 632 | 940 by 585 | 966 / 716 |
+
+- **Landscape turns portrait on its side:** at each size, the window and `PanelSize` swap width and height, and the scale stays the same, about 0.98 at Small, 1.16 at Medium, and 1.35 at Large.
+- **In the EFB's own units**, a pixel count divided by that scale, which is how `efb_os.css` sizes everything, an app's view is about 468 by 660 in portrait and 696 by 433 in landscape, at every size.
+  The rest of `PanelSize` is the dock under the view, 35px tall at Small and 47px at Large.
+- **The pilot's switch** is in the Settings app's General section: Tablet size, with Small, Medium, and Large, and Tablet orientation, with Vertical and Horizontal.
+  The sim's own Settings app keeps its type size in landscape and lays its rows out wider, with fewer on screen.
+- **`efb_os.css`'s media queries** match on the EFB's window: `orientation: landscape` in each Horizontal layout, and `max-height: 716px` at Horizontal Small and Medium, whose windows are 598px and 695px tall; `max-width: 516px` matched none of the six.
+- **What an app hears:** each change fired three or four `resize` events on the window, an orientation change passing through a square 790 by 790 window, and then `PanelSize`'s width and height changed, 8ms to 16ms after the last `resize`.
+  `PanelInfo.orientation` changed once, at the turn to Horizontal.
+- **The screenshots** came from the sim's window drawing itself, through `PrintWindow` with `PW_RENDERFULLCONTENT`, with the sim behind other windows, after Windows refused to bring it forward for the probe.
+
+**Changed:** an EFB app's page is narrower and shorter than 516 by 716: about 468 by 660 in the EFB's units in portrait, and 696 by 433 in landscape, which the pilot can choose at any size.
+So an app that reads its size from `PanelSize`, or from its own box after the last `resize`, and has a layout for each shape, fits every setting the EFB offers.
+What our EFB app's frames do in landscape is for stage 11b's design.
+
+What we haven't run: an EFB app of ours in landscape, the EFB popped out, the tablet in a cockpit, and any other window size, so whether the EFB's window keeps to about 60%, 70%, and 80% of the sim window's height at the three sizes is unverified.
+
+**Affects:** the EFB app's frames, which [stage 11b](../build/plan.md#11b-the-apps) designs.
+
+**Evidence:** `results/p21-efb-landscape-2026-10-30-17-36-53.txt`, with a screenshot of each layout, cropped to the EFB; `results/p21-efb-landscape-2026-10-30-17-32-58.txt`, the run before, measured the same sizes and saved no screenshots.
+
 ## 2026-10-24: The apps' wiring calls notices notifications, gives the banner's socket a slice of its own, and passes a development core's data folder to the desktop app
 
 **Asked:** what the names and behaviors [stage 11a](../build/plan.md#11a-the-apps-wiring)'s wiring needs, and the record leaves open, should be: the message crate's names, where the slice that says whether a banner page's socket is open goes, what the core passes the desktop app's program, how the bench sees that start, and what a click does when its notice has cleared or no EFB app is connected.

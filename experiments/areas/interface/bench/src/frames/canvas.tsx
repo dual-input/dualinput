@@ -25,55 +25,50 @@ const PLAYS: { play: Action; label: string }[] = [
 // How long after its frame opens the crewmate joins, in milliseconds: long enough to take in the
 // card alone first.
 const CREWMATE_JOINS_AFTER = 2500
+// A section holds one run of the app, from where it starts to what follows on from it, so a run
+// that continues another joins it rather than taking a section of its own. A frame's name says
+// what sets it apart within its section.
 const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
+  // First-time setup, then home's first visit, which setup's Continue leads to.
   {
-    name: "First-time setup",
+    name: "First run",
     frames: [
-      { name: "Every check passes", replay: true, draw: (t) => <SetupFlowFrame theme={t} /> },
-      { name: "Failed: Dual Input service", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="core" openOnFailure /> },
-      { name: "Failed: sim add-on", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="addon" openOnFailure /> },
-      { name: "Failed: PC offline", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="offline" openOnFailure /> },
-      { name: "Failed: our servers", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="servers" openOnFailure /> },
-      { name: "Failed: Windows Firewall", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="firewall" openOnFailure /> },
-      { name: "Crew card", replay: true, draw: (t) => <SetupFlowFrame theme={t} openOnCard /> },
+      { name: "Setup, every check passes", replay: true, draw: (t) => <SetupFlowFrame theme={t} /> },
+      { name: "Setup failed: Dual Input service", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="core" openOnFailure /> },
+      { name: "Setup failed: sim add-on", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="addon" openOnFailure /> },
+      { name: "Setup failed: PC offline", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="offline" openOnFailure /> },
+      { name: "Setup failed: our servers", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="servers" openOnFailure /> },
+      { name: "Setup failed: Windows Firewall", replay: true, draw: (t) => <SetupFlowFrame theme={t} failure="firewall" openOnFailure /> },
+      { name: "Setup, crew card", replay: true, draw: (t) => <SetupFlowFrame theme={t} openOnCard /> },
+      { name: "Home, the guide", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" /> },
+      { name: "Home, on the aircraft check", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" openOnCheck /> },
+      { name: "Home, on the aircraft check, unsupported", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="unsupported" openOnCheck /> },
     ],
   },
-  // Sections hold what a frame shows, a page or a part several pages open, so a frame's name says
-  // only what sets it apart within its section.
+  // Home on a later visit, then Host and Join from it. Our servers, faked, take Host and Join, refuse
+  // them, or are slow; or the PC is offline, which the header shows too.
   {
-    name: "Home, first visit",
-    frames: [
-      { name: "The guide", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" /> },
-      { name: "On the aircraft check", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="supported" openOnCheck /> },
-      { name: "On the aircraft check, unsupported", replay: true, draw: (t) => <HomeFirstTimeFrame theme={t} aircraft="unsupported" openOnCheck /> },
-    ],
-  },
-  {
-    name: "Home, later visit",
+    name: "Home",
     frames: [
       { name: "With the authors' notes", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" notes="short" /> },
       { name: "A long note", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" notes="long" /> },
       { name: "No notes", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" /> },
       { name: "Unsupported aircraft", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="unsupported" /> },
-    ],
-  },
-  // Our servers, faked, take Host and Join in the first frame, refuse them in the second, and are
-  // slow in the third; in the fourth the PC is offline, which the header shows too.
-  {
-    name: "Hosting and joining",
-    frames: [
-      { name: "Succeeds", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" play={play} /> },
-      { name: "Refused", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="refusing" play={play} /> },
-      { name: "Slow", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="slow" play={play} /> },
-      { name: "Offline", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="offline" header={{ offline: true }} play={play} /> },
+      { name: "Host or join, succeeds", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" play={play} /> },
+      { name: "Host or join, refused", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="refusing" play={play} /> },
+      { name: "Host or join, slow", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="slow" play={play} /> },
+      { name: "Host or join, offline", replay: true, plays: true, draw: (t, play) => <HomeLaterFrame theme={t} aircraft="supported" servers="offline" header={{ offline: true }} play={play} /> },
       { name: "Every refusal", draw: (t) => <RefusalsFrame theme={t} /> },
     ],
   },
-  // The session page, which is home once Host or Join succeeds, before preflight: hosted, alone,
-  // as a crewmate joins, and once one has, with a sheet of where a crewmate can be; joined, with a
-  // sheet of a joiner's ways to the pilot flying; and, for Later, a crew bigger than v1's two. Each
-  // opens with its heads popping in, as the card turning to it does. Hosting and joining's Succeeds
-  // plays the way in.
+  // The session page, which is home once Host or Join succeeds, then preflight on it once the PF is
+  // in a flight on the ground. Before preflight: hosted, alone, as a crewmate joins, and once one
+  // has, with a sheet of where a crewmate can be; joined, with a sheet of a joiner's ways to the
+  // pilot flying; and, for Later, a crew bigger than v1's two. Each opens with its heads popping in,
+  // as the card turning to it does. In preflight, on the host's side: alone, with the crewmate
+  // loading, with them in the flight and ready, with the checklist given the page, while the host's
+  // aircraft settles, with the crewmate dropped out, and counting down; then on the joiner's side,
+  // and with the joiner's checklist given the page.
   {
     name: "Session",
     frames: [
@@ -84,27 +79,31 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Joined", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="joined" /> },
       { name: "Every way to the pilot flying", draw: (t) => <WaysFrame theme={t} /> },
       { name: "Later: a bigger crew", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="bigger-crew" /> },
+      { name: "Preflight, host alone", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-alone" /> },
+      { name: "Preflight, crewmate loading", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-loading" /> },
+      { name: "Preflight, crewmate ready", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-crew" /> },
+      { name: "Preflight, checklist expanded", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-crew" checklistExpanded /> },
+      { name: "Preflight, aircraft settling", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-settling" /> },
+      { name: "Preflight, crewmate dropped out", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-dropped" /> },
+      { name: "Preflight, countdown", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-countdown" /> },
+      { name: "Preflight, joiner", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-joined" /> },
+      { name: "Preflight, joiner's checklist expanded", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-joined" checklistExpanded /> },
     ],
   },
-  // The header on home, open over what needs the pilot, or at rest; with nothing, as on every other
-  // frame, it's the mark alone.
+  // What the app's window says of itself on any page. The header on home, open over what needs the
+  // pilot, or at rest; with nothing, as on every other frame, it's the mark alone. Then the window
+  // when its link to the service, the core, is lost: reconnecting after a crash, over home here,
+  // where the service comes back on its own; not running; and quit.
   {
-    name: "Header",
+    name: "App status",
     frames: [
-      { name: "An update", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ update: "1.0.3" }} headerOpen /> },
-      { name: "Needs attention", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ servers: "unreachable", firewall: "blocks", update: "1.0.3" }} headerOpen /> },
-      { name: "Needs attention, at rest", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ servers: "unreachable", firewall: "blocks", update: "1.0.3" }} /> },
-      { name: "Every issue", draw: (t) => <EveryIssueFrame theme={t} /> },
-    ],
-  },
-  // The app's window when its link to the service, the core, is lost, on any page: reconnecting
-  // after a crash, over home here, where the service comes back on its own; not running; and quit.
-  {
-    name: "Service",
-    frames: [
-      { name: "Reconnecting", replay: true, draw: (t) => <ReconnectingFrame theme={t} /> },
-      { name: "Not running", draw: (t) => <AppFrame theme={t} core="not-running" fixed /> },
-      { name: "Closed", draw: (t) => <AppFrame theme={t} core="closed" fixed /> },
+      { name: "Header, an update", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ update: "1.0.3" }} headerOpen /> },
+      { name: "Header, needs attention", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ servers: "unreachable", firewall: "blocks", update: "1.0.3" }} headerOpen /> },
+      { name: "Header, needs attention, at rest", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ servers: "unreachable", firewall: "blocks", update: "1.0.3" }} /> },
+      { name: "Header, every issue", draw: (t) => <EveryIssueFrame theme={t} /> },
+      { name: "Service, reconnecting", replay: true, draw: (t) => <ReconnectingFrame theme={t} /> },
+      { name: "Service, not running", draw: (t) => <AppFrame theme={t} core="not-running" fixed /> },
+      { name: "Service, closed", draw: (t) => <AppFrame theme={t} core="closed" fixed /> },
     ],
   },
   {

@@ -110,10 +110,12 @@ export function Figures({ width, height, figures, cam }: { width: number; height
   return <canvas ref={canvas} className="pointer-events-none absolute top-0 left-0" style={{ width, height }} />
 }
 
-// The head's box, in pixels, and the camera that fills it: a meter is 115 pixels, so the head is
-// 23px across and its nose stays inside the box.
+// Each head has a window, a circle filling its box in the color of the setup portrait's backdrop
+// (setup-check.tsx), and looks to have popped out of it, so the head fills the box too: the
+// camera's meter is as many pixels as makes the head the window's width. The head's box, in pixels;
+// the nose stays inside it.
 const HEAD_SIZE = 28
-const HEAD_CAMERA: Camera = { cx: HEAD_SIZE / 2, cy: HEAD_SIZE / 2, k: 115, tilt: 0 }
+const HEAD_CAMERA: Camera = { cx: HEAD_SIZE / 2, cy: HEAD_SIZE / 2, k: HEAD_SIZE / (2 * SPEC.head.radius), tilt: 0 }
 function headShapes(): Shape[] {
   const look = unit([0.4, -0.1, 1])
   const R = SPEC.head.radius, r = SPEC.nose.radius, rt = r * SPEC.nose.tip
@@ -123,23 +125,30 @@ function headShapes(): Shape[] {
     { ball: false, a: scale(look, out), b: scale(look, R + SPEC.nose.length - rt), ra: r, rb: rt },
   ]
 }
+function HeadWindow() {
+  return <span className="absolute inset-0 rounded-full bg-muted" />
+}
+
 // A head given pop pops in when it first shows, after that many milliseconds, hidden until then
-// (index.css, head-pop).
+// (index.css, head-pop). The window shows at once and holds still, and only the head pops, so it
+// grows out of the window and swells past its edge before it rests.
 const POP_MS = 360
 export function Head({ hex, pop }: { hex: string; pop?: number }) {
   return (
-    <span className="relative inline-block shrink-0" style={{ width: HEAD_SIZE, height: HEAD_SIZE, animation: pop === undefined ? undefined : `head-pop ${POP_MS}ms ${pop}ms both` }}>
-      <Figures width={HEAD_SIZE} height={HEAD_SIZE} figures={[{ shapes: headShapes(), hex }]} cam={HEAD_CAMERA} />
+    <span className="relative inline-block shrink-0" style={{ width: HEAD_SIZE, height: HEAD_SIZE }}>
+      <HeadWindow />
+      <span className="absolute inset-0" style={{ animation: pop === undefined ? undefined : `head-pop ${POP_MS}ms ${pop}ms both` }}>
+        <Figures width={HEAD_SIZE} height={HEAD_SIZE} figures={[{ shapes: headShapes(), hex }]} cam={HEAD_CAMERA} />
+      </span>
     </span>
   )
 }
 
-// Where a head goes in a row still waiting for its pilot: the head's outline, dashed, in the same box.
+// Where a head goes in a row still waiting for its pilot: the window alone.
 export function EmptyHead() {
-  const across = 2 * SPEC.head.radius * HEAD_CAMERA.k
   return (
-    <span className="inline-flex shrink-0 items-center justify-center" style={{ width: HEAD_SIZE, height: HEAD_SIZE }}>
-      <span className="rounded-full border border-dashed border-muted-foreground" style={{ width: across, height: across }} />
+    <span className="relative inline-block shrink-0" style={{ width: HEAD_SIZE, height: HEAD_SIZE }}>
+      <HeadWindow />
     </span>
   )
 }

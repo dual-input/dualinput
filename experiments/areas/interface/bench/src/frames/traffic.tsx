@@ -222,7 +222,7 @@ const PACKS: Record<"match" | "differ", Pack[]> = {
 }
 function PacksOnThisPc({ packs }: { packs: Pack[] }) {
   return (
-    <section className="flex flex-col gap-2.5 rounded-lg bg-muted/50 px-4 py-3.5 text-xs">
+    <section className="flex flex-col gap-2.5 rounded-xl bg-muted/20 px-4 py-3.5 text-xs">
       <h2 className="flex items-center gap-1.5 font-medium text-muted-foreground">
         <Package className="size-3.5 shrink-0" />
         Detected traffic packs on this PC

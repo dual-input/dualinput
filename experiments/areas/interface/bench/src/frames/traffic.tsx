@@ -95,7 +95,9 @@ const STATE_ICON: Record<State, React.ReactNode> = {
   differs: <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" />,
   unchecked: <CircleDashed className="mt-0.5 size-4 shrink-0 text-muted-foreground" />,
 }
-function HowAndCheck({ how, lines }: { how: string; lines: Line[] }) {
+// While nobody's sharing, and outside a session, there's nothing to check, so the same lines are
+// the feature's rules, and the list says so (user, 2026-10-31).
+function HowAndCheck({ how, lines, rules }: { how: string; lines: Line[]; rules: boolean }) {
   return (
     <>
       <section className="flex flex-col gap-2">
@@ -103,7 +105,7 @@ function HowAndCheck({ how, lines }: { how: string; lines: Line[] }) {
         <p className="text-sm text-muted-foreground">{how}</p>
       </section>
       <section className="flex flex-col gap-3">
-        <Label>Check</Label>
+        <Label>{rules ? "Rules" : "Check"}</Label>
         <ul className="flex flex-col gap-3">
           {lines.map((l) => (
             <li key={l.says} className="flex items-start gap-2.5">
@@ -199,7 +201,7 @@ function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 
       <RoleCard id="share-traffic" label="Share my traffic" noun="traffic" session={where.session} sharer={sharer} onChange={(on) => setSharer(on ? "You" : undefined)}>
         {(sharer === "You" || !where.session) && <Radius />}
       </RoleCard>
-      <HowAndCheck how="One pilot shares their traffic at a time: Dual Input copies the AI traffic in their sim into everyone else's. The copies look right when everyone else runs the same traffic packs and scenery, with their own traffic off." lines={lines} />
+      <HowAndCheck how="One pilot shares. Dual Input watches the AI traffic in their sim and injects it into everyone else's. This works by reading the traffic straight from the sim and works regardless of the original method of traffic generation." lines={lines} rules={!where.session || !sharer} />
     </ScrollPage>
   )
 }
@@ -263,7 +265,7 @@ function AtcPage({ where, capture = "capturing" }: { where: Where; capture?: "ca
           </div>
         )}
       </RoleCard>
-      <HowAndCheck how="One pilot shares their ATC at a time: Dual Input plays their ATC app's voice on everyone else's machine. It carries ATC, not your voices, so talk to each other, and hear the readbacks, on Discord." lines={lines} />
+      <HowAndCheck how="One pilot shares their ATC at a time: Dual Input plays their ATC app's voice on everyone else's machine. It carries ATC, not your voices, so talk to each other, and hear the readbacks, on Discord." lines={lines} rules={!where.session || !sharer} />
       {!hosting && (
         <Card className="[--card-spacing:--spacing(5)]">
           <CardContent className="flex flex-col gap-3">

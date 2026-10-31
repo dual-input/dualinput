@@ -42,7 +42,7 @@ const hexOf = (pilot: "James" | "You") =>
 
 // The flight's frame around a tab: the phase in the header and the take-control strip under the
 // tabs while flying, as on every tab; neither outside a session.
-function useFlightAround(session: boolean) {
+export function useFlightAround(session: boolean) {
   useShowPhase(session ? "syncing" : undefined)
   useShowSession(session)
   const [mine, setMine] = useState(false)

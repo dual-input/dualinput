@@ -3,7 +3,7 @@
 // later visits the profile authors' notes. The aircraft and the notes are examples.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
-import { ArrowRightLeft, BookOpen, Check, ChevronDown, ChevronUp, CircleCheck, CircleX, Copy, ExternalLink, Hand, Info, LogOut, RadioTower, RotateCcw, TriangleAlert, X } from "lucide-react"
+import { ArrowRightLeft, BookOpen, Check, ChevronDown, ChevronUp, CircleCheck, CircleX, Copy, ExternalLink, Hand, Headset, Info, LogOut, Plane, RotateCcw, TriangleAlert, X } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
@@ -111,15 +111,17 @@ const WHERE: Record<Whereabouts, { when: string; shows: string; trouble?: boolea
 // each pilot is are examples.
 // Once preflight runs, a pilot in the flight shows their link, its path and round trip, as the
 // network's slice carries them, and whether they're ready.
-// The pilot who shares their traffic and ATC, the traffic and ATC host, has a chip on their row, so
-// who shares shows on the session page, though the switch lives on the traffic tab (user,
-// 2026-10-31; record/areas/product/03-v1-scope.md, Traffic sync).
-type Pilot = { name: string; hue: string; at?: Whereabouts; flying?: boolean; way?: Way; link?: string; ready?: boolean; shares?: boolean }
+// The traffic host and the ATC host each have a chip on their row, with their tab's icon, so who
+// shares shows on the session page, though the switch lives on the traffic tab (user, 2026-10-31).
+// They're two roles, each declared by its feature, which the one "Share my traffic and ATC" switch
+// claims together (record/areas/session/01-roles-and-members.md, The traffic and ATC host), so one
+// pilot holds both in v1.
+type Pilot = { name: string; hue: string; at?: Whereabouts; flying?: boolean; way?: Way; link?: string; ready?: boolean; traffic?: boolean; atc?: boolean }
 // A session can open with its flight already started: then whether this pilot's catch-up runs, the
 // binding's name for the take-control strip, and a demo of taking control, which can hand control
 // back to the pilot flying a while later.
 type Flight = { catchingUp?: boolean; bound?: string; demo?: "hold" | "tap"; handsBack?: boolean }
-type Session = { joined: boolean; crew: Pilot[]; preflight?: Preflight; shares?: string; flight?: Flight }
+type Session = { joined: boolean; crew: Pilot[]; preflight?: Preflight; traffic?: string; atc?: string; flight?: Flight }
 
 // Preflight, from the moment the PF is in a flight on the ground, as every core follows the PF's
 // `preflight` key (record/areas/session/02-units.md, Preflight and The match check;
@@ -275,27 +277,27 @@ const SESSIONS: Record<
   // with everyone ready, so the countdown runs. Then on the joiner's card, in the flight.
   "preflight-alone": { joined: false, crew: [], preflight: { settled: true, differences: [], checklist: PF_CHECKLIST } },
   "preflight-loading": { joined: false, crew: [{ ...JAMES, at: "loading" }], preflight: { settled: true, differences: [], checklist: PF_CHECKLIST } },
-  "preflight-crew": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
+  "preflight-crew": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
   "preflight-worst": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }, ...BIG_CREW], preflight: { settled: true, differences: MOST_DIFFERENCES, checklist: LONG_CHECKLIST } },
   "preflight-settling": { joined: false, crew: [{ ...JAMES, link: LINK }], preflight: { settled: false, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
   "preflight-dropped": { joined: false, crew: [{ ...JAMES, at: "lost" }], preflight: { settled: true, ready: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
-  "preflight-countdown": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }], shares: DEMO_HOST, preflight: { settled: true, ready: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
-  "preflight-joined": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner, checklist: EVERY_PILOT } },
+  "preflight-countdown": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, ready: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
+  "preflight-joined": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner, checklist: EVERY_PILOT } },
   // In the flight, preflight over, its differences folded to counts: the joiner, monitoring, with
   // James flying; the host, flying; the joiner taking control with a hold, and later James taking
   // it back; the joiner letting go too soon; a late joiner whose catch-up runs; and the joiner whose
   // link to James, flying, is lost. James shares traffic and ATC.
-  "flying-pm": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND } },
-  "flying-pf": { joined: false, crew: [{ ...JAMES, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.host }, flight: { bound: BOUND } },
-  "flying-take": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND, demo: "hold", handsBack: true } },
-  "flying-tap": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND, demo: "tap" } },
-  "flying-catching-up": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND, catchingUp: true } },
-  "flying-pf-lost": { joined: true, crew: [{ ...JAMES, flying: true, at: "lost" }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND } },
+  "flying-pm": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND } },
+  "flying-pf": { joined: false, crew: [{ ...JAMES, link: LINK }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.host }, flight: { bound: BOUND } },
+  "flying-take": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND, demo: "hold", handsBack: true } },
+  "flying-tap": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND, demo: "tap" } },
+  "flying-catching-up": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND, catchingUp: true } },
+  "flying-pf-lost": { joined: true, crew: [{ ...JAMES, flying: true, at: "lost" }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND } },
   // Long bindings on the strip, to see how they fit: a four-key combination, which the binding
   // doesn't take (record/areas/control/01-take-control.md, The binding), and a hardware button,
   // whose name format is hypothetical.
-  "flying-combo": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: "Ctrl+Shift+Alt+T", demo: "hold" } },
-  "flying-hardware": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: "TCA Sidestick Button 3", demo: "hold" } },
+  "flying-combo": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: "Ctrl+Shift+Alt+T", demo: "hold" } },
+  "flying-hardware": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: "TCA Sidestick Button 3", demo: "hold" } },
 }
 // How long the countdown runs once every counted pilot is ready, in seconds.
 const COUNTDOWN = 3
@@ -366,7 +368,8 @@ function CrewRow({ pilot, pop, end, alive }: { pilot: Pilot; pop?: number; end?:
               {pilot.link}
             </Badge>
           )}
-          {pilot.shares && <SharesChip />}
+          {pilot.traffic && <RoleChip icon={<Plane />} says="Shares traffic" />}
+          {pilot.atc && <RoleChip icon={<Headset />} says="Shares ATC" />}
         </span>
         {under && <span className={"text-xs " + (under.trouble ? "text-warning" : "text-muted-foreground")}>{under.shows}</span>}
       </div>
@@ -379,18 +382,18 @@ function CrewRow({ pilot, pop, end, alive }: { pilot: Pilot; pop?: number; end?:
   )
 }
 
-// The traffic and ATC host's chip: an icon alone, since a row already holds a name of up to 20
-// characters, Pilot flying, and the link, and a tooltip says what it means. The words are drafts.
-function SharesChip() {
+// A role's chip: its tab's icon alone, since a row already holds a name of up to 20 characters,
+// Pilot flying, and the link, and a tooltip says what it means. The words are drafts.
+function RoleChip({ icon, says }: { icon: React.ReactNode; says: string }) {
   const { Badge, Tooltip, TooltipContent, TooltipTrigger } = useUI()
   return (
     <Tooltip>
       <TooltipTrigger render={<span className="inline-flex" />}>
-        <Badge variant="outline" aria-label="Shares traffic and ATC" className="px-1.5 text-muted-foreground">
-          <RadioTower />
+        <Badge variant="outline" aria-label={says} className="px-1.5 text-muted-foreground">
+          {icon}
         </Badge>
       </TooltipTrigger>
-      <TooltipContent>Shares traffic and ATC</TooltipContent>
+      <TooltipContent>{says}</TooltipContent>
     </Tooltip>
   )
 }
@@ -1013,7 +1016,7 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
   const firstPf = (joined && crew.find((p) => p.flying)?.name) || "You"
   const [pf, setPf] = useState(firstPf)
   const flight = session.flight
-  const me: Pilot = { name: "You", hue: "orange", flying: pf === "You", at: started && flight?.catchingUp ? "catching-up" : undefined, shares: session.shares === "You" }
+  const me: Pilot = { name: "You", hue: "orange", flying: pf === "You", at: started && flight?.catchingUp ? "catching-up" : undefined, traffic: session.traffic === "You", atc: session.atc === "You" }
   const pfPilot = crew.find((p) => p.name === pf)
   const takeNow = useRef(() => setPf("You"))
   const control = useMemo<Control | undefined>(
@@ -1097,7 +1100,7 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
   // The folded row has room for ROW_HEADS heads before Ready with its ring; a bigger crew shows the
   // first ones and a count of the rest.
   const waitedOn = (p: Pilot) => !!preflight && !started && !p.ready && !goneWithout.includes(p.name)
-  const crewNow = crew.map((p) => ({ ...p, flying: p.name === pf, shares: session.shares === p.name }))
+  const crewNow = crew.map((p) => ({ ...p, flying: p.name === pf, traffic: session.traffic === p.name, atc: session.atc === p.name }))
   const everyone = [me, ...crewNow.filter(waitedOn), ...crewNow.filter((p) => !waitedOn(p))]
   // Where a pilot stands, for their head's badge in the folded row.
   const stateOf = (p: Pilot, you: boolean): HeadState | undefined => {

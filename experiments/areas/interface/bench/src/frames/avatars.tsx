@@ -75,15 +75,16 @@ function SwitchRow({ label, note }: { label: string; note?: string }) {
 }
 
 // Which figures show, this pilot's own and the crew's, each inside the aircraft and on a walkaround
-// apart, all on at first (user, 2026-10-31; tried and dropped: one switch for each, which the record
-// gives, record/areas/product/03-v1-scope.md, Avatar sync; and grouped by where, inside the
-// aircraft and walkaround, each with My figure and The crew's figures).
+// apart, all on at first, the app speaking to the pilot as "your" (user, 2026-10-31; tried and
+// dropped: "My figure"; one switch for each, which the record gives,
+// record/areas/product/03-v1-scope.md, Avatar sync; and grouped by where, inside the aircraft and
+// walkaround, each with My figure and The crew's figures).
 function Visibility() {
   const { Card, Separator } = useUI()
   const group = (title: string) => <span className="px-(--card-spacing) pt-4 pb-1 text-xs text-muted-foreground">{title}</span>
   return (
     <Card className="gap-0 py-0 [--card-spacing:--spacing(5)]">
-      {group("My figure")}
+      {group("Your figure")}
       <SwitchRow label="Inside the aircraft" note="Your figure's head is hidden and its hands fade, so they don't block your view" />
       <SwitchRow label="Walkaround" />
       <Separator className="mt-1" />

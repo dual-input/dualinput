@@ -40,11 +40,15 @@ function useFlightAround(session: boolean) {
   useShowControl(control)
 }
 
-// The sharing card: the switch and what it does, then who shares, the tab's first question, by
-// their head as on the crew list, with what turning a switch on does to them (user, 2026-10-31: the
-// host's head in the card "was nice", where a line of the check named them); then the role's own
-// setting, which only a pilot who shares or could share needs.
-function RoleCard({ id, label, what, noun, session, sharer, onChange, children }: { id: string; label: string; what: string; noun: string; session: boolean; sharer: Sharer; onChange: (on: boolean) => void; children?: React.ReactNode }) {
+// The sharing card: the switch, then who's sharing, the tab's first question, by their head as on
+// the crew list, with what turning a switch on does to them (user, 2026-10-31: the host's head in
+// the card "was nice", where a line of the check named them); with nobody sharing, nothing, since
+// the switch says it (user, 2026-10-31). Then the role's own setting, which shows while this pilot
+// is sharing and hides when they stop, and outside a session, where the settings still change
+// (user, 2026-10-31). How it works says what the switch does, so the card carries no description
+// (user, 2026-10-31). A status of something happening now takes the progressive, "James is sharing
+// traffic" (user, 2026-10-31).
+function RoleCard({ id, label, noun, session, sharer, onChange, children }: { id: string; label: string; noun: string; session: boolean; sharer: Sharer; onChange: (on: boolean) => void; children?: React.ReactNode }) {
   const { Card, CardContent, Separator, Switch } = useUI()
   const who = !session ? (
     <span className="text-muted-foreground">Sharing needs a session</span>
@@ -54,23 +58,20 @@ function RoleCard({ id, label, what, noun, session, sharer, onChange, children }
         <Head hex={hexOf(sharer)} />
       </span>
       <span className="flex flex-col">
-        <span>{sharer === "You" ? `You share ${noun}` : `${sharer} shares ${noun}`}</span>
+        <span>{sharer === "You" ? `You're sharing ${noun}` : `${sharer} is sharing ${noun}`}</span>
         <span className="text-xs text-muted-foreground">{sharer === "You" ? "Turning theirs on takes over from you" : "Turning yours on takes over"}</span>
       </span>
     </>
-  ) : (
-    <span className="text-muted-foreground">Nobody shares {noun}</span>
-  )
+  ) : undefined
   return (
     <Card className="[--card-spacing:--spacing(5)]">
       <CardContent className="flex items-start gap-4">
-        <label htmlFor={id} className={"flex flex-1 flex-col gap-1 " + (session ? "cursor-pointer" : "")}>
-          <span className="text-sm font-medium">{label}</span>
-          <span className="text-xs text-muted-foreground">{what}</span>
+        <label htmlFor={id} className={"flex-1 text-sm font-medium " + (session ? "cursor-pointer" : "")}>
+          {label}
         </label>
         <Switch id={id} disabled={!session} checked={sharer === "You"} onCheckedChange={onChange} />
       </CardContent>
-      <CardContent className="flex min-h-7 items-center gap-3 text-sm">{who}</CardContent>
+      {who && <CardContent className="flex min-h-7 items-center gap-3 text-sm">{who}</CardContent>}
       {children && (
         <>
           <Separator />
@@ -162,12 +163,12 @@ function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: C
       counts.others ? { state: "differs", says: "Your own AI traffic and multiplayer are off", detail: `${counts.others} aircraft in your sim aren't ${sharer}'s` } : { state: "ok", says: "Your own AI traffic and multiplayer are off" },
       packsDiffer.length ? { state: "differs", says: `Your traffic packs match ${sharer}'s`, detail: <Lines items={packsDiffer.map((p) => packSays(p, sharer))} /> } : { state: "ok", says: `Your traffic packs match ${sharer}'s` },
       { state: "unchecked", says: `Your scenery matches ${sharer}'s`, detail: "Dual Input can't check this" },
-      counts.missing ? { state: "differs", says: `${sharer}'s aircraft show in your sim`, detail: `${counts.missing} missing or shown as stand-ins` } : { state: "ok", says: `${sharer}'s aircraft show in your sim` },
+      counts.missing ? { state: "differs", says: `${sharer}'s aircraft are showing in your sim`, detail: `${counts.missing} missing or shown as stand-ins` } : { state: "ok", says: `${sharer}'s aircraft are showing in your sim` },
     ]
   }
   return [
     { state: "unchecked", says: "Everyone else turns off their own AI traffic and multiplayer" },
-    { state: "unchecked", says: "Everyone runs the same traffic packs and scenery", detail: "Dual Input compares the packs once someone shares" },
+    { state: "unchecked", says: "Everyone runs the same traffic packs and scenery", detail: "Dual Input compares the packs once someone's sharing" },
   ]
 }
 
@@ -190,13 +191,12 @@ function Radius() {
 function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 } }: { where: Where; packs?: keyof typeof PACKS; counts?: Counts }) {
   useFlightAround(where.session)
   const [sharer, setSharer] = useState<Sharer>(where.sharer)
-  const receiving = where.session && !!sharer && sharer !== "You"
   const lines = trafficLines(where.session, sharer, PACKS[packs], counts)
   useShowDot("traffic", differs(lines))
   return (
     <ScrollPage>
-      <RoleCard id="share-traffic" label="Share my traffic" what="The AI traffic in your sim shows in the others' sims." noun="traffic" session={where.session} sharer={sharer} onChange={(on) => setSharer(on ? "You" : undefined)}>
-        {!receiving && <Radius />}
+      <RoleCard id="share-traffic" label="Share my traffic" noun="traffic" session={where.session} sharer={sharer} onChange={(on) => setSharer(on ? "You" : undefined)}>
+        {(sharer === "You" || !where.session) && <Radius />}
       </RoleCard>
       <HowAndCheck how="One pilot shares their traffic at a time: Dual Input copies the AI traffic in their sim into everyone else's. The copies look right when everyone else runs the same traffic packs and scenery, with their own traffic off." lines={lines} />
     </ScrollPage>
@@ -214,7 +214,7 @@ function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 
 function atcLines(session: boolean, sharer: Sharer, capture: "capturing" | "waiting"): Line[] {
   if (sharer === "You")
     return [
-      capture === "waiting" ? { state: "differs", says: "Your ATC app runs", detail: "Waiting for BeyondATC or SayIntentions to run" } : { state: "ok", says: "Your ATC app runs", detail: "Sharing BeyondATC" },
+      capture === "waiting" ? { state: "differs", says: "Your ATC app is running", detail: "Waiting for BeyondATC or SayIntentions to start" } : { state: "ok", says: "Your ATC app is running", detail: "Sharing BeyondATC" },
       { state: "unchecked", says: "The sim's own ATC is off", detail: "Dual Input can't share it, or check it" },
       { state: "unchecked", says: "The crew's own ATC apps are closed", detail: "Dual Input can't check this" },
     ]
@@ -234,7 +234,6 @@ function AtcPage({ where, capture = "capturing" }: { where: Where; capture?: "ca
   useFlightAround(where.session)
   const [sharer, setSharer] = useState<Sharer>(where.sharer)
   const [volume, setVolume] = useState([100])
-  const receiving = where.session && !!sharer && sharer !== "You"
   const hosting = where.session && sharer === "You"
   const lines = atcLines(where.session, sharer, capture)
   useShowDot("atc", differs(lines))
@@ -244,8 +243,8 @@ function AtcPage({ where, capture = "capturing" }: { where: Where; capture?: "ca
   ]
   return (
     <ScrollPage>
-      <RoleCard id="share-atc" label="Share my ATC" what="The others hear your ATC app." noun="ATC" session={where.session} sharer={where.session ? sharer : undefined} onChange={(on) => setSharer(on ? "You" : undefined)}>
-        {!receiving && (
+      <RoleCard id="share-atc" label="Share my ATC" noun="ATC" session={where.session} sharer={where.session ? sharer : undefined} onChange={(on) => setSharer(on ? "You" : undefined)}>
+        {(hosting || !where.session) && (
           <div className="flex flex-col gap-3">
             <span className="text-sm">ATC app</span>
             <Select items={apps} defaultValue="auto">

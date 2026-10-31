@@ -293,7 +293,9 @@ const differs = (lines: Line[]) => lines.some((l) => l.state === "differs")
 // (user, 2026-10-31). A pack the list doesn't know isn't shown, so the title says the packs were
 // detected. It's a supplement to the check, so it sits in a tint with no border, in smaller text,
 // with no tip, since the rules and the check's lines already say what to compare (user,
-// 2026-10-31). The second pack's name is hypothetical, and every version is an example.
+// 2026-10-31). It sits at the page's foot, so it holds still as the parts above it open and shut,
+// and follows them once the page outgrows the EFB (user, 2026-10-31). The second pack's name is
+// hypothetical, and every version is an example.
 type Pack = { name: string; version: string }
 const PACKS: Record<"match" | "differ", Pack[]> = {
   match: [
@@ -304,7 +306,7 @@ const PACKS: Record<"match" | "differ", Pack[]> = {
 }
 function PacksOnThisPc({ packs }: { packs: Pack[] }) {
   return (
-    <section className="flex flex-col gap-2.5 rounded-xl bg-muted/20 px-4 py-3.5 text-xs">
+    <section className="mt-auto flex flex-col gap-2.5 rounded-xl bg-muted/20 px-4 py-3.5 text-xs">
       <h2 className="flex items-center gap-1.5 font-medium text-muted-foreground/80">
         <Package className="size-3.5 shrink-0" />
         Detected traffic packs on this PC

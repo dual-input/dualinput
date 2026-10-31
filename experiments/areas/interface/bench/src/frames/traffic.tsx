@@ -9,7 +9,7 @@
 // the role it serves; then how the feature works, in a sentence or two; then the check, a line for
 // each rule of it with what Dual Input knows of it now. The words, the packs' names and versions,
 // the counts, and the devices are drafts and examples.
-import { useId, useMemo, useRef, useState } from "react"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { CircleCheck, CircleDashed, Package, TriangleAlert } from "lucide-react"
 
@@ -20,6 +20,8 @@ import { useShowPhase } from "./phase"
 import { useShowControl, useShowSession, type Control } from "./flight"
 import { ScrollPage } from "./scroller"
 import { Head } from "./figure-head"
+import { Swap, Room } from "./ease"
+import { Rolling } from "./home"
 import { FIGURE_COLORS } from "./figure-portrait"
 
 // Who shares as the frame opens: James, nobody, or this pilot; or no session at all. In a session,
@@ -53,13 +55,19 @@ function useFlightAround(session: boolean) {
 // head and "You're sharing traffic" with the switch on, to stop; while another pilot is, their head
 // and "James is sharing traffic" with Take over in place of the switch, which says what a switch
 // with a note under it had to, and takes over at once, with no question (user, 2026-10-31).
-// Outside a session the switch is off and can't turn on. Then the role's own setting, which shows while this
-// pilot is sharing and hides when they stop, and outside a session, where the settings still change
-// (user, 2026-10-31). How it works says what the switch does, so the card carries no description,
-// and a status of something happening now takes the progressive (user, 2026-10-31).
+// Outside a session the switch is off and can't turn on. Then the role's own setting, which shows
+// while this pilot is sharing and hides when they stop, and outside a session, where the settings
+// still change (user, 2026-10-31). How it works says what the switch does, so the card carries no
+// description, and a status of something happening now takes the progressive (user, 2026-10-31).
 // While the row holds the switch, the whole row is its label, out to the card's edges, so a VR
 // pointer anywhere on it flips the switch, and the row tints under the pointer to say so (user,
 // 2026-10-31). The card's padding moves into the row for that, and into the settings below it.
+// The row is a label in every state, so a change of state doesn't redraw it from scratch. With Take
+// over in it, the switch it names isn't there, so a press on it does nothing; a label naming no
+// control would take the first it holds, Take over.
+// As the state changes, the row changes in place (user, 2026-10-31): the words and the control give
+// way to the next (Swap), and a switch that only flips slides; a head's spot opens or shuts, and a
+// head pops into it, as a crew row's does as its pilot joins, a new one for a new pilot.
 function RoleCard({
   label,
   noun,
@@ -80,62 +88,54 @@ function RoleCard({
   const id = useId()
   const someone = session ? sharer : undefined
   const takeOver = !!someone && someone !== "You"
-  const row = (
-    <>
-      {someone && (
-        <span className="flex shrink-0">
-          <Head hex={hexOf(someone)} />
-        </span>
-      )}
-      <span
-        className={
-          "flex flex-1 flex-col text-sm " + (someone ? "" : "font-medium")
-        }
-      >
-        {someone === "You"
-          ? `You're sharing ${noun}`
-          : someone
-            ? `${someone} is sharing ${noun}`
-            : label}
-        {!session && (
-          <span className="text-xs font-normal text-muted-foreground">
-            Sharing needs a session
-          </span>
-        )}
-      </span>
-      {takeOver ? (
-        <Button variant="outline" size="sm" onClick={() => onChange(true)}>
-          Take over
-        </Button>
-      ) : (
-        <Switch
-          id={id}
-          disabled={!session}
-          checked={someone === "You"}
-          onCheckedChange={onChange}
-        />
-      )}
-    </>
-  )
-  const rowClass =
-    "flex min-h-7 items-center gap-3 box-content p-(--card-spacing)"
+  const says =
+    someone === "You"
+      ? `You're sharing ${noun}`
+      : someone
+        ? `${someone} is sharing ${noun}`
+        : label
   return (
     <Card className="gap-0 py-0 [--card-spacing:--spacing(5)]">
-      {takeOver ? (
-        <div className={rowClass}>{row}</div>
-      ) : (
-        <label
-          htmlFor={id}
+      <label
+        htmlFor={id}
+        className={
+          "box-content flex min-h-7 items-center p-(--card-spacing) " +
+          (session && !takeOver
+            ? "cursor-pointer transition-colors hover:bg-muted/40 active:bg-muted/60"
+            : "")
+        }
+      >
+        <HeadSpot who={someone} />
+        <span
           className={
-            rowClass +
-            (session
-              ? " cursor-pointer transition-colors hover:bg-muted/40 active:bg-muted/60"
-              : "")
+            "flex flex-1 flex-col text-sm " + (someone ? "" : "font-medium")
           }
         >
-          {row}
-        </label>
-      )}
+          <Swap id={says}>{says}</Swap>
+          {!session && (
+            <span className="text-xs font-normal text-muted-foreground">
+              Sharing needs a session
+            </span>
+          )}
+        </span>
+        <Swap
+          id={takeOver ? "take-over" : "switch"}
+          className="ml-3 justify-items-end"
+        >
+          {takeOver ? (
+            <Button variant="outline" size="sm" onClick={() => onChange(true)}>
+              Take over
+            </Button>
+          ) : (
+            <Switch
+              id={id}
+              disabled={!session}
+              checked={someone === "You"}
+              onCheckedChange={onChange}
+            />
+          )}
+        </Swap>
+      </label>
       {children && (
         <>
           <Separator />
@@ -148,14 +148,54 @@ function RoleCard({
   )
 }
 
+// The head's spot, its 28px and the 12px after it, eases open as a pilot starts sharing and shut as
+// they stop, the head fading as it shuts. A head that arrives after the card first shows pops in,
+// once the spot is partly open; one there from the start doesn't.
+const HEAD_SPOT = { width: 40, ease: 300, popAfter: 120 }
+function HeadSpot({ who }: { who: Sharer }) {
+  const last = useRef(who)
+  if (who) last.current = who
+  const [was, setWas] = useState(who)
+  const [popFor, setPopFor] = useState<Sharer>()
+  if (who !== was) {
+    setWas(who)
+    if (who) setPopFor(who)
+  }
+  const shown = last.current
+  return (
+    <span
+      className="flex shrink-0 overflow-hidden"
+      style={{
+        width: who ? HEAD_SPOT.width : 0,
+        opacity: who ? 1 : 0,
+        transition: `width ${HEAD_SPOT.ease}ms ease-out, opacity ${who ? 0 : 150}ms ease-in`,
+      }}
+    >
+      {shown && (
+        <Head
+          key={shown}
+          hex={hexOf(shown)}
+          pop={popFor === shown ? HEAD_SPOT.popAfter : undefined}
+        />
+      )}
+    </span>
+  )
+}
+
 // How the feature works, in a sentence or two under a heading in the card titles' style, since in
-// the small muted label it read as a caption (user, 2026-10-31); then the check: one line for each rule of it, each
-// with what Dual Input knows of it now (user, 2026-10-31: one place to explain, suggest, teach,
-// and troubleshoot, where a guide, a comparison, and tips were scattered). A line is checked and
-// fine, checked and different, with what differs under it, which also lights the tab's dot, or
-// beyond what Dual Input can check, so the line is the tip; with nobody sharing, every line waits.
+// the small muted label it read as a caption (user, 2026-10-31); then the check: one line for each
+// rule of it, each with what Dual Input knows of it now (user, 2026-10-31: one place to explain,
+// suggest, teach, and troubleshoot, where a guide, a comparison, and tips were scattered). A line is
+// checked and fine, checked and different, with what differs under it, which also lights the tab's
+// dot, or beyond what Dual Input can check, so the line is the tip; with nobody sharing, every line
+// waits. A line's id stays as its state changes, so the line changes in place.
 type State = "ok" | "differs" | "unchecked" | "rule"
-type Line = { state: State; says: string; detail?: React.ReactNode }
+type Line = {
+  id?: string
+  state: State
+  says: React.ReactNode
+  detail?: React.ReactNode
+}
 // Each icon centers on the capital letters of its line's first words, so it's placed from the
 // text's baseline, which sits at the same spot on every platform, where the line box doesn't:
 // placed in the 20px line by margin, the icon sat on the capitals' middle in Chromium on Linux and
@@ -173,13 +213,16 @@ const STATE_ICON: Record<State, React.ReactNode> = {
   // column the states' icons fill (user, 2026-10-31: the dashed circle read as "can't check" where
   // nothing was being checked yet).
   rule: (
-    <span className="mx-[5px] size-1.5 shrink-0 [transform:translateY(-1px)] rounded-full bg-muted-foreground" />
+    <span className="mx-[5px] block size-1.5 shrink-0 [transform:translateY(-1px)] rounded-full bg-muted-foreground" />
   ),
 }
 // While nobody's sharing, and outside a session, there's nothing to check, so the same lines are
 // the feature's rules, and the list says so (user, 2026-10-31). A note on the feature's cost sits
 // under how it works, in a paragraph of its own, since it's neither a rule nor a check (user,
 // 2026-10-31), on the tab of the pilot it speaks to.
+// The note and the list open and shut as rooms do (Room) as sharing starts or stops, and a line
+// whose state changes swaps its icon and words in place, its detail opening or shutting under it
+// (user, 2026-10-31).
 function HowAndCheck({
   how,
   note,
@@ -192,40 +235,51 @@ function HowAndCheck({
   rules: boolean
 }) {
   return (
-    <>
-      <section className="flex flex-col gap-2">
+    <div className="flex flex-col">
+      <section className="flex flex-col">
         <h2 className="text-sm font-medium">How it works</h2>
-        <p className="text-sm text-muted-foreground">{how}</p>
-        {note && <p className="text-sm text-muted-foreground">{note}</p>}
+        <p className="pt-2 text-sm text-muted-foreground">{how}</p>
+        <Room pad="pt-2">
+          {note && <p className="text-sm text-muted-foreground">{note}</p>}
+        </Room>
       </section>
-      {lines.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium">{rules ? "Rules" : "Check"}</h2>
-          <ul className="flex flex-col gap-3">
-            {lines.map((l) => (
-              <li key={l.says} className="flex items-baseline gap-2.5">
-                {STATE_ICON[l.state]}
-                <span className="flex flex-col gap-0.5">
-                  <span className="text-sm">{l.says}</span>
-                  {l.detail && (
-                    <span
-                      className={
-                        "text-xs " +
-                        (l.state === "differs"
-                          ? "text-warning"
-                          : "text-muted-foreground")
-                      }
-                    >
-                      {l.detail}
-                    </span>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-    </>
+      <Room pad="pt-6">
+        {lines.length > 0 && (
+          <section className="flex flex-col gap-2">
+            <h2 className="text-sm font-medium">{rules ? "Rules" : "Check"}</h2>
+            <ul className="flex flex-col gap-3">
+              {lines.map((l) => (
+                <li
+                  key={l.id ?? String(l.says)}
+                  className="flex items-baseline gap-2.5"
+                >
+                  <Swap id={l.state}>{STATE_ICON[l.state]}</Swap>
+                  <span className="flex flex-col">
+                    <Swap id={l.state} className="text-sm">
+                      {l.says}
+                    </Swap>
+                    <Room pad="pt-0.5">
+                      {l.detail && (
+                        <span
+                          className={
+                            "block text-xs " +
+                            (l.state === "differs"
+                              ? "text-warning"
+                              : "text-muted-foreground")
+                          }
+                        >
+                          {l.detail}
+                        </span>
+                      )}
+                    </Room>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </Room>
+    </div>
   )
 }
 const differs = (lines: Line[]) => lines.some((l) => l.state === "differs")
@@ -292,21 +346,36 @@ function trafficLines(
     return [
       counts.missing
         ? {
+            id: "missing",
             state: "differs",
-            says: `${counts.missing} aircraft from ${sharer} ${counts.missing === 1 ? "is" : "are"} missing or shown incorrectly`,
+            says: (
+              <>
+                <Rolling value={counts.missing} /> aircraft from {sharer}{" "}
+                {counts.missing === 1 ? "is" : "are"} missing or shown
+                incorrectly
+              </>
+            ),
             detail: "Usually caused by a difference in installed traffic packs",
           }
         : {
+            id: "missing",
             state: "ok",
             says: `All aircraft from ${sharer} loaded in your sim`,
           },
       counts.others
         ? {
+            id: "others",
             state: "differs",
-            says: `${counts.others} aircraft in your sim ${counts.others === 1 ? "isn't" : "aren't"} coming from ${sharer}`,
+            says: (
+              <>
+                <Rolling value={counts.others} /> aircraft in your sim{" "}
+                {counts.others === 1 ? "isn't" : "aren't"} coming from {sharer}
+              </>
+            ),
             detail: "Turn off AI traffic on your PC",
           }
         : {
+            id: "others",
             state: "ok",
             says: `No extra aircraft on top of what comes from ${sharer}`,
           },
@@ -339,18 +408,32 @@ function trafficLines(
   ]
 }
 
+// A frame can play the counts changing, as they do live: each step's counts after its time, in
+// milliseconds from the frame's opening.
+type CountsLater = { after: number; counts: Counts }[]
 function TrafficPage({
   where,
   packs = "match",
   counts = { missing: 0, others: 0 },
+  later = [],
 }: {
   where: Where
   packs?: keyof typeof PACKS
   counts?: Counts
+  later?: CountsLater
 }) {
   useFlightAround(where.session)
   const [sharer, setSharer] = useState<Sharer>(where.sharer)
-  const lines = trafficLines(where.session, sharer, counts)
+  const [countsNow, setCountsNow] = useState(counts)
+  useEffect(() => {
+    const timers = later.map((step) =>
+      window.setTimeout(() => setCountsNow(step.counts), step.after)
+    )
+    return () => timers.forEach(clearTimeout)
+    // It plays once, from the frame's opening.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const lines = trafficLines(where.session, sharer, countsNow)
   useShowDot("traffic", differs(lines))
   useShowShared("traffic", where.session ? sharer : undefined)
   useShowShared("atc", where.session ? "James" : undefined)
@@ -542,15 +625,17 @@ export function TrafficFrame({
   where,
   packs,
   counts,
+  later,
 }: {
   theme: Theme
   where: Where
   packs?: keyof typeof PACKS
   counts?: Counts
+  later?: CountsLater
 }) {
   return (
     <AppFrame theme={theme} tab="traffic" fixed>
-      <TrafficPage where={where} packs={packs} counts={counts} />
+      <TrafficPage where={where} packs={packs} counts={counts} later={later} />
     </AppFrame>
   )
 }

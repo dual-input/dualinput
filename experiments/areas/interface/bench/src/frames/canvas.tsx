@@ -130,6 +130,8 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Nobody shares traffic", draw: (t) => <TrafficFrame theme={t} where={{ session: true }} /> },
       { name: "Sharing traffic", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "You" }} /> },
       { name: "Receiving, aircraft missing and extra", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "James" }} packs="differ" counts={{ missing: 14, others: 6 }} /> },
+      // James's traffic changes, so the missing count rolls, then the pilot's own AI traffic goes off.
+      { name: "Receiving, counts changing", replay: true, draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "James" }} packs="differ" counts={{ missing: 14, others: 6 }} later={[{ after: 1500, counts: { missing: 12, others: 6 } }, { after: 3200, counts: { missing: 12, others: 0 } }]} /> },
       { name: "Receiving, everything matches", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "James" }} /> },
       { name: "Traffic outside a session", draw: (t) => <TrafficFrame theme={t} where={{ session: false }} /> },
     ],

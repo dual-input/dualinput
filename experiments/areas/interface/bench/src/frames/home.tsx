@@ -501,7 +501,7 @@ function ReadyButton({ ready, settled, onToggle }: { ready: boolean; settled: bo
 // A number that rolls to its next value as a counter's wheel does: the old one slides up out of its
 // window as the new one slides up in from below.
 const ROLL_MS = 250
-function Rolling({ value }: { value: number }) {
+export function Rolling({ value }: { value: number }) {
   const [leaving, setLeaving] = useState<number | null>(null)
   const last = useRef(value)
   useEffect(() => {

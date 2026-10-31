@@ -373,7 +373,8 @@ function EveryIssueSheet() {
 // audio's when its capture waits for an ATC app (user, 2026-10-31). The page says so, as a session
 // page says its phase. The dot is 8px at the icon's lower right, big enough to notice at an EFB's
 // distance and no bigger (user, 2026-10-31; tried and dropped: 10px at the upper right), with a
-// ring of the bar's own color parting it from the icon.
+// ring of the bar's own color parting it from the icon. It springs in as a warning arrives and
+// shrinks away as it clears.
 export const DotContext = createContext<(tab: Tab, on: boolean) => void>(() => {})
 export function useShowDot(tab: Tab, on: boolean) {
   const show = useContext(DotContext)
@@ -402,7 +403,7 @@ export function TabBar({ active = "session", dots = {} }: { active?: Tab; dots?:
           {id === active && <span className="absolute inset-x-4 -top-px h-0.5 rounded-full bg-primary" />}
           <span className="relative flex">
             <Icon className="size-5" />
-            {dots[id] && <span aria-label="Needs attention" className="absolute -right-0.5 -bottom-0.5 size-2 rounded-full bg-warning ring-2 ring-background" />}
+            <span aria-label={dots[id] ? "Needs attention" : undefined} aria-hidden={!dots[id]} className="absolute -right-0.5 -bottom-0.5 size-2 rounded-full bg-warning ring-2 ring-background" style={{ opacity: dots[id] ? 1 : 0, transform: dots[id] ? "none" : "scale(0.4)", transition: dots[id] ? "opacity 180ms ease-out, transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1)" : "opacity 150ms ease-in, transform 150ms ease-in" }} />
           </span>
         </button>
       ))}

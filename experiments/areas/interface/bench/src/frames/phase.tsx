@@ -103,19 +103,30 @@ function PhaseFace({ phase, stage, dotStays, shared }: { phase: SessionPhase; st
 // bigger than the crew list's faint one though both measure 26px by 20px; and a green bar above
 // the tab's icon, as an Airbus FCU pushbutton's, which looked ugly (user, 2026-10-31).
 const FEATURES: { id: SharedFeature; icon: React.ReactNode; noun: string }[] = [
-  { id: "traffic", icon: <Plane className="size-3" />, noun: "traffic" },
-  { id: "atc", icon: <Headset className="size-3" />, noun: "ATC" },
+  { id: "traffic", icon: <Plane className="size-3 shrink-0" />, noun: "traffic" },
+  { id: "atc", icon: <Headset className="size-3 shrink-0" />, noun: "ATC" },
 ]
 function SharedIcons({ shared, style }: { shared: Shared; style: React.CSSProperties }) {
-  const on = FEATURES.filter((f) => shared[f.id])
-  if (!on.length) return null
+  // Each icon is always drawn, at no width while its feature isn't shared, so one arriving or
+  // leaving eases in or out and moves the other over, rather than it jumping.
   return (
-    <span className="flex items-center gap-1.5 text-success" style={style}>
-      {on.map((f) => (
-        <span key={f.id} role="img" aria-label={`Sharing ${f.noun}`} className="flex animate-in duration-300 fade-in">
-          {f.icon}
-        </span>
-      ))}
+    <span className="flex items-center text-success" style={style}>
+      {FEATURES.map((f, i) => {
+        const on = !!shared[f.id]
+        const after = FEATURES.slice(0, i).some((g) => shared[g.id])
+        return (
+          <span
+            key={f.id}
+            role={on ? "img" : undefined}
+            aria-label={on ? `Sharing ${f.noun}` : undefined}
+            aria-hidden={!on}
+            className="flex overflow-hidden"
+            style={{ width: on ? 12 : 0, marginLeft: on && after ? 6 : 0, opacity: on ? 1 : 0, transform: on ? "none" : "scale(0.6)", transition: "width 250ms ease-out, margin-left 250ms ease-out, opacity 200ms ease-out, transform 250ms ease-out" }}
+          >
+            {f.icon}
+          </span>
+        )
+      })}
     </span>
   )
 }

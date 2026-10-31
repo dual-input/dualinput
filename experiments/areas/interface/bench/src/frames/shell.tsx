@@ -382,13 +382,30 @@ export function useShowDot(tab: Tab, on: boolean) {
   useLayoutEffect(() => () => show(tab, false), [show, tab])
 }
 
-export function TabBar({ active = "session", dots = {} }: { active?: Tab; dots?: Partial<Record<Tab, boolean>> }) {
+// A tab whose feature is being shared in this session shows a short green bar above its icon, as an
+// Airbus FCU pushbutton's green bar shows it's engaged, for everyone, host or not, since the page
+// says who shares (user, 2026-10-31). It differs from the warning's dot in shape and place, not
+// only color, so a pilot who can't tell green from amber still tells them apart, and both show at
+// once. The selected tab's page says the same, so its bar hides, which also keeps it from stacking
+// under the selected tab's line; it's 14px wide and 3px tall, clear of the bar's top edge, so it
+// doesn't read as that line. Whichever page is showing says what it knows, as with the dots.
+export const SharedContext = createContext<(tab: Tab, on: boolean) => void>(() => {})
+export function useShowShared(tab: Tab, on: boolean) {
+  const show = useContext(SharedContext)
+  useLayoutEffect(() => {
+    show(tab, on)
+  }, [show, tab, on])
+  useLayoutEffect(() => () => show(tab, false), [show, tab])
+}
+
+export function TabBar({ active = "session", dots = {}, shared = {} }: { active?: Tab; dots?: Partial<Record<Tab, boolean>>; shared?: Partial<Record<Tab, boolean>> }) {
   return (
     <nav className="flex h-14 shrink-0 border-t">
       {TABS.map(({ id, icon: Icon, label }) => (
         <button key={id} title={label} className={"relative flex flex-1 items-center justify-center outline-none hover:text-foreground " + (id === active ? "text-primary" : "text-muted-foreground")}>
           {id === active && <span className="absolute inset-x-4 -top-px h-0.5 rounded-full bg-primary" />}
           <span className="relative flex">
+            {shared[id] && id !== active && <span aria-label="Being shared" className="absolute inset-x-[3px] -top-[7px] h-[3px] rounded-full bg-success" />}
             <Icon className="size-5" />
             {dots[id] && <span aria-label="Needs attention" className="absolute -right-0.5 -bottom-0.5 size-2 rounded-full bg-warning ring-2 ring-background" />}
           </span>
@@ -461,6 +478,8 @@ export function AppFrame({ theme, status = {}, header = true, tabs = true, tab, 
   const [control, setControl] = useState<Control>()
   const [dots, setDots] = useState<Partial<Record<Tab, boolean>>>({})
   const showDot = useCallback((tab: Tab, on: boolean) => setDots((d) => (!!d[tab] === on ? d : { ...d, [tab]: on })), [])
+  const [shared, setShared] = useState<Partial<Record<Tab, boolean>>>({})
+  const showShared = useCallback((tab: Tab, on: boolean) => setShared((d) => (!!d[tab] === on ? d : { ...d, [tab]: on })), [])
   return (
     <ThemeContext.Provider value={theme}>
       <UIContext.Provider value={ui}>
@@ -468,6 +487,7 @@ export function AppFrame({ theme, status = {}, header = true, tabs = true, tab, 
       <SessionContext.Provider value={setInSession}>
       <ControlContext.Provider value={setControl}>
       <DotContext.Provider value={showDot}>
+      <SharedContext.Provider value={showShared}>
         <div
           data-app-frame
           className="dark relative flex flex-col overflow-hidden rounded-xl border bg-background font-sans text-foreground shadow-2xl"
@@ -475,10 +495,11 @@ export function AppFrame({ theme, status = {}, header = true, tabs = true, tab, 
         >
           {header && <Header status={down ? {} : status} startOpen={headerOpen} phase={down ? undefined : phase} inSession={!down && inSession} />}
           <div className="flex min-h-0 flex-1 flex-col">{down ? <ServiceDown closed={core === "closed"} /> : children}</div>
-          {tabs && !down && <TabBar active={tab} dots={dots} />}
+          {tabs && !down && <TabBar active={tab} dots={dots} shared={shared} />}
           {tabs && !down && <TakeControl control={control} />}
           {!down && <Reconnecting on={core === "reconnecting"} />}
         </div>
+      </SharedContext.Provider>
       </DotContext.Provider>
       </ControlContext.Provider>
       </SessionContext.Provider>

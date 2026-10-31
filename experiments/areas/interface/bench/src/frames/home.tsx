@@ -8,7 +8,7 @@ import { ArrowRightLeft, BookOpen, Check, ChevronDown, ChevronUp, CircleCheck, C
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
 import { StatusChip } from "@/bench/screens"
-import { AppFrame, InlineLink, Label, type Core, type HeaderStatus } from "./shell"
+import { AppFrame, InlineLink, Label, useShowShared, type Core, type HeaderStatus } from "./shell"
 import { FIGURE_COLORS } from "./figure-portrait"
 import { StandingFigure } from "./figure-standing"
 import { ConfirmButton, RESTART_SIM } from "./confirm"
@@ -1417,6 +1417,8 @@ function StartCard({ aircraft, servers = "answering", play, session, next, opens
     if (SESSIONS[shown].flight) setStarted(true)
   }
   useShowSession(half === "session")
+  useShowShared("traffic", half === "session" && !!SESSIONS[shown].traffic)
+  useShowShared("atc", half === "session" && !!SESSIONS[shown].atc)
   const checklist = half === "session" && !started ? SESSIONS[shown].preflight?.checklist : undefined
   const [foldedNow, setFoldedNow] = useState(false)
   const folded = foldedNow && !!checklist

@@ -1,12 +1,11 @@
 // How others see a pilot: their name and their figure's color, beside a portrait of the figure
 // whose head turns toward the cursor, as the figure in the cockpit turns where its pilot looks.
-// First-time setup asks for both with it, and the Avatars tab changes them with it (user,
+// First-time setup asks for both with it, and the Figures tab changes them with it (user,
 // 2026-10-31), so it's one card in both places.
 import { useEffect, useLayoutEffect, useRef } from "react"
 
 import { useUI } from "@/bench/ui"
 import { Label } from "./shell"
-import { Head } from "./figure-head"
 import { FIGURE_COLORS, FigurePortrait, HEAD_IN_PORTRAIT, unit, type V } from "./figure-portrait"
 
 export const WINDOWS_USERNAME = "jordan"
@@ -15,34 +14,24 @@ export const WINDOWS_USERNAME = "jordan"
 // with always fits (record/areas/interface/decisions.md, A display name runs to 20 characters).
 export const NAME_MAX = 20
 
-// A crewmate whose color shows on its swatch.
-export type Mate = { name: string; hue: string }
-
 // Each swatch is a 28px target, for a VR pointer in the EFB, and shows a 22px dot, so the picked
 // one's 2px ring sits 1px off the dot inside the target, and eight spread across the fields'
 // column, at least 2px apart, so the row ends where the name field does, in setup's narrower card
-// too (user, 2026-10-31: 20px swatches were small for VR, and the card keeps its symmetry). A color a crewmate
-// wears shows as their head, as on the crew list, so a pilot sees the clash before picking it; two
-// pilots may share a color and sort it out between themselves
-// (record/areas/avatars/01-avatars.md, The pose). The ring eases between swatches as the pick moves.
-function Swatch({ hex, name, on, mate, onPick, set }: { hex: string; name: string; on: boolean; mate?: string; onPick: () => void; set: (el: HTMLButtonElement | null) => void }) {
+// too (user, 2026-10-31: 20px swatches were small for VR, and the card keeps its symmetry). Every
+// swatch is a flat color (user, 2026-10-31; tried and dropped: a crewmate's color as their head,
+// which read as a figure among colors). The ring eases between swatches as the pick moves.
+function Swatch({ hex, name, on, onPick, set }: { hex: string; name: string; on: boolean; onPick: () => void; set: (el: HTMLButtonElement | null) => void }) {
   return (
     <button
       ref={set}
       type="button"
       onClick={onPick}
-      aria-label={mate ? `${name}, ${mate}'s color` : name}
+      aria-label={name}
       aria-pressed={on}
       className="relative flex size-7 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <span className="absolute inset-0 rounded-full border-2 border-foreground" style={{ opacity: on ? 1 : 0, transform: on ? "none" : "scale(0.8)", transition: "opacity 180ms ease-out, transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1)" }} />
-      {mate ? (
-        <span className="flex" style={{ transform: "scale(0.786)" }}>
-          <Head hex={hex} />
-        </span>
-      ) : (
-        <span className="size-[22px] rounded-full" style={{ background: hex }} />
-      )}
+      <span className="size-[22px] rounded-full" style={{ background: hex }} />
     </button>
   )
 }
@@ -56,7 +45,6 @@ export function IdentityCard({
   onName,
   hue,
   onHue,
-  crew = [],
   region,
   focus,
   className,
@@ -65,7 +53,6 @@ export function IdentityCard({
   onName: (name: string) => void
   hue: string
   onHue: (hue: string) => void
-  crew?: Mate[]
   region?: React.RefObject<HTMLElement | null>
   focus?: boolean
   className?: string
@@ -136,7 +123,6 @@ export function IdentityCard({
                   hex={c.hex}
                   name={c.name}
                   on={hue === c.name}
-                  mate={crew.find((m) => m.hue === c.name)?.name}
                   onPick={() => onHue(c.name)}
                   set={(el) => {
                     if (el) swatches.current.set(c.name, el)

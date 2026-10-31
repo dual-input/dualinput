@@ -22,7 +22,7 @@ const TABS: { id: Tab; icon: typeof Users; label: string }[] = [
   { id: "session", icon: Users, label: "Session" },
   { id: "traffic", icon: Plane, label: "Traffic" },
   { id: "atc", icon: Headset, label: "ATC audio" },
-  { id: "avatars", icon: PersonStanding, label: "Avatars" },
+  { id: "avatars", icon: PersonStanding, label: "Figures" },
   { id: "settings", icon: Gear, label: "Settings" },
 ]
 

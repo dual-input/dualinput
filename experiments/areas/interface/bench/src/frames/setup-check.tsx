@@ -1,6 +1,6 @@
 // First-time setup as a short sequence: the welcome alone on the page, then a system check that
 // runs one check at a time in one centered slot, stopping on a failure, then the pilot's crew card
-// with a portrait of their figure (identity.tsx), which the Avatars tab changes later. The checks'
+// with a portrait of their figure (identity.tsx), which the Figures tab changes later. The checks'
 // outcomes and the name are examples.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -210,13 +210,13 @@ function CrewCard() {
     >
       <div className="flex flex-col gap-1">
         <h2 className="text-lg font-semibold">How should others see you?</h2>
-        <p className="text-sm text-muted-foreground">Pick a name and a color for your avatar.</p>
+        <p className="text-sm text-muted-foreground">Pick a name and a color for your figure.</p>
       </div>
       <IdentityCard name={name} onName={setName} hue={hue} onHue={setHue} region={form} focus />
       <p className="text-xs text-muted-foreground">
         We pre-filled your Windows username.
         <br />
-        You can change both later on the Avatars tab.
+        You can change both later on the Figures tab.
       </p>
       <Button type="submit" size="lg" className="w-full" disabled={!name.trim()}>
         Continue

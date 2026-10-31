@@ -336,9 +336,9 @@ const differs = (lines: Line[]) => lines.some((l) => l.state === "differs")
 // catch a mismatch whatever its cause, where comparing the crew's lists saw only the packs on the
 // known list, which starts with `fsltl-traffic-base`, and needed the lists sent between the cores
 // (user, 2026-10-31). A pack the list doesn't know isn't shown, so the title says the packs were
-// detected. It's a supplement to the check, so it sits in a tint with no border, in smaller text,
-// with no tip, since the rules and the check's lines already say what to compare (user,
-// 2026-10-31). It sits at the page's foot, so it holds still as the parts above it open and shut,
+// detected. It's a supplement to the check, so it sits in a tint with no border, its corners
+// 16px, styled as the Figures tab's guides are, its title row theirs, with no tip, since the rules
+// and the check's lines already say what to compare (user, 2026-10-31). It sits at the page's foot, so it holds still as the parts above it open and shut,
 // and follows them once the page outgrows the EFB (user, 2026-10-31). The second pack's name is
 // hypothetical, and every version is an example.
 type Pack = { name: string; version: string }
@@ -351,19 +351,19 @@ const PACKS: Record<"match" | "differ", Pack[]> = {
 }
 function PacksOnThisPc({ packs }: { packs: Pack[] }) {
   return (
-    <section className="mt-auto flex flex-col gap-2.5 rounded-xl bg-muted/20 px-4 py-3.5 text-xs">
-      <h2 className="flex items-center gap-1.5 font-medium text-muted-foreground/80">
-        <Package className="size-3.5 shrink-0" />
+    <section className="mt-auto flex flex-col rounded-2xl bg-muted/20 text-sm text-muted-foreground">
+      <h2 className="flex min-h-11 items-center gap-2.5 px-4 py-3">
+        <Package className="size-4 shrink-0" />
         Detected traffic packs on this PC
       </h2>
-      <ul className="flex flex-col gap-1.5">
+      <ul className="flex flex-col gap-1.5 px-4 pb-4">
         {packs.map((p) => (
           <li
             key={p.name}
             className="flex items-baseline justify-between gap-4"
           >
-            <span className="text-foreground/75">{p.name}</span>
-            <span className="text-muted-foreground/80 tabular-nums">
+            <span>{p.name}</span>
+            <span className="text-muted-foreground/70 tabular-nums">
               {p.version}
             </span>
           </li>

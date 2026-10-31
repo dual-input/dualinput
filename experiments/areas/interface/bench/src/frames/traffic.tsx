@@ -155,22 +155,24 @@ function RoleCard({
 // beyond what Dual Input can check, so the line is the tip; with nobody sharing, every line waits.
 type State = "ok" | "differs" | "unchecked" | "rule"
 type Line = { state: State; says: string; detail?: React.ReactNode }
-// Each icon's middle sits 11px down the 20px line, 1px below the line's own middle, since the eye
-// centers on the lowercase letters, which sit low in the line; centered on the line, the icons
-// looked high (user, 2026-10-31).
+// Each icon centers on the capital letters of its line's first words, so it's placed from the
+// text's baseline, which sits at the same spot on every platform, where the line box doesn't:
+// placed in the 20px line by margin, the icon sat on the capitals' middle in Chromium on Linux and
+// 2px low in the user's browser (user, 2026-10-31), since each platform reads the font's height
+// from another table. The row aligns its items' baselines, an icon's being its bottom edge, and
+// the icon moves 3px down, half its 16px less half Geist's 10px capitals at 14px, and a rule's
+// 6px dot 1px up, to the lowercase letters' middle, as a list's points sit. Coherent GT lists
+// align-items as working, but its baseline value is unmeasured there.
+const ICON = "size-4 shrink-0 [transform:translateY(3px)]"
 const STATE_ICON: Record<State, React.ReactNode> = {
-  ok: <CircleCheck className="mt-[3px] size-4 shrink-0 text-success" />,
-  differs: <TriangleAlert className="mt-[3px] size-4 shrink-0 text-warning" />,
-  unchecked: (
-    <CircleDashed className="mt-[3px] size-4 shrink-0 text-muted-foreground" />
-  ),
-  // A rule is a plain list's point rather than a state, so it takes a small solid dot, centered on
-  // the line where the states' icons fill a 16px box (user, 2026-10-31: the dashed circle read as
-  // "can't check" where nothing was being checked yet).
+  ok: <CircleCheck className={ICON + " text-success"} />,
+  differs: <TriangleAlert className={ICON + " text-warning"} />,
+  unchecked: <CircleDashed className={ICON + " text-muted-foreground"} />,
+  // A rule is a plain list's point rather than a state, so it takes a small solid dot, in the 16px
+  // column the states' icons fill (user, 2026-10-31: the dashed circle read as "can't check" where
+  // nothing was being checked yet).
   rule: (
-    <span className="flex size-4 shrink-0 items-center justify-center pt-1.5">
-      <span className="size-1.5 rounded-full bg-muted-foreground" />
-    </span>
+    <span className="mx-[5px] size-1.5 shrink-0 [transform:translateY(-1px)] rounded-full bg-muted-foreground" />
   ),
 }
 // While nobody's sharing, and outside a session, there's nothing to check, so the same lines are
@@ -200,7 +202,7 @@ function HowAndCheck({
           <h2 className="text-sm font-medium">{rules ? "Rules" : "Check"}</h2>
           <ul className="flex flex-col gap-3">
             {lines.map((l) => (
-              <li key={l.says} className="flex items-start gap-2.5">
+              <li key={l.says} className="flex items-baseline gap-2.5">
                 {STATE_ICON[l.state]}
                 <span className="flex flex-col gap-0.5">
                   <span className="text-sm">{l.says}</span>

@@ -313,7 +313,10 @@ function foldPage(box: HTMLElement) {
       edge.style.top = `${el.offsetTop + under - 1}px`
       edge.style.left = `${el.offsetLeft - 1}px`
       edge.style.width = `${el.offsetWidth + 2}px`
-      edge.style.height = `${el.offsetHeight - under + 2}px`
+      // Once the card has scrolled past whole, its ring goes with it, since a negative height is
+      // ignored and would leave the last one standing.
+      edge.style.display = under >= el.offsetHeight ? "none" : ""
+      edge.style.height = `${Math.max(0, el.offsetHeight - under) + 2}px`
       edge.style.borderColor = ring
       edge.style.borderRadius = `${round + 1}px`
     }

@@ -749,7 +749,7 @@ const MESSAGES_WINDOW = 128
 // side 8px, the ring's spread at the row's end, which also covers a list head's nose, which its
 // cone and a nod's dip take out of its window by up to 7px (figure-head.tsx, LIST_ROOM).
 const WINDOW_ROOM = { x: 8, y: 8 }
-function ScrollWindow({ max, children }: { max?: number; children: React.ReactNode }) {
+export function ScrollWindow({ max, children }: { max?: number; children: React.ReactNode }) {
   const w = useScroller({ nested: true })
   return (
     <div className="relative">

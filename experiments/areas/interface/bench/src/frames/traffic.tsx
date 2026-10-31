@@ -41,8 +41,9 @@ const hexOf = (pilot: "James" | "You") =>
   FIGURE_COLORS.find((c) => c.name === HUE[pilot])!.hex
 
 // The flight's frame around a tab: the phase in the header and the take-control strip under the
-// tabs while flying, as on every tab; neither outside a session.
-export function useFlightAround(session: boolean) {
+// tabs while flying, as on every tab; neither outside a session. The strip shows the bound key, F9
+// unless the page says otherwise, as Settings does while a pilot binds one.
+export function useFlightAround(session: boolean, bound: string | undefined = "F9") {
   useShowPhase(session ? "syncing" : undefined)
   useShowSession(session)
   const [mine, setMine] = useState(false)
@@ -50,9 +51,9 @@ export function useFlightAround(session: boolean) {
   const control = useMemo<Control | undefined>(
     () =>
       session
-        ? { mine, pf: "James", bound: "F9", take: () => takeNow.current() }
+        ? { mine, pf: "James", bound, take: () => takeNow.current() }
         : undefined,
-    [session, mine]
+    [session, mine, bound]
   )
   useShowControl(control)
 }

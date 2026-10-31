@@ -15,6 +15,7 @@ import { CrewmateStatesFrame, HeadsUpFrame, HomeFirstTimeFrame, HomeLaterFrame, 
 import { AircraftPickerFrame } from "./aircraft"
 import { AtcFrame, TrafficFrame } from "./traffic"
 import { AvatarsFrame } from "./avatars"
+import { SettingsFrame } from "./settings"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
 // one gets a Replay button beside its name, which draws it afresh. A home page with Host and Join
@@ -161,6 +162,24 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Profile has no seats", draw: (t) => <AvatarsFrame theme={t} note="seats" /> },
       { name: "No profile for this aircraft", draw: (t) => <AvatarsFrame theme={t} note="profile" /> },
       { name: "Help notes open", draw: (t) => <AvatarsFrame theme={t} helpOpen /> },
+    ],
+  },
+  // The Settings tab in a flight, with F9 bound, and outside a session; the key before it's set,
+  // and waiting for a press; a picked output device that's gone; then the update's states, each
+  // opened as the header's View update opens it, scrolled to Dual Input's section.
+  {
+    name: "Settings",
+    frames: [
+      { name: "Settings in a flight", draw: (t) => <SettingsFrame theme={t} /> },
+      { name: "Settings outside a session", draw: (t) => <SettingsFrame theme={t} session={false} /> },
+      { name: "Key not set", draw: (t) => <SettingsFrame theme={t} bound={null} /> },
+      { name: "Waiting for a key", draw: (t) => <SettingsFrame theme={t} bound="waiting" /> },
+      { name: "Picked device not connected", draw: (t) => <SettingsFrame theme={t} device="missing" /> },
+      { name: "Checking for updates", draw: (t) => <SettingsFrame theme={t} session={false} update="checking" show /> },
+      { name: "Update downloading", draw: (t) => <SettingsFrame theme={t} session={false} update="downloading" show /> },
+      { name: "Update ready", draw: (t) => <SettingsFrame theme={t} session={false} update="ready" show /> },
+      { name: "Update ready in a flight", draw: (t) => <SettingsFrame theme={t} update="ready" show /> },
+      { name: "Update failed", draw: (t) => <SettingsFrame theme={t} session={false} update="failed" show /> },
     ],
   },
   // What the app's window says of itself on any page. The header on home, open over what needs the

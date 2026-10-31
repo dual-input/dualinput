@@ -60,10 +60,10 @@ function NoteForAircraft({ note, onLearnMore }: { note: AircraftNote; onLearnMor
 // its words' capitals on the switch from their baseline, through a strut half the switch's 20px and
 // half Geist's 10px capitals at 14px tall, since each platform places the words in their line box
 // differently; a row with a note centers the two as a block.
-function SwitchRow({ label, note }: { label: string; note?: string }) {
+export function SwitchRow({ label, note, on: start = true }: { label: string; note?: string; on?: boolean }) {
   const { Switch } = useUI()
   const id = useId()
-  const [on, setOn] = useState(true)
+  const [on, setOn] = useState(start)
   return (
     <label htmlFor={id} className={"box-content flex min-h-5 cursor-pointer px-(--card-spacing) py-2 transition-colors hover:bg-muted/40 active:bg-muted/60 " + (note ? "items-center" : "items-baseline")}>
       {!note && <span aria-hidden className="h-[15px] w-0 self-baseline" />}
@@ -217,7 +217,7 @@ function SeatsDrawing({ hex }: { hex: string }) {
 // page's own pixels. 20px of room stays at either end, the page's padding. Tried and dropped: one
 // smooth scroll by the whole distance, which the browser cut short at the page's foot before the
 // guide had opened.
-function showWhole(part: HTMLElement, height: number) {
+export function showWhole(part: HTMLElement, height: number) {
   let box = part.parentElement
   while (box && getComputedStyle(box).overflowY !== "auto") box = box.parentElement
   if (!box) return

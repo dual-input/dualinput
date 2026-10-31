@@ -595,7 +595,7 @@ function CountdownRing({ left }: { left: number | null }) {
 // The session's phase, which the header shows (phase.tsx): preflight once the PF is in a flight on
 // the ground, or has a way for a joiner to reach them, then syncing once the countdown ends.
 const phaseOf = (session: Session, started: boolean): SessionPhase | undefined =>
-  started ? "syncing" : session.preflight || session.crew.find((p) => p.flying)?.way ? "preflight" : undefined
+  started ? "syncing" : session.preflight ? "preflight" : undefined
 
 // A pilot's head in the folded card's row, named with where they stand for a screen reader, with a
 // badge at its lower right: while the countdown waits on them, an empty ring in the muted color,

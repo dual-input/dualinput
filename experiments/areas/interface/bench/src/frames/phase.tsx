@@ -7,9 +7,12 @@ import { Headset, Plane } from "lucide-react"
 import { ARRIVE, MOMENT } from "./ease"
 
 // Preflight runs from the moment the PF is in a flight on the ground
-// (record/areas/session/02-units.md, Preflight), so a joiner whose PF waits at a stand is in it
-// before they're in the flight, then syncing once its countdown ends. Before preflight there's
-// none, and the header shows the mark. Preflight says what it is: sync hasn't started yet, rather
+// (record/areas/session/02-units.md, Preflight), but the header shows it to a pilot only once
+// they're in the flight, with their checklist and their Ready, so a joiner still at the world map
+// sees the mark (user, 2026-10-31; tried and dropped: Preflight from the PF's flight, which named a
+// phase whose checklist and Ready the joiner didn't have yet, and a phase of its own for boarding);
+// then syncing once its countdown ends. Before preflight there's none, and the header shows the
+// mark. Preflight says what it is: sync hasn't started yet, rather
 // than paused, which would say it ran and stopped, and pause is the sim's word too; syncing needs
 // no explaining. The colors follow a Boeing flight mode annunciator, where a mode armed shows in
 // white and engaged in green: preflight is the app's information color, a white with a cool tint,

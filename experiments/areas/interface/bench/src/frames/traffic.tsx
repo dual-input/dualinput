@@ -18,14 +18,11 @@ import type { Theme } from "@/bench/theme"
 import { AppFrame, InlineLink, Label, useShowDot } from "./shell"
 import { useShowPhase } from "./phase"
 import { useShowControl, useShowSession, type Control } from "./flight"
+import { ScrollPage } from "./scroller"
 
 // Who shares as the frame opens: James, nobody, or this pilot; or no session at all.
 type Sharer = "James" | "You" | undefined
 type Where = { session: boolean; sharer?: Sharer }
-
-// A tab's page scrolls once it holds more than the window, its parts keeping their height rather
-// than shrinking to fit.
-const PAGE = "flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-5 pt-0 [&>*]:shrink-0"
 
 // The flight's frame around a tab: the phase in the header and the take-control strip under the
 // tabs while flying, as on every tab; neither outside a session.
@@ -177,12 +174,12 @@ function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 
   const lines = trafficLines(where.session, sharer, PACKS[packs], counts)
   useShowDot("traffic", differs(lines))
   return (
-    <div className={PAGE}>
+    <ScrollPage>
       <RoleCard id="share-traffic" label="Share my traffic" what="The AI traffic in your sim shows in the others' sims." session={where.session} sharing={sharer === "You"} onChange={(on) => setSharer(on ? "You" : undefined)}>
         {!receiving && <Radius />}
       </RoleCard>
       <HowAndCheck how="One pilot shares their traffic at a time: Dual Input copies the AI traffic in their sim into everyone else's. The copies look right when everyone else runs the same traffic packs and scenery, with their own traffic off." lines={lines} />
-    </div>
+    </ScrollPage>
   )
 }
 
@@ -205,7 +202,7 @@ function atcLines(session: boolean, sharer: Sharer, capture: "capturing" | "wait
   if (sharer && session)
     return [
       { state: "ok", says: `${sharer} shares their ATC`, detail: "Turning yours on takes over" },
-      { state: "unchecked", says: "Your own ATC app is closed", detail: "Dual Input can't check this. With one open, you'd hear two" },
+      { state: "unchecked", says: "Your own ATC app is closed", detail: "With one open you'd hear two, and Dual Input can't check this" },
       { state: "unchecked", says: "The sim's own ATC is off", detail: "Dual Input can't check this" },
     ]
   return [
@@ -229,7 +226,7 @@ function AtcPage({ where, capture = "capturing" }: { where: Where; capture?: "ca
     { value: "pick", label: "Pick a program playing audio…" },
   ]
   return (
-    <div className={PAGE}>
+    <ScrollPage>
       <RoleCard id="share-atc" label="Share my ATC" what="The others hear your ATC app." session={where.session} sharing={hosting} onChange={(on) => setSharer(on ? "You" : undefined)}>
         {!receiving && (
           <div className="flex flex-col gap-3">
@@ -264,7 +261,7 @@ function AtcPage({ where, capture = "capturing" }: { where: Where; capture?: "ca
           </CardContent>
         </Card>
       )}
-    </div>
+    </ScrollPage>
   )
 }
 

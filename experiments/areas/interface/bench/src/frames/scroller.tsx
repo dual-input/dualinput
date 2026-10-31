@@ -207,3 +207,32 @@ export function useScroller({ nested, ...said }: Told & { nested?: boolean } = {
   const moving = () => pressed.current || frame.current !== 0
   return { ref, onScroll: measure, onMouseDown, onWheel: stop, onTouchStart, onTouchEnd, above, below, cursor, glideTo, moving }
 }
+
+// A page of the app that scrolls once it holds more than the window, for every page but home,
+// whose session card folds as it scrolls. Like home's, it draws no scrollbar, fades at either end
+// while there's more that way, and scrolls on a drag anywhere. The scroll box starts 1px above the
+// page with 1px of padding, so its clip doesn't cut the top card's border, and the page's parts
+// keep their height rather than shrinking to fit (user, 2026-10-31: a page built without these
+// brought back a scrollbar and a clipped border).
+export function ScrollPage({ children }: { children: React.ReactNode }) {
+  const scroller = useScroller()
+  const fade = (to: "top" | "bottom", shown: boolean): React.CSSProperties => ({ background: `linear-gradient(to ${to === "top" ? "bottom" : "top"}, var(--background), transparent)`, opacity: shown ? 1 : 0 })
+  return (
+    <div className="relative -mt-px flex min-h-0 flex-1 flex-col">
+      <div
+        ref={scroller.ref}
+        onScroll={scroller.onScroll}
+        onWheel={scroller.onWheel}
+        onMouseDown={scroller.onMouseDown}
+        onTouchStart={scroller.onTouchStart}
+        onTouchEnd={scroller.onTouchEnd}
+        onTouchCancel={scroller.onTouchEnd}
+        className={"flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pt-px pb-5 select-none [&>*]:shrink-0 " + NO_SCROLLBAR + " " + scroller.cursor}
+      >
+        {children}
+      </div>
+      <div className="pointer-events-none absolute top-0 right-0 left-0 h-6 transition-opacity duration-200" style={fade("top", scroller.above)} />
+      <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-8 transition-opacity duration-200" style={fade("bottom", scroller.below)} />
+    </div>
+  )
+}

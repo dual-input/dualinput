@@ -1,92 +1,87 @@
-// Two ways a page changes smoothly, for pages whose content changes while a pilot watches, as the
-// Traffic tab's does when sharing starts or stops, or a count moves. Coherent GT has no
-// ResizeObserver, so heights are measured when what they hold changes.
+// A page whose state changes while a pilot watches, as the Traffic tab's does when sharing starts or
+// stops, or a check's line turns, changes in one moment with three steps, as the header's phase does
+// (phase.tsx), so nothing moves two ways at once and nothing moves while it's being read:
+//   1. out: what's going fades, words rising 4px as they go;
+//   2. move: with nothing changing on show, the layout settles, every part in one ease, one length,
+//      one curve, a room opening as another shuts;
+//   3. in: what's arriving fades in, in an order, each step 40ms after the last, words rising 4px.
+//      It starts while the layout still settles, once it's about 80% there, as the session card's
+//      rooms do (home.tsx, EaseRoom), since one step after the other left the card's row blank for
+//      a beat (user, 2026-10-31).
+// A control a pilot pressed answers at once, outside the moment, as a switch slides on its press.
+// The page keeps showing its old state through the first step, and its new one from the second, so
+// each part knows whether it changes from what it was before the moment and what it is after it.
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
-// Swap: one thing in a spot gives way to another, as the header's phase does (phase.tsx): what
-// leaves fades up and out, and what arrives fades up in from 4px below, a beat later, both drawn in
-// the same grid cell so neither moves the other. It suits things of one height, such as a line of
-// text, an icon, or a control; the id says when it's a new thing, so a switch that only flips stays
-// the same thing and slides as it does.
-const SWAP = { out: 150, in: 220, inAfter: 70, rise: 4 }
-export function Swap({ id, children, className = "" }: { id: string; children: React.ReactNode; className?: string }) {
-  const [lastId, setLastId] = useState(id)
-  const [leaving, setLeaving] = useState<{ id: string; node: React.ReactNode }>()
-  const prev = useRef(children)
-  if (id !== lastId) {
-    setLastId(id)
-    setLeaving({ id: lastId, node: prev.current })
-  }
-  useLayoutEffect(() => {
-    prev.current = children
-  })
-  useEffect(() => {
-    if (!leaving) return
-    const t = window.setTimeout(() => setLeaving(undefined), SWAP.out + SWAP.inAfter)
-    return () => clearTimeout(t)
-  }, [leaving])
-  const cell = { gridArea: "1 / 1" }
-  return (
-    <span className={"grid " + className}>
-      {leaving && (
-        <span key={`out-${leaving.id}`} aria-hidden className="pointer-events-none" style={{ ...cell, opacity: 0, transform: `translateY(-${SWAP.rise}px)`, animation: `swap-out ${SWAP.out}ms ease-in` }}>
-          {leaving.node}
-        </span>
-      )}
-      <span key={id} style={{ ...cell, ...(leaving ? { animation: `swap-in ${SWAP.in}ms ease-out ${SWAP.inAfter}ms both` } : {}) }}>
-        {children}
-      </span>
-    </span>
-  )
-}
+// In milliseconds, `inAt` counted from the layout's start. The steps in, and the steps that wait on
+// them, are counted in `step`s, and a moment ends after the fifth, the most any page waits.
+export const MOMENT = { out: 120, move: 220, inAt: 150, in: 200, step: 40, steps: 5 }
+export const ARRIVE = MOMENT.out + MOMENT.inAt
+export type Stage = "idle" | "out" | "move" | "in"
 
-// Room: a part that comes and goes opens and shuts, as the session card's rooms do (home.tsx,
-// EaseRoom): opening, the room eases to its content's height and the content fades in as it
-// finishes; shutting, the content fades out first, still showing what it had, and the room eases
-// shut as it goes. Its spacing from what it follows sits inside it, so a shut room leaves none.
-// Once open, it takes its content's own height, so a line that grows inside it isn't cut off.
-const ROOM = { ease: 300, showAt: 160, in: 180, out: 120, shutAt: 80 }
-export function Room({ children, pad = "" }: { children?: React.ReactNode; pad?: string }) {
-  const has = !!children
-  const last = useRef(children)
-  if (children) last.current = children
-  const inner = useRef<HTMLDivElement>(null)
-  const [height, setHeight] = useState<number | "auto">(has ? "auto" : 0)
-  const [shown, setShown] = useState(has)
-  const first = useRef(true)
-  useLayoutEffect(() => {
-    if (first.current) {
-      first.current = false
+// The moment's clock. A new key starts a moment, which shows the value from before it until the
+// layout moves; with the key unchanged, the value shows as it comes, so a count rolls with no moment.
+// A key that changes back before the layout moves ends the moment where it is.
+export function useMoment<T>(key: string, value: T): { shown: T; from: T; to: T; stage: Stage } {
+  const [shownKey, setShownKey] = useState(key)
+  const [stage, setStage] = useState<Stage>("idle")
+  const held = useRef(value)
+  const from = useRef(value)
+  if (key === shownKey) held.current = value
+  useEffect(() => {
+    if (key === shownKey) {
+      setStage("idle")
       return
     }
-    const h = inner.current?.offsetHeight ?? 0
-    if (has) {
-      setHeight(h)
-      const show = window.setTimeout(() => setShown(true), ROOM.showAt)
-      const settle = window.setTimeout(() => setHeight("auto"), ROOM.ease)
-      return () => {
-        clearTimeout(show)
-        clearTimeout(settle)
-      }
-    }
-    // From its own height, pinned, so the ease to none has somewhere to start.
-    setShown(false)
-    setHeight(h)
-    const shut = window.setTimeout(() => setHeight(0), ROOM.shutAt)
-    return () => clearTimeout(shut)
-  }, [has])
+    from.current = held.current
+    setStage("out")
+    const timers = [
+      window.setTimeout(() => {
+        setShownKey(key)
+        setStage("move")
+      }, MOMENT.out),
+      window.setTimeout(() => setStage("in"), ARRIVE),
+      window.setTimeout(() => setStage("idle"), ARRIVE + MOMENT.in + MOMENT.steps * MOMENT.step),
+    ]
+    return () => timers.forEach(clearTimeout)
+    // The moment starts on a new key alone; the key it shows moves on inside it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key])
+  const shown = key === shownKey ? value : held.current
+  return { shown, stage, from: stage === "idle" ? shown : from.current, to: value }
+}
+
+// How a part that changes in the moment looks at each step: gone in the first, hidden below its
+// place in the second, and fading up into it in the third, after `at` steps. A part that doesn't
+// change is left alone. A block, such as a paragraph or a list, fades without rising. A part whose
+// own spot doesn't move with the layout, such as a card's row whose parts change while hidden,
+// arrives early, as the layout starts to move, rather than waiting on it.
+export function part(stage: Stage, changes: boolean, at = 0, rise = true, early = false): React.CSSProperties {
+  if (!changes || stage === "idle") return {}
+  const y = (px: number) => (rise ? `translateY(${px}px)` : "none")
+  if (stage === "out") return { opacity: 0, transform: y(-4), transition: `opacity ${MOMENT.out}ms ease-in, transform ${MOMENT.out}ms ease-in` }
+  if (stage === "move" && !early) return { opacity: 0, transform: y(4) }
+  const delay = at * MOMENT.step
+  return { opacity: 1, transform: "none", transition: `opacity ${MOMENT.in}ms ease-out ${delay}ms, transform ${MOMENT.in}ms ease-out ${delay}ms` }
+}
+
+// A part that comes and goes: its room opens to its content's height, or shuts, in the moment's
+// second step, and holds what it had while it shuts. Its spacing from what it follows sits inside
+// it, so a shut room leaves none. Coherent GT has no ResizeObserver, so the content is measured
+// after every render, and an open room follows its content's height.
+export function Room({ open, pad = "", style, children }: { open: boolean; pad?: string; style?: React.CSSProperties; children?: React.ReactNode }) {
+  const last = useRef(children)
+  if (open) last.current = children
+  const inner = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState<number>()
+  useLayoutEffect(() => {
+    const measured = inner.current?.offsetHeight ?? 0
+    if (measured !== height) setHeight(measured)
+  })
   return (
-    <div className="overflow-hidden" style={{ height: height === "auto" ? undefined : height, transition: `height ${ROOM.ease}ms ease-out` }}>
+    <div className="overflow-hidden" style={{ height: open ? height : 0, transition: `height ${MOMENT.move}ms ease-in-out` }}>
       <div ref={inner} className={pad}>
-        <div
-          style={{
-            opacity: shown ? 1 : 0,
-            transform: shown ? "none" : "scale(0.97)",
-            transition: shown ? `opacity ${ROOM.in}ms ease-out, transform ${ROOM.in}ms ease-out` : `opacity ${ROOM.out}ms ease-in, transform ${ROOM.out}ms ease-in`,
-          }}
-        >
-          {last.current}
-        </div>
+        <div style={style}>{last.current}</div>
       </div>
     </div>
   )

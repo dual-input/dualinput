@@ -4,6 +4,8 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Headset, Plane } from "lucide-react"
 
+import { ARRIVE, MOMENT } from "./ease"
+
 // Preflight runs from the moment the PF is in a flight on the ground
 // (record/areas/session/02-units.md, Preflight), so a joiner whose PF waits at a stand is in it
 // before they're in the flight, then syncing once its countdown ends. Before preflight there's
@@ -108,7 +110,8 @@ const FEATURES: { id: SharedFeature; icon: React.ReactNode; noun: string }[] = [
 ]
 function SharedIcons({ shared, style }: { shared: Shared; style: React.CSSProperties }) {
   // Each icon is always drawn, at no width while its feature isn't shared, so one arriving or
-  // leaving eases in or out and moves the other over, rather than it jumping.
+  // leaving moves the other over rather than jumping it. It keeps to the page's moment (ease.tsx): one
+  // going fades first, then its room shuts; one coming gets its room first, then fades in.
   return (
     <span className="flex items-center text-success" style={style}>
       {FEATURES.map((f, i) => {
@@ -121,7 +124,7 @@ function SharedIcons({ shared, style }: { shared: Shared; style: React.CSSProper
             aria-label={on ? `Sharing ${f.noun}` : undefined}
             aria-hidden={!on}
             className="flex overflow-hidden"
-            style={{ width: on ? 12 : 0, marginLeft: on && after ? 6 : 0, opacity: on ? 1 : 0, transform: on ? "none" : "scale(0.6)", transition: "width 250ms ease-out, margin-left 250ms ease-out, opacity 200ms ease-out, transform 250ms ease-out" }}
+            style={{ width: on ? 12 : 0, marginLeft: on && after ? 6 : 0, opacity: on ? 1 : 0, transform: on ? "none" : "scale(0.6)", transition: on ? `width ${MOMENT.move}ms ease-in-out ${MOMENT.out}ms, margin-left ${MOMENT.move}ms ease-in-out ${MOMENT.out}ms, opacity ${MOMENT.in}ms ease-out ${ARRIVE}ms, transform ${MOMENT.in}ms ease-out ${ARRIVE}ms` : `opacity ${MOMENT.out}ms ease-in, transform ${MOMENT.out}ms ease-in, width ${MOMENT.move}ms ease-in-out ${MOMENT.out}ms, margin-left ${MOMENT.move}ms ease-in-out ${MOMENT.out}ms` }}
           >
             {f.icon}
           </span>

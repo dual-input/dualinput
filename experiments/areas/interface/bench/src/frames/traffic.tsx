@@ -20,7 +20,7 @@ import { useShowPhase } from "./phase"
 import { useShowControl, useShowSession, type Control } from "./flight"
 import { ScrollPage } from "./scroller"
 import { Head } from "./figure-head"
-import { Swap, Room } from "./ease"
+import { MOMENT, part, Room, useMoment, type Stage } from "./ease"
 import { Rolling } from "./home"
 import { FIGURE_COLORS } from "./figure-portrait"
 
@@ -65,14 +65,21 @@ function useFlightAround(session: boolean) {
 // The row is a label in every state, so a change of state doesn't redraw it from scratch. With Take
 // over in it, the switch it names isn't there, so a press on it does nothing; a label naming no
 // control would take the first it holds, Take over.
-// As the state changes, the row changes in place (user, 2026-10-31): the words and the control give
-// way to the next (Swap), and a switch that only flips slides; a head's spot opens or shuts, and a
-// head pops into it, as a crew row's does as its pilot joins, a new one for a new pilot.
+// The card shows the moment's state (ease.tsx), but the switch follows the press, so it slides the
+// moment it's pressed. In the moment, what changes in the row fades out, then the row takes its new
+// layout while nothing in it shows, so no word slides sideways, and its new parts arrive at once,
+// not waiting on the page's layout below: an arriving head pops in first, as a crew row's does as
+// its pilot joins, and the words and the control a step after it. On a take-over, the new pilot's
+// head popping in is what the eye follows (user, 2026-10-31; tried and dropped: the head's spot
+// easing open, which left the row blank while it opened).
+type CardMoment = { stage: Stage; from: Sharer; to: Sharer }
 function RoleCard({
   label,
   noun,
   session,
   sharer,
+  live = sharer,
+  moment,
   onChange,
   children,
 }: {
@@ -80,20 +87,21 @@ function RoleCard({
   noun: string
   session: boolean
   sharer: Sharer
+  live?: Sharer
+  moment?: CardMoment
   onChange: (on: boolean) => void
   children?: React.ReactNode
 }) {
   const { Button, Card, Separator, Switch } = useUI()
   // Every frame on the canvas draws this card, so the switch's id is each card's own.
   const id = useId()
-  const someone = session ? sharer : undefined
+  const of = (s: Sharer) => (session ? s : undefined)
+  const someone = of(sharer)
   const takeOver = !!someone && someone !== "You"
-  const says =
-    someone === "You"
-      ? `You're sharing ${noun}`
-      : someone
-        ? `${someone} is sharing ${noun}`
-        : label
+  const stage = moment?.stage ?? "idle"
+  const changes = !!moment && of(moment.from) !== of(moment.to)
+  const isTake = (s: Sharer) => !!of(s) && of(s) !== "You"
+  const controlChanges = !!moment && isTake(moment.from) !== isTake(moment.to)
   return (
     <Card className="gap-0 py-0 [--card-spacing:--spacing(5)]">
       <label
@@ -105,22 +113,28 @@ function RoleCard({
             : "")
         }
       >
-        <HeadSpot who={someone} />
+        <HeadSpot who={someone} stage={stage} changes={changes} />
         <span
           className={
             "flex flex-1 flex-col text-sm " + (someone ? "" : "font-medium")
           }
         >
-          <Swap id={says}>{says}</Swap>
+          <span style={part(stage, changes, 1, true, true)}>
+            {someone === "You"
+              ? `You're sharing ${noun}`
+              : someone
+                ? `${someone} is sharing ${noun}`
+                : label}
+          </span>
           {!session && (
             <span className="text-xs font-normal text-muted-foreground">
               Sharing needs a session
             </span>
           )}
         </span>
-        <Swap
-          id={takeOver ? "take-over" : "switch"}
-          className="ml-3 justify-items-end"
+        <span
+          className="ml-3 flex"
+          style={part(stage, controlChanges, 1, true, true)}
         >
           {takeOver ? (
             <Button variant="outline" size="sm" onClick={() => onChange(true)}>
@@ -130,11 +144,11 @@ function RoleCard({
             <Switch
               id={id}
               disabled={!session}
-              checked={someone === "You"}
+              checked={of(live) === "You"}
               onCheckedChange={onChange}
             />
           )}
-        </Swap>
+        </span>
       </label>
       {children && (
         <>
@@ -148,35 +162,38 @@ function RoleCard({
   )
 }
 
-// The head's spot, its 28px and the 12px after it, eases open as a pilot starts sharing and shut as
-// they stop, the head fading as it shuts. A head that arrives after the card first shows pops in,
-// once the spot is partly open; one there from the start doesn't.
-const HEAD_SPOT = { width: 40, ease: 300, popAfter: 120 }
-function HeadSpot({ who }: { who: Sharer }) {
+// The head's spot, its 28px and the 12px after it, is there while a pilot is sharing. A head that
+// goes fades in the moment's first step, and its spot goes once it's gone; one that arrives pops in
+// as the second starts, its window with it.
+function HeadSpot({
+  who,
+  stage,
+  changes,
+}: {
+  who: Sharer
+  stage: Stage
+  changes: boolean
+}) {
   const last = useRef(who)
   if (who) last.current = who
-  const [was, setWas] = useState(who)
-  const [popFor, setPopFor] = useState<Sharer>()
-  if (who !== was) {
-    setWas(who)
-    if (who) setPopFor(who)
-  }
-  const shown = last.current
+  const head = last.current
+  const look: React.CSSProperties = !changes
+    ? {}
+    : stage === "out"
+      ? { opacity: 0, transition: `opacity ${MOMENT.out}ms ease-in` }
+      : {}
   return (
     <span
       className="flex shrink-0 overflow-hidden"
-      style={{
-        width: who ? HEAD_SPOT.width : 0,
-        opacity: who ? 1 : 0,
-        transition: `width ${HEAD_SPOT.ease}ms ease-out, opacity ${who ? 0 : 150}ms ease-in`,
-      }}
+      style={{ width: who ? 40 : 0 }}
     >
-      {shown && (
-        <Head
-          key={shown}
-          hex={hexOf(shown)}
-          pop={popFor === shown ? HEAD_SPOT.popAfter : undefined}
-        />
+      {head && (
+        <span key={head} className="flex" style={look}>
+          <Head
+            hex={hexOf(head)}
+            pop={changes && stage !== "out" && stage !== "idle" ? 0 : undefined}
+          />
+        </span>
       )}
     </span>
   )
@@ -196,6 +213,7 @@ type Line = {
   says: React.ReactNode
   detail?: React.ReactNode
 }
+const lineId = (l: Line) => l.id ?? String(l.says)
 // Each icon centers on the capital letters of its line's first words, so it's placed from the
 // text's baseline, which sits at the same spot on every platform, where the line box doesn't:
 // placed in the 20px line by margin, the icon sat on the capitals' middle in Chromium on Linux and
@@ -220,64 +238,90 @@ const STATE_ICON: Record<State, React.ReactNode> = {
 // the feature's rules, and the list says so (user, 2026-10-31). A note on the feature's cost sits
 // under how it works, in a paragraph of its own, since it's neither a rule nor a check (user,
 // 2026-10-31), on the tab of the pilot it speaks to.
-// The note and the list open and shut as rooms do (Room) as sharing starts or stops, and a line
-// whose state changes swaps its icon and words in place, its detail opening or shutting under it
-// (user, 2026-10-31).
+// In the moment (ease.tsx), the note and the list each open or shut as a room; arriving, the note
+// and the list's title fade in two steps after the card's head, and the lines one step apart after
+// them, each rising. A line whose state turns, its list staying, fades its icon and words out and
+// back as the new state, its detail's room opening or shutting under it (user, 2026-10-31).
+type CheckMoment = {
+  stage: Stage
+  note: boolean
+  list: boolean
+  line: (id: string) => boolean
+}
 function HowAndCheck({
   how,
   note,
   lines,
   rules,
+  moment,
 }: {
   how: string
   note?: string
   lines: Line[]
   rules: boolean
+  moment?: CheckMoment
 }) {
+  const stage = moment?.stage ?? "idle"
   return (
     <div className="flex flex-col">
       <section className="flex flex-col">
         <h2 className="text-sm font-medium">How it works</h2>
         <p className="pt-2 text-sm text-muted-foreground">{how}</p>
-        <Room pad="pt-2">
-          {note && <p className="text-sm text-muted-foreground">{note}</p>}
+        <Room
+          open={!!note}
+          pad="pt-2"
+          style={part(stage, !!moment?.note, 2, false)}
+        >
+          <p className="text-sm text-muted-foreground">{note}</p>
         </Room>
       </section>
-      <Room pad="pt-6">
-        {lines.length > 0 && (
-          <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium">{rules ? "Rules" : "Check"}</h2>
-            <ul className="flex flex-col gap-3">
-              {lines.map((l) => (
+      <Room open={lines.length > 0} pad="pt-6">
+        <section className="flex flex-col gap-2">
+          <h2
+            className="text-sm font-medium"
+            style={part(stage, !!moment?.list, 2)}
+          >
+            {rules ? "Rules" : "Check"}
+          </h2>
+          <ul className="flex flex-col gap-3">
+            {lines.map((l, i) => {
+              const whole = !!moment?.list
+              const turns = !whole && !!moment?.line(lineId(l))
+              return (
                 <li
-                  key={l.id ?? String(l.says)}
+                  key={lineId(l)}
                   className="flex items-baseline gap-2.5"
+                  style={part(stage, whole, 3 + i)}
                 >
-                  <Swap id={l.state}>{STATE_ICON[l.state]}</Swap>
+                  <span className="flex" style={part(stage, turns, 0)}>
+                    {STATE_ICON[l.state]}
+                  </span>
                   <span className="flex flex-col">
-                    <Swap id={l.state} className="text-sm">
+                    <span className="text-sm" style={part(stage, turns, 1)}>
                       {l.says}
-                    </Swap>
-                    <Room pad="pt-0.5">
-                      {l.detail && (
-                        <span
-                          className={
-                            "block text-xs " +
-                            (l.state === "differs"
-                              ? "text-warning"
-                              : "text-muted-foreground")
-                          }
-                        >
-                          {l.detail}
-                        </span>
-                      )}
+                    </span>
+                    <Room
+                      open={!!l.detail}
+                      pad="pt-0.5"
+                      style={part(stage, turns, 2, false)}
+                    >
+                      <span
+                        className={
+                          "block text-xs " +
+                          (l.state === "differs"
+                            ? "text-warning"
+                            : "text-muted-foreground")
+                        }
+                      >
+                        {l.detail}
+                      </span>
                     </Room>
                   </span>
                 </li>
-              ))}
-            </ul>
-          </section>
-        )}
+              )
+            })}
+          </ul>
+        </section>
       </Room>
     </div>
   )
@@ -435,30 +479,56 @@ function TrafficPage({
     // It plays once, from the frame's opening.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  const lines = trafficLines(where.session, sharer, countsNow)
-  useShowDot("traffic", differs(lines))
+  const live = trafficLines(where.session, sharer, countsNow)
+  useShowDot("traffic", differs(live))
   useShowShared("traffic", where.session ? sharer : undefined)
   useShowShared("atc", where.session ? "James" : undefined)
+  // One moment for the page (ease.tsx) whenever who's sharing changes or a line turns; a count that
+  // moves while its line keeps its state rolls in place, with no moment.
+  const m = useMoment(
+    `${sharer}|${live.map((l) => `${lineId(l)}:${l.state}`)}`,
+    {
+      sharer,
+      counts: countsNow,
+    }
+  )
+  const linesOf = (v: { sharer: Sharer; counts: Counts }) =>
+    trafficLines(where.session, v.sharer, v.counts)
+  const lines = linesOf(m.shown)
+  const [from, to] = [linesOf(m.from), linesOf(m.to)]
+  const stateIn = (ls: Line[], id: string) =>
+    ls.find((l) => lineId(l) === id)?.state
   // The note speaks to the pilot whose traffic is shared, so it shows only on their tab.
-  const sharing = where.session && sharer === "You"
+  const notes = (s: Sharer) => where.session && s === "You"
+  const rulesOf = (s: Sharer) => !where.session || !s
   return (
     <ScrollPage>
       <RoleCard
         label="Share my traffic"
         noun="traffic"
         session={where.session}
-        sharer={sharer}
+        sharer={m.shown.sharer}
+        live={sharer}
+        moment={{ stage: m.stage, from: m.from.sharer, to: m.to.sharer }}
         onChange={(on) => setSharer(on ? "You" : undefined)}
       />
       <HowAndCheck
         how="One pilot shares. Dual Input watches the AI traffic in their sim and injects it into everyone else's. This works by reading the traffic straight from the sim and works regardless of the original method of traffic generation."
         note={
-          sharing
+          notes(m.shown.sharer)
             ? "Performance issues? Since your traffic is shared as-is, PCs that aren't as powerful as yours might struggle to keep up. If that happens, decrease your traffic density in your AI traffic app."
             : undefined
         }
         lines={lines}
-        rules={!where.session || !sharer}
+        rules={rulesOf(m.shown.sharer)}
+        moment={{
+          stage: m.stage,
+          note: notes(m.from.sharer) !== notes(m.to.sharer),
+          list:
+            from.length > 0 !== to.length > 0 ||
+            rulesOf(m.from.sharer) !== rulesOf(m.to.sharer),
+          line: (id) => stateIn(from, id) !== stateIn(to, id),
+        }}
       />
       <PacksOnThisPc packs={PACKS[packs]} />
     </ScrollPage>

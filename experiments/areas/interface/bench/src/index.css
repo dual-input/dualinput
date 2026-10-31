@@ -115,17 +115,6 @@
   top: 0;
 }
 
-/* One thing giving way to another in a spot (frames/ease.tsx, Swap): what leaves fades up and out,
-   and what arrives fades up in from below. */
-@keyframes swap-out {
-  from { opacity: 1; transform: none; }
-  to { opacity: 0; transform: translateY(-4px); }
-}
-@keyframes swap-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: none; }
-}
-
 /* Taking control (frames/flight.tsx): the ring beside the label fills over the hold, its path
    counted 100 long as the countdown ring's is, and a take swells the button past its size and
    settles it. */

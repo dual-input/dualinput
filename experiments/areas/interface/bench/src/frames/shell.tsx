@@ -9,6 +9,7 @@ import { themeVars, type Theme } from "@/bench/theme"
 import { FailureBox, SERVICE_NOT_RUNNING } from "./failure"
 import { ControlContext, SessionContext, TakeControl, type Control } from "./flight"
 import { HeaderStart, PhaseContext, type SessionPhase, type Shared, type SharedFeature } from "./phase"
+import { ARRIVE, MOMENT } from "./ease"
 
 // The sim's EFB sizes its apps from a 516 by 716 base (record/areas/interface/log.md, 2026-10-24).
 export const EFB = { width: 516, height: 716 }
@@ -373,8 +374,8 @@ function EveryIssueSheet() {
 // audio's when its capture waits for an ATC app (user, 2026-10-31). The page says so, as a session
 // page says its phase. The dot is 8px at the icon's lower right, big enough to notice at an EFB's
 // distance and no bigger (user, 2026-10-31; tried and dropped: 10px at the upper right), with a
-// ring of the bar's own color parting it from the icon. It springs in as a warning arrives and
-// shrinks away as it clears.
+// ring of the bar's own color parting it from the icon. It keeps to the page's moment (ease.tsx):
+// it shrinks away with what goes, and springs in with what arrives, once the layout has moved.
 export const DotContext = createContext<(tab: Tab, on: boolean) => void>(() => {})
 export function useShowDot(tab: Tab, on: boolean) {
   const show = useContext(DotContext)
@@ -403,7 +404,7 @@ export function TabBar({ active = "session", dots = {} }: { active?: Tab; dots?:
           {id === active && <span className="absolute inset-x-4 -top-px h-0.5 rounded-full bg-primary" />}
           <span className="relative flex">
             <Icon className="size-5" />
-            <span aria-label={dots[id] ? "Needs attention" : undefined} aria-hidden={!dots[id]} className="absolute -right-0.5 -bottom-0.5 size-2 rounded-full bg-warning ring-2 ring-background" style={{ opacity: dots[id] ? 1 : 0, transform: dots[id] ? "none" : "scale(0.4)", transition: dots[id] ? "opacity 180ms ease-out, transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1)" : "opacity 150ms ease-in, transform 150ms ease-in" }} />
+            <span aria-label={dots[id] ? "Needs attention" : undefined} aria-hidden={!dots[id]} className="absolute -right-0.5 -bottom-0.5 size-2 rounded-full bg-warning ring-2 ring-background" style={{ opacity: dots[id] ? 1 : 0, transform: dots[id] ? "none" : "scale(0.4)", transition: dots[id] ? `opacity 180ms ease-out ${ARRIVE}ms, transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1) ${ARRIVE}ms` : `opacity ${MOMENT.out}ms ease-in, transform ${MOMENT.out}ms ease-in` }} />
           </span>
         </button>
       ))}

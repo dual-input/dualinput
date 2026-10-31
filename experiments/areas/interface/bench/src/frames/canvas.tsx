@@ -142,6 +142,8 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Nobody shares ATC", draw: (t) => <AtcFrame theme={t} where={{ session: true }} /> },
       { name: "Sharing, waiting for an ATC app", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "You" }} capture="waiting" /> },
       { name: "Sharing ATC", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "You" }} /> },
+      // The ATC app starts after the pilot turned sharing on, so the capture stops waiting.
+      { name: "Sharing, the ATC app starts", replay: true, draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "You" }} capture="waiting" later={[{ after: 1800, capture: "capturing" }]} /> },
       { name: "Receiving ATC", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "James" }} /> },
       { name: "ATC outside a session", draw: (t) => <AtcFrame theme={t} where={{ session: false }} /> },
     ],

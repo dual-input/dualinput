@@ -79,7 +79,7 @@ function useFlightAround(session: boolean) {
 // its pilot joins, and the words and the control a step after it. On a take-over, the new pilot's
 // head popping in is what the eye follows (user, 2026-10-31; tried and dropped: the head's spot
 // easing open, which left the row blank while it opened).
-type CardMoment = { stage: Stage; from: Sharer; to: Sharer }
+type CardMoment = { stage: Stage; from: Sharer; to: Sharer; settings?: boolean }
 function RoleCard({
   label,
   noun,
@@ -159,14 +159,10 @@ function RoleCard({
           )}
         </span>
       </label>
-      {children && (
-        <>
-          <Separator />
-          <div className="flex flex-col gap-5 p-(--card-spacing)">
-            {children}
-          </div>
-        </>
-      )}
+      <Room open={!!children} style={part(stage, !!moment?.settings, 2, false)}>
+        <Separator />
+        <div className="flex flex-col gap-5 p-(--card-spacing)">{children}</div>
+      </Room>
     </Card>
   )
 }
@@ -533,76 +529,65 @@ function TrafficPage({
   )
 }
 
-// ATC audio's settings each serve one side: the ATC app, which program a host shares, Automatic
-// capturing the first of BeyondATC and SayIntentions that runs; the ATC volume, how loud another
-// host's ATC plays here (record/areas/traffic-atc/01-traffic-and-atc.md, ATC audio). The output
-// device carries every sound Dual Input plays, so it's set in Settings and only shown here. A
-// receiving pilot who runs an ATC app of their own hears two, and nothing finds one on a receiving
-// machine; the sim's own ATC can't be shared, so pilots who share ATC turn it off; and Dual Input
-// carries no voice, so the crew talks, and hears the host's readbacks, over Discord
-// (record/areas/product/03-v1-scope.md, Hearing ATC).
-function atcLines(
-  session: boolean,
-  sharer: Sharer,
-  capture: "capturing" | "waiting"
-): Line[] {
-  if (sharer === "You")
-    return [
-      capture === "waiting"
-        ? {
-            state: "differs",
-            says: "Your ATC app is running",
-            detail: "Waiting for BeyondATC or SayIntentions to start",
-          }
-        : {
-            state: "ok",
-            says: "Your ATC app is running",
-            detail: "Sharing BeyondATC",
-          },
-      {
-        state: "unchecked",
-        says: "The sim's own ATC is off",
-        detail: "Dual Input can't share it, or check it",
-      },
-      {
-        state: "unchecked",
-        says: "The crew's own ATC apps are closed",
-        detail: "Dual Input can't check this",
-      },
-    ]
-  if (sharer && session)
-    return [
-      {
-        state: "unchecked",
-        says: "Your own ATC app is closed",
-        detail: "With one open you'd hear two, and Dual Input can't check this",
-      },
-      {
-        state: "unchecked",
-        says: "The sim's own ATC is off",
-        detail: "Dual Input can't check this",
-      },
-    ]
-  return [
-    {
-      state: "rule",
-      says: "Receiving pilots should close their own ATC app",
-      detail: "To avoid hearing two",
-    },
-    {
-      state: "rule",
-      says: "Everyone should turn off the sim's own ATC",
-      detail: "Dual Input can't share it",
-    },
-  ]
+// ATC audio's tab holds no check and no rules: everyone understands sharing audio, How it works
+// says only the sharing pilot runs an ATC app, and the tab shows only what goes wrong in Dual
+// Input's own pipeline (user, 2026-10-31). Of those, the one ATC audio's tab shows is the sharing
+// pilot's capture waiting for an ATC app, which the core helper reports, looking every 2s
+// (record/areas/traffic-atc/01-traffic-and-atc.md, The ATC host); a link that drops is the header's,
+// and an output device that's gone is every sound's, so Settings'. Tried and dropped: a check line
+// for each thing a pilot sets up by hand, then rules for them; turning off the sim's own ATC, which
+// pilots who know ATC apps have off already, "none of our business"; and a warning when ATC breaks
+// up, from the frames the helper conceals, which waits for a threshold (user, 2026-10-31).
+// Its settings each serve one side: the ATC app, which program a host shares, Automatic capturing
+// the first of BeyondATC and SayIntentions that runs, which shows while this pilot shares, with what
+// the capture takes or that it's waiting, and outside a session, where the settings still change;
+// and the ATC volume, how loud another host's ATC plays here, for everyone not sharing. The output
+// device carries every sound Dual Input plays, so it's set in Settings and only shown here. The
+// words are drafts.
+type Capture = "capturing" | "waiting"
+type CaptureLater = { after: number; capture: Capture }[]
+
+// What the capture takes, under the ATC app it's set to: the program it's capturing, or that it's
+// waiting for one, in the warning's color, which also lights the tab's dot. Its icon centers on the
+// capitals as a check line's does, from the baseline: half its 14px less half Geist's 8.5px capitals
+// at 12px is 2.75px.
+function CaptureStatus({
+  capture,
+  style,
+}: {
+  capture: Capture
+  style: React.CSSProperties
+}) {
+  const icon = "size-3.5 shrink-0 [transform:translateY(2.75px)]"
+  return capture === "waiting" ? (
+    <p className="flex items-baseline gap-2 text-xs text-warning" style={style}>
+      <TriangleAlert className={icon} />
+      Waiting for BeyondATC or SayIntentions to start
+    </p>
+  ) : (
+    <p
+      className="flex items-baseline gap-2 text-xs text-muted-foreground"
+      style={style}
+    >
+      <CircleCheck className={icon + " text-success"} />
+      Capturing BeyondATC
+    </p>
+  )
 }
 
+// The page changes in one moment (ease.tsx), as Traffic's does: the card's row as there; the ATC
+// app's part of the card opening or shutting as sharing starts or stops; the volume's card opening
+// or shutting the same way; and the capture's status, when it starts or waits again, going and
+// coming back as the other, the tab's dot with it. The status keeps its height as it turns, so it
+// comes back as soon as it's gone, not waiting on a layout that doesn't move.
 function AtcPage({
   where,
   capture = "capturing",
+  later = [],
 }: {
   where: Where
-  capture?: "capturing" | "waiting"
+  capture?: Capture
+  later?: CaptureLater
 }) {
   const {
     Card,
@@ -616,12 +601,27 @@ function AtcPage({
   } = useUI()
   useFlightAround(where.session)
   const [sharer, setSharer] = useState<Sharer>(where.sharer)
+  const [captureNow, setCaptureNow] = useState(capture)
+  useEffect(() => {
+    const timers = later.map((step) =>
+      window.setTimeout(() => setCaptureNow(step.capture), step.after)
+    )
+    return () => timers.forEach(clearTimeout)
+    // It plays once, from the frame's opening.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [volume, setVolume] = useState([100])
-  const hosting = where.session && sharer === "You"
-  const lines = atcLines(where.session, sharer, capture)
-  useShowDot("atc", differs(lines))
+  const hosts = (s: Sharer) => where.session && s === "You"
+  const sets = (s: Sharer) => hosts(s) || !where.session
+  useShowDot("atc", hosts(sharer) && captureNow === "waiting")
   useShowShared("atc", where.session ? sharer : undefined)
   useShowShared("traffic", where.session ? "James" : undefined)
+  const m = useMoment(`${sharer}|${hosts(sharer) ? captureNow : ""}`, {
+    sharer,
+    capture: captureNow,
+  })
+  const [from, to] = [m.from.sharer, m.to.sharer]
+  const turns = hosts(from) && hosts(to) && m.from.capture !== m.to.capture
   const apps = [
     { value: "auto", label: "Automatic: BeyondATC or SayIntentions" },
     { value: "pick", label: "Pick a program playing audio…" },
@@ -632,10 +632,12 @@ function AtcPage({
         label="Share my ATC"
         noun="ATC"
         session={where.session}
-        sharer={where.session ? sharer : undefined}
+        sharer={m.shown.sharer}
+        live={sharer}
+        moment={{ stage: m.stage, from, to, settings: sets(from) !== sets(to) }}
         onChange={(on) => setSharer(on ? "You" : undefined)}
       >
-        {(hosting || !where.session) && (
+        {sets(m.shown.sharer) && (
           <div className="flex flex-col gap-3">
             <span className="text-sm">ATC app</span>
             <Select items={apps} defaultValue="auto">
@@ -650,15 +652,25 @@ function AtcPage({
                 ))}
               </SelectContent>
             </Select>
+            {hosts(m.shown.sharer) && (
+              <CaptureStatus
+                capture={m.shown.capture}
+                style={part(m.stage, turns, 0, true, true)}
+              />
+            )}
           </div>
         )}
       </RoleCard>
       <HowAndCheck
-        how="One pilot shares their ATC at a time: Dual Input plays their ATC app's voice on everyone else's machine. It carries ATC, not your voices, so talk to each other, and hear the readbacks, on Discord."
-        lines={lines}
-        rules={!where.session || !sharer}
+        how="One pilot shares. Their ATC app runs on their PC alone, and Dual Input plays its voice on everyone else's."
+        note="It carries ATC, not your voices, so talk to each other, and hear the readbacks, on Discord."
+        lines={[]}
+        rules={false}
       />
-      {!hosting && (
+      <Room
+        open={!hosts(m.shown.sharer)}
+        style={part(m.stage, hosts(from) !== hosts(to), 2, false)}
+      >
         <Card className="[--card-spacing:--spacing(5)]">
           <CardContent className="flex flex-col gap-3">
             <div className="flex items-center justify-between text-sm">
@@ -685,7 +697,7 @@ function AtcPage({
             </span>
           </CardContent>
         </Card>
-      )}
+      </Room>
     </ScrollPage>
   )
 }
@@ -713,14 +725,16 @@ export function AtcFrame({
   theme,
   where,
   capture,
+  later,
 }: {
   theme: Theme
   where: Where
-  capture?: "capturing" | "waiting"
+  capture?: Capture
+  later?: CaptureLater
 }) {
   return (
     <AppFrame theme={theme} tab="atc" fixed>
-      <AtcPage where={where} capture={capture} />
+      <AtcPage where={where} capture={capture} later={later} />
     </AppFrame>
   )
 }

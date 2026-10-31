@@ -68,7 +68,8 @@ export function part(stage: Stage, changes: boolean, at = 0, rise = true, early 
 // A part that comes and goes: its room opens to its content's height, or shuts, in the moment's
 // second step, and holds what it had while it shuts. Its spacing from what it follows sits inside
 // it, so a shut room leaves none. Coherent GT has no ResizeObserver, so the content is measured
-// after every render, and an open room follows its content's height.
+// after every render, and an open room follows its content's height. It cuts off what overflows it
+// only while it's shut or moving, so a card at rest in it keeps its outline and shadow.
 export function Room({ open, pad = "", style, children }: { open: boolean; pad?: string; style?: React.CSSProperties; children?: React.ReactNode }) {
   const last = useRef(children)
   if (open) last.current = children
@@ -78,8 +79,17 @@ export function Room({ open, pad = "", style, children }: { open: boolean; pad?:
     const measured = inner.current?.offsetHeight ?? 0
     if (measured !== height) setHeight(measured)
   })
+  const [moving, setMoving] = useState(false)
+  const was = useRef(open)
+  useEffect(() => {
+    if (was.current === open) return
+    was.current = open
+    setMoving(true)
+    const t = window.setTimeout(() => setMoving(false), MOMENT.move)
+    return () => clearTimeout(t)
+  }, [open])
   return (
-    <div className="overflow-hidden" style={{ height: open ? height : 0, transition: `height ${MOMENT.move}ms ease-in-out` }}>
+    <div style={{ height: open ? height : 0, overflow: open && !moving ? "visible" : "hidden", transition: `height ${MOMENT.move}ms ease-in-out` }}>
       <div ref={inner} className={pad}>
         <div style={style}>{last.current}</div>
       </div>

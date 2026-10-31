@@ -208,20 +208,36 @@ export function useScroller({ nested, ...said }: Told & { nested?: boolean } = {
   return { ref, onScroll: measure, onMouseDown, onWheel: stop, onTouchStart, onTouchEnd, above, below, cursor, glideTo, moving }
 }
 
+// The fades at a scroll box's ends, while there's more that way: a mask on the box itself, its
+// content fading out to what's behind, rather than a layer of the background over it. A layer
+// ending on the box's edge left a row of what scrolled under at full strength past it wherever the
+// canvas put the box at a fraction of a pixel, since the box's clip rounds out to the row its edge
+// falls in and the layer covered a sliver of that row; a layer reaching 1px past the edge fixed the
+// top but would cover the tab bar's border at the bottom, and clipping that layer at the box's
+// edges rounded otherwise than the box's own clip (user, 2026-10-31; measured in Chromium, a row at
+// up to 163 of 255 at 1x, 1.25x, 1.75x, and 2x). A mask is clipped with what it masks, so the two
+// can't part. Each ramp turns off by moving out past the box's edge, the mask's size and place
+// easing, so a fade comes and goes over 200ms as the layers' opacity did. Coherent GT keeps the
+// -webkit- mask properties (record/areas/architecture/coherent-gt.md).
+export function fadeMask(above: boolean, below: boolean, top: number, bottom: number): React.CSSProperties {
+  const off = (above ? 0 : top) + (below ? 0 : bottom)
+  return {
+    WebkitMaskImage: `linear-gradient(to bottom, transparent, #000 ${top}px, #000 calc(100% - ${bottom}px), transparent)`,
+    WebkitMaskRepeat: "no-repeat",
+    WebkitMaskSize: `100% calc(100% + ${off}px)`,
+    WebkitMaskPosition: `0 ${above ? 0 : -top}px`,
+    transition: "-webkit-mask-size 200ms ease-out, -webkit-mask-position 200ms ease-out",
+  }
+}
+
 // A page of the app that scrolls once it holds more than the window, for every page but home,
 // whose session card folds as it scrolls. Like home's, it draws no scrollbar, fades at either end
-// while there's more that way, and scrolls on a drag anywhere. The scroll box starts 1px above the
-// page with 1px of padding, so its clip doesn't cut the top card's border, and the page's parts
-// keep their height rather than shrinking to fit (user, 2026-10-31: a page built without these
-// brought back a scrollbar and a clipped border). The top fade starts 1px above the scroll box,
-// over the header's empty foot in the same color: where the canvas puts the page at a fraction of
-// a pixel, the box's clip rounds out to the row it starts in while the fade's first row covers a
-// sliver of it, so a row of what scrolled under showed at full strength above the fade (user,
-// 2026-10-31; measured in Chromium at 1x and 2x, and only at the top). Every top fade over a
-// scroll box starts 1px above it for the same reason.
+// while there's more that way (fadeMask), and scrolls on a drag anywhere. The scroll box starts 1px
+// above the page with 1px of padding, so its clip doesn't cut the top card's border, and the page's
+// parts keep their height rather than shrinking to fit (user, 2026-10-31: a page built without
+// these brought back a scrollbar and a clipped border).
 export function ScrollPage({ children }: { children: React.ReactNode }) {
   const scroller = useScroller()
-  const fade = (to: "top" | "bottom", shown: boolean): React.CSSProperties => ({ background: `linear-gradient(to ${to === "top" ? "bottom" : "top"}, var(--background), transparent)`, opacity: shown ? 1 : 0 })
   return (
     <div className="relative -mt-px flex min-h-0 flex-1 flex-col">
       <div
@@ -233,11 +249,10 @@ export function ScrollPage({ children }: { children: React.ReactNode }) {
         onTouchEnd={scroller.onTouchEnd}
         onTouchCancel={scroller.onTouchEnd}
         className={"flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pt-px pb-5 select-none [&>*]:shrink-0 " + NO_SCROLLBAR + " " + scroller.cursor}
+        style={fadeMask(scroller.above, scroller.below, 24, 32)}
       >
         {children}
       </div>
-      <div className="pointer-events-none absolute -top-px right-0 left-0 h-[25px] transition-opacity duration-200" style={fade("top", scroller.above)} />
-      <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-8 transition-opacity duration-200" style={fade("bottom", scroller.below)} />
     </div>
   )
 }

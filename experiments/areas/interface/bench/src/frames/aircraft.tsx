@@ -8,7 +8,7 @@ import { Check, ChevronRight, XIcon } from "lucide-react"
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
 import { AppFrame } from "./shell"
-import { NO_SCROLLBAR, useScroller } from "./scroller"
+import { fadeMask, NO_SCROLLBAR, useScroller } from "./scroller"
 
 // An aircraft as home names it: the maker from its package's manifest, the model, and its tail
 // number, which the sim reports as `A:ATC ID`; for one Dual Input has a profile for, the maturity
@@ -104,7 +104,6 @@ export function AircraftPicker({ open, onOpenChange }: { open: boolean; onOpenCh
   const installed = profiles.filter((a) => a.installed).sort(byName)
   const others = profiles.filter((a) => !a.installed).sort(byName)
   const canPick = at === "world-map" && installed.length > 0
-  const fade = (to: "top" | "bottom", shown: boolean): React.CSSProperties => ({ background: `linear-gradient(to ${to === "top" ? "bottom" : "top"}, var(--popover), transparent)`, opacity: shown ? 1 : 0 })
   // A group's heading and count stay at full strength, even over the dimmed group.
   const heading = (text: string, count: number, first?: boolean) => (
     <p className={"px-1 pb-2 text-xs font-medium tracking-wider text-muted-foreground uppercase " + (first ? "pt-1" : "pt-5")}>
@@ -169,6 +168,7 @@ export function AircraftPicker({ open, onOpenChange }: { open: boolean; onOpenCh
                   onMouseDown={scroller.onMouseDown}
                   onWheel={scroller.onWheel}
                   className={"min-h-0 flex-1 overflow-y-auto px-5 pb-5 select-none " + NO_SCROLLBAR + " " + scroller.cursor}
+                  style={fadeMask(scroller.above, scroller.below, 32, 40)}
                 >
                   {/* With none installed, the group is left out, and the list opens on the rest,
                       whose heading says why none can be picked. */}
@@ -215,9 +215,6 @@ export function AircraftPicker({ open, onOpenChange }: { open: boolean; onOpenCh
                     ))}
                   </div>
                 </div>
-                {/* 1px above the list, so no row of it shows above the fade (scroller.tsx, ScrollPage). */}
-                <div className="pointer-events-none absolute -top-px right-0 left-0 h-[33px] transition-opacity duration-200" style={fade("top", scroller.above)} />
-                <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-10 rounded-b-4xl transition-opacity duration-200" style={fade("bottom", scroller.below)} />
               </div>
             </DialogPrimitive.Popup>
           </DialogPortal>

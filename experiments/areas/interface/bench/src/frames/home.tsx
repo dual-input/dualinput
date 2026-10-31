@@ -13,7 +13,7 @@ import { FIGURE_COLORS } from "./figure-portrait"
 import { StandingFigure } from "./figure-standing"
 import { ConfirmButton, RESTART_SIM } from "./confirm"
 import { AircraftContext, AircraftPicker, LOADED, LOADED_UNSUPPORTED, PROFILES, type Aircraft } from "./aircraft"
-import { NO_SCROLLBAR, useScroller } from "./scroller"
+import { fadeMask, NO_SCROLLBAR, useScroller } from "./scroller"
 import { cueHeads, EmptyHead, Head } from "./figure-head"
 import { useShowPhase, type SessionPhase } from "./phase"
 import { useShowControl, useShowSession, type Control } from "./flight"
@@ -751,7 +751,6 @@ const MESSAGES_WINDOW = 128
 const WINDOW_ROOM = { x: 8, y: 8 }
 function ScrollWindow({ max, children }: { max?: number; children: React.ReactNode }) {
   const w = useScroller({ nested: true })
-  const fade = (to: "top" | "bottom", on: boolean): React.CSSProperties => ({ background: `linear-gradient(to ${to === "top" ? "bottom" : "top"}, var(--card), transparent)`, opacity: on ? 1 : 0 })
   return (
     <div className="relative">
       <div
@@ -761,13 +760,10 @@ function ScrollWindow({ max, children }: { max?: number; children: React.ReactNo
         onMouseDown={w.onMouseDown}
         onWheel={w.onWheel}
         className={"overflow-y-auto " + NO_SCROLLBAR + " " + w.cursor}
-        style={{ maxHeight: max === undefined ? undefined : max + 2 * WINDOW_ROOM.y, margin: `${-WINDOW_ROOM.y}px ${-WINDOW_ROOM.x}px`, padding: `${WINDOW_ROOM.y}px ${WINDOW_ROOM.x}px` }}
+        style={{ maxHeight: max === undefined ? undefined : max + 2 * WINDOW_ROOM.y, margin: `${-WINDOW_ROOM.y}px ${-WINDOW_ROOM.x}px`, padding: `${WINDOW_ROOM.y}px ${WINDOW_ROOM.x}px`, ...fadeMask(w.above, w.below, 24, 24) }}
       >
         {children}
       </div>
-      {/* 1px above the window, so no row of it shows above the fade (scroller.tsx, ScrollPage). */}
-      <div className="pointer-events-none absolute right-0 left-0 h-[25px] transition-opacity duration-200" style={{ ...fade("top", w.above), top: -WINDOW_ROOM.y - 1, marginInline: -WINDOW_ROOM.x }} />
-      <div className="pointer-events-none absolute right-0 left-0 h-6 transition-opacity duration-200" style={{ ...fade("bottom", w.below), bottom: -WINDOW_ROOM.y, marginInline: -WINDOW_ROOM.x }} />
     </div>
   )
 }
@@ -1711,13 +1707,17 @@ function StartCard({ aircraft, servers = "answering", play, session, next, opens
       // The room under a checklist that runs past the page by less than the fold, on top of the
       // page's 20px. The page's height never changes as the card folds, so the browser has nothing
       // to keep in view by moving the scroll.
-      style={scrolls ? { paddingBottom: pad ? `calc(var(--spacing) * 5 + ${pad}px)` : undefined, overflowAnchor: "none" } : undefined}
+      // Its foot fades as every scroll box's does (scroller.tsx, fadeMask); its top fades under the
+      // folded card instead, which pins there.
+      style={scrolls ? { paddingBottom: pad ? `calc(var(--spacing) * 5 + ${pad}px)` : undefined, overflowAnchor: "none", ...fadeMask(false, scroller.below, 0, 32) } : undefined}
     >
     <div className={"flex shrink-0 flex-col " + (scrolls ? "pin-top z-20 -mx-5 bg-background px-5 shadow-[0_-1px_0_var(--background)]" : "")}>
     {/* Only once something has gone under the folded card: hanging below it, inside the part that
         scrolls, the fade would otherwise make a short page scroll by its overhang. */}
-    {/* From 1px up the card's foot, so no row of what's under it shows above the fade
-        (scroller.tsx, ScrollPage). */}
+    {/* A layer, since the card it hangs under pins inside the box, where the box's mask can't
+        reach; from 1px up the card's foot, over the card's own color, so no row of what's under it
+        shows above the fade where the canvas puts the card at a fraction of a pixel
+        (scroller.tsx, fadeMask). */}
     {scrolls && goneUnder && <div className="pointer-events-none absolute top-[calc(100%-1px)] right-0 left-0 h-[25px]" style={fade("top", true)} />}
     {/* The card's padding sits inside the part that turns: at the bottom, so something reaching into
         it, as the differences' folded row does, isn't cut off by the part's own edge; and at the
@@ -1857,7 +1857,6 @@ function StartCard({ aircraft, servers = "answering", play, session, next, opens
       </div>
     )}
     </div>
-    {scrolls && <div className="pointer-events-none absolute right-0 bottom-0 left-0 z-20 h-8 transition-opacity duration-200" style={fade("bottom", scroller.below)} />}
     </div>
   )
 }
@@ -2144,7 +2143,6 @@ const NOTES = {
 // fade at either end shows there's more that way.
 function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
   const { ref, onScroll, onMouseDown, onWheel, above, below, cursor } = useScroller()
-  const fade = (to: "top" | "bottom", shown: boolean): React.CSSProperties => ({ background: `linear-gradient(to ${to === "top" ? "bottom" : "top"}, ${PAPER}, transparent)`, opacity: shown ? 1 : 0 })
   return (
     // Manila paper, turned a little off square, with a strip of tape at the top. It's darker than
     // white paper, so it doesn't outshine the dark page around it.
@@ -2161,7 +2159,7 @@ function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
           padding, so they scroll away with the notes: the fades start right at the underline and
           the slip's bottom edge. */}
       <div className="relative flex min-h-0 flex-col">
-        <div ref={ref} onScroll={onScroll} onMouseDown={onMouseDown} onWheel={onWheel} className={"min-h-0 overflow-y-auto pt-2 pb-4 select-none " + NO_SCROLLBAR + " " + cursor}>
+        <div ref={ref} onScroll={onScroll} onMouseDown={onMouseDown} onWheel={onWheel} className={"min-h-0 overflow-y-auto pt-2 pb-4 select-none " + NO_SCROLLBAR + " " + cursor} style={fadeMask(above, below, 48, 48)}>
           <p>{notes.lead}</p>
           <ul>
             {notes.items.map((note) => (
@@ -2175,9 +2173,6 @@ function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
               line out. */}
           {notes.authors && <p className="mt-1 text-right">— {notes.authors}</p>}
         </div>
-        {/* 1px above the notes, so no row of them shows above the fade (scroller.tsx, ScrollPage). */}
-        <div className="pointer-events-none absolute -top-px right-0 left-0 h-[49px] transition-opacity duration-200" style={fade("top", above)} />
-        <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-12 transition-opacity duration-200" style={fade("bottom", below)} />
       </div>
     </section>
   )

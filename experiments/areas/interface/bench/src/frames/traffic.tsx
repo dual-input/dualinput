@@ -203,7 +203,7 @@ function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 
   return (
     <ScrollPage>
       <RoleCard id="share-traffic" label="Share my traffic" noun="traffic" session={where.session} sharer={sharer} onChange={(on) => setSharer(on ? "You" : undefined)} />
-      <HowAndCheck how="One pilot shares. Dual Input watches the AI traffic in their sim and injects it into everyone else's. This works by reading the traffic straight from the sim and works regardless of the original method of traffic generation." note="Each shared aircraft has a performance cost for receiving pilots, so the sharing pilot should lower the traffic density at its source as needed." lines={lines} rules={!where.session || !sharer} />
+      <HowAndCheck how="One pilot shares. Dual Input watches the AI traffic in their sim and injects it into everyone else's. This works by reading the traffic straight from the sim and works regardless of the original method of traffic generation." note="Performance issues? Since your traffic is shared as-is, PCs that aren't as powerful as yours might struggle to keep up. If that happens, decrease your traffic density in your AI traffic app." lines={lines} rules={!where.session || !sharer} />
     </ScrollPage>
   )
 }

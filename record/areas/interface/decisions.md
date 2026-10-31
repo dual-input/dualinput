@@ -242,7 +242,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 ## Traffic polls within the sim's 200km cap, with no radius setting
 
 - **Decided:** traffic has no radius setting: the traffic host polls AI aircraft and helicopters within 200km, the most the SDK allows, and ground objects within 1km, as before.
-  The Traffic tab notes, under how traffic sharing works, that each shared aircraft costs receiving pilots performance, so the sharing pilot lowers the traffic density where their traffic comes from as needed.
+  The Traffic tab notes, under how traffic sharing works, that traffic is shared as it is, so a slower PC than the sharing pilot's can struggle, and the sharing pilot then lowers the density in their AI traffic app.
   This changes [03-v1-scope](../product/03-v1-scope.md#traffic-sync), which gives a radius as a setting, [traffic and ATC](../traffic-atc/01-traffic-and-atc.md#settings)'s polling and settings, and [the Traffic and ATC audio tabs](#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon), which held the setting.
   Settled by the user on 2026-10-31.
 - **Because:**

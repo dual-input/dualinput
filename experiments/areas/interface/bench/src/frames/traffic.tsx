@@ -9,7 +9,7 @@
 // the role it serves; then how the feature works, in a sentence or two; then the check, a line for
 // each rule of it with what Dual Input knows of it now. The words, the packs' names and versions,
 // the counts, and the devices are drafts and examples.
-import { useMemo, useRef, useState } from "react"
+import { useId, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { CircleCheck, CircleDashed, Package, TriangleAlert } from "lucide-react"
 
@@ -56,8 +56,10 @@ function useFlightAround(session: boolean) {
 // pilot is sharing and hides when they stop, and outside a session, where the settings still change
 // (user, 2026-10-31). How it works says what the switch does, so the card carries no description,
 // and a status of something happening now takes the progressive (user, 2026-10-31).
+// While the row holds the switch, the whole row is its label, out to the card's edges, so a VR
+// pointer anywhere on it flips the switch, and the row tints under the pointer to say so (user,
+// 2026-10-31). The card's padding moves into the row for that, and into the settings below it.
 function RoleCard({
-  id,
   label,
   noun,
   session,
@@ -65,7 +67,6 @@ function RoleCard({
   onChange,
   children,
 }: {
-  id: string
   label: string
   noun: string
   session: boolean
@@ -73,52 +74,73 @@ function RoleCard({
   onChange: (on: boolean) => void
   children?: React.ReactNode
 }) {
-  const { Button, Card, CardContent, Separator, Switch } = useUI()
+  const { Button, Card, Separator, Switch } = useUI()
+  // Every frame on the canvas draws this card, so the switch's id is each card's own.
+  const id = useId()
   const someone = session ? sharer : undefined
-  return (
-    <Card className="[--card-spacing:--spacing(5)]">
-      <CardContent className="flex min-h-7 items-center gap-3">
-        {someone && (
-          <span className="flex shrink-0">
-            <Head hex={hexOf(someone)} />
+  const takeOver = !!someone && someone !== "You"
+  const row = (
+    <>
+      {someone && (
+        <span className="flex shrink-0">
+          <Head hex={hexOf(someone)} />
+        </span>
+      )}
+      <span
+        className={
+          "flex flex-1 flex-col text-sm " + (someone ? "" : "font-medium")
+        }
+      >
+        {someone === "You"
+          ? `You're sharing ${noun}`
+          : someone
+            ? `${someone} is sharing ${noun}`
+            : label}
+        {!session && (
+          <span className="text-xs font-normal text-muted-foreground">
+            Sharing needs a session
           </span>
         )}
+      </span>
+      {takeOver ? (
+        <Button variant="outline" size="sm" onClick={() => onChange(true)}>
+          Take over
+        </Button>
+      ) : (
+        <Switch
+          id={id}
+          disabled={!session}
+          checked={someone === "You"}
+          onCheckedChange={onChange}
+        />
+      )}
+    </>
+  )
+  const rowClass =
+    "flex min-h-7 items-center gap-3 box-content p-(--card-spacing)"
+  return (
+    <Card className="gap-0 py-0 [--card-spacing:--spacing(5)]">
+      {takeOver ? (
+        <div className={rowClass}>{row}</div>
+      ) : (
         <label
           htmlFor={id}
           className={
-            "flex flex-1 flex-col text-sm " +
-            (someone ? "" : "font-medium ") +
-            (session ? "cursor-pointer" : "")
+            rowClass +
+            (session
+              ? " cursor-pointer transition-colors hover:bg-muted/40 active:bg-muted/60"
+              : "")
           }
         >
-          {someone === "You"
-            ? `You're sharing ${noun}`
-            : someone
-              ? `${someone} is sharing ${noun}`
-              : label}
-          {!session && (
-            <span className="text-xs font-normal text-muted-foreground">
-              Sharing needs a session
-            </span>
-          )}
+          {row}
         </label>
-        {someone && someone !== "You" ? (
-          <Button variant="outline" size="sm" onClick={() => onChange(true)}>
-            Take over
-          </Button>
-        ) : (
-          <Switch
-            id={id}
-            disabled={!session}
-            checked={someone === "You"}
-            onCheckedChange={onChange}
-          />
-        )}
-      </CardContent>
+      )}
       {children && (
         <>
           <Separator />
-          <CardContent className="flex flex-col gap-5">{children}</CardContent>
+          <div className="flex flex-col gap-5 p-(--card-spacing)">
+            {children}
+          </div>
         </>
       )}
     </Card>
@@ -332,7 +354,6 @@ function TrafficPage({
   return (
     <ScrollPage>
       <RoleCard
-        id="share-traffic"
         label="Share my traffic"
         noun="traffic"
         session={where.session}
@@ -448,7 +469,6 @@ function AtcPage({
   return (
     <ScrollPage>
       <RoleCard
-        id="share-atc"
         label="Share my ATC"
         noun="ATC"
         session={where.session}

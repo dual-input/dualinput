@@ -3,7 +3,14 @@
 // session page says how control stands, as it says its phase (phase.tsx), and the frame draws the
 // strip. Whether this session is held at all goes the same way, for the header, whose rows change
 // what they say in a session.
-import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react"
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 import { TriangleAlert } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
@@ -26,8 +33,12 @@ export type Control = {
   demo?: "hold" | "tap"
 }
 
-export const ControlContext = createContext<(control: Control | undefined) => void>(() => {})
-export const SessionContext = createContext<(inSession: boolean) => void>(() => {})
+export const ControlContext = createContext<
+  (control: Control | undefined) => void
+>(() => {})
+export const SessionContext = createContext<(inSession: boolean) => void>(
+  () => {}
+)
 
 // Each says its state before the frame first paints, so a frame that opens in a flight shows the
 // strip at once, and clears it when the page goes.
@@ -47,9 +58,10 @@ export function useShowSession(inSession: boolean) {
 }
 
 // A click takes nothing, so a stray click or a VR trigger's jolt can't take control; holding the
-// button does, once held 0.5s (user, 2026-10-31: 1s felt "a touch too long"). The bound key's long
-// press holds 1s, with no setting (record/areas/control/01-take-control.md, The binding), and moves
-// to the same 0.5s with the record, so the gesture keeps one number. The press answers at once:
+// button does, once held 0.35s (user, 2026-10-31: 1s felt "a touch too long", and then 0.8s and
+// 0.5s too). The bound key's long press holds 1s, with no setting
+// (record/areas/control/01-take-control.md, The binding), and moves to the same 0.35s with the
+// record, so the gesture keeps one number. The press answers at once:
 // the button darkens and starts to sink, and a 16px ring left of the label fills over the hold, as
 // preflight's countdown ring drains, the key cap's side kept free for a long binding's name, so a
 // pilot who clicks and lets go sees there was more to do. Coherent GT has no conic gradient, so the
@@ -58,14 +70,16 @@ export function useShowSession(inSession: boolean) {
 // slow). Held through, the button swells past its size and settles as a ring spreads from it, the
 // moment the core plays its control-passed cue (record/areas/control/01-take-control.md, A pass).
 // In milliseconds, and the sinking as a scale.
-const HOLD = { ms: 500, back: 120, taken: 320, sink: 0.97 }
+const HOLD = { ms: 350, back: 120, taken: 320, sink: 0.97 }
 type Hold = "idle" | "holding" | "taken"
 
 function usePainted() {
   const [painted, setPainted] = useState(false)
   useEffect(() => {
     let inner = 0
-    const outer = requestAnimationFrame(() => (inner = requestAnimationFrame(() => setPainted(true))))
+    const outer = requestAnimationFrame(
+      () => (inner = requestAnimationFrame(() => setPainted(true)))
+    )
     return () => {
       cancelAnimationFrame(outer)
       cancelAnimationFrame(inner)
@@ -88,7 +102,10 @@ export function TakeControl({ control }: { control?: Control }) {
     if (h !== height) setHeight(h)
   })
   return (
-    <div className="shrink-0 overflow-hidden ease-out" style={{ height, transition: painted ? "height 300ms ease-out" : "none" }}>
+    <div
+      className="shrink-0 overflow-hidden ease-out"
+      style={{ height, transition: painted ? "height 300ms ease-out" : "none" }}
+    >
       <div ref={inner}>{drawn && <Strip control={drawn} />}</div>
     </div>
   )
@@ -157,9 +174,18 @@ function Strip({ control }: { control: Control }) {
   // hold; letting go springs it back fast; a take plays its swell instead.
   const body: React.CSSProperties =
     hold === "taken"
-      ? { animation: `control-taken ${HOLD.taken}ms cubic-bezier(0.34, 1.56, 0.64, 1)` }
-      : { transform: `scale(${hold === "holding" ? HOLD.sink : 1})`, transition: `transform ${hold === "holding" ? `${HOLD.ms}ms cubic-bezier(0.2, 0.7, 0.3, 1)` : `${HOLD.back}ms ease-out`}` }
-  const note = pfLost ? `${pf} may still be flying. If you take control, their aircraft will jump to yours when they reconnect.` : catchingUp ? "Taking control disabled while you catch up" : undefined
+      ? {
+          animation: `control-taken ${HOLD.taken}ms cubic-bezier(0.34, 1.56, 0.64, 1)`,
+        }
+      : {
+          transform: `scale(${hold === "holding" ? HOLD.sink : 1})`,
+          transition: `transform ${hold === "holding" ? `${HOLD.ms}ms cubic-bezier(0.2, 0.7, 0.3, 1)` : `${HOLD.back}ms ease-out`}`,
+        }
+  const note = pfLost
+    ? `${pf} may still be flying. If you take control, their aircraft will jump to yours when they reconnect.`
+    : catchingUp
+      ? "Taking control disabled while you catch up"
+      : undefined
   return (
     // Room above for the ring a take spreads, which the strip's own box would cut off.
     <div className="px-4 pt-2 pb-4">
@@ -179,24 +205,56 @@ function Strip({ control }: { control: Control }) {
           }}
           onKeyUp={(e) => (e.key === " " || e.key === "Enter") && stop()}
           className={
-            "relative flex h-12 w-full items-center justify-center rounded-lg text-sm font-semibold outline-none select-none transition-colors duration-300 focus-visible:ring-3 focus-visible:ring-ring/50 " +
-            (mine ? "cursor-default bg-primary/10 text-primary/70" : catchingUp ? "cursor-not-allowed bg-primary text-primary-foreground opacity-30" : "cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90")
+            "relative flex h-12 w-full items-center justify-center rounded-lg text-sm font-semibold transition-colors duration-300 outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50 " +
+            (mine
+              ? "cursor-default bg-primary/10 text-primary/70"
+              : catchingUp
+                ? "cursor-not-allowed bg-primary text-primary-foreground opacity-30"
+                : "cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90")
           }
         >
           {/* Darkens the button the moment it's pressed, with no easing. */}
-          {hold === "holding" && <span className="absolute inset-0 rounded-lg bg-black/10" />}
-          <span key={mine ? "mine" : "take"} className="relative animate-in duration-300 fade-in">
+          {hold === "holding" && (
+            <span className="absolute inset-0 rounded-lg bg-black/10" />
+          )}
+          <span
+            key={mine ? "mine" : "take"}
+            className="relative animate-in duration-300 fade-in"
+          >
             {mine ? "You have control" : "Hold to take control"}
             {hold === "holding" && (
               // The path counts 100 long, dashed 100 on and 100 off, so an offset of 100 shows none
               // of it; turned so it fills clockwise from the top.
               // Centered on the label's line by flex rather than offsets, which a zoomed frame rounds,
               // and turned inside the drawing, where every browser turns about the same point.
-              <span className="absolute inset-y-0 right-full mr-2.5 flex items-center" aria-hidden>
+              <span
+                className="absolute inset-y-0 right-full mr-2.5 flex items-center"
+                aria-hidden
+              >
                 <svg viewBox="0 0 16 16" className="size-4">
                   <g transform="rotate(-90 8 8)">
-                    <circle cx="8" cy="8" r="6.5" fill="none" strokeWidth="2" className="stroke-primary-foreground/20" />
-                    <circle cx="8" cy="8" r="6.5" fill="none" strokeWidth="2" strokeLinecap="round" pathLength={100} strokeDasharray="100 100" className="stroke-primary-foreground" style={{ animation: `hold-ring ${HOLD.ms}ms linear forwards` }} />
+                    <circle
+                      cx="8"
+                      cy="8"
+                      r="6.5"
+                      fill="none"
+                      strokeWidth="2"
+                      className="stroke-primary-foreground/20"
+                    />
+                    <circle
+                      cx="8"
+                      cy="8"
+                      r="6.5"
+                      fill="none"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      pathLength={100}
+                      strokeDasharray="100 100"
+                      className="stroke-primary-foreground"
+                      style={{
+                        animation: `hold-ring ${HOLD.ms}ms linear forwards`,
+                      }}
+                    />
                   </g>
                 </svg>
               </span>
@@ -205,18 +263,35 @@ function Strip({ control }: { control: Control }) {
           {bound && !mine && (
             <KbdGroup className="absolute right-3">
               {bound.split("+").map((key) => (
-                <Kbd key={key} className="border border-primary-foreground bg-transparent font-semibold text-primary-foreground">
+                <Kbd
+                  key={key}
+                  className="border border-primary-foreground bg-transparent font-semibold text-primary-foreground"
+                >
                   {key}
                 </Kbd>
               ))}
             </KbdGroup>
           )}
         </div>
-        {hold === "taken" && <span className="pointer-events-none absolute inset-0 rounded-lg text-primary" style={{ animation: "ready-pulse 600ms ease-out forwards" }} />}
+        {hold === "taken" && (
+          <span
+            className="pointer-events-none absolute inset-0 rounded-lg text-primary"
+            style={{ animation: "ready-pulse 600ms ease-out forwards" }}
+          />
+        )}
       </div>
       {note && (
-        <p className={"flex items-start gap-2 pt-2.5 text-xs " + (pfLost ? "text-warning" : "text-muted-foreground")}>
-          {pfLost ? <TriangleAlert className="mt-px size-3.5 shrink-0" /> : <Spinner className="mt-px size-3.5 shrink-0" />}
+        <p
+          className={
+            "flex items-start gap-2 pt-2.5 text-xs " +
+            (pfLost ? "text-warning" : "text-muted-foreground")
+          }
+        >
+          {pfLost ? (
+            <TriangleAlert className="mt-px size-3.5 shrink-0" />
+          ) : (
+            <Spinner className="mt-px size-3.5 shrink-0" />
+          )}
           {note}
         </p>
       )}

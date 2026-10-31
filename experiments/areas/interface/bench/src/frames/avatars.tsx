@@ -165,12 +165,12 @@ function SeatIcon() {
 // (record/areas/avatars/01-avatars.md, A seat; record/areas/profiles/01-format-and-delivery.md,
 // Seats). To scale at 120px a meter, with the seats 0.62m apart, as the format's example puts them,
 // whose numbers are hypothetical. Each bubble is centered on its seat, which reads more plainly
-// than on the eye 5cm behind the hip (user, 2026-10-31). Flat, as the app is, with dashed edges,
-// since in the sim the bubbles can't be seen: this pilot's bubble a tint of their color, holding
-// their head; the other a faint neutral tint; the seats in the page's muted ink. Tried and
-// dropped: two separate round bubbles, which no cockpit has; the taken seat in its pilot's color;
-// soap bubbles, with a film brightening to the rim and a highlight, whose shine didn't suit the
-// flat app; solid edges (user, 2026-10-31).
+// than on the eye 5cm behind the hip (user, 2026-10-31). Flat, as the app is: the free bubble a
+// faint neutral tint with a dashed edge, empty; this pilot's a tint of their color with a solid
+// edge, filled by their head; the seats in the page's muted ink. Tried and dropped: two separate
+// round bubbles, which no cockpit has; the taken seat in its pilot's color; soap bubbles, with a
+// film brightening to the rim and a highlight, whose shine didn't suit the flat app; both edges
+// solid, then both dashed (user, 2026-10-31).
 function SeatsDrawing({ hex }: { hex: string }) {
   const px = 120
   const r = 0.4 * px
@@ -189,7 +189,7 @@ function SeatsDrawing({ hex }: { hex: string }) {
   return (
     <svg viewBox="0 0 240 120" className="mx-auto h-[120px] w-[240px]" aria-hidden>
       <path d={bubble(1)} fill="currentColor" fillOpacity={0.05} stroke="currentColor" strokeOpacity={0.4} strokeDasharray="3 4" />
-      <path d={bubble(0)} fill={hex} fillOpacity={0.14} stroke={hex} strokeOpacity={0.85} strokeWidth={1.5} strokeDasharray="3 4" />
+      <path d={bubble(0)} fill={hex} fillOpacity={0.14} stroke={hex} strokeOpacity={0.85} strokeWidth={1.5} />
       {seat(left)}
       {seat(right)}
       <circle cx={left} cy={seatY - 5} r={9} fill={hex} />

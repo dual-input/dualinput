@@ -219,10 +219,20 @@ export function useScroller({ nested, ...said }: Told & { nested?: boolean } = {
 // can't part. Each ramp turns off by moving out past the box's edge, the mask's size and place
 // easing, so a fade comes and goes over 200ms as the layers' opacity did. Coherent GT keeps the
 // -webkit- mask properties (record/areas/architecture/coherent-gt.md).
+// Each ramp eases, a gentle start at the edge and a soft landing on full strength, since a straight
+// ramp's corner where it meets full strength drew a line across the page, and a page's fades are
+// 16px at the top and 20px at the bottom (user, 2026-10-31: the fade felt too strong, and dated;
+// tried and dropped: straight ramps, 24px at the top and 32px at the bottom of a page).
+const EASE = [0, 0.08, 0.28, 0.58, 0.84, 0.97, 1]
+const ramp = (length: number, from: "top" | "bottom") =>
+  EASE.map((a, i) => {
+    const at = (length * i) / (EASE.length - 1)
+    return `rgba(0,0,0,${a}) ${from === "top" ? `${at}px` : `calc(100% - ${at}px)`}`
+  })
 export function fadeMask(above: boolean, below: boolean, top: number, bottom: number): React.CSSProperties {
   const off = (above ? 0 : top) + (below ? 0 : bottom)
   return {
-    WebkitMaskImage: `linear-gradient(to bottom, transparent, #000 ${top}px, #000 calc(100% - ${bottom}px), transparent)`,
+    WebkitMaskImage: `linear-gradient(to bottom, ${[...ramp(top, "top"), ...ramp(bottom, "bottom").reverse()].join(", ")})`,
     WebkitMaskRepeat: "no-repeat",
     WebkitMaskSize: `100% calc(100% + ${off}px)`,
     WebkitMaskPosition: `0 ${above ? 0 : -top}px`,
@@ -249,7 +259,7 @@ export function ScrollPage({ children }: { children: React.ReactNode }) {
         onTouchEnd={scroller.onTouchEnd}
         onTouchCancel={scroller.onTouchEnd}
         className={"flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pt-px pb-5 select-none [&>*]:shrink-0 " + NO_SCROLLBAR + " " + scroller.cursor}
-        style={fadeMask(scroller.above, scroller.below, 24, 32)}
+        style={fadeMask(scroller.above, scroller.below, 16, 20)}
       >
         {children}
       </div>

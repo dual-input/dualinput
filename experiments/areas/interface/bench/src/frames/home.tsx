@@ -113,9 +113,8 @@ const WHERE: Record<Whereabouts, { when: string; shows: string; trouble?: boolea
 // network's slice carries them, and whether they're ready.
 // The traffic host and the ATC host each have a chip on their row, with their tab's icon, so who
 // shares shows on the session page, though the switch lives on the traffic tab (user, 2026-10-31).
-// They're two roles, each declared by its feature, which the one "Share my traffic and ATC" switch
-// claims together (record/areas/session/01-roles-and-members.md, The traffic and ATC host), so one
-// pilot holds both in v1.
+// They're two roles, each declared by its feature and taken by its own switch, so they can sit with
+// two pilots (record/areas/interface/decisions.md, Traffic and ATC audio are shared apart).
 type Pilot = { name: string; hue: string; at?: Whereabouts; flying?: boolean; way?: Way; link?: string; ready?: boolean; traffic?: boolean; atc?: boolean }
 // A session can open with its flight already started: then whether this pilot's catch-up runs, the
 // binding's name for the take-control strip, and a demo of taking control, which can hand control
@@ -258,7 +257,7 @@ const LONG_CHECKLIST: ChecklistItem[] = [
 const BOUND = "F9"
 const SESSIONS: Record<
   | "alone" | "crewmate" | "bigger-crew" | "joined" | "preflight-alone" | "preflight-loading" | "preflight-crew" | "preflight-settling" | "preflight-dropped" | "preflight-countdown" | "preflight-joined" | "preflight-worst"
-  | "flying-pm" | "flying-pf" | "flying-take" | "flying-tap" | "flying-catching-up" | "flying-pf-lost" | "flying-combo" | "flying-hardware",
+  | "flying-pm" | "flying-pf" | "flying-take" | "flying-tap" | "flying-catching-up" | "flying-pf-lost" | "flying-split" | "flying-combo" | "flying-hardware",
   Session
 > = {
   alone: { joined: false, crew: [] },
@@ -297,6 +296,8 @@ const SESSIONS: Record<
   // doesn't take (record/areas/control/01-take-control.md, The binding), and a hardware button,
   // whose name format is hypothetical.
   "flying-combo": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: "Ctrl+Shift+Alt+T", demo: "hold" } },
+  // James shares traffic and this pilot shares ATC, since each is shared apart.
+  "flying-split": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], traffic: DEMO_HOST, atc: "You", preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND } },
   "flying-hardware": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: "TCA Sidestick Button 3", demo: "hold" } },
 }
 // How long the countdown runs once every counted pilot is ready, in seconds.

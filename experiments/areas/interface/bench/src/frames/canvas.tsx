@@ -13,7 +13,7 @@ import { AppFrame, EFB, EveryIssueFrame } from "./shell"
 import { SetupFlowFrame } from "./setup-check"
 import { CrewmateStatesFrame, HeadsUpFrame, HomeFirstTimeFrame, HomeLaterFrame, ReconnectingFrame, RefusalsFrame, WaysFrame, type Action } from "./home"
 import { AircraftPickerFrame } from "./aircraft"
-import { TrafficFrame } from "./traffic"
+import { ShareFrame } from "./traffic"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
 // one gets a Replay button beside its name, which draws it afresh. A home page with Host and Join
@@ -115,17 +115,27 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "A click let go too soon", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-tap" /> },
       { name: "Flying, catching up", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-catching-up" /> },
       { name: "Flying, link to the pilot flying lost", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-pf-lost" /> },
+      { name: "Flying, traffic and ATC from two pilots", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-split" /> },
       { name: "Bound to a key combination", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-combo" /> },
       { name: "Bound to a hardware button", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-hardware" /> },
     ],
   },
-  // The traffic tab, in a flight: James sharing, nobody, and this pilot.
+  // The Traffic and ATC audio tabs, each with its own switch, in a flight: James sharing, nobody,
+  // and this pilot.
   {
     name: "Traffic",
     frames: [
-      { name: "James shares", draw: (t) => <TrafficFrame theme={t} sharer="James" /> },
-      { name: "Nobody shares", draw: (t) => <TrafficFrame theme={t} /> },
-      { name: "You share", draw: (t) => <TrafficFrame theme={t} sharer="You" /> },
+      { name: "James shares traffic", draw: (t) => <ShareFrame theme={t} feature="traffic" sharer="James" /> },
+      { name: "Nobody shares traffic", draw: (t) => <ShareFrame theme={t} feature="traffic" /> },
+      { name: "You share traffic", draw: (t) => <ShareFrame theme={t} feature="traffic" sharer="You" /> },
+    ],
+  },
+  {
+    name: "ATC audio",
+    frames: [
+      { name: "James shares ATC", draw: (t) => <ShareFrame theme={t} feature="atc" sharer="James" /> },
+      { name: "Nobody shares ATC", draw: (t) => <ShareFrame theme={t} feature="atc" /> },
+      { name: "You share ATC", draw: (t) => <ShareFrame theme={t} feature="atc" sharer="You" /> },
     ],
   },
   // What the app's window says of itself on any page. The header on home, open over what needs the

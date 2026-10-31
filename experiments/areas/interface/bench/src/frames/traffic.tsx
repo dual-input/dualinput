@@ -351,7 +351,10 @@ const PACKS: Record<"match" | "differ", Pack[]> = {
 }
 function PacksOnThisPc({ packs }: { packs: Pack[] }) {
   return (
-    <section className="mt-auto flex flex-col rounded-2xl bg-muted/20 text-sm text-muted-foreground">
+    <section
+      data-surface
+      className="mt-auto flex flex-col rounded-2xl bg-muted/20 text-sm text-muted-foreground"
+    >
       <h2 className="flex min-h-11 items-center gap-2.5 px-4 py-3">
         <Package className="size-4 shrink-0" />
         Detected traffic packs on this PC

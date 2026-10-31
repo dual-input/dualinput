@@ -33,7 +33,7 @@ import { useFlightAround } from "./traffic"
 export type AircraftNote = "model" | "seats" | "profile"
 function NoteForAircraft({ note, onLearnMore }: { note: AircraftNote; onLearnMore: () => void }) {
   return (
-    <p className="flex items-baseline gap-2.5 rounded-2xl bg-info/10 px-4 py-3 text-sm text-info">
+    <p data-surface className="flex items-baseline gap-2.5 rounded-2xl bg-info/10 px-4 py-3 text-sm text-info">
       <Info className="size-4 shrink-0 [transform:translateY(3px)]" />
       <span>
         {note === "model" ? (
@@ -126,7 +126,7 @@ function Guide({ icon, title, open, onToggle, children, shown = 0 }: { icon: Rea
     return () => cancelAnimationFrame(frame)
   }, [open, shown])
   return (
-    <section ref={section} className="rounded-2xl bg-muted/20">
+    <section ref={section} data-surface className="rounded-2xl bg-muted/20">
       <button
         type="button"
         aria-expanded={open}

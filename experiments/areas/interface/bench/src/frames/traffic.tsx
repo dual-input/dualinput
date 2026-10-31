@@ -223,7 +223,7 @@ const PACKS: Record<"match" | "differ", Pack[]> = {
 function PacksOnThisPc({ packs }: { packs: Pack[] }) {
   return (
     <section className="flex flex-col gap-2.5 rounded-xl bg-muted/20 px-4 py-3.5 text-xs">
-      <h2 className="flex items-center gap-1.5 font-medium text-muted-foreground">
+      <h2 className="flex items-center gap-1.5 font-medium text-muted-foreground/80">
         <Package className="size-3.5 shrink-0" />
         Detected traffic packs on this PC
       </h2>
@@ -233,8 +233,8 @@ function PacksOnThisPc({ packs }: { packs: Pack[] }) {
             key={p.name}
             className="flex items-baseline justify-between gap-4"
           >
-            <span>{p.name}</span>
-            <span className="text-muted-foreground tabular-nums">
+            <span className="text-foreground/75">{p.name}</span>
+            <span className="text-muted-foreground/80 tabular-nums">
               {p.version}
             </span>
           </li>

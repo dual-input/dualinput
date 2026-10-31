@@ -19,10 +19,15 @@ import { AppFrame, InlineLink, Label, useShowDot } from "./shell"
 import { useShowPhase } from "./phase"
 import { useShowControl, useShowSession, type Control } from "./flight"
 import { ScrollPage } from "./scroller"
+import { Head } from "./figure-head"
+import { FIGURE_COLORS } from "./figure-portrait"
 
-// Who shares as the frame opens: James, nobody, or this pilot; or no session at all.
+// Who shares as the frame opens: James, nobody, or this pilot; or no session at all. The pilots'
+// colors are the session page's examples.
 type Sharer = "James" | "You" | undefined
 type Where = { session: boolean; sharer?: Sharer }
+const HUE: Record<"James" | "You", string> = { James: "red", You: "orange" }
+const hexOf = (pilot: "James" | "You") => FIGURE_COLORS.find((c) => c.name === HUE[pilot])!.hex
 
 // The flight's frame around a tab: the phase in the header and the take-control strip under the
 // tabs while flying, as on every tab; neither outside a session.
@@ -35,10 +40,27 @@ function useFlightAround(session: boolean) {
   useShowControl(control)
 }
 
-// The sharing card: the switch and what it does, then the role's own setting, which only a pilot
-// who shares or could share needs. Who shares is the check's first line.
-function RoleCard({ id, label, what, session, sharing, onChange, children }: { id: string; label: string; what: string; session: boolean; sharing: boolean; onChange: (on: boolean) => void; children?: React.ReactNode }) {
+// The sharing card: the switch and what it does, then who shares, the tab's first question, by
+// their head as on the crew list, with what turning a switch on does to them (user, 2026-10-31: the
+// host's head in the card "was nice", where a line of the check named them); then the role's own
+// setting, which only a pilot who shares or could share needs.
+function RoleCard({ id, label, what, noun, session, sharer, onChange, children }: { id: string; label: string; what: string; noun: string; session: boolean; sharer: Sharer; onChange: (on: boolean) => void; children?: React.ReactNode }) {
   const { Card, CardContent, Separator, Switch } = useUI()
+  const who = !session ? (
+    <span className="text-muted-foreground">Sharing needs a session</span>
+  ) : sharer ? (
+    <>
+      <span className="flex shrink-0">
+        <Head hex={hexOf(sharer)} />
+      </span>
+      <span className="flex flex-col">
+        <span>{sharer === "You" ? `You share ${noun}` : `${sharer} shares ${noun}`}</span>
+        <span className="text-xs text-muted-foreground">{sharer === "You" ? "Turning theirs on takes over from you" : "Turning yours on takes over"}</span>
+      </span>
+    </>
+  ) : (
+    <span className="text-muted-foreground">Nobody shares {noun}</span>
+  )
   return (
     <Card className="[--card-spacing:--spacing(5)]">
       <CardContent className="flex items-start gap-4">
@@ -46,8 +68,9 @@ function RoleCard({ id, label, what, session, sharing, onChange, children }: { i
           <span className="text-sm font-medium">{label}</span>
           <span className="text-xs text-muted-foreground">{what}</span>
         </label>
-        <Switch id={id} disabled={!session} checked={sharing} onCheckedChange={onChange} />
+        <Switch id={id} disabled={!session} checked={sharer === "You"} onCheckedChange={onChange} />
       </CardContent>
+      <CardContent className="flex min-h-7 items-center gap-3 text-sm">{who}</CardContent>
       {children && (
         <>
           <Separator />
@@ -129,7 +152,6 @@ const Lines = ({ items }: { items: string[] }) => (
 function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: Counts): Line[] {
   if (sharer === "You")
     return [
-      { state: "ok", says: "You share your traffic", detail: "Turning theirs on takes over from you" },
       CREW_PACKS.length ? { state: "differs", says: "The crew's traffic packs match yours", detail: <Lines items={CREW_PACKS} /> } : { state: "ok", says: "The crew's traffic packs match yours" },
       { state: "unchecked", says: "The crew's own AI traffic and multiplayer are off", detail: "Each crewmate's Traffic tab checks this" },
       { state: "unchecked", says: "The crew's scenery matches yours", detail: "Dual Input can't check this" },
@@ -137,7 +159,6 @@ function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: C
   if (sharer && session) {
     const packsDiffer = packs.filter((p) => p.host !== p.mine)
     return [
-      { state: "ok", says: `${sharer} shares their traffic`, detail: "Turning yours on takes over" },
       counts.others ? { state: "differs", says: "Your own AI traffic and multiplayer are off", detail: `${counts.others} aircraft in your sim aren't ${sharer}'s` } : { state: "ok", says: "Your own AI traffic and multiplayer are off" },
       packsDiffer.length ? { state: "differs", says: `Your traffic packs match ${sharer}'s`, detail: <Lines items={packsDiffer.map((p) => packSays(p, sharer))} /> } : { state: "ok", says: `Your traffic packs match ${sharer}'s` },
       { state: "unchecked", says: `Your scenery matches ${sharer}'s`, detail: "Dual Input can't check this" },
@@ -145,7 +166,6 @@ function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: C
     ]
   }
   return [
-    { state: "unchecked", says: "One pilot shares their traffic", detail: session ? "Nobody shares yet" : "Sharing needs a session" },
     { state: "unchecked", says: "Everyone else turns off their own AI traffic and multiplayer" },
     { state: "unchecked", says: "Everyone runs the same traffic packs and scenery", detail: "Dual Input compares the packs once someone shares" },
   ]
@@ -175,7 +195,7 @@ function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 
   useShowDot("traffic", differs(lines))
   return (
     <ScrollPage>
-      <RoleCard id="share-traffic" label="Share my traffic" what="The AI traffic in your sim shows in the others' sims." session={where.session} sharing={sharer === "You"} onChange={(on) => setSharer(on ? "You" : undefined)}>
+      <RoleCard id="share-traffic" label="Share my traffic" what="The AI traffic in your sim shows in the others' sims." noun="traffic" session={where.session} sharer={sharer} onChange={(on) => setSharer(on ? "You" : undefined)}>
         {!receiving && <Radius />}
       </RoleCard>
       <HowAndCheck how="One pilot shares their traffic at a time: Dual Input copies the AI traffic in their sim into everyone else's. The copies look right when everyone else runs the same traffic packs and scenery, with their own traffic off." lines={lines} />
@@ -194,19 +214,16 @@ function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 
 function atcLines(session: boolean, sharer: Sharer, capture: "capturing" | "waiting"): Line[] {
   if (sharer === "You")
     return [
-      { state: "ok", says: "You share your ATC", detail: "Turning theirs on takes over from you" },
       capture === "waiting" ? { state: "differs", says: "Your ATC app runs", detail: "Waiting for BeyondATC or SayIntentions to run" } : { state: "ok", says: "Your ATC app runs", detail: "Sharing BeyondATC" },
       { state: "unchecked", says: "The sim's own ATC is off", detail: "Dual Input can't share it, or check it" },
       { state: "unchecked", says: "The crew's own ATC apps are closed", detail: "Dual Input can't check this" },
     ]
   if (sharer && session)
     return [
-      { state: "ok", says: `${sharer} shares their ATC`, detail: "Turning yours on takes over" },
       { state: "unchecked", says: "Your own ATC app is closed", detail: "With one open you'd hear two, and Dual Input can't check this" },
       { state: "unchecked", says: "The sim's own ATC is off", detail: "Dual Input can't check this" },
     ]
   return [
-    { state: "unchecked", says: "One pilot shares their ATC", detail: session ? "Nobody shares yet" : "Sharing needs a session" },
     { state: "unchecked", says: "Everyone else closes their own ATC app" },
     { state: "unchecked", says: "Everyone turns off the sim's own ATC" },
   ]
@@ -227,7 +244,7 @@ function AtcPage({ where, capture = "capturing" }: { where: Where; capture?: "ca
   ]
   return (
     <ScrollPage>
-      <RoleCard id="share-atc" label="Share my ATC" what="The others hear your ATC app." session={where.session} sharing={hosting} onChange={(on) => setSharer(on ? "You" : undefined)}>
+      <RoleCard id="share-atc" label="Share my ATC" what="The others hear your ATC app." noun="ATC" session={where.session} sharer={where.session ? sharer : undefined} onChange={(on) => setSharer(on ? "You" : undefined)}>
         {!receiving && (
           <div className="flex flex-col gap-3">
             <span className="text-sm">ATC app</span>

@@ -20,6 +20,7 @@ import { useShowPhase } from "./phase"
 import { useShowControl, useShowSession, type Control } from "./flight"
 import { ScrollPage } from "./scroller"
 import { Head } from "./figure-head"
+import { ConfirmButton } from "./confirm"
 import { FIGURE_COLORS } from "./figure-portrait"
 
 // Who shares as the frame opens: James, nobody, or this pilot; or no session at all. The pilots'
@@ -40,38 +41,38 @@ function useFlightAround(session: boolean) {
   useShowControl(control)
 }
 
-// The sharing card: the switch, then who's sharing, the tab's first question, by their head as on
-// the crew list, with what turning a switch on does to them (user, 2026-10-31: the host's head in
-// the card "was nice", where a line of the check named them); with nobody sharing, nothing, since
-// the switch says it (user, 2026-10-31). Then the role's own setting, which shows while this pilot
-// is sharing and hides when they stop, and outside a session, where the settings still change
-// (user, 2026-10-31). How it works says what the switch does, so the card carries no description
-// (user, 2026-10-31). A status of something happening now takes the progressive, "James is sharing
-// traffic" (user, 2026-10-31).
+// The sharing card, one row in every state: what's happening on the left, and its control on the
+// right. With nobody sharing, "Share my traffic" and its switch; while this pilot is sharing, their
+// head and "You're sharing traffic" with the switch on, to stop; while another pilot is, their head
+// and "James is sharing traffic" with Take over in place of the switch, which says what a switch
+// with a note under it had to (user, 2026-10-31). Taking over ends the other pilot's sharing, and
+// for ATC their ATC app's conversation with the crew (record/areas/session/01-roles-and-members.md,
+// The traffic and ATC host), so it asks first in the confirm popover, as Leave does. Outside a
+// session the switch is off and can't turn on. Then the role's own setting, which shows while this
+// pilot is sharing and hides when they stop, and outside a session, where the settings still change
+// (user, 2026-10-31). How it works says what the switch does, so the card carries no description,
+// and a status of something happening now takes the progressive (user, 2026-10-31).
 function RoleCard({ id, label, noun, session, sharer, onChange, children }: { id: string; label: string; noun: string; session: boolean; sharer: Sharer; onChange: (on: boolean) => void; children?: React.ReactNode }) {
   const { Card, CardContent, Separator, Switch } = useUI()
-  const who = !session ? (
-    <span className="text-muted-foreground">Sharing needs a session</span>
-  ) : sharer ? (
-    <>
-      <span className="flex shrink-0">
-        <Head hex={hexOf(sharer)} />
-      </span>
-      <span className="flex flex-col">
-        <span>{sharer === "You" ? `You're sharing ${noun}` : `${sharer} is sharing ${noun}`}</span>
-        <span className="text-xs text-muted-foreground">{sharer === "You" ? "Turning theirs on takes over from you" : "Turning yours on takes over"}</span>
-      </span>
-    </>
-  ) : undefined
+  const someone = session ? sharer : undefined
   return (
     <Card className="[--card-spacing:--spacing(5)]">
-      <CardContent className="flex items-start gap-4">
-        <label htmlFor={id} className={"flex-1 text-sm font-medium " + (session ? "cursor-pointer" : "")}>
-          {label}
+      <CardContent className="flex min-h-7 items-center gap-3">
+        {someone && (
+          <span className="flex shrink-0">
+            <Head hex={hexOf(someone)} />
+          </span>
+        )}
+        <label htmlFor={id} className={"flex flex-1 flex-col text-sm " + (someone ? "" : "font-medium ") + (session ? "cursor-pointer" : "")}>
+          {someone === "You" ? `You're sharing ${noun}` : someone ? `${someone} is sharing ${noun}` : label}
+          {!session && <span className="text-xs font-normal text-muted-foreground">Sharing needs a session</span>}
         </label>
-        <Switch id={id} disabled={!session} checked={sharer === "You"} onCheckedChange={onChange} />
+        {someone && someone !== "You" ? (
+          <ConfirmButton label="Take over" question={`Take over from ${someone}?`} go="Take over" onConfirm={() => onChange(true)} trigger={{ variant: "outline", size: "sm" }} tone="primary" align="end" />
+        ) : (
+          <Switch id={id} disabled={!session} checked={someone === "You"} onCheckedChange={onChange} />
+        )}
       </CardContent>
-      {who && <CardContent className="flex min-h-7 items-center gap-3 text-sm">{who}</CardContent>}
       {children && (
         <>
           <Separator />

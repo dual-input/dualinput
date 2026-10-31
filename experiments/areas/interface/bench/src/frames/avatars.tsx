@@ -180,10 +180,15 @@ function SeatsDrawing({ hex }: { hex: string }) {
   const dy = Math.sqrt(r * r - half * half)
   const [left, right] = [mid - half, mid + half]
   const bubble = (side: 0 | 1) => `M ${mid} ${seatY - dy} A ${r} ${r} 0 1 ${side} ${mid} ${seatY + dy} Z`
+  // A seat from above, nose up, so it reads as one: the cushion, a backrest across its back a
+  // little wider than it, and an armrest down each side (user, 2026-10-31: a cushion with a thin
+  // bar behind it didn't read as a seat from above).
   const seat = (x: number) => (
     <g>
-      <rect x={x - 27} y={seatY - 30} width={54} height={50} rx={10} fill="none" stroke="currentColor" strokeOpacity={0.55} strokeWidth={1.5} />
-      <rect x={x - 25} y={seatY + 18} width={50} height={10} rx={5} fill="currentColor" fillOpacity={0.3} />
+      <rect x={x - 21} y={seatY - 26} width={42} height={40} rx={8} fill="none" stroke="currentColor" strokeOpacity={0.55} strokeWidth={1.5} />
+      <rect x={x - 29} y={seatY - 16} width={6} height={32} rx={3} fill="currentColor" fillOpacity={0.3} />
+      <rect x={x + 23} y={seatY - 16} width={6} height={32} rx={3} fill="currentColor" fillOpacity={0.3} />
+      <rect x={x - 25} y={seatY + 14} width={50} height={14} rx={7} fill="currentColor" fillOpacity={0.4} />
     </g>
   )
   return (
@@ -192,7 +197,8 @@ function SeatsDrawing({ hex }: { hex: string }) {
       <path d={bubble(0)} fill={hex} fillOpacity={0.14} stroke={hex} strokeOpacity={0.85} strokeWidth={1.5} />
       {seat(left)}
       {seat(right)}
-      <circle cx={left} cy={seatY - 5} r={9} fill={hex} />
+      {/* Over the seat's back, where a seated pilot's head is from above. */}
+      <circle cx={left} cy={seatY + 5} r={9} fill={hex} />
       <text x={left} y={116} textAnchor="middle" fontSize={11} fill="currentColor">
         You
       </text>

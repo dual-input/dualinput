@@ -278,17 +278,39 @@ function foldPage(box: HTMLElement) {
   const away = Math.min(1, box.scrollTop / TOP_FADE)
   const fold = (el: HTMLElement) => {
     const under = -topOf(el)
-    const parts = [...el.children] as HTMLElement[]
+    const parts = ([...el.children] as HTMLElement[]).filter((p) => !p.dataset.foldRing)
     if (under <= 0) {
       if (el.dataset.folding) {
         delete el.dataset.folding
         setClip(el)
         parts.forEach((p) => setMask(p))
+        el.querySelector(":scope > [data-fold-ring]")?.remove()
       }
       return
     }
     el.dataset.folding = "1"
-    setClip(el, `inset(${under}px 0 0 0 round ${getComputedStyle(el).borderTopLeftRadius})`)
+    // A card's border is a 1px ring outside its box, so the clip reaches 1px past the box at the
+    // sides and foot, its corners a pixel rounder to match, and the same ring is drawn along the
+    // held edge, so the card stays outlined all round as it folds (user, 2026-10-31: the border
+    // went as the fold started).
+    const look = getComputedStyle(el)
+    const round = parseFloat(look.borderTopLeftRadius) || 0
+    // Its color as the browser writes it, rgba() or oklab() among them.
+    const ring = /([a-z]+\([^)]*\)) 0px 0px 0px 1px/.exec(look.boxShadow)?.[1]
+    setClip(el, `inset(${under - (ring ? 1 : 0)}px -1px -1px -1px round ${round + (ring ? 1 : 0)}px)`)
+    if (ring) {
+      let edge = el.querySelector<HTMLElement>(":scope > [data-fold-ring]")
+      if (!edge) {
+        edge = document.createElement("span")
+        edge.dataset.foldRing = "1"
+        edge.style.cssText = "position:absolute;left:-1px;right:-1px;bottom:-1px;pointer-events:none;box-sizing:border-box;border-style:solid;border-width:1px"
+        if (look.position === "static") el.style.position = "relative"
+        el.appendChild(edge)
+      }
+      edge.style.top = `${under - 1}px`
+      edge.style.borderColor = ring
+      edge.style.borderRadius = `${round + 1}px`
+    }
     const top = topOf(el)
     const strength = Math.min(1, under / SURFACE_FADE)
     for (const p of parts) {

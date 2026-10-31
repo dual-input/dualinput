@@ -64,7 +64,14 @@ function useFlightAround(session: boolean) {
 // 2026-10-31). The card's padding moves into the row for that, and into the settings below it.
 // The row is a label in every state, so a change of state doesn't redraw it from scratch. With Take
 // over in it, the switch it names isn't there, so a press on it does nothing; a label naming no
-// control would take the first it holds, Take over.
+// control would take the first it holds, Take over. The row is Take over's 32px tall in every
+// state, so the card keeps its height as Take over gives way to the switch (user, 2026-10-31: the
+// 28px a switch needs made a take-over jump 4px). Its one line of words centers its capitals on the
+// row from the words' baseline, as the check's icons do, since each platform places the words in
+// their line box differently: an empty strut 21px tall, half the row and half Geist's 10px capitals
+// at 14px, sets the baseline its bottom edge gives (user, 2026-10-31: centered by its line box,
+// the line sat 1px high on the user's machine). Outside a session the label and its note center as
+// a block.
 // The card shows the moment's state (ease.tsx), but the switch follows the press, so it slides the
 // moment it's pressed. In the moment, what changes in the row fades out, then the row takes its new
 // layout while nothing in it shows, so no word slides sideways, and its new parts arrive at once,
@@ -107,13 +114,15 @@ function RoleCard({
       <label
         htmlFor={id}
         className={
-          "box-content flex min-h-7 items-center p-(--card-spacing) " +
+          "box-content flex min-h-8 p-(--card-spacing) " +
+          (session ? "items-baseline " : "items-center ") +
           (session && !takeOver
             ? "cursor-pointer transition-colors hover:bg-muted/40 active:bg-muted/60"
             : "")
         }
       >
         <HeadSpot who={someone} stage={stage} changes={changes} />
+        {session && <span aria-hidden className="h-[21px] w-0 self-baseline" />}
         <span
           className={
             "flex flex-1 flex-col text-sm " + (someone ? "" : "font-medium")
@@ -133,7 +142,7 @@ function RoleCard({
           )}
         </span>
         <span
-          className="ml-3 flex"
+          className="ml-3 flex self-center"
           style={part(stage, controlChanges, 1, true, true)}
         >
           {takeOver ? (
@@ -164,7 +173,8 @@ function RoleCard({
 
 // The head's spot, its 28px and the 12px after it, is there while a pilot is sharing. A head that
 // goes fades in the moment's first step, and its spot goes once it's gone; one that arrives pops in
-// as the second starts, its window with it.
+// as the second starts, its window with it. Nothing clips the spot, since the pop swells the head
+// to 1.25 times its size, as a crew row's does (user, 2026-10-31: clipped, its edges were cut).
 function HeadSpot({
   who,
   stage,
@@ -174,19 +184,14 @@ function HeadSpot({
   stage: Stage
   changes: boolean
 }) {
-  const last = useRef(who)
-  if (who) last.current = who
-  const head = last.current
+  const head = who
   const look: React.CSSProperties = !changes
     ? {}
     : stage === "out"
       ? { opacity: 0, transition: `opacity ${MOMENT.out}ms ease-in` }
       : {}
   return (
-    <span
-      className="flex shrink-0 overflow-hidden"
-      style={{ width: who ? 40 : 0 }}
-    >
+    <span className="flex shrink-0 self-center" style={{ width: who ? 40 : 0 }}>
       {head && (
         <span key={head} className="flex" style={look}>
           <Head
@@ -238,9 +243,9 @@ const STATE_ICON: Record<State, React.ReactNode> = {
 // the feature's rules, and the list says so (user, 2026-10-31). A note on the feature's cost sits
 // under how it works, in a paragraph of its own, since it's neither a rule nor a check (user,
 // 2026-10-31), on the tab of the pilot it speaks to.
-// In the moment (ease.tsx), the note and the list each open or shut as a room; arriving, the note
-// and the list's title fade in two steps after the card's head, and the lines one step apart after
-// them, each rising. A line whose state turns, its list staying, fades its icon and words out and
+// In the moment (ease.tsx), the note and the list each open or shut as a room; arriving, each fades
+// in as one block, with no rise, two steps after the card's head (user, 2026-10-31: the list's
+// title and lines rising one after another was too flashy). A line whose state turns, its list staying, fades its icon and words out and
 // back as the new state, its detail's room opening or shutting under it (user, 2026-10-31).
 type CheckMoment = {
   stage: Stage
@@ -276,23 +281,16 @@ function HowAndCheck({
         </Room>
       </section>
       <Room open={lines.length > 0} pad="pt-6">
-        <section className="flex flex-col gap-2">
-          <h2
-            className="text-sm font-medium"
-            style={part(stage, !!moment?.list, 2)}
-          >
-            {rules ? "Rules" : "Check"}
-          </h2>
+        <section
+          className="flex flex-col gap-2"
+          style={part(stage, !!moment?.list, 2, false)}
+        >
+          <h2 className="text-sm font-medium">{rules ? "Rules" : "Check"}</h2>
           <ul className="flex flex-col gap-3">
-            {lines.map((l, i) => {
-              const whole = !!moment?.list
-              const turns = !whole && !!moment?.line(lineId(l))
+            {lines.map((l) => {
+              const turns = !moment?.list && !!moment?.line(lineId(l))
               return (
-                <li
-                  key={lineId(l)}
-                  className="flex items-baseline gap-2.5"
-                  style={part(stage, whole, 3 + i)}
-                >
+                <li key={lineId(l)} className="flex items-baseline gap-2.5">
                   <span className="flex" style={part(stage, turns, 0)}>
                     {STATE_ICON[l.state]}
                   </span>

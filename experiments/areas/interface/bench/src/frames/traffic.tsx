@@ -620,7 +620,9 @@ function AtcAppPicker({
             )}
           </SelectValue>
         </SelectTrigger>
-        <SelectContent>
+        {/* Below the picker, as a plain dropdown: the kit's default lays the picked item over the
+            picker and highlights it, so Automatic read as a box of its own (user, 2026-10-31). */}
+        <SelectContent alignItemWithTrigger={false}>
           <SelectItem value="auto">Automatic</SelectItem>
           <SelectSeparator />
           <SelectGroup>

@@ -131,7 +131,7 @@ function TakeControlKey({ start, onBound }: { start: Key; onBound: (key: string 
             </>
           ) : key ? (
             <>
-              <Kbd className="mr-2 border border-foreground bg-transparent font-semibold text-foreground">{key}</Kbd>
+              <Kbd className="mr-2 border border-foreground/70 bg-transparent font-semibold text-foreground/70">{key}</Kbd>
               <Button size="sm" variant="secondary" onClick={() => setKey("waiting")}>
                 Change
               </Button>

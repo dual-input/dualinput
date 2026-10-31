@@ -96,3 +96,46 @@ export function Room({ open, pad = "", style, children }: { open: boolean; pad?:
     </div>
   )
 }
+
+// A part that one control opens and shuts, such as a help note's body: opening, it eases open at
+// once, since there's nothing to clear first, and its content fades in once it's about 80% open;
+// shutting, its content fades first, then it eases shut, its content hidden until it's shut.
+// Run as the page's moment, opening waited out a fade of content already hidden, and shutting let
+// the content fade back in over the room's last pixels (2026-10-31).
+export function useReveal(open: boolean): { open: boolean; style: React.CSSProperties } {
+  const [shown, setShown] = useState(open)
+  const [look, setLook] = useState<"rest" | "hidden" | "in" | "out">("rest")
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    const timers: number[] = []
+    if (open) {
+      setShown(true)
+      setLook("hidden")
+      timers.push(window.setTimeout(() => setLook("in"), MOMENT.inAt))
+      timers.push(window.setTimeout(() => setLook("rest"), MOMENT.inAt + MOMENT.in))
+    } else {
+      setLook("out")
+      timers.push(
+        window.setTimeout(() => {
+          setShown(false)
+          setLook("hidden")
+        }, MOMENT.out)
+      )
+      timers.push(window.setTimeout(() => setLook("rest"), MOMENT.out + MOMENT.move))
+    }
+    return () => timers.forEach(clearTimeout)
+  }, [open])
+  const style: React.CSSProperties =
+    look === "hidden"
+      ? { opacity: 0 }
+      : look === "out"
+        ? { opacity: 0, transition: `opacity ${MOMENT.out}ms ease-in` }
+        : look === "in"
+          ? { opacity: 1, transition: `opacity ${MOMENT.in}ms ease-out` }
+          : {}
+  return { open: shown, style }
+}

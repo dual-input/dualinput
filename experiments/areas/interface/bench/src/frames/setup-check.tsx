@@ -1,7 +1,7 @@
 // First-time setup as a short sequence: the welcome alone on the page, then a system check that
 // runs one check at a time in one centered slot, stopping on a failure, then the pilot's crew card
-// with a portrait of their figure, whose head turns toward the cursor as the figure in the cockpit
-// turns where its pilot looks. The checks' outcomes and the name are examples.
+// with a portrait of their figure (identity.tsx), which the Avatars tab changes later. The checks'
+// outcomes and the name are examples.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { CircleCheck, CircleX, TriangleAlert } from "lucide-react"
@@ -9,15 +9,10 @@ import { CircleCheck, CircleX, TriangleAlert } from "lucide-react"
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
 import { AppFrame, Label, MarkTile } from "./shell"
-import { FIGURE_COLORS, FigurePortrait, HEAD_IN_PORTRAIT, unit, type V } from "./figure-portrait"
+import { IdentityCard, WINDOWS_USERNAME } from "./identity"
 import { ConfirmButton, RESTART_SIM } from "./confirm"
 import { FailureBox, SERVICE_NOT_RUNNING, toneOf, type Failure } from "./failure"
 
-const WINDOWS_USERNAME = "jordan"
-// A display name runs to 20 characters, so it fits every place the app shows it, such as the crew
-// rows and Join's question; a Windows account's name runs to 20 too, so the one the field starts
-// with always fits (record/areas/interface/decisions.md, A display name runs to 20 characters).
-const NAME_MAX = 20
 
 // How long each step of the sequence holds, in milliseconds.
 const WELCOME_HOLD = 1600
@@ -200,39 +195,14 @@ function Checks({ checks, phase, onFix, onSkip }: { checks: Check[]; phase: Extr
 }
 
 function CrewCard() {
-  const { Button, Card, CardContent, Input } = useUI()
+  const { Button } = useUI()
   const [name, setName] = useState(WINDOWS_USERNAME)
   const [hue, setHue] = useState("orange")
-  const field = useRef<HTMLInputElement>(null)
-  const box = useRef<HTMLDivElement>(null)
-  const swatches = useRef(new Map<string, HTMLButtonElement>())
-  const aim = useRef<V>([0, 0, 1])
-
-  useEffect(() => {
-    field.current?.focus({ preventScroll: true })
-    field.current?.select()
-  }, [])
-
-  // The figure looks at a point on the page as if the page were a window in front of it, a little
-  // more than the portrait's width away, so its nose points at the cursor.
-  const toward = (x: number, y: number): V => {
-    const b = box.current!.getBoundingClientRect()
-    const dx = x - (b.left + b.width * HEAD_IN_PORTRAIT[0])
-    const dy = y - (b.top + b.height * HEAD_IN_PORTRAIT[1])
-    return unit([dx, -dy, b.width * 1.3])
-  }
-  // Until the cursor comes near, it looks at the color it wears, since facing you its nose is a dot.
-  const lookAtColor = (c: string) => {
-    const s = swatches.current.get(c)?.getBoundingClientRect()
-    if (s) aim.current = toward(s.left + s.width / 2, s.top + s.height / 2)
-  }
-  useLayoutEffect(() => lookAtColor(hue), [])
-
+  const form = useRef<HTMLFormElement>(null)
   return (
     <form
+      ref={form}
       className="flex flex-1 animate-in flex-col justify-center gap-6 px-8 duration-500 fade-in zoom-in-95"
-      onMouseMove={(e) => (aim.current = toward(e.clientX, e.clientY))}
-      onMouseLeave={() => lookAtColor(hue)}
       onSubmit={(e) => {
         e.preventDefault()
         if (name.trim()) toast(`Continued as ${name.trim()}`)
@@ -242,44 +212,12 @@ function CrewCard() {
         <h2 className="text-lg font-semibold">How should others see you?</h2>
         <p className="text-sm text-muted-foreground">Pick a name and a color for your avatar.</p>
       </div>
-      <Card>
-        <CardContent className="flex items-center gap-5">
-          {/* The box stands as tall as the name and color fields beside it, 130px, so change it
-              with them; Coherent GT drops aspect-ratio, so it can't square itself to their height.
-              The backdrop clips to the box's rounded corners on its own, since the figure's hands
-              hang over the box's bottom edge. */}
-          <div ref={box} className="relative size-[130px] shrink-0">
-            <div className="absolute inset-0 overflow-hidden rounded-2xl bg-muted" />
-            <FigurePortrait hex={FIGURE_COLORS.find((c) => c.name === hue)!.hex} aim={aim} />
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label>Name</Label>
-              <Input ref={field} aria-label="Display name" maxLength={NAME_MAX} value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Color</Label>
-              <div className="flex flex-wrap gap-2">
-                {FIGURE_COLORS.map((c) => (
-                  <button
-                    key={c.name}
-                    ref={(el) => {
-                      if (el) swatches.current.set(c.name, el)
-                    }}
-                    type="button"
-                    onClick={() => setHue(c.name)}
-                    aria-label={c.name}
-                    className="size-5 rounded-full ring-offset-2 ring-offset-card transition-shadow outline-none focus-visible:ring-2 focus-visible:ring-ring data-[on=true]:ring-2 data-[on=true]:ring-foreground"
-                    data-on={hue === c.name}
-                    style={{ background: c.hex }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      <p className="text-xs text-muted-foreground">We pre-filled your Windows username. You can change both later in Settings.</p>
+      <IdentityCard name={name} onName={setName} hue={hue} onHue={setHue} region={form} focus />
+      <p className="text-xs text-muted-foreground">
+        We pre-filled your Windows username.
+        <br />
+        You can change both later on the Avatars tab.
+      </p>
       <Button type="submit" size="lg" className="w-full" disabled={!name.trim()}>
         Continue
       </Button>

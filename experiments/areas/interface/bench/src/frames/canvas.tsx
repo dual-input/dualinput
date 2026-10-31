@@ -14,6 +14,7 @@ import { SetupFlowFrame } from "./setup-check"
 import { CrewmateStatesFrame, HeadsUpFrame, HomeFirstTimeFrame, HomeLaterFrame, ReconnectingFrame, RefusalsFrame, WaysFrame, type Action } from "./home"
 import { AircraftPickerFrame } from "./aircraft"
 import { AtcFrame, TrafficFrame } from "./traffic"
+import { AvatarsFrame } from "./avatars"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
 // one gets a Replay button beside its name, which draws it afresh. A home page with Host and Join
@@ -147,6 +148,19 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Receiving ATC", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "James" }} /> },
       { name: "Receiving ATC, turned all the way down", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "James" }} volume={0} /> },
       { name: "ATC outside a session", draw: (t) => <AtcFrame theme={t} where={{ session: false }} /> },
+    ],
+  },
+  // The Avatars tab in a flight, with James in red; outside a session; and the note at the top
+  // for each aircraft whose figures do less; then with both help notes open.
+  {
+    name: "Avatars",
+    frames: [
+      { name: "Avatars in a flight", draw: (t) => <AvatarsFrame theme={t} /> },
+      { name: "Avatars outside a session", draw: (t) => <AvatarsFrame theme={t} session={false} /> },
+      { name: "Aircraft model can't be read", draw: (t) => <AvatarsFrame theme={t} note="model" /> },
+      { name: "Profile has no seats", draw: (t) => <AvatarsFrame theme={t} note="seats" /> },
+      { name: "No profile for this aircraft", draw: (t) => <AvatarsFrame theme={t} note="profile" /> },
+      { name: "Help notes open", draw: (t) => <AvatarsFrame theme={t} helpOpen /> },
     ],
   },
   // What the app's window says of itself on any page. The header on home, open over what needs the

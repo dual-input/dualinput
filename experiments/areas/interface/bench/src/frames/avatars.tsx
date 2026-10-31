@@ -159,69 +159,44 @@ function SeatIcon() {
 
 // Seats as bubbles, in the user's words (user, 2026-10-31), drawn as they are in practice, from
 // above with the nose up (user, 2026-10-31: "more representative bubbles"): a seat's bubble is its
-// take radius, 0.4m unless the profile gives one, around its eye, which sits over the back of the
-// cushion, 5cm behind the hip; two seats side by side sit closer than two radii, so their bubbles
-// overlap, and the overlap splits at the plane halfway between their eyes, as two balls of dough
-// pressed together meet in a flat border (record/areas/avatars/01-avatars.md, A seat;
-// record/areas/profiles/01-format-and-delivery.md, Seats). To scale at 120px a meter, with the
-// seats 0.62m apart, as the format's example puts them, whose numbers are hypothetical.
-// Each is drawn as a soap bubble, which two pressed together share a flat wall as these do: clear
-// in the middle, its film brightening toward a thin rim, with a highlight near its top left. This
-// pilot's bubble takes their color and holds their head at its eye; the other is clear and free.
-// The seats stay in the page's muted ink (user, 2026-10-31; tried and dropped: two separate round
-// bubbles, which no cockpit has; dashed bubbles, which looked basic; the taken seat in its pilot's
-// color).
+// take radius, 0.4m unless the profile gives one, around its eye, which sits over the seat; two
+// seats side by side sit closer than two radii, so their bubbles overlap, and the overlap splits at
+// the plane halfway between them, as two balls of dough pressed together meet in a flat border
+// (record/areas/avatars/01-avatars.md, A seat; record/areas/profiles/01-format-and-delivery.md,
+// Seats). To scale at 120px a meter, with the seats 0.62m apart, as the format's example puts them,
+// whose numbers are hypothetical. Each bubble is centered on its seat, which reads more plainly
+// than on the eye 5cm behind the hip (user, 2026-10-31). Flat, as the app is: this pilot's bubble a
+// tint of their color with a solid edge, holding their head; the other a faint neutral tint; the
+// seats in the page's muted ink. Tried and dropped: two separate round bubbles, which no cockpit
+// has; dashed bubbles, which looked basic; the taken seat in its pilot's color; soap bubbles, with
+// a film brightening to the rim and a highlight, whose shine didn't suit the flat app (user,
+// 2026-10-31).
 function SeatsDrawing({ hex }: { hex: string }) {
-  // SVG ids are the document's, and every frame on the canvas draws this, so each takes its own.
-  const id = useId().replace(/:/g, "")
   const px = 120
   const r = 0.4 * px
   const half = (0.62 / 2) * px
   const mid = 120
-  const eyeY = 62
+  const seatY = 52
   const dy = Math.sqrt(r * r - half * half)
   const [left, right] = [mid - half, mid + half]
-  const bubble = (side: 0 | 1) => `M ${mid} ${eyeY - dy} A ${r} ${r} 0 1 ${side} ${mid} ${eyeY + dy} Z`
-  // A highlight's arc, inside the rim, from 215 to 260 degrees around the eye, clockwise from east,
-  // so the free bubble's stays clear of the shared wall.
-  const glint = (cx: number) => {
-    const at = (deg: number) => [cx + (r - 7) * Math.cos((deg * Math.PI) / 180), eyeY + (r - 7) * Math.sin((deg * Math.PI) / 180)]
-    const [a, b] = [at(215), at(260)]
-    return `M ${a[0]} ${a[1]} A ${r - 7} ${r - 7} 0 0 1 ${b[0]} ${b[1]}`
-  }
-  // Round to its own eye, in the drawing's units, since a gradient sized to the cut bubble's box
-  // would center off the eye.
-  const film = (key: string, cx: number, color: string, edge: number) => (
-    <radialGradient id={`${id}-${key}`} gradientUnits="userSpaceOnUse" cx={cx} cy={eyeY} r={r}>
-      <stop offset="0%" stopColor={color} stopOpacity={0.03} />
-      <stop offset="72%" stopColor={color} stopOpacity={edge * 0.35} />
-      <stop offset="100%" stopColor={color} stopOpacity={edge} />
-    </radialGradient>
-  )
+  const bubble = (side: 0 | 1) => `M ${mid} ${seatY - dy} A ${r} ${r} 0 1 ${side} ${mid} ${seatY + dy} Z`
   const seat = (x: number) => (
     <g>
-      <rect x={x - 27} y={22} width={54} height={50} rx={10} fill="none" stroke="currentColor" strokeOpacity={0.55} strokeWidth={1.5} />
-      <rect x={x - 25} y={70} width={50} height={10} rx={5} fill="currentColor" fillOpacity={0.3} />
+      <rect x={x - 27} y={seatY - 30} width={54} height={50} rx={10} fill="none" stroke="currentColor" strokeOpacity={0.55} strokeWidth={1.5} />
+      <rect x={x - 25} y={seatY + 18} width={50} height={10} rx={5} fill="currentColor" fillOpacity={0.3} />
     </g>
   )
   return (
-    <svg viewBox="0 0 240 132" className="mx-auto h-[132px] w-[240px]" aria-hidden>
-      <defs>
-        {film("mine", left, hex, 0.4)}
-        {film("free", right, "#ffffff", 0.16)}
-      </defs>
+    <svg viewBox="0 0 240 120" className="mx-auto h-[120px] w-[240px]" aria-hidden>
+      <path d={bubble(1)} fill="currentColor" fillOpacity={0.05} stroke="currentColor" strokeOpacity={0.3} />
+      <path d={bubble(0)} fill={hex} fillOpacity={0.14} stroke={hex} strokeOpacity={0.8} strokeWidth={1.5} />
       {seat(left)}
       {seat(right)}
-      {/* The film over each seat, the shared wall cutting it flat. */}
-      <path d={bubble(1)} fill={`url(#${id}-free)`} stroke="#ffffff" strokeOpacity={0.28} />
-      <path d={bubble(0)} fill={`url(#${id}-mine)`} stroke={hex} strokeOpacity={0.75} />
-      <path d={glint(left)} fill="none" stroke="#ffffff" strokeOpacity={0.55} strokeWidth={2.5} strokeLinecap="round" />
-      <path d={glint(right)} fill="none" stroke="#ffffff" strokeOpacity={0.35} strokeWidth={2.5} strokeLinecap="round" />
-      <circle cx={left} cy={eyeY} r={9} fill={hex} />
-      <text x={left} y={127} textAnchor="middle" fontSize={11} fill="currentColor">
+      <circle cx={left} cy={seatY - 5} r={9} fill={hex} />
+      <text x={left} y={116} textAnchor="middle" fontSize={11} fill="currentColor">
         You
       </text>
-      <text x={right} y={127} textAnchor="middle" fontSize={11} fill="currentColor">
+      <text x={right} y={116} textAnchor="middle" fontSize={11} fill="currentColor">
         Free
       </text>
     </svg>

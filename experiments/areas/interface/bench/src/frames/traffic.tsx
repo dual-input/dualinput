@@ -623,7 +623,11 @@ function AtcAppPicker({
         {/* Below the picker, as a plain dropdown: the kit's default lays the picked item over the
             picker and highlights it, so Automatic read as a box of its own (user, 2026-10-31). */}
         <SelectContent alignItemWithTrigger={false}>
-          <SelectItem value="auto">Automatic</SelectItem>
+          {/* A group of its own, since the kit pads a group's items 6px in from the list's
+              edges, and Automatic alone outside one sat flush against them (user, 2026-10-31). */}
+          <SelectGroup>
+            <SelectItem value="auto">Automatic</SelectItem>
+          </SelectGroup>
           <SelectSeparator />
           <SelectGroup>
             <SelectLabel>Playing audio</SelectLabel>

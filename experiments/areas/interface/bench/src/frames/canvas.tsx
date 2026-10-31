@@ -123,13 +123,13 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
   // The Traffic and ATC audio tabs, each holding its feature's sharing, settings, and warnings,
   // with an amber dot on the tab's icon while it holds a warning, in the order a session meets
   // them (user, 2026-10-31): nobody sharing; this pilot sharing, ATC waiting for its app before it
-  // shares; James sharing, the packs differing before they're fixed; and outside a session.
+  // shares; James sharing, aircraft missing and extra before they're fixed; and outside a session.
   {
     name: "Traffic",
     frames: [
       { name: "Nobody shares traffic", draw: (t) => <TrafficFrame theme={t} where={{ session: true }} /> },
-      { name: "Sharing, a crewmate's packs differ", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "You" }} /> },
-      { name: "Receiving, packs and aircraft differ", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "James" }} packs="differ" counts={{ missing: 14, others: 6 }} /> },
+      { name: "Sharing traffic", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "You" }} /> },
+      { name: "Receiving, aircraft missing and extra", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "James" }} packs="differ" counts={{ missing: 14, others: 6 }} /> },
       { name: "Receiving, everything matches", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "James" }} /> },
       { name: "Traffic outside a session", draw: (t) => <TrafficFrame theme={t} where={{ session: false }} /> },
     ],

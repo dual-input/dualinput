@@ -22,7 +22,7 @@ Decides:     The session crate's members, session keys, control, session file, j
 > Stage 11b's tentative decision that [a display name runs to 20 characters](../interface/decisions.md#a-display-name-runs-to-20-characters) limits the display name setting in [members](#members) to 20 characters, and the session crate refuses a longer name from any app (user, 2026-10-29).
 
 > **Note**
-> Stage 11b's tentative decision that [the Traffic and ATC audio tabs hold their sharing, settings, and warnings](../interface/decisions.md#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon) settles what [the match check](#the-match-check) leaves open about traffic (user, 2026-10-31): traffic feeds no item, its packs are compared on the Traffic tab, and its notifications become counts there.
+> Stage 11b's tentative decision that [the Traffic and ATC audio tabs hold their sharing, settings, and warnings](../interface/decisions.md#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon) settles what [the match check](#the-match-check) leaves open about traffic (user, 2026-10-31): traffic feeds no item, and its notifications become counts on the Traffic tab.
 
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.

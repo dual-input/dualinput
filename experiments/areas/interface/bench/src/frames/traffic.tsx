@@ -27,7 +27,8 @@ import { FIGURE_COLORS } from "./figure-portrait"
 type Sharer = "James" | "You" | undefined
 type Where = { session: boolean; sharer?: Sharer }
 const HUE: Record<"James" | "You", string> = { James: "red", You: "orange" }
-const hexOf = (pilot: "James" | "You") => FIGURE_COLORS.find((c) => c.name === HUE[pilot])!.hex
+const hexOf = (pilot: "James" | "You") =>
+  FIGURE_COLORS.find((c) => c.name === HUE[pilot])!.hex
 
 // The flight's frame around a tab: the phase in the header and the take-control strip under the
 // tabs while flying, as on every tab; neither outside a session.
@@ -36,7 +37,13 @@ function useFlightAround(session: boolean) {
   useShowSession(session)
   const [mine, setMine] = useState(false)
   const takeNow = useRef(() => setMine(true))
-  const control = useMemo<Control | undefined>(() => (session ? { mine, pf: "James", bound: "F9", take: () => takeNow.current() } : undefined), [session, mine])
+  const control = useMemo<Control | undefined>(
+    () =>
+      session
+        ? { mine, pf: "James", bound: "F9", take: () => takeNow.current() }
+        : undefined,
+    [session, mine]
+  )
   useShowControl(control)
 }
 
@@ -49,7 +56,23 @@ function useFlightAround(session: boolean) {
 // pilot is sharing and hides when they stop, and outside a session, where the settings still change
 // (user, 2026-10-31). How it works says what the switch does, so the card carries no description,
 // and a status of something happening now takes the progressive (user, 2026-10-31).
-function RoleCard({ id, label, noun, session, sharer, onChange, children }: { id: string; label: string; noun: string; session: boolean; sharer: Sharer; onChange: (on: boolean) => void; children?: React.ReactNode }) {
+function RoleCard({
+  id,
+  label,
+  noun,
+  session,
+  sharer,
+  onChange,
+  children,
+}: {
+  id: string
+  label: string
+  noun: string
+  session: boolean
+  sharer: Sharer
+  onChange: (on: boolean) => void
+  children?: React.ReactNode
+}) {
   const { Button, Card, CardContent, Separator, Switch } = useUI()
   const someone = session ? sharer : undefined
   return (
@@ -60,16 +83,36 @@ function RoleCard({ id, label, noun, session, sharer, onChange, children }: { id
             <Head hex={hexOf(someone)} />
           </span>
         )}
-        <label htmlFor={id} className={"flex flex-1 flex-col text-sm " + (someone ? "" : "font-medium ") + (session ? "cursor-pointer" : "")}>
-          {someone === "You" ? `You're sharing ${noun}` : someone ? `${someone} is sharing ${noun}` : label}
-          {!session && <span className="text-xs font-normal text-muted-foreground">Sharing needs a session</span>}
+        <label
+          htmlFor={id}
+          className={
+            "flex flex-1 flex-col text-sm " +
+            (someone ? "" : "font-medium ") +
+            (session ? "cursor-pointer" : "")
+          }
+        >
+          {someone === "You"
+            ? `You're sharing ${noun}`
+            : someone
+              ? `${someone} is sharing ${noun}`
+              : label}
+          {!session && (
+            <span className="text-xs font-normal text-muted-foreground">
+              Sharing needs a session
+            </span>
+          )}
         </label>
         {someone && someone !== "You" ? (
           <Button variant="outline" size="sm" onClick={() => onChange(true)}>
             Take over
           </Button>
         ) : (
-          <Switch id={id} disabled={!session} checked={someone === "You"} onCheckedChange={onChange} />
+          <Switch
+            id={id}
+            disabled={!session}
+            checked={someone === "You"}
+            onCheckedChange={onChange}
+          />
         )}
       </CardContent>
       {children && (
@@ -93,7 +136,9 @@ type Line = { state: State; says: string; detail?: React.ReactNode }
 const STATE_ICON: Record<State, React.ReactNode> = {
   ok: <CircleCheck className="mt-0.5 size-4 shrink-0 text-success" />,
   differs: <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" />,
-  unchecked: <CircleDashed className="mt-0.5 size-4 shrink-0 text-muted-foreground" />,
+  unchecked: (
+    <CircleDashed className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+  ),
   // A rule is a plain list's point rather than a state, so it takes a small solid dot, centered on
   // the line where the states' icons fill a 16px box (user, 2026-10-31: the dashed circle read as
   // "can't check" where nothing was being checked yet).
@@ -107,7 +152,17 @@ const STATE_ICON: Record<State, React.ReactNode> = {
 // the feature's rules, and the list says so (user, 2026-10-31). A note on the feature's cost sits
 // under how it works, in a paragraph of its own, since it's neither a rule nor a check (user,
 // 2026-10-31).
-function HowAndCheck({ how, note, lines, rules }: { how: string; note?: string; lines: Line[]; rules: boolean }) {
+function HowAndCheck({
+  how,
+  note,
+  lines,
+  rules,
+}: {
+  how: string
+  note?: string
+  lines: Line[]
+  rules: boolean
+}) {
   return (
     <>
       <section className="flex flex-col gap-2">
@@ -115,71 +170,105 @@ function HowAndCheck({ how, note, lines, rules }: { how: string; note?: string; 
         <p className="text-sm text-muted-foreground">{how}</p>
         {note && <p className="text-sm text-muted-foreground">{note}</p>}
       </section>
-      <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium">{rules ? "Rules" : "Check"}</h2>
-        <ul className="flex flex-col gap-3">
-          {lines.map((l) => (
-            <li key={l.says} className="flex items-start gap-2.5">
-              {STATE_ICON[l.state]}
-              <span className="flex flex-col gap-0.5">
-                <span className="text-sm">{l.says}</span>
-                {l.detail && <span className={"text-xs " + (l.state === "differs" ? "text-warning" : "text-muted-foreground")}>{l.detail}</span>}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {lines.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h2 className="text-sm font-medium">{rules ? "Rules" : "Check"}</h2>
+          <ul className="flex flex-col gap-3">
+            {lines.map((l) => (
+              <li key={l.says} className="flex items-start gap-2.5">
+                {STATE_ICON[l.state]}
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-sm">{l.says}</span>
+                  {l.detail && (
+                    <span
+                      className={
+                        "text-xs " +
+                        (l.state === "differs"
+                          ? "text-warning"
+                          : "text-muted-foreground")
+                      }
+                    >
+                      {l.detail}
+                    </span>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </>
   )
 }
 const differs = (lines: Line[]) => lines.some((l) => l.state === "differs")
 
-// Traffic packs, compared by folder name and `package_version`: a receiving pilot runs the traffic
-// host's packs and no others, or copies go missing, fall back to stand-ins, or float
-// (record/areas/product/03-v1-scope.md, Traffic sync). Traffic's list of known packs starts with
-// `fsltl-traffic-base`; the second pack's name is hypothetical, and every version is an example.
-// Nothing compares the scenery, or, from the host's side, what the crew's own sims show.
-type Pack = { name: string; host?: string; mine?: string }
+// The traffic packs on this PC, as traffic lists them when asked: each folder whose name a known
+// traffic pack matches, with its manifest's `package_version`
+// (record/areas/traffic-atc/01-traffic-and-atc.md, Traffic packs). Pilots compare them with the
+// host's by hand, since the counts above
+// catch a mismatch whatever its cause, where comparing the crew's lists saw only the packs on the
+// known list, which starts with `fsltl-traffic-base`, and needed the lists sent between the cores
+// (user, 2026-10-31). A pack the list doesn't know isn't shown, so the tip sends pilots to their
+// Community folder too. The second pack's name is hypothetical, and every version is an example.
+type Pack = { name: string; version: string }
 const PACKS: Record<"match" | "differ", Pack[]> = {
   match: [
-    { name: "fsltl-traffic-base", host: "1.2.0", mine: "1.2.0" },
-    { name: "fsltl-traffic-liveries", host: "2.0.3", mine: "2.0.3" },
+    { name: "fsltl-traffic-base", version: "1.2.0" },
+    { name: "fsltl-traffic-liveries", version: "2.0.3" },
   ],
-  differ: [
-    { name: "fsltl-traffic-base", host: "1.2.0", mine: "1.1.4" },
-    { name: "fsltl-traffic-liveries", host: "2.0.3" },
-  ],
+  differ: [{ name: "fsltl-traffic-base", version: "1.1.4" }],
 }
-const packSays = (p: Pack, host: string) => (!p.mine ? `You don't have ${p.name}, ${host} runs ${p.host}` : !p.host ? `You run ${p.name}, which ${host} doesn't` : `Your ${p.name} is ${p.mine}, ${host} runs ${p.host}`)
-// On the traffic host's tab, what differs in a crewmate's packs from theirs.
-const CREW_PACKS = ["Adam doesn't have fsltl-traffic-liveries", "Adam's fsltl-traffic-base is 1.1.4, yours is 1.2.0"]
+function PacksOnThisPc({ packs, tip }: { packs: Pack[]; tip: string }) {
+  return (
+    <section className="flex flex-col gap-2">
+      <h2 className="text-sm font-medium">Traffic packs on this PC</h2>
+      <ul className="flex flex-col gap-1.5">
+        {packs.map((p) => (
+          <li
+            key={p.name}
+            className="flex items-baseline justify-between gap-4 text-sm"
+          >
+            <span>{p.name}</span>
+            <span className="text-muted-foreground tabular-nums">
+              {p.version}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-muted-foreground">{tip}</p>
+    </section>
+  )
+}
 type Counts = { missing: number; others: number }
-const Lines = ({ items }: { items: string[] }) => (
-  <>
-    {items.map((i) => (
-      <span key={i} className="block">
-        {i}
-      </span>
-    ))}
-  </>
-)
 
-function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: Counts): Line[] {
-  if (sharer === "You")
+// What Dual Input checks for a receiving pilot is what their sim shows: the traffic host's aircraft
+// it shows as stand-ins or not at all, and the aircraft that aren't the host's
+// (record/areas/traffic-atc/01-traffic-and-atc.md, Notifications). The first catches a pack that
+// differs whatever the pack, and the second the pilot's own traffic left on. The host's own sim
+// has nothing to check, so their tab has no check (user, 2026-10-31).
+function trafficLines(
+  session: boolean,
+  sharer: Sharer,
+  counts: Counts
+): Line[] {
+  if (sharer === "You") return []
+  if (sharer && session)
     return [
-      CREW_PACKS.length ? { state: "differs", says: "The crew's traffic packs match yours", detail: <Lines items={CREW_PACKS} /> } : { state: "ok", says: "The crew's traffic packs match yours" },
-      { state: "unchecked", says: "The crew's own AI traffic is off", detail: "Each crewmate's Traffic tab checks this" },
-      { state: "unchecked", says: "The crew's scenery matches yours", detail: "Dual Input can't check this" },
+      counts.missing
+        ? {
+            state: "differs",
+            says: `${counts.missing} of ${sharer}'s aircraft are missing or shown as stand-ins`,
+            detail: `Usually a traffic pack that differs from ${sharer}'s`,
+          }
+        : { state: "ok", says: `Every one of ${sharer}'s aircraft is showing` },
+      counts.others
+        ? {
+            state: "differs",
+            says: `${counts.others} aircraft in your sim aren't ${sharer}'s`,
+            detail: "Turn off your own AI traffic",
+          }
+        : { state: "ok", says: `No aircraft but ${sharer}'s in your sim` },
     ]
-  if (sharer && session) {
-    const packsDiffer = packs.filter((p) => p.host !== p.mine)
-    return [
-      counts.others ? { state: "differs", says: "Your own AI traffic is off", detail: `${counts.others} aircraft in your sim aren't ${sharer}'s` } : { state: "ok", says: "Your own AI traffic is off" },
-      packsDiffer.length ? { state: "differs", says: `Your traffic packs match ${sharer}'s`, detail: <Lines items={packsDiffer.map((p) => packSays(p, sharer))} /> } : { state: "ok", says: `Your traffic packs match ${sharer}'s` },
-      { state: "unchecked", says: `Your scenery matches ${sharer}'s`, detail: "Dual Input can't check this" },
-      counts.missing ? { state: "differs", says: `${sharer}'s aircraft are showing in your sim`, detail: `${counts.missing} missing or shown as stand-ins` } : { state: "ok", says: `${sharer}'s aircraft are showing in your sim` },
-    ]
-  }
   // The rules, in the user's words (user, 2026-10-31). Copies are frozen rather than held to the
   // ground, so with other scenery, whose ground can sit at another elevation, they float or sink
   // (record/areas/traffic-atc/01-traffic-and-atc.md, Known limits). Traffic has no radius setting,
@@ -189,21 +278,63 @@ function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: C
   // sim's 200km cap).
   // Multiplayer off is a rule for all of Dual Input, not traffic's, so it isn't here.
   return [
-    { state: "rule", says: "Receiving pilots should turn off their own AI traffic", detail: "To ensure everyone sees the same traffic" },
-    { state: "rule", says: "Everyone should have the same traffic packs installed", detail: "To avoid missing or incorrect aircraft" },
-    { state: "rule", says: "Everyone should have the same scenery", detail: "To avoid issues such as floating aircraft due to different ground elevation" },
+    {
+      state: "rule",
+      says: "Receiving pilots should turn off their own AI traffic",
+      detail: "To ensure everyone sees the same traffic",
+    },
+    {
+      state: "rule",
+      says: "Everyone should have the same traffic packs installed",
+      detail: "To avoid missing or incorrect aircraft",
+    },
+    {
+      state: "rule",
+      says: "Everyone should have the same scenery",
+      detail:
+        "To avoid issues such as floating aircraft due to different ground elevation",
+    },
   ]
 }
 
-function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 } }: { where: Where; packs?: keyof typeof PACKS; counts?: Counts }) {
+function TrafficPage({
+  where,
+  packs = "match",
+  counts = { missing: 0, others: 0 },
+}: {
+  where: Where
+  packs?: keyof typeof PACKS
+  counts?: Counts
+}) {
   useFlightAround(where.session)
   const [sharer, setSharer] = useState<Sharer>(where.sharer)
-  const lines = trafficLines(where.session, sharer, PACKS[packs], counts)
+  const lines = trafficLines(where.session, sharer, counts)
   useShowDot("traffic", differs(lines))
+  const known =
+    "Dual Input lists only the traffic packs it knows, so check your Community folder for others too."
+  const tip =
+    !where.session || !sharer
+      ? known
+      : sharer === "You"
+        ? `Receiving pilots need these same packs, and no others. ${known}`
+        : `If aircraft are missing, compare these with ${sharer}'s. ${known}`
   return (
     <ScrollPage>
-      <RoleCard id="share-traffic" label="Share my traffic" noun="traffic" session={where.session} sharer={sharer} onChange={(on) => setSharer(on ? "You" : undefined)} />
-      <HowAndCheck how="One pilot shares. Dual Input watches the AI traffic in their sim and injects it into everyone else's. This works by reading the traffic straight from the sim and works regardless of the original method of traffic generation." note="Performance issues? Since your traffic is shared as-is, PCs that aren't as powerful as yours might struggle to keep up. If that happens, decrease your traffic density in your AI traffic app." lines={lines} rules={!where.session || !sharer} />
+      <RoleCard
+        id="share-traffic"
+        label="Share my traffic"
+        noun="traffic"
+        session={where.session}
+        sharer={sharer}
+        onChange={(on) => setSharer(on ? "You" : undefined)}
+      />
+      <HowAndCheck
+        how="One pilot shares. Dual Input watches the AI traffic in their sim and injects it into everyone else's. This works by reading the traffic straight from the sim and works regardless of the original method of traffic generation."
+        note="Performance issues? Since your traffic is shared as-is, PCs that aren't as powerful as yours might struggle to keep up. If that happens, decrease your traffic density in your AI traffic app."
+        lines={lines}
+        rules={!where.session || !sharer}
+      />
+      <PacksOnThisPc packs={PACKS[packs]} tip={tip} />
     </ScrollPage>
   )
 }
@@ -216,26 +347,79 @@ function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 
 // machine; the sim's own ATC can't be shared, so pilots who share ATC turn it off; and Dual Input
 // carries no voice, so the crew talks, and hears the host's readbacks, over Discord
 // (record/areas/product/03-v1-scope.md, Hearing ATC).
-function atcLines(session: boolean, sharer: Sharer, capture: "capturing" | "waiting"): Line[] {
+function atcLines(
+  session: boolean,
+  sharer: Sharer,
+  capture: "capturing" | "waiting"
+): Line[] {
   if (sharer === "You")
     return [
-      capture === "waiting" ? { state: "differs", says: "Your ATC app is running", detail: "Waiting for BeyondATC or SayIntentions to start" } : { state: "ok", says: "Your ATC app is running", detail: "Sharing BeyondATC" },
-      { state: "unchecked", says: "The sim's own ATC is off", detail: "Dual Input can't share it, or check it" },
-      { state: "unchecked", says: "The crew's own ATC apps are closed", detail: "Dual Input can't check this" },
+      capture === "waiting"
+        ? {
+            state: "differs",
+            says: "Your ATC app is running",
+            detail: "Waiting for BeyondATC or SayIntentions to start",
+          }
+        : {
+            state: "ok",
+            says: "Your ATC app is running",
+            detail: "Sharing BeyondATC",
+          },
+      {
+        state: "unchecked",
+        says: "The sim's own ATC is off",
+        detail: "Dual Input can't share it, or check it",
+      },
+      {
+        state: "unchecked",
+        says: "The crew's own ATC apps are closed",
+        detail: "Dual Input can't check this",
+      },
     ]
   if (sharer && session)
     return [
-      { state: "unchecked", says: "Your own ATC app is closed", detail: "With one open you'd hear two, and Dual Input can't check this" },
-      { state: "unchecked", says: "The sim's own ATC is off", detail: "Dual Input can't check this" },
+      {
+        state: "unchecked",
+        says: "Your own ATC app is closed",
+        detail: "With one open you'd hear two, and Dual Input can't check this",
+      },
+      {
+        state: "unchecked",
+        says: "The sim's own ATC is off",
+        detail: "Dual Input can't check this",
+      },
     ]
   return [
-    { state: "rule", says: "Receiving pilots should close their own ATC app", detail: "To avoid hearing two" },
-    { state: "rule", says: "Everyone should turn off the sim's own ATC", detail: "Dual Input can't share it" },
+    {
+      state: "rule",
+      says: "Receiving pilots should close their own ATC app",
+      detail: "To avoid hearing two",
+    },
+    {
+      state: "rule",
+      says: "Everyone should turn off the sim's own ATC",
+      detail: "Dual Input can't share it",
+    },
   ]
 }
 
-function AtcPage({ where, capture = "capturing" }: { where: Where; capture?: "capturing" | "waiting" }) {
-  const { Card, CardContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Slider } = useUI()
+function AtcPage({
+  where,
+  capture = "capturing",
+}: {
+  where: Where
+  capture?: "capturing" | "waiting"
+}) {
+  const {
+    Card,
+    CardContent,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+    Slider,
+  } = useUI()
   useFlightAround(where.session)
   const [sharer, setSharer] = useState<Sharer>(where.sharer)
   const [volume, setVolume] = useState([100])
@@ -248,7 +432,14 @@ function AtcPage({ where, capture = "capturing" }: { where: Where; capture?: "ca
   ]
   return (
     <ScrollPage>
-      <RoleCard id="share-atc" label="Share my ATC" noun="ATC" session={where.session} sharer={where.session ? sharer : undefined} onChange={(on) => setSharer(on ? "You" : undefined)}>
+      <RoleCard
+        id="share-atc"
+        label="Share my ATC"
+        noun="ATC"
+        session={where.session}
+        sharer={where.session ? sharer : undefined}
+        onChange={(on) => setSharer(on ? "You" : undefined)}
+      >
         {(hosting || !where.session) && (
           <div className="flex flex-col gap-3">
             <span className="text-sm">ATC app</span>
@@ -267,17 +458,35 @@ function AtcPage({ where, capture = "capturing" }: { where: Where; capture?: "ca
           </div>
         )}
       </RoleCard>
-      <HowAndCheck how="One pilot shares their ATC at a time: Dual Input plays their ATC app's voice on everyone else's machine. It carries ATC, not your voices, so talk to each other, and hear the readbacks, on Discord." lines={lines} rules={!where.session || !sharer} />
+      <HowAndCheck
+        how="One pilot shares their ATC at a time: Dual Input plays their ATC app's voice on everyone else's machine. It carries ATC, not your voices, so talk to each other, and hear the readbacks, on Discord."
+        lines={lines}
+        rules={!where.session || !sharer}
+      />
       {!hosting && (
         <Card className="[--card-spacing:--spacing(5)]">
           <CardContent className="flex flex-col gap-3">
             <div className="flex items-center justify-between text-sm">
               <span>Crew's ATC volume</span>
-              <span className="text-muted-foreground tabular-nums">{volume[0]}%</span>
+              <span className="text-muted-foreground tabular-nums">
+                {volume[0]}%
+              </span>
             </div>
-            <Slider value={volume} onValueChange={(v: number | number[]) => setVolume(Array.isArray(v) ? v : [v])} max={100} step={5} />
+            <Slider
+              value={volume}
+              onValueChange={(v: number | number[]) =>
+                setVolume(Array.isArray(v) ? v : [v])
+              }
+              max={100}
+              step={5}
+            />
             <span className="text-xs text-muted-foreground">
-              Plays on Headset (USB Audio) · <InlineLink onClick={() => toast("Opening Settings on the output device")}>Change in Settings</InlineLink>
+              Plays on Headset (USB Audio) ·{" "}
+              <InlineLink
+                onClick={() => toast("Opening Settings on the output device")}
+              >
+                Change in Settings
+              </InlineLink>
             </span>
           </CardContent>
         </Card>
@@ -286,14 +495,32 @@ function AtcPage({ where, capture = "capturing" }: { where: Where; capture?: "ca
   )
 }
 
-export function TrafficFrame({ theme, where, packs, counts }: { theme: Theme; where: Where; packs?: keyof typeof PACKS; counts?: Counts }) {
+export function TrafficFrame({
+  theme,
+  where,
+  packs,
+  counts,
+}: {
+  theme: Theme
+  where: Where
+  packs?: keyof typeof PACKS
+  counts?: Counts
+}) {
   return (
     <AppFrame theme={theme} tab="traffic" fixed>
       <TrafficPage where={where} packs={packs} counts={counts} />
     </AppFrame>
   )
 }
-export function AtcFrame({ theme, where, capture }: { theme: Theme; where: Where; capture?: "capturing" | "waiting" }) {
+export function AtcFrame({
+  theme,
+  where,
+  capture,
+}: {
+  theme: Theme
+  where: Where
+  capture?: "capturing" | "waiting"
+}) {
   return (
     <AppFrame theme={theme} tab="atc" fixed>
       <AtcPage where={where} capture={capture} />

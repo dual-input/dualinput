@@ -220,23 +220,25 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 ## The Traffic and ATC audio tabs hold their sharing, settings, and warnings, flagged by a dot on the tab's icon
 
-- **Decided:** the Traffic tab holds "Share my traffic" and who shares, what a receiving pilot sets up by hand, and traffic's warnings:
-  - a check of each receiving pilot's known traffic packs against the traffic host's, with their versions, which every pilot's Traffic tab shows, so the host sees which crewmates lack or add which packs, and a receiving pilot sees their own;
-  - and, on a receiving pilot's tab, two counts kept live: the traffic host's aircraft this sim shows as stand-ins or not at all, and the aircraft that aren't the traffic host's.
+- **Decided:** the Traffic tab holds "Share my traffic" and who shares, what a receiving pilot sets up by hand, traffic's warnings, and this PC's traffic packs:
+  - on a receiving pilot's tab, two counts kept live: the traffic host's aircraft this sim shows as stand-ins or not at all, and the aircraft that aren't the traffic host's;
+  - and on every pilot's tab, the traffic packs on this PC with their versions, as [traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs) lists them, for pilots to compare with the host's by hand, with a tip that packs missing from Dual Input's known list don't show.
 
-  These replace traffic's two notifications on the banner, and traffic feeds no item of the match check, so the session card's heads-up list stays about the flight.
+  These replace traffic's two notifications on the banner, and traffic feeds no item of the match check, so the session card's heads-up list stays about the flight; the crew's lists of packs don't travel between the cores.
   The ATC audio tab holds "Share my ATC" and who shares; on the ATC host, which program the capture takes, or that it's waiting for one; the ATC app and ATC volume settings; what a receiving pilot sets up by hand; that Dual Input carries no voice, so the crew talks over Discord; and the output device, shown but set in Settings.
   While a tab holds a warning, an amber dot shows on its icon in the tab bar, on every page: for traffic, a pack that differs or either count above 0, and for ATC audio, such as its capture waiting for an ATC app; the dot is big enough to notice, and no bigger.
   Outside a session both switches are off and can't be turned on, since a role is a session key, and the settings still change.
   Settled by the user on 2026-10-31.
 - **Because:**
-  - Two groups of FS Copilot's testers flew with airliners missing, because their traffic packs differed, without knowing ([traffic sync](../product/03-v1-scope.md#traffic-sync)), so the packs are compared before aircraft go missing, and the dot keeps a difference in view on every page.
+  - Two groups of FS Copilot's testers flew with airliners missing, because their traffic packs differed, without knowing ([traffic sync](../product/03-v1-scope.md#traffic-sync)), so the missing count shows on the tab, and the dot keeps it in view on every page.
+    The count measures what a mismatch does, so it catches one whatever its cause, where comparing the crew's lists would have seen only the packs on traffic's known list, and needed the lists sent between the cores (user, 2026-10-31).
+    A receiving machine creates the copies once its pilot is in the flight, preflight included, so the count shows before anyone flies.
   - Traffic's warnings concern a feature a crew may not use, and a pilot with traffic trouble looks in its tab, so they live there rather than on the banner or in the card's list (user, 2026-10-31).
     With nobody sharing traffic there's no host to compare against, so the tab shows no warning.
   - The output device carries every sound Dual Input plays, take-control's cues among them ([the devices](../core/04-core-helper.md#the-devices)), so one place sets it, and the ATC audio tab shows it where a pilot looking for ATC's sound looks.
 - **Leaves out:**
-  - How each pilot's list of traffic packs reaches the others, which traffic's design adds; [traffic and ATC](../traffic-atc/01-traffic-and-atc.md#left-open) expected an ask and an answer on a channel of traffic's.
-  - What the check can't see: packs missing from traffic's list of known packs, which starts with `fsltl-traffic-base`; a streamed pack's version, which it has none of on disk; and the scenery ([traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs)).
+  - Comparing the crew's traffic packs automatically, which the count covers.
+  - What the list can't show: packs missing from traffic's list of known packs, which starts with `fsltl-traffic-base`, and a streamed pack's version, which it has none of on disk ([traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs)); the scenery, which nothing compares, stays a rule a pilot reads.
   - What else sets the ATC audio tab's dot, the tabs' words, and their look.
 
 ## Traffic polls within the sim's 200km cap, with no radius setting

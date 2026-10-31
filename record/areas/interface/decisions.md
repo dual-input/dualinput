@@ -227,7 +227,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   These replace traffic's two notifications on the banner, and traffic feeds no item of the match check, so the session card's heads-up list stays about the flight; the crew's lists of packs don't travel between the cores.
   The ATC audio tab holds "Share my ATC" and who shares; on the ATC host, which program the capture takes, or that it's waiting for one; the ATC app and ATC volume settings; what a receiving pilot sets up by hand; that Dual Input carries no voice, so the crew talks over Discord; and the output device, shown but set in Settings.
   While a tab holds a warning, an amber dot shows on its icon in the tab bar, on every page: for traffic, a pack that differs or either count above 0, and for ATC audio, such as its capture waiting for an ATC app; the dot is big enough to notice, and no bigger.
-  While a feature is being shared in the session, a short green bar shows above its tab's icon, for every pilot, host or not, as an Airbus FCU pushbutton's green bar shows it's engaged, except on the selected tab, whose page says so; it differs from the dot in shape and place, so a pilot who can't tell green from amber tells them apart, and both can show at once (user, 2026-10-31).
+  While a feature is being shared in the session, the header carries the crew list's chip for it, its tab's icon in an outline, in green, after the session's phase, so it shows on every page, for every pilot, host or not, with a tooltip saying who is sharing (user, 2026-10-31).
   Outside a session both switches are off and can't be turned on, since a role is a session key, and the settings still change.
   Settled by the user on 2026-10-31.
 - **Because:**

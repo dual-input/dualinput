@@ -23,8 +23,8 @@ import { Head } from "./figure-head"
 import { FIGURE_COLORS } from "./figure-portrait"
 
 // Who shares as the frame opens: James, nobody, or this pilot; or no session at all. In a session,
-// James shares the other feature, as on the session page's flying frames, so its tab's green bar
-// shows. The pilots' colors are the session page's examples.
+// James shares the other feature, as on the session page's flying frames, so its chip shows in the
+// header. The pilots' colors are the session page's examples.
 type Sharer = "James" | "You" | undefined
 type Where = { session: boolean; sharer?: Sharer }
 const HUE: Record<"James" | "You", string> = { James: "red", You: "orange" }
@@ -352,8 +352,8 @@ function TrafficPage({
   const [sharer, setSharer] = useState<Sharer>(where.sharer)
   const lines = trafficLines(where.session, sharer, counts)
   useShowDot("traffic", differs(lines))
-  useShowShared("traffic", where.session && !!sharer)
-  useShowShared("atc", where.session)
+  useShowShared("traffic", where.session ? sharer : undefined)
+  useShowShared("atc", where.session ? "James" : undefined)
   // The note speaks to the pilot whose traffic is shared, so it shows only on their tab.
   const sharing = where.session && sharer === "You"
   return (
@@ -467,8 +467,8 @@ function AtcPage({
   const hosting = where.session && sharer === "You"
   const lines = atcLines(where.session, sharer, capture)
   useShowDot("atc", differs(lines))
-  useShowShared("atc", where.session && !!sharer)
-  useShowShared("traffic", where.session)
+  useShowShared("atc", where.session ? sharer : undefined)
+  useShowShared("traffic", where.session ? "James" : undefined)
   const apps = [
     { value: "auto", label: "Automatic: BeyondATC or SayIntentions" },
     { value: "pick", label: "Pick a program playing audio…" },

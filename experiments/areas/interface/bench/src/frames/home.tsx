@@ -1417,8 +1417,8 @@ function StartCard({ aircraft, servers = "answering", play, session, next, opens
     if (SESSIONS[shown].flight) setStarted(true)
   }
   useShowSession(half === "session")
-  useShowShared("traffic", half === "session" && !!SESSIONS[shown].traffic)
-  useShowShared("atc", half === "session" && !!SESSIONS[shown].atc)
+  useShowShared("traffic", half === "session" ? SESSIONS[shown].traffic : undefined)
+  useShowShared("atc", half === "session" ? SESSIONS[shown].atc : undefined)
   const checklist = half === "session" && !started ? SESSIONS[shown].preflight?.checklist : undefined
   const [foldedNow, setFoldedNow] = useState(false)
   const folded = foldedNow && !!checklist

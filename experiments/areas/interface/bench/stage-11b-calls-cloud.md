@@ -3,6 +3,20 @@
 The calls settled in the stage 11b cloud session, from 2026-10-31, kept as the PC's `stage-11b-outline-calls.md` keeps its own: one dated bullet per call, with the user's words where they gave them, and what was tried and dropped.
 They're bullets to append to that file, which holds the calls before this session, and they go into `record/areas/interface/decisions.md` when the outline is done.
 
+## Before publishing a frame
+
+Defects the user caught on 2026-10-31 that a look at the changed frames at 2x would have caught first.
+One screenshot run of the frames that changed, then one look, in a minute or two, since a slow check costs the user the rounds it saves (user, 2026-10-31).
+Motion waits until the layout is settled, since a layout that changes wastes it (user, 2026-10-31).
+
+- Nothing is clipped: heads mid-pop, rings, card outlines, and shadows; a box clips only while it eases.
+- An icon, or a single line of words in a box, centers on the capitals from the baseline, not from the line box, which each platform places differently.
+- A change of state keeps every box its size where it can, so nothing jumps: a card's row is as tall in each state.
+- Items in one list or menu share one inset and one padding, the kit's groups included.
+- A label's space above matches its siblings'.
+- Words: something happening now takes the progressive; no pilot is "he" or "she"; a one-sentence tooltip or toast has no period.
+- Coherent GT: no `translate`, `scale`, or `rotate` property, no ResizeObserver, IntersectionObserver, or PointerEvent, and no conic gradient.
+
 ## The flying page (cloud session, from 2026-10-31)
 
 - The flying page's content (2026-10-31, from the record): the same session card as preflight, the header on SYNC ACTIVE; the card keeps the code with Copy, Leave, the crew rows, and the differences folded to counts; the checklist, the hand line, Ready, the countdown ring, Go without, and the fold leave once the flight starts.

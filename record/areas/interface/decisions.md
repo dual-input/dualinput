@@ -222,7 +222,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 - **Decided:** the Traffic tab holds "Share my traffic" and who shares, what a receiving pilot sets up by hand, traffic's warnings, and this PC's traffic packs:
   - on a receiving pilot's tab, two counts kept live: the traffic host's aircraft this sim shows as stand-ins or not at all, and the aircraft that aren't the traffic host's;
-  - and on every pilot's tab, the traffic packs on this PC with their versions, as [traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs) lists them, for pilots to compare with the host's by hand, with a tip that packs missing from Dual Input's known list don't show.
+  - and on every pilot's tab, the traffic packs on this PC with their versions, as [traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs) lists them, for pilots to compare with the host's by hand, titled as the packs detected, since packs missing from Dual Input's known list don't show, and set apart in a tint as a supplement to the check.
 
   These replace traffic's two notifications on the banner, and traffic feeds no item of the match check, so the session card's heads-up list stays about the flight; the crew's lists of packs don't travel between the cores.
   The ATC audio tab holds "Share my ATC" and who shares; on the ATC host, which program the capture takes, or that it's waiting for one; the ATC app and ATC volume settings; what a receiving pilot sets up by hand; that Dual Input carries no voice, so the crew talks over Discord; and the output device, shown but set in Settings.
@@ -244,7 +244,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 ## Traffic polls within the sim's 200km cap, with no radius setting
 
 - **Decided:** traffic has no radius setting: the traffic host polls AI aircraft and helicopters within 200km, the most the SDK allows, and ground objects within 1km, as before.
-  The Traffic tab notes, under how traffic sharing works, that traffic is shared as it is, so a slower PC than the sharing pilot's can struggle, and the sharing pilot then lowers the density in their AI traffic app.
+  The sharing pilot's Traffic tab notes, under how traffic sharing works, that traffic is shared as it is, so a slower PC than theirs can struggle, and they then lower the density in their AI traffic app.
   This changes [03-v1-scope](../product/03-v1-scope.md#traffic-sync), which gives a radius as a setting, [traffic and ATC](../traffic-atc/01-traffic-and-atc.md#settings)'s polling and settings, and [the Traffic and ATC audio tabs](#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon), which held the setting.
   Settled by the user on 2026-10-31.
 - **Because:**

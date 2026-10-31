@@ -11,7 +11,7 @@
 // the counts, and the devices are drafts and examples.
 import { useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
-import { CircleCheck, CircleDashed, TriangleAlert } from "lucide-react"
+import { CircleCheck, CircleDashed, Package, TriangleAlert } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
@@ -151,7 +151,7 @@ const STATE_ICON: Record<State, React.ReactNode> = {
 // While nobody's sharing, and outside a session, there's nothing to check, so the same lines are
 // the feature's rules, and the list says so (user, 2026-10-31). A note on the feature's cost sits
 // under how it works, in a paragraph of its own, since it's neither a rule nor a check (user,
-// 2026-10-31).
+// 2026-10-31), on the tab of the pilot it speaks to.
 function HowAndCheck({
   how,
   note,
@@ -208,8 +208,10 @@ const differs = (lines: Line[]) => lines.some((l) => l.state === "differs")
 // host's by hand, since the counts above
 // catch a mismatch whatever its cause, where comparing the crew's lists saw only the packs on the
 // known list, which starts with `fsltl-traffic-base`, and needed the lists sent between the cores
-// (user, 2026-10-31). A pack the list doesn't know isn't shown, so the tip sends pilots to their
-// Community folder too. The second pack's name is hypothetical, and every version is an example.
+// (user, 2026-10-31). A pack the list doesn't know isn't shown, so the title says the packs were
+// detected. It's a supplement to the check, so it sits in a tint with no border, in smaller text,
+// with no tip, since the rules and the check's lines already say what to compare (user,
+// 2026-10-31). The second pack's name is hypothetical, and every version is an example.
 type Pack = { name: string; version: string }
 const PACKS: Record<"match" | "differ", Pack[]> = {
   match: [
@@ -218,15 +220,18 @@ const PACKS: Record<"match" | "differ", Pack[]> = {
   ],
   differ: [{ name: "fsltl-traffic-base", version: "1.1.4" }],
 }
-function PacksOnThisPc({ packs, tip }: { packs: Pack[]; tip: string }) {
+function PacksOnThisPc({ packs }: { packs: Pack[] }) {
   return (
-    <section className="flex flex-col gap-2">
-      <h2 className="text-sm font-medium">Traffic packs on this PC</h2>
+    <section className="flex flex-col gap-2.5 rounded-lg bg-muted/50 px-4 py-3.5 text-xs">
+      <h2 className="flex items-center gap-1.5 font-medium text-muted-foreground">
+        <Package className="size-3.5 shrink-0" />
+        Detected traffic packs on this PC
+      </h2>
       <ul className="flex flex-col gap-1.5">
         {packs.map((p) => (
           <li
             key={p.name}
-            className="flex items-baseline justify-between gap-4 text-sm"
+            className="flex items-baseline justify-between gap-4"
           >
             <span>{p.name}</span>
             <span className="text-muted-foreground tabular-nums">
@@ -235,7 +240,6 @@ function PacksOnThisPc({ packs, tip }: { packs: Pack[]; tip: string }) {
           </li>
         ))}
       </ul>
-      <p className="text-xs text-muted-foreground">{tip}</p>
     </section>
   )
 }
@@ -310,14 +314,8 @@ function TrafficPage({
   const [sharer, setSharer] = useState<Sharer>(where.sharer)
   const lines = trafficLines(where.session, sharer, counts)
   useShowDot("traffic", differs(lines))
-  const known =
-    "Dual Input lists only the traffic packs it knows, so check your Community folder for others too."
-  const tip =
-    !where.session || !sharer
-      ? known
-      : sharer === "You"
-        ? `Receiving pilots need these same packs, and no others. ${known}`
-        : `If aircraft are missing, compare these with ${sharer}'s. ${known}`
+  // The note speaks to the pilot whose traffic is shared, so it shows only on their tab.
+  const sharing = where.session && sharer === "You"
   return (
     <ScrollPage>
       <RoleCard
@@ -330,11 +328,15 @@ function TrafficPage({
       />
       <HowAndCheck
         how="One pilot shares. Dual Input watches the AI traffic in their sim and injects it into everyone else's. This works by reading the traffic straight from the sim and works regardless of the original method of traffic generation."
-        note="Performance issues? Since your traffic is shared as-is, PCs that aren't as powerful as yours might struggle to keep up. If that happens, decrease your traffic density in your AI traffic app."
+        note={
+          sharing
+            ? "Performance issues? Since your traffic is shared as-is, PCs that aren't as powerful as yours might struggle to keep up. If that happens, decrease your traffic density in your AI traffic app."
+            : undefined
+        }
         lines={lines}
         rules={!where.session || !sharer}
       />
-      <PacksOnThisPc packs={PACKS[packs]} tip={tip} />
+      <PacksOnThisPc packs={PACKS[packs]} />
     </ScrollPage>
   )
 }

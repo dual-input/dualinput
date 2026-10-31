@@ -104,13 +104,16 @@ const STATE_ICON: Record<State, React.ReactNode> = {
   ),
 }
 // While nobody's sharing, and outside a session, there's nothing to check, so the same lines are
-// the feature's rules, and the list says so (user, 2026-10-31).
-function HowAndCheck({ how, lines, rules }: { how: string; lines: Line[]; rules: boolean }) {
+// the feature's rules, and the list says so (user, 2026-10-31). A note on the feature's cost sits
+// under how it works, in a paragraph of its own, since it's neither a rule nor a check (user,
+// 2026-10-31).
+function HowAndCheck({ how, note, lines, rules }: { how: string; note?: string; lines: Line[]; rules: boolean }) {
   return (
     <>
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-medium">How it works</h2>
         <p className="text-sm text-muted-foreground">{how}</p>
+        {note && <p className="text-sm text-muted-foreground">{note}</p>}
       </section>
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-medium">{rules ? "Rules" : "Check"}</h2>
@@ -167,7 +170,6 @@ function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: C
       CREW_PACKS.length ? { state: "differs", says: "The crew's traffic packs match yours", detail: <Lines items={CREW_PACKS} /> } : { state: "ok", says: "The crew's traffic packs match yours" },
       { state: "unchecked", says: "The crew's own AI traffic is off", detail: "Each crewmate's Traffic tab checks this" },
       { state: "unchecked", says: "The crew's scenery matches yours", detail: "Dual Input can't check this" },
-      { state: "unchecked", says: "Your traffic density suits the crew's sims", detail: "Each shared aircraft has a performance cost for receiving pilots, so lower the density in the sim or your traffic app as needed" },
     ]
   if (sharer && session) {
     const packsDiffer = packs.filter((p) => p.host !== p.mine)
@@ -183,13 +185,13 @@ function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: C
   // (record/areas/traffic-atc/01-traffic-and-atc.md, Known limits). Traffic has no radius setting,
   // since the traffic generators keep their aircraft near the pilot and the airport's own aircraft,
   // where the frame rate goes, stay at any radius, so the lever is the density at the traffic's
-  // source (record/areas/interface/decisions.md, Traffic polls within the sim's 200km cap).
+  // source, which How it works notes (record/areas/interface/decisions.md, Traffic polls within the
+  // sim's 200km cap).
   // Multiplayer off is a rule for all of Dual Input, not traffic's, so it isn't here.
   return [
     { state: "rule", says: "Receiving pilots should turn off their own AI traffic", detail: "To ensure everyone sees the same traffic" },
     { state: "rule", says: "Everyone should have the same traffic packs installed", detail: "To avoid missing or incorrect aircraft" },
     { state: "rule", says: "Everyone should have the same scenery", detail: "To avoid issues such as floating aircraft due to different ground elevation" },
-    { state: "rule", says: "The sharing pilot sets the traffic density", detail: "Each shared aircraft has a performance cost for receiving pilots, so lower it at the source as needed" },
   ]
 }
 
@@ -201,7 +203,7 @@ function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 
   return (
     <ScrollPage>
       <RoleCard id="share-traffic" label="Share my traffic" noun="traffic" session={where.session} sharer={sharer} onChange={(on) => setSharer(on ? "You" : undefined)} />
-      <HowAndCheck how="One pilot shares. Dual Input watches the AI traffic in their sim and injects it into everyone else's. This works by reading the traffic straight from the sim and works regardless of the original method of traffic generation." lines={lines} rules={!where.session || !sharer} />
+      <HowAndCheck how="One pilot shares. Dual Input watches the AI traffic in their sim and injects it into everyone else's. This works by reading the traffic straight from the sim and works regardless of the original method of traffic generation." note="Each shared aircraft has a performance cost for receiving pilots, so the sharing pilot should lower the traffic density at its source as needed." lines={lines} rules={!where.session || !sharer} />
     </ScrollPage>
   )
 }

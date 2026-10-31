@@ -11,7 +11,14 @@
 // the counts, and the devices are drafts and examples.
 import { useEffect, useId, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
-import { CircleCheck, CircleDashed, Package, TriangleAlert } from "lucide-react"
+import {
+  ChevronRight,
+  CircleCheck,
+  CircleDashed,
+  Package,
+  TriangleAlert,
+  Volume2,
+} from "lucide-react"
 
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
@@ -639,7 +646,10 @@ function AtcAppPicker({
   )
 }
 
-// The volume of another pilot's ATC here, and the device it plays on, which Settings sets.
+// The volume of another pilot's ATC here, and the device it plays on, which Settings sets: the
+// device's name in one quiet row under the slider, the whole row opening Settings, so a VR pointer
+// has one wide target (user, 2026-10-31; tried and dropped: "Plays on Headset (USB Audio) · Change
+// in Settings", a line with a link at its end).
 function AtcVolume() {
   const { Slider } = useUI()
   const [volume, setVolume] = useState([100])
@@ -657,14 +667,15 @@ function AtcVolume() {
         max={100}
         step={5}
       />
-      <span className="text-xs text-muted-foreground">
-        Plays on Headset (USB Audio) ·{" "}
-        <InlineLink
-          onClick={() => toast("Opening Settings on the output device")}
-        >
-          Change in Settings
-        </InlineLink>
-      </span>
+      <button
+        type="button"
+        onClick={() => toast("Opening Settings on the output device")}
+        className="-mx-2 -mb-1.5 flex items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors outline-none hover:bg-muted/50 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 active:[transform:translateY(1px)]"
+      >
+        <Volume2 className="size-3.5 shrink-0" />
+        Headset (USB Audio)
+        <ChevronRight className="ml-auto size-3.5 shrink-0" />
+      </button>
     </div>
   )
 }

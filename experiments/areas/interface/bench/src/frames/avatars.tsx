@@ -157,26 +157,45 @@ function SeatIcon() {
   )
 }
 
-// Seats as bubbles, in the user's words (user, 2026-10-31), under a cockpit from above: two seats,
-// each in its bubble, this pilot's head in one and the other free. A seat's bubble is its take
-// radius around its eye (record/areas/avatars/01-avatars.md, A seat).
+// Seats as bubbles, in the user's words (user, 2026-10-31), drawn as they are in practice, from
+// above with the nose up (user, 2026-10-31: "more representative bubbles"): a seat's bubble is its
+// take radius, 0.4m unless the profile gives one, around its eye, which sits over the back of the
+// cushion, 5cm behind the hip; two seats side by side sit closer than two radii, so their bubbles
+// overlap, and the overlap splits at the plane halfway between their eyes, as two balls of dough
+// pressed together meet in a flat border (record/areas/avatars/01-avatars.md, A seat;
+// record/areas/profiles/01-format-and-delivery.md, Seats). To scale at 120px a meter, with the
+// seats 0.62m apart, as the format's example puts them, whose numbers are hypothetical. This
+// pilot's seat and bubble take their color, the seat stronger, and their head sits at its eye
+// (user, 2026-10-31: "coloring the 'taken' seat with the figure's color"); the other is free.
+// Tried and dropped: two separate round bubbles, which no cockpit has.
 function SeatsDrawing({ hex }: { hex: string }) {
-  const seat = (x: number) => (
+  const px = 120
+  const r = 0.4 * px
+  const half = (0.62 / 2) * px
+  const mid = 120
+  const eyeY = 62
+  const dy = Math.sqrt(r * r - half * half)
+  const [left, right] = [mid - half, mid + half]
+  const bubble = (side: 0 | 1) => `M ${mid} ${eyeY - dy} A ${r} ${r} 0 1 ${side} ${mid} ${eyeY + dy} Z`
+  // The taken seat in its pilot's color, the cushion tinted and outlined, the backrest stronger;
+  // the free seat in the page's own muted ink.
+  const seat = (x: number, color?: string) => (
     <g>
-      <circle cx={x} cy={38} r={30} fill="none" stroke="currentColor" strokeOpacity={0.45} strokeDasharray="3 4" />
-      <rect x={x - 22} y={44} width={44} height={36} rx={9} fill="none" stroke="currentColor" strokeOpacity={0.6} strokeWidth={1.5} />
-      <rect x={x - 20} y={76} width={40} height={8} rx={4} fill="currentColor" fillOpacity={0.35} />
+      <rect x={x - 27} y={22} width={54} height={50} rx={10} fill={color ?? "none"} fillOpacity={color ? 0.22 : 0} stroke={color ?? "currentColor"} strokeOpacity={color ? 0.9 : 0.6} strokeWidth={1.5} />
+      <rect x={x - 25} y={70} width={50} height={10} rx={5} fill={color ?? "currentColor"} fillOpacity={color ? 0.7 : 0.35} />
     </g>
   )
   return (
-    <svg viewBox="0 0 240 108" className="mx-auto h-[108px] w-[240px]" aria-hidden>
-      {seat(70)}
-      {seat(170)}
-      <circle cx={70} cy={38} r={9} fill={hex} />
-      <text x={70} y={102} textAnchor="middle" fontSize={11} fill="currentColor">
+    <svg viewBox="0 0 240 132" className="mx-auto h-[132px] w-[240px]" aria-hidden>
+      {seat(left, hex)}
+      {seat(right)}
+      <path d={bubble(0)} fill={hex} fillOpacity={0.08} stroke={hex} strokeOpacity={0.6} strokeDasharray="3 4" />
+      <path d={bubble(1)} fill="none" stroke="currentColor" strokeOpacity={0.45} strokeDasharray="3 4" />
+      <circle cx={left} cy={eyeY} r={9} fill={hex} />
+      <text x={left} y={127} textAnchor="middle" fontSize={11} fill="currentColor">
         You
       </text>
-      <text x={170} y={102} textAnchor="middle" fontSize={11} fill="currentColor">
+      <text x={right} y={127} textAnchor="middle" fontSize={11} fill="currentColor">
         Free
       </text>
     </svg>

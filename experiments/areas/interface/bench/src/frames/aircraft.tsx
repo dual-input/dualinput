@@ -167,6 +167,7 @@ export function AircraftPicker({ open, onOpenChange }: { open: boolean; onOpenCh
                   ref={scroller.ref}
                   onScroll={scroller.onScroll}
                   onMouseDown={scroller.onMouseDown}
+                  onWheel={scroller.onWheel}
                   className={"min-h-0 flex-1 overflow-y-auto px-5 pb-5 select-none " + NO_SCROLLBAR + " " + scroller.cursor}
                 >
                   {/* With none installed, the group is left out, and the list opens on the rest,

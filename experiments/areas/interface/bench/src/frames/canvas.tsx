@@ -10,7 +10,6 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { UI } from "@/bench/ui"
 import { DEFAULT_THEME, themeLabel, themeVars, type Theme } from "@/bench/theme"
 import { AppFrame, EFB, EveryIssueFrame } from "./shell"
-import { PreflightFrame } from "./preflight"
 import { SetupFlowFrame } from "./setup-check"
 import { CrewmateStatesFrame, HeadsUpFrame, HomeFirstTimeFrame, HomeLaterFrame, ReconnectingFrame, RefusalsFrame, WaysFrame, type Action } from "./home"
 import { AircraftPickerFrame } from "./aircraft"
@@ -62,15 +61,10 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Every refusal", draw: (t) => <RefusalsFrame theme={t} /> },
     ],
   },
-  // The session page, which is home once Host or Join succeeds, then preflight on it once the PF is
-  // in a flight on the ground. Before preflight: hosted, alone, as a crewmate joins, and once one
-  // has, with a sheet of where a crewmate can be; joined, with a sheet of a joiner's ways to the
-  // pilot flying; and, for Later, a crew bigger than v1's two. Each opens with its heads popping in,
-  // as the card turning to it does. Then preflight starting, as the host loads a flight; in
-  // preflight, on the host's side: alone, with the crewmate
-  // loading, with them in the flight and ready, with the checklist given the page, while the host's
-  // aircraft settles, with a sheet of every match check message, with the crewmate dropped out, and counting down; then on the joiner's side,
-  // and with the joiner's checklist given the page.
+  // The session page, which is home once Host or Join succeeds, before preflight: hosted, alone, as a
+  // crewmate joins, and once one has, with a sheet of where a crewmate can be; joined, with a sheet
+  // of a joiner's ways to the pilot flying; and, for Later, a crew bigger than v1's two. Each opens
+  // with its heads popping in, as the card turning to it does.
   {
     name: "Session",
     frames: [
@@ -81,17 +75,29 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Joined", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="joined" /> },
       { name: "Every way to the pilot flying", draw: (t) => <WaysFrame theme={t} /> },
       { name: "Later: a bigger crew", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="bigger-crew" /> },
+    ],
+  },
+  // Preflight on the session page, once the PF is in a flight on the ground: starting, as the host
+  // loads a flight; then on the host's side, alone, with the crewmate loading, with them in the
+  // flight and ready, with the card folded to its row, while the host's aircraft settles, with the
+  // crewmate dropped out, and counting down; then on the joiner's side, open and folded. Then, for
+  // Later, the worst case, a big crew with the most messages at once and a long checklist; and a
+  // sheet of every match check message.
+  {
+    name: "Preflight",
+    frames: [
       { name: "Preflight starts", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="crewmate" next={{ after: CREWMATE_JOINS_AFTER, session: "preflight-loading" }} /> },
       { name: "Preflight, host alone", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-alone" /> },
       { name: "Preflight, crewmate loading", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-loading" /> },
       { name: "Preflight, crewmate ready", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-crew" /> },
-      { name: "Preflight, checklist expanded", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-crew" checklistExpanded /> },
+      { name: "Preflight, card folded", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-crew" opensFolded /> },
       { name: "Preflight, aircraft settling", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-settling" /> },
-      { name: "Every match check message", tall: true, draw: (t) => <HeadsUpFrame theme={t} /> },
       { name: "Preflight, crewmate dropped out", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-dropped" /> },
       { name: "Preflight, countdown", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-countdown" /> },
       { name: "Preflight, joiner", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-joined" /> },
-      { name: "Preflight, joiner's checklist expanded", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-joined" checklistExpanded /> },
+      { name: "Preflight, joiner, card folded", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-joined" opensFolded /> },
+      { name: "Later: preflight, worst case", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="preflight-worst" /> },
+      { name: "Every match check message", tall: true, draw: (t) => <HeadsUpFrame theme={t} /> },
     ],
   },
   // What the app's window says of itself on any page. The header on home, open over what needs the
@@ -118,9 +124,6 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "None installed", replay: true, draw: (t) => <AircraftPickerFrame theme={t} noneInstalled /> },
     ],
   },
-  // The preflight page from the sketch, with an example of every kit component in its checklist's
-  // place, kept as the kit's reference while preflight gets designed afresh.
-  { name: "All components", frames: [{ name: "All components", tall: true, draw: (t) => <PreflightFrame theme={t} /> }] },
 ]
 
 // A frame's name is short and can repeat across sections, so the canvas knows a frame by both.

@@ -3,7 +3,7 @@
 // later visits the profile authors' notes. The aircraft and the notes are examples.
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { ArrowRightLeft, BookOpen, Check, ChevronDown, ChevronUp, CircleCheck, CircleX, Copy, ExternalLink, Hand, Info, LogOut, TriangleAlert, X } from "lucide-react"
+import { ArrowRightLeft, BookOpen, Check, ChevronDown, ChevronUp, CircleCheck, CircleX, Copy, ExternalLink, Hand, Info, LogOut, RotateCcw, TriangleAlert, X } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
@@ -14,7 +14,7 @@ import { StandingFigure } from "./figure-standing"
 import { ConfirmButton, RESTART_SIM } from "./confirm"
 import { AircraftContext, AircraftPicker, LOADED, LOADED_UNSUPPORTED, PROFILES, type Aircraft } from "./aircraft"
 import { NO_SCROLLBAR, useScroller } from "./scroller"
-import { EmptyHead, Head } from "./figure-head"
+import { cueHeads, EmptyHead, Head } from "./figure-head"
 import { useShowPhase, type SessionPhase } from "./phase"
 
 
@@ -201,7 +201,47 @@ const PF_CHECKLIST: ChecklistItem[] = [
 const LINK = "Relay · 120ms"
 
 const JAMES: Pilot = { name: DEMO_HOST, hue: "red" }
-const SESSIONS: Record<"alone" | "crewmate" | "bigger-crew" | "joined" | "preflight-alone" | "preflight-loading" | "preflight-crew" | "preflight-settling" | "preflight-dropped" | "preflight-countdown" | "preflight-joined", Session> = {
+// The worst case, for Later, to compare the card with the usual one (user, 2026-10-30): a
+// big crew, more than v1's two pilots, the most match check messages that can show at once, and a
+// 20-item checklist, its extra items hypothetical. The messages are one from each group
+// that can't show together: the version (an older one, or a streamed copy's two lines, whose
+// version can't be read); the stores, only for two installed copies; the profile (none at all, or a
+// download failing on either PC or both, or an unpublished one someone lacks, or one everyone has);
+// and the time (hours ahead, or another date); with the packages and the livery, which go with any.
+const BIG_CREW: Pilot[] = ["Adam", "Mia", "Lena", "Omar", "Priya", "Theo", "Sven", "Rosa", "Kai", "Noor", "Ivo", "Zoe"].map((name, i) => ({
+  name,
+  hue: ["green", "blue", "yellow", "purple", "teal", "pink", "red"][i % 7],
+  link: LINK,
+  ready: i % 3 !== 0,
+}))
+const MOST_DIFFERENCES: Difference[] = [
+  HEADS_UP.olderThere,
+  HEADS_UP.stores,
+  HEADS_UP.packages,
+  HEADS_UP.livery,
+  HEADS_UP.downloadThere,
+  HEADS_UP.downloadHere,
+  HEADS_UP.aheadThere,
+]
+const LONG_CHECKLIST: ChecklistItem[] = [
+  ...PF_CHECKLIST,
+  { id: "altimeter", name: "Altimeter setting", default: "29.92" },
+  { id: "fuel_selector", name: "Fuel selector", default: "Left", description: "The selector on the floor between the seats" },
+  { id: "mixture", name: "Mixture", default: "Rich" },
+  { id: "propeller", name: "Propeller", default: "High RPM" },
+  { id: "cowl_flaps", name: "Cowl flaps", default: "Open" },
+  { id: "elevator_trim", name: "Elevator trim", default: "Takeoff", description: "The wheel left of the throttle quadrant" },
+  { id: "transponder", name: "Transponder code", default: "1200" },
+  { id: "com1", name: "COM 1 frequency", default: "121.900" },
+  { id: "nav1", name: "NAV 1 frequency", default: "110.300" },
+  { id: "adf", name: "ADF frequency", default: "350" },
+  { id: "ap_altitude", name: "Autopilot altitude", default: "5000" },
+  { id: "panel_lights", name: "Panel lights", default: "Off" },
+  { id: "pitot_heat", name: "Pitot heat", default: "Off" },
+  { id: "yaw_damper", name: "Yaw damper", default: "Off", description: "Each sim engages its own, so leave it off until the flight starts" },
+  { id: "parking_brake", name: "Parking brake", default: "Set" },
+]
+const SESSIONS: Record<"alone" | "crewmate" | "bigger-crew" | "joined" | "preflight-alone" | "preflight-loading" | "preflight-crew" | "preflight-settling" | "preflight-dropped" | "preflight-countdown" | "preflight-joined" | "preflight-worst", Session> = {
   alone: { joined: false, crew: [] },
   crewmate: { joined: false, crew: [{ ...JAMES, at: "world-map" }] },
   "bigger-crew": {
@@ -219,6 +259,7 @@ const SESSIONS: Record<"alone" | "crewmate" | "bigger-crew" | "joined" | "prefli
   "preflight-alone": { joined: false, crew: [], preflight: { settled: true, differences: [], checklist: PF_CHECKLIST } },
   "preflight-loading": { joined: false, crew: [{ ...JAMES, at: "loading" }], preflight: { settled: true, differences: [], checklist: PF_CHECKLIST } },
   "preflight-crew": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }], preflight: { settled: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
+  "preflight-worst": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }, ...BIG_CREW], preflight: { settled: true, differences: MOST_DIFFERENCES, checklist: LONG_CHECKLIST } },
   "preflight-settling": { joined: false, crew: [{ ...JAMES, link: LINK }], preflight: { settled: false, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
   "preflight-dropped": { joined: false, crew: [{ ...JAMES, at: "lost" }], preflight: { settled: true, ready: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
   "preflight-countdown": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }], preflight: { settled: true, ready: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
@@ -274,7 +315,7 @@ const SIM_FLY_BUTTON = "bg-[#FFDE03] text-[#242934] hover:bg-[#FFDE03]/90 focus-
 // measured, and on the outside its changing width moves nothing else. The row's end is the card's
 // to give: during preflight, each pilot's Ready.
 // A row given pop pops its head in after that many milliseconds, fixed when the row first shows.
-function CrewRow({ pilot, pop, end }: { pilot: Pilot; pop?: number; end?: React.ReactNode }) {
+function CrewRow({ pilot, pop, end, alive }: { pilot: Pilot; pop?: number; end?: React.ReactNode; alive?: boolean }) {
   const { Badge } = useUI()
   const [popAfter] = useState(pop)
   const under = pilot.way ? { shows: WAYS[pilot.way].at, trouble: false } : pilot.at ? WHERE[pilot.at] : pilot.link ? { shows: "In the flight", trouble: false } : undefined
@@ -282,7 +323,7 @@ function CrewRow({ pilot, pop, end }: { pilot: Pilot; pop?: number; end?: React.
   return (
     <li className="flex items-center gap-3">
       <span data-fold-morph={`head-${pilot.name}`} className="flex shrink-0">
-        <Head hex={hexOf(pilot.hue)} pop={popAfter} />
+        <Head hex={hexOf(pilot.hue)} pop={popAfter} alive={alive ? pilot.name : undefined} slumped={pilot.at === "lost" || pilot.at === "crashed"} />
       </span>
       <div data-fold-fade className="flex min-w-0 flex-col">
         <span className="flex items-center gap-2 text-sm font-medium">
@@ -503,20 +544,32 @@ function CountdownRing({ left }: { left: number | null }) {
 const phaseOf = (session: Session, started: boolean): SessionPhase | undefined =>
   started ? "syncing" : session.preflight || session.crew.find((p) => p.flying)?.way ? "preflight" : undefined
 
-// A pilot's head in the folded card's row, named for a screen reader, with a badge at its lower right once
-// there's something to say: a green check once they're ready, a red cross while they're out of
-// the flight, a dropped link or a crashed sim. A ring in the card's color parts the badge from the
-// head.
-function StripHead({ pilot, ready }: { pilot: Pilot; ready: boolean }) {
-  const out = pilot.at === "lost" || pilot.at === "crashed"
+// A pilot's head in the folded card's row, named with where they stand for a screen reader, with a
+// badge at its lower right: while the countdown waits on them, an empty ring in the muted color,
+// the card's own color inside, so whom it waits on shows rather than being read from which checks
+// are missing; once they're ready, green fills it from the middle and a check comes in; and a red
+// cross while they're out of the flight, a dropped link or a crashed sim (user, 2026-10-30). A
+// pilot the crew went without has none. A ring in the card's color parts the badge from the head.
+// Tried and dropped for waiting: an hourglass, outlined or solid, which at 14px read as a scribble
+// or an X; and the ring in preflight's information color, which didn't work beside the heads.
+type HeadState = "ready" | "out" | "waiting"
+const HEAD_SAYS: Record<HeadState, string> = { ready: "ready", out: "out of the flight", waiting: "not ready" }
+const FILL_MS = 220
+function StripHead({ pilot, state }: { pilot: Pilot; state?: HeadState }) {
+  const ready = state === "ready"
+  const at = "absolute -right-0.5 -bottom-0.5 flex size-3.5 items-center justify-center rounded-full ring-2 ring-card "
   return (
-    <span className="relative inline-flex" aria-label={pilot.name}>
-      <span data-fold-morph={`head-${pilot.name}`} className="flex">
-        <Head hex={hexOf(pilot.hue)} />
-      </span>
-      {(ready || out) && (
-        <span data-fold-fade className={"absolute -right-0.5 -bottom-0.5 flex size-3.5 items-center justify-center rounded-full ring-2 ring-card " + (ready ? "bg-success text-success-foreground" : "bg-destructive text-destructive-foreground")}>
-          {ready ? <Check className="size-2.5" strokeWidth={3} /> : <X className="size-2.5" strokeWidth={3} />}
+    <span data-fold-morph={`head-${pilot.name}`} className="relative inline-flex" aria-label={state ? `${pilot.name}, ${HEAD_SAYS[state]}` : pilot.name}>
+      <Head hex={hexOf(pilot.hue)} alive={pilot.name} turns slumped={state === "out"} />
+      {state === "out" && (
+        <span data-fold-fade className={at + "bg-destructive text-destructive-foreground"}>
+          <X className="size-2.5" strokeWidth={3} />
+        </span>
+      )}
+      {(state === "waiting" || ready) && (
+        <span data-fold-fade className={at + "bg-card text-success-foreground inset-ring-[1.5px] inset-ring-muted-foreground"}>
+          <span className="absolute inset-0 rounded-full bg-success" style={{ transform: ready ? "none" : "scale(0)", transition: `transform ${FILL_MS}ms ease-out` }} />
+          <Check className="relative size-2.5" strokeWidth={3} style={{ opacity: ready ? 1 : 0, transition: `opacity ${FILL_MS}ms ease-out` }} />
         </span>
       )}
     </span>
@@ -535,7 +588,8 @@ function StripHead({ pilot, ready }: { pilot: Pilot; ready: boolean }) {
 // The counts are snug: the chevron beside them, in a tint that hugs them on hover, 8px around on
 // every side, its corners 6px, as the checklist rows' are, with the counts on the card's content
 // edge, and the press reaches 6px above the tint, unseen, to 42px tall, for a VR pointer. The
-// open list's tint covers the whole list, which has nothing else to press. Both forms start 12px
+// open list's tint covers the whole list, which has nothing else to press. Either nudges down 1px
+// while pressed, as the kit's buttons do (user, 2026-10-31). Both forms start 12px
 // under the crew, their words 20px under it, the card's own spacing, so they read as a group of
 // their own; and each ends the card 8px into its bottom padding, so a tint's bottom sits as far
 // from the card's edge as its side does, 12px.
@@ -566,7 +620,7 @@ function CrewDifferences({ differences, started }: { differences: Difference[]; 
   const painted = usePainted()
   useLayoutEffect(() => {
     if (!painted.current || !counts.current || !list.current) return
-    return expanded ? morph(counts.current, list.current, { inAfter: MORPH.inAfter.open }) : morph(list.current, counts.current, { inAfter: MORPH.inAfter.fold })
+    return expanded ? morph(counts.current, list.current, MORPH.inAfter.open) : morph(list.current, counts.current, MORPH.inAfter.fold)
     // It morphs when the form changes, from the one showing before.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expanded])
@@ -582,7 +636,7 @@ function CrewDifferences({ differences, started }: { differences: Difference[]; 
           aria-expanded={false}
           aria-label={`${errors} errors and ${warnings} warnings between the crew's setups`}
           onClick={() => setOpen(true)}
-          className={"group -mx-2 -mt-1.5 flex w-fit pt-1.5 text-sm outline-none " + (expanded ? hidden : "")}
+          className={"group -mx-2 -mt-1.5 flex w-fit pt-1.5 text-sm outline-none active:translate-y-px " + (expanded ? hidden : "")}
         >
           <span className="flex items-center gap-3 rounded-[6px] p-2 group-hover:bg-muted/50 group-focus-visible:bg-muted/50">
             {errors > 0 && (
@@ -613,64 +667,103 @@ function CrewDifferences({ differences, started }: { differences: Difference[]; 
           e.preventDefault()
           fold()
         }}
-        className={"-mx-2 rounded-[6px] p-2 outline-none " + (started ? "cursor-pointer hover:bg-muted/50 focus-visible:bg-muted/50 " : "") + (expanded ? "" : hidden + " right-0")}
+        className={"-mx-2 rounded-[6px] p-2 outline-none " + (started ? "cursor-pointer hover:bg-muted/50 focus-visible:bg-muted/50 active:translate-y-px " : "") + (expanded ? "" : hidden + " right-0")}
       >
-        <Differences differences={differences} marked after={started ? <ChevronUp className="ml-1.5 inline size-4 align-[-3px] text-muted-foreground" /> : undefined} />
+        <ScrollWindow max={MESSAGES_WINDOW}>
+          <Differences differences={differences} marked after={started ? <ChevronUp className="ml-1.5 inline size-4 align-[-3px] text-muted-foreground" /> : undefined} />
+        </ScrollWindow>
       </div>
     </div>
   )
 }
 
-// One form of a thing turning into another, as the differences' counts and list do, and the
-// session card's row and the whole card: what's marked to fade in the leaving form fades out, its
-// parts marked to glide that the arriving form also has glide to where it has them, and the
-// arriving form's own marked parts fade up in, a row of a list at a time, or top to bottom. A part
-// marked to fade never takes a gliding part inside it along. The leaving form stays shown over the
-// arriving one until the glide ends, then hides, and the arriving form's parts take over from the
-// gliding ones in the same spot. Opening the differences, the words start as the icons set off;
-// folding them, the counts wait for the icons to near them. It styles the elements directly, and
-// the cleanup it returns undoes it, so a press mid-morph starts the next from where things are.
-const MORPH = { ms: 320, out: 110, in: 180, stagger: 40, perPx: 0.4, inAfter: { open: 90, fold: 200 } }
-// The glide's curve, which a box easing its height around a morph takes too.
-const GLIDE = "cubic-bezier(0.4, 0, 0.2, 1)"
-type Morph = { inAfter: number; ms?: number; fade?: string; glide?: string; cascade?: "rows" | "top" }
-function morph(from: HTMLElement, to: HTMLElement, { inAfter, ms = MORPH.ms, fade = "data-fade", glide = "data-morph", cascade = "rows" }: Morph) {
+// A list that scrolls in a window of its own once it runs past max pixels, as the crew and the
+// match check's messages do with a big crew, so the session card stays short enough to fold in one
+// gesture (user, 2026-10-30). It scrolls as the app's other boxes do, by wheel, drag, and coast, a
+// drag staying with it while it can scroll the way the drag goes and passing to the page past its
+// end, and fades at its edges in the card's color say there's more. The card's fold reads how much
+// of a part it shows (data-fold-window). The crew's shows three rows, this pilot and two more, which
+// covers v1's two-pilot sessions with room to spare and keeps the card small (user, 2026-10-30),
+// and half of a fourth; the messages' the three a two-pilot crew most often has and part of a
+// fourth; so the cut line says there's more. The crew's has no limit outside preflight, where no
+// checklist waits under the card and the card doesn't fold, so a big crew only lengthens the page
+// (user, 2026-10-30).
+const CREW_WINDOW = 150
+const MESSAGES_WINDOW = 128
+// A box that scrolls clips what reaches past it, so the window reaches out past its list, taking it
+// back with as much negative margin: above and below, 8px, the green ring a pressed Ready spreads
+// (index.css, ready-pulse), which was cut off on the top row (user, 2026-10-30); and to either
+// side 8px, the ring's spread at the row's end, which also covers a list head's nose, which its
+// cone and a nod's dip take out of its window by up to 7px (figure-head.tsx, LIST_ROOM).
+const WINDOW_ROOM = { x: 8, y: 8 }
+function ScrollWindow({ max, children }: { max?: number; children: React.ReactNode }) {
+  const w = useScroller({ nested: true })
+  const fade = (to: "top" | "bottom", on: boolean): React.CSSProperties => ({ background: `linear-gradient(to ${to === "top" ? "bottom" : "top"}, var(--card), transparent)`, opacity: on ? 1 : 0 })
+  return (
+    <div className="relative">
+      <div
+        ref={w.ref}
+        data-fold-window
+        onScroll={w.onScroll}
+        onMouseDown={w.onMouseDown}
+        onWheel={w.onWheel}
+        className={"overflow-y-auto " + NO_SCROLLBAR + " " + w.cursor}
+        style={{ maxHeight: max === undefined ? undefined : max + 2 * WINDOW_ROOM.y, margin: `${-WINDOW_ROOM.y}px ${-WINDOW_ROOM.x}px`, padding: `${WINDOW_ROOM.y}px ${WINDOW_ROOM.x}px` }}
+      >
+        {children}
+      </div>
+      <div className="pointer-events-none absolute right-0 left-0 h-6 transition-opacity duration-200" style={{ ...fade("top", w.above), top: -WINDOW_ROOM.y, marginInline: -WINDOW_ROOM.x }} />
+      <div className="pointer-events-none absolute right-0 left-0 h-6 transition-opacity duration-200" style={{ ...fade("bottom", w.below), bottom: -WINDOW_ROOM.y, marginInline: -WINDOW_ROOM.x }} />
+    </div>
+  )
+}
+
+// One form of the differences turning into the other: what's marked to fade in the leaving form
+// fades out, its icons that the arriving form also has glide to where it has them, and the
+// arriving form's own words fade up in, a row at a time. The leaving form stays shown over the
+// arriving one until the glide ends, then hides, and the arriving form's icons take over from the
+// gliding ones in the same spot. Opening, the words start as the icons set off; folding, the counts
+// wait for the icons to near them. It styles the elements directly, and the cleanup it returns
+// undoes it, so a press mid-morph starts the next from where things are.
+const MORPH = { ms: 320, out: 110, in: 180, stagger: 40, inAfter: { open: 90, fold: 200 } }
+function morph(from: HTMLElement, to: HTMLElement, inAfter: number) {
   const touched: (HTMLElement | SVGElement)[] = []
   const set = (e: HTMLElement | SVGElement, s: Record<string, string>) => {
     Object.assign(e.style, s)
     touched.push(e)
   }
-  // The canvas zooms the frames, so a distance on screen is turned back into the box's own pixels.
-  const scale = from.getBoundingClientRect().width / from.offsetWidth || 1
-  const fading = (form: HTMLElement) => [...form.querySelectorAll<HTMLElement>(`[${fade}]`)].filter((e) => !e.querySelector(`[${glide}]`))
+  const scale = zoomOf(from)
   set(from, { opacity: "1" })
-  fading(from).forEach((e) => set(e, { transition: `opacity ${MORPH.out}ms ease-in`, opacity: "0" }))
-  from.querySelectorAll<HTMLElement | SVGElement>(`[${glide}]`).forEach((part) => {
-    const target = to.querySelector<HTMLElement | SVGElement>(`[${glide}="${part.getAttribute(glide)}"]`)
-    if (!target) return set(part, { transition: `opacity ${MORPH.out}ms ease-in`, opacity: "0" })
-    const a = part.getBoundingClientRect()
+  from.querySelectorAll<HTMLElement>("[data-fade]").forEach((e) => set(e, { transition: `opacity ${MORPH.out}ms ease-in`, opacity: "0" }))
+  from.querySelectorAll<SVGElement>("[data-morph]").forEach((icon) => {
+    const target = to.querySelector<SVGElement>(`[data-morph="${icon.dataset.morph}"]`)
+    if (!target) return set(icon, { transition: `opacity ${MORPH.out}ms ease-in`, opacity: "0" })
+    const a = icon.getBoundingClientRect()
     const b = target.getBoundingClientRect()
     set(target, { opacity: "0" })
-    set(part, { transition: `transform ${ms}ms ${GLIDE}`, transform: `translate(${(b.left - a.left) / scale}px, ${(b.top - a.top) / scale}px)` })
+    set(icon, { transition: `transform ${MORPH.ms}ms cubic-bezier(0.4, 0, 0.2, 1)`, transform: `translate(${(b.left - a.left) / scale}px, ${(b.top - a.top) / scale}px)` })
   })
-  const top = to.getBoundingClientRect().top
-  const arriving = fading(to).map((e) => {
-    if (cascade === "top") return { e, delay: inAfter + Math.round(((e.getBoundingClientRect().top - top) / scale) * MORPH.perPx) }
-    const row = e.closest("li")
-    return { e, delay: inAfter + (row ? [...row.parentElement!.children].indexOf(row) : 0) * MORPH.stagger }
-  })
-  arriving.forEach(({ e }) => set(e, { transition: "none", opacity: "0", transform: "translateY(4px)" }))
+  const arriving = [...to.querySelectorAll<HTMLElement>("[data-fade]")]
+  arriving.forEach((e) => set(e, { transition: "none", opacity: "0", transform: "translateY(4px)" }))
   void to.offsetHeight
-  arriving.forEach(({ e, delay }) => {
+  arriving.forEach((e) => {
+    const row = e.closest("li")
+    const i = row ? [...row.parentElement!.children].indexOf(row) : 0
+    const delay = inAfter + i * MORPH.stagger
     Object.assign(e.style, { transition: `opacity ${MORPH.in}ms ease-out ${delay}ms, transform ${MORPH.in}ms ease-out ${delay}ms`, opacity: "1", transform: "none" })
   })
   const undo = () => touched.forEach((e) => Object.assign(e.style, { opacity: "", transform: "", transition: "" }))
-  const end = window.setTimeout(undo, Math.max(ms, ...arriving.map(({ delay }) => delay + MORPH.in)))
+  const rows = to.querySelectorAll("li").length
+  const end = window.setTimeout(undo, Math.max(MORPH.ms, inAfter + Math.max(0, rows - 1) * MORPH.stagger + MORPH.in))
   return () => {
     clearTimeout(end)
     undo()
   }
 }
+
+// The canvas zooms the frames, so a distance on screen is turned back into a box's own pixels by
+// this.
+const zoomOf = (e: HTMLElement) => e.getBoundingClientRect().width / e.offsetWidth || 1
 
 // Whether the frame has painted once: what a frame opens on shows at once, and a change after its
 // first paint eases.
@@ -686,7 +779,8 @@ function usePainted() {
 // The match check's differences, in a section of the session card: an error's icon in red, a
 // warning's in amber, and a note's muted, the difference, and what it can cause, muted. Anything
 // given to go after it ends the last line. Marked, the first icon of each level is one the counts
-// also have, and everything else fades, for a morph between the two.
+// also have, and everything else fades, for a morph between the two. Each line fades on its own as
+// the session card folds (drawFold), so the lines slide under the folded row one by one.
 function Differences({ differences, after, marked }: { differences: Difference[]; after?: React.ReactNode; marked?: boolean }) {
   const first = (i: number) => differences.findIndex((d) => d.level === differences[i].level) === i
   return (
@@ -694,7 +788,7 @@ function Differences({ differences, after, marked }: { differences: Difference[]
       {differences.map((d, i) => {
         const mark = marked ? (first(i) ? { "data-morph": d.level } : { "data-fade": "" }) : {}
         return (
-        <li key={d.says} className="flex items-start gap-2">
+        <li key={d.says} data-fold-fade className="flex items-start gap-2">
           {d.level === "error" ? (
             <CircleX {...mark} className="mt-0.5 size-4 shrink-0 text-destructive" />
           ) : d.level === "warning" ? (
@@ -721,16 +815,23 @@ function Differences({ differences, after, marked }: { differences: Difference[]
 // 03-v1-scope.md, Preflight). Its rows read as an aircraft's checklist does, each control, dots,
 // then its starting value, in capitals, in B612 Mono, the typeface Airbus made for its cockpit
 // displays, and a row checked turns green. Each row is the page's width and at least 44px tall, so
-// a VR controller's pointer lands on one without careful aim. A row checked is the pilot's own
-// note, and Ready doesn't wait for it.
+// a VR controller's pointer lands on one without careful aim, and a press nudges it down 1px, as
+// the kit's buttons do. A row checked is the pilot's own note, and Ready doesn't wait for it.
 // Profile authors write the names, values, and descriptions, and Dual Input makes some entries
 // itself, so the rows take any length rather than the format limiting it: a value always shows
 // whole, since a value cut short reads as another value, and wraps once it passes half the row; a
 // name takes the rest of the line, cut at its edge, and slides to show its end while the pointer
 // rests on it; the dots between keep at least three; and a description wraps under the name as
-// long as it runs. Rows go by the entry's ID, since two entries can share a name.
+// long as it runs. Rows go by the entry's ID, since two entries can share a name. How bright the
+// list is follows the session card's fold (StartCard).
+// Under the rows, a muted Reset checklist unchecks them all, for a pilot whose cockpit went back
+// where it started, as after reloading the flight; it waits, disabled, until a row is checked, so
+// the list's end never moves (user, 2026-10-31). Tried and dropped: clearing the checks by
+// themselves when the aircraft loaded again, which could clear a pilot's checks on a signal that
+// wasn't a reload.
 const LEADER = ".".repeat(80)
 function Checklist({ items }: { items: ChecklistItem[] }) {
+  const { Button } = useUI()
   const [done, setDone] = useState<string[]>([])
   const [pointed, setPointed] = useState<string | null>(null)
   const toggle = (id: string) => setDone((d) => (d.includes(id) ? d.filter((n) => n !== id) : [...d, id]))
@@ -754,7 +855,7 @@ function Checklist({ items }: { items: ChecklistItem[] }) {
                 onClick={() => toggle(item.id)}
                 onMouseEnter={() => setPointed(item.id)}
                 onMouseLeave={() => setPointed((p) => (p === item.id ? null : p))}
-                className={"flex min-h-11 w-full flex-col justify-center gap-0.5 rounded-[6px] px-2 py-2 text-left outline-none hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/30 " + (checked ? "text-success" : "")}
+                className={"flex min-h-11 w-full flex-col justify-center gap-0.5 rounded-[6px] px-2 py-2 text-left outline-none hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/30 active:translate-y-px " + (checked ? "text-success" : "")}
               >
                 <span className="flex items-center gap-3">
                   <ChecklistBox checked={checked} />
@@ -772,6 +873,10 @@ function Checklist({ items }: { items: ChecklistItem[] }) {
           )
         })}
       </ul>
+      <Button variant="ghost" size="sm" className="-ml-2 self-start text-muted-foreground" disabled={done.length === 0} onClick={() => setDone([])}>
+        <RotateCcw data-icon="inline-start" />
+        Reset checklist
+      </Button>
     </section>
   )
 }
@@ -841,13 +946,11 @@ const POP = { first: 120, stagger: 70 }
 // watches: every pilot's head, badged ready or out, so they see whom they're waiting on, and their
 // own Ready at the end, with the countdown's ring before it once it runs. The code, Leave, Go without, and
 // the match check wait for the whole card.
-// The row and the whole card are one card in two forms, so one turns into the other (morph): both
-// stay drawn, one over the other, the one not showing hidden, and as the card's height eases, each
-// head glides between the row and its crew row, and Ready with its ring between the row's end and
-// this pilot's crew row, while the rest fades out, and the arriving form's own parts fade up in,
-// top to bottom. Unfolding, they start as the heads set off; folding, the row's badges wait for the
-// heads to near their places. The glide is longer than the differences', since it travels farther.
-const FOLD = { ms: 380, inAfter: { open: 100, fold: 220 } }
+const ROW_HEADS = 7
+// The row and the whole card are one card in two forms, both drawn: the whole card in the page's
+// flow, the row over its top, hidden until the card folds. The card's fold draws the way between
+// them (drawFold), from the parts marked data-fold-morph, which glide, and data-fold-fade, which
+// fade.
 function SessionHalf({ session, started, folded, onStarted, onLeave }: { session: Session; started: boolean; folded: boolean; onStarted: () => void; onLeave: () => void }) {
   const { Button, CardContent, Separator } = useUI()
   const { joined, crew, preflight } = session
@@ -875,9 +978,18 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
     // It hands up the moment the countdown ends, once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [left])
+  // The crew's heads hear what happens to the crew (figure-head.tsx, LiveFigure): a pilot who
+  // readies nods and the rest look at them.
+  const crewBox = useRef<HTMLDivElement>(null)
+  const readyBefore = useRef(new Set([...(ready ? ["You"] : []), ...crew.filter((p) => p.ready).map((p) => p.name)]))
+  useEffect(() => {
+    const now = new Set([...(ready ? ["You"] : []), ...crew.filter((p) => p.ready).map((p) => p.name)])
+    for (const name of now) if (!readyBefore.current.has(name)) cueHeads(crewBox.current, { kind: "ready", name })
+    readyBefore.current = now
+  }, [ready, crew])
   // This pilot's Ready, with the countdown's ring before it, in the whole card and the folded one.
   const myReady = preflight && (
-    <span data-fold-morph="ready" className="flex items-center gap-2">
+    <span data-fold-morph="ready" data-pressed={ready || undefined} className="flex items-center gap-2">
       <CountdownRing left={left} />
       <ReadyButton ready={ready} settled={preflight.settled} onToggle={() => setReady((r) => !r)} />
     </span>
@@ -893,6 +1005,9 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
         </Button>
       )
     if (p.way) return undefined
+    // Not ready is a plain muted line, as the folded row's empty ring is muted; chips with icons, as
+    // the folded row's badges, made the whole card busy, and preflight's information color didn't
+    // work (user, 2026-10-30).
     return p.ready ? <StatusChip level="success">Ready</StatusChip> : <span className="text-xs text-muted-foreground">Not ready</span>
   }
   const code = `${DEMO_CODE.slice(0, 3)}-${DEMO_CODE.slice(3)}`
@@ -901,25 +1016,29 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
       <Copy />
     </Button>
   )
-  const fullForm = useRef<HTMLDivElement>(null)
-  const rowForm = useRef<HTMLDivElement>(null)
-  const painted = usePainted()
-  useLayoutEffect(() => {
-    if (!painted.current || !fullForm.current || !rowForm.current) return
-    const fold = { ms: FOLD.ms, fade: "data-fold-fade", glide: "data-fold-morph", cascade: "top" } as const
-    return folded ? morph(fullForm.current, rowForm.current, { ...fold, inAfter: FOLD.inAfter.fold }) : morph(rowForm.current, fullForm.current, { ...fold, inAfter: FOLD.inAfter.open })
-    // It morphs when the form changes, from the one showing before.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [folded])
   const leave = (
     <>
       Leave <LogOut data-icon="inline-end" />
     </>
   )
-  const hidden = "pointer-events-none absolute top-0 right-0 left-0 opacity-0"
+  // This pilot first, then, during preflight, the pilots the countdown waits on, not ready or
+  // dropped out, and then the rest, so the crew's window and the folded row show who's holding the
+  // flight up first (user, 2026-10-30). A pilot moves down the list as they ready, unanimated.
+  // The folded row has room for ROW_HEADS heads before Ready with its ring; a bigger crew shows the
+  // first ones and a count of the rest.
+  const waitedOn = (p: Pilot) => !!preflight && !started && !p.ready && !goneWithout.includes(p.name)
+  const everyone = [me, ...crew.filter(waitedOn), ...crew.filter((p) => !waitedOn(p))]
+  // Where a pilot stands, for their head's badge in the folded row.
+  const stateOf = (p: Pilot, you: boolean): HeadState | undefined => {
+    if (you ? ready : p.ready) return "ready"
+    if (p.at === "lost" || p.at === "crashed") return "out"
+    return you || waitedOn(p) ? "waiting" : undefined
+  }
+  const inRow = everyone.length > ROW_HEADS ? everyone.slice(0, ROW_HEADS - 1) : everyone
+  const notInRow = everyone.length - inRow.length
   return (
-    <div className="relative">
-      <div ref={fullForm} inert={folded} className={"flex flex-col gap-(--card-spacing) " + (folded ? hidden : "")}>
+    <div ref={crewBox} data-heads className="relative">
+      <div data-fold-form="full" inert={folded} className={"flex flex-col gap-(--card-spacing) " + (folded ? "pointer-events-none" : "")}>
         <CardContent data-fold-fade className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
             <Label>Invite code</Label>
@@ -929,9 +1048,11 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
             </div>
           </div>
           {crew.length > 0 ? (
-            <ConfirmButton label={leave} question="Leave the session?" go="Leave" onConfirm={onLeave} trigger={{ variant: "destructive", size: "sm" }} className={RED_BUTTON} align="end" />
+            <span data-leave className="contents">
+              <ConfirmButton label={leave} question="Leave the session?" go="Leave" onConfirm={onLeave} trigger={{ variant: "destructive", size: "sm" }} className={RED_BUTTON} align="end" />
+            </span>
           ) : (
-            <Button variant="destructive" size="sm" onClick={onLeave}>
+            <Button data-leave variant="destructive" size="sm" onClick={onLeave}>
               {leave}
             </Button>
           )}
@@ -940,32 +1061,36 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
         <CardContent className="flex flex-col gap-3">
           <Label data-fold-fade>Crew</Label>
           <div className="flex flex-col">
-            <ul className="flex flex-col gap-2">
-              {[me, ...crew].map((p, i) => (
-                <CrewRow key={p.name} pilot={p} pop={turnedIn.current ? 0 : POP.first + i * POP.stagger} end={endOf(p, i === 0)} />
-              ))}
-              {crew.length === 0 && (
-                <li data-fold-fade className="flex items-center gap-3 text-sm text-muted-foreground/60">
-                  <EmptyHead />
-                  Send the invite code for others to join
-                </li>
-              )}
-            </ul>
-            {preflight && preflight.differences.length > 0 && (
-              <div data-fold-fade>
-                <CrewDifferences differences={preflight.differences} started={started} />
-              </div>
-            )}
+            <ScrollWindow max={preflight && !started ? CREW_WINDOW : undefined}>
+              <ul className="flex flex-col gap-2">
+                {everyone.map((p, i) => (
+                  <CrewRow key={p.name} pilot={p} pop={turnedIn.current ? 0 : POP.first + i * POP.stagger} end={endOf(p, i === 0)} alive={!!preflight && !started && p.at !== "lost" && p.at !== "crashed"} />
+                ))}
+                {crew.length === 0 && (
+                  <li data-fold-fade className="flex items-center gap-3 text-sm text-muted-foreground/60">
+                    <EmptyHead />
+                    Send the invite code for others to join
+                  </li>
+                )}
+              </ul>
+            </ScrollWindow>
+            {preflight && preflight.differences.length > 0 && <CrewDifferences differences={preflight.differences} started={started} />}
           </div>
         </CardContent>
       </div>
       {preflight && (
-        <div ref={rowForm} inert={!folded} className={folded ? "" : hidden}>
+        <div data-fold-form="row" inert={!folded} className={"absolute top-0 right-0 left-0 " + (folded ? "" : "pointer-events-none opacity-0")}>
           <CardContent className="flex items-center gap-4">
             <div className="flex shrink-0 items-center gap-1.5">
-              {[me, ...crew].map((p, i) => (
-                <StripHead key={p.name} pilot={p} ready={i === 0 ? ready : !!p.ready} />
+              {inRow.map((p, i) => (
+                <StripHead key={p.name} pilot={p} state={stateOf(p, i === 0)} />
               ))}
+              {/* A head's size, 28px. */}
+              {notInRow > 0 && (
+                <span data-fold-follows={`head-${everyone[inRow.length].name}`} aria-label={`${notInRow} more pilots`} className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground tabular-nums">
+                  +{notInRow}
+                </span>
+              )}
             </div>
             <span className="ml-auto">{myReady}</span>
           </CardContent>
@@ -973,6 +1098,193 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
       )}
     </div>
   )
+}
+
+// The session card's fold follows the page's scroll, as a phone app's collapsing header does
+// (user, 2026-10-30): from the page's top, the first stretch of scrolling folds the whole card into
+// its row, the checklist rising with the card's edge, and past it the checklist scrolls on under the
+// row; scrolling back to the top unfolds it. The page keeps the whole card's height in its flow,
+// with room under the shrinking card making up the difference, so folding never changes what can
+// be scrolled, and can't fold or unfold itself.
+// On the way, the whole card's content scrolls with the page, as a list scrolls under a header, and
+// the row builds itself at the top as the crew rows reach it, so a pause anywhere looks deliberate
+// (user, 2026-10-30, after heads gliding from the first pixel left their rows behind: "everything
+// looks like a mess"). What's above this pilot's crew row, the code, Leave, and the Crew label,
+// fades as it slides under the card's top edge. Each of the row's heads, and this pilot's Ready,
+// takes over from its twin in the crew list where that twin is, scrolling with it until it reaches
+// its place in the row, and sliding sideways into it over the last dock pixels before. It's the
+// row's own part that travels, never the list's, since the crew list is a window of its own that
+// would cut off a part leaving it; so a part the window hides comes into view only as it nears its
+// place. A crew row's words fade out by the time its head is halfway through that approach, so they
+// never run into the row above, and its badge rides its head in and fades in as it lands.
+// Everything else below fades as it nears the docked row, so it slides under it rather than across
+// it. A part with no twin in the other form fades with its own. Per scroll it styles the parts
+// directly rather than rendering, so a frame's work is a few dozen writes. Whether Coherent GT runs
+// scroll-driven animations is unmeasured, and a scroll handler needs none.
+// A fold is never left partway: a drag let go of inside it lands on a form (StartCard), and a wheel
+// that stops inside it finishes the way it was going once it has rested snapAfter, in
+// milliseconds. The crew list and the match check's messages each scroll in a window of their own
+// (ScrollWindow), so however big the crew, the card stays short enough to fold in one gesture
+// (user, 2026-10-30, after a card several screens tall that only stopped in the right places felt
+// loose at its usual size). The pill on the card's edge glides the page to the top or to the
+// fold; the flight starting unfolds a folded card over ms. A part fades over edgeFade pixels as it
+// nears the docked row, or over its own height while sliding under the card's top. All that is how a
+// finger scrubs the fold; one the page animates, on a click, a snap, or a flick, goes as one motion
+// (blendLooks), what fades out going over the first blendOut of the way and what fades in over the
+// last blendIn.
+const FOLD = { ms: 380, snapAfter: 120, edgeFade: 24, dock: 64, blendOut: 0.4, blendIn: 0.5 }
+// How much of the checklist shows while the whole card does; it comes up to full as the card folds.
+const LIST_DIM = 0.5
+type FoldParts = { full: HTMLElement; row: HTMLElement; range: number }
+function foldParts(inner: HTMLElement | null): FoldParts | undefined {
+  const full = inner?.querySelector<HTMLElement>('[data-fold-form="full"]')
+  const row = inner?.querySelector<HTMLElement>('[data-fold-form="row"]')
+  return full && row ? { full, row, range: full.offsetHeight - row.offsetHeight } : undefined
+}
+const smooth = (t: number) => {
+  const c = Math.min(1, Math.max(0, t))
+  return c * c * (3 - 2 * c)
+}
+const easeOut = (t: number) => 1 - (1 - t) ** 3
+// How far each of the row's parts has been moved, so its place without the move can be read back.
+const moved = new WeakMap<Element, [number, number]>()
+// A part's look in the fold: how far it's moved, for the row's parts that travel, how much of it
+// shows, and for a row's head, how far round to its back it has turned as it docks (figure-head.tsx,
+// LiveFigure); and how much of the whole card shows around its marked parts.
+type Look = { x?: number; y?: number; o: number; turn?: number }
+type FoldLook = { parts: Map<HTMLElement, Look>; fullO: number }
+const glidesIn = (form: HTMLElement) => [...form.querySelectorAll<HTMLElement>("[data-fold-morph]")]
+// A part marked to fade never takes a gliding part inside it along.
+const fadesIn = (form: HTMLElement) => [...form.querySelectorAll<HTMLElement>("[data-fold-fade]")].filter((e) => !e.querySelector("[data-fold-morph]"))
+const standInsIn = (form: HTMLElement) => [...form.querySelectorAll<HTMLElement>("[data-fold-follows]")]
+// Back to the whole card at rest, every style the fold set taken off.
+function clearFold({ full, row }: FoldParts) {
+  for (const e of [...glidesIn(full), ...glidesIn(row), ...fadesIn(full), ...fadesIn(row), ...standInsIn(row)]) {
+    Object.assign(e.style, { transform: "", opacity: "" })
+    e.style.removeProperty("--fold-turn")
+    moved.delete(e)
+  }
+  Object.assign(full.style, { transform: "", opacity: "" })
+  row.style.opacity = ""
+}
+// How the fold looks at p, above 0, as a finger scrubs it. It only reads the page.
+function foldLook({ full, row, range }: FoldParts, p: number): FoldLook {
+  const twin = (form: HTMLElement, e: HTMLElement) => form.querySelector<HTMLElement>(`[data-fold-morph="${e.dataset.foldMorph}"]`)
+  const scale = zoomOf(full)
+  // The whole card moves as one, so a part's place from its top holds wherever it's moved; the row
+  // starts where the whole card does before moving, at the top of the box holding both.
+  const fullBox = full.getBoundingClientRect()
+  const both = (full.parentElement ?? full).getBoundingClientRect()
+  const inFull = (e: HTMLElement) => {
+    const r = e.getBoundingClientRect()
+    return { x: (r.left - fullBox.left) / scale, y: (r.top - fullBox.top) / scale, h: r.height / scale }
+  }
+  const inRow = (e: HTMLElement) => {
+    const r = e.getBoundingClientRect()
+    const [mx, my] = moved.get(e) ?? [0, 0]
+    return { x: (r.left - both.left) / scale - mx, y: (r.top - both.top) / scale - my, h: r.height / scale }
+  }
+  // How much of a part the window it scrolls in shows, from 0 to 1, or all of it outside one.
+  const shown = (e: HTMLElement) => {
+    const w = e.closest<HTMLElement>("[data-fold-window]")
+    if (!w) return 1
+    const r = e.getBoundingClientRect()
+    const b = w.getBoundingClientRect()
+    return Math.min(1, Math.max(0, (Math.min(r.bottom, b.bottom) - Math.max(r.top, b.top)) / (r.height || 1)))
+  }
+  // A crew-list part and its twin in the row: dx and dy take the twin from the part's place to its
+  // own, so the twin docks at the scroll -dy.
+  const pairs = glidesIn(full).map((e) => {
+    const t = twin(row, e)
+    const a = inFull(e)
+    const b = t && inRow(t)
+    return { e, t, a, dx: b ? b.x - a.x : 0, dy: b ? b.y - a.y : 0, shown: shown(e) }
+  })
+  const docked = pairs.filter((g) => g.t)
+  // The page has scrolled s into the fold. A twin's approach runs 0 to 1 over the dock pixels
+  // before it docks. The docked row ends at dockLine, and this pilot's crew row starts at firstRow.
+  const s = p * range
+  const dockLine = Math.max(0, ...docked.map((g) => { const b = inRow(g.t!); return b.y + b.h }))
+  const firstRow = Math.min(...docked.map((g) => g.a.y))
+  const approach = (dy: number) => (p >= 1 ? 1 : smooth(1 - (-dy - s) / FOLD.dock))
+  // Above this pilot's row, a part fades as it slides under the card's top edge, pad above the
+  // whole card's top, over its own height, or edgeFade for a short one; below it, as it nears the
+  // docked row. Fading out before the edge, so nothing showed cut, vanished it early once the edge
+  // was the card's own (user, 2026-10-30).
+  const clip = full.closest<HTMLElement>("[data-fold-clip]")
+  const pad = clip ? (both.top - clip.getBoundingClientRect().top) / scale : 0
+  const fading = (from: number, top: number, h: number) => smooth(from < firstRow ? (pad + top + h) / Math.max(h, FOLD.edgeFade) : (top - dockLine) / FOLD.edgeFade)
+  const look = new Map<HTMLElement, Look>()
+  for (const { e, t, a, dx, dy, shown } of pairs) {
+    if (!t) {
+      look.set(e, { o: fading(a.y, a.y - s, a.h) })
+      continue
+    }
+    look.set(e, { o: 0 })
+    const k = approach(dy)
+    // As much of it shows as its window showed, and the rest comes in as it nears its place, but no
+    // sooner than the fold's first dock pixels: a head scrolled out over the top of a scrolled list
+    // is already at or past its place, and appeared there the moment the fold began (user,
+    // 2026-10-30).
+    look.set(t, { x: -dx * (1 - k), y: p >= 1 ? 0 : Math.max(0, -dy - s), o: shown + (1 - shown) * Math.min(k, smooth(s / FOLD.dock)), turn: t.dataset.foldMorph?.startsWith("head-") ? k : undefined })
+  }
+  // A crew row's words are gone by the time its head is halfway through its approach.
+  for (const e of fadesIn(full)) {
+    const { y, h } = inFull(e)
+    const head = e.closest("li")?.querySelector<HTMLElement>("[data-fold-morph]")
+    const g = head && docked.find((g) => g.e === head)
+    look.set(e, { o: g ? 1 - smooth(approach(g.dy) * 2) : fading(y, y - s, h) })
+  }
+  for (const e of glidesIn(row).filter((e) => !twin(full, e))) look.set(e, { o: smooth((p - 0.8) / 0.2) })
+  // A badge rides its head, which carries it, and comes in as the head lands.
+  for (const e of fadesIn(row)) {
+    const key = e.closest<HTMLElement>("[data-fold-morph]")?.dataset.foldMorph
+    const g = key ? docked.find((g) => g.e.dataset.foldMorph === key) : undefined
+    look.set(e, { o: g ? smooth((approach(g.dy) - 0.6) / 0.4) : p >= 1 ? 1 : 0 })
+  }
+  // A part of the row standing in for a crew-list head it isn't the twin of, as the count of the
+  // crew the row has no room for stands in for the first head left out, fades in at its own place
+  // when that head would have docked there, rather than with the last head that docks, which read
+  // as early. It isn't a pilot, so it doesn't fly in from a pilot's row (user, 2026-10-30). The
+  // head itself stays in the list, fading with its row.
+  for (const e of standInsIn(row)) {
+    const o = full.querySelector<HTMLElement>(`[data-fold-morph="${e.dataset.foldFollows}"]`)
+    look.set(e, { o: o ? Math.min(approach(inRow(e).y - inFull(o).y), smooth(s / FOLD.dock)) : p >= 1 ? 1 : 0 })
+  }
+  return { parts: look, fullO: p >= 1 ? 0 : 1 }
+}
+// Draws a look, with the whole card scrolled s into the fold.
+function showLook({ full, row }: FoldParts, look: FoldLook, s: number) {
+  Object.assign(full.style, { transform: `translateY(${-s}px)`, opacity: String(look.fullO) })
+  row.style.opacity = "1"
+  for (const [e, { x, y, o, turn }] of look.parts) {
+    e.style.opacity = String(o)
+    if (turn !== undefined) e.style.setProperty("--fold-turn", String(turn))
+    if (x === undefined || y === undefined) continue
+    moved.set(e, [x, y])
+    e.style.transform = `translate(${x}px, ${y}px)`
+  }
+}
+// The fold at p, as a finger scrubs it.
+function drawFold(parts: FoldParts, p: number) {
+  if (p <= 0) clearFold(parts)
+  else showLook(parts, foldLook(parts, p), p * parts.range)
+}
+// Between two looks at q, from 0 to 1, for a fold the page animates rather than a finger scrubs, as
+// one motion rather than the scrub's sequence played fast, which read as a million things jumping
+// into place (user, 2026-10-30): what travels goes straight to its place, every part together;
+// what fades out does so over the first blendOut of the way, the whole card's words together; and
+// what fades in over the last blendIn.
+function blendLooks(a: FoldLook, b: FoldLook, q: number): FoldLook {
+  const fade = (from: number, to: number) => from + (to - from) * (to < from ? smooth(q / FOLD.blendOut) : to > from ? smooth((q - 1 + FOLD.blendIn) / FOLD.blendIn) : 1)
+  const parts = new Map<HTMLElement, Look>()
+  for (const [e, from] of a.parts) {
+    const to = b.parts.get(e) ?? from
+    const glides = from.x !== undefined && from.y !== undefined && to.x !== undefined && to.y !== undefined
+    const turn = from.turn !== undefined && to.turn !== undefined ? from.turn + (to.turn - from.turn) * q : undefined
+    parts.set(e, { x: glides ? from.x! + (to.x! - from.x!) * q : undefined, y: glides ? from.y! + (to.y! - from.y!) * q : undefined, o: fade(from.o, to.o), turn })
+  }
+  return { parts, fullO: fade(a.fullO, b.fullO) }
 }
 
 // The loaded aircraft on top, since a session flies the host's aircraft, then Host and the code
@@ -987,9 +1299,9 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
 // the code. Once Host or Join succeeds, the card turns to the session, the one hosted or the one
 // joined, which has no use for the aircraft, and Leave turns it back; a frame can open on a session,
 // and move on to another a while later, such as a crewmate joining, or preflight starting. In
-// preflight, the pilot's checklist sits under the card until the flight starts, and can take the
-// page, folding the card to a row; a frame can open with it taken.
-function StartCard({ aircraft, servers = "answering", play, session, next, checklistExpanded }: { aircraft: Aircraft; servers?: Servers; play?: Action; session?: SessionKey; next?: NextSession; checklistExpanded?: boolean }) {
+// preflight, the pilot's checklist sits under the card until the flight starts, and scrolling it
+// folds the card to a row (FOLD); a frame can open folded.
+function StartCard({ aircraft, servers = "answering", play, session, next, opensFolded }: { aircraft: Aircraft; servers?: Servers; play?: Action; session?: SessionKey; next?: NextSession; opensFolded?: boolean }) {
   const { Badge, Button, Card, CardContent, Separator, Spinner, InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } = useUI()
   const [status, setStatus] = useState<Status>({ kind: "idle" })
   const [code, setCode] = useState("")
@@ -1024,8 +1336,8 @@ function StartCard({ aircraft, servers = "answering", play, session, next, check
   const [shown, setShown] = useState<SessionKey>(session ?? "alone")
   const [started, setStarted] = useState(false)
   const checklist = half === "session" && !started ? SESSIONS[shown].preflight?.checklist : undefined
-  const [expanded, setExpanded] = useState(!!checklistExpanded)
-  const folded = expanded && !!checklist
+  const [foldedNow, setFoldedNow] = useState(false)
+  const folded = foldedNow && !!checklist
   const phase = half === "session" ? phaseOf(SESSIONS[shown], started) : undefined
   useShowPhase(phase)
   const [turning, setTurning] = useState<"out" | "in" | null>(null)
@@ -1040,18 +1352,6 @@ function StartCard({ aircraft, servers = "answering", play, session, next, check
   const halfBox = useRef<HTMLDivElement>(null)
   const halfInner = useRef<HTMLDivElement>(null)
   const [halfHeight, setHalfHeight] = useState<number>()
-  // While the card folds or unfolds, its height eases on the glide's curve and for as long, so a
-  // head or Ready gliding between its row and the crew moves with the card's edge and is never cut
-  // off by it (SessionHalf). It's set in the same commit as the height it eases to.
-  const [folding, setFolding] = useState(false)
-  const wasFolded = useRef(folded)
-  useLayoutEffect(() => {
-    if (wasFolded.current === folded) return
-    wasFolded.current = folded
-    setFolding(true)
-    const t = window.setTimeout(() => setFolding(false), FOLD.ms)
-    return () => clearTimeout(t)
-  }, [folded])
   // A room in the session that starts to ease, such as the countdown's, re-renders only itself, so
   // it says so, and the card measures again, to the height the room is easing to, and eases with it.
   const [, remeasure] = useState(0)
@@ -1072,7 +1372,6 @@ function StartCard({ aircraft, servers = "answering", play, session, next, check
     setStatus({ kind: "idle" })
     setCode("")
     setStarted(false)
-    setExpanded(false)
     turnTo("start")
   }
 
@@ -1151,19 +1450,160 @@ function StartCard({ aircraft, servers = "answering", play, session, next, check
   // padding, so nothing under it shows past its edges, and a fade under it once anything has gone
   // under. A fade at the bottom says there's more below. The card's edge is a ring drawn outside
   // its box, which the scroller would clip at the top, so the scroller starts 1px higher and pads
-  // that 1px back.
-  // Pinned whole, the card can leave the checklist a row's room, so it folds to its row as soon as
-  // the checklist scrolls, and only the circle on its bottom edge unfolds it: folding mostly lets the
-  // list fit, which takes the page back to its top, so unfolding there would fold and unfold in turn.
-  // The circle shows while the page can scroll, and while the card is folded, so a card folded onto a
-  // list that then fits can still unfold.
-  const scroller = useScroller()
+  // that 1px back; the pinned card then sticks below that 1px, so its background reaches up over
+  // it with a shadow, or what scrolls under the card showed through as a line (user, 2026-10-30).
+  // The card's ring draws over that shadow.
+  // Pinned whole, the card can leave the checklist a row's room, so it folds to its row as the
+  // checklist scrolls (FOLD). A checklist that runs past the page by less than the fold gets room
+  // under it to make up the rest, so the card can always fold all the way. The pill on its edge
+  // shows while the page can scroll. The fade under the card shows once anything has gone under the
+  // folded card.
+  // A drag let go of coasts on (useScroller), and where the coast would end inside the fold, it
+  // lands on the nearer form instead, from the speed it was let go at, so a flick folds or unfolds
+  // the whole way and a slow release goes back to where it was nearest. A drag draws the fold in the
+  // same frame as it scrolls.
+  const scroller = useScroller({ settleAt: (end) => settleFold(end), onMove: () => foldFromScroll(), onMotion: (to) => blendTo(to), onLift: () => snapLater() })
   const scrolls = half === "session"
-  const canFold = !!checklist && (folded || scroller.above || scroller.below)
+  const canFold = !!checklist && (scroller.above || scroller.below)
+  const spacer = useRef<HTMLDivElement>(null)
+  const listBox = useRef<HTMLDivElement>(null)
+  const foldBox = useRef<HTMLDivElement>(null)
+  const chevron = useRef<SVGSVGElement>(null)
+  const fold = useRef(0)
+  const [goneUnder, setGoneUnder] = useState(false)
+  const [pad, setPad] = useState(0)
+  const openFolded = useRef(!!opensFolded)
+  const snapTimer = useRef(0)
+  const unfoldFrame = useRef(0)
+  useEffect(
+    () => () => {
+      cancelAnimationFrame(unfoldFrame.current)
+      clearTimeout(snapTimer.current)
+    },
+    []
+  )
+  // Draws the card at fold p: its parts, its height, and the room under it that keeps the page's
+  // height. The pill's chevron turns over as the fold passes halfway, pointing the way the pill
+  // would take it, since one turned partway, as the fold left it, read as broken.
+  // A fold the page animates, a glide or a coast, or the flight's start unfolding the card, blends
+  // from how it looked when it set off to how it looks where it's going (blendLooks), by how far
+  // through the fold it's come; one a press or a wheel stops goes back to being scrubbed. From here
+  // to where it's going: s0 and sT, in the fold's own pixels, the page scrolled past it counting as
+  // its end.
+  const blend = useRef<{ s0: number; sT: number; from: FoldLook; to: FoldLook } | null>(null)
+  const blendBetween = (s0: number, sT: number) => {
+    blend.current = null
+    const parts = foldParts(halfInner.current)
+    if (!parts || parts.range <= 0) return
+    const from = Math.min(Math.max(s0, 0), parts.range)
+    const to = Math.min(Math.max(sT, 0), parts.range)
+    if (Math.abs(to - from) < 1) return
+    // Just past 0, where the row's parts stand in for the list's, in their places.
+    const look = (s: number) => foldLook(parts, Math.max(s / parts.range, 0.001))
+    blend.current = { s0: from, sT: to, from: look(from), to: look(to) }
+  }
+  const blendTo = (to: number | null) => {
+    if (to === null || !checklist) blend.current = null
+    else blendBetween(scroller.ref.current?.scrollTop ?? 0, to)
+  }
+  const showFold = (p: number) => {
+    fold.current = p
+    const parts = foldParts(halfInner.current)
+    const b = blend.current
+    if (parts && b) {
+      const q = Math.min(1, Math.max(0, (p * parts.range - b.s0) / (b.sT - b.s0)))
+      if (q >= 1) blend.current = null
+      else showLook(parts, blendLooks(b.from, b.to, q), p * parts.range)
+    }
+    if (parts && !blend.current) drawFold(parts, p)
+    const shrink = parts ? p * parts.range : 0
+    if (foldBox.current) foldBox.current.style.height = shrink ? `${(halfBox.current?.offsetHeight ?? 0) - shrink}px` : ""
+    if (spacer.current) spacer.current.style.height = shrink ? `${shrink}px` : ""
+    listBox.current?.style.setProperty("--list-shown", String(LIST_DIM + (1 - LIST_DIM) * p))
+    if (chevron.current) Object.assign(chevron.current.style, { transform: p >= 0.5 ? "none" : "rotate(180deg)", transition: "transform 200ms ease-out" })
+    setFoldedNow(p >= 1)
+  }
+  const foldFromScroll = () => {
+    const s = scroller.ref.current
+    const parts = foldParts(halfInner.current)
+    if (!s || !checklist || !parts || parts.range <= 0) return
+    // Within a pixel of either end is that end: a zoomed page's scroll stops on a fraction short of
+    // it, 280.4 of 281 at 223%, which left the card never quite folded.
+    const top = s.scrollTop
+    const p = top < 1 ? 0 : top > parts.range - 1 ? 1 : top / parts.range
+    showFold(p)
+    setGoneUnder(s.scrollTop > parts.range + 1)
+    return { p, range: parts.range }
+  }
+  // Where a coast that would end at end lands instead: inside the fold, on its nearer form.
+  const settleFold = (end: number) => {
+    const parts = foldParts(halfInner.current)
+    if (!checklist || !parts || end < 1 || end > parts.range - 1) return undefined
+    return end < parts.range / 2 ? 0 : parts.range
+  }
+  // A wheel, or a key, leaves no letting go, so a fold it leaves partway finishes once the scroll
+  // has rested snapAfter, toward the way it was going: a wheel turned down and stopped meant to
+  // fold, wherever it stopped.
+  const lastTop = useRef(0)
+  const heading = useRef(0)
   const onScroll = () => {
     scroller.onScroll()
-    if ((scroller.ref.current?.scrollTop ?? 0) > 2 && checklist && !expanded) setExpanded(true)
+    const s = scroller.ref.current
+    if (s && s.scrollTop !== lastTop.current) {
+      heading.current = Math.sign(s.scrollTop - lastTop.current)
+      lastTop.current = s.scrollTop
+    }
+    snapLater()
   }
+  // A finger lifted inside the fold, on a phone, finishes it the same way once the page has rested.
+  const snapLater = () => {
+    const at = foldFromScroll()
+    clearTimeout(snapTimer.current)
+    if (!at || scroller.moving() || at.p <= 0 || at.p >= 1) return
+    snapTimer.current = window.setTimeout(() => {
+      if (!scroller.moving()) scroller.glideTo(heading.current > 0 ? at.range : 0)
+    }, FOLD.snapAfter)
+  }
+  // The flight starting takes the checklist away, and a folded card unfolds by itself, over ms;
+  // a card turning back to Host and Join drops its fold at once, unseen.
+  const unfoldByTime = () => {
+    const from = fold.current
+    const parts = foldParts(halfInner.current)
+    if (parts) blendBetween(from * parts.range, 0)
+    let start: number | undefined
+    const step = (now: number) => {
+      if (start === undefined) start = now
+      const t = Math.min(1, (now - start) / FOLD.ms)
+      showFold(from * (1 - easeOut(t)))
+      unfoldFrame.current = t < 1 ? requestAnimationFrame(step) : 0
+    }
+    unfoldFrame.current = requestAnimationFrame(step)
+  }
+  // After every render, since what it measures can change with any of them: the room under the
+  // checklist, a frame that opens folded, and the fold at the page's scroll.
+  useLayoutEffect(() => {
+    const s = scroller.ref.current
+    const parts = foldParts(halfInner.current)
+    if (!s || !checklist || !parts || parts.range <= 0) {
+      if (pad) setPad(0)
+      if (fold.current > 0 && !unfoldFrame.current) {
+        if (parts) unfoldByTime()
+        else showFold(0)
+      }
+      return
+    }
+    const natural = s.scrollHeight - pad - s.clientHeight
+    const want = natural > 1 ? Math.max(0, Math.ceil(parts.range - natural)) : 0
+    if (want !== pad) {
+      setPad(want)
+      return
+    }
+    if (openFolded.current && s.scrollHeight - s.clientHeight >= parts.range) {
+      openFolded.current = false
+      s.scrollTop = parts.range
+    }
+    foldFromScroll()
+  })
   const fade = (to: "top" | "bottom", shown: boolean): React.CSSProperties => ({ background: `linear-gradient(to ${to === "top" ? "bottom" : "top"}, var(--background), transparent)`, opacity: shown ? 1 : 0 })
   return (
     // The card's padding matches the page's 20px, where Luma's default card spacing is 24px.
@@ -1174,28 +1614,36 @@ function StartCard({ aircraft, servers = "answering", play, session, next, check
     <div
       ref={scroller.ref}
       onScroll={onScroll}
+      onWheel={scrolls ? scroller.onWheel : undefined}
+      onTouchStart={scrolls ? scroller.onTouchStart : undefined}
+      onTouchEnd={scrolls ? scroller.onTouchEnd : undefined}
+      onTouchCancel={scrolls ? scroller.onTouchEnd : undefined}
       onMouseDown={scrolls ? scroller.onMouseDown : undefined}
       className={
         "flex flex-col gap-5 " +
         (scrolls ? "min-h-0 overflow-y-auto px-5 pt-px pb-5 select-none " + NO_SCROLLBAR + " " + scroller.cursor : "")
       }
+      // The room under a checklist that runs past the page by less than the fold, on top of the
+      // page's 20px. The page's height never changes as the card folds, so the browser has nothing
+      // to keep in view by moving the scroll.
+      style={scrolls ? { paddingBottom: pad ? `calc(var(--spacing) * 5 + ${pad}px)` : undefined, overflowAnchor: "none" } : undefined}
     >
-    <div className={"flex shrink-0 flex-col " + (scrolls ? "pin-top z-20 -mx-5 bg-background px-5" : "")}>
-    {/* Only once something has gone under the card: hanging below it, inside the part that
+    <div className={"flex shrink-0 flex-col " + (scrolls ? "pin-top z-20 -mx-5 bg-background px-5 shadow-[0_-1px_0_var(--background)]" : "")}>
+    {/* Only once something has gone under the folded card: hanging below it, inside the part that
         scrolls, the fade would otherwise make a short page scroll by its overhang. */}
-    {scrolls && scroller.above && <div className="pointer-events-none absolute top-full right-0 left-0 h-6" style={fade("top", true)} />}
-    {/* The card's bottom padding sits inside the part that turns, so something reaching into it, as
-        the differences' folded row does, isn't cut off by the part's own edge. */}
-    <Card className="relative z-10 shrink-0 [--card-spacing:--spacing(5)]" style={{ paddingBottom: 0 }}>
-      <div
-        ref={halfBox}
-        className="overflow-hidden transition-[height] ease-out"
-        style={{ height: halfHeight, transitionDuration: `${folding ? FOLD.ms : HALF_EASE}ms`, transitionTimingFunction: folding ? GLIDE : undefined }}
-      >
+    {scrolls && goneUnder && <div className="pointer-events-none absolute top-full right-0 left-0 h-6" style={fade("top", true)} />}
+    {/* The card's padding sits inside the part that turns: at the bottom, so something reaching into
+        it, as the differences' folded row does, isn't cut off by the part's own edge; and at the
+        top, so what the fold scrolls up slides under the card's own edge, rather than being cut
+        across a band of empty card (user, 2026-10-30). The fold sets the outer box's height; turns
+        and rooms set the inner one's. */}
+    <Card className="relative z-10 shrink-0 [--card-spacing:--spacing(5)]" style={{ paddingTop: 0, paddingBottom: 0 }}>
+      <div ref={foldBox} data-fold-clip className="overflow-hidden">
+      <div ref={halfBox} className="overflow-hidden transition-[height] ease-out" style={{ height: halfHeight, transitionDuration: `${HALF_EASE}ms` }}>
         <div
           ref={halfInner}
           key={half}
-          className={"flex flex-col gap-(--card-spacing) pb-(--card-spacing) " + (turning === "in" ? "animate-in fade-in slide-in-from-bottom-[6px]" : "")}
+          className={"flex flex-col gap-(--card-spacing) py-(--card-spacing) " + (turning === "in" ? "animate-in fade-in slide-in-from-bottom-[6px]" : "")}
           style={{ animationDuration: `${TURN.in}ms`, opacity: turning === "out" ? 0 : 1, transition: `opacity ${TURN.out}ms ease-out` }}
         >
           {half === "session" ? (
@@ -1269,26 +1717,35 @@ function StartCard({ aircraft, servers = "answering", play, session, next, check
           )}
         </div>
       </div>
+      </div>
     </Card>
-    {/* Centered on the card's bottom edge by its offsets, without the translate property, which
-        Coherent GT drops (record/areas/architecture/coherent-gt.md). It's sky, the app's color for
-        what can be pressed, on the card's own color, its fill held on hover. Its edge is drawn
-        inside it, since a translucent ring outside would tint the card's half and the page's half
-        differently. In dark, the card's 10% ring over the page comes out the same gray as 5% over
-        the card's lighter fill, so the circle's edge is 5% in both themes. */}
+    {/* A pill, 48 by 24px, reads as a handle to grab, as a phone's sheet grabber does, which suits
+        a fold that follows the scroll, and is wider to hit with a mouse in the sim (user,
+        2026-10-31; tried and dropped: a 28px circle, which read as a button that flips). Centered on
+        the card's bottom edge by its offsets, without the translate property, which Coherent GT
+        drops (record/areas/architecture/coherent-gt.md). It's sky, the app's color for what can be
+        pressed, on the card's own color, its fill held on hover. Its edge is drawn inside it, since
+        a translucent ring outside would tint the card's half and the page's half differently. In
+        dark, the card's 10% ring over the page comes out the same gray as 5% over the card's
+        lighter fill, so the pill's edge is 5% in both themes. */}
     {canFold && (
       <Button
         variant="outline"
         size="icon-sm"
-        className="absolute -bottom-3.5 left-1/2 z-30 -ml-3.5 size-7 rounded-full border-0 bg-card text-primary inset-ring-1 inset-ring-foreground/5 hover:bg-card hover:text-primary dark:bg-card dark:hover:bg-card"
+        className="absolute -bottom-3 left-1/2 z-30 -ml-6 h-6 w-12 rounded-full border-0 bg-card text-primary inset-ring-1 inset-ring-foreground/5 hover:bg-card hover:text-primary dark:bg-card dark:hover:bg-card"
         aria-label={folded ? "Show the whole session card" : "Fold the session card"}
-        onClick={() => setExpanded((e) => !e)}
+        onClick={() => scroller.glideTo(fold.current >= 0.5 ? 0 : (foldParts(halfInner.current)?.range ?? 0))}
       >
-        {/* One chevron, turning as the card folds and unfolds. */}
-        <ChevronDown style={{ transform: folded ? "none" : "rotate(180deg)", transition: `transform ${FOLD.ms}ms ${GLIDE}` }} />
+        {/* One chevron, turning with the fold (showFold). */}
+        <ChevronDown ref={chevron} />
       </Button>
     )}
     </div>
+    {/* The room the folding card leaves, so the page below keeps its place. It's apart from the
+        pinned card, which a page pins only while there's at least its height left below it: a card
+        carrying the room itself, 1489px with a crew of 14, was pushed off the top once folded. Its
+        top margin takes back the page's gap before it. */}
+    {scrolls && <div ref={spacer} aria-hidden className="-mt-5 shrink-0" />}
     {/* For every pilot, what preflight's rule asks for, between the card and the checklist, so it
         shows whether or not their profile gives them one (record/areas/product/03-v1-scope.md,
         Preflight, Rules): catch-up sets only what the profile holds, so a display a PM pages through
@@ -1297,10 +1754,21 @@ function StartCard({ aircraft, servers = "answering", play, session, next, check
     {half === "session" && !started && SESSIONS[shown].preflight && (
       <p className="flex shrink-0 items-start gap-2 text-sm text-info">
         <Hand className="mt-0.5 size-4 shrink-0" />
-        Avoid unnecessary cockpit interactions until the flight starts, since some might not sync.
+        Avoid unnecessary cockpit interactions until the flight starts, as some may not sync.
       </p>
     )}
-    {checklist && <Checklist items={checklist} />}
+    {/* The checklist, its title and words with it, stays dim while the whole card shows, so a pilot
+        new to the page takes in the crew and Ready first, and comes up to full as the card folds
+        and the pilot scrolls into the list (user, 2026-10-30). A pointer on it, or the keyboard
+        in it, brings it up at once, so it never reads as disabled, and a list short enough that the
+        card never folds can still be worked at full. A click leaves its row focused, so only
+        keyboard focus counts, or the list stayed lit after the pointer left. Tried and dropped:
+        dimming the names, dots, and descriptions apart, the values left bright. */}
+    {checklist && (
+      <div ref={listBox} className="flex shrink-0 flex-col opacity-(--list-shown) transition-opacity duration-200 hover:opacity-100 has-focus-visible:opacity-100" style={{ "--list-shown": LIST_DIM } as React.CSSProperties}>
+        <Checklist items={checklist} />
+      </div>
+    )}
     </div>
     {scrolls && <div className="pointer-events-none absolute right-0 bottom-0 left-0 z-20 h-8 transition-opacity duration-200" style={fade("bottom", scroller.below)} />}
     </div>
@@ -1588,7 +2056,7 @@ const NOTES = {
 // The notes scroll inside the slip when they run past the page, under a title that stays put, and a
 // fade at either end shows there's more that way.
 function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
-  const { ref, onScroll, onMouseDown, above, below, cursor } = useScroller()
+  const { ref, onScroll, onMouseDown, onWheel, above, below, cursor } = useScroller()
   const fade = (to: "top" | "bottom", shown: boolean): React.CSSProperties => ({ background: `linear-gradient(to ${to === "top" ? "bottom" : "top"}, ${PAPER}, transparent)`, opacity: shown ? 1 : 0 })
   return (
     // Manila paper, turned a little off square, with a strip of tape at the top. It's darker than
@@ -1606,7 +2074,7 @@ function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
           padding, so they scroll away with the notes: the fades start right at the underline and
           the slip's bottom edge. */}
       <div className="relative flex min-h-0 flex-col">
-        <div ref={ref} onScroll={onScroll} onMouseDown={onMouseDown} className={"min-h-0 overflow-y-auto pt-2 pb-4 select-none " + NO_SCROLLBAR + " " + cursor}>
+        <div ref={ref} onScroll={onScroll} onMouseDown={onMouseDown} onWheel={onWheel} className={"min-h-0 overflow-y-auto pt-2 pb-4 select-none " + NO_SCROLLBAR + " " + cursor}>
           <p>{notes.lead}</p>
           <ul>
             {notes.items.map((note) => (
@@ -1746,7 +2214,7 @@ function NoNotes() {
 // The start card for the loaded aircraft, and under it the page's rest; a frame's servers and play
 // go to the card. A loaded aircraft with a maturity has a profile. The header shows what a frame
 // says of our servers, the firewall, and an update, and a frame can open it.
-function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, session, next, checklistExpanded, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; next?: NextSession; checklistExpanded?: boolean; children: React.ReactNode }) {
+function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, session, next, opensFolded, children }: { theme: Theme; aircraft: Aircraft; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; next?: NextSession; opensFolded?: boolean; children: React.ReactNode }) {
   return (
     <AppFrame
       theme={theme}
@@ -1757,7 +2225,7 @@ function HomePage({ theme, aircraft, servers, play, header, headerOpen, core, se
     >
       {/* None on top, since the header leaves as much room under its pill as above it. */}
       <div className="flex min-h-0 flex-1 flex-col gap-6 p-5 pt-0" data-home-page>
-        <StartCard aircraft={aircraft} servers={servers} play={play} session={session} next={next} checklistExpanded={checklistExpanded} />
+        <StartCard aircraft={aircraft} servers={servers} play={play} session={session} next={next} opensFolded={opensFolded} />
         {children}
       </div>
     </AppFrame>
@@ -1832,11 +2300,11 @@ export function HomeFirstTimeFrame({ theme, aircraft, openOnCheck }: { theme: Th
 // hosting or joining by itself, what the header shows and whether it opens out, how the link to
 // the service stands, and whether it opens on a session, which one, with whom, whether a crewmate
 // joins it a while later, and whether the checklist has the page.
-export function HomeLaterFrame({ theme, aircraft, notes, servers, play, header, headerOpen, core, session, next, checklistExpanded }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; next?: NextSession; checklistExpanded?: boolean }) {
+export function HomeLaterFrame({ theme, aircraft, notes, servers, play, header, headerOpen, core, session, next, opensFolded }: { theme: Theme; aircraft: "supported" | "unsupported"; notes?: keyof typeof NOTES; servers?: Servers; play?: Action; header?: HeaderStatus; headerOpen?: boolean; core?: Core; session?: SessionKey; next?: NextSession; opensFolded?: boolean }) {
   const { loaded, context } = useLoaded(aircraft)
   return (
     <AircraftContext.Provider value={context}>
-      <HomePage theme={theme} aircraft={loaded} servers={servers} play={play} header={header} headerOpen={headerOpen} core={core} session={session} next={next} checklistExpanded={checklistExpanded}>
+      <HomePage theme={theme} aircraft={loaded} servers={servers} play={play} header={header} headerOpen={headerOpen} core={core} session={session} next={next} opensFolded={opensFolded}>
         {/* A session's page ends at the card: the authors' notes are for before it (user,
             2026-10-29), and the figure leaps off the page when a session starts. */}
         {session ? null : !loaded.maturity ? (

@@ -121,25 +121,26 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
     ],
   },
   // The Traffic and ATC audio tabs, each holding its feature's sharing, settings, and warnings,
-  // with an amber dot on the tab's icon while it holds a warning: in a flight, receiving, sharing,
-  // and with nobody sharing; and outside a session, where the switches are off.
+  // with an amber dot on the tab's icon while it holds a warning, in the order a session meets
+  // them (user, 2026-10-31): nobody sharing; this pilot sharing, ATC waiting for its app before it
+  // shares; James sharing, the packs differing before they're fixed; and outside a session.
   {
     name: "Traffic",
     frames: [
-      { name: "Receiving, everything matches", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "James" }} /> },
-      { name: "Receiving, packs and aircraft differ", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "James" }} packs="differ" counts={{ missing: 14, others: 6 }} /> },
-      { name: "Sharing, a crewmate's packs differ", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "You" }} /> },
       { name: "Nobody shares traffic", draw: (t) => <TrafficFrame theme={t} where={{ session: true }} /> },
+      { name: "Sharing, a crewmate's packs differ", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "You" }} /> },
+      { name: "Receiving, packs and aircraft differ", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "James" }} packs="differ" counts={{ missing: 14, others: 6 }} /> },
+      { name: "Receiving, everything matches", draw: (t) => <TrafficFrame theme={t} where={{ session: true, sharer: "James" }} /> },
       { name: "Traffic outside a session", draw: (t) => <TrafficFrame theme={t} where={{ session: false }} /> },
     ],
   },
   {
     name: "ATC audio",
     frames: [
-      { name: "Receiving ATC", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "James" }} /> },
-      { name: "Sharing ATC", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "You" }} /> },
-      { name: "Sharing, waiting for an ATC app", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "You" }} capture="waiting" /> },
       { name: "Nobody shares ATC", draw: (t) => <AtcFrame theme={t} where={{ session: true }} /> },
+      { name: "Sharing, waiting for an ATC app", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "You" }} capture="waiting" /> },
+      { name: "Sharing ATC", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "You" }} /> },
+      { name: "Receiving ATC", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "James" }} /> },
       { name: "ATC outside a session", draw: (t) => <AtcFrame theme={t} where={{ session: false }} /> },
     ],
   },

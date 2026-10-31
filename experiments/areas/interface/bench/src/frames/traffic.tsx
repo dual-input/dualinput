@@ -189,7 +189,11 @@ function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: C
 }
 
 // The radius the traffic host polls within, up to the SDK's 200km cap, 200km at first
-// (record/areas/traffic-atc/01-traffic-and-atc.md, Settings).
+// (record/areas/traffic-atc/01-traffic-and-atc.md, Settings). A line under it says what it does and
+// why a pilot would lower it (user, 2026-10-31): each copy costs the crew's sims about what the
+// same AI traffic costs the host's, 44.7 fps with none, 38.0 with BeyondATC's 73 aircraft, and 32.5
+// with 132 copies in FS Copilot's measure, while the traffic between machines stays small, about
+// 2.5KB/s for 120 aircraft (record/areas/traffic-atc/01-traffic-and-atc.md, Budgets).
 function Radius() {
   const { Slider } = useUI()
   const [km, setKm] = useState([200])
@@ -200,6 +204,7 @@ function Radius() {
         <span className="text-muted-foreground tabular-nums">{km[0]} km</span>
       </div>
       <Slider value={km} onValueChange={(v: number | number[]) => setKm(Array.isArray(v) ? v : [v])} min={10} max={200} step={10} />
+      <span className="text-xs text-muted-foreground">How far around you traffic is shared. Each shared aircraft costs the crew's sims some frame rate, so lower it if theirs drops at busy airports.</span>
     </div>
   )
 }

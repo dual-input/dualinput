@@ -765,7 +765,8 @@ function ScrollWindow({ max, children }: { max?: number; children: React.ReactNo
       >
         {children}
       </div>
-      <div className="pointer-events-none absolute right-0 left-0 h-6 transition-opacity duration-200" style={{ ...fade("top", w.above), top: -WINDOW_ROOM.y, marginInline: -WINDOW_ROOM.x }} />
+      {/* 1px above the window, so no row of it shows above the fade (scroller.tsx, ScrollPage). */}
+      <div className="pointer-events-none absolute right-0 left-0 h-[25px] transition-opacity duration-200" style={{ ...fade("top", w.above), top: -WINDOW_ROOM.y - 1, marginInline: -WINDOW_ROOM.x }} />
       <div className="pointer-events-none absolute right-0 left-0 h-6 transition-opacity duration-200" style={{ ...fade("bottom", w.below), bottom: -WINDOW_ROOM.y, marginInline: -WINDOW_ROOM.x }} />
     </div>
   )
@@ -1715,7 +1716,9 @@ function StartCard({ aircraft, servers = "answering", play, session, next, opens
     <div className={"flex shrink-0 flex-col " + (scrolls ? "pin-top z-20 -mx-5 bg-background px-5 shadow-[0_-1px_0_var(--background)]" : "")}>
     {/* Only once something has gone under the folded card: hanging below it, inside the part that
         scrolls, the fade would otherwise make a short page scroll by its overhang. */}
-    {scrolls && goneUnder && <div className="pointer-events-none absolute top-full right-0 left-0 h-6" style={fade("top", true)} />}
+    {/* From 1px up the card's foot, so no row of what's under it shows above the fade
+        (scroller.tsx, ScrollPage). */}
+    {scrolls && goneUnder && <div className="pointer-events-none absolute top-[calc(100%-1px)] right-0 left-0 h-[25px]" style={fade("top", true)} />}
     {/* The card's padding sits inside the part that turns: at the bottom, so something reaching into
         it, as the differences' folded row does, isn't cut off by the part's own edge; and at the
         top, so what the fold scrolls up slides under the card's own edge, rather than being cut
@@ -2172,7 +2175,8 @@ function AuthorsNotes({ notes }: { notes: (typeof NOTES)["short"] }) {
               line out. */}
           {notes.authors && <p className="mt-1 text-right">— {notes.authors}</p>}
         </div>
-        <div className="pointer-events-none absolute top-0 right-0 left-0 h-12 transition-opacity duration-200" style={fade("top", above)} />
+        {/* 1px above the notes, so no row of them shows above the fade (scroller.tsx, ScrollPage). */}
+        <div className="pointer-events-none absolute -top-px right-0 left-0 h-[49px] transition-opacity duration-200" style={fade("top", above)} />
         <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-12 transition-opacity duration-200" style={fade("bottom", below)} />
       </div>
     </section>

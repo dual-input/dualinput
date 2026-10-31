@@ -213,7 +213,12 @@ export function useScroller({ nested, ...said }: Told & { nested?: boolean } = {
 // while there's more that way, and scrolls on a drag anywhere. The scroll box starts 1px above the
 // page with 1px of padding, so its clip doesn't cut the top card's border, and the page's parts
 // keep their height rather than shrinking to fit (user, 2026-10-31: a page built without these
-// brought back a scrollbar and a clipped border).
+// brought back a scrollbar and a clipped border). The top fade starts 1px above the scroll box,
+// over the header's empty foot in the same color: where the canvas puts the page at a fraction of
+// a pixel, the box's clip rounds out to the row it starts in while the fade's first row covers a
+// sliver of it, so a row of what scrolled under showed at full strength above the fade (user,
+// 2026-10-31; measured in Chromium at 1x and 2x, and only at the top). Every top fade over a
+// scroll box starts 1px above it for the same reason.
 export function ScrollPage({ children }: { children: React.ReactNode }) {
   const scroller = useScroller()
   const fade = (to: "top" | "bottom", shown: boolean): React.CSSProperties => ({ background: `linear-gradient(to ${to === "top" ? "bottom" : "top"}, var(--background), transparent)`, opacity: shown ? 1 : 0 })
@@ -231,7 +236,7 @@ export function ScrollPage({ children }: { children: React.ReactNode }) {
       >
         {children}
       </div>
-      <div className="pointer-events-none absolute top-0 right-0 left-0 h-6 transition-opacity duration-200" style={fade("top", scroller.above)} />
+      <div className="pointer-events-none absolute -top-px right-0 left-0 h-[25px] transition-opacity duration-200" style={fade("top", scroller.above)} />
       <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-8 transition-opacity duration-200" style={fade("bottom", scroller.below)} />
     </div>
   )

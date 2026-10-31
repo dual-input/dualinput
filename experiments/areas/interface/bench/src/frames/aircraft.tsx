@@ -215,7 +215,8 @@ export function AircraftPicker({ open, onOpenChange }: { open: boolean; onOpenCh
                     ))}
                   </div>
                 </div>
-                <div className="pointer-events-none absolute top-0 right-0 left-0 h-8 transition-opacity duration-200" style={fade("top", scroller.above)} />
+                {/* 1px above the list, so no row of it shows above the fade (scroller.tsx, ScrollPage). */}
+                <div className="pointer-events-none absolute -top-px right-0 left-0 h-[33px] transition-opacity duration-200" style={fade("top", scroller.above)} />
                 <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-10 rounded-b-4xl transition-opacity duration-200" style={fade("bottom", scroller.below)} />
               </div>
             </DialogPrimitive.Popup>

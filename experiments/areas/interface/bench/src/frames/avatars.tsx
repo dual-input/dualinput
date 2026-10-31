@@ -53,9 +53,8 @@ function NoteForAircraft({ note, onLearnMore }: { note: AircraftNote; onLearnMor
   )
 }
 
-// A setting's switch, the whole row its label out to the card's edges, 36px tall at least, as the
-// ATC output device's row is, so a VR pointer anywhere on it flips the switch, as the sharing cards'
-// rows do (user, 2026-10-31: at 44px the card leaned too far to comfort over density). A row of one line centers
+// A setting's switch, the whole row its label out to the card's edges, 44px tall at least, so a VR
+// pointer anywhere on it flips the switch, as the sharing cards' rows do. A row of one line centers
 // its words' capitals on the switch from their baseline, through a strut half the switch's 20px and
 // half Geist's 10px capitals at 14px tall, since each platform places the words in their line box
 // differently; a row with a note centers the two as a block.
@@ -64,7 +63,7 @@ function SwitchRow({ label, note }: { label: string; note?: string }) {
   const id = useId()
   const [on, setOn] = useState(true)
   return (
-    <label htmlFor={id} className={"box-content flex min-h-5 cursor-pointer px-(--card-spacing) py-2 transition-colors hover:bg-muted/40 active:bg-muted/60 " + (note ? "items-center" : "items-baseline")}>
+    <label htmlFor={id} className={"box-content flex min-h-5 cursor-pointer px-(--card-spacing) py-3 transition-colors hover:bg-muted/40 active:bg-muted/60 " + (note ? "items-center" : "items-baseline")}>
       {!note && <span aria-hidden className="h-[15px] w-0 self-baseline" />}
       <span className="flex flex-1 flex-col gap-0.5 text-sm">
         {label}
@@ -76,23 +75,25 @@ function SwitchRow({ label, note }: { label: string; note?: string }) {
 }
 
 // Which figures show, this pilot's own and the crew's, each inside the aircraft and on a walkaround
-// apart, all on at first, the app speaking to the pilot as "your" (user, 2026-10-31; tried and
-// dropped: "My figure"; one switch for each, which the record gives,
-// record/areas/product/03-v1-scope.md, Avatar sync; and grouped by where, inside the aircraft and
-// walkaround, each with My figure and The crew's figures).
+// apart, all on at first, the app speaking to the pilot as "your" (user, 2026-10-31). Tried and
+// dropped: one switch for each, which the record gives (record/areas/product/03-v1-scope.md, Avatar
+// sync); grouped by where, inside the aircraft and walkaround; "My figure"; a note under your
+// figure inside, "Your figure's head is hidden and its hands fade, so they don't block your view",
+// since a pilot sees the figure at work before reading it and minds it or not whatever it says; and
+// 36px rows (user, 2026-10-31).
 function Visibility() {
   const { Card, Separator } = useUI()
-  const group = (title: string) => <span className="px-(--card-spacing) pt-3 text-xs text-muted-foreground">{title}</span>
+  const group = (title: string) => <span className="px-(--card-spacing) pt-4 pb-1 text-xs text-muted-foreground">{title}</span>
   return (
     <Card className="gap-0 py-0 [--card-spacing:--spacing(5)]">
       {group("Your figure")}
-      <SwitchRow label="Inside the aircraft" note="Your figure's head is hidden and its hands fade, so they don't block your view" />
+      <SwitchRow label="Inside the aircraft" />
       <SwitchRow label="Walkaround" />
-      <Separator className="mt-0.5" />
+      <Separator className="mt-1" />
       {group("The crew's figures")}
       <SwitchRow label="Inside the aircraft" />
       <SwitchRow label="Walkaround" />
-      <span className="h-0.5" />
+      <span className="h-1" />
     </Card>
   )
 }

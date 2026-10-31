@@ -9,7 +9,7 @@
 // What the tab leaves out: which seat this pilot is in, which the figures show; and a held seat,
 // which the notification banner says while this pilot's camera is in it, "This seat is taken",
 // since the fix is in the cockpit, not on the EFB (user, 2026-10-31).
-import { useId, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { ChevronDown, EyeOff, Info, MousePointerClick } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
@@ -102,12 +102,31 @@ function Visibility() {
 
 // A guide a pilot opens for help, in a tint with no border, as the traffic packs box is, its
 // corners 16px. Its title row is the button, 44px tall for a VR pointer; its chevron turns on the
-// press, and its body opens in a moment of its own (ease.tsx, useReveal). A guide another part of
-// the page opens, as the note's Learn more opens pointing and clicking, is held by the page.
-function Guide({ icon, title, open, onToggle, children, anchor }: { icon: React.ReactNode; title: string; open: boolean; onToggle: () => void; children: React.ReactNode; anchor?: React.RefObject<HTMLElement | null> }) {
+// press, and its body opens in a moment of its own (ease.tsx, useReveal), the page scrolling as it
+// opens so the guide shows whole. A guide another part of the page opens, as the note's Learn more
+// opens pointing and clicking, is held by the page.
+function Guide({ icon, title, open, onToggle, children, shown = 0 }: { icon: React.ReactNode; title: string; open: boolean; onToggle: () => void; children: React.ReactNode; shown?: number }) {
   const body = useReveal(open)
+  const section = useRef<HTMLElement>(null)
+  // As it opens, and each time the page asks again to show it, as the note's Learn more does; not
+  // for a guide open from the page's first showing.
+  const first = useRef(true)
+  useEffect(() => {
+    const el = section.current
+    if (first.current) {
+      first.current = false
+      return
+    }
+    if (!open || !el) return
+    const frame = requestAnimationFrame(() => {
+      const head = el.firstElementChild as HTMLElement
+      const inner = el.lastElementChild?.firstElementChild as HTMLElement | null
+      showWhole(el, head.offsetHeight + (inner?.offsetHeight ?? 0))
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [open, shown])
   return (
-    <section ref={anchor} className="scroll-mt-5 rounded-2xl bg-muted/20">
+    <section ref={section} className="rounded-2xl bg-muted/20">
       <button
         type="button"
         aria-expanded={open}
@@ -164,14 +183,37 @@ function SeatsDrawing({ hex }: { hex: string }) {
   )
 }
 
-// Scrolls the page so a part's top sits 20px under the page's top, in the page's own scroll box,
-// which the canvas's zoom leaves scrollIntoView short of.
-function bringUp(part: HTMLElement | null) {
-  let box = part?.parentElement ?? null
+// Scrolls the page, in its own scroll box, just enough that a guide shows whole once open: down
+// while its foot is below the page's foot, but never so far its title leaves the top; up when its
+// title is above the top; not at all when it shows already (user, 2026-10-31). Its height is the
+// open one, its title row and its body's measured height, so the scroll runs as the guide opens
+// rather than after. The canvas can zoom the page, so screen distances are turned back into the
+// page's own pixels. 20px of room stays at either end, the page's padding. Tried and dropped: one
+// smooth scroll by the whole distance, which the browser cut short at the page's foot before the
+// guide had opened.
+function showWhole(part: HTMLElement, height: number) {
+  let box = part.parentElement
   while (box && getComputedStyle(box).overflowY !== "auto") box = box.parentElement
-  if (!part || !box) return
-  const top = box.scrollTop + part.getBoundingClientRect().top - box.getBoundingClientRect().top - 20
-  box.scrollTo({ top, behavior: "smooth" })
+  if (!box) return
+  const page = box
+  const zoom = page.getBoundingClientRect().height / page.clientHeight || 1
+  const room = 20
+  const needed = () => {
+    const top = (part.getBoundingClientRect().top - page.getBoundingClientRect().top) / zoom
+    const above = top - room
+    const below = top + height - (page.clientHeight - room)
+    return above < 0 ? above : below > 0 ? Math.min(below, above) : 0
+  }
+  // A quarter of what's left each frame, so it eases in, and it follows the page as the guide
+  // opens, since the browser stops a scroll at the page's foot, which moves down as it opens.
+  const until = performance.now() + MOMENT.move + 400
+  const step = () => {
+    const by = needed()
+    if (Math.abs(by) < 0.5) return
+    page.scrollTop += by * 0.25
+    if (performance.now() < until) requestAnimationFrame(step)
+  }
+  requestAnimationFrame(step)
 }
 
 // How a figure points at what its pilot clicks: the core casts a ray from the camera through the
@@ -188,7 +230,7 @@ function AvatarsPage({ session, note, helpOpen }: { session: boolean; note?: Air
   useShowShared("traffic", session ? "James" : undefined)
   useShowShared("atc", session ? "James" : undefined)
   const page = useRef<HTMLDivElement>(null)
-  const pointing = useRef<HTMLElement>(null)
+  const [asked, setAsked] = useState(0)
   const [name, setName] = useState(WINDOWS_USERNAME)
   const [hue, setHue] = useState("orange")
   const [open, setOpen] = useState({ seats: !!helpOpen, pointing: !!helpOpen, avatar: !!helpOpen })
@@ -206,8 +248,7 @@ function AvatarsPage({ session, note, helpOpen }: { session: boolean; note?: Air
             note={note}
             onLearnMore={() => {
               setOpen((o) => ({ ...o, pointing: true }))
-              // Once the guide has opened, since before it the page is too short to bring it up.
-              window.setTimeout(() => bringUp(pointing.current), MOMENT.move)
+              setAsked((n) => n + 1)
             }}
           />
         )}
@@ -223,7 +264,7 @@ function AvatarsPage({ session, note, helpOpen }: { session: boolean; note?: Air
             <p>Think of seats like invisible bubbles. Moving your camera into one makes your figure take that seat. Moving out frees the seat.</p>
             <SeatsDrawing hex={hex} />
           </Guide>
-          <Guide icon={<MousePointerClick className="size-4 shrink-0" />} title="How pointing and clicking works" open={open.pointing} onToggle={toggle("pointing")} anchor={pointing}>
+          <Guide icon={<MousePointerClick className="size-4 shrink-0" />} title="How pointing and clicking works" open={open.pointing} onToggle={toggle("pointing")} shown={asked}>
             <p>When you click something in the cockpit, Dual Input traces a line from your camera through your pointer to where it meets the aircraft's 3D model, and your figure's hand reaches for that spot on the crew's screens.</p>
             <p>To find it, Dual Input reads the aircraft's model files. Marketplace aircraft usually ship them encrypted, so in those your figure's hands stay at rest.</p>
           </Guide>

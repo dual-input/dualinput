@@ -234,50 +234,86 @@ export function fadeMask(above: boolean, below: boolean, top: number, bottom: nu
   }
 }
 
-// A surface on a scrolling page, a card or a tinted box, folds away under the page's top rather
-// than sliding through its fade, which smudged a lit surface where it faded text and dark parts
-// cleanly (user, 2026-10-31). Once a surface's top reaches the stop, the fade's inner edge, 24px
-// down, its top edge holds there, rounded as its own corners are, while what it holds goes on
-// scrolling up under that edge and out, so it shortens from the top until it's gone; its foot stays
-// where it is, so nothing under it moves. Its content fades over 16px just under the held edge, its
-// surface not, so items go softly and the surface stays whole. A clip and masks only, set as the
-// page scrolls, so nothing's laid out again. Coherent GT keeps -webkit-clip-path with a shape
+// What's under a scrolling page's top goes in one of two ways, worked out as the page scrolls, with
+// a clip and masks only, so nothing's laid out again (user, 2026-10-31):
+//   - A surface, a card or anything marked data-surface, folds away: once its top reaches the
+//     page's top, where it rests, its top edge holds there, rounded as its own corners are, while
+//     what it holds goes on scrolling up under that edge and out, so it shortens from the top until
+//     it's gone; its foot stays where it is, so nothing under it moves. Its content fades over 16px
+//     just under the held edge, its surface not. A fade over a lit surface smudged it, where it took
+//     text and dark parts cleanly.
+//   - Anything else fades over the page's top 24px, a mask of its own, the ramp easing in over the
+//     first 24px of scroll, so nothing jumps as the page leaves its rest.
+// The fold starts where a surface rests, not lower: held 24px down, the top card rested above that
+// line, and the first pixel of scroll cut 24px from it at once (user, 2026-10-31). Coherent GT keeps
+// -webkit-clip-path with a shape and the -webkit- mask properties
 // (record/areas/architecture/coherent-gt.md); how it takes this every frame is unmeasured. A
-// surface is a card, or anything marked data-surface; one inside another folds with it.
-const STOP = 24
+// surface inside another folds with it; a part that holds a surface is looked through.
 const SURFACE = "[data-slot=card], [data-surface]"
-function collapseSurfaces(box: HTMLElement) {
+const TOP_FADE = 24
+const SURFACE_FADE = 16
+const setMask = (el: HTMLElement, mask?: string) => {
+  if (mask) {
+    el.style.setProperty("-webkit-mask-image", mask)
+    el.style.setProperty("mask-image", mask)
+  } else {
+    el.style.removeProperty("-webkit-mask-image")
+    el.style.removeProperty("mask-image")
+  }
+}
+const setClip = (el: HTMLElement, clip?: string) => {
+  if (clip) {
+    el.style.setProperty("-webkit-clip-path", clip)
+    el.style.setProperty("clip-path", clip)
+  } else {
+    el.style.removeProperty("-webkit-clip-path")
+    el.style.removeProperty("clip-path")
+  }
+}
+function foldPage(box: HTMLElement) {
   const frame = box.getBoundingClientRect()
   const zoom = frame.height / box.clientHeight || 1
-  for (const el of box.querySelectorAll<HTMLElement>(SURFACE)) {
-    if (el.parentElement?.closest(SURFACE) && box.contains(el.parentElement.closest(SURFACE))) continue
-    const under = STOP - (el.getBoundingClientRect().top - frame.top) / zoom
+  const topOf = (el: Element) => (el.getBoundingClientRect().top - frame.top) / zoom
+  // How far the page has left its rest, as a share of the fade, so the fades come in with it.
+  const away = Math.min(1, box.scrollTop / TOP_FADE)
+  const fold = (el: HTMLElement) => {
+    const under = -topOf(el)
     const parts = [...el.children] as HTMLElement[]
     if (under <= 0) {
       if (el.dataset.folding) {
         delete el.dataset.folding
-        el.style.removeProperty("clip-path")
-        el.style.removeProperty("-webkit-clip-path")
-        for (const p of parts) {
-          p.style.removeProperty("-webkit-mask-image")
-          p.style.removeProperty("mask-image")
-        }
+        setClip(el)
+        parts.forEach((p) => setMask(p))
       }
-      continue
+      return
     }
     el.dataset.folding = "1"
-    const round = getComputedStyle(el).borderTopLeftRadius
-    const clip = `inset(${under}px 0 0 0 round ${round})`
-    el.style.setProperty("-webkit-clip-path", clip)
-    el.style.setProperty("clip-path", clip)
-    const top = el.getBoundingClientRect().top
+    setClip(el, `inset(${under}px 0 0 0 round ${getComputedStyle(el).borderTopLeftRadius})`)
+    const top = topOf(el)
+    const strength = Math.min(1, under / SURFACE_FADE)
     for (const p of parts) {
-      const from = under - (p.getBoundingClientRect().top - top) / zoom
-      const mask = `linear-gradient(to bottom, transparent ${from}px, #000 ${from + 16}px)`
-      p.style.setProperty("-webkit-mask-image", mask)
-      p.style.setProperty("mask-image", mask)
+      const from = under - (topOf(p) - top)
+      setMask(p, `linear-gradient(to bottom, rgba(0,0,0,${1 - strength}) ${from}px, #000 ${from + SURFACE_FADE}px)`)
     }
   }
+  const fade = (el: HTMLElement) => {
+    const top = topOf(el)
+    if (away === 0 || top >= TOP_FADE) {
+      if (el.dataset.fading) {
+        delete el.dataset.fading
+        setMask(el)
+      }
+      return
+    }
+    el.dataset.fading = "1"
+    setMask(el, `linear-gradient(to bottom, rgba(0,0,0,${1 - away}) ${-top}px, #000 ${TOP_FADE - top}px)`)
+  }
+  const visit = (el: HTMLElement) => {
+    if (el.matches(SURFACE)) fold(el)
+    else if (el.querySelector(SURFACE)) for (const c of el.children) visit(c as HTMLElement)
+    else fade(el)
+  }
+  for (const c of box.children) visit(c as HTMLElement)
 }
 
 // A page of the app that scrolls once it holds more than the window, for every page but home,
@@ -294,7 +330,7 @@ export function ScrollPage({ children }: { children: React.ReactNode }) {
     let frame = 0
     const onScroll = () => {
       cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => collapseSurfaces(box))
+      frame = requestAnimationFrame(() => foldPage(box))
     }
     box.addEventListener("scroll", onScroll, { passive: true })
     return () => {
@@ -315,7 +351,9 @@ export function ScrollPage({ children }: { children: React.ReactNode }) {
         onTouchEnd={scroller.onTouchEnd}
         onTouchCancel={scroller.onTouchEnd}
         className={"flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pt-px pb-5 select-none [&>*]:shrink-0 " + NO_SCROLLBAR + " " + scroller.cursor}
-        style={fadeMask(scroller.above, scroller.below, 24, 32)}
+        // The foot fades as every scroll box's does; the top's parts fade or fold on their own
+        // (foldPage).
+        style={fadeMask(false, scroller.below, 0, 32)}
       >
         {children}
       </div>

@@ -1,6 +1,6 @@
 // What every frame of the EFB app shares: its size, the header, the tab bar, the small label,
 // and the frame that gives a page the theme and the preset's components.
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { CircleArrowUp, CircleX, ExternalLink, Headset, PersonStanding, Plane, Settings as Gear, TriangleAlert, Users } from "lucide-react"
 
@@ -367,13 +367,30 @@ function EveryIssueSheet() {
   )
 }
 
-export function TabBar({ active = "session" }: { active?: Tab }) {
+// A tab whose page holds a warning shows an amber dot on its icon, on every page, so a pilot sees
+// it from wherever they are: traffic's when a pack differs or a count of aircraft is above 0, ATC
+// audio's when its capture waits for an ATC app (user, 2026-10-31). The page says so, as a session
+// page says its phase. The dot is big enough to notice at an EFB's distance, and no bigger, with a
+// ring of the bar's own color parting it from the icon.
+export const DotContext = createContext<(tab: Tab, on: boolean) => void>(() => {})
+export function useShowDot(tab: Tab, on: boolean) {
+  const show = useContext(DotContext)
+  useLayoutEffect(() => {
+    show(tab, on)
+  }, [show, tab, on])
+  useLayoutEffect(() => () => show(tab, false), [show, tab])
+}
+
+export function TabBar({ active = "session", dots = {} }: { active?: Tab; dots?: Partial<Record<Tab, boolean>> }) {
   return (
     <nav className="flex h-14 shrink-0 border-t">
       {TABS.map(({ id, icon: Icon, label }) => (
         <button key={id} title={label} className={"relative flex flex-1 items-center justify-center outline-none hover:text-foreground " + (id === active ? "text-primary" : "text-muted-foreground")}>
           {id === active && <span className="absolute inset-x-4 -top-px h-0.5 rounded-full bg-primary" />}
-          <Icon className="size-5" />
+          <span className="relative flex">
+            <Icon className="size-5" />
+            {dots[id] && <span aria-label="Needs attention" className="absolute -top-0.5 -right-1 size-2.5 rounded-full bg-warning ring-2 ring-background" />}
+          </span>
         </button>
       ))}
     </nav>
@@ -441,12 +458,15 @@ export function AppFrame({ theme, status = {}, header = true, tabs = true, tab, 
   const [phase, setPhase] = useState<SessionPhase>()
   const [inSession, setInSession] = useState(false)
   const [control, setControl] = useState<Control>()
+  const [dots, setDots] = useState<Partial<Record<Tab, boolean>>>({})
+  const showDot = useCallback((tab: Tab, on: boolean) => setDots((d) => (!!d[tab] === on ? d : { ...d, [tab]: on })), [])
   return (
     <ThemeContext.Provider value={theme}>
       <UIContext.Provider value={ui}>
       <PhaseContext.Provider value={setPhase}>
       <SessionContext.Provider value={setInSession}>
       <ControlContext.Provider value={setControl}>
+      <DotContext.Provider value={showDot}>
         <div
           data-app-frame
           className="dark relative flex flex-col overflow-hidden rounded-xl border bg-background font-sans text-foreground shadow-2xl"
@@ -454,10 +474,11 @@ export function AppFrame({ theme, status = {}, header = true, tabs = true, tab, 
         >
           {header && <Header status={down ? {} : status} startOpen={headerOpen} phase={down ? undefined : phase} inSession={!down && inSession} />}
           <div className="flex min-h-0 flex-1 flex-col">{down ? <ServiceDown closed={core === "closed"} /> : children}</div>
-          {tabs && !down && <TabBar active={tab} />}
+          {tabs && !down && <TabBar active={tab} dots={dots} />}
           {tabs && !down && <TakeControl control={control} />}
           {!down && <Reconnecting on={core === "reconnecting"} />}
         </div>
+      </DotContext.Provider>
       </ControlContext.Provider>
       </SessionContext.Provider>
       </PhaseContext.Provider>

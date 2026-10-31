@@ -145,6 +145,7 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       // The ATC app starts after the pilot turned sharing on, so Automatic takes it.
       { name: "Sharing, the ATC app starts", replay: true, draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "You" }} capture="none" later={[{ after: 1800, capture: "capturing" }]} /> },
       { name: "Receiving ATC", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "James" }} /> },
+      { name: "Receiving ATC, turned all the way down", draw: (t) => <AtcFrame theme={t} where={{ session: true, sharer: "James" }} volume={0} /> },
       { name: "ATC outside a session", draw: (t) => <AtcFrame theme={t} where={{ session: false }} /> },
     ],
   },

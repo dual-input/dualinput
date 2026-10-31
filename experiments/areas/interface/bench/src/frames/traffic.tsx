@@ -22,7 +22,7 @@ import {
 
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
-import { AppFrame, InlineLink, useShowDot, useShowShared } from "./shell"
+import { AppFrame, useShowDot, useShowQuiet, useShowShared } from "./shell"
 import { useShowPhase } from "./phase"
 import { useShowControl, useShowSession, type Control } from "./flight"
 import { ScrollPage } from "./scroller"
@@ -657,14 +657,21 @@ function AtcAppPicker({
 // device's name in one quiet row under the slider, the whole row opening Settings, so a VR pointer
 // has one wide target, 36px tall, 12px under the slider (user, 2026-10-31; tried and
 // dropped: "Plays on Headset (USB Audio) · Change in Settings", a line with a link at its end).
-function AtcVolume() {
+function AtcVolume({
+  volume,
+  setVolume,
+}: {
+  volume: number[]
+  setVolume: (v: number[]) => void
+}) {
   const { Slider } = useUI()
-  const [volume, setVolume] = useState([100])
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between text-sm">
         <span>Volume</span>
-        <span className="text-muted-foreground tabular-nums">{volume[0]}%</span>
+        <span className="text-muted-foreground tabular-nums">
+          {volume[0] ? `${volume[0]}%` : "Muted"}
+        </span>
       </div>
       <Slider
         value={volume}
@@ -695,11 +702,14 @@ function AtcPage({
   where,
   capture = "capturing",
   later = [],
+  volume: startVolume = 100,
 }: {
   where: Where
   capture?: Capture
   later?: CaptureLater
+  volume?: number
 }) {
+  const [volume, setVolume] = useState([startVolume])
   useFlightAround(where.session)
   const [sharer, setSharer] = useState<Sharer>(where.sharer)
   const [captureNow, setCaptureNow] = useState(capture)
@@ -715,6 +725,8 @@ function AtcPage({
     !where.session ? "both" : s === "You" ? "host" : s ? "listen" : "none"
   useShowShared("atc", where.session ? sharer : undefined)
   useShowShared("traffic", where.session ? "James" : undefined)
+  // Only a receiving pilot hears the volume, so only theirs at 0% grays the header's icon.
+  useShowQuiet("atc", role(sharer) === "listen" && volume[0] === 0)
   const m = useMoment(
     `${sharer}|${role(sharer) === "host" ? captureNow : ""}`,
     { sharer, capture: captureNow }
@@ -754,7 +766,9 @@ function AtcPage({
                 liveLook={part(m.stage, turns, 0, true, true)}
               />
             )}
-            {(shown === "listen" || shown === "both") && <AtcVolume />}
+            {(shown === "listen" || shown === "both") && (
+              <AtcVolume volume={volume} setVolume={setVolume} />
+            )}
           </>
         )}
       </RoleCard>
@@ -791,15 +805,17 @@ export function AtcFrame({
   where,
   capture,
   later,
+  volume,
 }: {
   theme: Theme
   where: Where
   capture?: Capture
   later?: CaptureLater
+  volume?: number
 }) {
   return (
     <AppFrame theme={theme} tab="atc" fixed>
-      <AtcPage where={where} capture={capture} later={later} />
+      <AtcPage where={where} capture={capture} later={later} volume={volume} />
     </AppFrame>
   )
 }

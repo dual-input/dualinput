@@ -23,6 +23,8 @@ const PHASES: Record<SessionPhase, { name: string; text: string; line?: string }
 // Who is sharing each feature in the session, by name, "You" for this pilot.
 export type SharedFeature = "traffic" | "atc"
 export type Shared = Partial<Record<SharedFeature, string>>
+// A feature this pilot has turned all the way down, which reaches no one here though it's shared.
+export type Quiet = Partial<Record<SharedFeature, boolean>>
 
 export const PhaseContext = createContext<(phase: SessionPhase | undefined) => void>(() => {})
 
@@ -69,7 +71,7 @@ function fade(stage: Stage, delay = 0): React.CSSProperties {
 // then its name in capitals, in the same color, then the icon of each feature being shared; under
 // them, from the dot's edge, for a phase that needs it, a line saying what it is, muted, cut at the
 // header's room. The line keeps its words while it closes.
-function PhaseFace({ phase, stage, dotStays, shared }: { phase: SessionPhase; stage: Stage; dotStays: boolean; shared: Shared }) {
+function PhaseFace({ phase, stage, dotStays, shared, quiet }: { phase: SessionPhase; stage: Stage; dotStays: boolean; shared: Shared; quiet?: Quiet }) {
   const p = PHASES[phase]
   const lastLine = useRef(p.line)
   if (p.line) lastLine.current = p.line
@@ -87,7 +89,7 @@ function PhaseFace({ phase, stage, dotStays, shared }: { phase: SessionPhase; st
         <span className={"text-[10px] leading-4 font-semibold tracking-widest whitespace-nowrap uppercase " + p.text} style={fade(stage)}>
           {p.name}
         </span>
-        <SharedIcons shared={shared} style={fade(stage)} />
+        <SharedIcons shared={shared} quiet={quiet} style={fade(stage)} />
       </div>
       <div className="overflow-hidden transition-[height] ease-in-out" style={{ height: p.line ? 16 : 0, transitionDuration: `${STEP.move}ms` }}>
         <span className="block truncate text-xs leading-4 text-muted-foreground" style={fade(stage, STEP.lineAfter)}>
@@ -104,11 +106,18 @@ function PhaseFace({ phase, stage, dotStays, shared }: { phase: SessionPhase; st
 // dropped: the crew list's chip in green, its outline and icon alike, whose bright outline read
 // bigger than the crew list's faint one though both measure 26px by 20px; and a green bar above
 // the tab's icon, as an Airbus FCU pushbutton's, which looked ugly (user, 2026-10-31).
+// A feature this pilot has turned all the way down, ATC audio at 0%, keeps its icon, gray and
+// slashed, so a pilot who turned ATC off on a past flight sees why they hear none, since the
+// volume is a saved setting (user, 2026-10-31). Gray rather than red, since red is the app's
+// error and a volume at 0% is the pilot's choice; and the same headset with a slash drawn over it,
+// since Lucide's crossed-out icon is a headphone, which would change the icon's shape. The slash
+// is drawn twice, wide in the header's background and then thin in the icon's color, so a gap
+// parts it from the strokes it crosses, as Lucide's crossed-out icons are cut.
 const FEATURES: { id: SharedFeature; icon: React.ReactNode; noun: string }[] = [
   { id: "traffic", icon: <Plane className="size-3 shrink-0" />, noun: "traffic" },
   { id: "atc", icon: <Headset className="size-3 shrink-0" />, noun: "ATC" },
 ]
-function SharedIcons({ shared, style }: { shared: Shared; style: React.CSSProperties }) {
+function SharedIcons({ shared, quiet = {}, style }: { shared: Shared; quiet?: Quiet; style: React.CSSProperties }) {
   // Each icon is always drawn, at no width while its feature isn't shared, so one arriving or
   // leaving moves the other over rather than jumping it. It keeps to the page's moment (ease.tsx): one
   // going fades first, then its room shuts; one coming gets its room first, then fades in.
@@ -117,16 +126,23 @@ function SharedIcons({ shared, style }: { shared: Shared; style: React.CSSProper
       {FEATURES.map((f, i) => {
         const on = !!shared[f.id]
         const after = FEATURES.slice(0, i).some((g) => shared[g.id])
+        const hushed = on && !!quiet[f.id]
         return (
           <span
             key={f.id}
             role={on ? "img" : undefined}
-            aria-label={on ? `Sharing ${f.noun}` : undefined}
+            aria-label={on ? `Sharing ${f.noun}${hushed ? ", turned all the way down here" : ""}` : undefined}
             aria-hidden={!on}
             className="flex overflow-hidden"
             style={{ width: on ? 12 : 0, marginLeft: on && after ? 6 : 0, opacity: on ? 1 : 0, transform: on ? "none" : "scale(0.6)", transition: on ? `width ${MOMENT.move}ms ease-in-out ${MOMENT.out}ms, margin-left ${MOMENT.move}ms ease-in-out ${MOMENT.out}ms, opacity ${MOMENT.in}ms ease-out ${ARRIVE}ms, transform ${MOMENT.in}ms ease-out ${ARRIVE}ms` : `opacity ${MOMENT.out}ms ease-in, transform ${MOMENT.out}ms ease-in, width ${MOMENT.move}ms ease-in-out ${MOMENT.out}ms, margin-left ${MOMENT.move}ms ease-in-out ${MOMENT.out}ms` }}
           >
-            {f.icon}
+            <span className="relative flex transition-colors duration-200" style={{ color: hushed ? "var(--muted-foreground)" : undefined }}>
+              {f.icon}
+              <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" className="absolute inset-0 size-3" style={{ opacity: hushed ? 1 : 0, transition: "opacity 200ms ease-out" }} aria-hidden>
+                <path d="M3 3 21 21" stroke="var(--background)" strokeWidth="6" />
+                <path d="M3 3 21 21" stroke="currentColor" strokeWidth="2" />
+              </svg>
+            </span>
           </span>
         )
       })}
@@ -136,7 +152,7 @@ function SharedIcons({ shared, style }: { shared: Shared; style: React.CSSProper
 
 // The header's start: the brand, the mark and version, or, in a session that's in preflight or
 // flying, its phase. It shows one at a time, and steps from one to the next.
-export function HeaderStart({ phase, shared = {}, brand }: { phase?: SessionPhase; shared?: Shared; brand: React.ReactNode }) {
+export function HeaderStart({ phase, shared = {}, quiet, brand }: { phase?: SessionPhase; shared?: Shared; quiet?: Quiet; brand: React.ReactNode }) {
   const target: Shown = phase ?? "brand"
   const [shown, setShown] = useState<Shown>(target)
   const [stage, setStage] = useState<Stage>("idle")
@@ -170,7 +186,7 @@ export function HeaderStart({ phase, shared = {}, brand }: { phase?: SessionPhas
       {shown === "brand" ? (
         <div style={fade(stage)}>{brand}</div>
       ) : (
-        <PhaseFace phase={shown} stage={stage} dotStays={from !== "brand" && target !== "brand"} shared={shared} />
+        <PhaseFace phase={shown} stage={stage} dotStays={from !== "brand" && target !== "brand"} shared={shared} quiet={quiet} />
       )}
     </div>
   )

@@ -8,7 +8,7 @@ import { ThemeContext, UI, UIContext, useUI } from "@/bench/ui"
 import { themeVars, type Theme } from "@/bench/theme"
 import { FailureBox, SERVICE_NOT_RUNNING } from "./failure"
 import { ControlContext, SessionContext, TakeControl, type Control } from "./flight"
-import { HeaderStart, PhaseContext, type SessionPhase, type Shared, type SharedFeature } from "./phase"
+import { HeaderStart, PhaseContext, type Quiet, type SessionPhase, type Shared, type SharedFeature } from "./phase"
 import { ARRIVE, MOMENT } from "./ease"
 
 // The sim's EFB sizes its apps from a 516 by 716 base (record/areas/interface/log.md, 2026-10-24).
@@ -202,7 +202,7 @@ const HEADER = { openAfter: 200, closeAfter: 300, grow: 260, shrink: 220, spring
 // window, a row for each with its action, if it has one, while the window dims under it. A press
 // keeps it open, as does pressing anything in it, so its actions and their popovers don't close
 // under the pointer; then a press elsewhere or Escape closes it. The copy is drafts.
-export function Header({ status, startOpen, phase, shared = {}, inSession }: { status: HeaderStatus; startOpen?: boolean; phase?: SessionPhase; shared?: Shared; inSession?: boolean }) {
+export function Header({ status, startOpen, phase, shared = {}, quiet, inSession }: { status: HeaderStatus; startOpen?: boolean; phase?: SessionPhase; shared?: Shared; quiet?: Quiet; inSession?: boolean }) {
   const { Button } = useUI()
   const [hovered, setHovered] = useState(false)
   const [open, setOpen] = useState(!!startOpen)
@@ -249,6 +249,7 @@ export function Header({ status, startOpen, phase, shared = {}, inSession }: { s
     <HeaderStart
       phase={phase}
       shared={shared}
+      quiet={quiet}
       brand={
         <div className="flex items-center gap-2">
           <Mark className="size-4 text-primary" />
@@ -387,6 +388,15 @@ export function useShowDot(tab: Tab, on: boolean) {
 
 // Who is sharing traffic and who is sharing ATC audio in this session, which the header shows
 // beside the phase (phase.tsx). Whichever page is showing says what it knows, as with the dots.
+// Which shared feature this pilot has turned all the way down, which the header's icon shows.
+export const QuietContext = createContext<(feature: SharedFeature, quiet: boolean) => void>(() => {})
+export function useShowQuiet(feature: SharedFeature, quiet: boolean) {
+  const show = useContext(QuietContext)
+  useLayoutEffect(() => {
+    show(feature, quiet)
+  }, [show, feature, quiet])
+  useLayoutEffect(() => () => show(feature, false), [show, feature])
+}
 export const SharedContext = createContext<(feature: SharedFeature, sharer: string | undefined) => void>(() => {})
 export function useShowShared(feature: SharedFeature, sharer: string | undefined) {
   const show = useContext(SharedContext)
@@ -475,6 +485,8 @@ export function AppFrame({ theme, status = {}, header = true, tabs = true, tab, 
   const [control, setControl] = useState<Control>()
   const [dots, setDots] = useState<Partial<Record<Tab, boolean>>>({})
   const showDot = useCallback((tab: Tab, on: boolean) => setDots((d) => (!!d[tab] === on ? d : { ...d, [tab]: on })), [])
+  const [quiet, setQuiet] = useState<Quiet>({})
+  const showQuiet = useCallback((feature: SharedFeature, on: boolean) => setQuiet((d) => (!!d[feature] === on ? d : { ...d, [feature]: on })), [])
   const [shared, setShared] = useState<Shared>({})
   const showShared = useCallback((feature: SharedFeature, sharer: string | undefined) => setShared((d) => (d[feature] === sharer ? d : { ...d, [feature]: sharer })), [])
   return (
@@ -485,17 +497,19 @@ export function AppFrame({ theme, status = {}, header = true, tabs = true, tab, 
       <ControlContext.Provider value={setControl}>
       <DotContext.Provider value={showDot}>
       <SharedContext.Provider value={showShared}>
+      <QuietContext.Provider value={showQuiet}>
         <div
           data-app-frame
           className="dark relative flex flex-col overflow-hidden rounded-xl border bg-background font-sans text-foreground shadow-2xl"
           style={{ ...(themeVars(theme) as React.CSSProperties), width: EFB.width, ...(fixed ? { height: EFB.height } : { minHeight: EFB.height }) }}
         >
-          {header && <Header status={down ? {} : status} startOpen={headerOpen} phase={down ? undefined : phase} shared={down ? {} : shared} inSession={!down && inSession} />}
+          {header && <Header status={down ? {} : status} startOpen={headerOpen} phase={down ? undefined : phase} shared={down ? {} : shared} quiet={quiet} inSession={!down && inSession} />}
           <div className="flex min-h-0 flex-1 flex-col">{down ? <ServiceDown closed={core === "closed"} /> : children}</div>
           {tabs && !down && <TabBar active={tab} dots={dots} />}
           {tabs && !down && <TakeControl control={control} />}
           {!down && <Reconnecting on={core === "reconnecting"} />}
         </div>
+      </QuietContext.Provider>
       </SharedContext.Provider>
       </DotContext.Provider>
       </ControlContext.Provider>

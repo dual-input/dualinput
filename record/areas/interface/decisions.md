@@ -229,6 +229,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   It holds no check and no rules, since everyone understands sharing audio, and shows only what goes wrong in Dual Input's own pipeline, which for now is nothing, since Automatic waits for an ATC app silently (user, 2026-10-31).
   While a tab holds a warning, an amber dot shows on its icon in the tab bar, on every page: for traffic, either count above 0, and ATC audio has none yet; the dot is big enough to notice, and no bigger.
   While a feature is being shared in the session, the header shows its tab's icon in green after the session's phase, so it shows on every page, for every pilot, host or not; the crew list's chips say who is sharing (user, 2026-10-31).
+  While ATC audio is shared and this pilot's ATC volume is at 0%, its header icon turns gray with a slash, since the volume is a saved setting and a pilot who turned ATC down on a past flight would otherwise hear none without knowing why; the volume reads "Muted" (user, 2026-10-31).
   Outside a session both switches are off and can't be turned on, since a role is a session key, and the settings still change.
   Settled by the user on 2026-10-31.
 - **Because:**

@@ -202,8 +202,19 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 // frame rate. Once the zoom rests, though, CSS zoom rounds the text's lines afresh, and a box that
 // measured its contents after a render, as the session card's turning part does, would keep the
 // height from the old zoom, cutting off its last 3px or leaving a gap under it.
+// Each frame mounts in a task of its own. Many frames measure themselves after a render and set
+// state from it, and React counts those updates across one commit, stopping at 50: with every frame
+// on the canvas mounting in the same commit, their chains together passed that on screens at 2x
+// and 4x pixel density, and the canvas went blank with "Maximum update depth exceeded" (measured in
+// Chromium, 2026-10-31, after the Flying and Traffic sections joined; skipping any one large
+// section stopped it). A frame's first draw comes a task after the canvas's.
 const FrameBody = memo(function FrameBody({ entry, theme, play }: { entry: FrameEntry; theme: Theme; play?: Action; zoom: number }) {
-  return <>{entry.draw(theme, play)}</>
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    const t = window.setTimeout(() => setMounted(true))
+    return () => clearTimeout(t)
+  }, [])
+  return mounted ? <>{entry.draw(theme, play)}</> : null
 })
 
 // CSS zoom lays every frame out again, about 100ms a step on the development PC with 20 frames, so

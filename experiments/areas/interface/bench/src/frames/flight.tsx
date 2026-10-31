@@ -190,10 +190,16 @@ function Strip({ control }: { control: Control }) {
             {hold === "holding" && (
               // The path counts 100 long, dashed 100 on and 100 off, so an offset of 100 shows none
               // of it; turned so it fills clockwise from the top.
-              <svg viewBox="0 0 16 16" className="absolute top-1/2 right-full -mt-2 mr-2.5 size-4" style={{ transform: "rotate(-90deg)" }} aria-hidden>
-                <circle cx="8" cy="8" r="6.5" fill="none" strokeWidth="2" className="stroke-primary-foreground/20" />
-                <circle cx="8" cy="8" r="6.5" fill="none" strokeWidth="2" strokeLinecap="round" pathLength={100} strokeDasharray="100 100" className="stroke-primary-foreground" style={{ animation: `hold-ring ${HOLD.ms}ms linear forwards` }} />
-              </svg>
+              // Centered on the label's line by flex rather than offsets, which a zoomed frame rounds,
+              // and turned inside the drawing, where every browser turns about the same point.
+              <span className="absolute inset-y-0 right-full mr-2.5 flex items-center" aria-hidden>
+                <svg viewBox="0 0 16 16" className="size-4">
+                  <g transform="rotate(-90 8 8)">
+                    <circle cx="8" cy="8" r="6.5" fill="none" strokeWidth="2" className="stroke-primary-foreground/20" />
+                    <circle cx="8" cy="8" r="6.5" fill="none" strokeWidth="2" strokeLinecap="round" pathLength={100} strokeDasharray="100 100" className="stroke-primary-foreground" style={{ animation: `hold-ring ${HOLD.ms}ms linear forwards` }} />
+                  </g>
+                </svg>
+              </span>
             )}
           </span>
           {bound && !mine && (

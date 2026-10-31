@@ -630,7 +630,8 @@ function AtcAppPicker({
           </SelectGroup>
           <SelectSeparator />
           <SelectGroup>
-            <SelectLabel>Playing audio</SelectLabel>
+            {/* 18px under the separator, where the kit's 22px read loose (user, 2026-10-31). */}
+            <SelectLabel className="pt-1.5">Playing audio</SelectLabel>
             {[...PLAYING]
               .sort(
                 (x, y) => Number(KNOWN.includes(y)) - Number(KNOWN.includes(x))

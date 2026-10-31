@@ -133,17 +133,20 @@ function RoleCard({
 // beyond what Dual Input can check, so the line is the tip; with nobody sharing, every line waits.
 type State = "ok" | "differs" | "unchecked" | "rule"
 type Line = { state: State; says: string; detail?: React.ReactNode }
+// Each icon's middle sits 11px down the 20px line, 1px below the line's own middle, since the eye
+// centers on the lowercase letters, which sit low in the line; centered on the line, the icons
+// looked high (user, 2026-10-31).
 const STATE_ICON: Record<State, React.ReactNode> = {
-  ok: <CircleCheck className="mt-0.5 size-4 shrink-0 text-success" />,
-  differs: <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" />,
+  ok: <CircleCheck className="mt-[3px] size-4 shrink-0 text-success" />,
+  differs: <TriangleAlert className="mt-[3px] size-4 shrink-0 text-warning" />,
   unchecked: (
-    <CircleDashed className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+    <CircleDashed className="mt-[3px] size-4 shrink-0 text-muted-foreground" />
   ),
   // A rule is a plain list's point rather than a state, so it takes a small solid dot, centered on
   // the line where the states' icons fill a 16px box (user, 2026-10-31: the dashed circle read as
   // "can't check" where nothing was being checked yet).
   rule: (
-    <span className="flex size-4 shrink-0 items-center justify-center pt-1">
+    <span className="flex size-4 shrink-0 items-center justify-center pt-1.5">
       <span className="size-1.5 rounded-full bg-muted-foreground" />
     </span>
   ),
@@ -249,7 +252,11 @@ type Counts = { missing: number; others: number }
 // it shows as stand-ins or not at all, and the aircraft that aren't the host's
 // (record/areas/traffic-atc/01-traffic-and-atc.md, Notifications). The first catches a pack that
 // differs whatever the pack, and the second the pilot's own traffic left on. The host's own sim
-// has nothing to check, so their tab has no check (user, 2026-10-31).
+// has nothing to check, so their tab has no check (user, 2026-10-31). The first count sees only
+// creates the sim refused, so its passing line says the aircraft loaded, not that they show:
+// a copy with another pack's livery, or floating over other scenery, still counts as loaded, and
+// whether the sim refuses a title it lacks at all is a check in the sim
+// (record/areas/traffic-atc/01-traffic-and-atc.md, Creating a copy). Counts handle the singular.
 function trafficLines(
   session: boolean,
   sharer: Sharer,
@@ -261,17 +268,23 @@ function trafficLines(
       counts.missing
         ? {
             state: "differs",
-            says: `${counts.missing} of ${sharer}'s aircraft are missing or shown as stand-ins`,
-            detail: `Usually a traffic pack that differs from ${sharer}'s`,
+            says: `${counts.missing} aircraft from ${sharer} ${counts.missing === 1 ? "is" : "are"} missing or shown incorrectly`,
+            detail: "Usually caused by a difference in installed traffic packs",
           }
-        : { state: "ok", says: `Every one of ${sharer}'s aircraft is showing` },
+        : {
+            state: "ok",
+            says: `All aircraft from ${sharer} loaded in your sim`,
+          },
       counts.others
         ? {
             state: "differs",
-            says: `${counts.others} aircraft in your sim aren't ${sharer}'s`,
-            detail: "Turn off your own AI traffic",
+            says: `${counts.others} aircraft in your sim ${counts.others === 1 ? "isn't" : "aren't"} coming from ${sharer}`,
+            detail: "Turn off AI traffic on your PC",
           }
-        : { state: "ok", says: `No aircraft but ${sharer}'s in your sim` },
+        : {
+            state: "ok",
+            says: `No extra aircraft on top of what comes from ${sharer}`,
+          },
     ]
   // The rules, in the user's words (user, 2026-10-31). Copies are frozen rather than held to the
   // ground, so with other scenery, whose ground can sit at another elevation, they float or sink

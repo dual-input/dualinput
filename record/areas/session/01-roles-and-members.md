@@ -6,6 +6,10 @@ Depends on:  ../product/03-v1-scope.md, ../product/04-room-for-later.md, ../netw
 Decides:     The member list and its kinds, the table of roles and v1's three, who may take control and when, and how the traffic host and the ATC host are chosen.
 ```
 
+> **Note**
+> Stage 11b's tentative decision that [traffic and ATC audio are shared apart](../interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) changes [the traffic and ATC host](#the-traffic-and-atc-host) until the apps' design confirms it (user, 2026-10-31).
+> Each role is taken by a switch of its own, "Share my traffic" or "Share my ATC", and one pilot need not hold both, so that section's rule that the traffic host is also the ATC host, and its one request that claims both, no longer hold; the rest of each role's row stands.
+
 A session's members are listed on the session channel, each by an entry it writes itself.
 Its roles are one table, each row saying who may hold the role, how it moves, and what happens when its holder loses the link, leaves the flight, or leaves the session.
 v1's table has three rows, the PF, the traffic host, and the ATC host, and the picks after v1 add rows rather than mechanisms ([04-room-for-later](../product/04-room-for-later.md#roles)).

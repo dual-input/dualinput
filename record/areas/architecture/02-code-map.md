@@ -11,6 +11,7 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > The banner's page draws plain markup with no framework and no part API, so `efb-shell` holds the EFB app's frame and its part API alone ([the banner](../interface/decisions.md#the-banner-draws-its-few-lines-in-plain-markup-with-the-kits-colors-and-no-framework)).
 > [The workspace](#the-workspace) gains `src/packages/`, for packages that are no tier's units, whose first is the kit, `@dualinput/ui` in `src/packages/ui/`, and a feature's EFB part may import it beside its shell and the messages' types ([the kit's package](../interface/decisions.md#the-kit-and-dual-inputs-palette-are-one-package-in-this-repository)).
 > The Coherent GT check leaves `tools/` for its own repository, `dual-input/coherent-checks`, which Dual Input installs with npm ([build plan](../build/plan.md#11b-the-apps)).
+> [The traffic and ATC switch](#the-traffic-and-atc-switch) becomes two switches, each writing its own feature's key, since [traffic and ATC audio are shared apart](../interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) (user, 2026-10-31), so nothing sends the request that claims several keys together.
 
 Dual Input's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

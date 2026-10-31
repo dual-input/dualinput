@@ -197,6 +197,48 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - A list of what the engine drops would pass everything no probe tried, which is where a silent drop hides, while a list of what it keeps fails that CSS where the developer writing it sees the failure.
 - **Leaves out:** its CSS parser; how its data comes from p14's results, so a run of p14 after a sim update refreshes it; and CSS written in a component's markup rather than a stylesheet, which the stage's design of the check settles.
 
+## Traffic and ATC audio are shared apart, each by a switch of its own
+
+- **Decided:** traffic and ATC audio are shared as two features, each with its own host and its own switch, and Dual Input doesn't check whether one pilot holds both roles.
+  The Traffic tab's "Share my traffic" writes the traffic host's key, and the ATC audio tab's "Share my ATC" writes the ATC host's, each by itself, so a pilot can share either without the other, and a crew that wants one host for both turns both on.
+  Each role keeps the rest of its row in [the table of roles](../session/01-roles-and-members.md#the-table-of-roles): any pilot takes it at any time by turning their own switch on, which turns the old holder's off, and only leaving the session releases it.
+  On the session page, each host's crew row carries a chip with the icon of the tab whose role they hold, a plane for traffic and a headset for ATC.
+  This changes [03-v1-scope](../product/03-v1-scope.md#hearing-atc)'s rule that the traffic host is also the ATC host, [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host), the code map's [traffic and ATC switch](../architecture/02-code-map.md#the-traffic-and-atc-switch), and the architecture's tentative decision that [one request claims both](../architecture/decisions.md#traffic-and-atc-audio-each-hold-a-role-and-one-request-claims-both), and [decision 044](../../decisions/044-table-of-roles.md), which gives the two one role that can split, once step 8's decisions are numbered.
+  Settled by the user on 2026-10-31.
+- **Because:**
+  - Each half has crews that want it alone.
+    ATC without traffic suits a crewmate who can't match the traffic host's traffic packs or scenery, whose copies would go missing, fall back to stand-ins, or float or sink ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
+    Traffic without ATC suits a host whose traffic comes from an injector with no ATC voice.
+    And [decision 044](../../decisions/044-table-of-roles.md) set aside the case that wants two hosts, an ATC app that injects no traffic on one machine beside a traffic injector on another, as too rare for v1.
+  - The two roles already exist, since traffic and ATC audio each declare a key ([02-code-map](../architecture/02-code-map.md#the-traffic-and-atc-switch)), so a switch for each that writes its own key needs nothing a session key doesn't already do, where one host choosing either half would need a rule that both keys name the same pilot (user, 2026-10-31).
+  - One switch for two tabs had no clean place: on one tab and explained on the other, or the same switch on both (user, 2026-10-31).
+  - FS Copilot's build gave traffic and ATC audio a host each (FS Copilot fork, `record/traffic-atc/docs/03-implementation-plan.md`, "Decisions locked with the user (2026-09-06)", row 1).
+- **Leaves out:**
+  - A crew whose ATC and traffic come from two pilots may hear ATC talk about aircraft it doesn't see, since an ATC app works with the traffic in its own pilot's sim (unverified, and likely to differ by app); the crew settles that on voice, as it settles a tussle over a switch ([decision 044](../../decisions/044-table-of-roles.md)).
+  - Whether the platform keeps its request that claims several keys together, which only the combined switch sent ([02-code-map](../architecture/02-code-map.md#the-traffic-and-atc-switch)): the user's to decide.
+  - The two tabs' words, which the apps' design settles.
+
+## The Traffic and ATC audio tabs hold their sharing, settings, and warnings, flagged by a dot on the tab's icon
+
+- **Decided:** the Traffic tab holds "Share my traffic" and who shares, the radius setting, what a receiving pilot sets up by hand, and traffic's warnings:
+  - a check of each receiving pilot's known traffic packs against the traffic host's, with their versions, which every pilot's Traffic tab shows, so the host sees which crewmates lack or add which packs, and a receiving pilot sees their own;
+  - and, on a receiving pilot's tab, two counts kept live: the traffic host's aircraft this sim shows as stand-ins or not at all, and the aircraft that aren't the traffic host's.
+
+  These replace traffic's two notifications on the banner, and traffic feeds no item of the match check, so the session card's heads-up list stays about the flight.
+  The ATC audio tab holds "Share my ATC" and who shares; on the ATC host, which program the capture takes, or that it's waiting for one; the ATC app and ATC volume settings; what a receiving pilot sets up by hand; that Dual Input carries no voice, so the crew talks over Discord; and the output device, shown but set in Settings.
+  While a tab holds a warning, an amber dot shows on its icon in the tab bar, on every page: for traffic, a pack that differs or either count above 0, and for ATC audio, such as its capture waiting for an ATC app; the dot is big enough to notice, and no bigger.
+  Outside a session both switches are off and can't be turned on, since a role is a session key, and the settings still change.
+  Settled by the user on 2026-10-31.
+- **Because:**
+  - Two groups of FS Copilot's testers flew with airliners missing, because their traffic packs differed, without knowing ([traffic sync](../product/03-v1-scope.md#traffic-sync)), so the packs are compared before aircraft go missing, and the dot keeps a difference in view on every page.
+  - Traffic's warnings concern a feature a crew may not use, and a pilot with traffic trouble looks in its tab, so they live there rather than on the banner or in the card's list (user, 2026-10-31).
+    With nobody sharing traffic there's no host to compare against, so the tab shows no warning.
+  - The output device carries every sound Dual Input plays, take-control's cues among them ([the devices](../core/04-core-helper.md#the-devices)), so one place sets it, and the ATC audio tab shows it where a pilot looking for ATC's sound looks.
+- **Leaves out:**
+  - How each pilot's list of traffic packs reaches the others, which traffic's design adds; [traffic and ATC](../traffic-atc/01-traffic-and-atc.md#left-open) expected an ask and an answer on a channel of traffic's.
+  - What the check can't see: packs missing from traffic's list of known packs, which starts with `fsltl-traffic-base`; a streamed pack's version, which it has none of on disk; and the scenery ([traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs)).
+  - What else sets the ATC audio tab's dot, the tabs' words, and their look.
+
 [p02]: ../install/log.md#2026-10-25-an-egui-window-in-a-rust-tray-app-takes-96-mb-to-153-mb-while-open-and-leaves-62-mb-to-69-mb-in-the-process-once-it-closes-where-tauris-leaves-37-mb
 [p08]: log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight
 [p10]: log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly

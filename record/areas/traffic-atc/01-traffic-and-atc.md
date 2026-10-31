@@ -6,6 +6,13 @@ Depends on:  ../product/03-v1-scope.md, ../session/01-roles-and-members.md, ../s
 Decides:     What the traffic host polls, how often, and which objects it carries; what an identity and a state carry, and when a state goes out; how a receiving machine creates, freezes, dresses, and removes each copy, and how traffic's routine draws them; the object-mirror engine; traffic's notifications and its list of traffic packs; how ATC audio picks the ATC app, sends its frames, and plays them; the settings; the budgets; and the cases for the bench (node 6.14).
 ```
 
+> **Note**
+> Stage 11b's tentative decision that [traffic and ATC audio are shared apart](../interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) gives each its own switch (user, 2026-10-31), so the traffic host and the ATC host can be two pilots, and where this design says the "Share my traffic and ATC" switch sends one request that claims both keys, each switch writes its own.
+
+> **Note**
+> Stage 11b's tentative decision that [the Traffic and ATC audio tabs hold their sharing, settings, and warnings](../interface/decisions.md#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon) changes [notifications](#notifications) and [traffic packs](#traffic-packs) until the apps' design confirms it (user, 2026-10-31).
+> The two counts are kept live on a receiving pilot's Traffic tab, flagged by a dot on its icon, in place of notifications on the banner, and every pilot's Traffic tab compares each receiving pilot's known traffic packs with the traffic host's, so the crew's lists reach each other's cores, which [left open](#left-open) leaves to the user.
+
 On the traffic host, traffic polls the sim's AI aircraft and helicopters within the radius setting, and the ground objects within 1km whose titles it allows, twice a second.
 It sends each object's identity once, and its state when it changes or every 5s.
 Every other machine creates a frozen copy of each object, and traffic's routine `Traffic` in our WASM module draws each copy every frame, 1s behind the traffic host's reads.

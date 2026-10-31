@@ -6,6 +6,9 @@ Depends on:  01-aims.md, 03-v1-scope.md, ../sync/01-profile-entries.md, ../sync/
 Decides:     What Dual Input must allow for each Soon and Later pick, and what v1 builds now so that it does.
 ```
 
+> **Note**
+> Stage 11b's tentative decision that [traffic and ATC audio are shared apart](../interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) makes the ATC host a role apart from the traffic host (user, 2026-10-31), so v1 has three roles, as [roles and members](../session/01-roles-and-members.md#the-table-of-roles) lists them, where [Roles](#roles) counts two.
+
 v1 builds what each Soon and Later pick in [the plan](plan.md) needs from it, so no pick rebuilds part of v1, because v1 gives up features, never design ([01-aims](01-aims.md#aims)).
 That's channels that each declare how they travel, catch-up as a pipeline of steps, hosts inside the sim that load modules by name, one table of roles, a session that holds passengers, one protocol for every client, a profile format with room to grow, and a recording that's a replay log of every input.
 v1 doesn't build the input layer, but it builds the two things the layer starts from: a core that starts with every sim run, and a connection to the sim that comes up with no flight loaded.

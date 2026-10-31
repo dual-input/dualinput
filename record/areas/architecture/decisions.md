@@ -832,6 +832,9 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Traffic and ATC audio each hold a role, and one request claims both
 
+> **Note**
+> Since 2026-10-31, each switch writes its own feature's key, and nothing sends the request that claims both, since [traffic and ATC audio are shared apart](../interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) (user).
+
 - **Decided:** traffic declares the traffic host's key and ATC audio the ATC host's, and the platform offers one request that claims several keys together, refused whole if any guard denies one.
   The apps' "Share my traffic and ATC" switch sends it with both keys, and shows on while the pilot holds both, so the platform never knows what either key is for.
   This changes [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host), which gives the two one role that can split.

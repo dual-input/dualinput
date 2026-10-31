@@ -20,6 +20,13 @@ Decides:     The scope of every v1 feature.
 > So loading a pilot's flight for them, which preflight's "Not in v1" leaves out, is in v1 from the world map.
 > The Go to button is also unavailable, and says why, while the joiner lacks the PF's aircraft.
 
+> **Note**
+> Stage 11b's tentative decision that [traffic and ATC audio are shared apart](../interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) changes [traffic sync](#traffic-sync) and [hearing ATC](#hearing-atc) until the apps' design confirms it (user, 2026-10-31).
+> Each has a host of its own, taken by a switch of its own, "Share my traffic" or "Share my ATC", in place of one "Share my traffic and ATC" switch, and the rule that the traffic host is also the ATC host no longer holds.
+
+> **Note**
+> Stage 11b's tentative decision that [the Traffic and ATC audio tabs hold their sharing, settings, and warnings](../interface/decisions.md#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon) changes [traffic sync](#traffic-sync) until the apps' design confirms it (user, 2026-10-31): a receiving machine's two notifications become counts kept live on its Traffic tab, flagged by a dot on the tab's icon, and the page of traffic packs compares each receiving pilot's packs with the traffic host's.
+
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
 It says what Dual Input does, not how: mechanisms are for the sync design in `record/areas/sync/` and the architecture, step 7, and screens and wording for a later pass.

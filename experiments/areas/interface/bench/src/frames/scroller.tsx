@@ -277,37 +277,43 @@ function foldPage(box: HTMLElement) {
   // How far the page has left its rest, as a share of the fade, so the fades come in with it.
   const away = Math.min(1, box.scrollTop / TOP_FADE)
   const fold = (el: HTMLElement) => {
-    const under = -topOf(el)
-    const parts = ([...el.children] as HTMLElement[]).filter((p) => !p.dataset.foldRing)
+    // The scroll box cuts off everything above its top row, the ring's top line with it, so the
+    // card folds from the moment its ring reaches that row, and the line holds there (user,
+    // 2026-10-31: the line went while the corners stayed).
+    const under = 1 - topOf(el)
+    const parts = [...el.children] as HTMLElement[]
+    const drawn = el.nextElementSibling instanceof HTMLElement && el.nextElementSibling.dataset.foldRing ? el.nextElementSibling : null
     if (under <= 0) {
       if (el.dataset.folding) {
         delete el.dataset.folding
         setClip(el)
         parts.forEach((p) => setMask(p))
-        el.querySelector(":scope > [data-fold-ring]")?.remove()
+        drawn?.remove()
       }
       return
     }
     el.dataset.folding = "1"
-    // A card's border is a 1px ring outside its box, so the clip reaches 1px past the box at the
-    // sides and foot, its corners a pixel rounder to match, and the same ring is drawn along the
-    // held edge, so the card stays outlined all round as it folds (user, 2026-10-31: the border
-    // went as the fold started).
     const look = getComputedStyle(el)
     const round = parseFloat(look.borderTopLeftRadius) || 0
-    // Its color as the browser writes it, rgba() or oklab() among them.
+    setClip(el, `inset(${under}px 0 0 0 round ${round}px)`)
+    // A card's border is a 1px ring outside its box, which the clip cuts away, so the same ring is
+    // drawn around what shows, held edge and all, in a layer beside the card, since the card's own
+    // overflow hid the ring's sides when it was drawn inside (user, 2026-10-31: the border went as
+    // the fold started). Its color as the browser writes it, rgba() or oklab() among them.
     const ring = /([a-z]+\([^)]*\)) 0px 0px 0px 1px/.exec(look.boxShadow)?.[1]
-    setClip(el, `inset(${under - (ring ? 1 : 0)}px -1px -1px -1px round ${round + (ring ? 1 : 0)}px)`)
-    if (ring) {
-      let edge = el.querySelector<HTMLElement>(":scope > [data-fold-ring]")
+    if (ring && el.parentElement) {
+      let edge = drawn
       if (!edge) {
         edge = document.createElement("span")
         edge.dataset.foldRing = "1"
-        edge.style.cssText = "position:absolute;left:-1px;right:-1px;bottom:-1px;pointer-events:none;box-sizing:border-box;border-style:solid;border-width:1px"
-        if (look.position === "static") el.style.position = "relative"
-        el.appendChild(edge)
+        edge.style.cssText = "position:absolute;pointer-events:none;box-sizing:border-box;border-style:solid;border-width:1px"
+        if (getComputedStyle(el.parentElement).position === "static") el.parentElement.style.position = "relative"
+        el.after(edge)
       }
-      edge.style.top = `${under - 1}px`
+      edge.style.top = `${el.offsetTop + under - 1}px`
+      edge.style.left = `${el.offsetLeft - 1}px`
+      edge.style.width = `${el.offsetWidth + 2}px`
+      edge.style.height = `${el.offsetHeight - under + 2}px`
       edge.style.borderColor = ring
       edge.style.borderRadius = `${round + 1}px`
     }
@@ -331,6 +337,7 @@ function foldPage(box: HTMLElement) {
     setMask(el, `linear-gradient(to bottom, rgba(0,0,0,${1 - away}) ${-top}px, #000 ${TOP_FADE - top}px)`)
   }
   const visit = (el: HTMLElement) => {
+    if (el.dataset.foldRing) return
     if (el.matches(SURFACE)) fold(el)
     else if (el.querySelector(SURFACE)) for (const c of el.children) visit(c as HTMLElement)
     else fade(el)

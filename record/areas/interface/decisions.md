@@ -225,9 +225,9 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - and on every pilot's tab, the traffic packs on this PC with their versions, as [traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs) lists them, for pilots to compare with the host's by hand, titled as the packs detected, since packs missing from Dual Input's known list don't show, and set apart in a tint as a supplement to the check.
 
   These replace traffic's two notifications on the banner, and traffic feeds no item of the match check, so the session card's heads-up list stays about the flight; the crew's lists of packs don't travel between the cores.
-  The ATC audio tab holds "Share my ATC" and who shares; on the ATC host, which program the capture takes, or that it's waiting for one; the ATC app and ATC volume settings; that only the ATC host runs an ATC app, and that Dual Input carries no voice, so the crew talks over Discord; and the output device, shown but set in Settings.
-  It holds no check and no rules, since everyone understands sharing audio, so it shows only what goes wrong in Dual Input's own pipeline, which for now is the capture waiting for an ATC app (user, 2026-10-31).
-  While a tab holds a warning, an amber dot shows on its icon in the tab bar, on every page: for traffic, a pack that differs or either count above 0, and for ATC audio, such as its capture waiting for an ATC app; the dot is big enough to notice, and no bigger.
+  The ATC audio tab holds "Share my ATC" and who shares; in the card, the setting of this pilot's role: the ATC app on the ATC host, Automatic or a program playing audio, marked while the capture takes it, and the ATC volume while another member is the ATC host; that Dual Input plays the ATC host's ATC app on every other pilot's machine; and the output device, shown but set in Settings.
+  It holds no check and no rules, since everyone understands sharing audio, and shows only what goes wrong in Dual Input's own pipeline, which for now is nothing, since Automatic waits for an ATC app silently (user, 2026-10-31).
+  While a tab holds a warning, an amber dot shows on its icon in the tab bar, on every page: for traffic, either count above 0, and ATC audio has none yet; the dot is big enough to notice, and no bigger.
   While a feature is being shared in the session, the header shows its tab's icon in green after the session's phase, so it shows on every page, for every pilot, host or not; the crew list's chips say who is sharing (user, 2026-10-31).
   Outside a session both switches are off and can't be turned on, since a role is a session key, and the settings still change.
   Settled by the user on 2026-10-31.
@@ -241,7 +241,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Leaves out:**
   - Comparing the crew's traffic packs automatically, which the count covers.
   - What the list can't show: packs missing from traffic's list of known packs, which starts with `fsltl-traffic-base`, and a streamed pack's version, which it has none of on disk ([traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs)); the scenery, which nothing compares, stays a rule a pilot reads.
-  - A warning when ATC breaks up, from the frames the core helper conceals, which waits for a threshold, and the sim's own ATC, which pilots who know ATC apps have off already (user, 2026-10-31).
+  - A warning when ATC breaks up, from the frames the core helper conceals, which waits for a threshold; a warning while the capture waits for an ATC app; and the sim's own ATC, which pilots who know ATC apps have off already (user, 2026-10-31).
   - What else sets the ATC audio tab's dot, the tabs' words, and their look.
 
 ## Traffic polls within the sim's 200km cap, with no radius setting

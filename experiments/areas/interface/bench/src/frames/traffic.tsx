@@ -530,56 +530,149 @@ function TrafficPage({
 }
 
 // ATC audio's tab holds no check and no rules: everyone understands sharing audio, How it works
-// says only the sharing pilot runs an ATC app, and the tab shows only what goes wrong in Dual
-// Input's own pipeline (user, 2026-10-31). Of those, the one ATC audio's tab shows is the sharing
-// pilot's capture waiting for an ATC app, which the core helper reports, looking every 2s
-// (record/areas/traffic-atc/01-traffic-and-atc.md, The ATC host); a link that drops is the header's,
-// and an output device that's gone is every sound's, so Settings'. Tried and dropped: a check line
-// for each thing a pilot sets up by hand, then rules for them; turning off the sim's own ATC, which
-// pilots who know ATC apps have off already, "none of our business"; and a warning when ATC breaks
-// up, from the frames the helper conceals, which waits for a threshold (user, 2026-10-31).
-// Its settings each serve one side: the ATC app, which program a host shares, Automatic capturing
-// the first of BeyondATC and SayIntentions that runs, which shows while this pilot shares, with what
-// the capture takes or that it's waiting, and outside a session, where the settings still change;
-// and the ATC volume, how loud another host's ATC plays here, for everyone not sharing. The output
+// says Dual Input plays the sharing pilot's ATC app on every other pilot's machine, and the tab
+// shows only what goes wrong in Dual Input's own pipeline (user, 2026-10-31), which is nothing yet:
+// Automatic waits for an ATC app silently, a link that drops is the header's, and an output device
+// that's gone is every sound's, so Settings'. Tried and dropped: a check line for each thing a pilot
+// sets up by hand, then rules for them; turning off the sim's own ATC, which pilots who know ATC
+// apps have off already, "none of our business"; a warning while the capture waits for an ATC app;
+// a status line under the picker, which the picker's own live mark says; and a warning when ATC
+// breaks up, from the frames the core helper conceals, which waits for a threshold (user,
+// 2026-10-31).
+// The card holds the setting of the role this pilot has, as Traffic's does: the ATC app while they
+// share, the volume while another pilot shares, nothing while nobody shares, and both outside a
+// session, where the settings still change (user, 2026-10-31: the volume in the card). The output
 // device carries every sound Dual Input plays, so it's set in Settings and only shown here. The
 // words are drafts.
-type Capture = "capturing" | "waiting"
+type Capture = "capturing" | "none"
 type CaptureLater = { after: number; capture: Capture }[]
 
-// What the capture takes, under the ATC app it's set to: the program it's capturing, or that it's
-// waiting for one, in the warning's color, which also lights the tab's dot. Its icon centers on the
-// capitals as a check line's does, from the baseline: half its 14px less half Geist's 8.5px capitals
-// at 12px is 2.75px.
-function CaptureStatus({
-  capture,
-  style,
+// The ATC app setting, as FS Copilot's dropdown was (FS Copilot fork, AtcHost.cs, read in
+// record/areas/traffic-atc/results/2026-10-17-fsc-atc-code.txt): Automatic, which captures the
+// first known ATC app that's running, then every program playing audio, the known ATC apps first,
+// for the core helper lists the programs that own an audio session; a program picked is a
+// preference, not a lock (record/areas/traffic-atc/01-traffic-and-atc.md, The ATC host). Closed, it
+// says what it captures, with a green dot by the chevron while it does, the sync's green, which says
+// engaged, where its coming and going moves no word (user, 2026-10-31; tried and dropped: the dot
+// before the name, which pushed it aside):
+// "Automatic · BeyondATC", or "Automatic" alone while no ATC app runs, and open, beside the
+// program it captures (user, 2026-10-31). The
+// sim and Dual Input itself never show, since capturing the sim would take all its sound. The
+// programs other than BeyondATC are examples.
+const PLAYING = ["BeyondATC", "Discord", "Google Chrome", "Spotify"]
+const KNOWN = ["BeyondATC", "SayIntentions"]
+function AtcAppPicker({
+  running,
+  liveLook,
 }: {
-  capture: Capture
-  style: React.CSSProperties
+  running?: string
+  liveLook: React.CSSProperties
 }) {
-  const icon = "size-3.5 shrink-0 [transform:translateY(2.75px)]"
-  return capture === "waiting" ? (
-    <p className="flex items-baseline gap-2 text-xs text-warning" style={style}>
-      <TriangleAlert className={icon} />
-      Waiting for BeyondATC or SayIntentions to start
-    </p>
-  ) : (
-    <p
-      className="flex items-baseline gap-2 text-xs text-muted-foreground"
-      style={style}
-    >
-      <CircleCheck className={icon + " text-success"} />
-      Capturing BeyondATC
-    </p>
+  const {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectGroup,
+    SelectLabel,
+    SelectSeparator,
+    SelectItem,
+  } = useUI()
+  const [value, setValue] = useState("auto")
+  const captured =
+    value === "auto" ? running : PLAYING.includes(value) ? value : running
+  const items = [
+    { value: "auto", label: "Automatic" },
+    ...PLAYING.map((p) => ({ value: p, label: p })),
+  ]
+  return (
+    <div className="flex flex-col gap-3">
+      <span className="text-sm">ATC app</span>
+      <Select
+        items={items}
+        value={value}
+        onValueChange={(v: string | null) => v && setValue(v)}
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue>
+            {(v: string) => (
+              <span className="flex w-full items-center gap-2">
+                {v === "auto" ? "Automatic" : v}
+                {v === "auto" && captured && (
+                  <span className="text-muted-foreground" style={liveLook}>
+                    · {captured}
+                  </span>
+                )}
+                {captured && (
+                  <span
+                    className="mr-1 ml-auto size-1.5 shrink-0 rounded-full bg-success"
+                    style={liveLook}
+                  />
+                )}
+              </span>
+            )}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="auto">Automatic</SelectItem>
+          <SelectSeparator />
+          <SelectGroup>
+            <SelectLabel>Playing audio</SelectLabel>
+            {[...PLAYING]
+              .sort(
+                (x, y) => Number(KNOWN.includes(y)) - Number(KNOWN.includes(x))
+              )
+              .map((p) => (
+                <SelectItem key={p} value={p}>
+                  <span className="flex items-center gap-2">
+                    {p}
+                    {p === captured && (
+                      <span className="size-1.5 shrink-0 rounded-full bg-success" />
+                    )}
+                  </span>
+                </SelectItem>
+              ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
   )
 }
 
-// The page changes in one moment (ease.tsx), as Traffic's does: the card's row as there; the ATC
-// app's part of the card opening or shutting as sharing starts or stops; the volume's card opening
-// or shutting the same way; and the capture's status, when it starts or waits again, going and
-// coming back as the other, the tab's dot with it. The status keeps its height as it turns, so it
-// comes back as soon as it's gone, not waiting on a layout that doesn't move.
+// The volume of another pilot's ATC here, and the device it plays on, which Settings sets.
+function AtcVolume() {
+  const { Slider } = useUI()
+  const [volume, setVolume] = useState([100])
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between text-sm">
+        <span>Volume</span>
+        <span className="text-muted-foreground tabular-nums">{volume[0]}%</span>
+      </div>
+      <Slider
+        value={volume}
+        onValueChange={(v: number | number[]) =>
+          setVolume(Array.isArray(v) ? v : [v])
+        }
+        max={100}
+        step={5}
+      />
+      <span className="text-xs text-muted-foreground">
+        Plays on Headset (USB Audio) ·{" "}
+        <InlineLink
+          onClick={() => toast("Opening Settings on the output device")}
+        >
+          Change in Settings
+        </InlineLink>
+      </span>
+    </div>
+  )
+}
+
+// The page changes in one moment (ease.tsx), as Traffic's does: the card's row as there, and its
+// settings as the role changes, the card easing to their height, opening as sharing starts and
+// shutting as it stops; an ATC app that starts or stops while this pilot shares changes only the
+// picker's live mark, which comes and goes in place.
 function AtcPage({
   where,
   capture = "capturing",
@@ -589,16 +682,6 @@ function AtcPage({
   capture?: Capture
   later?: CaptureLater
 }) {
-  const {
-    Card,
-    CardContent,
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
-    Slider,
-  } = useUI()
   useFlightAround(where.session)
   const [sharer, setSharer] = useState<Sharer>(where.sharer)
   const [captureNow, setCaptureNow] = useState(capture)
@@ -610,22 +693,25 @@ function AtcPage({
     // It plays once, from the frame's opening.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  const [volume, setVolume] = useState([100])
-  const hosts = (s: Sharer) => where.session && s === "You"
-  const sets = (s: Sharer) => hosts(s) || !where.session
-  useShowDot("atc", hosts(sharer) && captureNow === "waiting")
+  const role = (s: Sharer) =>
+    !where.session ? "both" : s === "You" ? "host" : s ? "listen" : "none"
   useShowShared("atc", where.session ? sharer : undefined)
   useShowShared("traffic", where.session ? "James" : undefined)
-  const m = useMoment(`${sharer}|${hosts(sharer) ? captureNow : ""}`, {
-    sharer,
-    capture: captureNow,
-  })
+  const m = useMoment(
+    `${sharer}|${role(sharer) === "host" ? captureNow : ""}`,
+    { sharer, capture: captureNow }
+  )
   const [from, to] = [m.from.sharer, m.to.sharer]
-  const turns = hosts(from) && hosts(to) && m.from.capture !== m.to.capture
-  const apps = [
-    { value: "auto", label: "Automatic: BeyondATC or SayIntentions" },
-    { value: "pick", label: "Pick a program playing audio…" },
-  ]
+  const turns =
+    role(from) === "host" &&
+    role(to) === "host" &&
+    m.from.capture !== m.to.capture
+  const shown = role(m.shown.sharer)
+  // Only a sharing pilot's capture runs, so only theirs takes a program.
+  const running =
+    shown === "host" && m.shown.capture === "capturing"
+      ? "BeyondATC"
+      : undefined
   return (
     <ScrollPage>
       <RoleCard
@@ -634,70 +720,31 @@ function AtcPage({
         session={where.session}
         sharer={m.shown.sharer}
         live={sharer}
-        moment={{ stage: m.stage, from, to, settings: sets(from) !== sets(to) }}
+        moment={{
+          stage: m.stage,
+          from,
+          to,
+          settings: role(from) !== role(to),
+        }}
         onChange={(on) => setSharer(on ? "You" : undefined)}
       >
-        {sets(m.shown.sharer) && (
-          <div className="flex flex-col gap-3">
-            <span className="text-sm">ATC app</span>
-            <Select items={apps} defaultValue="auto">
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {apps.map((a) => (
-                  <SelectItem key={a.value} value={a.value}>
-                    {a.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {hosts(m.shown.sharer) && (
-              <CaptureStatus
-                capture={m.shown.capture}
-                style={part(m.stage, turns, 0, true, true)}
+        {shown !== "none" && (
+          <>
+            {(shown === "host" || shown === "both") && (
+              <AtcAppPicker
+                running={running}
+                liveLook={part(m.stage, turns, 0, true, true)}
               />
             )}
-          </div>
+            {(shown === "listen" || shown === "both") && <AtcVolume />}
+          </>
         )}
       </RoleCard>
       <HowAndCheck
-        how="One pilot shares. Their ATC app runs on their PC alone, and Dual Input plays its voice on everyone else's."
-        note="It carries ATC, not your voices, so talk to each other, and hear the readbacks, on Discord."
+        how="One pilot shares. Dual Input captures audio from their selected ATC app and plays it on every other pilot's machine."
         lines={[]}
         rules={false}
       />
-      <Room
-        open={!hosts(m.shown.sharer)}
-        style={part(m.stage, hosts(from) !== hosts(to), 2, false)}
-      >
-        <Card className="[--card-spacing:--spacing(5)]">
-          <CardContent className="flex flex-col gap-3">
-            <div className="flex items-center justify-between text-sm">
-              <span>Crew's ATC volume</span>
-              <span className="text-muted-foreground tabular-nums">
-                {volume[0]}%
-              </span>
-            </div>
-            <Slider
-              value={volume}
-              onValueChange={(v: number | number[]) =>
-                setVolume(Array.isArray(v) ? v : [v])
-              }
-              max={100}
-              step={5}
-            />
-            <span className="text-xs text-muted-foreground">
-              Plays on Headset (USB Audio) ·{" "}
-              <InlineLink
-                onClick={() => toast("Opening Settings on the output device")}
-              >
-                Change in Settings
-              </InlineLink>
-            </span>
-          </CardContent>
-        </Card>
-      </Room>
     </ScrollPage>
   )
 }

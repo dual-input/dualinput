@@ -112,7 +112,7 @@ function HowAndCheck({ how, lines, rules }: { how: string; lines: Line[]; rules:
         <h2 className="text-sm font-medium">How it works</h2>
         <p className="text-sm text-muted-foreground">{how}</p>
       </section>
-      <section className="flex flex-col gap-1">
+      <section className="flex flex-col gap-2">
         <h2 className="text-sm font-medium">{rules ? "Rules" : "Check"}</h2>
         <ul className="flex flex-col gap-3">
           {lines.map((l) => (

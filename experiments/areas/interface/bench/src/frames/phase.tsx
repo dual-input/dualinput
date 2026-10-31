@@ -4,8 +4,6 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Headset, Plane } from "lucide-react"
 
-import { useUI } from "@/bench/ui"
-
 // Preflight runs from the moment the PF is in a flight on the ground
 // (record/areas/session/02-units.md, Preflight), so a joiner whose PF waits at a stand is in it
 // before they're in the flight, then syncing once its countdown ends. Before preflight there's
@@ -66,7 +64,7 @@ function fade(stage: Stage, delay = 0): React.CSSProperties {
 }
 
 // The phase: a dot in its color, pulsing while preflight waits on the crew, from the kit's ping,
-// then its name in capitals, in the same color, then a chip for each feature being shared; under
+// then its name in capitals, in the same color, then the icon of each feature being shared; under
 // them, from the dot's edge, for a phase that needs it, a line saying what it is, muted, cut at the
 // header's room. The line keeps its words while it closes.
 function PhaseFace({ phase, stage, dotStays, shared }: { phase: SessionPhase; stage: Stage; dotStays: boolean; shared: Shared }) {
@@ -87,7 +85,7 @@ function PhaseFace({ phase, stage, dotStays, shared }: { phase: SessionPhase; st
         <span className={"text-[10px] leading-4 font-semibold tracking-widest whitespace-nowrap uppercase " + p.text} style={fade(stage)}>
           {p.name}
         </span>
-        <SharedChips shared={shared} style={fade(stage)} />
+        <SharedIcons shared={shared} style={fade(stage)} />
       </div>
       <div className="overflow-hidden transition-[height] ease-in-out" style={{ height: p.line ? 16 : 0, transitionDuration: `${STEP.move}ms` }}>
         <span className="block truncate text-xs leading-4 text-muted-foreground" style={fade(stage, STEP.lineAfter)}>
@@ -98,36 +96,26 @@ function PhaseFace({ phase, stage, dotStays, shared }: { phase: SessionPhase; st
   )
 }
 
-// While traffic or ATC audio is being shared, the header carries the crew list's chip for it, its
-// tab's icon in an outline, after the phase's name, so it shows on every page, and a tooltip says
-// who is sharing (user, 2026-10-31). Chip and icon are the sync's green, which says engaged, as the
-// phase's name does; the crew list's chips stay muted, since there they say whose role it is.
-// Tried and dropped: a green bar above the tab's icon, as an Airbus FCU pushbutton's, which looked
-// ugly (user, 2026-10-31).
+// While traffic or ATC audio is being shared, the header shows its tab's icon after the phase's
+// name, 12px, in the sync's green, which says engaged, as the name does, so it shows on every page,
+// with no tooltip, since the crew list's chips say who is sharing (user, 2026-10-31). Tried and
+// dropped: the crew list's chip in green, its outline and icon alike, whose bright outline read
+// bigger than the crew list's faint one though both measure 26px by 20px; and a green bar above
+// the tab's icon, as an Airbus FCU pushbutton's, which looked ugly (user, 2026-10-31).
 const FEATURES: { id: SharedFeature; icon: React.ReactNode; noun: string }[] = [
-  { id: "traffic", icon: <Plane />, noun: "traffic" },
-  { id: "atc", icon: <Headset />, noun: "ATC" },
+  { id: "traffic", icon: <Plane className="size-3" />, noun: "traffic" },
+  { id: "atc", icon: <Headset className="size-3" />, noun: "ATC" },
 ]
-function SharedChips({ shared, style }: { shared: Shared; style: React.CSSProperties }) {
-  const { Badge, Tooltip, TooltipContent, TooltipTrigger } = useUI()
+function SharedIcons({ shared, style }: { shared: Shared; style: React.CSSProperties }) {
   const on = FEATURES.filter((f) => shared[f.id])
   if (!on.length) return null
   return (
-    <span className="flex gap-1" style={style}>
-      {on.map((f) => {
-        const who = shared[f.id]!
-        const says = `${who === "You" ? "You're" : `${who} is`} sharing ${f.noun}`
-        return (
-          <Tooltip key={f.id}>
-            <TooltipTrigger render={<span className="inline-flex animate-in duration-300 fade-in" />}>
-              <Badge variant="outline" aria-label={says} className="border-success px-1.5 text-success">
-                {f.icon}
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent>{says}</TooltipContent>
-          </Tooltip>
-        )
-      })}
+    <span className="flex items-center gap-1.5 text-success" style={style}>
+      {on.map((f) => (
+        <span key={f.id} role="img" aria-label={`Sharing ${f.noun}`} className="flex animate-in duration-300 fade-in">
+          {f.icon}
+        </span>
+      ))}
     </span>
   )
 }

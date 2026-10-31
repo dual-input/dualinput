@@ -115,6 +115,19 @@
   top: 0;
 }
 
+/* Taking control (frames/flight.tsx): the ring beside the label fills over the hold, its path
+   counted 100 long as the countdown ring's is, and a take swells the button past its size and
+   settles it. */
+@keyframes hold-ring {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes control-taken {
+  0% { transform: scale(0.97); }
+  45% { transform: scale(1.025); }
+  100% { transform: scale(1); }
+}
+
 /* A ring that spreads from a button pressed into a good state, in its text color, and fades. */
 @keyframes ready-pulse {
   from { box-shadow: 0 0 0 0 currentColor; opacity: 0.6; }

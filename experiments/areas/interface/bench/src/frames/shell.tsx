@@ -2,11 +2,12 @@
 // and the frame that gives a page the theme and the preset's components.
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { CircleArrowUp, CircleX, ExternalLink, Headset, PersonStanding, Plane, Settings as Gear, Users } from "lucide-react"
+import { CircleArrowUp, CircleX, ExternalLink, Headset, PersonStanding, Plane, Settings as Gear, TriangleAlert, Users } from "lucide-react"
 
 import { ThemeContext, UI, UIContext, useUI } from "@/bench/ui"
 import { themeVars, type Theme } from "@/bench/theme"
 import { FailureBox, SERVICE_NOT_RUNNING } from "./failure"
+import { ControlContext, SessionContext, TakeControl, type Control } from "./flight"
 import { HeaderStart, PhaseContext, type SessionPhase } from "./phase"
 
 // The sim's EFB sizes its apps from a 516 by 716 base (record/areas/interface/log.md, 2026-10-24).
@@ -15,7 +16,8 @@ export const EFB = { width: 516, height: 716 }
 // The version the frames run, an example, which the header's mark and an update's row both show.
 const VERSION = "1.0.2"
 
-const TABS = [
+export type Tab = "session" | "traffic" | "atc" | "avatars" | "settings"
+const TABS: { id: Tab; icon: typeof Users; label: string }[] = [
   { id: "session", icon: Users, label: "Session" },
   { id: "traffic", icon: Plane, label: "Traffic" },
   { id: "atc", icon: Headset, label: "ATC audio" },
@@ -86,9 +88,10 @@ export type HeaderStatus = {
   update?: string
 }
 
-type Tone = "bad" | "news"
+type Tone = "bad" | "warn" | "news"
 const TONE_ICON = {
   bad: <CircleX className="size-4 text-destructive" />,
+  warn: <TriangleAlert className="size-4 text-warning" />,
   news: <CircleArrowUp className="size-4 text-primary" />,
 }
 
@@ -101,23 +104,43 @@ type Issue = { tone: Tone; word: string; title: string; detail: string; action?:
 // with no internet Dual Input can't tell whether they answer, as setup's check tells the two apart.
 // Our servers are "can't reach", where a refusal's are "couldn't", since this is a state that lasts
 // rather than one attempt.
-function issuesOf(status: HeaderStatus, Button: ReturnType<typeof useUI>["Button"]): Issue[] {
+// In a session each row says what it costs there (user, 2026-10-31). Offline cuts every link to the
+// crew, so it stays an error, and the core reconnects and replays what was missed
+// (record/areas/sync/03-catch-up.md, Replaying a short outage). A running session doesn't wait on
+// the backend (record/areas/network/01-between-machines.md, Who does what), and a relayed link that
+// drops shows on its crewmate's row, so our servers become a warning about joins. The links have
+// their paths already, so the firewall becomes a warning too, and Fix stays, since a relayed link
+// can go direct within a minute of the rule landing (inference, from iroh's 60s punch). An update
+// restarts the sim, which would end the flight, so it waits until the session ends.
+function issuesOf(status: HeaderStatus, Button: ReturnType<typeof useUI>["Button"], inSession = false): Issue[] {
   const issues: Issue[] = []
-  if (status.offline) issues.push({ tone: "bad", word: "Internet", title: "Your PC seems offline", detail: "Dual Input needs an internet connection to host or join." })
-  else if (status.servers === "unreachable") issues.push({ tone: "bad", word: "Servers", title: "Can't reach our servers", detail: "Dual Input needs them to connect you and your crew." })
-  if (status.firewall === "blocks")
+  if (status.offline)
     issues.push({
       tone: "bad",
+      word: "Internet",
+      title: "Your PC seems offline",
+      detail: inSession ? "You've lost the connection to the others. When it's back, Dual Input will reconnect you and replay what you missed." : "Dual Input needs an internet connection to host or join.",
+    })
+  else if (status.servers === "unreachable")
+    issues.push({
+      tone: inSession ? "warn" : "bad",
+      word: "Servers",
+      title: "Can't reach our servers",
+      detail: inSession ? "Pilots can't join or rejoin your session until our servers are back." : "Dual Input needs them to connect you and your crew.",
+    })
+  if (status.firewall === "blocks")
+    issues.push({
+      tone: inSession ? "warn" : "bad",
       word: "Firewall",
       title: "Windows Firewall is blocking Dual Input",
-      detail: "You can still connect through our relay servers, but with more latency.",
+      detail: inSession ? "Connections may run through our relay servers, with more latency." : "You can still connect through our relay servers, but with more latency.",
       action: (
         <Button size="sm" variant="secondary" onClick={() => toast("Waiting for Windows")}>
           Fix
         </Button>
       ),
     })
-  if (status.update)
+  if (status.update && !inSession)
     issues.push({
       tone: "news",
       word: "Update",
@@ -178,7 +201,7 @@ const HEADER = { openAfter: 200, closeAfter: 300, grow: 260, shrink: 220, spring
 // window, a row for each with its action, if it has one, while the window dims under it. A press
 // keeps it open, as does pressing anything in it, so its actions and their popovers don't close
 // under the pointer; then a press elsewhere or Escape closes it. The copy is drafts.
-export function Header({ status, startOpen, phase }: { status: HeaderStatus; startOpen?: boolean; phase?: SessionPhase }) {
+export function Header({ status, startOpen, phase, inSession }: { status: HeaderStatus; startOpen?: boolean; phase?: SessionPhase; inSession?: boolean }) {
   const { Button } = useUI()
   const [hovered, setHovered] = useState(false)
   const [open, setOpen] = useState(!!startOpen)
@@ -233,8 +256,8 @@ export function Header({ status, startOpen, phase }: { status: HeaderStatus; sta
       }
     />
   )
-  const rows = issuesOf(status, Button)
-  const trouble = rows.some((r) => r.tone === "bad")
+  const rows = issuesOf(status, Button, inSession)
+  const trouble = rows.some((r) => r.tone !== "news")
   // The mark lines up with the pages' 20px gutter.
   if (!rows.length)
     return (
@@ -315,21 +338,24 @@ export function Header({ status, startOpen, phase }: { status: HeaderStatus; sta
 
 // Every row the header's island can show, each under a line saying when, in a box of the island's
 // width, colors, and padding, so each shows as it does there. The version is an example.
-const EVERY_ISSUE: { when: string; status: HeaderStatus }[] = [
+const EVERY_ISSUE: { when: string; status: HeaderStatus; inSession?: boolean }[] = [
   { when: "PC offline, in place of our servers", status: { offline: true } },
   { when: "Our servers down", status: { servers: "unreachable" } },
   { when: "Firewall blocking", status: { firewall: "blocks" } },
-  { when: "Update ready", status: { update: "1.0.3" } },
+  { when: "Update ready, outside a session only", status: { update: "1.0.3" } },
+  { when: "In a session: PC offline", status: { offline: true }, inSession: true },
+  { when: "In a session: our servers down", status: { servers: "unreachable" }, inSession: true },
+  { when: "In a session: firewall blocking", status: { firewall: "blocks" }, inSession: true },
 ]
 function EveryIssueSheet() {
   const { Button } = useUI()
   return (
     <div className="p-5">
       <div className="mx-auto flex flex-col gap-6 rounded-xl bg-popover p-4 shadow-xl" style={{ width: HEADER.openWidth }}>
-        {EVERY_ISSUE.map(({ when, status }) => (
+        {EVERY_ISSUE.map(({ when, status, inSession }) => (
           <div key={when} className="flex flex-col gap-2">
             <Label>{when}</Label>
-            <IssueRow issue={issuesOf(status, Button)[0]} />
+            <IssueRow issue={issuesOf(status, Button, inSession)[0]} />
           </div>
         ))}
         <div className="flex flex-col gap-2">
@@ -341,12 +367,12 @@ function EveryIssueSheet() {
   )
 }
 
-export function TabBar() {
+export function TabBar({ active = "session" }: { active?: Tab }) {
   return (
     <nav className="flex h-14 shrink-0 border-t">
-      {TABS.map(({ id, icon: Icon, label }, i) => (
-        <button key={id} title={label} className={"relative flex flex-1 items-center justify-center outline-none hover:text-foreground " + (i === 0 ? "text-primary" : "text-muted-foreground")}>
-          {i === 0 && <span className="absolute inset-x-4 -top-px h-0.5 rounded-full bg-primary" />}
+      {TABS.map(({ id, icon: Icon, label }) => (
+        <button key={id} title={label} className={"relative flex flex-1 items-center justify-center outline-none hover:text-foreground " + (id === active ? "text-primary" : "text-muted-foreground")}>
+          {id === active && <span className="absolute inset-x-4 -top-px h-0.5 rounded-full bg-primary" />}
           <Icon className="size-5" />
         </button>
       ))}
@@ -406,25 +432,34 @@ function ServiceDown({ closed }: { closed: boolean }) {
 // stays at the EFB's height, as the EFB's window does, for a page that scrolls part of itself.
 // It's marked data-app-frame, the app's window, which a popup opens inside. A frame can open with
 // the header's details out, and say how its link to the service stands. A session page in it says
-// its phase, which the frame hands to the header.
-export function AppFrame({ theme, status = {}, header = true, tabs = true, fixed, headerOpen, core = "connected", children }: { theme: Theme; status?: HeaderStatus; header?: boolean; tabs?: boolean; fixed?: boolean; headerOpen?: boolean; core?: Core; children?: React.ReactNode }) {
+// its phase, which the frame hands to the header, whether a session is held, which the header's
+// rows read, and once the flight starts, how control stands, which the frame draws under the tabs
+// on every page (flight.tsx). A frame can open on a tab other than the session's.
+export function AppFrame({ theme, status = {}, header = true, tabs = true, tab, fixed, headerOpen, core = "connected", children }: { theme: Theme; status?: HeaderStatus; header?: boolean; tabs?: boolean; tab?: Tab; fixed?: boolean; headerOpen?: boolean; core?: Core; children?: React.ReactNode }) {
   const ui = UI[theme.preset] ?? UI.nova
   const down = core === "not-running" || core === "closed"
   const [phase, setPhase] = useState<SessionPhase>()
+  const [inSession, setInSession] = useState(false)
+  const [control, setControl] = useState<Control>()
   return (
     <ThemeContext.Provider value={theme}>
       <UIContext.Provider value={ui}>
       <PhaseContext.Provider value={setPhase}>
+      <SessionContext.Provider value={setInSession}>
+      <ControlContext.Provider value={setControl}>
         <div
           data-app-frame
           className="dark relative flex flex-col overflow-hidden rounded-xl border bg-background font-sans text-foreground shadow-2xl"
           style={{ ...(themeVars(theme) as React.CSSProperties), width: EFB.width, ...(fixed ? { height: EFB.height } : { minHeight: EFB.height }) }}
         >
-          {header && <Header status={down ? {} : status} startOpen={headerOpen} phase={down ? undefined : phase} />}
+          {header && <Header status={down ? {} : status} startOpen={headerOpen} phase={down ? undefined : phase} inSession={!down && inSession} />}
           <div className="flex min-h-0 flex-1 flex-col">{down ? <ServiceDown closed={core === "closed"} /> : children}</div>
-          {tabs && !down && <TabBar />}
+          {tabs && !down && <TabBar active={tab} />}
+          {tabs && !down && <TakeControl control={control} />}
           {!down && <Reconnecting on={core === "reconnecting"} />}
         </div>
+      </ControlContext.Provider>
+      </SessionContext.Provider>
       </PhaseContext.Provider>
       </UIContext.Provider>
     </ThemeContext.Provider>

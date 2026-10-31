@@ -13,6 +13,7 @@ import { AppFrame, EFB, EveryIssueFrame } from "./shell"
 import { SetupFlowFrame } from "./setup-check"
 import { CrewmateStatesFrame, HeadsUpFrame, HomeFirstTimeFrame, HomeLaterFrame, ReconnectingFrame, RefusalsFrame, WaysFrame, type Action } from "./home"
 import { AircraftPickerFrame } from "./aircraft"
+import { TrafficFrame } from "./traffic"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
 // one gets a Replay button beside its name, which draws it afresh. A home page with Host and Join
@@ -100,8 +101,36 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Every match check message", tall: true, draw: (t) => <HeadsUpFrame theme={t} /> },
     ],
   },
+  // The flight, once preflight's countdown has ended: the session card with its differences folded
+  // to counts, and taking control in a strip under the tabs, on every tab. The joiner monitoring
+  // while James flies, and the host flying; the joiner taking control with a hold, then James
+  // taking it back; a click let go too soon; a late joiner's catch-up, which control waits for;
+  // the link to James, flying, lost; and the strip with long bindings, held.
+  {
+    name: "Flying",
+    frames: [
+      { name: "Flying, pilot monitoring", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-pm" /> },
+      { name: "Flying, pilot flying", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-pf" /> },
+      { name: "Taking control, then James takes it back", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-take" /> },
+      { name: "A click let go too soon", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-tap" /> },
+      { name: "Flying, catching up", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-catching-up" /> },
+      { name: "Flying, link to the pilot flying lost", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-pf-lost" /> },
+      { name: "Bound to a key combination", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-combo" /> },
+      { name: "Bound to a hardware button", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-hardware" /> },
+    ],
+  },
+  // The traffic tab, in a flight: James sharing, nobody, and this pilot.
+  {
+    name: "Traffic",
+    frames: [
+      { name: "James shares", draw: (t) => <TrafficFrame theme={t} sharer="James" /> },
+      { name: "Nobody shares", draw: (t) => <TrafficFrame theme={t} /> },
+      { name: "You share", draw: (t) => <TrafficFrame theme={t} sharer="You" /> },
+    ],
+  },
   // What the app's window says of itself on any page. The header on home, open over what needs the
-  // pilot, or at rest; with nothing, as on every other frame, it's the mark alone. Then the window
+  // pilot, or at rest, and in a flight, where its rows say what each costs there and an update
+  // waits; with nothing, as on every other frame, it's the mark alone. Then the window
   // when its link to the service, the core, is lost: reconnecting after a crash, over home here,
   // where the service comes back on its own; not running; and quit.
   {
@@ -110,7 +139,9 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Header, an update", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ update: "1.0.3" }} headerOpen /> },
       { name: "Header, needs attention", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ servers: "unreachable", firewall: "blocks", update: "1.0.3" }} headerOpen /> },
       { name: "Header, needs attention, at rest", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ servers: "unreachable", firewall: "blocks", update: "1.0.3" }} /> },
-      { name: "Header, every issue", draw: (t) => <EveryIssueFrame theme={t} /> },
+      { name: "Header in a flight, needs attention", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-pf" header={{ servers: "unreachable", firewall: "blocks", update: "1.0.3" }} headerOpen /> },
+      { name: "Header in a flight, offline", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-pf" header={{ offline: true, firewall: "blocks" }} headerOpen /> },
+      { name: "Header, every issue", tall: true, draw: (t) => <EveryIssueFrame theme={t} /> },
       { name: "Service, reconnecting", replay: true, draw: (t) => <ReconnectingFrame theme={t} /> },
       { name: "Service, not running", draw: (t) => <AppFrame theme={t} core="not-running" fixed /> },
       { name: "Service, closed", draw: (t) => <AppFrame theme={t} core="closed" fixed /> },

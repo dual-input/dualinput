@@ -1,9 +1,9 @@
 // The EFB app's home page, designed from the user's sketch of 2026-10-26: the start card, then on a
 // pilot's first visit a short guide to how a session works that ends on the aircraft check, and on
 // later visits the profile authors' notes. The aircraft and the notes are examples.
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
-import { ArrowRightLeft, BookOpen, Check, ChevronDown, ChevronUp, CircleCheck, CircleX, Copy, ExternalLink, Hand, Info, LogOut, RotateCcw, TriangleAlert, X } from "lucide-react"
+import { ArrowRightLeft, BookOpen, Check, ChevronDown, ChevronUp, CircleCheck, CircleX, Copy, ExternalLink, Hand, Info, LogOut, RadioTower, RotateCcw, TriangleAlert, X } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
@@ -16,6 +16,7 @@ import { AircraftContext, AircraftPicker, LOADED, LOADED_UNSUPPORTED, PROFILES, 
 import { NO_SCROLLBAR, useScroller } from "./scroller"
 import { cueHeads, EmptyHead, Head } from "./figure-head"
 import { useShowPhase, type SessionPhase } from "./phase"
+import { useShowControl, useShowSession, type Control } from "./flight"
 
 
 // How hosting and joining can be refused: either one when the PC seems offline, which Windows
@@ -88,7 +89,7 @@ const GREEN_BUTTON = "bg-success text-success-foreground hover:bg-success/90 foc
 // them out of the flight; or their link lost, which Dual Input mends on its own, or their sim
 // crashed, after which it rejoins them once they're back in a flight. It shows under their name,
 // the two troubles in the warning color. The aircraft is an example.
-type Whereabouts = "closed" | "starting" | "menu" | "world-map" | "loading" | "aircraft" | "lost" | "crashed"
+type Whereabouts = "closed" | "starting" | "menu" | "world-map" | "loading" | "aircraft" | "catching-up" | "lost" | "crashed"
 const WHERE: Record<Whereabouts, { when: string; shows: string; trouble?: boolean }> = {
   closed: { when: "Their sim isn't running", shows: "Sim not running" },
   starting: { when: "Their sim is starting", shows: "Starting the sim" },
@@ -96,6 +97,9 @@ const WHERE: Record<Whereabouts, { when: string; shows: string; trouble?: boolea
   "world-map": { when: "At Free flight's world map", shows: "At the world map" },
   loading: { when: "Loading a flight", shows: "Loading a flight" },
   aircraft: { when: "In a flight before the session has an aircraft, or in another one", shows: "In the A320" },
+  // A late joiner's or a returning pilot's catch-up, during which control can't pass to them
+  // (record/areas/sync/03-catch-up.md, While catch-up runs).
+  "catching-up": { when: "In the flight, catching up, so control can't pass to them yet", shows: "Catching up" },
   lost: { when: "Their link is lost, and Dual Input is reconnecting them", shows: "Connection lost", trouble: true },
   crashed: { when: "Their sim crashed, and Dual Input rejoins them once they're back in a flight", shows: "Sim crashed", trouble: true },
 }
@@ -107,8 +111,15 @@ const WHERE: Record<Whereabouts, { when: string; shows: string; trouble?: boolea
 // each pilot is are examples.
 // Once preflight runs, a pilot in the flight shows their link, its path and round trip, as the
 // network's slice carries them, and whether they're ready.
-type Pilot = { name: string; hue: string; at?: Whereabouts; flying?: boolean; way?: Way; link?: string; ready?: boolean }
-type Session = { joined: boolean; crew: Pilot[]; preflight?: Preflight }
+// The pilot who shares their traffic and ATC, the traffic and ATC host, has a chip on their row, so
+// who shares shows on the session page, though the switch lives on the traffic tab (user,
+// 2026-10-31; record/areas/product/03-v1-scope.md, Traffic sync).
+type Pilot = { name: string; hue: string; at?: Whereabouts; flying?: boolean; way?: Way; link?: string; ready?: boolean; shares?: boolean }
+// A session can open with its flight already started: then whether this pilot's catch-up runs, the
+// binding's name for the take-control strip, and a demo of taking control, which can hand control
+// back to the pilot flying a while later.
+type Flight = { catchingUp?: boolean; bound?: string; demo?: "hold" | "tap"; handsBack?: boolean }
+type Session = { joined: boolean; crew: Pilot[]; preflight?: Preflight; shares?: string; flight?: Flight }
 
 // Preflight, from the moment the PF is in a flight on the ground, as every core follows the PF's
 // `preflight` key (record/areas/session/02-units.md, Preflight and The match check;
@@ -241,7 +252,13 @@ const LONG_CHECKLIST: ChecklistItem[] = [
   { id: "yaw_damper", name: "Yaw damper", default: "Off", description: "Each sim engages its own, so leave it off until the flight starts" },
   { id: "parking_brake", name: "Parking brake", default: "Set" },
 ]
-const SESSIONS: Record<"alone" | "crewmate" | "bigger-crew" | "joined" | "preflight-alone" | "preflight-loading" | "preflight-crew" | "preflight-settling" | "preflight-dropped" | "preflight-countdown" | "preflight-joined" | "preflight-worst", Session> = {
+// The key the take-control strip shows as bound, an example of a name the helper gives a key.
+const BOUND = "F9"
+const SESSIONS: Record<
+  | "alone" | "crewmate" | "bigger-crew" | "joined" | "preflight-alone" | "preflight-loading" | "preflight-crew" | "preflight-settling" | "preflight-dropped" | "preflight-countdown" | "preflight-joined" | "preflight-worst"
+  | "flying-pm" | "flying-pf" | "flying-take" | "flying-tap" | "flying-catching-up" | "flying-pf-lost" | "flying-combo" | "flying-hardware",
+  Session
+> = {
   alone: { joined: false, crew: [] },
   crewmate: { joined: false, crew: [{ ...JAMES, at: "world-map" }] },
   "bigger-crew": {
@@ -258,12 +275,27 @@ const SESSIONS: Record<"alone" | "crewmate" | "bigger-crew" | "joined" | "prefli
   // with everyone ready, so the countdown runs. Then on the joiner's card, in the flight.
   "preflight-alone": { joined: false, crew: [], preflight: { settled: true, differences: [], checklist: PF_CHECKLIST } },
   "preflight-loading": { joined: false, crew: [{ ...JAMES, at: "loading" }], preflight: { settled: true, differences: [], checklist: PF_CHECKLIST } },
-  "preflight-crew": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }], preflight: { settled: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
+  "preflight-crew": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
   "preflight-worst": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }, ...BIG_CREW], preflight: { settled: true, differences: MOST_DIFFERENCES, checklist: LONG_CHECKLIST } },
   "preflight-settling": { joined: false, crew: [{ ...JAMES, link: LINK }], preflight: { settled: false, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
   "preflight-dropped": { joined: false, crew: [{ ...JAMES, at: "lost" }], preflight: { settled: true, ready: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
-  "preflight-countdown": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }], preflight: { settled: true, ready: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
-  "preflight-joined": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], preflight: { settled: true, differences: DIFFERENCES.joiner, checklist: EVERY_PILOT } },
+  "preflight-countdown": { joined: false, crew: [{ ...JAMES, link: LINK, ready: true }], shares: DEMO_HOST, preflight: { settled: true, ready: true, differences: DIFFERENCES.host, checklist: PF_CHECKLIST } },
+  "preflight-joined": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner, checklist: EVERY_PILOT } },
+  // In the flight, preflight over, its differences folded to counts: the joiner, monitoring, with
+  // James flying; the host, flying; the joiner taking control with a hold, and later James taking
+  // it back; the joiner letting go too soon; a late joiner whose catch-up runs; and the joiner whose
+  // link to James, flying, is lost. James shares traffic and ATC.
+  "flying-pm": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND } },
+  "flying-pf": { joined: false, crew: [{ ...JAMES, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.host }, flight: { bound: BOUND } },
+  "flying-take": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND, demo: "hold", handsBack: true } },
+  "flying-tap": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND, demo: "tap" } },
+  "flying-catching-up": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND, catchingUp: true } },
+  "flying-pf-lost": { joined: true, crew: [{ ...JAMES, flying: true, at: "lost" }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: BOUND } },
+  // Long bindings on the strip, to see how they fit: a four-key combination, which the binding
+  // doesn't take (record/areas/control/01-take-control.md, The binding), and a hardware button,
+  // whose name format is hypothetical.
+  "flying-combo": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: "Ctrl+Shift+Alt+T", demo: "hold" } },
+  "flying-hardware": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], shares: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: "TCA Sidestick Button 3", demo: "hold" } },
 }
 // How long the countdown runs once every counted pilot is ready, in seconds.
 const COUNTDOWN = 3
@@ -334,6 +366,7 @@ function CrewRow({ pilot, pop, end, alive }: { pilot: Pilot; pop?: number; end?:
               {pilot.link}
             </Badge>
           )}
+          {pilot.shares && <SharesChip />}
         </span>
         {under && <span className={"text-xs " + (under.trouble ? "text-warning" : "text-muted-foreground")}>{under.shows}</span>}
       </div>
@@ -343,6 +376,22 @@ function CrewRow({ pilot, pop, end, alive }: { pilot: Pilot; pop?: number; end?:
         </span>
       )}
     </li>
+  )
+}
+
+// The traffic and ATC host's chip: an icon alone, since a row already holds a name of up to 20
+// characters, Pilot flying, and the link, and a tooltip says what it means. The words are drafts.
+function SharesChip() {
+  const { Badge, Tooltip, TooltipContent, TooltipTrigger } = useUI()
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span className="inline-flex" />}>
+        <Badge variant="outline" aria-label="Shares traffic and ATC" className="px-1.5 text-muted-foreground">
+          <RadioTower />
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent>Shares traffic and ATC</TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -958,7 +1007,28 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
   useEffect(() => {
     turnedIn.current = true
   }, [])
-  const me: Pilot = { name: "You", hue: "orange", flying: !joined }
+  // Who flies: the host when the session starts, and whoever takes control after. Once the flight
+  // has started, the session page says how control stands, and the app's frame draws the strip
+  // under the tabs (flight.tsx).
+  const firstPf = (joined && crew.find((p) => p.flying)?.name) || "You"
+  const [pf, setPf] = useState(firstPf)
+  const flight = session.flight
+  const me: Pilot = { name: "You", hue: "orange", flying: pf === "You", at: started && flight?.catchingUp ? "catching-up" : undefined, shares: session.shares === "You" }
+  const pfPilot = crew.find((p) => p.name === pf)
+  const takeNow = useRef(() => setPf("You"))
+  const control = useMemo<Control | undefined>(
+    () => (started ? { mine: pf === "You", pf, catchingUp: !!flight?.catchingUp, pfLost: pfPilot?.at === "lost", bound: flight?.bound, take: () => takeNow.current(), demo: flight?.demo } : undefined),
+    [started, pf, pfPilot?.at, flight],
+  )
+  useShowControl(control)
+  // A demo that hands control back: the pilot flying takes it again a while after this pilot took
+  // it, and the strip turns back into the button. The banner says who has control
+  // (record/areas/control/01-take-control.md, A pass), so the app adds nothing.
+  useEffect(() => {
+    if (!flight?.handsBack || pf !== "You" || firstPf === "You") return
+    const t = window.setTimeout(() => setPf(firstPf), 2500)
+    return () => clearTimeout(t)
+  }, [pf, flight, firstPf])
 
   const [ready, setReady] = useState(!!preflight?.ready)
   const [goneWithout, setGoneWithout] = useState<string[]>([])
@@ -1027,7 +1097,8 @@ function SessionHalf({ session, started, folded, onStarted, onLeave }: { session
   // The folded row has room for ROW_HEADS heads before Ready with its ring; a bigger crew shows the
   // first ones and a count of the rest.
   const waitedOn = (p: Pilot) => !!preflight && !started && !p.ready && !goneWithout.includes(p.name)
-  const everyone = [me, ...crew.filter(waitedOn), ...crew.filter((p) => !waitedOn(p))]
+  const crewNow = crew.map((p) => ({ ...p, flying: p.name === pf, shares: session.shares === p.name }))
+  const everyone = [me, ...crewNow.filter(waitedOn), ...crewNow.filter((p) => !waitedOn(p))]
   // Where a pilot stands, for their head's badge in the folded row.
   const stateOf = (p: Pilot, you: boolean): HeadState | undefined => {
     if (you ? ready : p.ready) return "ready"
@@ -1334,7 +1405,14 @@ function StartCard({ aircraft, servers = "answering", play, session, next, opens
   // own, since a refusal's room eases open there and a measured height would clip it.
   const [half, setHalf] = useState<"start" | "session">(session ? "session" : "start")
   const [shown, setShown] = useState<SessionKey>(session ?? "alone")
-  const [started, setStarted] = useState(false)
+  // A session that a frame moves on to can be in a flight already.
+  const [started, setStarted] = useState(!!SESSIONS[shown].flight)
+  const [startedFor, setStartedFor] = useState(shown)
+  if (shown !== startedFor) {
+    setStartedFor(shown)
+    if (SESSIONS[shown].flight) setStarted(true)
+  }
+  useShowSession(half === "session")
   const checklist = half === "session" && !started ? SESSIONS[shown].preflight?.checklist : undefined
   const [foldedNow, setFoldedNow] = useState(false)
   const folded = foldedNow && !!checklist

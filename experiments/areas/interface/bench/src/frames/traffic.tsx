@@ -20,7 +20,6 @@ import { useShowPhase } from "./phase"
 import { useShowControl, useShowSession, type Control } from "./flight"
 import { ScrollPage } from "./scroller"
 import { Head } from "./figure-head"
-import { ConfirmButton } from "./confirm"
 import { FIGURE_COLORS } from "./figure-portrait"
 
 // Who shares as the frame opens: James, nobody, or this pilot; or no session at all. The pilots'
@@ -45,15 +44,13 @@ function useFlightAround(session: boolean) {
 // right. With nobody sharing, "Share my traffic" and its switch; while this pilot is sharing, their
 // head and "You're sharing traffic" with the switch on, to stop; while another pilot is, their head
 // and "James is sharing traffic" with Take over in place of the switch, which says what a switch
-// with a note under it had to (user, 2026-10-31). Taking over ends the other pilot's sharing, and
-// for ATC their ATC app's conversation with the crew (record/areas/session/01-roles-and-members.md,
-// The traffic and ATC host), so it asks first in the confirm popover, as Leave does. Outside a
-// session the switch is off and can't turn on. Then the role's own setting, which shows while this
+// with a note under it had to, and takes over at once, with no question (user, 2026-10-31).
+// Outside a session the switch is off and can't turn on. Then the role's own setting, which shows while this
 // pilot is sharing and hides when they stop, and outside a session, where the settings still change
 // (user, 2026-10-31). How it works says what the switch does, so the card carries no description,
 // and a status of something happening now takes the progressive (user, 2026-10-31).
 function RoleCard({ id, label, noun, session, sharer, onChange, children }: { id: string; label: string; noun: string; session: boolean; sharer: Sharer; onChange: (on: boolean) => void; children?: React.ReactNode }) {
-  const { Card, CardContent, Separator, Switch } = useUI()
+  const { Button, Card, CardContent, Separator, Switch } = useUI()
   const someone = session ? sharer : undefined
   return (
     <Card className="[--card-spacing:--spacing(5)]">
@@ -68,7 +65,9 @@ function RoleCard({ id, label, noun, session, sharer, onChange, children }: { id
           {!session && <span className="text-xs font-normal text-muted-foreground">Sharing needs a session</span>}
         </label>
         {someone && someone !== "You" ? (
-          <ConfirmButton label="Take over" question={`Take over from ${someone}?`} go="Take over" onConfirm={() => onChange(true)} trigger={{ variant: "outline", size: "sm" }} tone="primary" align="end" />
+          <Button variant="outline" size="sm" onClick={() => onChange(true)}>
+            Take over
+          </Button>
         ) : (
           <Switch id={id} disabled={!session} checked={someone === "You"} onCheckedChange={onChange} />
         )}

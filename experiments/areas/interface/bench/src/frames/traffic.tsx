@@ -82,7 +82,8 @@ function RoleCard({ id, label, noun, session, sharer, onChange, children }: { id
   )
 }
 
-// How the feature works, in a sentence or two, then the check: one line for each rule of it, each
+// How the feature works, in a sentence or two under a heading in the card titles' style, since in
+// the small muted label it read as a caption (user, 2026-10-31); then the check: one line for each rule of it, each
 // with what Dual Input knows of it now (user, 2026-10-31: one place to explain, suggest, teach,
 // and troubleshoot, where a guide, a comparison, and tips were scattered). A line is checked and
 // fine, checked and different, with what differs under it, which also lights the tab's dot, or
@@ -98,7 +99,7 @@ function HowAndCheck({ how, lines }: { how: string; lines: Line[] }) {
   return (
     <>
       <section className="flex flex-col gap-2">
-        <Label>How it works</Label>
+        <h2 className="text-sm font-medium">How it works</h2>
         <p className="text-sm text-muted-foreground">{how}</p>
       </section>
       <section className="flex flex-col gap-3">

@@ -167,6 +167,7 @@ function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: C
       CREW_PACKS.length ? { state: "differs", says: "The crew's traffic packs match yours", detail: <Lines items={CREW_PACKS} /> } : { state: "ok", says: "The crew's traffic packs match yours" },
       { state: "unchecked", says: "The crew's own AI traffic is off", detail: "Each crewmate's Traffic tab checks this" },
       { state: "unchecked", says: "The crew's scenery matches yours", detail: "Dual Input can't check this" },
+      { state: "unchecked", says: "Your traffic density suits the crew's sims", detail: "Each shared aircraft has a performance cost for receiving pilots, so lower the density in the sim or your traffic app as needed" },
     ]
   if (sharer && session) {
     const packsDiffer = packs.filter((p) => p.host !== p.mine)
@@ -177,37 +178,19 @@ function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: C
       counts.missing ? { state: "differs", says: `${sharer}'s aircraft are showing in your sim`, detail: `${counts.missing} missing or shown as stand-ins` } : { state: "ok", says: `${sharer}'s aircraft are showing in your sim` },
     ]
   }
-  // The rules, in the user's words (user, 2026-10-31). Multiplayer off is a rule for all of Dual
-  // Input, not traffic's, so it isn't here (user, 2026-10-31). Copies are frozen rather than held to
-  // the ground, so with other scenery, whose ground can sit at another elevation, they float or sink
-  // (record/areas/traffic-atc/01-traffic-and-atc.md, Known limits).
+  // The rules, in the user's words (user, 2026-10-31). Copies are frozen rather than held to the
+  // ground, so with other scenery, whose ground can sit at another elevation, they float or sink
+  // (record/areas/traffic-atc/01-traffic-and-atc.md, Known limits). Traffic has no radius setting,
+  // since the traffic generators keep their aircraft near the pilot and the airport's own aircraft,
+  // where the frame rate goes, stay at any radius, so the lever is the density at the traffic's
+  // source (record/areas/interface/decisions.md, Traffic polls within the sim's 200km cap).
+  // Multiplayer off is a rule for all of Dual Input, not traffic's, so it isn't here.
   return [
     { state: "rule", says: "Receiving pilots should turn off their own AI traffic", detail: "To ensure everyone sees the same traffic" },
     { state: "rule", says: "Everyone should have the same traffic packs installed", detail: "To avoid missing or incorrect aircraft" },
     { state: "rule", says: "Everyone should have the same scenery", detail: "To avoid issues such as floating aircraft due to different ground elevation" },
+    { state: "rule", says: "The sharing pilot sets the traffic density", detail: "Each shared aircraft has a performance cost for receiving pilots, so lower it at the source as needed" },
   ]
-}
-
-// The radius the traffic host polls within, up to the SDK's 200km cap, 200km at first
-// (record/areas/traffic-atc/01-traffic-and-atc.md, Settings). A line under it says what it does, as
-// a net that picks aircraft up rather than traffic spreading out (user, 2026-10-31), and why a pilot
-// would lower it: each copy costs the crew's sims about what the
-// same AI traffic costs the host's, 44.7 fps with none, 38.0 with BeyondATC's 73 aircraft, and 32.5
-// with 132 copies in FS Copilot's measure, while the traffic between machines stays small, about
-// 2.5KB/s for 120 aircraft (record/areas/traffic-atc/01-traffic-and-atc.md, Budgets).
-function Radius() {
-  const { Slider } = useUI()
-  const [km, setKm] = useState([200])
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between text-sm">
-        <span>Radius</span>
-        <span className="text-muted-foreground tabular-nums">{km[0]} km</span>
-      </div>
-      <Slider value={km} onValueChange={(v: number | number[]) => setKm(Array.isArray(v) ? v : [v])} min={10} max={200} step={10} />
-      <span className="text-xs text-muted-foreground">Dual Input picks up the AI traffic within this distance of you. Each shared aircraft has a performance cost for receiving pilots, so lower it here as needed.</span>
-    </div>
-  )
 }
 
 function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 } }: { where: Where; packs?: keyof typeof PACKS; counts?: Counts }) {
@@ -217,9 +200,7 @@ function TrafficPage({ where, packs = "match", counts = { missing: 0, others: 0 
   useShowDot("traffic", differs(lines))
   return (
     <ScrollPage>
-      <RoleCard id="share-traffic" label="Share my traffic" noun="traffic" session={where.session} sharer={sharer} onChange={(on) => setSharer(on ? "You" : undefined)}>
-        {(sharer === "You" || !where.session) && <Radius />}
-      </RoleCard>
+      <RoleCard id="share-traffic" label="Share my traffic" noun="traffic" session={where.session} sharer={sharer} onChange={(on) => setSharer(on ? "You" : undefined)} />
       <HowAndCheck how="One pilot shares. Dual Input watches the AI traffic in their sim and injects it into everyone else's. This works by reading the traffic straight from the sim and works regardless of the original method of traffic generation." lines={lines} rules={!where.session || !sharer} />
     </ScrollPage>
   )

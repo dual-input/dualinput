@@ -220,7 +220,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 ## The Traffic and ATC audio tabs hold their sharing, settings, and warnings, flagged by a dot on the tab's icon
 
-- **Decided:** the Traffic tab holds "Share my traffic" and who shares, the radius setting, what a receiving pilot sets up by hand, and traffic's warnings:
+- **Decided:** the Traffic tab holds "Share my traffic" and who shares, what a receiving pilot sets up by hand, and traffic's warnings:
   - a check of each receiving pilot's known traffic packs against the traffic host's, with their versions, which every pilot's Traffic tab shows, so the host sees which crewmates lack or add which packs, and a receiving pilot sees their own;
   - and, on a receiving pilot's tab, two counts kept live: the traffic host's aircraft this sim shows as stand-ins or not at all, and the aircraft that aren't the traffic host's.
 
@@ -238,6 +238,18 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - How each pilot's list of traffic packs reaches the others, which traffic's design adds; [traffic and ATC](../traffic-atc/01-traffic-and-atc.md#left-open) expected an ask and an answer on a channel of traffic's.
   - What the check can't see: packs missing from traffic's list of known packs, which starts with `fsltl-traffic-base`; a streamed pack's version, which it has none of on disk; and the scenery ([traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs)).
   - What else sets the ATC audio tab's dot, the tabs' words, and their look.
+
+## Traffic polls within the sim's 200km cap, with no radius setting
+
+- **Decided:** traffic has no radius setting: the traffic host polls AI aircraft and helicopters within 200km, the most the SDK allows, and ground objects within 1km, as before.
+  When the crew's frame rate suffers, the Traffic tab's rules point the sharing pilot to the traffic density where their traffic comes from, the sim's settings or their traffic app's.
+  This changes [03-v1-scope](../product/03-v1-scope.md#traffic-sync), which gives a radius as a setting, [traffic and ATC](../traffic-atc/01-traffic-and-atc.md#settings)'s polling and settings, and [the Traffic and ATC audio tabs](#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon), which held the setting.
+  Settled by the user on 2026-10-31.
+- **Because:**
+  - A smaller radius leaves the aircraft that cost the most: at EGLL, reading AI aircraft within 100km in place of 200km kept 519.3 of 521.2 inputs a second, and within 50km kept 445.5 ([architecture log](../architecture/log.md#2026-10-16-reading-traffic-only-as-it-changes-within-50km-once-a-second-and-the-flight-model-and-camera-at-their-send-rates-would-shrink-p10s-recording-from-45-to-13-mb-an-hour)), so the traffic generators keep their aircraft near the pilot, and the airport's own aircraft, parked and taxiing, stay at any radius a pilot would pick (user, 2026-10-31).
+  - Each copy costs a receiving sim about what the same AI traffic costs the host's: 44.7 fps with none, 38.0 with BeyondATC's 73 aircraft, and 32.5 with 132 copies in FS Copilot's measure ([budgets](../traffic-atc/01-traffic-and-atc.md#budgets)), so lowering the density at its source lightens the host's sim and every receiving sim alike.
+  - A setting that changes little is one more thing every pilot reads past.
+- **Leaves out:** whether a copy far away costs a receiving sim the frame time one at the gate does, which nobody has measured.
 
 [p02]: ../install/log.md#2026-10-25-an-egui-window-in-a-rust-tray-app-takes-96-mb-to-153-mb-while-open-and-leaves-62-mb-to-69-mb-in-the-process-once-it-closes-where-tauris-leaves-37-mb
 [p08]: log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight

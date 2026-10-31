@@ -13,6 +13,9 @@ Decides:     What the traffic host polls, how often, and which objects it carrie
 > Stage 11b's tentative decision that [the Traffic and ATC audio tabs hold their sharing, settings, and warnings](../interface/decisions.md#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon) changes [notifications](#notifications) and [traffic packs](#traffic-packs) until the apps' design confirms it (user, 2026-10-31).
 > The two counts are kept live on a receiving pilot's Traffic tab, flagged by a dot on its icon, in place of notifications on the banner, and every pilot's Traffic tab compares each receiving pilot's known traffic packs with the traffic host's, so the crew's lists reach each other's cores, which [left open](#left-open) leaves to the user.
 
+> **Note**
+> Stage 11b's tentative decision that [traffic polls within the sim's 200km cap, with no radius setting](../interface/decisions.md#traffic-polls-within-the-sims-200km-cap-with-no-radius-setting) takes out the radius setting until the apps' design confirms it (user, 2026-10-31): [polling](#polling) reads AI aircraft and helicopters within 200km, and [settings](#settings) loses its row.
+
 On the traffic host, traffic polls the sim's AI aircraft and helicopters within the radius setting, and the ground objects within 1km whose titles it allows, twice a second.
 It sends each object's identity once, and its state when it changes or every 5s.
 Every other machine creates a frozen copy of each object, and traffic's routine `Traffic` in our WASM module draws each copy every frame, 1s behind the traffic host's reads.

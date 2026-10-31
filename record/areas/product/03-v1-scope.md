@@ -27,6 +27,9 @@ Decides:     The scope of every v1 feature.
 > **Note**
 > Stage 11b's tentative decision that [the Traffic and ATC audio tabs hold their sharing, settings, and warnings](../interface/decisions.md#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon) changes [traffic sync](#traffic-sync) until the apps' design confirms it (user, 2026-10-31): a receiving machine's two notifications become counts kept live on its Traffic tab, flagged by a dot on the tab's icon, and the page of traffic packs compares each receiving pilot's packs with the traffic host's.
 
+> **Note**
+> Stage 11b's tentative decision that [traffic polls within the sim's 200km cap, with no radius setting](../interface/decisions.md#traffic-polls-within-the-sims-200km-cap-with-no-radius-setting) takes out [traffic sync](#traffic-sync)'s radius setting until the apps' design confirms it (user, 2026-10-31), since the traffic generators keep their aircraft near the pilot and the airport's own aircraft stay at any radius.
+
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
 It says what Dual Input does, not how: mechanisms are for the sync design in `record/areas/sync/` and the architecture, step 7, and screens and wording for a later pass.

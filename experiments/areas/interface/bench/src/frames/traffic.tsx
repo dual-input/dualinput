@@ -108,11 +108,11 @@ const STATE_ICON: Record<State, React.ReactNode> = {
 function HowAndCheck({ how, lines, rules }: { how: string; lines: Line[]; rules: boolean }) {
   return (
     <>
-      <section className="flex flex-col gap-2">
+      <section className="flex flex-col gap-1">
         <h2 className="text-sm font-medium">How it works</h2>
         <p className="text-sm text-muted-foreground">{how}</p>
       </section>
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-1">
         <h2 className="text-sm font-medium">{rules ? "Rules" : "Check"}</h2>
         <ul className="flex flex-col gap-3">
           {lines.map((l) => (
@@ -179,14 +179,16 @@ function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: C
       counts.missing ? { state: "differs", says: `${sharer}'s aircraft are showing in your sim`, detail: `${counts.missing} missing or shown as stand-ins` } : { state: "ok", says: `${sharer}'s aircraft are showing in your sim` },
     ]
   }
-  // The rules, in the user's words (user, 2026-10-31). Copies are frozen rather than held to the
+  // The rules, in the user's words (user, 2026-10-31). With multiplayer on, each pilot also sees the
+  // other pilot's copy of the shared aircraft (unverified, from our FS Copilot sessions;
+  // record/areas/product/ideas.md, Multiplayer kept on). Copies are frozen rather than held to the
   // ground, so with other scenery, whose ground can sit at another elevation, they float or sink
   // (record/areas/traffic-atc/01-traffic-and-atc.md, Known limits).
   return [
-    { state: "rule", says: "Receiving pilots should turn off their own AI traffic" },
-    { state: "rule", says: "Everyone should disable multiplayer" },
+    { state: "rule", says: "Receiving pilots should turn off their own AI traffic", detail: "To ensure everyone sees the same traffic" },
+    { state: "rule", says: "Everyone should disable multiplayer", detail: "To avoid seeing a duplicate of your aircraft" },
     { state: "rule", says: "Everyone should have the same traffic packs installed", detail: "To avoid missing or incorrect aircraft" },
-    { state: "rule", says: "Everyone should have the same scenery", detail: "To avoid issues such as aircraft floating on the ground, due to different ground elevation" },
+    { state: "rule", says: "Everyone should have the same scenery", detail: "To avoid issues such as floating aircraft due to different ground elevation" },
   ]
 }
 

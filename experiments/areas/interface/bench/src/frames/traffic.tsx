@@ -15,7 +15,7 @@ import { CircleCheck, CircleDashed, TriangleAlert } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
-import { AppFrame, InlineLink, Label, useShowDot } from "./shell"
+import { AppFrame, InlineLink, useShowDot } from "./shell"
 import { useShowPhase } from "./phase"
 import { useShowControl, useShowSession, type Control } from "./flight"
 import { ScrollPage } from "./scroller"
@@ -88,12 +88,20 @@ function RoleCard({ id, label, noun, session, sharer, onChange, children }: { id
 // and troubleshoot, where a guide, a comparison, and tips were scattered). A line is checked and
 // fine, checked and different, with what differs under it, which also lights the tab's dot, or
 // beyond what Dual Input can check, so the line is the tip; with nobody sharing, every line waits.
-type State = "ok" | "differs" | "unchecked"
+type State = "ok" | "differs" | "unchecked" | "rule"
 type Line = { state: State; says: string; detail?: React.ReactNode }
 const STATE_ICON: Record<State, React.ReactNode> = {
   ok: <CircleCheck className="mt-0.5 size-4 shrink-0 text-success" />,
   differs: <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" />,
   unchecked: <CircleDashed className="mt-0.5 size-4 shrink-0 text-muted-foreground" />,
+  // A rule is a plain list's point rather than a state, so it takes a small solid dot, centered on
+  // the line where the states' icons fill a 16px box (user, 2026-10-31: the dashed circle read as
+  // "can't check" where nothing was being checked yet).
+  rule: (
+    <span className="flex size-4 shrink-0 items-center justify-center pt-1">
+      <span className="size-1.5 rounded-full bg-muted-foreground" />
+    </span>
+  ),
 }
 // While nobody's sharing, and outside a session, there's nothing to check, so the same lines are
 // the feature's rules, and the list says so (user, 2026-10-31).
@@ -105,7 +113,7 @@ function HowAndCheck({ how, lines, rules }: { how: string; lines: Line[]; rules:
         <p className="text-sm text-muted-foreground">{how}</p>
       </section>
       <section className="flex flex-col gap-3">
-        <Label>{rules ? "Rules" : "Check"}</Label>
+        <h2 className="text-sm font-medium">{rules ? "Rules" : "Check"}</h2>
         <ul className="flex flex-col gap-3">
           {lines.map((l) => (
             <li key={l.says} className="flex items-start gap-2.5">
@@ -157,21 +165,28 @@ function trafficLines(session: boolean, sharer: Sharer, packs: Pack[], counts: C
   if (sharer === "You")
     return [
       CREW_PACKS.length ? { state: "differs", says: "The crew's traffic packs match yours", detail: <Lines items={CREW_PACKS} /> } : { state: "ok", says: "The crew's traffic packs match yours" },
-      { state: "unchecked", says: "The crew's own AI traffic and multiplayer are off", detail: "Each crewmate's Traffic tab checks this" },
+      { state: "unchecked", says: "Multiplayer is off, yours and the crew's", detail: "Dual Input can't check this" },
+      { state: "unchecked", says: "The crew's own AI traffic is off", detail: "Each crewmate's Traffic tab checks this" },
       { state: "unchecked", says: "The crew's scenery matches yours", detail: "Dual Input can't check this" },
     ]
   if (sharer && session) {
     const packsDiffer = packs.filter((p) => p.host !== p.mine)
     return [
-      counts.others ? { state: "differs", says: "Your own AI traffic and multiplayer are off", detail: `${counts.others} aircraft in your sim aren't ${sharer}'s` } : { state: "ok", says: "Your own AI traffic and multiplayer are off" },
+      counts.others ? { state: "differs", says: "Your own AI traffic is off", detail: `${counts.others} aircraft in your sim aren't ${sharer}'s` } : { state: "ok", says: "Your own AI traffic is off" },
+      { state: "unchecked", says: "Multiplayer is off", detail: "Dual Input can't check this" },
       packsDiffer.length ? { state: "differs", says: `Your traffic packs match ${sharer}'s`, detail: <Lines items={packsDiffer.map((p) => packSays(p, sharer))} /> } : { state: "ok", says: `Your traffic packs match ${sharer}'s` },
       { state: "unchecked", says: `Your scenery matches ${sharer}'s`, detail: "Dual Input can't check this" },
       counts.missing ? { state: "differs", says: `${sharer}'s aircraft are showing in your sim`, detail: `${counts.missing} missing or shown as stand-ins` } : { state: "ok", says: `${sharer}'s aircraft are showing in your sim` },
     ]
   }
+  // The rules, in the user's words (user, 2026-10-31). Copies are frozen rather than held to the
+  // ground, so with other scenery, whose ground can sit at another elevation, they float or sink
+  // (record/areas/traffic-atc/01-traffic-and-atc.md, Known limits).
   return [
-    { state: "unchecked", says: "Everyone else turns off their own AI traffic and multiplayer" },
-    { state: "unchecked", says: "Everyone runs the same traffic packs and scenery", detail: "Dual Input compares the packs once someone's sharing" },
+    { state: "rule", says: "Receiving pilots should turn off their own AI traffic" },
+    { state: "rule", says: "Everyone should disable multiplayer" },
+    { state: "rule", says: "Everyone should have the same traffic packs installed", detail: "To avoid missing or incorrect aircraft" },
+    { state: "rule", says: "Everyone should have the same scenery", detail: "To avoid issues such as aircraft floating on the ground, due to different ground elevation" },
   ]
 }
 
@@ -227,8 +242,8 @@ function atcLines(session: boolean, sharer: Sharer, capture: "capturing" | "wait
       { state: "unchecked", says: "The sim's own ATC is off", detail: "Dual Input can't check this" },
     ]
   return [
-    { state: "unchecked", says: "Everyone else closes their own ATC app" },
-    { state: "unchecked", says: "Everyone turns off the sim's own ATC" },
+    { state: "rule", says: "Receiving pilots should close their own ATC app", detail: "To avoid hearing two" },
+    { state: "rule", says: "Everyone should turn off the sim's own ATC", detail: "Dual Input can't share it" },
   ]
 }
 

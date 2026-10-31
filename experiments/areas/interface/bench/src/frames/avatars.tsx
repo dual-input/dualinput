@@ -208,7 +208,7 @@ function AvatarsPage({ session, note, helpOpen }: { session: boolean; note?: Air
         <div className="flex flex-col">
           <IdentityCard name={name} onName={setName} hue={hue} onHue={setHue} region={page} className="[--card-spacing:--spacing(5)]" />
           <Room open={renamed.open} pad="pt-2.5" style={renamed.style}>
-            <p className="px-1 text-xs text-muted-foreground">Your crew sees your new name from your next session</p>
+            <p className="px-1 text-xs text-muted-foreground">Your new name will apply in your next flight</p>
           </Room>
         </div>
         <Visibility />

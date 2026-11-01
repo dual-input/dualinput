@@ -37,7 +37,7 @@ export function toast(text: string): void {
 /** One toast's look, which the kit's page shows on its own. */
 export function ToastCard({ text, leaving, style }: { text: string; leaving?: boolean; style?: React.CSSProperties }) {
   return (
-    <div className={cx("w-80 rounded-lg border border-border bg-popover p-4 text-[13px] leading-4 text-popover-foreground shadow-lg", leaving ? "animate-fade-out" : "animate-rise-in")} style={style}>
+    <div className={cx("w-80 rounded-4xl border border-border bg-popover p-4 text-[13px] leading-4 text-popover-foreground shadow-lg", leaving ? "animate-fade-out" : "animate-rise-in")} style={style}>
       {text}
     </div>
   )

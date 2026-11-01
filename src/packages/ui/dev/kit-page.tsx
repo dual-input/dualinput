@@ -9,11 +9,11 @@ import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 import { createRoot } from "react-dom/client"
 
-import { Badge, Button, Card, CardContent, CodeInput, Confirm, Dialog, Input, Kbd, Label, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
+import { Badge, Button, Card, CardContent, CodeInput, Confirm, Dialog, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
 import type { ButtonProps, ButtonSize, ButtonVariant } from "../src/index.ts"
 
 const SCALES = [0.72, 0.884, 1, 1.056, 1.225]
-const VARIANTS: ButtonVariant[] = ["default", "secondary", "outline", "ghost", "destructive", "link", "success", "warning", "danger"]
+const VARIANTS: ButtonVariant[] = ["default", "secondary", "outline", "ghost", "destructive", "success", "warning", "danger"]
 const SIZES: ButtonSize[] = ["xs", "sm", "default", "lg"]
 const FORCED: [string, string | undefined, boolean][] = [
   ["At rest", undefined, false],
@@ -54,8 +54,8 @@ function Buttons() {
           <div className="w-24 pt-7 text-xs text-muted-foreground">{variant}</div>
           {FORCED.map(([name, force, disabled]) => (
             <State key={name} name={name}>
-              <Button variant={variant} size={variant === "link" ? "inline" : "default"} disabled={disabled} {...({ "data-force": force } as ButtonProps)}>
-                {variant === "link" ? "See how" : "Host a session"}
+              <Button variant={variant} disabled={disabled} {...({ "data-force": force } as ButtonProps)}>
+                Host a session
               </Button>
             </State>
           ))}
@@ -100,6 +100,75 @@ function Buttons() {
             <Check />
             Ready
           </Button>
+        </State>
+      </Row>
+    </Section>
+  )
+}
+
+function Links() {
+  return (
+    <Section title="Link" note="One link, in a sentence or on its own. Hovering draws its line, in the color of its words.">
+      <Row>
+        <State name="In a sentence, live" width={260}>
+          <p className="text-muted-foreground">
+            Something wrong? <Link>Ask on our Discord</Link>
+          </p>
+        </State>
+        <State name="Hover" width={260}>
+          <p className="text-muted-foreground">
+            Something wrong? <Link data-force="hover">Ask on our Discord</Link>
+          </p>
+        </State>
+        <State name="Pressed" width={260}>
+          <p className="text-muted-foreground">
+            Something wrong? <Link data-force="hover active">Ask on our Discord</Link>
+          </p>
+        </State>
+        <State name="Hover, over lines" width={200}>
+          <p className="text-muted-foreground">
+            Something wrong? <Link data-force="hover">Ask on our Discord, where people can help</Link>
+          </p>
+        </State>
+      </Row>
+      <Row>
+        <State name="On its own, live">
+          <Link className="font-medium">See how</Link>
+        </State>
+        <State name="Hover">
+          <Link className="font-medium" data-force="hover">See how</Link>
+        </State>
+        <State name="Pressed">
+          <Link className="font-medium" data-force="hover active">
+            See how
+          </Link>
+        </State>
+        <State name="Disabled">
+          <Link className="font-medium" disabled>See how</Link>
+        </State>
+        <State name="Muted, live">
+          <Link className="font-medium" tone="muted">Skip guide</Link>
+        </State>
+        <State name="Warning box's, live">
+          <Link className="font-medium" tone="warning">Continue anyway</Link>
+        </State>
+        <State name="Trouble box's, hover">
+          <Link className="font-medium" tone="destructive" data-force="hover">
+            Continue anyway
+          </Link>
+        </State>
+        <State name="With an icon, live">
+          <Link className="font-medium" icon={<ArrowRightLeft />}>Switch to a supported aircraft</Link>
+        </State>
+        <State name="With an icon, hover">
+          <Link className="font-medium" icon={<ArrowRightLeft />} data-force="hover">
+            Switch to a supported aircraft
+          </Link>
+        </State>
+        <State name="With an icon, disabled">
+          <Link className="font-medium" icon={<ArrowRightLeft />} disabled>
+            Learn how to build a profile
+          </Link>
         </State>
       </Row>
     </Section>
@@ -533,6 +602,7 @@ function KitPage() {
       <div id="kit-scroll" className="overflow-y-auto px-5 pt-6 [&::-webkit-scrollbar]:w-0" style={{ height: "calc(100% - 48px)" }}>
         <Type />
         <Buttons />
+        <Links />
         <Fields />
         <Switches />
         <Selects />

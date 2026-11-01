@@ -77,7 +77,7 @@ Neither probe looked at the paint, so a kept declaration can still paint unlike 
 - **Media features:** `prefers-color-scheme`, `forced-colors`, `prefers-contrast`, and `scripting` don't parse.
   `(hover: none)` and `(prefers-reduced-motion: no-preference)` match, and `(hover: hover)`, `(pointer: fine)`, and `(any-pointer: fine)` don't, so a rule behind a hover or pointer query applies as on a touch screen, while `:hover` selectors work.
 - **Layout:** the engine places boxes on whole pixels where Chromium gives fractions, as `vw` and `space-evenly` showed, and a table cell given a width takes the table's whole width.
-  In the SDK's debugger, `width: max-content` under `border-box` comes out short by the box's padding, so words wrap, while an absolute box with its width left alone fits them ([interface log][p24]).
+  In the SDK's debugger, `width: max-content` under `border-box` comes out short by the box's padding, so words wrap, while an absolute box with its width left alone fits them, and a border inside a rounded `<button>` is cut at the button's corners, though its overflow reads `visible` ([interface log][p24]).
 - **Scaling:** in the SDK's debugger, a `transform: scale()` blurs text, and `zoom` scales layout and keeps text sharp, though a 1px height or `box-shadow` spread rounds down to nothing below a zoom of 1, and a border keeps its pixel (same entry).
 - **Each document's defaults:** mainUi and the toolbar lay out a box with padding and a border as `border-box`, and the EFB's document as `content-box`, so our pages set `box-sizing` themselves.
 - **Fonts:** mainUi and the toolbar declare Roboto as one family, `Roboto-Regular`, at weights 300 to 900, and Roboto Mono as `RobotoMono-Regular`.

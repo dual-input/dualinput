@@ -25,6 +25,9 @@ We expected nothing of `zoom`.
   So the kit's hairlines are borders, and its root sets `--hair`, the length of one real pixel at its scale, which `ring-1` takes.
 - **`width: max-content` comes out short under `border-box`,** by the box's padding: 115px where the words and padding take 139px.
   An absolute box with its width left alone gave 139px, and took `max-width`.
+- **A rounded button cuts what it holds:** a link's underline, a border on an inline span inside a `<button>` with a 10px radius and a height of 20px, stopped about 3.5px short at each end, though the span's rect was the button's full width and the button's `overflow` read `visible`.
+  With no radius on the button, the line ran the word's whole width.
+- **`text-underline-offset` is dropped,** and a plain underline hugs the letters, so a link's underline is a border on an inline element, which sits at the foot of the font's own box and takes no room from the line.
 - **Faded text can glitch at any scale:** text inside an element with `opacity` below 1 lost its bottom edge at some positions under `zoom` at 0.72, and at the same scale drew a ghost line above it under `calc()`, and in a column at 1:1 with no scaling.
   The same three columns at 1.225 drew clean, so it doesn't follow from `zoom`; we don't know what it does follow from, and whether the sim's own build of the engine does it.
 - **A WebSocket from a page in the debugger** to a server on 127.0.0.1 connected and echoed, as the development loop needs to reach a bench core.

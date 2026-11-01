@@ -4,7 +4,7 @@ import { cx } from "../lib/cx.ts"
 
 export type SwitchProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onChange"> & { checked: boolean; onCheckedChange?: (checked: boolean) => void }
 
-/** A pill that slides on a press. Its target reaches past its edges, for a VR pointer. */
+/** A pill that slides on a press. The row that holds one makes itself the target, for a VR pointer (record/areas/interface/decisions.md, "The sharing card is one row in every state"). */
 export function Switch({ checked, onCheckedChange, className, onClick, ...rest }: SwitchProps) {
   return (
     <button
@@ -12,7 +12,7 @@ export function Switch({ checked, onCheckedChange, className, onClick, ...rest }
       role="switch"
       aria-checked={checked}
       className={cx(
-        "relative inline-flex h-5 w-11 shrink-0 items-center rounded-full border-2 transition-all after:absolute after:-inset-x-3 after:-inset-y-2 after:content-[''] disabled:pointer-events-none disabled:opacity-50",
+        "relative inline-flex h-5 w-11 shrink-0 items-center rounded-full border-2 transition-all disabled:pointer-events-none disabled:opacity-50",
         checked ? "border-primary bg-primary" : "border-transparent bg-track",
         className,
       )}

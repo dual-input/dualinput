@@ -10,9 +10,10 @@ use messages::clients::{Landing, Level, Notification, PanelModule, ToClient, com
 
 use crate::Clients;
 
-/// A profile loaded with no cockpit panel's `hello` in this long means our panel bridge
-/// didn't load, which stops every panel module, so the clients crate raises trouble
-/// (record/areas/interface/01-apps.md, "Trouble").
+/// A profile with a panel module that needs a panel, loaded with no cockpit panel's `hello` in
+/// this long, means our panel bridge didn't load, which stops every panel module, so the
+/// clients crate raises trouble. Any other profile waits for no panel, since an aircraft can
+/// have no cockpit panels, as a balloon has none (record/areas/interface/01-apps.md, "Trouble").
 const NO_PANEL: Duration = Duration::from_secs(10);
 
 /// The clients crate's own notification for it, under its unit's name.
@@ -21,6 +22,7 @@ const NO_PANEL_NOTIFICATION: &str = "clients.no-panel";
 pub(crate) struct PanelModuleRule {
     pub(crate) name: &'static str,
     pub(crate) rule: fn(&View, &[String]) -> Vec<String>,
+    pub(crate) needed: fn(&View) -> bool,
 }
 
 #[derive(Default)]
@@ -64,7 +66,7 @@ impl Clients {
             panels = panels.len(),
             "the profile loaded, so the clients crate answers each cockpit panel"
         );
-        if panels.is_empty() {
+        if panels.is_empty() && me.panel_modules.iter().any(|m| (m.needed)(&cx.view())) {
             me.profile.no_panel = Some(cx.timer(NO_PANEL, Clients::no_panel));
         }
         for socket in panels {

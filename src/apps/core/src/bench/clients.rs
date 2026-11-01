@@ -50,7 +50,7 @@ impl BenchClients {
             },
         )
         .command("bench.read-setting", BenchClients::read_setting)
-        .panel_module(PANEL_MODULE, BenchClients::rule)
+        .panel_module(PANEL_MODULE, BenchClients::rule, BenchClients::needed)
         .client_messages(PANEL_MODULE, BenchClients::echo);
     }
 
@@ -106,6 +106,10 @@ impl BenchClients {
             .filter(|i| picks.iter().any(|p| i.starts_with(p.as_str())))
             .cloned()
             .collect()
+    }
+
+    fn needed(view: &View) -> bool {
+        !view.read::<BenchClients>().picks.is_empty()
     }
 
     /// Sends a panel module's message back to every panel that loaded the module.

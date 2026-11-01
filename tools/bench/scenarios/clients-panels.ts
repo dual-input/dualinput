@@ -2,11 +2,13 @@
 // a flight in the Baron 58P, whose profile the loader loads from the bench's profiles' site,
 // and the clients' test unit standing in for a feature with a panel module: panels connect
 // only in a session, each is answered once the profile loads, a panel told none stays away, a reloaded
-// panel replaces its socket, and trouble shows when no panel connects
+// panel replaces its socket, and trouble shows when no panel connects under a profile that needs one
 // (record/areas/core/02-clients-and-panel-bridge.md, "Cases for the bench" and "Budgets";
 // record/areas/interface/01-apps.md, "Cases for the bench").
 
 import assert from "node:assert/strict"
+import fs from "node:fs"
+import path from "node:path"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
@@ -14,6 +16,7 @@ import { announcing, BenchRun, type Core } from "../cores.ts"
 import { BARON, load } from "../flights.ts"
 import { app, BenchNetwork, host } from "../network.ts"
 import { FakePage } from "../pages.ts"
+import { copyProfiles } from "../profiles.ts"
 
 /** A fake cockpit panel's bridge, named as the sim names a panel. */
 function panel(core: Core, name: string, instruments: string[]): FakePage {
@@ -142,7 +145,8 @@ test("no cockpit panel within 10s of the profile loading raises the clients crat
   efb.client.watch("notifications", () => {})
   await efb.until(() => efb.slice("notifications") !== undefined, "the notifications")
   await host(core, "Host")
-  core.clients({ act: "picks", picks: ["PFD"] })
+  // The tree's Baron names a display, which is what makes pointer sync's panel module need a
+  // panel, with no pick for the test unit's module.
   await load(core, BARON)
   const ids = () => ((efb.slice("notifications") ?? []) as { id: string }[]).map((n) => n.id)
   await sleep(9_000)
@@ -151,6 +155,30 @@ test("no cockpit panel within 10s of the profile loading raises the clients crat
   const p = panel(core, "VCockpit60", ["CLOCK"])
   t.after(() => p.close())
   await efb.until(() => !ids().includes("clients.no-panel"), "the notification clearing")
+})
+
+test("no cockpit panel raises no trouble under a profile whose panel modules need none", { timeout: 60_000 }, async (t) => {
+  const run = new BenchRun("clients-no-panel-needed", t)
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  // The Baron without its one display stands in for a profile of an aircraft with no cockpit
+  // panels, since the tree has no such aircraft.
+  const copy = copyProfiles(path.join(run.folder, "no-displays"))
+  const file = path.join(copy, "aircraft", "bksq-baronpro.yaml")
+  fs.writeFileSync(file, fs.readFileSync(file, "utf8").replace("displays: BlackSquareTablet", ""))
+  const hash = net.profiles.publish(copy).get("aircraft/bksq-baronpro.yaml")!
+  const core = await announcing(run, "a", net.core())
+  const efb = new FakePage(core, { component: "efb-app" })
+  t.after(() => efb.close())
+  efb.client.watch("notifications", () => {})
+  await efb.until(() => efb.slice("notifications") !== undefined, "the notifications")
+  await host(core, "Host")
+  await load(core, BARON)
+  for (const started = Date.now(); !core.log().includes(`the profile loaded hash="${hash}"`); await sleep(100)) {
+    assert.ok(Date.now() - started < 15_000, "the Baron without its display should load")
+  }
+  await sleep(11_000)
+  assert.deepEqual(efb.slice("notifications"), [], "no notification 11s after the profile loaded")
 })
 
 test("a module from another build while a test routine is fed raises the sim service's trouble notification for our package", { timeout: 60_000 }, async (t) => {

@@ -18,6 +18,7 @@ use serde_json::{Value, json};
 struct Feature {
     counter: u32,
     profile: bool,
+    panel_needed: bool,
 }
 
 #[derive(Deserialize)]
@@ -25,7 +26,8 @@ struct Bump {
     by: u32,
 }
 
-/// Names the test unit's source, whose input loads its profile, `[1]`, or unloads it, `[0]`.
+/// Names the test unit's source, whose input loads its profile, `[1]`, loads one that needs no
+/// panel, `[2]`, or unloads it, `[0]`.
 struct ProfileKey;
 
 impl Feature {
@@ -38,7 +40,9 @@ impl Feature {
         )
         .command("feature.bump", Feature::bump)
         .command("feature.read-setting", Feature::read_setting)
-        .panel_module("feature-panel", Feature::rule)
+        .panel_module("feature-panel", Feature::rule, |view: &View| {
+            view.read::<Feature>().panel_needed
+        })
         .client_messages("feature-panel", Feature::echo)
         .setting(
             "feature.loud",
@@ -54,7 +58,8 @@ impl Feature {
 
     /// Stands in for the profile loader.
     fn profile(me: &mut Feature, input: &Input, cx: &mut Cx) {
-        me.profile = input.bytes == [1];
+        me.profile = input.bytes != [0];
+        me.panel_needed = input.bytes == [1];
         if me.profile {
             clients::profile_loaded(cx);
         } else {
@@ -515,6 +520,20 @@ fn no_cockpit_panel_within_10s_of_the_profile_loading_raises_trouble_until_one_c
     core.join_panel(2, "VCockpit02", &["CLOCK|"]);
     let out = core.advance(core.now + 50_000);
     assert_eq!(states(1, &out), [json!([])]);
+}
+
+#[test]
+fn no_cockpit_panel_raises_no_trouble_under_a_profile_that_needs_none() {
+    let (mut core, _) = Core::new(None);
+    core.join(1, "efb-app", &[]);
+    core.say(1, json!({ "t": "watch", "slices": ["notifications"] }));
+    let source = core
+        .kernel
+        .source::<ProfileKey>()
+        .expect("the test unit takes its profile's input");
+    core.handle(source, vec![2]);
+    let out = core.advance_alive(core.now + 10 * SECOND + 50_000, &[1]);
+    assert_eq!(states(1, &out), Vec::<Value>::new());
 }
 
 #[test]

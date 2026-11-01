@@ -56,7 +56,7 @@ struct WaitingUp {
 /// Registers pointer sync.
 pub fn register(r: &mut Registry) {
     let mut me = r.unit::<PointerSync>(NAME);
-    me.panel_module(NAME, PointerSync::displays)
+    me.panel_module(NAME, PointerSync::displays, PointerSync::any_displays)
         .client_messages(NAME, PointerSync::from_panel)
         .client_state(NAME, PointerSync::lock);
     // A panel whose socket a reload replaced leaves too, as the clients crate closes the old
@@ -95,6 +95,11 @@ impl PointerSync {
             .filter(|i| displays.iter().any(|d| names(d, i)))
             .cloned()
             .collect()
+    }
+
+    /// Whether the loaded profile names a display for the panel module to serve.
+    fn any_displays(view: &View) -> bool {
+        !profile_displays(view).is_empty()
     }
 
     fn from_panel(me: &mut PointerSync, from: Sender, message: FromPanel, cx: &mut Cx) {

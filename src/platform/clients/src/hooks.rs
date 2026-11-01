@@ -56,11 +56,14 @@ pub trait ClientsUnit<S> {
     /// A panel module, whose rule picks the instruments of a cockpit panel it loads for,
     /// given the instruments' keys, once the profile has loaded. The rule reads the loaded
     /// profile through `View`, and a panel none of whose instruments it picks doesn't load it.
-    /// The rule runs inside a handler of the clients crate, so reading `Clients` there panics.
+    /// `needed` says whether the loaded profile names anything the module serves, and when no
+    /// module's does, the clients crate raises no trouble over a panel that never connects.
+    /// Both run inside a handler of the clients crate, so reading `Clients` there panics.
     fn panel_module(
         &mut self,
         name: &'static str,
         rule: fn(&View, &[String]) -> Vec<String>,
+        needed: fn(&View) -> bool,
     ) -> &mut Self;
 
     /// A setting, by a key no other unit registers, whose value any unit reads through
@@ -127,13 +130,16 @@ impl<S: 'static> ClientsUnit<S> for Unit<'_, S> {
         &mut self,
         name: &'static str,
         rule: fn(&View, &[String]) -> Vec<String>,
+        needed: fn(&View) -> bool,
     ) -> &mut Self {
         let clients = self.registry().state_mut::<Clients>();
         assert!(
             !clients.panel_modules.iter().any(|m| m.name == name),
             "panel module {name} should be registered once"
         );
-        clients.panel_modules.push(PanelModuleRule { name, rule });
+        clients
+            .panel_modules
+            .push(PanelModuleRule { name, rule, needed });
         self
     }
 

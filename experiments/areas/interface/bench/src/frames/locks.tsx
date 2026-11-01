@@ -38,36 +38,43 @@ const DISPLAYS = {
 }
 type DisplayKind = keyof typeof DISPLAYS
 
-// One layout at every display size, its text 16px, the banner's scale, and smaller on a display
+// One layout at every display size, its type the banner's cards', a 14px title in the medium weight
+// over a 12px message and a 16px icon (user, 2026-11-01: "the text overall seems
+// oversized/overweight still though - not elegant"; tried and dropped: a 16px semibold title over
+// 13px), and smaller on a display
 // too small for it, a 26th of its width, or as much as lets its card's height fit, with no form
 // that drops the words, since a pilot can zoom in far enough to read small text (user, 2026-11-01:
 // "tiny text could work in tiny screens", then of a card that grew with the display: "are we
 // oversizing the overlay card on larger panels? I'd rather not"). The card is the banner's, one
 // column centered: its icon, its title, its message, and Dismiss where it has one (user,
 // 2026-11-01: "a nicer looking card"), up to 18em or 90% of the display wide; its height in em,
-// with room around it, is the lost link's 8.5, the catch-up's 5.5, and the stopped warning's 11.
-const CARD_EMS = { lost: 8.5, "catching-up": 5.5, silent: 11, flash: 1 }
-const emOf = (d: { width: number; height: number }, lock: Lock) => Math.min(16, d.width / 26, d.height / CARD_EMS[lock.kind])
+// with room around it, is the lost link's 9, the catch-up's 5.75, and the stopped warning's 11.5.
+// The message sits 0.4em under the title, and the card's bottom padding is a little more than its
+// top's, since the message's line box leaves less room under its last line than the icon does
+// above it (user, 2026-11-01: "a touch more padding between the title and the message body and the
+// body and the card edge").
+const CARD_EMS = { lost: 9, "catching-up": 5.75, silent: 11.5, flash: 1 }
+const emOf = (d: { width: number; height: number }, lock: Lock) => Math.min(14, d.width / 26, d.height / CARD_EMS[lock.kind])
 
 export type Lock = { kind: "lost"; key?: string } | { kind: "catching-up" } | { kind: "silent" } | { kind: "flash" }
 
 const TITLE = { lost: "Reconnecting to James", "catching-up": "Catching up with James", silent: "Dual Input stopped responding" }
 function LockCard({ lock, onDismiss }: { lock: Exclude<Lock, { kind: "flash" }>; onDismiss?: () => void }) {
   const { Spinner } = useUI()
-  const icon = { width: "1.4em", height: "1.4em" }
+  const icon = { width: "1.15em", height: "1.15em" }
   const lead = lock.kind === "lost" ? <TriangleAlert className="text-warning" style={icon} /> : lock.kind === "silent" ? <CircleX className="text-destructive" style={icon} /> : <Spinner className="text-muted-foreground" style={icon} />
   return (
-    <div className="pointer-events-auto flex flex-col items-center bg-card text-center text-card-foreground inset-ring inset-ring-foreground/10" style={{ maxWidth: "min(90%, 18em)", padding: "0.9em 1.1em", borderRadius: "0.6em" }}>
+    <div className="pointer-events-auto flex flex-col items-center bg-card text-center text-card-foreground inset-ring inset-ring-foreground/10" style={{ maxWidth: "min(90%, 20em)", padding: "1em 1.25em 1.2em", borderRadius: "0.7em" }}>
       {lead}
-      <span className="font-semibold" style={{ marginTop: "0.5em", lineHeight: "1.25em" }}>
+      <span className="font-medium" style={{ marginTop: "0.55em", lineHeight: "1.4em" }}>
         {TITLE[lock.kind]}
       </span>
       {lock.kind === "lost" && (
-        <span className="text-muted-foreground" style={{ marginTop: "0.25em", fontSize: "0.8em", lineHeight: 1.35 }}>
+        <span className="text-muted-foreground" style={{ marginTop: "0.35em", fontSize: "0.857em", lineHeight: 1.4 }}>
           Wait for them to come back.{" "}
           {lock.key ? (
             <>
-              If they don't, press <span className="font-semibold text-foreground">{lock.key}</span> to take control.
+              If they don't, press <span className="font-medium text-foreground">{lock.key}</span> to take control.
             </>
           ) : (
             "If they don't, take control in Dual Input's EFB app."
@@ -76,7 +83,7 @@ function LockCard({ lock, onDismiss }: { lock: Exclude<Lock, { kind: "flash" }>;
       )}
       {lock.kind === "silent" && (
         <>
-          <span className="text-muted-foreground" style={{ marginTop: "0.25em", fontSize: "0.8em", lineHeight: 1.35 }}>
+          <span className="text-muted-foreground" style={{ marginTop: "0.35em", fontSize: "0.857em", lineHeight: 1.4 }}>
             This screen works, but it isn't syncing until Dual Input is back.
           </span>
           {/* The kit's secondary button, in em, so it scales with the card. */}
@@ -84,7 +91,7 @@ function LockCard({ lock, onDismiss }: { lock: Exclude<Lock, { kind: "flash" }>;
             type="button"
             onClick={onDismiss}
             className="bg-secondary font-medium text-secondary-foreground outline-none hover:bg-secondary/80 focus-visible:ring-2 focus-visible:ring-ring active:[transform:translateY(1px)]"
-            style={{ marginTop: "0.7em", fontSize: "0.8em", padding: "0.35em 0.9em", borderRadius: "0.45em" }}
+            style={{ marginTop: "0.8em", fontSize: "0.857em", padding: "0.4em 1em", borderRadius: "0.5em" }}
           >
             Dismiss
           </button>

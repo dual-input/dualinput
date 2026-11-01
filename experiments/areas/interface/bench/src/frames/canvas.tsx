@@ -154,13 +154,13 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "ATC outside a session", draw: (t) => <AtcFrame theme={t} where={{ session: false }} /> },
     ],
   },
-  // The Avatars tab in a flight, with James in red; outside a session; and the note at the top
+  // The Figures tab in a flight, with James in red; outside a session; and the note at the top
   // for each aircraft whose figures do less; then with both help notes open.
   {
-    name: "Avatars",
+    name: "Figures",
     frames: [
-      { name: "Avatars in a flight", draw: (t) => <AvatarsFrame theme={t} /> },
-      { name: "Avatars outside a session", draw: (t) => <AvatarsFrame theme={t} session={false} /> },
+      { name: "Figures in a flight", draw: (t) => <AvatarsFrame theme={t} /> },
+      { name: "Figures outside a session", draw: (t) => <AvatarsFrame theme={t} session={false} /> },
       { name: "Aircraft model can't be read", draw: (t) => <AvatarsFrame theme={t} note="model" /> },
       { name: "Profile has no seats", draw: (t) => <AvatarsFrame theme={t} note="seats" /> },
       { name: "No profile for this aircraft", draw: (t) => <AvatarsFrame theme={t} note="profile" /> },

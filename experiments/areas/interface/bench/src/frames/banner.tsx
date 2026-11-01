@@ -80,7 +80,7 @@ export const NOTES = {
   "module-missing": { when: "Our module's file missing from a package that loaded, held", note: { level: "trouble", title: "Dual Input's WASM module is missing", detail: "It can't fly or hold the aircraft. Reinstall Dual Input with the sim closed." } },
   helper: { when: "The Windows helper down, held", note: { level: "trouble", title: "Dual Input's Windows helper is down", detail: "Take-control keybinds, ATC audio, Dual Input's sounds, and your figure's pointing won't work until it's back." } },
   want: { when: "A feature's want the helper can't carry out, held", note: { level: "warning", title: "Your take-control key isn't working", detail: "Windows didn't let Dual Input listen for F9." } },
-  seat: { when: "This pilot's camera in another figure's seat, held", note: { level: "info", who: JAMES, title: "This seat is taken", detail: "James's figure hides while your view is in it." } },
+  seat: { when: "This pilot's camera in another figure's seat, held", note: { level: "info", who: JAMES, title: "This seat is taken" } },
 } satisfies Record<string, { when: string; note: Note }>
 export type NoteKey = keyof typeof NOTES
 

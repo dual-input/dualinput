@@ -1,0 +1,3 @@
+p22-sdk-coherent-host features efb, 2026-11-01T09:57:26.315Z
+Frame removed: true
+{"ua":"Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0","size":[640,760,1],"features":{"PointerEvent":false,"ResizeObserver":false,"IntersectionObserver":false,"MutationObserver":true,"TouchEvent":true,"Proxy":true,"Reflect":true,"Symbol":true,"fetch":true,"WebSocket":true,"requestAnimationFrame":true,"CSS":true,"Intl":false,"BigInt":false,"queueMicrotask":false,"structuredClone":false,"AbortController":false,"TextEncoder":true,"customElements":true,"Coherent":false,"engine":false,"SimVar":false,"globalThis":false,"Promise.prototype.finally":false,"CSS.supports":true}}

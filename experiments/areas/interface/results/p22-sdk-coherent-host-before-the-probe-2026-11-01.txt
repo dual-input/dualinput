@@ -1,0 +1,29 @@
+p22-sdk-coherent-host: the runs of 2026-11-01 from before p22 existed, by the scratch scripts it was then written up from.
+MSFS 2024 1.9.21, on our development machine, in one flight the user loaded as a heavy one, which we didn't record, with BeyondATC and gtn_simulator running.
+Each time is p18's 1,000 rows. A median of an even count is the higher middle value.
+
+The debugger's page reloaded in one frame, 8 times, 2.5s apart:
+  No sim: 48.4, 46.8, 56.7, 47.1, 46.7, 47.6, 47.2, 47.4 ms; median 47.4
+  Sim in the flight, behind the debugger's window: 69.3, 90.6, 74.8, 72.7, 72.7, 69, 65.3, 62.8 ms; median 72.7
+  Sim in the flight, behind the debugger's window, between the EFB's two runs below: 87.1, 73.8, 82.6, 78.9, 82.1, 82.4, 84.3, 84 ms; median 82.6
+
+The EFB's document, an off screen frame, sim behind another window, 8 loads, 1.5s after each load:
+  Same frame reloaded, first run: 48.9, 104.4, 110.2, 113.5, 98.8, 114.5, 119.8, 98.2 ms; median 110.2
+  Same frame reloaded, second run: 60.6, 114.1, 116.8, 126.7, 119.1, 114, 109.6, 107.8 ms; median 114.1
+  A new frame each load: 58, 134.3, 92.5, 91.1, 88.9, 92.2, 84.5, 90.9 ms; median 91.1
+
+The EFB's document, sim in front for every load, 8 loads:
+  Same frame reloaded: 53.2, 108.1, 103.7, 111.2, 106.4, 102.9, 102.8, 103.4 ms; median 103.7; sim busy median 4.13 cores
+  A new frame each load: 54.1, 132.3, 103.2, 119.2, 101, 87.2, 86, 94.4 ms; median 101; sim busy median 3.97 cores
+
+12 bursts inside one loaded page, 1.5s apart:
+  The debugger, sim behind its window: 66.1, 33.3, 31.4, 32.6, 44.8, 25.6, 26.9, 26.8, 27.5, 28.2, 34.8, 22.9 ms; later bursts' median 28.2; sim busy median 4.11 cores
+  The EFB's document, sim in front for all 12: 54.1, 35.3, 30.8, 35.4, 29.2, 31.2, 20, 24.6, 21.1, 20.4, 29, 20.9 ms; later bursts' median 29; sim busy median 4.55 cores
+
+The sim's engine files in a copy of the debugger, run by hand:
+  All 8 of the sim's engine files: Debugger.exe exited at once with 0xC0000005. Windows' report: faulting module CoherentUIGT.dll, version 2.9.5.0, fault offset 0x00000000000d3f3d; Debugger.exe, time stamp 0x5a69ba8f.
+  The sim's files with the SDK's CoherentUIGT.dll: Debugger.exe stayed open, and no page it was given had posted after 90s.
+
+The SDK's versions:
+  https://sdk.flightsimulator.com/msfs2024/files/sdk.json, fetched 2026-11-01: its newest game version is 1.9.0.0, whose release notes start at SDK 1.8.1.
+  SDK 1.7.3's and SDK 1.8.1's CoherentGT Debugger folders: every .dll and .exe has the same SHA-256.

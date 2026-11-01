@@ -1,0 +1,2 @@
+# p22-sdk-coherent-host.mjs copies the SDK's debugger under out/.
+out/

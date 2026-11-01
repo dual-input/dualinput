@@ -1,0 +1,15 @@
+p22-sdk-coherent-host loads efb --new-frame --behind, 2026-11-01T09:58:13.025Z
+1: 54.1ms, claude in front, sim busy 2.97 cores
+2: 112.6ms, claude in front, sim busy 3.96 cores
+3: 171.5ms, Dia in front, sim busy 4.57 cores
+4: 78.3ms, claude in front, sim busy 4.17 cores
+5: 87.7ms, claude in front, sim busy 4 cores
+6: 86.2ms, claude in front, sim busy 5.17 cores
+7: 87.4ms, claude in front, sim busy 4.11 cores
+8: 85.6ms, claude in front, sim busy 4.54 cores
+Median of all 87.4ms; first 54.1ms; median of the later ones 87.4ms, range 78.3 to 171.5ms
+Sim in front for 0 of 8; sim busy median 4.17 cores
+Page: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0
+Sim globals in the frame: {"SimVar":"undefined","Coherent":"undefined","BaseInstrument":"undefined"}
+First run's checks: 10 of 10 ok
+Frame removed: true

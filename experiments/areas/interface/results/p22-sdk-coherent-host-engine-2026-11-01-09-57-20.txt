@@ -1,0 +1,185 @@
+p22-sdk-coherent-host engine, 2026-11-01T09:57:15.905Z
+
+SDK 1.8.1; sim 1.9.21.0
+
+Engine files, SDK's debugger against the sim:
+  CoherentGTCore.dll: SDK 28304896 bytes, sim 30513152 bytes
+  CoherentGTJS.dll: SDK 9595392 bytes, sim 10555392 bytes
+  CoherentUIGT.dll: SDK 3119104 bytes, sim 3623936 bytes
+  RenoirCore.WindowsDesktop.dll: SDK 1562112 bytes, sim 1771520 bytes
+  WTF.dll: SDK 457216 bytes, sim 524800 bytes
+  coherenticuin.dll: SDK 1834496 bytes, sim 1834496 bytes, identical
+  coherenticuuc.dll: SDK 1314816 bytes, sim 1314816 bytes, identical
+  icudtcoherent53.dll: SDK 21529088 bytes, sim 21529088 bytes, identical
+
+Screenshot: experiments/areas/interface/results/p22-sdk-coherent-host-engine-2026-11-01-09-57-15.png, 1296x759
+
+Feature check in a frame:
+{"ua":"Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0","size":[300,120,1],"features":{"PointerEvent":false,"ResizeObserver":false,"IntersectionObserver":false,"MutationObserver":true,"TouchEvent":false,"Proxy":true,"Reflect":true,"Symbol":true,"fetch":true,"WebSocket":true,"requestAnimationFrame":true,"CSS":true,"Intl":false,"BigInt":false,"queueMicrotask":false,"structuredClone":false,"AbortController":false,"TextEncoder":true,"customElements":true,"Coherent":false,"engine":false,"SimVar":false,"globalThis":false,"Promise.prototype.finally":false,"CSS.supports":true}}
+
+p18's page:
+  ok   renders the tree
+  ok   a click updates text bound to a MappedSubject (Pressed 3 times)
+  ok   a class bound to a subject follows it (inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-warning/15 text-warning)
+  ok   a class record toggles a class (rounded-md h-2 bg-primary ring-2 ring-ring)
+  ok   a style record binds a style (75%)
+  ok   an ArraySubject list adds and removes rows in order (Pilot 2,Pilot 3)
+  ok   typing reaches a subject (DLH4A)
+  ok   a subject reaches the field (BAW12)
+  ok   a binding outlives its removed element (a leak the kit must own) (after)
+  ok   1,000 rows render and clear (65.6ms for 1000 rows, 0 left after clear)
+
+Catalogs equal: true
+Debugger: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0
+
+Against the sim's mainUi document, 2026-10-25 (Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0):
+  properties: 600 of 602 identical
+    -webkit-tap-highlight-color
+      sim      {"name":"-webkit-tap-highlight-color","inherit":"inherit","supports":true,"keywords":{"aliceblue":"aliceblue","antiquewhite":"antiquewhite","aqua":"aqua","aquamarine":"aquamarine","azure":"azure","bei
+      debugger {"name":"-webkit-tap-highlight-color","inherit":"","supports":false,"keywords":{"aliceblue":"","antiquewhite":"","aqua":"","aquamarine":"","azure":"","beige":"","bisque":"","black":"","blanchedalmond"
+    touch-action
+      sim      {"name":"touch-action","inherit":"inherit","supports":true,"keywords":{"auto":"auto","none":"","pan-x":"","pan-left":"","pan-right":"","pan-y":"","pan-up":"","pan-down":"","pinch-zoom":"","manipulatio
+      debugger {"name":"touch-action","inherit":"","supports":false,"keywords":{"auto":"","none":"","pan-x":"","pan-left":"","pan-right":"","pan-y":"","pan-up":"","pan-down":"","pinch-zoom":"","manipulation":""},"we
+  functions: 121 of 121 identical
+  values: 69 of 69 identical
+  units: 53 of 53 identical
+  selectors: 156 of 160 identical
+    :future .x:future
+      sim      {"name":":future","sel":".x:future","kept":""}
+      debugger {"name":":future","sel":".x:future","kept":".x:future"}
+    :past .x:past
+      sim      {"name":":past","sel":".x:past","kept":""}
+      debugger {"name":":past","sel":".x:past","kept":".x:past"}
+    ::cue .x::cue
+      sim      {"name":"::cue","sel":".x::cue","kept":""}
+      debugger {"name":"::cue","sel":".x::cue","kept":".x::cue"}
+    ::cue() .x::cue(b)
+      sim      {"name":"::cue()","sel":".x::cue(b)","kept":""}
+      debugger {"name":"::cue()","sel":".x::cue(b)","kept":".x::cue"}
+  atRules: 28 of 28 identical
+  media: 49 of 56 identical
+    (min-aspect-ratio: 1/1)
+      sim      {"query":"(min-aspect-ratio: 1/1)","parsed":"(min-aspect-ratio: 1/1)","matches":true}
+      debugger {"query":"(min-aspect-ratio: 1/1)","parsed":"(min-aspect-ratio: 1/1)","matches":false}
+    (orientation: landscape)
+      sim      {"query":"(orientation: landscape)","parsed":"(orientation: landscape)","matches":true}
+      debugger {"query":"(orientation: landscape)","parsed":"(orientation: landscape)","matches":false}
+    (hover: hover)
+      sim      {"query":"(hover: hover)","parsed":"(hover: hover)","matches":false}
+      debugger {"query":"(hover: hover)","parsed":"(hover: hover)","matches":true}
+    (hover: none)
+      sim      {"query":"(hover: none)","parsed":"(hover: none)","matches":true}
+      debugger {"query":"(hover: none)","parsed":"(hover: none)","matches":false}
+    (any-hover: hover)
+      sim      {"query":"(any-hover: hover)","parsed":"(any-hover: hover)","matches":false}
+      debugger {"query":"(any-hover: hover)","parsed":"(any-hover: hover)","matches":true}
+    (pointer: fine)
+      sim      {"query":"(pointer: fine)","parsed":"(pointer: fine)","matches":false}
+      debugger {"query":"(pointer: fine)","parsed":"(pointer: fine)","matches":true}
+    (any-pointer: fine)
+      sim      {"query":"(any-pointer: fine)","parsed":"(any-pointer: fine)","matches":false}
+      debugger {"query":"(any-pointer: fine)","parsed":"(any-pointer: fine)","matches":true}
+  layout: 80 of 81 identical
+    sizing / content-box with padding and a border
+      sim      {"group":"sizing","name":"content-box with padding and a border","values":[20]}
+      debugger {"group":"sizing","name":"content-box with padding and a border","values":[32]}
+  all: 1156 of 1170 identical
+
+Against the sim's EFB document, 2026-10-25 (Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0):
+  properties: 600 of 602 identical
+    -webkit-tap-highlight-color
+      sim      {"name":"-webkit-tap-highlight-color","inherit":"inherit","supports":true,"keywords":{"aliceblue":"aliceblue","antiquewhite":"antiquewhite","aqua":"aqua","aquamarine":"aquamarine","azure":"azure","bei
+      debugger {"name":"-webkit-tap-highlight-color","inherit":"","supports":false,"keywords":{"aliceblue":"","antiquewhite":"","aqua":"","aquamarine":"","azure":"","beige":"","bisque":"","black":"","blanchedalmond"
+    touch-action
+      sim      {"name":"touch-action","inherit":"inherit","supports":true,"keywords":{"auto":"auto","none":"","pan-x":"","pan-left":"","pan-right":"","pan-y":"","pan-up":"","pan-down":"","pinch-zoom":"","manipulatio
+      debugger {"name":"touch-action","inherit":"","supports":false,"keywords":{"auto":"","none":"","pan-x":"","pan-left":"","pan-right":"","pan-y":"","pan-up":"","pan-down":"","pinch-zoom":"","manipulation":""},"we
+  functions: 121 of 121 identical
+  values: 69 of 69 identical
+  units: 53 of 53 identical
+  selectors: 156 of 160 identical
+    :future .x:future
+      sim      {"name":":future","sel":".x:future","kept":""}
+      debugger {"name":":future","sel":".x:future","kept":".x:future"}
+    :past .x:past
+      sim      {"name":":past","sel":".x:past","kept":""}
+      debugger {"name":":past","sel":".x:past","kept":".x:past"}
+    ::cue .x::cue
+      sim      {"name":"::cue","sel":".x::cue","kept":""}
+      debugger {"name":"::cue","sel":".x::cue","kept":".x::cue"}
+    ::cue() .x::cue(b)
+      sim      {"name":"::cue()","sel":".x::cue(b)","kept":""}
+      debugger {"name":"::cue()","sel":".x::cue(b)","kept":".x::cue"}
+  atRules: 28 of 28 identical
+  media: 51 of 56 identical
+    (hover: hover)
+      sim      {"query":"(hover: hover)","parsed":"(hover: hover)","matches":false}
+      debugger {"query":"(hover: hover)","parsed":"(hover: hover)","matches":true}
+    (hover: none)
+      sim      {"query":"(hover: none)","parsed":"(hover: none)","matches":true}
+      debugger {"query":"(hover: none)","parsed":"(hover: none)","matches":false}
+    (any-hover: hover)
+      sim      {"query":"(any-hover: hover)","parsed":"(any-hover: hover)","matches":false}
+      debugger {"query":"(any-hover: hover)","parsed":"(any-hover: hover)","matches":true}
+    (pointer: fine)
+      sim      {"query":"(pointer: fine)","parsed":"(pointer: fine)","matches":false}
+      debugger {"query":"(pointer: fine)","parsed":"(pointer: fine)","matches":true}
+    (any-pointer: fine)
+      sim      {"query":"(any-pointer: fine)","parsed":"(any-pointer: fine)","matches":false}
+      debugger {"query":"(any-pointer: fine)","parsed":"(any-pointer: fine)","matches":true}
+  layout: 81 of 81 identical
+  all: 1159 of 1170 identical
+
+Against the sim's toolbar document, 2026-10-25 (Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0):
+  properties: 600 of 602 identical
+    -webkit-tap-highlight-color
+      sim      {"name":"-webkit-tap-highlight-color","inherit":"inherit","supports":true,"keywords":{"aliceblue":"aliceblue","antiquewhite":"antiquewhite","aqua":"aqua","aquamarine":"aquamarine","azure":"azure","bei
+      debugger {"name":"-webkit-tap-highlight-color","inherit":"","supports":false,"keywords":{"aliceblue":"","antiquewhite":"","aqua":"","aquamarine":"","azure":"","beige":"","bisque":"","black":"","blanchedalmond"
+    touch-action
+      sim      {"name":"touch-action","inherit":"inherit","supports":true,"keywords":{"auto":"auto","none":"","pan-x":"","pan-left":"","pan-right":"","pan-y":"","pan-up":"","pan-down":"","pinch-zoom":"","manipulatio
+      debugger {"name":"touch-action","inherit":"","supports":false,"keywords":{"auto":"","none":"","pan-x":"","pan-left":"","pan-right":"","pan-y":"","pan-up":"","pan-down":"","pinch-zoom":"","manipulation":""},"we
+  functions: 121 of 121 identical
+  values: 69 of 69 identical
+  units: 53 of 53 identical
+  selectors: 156 of 160 identical
+    :future .x:future
+      sim      {"name":":future","sel":".x:future","kept":""}
+      debugger {"name":":future","sel":".x:future","kept":".x:future"}
+    :past .x:past
+      sim      {"name":":past","sel":".x:past","kept":""}
+      debugger {"name":":past","sel":".x:past","kept":".x:past"}
+    ::cue .x::cue
+      sim      {"name":"::cue","sel":".x::cue","kept":""}
+      debugger {"name":"::cue","sel":".x::cue","kept":".x::cue"}
+    ::cue() .x::cue(b)
+      sim      {"name":"::cue()","sel":".x::cue(b)","kept":""}
+      debugger {"name":"::cue()","sel":".x::cue(b)","kept":".x::cue"}
+  atRules: 28 of 28 identical
+  media: 49 of 56 identical
+    (min-aspect-ratio: 1/1)
+      sim      {"query":"(min-aspect-ratio: 1/1)","parsed":"(min-aspect-ratio: 1/1)","matches":true}
+      debugger {"query":"(min-aspect-ratio: 1/1)","parsed":"(min-aspect-ratio: 1/1)","matches":false}
+    (orientation: landscape)
+      sim      {"query":"(orientation: landscape)","parsed":"(orientation: landscape)","matches":true}
+      debugger {"query":"(orientation: landscape)","parsed":"(orientation: landscape)","matches":false}
+    (hover: hover)
+      sim      {"query":"(hover: hover)","parsed":"(hover: hover)","matches":false}
+      debugger {"query":"(hover: hover)","parsed":"(hover: hover)","matches":true}
+    (hover: none)
+      sim      {"query":"(hover: none)","parsed":"(hover: none)","matches":true}
+      debugger {"query":"(hover: none)","parsed":"(hover: none)","matches":false}
+    (any-hover: hover)
+      sim      {"query":"(any-hover: hover)","parsed":"(any-hover: hover)","matches":false}
+      debugger {"query":"(any-hover: hover)","parsed":"(any-hover: hover)","matches":true}
+    (pointer: fine)
+      sim      {"query":"(pointer: fine)","parsed":"(pointer: fine)","matches":false}
+      debugger {"query":"(pointer: fine)","parsed":"(pointer: fine)","matches":true}
+    (any-pointer: fine)
+      sim      {"query":"(any-pointer: fine)","parsed":"(any-pointer: fine)","matches":false}
+      debugger {"query":"(any-pointer: fine)","parsed":"(any-pointer: fine)","matches":true}
+  layout: 80 of 81 identical
+    sizing / content-box with padding and a border
+      sim      {"group":"sizing","name":"content-box with padding and a border","values":[20]}
+      debugger {"group":"sizing","name":"content-box with padding and a border","values":[32]}
+  all: 1156 of 1170 identical
+
+p14's answers: experiments/areas/interface/results/p22-sdk-coherent-host-engine-p14-2026-11-01-09-57-15.json

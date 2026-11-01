@@ -40,6 +40,62 @@ What we haven't run: an EFB app of ours in landscape, the EFB popped out, the ta
 **Affects:** the EFB app's frames, which [stage 11b](../build/plan.md#11b-the-apps) designs.
 
 **Evidence:** `results/p21-efb-landscape-2026-10-30-17-36-53.txt`, with a screenshot of each layout, cropped to the EFB; `results/p21-efb-landscape-2026-10-30-17-32-58.txt`, the run before, measured the same sizes and saved no screenshots.
+## 2026-11-01: The SDK's CoherentGT Debugger runs our pages in Coherent GT with no sim, and matches the sim's EFB on 1,159 of p14's 1,170 CSS items and on repeated work in a loaded page
+
+**Asked:** can we develop pages for Coherent GT with quick reloads in an environment that mimics the sim (user, 2026-11-01), since a browser draws what the engine drops ([the Coherent GT check](decisions.md#the-coherent-gt-check-covers-the-css-we-ship-into-the-sim)), and reloading the real app in the sim needs the sim running?
+
+**Expected:** no prediction: we had used the SDK's CoherentGT Debugger, the debugger from here on, only to read the sim's inspector.
+
+**Found:** on MSFS 2024 1.9.21, with the debugger of SDK 1.7.3 and 1.8.1, whose `.dll` and `.exe` files are identical:
+
+- **It's a host of its own:** `Tools\CoherentGT Debugger\Debugger.exe` draws `coui://html/debugger.html` from the `html` folder beside it, with the engine in its `assembly` folder.
+  That page's address bar sets a frame's `src`.
+  p22 replaces the page in a copy of the folder with frames of our pages from 127.0.0.1, which run with no sim.
+- **It's another build of the engine:** every engine file but the three ICU ones differs from the sim's, such as `CoherentGTCore.dll` at 28,304,896 bytes against the sim's 30,513,152, though both report `CoherentGT/2.0`.
+  SDK 1.8.1 is the newest for this sim as of 2026-11-01, so no update closes the gap.
+- **The sim's engine doesn't run in it:** with the sim's 8 files, `Debugger.exe` exited with 0xC0000005 inside `CoherentUIGT.dll` 2.9.5.0.
+  With the sim's files and the SDK's `CoherentUIGT.dll`, it loaded no page in 90s.
+- **CSS and layout:** on p14's catalog, the debugger gave the answers the sim's EFB document gave on 2026-10-25 for 1,159 of 1,170 items, all 81 layout cases among them.
+  - The sim keeps two properties the debugger drops: `-webkit-tap-highlight-color` and `touch-action`.
+  - The debugger keeps four selectors the sim drops: `:future`, `:past`, `::cue`, and `::cue()`.
+  - Five hover and pointer media queries differ: the sim reports no hover and no fine pointer, and the debugger reports both.
+  - Against the sim's `mainUi` and toolbar documents, 1,156 are the same.
+    Three more differ there and not in the EFB's document: two media queries on the frame's shape, and one layout case on `box-sizing`, which we take to be those documents' own stylesheets (unverified).
+- **JavaScript:** a frame in the debugger and a frame in the EFB's document agree on 24 of 25 features, `TouchEvent` being the one only the EFB's has.
+  Neither has `PointerEvent`, `ResizeObserver`, `IntersectionObserver`, `globalThis`, `Promise.prototype.finally`, `Coherent`, `engine`, or `SimVar`.
+  p18's 10 checks pass in both.
+- **Speed:** p18's 1,000 rows, in one flight the user loaded as a heavy one, which we didn't record, in milliseconds.
+  A median of an even count is the higher middle value:
+
+  | Where and how | The sim's window | First | Later, each run's median | Later, range |
+  | --- | --- | --- | --- | --- |
+  | Debugger, page reloaded | No sim | 48.4 | 47.2 | 46.7 to 56.7 |
+  | Debugger, page reloaded | Behind the debugger | 65.8, 69.3, 87.1 | 72.7, 72.8, 82.4 | 62.4 to 90.6 |
+  | EFB, page reloaded | Behind another window | 48.9, 55.2, 60.6 | 110.2, 111.1, 114.1 | 98.2 to 138.8 |
+  | EFB, page reloaded | In front | 53.2 | 103.7 | 102.8 to 111.2 |
+  | EFB, a new frame each load | Behind another window | 54.1, 58 | 87.4, 91.1 | 78.3 to 171.5 |
+  | EFB, a new frame each load | In front | 54.1 | 101 | 86 to 132.3 |
+  | EFB, repeated inside one page | Behind another window | 54.8 | 28.8 | 19.1 to 42.8 |
+  | EFB, repeated inside one page | In front | 54.1 | 29 | 20 to 35.4 |
+  | Debugger, repeated inside one page | Behind the debugger | 66.1, 66.4 | 28.2, 35.9 | 22.9 to 54.4 |
+
+  - The sim kept 3.5 to 4.6 cores busy at the median of every run that logged it, in front or behind, so it doesn't ease off behind another window, and that window made no consistent difference to the EFB's times.
+  - An EFB app at the world map took 51.3ms for its one load ([p19](#2026-10-25-inside-an-efb-app-clicks-the-wheel-hover-focus-and-typing-reach-our-elements-and-a-127001-frame-as-mouse-and-keyboard-events-geist-loads-as-ttf-but-not-woff2-and-p18s-page-renders-there-with-tailwind-3)), close to the first loads here.
+
+**Changed:** a copy of the debugger can stand in for the sim while we develop the kit, for layout, CSS, and the speed of work inside a loaded page, even with the sim running.
+The kit's [stand-ins](decisions.md#our-pages-import-fscomponent-from-microsoftmsfs-sdk-as-npm-ships-it) serve it as they do a browser, since a frame there has no sim globals.
+What needs the sim still needs it: `Coherent` calls, the EFB's own styles, and the last check.
+A time taken in the EFB after repeated loads reads 3 to 4 times what the same work takes once a page has run it a few times, so a timing there should load once and measure inside that page.
+Stage 11b's design of the kit's development loop decides whether to use it.
+
+We don't know why later loads in the EFB run up to twice as long as its first, or what layout and paint cost in either host, since the timed stretch builds page elements and forces no layout.
+Every EFB time here comes from an off screen frame in the EFB's document, not from an EFB app.
+What the debugger's `--webdriver` switch does, a string in `Debugger.exe`, is unknown.
+
+**Affects:** how stage 11b builds the kit's development loop ([build plan](../build/plan.md#11b-the-apps)).
+
+**Evidence:** in `results/`, `p22-sdk-coherent-host-engine-2026-11-01-09-57-20.txt` with its screenshot and p14's answers, `p22-sdk-coherent-host-features-2026-11-01-09-57-26.txt`, the three `p22-sdk-coherent-host-loads-2026-11-01-*.txt`, the two `p22-sdk-coherent-host-burst-2026-11-01-*.txt`, and `p22-sdk-coherent-host-before-the-probe-2026-11-01.txt`, which holds the runs with the sim in front, the run with no sim, and the engine swaps.
+
 ## 2026-10-25: The SDK as npm ships it loads in a browser once four of the sim's globals have stand-ins
 
 **Asked:** can the UI import `@microsoft/msfs-sdk` the usual way and still run outside the sim, for development in a browser and tests, rather than taking FSComponent's modules apart from the package as p18's modules variant does ([entry below](#2026-10-25-fscomponent-runs-in-edge-when-a-bundle-takes-only-the-sdk-modules-it-needs-in-81-kb-while-the-sdk-as-npm-ships-it-throws-on-load-outside-the-sim))?

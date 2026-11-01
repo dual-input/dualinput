@@ -1,0 +1,18 @@
+p22-sdk-coherent-host burst debugger, 2026-11-01T09:59:10.335Z
+1: 66.4ms, Debugger in front, sim busy 0 cores
+2: 38.2ms, Debugger in front, sim busy 5.43 cores
+3: 37.6ms, claude in front, sim busy 3.68 cores
+4: 44.2ms, claude in front, sim busy 5.34 cores
+5: 54.4ms, Dia in front, sim busy 4.47 cores
+6: 32.4ms, Dia in front, sim busy 4.72 cores
+7: 32.5ms, claude in front, sim busy 3.47 cores
+8: 33.1ms, claude in front, sim busy 4.32 cores
+9: 35.9ms, claude in front, sim busy 4.19 cores
+10: 35.3ms, claude in front, sim busy 4.25 cores
+11: 49ms, claude in front, sim busy 4.07 cores
+12: 34.7ms, claude in front, sim busy 2.66 cores
+Median of all 37.6ms; first 66.4ms; median of the later ones 35.9ms, range 32.4 to 54.4ms
+Sim in front for 0 of 12; sim busy median 4.25 cores
+Page: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0
+Sim globals in the frame: {"SimVar":"undefined","Coherent":"undefined","BaseInstrument":"undefined"}
+First run's checks: 10 of 10 ok

@@ -1,0 +1,19 @@
+p22-sdk-coherent-host burst efb --behind, 2026-11-01T09:58:38.454Z
+1: 54.8ms, claude in front, sim busy 5.19 cores
+2: 36ms, claude in front, sim busy 3.1 cores
+3: 32.9ms, claude in front, sim busy 4.32 cores
+4: 42.8ms, claude in front, sim busy 2.81 cores
+5: 30.5ms, claude in front, sim busy 4 cores
+6: 28.8ms, Dia in front, sim busy 4.03 cores
+7: 26.5ms, claude in front, sim busy 4.4 cores
+8: 25.4ms, Dia in front, sim busy 4.05 cores
+9: 25.3ms, Dia in front, sim busy 3.89 cores
+10: 22.3ms, Dia in front, sim busy 3.9 cores
+11: 28.8ms, Dia in front, sim busy 3.97 cores
+12: 19.1ms, Dia in front, sim busy 4.74 cores
+Median of all 28.8ms; first 54.8ms; median of the later ones 28.8ms, range 19.1 to 42.8ms
+Sim in front for 0 of 12; sim busy median 4.03 cores
+Page: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0
+Sim globals in the frame: {"SimVar":"undefined","Coherent":"undefined","BaseInstrument":"undefined"}
+First run's checks: 10 of 10 ok
+Frame removed: true

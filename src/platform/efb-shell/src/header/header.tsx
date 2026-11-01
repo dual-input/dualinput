@@ -51,10 +51,15 @@ function HelpLine() {
   )
 }
 
-export function Header({ version, phase, issues, offline }: { version: string; phase: SessionPhase | undefined; issues: Issue[]; offline: boolean }) {
+export function Header({ version, phase, issues, offline, opened }: { version: string; phase: SessionPhase | undefined; issues: Issue[]; offline: boolean; /** Counts the banner's cards that landed on the header, each opening its island on the rows. */ opened: number }) {
   const [hovered, setHovered] = useState(false)
   const [open, setOpen] = useState(false)
   const [pinned, setPinned] = useState(false)
+  useEffect(() => {
+    if (opened === 0) return
+    setPinned(true)
+    setOpen(true)
+  }, [opened])
   const place = useRef<HTMLDivElement>(null)
   const rows = useRef<HTMLDivElement>(null)
   const timer = useRef(0)

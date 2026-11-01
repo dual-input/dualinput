@@ -10,7 +10,11 @@ const AT_LEAST = 134
  * Set on the element itself, so no render waits on it.
  */
 export function showPress(event: ReactMouseEvent<HTMLElement>): void {
-  const element = event.currentTarget
+  showPressOn(event.currentTarget)
+}
+
+/** Shows a press on an element the press didn't land on, as a card's does on the card when a layer in it took the press. */
+export function showPressOn(element: HTMLElement): void {
   const from = performance.now()
   element.setAttribute("data-pressed", "")
   const up = () => {

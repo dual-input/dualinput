@@ -1,23 +1,20 @@
-// A stand-in for the core inside the page, so the app runs with no core and no sim: it speaks page-client's
-// protocol over a socket of its own, holds the slices a scene sets, and answers commands as the core would. The
-// real core's behavior is the bench's to test; this only puts the screens in each state a person needs to look at.
+// The EFB app's scenes on the stand-in core: each state a person looks at, and the commands a pilot presses walking
+// from it as the core would.
 
-import type { Env, Socket } from "../../../engines/page-client/src/page-client.ts"
-import type { ConnectionState } from "../../../engines/page-client/src/page-client.ts"
+import { StandInBase } from "../../../engines/page-client/dev/stand-in-base.ts"
+import type { Slices } from "../../../engines/page-client/dev/stand-in-base.ts"
 import type { Difference } from "../../../engines/messages/ts/session/Difference.ts"
-import type { FromClient } from "../../../engines/messages/ts/clients/FromClient.ts"
 import type { SessionSlice } from "../../../engines/messages/ts/session/SessionSlice.ts"
 import type { JsonValue } from "../../../engines/messages/ts/serde_json/JsonValue.ts"
 import type { SliceMember } from "../../../engines/messages/ts/session/SliceMember.ts"
 import type { Status } from "../../../engines/messages/ts/session/Status.ts"
 import type { Wanted } from "../src/wanted.ts"
-import { COUNTDOWN } from "../src/session/ready.tsx"
+import { COUNTDOWN } from "@dualinput/crew"
 
 /** A made-up pilot ID, 32 hex digits, which picks the color of their figure. */
 const pilotId = (seed: number) => Array.from({ length: 32 }, (_, at) => ((seed * 7 + at * at * 13 + seed * at) % 16).toString(16)).join("")
 const ME = pilotId(1)
 const JAMES = pilotId(2)
-const PORT = 1
 
 const inFlight: Status = { stage: "ready-to-fly", aircraft: { path: "baron58p/presets/blacksquare/baron58p" }, title: "Baron 58P", pause: 0, ended: null, links: [] }
 const atMenu: Status = { stage: "menu", aircraft: null, title: null, pause: 0, ended: null, links: [] }
@@ -79,8 +76,6 @@ const netUp = { network: { members: [{ pilot: JAMES, up: true, path: { Relay: { 
 const ROUND_TRIPS = { [JAMES]: 120 }
 const NOTES = { 1: "Some controls may not sync", 2: undefined, 3: undefined } as unknown as Record<number, string>
 
-type Slices = Record<string, unknown>
-
 /** Each state a person looks at, by name, with what it sets on top of the sim's healthy slices. */
 export const SCENES: Record<string, Slices> = {
   "First-time setup": { session: noSession, wanted: { setup: SETUP, aircraft: AIRCRAFT } },
@@ -123,58 +118,13 @@ export const SCENES: Record<string, Slices> = {
 const AFTER = { answer: 1000, slowAnswer: 10_000 }
 
 /** The stand-in. `scene` jumps to a state, and the commands a pilot presses walk from it as the core would. */
-export class StandInCore {
-  private socket: Socket | null = null
-  private watched = new Set<string>()
-  private slices: Slices = {}
-  private hear: ((text: string) => void) | null = null
+export class StandInCore extends StandInBase {
   private countdown = 0
   private answer = 0
-  /** How the socket closes, for the screens without the service. */
-  private connectionState: ConnectionState = "connected"
   sceneName = "Before a session"
 
-  env(): Env {
-    return {
-      connect: () => {
-        const socket: Socket = {
-          onopen: null,
-          onmessage: null,
-          onclose: null,
-          send: (text) => this.receive(text),
-          close: () => {
-            if (this.socket === socket) this.socket = null
-          },
-        }
-        this.socket = socket
-        window.setTimeout(() => socket.onopen?.(), 0)
-        return socket
-      },
-      every: (ms, then) => void window.setInterval(then, ms),
-      now: () => Date.now(),
-      listen: (hear) => {
-        this.hear = hear
-        this.announce()
-      },
-      log: (message) => console.log(`stand-in: ${message}`),
-    }
-  }
-
-  private announce(): void {
-    this.hear?.(JSON.stringify({ port: PORT, session: false }))
-  }
-
-  private send(message: unknown): void {
-    this.socket?.onmessage?.(JSON.stringify(message))
-  }
-
-  private publish(name: string): void {
-    if (this.watched.has(name) && this.slices[name] !== undefined) this.send({ t: "state", slice: name, value: this.slices[name] })
-  }
-
-  private set(changes: Slices): void {
-    this.slices = { ...this.slices, ...changes }
-    Object.keys(changes).forEach((name) => this.publish(name))
+  protected greeted(): void {
+    if (!this.slices.session) this.scene(this.sceneName)
   }
 
   private session(): SessionSlice {
@@ -193,39 +143,7 @@ export class StandInCore {
     this.set({ ...healthy, recording: { runs: RUNS }, "core-helper": OUTPUTS, notifications: [], wanted: {}, ...SCENES[name] })
   }
 
-  /** The socket closing without a `bye`, or with one, or the core coming back. */
-  connection(state: "reconnecting" | "closed" | "not-running" | "back"): void {
-    if (state === "back") {
-      this.connectionState = "connected"
-      this.announce()
-      return
-    }
-    if (state === "closed") this.send({ t: "bye" })
-    const socket = this.socket
-    this.socket = null
-    if (state !== "closed") socket?.onclose?.()
-    this.connectionState = "closed"
-  }
-
-  private receive(text: string): void {
-    const message = JSON.parse(text) as FromClient
-    if (message.t === "alive") {
-      // Each side sends something every 2s, and the page counts 8s of silence as a core that hung.
-      this.send({ t: "alive" })
-    } else if (message.t === "watch") {
-      message.slices.forEach((name) => {
-        this.watched.add(name)
-        this.publish(name)
-      })
-    } else if (message.t === "hello") {
-      if (!this.slices.session) this.scene(this.sceneName)
-    } else if (message.t === "command") {
-      this.command(message.name, message.args)
-      this.send({ t: "answer", id: message.id })
-    }
-  }
-
-  private command(name: string, args: JsonValue): void {
+  protected command(name: string, args: JsonValue): void {
     const fields = (args ?? {}) as Record<string, unknown>
     if (name === "session.host" || name === "session.join") this.attempt(name === "session.host" ? "host" : "join")
     else if (name === "session.leave") this.set({ session: noSession, wanted: { aircraft: AIRCRAFT } })

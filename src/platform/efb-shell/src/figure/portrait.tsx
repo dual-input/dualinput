@@ -6,8 +6,8 @@
 import { useEffect, useRef } from "react"
 import type { RefObject } from "react"
 
-import { add, cross, dot, scale, SPEC, sub, unit } from "../heads/trace.ts"
-import type { Shape, V } from "../heads/trace.ts"
+import { add, clamp01, cross, dot, scale, SPEC, sub, unit } from "@dualinput/crew/trace"
+import type { Shape, V } from "@dualinput/crew/trace"
 import { FigureDrawing } from "./drawing.ts"
 import type { Projection } from "./drawing.ts"
 
@@ -52,8 +52,17 @@ const HANDS = [HOLD.across, 1 - HOLD.across].map((across) => {
   const r = SPEC.hand.radius / (2 * z * TAN)
   return inPortrait(across, 1 - r * (1 - 2 * HOLD.over), HOLD.fwd)
 }) as [V, V]
-/** How far the drawing reaches below the portrait, as a share of its width: enough for the part of each hand over the edge. */
+/** How far the drawing reaches below the portrait, as a share of its width: enough for the part of each hand over the edge and its shadow. */
 const OVERHANG = 0.1
+/** Each hand's soft shadow on the page below the portrait, in the hand's radii on the portrait, faded out once the hand has lifted this many meters. */
+const HAND_SHADOW = { down: 0.35, size: 1.25, gone: 0.012 }
+const HAND_SHADOW_STOPS: [number, number][] = [
+  [0.35, 0.15],
+  [0.525, 0.123],
+  [0.675, 0.075],
+  [0.825, 0.027],
+  [1, 0],
+]
 
 /** The figure looking along `look`, its body and head raised by `lift`, and each hand moved from where it holds the edge. */
 function figure(look: V, lift: { body: number; head: number; hands: [V, V] }): Shape[] {
@@ -78,11 +87,13 @@ function figure(look: V, lift: { body: number; head: number; hands: [V, V] }): S
   return shapes
 }
 
+/** The nose's shadow falls on the head, the head's on the chest, and the chest's on the hips. */
 const SHADOWS = new Map([
   [2, 3],
   [1, 2],
   [0, 1],
 ])
+const isHand = (shape: Shape) => shape.ball && !!shape.hand
 
 /** A startle when the pilot picks another color: the body jolts up and settles with a small bounce, the head lagging a moment and tipping back, and the hands nearly lose their grip, popping off the edge one after the other. Times in seconds, the height in meters. */
 const STARTLE = {
@@ -113,26 +124,33 @@ function grab(t: number): number {
   return 1 - u * u
 }
 
+/**
+ * Below the portrait's bottom edge only the hands and their shadows draw, so the body stays cropped there. A clip
+ * path wipes what's under it in Coherent GT, so the body draws in a box that clips it, and the hands in a drawing
+ * of their own over that box, whose edge they hang over.
+ */
 export function FigurePortrait({ hex, size, aim }: { hex: string; size: number; aim: RefObject<V> }) {
-  const holder = useRef<HTMLDivElement>(null)
-  const drawingRef = useRef<FigureDrawing | null>(null)
+  const bodyHolder = useRef<HTMLDivElement>(null)
+  const handsHolder = useRef<HTMLDivElement>(null)
+  const shadows = useRef<(SVGCircleElement | null)[]>([])
+  const drawings = useRef<FigureDrawing[]>([])
   const startled = useRef(-Infinity)
   const firstHex = useRef(hex)
 
   useEffect(() => {
     if (hex === firstHex.current) return
     firstHex.current = hex
-    drawingRef.current?.setColor(hex)
+    drawings.current.forEach((drawing) => drawing.setColor(hex))
     startled.current = performance.now()
   }, [hex])
 
   useEffect(() => {
-    const element = holder.current
-    if (!element) return
-    const height = Math.round(size * (1 + OVERHANG))
-    const drawing = new FigureDrawing(firstHex.current, size, height)
-    drawingRef.current = drawing
-    element.appendChild(drawing.svg)
+    if (!bodyHolder.current || !handsHolder.current) return
+    const body = new FigureDrawing(firstHex.current, size, size)
+    const hands = new FigureDrawing(firstHex.current, size, Math.round(size * (1 + OVERHANG)))
+    drawings.current = [body, hands]
+    bodyHolder.current.appendChild(body.svg)
+    handsHolder.current.appendChild(hands.svg)
     const project: Projection = (point) => {
       const [x, y, z] = place(point)
       return { x: x * size, y: y * size, perMeter: size / (2 * z * TAN), depth: z }
@@ -148,8 +166,11 @@ export function FigurePortrait({ hex, size, aim }: { hex: string; size: number; 
         look = next
         const head = jolt(since - STARTLE.head.lag)
         const lifts = STARTLE.hands.map((hand) => STARTLE.height * hand.gain * grab(since - hand.lag))
-        const hands = lifts.map((lift, k): V => [-Math.sign(HANDS[k as 0 | 1][0]) * STARTLE.grab.inward * lift, lift, -STARTLE.grab.back * lift]) as [V, V]
-        drawing.draw(figure(unit(add(next, [0, STARTLE.head.tip * head, 0])), { body: STARTLE.height * jolt(since), head: STARTLE.height * STARTLE.head.gain * head, hands }), project, SHADOWS)
+        const moved = lifts.map((lift, k): V => [-Math.sign(HANDS[k as 0 | 1][0]) * STARTLE.grab.inward * lift, lift, -STARTLE.grab.back * lift]) as [V, V]
+        const shapes = figure(unit(add(next, [0, STARTLE.head.tip * head, 0])), { body: STARTLE.height * jolt(since), head: STARTLE.height * STARTLE.head.gain * head, hands: moved })
+        body.draw(shapes.filter((shape) => !isHand(shape)), project, SHADOWS)
+        hands.draw(shapes.filter(isHand), project)
+        lifts.forEach((lift, k) => shadows.current[k]?.setAttribute("opacity", String(1 - clamp01(lift / HAND_SHADOW.gone))))
         drawn = true
       }
       frame = requestAnimationFrame(tick)
@@ -157,13 +178,35 @@ export function FigurePortrait({ hex, size, aim }: { hex: string; size: number; 
     frame = requestAnimationFrame(tick)
     return () => {
       cancelAnimationFrame(frame)
-      drawing.svg.remove()
-      drawingRef.current = null
+      body.svg.remove()
+      hands.svg.remove()
+      drawings.current = []
     }
     // The aim is a ref, read each frame, and the size is the card's for its life.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // It spans the portrait's box and hangs below it, so the box must not clip it.
-  return <div ref={holder} className="absolute left-0 top-0" />
+  const strip = Math.round(size * OVERHANG)
+  return (
+    <>
+      <div ref={bodyHolder} className="absolute inset-x-0 inset-y-0 overflow-hidden rounded-2xl bg-muted" />
+      <div className="absolute left-0 overflow-hidden" style={{ top: size, width: size, height: strip }}>
+        <svg width={size} height={strip} viewBox={`0 0 ${size} ${strip}`} className="block">
+          <defs>
+            <radialGradient id="dualinput-hand-shadow">
+              {HAND_SHADOW_STOPS.map(([offset, opacity]) => (
+                <stop key={offset} offset={offset} stopColor="#000" stopOpacity={opacity} />
+              ))}
+            </radialGradient>
+          </defs>
+          {HANDS.map((hand, k) => {
+            const [x, y, z] = place(hand)
+            const r = (SPEC.hand.radius * size) / (2 * z * TAN)
+            return <circle key={k} ref={(element) => void (shadows.current[k] = element)} cx={x * size} cy={y * size + HAND_SHADOW.down * r - size} r={HAND_SHADOW.size * r} fill="url(#dualinput-hand-shadow)" />
+          })}
+        </svg>
+      </div>
+      <div ref={handsHolder} className="pointer-events-none absolute left-0 top-0" />
+    </>
+  )
 }

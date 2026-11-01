@@ -4,8 +4,6 @@ import { Button, cx, Tooltip } from "@dualinput/ui"
 import { Check } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
-import { HEAD_CUE } from "../heads/live.ts"
-
 /** How long the check takes to open room for itself and spring in, in milliseconds. */
 const READY_EASE = { room: 200, check: 300, after: 60 }
 /** How long the ring a press spreads takes, in milliseconds. */
@@ -58,7 +56,7 @@ export function ReadyButton({ ready, why, onToggle }: { ready: boolean; why: str
 }
 
 /** A number that rolls to its next value as a counter's wheel does. */
-function Rolling({ value }: { value: number }) {
+export function Rolling({ value }: { value: number }) {
   const [leaving, setLeaving] = useState<number | null>(null)
   const last = useRef(value)
   useEffect(() => {
@@ -149,12 +147,17 @@ export function CountdownRing({ left }: { left: number | null }) {
   )
 }
 
-/** This pilot's Ready with the countdown's ring before it, in the whole card and the folded one, which every head looks at and bobs at while the cursor rests on it unpressed. */
-export function MyReady({ ready, why, left, onToggle }: { ready: boolean; why: string | undefined; left: number | null; onToggle: () => void }) {
-  return (
-    <span data-fold-glide="ready" {...{ [HEAD_CUE]: "ready" }} data-on={ready ? "" : undefined} className="flex items-center">
-      <CountdownRing left={left} />
-      <ReadyButton ready={ready} why={why} onToggle={onToggle} />
-    </span>
-  )
+/** The countdown's seconds, drawn from the moment its phase starts. */
+export function useCountdown(counting: boolean): number | null {
+  const [left, setLeft] = useState<number | null>(null)
+  useEffect(() => {
+    if (!counting) {
+      setLeft(null)
+      return
+    }
+    setLeft(COUNTDOWN)
+    const tick = window.setInterval(() => setLeft((seconds) => (seconds === null ? null : Math.max(0, seconds - 1))), 1000)
+    return () => window.clearInterval(tick)
+  }, [counting])
+  return left
 }

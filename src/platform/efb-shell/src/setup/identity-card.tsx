@@ -7,9 +7,9 @@ import { useEffect, useLayoutEffect, useRef } from "react"
 import type { RefObject } from "react"
 
 import { FigurePortrait, HEAD_IN_PORTRAIT } from "../figure/portrait.tsx"
-import { FIGURE_COLORS } from "../heads/head.tsx"
-import { unit } from "../heads/trace.ts"
-import type { V } from "../heads/trace.ts"
+import { FIGURE_COLORS } from "@dualinput/crew"
+import { unit } from "@dualinput/crew/trace"
+import type { V } from "@dualinput/crew/trace"
 
 /** A display name runs to 20 characters, so it fits every place the app shows it, and a Windows account's name runs to 20 too, so the one the field starts with always fits. */
 export const NAME_MAX = 20
@@ -86,9 +86,7 @@ export function IdentityCard({ name, onName, color, onColor, region, focus }: Id
     <div ref={card}>
       <Card>
         <CardContent className="flex items-center">
-          {/* The backdrop clips to the box's rounded corners on its own, since the figure's hands hang over the box's bottom edge. */}
           <div ref={box} className="relative mr-5 shrink-0" style={{ width: PORTRAIT, height: PORTRAIT }}>
-            <div className="absolute inset-x-0 inset-y-0 overflow-hidden rounded-2xl bg-muted" />
             <FigurePortrait hex={FIGURE_COLORS.find((candidate) => candidate.name === color)!.hex} size={PORTRAIT} aim={aim} />
           </div>
           <div className="flex min-w-0 flex-1 flex-col">

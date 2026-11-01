@@ -18,7 +18,7 @@
 
 import { placeIn } from "@dualinput/ui"
 
-import { setHeadTurn } from "../heads/live.ts"
+import { setHeadTurn } from "@dualinput/crew"
 
 /** How long the flight's start takes to unfold a folded card, in milliseconds; how long a wheel rests before a fold it left partway finishes; over how many pixels a part fades as it nears the docked row, and a twin slides sideways; and how much of an animated fold its fades take at either end. */
 export const FOLD = { ms: 380, snapAfter: 120, edgeFade: 24, dock: 64, blendOut: 0.4, blendIn: 0.5 }

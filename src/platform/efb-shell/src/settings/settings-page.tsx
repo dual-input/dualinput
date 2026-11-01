@@ -3,9 +3,9 @@
 // take-control's key does. A change a pilot watches happens in the page's moment, its old words fading before its
 // new ones fade in, so a row never shows two states at once.
 
-import { Button, Card, Confirm, cx, Fades, Link, MOMENT, part, Room, ScrollPage, ScrollWindow, Select, SelectContent, SelectItem, SelectTrigger, Separator, Spinner, Switch, toast, useMoment, useReveal } from "@dualinput/ui"
+import { Button, Card, Confirm, cx, Fades, Link, MOMENT, part, Room, ScrollPage, ScrollWindow, Select, SelectContent, SelectItem, SelectTrigger, Separator, Spinner, Switch, toast, useMoment, useReveal, useScrollTo } from "@dualinput/ui"
 import { CircleArrowUp, FolderOpen, Trash2, TriangleAlert } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { createElement, useEffect, useRef, useState } from "react"
 import type { ReactNode, Ref } from "react"
 
 import type { HelperSlice } from "../../../../engines/messages/ts/core_helper/HelperSlice.ts"
@@ -13,6 +13,7 @@ import type { RecordingSlice } from "../../../../engines/messages/ts/recording/R
 import type { Run } from "../../../../engines/messages/ts/recording/Run.ts"
 import type { SessionSlice } from "../../../../engines/messages/ts/session/SessionSlice.ts"
 import { useCoreSlice, useShell } from "../part.ts"
+import type { Part } from "../part.ts"
 import { WANTED } from "../wanted.ts"
 import type { Wanted } from "../wanted.ts"
 
@@ -190,7 +191,8 @@ function Recordings() {
  * moment, as a count does.
  */
 function DualInput({ version }: { version: string }) {
-  const { link } = useShell()
+  const { link, updateAsks } = useShell()
+  const scrollTo = useScrollTo()
   const session = useCoreSlice<SessionSlice>("session")
   const wanted = useCoreSlice<Wanted>(WANTED)
   const update = wanted?.update ?? { state: "current" as const, next: "", checked: undefined, done: undefined }
@@ -199,6 +201,11 @@ function DualInput({ version }: { version: string }) {
   const ready = useReveal(update.state === "ready")
   const bar = useReveal(update.state === "downloading")
   const at = useRef<HTMLElement>(null)
+  useEffect(() => {
+    if (updateAsks > 0 && at.current) scrollTo(at.current)
+    // The header's View update asks by counting up, and the page is this section's for its life.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateAsks])
   const check = () => void link.client.command("update.check", null).catch(() => {})
   const shown = moment.shown
   const checks = (state: string) => state === "current" || state === "checking"
@@ -263,9 +270,10 @@ function DualInput({ version }: { version: string }) {
   )
 }
 
-export function SettingsPage({ version }: { version: string }) {
+export function SettingsPage({ version, parts }: { version: string; parts: Part[] }) {
   return (
     <ScrollPage>
+      {parts.map((part) => part.settings && createElement(part.settings, { key: part.name }))}
       <OutputDevice />
       <Recordings />
       <DualInput version={version} />

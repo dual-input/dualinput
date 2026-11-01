@@ -10,8 +10,8 @@
  *   node tools/dev.ts experiments/areas/interface/p26-figure-drawing/main.tsx
  */
 
-import { albedo, display, headShapes, lightAlbedo, hitBall, hitNormal, hitStick, offset, shade, SPEC, unit } from "../../../../src/platform/efb-shell/src/heads/trace.ts"
-import type { Shape, V } from "../../../../src/platform/efb-shell/src/heads/trace.ts"
+import { albedo, display, headShapes, lightAlbedo, hitBall, hitNormal, hitStick, offset, shade, SPEC, unit } from "@dualinput/crew/trace"
+import type { Shape, V } from "@dualinput/crew/trace"
 import { FigureDrawing } from "../../../../src/platform/efb-shell/src/figure/drawing.ts"
 import type { Projection } from "../../../../src/platform/efb-shell/src/figure/drawing.ts"
 import { body, BODY_SHADOWS, CHEST_UP, FEET, FOOT, HANDS_ON_HIPS, HEAD_UP, HIPS_UP, standingProjection } from "../../../../src/platform/efb-shell/src/figure/standing-pose.ts"

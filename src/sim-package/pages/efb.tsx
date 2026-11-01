@@ -6,10 +6,11 @@ import { createRoot } from "react-dom/client"
 
 import { simEnv } from "../../engines/page-client/src/sim-env.ts"
 import { VERSION } from "../../engines/messages/ts/stamp.ts"
-import { CoreLink } from "../../platform/efb-shell/src/core-link.ts"
+import { CoreLink } from "../../engines/page-client/src/core-link.ts"
 import { Frame } from "../../platform/efb-shell/src/frame.tsx"
 import type { Part } from "../../platform/efb-shell/src/part.ts"
 import { registerEfbApp } from "../../platform/efb-shell/src/register.ts"
+import { simWindow } from "../../platform/efb-shell/src/sim-window.ts"
 import { viewShown } from "../../platform/efb-shell/src/view.ts"
 
 /** `EFB_APP` in tools/lib/pages.ts names the same folder, so change both together. */
@@ -18,14 +19,16 @@ const INTERNAL_NAME = "DualInput"
 /** Each feature's part, one line each, in the order their tabs show. */
 const PARTS: Part[] = []
 
+const SIM = simWindow(INTERNAL_NAME)
+
 registerEfbApp({
   internalName: INTERNAL_NAME,
   name: "Dual Input",
   version: VERSION,
   mount(host) {
-    const link = new CoreLink(simEnv())
+    const link = new CoreLink("efb-app", simEnv())
     link.start()
-    createRoot(host).render(<Frame host={host} link={link} version={VERSION} parts={PARTS} />)
+    createRoot(host).render(<Frame host={host} link={link} sim={SIM} version={VERSION} parts={PARTS} />)
   },
   left: releaseKeyboard,
   shown: viewShown,

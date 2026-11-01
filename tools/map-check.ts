@@ -79,7 +79,7 @@ const CORE_PLATFORM_LINES = [
   ["clients"],
   ["kernel"],
 ]
-const OUTSIDE_PLATFORM = ["routine-host", "panel-bridge", "efb-shell", "desktop-shell"]
+const OUTSIDE_PLATFORM = ["routine-host", "panel-bridge", "efb-shell", "banner", "desktop-shell"]
 const FEATURE_PARTS = ["core", "routines", "panel", "efb", "desktop"]
 
 // The engines that are edge code, the stand-in sim included, which takes the sim's place

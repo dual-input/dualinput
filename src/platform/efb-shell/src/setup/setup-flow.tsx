@@ -39,6 +39,39 @@ const checkOf = (failure: SetupFailure): Check["id"] => (failure === "offline" ?
 
 type Phase = { kind: "welcome"; out: boolean } | { kind: "checks"; index: number; step: "enter" | "run" | "result" | "handoff"; failed?: boolean; fixing?: boolean; skipped: number[] } | { kind: "card" }
 
+/** What the window shows in place of its pages when the sim loaded another version of our add-on than the service runs: the box setup's check shows, the same way. */
+export function AddonMismatch({ addon, service, headerHeight, onRestart }: { addon: string; service: string; headerHeight: number; onRestart: () => void }) {
+  const [restarting, setRestarting] = useState(false)
+  const box = failures({ username: "", addonVersion: addon, version: service }).addon
+  return (
+    // As much room under it as the header takes above, so it centers in the window.
+    <div className="flex flex-1 flex-col items-center justify-center px-12" style={{ paddingBottom: headerHeight }}>
+      <FailureBox title={box.title} detail={box.detail}>
+        <div className="mt-3 flex items-center justify-center">
+          {restarting ? (
+            <Button variant="danger" disabled>
+              <Spinner />
+              {box.action.busy}
+            </Button>
+          ) : (
+            <Confirm
+              variant="danger"
+              question="Restart the sim?"
+              go="Restart now"
+              onConfirm={() => {
+                setRestarting(true)
+                onRestart()
+              }}
+            >
+              {box.action.label}
+            </Confirm>
+          )}
+        </div>
+      </FailureBox>
+    </div>
+  )
+}
+
 function Welcome({ out }: { out: boolean }) {
   return (
     <div className="flex flex-1 items-center justify-center" style={{ opacity: out ? 0 : 1, transition: `opacity ${STEP.welcomeOut}ms ease-out` }}>

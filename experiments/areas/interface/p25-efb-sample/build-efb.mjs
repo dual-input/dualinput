@@ -59,7 +59,7 @@ const bundled = await esbuild.build({
   logLevel: "warning",
 })
 const jsFile = write(`${DIR}/${INTERNAL}.js`, bundled.outputFiles[0].text)
-const cssFile = write(`${DIR}/${INTERNAL}.css`, await buildCss(["src/platform/efb-shell/src/**/*.{ts,tsx}", "src/platform/efb-shell/dev/**/*.{ts,tsx}"]))
+const cssFile = write(`${DIR}/${INTERNAL}.css`, await buildCss(["src/platform/efb-shell/src/**/*.{ts,tsx}", "src/platform/efb-shell/dev/**/*.{ts,tsx}", "src/packages/crew/src/**/*.{ts,tsx}"]))
 for (const font of fs.readdirSync(path.join(KIT, "fonts"))) write(`${DIR}/fonts/${font}`, fs.readFileSync(path.join(KIT, "fonts", font)))
 fs.copyFileSync(path.join(ROOT, "src/sim-package/pages/efb-icon.svg"), (fs.mkdirSync(path.join(OUT, DIR, "Assets"), { recursive: true }), path.join(OUT, DIR, "Assets/app-icon.svg")))
 

@@ -13,18 +13,21 @@ import type { NetSlice } from "../../../engines/messages/ts/net/NetSlice.ts"
 import type { Notification } from "../../../engines/messages/ts/clients/Notification.ts"
 import type { SessionSlice } from "../../../engines/messages/ts/session/SessionSlice.ts"
 import type { SimSlice } from "../../../engines/messages/ts/sim/SimSlice.ts"
-import { useCoreState, useSlice } from "./core-link.ts"
-import type { CoreLink } from "./core-link.ts"
+import { useCoreState, useSlice } from "../../../engines/page-client/src/core-link.ts"
+import type { CoreLink, CoreState } from "../../../engines/page-client/src/core-link.ts"
+import { BannerPanel } from "./banner-panel.ts"
 import { Header, HEADER_HEIGHT } from "./header/header.tsx"
 import { issuesOf } from "./header/issues.tsx"
 import type { HeaderStatus } from "./header/issues.tsx"
 import type { SessionPhase } from "./header/phase.tsx"
+import { useLanding } from "./landing.ts"
 import { Reconnecting, ServiceDown } from "./lost-service.tsx"
 import { ShellContext, startParts, stopParts } from "./part.ts"
 import type { Part, Shell } from "./part.ts"
 import { SessionTab } from "./session/session-tab.tsx"
-import { SetupFlow } from "./setup/setup-flow.tsx"
+import { AddonMismatch, SetupFlow } from "./setup/setup-flow.tsx"
 import { SettingsPage } from "./settings/settings-page.tsx"
+import type { SimWindow } from "./sim-window.ts"
 import { useViewSize } from "./view.ts"
 import { WANTED } from "./wanted.ts"
 import type { Wanted } from "./wanted.ts"
@@ -52,7 +55,23 @@ function phaseOf(session: SessionSlice | undefined): SessionPhase | undefined {
   return phase === "ended" ? "syncing" : phase === "running" || phase === "countdown" ? "preflight" : undefined
 }
 
-function useHeaderStatus(link: CoreLink, version: string, open: (tab: string) => void): HeaderStatus {
+/** The stages of a pilot's sim that have a flight, or are loading one, in which the banner's panel opens. */
+const IN_A_FLIGHT = ["loading", "ready-to-fly", "flying"]
+
+/** Keeps the banner's panel to the session and this pilot's flights, as the core says them. */
+function useBannerPanel(link: CoreLink, sim: SimWindow, session: SessionSlice | undefined, core: CoreState): void {
+  const pageOpen = useSlice<boolean>(link, "banner") === true
+  const panel = useMemo(() => new BannerPanel({ toolbar: sim.toggleBanner, setTimer: (then, ms) => window.setTimeout(then, ms), clearTimer: (timer) => window.clearTimeout(timer) }), [sim])
+  const stage = session?.members.find((member) => member.pilot === session.me)?.status.stage
+  const held = !!session?.held
+  const flying = held && !!stage && IN_A_FLIGHT.includes(stage)
+  useEffect(() => {
+    if (core === "closed") panel.coreQuit()
+    else if (core === "connected") panel.follow({ held, flying, pageOpen })
+  }, [panel, core, held, flying, pageOpen])
+}
+
+function useHeaderStatus(link: CoreLink, version: string, viewUpdate: () => void): HeaderStatus {
   const net = useSlice<NetSlice>(link, "network")
   const sim = useSlice<SimSlice>(link, "sim")
   const notifications = useSlice<Notification[]>(link, "notifications")
@@ -66,47 +85,62 @@ function useHeaderStatus(link: CoreLink, version: string, open: (tab: string) =>
     module: sim?.module === "stopped" ? "stopped" : sim?.module === "missing" ? "missing" : undefined,
     bridge: raised("clients.no-panel"),
     helper: raised("core-helper.down"),
-    update: update?.state === "ready" ? { next: update.next, have: version, view: () => open("settings") } : undefined,
+    update: update?.state === "ready" ? { next: update.next, have: version, view: viewUpdate } : undefined,
   }
 }
 
 export type FrameProps = {
   host: HTMLElement
   link: CoreLink
+  sim: SimWindow
   version: string
   parts: Part[]
 }
 
 type TabPage = { id: string; icon: ComponentType<{ className?: string }>; label: string; page: ComponentType }
 
-export function Frame({ host, link, version, parts }: FrameProps) {
+export function Frame({ host, link, sim, version, parts }: FrameProps) {
   const { width, height, scale } = useViewSize(host)
   const inset = useStatusBarInset(scale)
   const core = useCoreState(link)
   const [tab, setTab] = useState("session")
   const [dots, setDots] = useState<Record<string, boolean>>({})
   const setDot = useCallback((id: string, on: boolean) => setDots((now) => (!!now[id] === on ? now : { ...now, [id]: on })), [])
-  const shell = useMemo<Shell>(() => ({ link, open: setTab, setDot }), [link, setDot])
+  // Asks Settings to show its update section, by counting up, since the page stays mounted between asks.
+  const [updateAsks, setUpdateAsks] = useState(0)
+  const shell = useMemo<Shell>(() => ({ link, open: setTab, setDot, updateAsks }), [link, setDot, updateAsks])
   useEffect(() => {
     startParts(parts, link)
     return () => stopParts(parts)
   }, [parts, link])
+  const viewUpdate = useCallback(() => {
+    setTab("settings")
+    setUpdateAsks((asks) => asks + 1)
+  }, [])
   const tabs = useMemo<TabPage[]>(
     () => [
       { id: "session", icon: Users, label: "Session", page: () => <SessionTab parts={parts} /> },
       ...parts.filter((part) => part.tab).map((part) => ({ id: part.name, ...part.tab! })),
-      { id: "settings", icon: SettingsIcon, label: "Settings", page: () => <SettingsPage version={version} /> },
+      { id: "settings", icon: SettingsIcon, label: "Settings", page: () => <SettingsPage version={version} parts={parts} /> },
     ],
     [parts, version],
   )
   const session = useSlice<SessionSlice>(link, "session")
-  const status = useHeaderStatus(link, version, setTab)
+  const status = useHeaderStatus(link, version, viewUpdate)
   const down = core === "not-running" || core === "closed"
   const issues = down ? [] : issuesOf(status, !!session?.held)
+  useBannerPanel(link, sim, session, core)
+  const [headerOpened, setHeaderOpened] = useState(0)
+  useLanding(link, sim, core !== "connected", (landing) => {
+    if (landing === "header") setHeaderOpened((times) => times + 1)
+    else setTab(landing === "session" ? "session" : (parts.find((part) => part.tab?.landing === landing)?.name ?? "session"))
+  })
+  const coreVersion = useSlice<{ version: string }>(link, "core")?.version
+  const mismatch = !down && coreVersion !== undefined && coreVersion !== version
   const setup = useSlice<Wanted>(link, WANTED)?.setup
   // Setup has the whole window, with no header or tabs, until the pilot has a name.
   const [setupDone, setSetupDone] = useState(false)
-  if (!down && setup && !setupDone) {
+  if (!down && !mismatch && setup && !setupDone) {
     return (
       <ShellContext.Provider value={shell}>
         <Root scale={scale} style={{ width, height, overflow: "hidden" }}>
@@ -131,10 +165,12 @@ export function Frame({ host, link, version, parts }: FrameProps) {
     <ShellContext.Provider value={shell}>
       <Root scale={scale} style={{ width, height, overflow: "hidden" }}>
         <div data-app-frame className="relative flex h-full flex-col bg-background" style={{ paddingTop: inset }}>
-          <Header version={version} phase={down ? undefined : phaseOf(session)} issues={issues} offline={!!status.offline} />
+          <Header version={version} phase={down || mismatch ? undefined : phaseOf(session)} issues={mismatch ? [] : issues} offline={!!status.offline} opened={headerOpened} />
           <div className="flex min-h-0 flex-1 flex-col">
             {down ? (
               <ServiceDown closed={core === "closed"} headerHeight={HEADER_HEIGHT} />
+            ) : mismatch ? (
+              <AddonMismatch addon={version} service={coreVersion} headerHeight={HEADER_HEIGHT} onRestart={() => void link.client.command("setup.fix", { failure: "addon" }).catch(() => {})} />
             ) : (
               tabs.map(({ id, page }) => (
                 <div key={id} className="min-h-0 flex-1 flex-col" style={{ display: id === tab ? "flex" : "none" }}>
@@ -143,7 +179,8 @@ export function Frame({ host, link, version, parts }: FrameProps) {
               ))
             )}
           </div>
-          {!down && <TabBar tabs={tabs.map(({ id, icon, label }) => ({ id, icon, label, dot: dots[id] }))} active={tab} onSelect={setTab} />}
+          {!down && !mismatch && <TabBar tabs={tabs.map(({ id, icon, label }) => ({ id, icon, label, dot: dots[id] }))} active={tab} onSelect={setTab} />}
+          {!down && !mismatch && parts.map((part) => part.underTabs && createElement(part.underTabs, { key: part.name }))}
           {!down && <Reconnecting on={core === "reconnecting"} />}
         </div>
         <Toaster />

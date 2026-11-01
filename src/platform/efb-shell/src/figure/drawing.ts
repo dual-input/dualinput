@@ -6,8 +6,8 @@
 // meters draws nothing, so everything here is in the page's pixels; and a clip path wipes what's under it, so a
 // shadow is a gradient on a circle the size of its ball, which keeps it on the ball.
 
-import { add, albedo, clamp01, display, lightAlbedo, scale, shade, sub, unit } from "../heads/trace.ts"
-import type { Shape, V } from "../heads/trace.ts"
+import { add, albedo, clamp01, display, lightAlbedo, scale, shade, sub, unit } from "@dualinput/crew/trace"
+import type { Shape, V } from "@dualinput/crew/trace"
 
 const SVG = "http://www.w3.org/2000/svg"
 

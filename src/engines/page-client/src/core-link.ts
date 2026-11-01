@@ -1,22 +1,19 @@
-// The EFB app's link to the core, Dual Input's service, on page-client. It turns page-client's five
-// states into the three things the app's window shows
+// A React page's link to the core, Dual Input's service, on page-client, for the EFB app and the banner. It turns
+// page-client's five states into what either page shows for the link
 // (record/areas/interface/decisions.md, "Without the service the EFB app shows one of three screens"),
 // and hands React the slices of client state.
 
 import { useSyncExternalStore } from "react"
 
-import type { JsonValue } from "../../../engines/messages/ts/serde_json/JsonValue.ts"
-import { PageClient } from "../../../engines/page-client/src/page-client.ts"
-import type { ConnectionState, Env } from "../../../engines/page-client/src/page-client.ts"
+import type { JsonValue } from "../../messages/ts/serde_json/JsonValue.ts"
+import { PageClient } from "./page-client.ts"
+import type { ConnectionState, Env } from "./page-client.ts"
 
-/** What the app's window shows for the link: its pages, the reconnecting pill over them, or a screen of its own. */
+/** What a page shows for the link: its content, that it's reconnecting, or that the service is gone. */
 export type CoreState = "connected" | "reconnecting" | "not-running" | "closed"
 
-/** How long reconnecting lasts before the app says the service isn't running, in milliseconds. */
+/** How long reconnecting lasts before a page says the service isn't running, in milliseconds. */
 const RECONNECT_FOR = 10_000
-
-/** The component the EFB app's `hello` names. `component::EFB_APP` in src/engines/messages/src/clients.rs names it too. */
-const COMPONENT = "efb-app"
 
 export class CoreLink {
   readonly client: PageClient
@@ -26,8 +23,9 @@ export class CoreLink {
   private readonly slices = new Map<string, JsonValue>()
   private readonly watched = new Set<string>()
 
-  constructor(env: Env) {
-    this.client = new PageClient({ component: COMPONENT }, env)
+  /** `component` is what the page's `hello` names, as `component::*` in src/engines/messages/src/clients.rs does. */
+  constructor(component: "efb-app" | "banner", env: Env) {
+    this.client = new PageClient({ component }, env)
     this.client.onState((state) => this.follow(state))
   }
 
@@ -77,7 +75,7 @@ export class CoreLink {
   }
 }
 
-/** The link's state, for the app's window. */
+/** The link's state, for what a page shows. */
 export function useCoreState(link: CoreLink): CoreState {
   return useSyncExternalStore(link.subscribe, link.coreState)
 }

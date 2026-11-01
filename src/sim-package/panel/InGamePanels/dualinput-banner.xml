@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!-- The banner's box on the screen. The sim sizes a panel in percents of the screen's height (measured on MSFS 2024, 2026-10-04, record/areas/interface/log.md), so a box of 360 by 390 on a 1,080-line screen, 16 in from its right and 210 down, is 33.33 wide, 36.11 tall, 1.48 in, and 19.44 down, and src/platform/banner/src/stack.tsx holds the same box in the panel's own pixels. -->
+<SimBase.Document Type="InGamePanels" version="1,0">
+  <Filename>InGamePanel_DualInputBanner.spb</Filename>
+  <InGamePanels.InGamePanelDefinition id="PANEL_DUALINPUT_BANNER" Name="Dual Input" url="html_UI/InGamePanels/DualInput/banner.html" resizeDirections="None" minWidth="33.33" minHeight="36.11" defaultWidth="33.33" defaultHeight="36.11" defaultTop="19.44" defaultRight="1.48" icon="ICON_TOOLBAR_DUALINPUT_BANNER" buttonVisible="true">
+  </InGamePanels.InGamePanelDefinition>
+</SimBase.Document>

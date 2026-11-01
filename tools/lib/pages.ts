@@ -21,14 +21,21 @@ export const PAGES = path.join(ROOT, "target", "sim-pages")
 /** Our EFB app's folder, by whose name the EFB finds it, and the name its script and stylesheet take. `INTERNAL_NAME` in src/sim-package/pages/efb.tsx names it too. */
 const EFB_APP = "html_ui/efb_ui/efb_apps/DualInput"
 
+/** The banner's folder, which its panel definition names, src/sim-package/panel/InGamePanels/dualinput-banner.xml. */
+const BANNER = "html_ui/InGamePanels/DualInput"
+
+/** The source files the banner's classes can come from, on top of the kit's. */
+const BANNER_CONTENT = ["src/platform/banner/src/**/*.{ts,tsx}", "src/packages/crew/src/**/*.{ts,tsx}"]
+
 /** The source files the EFB app's classes can come from, on top of the kit's. */
-const EFB_CONTENT = ["src/platform/efb-shell/src/**/*.{ts,tsx}", "src/sim-package/pages/efb.tsx", "src/features/*/efb/**/*.{ts,tsx}"]
+const EFB_CONTENT = ["src/platform/efb-shell/src/**/*.{ts,tsx}", "src/packages/crew/src/**/*.{ts,tsx}", "src/sim-package/pages/efb.tsx", "src/features/*/efb/**/*.{ts,tsx}"]
 
 /** Each bundle of the sim package's own, by its entry, and where our package puts it. */
 const BUNDLES: { entry: string; to: string }[] = [
   { entry: "src/sim-package/pages/bridge.ts", to: "html_ui/DualInput/bridge.js" },
   { entry: "src/sim-package/pages/menu.ts", to: "html_ui/DualInput/menu.js" },
   { entry: "src/sim-package/pages/efb.tsx", to: `${EFB_APP}/DualInput.js` },
+  { entry: "src/sim-package/pages/banner.tsx", to: `${BANNER}/banner.js` },
 ]
 
 /**
@@ -101,7 +108,7 @@ export async function buildPages(out = PAGES): Promise<Built[]> {
     for (const warning of result.warnings) console.warn(`warning: ${entry}: ${warning.text}`)
     built.push({ file, to })
   }
-  built.push(...(await buildEfbAssets(out)))
+  built.push(...(await buildEfbAssets(out)), ...(await buildBannerAssets(out)))
   const vcockpit = path.join(out, "VCockpit.js")
   fs.writeFileSync(vcockpit, makeVCockpit(fs.readFileSync(path.join(STOCK, "VCockpit.js"), "utf8")))
   built.push({ file: vcockpit, to: VCOCKPIT })
@@ -125,6 +132,22 @@ async function buildEfbAssets(out: string): Promise<Built[]> {
     { file: css, to: `${EFB_APP}/DualInput.css` },
     ...fs.readdirSync(fonts).map((font) => ({ file: path.join(fonts, font), to: `${EFB_APP}/fonts/${font}` })),
     { file: path.join(ROOT, "src", "sim-package", "pages", "efb-icon.svg"), to: `${EFB_APP}/Assets/app-icon.svg` },
+  ]
+}
+
+/** What the banner takes beside its script: its page, its stylesheet, whose fonts sit beside it, and the toolbar's icon, which 2024 looks for under html_ui/icons/toolbar/ (measured on MSFS 2024, 2026-10-04, record/areas/interface/log.md). */
+async function buildBannerAssets(out: string): Promise<Built[]> {
+  const dir = path.join(out, BANNER.replace(/^html_ui\//, ""))
+  fs.mkdirSync(dir, { recursive: true })
+  const css = path.join(dir, "banner.css")
+  fs.writeFileSync(css, await buildCss(BANNER_CONTENT))
+  const fonts = path.join(KIT, "fonts")
+  const pages = path.join(ROOT, "src", "sim-package", "pages")
+  return [
+    { file: css, to: `${BANNER}/banner.css` },
+    { file: path.join(pages, "banner.html"), to: `${BANNER}/banner.html` },
+    ...fs.readdirSync(fonts).map((font) => ({ file: path.join(fonts, font), to: `${BANNER}/fonts/${font}` })),
+    { file: path.join(pages, "banner-icon.svg"), to: "html_ui/icons/toolbar/ICON_TOOLBAR_DUALINPUT_BANNER.svg" },
   ]
 }
 

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="/SCSS/common.css" />
+  <link rel="stylesheet" href="banner.css" />
+  <!-- The panel covers the banner's box, and only a card takes the mouse, so clicks can reach the cockpit through what's empty. -->
+  <style>
+    html, body { background: transparent !important; pointer-events: none; width: 100%; height: 100%; overflow: hidden; margin: 0; }
+    ingame-ui#DualInputBanner, ingame-ui#DualInputBanner .ingameUiContent, ingame-ui#DualInputBanner .ingameUiWrapper { background: transparent !important; width: 100% !important; height: 100% !important; pointer-events: none !important; }
+    #dualinput-banner { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+  </style>
+  <script type="text/javascript" src="/JS/coherent.js"></script>
+  <script type="text/javascript" src="/JS/common.js"></script>
+  <script type="text/javascript" src="/JS/dataStorage.js"></script>
+  <script type="text/javascript" src="/JS/simvar.js"></script>
+  <script type="text/javascript" src="/JS/buttons.js"></script>
+  <script type="text/javascript" src="/JS/Services/ToolBarPanels.js"></script>
+  <link rel="import" href="/templates/ingameUi/ingameUi.html" />
+  <script type="text/javascript" src="banner.js"></script>
+</head>
+<body class="border-box">
+  <dualinput-banner-panel>
+    <ingame-ui id="DualInputBanner" panel-id="PANEL_DUALINPUT_BANNER" title="" class="ingameUiFrame" isPanelCloseable="false" collapsible="false" noBackground="true" handlebygame="true" resize="none" auto-inside="" is-transparent>
+      <div id="dualinput-banner"></div>
+    </ingame-ui>
+  </dualinput-banner-panel>
+</body>
+</html>

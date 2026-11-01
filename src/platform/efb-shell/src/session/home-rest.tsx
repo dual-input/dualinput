@@ -8,7 +8,7 @@ import type { RefObject } from "react"
 
 import { StandingFigure } from "../figure/standing-figure.tsx"
 import type { FigureSignals } from "../figure/standing-figure.tsx"
-import { FIGURE_COLORS } from "../heads/head.tsx"
+import { FIGURE_COLORS } from "@dualinput/crew"
 import { useCoreSlice, useShell } from "../part.ts"
 import { WANTED } from "../wanted.ts"
 import type { Wanted } from "../wanted.ts"

@@ -4,21 +4,21 @@
 // (record/areas/interface/decisions.md, "The session page is home once a session starts"). During preflight it
 // has a second form for the card's fold: one row of every pilot's head, badged ready or out, and this pilot's Ready.
 
+import { BadgedHead, CountdownRing, CrewHeads, EmptyHead, Head, HEAD_CUE, ReadyButton, useCountdown, useCrew } from "@dualinput/crew"
+import type { HeadState } from "@dualinput/crew"
 import { Badge, Button, CardContent, Confirm, cx, ScrollWindow, Separator, toast, useRoot } from "@dualinput/ui"
-import { Check, Copy, LogOut, X } from "lucide-react"
+import { Copy, LogOut } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import type { HTMLAttributes } from "react"
 
 import type { MemberLink } from "../../../../engines/messages/ts/net/MemberLink.ts"
 import type { NetSlice } from "../../../../engines/messages/ts/net/NetSlice.ts"
 import type { SessionSlice } from "../../../../engines/messages/ts/session/SessionSlice.ts"
 import type { SliceMember } from "../../../../engines/messages/ts/session/SliceMember.ts"
-import { CrewHeads, EmptyHead, Head, useCrew } from "../heads/head.tsx"
-import { HEAD_CUE } from "../heads/live.ts"
 import { useCoreSlice, useShell } from "../part.ts"
 import { WANTED } from "../wanted.ts"
 import type { Wanted } from "../wanted.ts"
 import { CrewDifferences } from "./differences.tsx"
-import { COUNTDOWN, MyReady } from "./ready.tsx"
 
 /** A window of three rows and half of a fourth, which covers v1's two pilots with room to spare, during preflight only: outside it nothing waits under the card, so a big crew only lengthens the page. */
 const CREW_WINDOW = 150
@@ -26,6 +26,8 @@ const CREW_WINDOW = 150
 const ROW_HEADS = 7
 /** The heads pop in as the card turns to the session, one after another down the list, in milliseconds; a pilot who joins later pops in as their row appears. */
 const POP = { first: 120, stagger: 70 }
+/** What marks a head's badge for the card's fold, which fades it as the head glides. */
+const FOLD_FADES = { "data-fold-fade": true } as HTMLAttributes<HTMLSpanElement>
 
 /** Where a pilot is, under their name, the two troubles in the warning color. Their link lost and their sim crashed outrank where their sim last was. */
 function whereabouts(member: SliceMember, link: MemberLink | undefined): { shows: string; trouble?: boolean } {
@@ -85,29 +87,12 @@ function CrewRow({ member, you, flying, link, roundTrip, pop, alive, end }: { me
   )
 }
 
-/** A pilot's head in the folded row, with a badge at its lower right: an empty ring while the countdown waits on them, green filling it from the middle once they're ready, and a red cross while they're out of the flight. */
-type HeadState = "ready" | "out" | "waiting"
-const HEAD_SAYS: Record<HeadState, string> = { ready: "ready", out: "out of the flight", waiting: "not ready" }
-const FILL_MS = 220
-
-function RowHead({ member, name, state }: { member: SliceMember; name: string; state: HeadState | undefined }) {
-  const ready = state === "ready"
-  const badge = "absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full ring-2 ring-card"
+/** This pilot's Ready with the countdown's ring before it, in the whole card and the folded one, which every head looks at and bobs at while the cursor rests on it unpressed. */
+function MyReady({ ready, why, left, onToggle }: { ready: boolean; why: string | undefined; left: number | null; onToggle: () => void }) {
   return (
-    <span data-fold-glide={`head-${member.pilot}`} aria-label={state ? `${name}, ${HEAD_SAYS[state]}` : name} className="relative mr-1.5 inline-flex">
-      <Head pilot={member.pilot} alive turns slumped={state === "out"} />
-      {state === "out" && (
-        <span data-fold-fade className={cx(badge, "bg-destructive text-destructive-foreground")}>
-          <X className="size-2.5" strokeWidth={3} />
-        </span>
-      )}
-      {(state === "waiting" || ready) && (
-        <span data-fold-fade className={cx(badge, "bg-card text-success-foreground")}>
-          <span className="absolute inset-x-0 inset-y-0 rounded-full border border-muted-foreground" />
-          <span className="absolute inset-x-0 inset-y-0 rounded-full bg-success" style={{ transform: ready ? "none" : "scale(0)", transition: `transform ${FILL_MS}ms ease-out` }} />
-          <Check className="relative size-2.5" strokeWidth={3} style={{ opacity: ready ? 1 : 0, transition: `opacity ${FILL_MS}ms ease-out` }} />
-        </span>
-      )}
+    <span data-fold-glide="ready" {...{ [HEAD_CUE]: "ready" }} data-on={ready ? "" : undefined} className="flex items-center">
+      <CountdownRing left={left} />
+      <ReadyButton ready={ready} why={why} onToggle={onToggle} />
     </span>
   )
 }
@@ -125,18 +110,7 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
   const preflight = (phase === "running" || phase === "countdown") && !!me?.in_flight
   const ready = !!me?.ready
 
-  // The countdown's seconds, drawn here from the moment its phase starts.
-  const [left, setLeft] = useState<number | null>(null)
-  const counting = phase === "countdown"
-  useEffect(() => {
-    if (!counting) {
-      setLeft(null)
-      return
-    }
-    setLeft(COUNTDOWN)
-    const tick = window.setInterval(() => setLeft((seconds) => (seconds === null ? null : Math.max(0, seconds - 1))), 1000)
-    return () => window.clearInterval(tick)
-  }, [counting])
+  const left = useCountdown(phase === "countdown")
 
   // A pilot who readies nods, and the rest look at them.
   const readyBefore = useRef(new Set(session.members.filter((member) => member.ready).map((member) => member.pilot)))
@@ -254,7 +228,7 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
             <CardContent className="flex items-center">
               <div className="mr-4 flex shrink-0 items-center">
                 {inRow.map((member) => (
-                  <RowHead key={member.pilot} member={member} name={member === me ? "You" : member.name} state={stateOf(member)} />
+                  <BadgedHead key={member.pilot} pilot={member.pilot} name={member === me ? "You" : member.name} state={stateOf(member)} alive turns badge={FOLD_FADES} className="mr-1.5" {...{ "data-fold-glide": `head-${member.pilot}` }} />
                 ))}
                 {notInRow > 0 && (
                   <span data-fold-follows={`head-${everyone[inRow.length]!.pilot}`} aria-label={`${notInRow} more pilots`} className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium tabular-nums text-muted-foreground">

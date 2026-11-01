@@ -6,9 +6,10 @@ import { useState } from "react"
 import { createPortal } from "react-dom"
 import { createRoot } from "react-dom/client"
 
-import { CoreLink } from "../src/core-link.ts"
+import { CoreLink } from "../../../engines/page-client/src/core-link.ts"
 import { Frame } from "../src/frame.tsx"
 import type { Part } from "../src/part.ts"
+import type { SimWindow } from "../src/sim-window.ts"
 import { SCENES, StandInCore } from "./stand-in.ts"
 
 const CONNECTIONS = ["reconnecting", "not-running", "closed", "back"] as const
@@ -50,10 +51,17 @@ function Chooser({ core, compact }: { core: StandInCore; compact: boolean }) {
   )
 }
 
+/** The sim's window, where there's none: what the app asks of it goes to the console. */
+const NO_SIM: SimWindow = {
+  openEfb: () => console.log("the EFB opens onto our app"),
+  toggleBanner: (open) => console.log(`the banner's panel ${open ? "opens" : "closes"}`),
+  bannerAsked: () => 0,
+}
+
 /** Mounts the app into `host`, on a stand-in core, with the chooser beside it in `aside`, or over its corner with none. */
 export function mountSample({ host, aside, version, parts }: { host: HTMLElement; aside?: HTMLElement; version: string; parts: Part[] }): StandInCore {
   const core = new StandInCore()
-  const link = new CoreLink(core.env())
+  const link = new CoreLink("efb-app", core.env())
   link.start()
   const corner = document.createElement("div")
   corner.style.cssText = "position:absolute;right:8px;bottom:64px;z-index:997;pointer-events:none"
@@ -61,7 +69,7 @@ export function mountSample({ host, aside, version, parts }: { host: HTMLElement
   const place = aside ?? corner
   const tree = (
     <>
-      <Frame host={host} link={link} version={version} parts={parts} />
+      <Frame host={host} link={link} sim={NO_SIM} version={version} parts={parts} />
       {createPortal(
         <Root>
           <Chooser core={core} compact={!aside} />

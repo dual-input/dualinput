@@ -2,8 +2,8 @@
 // toward the window's left, hands on its hips. The figure's arms are straight sticks with no elbows, in the sim
 // too, so its hands on its hips splay its arms outward, the hips being wider than the shoulders.
 
-import { add, clamp01, cross, dot, scale, SPEC, sub, unit } from "../heads/trace.ts"
-import type { Shape, V } from "../heads/trace.ts"
+import { add, clamp01, cross, dot, scale, SPEC, sub, unit } from "@dualinput/crew/trace"
+import type { Shape, V } from "@dualinput/crew/trace"
 import type { Projection } from "./drawing.ts"
 
 const LEGS = { width: 0.16, down: 0.066, radius: 0.018, segments: 6 }

@@ -22,9 +22,18 @@ const SURFACE_FADE = 16
 /** A card's parts, as it registers them, and whether they're folded, so a card at rest costs a scroll no writes. */
 type Fold = { wrapper: HTMLElement; clip: HTMLElement; edge: HTMLElement; content: HTMLElement; radius: string; folded: boolean }
 
-type Registry = { add(fold: Fold): () => void; addFade(element: HTMLElement): () => void }
+type Registry = { add(fold: Fold): () => void; addFade(element: HTMLElement): () => void; scrollTo(element: HTMLElement): void }
 
 const FoldContext = createContext<Registry | null>(null)
+
+/** How long a page takes to scroll to a part a link named, in milliseconds. */
+const SCROLL_TO_MS = 320
+
+/** What scrolls the page around this component to a part of it, as View update does to Settings' update section. */
+export function useScrollTo(): (element: HTMLElement) => void {
+  const registry = useContext(FoldContext)
+  return (element) => registry?.scrollTo(element)
+}
 
 /** Registers a card's parts with the page that scrolls it, if one does. The refs are the card's for its life. */
 export function useFold(wrapper: RefObject<HTMLElement | null>, clip: RefObject<HTMLElement | null>, edge: RefObject<HTMLElement | null>, content: RefObject<HTMLElement | null>): void {
@@ -100,6 +109,19 @@ export function ScrollPage({ className, children }: { className?: string; childr
     addFade(element) {
       fades.current.add(element)
       return () => fades.current.delete(element)
+    },
+    scrollTo(element) {
+      const box = scroller.ref.current
+      if (!box) return
+      const from = box.scrollTop
+      const to = Math.max(0, Math.min(box.scrollHeight - box.clientHeight, from + placeIn(element, box).y))
+      const start = performance.now()
+      const step = () => {
+        const t = Math.min(1, (performance.now() - start) / SCROLL_TO_MS)
+        box.scrollTop = from + (to - from) * (1 - (1 - t) * (1 - t))
+        if (t < 1) requestAnimationFrame(step)
+      }
+      step()
     },
   })
   const run = () => {

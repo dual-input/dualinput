@@ -6,8 +6,8 @@ import { createContext, useContext } from "react"
 import type { ComponentType } from "react"
 
 import type { JsonValue } from "../../../engines/messages/ts/serde_json/JsonValue.ts"
-import type { CoreLink } from "./core-link.ts"
-import { useSlice } from "./core-link.ts"
+import type { CoreLink } from "../../../engines/page-client/src/core-link.ts"
+import { useSlice } from "../../../engines/page-client/src/core-link.ts"
 
 /** What a part reaches of the core: slices, commands, and the `unit` messages it trades with its own unit. */
 export type PartApi = {
@@ -24,9 +24,19 @@ export type Part = {
   start?(api: PartApi): void
   stop?(): void
   /** A tab of its own, between the Session tab and Settings. */
-  tab?: { icon: ComponentType<{ className?: string }>; label: string; page: ComponentType }
+  tab?: {
+    icon: ComponentType<{ className?: string }>
+    label: string
+    page: ComponentType
+    /** The landing a click on a banner's card opens this tab for, as avatars' "This seat is taken" does Figures. */
+    landing?: string
+  }
   /** What shows on the Session tab under the session card during preflight, which the card folds to keep in view. */
   preflight?: ComponentType
+  /** What shows under the tab bar on every tab, as Take control does, which can't wait for a tab switch. */
+  underTabs?: ComponentType
+  /** A section of the Settings tab, above the platform's, as Take control's binding is. */
+  settings?: ComponentType
 }
 
 export function definePart(part: Part): Part {
@@ -64,10 +74,12 @@ export function stopParts(parts: Part[]): void {
 /** The app around a page: the link to the core, and the frame's own controls. */
 export type Shell = {
   link: CoreLink
-  /** Opens a tab, as the header's View update opens Settings. */
+  /** Opens a tab, as a part's own link to Settings does. */
   open(tab: string): void
   /** An amber dot on a tab's icon, while the tab holds a warning. */
   setDot(tab: string, on: boolean): void
+  /** Counts the header's View update presses, each of which Settings answers by scrolling to its update section. */
+  updateAsks: number
 }
 
 export const ShellContext = createContext<Shell | null>(null)

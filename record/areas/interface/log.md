@@ -3,6 +3,20 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-01: A flex item with only absolute children keeps its height in Coherent GT until told `min-height: 0`
+
+**Asked:** why, in the debugger, a refusal growing the start card pushed the standing figure down over the tab bar.
+
+**Expected:** the figure's room to shrink from its top, as `flex: 1` does in a browser when a flex item's children are all out of flow, so the figure would stay put.
+
+**Found:** in the SDK's CoherentGT Debugger, the room stayed 331px tall while its parent shrank to 170px, and it ran that far past its parent's foot.
+With `min-height: 0` on the room it shrank to 189px, and the figure stayed where it was.
+We first blamed `bottom` on an absolute SVG and wrote that into a comment; testing it showed `bottom` holds, so the comment and the box it justified came back out.
+
+**Changed:** the figure's room has `min-h-0`.
+
+**Affects:** [Coherent GT's layout](../architecture/coherent-gt.md#css).
+
 ## 2026-11-01: Coherent GT's canvas takes no pixels, so a figure drawn by rays can't reach the screen at any size above a head's, while the fold, its pin, and its masks all work
 
 **Asked:** whether what the frames lean on draws in Coherent GT, now that the EFB app's sample runs there: the pilots' heads and figures, the pinned card, and the folds.

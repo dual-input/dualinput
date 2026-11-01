@@ -13,6 +13,7 @@ import { createRequire } from "node:module"
 import { readMessageTypes, writeMessageTypes } from "./lib/messages.ts"
 import { buildModule, clippyModule, missingExports } from "./lib/module.ts"
 import { buildPages, checkPages } from "./lib/pages.ts"
+import { panelCompileProblem } from "./lib/panel.ts"
 import { fromRoot, ROOT } from "./lib/repo.ts"
 import { Failed, main, run } from "./lib/run.ts"
 import { requireSdk } from "./lib/sdk.ts"
@@ -32,6 +33,7 @@ const checks: [string, () => void | Promise<void>][] = [
   ["Clippy on our WASM module", clippyModule],
   ["each tsconfig's type check", typeCheck],
   ["the stock files against stock.json", checkStockFiles],
+  ["the banner's panel against its source", checkPanel],
   ["the Coherent GT check on our code in the sim", async () => checkPages(await buildPages())],
   ["the map check", () => run(process.execPath, [path.join("tools", "map-check.ts")])],
   ["the profiles' level files", checkLevels],
@@ -109,6 +111,12 @@ function typeCheck(): void {
 
 function typeScriptTests(): string[] {
   return ["src", "tools"].flatMap((f) => find(path.join(ROOT, f), ".test.ts")).map((f) => fromRoot(f))
+}
+
+/** CI has no sim to compile with, so it checks only that the committed compile came from this source. */
+function checkPanel(): void {
+  const problem = panelCompileProblem()
+  if (problem) throw new Failed(problem)
 }
 
 /** CI has no sim, so it checks only that each stock file matches stock.json. */

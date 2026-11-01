@@ -114,11 +114,12 @@ export function ScrollPage({ className, children }: { className?: string; childr
       const box = scroller.ref.current
       if (!box) return
       const from = box.scrollTop
-      const to = Math.max(0, Math.min(box.scrollHeight - box.clientHeight, from + placeIn(element, box).y))
+      const to = from + placeIn(element, box).y
       const start = performance.now()
+      // How far it can go is read each frame, since what it scrolls to may still be opening.
       const step = () => {
         const t = Math.min(1, (performance.now() - start) / SCROLL_TO_MS)
-        box.scrollTop = from + (to - from) * (1 - (1 - t) * (1 - t))
+        box.scrollTop = Math.min(box.scrollHeight - box.clientHeight, from + (to - from) * (1 - (1 - t) * (1 - t)))
         if (t < 1) requestAnimationFrame(step)
       }
       step()

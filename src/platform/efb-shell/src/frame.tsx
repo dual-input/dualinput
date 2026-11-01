@@ -77,14 +77,17 @@ function useHeaderStatus(link: CoreLink, version: string, viewUpdate: () => void
   const notifications = useSlice<Notification[]>(link, "notifications")
   const wanted = useSlice<Wanted>(link, WANTED)
   const raised = (id: string) => !!notifications?.some((notification) => notification.id === id)
+  const want = notifications?.find((notification) => notification.id.indexOf("core-helper.failed.") === 0) as (Notification & { detail?: string }) | undefined
   const update = wanted?.update
   return {
     offline: net?.internet === false,
     servers: wanted?.servers,
     firewall: wanted?.firewall,
+    connection: raised("network.bind"),
     module: sim?.module === "stopped" ? "stopped" : sim?.module === "missing" ? "missing" : undefined,
     bridge: raised("clients.no-panel"),
     helper: raised("core-helper.down"),
+    want: want && { title: want.text, detail: want.detail },
     update: update?.state === "ready" ? { next: update.next, have: version, view: viewUpdate } : undefined,
   }
 }
@@ -165,7 +168,7 @@ export function Frame({ host, link, sim, version, parts }: FrameProps) {
     <ShellContext.Provider value={shell}>
       <Root scale={scale} style={{ width, height, overflow: "hidden" }}>
         <div data-app-frame className="relative flex h-full flex-col bg-background" style={{ paddingTop: inset }}>
-          <Header version={version} phase={down || mismatch ? undefined : phaseOf(session)} issues={mismatch ? [] : issues} offline={!!status.offline} opened={headerOpened} />
+          <Header version={version} phase={down || mismatch ? undefined : phaseOf(session)} icons={parts.map((part) => part.phaseIcon && createElement(part.phaseIcon, { key: part.name }))} issues={mismatch ? [] : issues} offline={!!status.offline} opened={headerOpened} />
           <div className="flex min-h-0 flex-1 flex-col">
             {down ? (
               <ServiceDown closed={core === "closed"} headerHeight={HEADER_HEIGHT} />

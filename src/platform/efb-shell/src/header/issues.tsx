@@ -10,9 +10,13 @@ export type HeaderStatus = {
   offline?: boolean
   servers?: "reachable" | "unreachable"
   firewall?: "allows" | "blocks"
+  /** The connection to other pilots failed to open. */
+  connection?: boolean
   module?: "stopped" | "missing"
   bridge?: boolean
   helper?: boolean
+  /** Something a feature asked of the Windows helper that it can't carry out, in the feature's own words, as a key Windows refuses. */
+  want?: { title: string; detail?: string }
   update?: { next: string; have: string; view: () => void }
 }
 
@@ -25,7 +29,15 @@ export const TONE_ICON: Record<Tone, ReactNode> = {
 }
 
 /** A row's title says what's wrong, as the pilot sees it, and its detail what that costs. */
-export type Issue = { tone: Tone; word: string; title: string; detail: string; action?: ReactNode }
+export type Issue = {
+  tone: Tone
+  word: string
+  title: string
+  detail: string
+  action?: ReactNode
+  /** Its action takes the pilot elsewhere, so the island closes with it. */
+  actionCloses?: boolean
+}
 
 /**
  * What a status shows, in the header's order. The PC offline stands in for our servers, since with no
@@ -64,16 +76,26 @@ export function issuesOf(status: HeaderStatus, inSession: boolean): Issue[] {
       ),
     })
   }
+  if (status.connection) {
+    issues.push({
+      tone: "bad",
+      word: "Connection",
+      title: "Dual Input can't open its connection to other pilots",
+      detail: inSession ? "Your crew can't reach you until it opens." : "You can't host or join until it opens.",
+    })
+  }
   if (status.bridge) issues.push({ tone: "bad", word: "Screens", title: "Cockpit screens aren't syncing", detail: "Dual Input couldn't load into the cockpit's panels. Another add-on that replaces VCockpit.js is the likeliest cause." })
   if (status.module === "stopped") issues.push({ tone: "bad", word: "WASM", title: "Dual Input's WASM module stopped", detail: "Restart the sim to fly together again." })
   if (status.module === "missing") issues.push({ tone: "bad", word: "WASM", title: "Dual Input's WASM module is missing", detail: "Reinstall Dual Input with the sim closed to fly together again." })
   if (status.helper) issues.push({ tone: "bad", word: "Helper", title: "Dual Input's Windows helper is down", detail: "Keybinds, audio, and your figure's pointing won't work until it's back." })
+  if (status.want) issues.push({ tone: "warn", word: "Keybind", title: status.want.title, detail: status.want.detail ?? "" })
   if (status.update && !inSession) {
     issues.push({
       tone: "news",
       word: "Update",
       title: `Dual Input ${status.update.next} is ready`,
       detail: `You have ${status.update.have}.`,
+      actionCloses: true,
       action: (
         <Button size="sm" variant="secondary" onClick={status.update.view}>
           View update

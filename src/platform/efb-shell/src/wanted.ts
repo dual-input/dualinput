@@ -32,6 +32,8 @@ export type Wanted = {
   supported?: { maker: string; model: string; maturity: "Stable" | "Experimental"; installed: boolean }[]
   /** For `sim`: whether the pilot is at Free flight's world map or in a flight, the one place a pick can load. */
   where?: "world-map" | "flight"
+  /** For `recording`: why the run in progress stopped, if it has. */
+  recordingStopped?: "no-space" | "failed-write"
   /** For the desktop app's local port: the update's state. */
   update?: { state: "current" | "checking" | "downloading" | "ready" | "failed"; next: string; done?: number; checked?: string }
 }

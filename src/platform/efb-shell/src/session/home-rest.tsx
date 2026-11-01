@@ -82,7 +82,7 @@ export function HomeRest({ page, signals, onFigureGone }: { page: RefObject<HTML
         <UnsupportedAircraft onPick={() => setPicking(true)} />
       ) : !farewell ? (
         // It runs through the page's bottom and right padding, to the tab bar and the window's edge, so its legs leave the page at the tab bar rather than ending in the air.
-        <div className="relative -mb-5 -mr-5 ml-auto w-[260px] flex-1 self-end">
+        <div className="relative -mb-5 -mr-5 ml-auto min-h-0 w-[260px] flex-1 self-end">
           <StandingFigure hex={color} page={page} signals={signals} onGone={onFigureGone} />
         </div>
       ) : null}

@@ -307,6 +307,13 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Because:** Coherent GT drops what it can't parse with no error, and p13 and p14 found three things it parses and then ignores ([architecture log][p13]; [architecture log][p14]), so a frame that draws in a browser says nothing about these.
   The development loop, `tools/dev.ts`, runs each page in a copy of the SDK's CoherentGT Debugger with no sim ([interface log][p22]), so what it can't show is what this list checks.
 
+## A pilot's head is traced, and a whole figure is drawn in SVG
+
+- **Decided:** a head in a list or on a card stays ray traced, painted a pixel at a time with `fillRect`, and the standing figure and the portrait draw as SVG, with gradients sampled from the tracer's shading.
+  The user saw the two side by side on 2026-11-01, and hasn't yet judged the SVG figure in the sim.
+- **Because:** Coherent GT's canvas takes no pixels, so `fillRect` is the only way to paint a traced picture, which a 28px head can afford and a figure 260px wide can't; and SVG at 44px stays a little stepped, where a head's nose needs its smoothness ([interface log](log.md#2026-11-01-coherent-gts-canvas-takes-no-pixels-so-a-figure-drawn-by-rays-cant-reach-the-screen-at-any-size-above-a-heads-while-the-fold-its-pin-and-its-masks-all-work)).
+- **Leaves out:** what either costs the sim's GPU in a flight, which a session in the sim settles.
+
 ## The desktop app shows Velopack's windows and its own figures, and the build designs the rest
 
 - **Decided:**
@@ -608,6 +615,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - Wherever the app was, for the service gone, since the app's own screen covers every tab.
 
   Settled by the user on 2026-11-01.
+- **With the service gone,** no core can carry the click, so the banner's page raises `L:DUALINPUT_BANNER_OPEN_EFB`, and the EFB app reads it every 200ms only while its own link is down, the one way we've measured from a panel to the EFB's document ([log](log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
 
 ## The banner is a box of opaque cards at the screen's top right
 

@@ -57,6 +57,11 @@ export abstract class StandInBase {
     })
   }
 
+  /** Sends every page a `unit` message, as the clients crate's order to the EFB app is. */
+  unit(unit: string, body: unknown): void {
+    this.sockets.forEach((_, socket) => socket.onmessage?.(JSON.stringify({ t: "unit", unit, body })))
+  }
+
   /** The socket closing without a `bye`, or with one, or the core coming back. */
   connection(state: LostService): void {
     if (state === "back") {

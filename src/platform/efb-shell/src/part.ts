@@ -37,6 +37,8 @@ export type Part = {
   underTabs?: ComponentType
   /** A section of the Settings tab, above the platform's, as Take control's binding is. */
   settings?: ComponentType
+  /** An icon after the phase's name in the header while the feature is shared, as a `PhaseIcon`, so it shows on every page. */
+  phaseIcon?: ComponentType
 }
 
 export function definePart(part: Part): Part {

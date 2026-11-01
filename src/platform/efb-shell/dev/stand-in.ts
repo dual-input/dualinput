@@ -1,6 +1,8 @@
 // The EFB app's scenes on the stand-in core: each state a person looks at, and the commands a pilot presses walking
 // from it as the core would.
 
+import { COUNTDOWN } from "@dualinput/crew"
+
 import { StandInBase } from "../../../engines/page-client/dev/stand-in-base.ts"
 import type { Slices } from "../../../engines/page-client/dev/stand-in-base.ts"
 import type { Difference } from "../../../engines/messages/ts/session/Difference.ts"
@@ -8,8 +10,8 @@ import type { SessionSlice } from "../../../engines/messages/ts/session/SessionS
 import type { JsonValue } from "../../../engines/messages/ts/serde_json/JsonValue.ts"
 import type { SliceMember } from "../../../engines/messages/ts/session/SliceMember.ts"
 import type { Status } from "../../../engines/messages/ts/session/Status.ts"
+import { VERSION } from "../../../engines/messages/ts/stamp.ts"
 import type { Wanted } from "../src/wanted.ts"
-import { COUNTDOWN } from "@dualinput/crew"
 
 /** A made-up pilot ID, 32 hex digits, which picks the color of their figure. */
 const pilotId = (seed: number) => Array.from({ length: 32 }, (_, at) => ((seed * 7 + at * at * 13 + seed * at) % 16).toString(16)).join("")
@@ -112,7 +114,20 @@ export const SCENES: Record<string, Slices> = {
   Flying: { ...netUp, session: held({ members: [me(inFlight), james(inFlight)], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, differences: DIFFERENCES, ready: null }), wanted: { roundTrips: ROUND_TRIPS, notes: NOTES } },
   "Header: offline": { session: noSession, network: { members: [], internet: false }, wanted: { aircraft: AIRCRAFT } },
   "Header: several things": { session: noSession, wanted: { aircraft: AIRCRAFT, servers: "unreachable", firewall: "blocks", update: { state: "ready", next: "1.0.3" } } },
+  "Header: our own parts": {
+    session: held({ members: [me(inFlight), james(inFlight)], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, ready: null }),
+    sim: { ...healthy.sim, module: "stopped" },
+    notifications: [
+      { id: "clients.no-panel", level: "trouble", text: "" },
+      { id: "core-helper.down", level: "trouble", text: "" },
+      { id: "network.bind", level: "trouble", text: "" },
+      { id: "core-helper.failed.key", level: "warning", text: "Your take-control key isn't working", detail: "Windows didn't let Dual Input listen for F9." },
+    ],
+    wanted: { firewall: "blocks", servers: "unreachable" },
+  },
+  "Recording stopped": { session: noSession, wanted: { aircraft: AIRCRAFT, recordingStopped: "no-space" } },
   "Update ready": { session: noSession, wanted: { aircraft: AIRCRAFT, update: { state: "ready", next: "1.0.3" } } },
+  "Another version": { session: noSession, core: { version: "0.0.9", hash: "", username: null }, wanted: { aircraft: AIRCRAFT } },
 }
 
 const AFTER = { answer: 1000, slowAnswer: 10_000 }
@@ -140,7 +155,7 @@ export class StandInCore extends StandInBase {
     window.clearTimeout(this.countdown)
     window.clearTimeout(this.answer)
     this.sceneName = name
-    this.set({ ...healthy, recording: { runs: RUNS }, "core-helper": OUTPUTS, notifications: [], wanted: {}, ...SCENES[name] })
+    this.set({ ...healthy, recording: { runs: RUNS }, "core-helper": OUTPUTS, notifications: [], core: { version: VERSION, hash: "", username: null }, wanted: {}, ...SCENES[name] })
   }
 
   protected command(name: string, args: JsonValue): void {

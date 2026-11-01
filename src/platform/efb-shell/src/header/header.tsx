@@ -7,6 +7,7 @@
 import { cx, Link, toast } from "@dualinput/ui"
 import { ExternalLink } from "lucide-react"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import type { ReactNode } from "react"
 
 import { Mark } from "../mark.tsx"
 import { TONE_ICON } from "./issues.tsx"
@@ -26,7 +27,10 @@ const ISLAND = { openAfter: 200, closeAfter: 300, grow: 260, shrink: 220, spring
 /** The header's height: its 32px pill centered, so it sits 11px from the window's top, as from its right, and a page starts 11px under it. */
 export const HEADER_HEIGHT = 54
 
-function IssueRow({ issue }: { issue: Issue }) {
+/** How many words the pill has room for beside a session's phase. Past this it's icons alone, and the island still says each one. */
+const PILL_WORDS = 3
+
+function IssueRow({ issue, close }: { issue: Issue; close: () => void }) {
   return (
     <div className="flex items-center">
       <span className="mr-3 shrink-0">{TONE_ICON[issue.tone]}</span>
@@ -34,7 +38,11 @@ function IssueRow({ issue }: { issue: Issue }) {
         <span className="text-sm font-medium">{issue.title}</span>
         <span className="text-xs text-muted-foreground">{issue.detail}</span>
       </span>
-      {issue.action && <span className="ml-3 shrink-0">{issue.action}</span>}
+      {issue.action && (
+        <span className="ml-3 shrink-0" onClick={issue.actionCloses ? close : undefined}>
+          {issue.action}
+        </span>
+      )}
     </div>
   )
 }
@@ -51,7 +59,18 @@ function HelpLine() {
   )
 }
 
-export function Header({ version, phase, issues, offline, opened }: { version: string; phase: SessionPhase | undefined; issues: Issue[]; offline: boolean; /** Counts the banner's cards that landed on the header, each opening its island on the rows. */ opened: number }) {
+export type HeaderProps = {
+  version: string
+  phase: SessionPhase | undefined
+  /** Each part's icon after the phase's name. */
+  icons: ReactNode
+  issues: Issue[]
+  offline: boolean
+  /** Counts the banner's cards that landed on the header, each opening its island on the rows. */
+  opened: number
+}
+
+export function Header({ version, phase, icons, issues, offline, opened }: HeaderProps) {
   const [hovered, setHovered] = useState(false)
   const [open, setOpen] = useState(false)
   const [pinned, setPinned] = useState(false)
@@ -98,6 +117,7 @@ export function Header({ version, phase, issues, offline, opened }: { version: s
   const brand = (
     <HeaderStart
       phase={phase}
+      icons={icons}
       brand={
         <div className="flex items-center">
           <Mark className="mr-2 size-4 text-primary" />
@@ -152,7 +172,7 @@ export function Header({ version, phase, issues, offline, opened }: { version: s
               style={{ width: ISLAND.openWidth, opacity: open ? 1 : 0, transition: open ? "opacity 160ms 80ms" : "opacity 100ms" }}
             >
               {issues.map((issue) => (
-                <IssueRow key={issue.word} issue={issue} />
+                <IssueRow key={issue.word} issue={issue} close={close} />
               ))}
               {!offline && trouble && <HelpLine />}
             </div>
@@ -172,7 +192,7 @@ export function Header({ version, phase, issues, offline, opened }: { version: s
           >
             {issues.map((issue, at) => (
               <span key={issue.word} className={cx("flex items-center text-muted-foreground", at > 0 && "ml-4")}>
-                <span className="mr-1">{issue.word}</span>
+                {issues.length <= PILL_WORDS && <span className="mr-1">{issue.word}</span>}
                 <span className="[&_svg]:size-3.5">{TONE_ICON[issue.tone]}</span>
               </span>
             ))}

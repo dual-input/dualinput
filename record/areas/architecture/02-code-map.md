@@ -8,7 +8,8 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 
 > **Note**
 > Stage 11b's tentative decisions change the desktop app's units, pending the apps' design (user, 2026-10-25): no feature has a section in the desktop app, so take-control's and go-to's `desktop/` folders become `efb/` ones ([one full window](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app)); and `efb-shell` and `desktop-shell` draw with one kit of React components, styled with Tailwind 3, so `efb-shell`'s MSFS Avionics Framework, `desktop-shell`'s Tailwind 4, `src/apps/desktop`'s Vite entry, and [building every target](#building-every-target)'s Vite and Tailwind `@source` lines no longer hold ([the kit](../interface/decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3); user, 2026-11-01).
-> The banner's page draws with React and the kit and has no part API, so `efb-shell` holds the EFB app's frame and its part API alone ([the banner](../interface/decisions.md#the-banner-draws-with-react-and-the-kit)).
+> The banner's page draws with React and the kit and has no part API, so `efb-shell` holds the EFB app's frame and its part API alone, and the banner is a platform unit of its own outside the core, `src/platform/banner/` ([the banner](../interface/decisions.md#the-banner-draws-with-react-and-the-kit)).
+> What the two draw of a crew, a pilot's head and Ready with its countdown, is a second package, `@dualinput/crew` in `src/packages/crew/`, since neither page's code may reach into the other's.
 > [The workspace](#the-workspace) gains `src/packages/`, for packages that are no tier's units, whose first is the kit, `@dualinput/ui` in `src/packages/ui/`, and a feature's EFB part may import it beside its shell and the messages' types ([the kit's package](../interface/decisions.md#the-kit-and-dual-inputs-palette-are-one-package-in-this-repository)).
 > The Coherent GT check leaves `tools/` for its own repository, `dual-input/coherent-checks`, which Dual Input installs with npm ([build plan](../build/plan.md#11b-the-apps)).
 > [The traffic and ATC switch](#the-traffic-and-atc-switch) becomes two switches, each writing its own feature's key, since [traffic and ATC audio are shared apart](../interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) (user, 2026-10-31), so nothing sends the request that claims several keys together.
@@ -646,6 +647,7 @@ A probe's kind is its ID, as in p08's `L:CROSSCHECK_P08_ECHO`, which carries the
 | `MENU` | The menu document's `window` | The menu script | `DUALINPUT_MENU_LOADED`, which our BlurPage copy sets as it loads the script, so the script loads once in each document |
 | `FIGURE` | SimObject titles, and `Z:` variables | avatars | The figure's title, `DUALINPUT_FIGURE_PILOT`, and `Z:DUALINPUT_FIGURE_` and each joint's channel ([avatars' names](../avatars/01-avatars.md#names)) |
 | `UI` | The EFB document's `window`, and the sim's keyboard calls | The kit, `@dualinput/ui` | `DUALINPUT_UI_RELEASE_KEYBOARD`, which gives back the keyboard a text field took, and `DUALINPUT_UI_FIELD`, the field's name in `UNFOCUS_INPUT_FIELD` |
+| `BANNER` | `L:` variables | The banner's page | `L:DUALINPUT_BANNER_OPEN_EFB`, which a click on a card raises while no core can carry it ([a notification's click](../interface/decisions.md#a-notifications-click-opens-the-efb-app-where-its-explained-or-acted-on)) |
 
 A unit that needs a name of a new kind adds the kind to this table.
 

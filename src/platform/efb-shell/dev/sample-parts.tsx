@@ -2,10 +2,11 @@
 // theirs: the checklist state sync's part will draw, on the entries a profile's authors would write, and a tab
 // for each feature with what a page of its kind holds.
 
-import { Card, CardContent, Fades, ScrollPage, Slider, Switch } from "@dualinput/ui"
+import { Button, Card, CardContent, Fades, ScrollPage, Slider, Switch, toast } from "@dualinput/ui"
 import { Headset, Plane, PersonStanding } from "lucide-react"
 import { useState } from "react"
 
+import { PhaseIcon } from "../src/header/phase.tsx"
 import { definePart } from "../src/part.ts"
 import { Checklist } from "../src/session/checklist.tsx"
 
@@ -51,9 +52,49 @@ function PlaceholderPage({ title }: { title: string }) {
   )
 }
 
+/** A row under the tabs on every tab, standing where Take control will. */
+function UnderTabs() {
+  return (
+    <div className="shrink-0 px-5 pb-3">
+      <Button variant="secondary" className="w-full" onClick={() => toast("Take control comes with its stage")}>
+        Take control
+      </Button>
+    </div>
+  )
+}
+
+/** A section of Settings, standing where Take control's binding will. */
+function SettingsSection() {
+  return (
+    <section className="flex flex-col">
+      <h2 className="mb-2 text-sm font-medium">Take control</h2>
+      <Card>
+        <CardContent className="text-sm text-muted-foreground">The binding comes with its stage.</CardContent>
+      </Card>
+    </section>
+  )
+}
+
 export const SAMPLE_PARTS = [
   definePart({ name: "state-sync", preflight: () => <Checklist items={ITEMS} /> }),
-  definePart({ name: "traffic", tab: { icon: Plane, label: "Traffic", page: () => <PlaceholderPage title="Traffic" /> } }),
-  definePart({ name: "atc-audio", tab: { icon: Headset, label: "ATC audio", page: () => <PlaceholderPage title="ATC audio" /> } }),
-  definePart({ name: "avatars", tab: { icon: PersonStanding, label: "Figures", page: () => <PlaceholderPage title="Figures" /> } }),
+  definePart({
+    name: "traffic",
+    tab: { icon: Plane, label: "Traffic", page: () => <PlaceholderPage title="Traffic" /> },
+    phaseIcon: () => (
+      <PhaseIcon on label="Sharing traffic">
+        <Plane />
+      </PhaseIcon>
+    ),
+  }),
+  definePart({
+    name: "atc-audio",
+    tab: { icon: Headset, label: "ATC audio", page: () => <PlaceholderPage title="ATC audio" /> },
+    phaseIcon: () => (
+      <PhaseIcon on hushed label="Sharing ATC, turned all the way down here">
+        <Headset />
+      </PhaseIcon>
+    ),
+  }),
+  definePart({ name: "avatars", tab: { icon: PersonStanding, label: "Figures", landing: "figures", page: () => <PlaceholderPage title="Figures" /> } }),
+  definePart({ name: "take-control", underTabs: UnderTabs, settings: SettingsSection }),
 ]

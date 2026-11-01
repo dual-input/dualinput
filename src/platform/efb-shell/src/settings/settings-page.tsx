@@ -129,10 +129,17 @@ const megabytes = (bytes: number) => Math.round(bytes / 1_000_000)
 /** A window of four rows and half of a fifth, so the cut row says there's more. */
 const RUNS_WINDOW = 36 * 4.5
 
+/** Why a run stopped, which only this page tells the pilot. */
+const STOPPED_WORDS = { "no-space": "Recording stopped: your drive has under 1 GB free", "failed-write": "Recording stopped: Dual Input couldn't write to your drive" }
+
 /** This PC's recordings, newest first. The run in progress can't be deleted, but its folder opens, for a problem the pilot is having now. Open folder's toast says where it opened, since Explorer opens behind the sim, where a pilot in VR won't see it. */
 function Recordings() {
   const { link } = useShell()
   const recording = useCoreSlice<RecordingSlice>("recording")
+  const stopped = useCoreSlice<Wanted>(WANTED)?.recordingStopped
+  const stoppedLine = useReveal(!!stopped)
+  const lastStopped = useRef(stopped)
+  if (stopped) lastStopped.current = stopped
   const runs: Run[] = (recording?.runs ?? []).slice().reverse()
   const total = runs.reduce((sum, run) => sum + megabytes(run.size), 0)
   return (
@@ -146,6 +153,12 @@ function Recordings() {
       }
     >
       <SettingsCard>
+        <Room open={stoppedLine.open} style={stoppedLine.style} pad="px-5 pb-2 pt-1">
+          <p className="flex items-start text-xs text-warning">
+            <TriangleAlert className="mr-2 mt-px size-3.5 shrink-0" />
+            <span>{lastStopped.current && STOPPED_WORDS[lastStopped.current]}</span>
+          </p>
+        </Room>
         <ScrollWindow max={RUNS_WINDOW}>
           <ul className="flex flex-col">
             {runs.map((run) => (

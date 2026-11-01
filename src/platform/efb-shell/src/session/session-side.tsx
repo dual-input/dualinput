@@ -170,7 +170,7 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
               <span className="mb-1 text-xs text-muted-foreground">Invite code</span>
               <div className="flex items-center">
                 <span className="mr-1 font-mono text-2xl font-medium tracking-wider">{session.code ? spaced(session.code) : "···-···"}</span>
-                <Button variant="ghost" size="icon-sm" aria-label="Copy the invite code" disabled={!session.code} onClick={() => toast("Copied the invite code")}>
+                <Button variant="ghost" size="icon-sm" aria-label="Copy the invite code" disabled={!session.code} onClick={() => void link.client.command("session.copy-code", null).then(() => toast("Copied the invite code"), () => toast("Couldn't copy the invite code"))}>
                   <Copy />
                 </Button>
               </div>

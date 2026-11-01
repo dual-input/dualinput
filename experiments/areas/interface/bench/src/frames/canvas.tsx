@@ -234,16 +234,15 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
     ],
   },
   // The cockpit's locks, over a stand-in display in its bezel: the visible lock while the link to
-  // the pilot flying is lost, with a key bound and without, on a radio's small display, and on a
+  // the pilot flying is lost, on a primary flight display, on a radio's small display, and on a
   // large one; while catching up; the warning once Dual Input stops renewing a lock, alone and on two
   // displays that one Dismiss clears; and a press blocked while another pilot's gesture plays, held.
   {
     name: "Cockpit locks",
     frames: [
-      { name: "Lost link", draw: (t) => <LockFrame theme={t} lock={{ kind: "lost", key: "F9" }} /> },
-      { name: "Lost link, no key bound", draw: (t) => <LockFrame theme={t} lock={{ kind: "lost" }} /> },
-      { name: "Lost link, a small display", draw: (t) => <LockFrame theme={t} displays={["radio"]} lock={{ kind: "lost", key: "F9" }} /> },
-      { name: "Lost link, a large display", width: 896, draw: (t) => <LockFrame theme={t} displays={["large"]} lock={{ kind: "lost", key: "F9" }} /> },
+      { name: "Lost link", draw: (t) => <LockFrame theme={t} lock={{ kind: "lost" }} /> },
+      { name: "Lost link, a small display", draw: (t) => <LockFrame theme={t} displays={["radio"]} lock={{ kind: "lost" }} /> },
+      { name: "Lost link, a large display", width: 896, draw: (t) => <LockFrame theme={t} displays={["large"]} lock={{ kind: "lost" }} /> },
       { name: "Catching up", draw: (t) => <LockFrame theme={t} lock={{ kind: "catching-up" }} /> },
       { name: "Catching up, a small display", draw: (t) => <LockFrame theme={t} displays={["radio"]} lock={{ kind: "catching-up" }} /> },
       { name: "Dual Input stopped responding", replay: true, draw: (t) => <LockFrame theme={t} lock={{ kind: "silent" }} /> },

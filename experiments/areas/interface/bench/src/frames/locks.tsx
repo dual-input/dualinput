@@ -18,7 +18,7 @@
 // without it, by a CommBus event, `DUALINPUT_BRIDGE_DISMISS`, since the CommBus reached every
 // cockpit panel (measured on MSFS 2024, 2026-10-08, record/areas/interface/log.md). And a press blocked while another pilot's gesture plays flashes the display's
 // whole rect, one solid color with no words, while it's held (user, 2026-10-17). What each says is the content call of 2026-11-01 in the
-// stage notes; the words are drafts, and the names and the key are examples.
+// stage notes; the words are drafts, and the names are examples.
 // The displays here are stand-ins, a primary flight display and a radio's, drawn as plain shapes
 // so the locks can be judged on something like what they cover.
 import { useState } from "react"
@@ -56,7 +56,7 @@ type DisplayKind = keyof typeof DISPLAYS
 const CARD_EMS = { lost: 9, "catching-up": 5.75, silent: 11.5, flash: 1 }
 const emOf = (d: { width: number; height: number }, lock: Lock) => Math.min(14, d.width / 26, d.height / CARD_EMS[lock.kind])
 
-export type Lock = { kind: "lost"; key?: string } | { kind: "catching-up" } | { kind: "silent" } | { kind: "flash" }
+export type Lock = { kind: "lost" } | { kind: "catching-up" } | { kind: "silent" } | { kind: "flash" }
 
 const TITLE = { lost: "Reconnecting to James", "catching-up": "Catching up with James", silent: "Dual Input stopped responding" }
 function LockCard({ lock, onDismiss }: { lock: Exclude<Lock, { kind: "flash" }>; onDismiss?: () => void }) {
@@ -69,22 +69,21 @@ function LockCard({ lock, onDismiss }: { lock: Exclude<Lock, { kind: "flash" }>;
       <span className="font-medium" style={{ marginTop: "0.55em", lineHeight: "1.4em" }}>
         {TITLE[lock.kind]}
       </span>
+      {/* The lost link's lock advises waiting, and names no way to take control: the banner's
+          line does, with what it costs, and the EFB app's strip offers it (user, 2026-11-01).
+          "Replayed" is the record's word for how a link cut under 30 minutes comes back
+          (record/areas/sync/04-order-and-recovery.md, What comes back after what), and it reads
+          plainly here, since the sentence says whose actions and where; while the replay runs, the
+          lock says "Catching up". */}
       {lock.kind === "lost" && (
         <span className="text-muted-foreground" style={{ marginTop: "0.35em", fontSize: "0.857em", lineHeight: 1.4 }}>
-          Wait for them to come back.{" "}
-          {lock.key ? (
-            <>
-              If they don't, press <span className="font-medium text-foreground">{lock.key}</span> to take control.
-            </>
-          ) : (
-            "If they don't, take control in Dual Input's EFB app."
-          )}
+          When they reconnect, their actions during the outage will be replayed here.
         </span>
       )}
       {lock.kind === "silent" && (
         <>
           <span className="text-muted-foreground" style={{ marginTop: "0.35em", fontSize: "0.857em", lineHeight: 1.4 }}>
-            This screen works, but it isn't syncing until Dual Input is back.
+            This screen works, but won't be synced until Dual Input is back.
           </span>
           {/* The kit's secondary button, in em, so it scales with the card. */}
           <button

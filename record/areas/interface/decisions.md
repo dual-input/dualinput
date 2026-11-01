@@ -443,6 +443,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Decided:**
   - Preflight shows from the PF being in a flight on the ground, and a joiner still at the world map sees no checklist and no phase until they're in the flight, while preflight stays session-wide in [the session's units](../session/02-units.md).
   - Each crew row ends on Ready or "Not ready", and this pilot's own Ready fills green with a check, a press again undoing it, disabled with a tooltip until the aircraft settles ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
+  - A reload of the flight clears this pilot's Ready and stops the countdown, with nothing built for it: a reload passes through Loading, which [leaves the flight](../session/02-units.md#in-the-flight), and a member that leaves the flight during preflight writes its Ready off (read in `src/platform/session/src/members.rs`).
   - A dropped-out pilot stays unready and counted, and once this pilot is ready, their row offers Go without, then "Not counted"; the PF can't be gone without.
   - Once every counted pilot is ready, a green ring just before this pilot's Ready counts the 3s down, so nothing shifts, and un-readying stops it.
   - The crew lists this pilot first, then the pilots the countdown waits on, then the rest, in a window of three rows and part of a fourth, during preflight only.
@@ -453,9 +454,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
   Settled by the user from 2026-10-29 to 2026-10-31.
 - **Because:** nearly every difference names a crewmate, and [the scope](../product/03-v1-scope.md#preflight-match-check) has them beside each Ready (user, 2026-10-30).
-- **Leaves out:**
-  - Whether a reload during preflight clears Ready, which the session's units decide.
-  - Whether a new difference in flight opens the list by itself.
+- **Leaves out:** whether a new difference in flight opens the list by itself.
 
 ## The checklist takes any entry an author writes, and every pilot has one
 
@@ -526,25 +525,23 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   This PC's traffic packs sit at the page's foot in a tinted box, so they hold still as what's above them opens and shuts.
   The ATC app picker offers Automatic, then every program playing audio, the known ATC apps first; closed, it says what it captures, such as "Automatic · BeyondATC", with a green dot while the capture takes it, and with no ATC app running it reads "Automatic", with no warning.
   A receiving pilot's output device shows under the volume as one quiet row that opens Settings, and their volume reads "Muted" at 0%.
-  Settled by the user on 2026-10-31.
+  No screen says Dual Input carries no voice, since nothing says it carries any (user, 2026-11-01).
+  Settled by the user on 2026-10-31 and 2026-11-01.
 - **Because:** people don't understand how a feature works from a switch alone, and a pilot needs one coherent place that explains it and shows its status (user, 2026-10-31).
 - **Leaves out:**
   - Where Dual Input states that multiplayer must be off, which is a rule for all of Dual Input rather than traffic's (user, 2026-10-31).
-  - Where Dual Input says it carries no voice: the guide left that to the tabs, and the user dropped ATC audio's paragraph on it (2026-10-31), so no frame says it.
   - Whether a copy in another pack's livery or floating over other scenery counts as missing: the count sees only the creates the sim refused, and whether the sim refuses a title it lacks is a [check in the sim](../traffic-atc/01-traffic-and-atc.md#creating-a-copy).
 
 ## The Figures tab holds the pilot's figure and explains what its figures can do
 
-- **Decided:** the tab holds setup's name and color card; in a session, a new name brings a line that it applies in the next flight, since a member's entry is written once per session ([members](../session/02-units.md#members)).
+- **Decided:** the tab holds setup's name and color card; in a session, a new name brings a line that it applies in the next session, since a member's entry is never rewritten after the first message ([session keys](../session/02-units.md#session-keys)).
   It has four switches, "Your figure" and "The crew's figures", each with "Inside the aircraft" and "Walkaround", where [the scope's avatar sync](../product/03-v1-scope.md#avatar-sync) has two.
   Three guides that open sit at the page's foot: how seats work, how pointing and clicking works, and how to hide the sim's default avatar.
   A note at the top, in the information color and with no tab dot, says when pointing and clicking won't work because the aircraft's model files can't be read, with a Learn more that opens that guide, or when the profile has no seats, so figures show as floating heads only.
   Interface copy says "figure" for Dual Input's and "avatar" only for the sim's own.
   Settled by the user on 2026-10-31.
 - **Because:** a notification that a model can't be read was annoying, popping up again and again (user, 2026-10-31), and this replaces [avatars'](../avatars/01-avatars.md#a-seat) notifications with this note and with "This seat is taken".
-- **Leaves out:**
-  - The steps in the guide that hides the sim's avatar: the menu path comes from forum posts, unverified, and the avatar's name in it is hypothetical.
-  - The rename line's words, "Your new name will apply in your next flight": a member's entry is never rewritten after the first message ([session keys](../session/02-units.md#session-keys)), so a second flight in one session keeps the old name, and whether the line says "next session" is the user's to settle.
+- **Leaves out:** the steps in the guide that hides the sim's avatar: the menu path comes from forum posts, unverified, and the avatar's name in it is hypothetical.
 
 ## The Settings tab holds the binding, the output device, the recordings, and the version
 
@@ -576,7 +573,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - A crewmate who leaves the flight, closes their sim, or crashes is still in the session, so their card says so.
   - The pause menu's line stays because it explains a frozen aircraft or says the PF is away from the controls: anyone can open that menu, since Dual Input syncs only active pause, and whether it stops a flying aircraft is unmeasured (user, 2026-11-01).
 - **Leaves out:**
-  - Whether the session card lists sync failures, which land on the Session tab with nothing there to list them.
+  - A list of sync failures on the session card, which the user set aside until a need shows (user, 2026-11-01), so a click on one lands on the Session tab with nothing there to list it.
   - The panel bridge's check, no cockpit panel's `hello` within 10s of the profile loading, which warns falsely in an aircraft with no cockpit panels, such as a balloon, so it needs to know the aircraft has panels.
 
 ## A notification's click opens the EFB app where it's explained or acted on
@@ -638,7 +635,9 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   In the product the card owns its fold, as an unclipped wrapper around a clipped layer and a border layer, and one scroll loop sets two numbers, the clip's depth and the fade's strength, from offsets, on the elements each card registers.
   Settled by the user on 2026-10-30 and 2026-10-31.
 - **Because:** at a fraction of a pixel, a box's clip rounded out to the row its edge fell in, while a fading layer covered only a sliver of that row, so a row of what scrolled under showed at full strength past the fade (measured in Chromium, 2026-10-31).
-- **Leaves out:** what the fold costs a frame ([above](#stage-11b-checks-in-coherent-gt-what-the-frames-lean-on)).
+- **Leaves out:**
+  - What the fold costs a frame ([above](#stage-11b-checks-in-coherent-gt-what-the-frames-lean-on)).
+  - Whether the aircraft picker's, the match check's, and the authors' notes' fades feel heavy, which waits until one shows as a problem (user, 2026-11-01).
 
 ## The apps' words follow a few rules
 

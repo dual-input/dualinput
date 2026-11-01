@@ -108,6 +108,13 @@ fn run(jobs: &Jobs, start: &StartJob) -> Result<Vec<u8>, String> {
         }
         Work::CopyText { text } => clipboard::set_text(text).map(|()| Vec::new()),
         Work::Username => Ok(std::env::var("USERNAME").unwrap_or_default().into_bytes()),
+        // Explorer hands the folder to its running copy and exits, with an exit code that says
+        // nothing, so only whether it started counts.
+        Work::OpenFolder { path } => std::process::Command::new("explorer")
+            .arg(resolve(&jobs.data, path))
+            .spawn()
+            .map(|_| Vec::new())
+            .map_err(|e| format!("couldn't start Explorer on {path}: {e}")),
         Work::Fetch(_) => unreachable!("a fetch runs as a task, not on the blocking pool"),
     }
 }

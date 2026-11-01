@@ -13,9 +13,13 @@
 //!
 //! Register it after the clients crate, whose slice and commands it uses.
 
+use std::time::Duration;
+
 use clients::ClientsUnit;
-use kernel::{Cx, Entry, Job, JobId, Registry, Started, View};
-use messages::recording::{DELETE, DeleteRun, MARK, RecordingSlice, Run, SLICE};
+use kernel::{Cx, Entry, Input, Job, JobId, Registry, Started, TimerId, View};
+use messages::recording::{
+    DELETE, DeleteRun, MARK, OPEN_FOLDER, OpenFolder, RecordingSlice, RecordingStopped, Run, SLICE,
+};
 use serde_json::Value;
 
 /// The folder in the data folder that holds the runs.
@@ -25,24 +29,66 @@ const RECORDINGS: &str = "recordings";
 /// recording at its budget of 60 MB an hour (record/areas/recording/log.md, 2026-10-23).
 const KEEP: u64 = 1_000_000_000;
 
+/// How often the slice's size of the run in progress is read again. A run grows about 1 MB a
+/// minute at its budget, and the apps show whole megabytes, so a slower read would show no less.
+const SIZE_EVERY: Duration = Duration::from_secs(10);
+
+/// Names the source the recording's writer tells this crate through, on its own thread at the
+/// core's edge, since a stop has no other way from the disk to the loop.
+pub struct Writer;
+
+/// The bytes of the writer's input, which says why it stopped. The writer has stopped before
+/// the input reaches the queue, so no recording holds it, and a replay ends before the stop.
+pub fn stopped_input(why: RecordingStopped) -> Vec<u8> {
+    serde_json::to_vec(&why).expect("serde_json should write why a recording stopped")
+}
+
 #[derive(Default)]
 pub struct Recording {
     /// The runs as last listed, oldest first, the newest being the run in progress.
     runs: Vec<Entry>,
+    /// Why the run in progress stopped recording, if it has.
+    stopped: Option<RecordingStopped>,
 }
 
 /// Registers the crate.
 pub fn register(r: &mut Registry) {
-    r.unit::<Recording>("recording")
-        .on::<Started>(Recording::started)
+    let mut me = r.unit::<Recording>("recording");
+    me.source::<Writer>(Recording::writer_stopped);
+    me.on::<Started>(Recording::started)
         .client_state(SLICE, Recording::slice)
         .command(MARK, Recording::mark)
-        .command(DELETE, Recording::delete);
+        .command(DELETE, Recording::delete)
+        .command(OPEN_FOLDER, Recording::open_folder);
 }
 
 impl Recording {
     fn started(_: &mut Recording, _: &Started, cx: &mut Cx) {
         cx.job(Job::list(RECORDINGS), Recording::listed_at_start);
+        cx.timer(SIZE_EVERY, Recording::read_size);
+    }
+
+    fn writer_stopped(me: &mut Recording, input: &Input, _: &mut Cx) {
+        match serde_json::from_slice(&input.bytes) {
+            Ok(why) => me.stopped = Some(why),
+            Err(error) => tracing::error!(%error, "the writer's input didn't read"),
+        }
+    }
+
+    /// Only the run in progress grows, and only it can't be deleted, so its folder's listing
+    /// can't bring back a run a pilot just deleted, as a listing of them all could.
+    fn read_size(me: &mut Recording, _: TimerId, cx: &mut Cx) {
+        if let Some(run) = me.runs.last() {
+            cx.job(Job::list(path(&run.name)), Recording::size_read);
+        }
+        cx.timer(SIZE_EVERY, Recording::read_size);
+    }
+
+    fn size_read(me: &mut Recording, _: JobId, result: Result<Vec<u8>, String>, _: &mut Cx) {
+        let entries = result.ok().and_then(|bytes| Entry::decode(&bytes));
+        if let (Some(entries), Some(run)) = (entries, me.runs.last_mut()) {
+            run.size = entries.iter().map(|entry| entry.size).sum();
+        }
     }
 
     fn listed_at_start(me: &mut Recording, _: JobId, result: Result<Vec<u8>, String>, cx: &mut Cx) {
@@ -97,6 +143,7 @@ impl Recording {
                     in_progress: i == newest,
                 })
                 .collect(),
+            stopped: me.stopped,
         }
     }
 
@@ -119,6 +166,22 @@ impl Recording {
         let run = me.runs.remove(at);
         tracing::info!(run = run.name, "the pilot deleted a run");
         cx.job(Job::delete(path(&run.name)), Recording::deleted);
+        Ok(())
+    }
+
+    fn open_folder(me: &mut Recording, args: OpenFolder, cx: &mut Cx) -> Result<(), String> {
+        // As in `delete`, only a name from the core's own listing reaches a path.
+        let Some(run) = me.runs.iter().find(|run| run.name == args.name) else {
+            return Err(format!("there's no run named {}", args.name));
+        };
+        cx.job(
+            Job::open_folder(path(&run.name)),
+            |_: &mut Recording, _: JobId, result: Result<Vec<u8>, String>, _: &mut Cx| {
+                if let Err(error) = result {
+                    tracing::warn!(%error, "a run's folder couldn't be opened");
+                }
+            },
+        );
         Ok(())
     }
 }

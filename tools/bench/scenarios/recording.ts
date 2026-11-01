@@ -40,4 +40,25 @@ test("a page deletes an older run, is refused the one in progress, and marks the
 
   await page.client.command("recording.mark", null)
   await page.until(() => /the pilot marked the moment/.test(core.log()), "the mark in the run's log")
+
+  // Only a name from the core's own listing opens a folder. A real one would open a window on
+  // this PC's desktop, so src/platform/recording/tests/recording.rs holds it to its job instead.
+  await assert.rejects(page.client.command("recording.open-folder", { name: "..\\settings.json" }), /no run named/)
+})
+
+test("the run in progress's size stays live, and a run that hasn't stopped says so", { timeout: 30_000 }, async (t) => {
+  const run = new BenchRun("recording-live-size", t)
+  const core = await run.core("a")
+  core.act({ act: "watch", process: run.stub().id })
+  await core.hear("stage Starting aircraft none")
+  const page = new FakePage(core, { component: "desktop" })
+  t.after(() => page.close())
+  page.client.watch("recording", () => {})
+  const slice = () => page.slice("recording") as RecordingSlice | undefined
+  await page.until(() => slice()?.runs.length === 1, "the slice listing the run")
+  assert.equal(slice()!.stopped, null)
+  const current = slice()!.runs[0]!
+  const grew = 5_000_000
+  fs.writeFileSync(path.join(run.folder, "a", "recordings", current.name, "bench-grew"), Buffer.alloc(grew))
+  await page.until(() => slice()!.runs[0]!.size >= grew, "the size counting what the run's folder gained", 15_000)
 })

@@ -83,6 +83,8 @@ struct Ready {
     helper: Option<SourceId>,
     /// The network crate's source, when the core has one, which the transport pushes under.
     network: Option<SourceId>,
+    /// The recording crate's source, when the core has one, which the writer tells of a stop.
+    recording: Option<SourceId>,
     #[cfg(feature = "stand-in")]
     bench: Option<crate::bench::Sources>,
 }
@@ -132,6 +134,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
                 sockets: kernel.source::<clients::Sockets>(),
                 helper: kernel.source::<core_helper_service::Pipe>(),
                 network: kernel.source::<network::Transport>(),
+                recording: kernel.source::<::recording::Writer>(),
                 #[cfg(feature = "stand-in")]
                 bench: crate::bench::Sources::of(&kernel),
             });
@@ -143,6 +146,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         sockets,
         helper,
         network,
+        recording,
         #[cfg(feature = "stand-in")]
         bench,
     }) = units_ready.recv()
@@ -172,8 +176,17 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         fma3,
         checkpoint_every_input: options.checkpoint_every_input,
     };
-    let (writer, writer_thread) =
-        writer::start(&folder.join("inputs.zst"), &header, context.clone())?;
+    let stopped_queue = queue.clone();
+    let (writer, writer_thread) = writer::start(
+        &folder.join("inputs.zst"),
+        &header,
+        context.clone(),
+        move |why| {
+            if let Some(source) = recording {
+                stopped_queue.push(source, ::recording::stopped_input(why));
+            }
+        },
+    )?;
     let _ = context.writer.set(writer.clone());
     queue.push(FIRST, kernel::first_input(seed, files));
 

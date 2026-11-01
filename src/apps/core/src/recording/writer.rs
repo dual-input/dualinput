@@ -8,6 +8,7 @@ use std::sync::mpsc::{self, RecvTimeoutError};
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
+use messages::recording::RecordingStopped;
 use recording_format::{Header, Record, Writer};
 use windows_sys::Win32::Storage::FileSystem::GetDiskFreeSpaceExW;
 
@@ -53,11 +54,13 @@ impl Handle {
     }
 }
 
-/// Writes the header to `path`, then starts the thread that writes everything after it.
+/// Writes the header to `path`, then starts the thread that writes everything after it, which
+/// calls `stopped` if it stops before the run ends.
 pub fn start(
     path: &Path,
     header: &Header,
     context: Arc<Context>,
+    stopped: impl Fn(RecordingStopped) + Send + 'static,
 ) -> std::io::Result<(Handle, JoinHandle<()>)> {
     let writer = Writer::new(
         BufWriter::new(crate::data_folder::create_run_file(path)?),
@@ -69,17 +72,19 @@ pub fn start(
         .name("writer".into())
         .spawn(move || {
             run_context::enter(context);
-            write(writer, &from, || free_space(&folder));
+            write(writer, &from, || free_space(&folder), stopped);
         })?;
     Ok((Handle { to }, thread))
 }
 
 /// Writes what `from` sends, flushing each second, until it's told to finish. `free` gives
-/// the bytes free on the recording's drive, or `None` when Windows can't say.
+/// the bytes free on the recording's drive, or `None` when Windows can't say, and `stopped` hears
+/// why the recording stopped before that.
 fn write<W: std::io::Write>(
     writer: Writer<W>,
     from: &mpsc::Receiver<Message>,
     free: impl Fn() -> Option<u64>,
+    stopped: impl Fn(RecordingStopped),
 ) {
     // A write that fails, such as on a full disk, stops the recording and nothing else,
     // since a pilot's session matters more than its recording.
@@ -97,17 +102,21 @@ fn write<W: std::io::Write>(
                 pending = true;
                 let result = writer.as_mut().map_or(Ok(()), |w| w.write(&record));
                 if flushed.elapsed() >= FLUSH {
-                    result.and_then(|()| flush(&mut writer, &mut flushed, &mut pending, &free))
+                    result.and_then(|()| {
+                        flush(&mut writer, &mut flushed, &mut pending, &free, &stopped)
+                    })
                 } else {
                     result
                 }
             }
             Ok(Message::Flush(answer)) => {
-                let result = flush(&mut writer, &mut flushed, &mut pending, &free);
+                let result = flush(&mut writer, &mut flushed, &mut pending, &free, &stopped);
                 let _ = answer.send(());
                 result
             }
-            Err(RecvTimeoutError::Timeout) => flush(&mut writer, &mut flushed, &mut pending, &free),
+            Err(RecvTimeoutError::Timeout) => {
+                flush(&mut writer, &mut flushed, &mut pending, &free, &stopped)
+            }
             Ok(Message::Finish) | Err(RecvTimeoutError::Disconnected) => {
                 if let Some(Err(error)) = writer.take().map(Writer::finish) {
                     tracing::error!(%error, "the recording's last block couldn't be written");
@@ -118,6 +127,7 @@ fn write<W: std::io::Write>(
         if let Err(error) = result {
             tracing::error!(%error, "the recording stopped, since a write to it failed");
             writer = None;
+            stopped(RecordingStopped::FailedWrite);
         }
     }
 }
@@ -127,6 +137,7 @@ fn flush<W: std::io::Write>(
     flushed: &mut Instant,
     pending: &mut bool,
     free: impl Fn() -> Option<u64>,
+    stopped: impl Fn(RecordingStopped),
 ) -> std::io::Result<()> {
     *flushed = Instant::now();
     *pending = false;
@@ -142,6 +153,7 @@ fn flush<W: std::io::Write>(
         if let Some(Err(error)) = writer.take().map(Writer::finish) {
             tracing::error!(%error, "the recording's last block couldn't be written");
         }
+        stopped(RecordingStopped::NoSpace);
     }
     Ok(())
 }
@@ -167,8 +179,9 @@ fn free_space(folder: &Path) -> Option<u64> {
 mod tests {
     use super::*;
     use recording_format::{Input, Reader};
-    use std::cell::Cell;
+    use std::cell::{Cell, RefCell};
     use std::fs::File;
+    use std::sync::atomic::{AtomicBool, Ordering};
 
     fn header() -> Header {
         Header {
@@ -217,8 +230,10 @@ mod tests {
         to.send(Message::Flush(answer)).unwrap();
         to.send(Message::Record(input(2))).unwrap();
         to.send(Message::Finish).unwrap();
-        write(writer, &from, free);
+        let heard = RefCell::new(Vec::new());
+        write(writer, &from, free, |why| heard.borrow_mut().push(why));
         assert_eq!(answered.try_iter().count(), 2, "every flush is answered");
+        assert_eq!(*heard.borrow(), [RecordingStopped::NoSpace]);
 
         let (_, mut reader) = Reader::new(File::open(&path).unwrap()).unwrap();
         let mut records = Vec::new();
@@ -228,6 +243,48 @@ mod tests {
         assert_eq!(records, vec![input(0), input(1)]);
         assert!(!reader.truncated(), "the stop ends the recording's frame");
         std::fs::remove_file(&path).unwrap();
+    }
+
+    /// A disk that takes the header's bytes, then refuses every write once `full` is set.
+    struct Disk {
+        full: Arc<AtomicBool>,
+    }
+
+    impl std::io::Write for Disk {
+        fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+            if self.full.load(Ordering::Relaxed) {
+                return Err(std::io::Error::other("the disk is full"));
+            }
+            Ok(bytes.len())
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn says_so_once_when_a_write_fails_and_writes_nothing_more() {
+        let full = Arc::new(AtomicBool::new(false));
+        let disk = Disk { full: full.clone() };
+        let writer = Writer::new(disk, &header()).unwrap();
+        full.store(true, Ordering::Relaxed);
+        let (to, from) = mpsc::channel();
+        let (answer, answered) = mpsc::channel();
+        to.send(Message::Record(input(0))).unwrap();
+        to.send(Message::Flush(answer.clone())).unwrap();
+        to.send(Message::Record(input(1))).unwrap();
+        to.send(Message::Flush(answer)).unwrap();
+        to.send(Message::Finish).unwrap();
+        let heard = RefCell::new(Vec::new());
+        write(
+            writer,
+            &from,
+            || Some(50 * FLOOR),
+            |why| heard.borrow_mut().push(why),
+        );
+        assert_eq!(answered.try_iter().count(), 2, "every flush is answered");
+        assert_eq!(*heard.borrow(), [RecordingStopped::FailedWrite]);
     }
 
     #[test]

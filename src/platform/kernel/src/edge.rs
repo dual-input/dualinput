@@ -164,6 +164,8 @@ pub enum Work {
     /// Reads the Windows account's name, which first-time setup offers as a display name. The
     /// result is the name, or empty.
     Username,
+    /// Opens a folder in Explorer, without waiting for its window. The result is empty.
+    OpenFolder { path: String },
     /// Fetches a URL, as the network's requests to the backend do. The result is a
     /// `Fetched`, whatever its status, and a fetch that got no answer is the job's error.
     Fetch(Fetch),
@@ -281,6 +283,13 @@ impl Job {
     pub fn username() -> Job {
         Job {
             work: Work::Username,
+            then: None,
+        }
+    }
+
+    pub fn open_folder(path: impl Into<String>) -> Job {
+        Job {
+            work: Work::OpenFolder { path: path.into() },
             then: None,
         }
     }

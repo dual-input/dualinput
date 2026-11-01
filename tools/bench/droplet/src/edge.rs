@@ -149,8 +149,8 @@ pub fn start_job(
                 "{} got no answer: the droplet run has no backend",
                 fetch.url
             )),
-            // Only the recording crate lists and deletes, and the droplet runs none.
-            Work::List { path } | Work::Delete { path } => {
+            // Only the recording crate lists, deletes, and opens folders, and the droplet runs none.
+            Work::List { path } | Work::Delete { path } | Work::OpenFolder { path } => {
                 Err(format!("{path}: the droplet program keeps no runs"))
             }
             // Only the session crate and the sim service ask these, and the droplet runs

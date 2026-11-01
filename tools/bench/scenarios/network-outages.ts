@@ -32,6 +32,12 @@ test("the link is lost after 5s of each outage, and comes back after it", { time
   await a.hear(/^net up \S+ again=false restart=0$/)
   const relay = net.relays[0]!
   const at = (): [number, number] => [a.heard().length, b.heard().length]
+  const replays = (core: Core): number => core.log().split("\n").filter((l) => l.includes("another member's replay of what this machine missed begins")).length
+  // Both cores redial every 2s through an outage, so a dial still running when the link comes
+  // back connects too, moves the link, and raises `LinkUp` again, and each `LinkUp` starts a replay
+  // about 90ms later. The next outage waits for them, or it would cut a replay off, and hear a
+  // late `LinkUp` as the link's return from itself.
+  const settle = (): Promise<void> => sleep(3_000)
 
   for (const seconds of [30, 60, 120]) {
     const after = at()
@@ -40,6 +46,7 @@ test("the link is lost after 5s of each outage, and comes back after it", { time
     const { lostMs, backMs } = await lostAndBack(a, b, after, () => cut + seconds * 1_000)
     t.diagnostic(`a ${seconds}s cut: lost after ${lostMs.toFixed(0)}ms, up again ${backMs.toFixed(0)}ms after it ended`)
     assert.ok(lostMs >= 4_500 && lostMs <= 6_500, `lost ${lostMs.toFixed(0)}ms into the cut`)
+    await settle()
   }
 
   {
@@ -52,6 +59,7 @@ test("the link is lost after 5s of each outage, and comes back after it", { time
     const { lostMs, backMs } = await lostAndBack(a, b, after, () => upAt || down + 40_000)
     await back
     t.diagnostic(`the relay down for 40s: lost after ${lostMs.toFixed(0)}ms, up again ${backMs.toFixed(0)}ms after it came back`)
+    await settle()
   }
 
   {
@@ -68,10 +76,9 @@ test("the link is lost after 5s of each outage, and comes back after it", { time
     // (record/areas/sync/05-units.md, "Kept messages and a replay").
     for (const [core, other] of [[a, b], [b, a]] as const) {
       const ups = other.heard().filter((l) => /^net up \S+ again=true/.test(l)).length
-      const replays = () => core.log().split("\n").filter((l) => l.includes("another member's replay of what this machine missed begins")).length
-      for (const started = Date.now(); replays() < ups && Date.now() - started < 5_000; ) await sleep(100)
+      for (const started = Date.now(); replays(core) < ups && Date.now() - started < 5_000; ) await sleep(100)
       assert.ok(ups >= 5, `${other.data} should have its link up again after each of 5 outages`)
-      assert.equal(replays(), ups, `${core.data}'s cockpit stream should get a replay at each of the other's links up again`)
+      assert.equal(replays(core), ups, `${core.data}'s cockpit stream should get a replay at each of the other's links up again`)
     }
   }
 })

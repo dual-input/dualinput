@@ -4,9 +4,12 @@
  * One run of the core: its folder, named by its start in UTC, as in `2026-10-20_14-02-11`,
  * and the bytes its recording and log take.
  */
-export type Run = { name: string, size: number, 
+export type Run = { name: string, 
 /**
- * The run in progress, which can't be deleted. Its size is as it was when the core
- * last listed the runs.
+ * The run in progress's is at most 10s old, and any other's is as the core last listed it.
+ */
+size: number, 
+/**
+ * The run in progress, which can't be deleted.
  */
 in_progress: boolean, };

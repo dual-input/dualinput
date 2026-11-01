@@ -120,18 +120,24 @@ const LAYER = "absolute inset-0 rounded-[inherit] inset-ring inset-ring-foregrou
 // desktop's notifications are (user, 2026-11-01: "how does one dismiss notifications (even held
 // ones, since they can be annoying if the user can't fix them in the moment)?"). The × is always
 // shown, in the muted color, since one that shows only on hover is hard to find, and it's a 28px
-// target, as Figures' swatches are, for a VR pointer, 8px in from the card's top and right on every
-// card, so the ×s line up down the stack (user, 2026-11-01: "x button alignments are off between
-// messages", where a card led by a head and no detail had it 4px lower). A press
+// target, as Figures' swatches are, for a VR pointer, 8px in from the card's right, and 8px down from
+// its top, so the ×s line up down the stack, or on a card that's only a title, centered on its
+// height (user, 2026-11-01: "x button alignments are off between messages", then "for title only
+// notifications we vertically center the x button"). A press
 // becomes a drag only past 6px, so a pointer that wobbles still clicks; the card follows it to the
 // right only, fading as it goes, and let go past a third of its width, or flung faster than
 // 0.5px/ms, it slides away, or else springs back. A held notification that's dismissed stays
-// hidden until its cause ends, and shows again if it comes back.
+// hidden until its cause ends, and shows again if it comes back. The × sends a card away as a
+// drag let go does, sliding right and fading (user, 2026-11-01).
 const DRAG = { start: 6, away: 1 / 3, fling: 0.5, ms: 200 }
 function useDragAway(onAway?: () => void) {
   const [dx, setDx] = useState(0)
   const [dragging, setDragging] = useState(false)
   const moved = useRef(false)
+  const away = (width: number) => {
+    setDx(width + BANNER.inset)
+    window.setTimeout(() => onAway?.(), DRAG.ms)
+  }
   const start = (e: React.MouseEvent<HTMLElement>) => {
     if (e.button !== 0 || !onAway) return
     moved.current = false
@@ -158,15 +164,13 @@ function useDragAway(onAway?: () => void) {
       window.removeEventListener("mouseup", up)
       setDragging(false)
       if (!moved.current) return
-      if (d > width * DRAG.away || speed > DRAG.fling) {
-        setDx(width + BANNER.inset)
-        window.setTimeout(onAway, DRAG.ms)
-      } else setDx(0)
+      if (d > width * DRAG.away || speed > DRAG.fling) away(width)
+      else setDx(0)
     }
     window.addEventListener("mousemove", move)
     window.addEventListener("mouseup", up)
   }
-  return { dx, dragging, start, moved }
+  return { dx, dragging, start, moved, away }
 }
 
 function NoteCard({ note, onDismiss }: { note: Note; onDismiss?: () => void }) {
@@ -220,9 +224,11 @@ function NoteCard({ note, onDismiss }: { note: Note; onDismiss?: () => void }) {
         </span>
       </div>
       {onDismiss && (
-        <Button variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={onDismiss} className="absolute top-2 right-2 text-muted-foreground">
-          <X />
-        </Button>
+        <span className={"absolute right-2 flex items-center " + (note.detail || note.list ? "top-2" : "inset-y-0")}>
+          <Button variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={() => drag.away(width)} className="text-muted-foreground">
+            <X />
+          </Button>
+        </span>
       )}
     </div>
   )

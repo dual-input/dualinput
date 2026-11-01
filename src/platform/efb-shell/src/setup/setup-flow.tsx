@@ -12,15 +12,21 @@ import { MarkTile } from "../mark.tsx"
 import { IdentityCard, NAME_MAX } from "./identity-card.tsx"
 
 /** How long each step holds, in milliseconds. Each check runs for a slightly different time, so the sequence doesn't tick like a metronome. */
-const STEP = { welcomeHold: 1600, welcomeOut: 450, enter: 220, runMin: 250, runSpread: 600, hold: 700, handoff: 450, fix: 1400 }
+const STEP = { welcomeHold: 1600, welcomeOut: 450, enter: 220, runMin: 250, runSpread: 600, hold: 700, handoff: 450, fixWait: 30_000 }
 
 /** What a check failing looks like. A failure Dual Input can work around also offers Continue anyway, in amber rather than red. */
 type Failure = { title: string; detail: string; action: { kind: "fix" | "restart" | "wait"; label?: string; busy: string }; skippable?: boolean }
 
 export type SetupFailure = "addon" | "offline" | "servers" | "firewall"
-export type SetupFacts = { failure?: SetupFailure; username: string; addonVersion?: string; version: string }
+export type SetupFacts = {
+  /** What's wrong now, which each check asks when it runs, and which clears by itself once it's mended. */
+  failures: SetupFailure[]
+  username: string
+  addonVersion: string
+  version: string
+}
 
-const failures = (facts: SetupFacts): Record<SetupFailure, Failure> => ({
+const failureWords = (facts: { addonVersion: string; version: string }): Record<SetupFailure, Failure> => ({
   // The EFB app is part of the add-on, so the add-on loaded; it can only be from another version, since the sim loads add-ons when it starts and Dual Input updates while it's closed.
   addon: { title: "Add-on version mismatch", detail: `The sim loaded version ${facts.addonVersion} of Dual Input's add-on when Dual Input is ${facts.version}. Restart the sim to load the right one.`, action: { kind: "restart", label: "Restart the sim", busy: "Closing the sim" } },
   offline: { title: "Your PC seems offline", detail: "Dual Input needs an internet connection. Check your setup?", action: { kind: "wait", busy: "Waiting for a connection" }, skippable: true },
@@ -42,7 +48,7 @@ type Phase = { kind: "welcome"; out: boolean } | { kind: "checks"; index: number
 /** What the window shows in place of its pages when the sim loaded another version of our add-on than the service runs: the box setup's check shows, the same way. */
 export function AddonMismatch({ addon, service, headerHeight, onRestart }: { addon: string; service: string; headerHeight: number; onRestart: () => void }) {
   const [restarting, setRestarting] = useState(false)
-  const box = failures({ username: "", addonVersion: addon, version: service }).addon
+  const box = failureWords({ addonVersion: addon, version: service }).addon
   return (
     // As much room under it as the header takes above, so it centers in the window.
     <div className="flex flex-1 flex-col items-center justify-center px-12" style={{ paddingBottom: headerHeight }}>
@@ -205,13 +211,11 @@ export type SetupFlowProps = {
 }
 
 export function SetupFlow({ facts, onFix, onDone }: SetupFlowProps) {
-  const failure = facts.failure
-  const failingAt = failure ? CHECKS.findIndex((check) => check.id === checkOf(failure)) : -1
+  const failureAt = (index: number) => facts.failures.find((failure) => checkOf(failure) === CHECKS[index]!.id)
   const runFor = useMemo(() => CHECKS.map(() => STEP.runMin + Math.random() * STEP.runSpread), [])
   const [phase, setPhase] = useState<Phase>({ kind: "welcome", out: false })
-  const [fixed, setFixed] = useState(false)
-  // A failure the pilot fixes outside Dual Input clears by itself, and the sequence goes on once it does.
-  const stillFailing = !fixed && !!failure
+  // A failure the pilot fixes, here or outside Dual Input, clears by itself, and the sequence goes on once it does.
+  const failuresNow = facts.failures.join()
 
   useEffect(() => {
     let timer = 0
@@ -220,19 +224,30 @@ export function SetupFlow({ facts, onFix, onDone }: SetupFlowProps) {
     }
     if (phase.kind === "welcome") after(phase.out ? STEP.welcomeOut : STEP.welcomeHold, phase.out ? { kind: "checks", index: 0, step: "enter", skipped: [] } : { kind: "welcome", out: true })
     if (phase.kind === "checks") {
-      const failing = stillFailing && phase.index === failingAt && !phase.skipped.includes(phase.index)
+      const failing = !!failureAt(phase.index) && !phase.skipped.includes(phase.index)
       if (phase.step === "enter") after(STEP.enter, { ...phase, step: "run" })
       if (phase.step === "run") after(runFor[phase.index]!, { ...phase, step: "result", failed: failing })
       if (phase.step === "result" && !phase.failed) after(STEP.hold, { ...phase, step: "handoff" })
-      if (phase.step === "result" && phase.failed && !failing) setPhase({ ...phase, failed: false })
+      if (phase.step === "result" && phase.failed && !failing) setPhase({ ...phase, failed: false, fixing: false })
       if (phase.step === "handoff") after(STEP.handoff, phase.index + 1 < CHECKS.length ? { ...phase, index: phase.index + 1, step: "run" } : { kind: "card" })
     }
     return () => window.clearTimeout(timer)
-  }, [phase, stillFailing, failingAt, runFor])
+    // A failure counts by its name, since `failureAt` is new each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, failuresNow, runFor])
+
+  // A fix a pilot turns down, as a UAC prompt, stops waiting after a while, and offers itself again.
+  const fixing = phase.kind === "checks" && !!phase.fixing
+  useEffect(() => {
+    if (!fixing) return
+    const timer = window.setTimeout(() => setPhase((now) => (now.kind === "checks" ? { ...now, fixing: false } : now)), STEP.fixWait)
+    return () => window.clearTimeout(timer)
+  }, [fixing])
 
   if (phase.kind === "welcome") return <Welcome out={phase.out} />
   if (phase.kind === "checks") {
-    const failing = failure && phase.index === failingAt ? failures(facts)[failure] : undefined
+    const failure = failureAt(phase.index)
+    const failing = failure ? failureWords(facts)[failure] : undefined
     return (
       <Checks
         phase={phase}
@@ -241,12 +256,6 @@ export function SetupFlow({ facts, onFix, onDone }: SetupFlowProps) {
           if (!failure) return
           onFix(failure)
           setPhase({ ...phase, fixing: true })
-          // A restart closes the sim, and the EFB app with it, so it stays on its busy words.
-          if (failing?.action.kind === "restart") return
-          window.setTimeout(() => {
-            setFixed(true)
-            setPhase({ ...phase, fixing: false, failed: false })
-          }, STEP.fix)
         }}
         onSkip={() => setPhase({ ...phase, failed: false, skipped: [...phase.skipped, phase.index] })}
       />

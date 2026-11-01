@@ -8,12 +8,12 @@ import { ChevronDown, Hand } from "lucide-react"
 import { createElement, useEffect, useLayoutEffect, useRef, useState } from "react"
 import type { CSSProperties } from "react"
 
+import type { ProfilesSlice } from "../../../../engines/messages/ts/profiles/ProfilesSlice.ts"
 import type { SessionSlice } from "../../../../engines/messages/ts/session/SessionSlice.ts"
+import type { SimSlice } from "../../../../engines/messages/ts/sim/SimSlice.ts"
 import { FigureSignals } from "../figure/standing-figure.tsx"
 import { useCoreSlice, useShell } from "../part.ts"
 import type { Part } from "../part.ts"
-import { WANTED } from "../wanted.ts"
-import type { Wanted } from "../wanted.ts"
 import { HomeRest } from "./home-rest.tsx"
 import { SessionSide } from "./session-side.tsx"
 import { StartSide } from "./start-side.tsx"
@@ -35,7 +35,9 @@ function stillEasing(box: HTMLElement): number {
 export function SessionTab({ parts }: { parts: Part[] }) {
   const { link } = useShell()
   const session = useCoreSlice<SessionSlice>("session")
-  const wanted = useCoreSlice<Wanted>(WANTED)
+  const sim = useCoreSlice<SimSlice>("sim")
+  const profiles = useCoreSlice<ProfilesSlice>("profiles")
+  const aircraft = sim?.aircraft ? { ...sim.aircraft, maturity: profiles?.loaded?.maturity ?? null } : null
   const held = !!session?.held
   const me = session?.members.find((member) => member.pilot === session.me)
   const phase = session?.preflight.phase
@@ -52,18 +54,23 @@ export function SessionTab({ parts }: { parts: Part[] }) {
   const slowTimer = useRef(0)
   const stopSlow = () => window.clearTimeout(slowTimer.current)
   useEffect(() => stopSlow, [])
+  // A refusal stays in the slice until the next attempt starts, so the one showing when a pilot presses again isn't this attempt's answer.
+  const answered = useRef<string | null>(null)
+  const refused = session?.refused ?? null
+  const refusedNow = refused && JSON.stringify(refused)
+  if (!refusedNow) answered.current = null
   const attempt = (on: Action) => {
+    answered.current = refusedNow
     setStatus({ kind: "busy", on, dialing: false, slow: false })
     signals.current.onAttempt()
     stopSlow()
     slowTimer.current = window.setTimeout(() => setStatus((now) => (now.kind === "busy" ? { ...now, slow: true } : now)), SLOW_AFTER)
     void link.client.command(on === "host" ? "session.host" : "session.join", on === "host" ? null : { code }).catch(() => {})
   }
-  const refused = wanted?.refused
-  const dialing = !!wanted?.attempt?.dialing
+  const dialing = !!session?.attempt?.dialing
   useEffect(() => {
     if (status.kind !== "busy") return
-    if (refused && refused.on === status.on) {
+    if (refused && refused.on === status.on && refusedNow !== answered.current) {
       stopSlow()
       signals.current.onAnswer(false)
       setStatus({ kind: "refused", on: status.on, refusal: refused })
@@ -74,7 +81,9 @@ export function SessionTab({ parts }: { parts: Part[] }) {
     } else if (status.dialing !== dialing) {
       setStatus({ ...status, dialing })
     }
-  }, [status, refused, held, dialing])
+    // A refusal counts by its words, since each of the slice's changes makes a new object.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, refusedNow, held, dialing])
 
   // The card turns between its sides as the guide's pages turn: the side it leaves fades out, then the next fades in, rising 6px, as the card eases to its height.
   const [side, setSide] = useState<"start" | "session">(held ? "session" : "start")
@@ -168,7 +177,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
                       <SessionSide session={session} started={started} turnedIn={turnedIn.current} folded={fold.folded} onEase={() => remeasure((n) => n + 1)} />
                     ) : (
                       <StartSide
-                        aircraft={wanted?.aircraft}
+                        aircraft={aircraft}
                         status={status}
                         code={code}
                         onCode={(next) => {
@@ -181,6 +190,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
                           stopSlow()
                           signals.current.onCancel()
                           setStatus({ kind: "idle" })
+                          void link.client.command("session.cancel", null).catch(() => {})
                         }}
                         slowText={status.kind === "busy" && status.dialing ? "Still trying to reach the host…" : "This is taking longer than usual."}
                       />
@@ -221,7 +231,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
           )}
         </div>
       </div>
-      {!figureGone && (side === "start" || turning) && <HomeRest page={pageRef} signals={signals.current} onFigureGone={() => setFigureGone(true)} />}
+      {!figureGone && (side === "start" || turning) && <HomeRest page={pageRef} signals={signals.current} aircraft={aircraft} onFigureGone={() => setFigureGone(true)} />}
     </div>
   )
 }

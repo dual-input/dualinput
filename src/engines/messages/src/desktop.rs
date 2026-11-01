@@ -62,6 +62,8 @@ pub enum ToDesktop {
     CheckForUpdates,
     /// Closes the sim, installs the update, and starts the sim again.
     InstallUpdate,
+    /// Closes the sim and starts it again, so it loads the add-on this version of Dual Input wrote.
+    RestartSim,
     /// Adds the firewall rule, with the UAC prompt.
     FixFirewall,
     SetStartWithWindows {

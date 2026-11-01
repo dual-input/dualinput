@@ -16,8 +16,7 @@ import type { NetSlice } from "../../../../engines/messages/ts/net/NetSlice.ts"
 import type { SessionSlice } from "../../../../engines/messages/ts/session/SessionSlice.ts"
 import type { SliceMember } from "../../../../engines/messages/ts/session/SliceMember.ts"
 import { useCoreSlice, useShell } from "../part.ts"
-import { WANTED } from "../wanted.ts"
-import type { Wanted } from "../wanted.ts"
+
 import { CrewDifferences } from "./differences.tsx"
 
 /** A window of three rows and half of a fourth, which covers v1's two pilots with room to spare, during preflight only: outside it nothing waits under the card, so a big crew only lengthens the page. */
@@ -43,20 +42,20 @@ function whereabouts(member: SliceMember, link: MemberLink | undefined): { shows
 }
 
 /** A link's quiet chip: its path and round trip. */
-function linkWords(link: MemberLink | undefined, roundTrip: number | undefined): string | undefined {
+function linkWords(link: MemberLink | undefined): string | undefined {
   if (!link?.up || !link.path) return undefined
   const path = link.path === "Direct" ? "Direct" : "Relay"
-  return roundTrip === undefined ? path : `${path} · ${roundTrip}ms`
+  return link.round_trip_ms === null ? path : `${path} · ${link.round_trip_ms}ms`
 }
 
 /** The code as a pilot reads it out, in two groups. */
 const spaced = (code: string) => `${code.slice(0, 3)}-${code.slice(3)}`
 
-function CrewRow({ member, you, flying, link, roundTrip, pop, alive, end }: { member: SliceMember; you: boolean; flying: boolean; link: MemberLink | undefined; roundTrip: number | undefined; pop?: number; alive: boolean; end?: React.ReactNode }) {
+function CrewRow({ member, you, flying, link, pop, alive, end }: { member: SliceMember; you: boolean; flying: boolean; link: MemberLink | undefined; pop?: number; alive: boolean; end?: React.ReactNode }) {
   // A row's pop is fixed when the row first shows.
   const [popAfter] = useState(pop)
   const under = you ? undefined : whereabouts(member, link)
-  const chip = you ? undefined : linkWords(link, roundTrip)
+  const chip = you ? undefined : linkWords(link)
   return (
     <li className="flex items-center">
       <span data-fold-glide={`head-${member.pilot}`} className="mr-3 flex shrink-0">
@@ -100,7 +99,6 @@ function MyReady({ ready, why, left, onToggle }: { ready: boolean; why: string |
 export function SessionSide({ session, started, turnedIn, folded, onEase }: { session: SessionSlice; started: boolean; turnedIn: boolean; folded: boolean; onEase: () => void }) {
   const { link } = useShell()
   const net = useCoreSlice<NetSlice>("network")
-  const wanted = useCoreSlice<Wanted>(WANTED)
   const crew = useCrew()
   const { scale } = useRoot()
   crew.scale = scale
@@ -204,7 +202,7 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
                     you={member === me}
                     flying={member.pilot === session.pf}
                     link={linkOf(member.pilot)}
-                    roundTrip={wanted?.roundTrips?.[member.pilot]}
+
                     pop={turnedIn ? 0 : POP.first + at * POP.stagger}
                     alive={preflight && !started && !out(member)}
                     end={endOf(member)}
@@ -220,7 +218,7 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
                 )}
               </ul>
             </ScrollWindow>
-            {(preflight || started) && session.differences.length > 0 && <CrewDifferences differences={session.differences} notes={wanted?.notes} started={started} onEase={onEase} />}
+            {(preflight || started) && session.differences.length > 0 && <CrewDifferences differences={session.differences} started={started} onEase={onEase} />}
           </CardContent>
         </div>
         {preflight && !started && (

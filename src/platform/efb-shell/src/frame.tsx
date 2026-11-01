@@ -9,6 +9,7 @@ import { Settings as SettingsIcon, Users } from "lucide-react"
 import { createElement, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react"
 import type { ComponentType } from "react"
 
+import type { CoreSlice } from "../../../engines/messages/ts/clients/CoreSlice.ts"
 import type { NetSlice } from "../../../engines/messages/ts/net/NetSlice.ts"
 import type { Notification } from "../../../engines/messages/ts/clients/Notification.ts"
 import type { SessionSlice } from "../../../engines/messages/ts/session/SessionSlice.ts"
@@ -28,11 +29,11 @@ import { ShellContext, startParts, stopParts } from "./part.ts"
 import type { Part, Shell } from "./part.ts"
 import { SessionTab } from "./session/session-tab.tsx"
 import { AddonMismatch, SetupFlow } from "./setup/setup-flow.tsx"
+import type { SetupFailure } from "./setup/setup-flow.tsx"
+import { FIGURE_COLOR, NAME, SETUP_DONE, useSetting, writeSetting } from "./settings/setting.ts"
 import { SettingsPage } from "./settings/settings-page.tsx"
 import type { SimWindow } from "./sim-window.ts"
 import { useViewSize } from "./view.ts"
-import { WANTED } from "./wanted.ts"
-import type { Wanted } from "./wanted.ts"
 
 /**
  * How much of the view's top the EFB's own status bar covers, in the root's units: its notifications and the
@@ -77,14 +78,13 @@ function useHeaderStatus(link: CoreLink, desktop: DesktopLink, version: string, 
   const net = useSlice<NetSlice>(link, "network")
   const sim = useSlice<SimSlice>(link, "sim")
   const notifications = useSlice<Notification[]>(link, "notifications")
-  const wanted = useSlice<Wanted>(link, WANTED)
   const local = useDesktopState(desktop)
   const raised = (id: string) => !!notifications?.some((notification) => notification.id === id)
   const want = notifications?.find((notification) => notification.id.indexOf("core-helper.failed.") === 0) as (Notification & { detail?: string }) | undefined
   const update = local?.update
   return {
     offline: net?.internet === false,
-    servers: wanted?.servers,
+    servers: net?.servers ?? undefined,
     firewall: local?.firewall,
     fixFirewall,
     connection: raised("network.bind"),
@@ -143,24 +143,31 @@ export function Frame({ host, link, desktop, sim, version, parts }: FrameProps) 
     if (landing === "header") setHeaderOpened((times) => times + 1)
     else setTab(landing === "session" ? "session" : (parts.find((part) => part.tab?.landing === landing)?.name ?? "session"))
   })
-  const coreVersion = useSlice<{ version: string }>(link, "core")?.version
+  const coreSlice = useSlice<CoreSlice>(link, "core")
+  const net = useSlice<NetSlice>(link, "network")
+  const local = useDesktopState(desktop)
+  const coreVersion = coreSlice?.version
   const mismatch = !down && coreVersion !== undefined && coreVersion !== version
-  const setup = useSlice<Wanted>(link, WANTED)?.setup
-  // Setup has the whole window, with no header or tabs, until the pilot has a name.
-  const [setupDone, setSetupDone] = useState(false)
-  if (!down && !mismatch && setup && !setupDone) {
+  // Setup has the whole window, with no header or tabs, until the pilot has a name. Its Continue ends it here at once, ahead of the setting's coming back from the core.
+  const setupDone = useSetting(link, SETUP_DONE)
+  const [continued, setContinued] = useState(false)
+  useEffect(() => {
+    if (setupDone === true) setContinued(false)
+  }, [setupDone])
+  const failures = [mismatch && "addon", net?.internet === false && "offline", net?.servers === "unreachable" && "servers", local?.firewall === "blocks" && "firewall"].filter((failure): failure is SetupFailure => !!failure)
+  if (!down && setupDone === false && !continued) {
     return (
       <ShellContext.Provider value={shell}>
         <Root scale={scale} style={{ width, height, overflow: "hidden" }}>
           <div data-app-frame className="relative flex h-full flex-col bg-background" style={{ paddingTop: inset }}>
             <SetupFlow
-              key={setup.failure ?? "clear"}
-              facts={{ ...setup, version }}
-              onFix={(failure) => void link.client.command("setup.fix", { failure }).catch(() => {})}
+              facts={{ failures, username: coreSlice?.username ?? "", addonVersion: version, version: coreVersion ?? version }}
+              onFix={(failure) => desktop.ask(failure === "addon" ? { t: "restart-sim" } : { t: "fix-firewall" })}
               onDone={(name, color) => {
-                setSetupDone(true)
-                void link.client.command("clients.set-setting", { key: "session.name", value: name }).catch(() => {})
-                void link.client.command("setup.done", { color }).catch(() => {})
+                setContinued(true)
+                writeSetting(link, NAME, name)
+                writeSetting(link, FIGURE_COLOR, color)
+                writeSetting(link, SETUP_DONE, true)
               }}
             />
           </div>
@@ -178,7 +185,7 @@ export function Frame({ host, link, desktop, sim, version, parts }: FrameProps) 
             {down ? (
               <ServiceDown closed={core === "closed"} headerHeight={HEADER_HEIGHT} />
             ) : mismatch ? (
-              <AddonMismatch addon={version} service={coreVersion} headerHeight={HEADER_HEIGHT} onRestart={() => void link.client.command("setup.fix", { failure: "addon" }).catch(() => {})} />
+              <AddonMismatch addon={version} service={coreVersion} headerHeight={HEADER_HEIGHT} onRestart={() => desktop.ask({ t: "restart-sim" })} />
             ) : (
               tabs.map(({ id, page }) => (
                 <div key={id} className="min-h-0 flex-1 flex-col" style={{ display: id === tab ? "flex" : "none" }}>

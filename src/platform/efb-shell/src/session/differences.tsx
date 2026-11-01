@@ -66,7 +66,7 @@ function LevelIcon({ level }: { level: string }) {
 }
 
 /** The lines: an error's icon in red, a warning's in amber, and a note's muted, the difference, and what it can cause. Marked, the first icon of each level is one the counts also have, and everything else fades, for a morph between the two. Each line fades on its own as the session card folds. */
-function Lines({ differences, notes, after, marked }: { differences: Difference[]; notes: Record<number, string> | undefined; after?: ReactNode; marked: boolean }) {
+function Lines({ differences, after, marked }: { differences: Difference[]; after?: ReactNode; marked: boolean }) {
   const first = (at: number) => differences.findIndex((difference) => difference.level === differences[at]!.level) === at
   return (
     <ul className="space-y-2 text-sm">
@@ -77,7 +77,7 @@ function Lines({ differences, notes, after, marked }: { differences: Difference[
           </span>
           <span {...(marked ? { "data-fade": "" } : {})}>
             {difference.words}
-            {notes?.[difference.item] && <span className="text-muted-foreground"> · {notes[difference.item]}</span>}
+            {difference.note && <span className="text-muted-foreground"> · {difference.note}</span>}
             {at === differences.length - 1 && after}
           </span>
         </li>
@@ -90,7 +90,7 @@ function Lines({ differences, notes, after, marked }: { differences: Difference[
 const PRESS = "data-[pressed]:translate-y-[var(--hair)]"
 const HIDDEN = "pointer-events-none absolute left-0 top-0 opacity-0"
 
-export function CrewDifferences({ differences, notes, started, onEase }: { differences: Difference[]; notes: Record<number, string> | undefined; started: boolean; onEase: () => void }) {
+export function CrewDifferences({ differences, started, onEase }: { differences: Difference[]; started: boolean; onEase: () => void }) {
   const [open, setOpen] = useState(false)
   const expanded = !started || open
   const count = (level: string) => differences.filter((difference) => difference.level === level).length
@@ -165,7 +165,7 @@ export function CrewDifferences({ differences, notes, started, onEase }: { diffe
         className={cx("-mx-2 rounded-[6px] p-2", started && "cursor-pointer hover:bg-muted/50", started && PRESS, !expanded && HIDDEN, !expanded && "right-0")}
       >
         <ScrollWindow max={WINDOW}>
-          <Lines differences={differences} notes={notes} marked={started} after={started ? <ChevronUp className="ml-1.5 inline size-4 align-[-3px] text-muted-foreground" /> : undefined} />
+          <Lines differences={differences} marked={started} after={started ? <ChevronUp className="ml-1.5 inline size-4 align-[-3px] text-muted-foreground" /> : undefined} />
         </ScrollWindow>
       </div>
     </div>

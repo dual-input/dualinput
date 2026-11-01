@@ -1,5 +1,20 @@
 # The build: log
 
+## 2026-11-01: fspackagetool names a compiled panel after its source file, and compiled it with a game running
+
+**Asked:** what `node tools/compile-panel.ts` gets from `fspackagetool` for the banner's panel definition, which the first run looked for under the name in the source's `Filename` element.
+
+**Expected:** `InGamePanel_DualInputBanner.spb`, as the source's `Filename` said.
+
+**Found:** on our development machine, with Cyberpunk 2077 running and the sim closed, `fspackagetool` reported "Attached to EXE - waiting for completion", then "Finished, 1 skipped, 1 done and 0 failed", and wrote `InGamePanels/dualinput-banner.spb`, 679 bytes, named after the source file.
+The game kept running through both runs.
+
+**Changed:** `tools/lib/panel.ts` names the compiled file `dualinput-banner.spb`, and the source's `Filename` says the same.
+The first compile is committed in `src/sim-package/panel/compiled/`.
+Whether the sim loads the panel from it, and takes the definition's fractional sizes, is unverified until a session in the sim.
+
+**Affects:** [files compiled with the sim](01-the-build.md#files-compiled-with-the-sim).
+
 ## 2026-11-01: Tauri in the root workspace gives the loop's crates getrandom, so the desktop app is a Cargo workspace of its own
 
 **Asked:** whether `src/apps/desktop` can sit in the one Cargo workspace [the code map](../architecture/02-code-map.md#the-workspace) gives every Rust crate.

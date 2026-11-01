@@ -11,8 +11,8 @@ const PANEL = path.join(ROOT, "src", "sim-package", "panel")
 export const PANEL_SOURCE = path.join(PANEL, "InGamePanels", "dualinput-banner.xml")
 export const COMPILED = path.join(PANEL, "compiled")
 export const SOURCE_JSON = path.join(COMPILED, "source.json")
-/** The compiled file's name, which the source's `Filename` element gives it. */
-export const SPB = "InGamePanel_DualInputBanner.spb"
+/** The compiled file's name, which fspackagetool takes from the source file's, whatever the source's `Filename` element says (measured on our development machine, 2026-11-01). */
+export const SPB = "dualinput-banner.spb"
 
 export function panelSourceHash(): string {
   return createHash("sha256").update(fs.readFileSync(PANEL_SOURCE)).digest("hex")

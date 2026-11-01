@@ -9,12 +9,14 @@ import type { RefObject } from "react"
 import { StandingFigure } from "../figure/standing-figure.tsx"
 import type { FigureSignals } from "../figure/standing-figure.tsx"
 import { FIGURE_COLORS } from "@dualinput/crew"
+import type { ProfilesSlice } from "../../../../engines/messages/ts/profiles/ProfilesSlice.ts"
+import type { SimSlice } from "../../../../engines/messages/ts/sim/SimSlice.ts"
 import { useCoreSlice, useShell } from "../part.ts"
-import { WANTED } from "../wanted.ts"
-import type { Wanted } from "../wanted.ts"
+import { FIGURE_COLOR, GUIDE_DONE, useSetting, writeSetting } from "../settings/setting.ts"
 import { AircraftPicker } from "./aircraft-picker.tsx"
 import type { PickableAircraft } from "./aircraft-picker.tsx"
 import { Farewell, WelcomeGuide } from "./guide.tsx"
+import type { HomeAircraft } from "./start-side.tsx"
 
 const SHARED_UNSUPPORTED = ["Share flight and physics", "Pass control between each other", "Share Traffic and ATC"]
 
@@ -55,17 +57,19 @@ function UnsupportedAircraft({ onPick }: { onPick: () => void }) {
   )
 }
 
-export function HomeRest({ page, signals, onFigureGone }: { page: RefObject<HTMLElement | null>; signals: FigureSignals; onFigureGone: () => void }) {
+export function HomeRest({ page, signals, aircraft, onFigureGone }: { page: RefObject<HTMLElement | null>; signals: FigureSignals; aircraft: HomeAircraft | null; onFigureGone: () => void }) {
   const { link } = useShell()
-  const wanted = useCoreSlice<Wanted>(WANTED)
+  const sim = useCoreSlice<SimSlice>("sim")
+  const profiles = useCoreSlice<ProfilesSlice>("profiles")
+  const guideDone = useSetting(link, GUIDE_DONE)
+  const figureColor = useSetting(link, FIGURE_COLOR)
   const [picking, setPicking] = useState(false)
   const [farewell, setFarewell] = useState(false)
   const [guideGone, setGuideGone] = useState(false)
-  const aircraft = wanted?.aircraft
   const supported = !!aircraft?.maturity
-  const guiding = !!wanted?.firstVisit && !guideGone
-  const color = FIGURE_COLORS.find((candidate) => candidate.name === wanted?.color)?.hex ?? FIGURE_COLORS[5]!.hex
-  const onPick = (picked: PickableAircraft) => link.client.command("aircraft.pick", { maker: picked.maker, model: picked.model }).catch(() => toast("Dual Input couldn't load that aircraft"))
+  const guiding = guideDone === false && !guideGone
+  const color = FIGURE_COLORS.find((candidate) => candidate.name === figureColor)?.hex ?? FIGURE_COLORS[5]!.hex
+  const onPick = (picked: PickableAircraft) => link.client.command("profiles.pick", { maker: picked.maker, model: picked.model }).catch(() => toast("Dual Input couldn't load that aircraft"))
   return (
     <div className="relative mt-6 flex min-h-0 flex-1 flex-col">
       {guiding ? (
@@ -75,7 +79,7 @@ export function HomeRest({ page, signals, onFigureGone }: { page: RefObject<HTML
           onLeave={() => setFarewell(true)}
           onClose={() => {
             setGuideGone(true)
-            void link.client.command("guide.done", null).catch(() => {})
+            writeSetting(link, GUIDE_DONE, true)
           }}
         />
       ) : !aircraft ? null : !supported ? (
@@ -87,7 +91,7 @@ export function HomeRest({ page, signals, onFigureGone }: { page: RefObject<HTML
         </div>
       ) : null}
       {farewell && <Farewell onGone={() => setFarewell(false)} />}
-      <AircraftPicker open={picking} onOpenChange={setPicking} aircraft={wanted?.supported ?? []} canLoad={wanted?.where !== "flight"} onPick={onPick} />
+      <AircraftPicker open={picking} onOpenChange={setPicking} aircraft={profiles?.supported ?? []} canLoad={sim?.where === "world-map"} onPick={onPick} />
     </div>
   )
 }

@@ -74,7 +74,7 @@ fn tray(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
-/// Carries out what the EFB app asks. TODO: when the app holds Velopack's updates and the firewall rule, carry out the first three here.
+/// Carries out what the EFB app asks. TODO: when the app holds Velopack's updates, the sim's restart, and the firewall rule, carry them out here.
 fn ask_handler(say: watch::Sender<DesktopState>) -> mpsc::UnboundedSender<ToDesktop> {
     let (ask, mut asks) = mpsc::unbounded_channel();
     tauri::async_runtime::spawn(async move {
@@ -86,7 +86,10 @@ fn ask_handler(say: watch::Sender<DesktopState>) -> mpsc::UnboundedSender<ToDesk
                     }
                     say.send_modify(|state| state.start_with_windows = start_with_windows::is_on());
                 }
-                ToDesktop::CheckForUpdates | ToDesktop::InstallUpdate | ToDesktop::FixFirewall => {}
+                ToDesktop::CheckForUpdates
+                | ToDesktop::InstallUpdate
+                | ToDesktop::RestartSim
+                | ToDesktop::FixFirewall => {}
             }
         }
     });

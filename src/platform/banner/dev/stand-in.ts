@@ -19,7 +19,7 @@ const ADAM = pilotId(3)
 const inFlight: Status = { stage: "ready-to-fly", aircraft: { path: "baron58p/presets/blacksquare/baron58p" }, title: "Baron 58P", pause: 0, ended: null, links: [] }
 const member = (pilot: string, name: string, rest: Partial<SliceMember> = {}): SliceMember => ({ pilot, name, status: inFlight, in_flight: true, ready: false, without: [], ...rest })
 
-const flying: SessionSlice = { held: true, code: "K7R4XM", me: ME, pf: JAMES, members: [member(ME, "You"), member(JAMES, "James")], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, differences: [], ready: null, share: [], roles: [] }
+const flying: SessionSlice = { held: true, code: "K7R4XM", me: ME, pf: JAMES, members: [member(ME, "You"), member(JAMES, "James")], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, differences: [], ready: null, share: [], roles: [], attempt: null, refused: null }
 const preflight = (rest: Partial<SessionSlice>): SessionSlice => ({ ...flying, preflight: { aircraft: inFlight.aircraft, phase: "running" }, ready: [], ...rest })
 const THREE_DIFFERENCES = [
   { item: 1, level: "error" as const, words: "James has version 2.1.2 of the aircraft, you have 2.1.3" },
@@ -59,7 +59,7 @@ export const SCENES: Record<string, { slices: Slices; play?: Script }> = {
   "Summary: pilot flying": { slices: { session: preflight({ pf: ME, members: [member(ME, "You"), member(ADAM, "Adam", { ready: true })], differences: THREE_DIFFERENCES }), notifications: [] } },
   "Summary: not pilot flying": { slices: { session: preflight({ members: [member(ME, "You"), member(JAMES, "James", { ready: true })], differences: [THREE_DIFFERENCES[2]!] }), notifications: [] } },
   "Summary: settling": { slices: { session: preflight({ ready: ["Ready opens once your aircraft has settled, about 30s after Ready to fly"] }), notifications: [] } },
-  "Summary: a crewmate out": { slices: { session: preflight({ pf: ME, members: [member(ME, "You"), member(ADAM, "Adam")], differences: THREE_DIFFERENCES }), network: { members: [{ pilot: ADAM, up: false, path: null }], internet: true }, notifications: [] } },
+  "Summary: a crewmate out": { slices: { session: preflight({ pf: ME, members: [member(ME, "You"), member(ADAM, "Adam")], differences: THREE_DIFFERENCES }), network: { members: [{ pilot: ADAM, up: false, path: null, round_trip_ms: null }], internet: true, servers: "reachable" }, notifications: [] } },
   "Summary and three notes": { slices: { session: preflight({ pf: ME, members: [member(ME, "You"), member(ADAM, "Adam", { ready: true })], differences: THREE_DIFFERENCES }), notifications: [N.pause, N.syncOne, N.controlThem] } },
   "Each kind": { slices: { session: flying, notifications: [N.controlYou, N.lostPf, N.pause] } },
   Crewmates: { slices: { session: flying, notifications: [N.left, N.crashed, N.back] } },
@@ -97,7 +97,7 @@ export class StandInCore extends StandInBase {
     this.timers.forEach((timer) => window.clearTimeout(timer))
     this.sceneName = name
     const scene = SCENES[name]!
-    this.set({ network: { members: [], internet: true }, ...scene.slices })
+    this.set({ network: { members: [], internet: true, servers: "reachable" }, ...scene.slices })
     this.timers = (scene.play ?? []).map((step) => window.setTimeout(() => this.set({ notifications: step.notes }), step.after))
   }
 

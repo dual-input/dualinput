@@ -3,4 +3,4 @@
 /**
  * What the EFB app asks of the desktop app.
  */
-export type ToDesktop = { "t": "check-for-updates" } | { "t": "install-update" } | { "t": "fix-firewall" } | { "t": "set-start-with-windows", on: boolean, };
+export type ToDesktop = { "t": "check-for-updates" } | { "t": "install-update" } | { "t": "restart-sim" } | { "t": "fix-firewall" } | { "t": "set-start-with-windows", on: boolean, };

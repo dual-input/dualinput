@@ -111,7 +111,7 @@ impl Network {
             cx.out(Command::Dial {
                 endpoint: link.member.endpoint,
             });
-            self.ping(cx);
+            self.check_reach(cx);
         }
         let timer = self.timer(cx, REDIAL_EVERY, TimerFor::Dial(pilot));
         if let Some(link) = self.links.get_mut(&pilot) {
@@ -206,7 +206,7 @@ impl Network {
                     });
                 }
                 if !lost.is_empty() {
-                    me.ping(cx);
+                    me.check_reach(cx);
                 }
             }
             Event::Bound(Err(error)) => {

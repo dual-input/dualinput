@@ -3,4 +3,4 @@
 /**
  * The menu's page, as the menu script last reported it.
  */
-export type MenuPage = "unknown" | "main" | "in-game";
+export type MenuPage = "unknown" | "main" | "world-map" | "in-game";

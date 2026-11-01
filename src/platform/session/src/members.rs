@@ -29,6 +29,7 @@ pub(crate) fn link_up(me: &mut Session, up: &LinkUp, cx: &mut Cx) {
     if held.left.contains(&member.pilot) {
         return;
     }
+    held.dialing = false;
     let new = !held.others.contains_key(&member.pilot);
     let order = match held.others.get(&member.pilot) {
         Some(other) => other.order,

@@ -103,8 +103,8 @@ test("a member for a code no session holds is refused", async () => {
 
 test("a joiner on another version is told whose is older, and on another build of it, that", async () => {
   const { code } = await host("0.2.0")
-  assert.deepEqual((await lookup(code, "198.51.100.2", "0.1.9")).body, { answer: "other-version", older: "mine" })
-  assert.deepEqual((await lookup(code, "198.51.100.2", "0.10.0")).body, { answer: "other-version", older: "theirs" })
+  assert.deepEqual((await lookup(code, "198.51.100.2", "0.1.9")).body, { answer: "other-version", older: "mine", theirs: "0.2.0" })
+  assert.deepEqual((await lookup(code, "198.51.100.2", "0.10.0")).body, { answer: "other-version", older: "theirs", theirs: "0.2.0" })
   assert.deepEqual((await lookup(code, "198.51.100.2", "0.2.0", "0".repeat(64))).body, { answer: "other-hash" })
 })
 
@@ -122,17 +122,23 @@ test("the hourly sweep deletes lapsed members and the sessions they leave empty"
   const entry = `{"code":"${code}","member":{"pilot":"${HOST_PILOT}","name":"Host","kind":"crew","endpoint":"${h.endpoint}"}}`
   assert.deepEqual(await post("/v1/members", entry, h.headers(entry)), { status: 404, body: { error: "no session has the code" } })
 })
+/** The refusal an address at its limit gets, which says when the next hour begins, in UTC. */
+function tooMany(): { answer: string; until: string } {
+  const hour = 3_600_000
+  return { answer: "too-many-wrong-codes", until: new Date((Math.floor(Date.now() / hour) + 1) * hour).toISOString() }
+}
+
 test("an address's 21st wrong code in an hour is refused, and a right code from it too", async () => {
   const { code } = await host()
   for (let i = 0; i < 20; i++) assert.deepEqual((await lookup("ZZZZZZ", "198.51.100.5")).body, { answer: "no-such-code" })
-  assert.deepEqual((await lookup("ZZZZZZ", "198.51.100.5")).body, { answer: "too-many-wrong-codes" })
-  assert.deepEqual((await lookup(code, "198.51.100.5")).body, { answer: "too-many-wrong-codes" })
+  assert.deepEqual((await lookup("ZZZZZZ", "198.51.100.5")).body, tooMany())
+  assert.deepEqual((await lookup(code, "198.51.100.5")).body, tooMany())
   assert.equal((await lookup(code, "198.51.100.6")).body.answer, "found")
 })
 
 test("addresses in one IPv6 /64 share their 20 wrong codes an hour", async () => {
   for (let i = 0; i < 20; i++) await lookup("ZZZZZZ", `2001:db8:7:7::${i + 1}`)
-  assert.deepEqual((await lookup("ZZZZZZ", "2001:db8:7:7:ffff::1")).body, { answer: "too-many-wrong-codes" })
+  assert.deepEqual((await lookup("ZZZZZZ", "2001:db8:7:7:ffff::1")).body, tooMany())
   assert.deepEqual((await lookup("ZZZZZZ", "2001:db8:7:8::1")).body, { answer: "no-such-code" })
 })
 

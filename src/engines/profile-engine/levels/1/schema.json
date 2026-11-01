@@ -252,6 +252,10 @@
       ],
       "description": "The modules it uses, each by its path from profiles/ without .yaml"
     },
+    "maker": {
+      "description": "Who makes the aircraft, as the EFB app's list of supported aircraft shows it",
+      "type": "string"
+    },
     "maturity": {
       "description": "stable or experimental, which that list tags the aircraft with",
       "enum": [
@@ -260,7 +264,7 @@
       ]
     },
     "name": {
-      "description": "The aircraft's name as the EFB app's list of supported aircraft shows it",
+      "description": "The aircraft's model, as that list shows it",
       "type": "string"
     },
     "seats": {

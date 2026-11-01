@@ -228,9 +228,20 @@ pub const SLICE: &str = "network";
 #[ts(export, export_to = "net/")]
 pub struct NetSlice {
     pub members: Vec<MemberLink>,
-    /// Whether this PC reaches the internet, as the last check made while a link was lost
-    /// found, or `None` before the first.
+    /// Whether this PC reaches the internet, as the last check found, or `None` before the
+    /// first: whether the backend or any relay answered.
     pub internet: Option<bool>,
+    /// Whether our servers answer, as the last check found, or `None` before the first.
+    pub servers: Option<Servers>,
+}
+
+/// Whether hosting and joining can reach what they need: the backend, and at least one relay.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "kebab-case")]
+#[ts(export, export_to = "net/")]
+pub enum Servers {
+    Reachable,
+    Unreachable,
 }
 
 /// One member's link, by the member's pilot ID as 32 hex digits.

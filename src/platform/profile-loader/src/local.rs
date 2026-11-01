@@ -10,6 +10,7 @@ use clients::Clients;
 use kernel::{Cx, Entry, Job, JobId};
 use messages::profiles::Pin;
 use messages::unhex;
+use profile_engine::Maturity;
 
 use crate::{LOCAL, Profiles};
 
@@ -30,6 +31,7 @@ struct Bundle {
     file: String,
     hash: String,
     covers: Vec<String>,
+    maturity: Maturity,
 }
 
 impl Local {
@@ -48,6 +50,14 @@ impl Local {
             hash: unhex(&b.hash)?,
             local: true,
         })
+    }
+
+    /// The maturity of the first local bundle, by file name, that covers the aircraft.
+    pub(crate) fn maturity_of(&self, aircraft: &str) -> Option<Maturity> {
+        self.found
+            .iter()
+            .find(|b| profile_engine::covers(&b.covers, aircraft))
+            .map(|b| b.maturity)
     }
 
     /// The file that holds a local bundle, by its hash.
@@ -102,17 +112,19 @@ fn listed(me: &mut Profiles, job: JobId, result: Result<Vec<u8>, String>, cx: &m
     finish(me, cx);
 }
 
-/// Runs at the edge on a local file: its hash and the folders and presets it covers, or why
-/// it doesn't read at this core's level.
+/// Runs at the edge on a local file: its hash, the folders and presets it covers, and its
+/// maturity, or why it doesn't read at this core's level.
 fn summarized(bytes: Vec<u8>) -> Result<Vec<u8>, String> {
     let profile = profile_engine::read(&bytes, profile_engine::LEVEL).map_err(|r| r.to_string())?;
+    let maturity = profile.maturity;
     let covers: Vec<String> = profile
         .aircraft
         .variants
         .into_iter()
         .flat_map(|v| v.paths)
         .collect();
-    postcard::to_stdvec(&(profile_engine::hash(&bytes), covers)).map_err(|e| e.to_string())
+    postcard::to_stdvec(&(profile_engine::hash(&bytes), covers, maturity))
+        .map_err(|e| e.to_string())
 }
 
 fn read(me: &mut Profiles, job: JobId, result: Result<Vec<u8>, String>, cx: &mut Cx) {
@@ -120,10 +132,15 @@ fn read(me: &mut Profiles, job: JobId, result: Result<Vec<u8>, String>, cx: &mut
         return;
     };
     let summary = result.and_then(|bytes| {
-        postcard::from_bytes::<(String, Vec<String>)>(&bytes).map_err(|e| e.to_string())
+        postcard::from_bytes::<(String, Vec<String>, Maturity)>(&bytes).map_err(|e| e.to_string())
     });
     match summary {
-        Ok((hash, covers)) => me.local.next.push(Bundle { file, hash, covers }),
+        Ok((hash, covers, maturity)) => me.local.next.push(Bundle {
+            file,
+            hash,
+            covers,
+            maturity,
+        }),
         Err(why) => tracing::warn!(
             file,
             why,

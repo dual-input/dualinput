@@ -23,6 +23,7 @@ pub fn hash(bytes: &[u8]) -> String {
 
 pub(crate) fn emit(p: &Profile) -> Vec<u8> {
     let mut out = Out::default();
+    out.line(0, &format!("maker: {}", scalar(&p.maker)));
     out.line(0, &format!("name: {}", scalar(&p.name)));
     out.line(
         0,

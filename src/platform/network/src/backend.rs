@@ -1,8 +1,7 @@
 //! The network's requests to the backend: a host's code, a joiner's lookup, each member's
 //! entry and its renewal every 10 minutes, a leave, and the lookup a core back from a restart
-//! makes when no member answers it; and the check of whether this PC reaches the internet
-//! while a link is lost (record/areas/network/02-units.md, "Requests the session crate makes"
-//! and "What the pilot sees, and settings").
+//! makes when no member answers it (record/areas/network/02-units.md, "Requests the session
+//! crate makes").
 //!
 //! Every request but a lookup is signed with the session's endpoint key, which the network
 //! draws at Host or Join. Ed25519 signing reads neither a clock nor randomness, so it runs on
@@ -55,8 +54,6 @@ pub(crate) const RENEW_EVERY: Duration = Duration::from_secs(10 * 60);
 /// A core back from a restart dials the crew in its session file, and looks the code up
 /// only when none of them has answered by then.
 const CHECK_AFTER: Duration = Duration::from_secs(10);
-/// The internet is reachable when a relay answers its `/ping` within this.
-const PING_WITHIN: Duration = Duration::from_secs(2);
 
 /// This core's pilot as the session crate gives them, which the network makes a member entry
 /// of with the endpoint ID.
@@ -115,10 +112,11 @@ pub enum Answer {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Refusal {
     NoSuchCode,
-    /// The session's host runs another version, and whose is older.
-    OtherVersion(Older),
+    /// The session's host runs another version, whose is older, and the host's version.
+    OtherVersion(Older, String),
     OtherHash,
-    TooManyWrongCodes,
+    /// When the next hour begins, in UTC, and its wrong codes count from none.
+    TooManyWrongCodes(String),
     /// Any other answer, such as a signature the backend refused, in its words.
     Other(String),
 }
@@ -146,7 +144,6 @@ pub(crate) enum JobFor {
     Ask(Asked),
     Renew,
     Leave,
-    Ping,
 }
 
 #[derive(Default)]
@@ -166,8 +163,6 @@ pub(crate) struct Backend {
     pub(crate) jobs: Vec<(JobId, JobFor)>,
     pub(crate) renew: Option<TimerId>,
     pub(crate) check: Option<TimerId>,
-    ping: Option<TimerId>,
-    pub(crate) internet: Option<bool>,
 }
 
 /// Asks the backend for a code for the session this core hosts, answering in
@@ -179,6 +174,11 @@ pub fn host(cx: &Cx, host: Host) {
 /// Looks a code up, answering in `BackendAnswered`.
 pub fn join(cx: &Cx, join: Join) {
     cx.call(Network::join, join);
+}
+
+/// Stops waiting for the backend's answer to Host or Join, so `BackendAnswered` doesn't come.
+pub fn cancel(cx: &Cx) {
+    cx.call(Network::cancel_ask, ());
 }
 
 impl Network {
@@ -272,10 +272,28 @@ impl Network {
         cx.cancel_job(job);
         me.backend.jobs.retain(|(j, _)| *j != job);
         tracing::warn!(?asked, "the backend didn't answer within 10s");
-        cx.raise(BackendAnswered {
-            asked,
-            answer: Answer::NoAnswer("the backend didn't answer within 10s".into()),
-        });
+        let answer = Answer::NoAnswer("the backend didn't answer within 10s".into());
+        me.answered(asked, answer, cx);
+    }
+
+    fn cancel_ask(me: &mut Network, (): (), cx: &mut Cx) {
+        if let Some((_, job, timer)) = me.backend.asking.take() {
+            cx.cancel_job(job);
+            cx.cancel_timer(timer);
+            me.backend.jobs.retain(|(j, _)| *j != job);
+        }
+        me.drop_held_answer();
+    }
+
+    /// Tells the session crate how the backend answered, once a check has found what this PC
+    /// reaches when it gave a Host or a Join no answer.
+    fn answered(&mut self, asked: Asked, answer: Answer, cx: &Cx) {
+        let answered = BackendAnswered { asked, answer };
+        if asked != Asked::Check && matches!(answered.answer, Answer::NoAnswer(_)) {
+            self.hold_for_reach(answered, cx);
+        } else {
+            cx.raise(answered);
+        }
     }
 
     fn job_done(me: &mut Network, job: JobId, result: Result<Vec<u8>, String>, cx: &mut Cx) {
@@ -296,7 +314,7 @@ impl Network {
                     me.backend.listed = true;
                 }
                 tracing::info!(?asked, ?answer, "the backend answered");
-                cx.raise(BackendAnswered { asked, answer });
+                me.answered(asked, answer, cx);
             }
             JobFor::Renew | JobFor::Leave => match fetched {
                 Ok(f) if f.status == 200 => {}
@@ -312,11 +330,6 @@ impl Network {
                     "a member's request got no answer from the backend"
                 ),
             },
-            JobFor::Ping => {
-                if fetched.is_ok_and(|f| f.status == 200) {
-                    me.pinged(Some(true), cx);
-                }
-            }
         }
     }
 
@@ -344,9 +357,12 @@ impl Network {
         self.backend.renew = Some(cx.timer(RENEW_EVERY, |me: &mut Network, _, cx| me.renew(cx)));
     }
 
-    /// Tells the backend this core left.
+    /// Tells the backend this core left, if it lists this core, as it doesn't list a joiner who
+    /// cancels before its first `LinkUp`.
     pub(crate) fn tell_leave(&mut self, cx: &Cx) {
-        let (Some(key), Some(open)) = (self.backend.key.clone(), &self.session) else {
+        let (Some(key), Some(open), true) =
+            (self.backend.key.clone(), &self.session, self.backend.listed)
+        else {
             return;
         };
         let body = Leave {
@@ -358,13 +374,9 @@ impl Network {
 
     /// Clears what the session held, once it's left.
     pub(crate) fn forget(&mut self, cx: &Cx) {
-        for timer in [
-            self.backend.renew.take(),
-            self.backend.check.take(),
-            self.backend.ping.take(),
-        ]
-        .into_iter()
-        .flatten()
+        for timer in [self.backend.renew.take(), self.backend.check.take()]
+            .into_iter()
+            .flatten()
         {
             cx.cancel_timer(timer);
         }
@@ -416,53 +428,9 @@ impl Network {
             self.renew(cx);
         }
     }
-
-    /// Asks every relay in the session's list for `/ping`, which answers with no token, as a
-    /// dial starts while a link is lost, unless a check is running.
-    pub(crate) fn ping(&mut self, cx: &Cx) {
-        if self.backend.ping.is_some() || self.backend.relays.is_empty() {
-            return;
-        }
-        for relay in &self.backend.relays {
-            let fetch = Fetch {
-                method: Method::Get,
-                url: format!("{}/ping", relay.url.trim_end_matches('/')),
-                headers: Vec::new(),
-                body: Vec::new(),
-                keep: Vec::new(),
-            };
-            let job = cx.job(Job::fetch(fetch), Network::job_done);
-            self.backend.jobs.push((job, JobFor::Ping));
-        }
-        self.backend.ping = Some(cx.timer(PING_WITHIN, |me: &mut Network, _, cx| {
-            me.backend.ping = None;
-            me.pinged(Some(false), cx);
-        }));
-    }
-
-    fn pinged(&mut self, internet: Option<bool>, cx: &Cx) {
-        if let Some(timer) = self.backend.ping.take() {
-            cx.cancel_timer(timer);
-        }
-        let pings: Vec<_> = self
-            .backend
-            .jobs
-            .iter()
-            .filter(|(_, p)| *p == JobFor::Ping)
-            .map(|(j, _)| *j)
-            .collect();
-        for job in pings {
-            cx.cancel_job(job);
-        }
-        self.backend.jobs.retain(|(_, p)| *p != JobFor::Ping);
-        if self.backend.internet != internet {
-            tracing::info!(?internet, "whether this PC reaches the internet changed");
-        }
-        self.backend.internet = internet;
-    }
 }
 
-fn backend_url(cx: &Cx) -> String {
+pub(crate) fn backend_url(cx: &Cx) -> String {
     cx.read::<Clients>()
         .setting_as::<String>(BACKEND)
         .filter(|url| !url.is_empty())
@@ -505,9 +473,13 @@ fn answer(asked: Asked, fetched: Result<Fetched, String>) -> Answer {
                 crew,
             },
             Ok(LookedUp::NoSuchCode) => Answer::Refused(Refusal::NoSuchCode),
-            Ok(LookedUp::OtherVersion { older }) => Answer::Refused(Refusal::OtherVersion(older)),
+            Ok(LookedUp::OtherVersion { older, theirs }) => {
+                Answer::Refused(Refusal::OtherVersion(older, theirs))
+            }
             Ok(LookedUp::OtherHash) => Answer::Refused(Refusal::OtherHash),
-            Ok(LookedUp::TooManyWrongCodes) => Answer::Refused(Refusal::TooManyWrongCodes),
+            Ok(LookedUp::TooManyWrongCodes { until }) => {
+                Answer::Refused(Refusal::TooManyWrongCodes(until))
+            }
             Err(_) => unreadable(),
         },
     }

@@ -32,8 +32,46 @@ pub enum MenuPage {
     Unknown,
     /// `MasterPage`, the main menu's.
     Main,
+    /// `MasterPage` with `FreeFlightPage` on it, Free flight's world map.
+    WorldMap,
     /// `MasterPage_InGame`, a flight's.
     InGame,
+}
+
+/// Where the pilot is, which the aircraft picker and Join turn on.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "kebab-case")]
+#[ts(export, export_to = "sim/")]
+pub enum Place {
+    MainMenu,
+    WorldMap,
+    Flight,
+}
+
+impl Place {
+    /// A load counts as a flight, since no aircraft can be picked once it's begun.
+    pub fn of(stage: Stage, page: MenuPage) -> Place {
+        match (stage, page) {
+            (Stage::Loading | Stage::ReadyToFly | Stage::Flying, _) => Place::Flight,
+            (Stage::Menu, MenuPage::WorldMap) => Place::WorldMap,
+            _ => Place::MainMenu,
+        }
+    }
+}
+
+/// The aircraft the sim last loaded, the main menu's own included, as the start card names it.
+/// A name stays `None` where it can't be read: a streamed copy keeps no `aircraft.cfg` on disk,
+/// and an `aircraft.cfg` may give a name as a token of the sim's localization.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "sim/")]
+pub struct NamedAircraft {
+    pub path: String,
+    /// `ui_manufacturer` in its `aircraft.cfg`.
+    pub maker: Option<String>,
+    /// `ui_type` in its `aircraft.cfg`.
+    pub model: Option<String>,
+    /// `A:ATC ID`.
+    pub tail: Option<String>,
 }
 
 /// The loaded aircraft, by the part of its `aircraft.cfg` path that names its folder and
@@ -130,7 +168,9 @@ pub const MENU_UNIT: &str = "sim-service";
 pub struct SimSlice {
     pub stage: Stage,
     pub page: MenuPage,
-    pub aircraft: Option<Aircraft>,
+    #[serde(rename = "where")]
+    pub place: Place,
+    pub aircraft: Option<NamedAircraft>,
     /// `Pause_EX1`'s flags, 0 when unpaused.
     pub pause: u32,
     /// How the run that ended last ended.

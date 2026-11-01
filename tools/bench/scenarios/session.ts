@@ -6,11 +6,13 @@
 
 import assert from "node:assert/strict"
 import fs from "node:fs"
+import { type AddressInfo, createServer, type Socket } from "node:net"
 import path from "node:path"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import type { Setting } from "../../../src/engines/messages/ts/clients/Setting.ts"
+import type { NetSlice } from "../../../src/engines/messages/ts/net/NetSlice.ts"
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
 import { BenchRun, type Core, type CoreOptions, type Stub } from "../cores.ts"
 import { type Aircraft, BARON, load as loadFlight, PA24, toMenu as endFlight } from "../flights.ts"
@@ -193,10 +195,11 @@ test("a pilot flying who leaves the session in preflight, with the other at the 
   await load(a, BARON)
   await until(b, (s) => s.preflight.phase === "running", "preflight running")
   await a.app.ok("session.leave")
-  let s = await until(b, (s) => s.pf === s.me && s.members.length === 1, "control, and the leaver gone", 15_000)
+  await until(b, (s) => s.pf === s.me && s.members.length === 1, "control, and the leaver gone", 15_000)
   await load(b, BARON)
-  s = await until(b, (s) => me(s)?.in_flight === true, "the new pilot flying in the flight")
-  assert.equal(s.preflight.phase, "running")
+  // The phase waits on the sim's answer to whether the aircraft is on the ground, a moment after
+  // the session has its aircraft and the pilot is in the flight.
+  await until(b, (s) => me(s)?.in_flight === true && s.preflight.phase === "running", "the new pilot flying in the flight, with preflight running")
   await untilFrozen(b, true)
 })
 
@@ -505,4 +508,109 @@ test("the settings command refuses a display name over 20 characters from any ap
   assert.match((await set("x".repeat(21))) ?? "", /doesn't fit session\.name/)
   await sleep(200)
   assert.equal(name()!.value, longest, "the refused name changed nothing")
+})
+
+/** A port on 127.0.0.1 nothing listens on, which refuses a fetch at once. */
+async function closedPort(): Promise<number> {
+  const server = createServer()
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
+  const { port } = server.address() as AddressInfo
+  await new Promise((resolve) => server.close(resolve))
+  return port
+}
+
+test("a wrong code shows why in the slice, and the next attempt clears it", { timeout: 60_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("session-refused", t)
+  const a = await pilot(run, net, "James")
+  const b = await pilot(run, net, "Adam")
+  await join(b.core, "ZZZZZZ", b.name)
+  const s = await until(b, (s) => s.refused !== null, "the refusal")
+  assert.deepEqual(s.refused, { on: "join", why: "no-code" })
+  assert.equal(s.attempt, null)
+  assert.equal(b.app.notifications().length, 0, "a refusal raises no notification")
+  assert.match((await b.app.command("session.copy-code")) ?? "", /There's no session/)
+
+  const code = await host(a.core, a.name)
+  await join(b.core, code, b.name)
+  await until(b, (s) => s.held && s.refused === null && s.attempt === null, "the session, with the refusal gone")
+})
+
+test("a join reaching the crew is an attempt until its first link, and a cancel stops it on this PC alone", { timeout: 60_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("session-cancel-dialing", t)
+  const a = await pilot(run, net, "James")
+  const b = await pilot(run, net, "Adam")
+  const code = await host(a.core, a.name)
+
+  await net.relays[0]!.cut(b.core.process.pid!, 60_000)
+  await join(b.core, code, b.name)
+  const dialing = await until(b, (s) => s.attempt?.dialing === true, "the join dialing")
+  assert.equal(dialing.attempt!.on, "join")
+  assert.equal(dialing.held, false, "the slice says no session is held until the first link")
+  await b.app.ok("session.cancel")
+  await until(b, (s) => s.attempt === null && !s.held, "the attempt stopped")
+  assert.equal(slice(b).refused, null)
+  await net.relays[0]!.cut(b.core.process.pid!, 0)
+  await sleep(1_000)
+  assert.equal(slice(a).members.length, 1, "the host heard of nothing")
+  assert.match((await b.app.command("session.cancel")) ?? "", /No Host or Join is running/)
+
+  // A cancelled join leaves nothing that stops the next attempt.
+  await join(b.core, code, b.name)
+  await until(b, (s) => s.held && s.members.length === 2, "the next join's session")
+})
+
+test("a cancel stops an attempt waiting on the backend", { timeout: 30_000 }, async (t) => {
+  // A backend that takes the connection and never answers.
+  const silent = createServer()
+  await new Promise<void>((resolve) => silent.listen(0, "127.0.0.1", resolve))
+  t.after(() => silent.close())
+  const sockets: Socket[] = []
+  silent.on("connection", (socket) => sockets.push(socket))
+  t.after(() => sockets.forEach((socket) => socket.destroy()))
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("session-cancel-asking", t)
+  const a = await pilot(run, net, "James", { settings: { "network.backend": `http://127.0.0.1:${(silent.address() as AddressInfo).port}` } })
+  await a.app.ok("clients.set-setting", { key: "session.name", value: a.name })
+  await a.app.ok("session.host")
+  const asking = await until(a, (s) => s.attempt !== null, "the attempt")
+  assert.deepEqual(asking.attempt, { on: "host", dialing: false })
+  await a.app.ok("session.cancel")
+  await until(a, (s) => s.attempt === null, "the attempt stopped")
+  assert.equal(slice(a).refused, null)
+})
+
+test("no answer from the backend is our servers while a relay answers, and this PC offline while nothing does", { timeout: 60_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("session-offline", t)
+  const down = `http://127.0.0.1:${await closedPort()}`
+  const reach = async (p: Pilot, want: Partial<NetSlice>): Promise<void> => {
+    const watching = await FakeApp.open(p.core, ["network"])
+    t.after(() => watching.close())
+    await watching.until(() => {
+      const s = watching.slice<NetSlice>("network")
+      return s?.internet === want.internet && s?.servers === want.servers
+    }, `${p.name}: the network's slice saying ${JSON.stringify(want)}`)
+  }
+  const refusal = async (p: Pilot): Promise<SessionSlice["refused"]> => {
+    await p.app.ok("clients.set-setting", { key: "session.name", value: p.name })
+    await p.app.ok("session.host")
+    return (await until(p, (s) => s.refused !== null, "the refusal", 15_000)).refused
+  }
+
+  const up = await pilot(run, net, "Rosa")
+  await reach(up, { internet: true, servers: "reachable" })
+
+  const servers = await pilot(run, net, "James", { settings: { "network.backend": down } })
+  await reach(servers, { internet: true, servers: "unreachable" })
+  assert.deepEqual(await refusal(servers), { on: "host", why: "servers" })
+
+  const offline = await pilot(run, net, "Adam", { settings: { "network.backend": down, "network.relays": [{ url: down, token: "t", cap: 1 }] } })
+  await reach(offline, { internet: false, servers: "unreachable" })
+  assert.deepEqual(await refusal(offline), { on: "host", why: "offline" })
 })

@@ -104,14 +104,18 @@ fn p08s_load_is_one_loading_one_ready_to_fly_and_one_flying() {
         ],
     );
     let starting = Changes {
-        steps: 1,
+        steps: 2,
         entered: vec![Stage::Starting],
     };
     assert_eq!(
         menu, starting,
-        "the main menu's AircraftLoaded change nothing"
+        "the main menu's AircraftLoaded changes only the selected aircraft, once"
     );
     assert_eq!(sim.aircraft, None);
+    assert_eq!(
+        sim.selected.as_ref().map(|a| a.path.as_str()),
+        Some("pa24-250/presets/a2a/pa24-250")
+    );
 
     let load = feed(
         &mut sim,
@@ -208,8 +212,13 @@ fn aircraft_loaded_around_one_load_moves_no_stage() {
         ],
     );
     let entered = vec![Stage::Loading, Stage::ReadyToFly, Stage::Flying];
-    assert_eq!(load, Changes { steps: 4, entered });
+    assert_eq!(load, Changes { steps: 6, entered });
     assert_eq!(sim.aircraft.unwrap().path, "pa24-250/presets/a2a/pa24-250");
+    assert_eq!(
+        sim.selected.unwrap().path,
+        "bksq-aircraft-baronpropress",
+        "what the sim last loaded, whatever the load"
+    );
 }
 
 /// A core that finds the sim already running learns where it is from the menu script's
@@ -227,12 +236,24 @@ fn the_main_menus_master_page_leaves_starting_for_menu() {
         ],
     );
     let entered = vec![Stage::Starting, Stage::Menu];
-    assert_eq!(changes, Changes { steps: 2, entered });
+    assert_eq!(changes, Changes { steps: 3, entered });
     assert_eq!(sim.page, MenuPage::Main);
     assert_eq!(
         sim.aircraft, None,
         "the main menu's aircraft isn't the pilot's"
     );
+    assert!(sim.selected.is_some(), "the apps name it all the same");
+}
+
+#[test]
+fn the_world_maps_page_leaves_starting_for_menu() {
+    let mut sim = SimAwareness::default();
+    feed(
+        &mut sim,
+        vec![found(FIRST), Signal::Page(MenuPage::WorldMap)],
+    );
+    assert_eq!(sim.stage, Stage::Menu);
+    assert_eq!(sim.page, MenuPage::WorldMap);
 }
 
 #[test]
@@ -247,7 +268,7 @@ fn a_flights_master_page_leaves_starting_for_flying_in_the_states_aircraft() {
         ],
     );
     let entered = vec![Stage::Starting, Stage::Flying];
-    assert_eq!(changes, Changes { steps: 2, entered });
+    assert_eq!(changes, Changes { steps: 3, entered });
     assert_eq!(sim.aircraft.unwrap().path, "pa24-250/presets/a2a/pa24-250");
 }
 

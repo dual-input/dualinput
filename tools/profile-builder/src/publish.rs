@@ -79,7 +79,9 @@ pub(crate) fn publish(
         write_whole(&jekyll, b"")?;
     }
     for (path, b) in built {
-        let (Some(bundle), Some(hash), Some(level)) = (b.bundle, b.hash, b.level) else {
+        let (Some(bundle), Some(hash), Some(level), Some(shown)) =
+            (b.bundle, b.hash, b.level, b.shown)
+        else {
             continue;
         };
         if level > released {
@@ -99,6 +101,7 @@ pub(crate) fn publish(
                 hash,
                 published: now.to_string(),
                 variants: b.covers.into_iter().flat_map(|v| v.paths).collect(),
+                shown,
             },
         );
     }
@@ -111,7 +114,7 @@ mod tests {
 
     use profile_build::STACK;
 
-    const BARON: &str = "name: A\nmaturity: stable\nauthors: Dual Input\naircraft:\n  variants:\n    press: bksq-aircraft-baronpropress\n";
+    const BARON: &str = "maker: M\nname: A\nmaturity: stable\nauthors: Dual Input\naircraft:\n  variants:\n    press: bksq-aircraft-baronpropress\n";
 
     /// A folder of its own under the PC's temporary folder, empty.
     fn scratch(name: &str) -> std::path::PathBuf {

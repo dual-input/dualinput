@@ -37,6 +37,7 @@ fn with_compiler(f: impl FnOnce(&mut Compiler) + Send + 'static) {
 }
 
 const PROFILE: &str = "\
+maker: M
 name: A
 maturity: stable
 authors: Dual Input
@@ -101,7 +102,7 @@ fn a_function_reading_a_key_one_variant_lacks_fails_at_its_line() {
         assert!(built.bundle.is_none());
         let e = built.report.errors().next().expect("an error");
         assert_eq!(e.code, "TS2339", "{}", built.report);
-        assert_eq!((e.at.line, e.at.column), (20, 32), "{}", built.report);
+        assert_eq!((e.at.line, e.at.column), (21, 32), "{}", built.report);
         assert!(e.message.ends_with("(on base)"), "{}", e.message);
     });
 }
@@ -126,7 +127,7 @@ fn a_wrong_pace_in_a_chain_fails_the_type_check() {
 fn a_write_function_types_what_the_sandbox_runs_and_nothing_it_lacks() {
     let profile = |body: &str| {
         format!(
-            "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => {{\n        {body}\n      }}\n"
+            "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => {{\n        {body}\n      }}\n"
         )
     };
     let fine = [

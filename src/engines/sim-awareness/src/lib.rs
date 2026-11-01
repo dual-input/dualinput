@@ -119,6 +119,10 @@ pub struct SimAwareness {
     /// The loaded aircraft: the last `AircraftLoaded` heard while Loading, or the
     /// `AircraftLoaded` state's answer when Starting gave way to Ready to fly or Flying.
     pub aircraft: Option<Aircraft>,
+    /// The aircraft the sim last loaded, in a load or not, as the main menu loads the one it has
+    /// selected, which the apps name before any flight (measured on MSFS 2024, 2026-10-07,
+    /// record/areas/flight-controls/log.md).
+    pub selected: Option<Aircraft>,
     /// Where the flight the sim service last read departed.
     pub departure: Option<Departure>,
     /// `Pause_EX1`'s flags, 0 when unpaused.
@@ -189,11 +193,15 @@ impl SimAwareness {
                 // The main menu loads an aircraft of its own, and Developer Mode's Aircraft
                 // Selector, which Dual Input doesn't support, loads one in a flight, so only
                 // an `AircraftLoaded` inside a load names the pilot's aircraft.
+                self.selected = aircraft(path);
                 if self.stage == Stage::Loading {
-                    self.aircraft = aircraft(path);
+                    self.aircraft = self.selected.clone();
                 }
             }
-            Signal::AircraftState(path) => self.held.state = aircraft(path),
+            Signal::AircraftState(path) => {
+                self.held.state = aircraft(path);
+                self.selected = self.held.state.clone();
+            }
             Signal::FlightLoaded => {
                 if matches!(self.stage, Stage::Starting | Stage::Menu | Stage::Flying) {
                     self.stage = Stage::Loading;
@@ -228,7 +236,7 @@ impl SimAwareness {
                 // 03-sim-seam-and-wasm-module.md, "Leaving Starting").
                 if self.stage == Stage::Starting {
                     match page {
-                        MenuPage::Main => self.stage = Stage::Menu,
+                        MenuPage::Main | MenuPage::WorldMap => self.stage = Stage::Menu,
                         MenuPage::InGame => self.fly(Stage::Flying),
                         MenuPage::Unknown => {}
                     }

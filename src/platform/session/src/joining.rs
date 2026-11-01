@@ -5,14 +5,16 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
 
-use clients::{ClientJoined, ClientLeft, Clients, Landing, Level};
+use clients::{ClientJoined, ClientLeft, Clients};
 use kernel::{Cx, Exit, Job, JobId, TimerId};
 use messages::backend::{Kind, Older};
 use messages::clients::component;
 use messages::hex;
 use messages::net::{PilotId, Relay};
-use messages::session::{self as wire, Join, MemberEntry, Preflight, Ready};
-use network::{Answer, Asked, BackendAnswered, Me, Member, Refusal};
+use messages::session::{
+    self as wire, Attempt, Attempting, Join, MemberEntry, Preflight, Ready, Refused, RefusedWhy,
+};
+use network::{Answer, Asked, BackendAnswered, Me, Member, Network, Refusal};
 use sim_service::SimAwareness;
 
 use crate::file::{self, SessionFile};
@@ -28,6 +30,63 @@ const CLOSE_AFTER_PASSING: Duration = Duration::from_secs(1);
 pub(crate) enum Asking {
     Host { session: String, me: Me },
     Join { code: String, me: Me },
+}
+
+impl Asking {
+    fn on(&self) -> Attempting {
+        match self {
+            Asking::Host { .. } => Attempting::Host,
+            Asking::Join { .. } => Attempting::Join,
+        }
+    }
+}
+
+impl Session {
+    /// The Host or Join running on this PC, as the apps show it.
+    pub(crate) fn attempt(&self) -> Option<Attempt> {
+        if let Some(asking) = &self.asking {
+            return Some(Attempt {
+                on: asking.on(),
+                dialing: false,
+            });
+        }
+        self.held.as_ref().filter(|h| h.dialing).map(|_| Attempt {
+            on: Attempting::Join,
+            dialing: true,
+        })
+    }
+}
+
+/// A refusal with nothing to fill in.
+fn refused(on: Attempting, why: RefusedWhy) -> Refused {
+    Refused {
+        on,
+        why,
+        theirs: None,
+        yours: None,
+        until: None,
+    }
+}
+
+/// How the apps name what the backend refused. Two builds of one version, as only development
+/// has, and a refusal the backend words itself, such as a signature it couldn't match, are
+/// nothing a pilot can act on, so they read as our servers not working, with the cause in the log.
+fn refused_by_backend(on: Attempting, refusal: &Refusal) -> Refused {
+    let versions = |why, theirs: &String| Refused {
+        theirs: Some(theirs.clone()),
+        yours: Some(messages::VERSION.into()),
+        ..refused(on, why)
+    };
+    match refusal {
+        Refusal::NoSuchCode => refused(on, RefusedWhy::NoCode),
+        Refusal::OtherVersion(Older::Mine, theirs) => versions(RefusedWhy::YouOlder, theirs),
+        Refusal::OtherVersion(Older::Theirs, theirs) => versions(RefusedWhy::HostOlder, theirs),
+        Refusal::TooManyWrongCodes(until) => Refused {
+            until: Some(until.clone()),
+            ..refused(on, RefusedWhy::TooMany)
+        },
+        Refusal::OtherHash | Refusal::Other(_) => refused(on, RefusedWhy::Servers),
+    }
 }
 
 /// The session file's write: the core opens its links only once the file holds what it last
@@ -77,7 +136,7 @@ pub(crate) fn host(me: &mut Session, (): (), cx: &mut Cx) -> Result<(), String> 
     let session = cx.new_id().to_string();
     tracing::info!(session, "this pilot hosts a session");
     // A refusal speaks of the attempt it refused, so the next attempt clears it.
-    clients::clear_notification(cx, "refused");
+    me.refused = None;
     me.asking = Some(Asking::Host {
         session: session.clone(),
         me: my.clone(),
@@ -95,7 +154,7 @@ pub(crate) fn join(me: &mut Session, args: Join, cx: &mut Cx) -> Result<(), Stri
     }
     let my = me_now(cx)?;
     tracing::info!(code, "this pilot joins a session");
-    clients::clear_notification(cx, "refused");
+    me.refused = None;
     me.asking = Some(Asking::Join {
         code: code.clone(),
         me: my.clone(),
@@ -127,6 +186,24 @@ fn clipboard_read(me: &mut Session, job: JobId, result: Result<Vec<u8>, String>,
         Ok(_) => tracing::info!("the clipboard holds no invite code"),
         Err(error) => tracing::warn!(error, "the clipboard couldn't be read"),
     }
+}
+
+/// `session.cancel`: stops the Host or Join running on this PC. No other pilot hears of it, since
+/// the backend lists a joiner only at its first link, and a host whose code never reached anyone
+/// lapses from the backend in 30 minutes.
+pub(crate) fn cancel(me: &mut Session, (): (), cx: &mut Cx) -> Result<(), String> {
+    if me.asking.take().is_some() {
+        tracing::info!("this pilot cancelled while the backend hadn't answered");
+        network::cancel(cx);
+        me.settle(cx);
+        return Ok(());
+    }
+    if me.held.as_ref().is_some_and(|h| h.dialing) {
+        tracing::info!("this pilot cancelled a join that hadn't reached the crew");
+        me.leave(cx, false);
+        return Ok(());
+    }
+    Err("No Host or Join is running".into())
 }
 
 /// `session.copy-code`: the session card's Copy, which writes the invite code to the clipboard
@@ -201,32 +278,26 @@ pub(crate) fn answered(me: &mut Session, answered: &BackendAnswered, cx: &mut Cx
             );
         }
         (Asked::Host | Asked::Join, Answer::Refused(why)) => {
-            let code = match me.asking.take() {
-                Some(Asking::Join { code, .. }) => code,
-                _ => String::new(),
+            let Some(asking) = me.asking.take() else {
+                return;
             };
-            let text = match why {
-                Refusal::NoSuchCode => format!("No session has the code {code}"),
-                Refusal::OtherVersion(Older::Mine) => "Your Dual Input is older than the session's. Update Dual Input, then join again".into(),
-                Refusal::OtherVersion(Older::Theirs) => "The session runs an older Dual Input than yours. Its host updates Dual Input and starts a new session".into(),
-                Refusal::OtherHash => "The session runs another build of Dual Input".into(),
-                Refusal::TooManyWrongCodes => "Too many wrong codes came from this connection. Wait an hour, then try again".into(),
-                Refusal::Other(words) => format!("The backend refused: {words}"),
-            };
-            tracing::info!(text, "the backend refused the session");
-            clients::notify(cx, "refused", Level::Warning, &text, None, Landing::Session);
+            tracing::info!(?why, "the backend refused the session");
+            me.refused = Some(refused_by_backend(asking.on(), why));
         }
         (Asked::Host | Asked::Join, Answer::NoAnswer(why)) => {
-            me.asking = None;
+            let Some(asking) = me.asking.take() else {
+                return;
+            };
             tracing::warn!(why, "the backend didn't answer");
-            clients::notify(
-                cx,
-                "refused",
-                Level::Warning,
-                "Dual Input's server didn't answer. Check your connection, then try again",
-                None,
-                Landing::Session,
-            );
+            // The network holds this answer for its check, so `internet` is what it found just
+            // now.
+            let offline = cx.read::<Network>().internet() == Some(false);
+            let why = if offline {
+                RefusedWhy::Offline
+            } else {
+                RefusedWhy::Servers
+            };
+            me.refused = Some(refused(asking.on(), why));
         }
         // The network looks the code up when no member answered a core back from a restart:
         // a session no member other than this core still holds is over.
@@ -242,6 +313,10 @@ pub(crate) fn answered(me: &mut Session, answered: &BackendAnswered, cx: &mut Cx
             };
             if !held_by_others {
                 tracing::info!("no other member holds the session any more, so it ended");
+                // A join still reaching the crew was found by a code that has since lapsed.
+                if me.held.as_ref().is_some_and(|h| h.dialing) {
+                    me.refused = Some(refused(Attempting::Join, RefusedWhy::NoCode));
+                }
                 me.leave(cx, false);
             }
         }
@@ -342,7 +417,11 @@ struct Start {
 /// The session starts for this core: its own keys, `SessionStarted`, the announcement, and
 /// the session file, after which the network opens it.
 fn start_with(me: &mut Session, start: Start, cx: &mut Cx) {
+    // A core back from a restart returns to a session the pilot joined long ago, so it's no
+    // attempt, whoever answers its dials.
+    let dialing = !start.host && start.restart == 0 && !start.crew.is_empty();
     me.held = Some(Held {
+        dialing,
         id: start.session,
         code: start.code,
         me: start.me.pilot,
@@ -601,4 +680,41 @@ fn delete_file(cx: &Cx) {
 fn exit(cx: &Cx) {
     clients::bye(cx);
     cx.out(Exit);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_refusal_names_whose_version_is_older_and_when_the_pause_ends() {
+        let you_older = refused_by_backend(
+            Attempting::Join,
+            &Refusal::OtherVersion(Older::Mine, "0.3.0".into()),
+        );
+        assert_eq!(you_older.why, RefusedWhy::YouOlder);
+        assert_eq!(you_older.theirs.as_deref(), Some("0.3.0"));
+        assert_eq!(you_older.yours.as_deref(), Some(messages::VERSION));
+        let host_older = refused_by_backend(
+            Attempting::Join,
+            &Refusal::OtherVersion(Older::Theirs, "0.1.0".into()),
+        );
+        assert_eq!(host_older.why, RefusedWhy::HostOlder);
+        let too_many = refused_by_backend(
+            Attempting::Join,
+            &Refusal::TooManyWrongCodes("2026-11-01T15:00:00.000Z".into()),
+        );
+        assert_eq!(too_many.why, RefusedWhy::TooMany);
+        assert_eq!(too_many.until.as_deref(), Some("2026-11-01T15:00:00.000Z"));
+    }
+
+    #[test]
+    fn a_refusal_no_pilot_can_act_on_reads_as_our_servers() {
+        for refusal in [Refusal::OtherHash, Refusal::Other("bad signature".into())] {
+            assert_eq!(
+                refused_by_backend(Attempting::Host, &refusal).why,
+                RefusedWhy::Servers
+            );
+        }
+    }
 }

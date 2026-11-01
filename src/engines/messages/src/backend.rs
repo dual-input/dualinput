@@ -100,13 +100,14 @@ pub enum LookedUp {
     },
     /// No session has the code, or none of its members renewed within 30 minutes.
     NoSuchCode,
-    /// The session's host runs another version of Dual Input, and `older` says whose is
-    /// older, so the pilot knows who should update.
-    OtherVersion { older: Older },
+    /// The session's host runs another version of Dual Input, `theirs`, and `older` says whose
+    /// is older, so the pilot knows who should update.
+    OtherVersion { older: Older, theirs: String },
     /// The same version, built from other messages, as two development builds can be.
     OtherHash,
-    /// This address got 20 codes wrong this hour.
-    TooManyWrongCodes,
+    /// This address got 20 codes wrong this hour, and `until` is when the next begins, in UTC, as
+    /// `2026-10-20T15:00:00.000Z`.
+    TooManyWrongCodes { until: String },
 }
 
 /// Whose version is older, as the core that looked the code up sees it.

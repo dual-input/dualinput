@@ -280,6 +280,68 @@ pub struct SessionSlice {
     pub share: Option<Vec<String>>,
     /// The role keys this pilot can claim, each with its label and its holder.
     pub roles: Vec<Role>,
+    /// The Host or Join running on this PC. A join stays an attempt until its first link is up,
+    /// which is when the slice starts saying a session is held
+    /// (record/areas/interface/decisions.md, "Host and Join answer inside the start card").
+    pub attempt: Option<Attempt>,
+    /// Why the last Host or Join was refused, until the next starts.
+    pub refused: Option<Refused>,
+}
+
+/// What a pilot tried.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "kebab-case")]
+#[ts(export, export_to = "session/")]
+pub enum Attempting {
+    Host,
+    Join,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "session/")]
+pub struct Attempt {
+    pub on: Attempting,
+    /// Whether the backend found a join's code, and it's reaching the crew, which never gives up
+    /// on its own, rather than waiting on the backend.
+    pub dialing: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "session/")]
+pub struct Refused {
+    pub on: Attempting,
+    pub why: RefusedWhy,
+    /// The host's version, when the versions differ.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub theirs: Option<String>,
+    /// This core's version, when the versions differ.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub yours: Option<String>,
+    /// When too many wrong codes stop being counted against this PC, in UTC, as
+    /// `2026-10-20T15:00:00.000Z`, which an app shows in the pilot's own time.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub until: Option<String>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "kebab-case")]
+#[ts(export, export_to = "session/")]
+pub enum RefusedWhy {
+    /// None of our servers answered this PC.
+    Offline,
+    /// The backend gave no answer it could use, while something of ours answered this PC.
+    Servers,
+    /// No session has the code.
+    NoCode,
+    /// This pilot's version is older than the host's.
+    YouOlder,
+    /// The host's version is older than this pilot's.
+    HostOlder,
+    /// This PC's address got too many codes wrong this hour.
+    TooMany,
 }
 
 /// A member as the slice shows it.
@@ -340,6 +402,9 @@ pub mod command {
     /// The EFB app's code box was selected: the core reads the clipboard, and joins with the
     /// code it holds, if it holds one. It takes no arguments.
     pub const JOIN_FROM_CLIPBOARD: &str = "session.join-from-clipboard";
+    /// Stops the Host or Join running on this PC, which no other pilot hears of. It takes no
+    /// arguments.
+    pub const CANCEL: &str = "session.cancel";
     /// The session card's Copy: the core writes the invite code to the clipboard, which it can
     /// do from any app. It takes no arguments.
     pub const COPY_CODE: &str = "session.copy-code";

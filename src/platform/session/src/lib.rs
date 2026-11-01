@@ -133,6 +133,8 @@ pub struct Session {
     pub(crate) mine: BTreeMap<u16, Vec<u8>>,
     /// Host or Join, waiting for the backend's answer.
     pub(crate) asking: Option<joining::Asking>,
+    /// Why the last Host or Join was refused, until the next starts.
+    pub(crate) refused: Option<wire::Refused>,
     pub(crate) held: Option<Held>,
     /// The desktop app's open sockets, while its window is open.
     pub(crate) desktops: BTreeSet<u64>,
@@ -149,6 +151,9 @@ pub struct Session {
 
 /// The session this core holds.
 pub(crate) struct Held {
+    /// Whether this is a join whose first link hasn't come up, which the apps show as an attempt
+    /// rather than a session.
+    pub(crate) dialing: bool,
     pub(crate) id: String,
     pub(crate) code: String,
     pub(crate) me: PilotId,
@@ -392,6 +397,7 @@ pub fn register(r: &mut Registry) {
             wire::command::JOIN_FROM_CLIPBOARD,
             joining::join_from_clipboard,
         )
+        .command(wire::command::CANCEL, joining::cancel)
         .command(wire::command::COPY_CODE, joining::copy_code)
         .command(wire::command::LEAVE, |me, (): (), cx| {
             me.leave(cx, false);
@@ -693,6 +699,7 @@ mod tests {
         register(&mut r);
         let declared = std::mem::take(&mut r.state_mut::<Session>().declared);
         let mut held = Held {
+            dialing: false,
             id: String::new(),
             code: "KX7P3M".into(),
             me: ME,

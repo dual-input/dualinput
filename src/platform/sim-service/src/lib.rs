@@ -20,7 +20,7 @@ mod connections;
 mod module;
 mod seam;
 
-pub use aircraft::{AircraftChanged, USER_CFG, aircraft_awareness};
+pub use aircraft::{AircraftChanged, PackageFound, USER_CFG, aircraft_awareness, find_package};
 pub use announce::announce;
 pub use calls::{ModuleCalls, Sim, SimCx, SimUnit};
 pub use module::{Status, hold};

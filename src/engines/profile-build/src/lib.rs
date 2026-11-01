@@ -8,8 +8,8 @@
 //! missing clock are for profiles' scripts, not for our own compiler.
 
 use profile_engine::{
-    Compiled, Diagnostic, Files, LEVEL, Program, Report, TypeError, Variant, check, hash, place,
-    program, read, source, write,
+    Compiled, Diagnostic, Files, LEVEL, Program, Report, Shown, TypeError, Variant, check, hash,
+    place, program, read, source, write,
 };
 use rquickjs::{CatchResultExt, Context, Function, Module, Runtime};
 
@@ -135,6 +135,8 @@ pub struct Built {
     pub hash: Option<String>,
     pub level: Option<u32>,
     pub covers: Vec<Variant>,
+    /// What the EFB app shows of it, once it's built.
+    pub shown: Option<Shown>,
     pub report: Report,
 }
 
@@ -199,6 +201,7 @@ pub fn build(files: &impl Files, path: &str, compiler: &mut Compiler) -> Built {
         hash: Some(hash(&bundle)),
         bundle: Some(bundle),
         level: Some(level),
+        shown: Some(Shown::of(&profile)),
         covers: profile.aircraft.variants,
         report,
     }
@@ -265,7 +268,7 @@ mod tests {
     #[test]
     fn a_script_quickjs_ng_cant_parse_fails_at_its_place() {
         let profile = One(
-            "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => write(L('X'), value)\n",
+            "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => write(L('X'), value)\n",
         );
         let p = program(&source(&profile, "p.yaml").expect("loads"), LEVEL);
         let broken = Compiled {
@@ -273,7 +276,7 @@ mod tests {
         };
         let report = parses(&p, &broken);
         let e = report.errors().next().expect("an error");
-        assert_eq!((e.code.as_str(), e.at.line), ("quickjs", 11), "{report}");
+        assert_eq!((e.code.as_str(), e.at.line), ("quickjs", 12), "{report}");
         let fine = Compiled {
             scripts: vec!["(value) => write(L('X'), value)".into()],
         };

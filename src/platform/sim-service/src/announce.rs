@@ -9,7 +9,7 @@ use std::time::Duration;
 use clients::{Clients, Landing, Level};
 use kernel::{Cx, TimerId, View};
 use messages::clients::{ANNOUNCE, Announce};
-use messages::sim::SimSlice;
+use messages::sim::{Place, SimSlice};
 use sim_awareness::SimAwareness;
 use sim_client::Op;
 use simconnect_types::SIMCONNECT_COMM_BUS_BROADCAST_TO_JS;
@@ -107,7 +107,8 @@ impl SimService {
         SimSlice {
             stage: awareness.stage,
             page: awareness.page,
-            aircraft: awareness.aircraft.clone(),
+            place: Place::of(awareness.stage, awareness.page),
+            aircraft: me.named_aircraft(awareness),
             pause: awareness.pause,
             ended: awareness.ended,
             module: me.module.status,

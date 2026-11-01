@@ -113,12 +113,14 @@ export class Core {
   /** Starts a core on the data folder `data`, and ends it again if it doesn't answer as a bench core of this tree. */
   static async start(data: string, options: CoreOptions = {}): Promise<Core> {
     fs.mkdirSync(data, { recursive: true })
-    // A core no scenario gave a profiles' site fetches from a closed port on this PC, so no
-    // bench core reaches the real site on the internet. A settings file the scenario wrote
-    // itself, or a core before this one, keeps its keys.
+    // A core no scenario gave a profiles' site, a backend, or relays asks a closed port on this
+    // PC, as every core checks what it reaches from its start, so no bench core reaches our real
+    // servers on the internet, and one given no `UserCfg.opt` reads none, so it searches no
+    // package of this PC's. A settings file the scenario wrote itself, or a core before this one,
+    // keeps its keys.
     const file = path.join(data, "settings.json")
     const written = fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, "utf8")) as Record<string, unknown>) : {}
-    const settings = { "profiles.site": OFFLINE_SITE, ...written, ...options.settings }
+    const settings = { ...OFFLINE_SETTINGS, ...written, ...options.settings }
     fs.writeFileSync(file, JSON.stringify(settings, null, 2))
     // A core started on this folder before, and killed, left its port behind.
     const portFile = path.join(data, "bench-port")
@@ -289,8 +291,11 @@ export async function announcing(run: BenchRun, name: string, options: CoreOptio
   return core
 }
 
-/** A port nothing listens on, where a core finds no profiles' site. */
-export const OFFLINE_SITE = "http://127.0.0.1:1"
+/** A port nothing listens on, where a core finds no server. */
+const OFFLINE_SERVER = "http://127.0.0.1:1"
+
+/** What every bench core's `settings.json` holds unless a scenario gave it its own. */
+export const OFFLINE_SETTINGS = { "profiles.site": OFFLINE_SERVER, "network.backend": OFFLINE_SERVER, "network.relays": [], "sim.user-cfg": "no-user-cfg.opt" }
 
 export type CoreOptions = {
   /** The core's `settings.json`, written into its data folder before it starts. */

@@ -24,7 +24,7 @@ pub use format::{
     Aircraft, Count, EventEntry, Maturity, Owner, Pace, Profile, Resolved, StateEntry, Steps,
     Variant, Watch, Write,
 };
-pub use index::{Index, IndexBundle, IndexProfile, covers};
+pub use index::{Index, IndexBundle, IndexProfile, Shown, covers};
 pub use levels::{declarations, schema};
 pub use names::{Arg, Name};
 pub use program::{Compiled, Program, ProgramFile, TypeError};

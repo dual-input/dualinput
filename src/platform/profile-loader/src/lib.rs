@@ -17,17 +17,20 @@ mod local;
 use std::collections::{BTreeMap, BTreeSet};
 
 use clients::{Clients, ClientsUnit, SettingChanged, SettingDef};
-use kernel::{Cx, JobId, Moment, Registry, Started};
+use kernel::{Cx, JobId, Moment, Registry, Started, View};
 use messages::clients::SettingKind;
-use messages::profiles::{BUNDLE, Bundle, PIN, Pin};
+use messages::profiles::{
+    self as wire, BUNDLE, Bundle, LoadedProfile, PIN, Pick, Pin, ProfilesSlice, SupportedAircraft,
+};
 use messages::session::{Phase, Severity};
 use messages::{hex, unhex};
-use profile_engine::{Index, Profile, Resolved};
+use profile_engine::{Index, IndexBundle, Maturity, Profile, Resolved};
 use serde_json::json;
 use session::{
     ControlPassed, FlightChanged, Found, KeyChanged, Session, SessionEnded, SessionStarted,
     SessionUnit, WriteKeys, clear_match, set_match,
 };
+use sim_service::{PackageFound, SimAwareness};
 
 /// The development setting that names the profiles' site, which the bench points at its own.
 pub const SITE: &str = "profiles.site";
@@ -84,6 +87,9 @@ pub struct Profiles {
     /// again in a later one if the session crate refused it.
     asked: Option<(u64, Option<Pin>)>,
     load: Load,
+    /// Whether a package on disk holds each folder a published profile covers, by the folder in
+    /// lowercase, as far as the sim service has answered.
+    installed: BTreeMap<String, bool>,
 }
 
 impl Profiles {
@@ -108,6 +114,9 @@ pub fn register(r: &mut Registry) {
         .on::<ControlPassed>(|me, _, cx| me.update(cx))
         .on::<FlightChanged>(Profiles::flight_changed)
         .on::<SettingChanged>(Profiles::setting_changed)
+        .on::<PackageFound>(Profiles::package_found)
+        .command(wire::command::PICK, Profiles::pick)
+        .client_state(wire::SLICE, Profiles::slice)
         .session_key(PIN)
         .match_item(BUNDLE, compare);
     me.setting(
@@ -169,9 +178,80 @@ impl Profiles {
         }
     }
 
+    fn package_found(me: &mut Profiles, found: &PackageFound, _: &mut Cx) {
+        me.installed.insert(found.folder.clone(), found.installed);
+    }
+
+    /// `profiles.pick`, from the aircraft picker.
+    // TODO: load the aircraft once the menu script makes the world map's requests,
+    // `game/aircraft/aircraftList` and `game/aircraft/configurator/setAircraftForConfigurator`.
+    fn pick(_: &mut Profiles, pick: Pick, _: &mut Cx) -> Result<(), String> {
+        tracing::info!(pick.maker, pick.model, "the aircraft picker can't load yet");
+        Err("Dual Input can't load an aircraft yet".into())
+    }
+
+    /// The slice `profiles`.
+    fn slice(me: &Profiles, view: &View) -> ProfilesSlice {
+        let selected = view.read::<SimAwareness>().selected.as_ref();
+        ProfilesSlice {
+            loaded: selected
+                .and_then(|aircraft| me.maturity_of(&aircraft.path))
+                .map(|maturity| LoadedProfile {
+                    maturity: shown(maturity),
+                }),
+            supported: me
+                .published()
+                .map(|b| SupportedAircraft {
+                    maker: b.shown.maker.clone(),
+                    model: b.shown.name.clone(),
+                    maturity: shown(b.shown.maturity),
+                    installed: b
+                        .variants
+                        .iter()
+                        .any(|v| me.installed.get(&folder(v)) == Some(&true)),
+                })
+                .collect(),
+        }
+    }
+
+    /// Each bundle the index gives this core's level.
+    fn published(&self) -> impl Iterator<Item = &IndexBundle> {
+        self.cache
+            .index
+            .iter()
+            .flat_map(|index| &index.profiles)
+            .filter_map(|p| p.bundle_for(profile_engine::LEVEL))
+    }
+
+    /// The maturity of the profile a session would take for an aircraft, by the same order as
+    /// the pilot flying's choice: a local bundle first.
+    fn maturity_of(&self, aircraft: &str) -> Option<Maturity> {
+        self.local.maturity_of(aircraft).or_else(|| {
+            self.published()
+                .find(|b| b.covers(aircraft))
+                .map(|b| b.shown.maturity)
+        })
+    }
+
+    /// Asks the sim service about each folder a published profile covers that it hasn't been
+    /// asked about.
+    fn find_installed(&mut self, cx: &Cx) {
+        let folders: BTreeSet<String> = self
+            .published()
+            .flat_map(|b| &b.variants)
+            .map(|v| folder(v))
+            .filter(|f| !self.installed.contains_key(f))
+            .collect();
+        for folder in folders {
+            self.installed.insert(folder.clone(), false);
+            sim_service::find_package(cx, folder);
+        }
+    }
+
     /// Brings the pin, the load, and the match check's item up to date with the session, the
     /// cache, and the local folder. Every handler ends here.
     pub(crate) fn update(&mut self, cx: &mut Cx) {
+        self.find_installed(cx);
         let session = cx.read::<Session>();
         let aircraft = session
             .held()
@@ -458,6 +538,22 @@ fn compare(values: &[(String, Bundle)]) -> Option<Found> {
         words: "The pilots loaded different profiles".into(),
         note: None,
     })
+}
+
+/// The folder a variant is in, a preset's first part, in lowercase.
+fn folder(variant: &str) -> String {
+    variant
+        .split('/')
+        .next()
+        .unwrap_or(variant)
+        .to_ascii_lowercase()
+}
+
+fn shown(maturity: Maturity) -> wire::Maturity {
+    match maturity {
+        Maturity::Stable => wire::Maturity::Stable,
+        Maturity::Experimental => wire::Maturity::Experimental,
+    }
 }
 
 /// The site's address, with no `/` at its end.

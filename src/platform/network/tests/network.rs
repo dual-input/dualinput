@@ -6,8 +6,8 @@ use std::collections::BTreeMap;
 
 use clients::{SocketOut, SocketUp, Sockets};
 use kernel::{
-    CancelTimer, Cx, FIRST, Fetched, Input, JOBS, Kernel, Output, Registry, SetTimer, SourceId,
-    StartJob, TIMERS, TimerId, Work, first_input,
+    CancelTimer, Cx, FIRST, Fetched, Input, JOBS, Kernel, Method, Output, Registry, SetTimer,
+    SourceId, StartJob, TIMERS, TimerId, Work, first_input,
 };
 use messages::backend::{Kind, NewSession};
 use messages::clients::ToClient;
@@ -43,8 +43,10 @@ enum Act {
     Quit,
     Host,
     Join(String),
-    /// Says whether the PC reaches the internet, and whether the refused notification is up.
+    /// Says what the PC reaches, and whether the refused notification is up.
     Peek,
+    /// Stops waiting for the backend's answer.
+    Cancel,
     /// Opens with no crew under this code.
     OpenAs(String),
 }
@@ -116,12 +118,16 @@ impl Session {
             ),
             Act::Peek => {
                 let internet = cx.read::<Network>().internet();
+                let servers = cx.read::<Network>().servers();
                 let refused = cx
                     .read::<clients::Clients>()
                     .notification_up("network.refused")
                     .is_some();
-                cx.out(Saw(format!("internet={internet:?} refused={refused}")));
+                cx.out(Saw(format!(
+                    "internet={internet:?} servers={servers:?} refused={refused}"
+                )));
             }
+            Act::Cancel => network::cancel(cx),
             Act::Host => network::host(
                 cx,
                 network::Host {
@@ -223,7 +229,7 @@ impl Core {
             ),
         );
         // The clients crate's read of the username, as the core starts.
-        core.jobs.clear();
+        core.jobs.retain(|j| matches!(j.job.work, Work::Fetch(_)));
         core
     }
 
@@ -314,8 +320,25 @@ impl Core {
     }
 
     /// The fetch jobs started since the last call, as each one's method, URL, and job.
+    /// Each request to the backend that started since the last call.
     fn fetches(&mut self) -> Vec<(String, StartJob)> {
-        std::mem::take(&mut self.jobs)
+        self.started(Method::Post)
+    }
+
+    /// Each fetch of the check of what this PC reaches that started since the last call.
+    fn checks(&mut self) -> Vec<(String, StartJob)> {
+        self.started(Method::Get)
+    }
+
+    fn started(&mut self, method: Method) -> Vec<(String, StartJob)> {
+        let (these, others): (Vec<_>, Vec<_>) = std::mem::take(&mut self.jobs)
+            .into_iter()
+            .partition(|job| match &job.job.work {
+                Work::Fetch(f) => f.method == method,
+                other => panic!("only fetches should start: {other:?}"),
+            });
+        self.jobs = others;
+        these
             .into_iter()
             .map(|job| match &job.job.work {
                 Work::Fetch(f) => (format!("{:?} {}", f.method, f.url), job),
@@ -767,8 +790,27 @@ fn a_lookup_answers_with_the_session_or_why_not() {
 
     core.act(Act::Join("K7Q2XN".into()));
     let (_, job) = core.fetches().remove(0);
-    core.answer(&job, 200, r#"{"answer":"other-version","older":"mine"}"#);
-    assert_eq!(core.take().1, ["answered Join Refused(OtherVersion(Mine))"]);
+    core.answer(
+        &job,
+        200,
+        r#"{"answer":"other-version","older":"mine","theirs":"0.3.0"}"#,
+    );
+    assert_eq!(
+        core.take().1,
+        [r#"answered Join Refused(OtherVersion(Mine, "0.3.0"))"#]
+    );
+
+    core.act(Act::Join("K7Q2XQ".into()));
+    let (_, job) = core.fetches().remove(0);
+    core.answer(
+        &job,
+        200,
+        r#"{"answer":"too-many-wrong-codes","until":"2026-11-01T15:00:00.000Z"}"#,
+    );
+    assert_eq!(
+        core.take().1,
+        [r#"answered Join Refused(TooManyWrongCodes("2026-11-01T15:00:00.000Z"))"#]
+    );
 
     core.act(Act::Join("K7Q2XP".into()));
     let (_, job) = core.fetches().remove(0);
@@ -787,8 +829,24 @@ fn a_request_with_no_answer_in_10s_answers_no_answer() {
     core.advance(core.now + 10 * SECOND);
     assert_eq!(
         core.take().1,
+        Vec::<String>::new(),
+        "the answer waits for the check of what this PC reaches"
+    );
+    core.advance(core.now + 2 * SECOND);
+    assert_eq!(
+        core.take().1,
         [r#"answered Join NoAnswer("the backend didn't answer within 10s")"#]
     );
+}
+
+#[test]
+fn a_cancel_stops_waiting_for_the_backend() {
+    let mut core = Core::new();
+    core.act(Act::Join("K7Q2XM".into()));
+    core.fetches();
+    core.act(Act::Cancel);
+    core.advance(core.now + 20 * SECOND);
+    assert_eq!(core.take().1, Vec::<String>::new());
 }
 
 /// A joiner lists itself at its first `LinkUp`, renews every 10 minutes, and tells the
@@ -882,45 +940,89 @@ fn a_member_with_no_connection_for_30_minutes_is_counted_out() {
     assert!(core.take().1.contains(&"out".to_string()));
 }
 
-/// While a link is lost, each dial asks every relay for `/ping`: an answer means this PC
-/// reaches the internet, and none within 2s means it doesn't (record/areas/network/02-units.md,
-/// "What the pilot sees, and settings").
+/// From the core's start, in a session or not, the check asks the backend and each relay, and
+/// tells our servers out of reach from this PC offline by whether anything answered
+/// (record/areas/network/02-units.md, "What the pilot sees, and settings").
 #[test]
-fn a_dial_while_a_link_is_lost_checks_whether_the_internet_answers() {
+fn the_check_runs_from_the_cores_start_and_tells_our_servers_from_this_pc_offline() {
+    let mut core = Core::with_settings(Some(
+        r#"{"network.relays":[{"url":"http://relay.test/","token":"t","cap":0}]}"#,
+    ));
+    let peek = |core: &mut Core| {
+        core.act(Act::Peek);
+        core.take().1.pop().expect("the test unit should say")
+    };
+    assert_eq!(peek(&mut core), "internet=None servers=None refused=false");
+
+    let checks = core.checks();
+    let [(backend, backend_job), (relay, relay_job)] = &checks[..] else {
+        panic!("the backend and the relay should be asked: {checks:?}")
+    };
+    assert_eq!(backend, "Get https://api.dualinput.app/");
+    assert_eq!(relay, "Get http://relay.test/ping");
+    core.answer(backend_job, 405, "");
+    core.answer(relay_job, 200, "");
+    assert_eq!(
+        peek(&mut core),
+        "internet=Some(true) servers=Some(Reachable) refused=false"
+    );
+
+    // With every server answering, the next check waits 60s.
+    core.advance(core.now + 59 * SECOND);
+    assert!(core.checks().is_empty());
+    core.advance(core.now + SECOND);
+    let checks = core.checks();
+    assert_eq!(checks.len(), 2);
+
+    // A relay that answers while the backend doesn't: the PC is online and our servers aren't all
+    // there, and the backend's other statuses, such as Cloudflare's page for a Worker that's
+    // down, don't count as an answer.
+    core.answer(&checks[0].1, 503, "");
+    core.answer(&checks[1].1, 200, "");
+    assert_eq!(
+        peek(&mut core),
+        "internet=Some(true) servers=Some(Unreachable) refused=false"
+    );
+
+    // With a server not answering, the next check waits only 5s, and nothing within 2s means
+    // this PC is offline.
+    core.advance(core.now + 5 * SECOND);
+    assert_eq!(core.checks().len(), 2);
+    core.advance(core.now + 2 * SECOND);
+    assert_eq!(
+        peek(&mut core),
+        "internet=Some(false) servers=Some(Unreachable) refused=false"
+    );
+}
+
+/// While a link is lost each dial starts a check, of the session's relays rather than the ones
+/// this core would host through.
+#[test]
+fn a_dial_while_a_link_is_lost_checks_the_sessions_relays() {
     let mut core = Core::new();
+    core.checks();
     core.act(Act::OpenRelayed {
         crew: vec![(THEM, 0, [7; 32])],
     });
-    core.event(Event::Bound(Ok(MY_ENDPOINT)));
-    let pings: Vec<_> = core
-        .fetches()
-        .into_iter()
-        .filter(|(w, _)| w.starts_with("Get"))
-        .collect();
-    let [(what, job)] = &pings[..] else {
-        panic!("one ping should start: {pings:?}")
-    };
-    assert_eq!(what, "Get http://relay.test/ping");
-    let job = job.clone();
-    core.answer(&job, 200, "");
-    core.act(Act::Peek);
-    assert_eq!(core.take().1, ["internet=Some(true) refused=false"]);
-
-    // The next dial, 2s on, checks again, and no answer within 2s means no internet.
     core.advance(core.now + 2 * SECOND);
+    core.checks();
+    core.event(Event::Bound(Ok(MY_ENDPOINT)));
+    let checks = core.checks();
+    let asked: Vec<&str> = checks.iter().map(|(w, _)| w.as_str()).collect();
     assert_eq!(
-        core.fetches()
-            .iter()
-            .filter(|(w, _)| w.starts_with("Get"))
-            .count(),
-        1
+        asked,
+        [
+            "Get https://api.dualinput.app/",
+            "Get http://relay.test/ping"
+        ]
     );
+    core.answer(&checks[1].1, 200, "");
     core.advance(core.now + 2 * SECOND);
     core.act(Act::Peek);
     assert!(
         core.take()
             .1
-            .contains(&"internet=Some(false) refused=false".to_string())
+            .contains(&"internet=Some(true) servers=Some(Unreachable) refused=false".to_string())
     );
 }
 
@@ -957,7 +1059,7 @@ fn a_close_with_a_refusals_code_shows_the_refused_notification() {
     assert!(
         core.take()
             .1
-            .contains(&"internet=None refused=true".to_string())
+            .contains(&"internet=None servers=None refused=true".to_string())
     );
 }
 

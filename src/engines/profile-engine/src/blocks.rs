@@ -35,10 +35,11 @@ const fn profile_only(key: &'static str, level: u32, about: &'static str) -> Fie
 
 pub(crate) const TOP: &[Field] = &[
     profile_only(
-        "name",
+        "maker",
         1,
-        "The aircraft's name as the EFB app's list of supported aircraft shows it",
+        "Who makes the aircraft, as the EFB app's list of supported aircraft shows it",
     ),
+    profile_only("name", 1, "The aircraft's model, as that list shows it"),
     profile_only(
         "maturity",
         1,

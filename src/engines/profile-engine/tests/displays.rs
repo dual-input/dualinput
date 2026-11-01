@@ -24,6 +24,7 @@ fn tree(files: &[(&str, &str)]) -> Tree {
 }
 
 const PROFILE: &str = "\
+maker: M
 name: A
 maturity: stable
 aircraft:
@@ -67,7 +68,7 @@ fn one_display_on_its_own_is_a_list_of_one() {
     let s = source(
         &tree(&[(
             "p.yaml",
-            "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\ndisplays: DisplayUnits\n",
+            "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\ndisplays: DisplayUnits\n",
         )]),
         "p.yaml",
     )
@@ -84,7 +85,7 @@ fn one_display_on_its_own_is_a_list_of_one() {
 
 #[test]
 fn a_wasm_instrument_fails_the_load_at_its_place() {
-    let yaml = "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\ndisplays:\n  - DisplayUnits\n  - WasmInstrument|wasm_module=ND\n";
+    let yaml = "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\ndisplays:\n  - DisplayUnits\n  - WasmInstrument|wasm_module=ND\n";
     let report = check(
         &source(&tree(&[("p.yaml", yaml)]), "p.yaml").expect("loads"),
         LEVEL,
@@ -93,7 +94,7 @@ fn a_wasm_instrument_fails_the_load_at_its_place() {
         .errors()
         .map(|d| (d.code.as_str(), d.at.line, d.at.column))
         .collect();
-    assert_eq!(found, [("displays-wasm", 8, 5)], "{report}");
+    assert_eq!(found, [("displays-wasm", 9, 5)], "{report}");
 }
 
 #[test]

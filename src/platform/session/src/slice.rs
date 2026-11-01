@@ -11,8 +11,14 @@ use messages::hex;
 
 /// The slice `session`.
 pub(crate) fn build(me: &Session, view: &View) -> SessionSlice {
-    let Some(held) = &me.held else {
-        return SessionSlice::default();
+    let attempt = me.attempt();
+    let refused = me.refused.clone();
+    let Some(held) = me.held.as_ref().filter(|h| !h.dialing) else {
+        return SessionSlice {
+            attempt,
+            refused,
+            ..SessionSlice::default()
+        };
     };
     let members = me
         .members()
@@ -53,6 +59,8 @@ pub(crate) fn build(me: &Session, view: &View) -> SessionSlice {
                 })
             })
             .collect(),
+        attempt,
+        refused,
     }
 }
 

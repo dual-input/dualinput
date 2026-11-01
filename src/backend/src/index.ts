@@ -107,7 +107,7 @@ async function lookup(request: Request, bytes: Uint8Array<ArrayBuffer>, db: D1Da
     .prepare("INSERT INTO wrong_codes (address, hour, count) VALUES (?, ?, 1) ON CONFLICT DO UPDATE SET count = count + 1 WHERE count < ? RETURNING count")
     .bind(address, hour(now), WRONG_CODES)
     .first<{ count: number }>()
-  if (!guess) return answer<LookedUp>({ answer: "too-many-wrong-codes" })
+  if (!guess) return answer<LookedUp>({ answer: "too-many-wrong-codes", until: new Date((hour(now) + 1) * 3_600_000).toISOString() })
 
   const code = body.code.toUpperCase()
   const session = wellFormed(code)
@@ -124,7 +124,7 @@ async function lookup(request: Request, bytes: Uint8Array<ArrayBuffer>, db: D1Da
   if (!session || crew.length === 0) return answer<LookedUp>({ answer: "no-such-code" })
   await db.prepare("UPDATE wrong_codes SET count = count - 1 WHERE address = ? AND hour = ?").bind(address, hour(now)).run()
   if (session.version !== body.version) {
-    return answer<LookedUp>({ answer: "other-version", older: older(body.version, session.version) })
+    return answer<LookedUp>({ answer: "other-version", older: older(body.version, session.version), theirs: session.version })
   }
   if (session.hash !== body.hash) return answer<LookedUp>({ answer: "other-hash" })
   return answer<LookedUp>({

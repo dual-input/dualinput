@@ -37,7 +37,7 @@ const DIFFERENCES: Difference[] = [
   { item: 3, level: "warning", words: "James's sim is 4 hours ahead of yours" },
 ]
 
-const noSession: SessionSlice = { held: false, code: null, me: ME, pf: null, members: [], preflight: { aircraft: null, phase: "no-aircraft" }, differences: [], ready: null, share: null, roles: [] }
+const noSession: SessionSlice = { held: false, code: null, me: ME, pf: null, members: [], preflight: { aircraft: null, phase: "no-aircraft" }, differences: [], ready: null, share: null, roles: [], attempt: null, refused: null }
 const held = (rest: Partial<SessionSlice>): SessionSlice => ({ ...noSession, held: true, code: CODE, pf: ME, ready: [], share: [], ...rest })
 const running = { aircraft: inFlight.aircraft, phase: "running" as const }
 

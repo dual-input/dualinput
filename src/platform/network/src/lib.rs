@@ -13,9 +13,10 @@ mod clock;
 mod edge;
 mod hooks;
 mod links;
+mod reach;
 
 pub use backend::{
-    Answer, Asked, BACKEND, BackendAnswered, Host, Join, Me, RELAYS, RELAYS_ONLY, Refusal,
+    Answer, Asked, BACKEND, BackendAnswered, Host, Join, Me, RELAYS, RELAYS_ONLY, Refusal, cancel,
     endpoint_id, host, join, member,
 };
 pub use edge::{Transport, encode as encode_event};
@@ -25,7 +26,7 @@ pub use messages::net::OneOff;
 use std::collections::BTreeMap;
 
 use clients::{Clients, ClientsUnit, SettingDef};
-use kernel::{Cx, Moment, Registry, TimerId, View};
+use kernel::{Cx, Moment, Registry, Started, TimerId, View};
 use messages::clients::SettingKind;
 use messages::net::{
     Channel, Command, Delivery, EndpointId, HEARTBEAT, Header, MemberLink, NetSlice, PilotId,
@@ -105,6 +106,7 @@ pub struct Network {
     /// What each of the links' timers is for.
     timer_for: BTreeMap<TimerId, links::TimerFor>,
     backend: backend::Backend,
+    reach: reach::Reach,
 }
 
 impl Network {
@@ -121,10 +123,15 @@ impl Network {
         self.links.get(pilot).is_some_and(|l| l.conn.is_some())
     }
 
-    /// Whether this PC reaches the internet, as the last check made while a link was lost
-    /// found, or `None` before the first.
+    /// Whether this PC reaches the internet, as the last check found, or `None` before the
+    /// first.
     pub fn internet(&self) -> Option<bool> {
-        self.backend.internet
+        self.reach.internet
+    }
+
+    /// Whether our servers answer, as the last check found, or `None` before the first.
+    pub fn servers(&self) -> Option<messages::net::Servers> {
+        self.reach.servers
     }
 
     fn slice(&self) -> NetSlice {
@@ -142,7 +149,8 @@ impl Network {
                     }
                 })
                 .collect(),
-            internet: self.backend.internet,
+            internet: self.reach.internet,
+            servers: self.reach.servers,
         }
     }
 }
@@ -151,6 +159,7 @@ impl Network {
 pub fn register(r: &mut Registry) {
     let mut me = r.unit::<Network>("network");
     me.source::<Transport>(Network::event);
+    me.on::<Started>(Network::started);
     me.setting(
         RELAYS,
         SettingDef {

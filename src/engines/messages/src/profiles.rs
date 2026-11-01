@@ -1,7 +1,10 @@
-//! The profile loader's session key and match item (record/areas/profiles/02-units.md, "The
-//! pin" and "The match check's item").
+//! The profile loader's session key, match item, slice, and command
+//! (record/areas/profiles/02-units.md, "The pin" and "The match check's item";
+//! record/areas/interface/decisions.md, "The aircraft picker loads an aircraft through the
+//! world map's store, and only at the world map").
 
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
 use crate::session::{Key, MatchItem, Writer};
 
@@ -30,4 +33,57 @@ pub enum Bundle {
     NoProfile,
     /// The pin names a bundle this core couldn't fetch, find, or read.
     Unavailable,
+}
+
+/// The slice `ProfilesSlice` is sent as.
+pub const SLICE: &str = "profiles";
+
+/// What the apps show of the profiles.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "profiles/")]
+pub struct ProfilesSlice {
+    /// The profile that covers the aircraft the sim last loaded, in a session or not, or `None`
+    /// when no profile covers it.
+    pub loaded: Option<LoadedProfile>,
+    /// Each published profile this core's level takes, in the aircraft picker.
+    pub supported: Vec<SupportedAircraft>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "profiles/")]
+pub struct LoadedProfile {
+    pub maturity: Maturity,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "profiles/")]
+pub struct SupportedAircraft {
+    pub maker: String,
+    pub model: String,
+    pub maturity: Maturity,
+    /// Whether a package on disk holds it. A streamed copy keeps no folder on disk, so one reads
+    /// as not installed until the world map's own list can say.
+    pub installed: bool,
+}
+
+/// How far a profile's authors stand behind it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "profiles/")]
+pub enum Maturity {
+    Stable,
+    Experimental,
+}
+
+/// The profile loader's commands, which any client sends.
+pub mod command {
+    /// Loads an aircraft from the picker, with a `Pick`.
+    pub const PICK: &str = "profiles.pick";
+}
+
+/// `profiles.pick`'s arguments.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "profiles/")]
+pub struct Pick {
+    pub maker: String,
+    pub model: String,
 }

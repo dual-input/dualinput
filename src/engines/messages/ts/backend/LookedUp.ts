@@ -3,4 +3,4 @@ import type { Relay } from "../net/Relay.ts";
 import type { Entry } from "./Entry.ts";
 import type { Older } from "./Older.ts";
 
-export type LookedUp = { "answer": "found", session: string, relays: Array<Relay>, crew: Array<Entry>, } | { "answer": "no-such-code" } | { "answer": "other-version", older: Older, } | { "answer": "other-hash" } | { "answer": "too-many-wrong-codes" };
+export type LookedUp = { "answer": "found", session: string, relays: Array<Relay>, crew: Array<Entry>, } | { "answer": "no-such-code" } | { "answer": "other-version", older: Older, theirs: string, } | { "answer": "other-hash" } | { "answer": "too-many-wrong-codes", until: string, };

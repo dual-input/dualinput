@@ -10,11 +10,14 @@ import path from "node:path"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
+import type { ProfilesSlice } from "../../../src/engines/messages/ts/profiles/ProfilesSlice.ts"
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
+import type { NamedAircraft } from "../../../src/engines/messages/ts/sim/NamedAircraft.ts"
+import type { SimSlice } from "../../../src/engines/messages/ts/sim/SimSlice.ts"
 import { BenchRun, type Core, type CoreOptions } from "../cores.ts"
 import { BARON, load, PA24, toMenu } from "../flights.ts"
 import { app, BenchNetwork, host, join } from "../network.ts"
-import type { FakeApp } from "../pages.ts"
+import { FakeApp, fakeMenuScript } from "../pages.ts"
 import { builtHashes, copyProfiles, runBuilder } from "../profiles.ts"
 
 /** The match check's item the profile loader owns, BUNDLE in the message crate's profiles module. */
@@ -191,7 +194,7 @@ test("the pilot flying loads the wrong aircraft, then the right one, and the pin
   t.after(() => net.stop())
   const run = new BenchRun("profiles-aircraft-change", t)
   const copy = copyProfiles(path.join(run.folder, "with-pa24"))
-  fs.writeFileSync(path.join(copy, "aircraft", "a2a-pa24.yaml"), "name: A\nmaturity: stable\nauthors: Dual Input\naircraft:\n  variants:\n    pa24: pa24-250\n")
+  fs.writeFileSync(path.join(copy, "aircraft", "a2a-pa24.yaml"), "maker: M\nname: A\nmaturity: stable\nauthors: Dual Input\naircraft:\n  variants:\n    pa24: pa24-250\n")
   const hashes = net.profiles.publish(copy)
   const baron = hashes.get(BARON_FILE)!
   const pa24 = hashes.get("aircraft/a2a-pa24.yaml")!
@@ -320,6 +323,83 @@ test("a session in an aircraft with no published profile shows the loader's erro
     { level: bundleDifference(s)?.level, words: bundleDifference(s)?.words },
     { level: "error", words: "No profile for this aircraft" },
   )
+  assert.equal(bundleDifference(s)?.note, "The cockpits won't sync")
+})
+
+/** A `UserCfg.opt` whose packages folder holds the Baron and the PA-24, or nothing when `empty`. */
+function userCfg(folder: string, empty = false): string {
+  const packages = path.join(folder, "packages")
+  fs.mkdirSync(path.join(packages, "Community"), { recursive: true })
+  if (!empty) {
+    const airplanes = (name: string) => path.join(packages, "Community", name, "SimObjects", "Airplanes")
+    const baron = path.join(airplanes("bksq-aircraft-baronpro"), BARON.path)
+    fs.mkdirSync(baron, { recursive: true })
+    fs.writeFileSync(path.join(baron, "aircraft.cfg"), `[FLTSIM.0]\r\ntitle = "Baron"\r\nui_manufacturer = "Black Square" ; e.g. Boeing, Cessna\r\nui_type = "Baron 58P"\r\n`)
+    const pa24 = path.join(airplanes("a2a-aircraft-pa24"), ...PA24.path.split("/"), "config")
+    fs.mkdirSync(pa24, { recursive: true })
+    fs.writeFileSync(path.join(pa24, "aircraft.cfg"), `[FLTSIM.0]\r\nui_manufacturer = "TT:AIRCRAFT.UI_MANUFACTURER"\r\nui_type = "PA24-250 Comanche"\r\n`)
+  }
+  const cfg = path.join(folder, "UserCfg.opt")
+  fs.writeFileSync(cfg, `Version 1\r\nInstalledPackagesPath "${packages}"\r\n`)
+  return cfg
+}
+
+test("the apps see where the pilot is, the aircraft the sim last loaded by name, and every profile's aircraft, with no session", { timeout: 60_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("profiles-slice", t)
+  fs.mkdirSync(run.folder, { recursive: true })
+  const a = await pilot(run, net, "James", { settings: { "sim.user-cfg": userCfg(run.folder) } })
+  const watching = await FakeApp.open(a.core, ["sim", "profiles"])
+  t.after(() => watching.close())
+  const sim = () => watching.slice<SimSlice>("sim")
+  const profiles = () => watching.slice<ProfilesSlice>("profiles")
+  const installed = (s: ProfilesSlice | undefined) => s?.supported.every((p) => p.installed) === true && s.supported.length > 0
+
+  await watching.until(() => installed(profiles()), "the Baron's profile, installed")
+  assert.deepEqual(profiles(), { loaded: null, supported: [{ maker: "Black Square", model: "Baron 58P", maturity: "Experimental", installed: true }] })
+  assert.equal(sim()?.where, "main-menu")
+  assert.equal(sim()?.aircraft, null)
+
+  // The main menu loads the aircraft it has selected, with no flight.
+  a.core.act({ act: "set", numbers: [], texts: [["A:ATC ID", "N58BS"]] })
+  a.core.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "aircraft-loaded", path: BARON.cfg } }] })
+  const named = (want: NamedAircraft) => watching.until(() => JSON.stringify(sim()?.aircraft) === JSON.stringify(want), `the slice naming ${want.path}`)
+  await named({ path: BARON.path, maker: "Black Square", model: "Baron 58P", tail: "N58BS" })
+  await watching.until(() => profiles()?.loaded?.maturity === "Experimental", "the loaded aircraft's maturity")
+
+  // An `aircraft.cfg` in a `config` folder, whose token names no maker, and no profile covers it.
+  a.core.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "aircraft-loaded", path: PA24.cfg } }] })
+  await named({ path: PA24.path, maker: null, model: "PA24-250 Comanche", tail: "N58BS" })
+  await watching.until(() => profiles()?.loaded === null, "no profile for the PA-24")
+
+  const menu = fakeMenuScript(a.core, "world-map")
+  t.after(() => menu.close())
+  await watching.until(() => sim()?.where === "world-map", "the world map")
+  await load(a.core, BARON)
+  await watching.until(() => sim()?.where === "flight", "the flight")
+  await named({ path: BARON.path, maker: "Black Square", model: "Baron 58P", tail: "N58BS" })
+
+  assert.match((await watching.command("profiles.pick", { maker: "Black Square", model: "Baron 58P" })) ?? "", /can't load an aircraft yet/)
+})
+
+test("a profile's aircraft no package on disk holds shows as not installed, and an aircraft with no package has no name", { timeout: 60_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("profiles-not-installed", t)
+  fs.mkdirSync(run.folder, { recursive: true })
+  const a = await pilot(run, net, "James", { settings: { "sim.user-cfg": userCfg(run.folder, true) } })
+  const watching = await FakeApp.open(a.core, ["sim", "profiles"])
+  t.after(() => watching.close())
+  await watching.until(() => watching.slice<ProfilesSlice>("profiles")?.supported.length === 1, "the Baron's profile")
+  await sleep(500)
+  assert.equal(watching.slice<ProfilesSlice>("profiles")?.supported[0]?.installed, false)
+  a.core.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "aircraft-loaded", path: BARON.cfg } }] })
+  await watching.until(() => watching.slice<SimSlice>("sim")?.aircraft?.path === BARON.path, "the aircraft")
+  await sleep(500)
+  const aircraft = watching.slice<SimSlice>("sim")?.aircraft
+  assert.equal(aircraft?.maker, null)
+  assert.equal(aircraft?.model, null)
 })
 
 test("a start with nothing new published costs one answer of headers", { timeout: 60_000 }, async (t) => {
@@ -346,7 +426,7 @@ test("a start with nothing new published costs one answer of headers", { timeout
  * aircraft has none of them.
  */
 function largeProfile(): string {
-  let yaml = "name: A\nmaturity: stable\nauthors: Dual Input\naircraft:\n  variants:\n    press: bksq-aircraft-baronpropress\nstate:\n"
+  let yaml = "maker: M\nname: A\nmaturity: stable\nauthors: Dual Input\naircraft:\n  variants:\n    press: bksq-aircraft-baronpropress\nstate:\n"
   for (let i = 0; i < 300; i++) {
     yaml += `  switch_${i}:\n    name: Switch ${i}, a control the bench made up\n    watch: L('BENCH_SWITCH_${i}')\n    write: |\n`
     yaml += `      (value) => {\n        if (value > 0) {\n          write(L('BENCH_SWITCH_${i}'), value)\n          write(H('BENCH_SWITCH_${i}_ON'))\n        } else {\n          write(L('BENCH_SWITCH_${i}'), 0)\n          write(H('BENCH_SWITCH_${i}_OFF'))\n        }\n      }\n`

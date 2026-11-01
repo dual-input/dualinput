@@ -61,6 +61,7 @@ pub(crate) fn check(files: &[File], level: u32, mode: Mode) -> (Checked, Report)
         mode,
         report: Report::default(),
         profile: Profile {
+            maker: String::new(),
             name: String::new(),
             maturity: Maturity::Experimental,
             authors: None,
@@ -282,6 +283,11 @@ impl Checker {
                 continue;
             };
             match field.key {
+                "maker" => {
+                    if let Some(maker) = self.text(node, "`maker`") {
+                        self.profile.maker = maker;
+                    }
+                }
                 "name" => {
                     if let Some(name) = self.text(node, "`name`") {
                         self.profile.name = name;
@@ -336,7 +342,7 @@ impl Checker {
         // The EFB app's list of supported aircraft shows every profile by these two, so a
         // profile without them would have no row to show.
         if !file.module {
-            for key in ["name", "maturity"] {
+            for key in ["maker", "name", "maturity"] {
                 if !entries.iter().any(|(k, _)| k.text == key) {
                     self.error(
                         &file.root.at,

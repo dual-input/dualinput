@@ -145,7 +145,11 @@ impl SimService {
                 messages::sim::Stage::ReadyToFly | messages::sim::Stage::Flying
             )
         };
-        if in_flight(cx.read::<SimAwareness>().stage) && !in_flight(changed.before.stage) {
+        let awareness = cx.read::<SimAwareness>();
+        if awareness.selected != changed.before.selected {
+            me.name_aircraft(cx);
+        }
+        if in_flight(awareness.stage) && !in_flight(changed.before.stage) {
             me.aircraft_loaded(cx);
         }
         me.check_stall(cx);

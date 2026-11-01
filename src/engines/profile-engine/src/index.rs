@@ -4,6 +4,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::format::{Maturity, Profile};
+
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Index {
     pub profiles: Vec<IndexProfile>,
@@ -26,6 +28,27 @@ pub struct IndexBundle {
     /// The SimObjects folders and presets it covers, so a core matches an aircraft to a
     /// profile without opening a bundle.
     pub variants: Vec<String>,
+    /// What the EFB app shows of it, so a core lists every profile without opening a bundle.
+    #[serde(flatten)]
+    pub shown: Shown,
+}
+
+/// What the EFB app's list of supported aircraft shows of a profile.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Shown {
+    pub maker: String,
+    pub name: String,
+    pub maturity: Maturity,
+}
+
+impl Shown {
+    pub fn of(profile: &Profile) -> Shown {
+        Shown {
+            maker: profile.maker.clone(),
+            name: profile.name.clone(),
+            maturity: profile.maturity,
+        }
+    }
 }
 
 impl IndexProfile {
@@ -105,6 +128,11 @@ mod tests {
             hash: hash.into(),
             published: "2026-10-20T14:02:11Z".into(),
             variants: vec!["bksq-aircraft-baronpropress".into()],
+            shown: Shown {
+                maker: "Black Square".into(),
+                name: "Baron 58P".into(),
+                maturity: Maturity::Experimental,
+            },
         }
     }
 
@@ -133,6 +161,16 @@ mod tests {
         later.published = "2026-11-01T00:00:00Z".into();
         index.add("aircraft/bksq-baronpro", later);
         assert_eq!(index.profiles[0].bundles, [bundle(1, "a1b2")]);
+    }
+
+    #[test]
+    fn an_index_says_what_the_efb_app_shows_of_each_bundle() {
+        let mut index = Index::default();
+        index.add("aircraft/bksq-baronpro", bundle(1, "a1b2"));
+        let text = String::from_utf8(index.encode()).expect("an index is text");
+        assert!(text.contains(r#""maker": "Black Square""#), "{text}");
+        assert!(text.contains(r#""maturity": "experimental""#), "{text}");
+        assert_eq!(Index::parse(text.as_bytes()), Some(index));
     }
 
     #[test]

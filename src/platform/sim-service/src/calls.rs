@@ -183,6 +183,9 @@ impl SimService {
             if self.aware.read == Some(data.request) {
                 self.aware.read = None;
                 self.title_read(&values, cx);
+            } else if self.aware.tail_read == Some(data.request) {
+                self.aware.tail_read = None;
+                self.tail_read(&values);
             }
             return;
         }

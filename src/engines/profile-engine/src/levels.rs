@@ -155,7 +155,7 @@ pub fn schema(level: u32) -> String {
     }));
     let top = object(with_features(
         fields(blocks::TOP, &|key| match key {
-            "name" | "authors" => json!({ "type": "string" }),
+            "maker" | "name" | "authors" => json!({ "type": "string" }),
             "maturity" => json!({ "enum": ["stable", "experimental"] }),
             "aircraft" => aircraft.clone(),
             "import" => text_or_texts.clone(),

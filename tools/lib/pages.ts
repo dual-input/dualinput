@@ -1,4 +1,4 @@
-// Builds our code in the sim: each esbuild bundle at es2017, and our VCockpit.js, made from
+// Builds our code in the sim: each esbuild bundle at es2017, the EFB app's stylesheet, fonts, and icon, and our VCockpit.js, made from
 // the sim's stock file with our two blocks put in at named anchors; then checks each file
 // against what Coherent GT runs (record/areas/build/01-the-build.md, "The Coherent GT check";
 // record/areas/core/02-clients-and-panel-bridge.md, "Our VCockpit.js").
@@ -10,6 +10,7 @@ import path from "node:path"
 import { checkFile, format } from "coherent-checks"
 import * as esbuild from "esbuild"
 
+import { buildCss, KIT } from "./css.ts"
 import { fromRoot, ROOT } from "./repo.ts"
 import { Failed } from "./run.ts"
 import { STOCK } from "./stock.ts"
@@ -17,10 +18,17 @@ import { STOCK } from "./stock.ts"
 /** Where the build writes our code in the sim, with each bundle's map beside it. */
 export const PAGES = path.join(ROOT, "target", "sim-pages")
 
+/** Our EFB app's folder, by whose name the EFB finds it, and the name its script and stylesheet take. `INTERNAL_NAME` in src/sim-package/pages/efb.tsx names it too. */
+const EFB_APP = "html_ui/efb_ui/efb_apps/DualInput"
+
+/** The source files the EFB app's classes can come from, on top of the kit's. */
+const EFB_CONTENT = ["src/platform/efb-shell/src/**/*.{ts,tsx}", "src/sim-package/pages/efb.tsx", "src/features/*/efb/**/*.{ts,tsx}"]
+
 /** Each bundle of the sim package's own, by its entry, and where our package puts it. */
 const BUNDLES: { entry: string; to: string }[] = [
   { entry: "src/sim-package/pages/bridge.ts", to: "html_ui/DualInput/bridge.js" },
   { entry: "src/sim-package/pages/menu.ts", to: "html_ui/DualInput/menu.js" },
+  { entry: "src/sim-package/pages/efb.tsx", to: `${EFB_APP}/DualInput.js` },
 ]
 
 /**
@@ -71,7 +79,7 @@ const BLOCKS: { file: string; anchor: string; where: "before" | "after" }[] = [
 export type Built = { file: string; to: string }
 
 /** Builds every bundle and our VCockpit.js into `out`, and returns each with where the package puts it. */
-export function buildPages(out = PAGES): Built[] {
+export async function buildPages(out = PAGES): Promise<Built[]> {
   fs.rmSync(out, { recursive: true, force: true })
   fs.mkdirSync(out, { recursive: true })
   const built: Built[] = []
@@ -87,10 +95,13 @@ export function buildPages(out = PAGES): Built[] {
       sourcemap: "external",
       outfile: file,
       logLevel: "silent",
+      jsx: "automatic",
+      define: { "process.env.NODE_ENV": '"production"' },
     })
     for (const warning of result.warnings) console.warn(`warning: ${entry}: ${warning.text}`)
     built.push({ file, to })
   }
+  built.push(...(await buildEfbAssets(out)))
   const vcockpit = path.join(out, "VCockpit.js")
   fs.writeFileSync(vcockpit, makeVCockpit(fs.readFileSync(path.join(STOCK, "VCockpit.js"), "utf8")))
   built.push({ file: vcockpit, to: VCOCKPIT })
@@ -101,6 +112,20 @@ export function buildPages(out = PAGES): Built[] {
   // goes as the sim ships it.
   built.push({ file: path.join(STOCK, `${BLURPAGE}.json`), to: `cookedcomps/${BLURPAGE}.json` })
   return built
+}
+
+/** What the EFB app takes beside its script: its stylesheet, whose fonts sit beside it, and its icon. */
+async function buildEfbAssets(out: string): Promise<Built[]> {
+  const dir = path.join(out, EFB_APP.replace(/^html_ui\//, ""))
+  fs.mkdirSync(dir, { recursive: true })
+  const css = path.join(dir, "DualInput.css")
+  fs.writeFileSync(css, await buildCss(EFB_CONTENT))
+  const fonts = path.join(KIT, "fonts")
+  return [
+    { file: css, to: `${EFB_APP}/DualInput.css` },
+    ...fs.readdirSync(fonts).map((font) => ({ file: path.join(fonts, font), to: `${EFB_APP}/fonts/${font}` })),
+    { file: path.join(ROOT, "src", "sim-package", "pages", "efb-icon.svg"), to: `${EFB_APP}/Assets/app-icon.svg` },
+  ]
 }
 
 /** Our BlurPage copy: the stock component with the menu script's loader before its last closing tag. */
@@ -135,9 +160,11 @@ export function makeVCockpit(stock: string, blocks = BLOCKS, root = ROOT): strin
  */
 export function checkPages(built: Built[]): void {
   const findings: string[] = []
-  for (const { file } of built.filter((b) => b.file.endsWith(".js"))) {
-    const parsed = spawnSync(process.execPath, ["--check", file], { encoding: "utf8" })
-    if (parsed.status !== 0) findings.push(`${fromRoot(file)} doesn't parse:\n${parsed.stderr}`)
+  for (const { file } of built.filter((b) => b.file.endsWith(".js") || b.file.endsWith(".css"))) {
+    if (file.endsWith(".js")) {
+      const parsed = spawnSync(process.execPath, ["--check", file], { encoding: "utf8" })
+      if (parsed.status !== 0) findings.push(`${fromRoot(file)} doesn't parse:\n${parsed.stderr}`)
+    }
     for (const f of checkFile(file)) findings.push(format(fromRoot(file), f))
   }
   if (findings.length) throw new Failed(`our code in the sim runs what Coherent GT can't:\n${findings.join("\n")}`)

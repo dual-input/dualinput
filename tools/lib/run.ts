@@ -39,12 +39,15 @@ export function output(program: string, args: string[], options: SpawnSyncOption
  * Runs a script's body. On `Failed`, it prints the message and exits with 1. Any other
  * error is a bug in the script, so it goes up with its stack trace.
  */
-export function main(body: () => void): void {
-  try {
-    body()
-  } catch (error) {
+export function main(body: () => void | Promise<void>): void {
+  const stop = (error: unknown) => {
     if (!(error instanceof Failed)) throw error
     console.error(`\n${error.message}`)
     process.exit(1)
+  }
+  try {
+    body()?.catch(stop)
+  } catch (error) {
+    stop(error)
   }
 }

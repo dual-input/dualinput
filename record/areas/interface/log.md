@@ -18,7 +18,7 @@ The probes and their raw output are in [experiments/areas/interface](../../../ex
 - **Hover:** a button's color took three frames to arrive, 68ms, 135ms, and 201ms after the mouse entered, through the same 150ms ease.
 
 **Changed:** the kit holds a press itself, through `data-pressed`, for as long as the mouse does and 134ms at least, two of those frames, with the nudge instant.
-A hover's color arrives at once and fades only as it goes.
+A hover's color arrives and leaves at once, and a field's focus ring too, since a 150ms fade is about two of these frames and read as a late step (user, 2026-11-01).
 In the debugger the quickest click, a down and an up posted with no wait, then showed for 95ms to 135ms, moved on every frame.
 Every motion the frames draw runs at this rate in the EFB, so a 220ms ease is about three frames.
 

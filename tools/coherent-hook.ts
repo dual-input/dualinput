@@ -33,7 +33,7 @@ async function main(): Promise<void> {
   const { buildPages, checkPages } = await import("./lib/pages.ts")
   let context: string | null = null
   try {
-    checkPages(buildPages())
+    checkPages(await buildPages())
   } catch (error) {
     // A broken build must not stop edits, but the agent should hear about it.
     context = error instanceof Failed ? `Coherent GT check: ${error.message}` : `the Coherent GT check failed and checked nothing: ${String(error)}`

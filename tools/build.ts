@@ -24,7 +24,7 @@ import { Failed, main, run } from "./lib/run.ts"
 import { requireSdk } from "./lib/sdk.ts"
 import { checkStock } from "./lib/stock.ts"
 
-main(() => {
+main(async () => {
   const args = process.argv.slice(2)
   const installing = args.length === 1 && args[0] === "install"
   if (args.length && !installing) throw new Failed(`unknown arguments: ${args.join(" ")}; run node tools/build.ts [install]`)
@@ -36,7 +36,7 @@ main(() => {
   if (installing) refuseWhileSimRuns()
   writeMessageTypes()
   run("cargo", ["build"])
-  const pages = buildPages()
+  const pages = await buildPages()
   checkPages(pages)
   layOutPackage(buildModule(), pages)
   console.log(`laid out our package in ${PACKAGE}`)

@@ -38,6 +38,8 @@ export type EfbApp = {
   mount(host: HTMLElement): void
   /** The app left the screen, so anything it holds of the pilot's input goes back. */
   left(): void
+  /** The app came back on screen. */
+  shown(): void
 }
 
 /** The class the EFB takes. The framework's classes exist only once the EFB has loaded, so it's made here. */
@@ -49,11 +51,15 @@ function appClass(app: EfbApp) {
     onAfterRender() {
       app.mount(this.root.instance)
     }
-    onOpen() {}
+    onOpen() {
+      app.shown()
+    }
     onClose() {
       app.left()
     }
-    onResume() {}
+    onResume() {
+      app.shown()
+    }
     onPause() {
       app.left()
     }

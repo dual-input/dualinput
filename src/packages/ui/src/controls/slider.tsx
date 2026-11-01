@@ -47,7 +47,7 @@ export function Slider({ value, min = 0, max = 100, step = 1, disabled, onValueC
         <div className="absolute inset-y-0 left-0 bg-primary" style={{ width: `calc(${THUMB / 2}px + (100% - ${THUMB}px) * ${share})` }} />
       </div>
       <div
-        className="absolute h-4 w-6 rounded-full bg-white shadow-md ring-1 ring-black/10 transition-shadow hover:ring-4 hover:ring-ring/30 active:ring-4 active:ring-ring/30"
+        className="absolute h-4 w-6 rounded-full bg-white shadow-md ring-1 ring-black/10 hover:ring-4 hover:ring-ring/30 active:ring-4 active:ring-ring/30"
         style={{ left: `calc((100% - ${THUMB}px) * ${share})` }}
       />
     </div>

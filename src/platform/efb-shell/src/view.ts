@@ -33,6 +33,17 @@ function measure(host: HTMLElement, previous: ViewSize): ViewSize {
   return { width: width / scale, height: height / scale, scale }
 }
 
+/** Each view that follows the tablet, for `viewShown` to tell. */
+const shownListeners = new Set<() => void>()
+
+/**
+ * The app came back on screen. The pilot can change the tablet's size in the EFB's Settings app, and
+ * while another app shows, our view measures nothing, so it keeps the old scale until it's told.
+ */
+export function viewShown(): void {
+  shownListeners.forEach((listener) => listener())
+}
+
 /**
  * Follows the view. A change of the tablet's size or turn fires a few `resize` events, and `PanelSize`
  * changes 8ms to 16ms after the last, so each is measured again a moment later (same log entry).
@@ -54,8 +65,10 @@ export function useViewSize(host: HTMLElement | null): ViewSize {
     }
     update()
     window.addEventListener("resize", onResize)
+    shownListeners.add(onResize)
     return () => {
       window.removeEventListener("resize", onResize)
+      shownListeners.delete(onResize)
       window.clearTimeout(later)
     }
   }, [host])

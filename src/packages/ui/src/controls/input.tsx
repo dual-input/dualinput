@@ -19,7 +19,7 @@ export function Input({ invalid, title = "", className, ref, ...rest }: InputPro
       }}
       aria-invalid={invalid || undefined}
       className={cx(
-        "h-9 w-full min-w-0 rounded-3xl border bg-field px-3 py-1 text-sm transition-all disabled:pointer-events-none disabled:opacity-50",
+        "h-9 w-full min-w-0 rounded-3xl border bg-field px-3 py-1 text-sm disabled:pointer-events-none disabled:opacity-50",
         invalid ? "border-destructive ring-3 ring-destructive/20" : "border-transparent focus:border-ring focus:ring-3 focus:ring-ring/30",
         className,
       )}

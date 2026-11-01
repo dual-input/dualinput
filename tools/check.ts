@@ -18,7 +18,7 @@ import { Failed, main, run } from "./lib/run.ts"
 import { requireSdk } from "./lib/sdk.ts"
 import { stockMismatches } from "./lib/stock.ts"
 
-const checks: [string, () => void][] = [
+const checks: [string, () => void | Promise<void>][] = [
   ["Rustfmt", () => run("cargo", ["fmt", "--all", "--", "--check"])],
   // This check compares ts/ before and after writing it again. `cargo test` writes ts/ too,
   // so this runs before the tests, or it would compare fresh files with fresh files.
@@ -32,7 +32,7 @@ const checks: [string, () => void][] = [
   ["Clippy on our WASM module", clippyModule],
   ["each tsconfig's type check", typeCheck],
   ["the stock files against stock.json", checkStockFiles],
-  ["the Coherent GT check on our code in the sim", () => checkPages(buildPages())],
+  ["the Coherent GT check on our code in the sim", async () => checkPages(await buildPages())],
   ["the map check", () => run(process.execPath, [path.join("tools", "map-check.ts")])],
   ["the profiles' level files", checkLevels],
   ["the profiles' build", () => run("cargo", [...BUILDER, "build", "profiles"])],
@@ -44,10 +44,10 @@ const checks: [string, () => void][] = [
 /** The profile builder, run from the tree. */
 const BUILDER = ["run", "--quiet", "--package", "dualinput-profile-builder", "--"]
 
-main(() => {
+main(async () => {
   for (const [name, check] of checks) {
     console.log(`\ncheck: ${name}`)
-    check()
+    await check()
   }
   console.log(`\ncheck: all ${checks.length} checks passed`)
 })

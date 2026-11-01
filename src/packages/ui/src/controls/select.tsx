@@ -61,7 +61,7 @@ export function SelectTrigger({ className, children, ...rest }: ButtonHTMLAttrib
       type="button"
       aria-haspopup="listbox"
       aria-expanded={open}
-      className={cx("flex h-9 w-fit items-center justify-between whitespace-nowrap rounded-3xl border border-transparent bg-field px-3 py-2 text-sm transition-all disabled:pointer-events-none disabled:opacity-50", className)}
+      className={cx("flex h-9 w-fit items-center justify-between whitespace-nowrap rounded-3xl border border-transparent bg-field px-3 py-2 text-sm disabled:pointer-events-none disabled:opacity-50", className)}
       onClick={() => setOpen(!open)}
       {...rest}
     >

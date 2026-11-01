@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "p23's own dependencies: the frameworks it compares with FSComponent. Product code never imports from here.",
+  "dependencies": {
+    "preact": "11.1.1",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  }
+}

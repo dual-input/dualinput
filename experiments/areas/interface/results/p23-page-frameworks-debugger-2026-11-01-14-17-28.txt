@@ -1,0 +1,86 @@
+p23-page-frameworks debugger, 2026-11-01T14:17:28.117Z
+
+Bundles, minified, at es2017:
+fscomponent: 28.4 KB, 8.9 KB gzipped; Coherent GT check exit 0, 0 lines of findings
+react: 196.0 KB, 61.7 KB gzipped; Coherent GT check exit 0, 0 lines of findings
+preact: 24.8 KB, 10.0 KB gzipped; Coherent GT check exit 1, 2 lines of findings
+    preact.js:1:1490: queueMicrotask is missing in Coherent GT
+    preact.js:1:1912: queueMicrotask is missing in Coherent GT
+
+fscomponent, 3 loads of its page:
+  Parse and first run: 5ms, 4.5ms, 2.4ms
+  Mounting the app's shell: 0.9ms, 0.8ms, 0.9ms
+  Errors: none
+  ok   a click reaches its handler and updates text (Pressed 3 times)
+  ok   the EFB's mousedown, mouseup, and click order reaches it too (Pressed 4 times)
+  ok   typing reaches state, and state the field (mirror DLH4A, field DLH4A, prototype setter true)
+  ok   a row lays out with its class (36px, flex)
+  ok   a keyed reverse keeps the same elements (Row 3,Row 2,Row 1,Row 0)
+  ok   an update reaches one row's class
+  ok   clearing leaves no rows
+  ok   a conditional part mounts (28 elements under it)
+  ok   a conditional part goes
+  ok   a room eases open to its measured content (29px at 100ms, 52px at 500ms, content 52px)
+  ok   a room eases shut (0px)
+  Each time is JavaScript + forced layout, in ms; the first burst of each load, then the median of the later ones with its range:
+    1,000 rows created: first 33.6 + 89.5, 40.1 + 87.6, 43.3 + 86; later 18.9 + 89.6, JavaScript range 11.2 to 32.2
+    one row of 1,000 updated: first 0 + 0, 0 + 0, 0 + 0; later 0 + 0.4, JavaScript range 0 to 0.1
+    all 1,000 updated: first 8.3 + 53.2, 9.4 + 57.5, 8.2 + 57; later 3.4 + 54.8, JavaScript range 0.2 to 5.3
+    1,000 rows reversed: first 14.5 + 88.1, 18.3 + 88.6, 23.3 + 89.5; later 16.2 + 87.2, JavaScript range 13.4 to 24.1
+    1,000 rows cleared: first 17.9 + 0.1, 16.9 + 0.1, 16.8 + 0; later 15.1 + 0.1, JavaScript range 12.7 to 22.2
+    29-element part mounted in a 168-element card: first 0.1 + 0.8, 0.1 + 0.8, 0.1 + 0.8; later 0.1 + 0.8, JavaScript range 0 to 0.1
+    that part removed: first 0.1 + 0, 0.1 + 0, 0.1 + 0; later 0.1 + 0, JavaScript range 0.1 to 0.1
+
+react, 3 loads of its page:
+  Parse and first run: 9.3ms, 2.5ms, 2.3ms
+  Mounting the app's shell: 17.8ms, 12.8ms, 12.9ms
+  Errors: none
+  ok   a click reaches its handler and updates text (Pressed 3 times)
+  ok   the EFB's mousedown, mouseup, and click order reaches it too (Pressed 4 times)
+  ok   typing reaches state, and state the field (mirror DLH4A, field DLH4A, prototype setter true)
+  ok   a row lays out with its class (36px, flex)
+  ok   a keyed reverse keeps the same elements (Row 3,Row 2,Row 1,Row 0)
+  ok   an update reaches one row's class
+  ok   clearing leaves no rows
+  ok   a conditional part mounts (28 elements under it)
+  ok   a conditional part goes
+  ok   a room eases open to its measured content (22px at 100ms, 52px at 500ms, content 52px)
+  ok   a room eases shut (0px)
+  Each time is JavaScript + forced layout, in ms; the first burst of each load, then the median of the later ones with its range:
+    1,000 rows created: first 46.5 + 85.6, 52.9 + 88, 52.9 + 89.1; later 6.6 + 90.7, JavaScript range 5.6 to 14.3
+    one row of 1,000 updated: first 0.7 + 0, 0.6 + 0, 0.8 + 0; later 0.5 + 0.4, JavaScript range 0.5 to 0.9
+    all 1,000 updated: first 24.8 + 51.3, 25.6 + 57.4, 27.1 + 55.7; later 5.7 + 54.9, JavaScript range 2.5 to 14.1
+    1,000 rows reversed: first 17.8 + 81.5, 19.7 + 84.6, 19.3 + 89.1; later 19.4 + 87.4, JavaScript range 16.4 to 32.4
+    1,000 rows cleared: first 19 + 0, 21.2 + 0.1, 22 + 0.1; later 17.3 + 0.1, JavaScript range 15.5 to 24.3
+    29-element part mounted in a 168-element card: first 0.2 + 0.8, 0.2 + 0.8, 0.3 + 0.9; later 0.1 + 0.9, JavaScript range 0.1 to 0.2
+    that part removed: first 0.3 + 0.1, 0.3 + 0.1, 0.3 + 0; later 0.2 + 0, JavaScript range 0.2 to 0.4
+
+preact, 3 loads of its page:
+  Parse and first run: 1.7ms, 1.6ms, 0.3ms
+  Mounting the app's shell: 12.6ms, 12.5ms, 15.4ms
+  Errors: ReferenceError: Can't find variable: queueMicrotask
+  FAIL a click reaches its handler and updates text (Pressed 0 times)
+  FAIL the EFB's mousedown, mouseup, and click order reaches it too (Pressed 0 times)
+  FAIL typing reaches state, and state the field (mirror , field DLH4A, prototype setter true)
+  ok   a row lays out with its class (36px, flex)
+  ok   a keyed reverse keeps the same elements (Row 3,Row 2,Row 1,Row 0)
+  ok   an update reaches one row's class
+  ok   clearing leaves no rows
+  ok   a conditional part mounts (28 elements under it)
+  ok   a conditional part goes
+  ok   a room eases open to its measured content (27px at 100ms, 52px at 500ms, content 52px)
+  ok   a room eases shut (0px)
+  Each time is JavaScript + forced layout, in ms; the first burst of each load, then the median of the later ones with its range:
+    1,000 rows created: first 35.7 + 91.3, 38 + 89.2, 40.2 + 85.1; later 9.2 + 88.4, JavaScript range 7.2 to 12.9
+    one row of 1,000 updated: first 0.3 + 0, 0.3 + 0, 0.4 + 0; later 0.3 + 0.4, JavaScript range 0.3 to 0.6
+    all 1,000 updated: first 25.8 + 52.6, 20.4 + 54, 21.2 + 54.9; later 8.6 + 55, JavaScript range 5 to 14.6
+    1,000 rows reversed: first 25.1 + 83.9, 23.4 + 88.1, 23.8 + 85.9; later 23.4 + 88, JavaScript range 18.2 to 36.5
+    1,000 rows cleared: first 17 + 0.1, 16.3 + 0.1, 16.4 + 0; later 15 + 0, JavaScript range 10.6 to 21.8
+    29-element part mounted in a 168-element card: first 0.3 + 0.9, 0.4 + 0.9, 0.3 + 0.8; later 0.2 + 0.8, JavaScript range 0.2 to 0.3
+    that part removed: first 0.3 + 0, 0.3 + 0, 0.3 + 0; later 0.3 + 0, JavaScript range 0.2 to 0.4
+
+Page: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0
+Sim globals in the frame: {"SimVar":"undefined","Coherent":"undefined","BaseInstrument":"undefined"}
+Features: {"MessageChannel":true,"queueMicrotask":false,"setImmediate":false,"globalThis":false,"reportError":false,"WeakRef":false,"AbortController":false,"MutationObserver":true,"ResizeObserver":false,"PointerEvent":false}
+Window in front at each page's end: mpv, mpv, mpv, mpv, mpv, mpv, mpv, mpv, mpv
+Sim busy at each page's end, in cores: 0, 0, 0, 0, 0, 0, 0, 0, 0

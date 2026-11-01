@@ -40,6 +40,61 @@ What we haven't run: an EFB app of ours in landscape, the EFB popped out, the ta
 **Affects:** the EFB app's frames, which [stage 11b](../build/plan.md#11b-the-apps) designs.
 
 **Evidence:** `results/p21-efb-landscape-2026-10-30-17-36-53.txt`, with a screenshot of each layout, cropped to the EFB; `results/p21-efb-landscape-2026-10-30-17-32-58.txt`, the run before, measured the same sizes and saved no screenshots.
+## 2026-11-01: React 19 runs in the EFB's own document and takes a pilot's real click, wheel, and typing, and on a card-sized change it stays within 0.1ms of FSComponent
+
+**Asked:** FSComponent's components don't re-render, so would the frames' motion turn into a mess there, and would bundling React be worth it instead (user, 2026-11-01)?
+The frames' motion is mostly not the trouble, since their per-frame work is already direct DOM.
+What they lean on is content that changes shape: across 8,370 lines they hold 148 `useState` calls, 137 effects, about 116 conditional blocks, and 65 lists, and `@microsoft/msfs-sdk` 2.3.3 has neither conditional rendering nor a keyed list (read in its `msfssdk.d.ts`).
+
+**Expected:** React to run, since the Synaptic A220 ships `react-dom` 19.2.7 with `createRoot` (read in synaptic-aircraft-a220 1.0.11, `CTP/instrument.js`), and to cost visibly more than FSComponent, with Preact the lighter choice.
+
+**Found:** on MSFS 2024 1.9.21, p23 built one DOM with each framework and ran one harness on it:
+
+- **React in the EFB's own document:** registered through the EFB API with one FSComponent host element, it took the pilot's real input.
+  One click reached its handler and opened a room to its measured height, the wheel scrolled a list, and focus and blur reached the field's handlers.
+  Typing abc into a controlled field gave the changes `a`, `ab`, and `abc` in order, with state, field, and mirror all `abc`, using the field the kit's rule describes ([the kit follows what the sim gives an EFB app](decisions.md#the-kit-follows-what-the-sim-gives-an-efb-app)).
+- **The checks:** React and FSComponent each passed all 11 of the harness's, in the debugger and in the EFB's document, among them a click, a keyed reverse that keeps its elements, a conditional part, and a room that measures after it renders.
+- **Preact 11.1.1 fails as shipped:** it calls `queueMicrotask`, which Coherent GT lacks, so clicks and typing stopped updating state and 3 of its 11 checks failed in the debugger.
+  The Coherent GT check named it before the run.
+  We didn't try a polyfill, and we didn't run Preact in the EFB.
+- **The bundle:** React and React DOM minify to 196.0 KB, 61.8 KB gzipped, and pass the Coherent GT check with no findings.
+  FSComponent's page is 7.5 KB there, since it draws with the EFB's own `msfssdk`.
+- **Speed:** in the EFB's own document at Free flight's world map, with no flight loaded, the sim in front for all 6 pages, and the sim keeping 1.31 to 1.73 cores busy, in milliseconds, as JavaScript + forced layout, the median of the later bursts inside 3 loads of each page.
+  A median of an even count is the higher middle value:
+
+  | What | React 19.2.7 | FSComponent |
+  | --- | --- | --- |
+  | Parse and first run, each load | 1.7 to 1.9 | 0.5 to 0.8 |
+  | Mounting the page's shell, once | 12.5 to 13.3 | 1 to 1.2 |
+  | 29-element part mounted in a 168-element card | 0.2 + 0.8 | 0.2 + 0.8 |
+  | That part removed | 0.2 + 0.1 | 0.1 + 0.1 |
+  | One row of 1,000 updated | 0.5 + 0.5 | 0 + 0.4 |
+  | All 1,000 rows updated | 5.5 + 51 | 4 + 50.3 |
+  | 1,000 rows created | 9.8 + 90.8 | 25.4 + 94.1 |
+  | 1,000 rows reversed | 24.2 + 73.8 | 21.2 + 74.8 |
+  | 1,000 rows cleared | 20 + 0.1 | 18.4 + 0.2 |
+
+  In each load's first burst, before the engine warmed up, 1,000 rows took React 45.1 to 46.8ms of JavaScript and FSComponent 25.7 to 27.9ms.
+  Layout outweighs either framework's JavaScript on everything but clearing, and is the same under both.
+  The debugger gave the same picture with no sim, within about 3ms on most operations, and its FSComponent page bundled 28.4 KB of the framework.
+- **A window in front empties layout:** in a round the user discarded, with another window in front, the app's room and the first load's rows measured 0px and forced layout took about 0.1ms, so a timing there can miss layout altogether.
+  p23 now runs a page again if another window comes to the front during it.
+
+**Changed:** nothing in the design yet.
+Moving the EFB app to React is the user's to settle, and until then [the kit's decision](decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3) stands.
+
+**Left open:**
+
+- The same times under a flight's load.
+  p22's 1,000 rows read 29ms of JavaScript inside one page in the EFB under a heavy flight, against FSComponent's 25.4ms here, so we expect little change (inference); a run in a flight settles it.
+- Text from the sim's own keyboard, `SetInputTextFromOS`, which never came in this run.
+- How the code reads in each, which timing can't show: `app-fsc.tsx` holds the small layer of kept rows and hand-mounted parts we'd own, on a page far simpler than the frames.
+
+**Affects:** if React is chosen, [the kit](decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3), [which copy of FSComponent our pages import](decisions.md#our-pages-import-fscomponent-from-microsoftmsfs-sdk-as-npm-ships-it), the EFB half of [decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md), and perhaps [the banner's plain markup](decisions.md#the-banner-draws-its-few-lines-in-plain-markup-with-the-kits-colors-and-no-framework).
+
+**Evidence:** [the probe](../../../experiments/areas/interface/p23-page-frameworks/p23-page-frameworks.mjs), [its run in the debugger](../../../experiments/areas/interface/results/p23-page-frameworks-debugger-2026-11-01-14-17-28.txt), [its run in the EFB](../../../experiments/areas/interface/results/p23-page-frameworks-efb-2026-11-01-14-44-45.txt), and [a screenshot of the app](../../../experiments/areas/interface/results/p23-page-frameworks-2026-11-01-14-42-50/01-react-in-efb.jpg).
+The real input came from a run moments before the timed one, in the same load of the EFB, and the app kept it; that run's timings were lost when the inspector refused a connection before the report saved.
+
 ## 2026-11-01: The SDK's CoherentGT Debugger runs our pages in Coherent GT with no sim, and matches the sim's EFB on 1,159 of p14's 1,170 CSS items and on repeated work in a loaded page
 
 **Asked:** can we develop pages for Coherent GT with quick reloads in an environment that mimics the sim (user, 2026-11-01), since a browser draws what the engine drops ([the Coherent GT check](decisions.md#the-coherent-gt-check-covers-the-css-we-ship-into-the-sim)), and reloading the real app in the sim needs the sim running?

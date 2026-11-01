@@ -1,0 +1,72 @@
+p23-page-frameworks efb --again, 2026-11-01T14:44:45.162Z
+
+EFB document: {"href":"coui://html_ui/efb_ui/efb_os/efb_ui.html","userAgent":"Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0","width":829,"height":1114,"PointerEvent":"undefined","TouchEvent":"function","Coherent":"object"}
+
+The pilot's real input, to React in the EFB's own document:
+  taken in an earlier run, in this load of the EFB, and read back from the app
+  React's handlers saw: 7 mouse enters, 2 mouse downs, 1 clicks, 46 wheels, 1 focuses, 1 blurs
+  State: pressed 1 times, room 33px tall, list scrolled 648px
+  The controlled field: state "abc", field "abc", mirror "abc"; each change ["a","ab","abc"]; from the sim's keyboard []
+  Triggers: [{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P23_FIELD"]},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P23_FIELD"]},{"name":"FOCUS_INPUT_FIELD","args":[{"title":"Title","description":"","default_text":"","is_numeric":false,"is_efb":true}]},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P23_FIELD"]},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P23_FIELD"]},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P23_FIELD"]},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P23_FIELD"]},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P23_FIELD"]},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P23_FIELD"]},{"name":"UNFOCUS_INPUT_FIELD","args":["DUALINPUT_P23_FIELD"]}]
+  Events in click: keyup 1, mousemove 108, mouseout 6, mouseleave 6, mouseover 6, mouseenter 14, mousedown 1, mouseup 1, click 1
+  Events in wheel: mousemove 138, mouseout 13, mouseleave 12, mouseover 13, mouseenter 13, wheel 11
+  Events in type: mousemove 166, wheel 3, mouseout 8, mouseleave 8, mouseover 8, mouseenter 9, mousedown 1, focus 1, focusin 1, mouseup 1, click 1, keydown 3, keypress 3, beforeinput 3, input 3, keyup 3, change 1, blur 1, focusout 1
+  Screenshot: experiments/areas/interface/results/p23-page-frameworks-2026-11-01-14-42-50/01-react-in-efb.jpg
+
+Bundles, minified, at es2017:
+react: 196.0 KB, 61.8 KB gzipped; Coherent GT check exit 0, 0 lines of findings
+fscomponent-efb: 7.5 KB, 3.1 KB gzipped; Coherent GT check exit 0, 0 lines of findings
+
+react, 3 loads of its page:
+  Parse and first run: 1.9ms, 1.7ms, 1.8ms
+  Mounting the app's shell: 13.3ms, 13ms, 12.5ms
+  Errors: none
+  ok   a click reaches its handler and updates text (Pressed 3 times)
+  ok   the EFB's mousedown, mouseup, and click order reaches it too (Pressed 4 times)
+  ok   typing reaches state, and state the field (mirror DLH4A, field DLH4A, prototype setter true)
+  ok   a row lays out with its class (36px, flex)
+  ok   a keyed reverse keeps the same elements (Row 3,Row 2,Row 1,Row 0)
+  ok   an update reaches one row's class
+  ok   clearing leaves no rows
+  ok   a conditional part mounts (28 elements under it)
+  ok   a conditional part goes
+  ok   a room eases open to its measured content (30px at 100ms, 52px at 500ms, content 52px)
+  ok   a room eases shut (0px)
+  Each time is JavaScript + forced layout, in ms; the first burst of each load, then the median of the later ones with its range:
+    1,000 rows created: first 45.6 + 103.8, 45.1 + 89.1, 46.8 + 103.4; later 9.8 + 90.8, JavaScript range 8.7 to 11.4
+    one row of 1,000 updated: first 0.6 + 0, 0.5 + 0, 0.5 + 0; later 0.5 + 0.5, JavaScript range 0.4 to 0.6
+    all 1,000 updated: first 20.6 + 49.7, 19.8 + 49.8, 19.2 + 49.5; later 5.5 + 51, JavaScript range 2.2 to 6.3
+    1,000 rows reversed: first 25.5 + 74.5, 24.6 + 75.3, 25.3 + 75; later 24.2 + 73.8, JavaScript range 21.4 to 29.5
+    1,000 rows cleared: first 23.4 + 0.1, 24.5 + 0.2, 24.9 + 0.2; later 20 + 0.1, JavaScript range 18 to 22.9
+    29-element part mounted in a 168-element card: first 0.2 + 0.9, 0.2 + 0.8, 0.2 + 0.9; later 0.2 + 0.8, JavaScript range 0.1 to 0.2
+    that part removed: first 0.4 + 0.1, 0.4 + 0.1, 0.3 + 0.1; later 0.2 + 0.1, JavaScript range 0.2 to 0.4
+
+fscomponent, 3 loads of its page:
+  Parse and first run: 0.8ms, 0.5ms, 0.8ms
+  Mounting the app's shell: 1ms, 1.2ms, 1.1ms
+  Errors: none
+  ok   a click reaches its handler and updates text (Pressed 3 times)
+  ok   the EFB's mousedown, mouseup, and click order reaches it too (Pressed 4 times)
+  ok   typing reaches state, and state the field (mirror DLH4A, field DLH4A, prototype setter true)
+  ok   a row lays out with its class (36px, flex)
+  ok   a keyed reverse keeps the same elements (Row 3,Row 2,Row 1,Row 0)
+  ok   an update reaches one row's class
+  ok   clearing leaves no rows
+  ok   a conditional part mounts (28 elements under it)
+  ok   a conditional part goes
+  ok   a room eases open to its measured content (33px at 100ms, 52px at 500ms, content 52px)
+  ok   a room eases shut (0px)
+  Each time is JavaScript + forced layout, in ms; the first burst of each load, then the median of the later ones with its range:
+    1,000 rows created: first 27.9 + 96.1, 25.7 + 92.3, 26.6 + 100; later 25.4 + 94.1, JavaScript range 22.2 to 31.8
+    one row of 1,000 updated: first 0 + 0, 0 + 0, 0 + 0; later 0 + 0.4, JavaScript range 0 to 0.1
+    all 1,000 updated: first 4.8 + 50.3, 4.4 + 53, 4.3 + 49.4; later 4 + 50.3, JavaScript range 0.2 to 4.8
+    1,000 rows reversed: first 22.9 + 74.2, 22.1 + 77.1, 20.8 + 72.7; later 21.2 + 74.8, JavaScript range 18.2 to 23.6
+    1,000 rows cleared: first 18.4 + 0.1, 18.9 + 0.3, 19.6 + 0.1; later 18.4 + 0.2, JavaScript range 17.5 to 19.7
+    29-element part mounted in a 168-element card: first 0.2 + 0.8, 0.2 + 0.8, 0.2 + 0.8; later 0.2 + 0.8, JavaScript range 0.1 to 0.2
+    that part removed: first 0.2 + 0.1, 0.1 + 0.1, 0.2 + 0.1; later 0.1 + 0.1, JavaScript range 0.1 to 0.2
+
+Page: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0
+Sim globals where the page ran: {"SimVar":"object","Coherent":"object","BaseInstrument":"undefined"}
+Features: {"MessageChannel":true,"queueMicrotask":false,"setImmediate":false,"globalThis":false,"reportError":false,"WeakRef":true,"AbortController":false,"MutationObserver":true,"ResizeObserver":false,"PointerEvent":false}
+Window in front at each page's end: FlightSimulator2024, FlightSimulator2024, FlightSimulator2024, FlightSimulator2024, FlightSimulator2024, FlightSimulator2024
+Sim busy at each page's end, in cores: 1.43, 1.58, 1.43, 1.31, 1.73, 1.41

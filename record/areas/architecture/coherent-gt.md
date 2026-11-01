@@ -77,6 +77,8 @@ Neither probe looked at the paint, so a kept declaration can still paint unlike 
 - **Media features:** `prefers-color-scheme`, `forced-colors`, `prefers-contrast`, and `scripting` don't parse.
   `(hover: none)` and `(prefers-reduced-motion: no-preference)` match, and `(hover: hover)`, `(pointer: fine)`, and `(any-pointer: fine)` don't, so a rule behind a hover or pointer query applies as on a touch screen, while `:hover` selectors work.
 - **Layout:** the engine places boxes on whole pixels where Chromium gives fractions, as `vw` and `space-evenly` showed, and a table cell given a width takes the table's whole width.
+  In the SDK's debugger, `width: max-content` under `border-box` comes out short by the box's padding, so words wrap, while an absolute box with its width left alone fits them ([interface log][p24]).
+- **Scaling:** in the SDK's debugger, a `transform: scale()` blurs text, and `zoom` scales layout and keeps text sharp, though a 1px height or `box-shadow` spread rounds down to nothing below a zoom of 1, and a border keeps its pixel (same entry).
 - **Each document's defaults:** mainUi and the toolbar lay out a box with padding and a border as `border-box`, and the EFB's document as `content-box`, so our pages set `box-sizing` themselves.
 - **Fonts:** mainUi and the toolbar declare Roboto as one family, `Roboto-Regular`, at weights 300 to 900, and Roboto Mono as `RobotoMono-Regular`.
   The EFB's document declares a family for each face, such as `Roboto-Bold` and `RobotoMono-Regular`, and sets its body in Verdana, so text there takes Roboto only from a rule that names a face.
@@ -86,6 +88,7 @@ Neither probe looked at the paint, so a kept declaration can still paint unlike 
 
 A sim update can change any of this, so re-run [p09](../../../experiments/areas/architecture/p09-coherent-syntax.mjs) after each one, with the sim in a flight, and [p14](../../../experiments/areas/architecture/p14-coherent-css-full.mjs), with the sim at the main menu, after its `--baseline` run in current Chromium.
 
+[p24]: ../interface/log.md#2026-11-01-in-the-sdks-debugger-zoom-scales-a-page-with-sharp-text-and-its-layout-motion-scrolling-and-real-input-in-step-where-a-transform-blurs-its-text
 [p14]: log.md#2026-10-25-coherent-gt-keeps-304-of-the-554-css-properties-chromium-152-keeps-and-lays-out-flexbox-and-grid-as-chromium-does-but-for-gap-justify-content-end-and-subgrid
 [p13]: log.md#2026-10-25-coherent-gt-drops-layer-oklch-color-mix-and-every-gap-but-grid-gap-so-tailwind-4s-output-cant-style-a-page-there
 [p09]: log.md#2026-10-09-coherent-gt-parses-all-of-es2017-and-object-rest-but-no-other-syntax-from-es2018-on-has-no-built-in-from-es2018-on-of-its-own-but-weakref-and-runs-typescript-compiled-to-es2017-by-tsc-and-by-esbuild

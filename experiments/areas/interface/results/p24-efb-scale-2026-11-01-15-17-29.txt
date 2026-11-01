@@ -1,0 +1,15 @@
+p24-efb-scale, 2026-11-01T15:17:29.771Z
+Screenshot: experiments/areas/interface/results/p24-efb-scale-2026-11-01-15-17-28.png, 1296x759
+
+transform scale 0.72  rect 188.6 x 119.5, offset 262 x 166, zoom 1, window 1280 x 720
+transform scale 0.884 rect 231.6 x 146.7, offset 262 x 166, zoom 1, window 1280 x 720
+transform scale 1.056 rect 276.7 x 175.3, offset 262 x 166, zoom 1, window 1280 x 720
+transform scale 1.225 rect 321.0 x 203.4, offset 262 x 166, zoom 1, window 1280 x 720
+zoom      scale 0.72  rect 259.7 x 158.3, offset 259 x 158, zoom 0.7200000286102295, window 1280 x 720
+zoom      scale 0.884 rect 260.2 x 158.4, offset 260 x 158, zoom 0.8840000033378601, window 1280 x 720
+zoom      scale 1.056 rect 260.4 x 161.9, offset 260 x 161, zoom 1.055999994277954, window 1280 x 720
+zoom      scale 1.225 rect 260.4 x 162.4, offset 260 x 162, zoom 1.225000023841858, window 1280 x 720
+calc      scale 0.72  rect 187.0 x 114.0, offset 187 x 114, zoom 1, window 1280 x 720
+calc      scale 0.884 rect 230.0 x 140.0, offset 230 x 140, zoom 1, window 1280 x 720
+calc      scale 1.056 rect 275.0 x 171.0, offset 275 x 171, zoom 1, window 1280 x 720
+calc      scale 1.225 rect 319.0 x 199.0, offset 319 x 199, zoom 1, window 1280 x 720

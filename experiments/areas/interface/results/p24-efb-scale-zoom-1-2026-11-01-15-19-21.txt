@@ -1,0 +1,105 @@
+p24-efb-scale-zoom, 2026-11-01T15:19:17.959Z
+
+zoom 1: screenshot experiments/areas/interface/results/p24-efb-scale-zoom-1-2026-11-01-15-19-17.png, 1296x759
+{
+ "zoom": 1,
+ "events": [
+  {
+   "type": "mousedown",
+   "id": "box",
+   "clientX": 125,
+   "clientY": 120,
+   "pageX": 125,
+   "offsetX": 25,
+   "screenX": 125
+  },
+  {
+   "type": "click",
+   "id": "box",
+   "clientX": 125,
+   "clientY": 120
+  },
+  {
+   "type": "wheel",
+   "id": "tall",
+   "deltaY": 100,
+   "deltaMode": 0,
+   "clientX": 360
+  }
+ ],
+ "ws": "echoed: echo of hello from the page",
+ "box": {
+  "offset": [
+   100,
+   100,
+   50,
+   40
+  ],
+  "rect": [
+   100,
+   100,
+   50,
+   40
+  ]
+ },
+ "moved": {
+  "offset": [
+   100,
+   150
+  ],
+  "rect": [
+   150,
+   150,
+   50,
+   40
+  ]
+ },
+ "fixed": {
+  "rect": [
+   100,
+   200,
+   50,
+   40
+  ]
+ },
+ "font": "13px",
+ "computedLeft": "100px",
+ "window": [
+  1280,
+  720
+ ],
+ "hits": {
+  "box at its frame units": "box",
+  "box at frame units times zoom": "box",
+  "moved at 175 by 170 times zoom, where a zoomed translate lands": "moved",
+  "moved at 125 + 50 by 170, where an unzoomed translate lands": "moved",
+  "fixed at frame units times zoom": "fixed",
+  "fixed at its frame units": "fixed"
+ },
+ "scroller": {
+  "client": 100,
+  "scrollHeight": 300,
+  "offset": 100,
+  "afterSet60": 60
+ },
+ "stickyAfterScroll": [
+  300,
+  110,
+  120,
+  20
+ ],
+ "scrollerRect": [
+  300,
+  100,
+  120,
+  100
+ ],
+ "childAfterScroll": [
+  300,
+  40,
+  120,
+  300
+ ]
+}
+
+WebSocket connections the server took: 1

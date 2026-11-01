@@ -172,7 +172,7 @@ async function buildVariant(name, css, sdkIndex) {
   const sdkModules = Object.keys(out.inputs).filter((file) => /sdk-modules/.test(file)).length
   const code = fs.readFileSync(path.join(dir, "app.js"), "utf8")
   const count = (re) => (code.match(re) || []).length
-  const check = spawnSync(process.execPath, ["tools/coherent-check/main.ts", path.join(dir, "app.js")], { cwd: ROOT, encoding: "utf8" })
+  const check = spawnSync(process.execPath, ["node_modules/coherent-checks/dist/main.js", path.join(dir, "app.js")], { cwd: ROOT, encoding: "utf8" })
   return {
     name,
     bundleKB: +(out.bytes / 1024).toFixed(1),

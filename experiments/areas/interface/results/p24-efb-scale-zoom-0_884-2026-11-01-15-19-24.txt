@@ -1,0 +1,105 @@
+p24-efb-scale-zoom, 2026-11-01T15:19:21.462Z
+
+zoom 0.884: screenshot experiments/areas/interface/results/p24-efb-scale-zoom-0_884-2026-11-01-15-19-21.png, 1296x759
+{
+ "zoom": 0.884,
+ "events": [
+  {
+   "type": "mousedown",
+   "id": "box",
+   "clientX": 111,
+   "clientY": 106,
+   "pageX": 111,
+   "offsetX": 23,
+   "screenX": 111
+  },
+  {
+   "type": "click",
+   "id": "box",
+   "clientX": 111,
+   "clientY": 106
+  },
+  {
+   "type": "wheel",
+   "id": "tall",
+   "deltaY": 100,
+   "deltaMode": 0,
+   "clientX": 318
+  }
+ ],
+ "ws": "echoed: echo of hello from the page",
+ "box": {
+  "offset": [
+   100,
+   100,
+   49,
+   39
+  ],
+  "rect": [
+   99.5,
+   99.5,
+   49.8,
+   39.6
+  ]
+ },
+ "moved": {
+  "offset": [
+   100,
+   149
+  ],
+  "rect": [
+   149.5,
+   149.3,
+   49.8,
+   39.6
+  ]
+ },
+ "fixed": {
+  "rect": [
+   99.5,
+   199.1,
+   49.8,
+   39.6
+  ]
+ },
+ "font": "13px",
+ "computedLeft": "99.5475082397461px",
+ "window": [
+  1280,
+  720
+ ],
+ "hits": {
+  "box at its frame units": "box",
+  "box at frame units times zoom": "box",
+  "moved at 175 by 170 times zoom, where a zoomed translate lands": "moved",
+  "moved at 125 + 50 by 170, where an unzoomed translate lands": "moved",
+  "fixed at frame units times zoom": "fixed",
+  "fixed at its frame units": "root"
+ },
+ "scroller": {
+  "client": 99,
+  "scrollHeight": 299,
+  "offset": 99,
+  "afterSet60": 59
+ },
+ "stickyAfterScroll": [
+  299.8,
+  108.6,
+  119.9,
+  19.2
+ ],
+ "scrollerRect": [
+  299.8,
+  99.5,
+  119.9,
+  99.5
+ ],
+ "childAfterScroll": [
+  299.8,
+  39.6,
+  119.9,
+  299.8
+ ]
+}
+
+WebSocket connections the server took: 1

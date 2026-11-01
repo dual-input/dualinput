@@ -3,6 +3,41 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-01: In the SDK's debugger, zoom scales a page with sharp text and its layout, motion, scrolling, and real input in step, where a transform blurs its text
+
+**Asked:** how one number should fit the EFB app to its view, since [p21](#2026-10-30-in-landscape-an-efb-apps-view-is-its-portrait-view-turned-on-its-side-about-696-by-433-in-the-efbs-own-units-against-468-by-660) found that view 456px to 632px wide at the tablet's three sizes in one window, and the frames are drawn 516 wide.
+The kit's sizes and the frames' motion both depend on the answer (user, 2026-11-01: "what for?", answered as fitting the app to any tablet).
+
+**Expected:** a transform to do it most cheaply, and `calc()` around a variable, which is how `efb_os.css` sizes itself, to be the fallback.
+We expected nothing of `zoom`.
+
+**Found:** in a copy of the SDK's CoherentGT Debugger, with no run yet in the sim's EFB, p24 drew the same card three ways at scales of 0.72, 0.884, 1.056, and 1.225:
+
+- **A transform blurs:** the engine draws text at its unscaled size and resamples it, so a card under `transform: scale()` reads doubled at every one of the four.
+- **`zoom` and `calc()` both draw sharp text**, and wrap words alike at each scale.
+- **`zoom` keeps every number in frame units.** With `zoom` on a root at 0.884 and at 1.225, in the units of the root:
+  - `offsetLeft`, `offsetWidth`, `getBoundingClientRect()`, computed `left`, and `scrollTop` all read about what the CSS wrote, within a unit, so a 50px box reads 49 or 50.
+  - `translateX(50px)` moved a box 50 units, so 61px on screen at 1.225, and `-webkit-sticky` stuck 10 units from its scroller's top, with `scrollTop` set to 60.
+  - Hit testing takes the window's pixels: `elementFromPoint` found a box at 125 units at 125 times the zoom.
+  - A real click and a real wheel posted to the window reached the right element, and `clientX` read in the window's pixels, 111 for a box's middle at 125 units at 0.884.
+- **The kit agrees:** every live component of the kit's page, its select, popover, confirm, dialog, and toasts, took real clicks at 1, 0.884, and 1.225, with each popup against its anchor.
+- **A line under 1px vanishes:** at a zoom below 1, a 1px height and a 1px `box-shadow` spread both round down to nothing, while a border keeps its pixel.
+  So the kit's hairlines are borders, and its root sets `--hair`, the length of one real pixel at its scale, which `ring-1` takes.
+- **`width: max-content` comes out short under `border-box`,** by the box's padding: 115px where the words and padding take 139px.
+  An absolute box with its width left alone gave 139px, and took `max-width`.
+- **Faded text can glitch at any scale:** text inside an element with `opacity` below 1 lost its bottom edge at some positions under `zoom` at 0.72, and at the same scale drew a ghost line above it under `calc()`, and in a column at 1:1 with no scaling.
+  The same three columns at 1.225 drew clean, so it doesn't follow from `zoom`; we don't know what it does follow from, and whether the sim's own build of the engine does it.
+- **A WebSocket from a page in the debugger** to a server on 127.0.0.1 connected and echoed, as the development loop needs to reach a bench core.
+- **The picture is flaky:** `PrintWindow` came back all white about half the time just after input was posted to the window, at any zoom and with `calc()` alike, 7 of 10 under `zoom` and 7 of 12 under `calc()`, so a white picture says nothing about the page.
+  Taking it again a moment later gives the page.
+
+**Changed:** [the kit fits its root with `zoom`](decisions.md#the-efb-app-fits-its-view-with-zoom-on-its-root), and every size in the frames carries over unchanged.
+What we haven't run: any of this in the sim's EFB, whose engine is another build ([p22](#2026-11-01-the-sdks-coherentgt-debugger-runs-our-pages-in-coherent-gt-with-no-sim-and-matches-the-sims-efb-on-1159-of-p14s-1170-css-items-and-on-repeated-work-in-a-loaded-page)), and what `zoom` costs a frame.
+
+**Affects:** the kit, the EFB shell, and the frames' motion, which reads offsets and scrolls in frame units; [Coherent GT's JavaScript and CSS](../architecture/coherent-gt.md#css).
+
+**Evidence:** in `experiments/areas/interface/results/`, `p24-efb-scale-2026-11-01-15-17-29.txt` and its picture of the three ways, the `p24-efb-scale-zoom-*` files, and the three `p24-efb-scale-opacity-*` pictures. The white pictures from narrowing down the flaky one are left out.
+
 ## 2026-11-01: React 19 runs in the EFB's own document and takes a pilot's real click, wheel, and typing, and on a card-sized change it stays within 0.1ms of FSComponent
 
 **Asked:** FSComponent's components don't re-render, so would the frames' motion turn into a mess there, and would bundling React be worth it instead (user, 2026-11-01)?

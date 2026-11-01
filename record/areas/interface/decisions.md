@@ -144,6 +144,21 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - The EFB loads no app's stylesheet: each app adds its own link, as CIVA's does through efb_api's `loadCss` (same entry).
 - **Leaves out:** whether the sim also acts on keys typed into a field that didn't ask for the keyboard, which p19 saw reach the field but didn't watch the sim for.
 
+## The EFB app fits its view with zoom on its root
+
+- **Decided:** the kit's root takes one number, its scale, as the CSS `zoom` property, so the frames' sizes stay as written, in code and in styles, and the page lays out in those units.
+  A mouse event's position alone reads in the window's pixels, which the kit converts with its root's scale.
+  A hairline is a border, or takes `--hair`, the length of one real pixel at the root's scale, since a 1px height or shadow rounds down to nothing below a scale of 1.
+  If the sim's EFB turns out to differ, the fallback is every size written as `calc(Npx * var(--scale))`, which is how `efb_os.css` sizes itself, by a step on the built stylesheet, with a helper for each number in our code.
+  Settled by us on 2026-11-01, on p24 in the SDK's debugger, for the user to look at with the kit's page.
+- **Because:**
+  - A transform blurs text in the debugger, at every scale tried, and `zoom` and `calc()` both draw it sharp ([interface log][p24]).
+  - Under `zoom`, offsets, rects, `scrollTop`, and a `translateX` all read and move in the frames' units, so the frames' motion carries over with no number changed (same entry).
+  - With `calc()`, every number in our code that sets a size or a motion would need a helper, and one that missed it would show only at another scale.
+- **Leaves out:**
+  - The scale itself, which the EFB shell reads from the app's view, and what the frames do in landscape, which p21 measured at about 696 by 433 of the EFB's units and no call has settled.
+  - How it runs in the sim's EFB, which [the list below](#stage-11b-checks-in-coherent-gt-what-the-frames-lean-on) holds.
+
 ## Go to from the EFB app runs through the menu script, so BlurPage stays
 
 - **Decided:** the EFB app's Go to button sends `go-to`'s command, as any client's does, and the core runs the world map's requests through the menu script, which our copy of BlurPage brings into the menu's document ([Go to](../session/02-units.md#go-to)), so [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md) stands.
@@ -273,6 +288,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 ## Stage 11b checks in Coherent GT what the frames lean on
 
 - **Decided:** as the build reaches the first screen that uses each of these, it checks it in Coherent GT, since no run has shown it there:
+  - `zoom` on the app's root in the EFB's own document, with its layout, popups, and real input, and what it costs a frame, since p24 ran it only in the SDK's debugger.
+  - Text inside an element with `opacity` below 1, which lost an edge or drew a ghost line at some scales in the debugger, with `zoom`, with `calc()`, and at 1:1 ([interface log][p24]), since disabled states and fades both rest on it.
   - React in the banner panel's page, since p23 ran it only in the EFB's document.
   - `position: -webkit-sticky`, which pins the session card; the engine parses it, and nobody has seen it stick.
   - What a masked element costs a frame, for the [scrolling page's fold](#a-scrolling-page-folds-its-surfaces-and-a-change-on-a-page-is-one-moment-in-three-steps), since a browser usually draws one offscreen (unverified in Coherent GT); if it costs too much, the fallback is a hard top edge, with a 1px line under the header while the page is scrolled.
@@ -282,7 +299,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - Whether the wheel glides or steps in an EFB app, for the page's coasting.
   - Whether clicks reach the cockpit through the banner's empty part, a [case in the sim](01-apps.md#cases-for-the-bench) that the banner's box was sized around.
 - **Because:** Coherent GT drops what it can't parse with no error, and p13 and p14 found three things it parses and then ignores ([architecture log][p13]; [architecture log][p14]), so a frame that draws in a browser says nothing about these.
-- **Leaves out:** the kit's development loop, and whether it uses the SDK's CoherentGT Debugger as a host ([interface log][p22]).
+  The development loop, `tools/dev.ts`, runs each page in a copy of the SDK's CoherentGT Debugger with no sim ([interface log][p22]), so what it can't show is what this list checks.
 
 ## The desktop app shows Velopack's windows and its own figures, and the build designs the rest
 
@@ -666,6 +683,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Because:** every input is recorded with its time, so a pilot's rough time still finds the moment (user, 2026-10-31).
 
 [coverage]: log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel
+[p24]: log.md#2026-11-01-in-the-sdks-debugger-zoom-scales-a-page-with-sharp-text-and-its-layout-motion-scrolling-and-real-input-in-step-where-a-transform-blurs-its-text
 [p22]: log.md#2026-11-01-the-sdks-coherentgt-debugger-runs-our-pages-in-coherent-gt-with-no-sim-and-matches-the-sims-efb-on-1159-of-p14s-1170-css-items-and-on-repeated-work-in-a-loaded-page
 [p23]: log.md#2026-11-01-react-19-runs-in-the-efbs-own-document-and-takes-a-pilots-real-click-wheel-and-typing-and-on-a-card-sized-change-it-stays-within-01ms-of-fscomponent
 [p02]: ../install/log.md#2026-10-25-an-egui-window-in-a-rust-tray-app-takes-96-mb-to-153-mb-while-open-and-leaves-62-mb-to-69-mb-in-the-process-once-it-closes-where-tauris-leaves-37-mb

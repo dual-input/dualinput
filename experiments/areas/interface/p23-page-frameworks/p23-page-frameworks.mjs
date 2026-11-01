@@ -100,7 +100,7 @@ async function build(names) {
     // esbuild resolves an alias from its working directory, and Preact is installed here.
     await esbuild.build({ ...BUILDS[name], absWorkingDir: HERE, bundle: true, format: "iife", target: "es2017", minify: true, legalComments: "none", define: { "process.env.NODE_ENV": '"production"' }, outfile, logLevel: "warning" })
     const code = readFileSync(outfile)
-    const checked = spawnSync(process.execPath, ["tools/coherent-check/main.ts", outfile], { cwd: REPO, encoding: "utf8" })
+    const checked = spawnSync(process.execPath, ["node_modules/coherent-checks/dist/main.js", outfile], { cwd: REPO, encoding: "utf8" })
     const findings = (checked.stdout + checked.stderr).trim().split("\n").filter(Boolean).map((l) => l.replace(outfile, `${name}.js`).replace(repoRelative(outfile), `${name}.js`))
     lines.push(`${name}: ${(code.length / 1024).toFixed(1)} KB, ${(gzipSync(code).length / 1024).toFixed(1)} KB gzipped; Coherent GT check exit ${checked.status}, ${findings.length} lines of findings`)
     for (const f of findings.slice(0, 12)) lines.push(`    ${f.slice(0, 200)}`)

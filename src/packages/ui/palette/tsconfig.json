@@ -1,0 +1,18 @@
+// The palette runs in Node, in the build that writes each page's stylesheet, so it's checked as our
+// tools are, apart from the kit's components, which run in Coherent GT.
+{
+  "compilerOptions": {
+    "target": "es2024",
+    "lib": ["es2024"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "types": ["node"]
+  },
+  "include": ["*.ts"]
+}

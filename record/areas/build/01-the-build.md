@@ -152,7 +152,10 @@ The figure's model and the banner's in-game panel definition are the only files 
   The hook gives the same findings at our TypeScript's line, and typescript-eslint refuses TypeScript 7, so a config would need TypeScript 6 installed beside it (measured, [log][check]); one generated from the same data file can come later.
   ESLint with eslint-plugin-es-x as the check itself ran about 3 times slower, has no rule for any web API or for `Intl`, and in its aggressive mode put 172 false hits on one bundle (measured, [log][check]).
 - The data file holds what [Coherent GT's JavaScript](../architecture/coherent-gt.md) lists.
-  The check lives in `tools/coherent-check/` until its repository is made, after which our `package.json` pins it at an exact version.
+- **CSS.** The check also reads each CSS file we ship into the sim, with css-tree, and passes only what p14 measured the engine keeping ([tentative decisions](../interface/decisions.md#the-coherent-gt-check-covers-the-css-we-ship-into-the-sim)).
+  Its README says what each part of a rule passes on, and its known gaps.
+- **Where it lives.** The check is its own repository, `dual-input/coherent-checks`, which our `package.json` installs from GitHub, with npm's lockfile pinning the commit.
+  The hook stays with us, in `tools/coherent-hook.ts`, since it names our folders and runs our build.
 
 ### No for-of rewrite
 

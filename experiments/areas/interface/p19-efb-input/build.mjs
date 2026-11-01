@@ -220,7 +220,7 @@ for (const f of ["Geist-Regular.ttf", "Geist-Regular.woff2"]) write(`${dir}/Asse
 
 const syntax = spawnSync(process.execPath, ["--check", jsFile], { stdio: "inherit" })
 if (syntax.status !== 0) die(`${APP.internal}.js doesn't parse.`)
-const coherent = spawnSync(process.execPath, ["tools/coherent-check/main.ts", jsFile], { cwd: ROOT, stdio: "inherit" })
+const coherent = spawnSync(process.execPath, ["node_modules/coherent-checks/dist/main.js", jsFile], { cwd: ROOT, stdio: "inherit" })
 if (coherent.status !== 0) die(`${APP.internal}.js fails the Coherent GT check.`)
 
 const filetime = (ms) => ((BigInt(Math.floor(ms)) + 11644473600000n) * 10000n).toString()

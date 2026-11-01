@@ -1,0 +1,52 @@
+import { Children } from "react"
+import type { ButtonHTMLAttributes, ReactNode, Ref } from "react"
+
+import { cx } from "../lib/cx.ts"
+
+const BASE =
+  "inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-4xl border bg-clip-padding text-sm font-medium transition-all select-none active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0"
+
+const VARIANTS = {
+  default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+  outline: "border-border hover:bg-outline-hover hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
+  secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary",
+  ghost: "border-transparent hover:bg-muted/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
+  destructive: "border-transparent bg-destructive/20 text-destructive hover:bg-destructive/30",
+  link: "border-transparent text-primary hover:underline",
+  // A solid button in a status color, for the action of a box in that color, which takes the box's
+  // whole palette (record/areas/interface/decisions.md, "The apps' words follow a few rules").
+  success: "border-transparent bg-success text-success-foreground hover:bg-success/90",
+  warning: "border-transparent bg-warning text-warning-foreground hover:bg-warning/90",
+  danger: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/90",
+}
+
+const SIZES = {
+  xs: "h-6 space-x-1 px-2.5 text-xs [&_svg:not([class*='size-'])]:size-3",
+  sm: "h-8 space-x-1 px-3 [&_svg:not([class*='size-'])]:size-4",
+  default: "h-9 space-x-1.5 px-3 [&_svg:not([class*='size-'])]:size-4",
+  lg: "h-10 space-x-1.5 px-4 [&_svg:not([class*='size-'])]:size-4",
+  "icon-sm": "size-8 [&_svg:not([class*='size-'])]:size-4",
+  icon: "size-9 [&_svg:not([class*='size-'])]:size-4",
+  // No box of its own, for a link that sits in a line of words.
+  inline: "h-auto border-0 p-0 [&_svg:not([class*='size-'])]:size-4",
+}
+
+export type ButtonVariant = keyof typeof VARIANTS
+export type ButtonSize = keyof typeof SIZES
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; size?: ButtonSize; ref?: Ref<HTMLButtonElement> }
+
+/**
+ * Coherent GT drops `gap`, and the margins that stand in for it reach only elements, so a word beside
+ * an icon needs an element of its own for the space between them to land on.
+ */
+export function spaced(children: ReactNode): ReactNode {
+  return Children.map(children, (child) => (typeof child === "string" || typeof child === "number" ? <span>{child}</span> : child))
+}
+
+export function Button({ variant = "default", size = "default", type = "button", className, children, ...rest }: ButtonProps) {
+  return (
+    <button type={type} className={cx(BASE, VARIANTS[variant], SIZES[size], className)} {...rest}>
+      {spaced(children)}
+    </button>
+  )
+}

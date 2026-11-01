@@ -15,7 +15,7 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/tools/coherent-check/hook.ts"]
+            "args": ["${CLAUDE_PROJECT_DIR}/tools/coherent-hook.ts"]
           }
         ]
       }

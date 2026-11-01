@@ -7,9 +7,9 @@ import { spawnSync } from "node:child_process"
 import fs from "node:fs"
 import path from "node:path"
 
+import { checkFile, format } from "coherent-checks"
 import * as esbuild from "esbuild"
 
-import { checkFile, format } from "../coherent-check/check.ts"
 import { fromRoot, ROOT } from "./repo.ts"
 import { Failed } from "./run.ts"
 import { STOCK } from "./stock.ts"

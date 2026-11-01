@@ -1,0 +1,50 @@
+/* The kit's stylesheet, which each page builds with its own source files. Coherent GT draws Geist's
+   TTF, from our package and from 127.0.0.1, and not its WOFF2 (record/areas/interface/log.md,
+   2026-10-25). Font faces share the document's one namespace, so ours carry our name. */
+@font-face { font-family: "DualInput Geist"; font-weight: 400; src: url("fonts/Geist-Regular.ttf") format("truetype"); }
+@font-face { font-family: "DualInput Geist"; font-weight: 500; src: url("fonts/Geist-Medium.ttf") format("truetype"); }
+@font-face { font-family: "DualInput Geist"; font-weight: 600; src: url("fonts/Geist-SemiBold.ttf") format("truetype"); }
+@font-face { font-family: "DualInput Geist Mono"; font-weight: 400; src: url("fonts/GeistMono-Regular.ttf") format("truetype"); }
+@font-face { font-family: "DualInput Geist Mono"; font-weight: 500; src: url("fonts/GeistMono-Medium.ttf") format("truetype"); }
+
+/* A reset of our own, scoped to our root, since Tailwind's would restyle the EFB around our app and
+   without one nothing draws a border, because Tailwind's reset is what sets border-style
+   (record/areas/interface/log.md, 2026-10-25). The custom properties go in here too, from the
+   palette, by the build. */
+.dualinput-ui {
+  /* @kit-variables */
+  position: relative;
+  font-family: "DualInput Geist", sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: rgba(var(--foreground), 1);
+  -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+}
+.dualinput-ui *, .dualinput-ui *::before, .dualinput-ui *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-width: 0;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.dualinput-ui button, .dualinput-ui input, .dualinput-ui select, .dualinput-ui textarea {
+  font-family: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  background-color: transparent;
+  outline: none;
+}
+.dualinput-ui button { cursor: pointer; text-align: center; }
+.dualinput-ui button:disabled { cursor: default; }
+.dualinput-ui a { color: inherit; text-decoration: inherit; }
+.dualinput-ui ol, .dualinput-ui ul { list-style: none; }
+.dualinput-ui svg { display: block; }
+.dualinput-ui input { -webkit-user-select: text; }
+.dualinput-ui input::placeholder { color: rgba(var(--muted-foreground), 1); }
+
+@tailwind base;
+@tailwind utilities;

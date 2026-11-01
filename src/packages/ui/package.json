@@ -1,0 +1,16 @@
+{
+  "name": "@dualinput/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./palette": "./palette/palette.ts",
+    "./kit.css": "./src/kit.css"
+  },
+  "peerDependencies": {
+    "lucide-react": "1.61.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  }
+}

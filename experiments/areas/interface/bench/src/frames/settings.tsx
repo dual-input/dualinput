@@ -322,7 +322,7 @@ function Recordings() {
       aside={`${total} MB of 1 GB`}
       foot={
         <>
-          A record of what Dual Input did in each run, kept on this PC to help us trace a problem you report. The oldest are deleted first. To report one, open the run's folder and send us its log.txt on{" "}
+          A record of what Dual Input did in each run, kept on this PC to help us trace a problem you report. The oldest are deleted first. To report one, send us the log.txt from that run's folder on{" "}
           <button type="button" onClick={() => toast("Opening our Discord in your browser")} className="underline underline-offset-2 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
             Discord
           </button>
@@ -378,9 +378,7 @@ function Recordings() {
 // Try again. A ready update grows a box in the header's news tone, which installs it: the sim
 // closes, the desktop app installs it, and starts the sim again (user, 2026-10-31), which asks
 // first, since it ends the flight; in a session, the session holds the update, so the box says to
-// install it outside a flight, and the header shows no update row. To a pilot it's a flight, not a
-// session, since flights are what they host, join, and leave (user, 2026-11-01: "say 'flight' for
-// 'session' to the user"). The box takes the app's other boxes' tint and corners, a 7% wash
+// install it outside a session, and the header shows no update row. The box takes the app's other boxes' tint and corners, a 7% wash
 // and 2xl, since the 10% wash at xl read too bright and too sharp (user, 2026-11-01). The header's View update opens this section,
 // scrolled into view.
 type Update = "current" | "checking" | "downloading" | "ready" | "failed"
@@ -483,7 +481,7 @@ function DualInput({ start, session, show, play }: { start: Update; session: boo
               <CircleArrowUp className="size-4 shrink-0 text-primary [transform:translateY(3px)]" />
               <span className="flex flex-col gap-1">
                 <span className="text-sm font-medium text-primary">Dual Input {NEXT} is ready</span>
-                <span className="text-sm text-foreground/75">{session ? "Install it when you are not in a flight." : "Close the sim to install."}</span>
+                <span className="text-sm text-foreground/75">{session ? "Install it when you're not in a session." : "Close the sim to install."}</span>
               </span>
             </div>
             {!session && (

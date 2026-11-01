@@ -42,8 +42,8 @@ const hexOf = (hue: string) => FIGURE_COLORS.find((c) => c.name === hue)!.hex
 // record has them (record/areas/core/02-clients-and-panel-bridge.md, What a unit registers and
 // calls). One about a crewmate, or about who has control, leads with that pilot's head, slumped
 // while they're out of the flight, as the crew rows draw it; one about something happening now
-// that ends by itself, a catch-up or a replay, leads with a spinner in a neutral color, as the
-// take-control strip's line does; the rest lead with their level's icon, as the header's rows do.
+// that ends by itself, catching up, leads with a spinner in a neutral color, as the take-control
+// strip's line does; the rest lead with their level's icon, as the header's rows do.
 type Level = "info" | "warning" | "trouble"
 type Note = { level: Level; title: string; detail?: string; list?: string[]; who?: Pilot; out?: boolean; busy?: boolean }
 const LEVEL_ICON: Record<Level, React.ReactNode> = {
@@ -60,33 +60,33 @@ export const NOTES = {
   "control-them": { when: "Control passes to another pilot", note: { level: "info", who: JAMES, title: "James has control" } },
   "control-left": { when: "Control passes to you as the pilot flying leaves the flight", note: { level: "info", who: YOU, title: "You have control", detail: "James left the flight." } },
   "refused-catch-up": { when: "Take control refused while you catch up", note: { level: "warning", title: "Couldn't take control", detail: "You're catching up with James." } },
-  "refused-replay": { when: "Take control refused during a replay", note: { level: "warning", title: "Couldn't take control", detail: "Dual Input is replaying what you missed." } },
   "lost-pf": { when: "No link to the pilot flying, held", note: { level: "warning", title: "Reconnecting to James", detail: "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect." } },
   "taken-while-away": { when: "Back after another pilot took control while your link was lost", note: { level: "warning", title: "Adam took control while you were disconnected", detail: "What you changed in that time was undone, and your pages and FMS entries may differ from Adam's." } },
-  "catching-up": { when: "Catching up after joining late, held", note: { level: "info", busy: true, title: "Catching up with James", detail: "Anything you move in the cockpit now will be reset." } },
-  replaying: { when: "Replaying a short outage, held", note: { level: "info", busy: true, title: "Replaying what you missed", detail: "Anything you move in the cockpit now will be reset." } },
+  "catching-up": { when: "Catching up, after joining late or after a short outage, held", note: { level: "info", busy: true, title: "Catching up with James", detail: "Anything you move in the cockpit now will be reset." } },
   "caught-up": { when: "Caught up after joining late", note: { level: "info", title: "Caught up with James", detail: "Pages and FMS entries may differ from James's." } },
-  pause: { when: "The pilot flying in the pause menu, held, on the others' banners", note: { level: "info", who: JAMES, title: "James is in the pause menu" } },
-  left: { when: "A crewmate leaves the flight", note: { level: "info", who: ADAM, out: true, title: "Adam left the flight", detail: "Dual Input rejoins them once they're back in it." } },
-  closed: { when: "A crewmate closes their sim", note: { level: "info", who: ADAM, out: true, title: "Adam closed their sim", detail: "Dual Input rejoins them once they're back in a flight." } },
-  crashed: { when: "A crewmate's sim crashes", note: { level: "warning", who: ADAM, out: true, title: "Adam's sim crashed", detail: "Dual Input rejoins them once they're back in a flight." } },
+  "caught-up-outage": { when: "Caught up after a short outage", note: { level: "info", title: "Caught up with James" } },
+  pause: { when: "The pilot flying in the pause menu, held, on the others' banners", note: { level: "info", who: JAMES, title: "James has paused" } },
+  left: { when: "A crewmate goes to the menu or another flight", note: { level: "info", who: ADAM, out: true, title: "Adam left the flight", detail: "They're still in the session." } },
+  closed: { when: "A crewmate closes their sim", note: { level: "info", who: ADAM, out: true, title: "Adam closed their sim", detail: "They're still in the session." } },
+  crashed: { when: "A crewmate's sim crashes", note: { level: "warning", who: ADAM, out: true, title: "Adam's sim crashed", detail: "They're still in the session." } },
+  "left-session": { when: "A crewmate leaves the session", note: { level: "info", who: ADAM, out: true, title: "Adam left the session" } },
   back: { when: "A crewmate is back in the flight", note: { level: "info", who: ADAM, title: "Adam is back in the flight" } },
   "service-reconnecting": { when: "The service's link lost, held", note: { level: "trouble", title: "Reconnecting to the Dual Input service", detail: "Nothing syncs until it's back." } },
   "service-down": { when: "The service not running, held", note: { level: "trouble", title: "Dual Input service isn't running", detail: "Nothing syncs until it's back. Open it from the Start menu." } },
-  "sync-one": { when: "A control that never matched, once per control for each load", note: { level: "warning", title: "Couldn't sync the beacon", detail: "Yours may differ from James's." } },
+  "sync-one": { when: "A control that never matched, once per control for each load", note: { level: "warning", title: "Couldn't sync Beacon", detail: "Yours may differ from James's." } },
   "sync-several": { when: "Several at one load, as one notification", note: { level: "warning", title: "Couldn't sync 3 controls", detail: "Yours may differ from James's:", list: ["Beacon", "Taxi light", "Fuel pump 2"] } },
   bridge: { when: "The panel bridge didn't load, held", note: { level: "trouble", title: "Cockpit screens aren't syncing", detail: "Dual Input couldn't load into the cockpit's panels. Another add-on that replaces VCockpit.js is the likeliest cause." } },
-  "module-stopped": { when: "Our module stopped, held", note: { level: "trouble", title: "Dual Input's add-on stopped", detail: "It can't fly or hold the aircraft until you restart the sim. A frozen aircraft stays frozen until you take control or leave the session." } },
-  "module-missing": { when: "Our module's file missing from a package that loaded, held", note: { level: "trouble", title: "Part of Dual Input's add-on is missing", detail: "It can't fly or hold the aircraft. Reinstall Dual Input with the sim closed." } },
-  helper: { when: "The input and audio helper down, held", note: { level: "trouble", title: "Your take-control key and ATC audio aren't working", detail: "Their helper stopped, and Dual Input is starting it again." } },
+  "module-stopped": { when: "Our module stopped, held", note: { level: "trouble", title: "Dual Input's WASM module stopped", detail: "It can't fly or hold the aircraft until you restart the sim. A frozen aircraft stays frozen until you take control or leave the session." } },
+  "module-missing": { when: "Our module's file missing from a package that loaded, held", note: { level: "trouble", title: "Dual Input's WASM module is missing", detail: "It can't fly or hold the aircraft. Reinstall Dual Input with the sim closed." } },
+  helper: { when: "The Windows helper down, held", note: { level: "trouble", title: "Dual Input's Windows helper is down", detail: "Take-control keybinds, ATC audio, Dual Input's sounds, and your figure's pointing won't work until it's back." } },
   want: { when: "A feature's want the helper can't carry out, held", note: { level: "warning", title: "Your take-control key isn't working", detail: "Windows didn't let Dual Input listen for F9." } },
-  seat: { when: "This pilot's camera in another figure's seat, held", note: { level: "info", who: JAMES, title: "This seat is taken", detail: "James's figure is in it. The Copilot seat is free." } },
+  seat: { when: "This pilot's camera in another figure's seat, held", note: { level: "info", who: JAMES, title: "This seat is taken", detail: "James's figure hides while your view is in it." } },
 } satisfies Record<string, { when: string; note: Note }>
 export type NoteKey = keyof typeof NOTES
 
 // A card's fill and edge, which every card on the banner shares. The kit's card draws its edge as an
 // outer ring; this one's is inset, so it lies over the card's own fill rather than over the cockpit.
-const CARD = "w-full rounded-xl bg-card text-card-foreground inset-ring inset-ring-foreground/10"
+const CARD = "w-full rounded-3xl bg-card text-card-foreground inset-ring inset-ring-foreground/10"
 
 // A click anywhere on a card opens Dual Input's app on the EFB, on Home; where each notification
 // lands waits for the frames (user, 2026-11-01).

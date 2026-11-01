@@ -120,7 +120,7 @@ function issuesOf(status: HeaderStatus, Button: ReturnType<typeof useUI>["Button
       tone: "bad",
       word: "Internet",
       title: "Your PC seems offline",
-      detail: inSession ? "You've lost the connection to the others. When it's back, Dual Input will reconnect you and replay what you missed." : "Dual Input needs an internet connection to host or join.",
+      detail: inSession ? "You've lost the connection to the others. When it's back, Dual Input will reconnect you and catch you up." : "Dual Input needs an internet connection to host or join.",
     })
   else if (status.servers === "unreachable")
     issues.push({

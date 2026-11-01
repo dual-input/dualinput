@@ -3,6 +3,18 @@
 The calls settled in the stage 11b cloud session, from 2026-10-31, kept as the PC's `stage-11b-outline-calls.md` keeps its own: one dated bullet per call, with the user's words where they gave them, and what was tried and dropped.
 They're bullets to append to that file, which holds the calls before this session, and they go into `record/areas/interface/decisions.md` when the outline is done.
 
+## Left for the record
+
+The cloud session closed on 2026-11-01 with stage 11b's design done but for the desktop app, which the build designs (user, 2026-11-01: "you can close everything here. I'll have the local PC session do the record writing"). Writing the outline into the record takes these, beyond the calls below:
+
+- Edits the calls make in other docs: take control's hold is 0.35s, where control/01 and 03-v1-scope say 1s; the lost-link warning and the sim-crash examples say "he", where a pilot is "they"; sync/02's line drops "send a bug report from the desktop app"; traffic's two banner notifications are its tab's counts; avatars/01's unreadable-models notification is the Figures tab's note, and its free-seats one is "This seat is taken".
+- interface/01-apps.md: where a notification's click lands, and the order that opens the EFB carrying it; an EFB app of another version shows setup's "Add-on version mismatch" box, where Trouble's table has it reach only the log; the banner's place, box, dismissal, and overflow.
+- The code map's What the bridge owns: the lock that turns into a warning looks like a lock, with Dismiss, and its card takes presses, where it says a warning that blocks nothing; Dismiss reaches every panel by the CommBus event `DUALINPUT_BRIDGE_DISMISS`, which joins names the sim shares; the blocked press's flash is our error red at 55%.
+- The panel bridge's check, no cockpit panel's `hello` within 10s of the profile loading, warns falsely in an aircraft with no cockpit panels; it needs to know the aircraft has panels.
+- Quit only in the tray, which changes the one-window decision; Start with Windows in the EFB app's Settings; the four figure-visibility settings.
+- Still open: whether the session card lists sync failures, which land on the Session tab with nothing there to list them; whether a reload should clear Ready, for the session's units; whether the aircraft picker's, the match check's, and the authors' notes' fades feel heavy.
+- The bench's canvas: each frame in a React root of its own, live only near the view, and a name card below 35% zoom; a jump to a frame in the first seconds after the very first load can still drift while every frame is measured once.
+
 ## Before publishing a frame
 
 Defects the user caught on 2026-10-31 that a look at the changed frames at 2x would have caught first.

@@ -303,16 +303,19 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 //   joined, and on 2026-11-01, after the banner's did (measured in Chromium).
 // - Only frames on the board, or within half the board's size of it, are live; the rest are
 //   placeholders at their last measured height, kept across reloads, so the layout doesn't jump.
+//   A frame never measured goes live once, wherever it is, so no placeholder stays a guess.
 // - Below 35% zoom no frame is live, since zoomed out every frame is on the board at once; each
 //   shows its name on a card its size instead.
 // Frames that come live mount a few at a time, each batch in a task of its own, so the board
-// stays responsive as a pan brings many in.
+// stays responsive as a pan brings many in; a frame on the board goes ahead of those only being
+// measured, so a jump to a frame while the canvas is still measuring shows it at once.
 const LIVE = { margin: 0.5, minZoom: 0.35, after: 120 }
 const MOUNT_BATCH = 4
 const toMount: (() => void)[] = []
 let mounting = false
-function mountSoon(go: () => void) {
-  toMount.push(go)
+function mountSoon(go: () => void, first: boolean) {
+  if (first) toMount.unshift(go)
+  else toMount.push(go)
   if (mounting) return
   mounting = true
   const next = () => {
@@ -372,13 +375,13 @@ function LiveFrame({ entry, theme, play, zoom, height }: { entry: FrameEntry; th
       </TooltipProvider>
     )
   }, [entry, theme, play, zoom])
-  return <div ref={host} style={{ minHeight: held }} />
+  return <div ref={host} data-live-host data-settled={held === undefined || undefined} style={{ minHeight: held }} />
 }
-function DeferredFrame({ placeholder, ...props }: { entry: FrameEntry; theme: Theme; play?: Action; zoom: number; height?: number; placeholder: React.ReactNode }) {
+function DeferredFrame({ placeholder, first, ...props }: { entry: FrameEntry; theme: Theme; play?: Action; zoom: number; height?: number; placeholder: React.ReactNode; first: boolean }) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     let live = true
-    mountSoon(() => live && setMounted(true))
+    mountSoon(() => live && setMounted(true), first)
     return () => {
       live = false
     }
@@ -427,10 +430,12 @@ export function Canvas() {
     const t = window.setTimeout(() => setLaidOut(view.z), SETTLE)
     return () => clearTimeout(t)
   }, [view.z, laidOut])
+  const [current, setCurrent] = useState<string | null>(null)
   // Which frames are live, worked out a moment after the view or the layout's zoom changes, and each
   // frame's last measured height, which its placeholder keeps.
   const [sizes, setSizes] = useState<Record<string, number>>(() => stored(SIZES_KEY, isSizes) ?? {})
   const [live, setLive] = useState<Set<string>>(new Set())
+  const [onBoard, setOnBoard] = useState<Set<string>>(new Set())
   useEffect(() => {
     const t = window.setTimeout(() => {
       const b = board.current
@@ -439,42 +444,54 @@ export function Canvas() {
       const mx = box.width * LIVE.margin
       const my = box.height * LIVE.margin
       const next = new Set<string>()
+      const seen = new Set<string>()
       const heights = { ...sizes }
       let measured = false
       for (const [id, el] of frames.current) {
-        if (live.has(id) && el.offsetHeight > 0 && heights[id] !== el.offsetHeight) {
+        // A frame's height counts once its root has drawn and no longer holds a placeholder's.
+        const drawn = el.querySelector("[data-live-host][data-settled]")
+        if (live.has(id) && drawn && drawn.childElementCount > 0 && heights[id] !== el.offsetHeight) {
           heights[id] = el.offsetHeight
           measured = true
         }
+        // A frame never measured goes live once, wherever it is, so its placeholder learns its height.
+        if (!(id in heights)) next.add(id)
         if (laidOut < LIVE.minZoom) continue
         const r = el.getBoundingClientRect()
         if (r.right > box.left - mx && r.left < box.right + mx && r.bottom > box.top - my && r.top < box.bottom + my) next.add(id)
+        if (r.right > box.left && r.left < box.right && r.bottom > box.top && r.top < box.bottom) seen.add(id)
       }
+      if (seen.size !== onBoard.size || [...seen].some((id) => !onBoard.has(id))) setOnBoard(seen)
       if (measured) {
         store(SIZES_KEY, heights)
         setSizes(heights)
       }
       if (next.size !== live.size || [...next].some((id) => !live.has(id))) setLive(next)
-      // The anchor is the frame nearest the board's middle, the one a jump to a frame centers.
+      // The anchor is the frame a jump went to while it's on the board, or else the frame whose
+      // middle is nearest the board's: a tall frame's box can cover the board's middle while the
+      // frame the pilot is looking at sits beside it, and anchoring to that took the view away
+      // from the frame jumped to.
       const cx = box.left + box.width / 2
       const cy = box.top + box.height / 2
-      let nearest: string | null = null
+      const jumpedTo = current ? frames.current.get(current) : undefined
+      let nearest: string | null = current && seen.has(current) && jumpedTo ? current : null
       let best = Infinity
-      for (const [id, el] of frames.current) {
-        const r = el.getBoundingClientRect()
-        const d = Math.hypot(Math.max(r.left - cx, 0, cx - r.right), Math.max(r.top - cy, 0, cy - r.bottom))
-        if (d < best) {
-          best = d
-          nearest = id
+      if (!nearest)
+        for (const [id, el] of frames.current) {
+          const r = el.getBoundingClientRect()
+          const d = Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy)
+          if (d < best) {
+            best = d
+            nearest = id
+          }
         }
-      }
       if (nearest !== anchor.current) {
         anchor.current = nearest
         anchorAt.current = null
       }
     }, LIVE.after)
     return () => clearTimeout(t)
-  }, [view, laidOut, live, sizes])
+  }, [view, laidOut, live, sizes, current, onBoard])
   // A frame that goes live, or grows, moves every frame after it, and a placeholder's height is only
   // a guess until its frame has been live once, so the frame in the middle of the board, which a
   // jump to a frame just centered, could slide away and go back to a placeholder. Each animation
@@ -505,7 +522,6 @@ export function Canvas() {
     frame = requestAnimationFrame(hold)
     return () => cancelAnimationFrame(frame)
   }, [])
-  const [current, setCurrent] = useState<string | null>(null)
   const [runs, setRuns] = useState<Record<string, number>>({})
   const [playing, setPlaying] = useState<Record<string, Action | undefined>>({})
   const rerun = (name: string, play?: Action) => {
@@ -684,7 +700,7 @@ export function Canvas() {
                                   {f.name}
                                 </div>
                               )
-                              return live.has(idOf(s, f)) ? <DeferredFrame entry={f} theme={theme} play={playing[idOf(s, f)]} zoom={laidOut} height={height} placeholder={placeholder} /> : placeholder
+                              return live.has(idOf(s, f)) ? <DeferredFrame entry={f} theme={theme} play={playing[idOf(s, f)]} zoom={laidOut} height={sizes[idOf(s, f)]} placeholder={placeholder} first={onBoard.has(idOf(s, f))} /> : placeholder
                             })()}
                           </div>
                           {f.tall && (

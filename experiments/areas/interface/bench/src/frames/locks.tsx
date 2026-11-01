@@ -3,8 +3,8 @@
 // record/areas/architecture/02-code-map.md, What the bridge owns). A visible lock covers each
 // synced display on a machine other than the PF's while it has no link up to the PF, or while it
 // catches up; it blocks presses, and the pilot may still want to read the display through it, so
-// it's a dark scrim at 50% under an opaque card that says why, the banner's card, centered (user,
-// 2026-11-01: "yes, build it", to my sketch). The lock that 8s to 10s after the core last renewed
+// it's a veil the display shows through, under an opaque card that says why, the banner's card,
+// centered (user, 2026-11-01: "yes, build it", to my sketch). The lock that 8s to 10s after the core last renewed
 // it blocks nothing becomes a strip along the display's top edge; and a press blocked while
 // another pilot's gesture plays flashes the display's whole rect, one solid color with no words,
 // while it's held (user, 2026-10-17). What each says is the content call of 2026-11-01 in the
@@ -26,11 +26,13 @@ const DISPLAYS = {
 }
 type DisplayKind = keyof typeof DISPLAYS
 
-// One layout at every display size, its text sized from the display, a 26th of its width or a
-// fifth and a half of its height, whichever is smaller, with no form that drops the words, since a
-// pilot can zoom in far enough to read small text (user, 2026-11-01: "tiny text could work in tiny
-// screens"). The card is the banner's, sized to its words up to 17em or 90% of the display.
-const emOf = (d: { width: number; height: number }) => Math.min(d.width / 26, d.height / 5.5)
+// One layout at every display size, its text 16px, the banner's scale, and smaller on a display
+// too small for it, a 26th of its width or a fifth and a half of its height, with no form that drops
+// the words, since a pilot can zoom in far enough to read small text (user, 2026-11-01: "tiny text
+// could work in tiny screens", then of a card that grew with the display: "are we oversizing the
+// overlay card on larger panels? I'd rather not"). The card is the banner's, sized to its words up
+// to 17em or 90% of the display.
+const emOf = (d: { width: number; height: number }) => Math.min(16, d.width / 26, d.height / 5.5)
 
 export type Lock = { kind: "lost"; key?: string } | { kind: "catching-up" } | { kind: "silent" } | { kind: "flash" }
 
@@ -64,6 +66,24 @@ function LockCard({ lock }: { lock: Lock }) {
   )
 }
 
+// The veil is tinted for its lock, amber from our warning color for a lost link and neutral for a
+// catch-up, at about 45%, with a fine diagonal hatch over it in the same tint, which reads as
+// "disabled" at any display size, as FS Copilot's lock does (user, 2026-11-01: "the visual overlay
+// backdrops we implemented there were nicer looking"). The hatch is an 8px tile repeated by
+// background-size rather than one repeating gradient, since Coherent GT works gradients out at
+// reduced precision, and a few pixels' period across a wide panel smeared into broad bands (FS
+// Copilot fork, overlay.js, apply).
+const VEIL = {
+  lost: { veil: "rgba(22, 17, 6, 0.48)", hatch: "rgba(241, 190, 77, 0.14)" },
+  "catching-up": { veil: "rgba(10, 12, 16, 0.48)", hatch: "rgba(255, 255, 255, 0.07)" },
+}
+const HATCH_TILE = 8
+const hatched = (veil: string, line: string): React.CSSProperties => ({
+  backgroundColor: veil,
+  backgroundImage: `linear-gradient(45deg, ${line} 25%, transparent 25%, transparent 50%, ${line} 50%, ${line} 75%, transparent 75%, transparent)`,
+  backgroundSize: `${HATCH_TILE}px ${HATCH_TILE}px`,
+})
+
 function LockOver({ lock }: { lock: Lock }) {
   if (lock.kind === "flash") return <div className="absolute inset-0" style={{ background: "rgba(255, 84, 32, 0.6)" }} />
   if (lock.kind === "silent")
@@ -73,7 +93,7 @@ function LockOver({ lock }: { lock: Lock }) {
       </div>
     )
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+    <div className="absolute inset-0 flex items-center justify-center" style={hatched(VEIL[lock.kind].veil, VEIL[lock.kind].hatch)}>
       <LockCard lock={lock} />
     </div>
   )

@@ -120,7 +120,9 @@ const LAYER = "absolute inset-0 rounded-[inherit] inset-ring inset-ring-foregrou
 // desktop's notifications are (user, 2026-11-01: "how does one dismiss notifications (even held
 // ones, since they can be annoying if the user can't fix them in the moment)?"). The × is always
 // shown, in the muted color, since one that shows only on hover is hard to find, and it's a 28px
-// target, as Figures' swatches are, for a VR pointer, centered on the title's line. A press
+// target, as Figures' swatches are, for a VR pointer, 8px in from the card's top and right on every
+// card, so the ×s line up down the stack (user, 2026-11-01: "x button alignments are off between
+// messages", where a card led by a head and no detail had it 4px lower). A press
 // becomes a drag only past 6px, so a pointer that wobbles still clicks; the card follows it to the
 // right only, fading as it goes, and let go past a third of its width, or flung faster than
 // 0.5px/ms, it slides away, or else springs back. A held notification that's dismissed stays
@@ -181,8 +183,6 @@ function NoteCard({ note, onDismiss }: { note: Note; onDismiss?: () => void }) {
   ) : (
     <span className="flex h-5 shrink-0 items-center">{note.busy ? <Spinner className="size-4 text-muted-foreground" /> : LEVEL_ICON[note.level]}</span>
   )
-  // The title's line is centered 22px down a card, or 26px beside a head with no detail.
-  const xTop = note.who && !note.detail && !note.list ? 12 : 8
   const width = card.current?.offsetWidth ?? BANNER.width
   return (
     <div
@@ -220,7 +220,7 @@ function NoteCard({ note, onDismiss }: { note: Note; onDismiss?: () => void }) {
         </span>
       </div>
       {onDismiss && (
-        <Button variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={onDismiss} className="absolute right-2 text-muted-foreground" style={{ top: xTop }}>
+        <Button variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={onDismiss} className="absolute top-2 right-2 text-muted-foreground">
           <X />
         </Button>
       )}

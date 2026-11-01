@@ -12,7 +12,7 @@
 // Install and restart, and Start with Windows, each need the EFB app to reach the desktop app,
 // which holds the update and writes the Run value, and nothing carries either yet
 // (record/areas/interface/decisions.md, Dual Input's one full window is its EFB app).
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { CircleArrowUp, FolderOpen, Trash2, TriangleAlert, X } from "lucide-react"
 
@@ -24,6 +24,14 @@ import { ConfirmButton, RESTART_SIM } from "./confirm"
 import { ScrollWindow } from "./home"
 import { SwitchRow } from "./avatars"
 import { useFlightAround } from "./traffic"
+import { MOMENT, part, Room, useMoment, useReveal } from "./ease"
+
+// The page's motion (user, 2026-11-01: "just build the whole motion pass now"): a part whose state
+// changes while the pilot watches changes in the page's moment (ease.tsx), its old words fading
+// before its new ones fade in, so a row never shows two states at once. A play runs one change as
+// it would happen, for the frames: binding a key, switching Press and Hold, the picked device
+// disconnecting, and Check now finding an update.
+export type Play = "bind" | "hold" | "disconnect" | "update"
 
 const VERSION = "1.0.2"
 const NEXT = "1.0.3"
@@ -66,20 +74,42 @@ function Row({ label, note, tone, children }: { label: React.ReactNode; note?: R
 }
 
 // Two choices side by side, the kit's tabs drawn at a row's 32px, since a switch would name only
-// one of them.
+// one of them. The picked one's pill slides to a press at once, as a switch's thumb does, since a
+// control a pilot pressed answers outside the page's moment; it's measured from the buttons'
+// offsets, as Coherent GT has no ResizeObserver.
 function Choice<T extends string>({ value, options, onChange }: { value: T; options: [T, string][]; onChange: (v: T) => void }) {
+  const buttons = useRef(new Map<T, HTMLButtonElement>())
+  const [pill, setPill] = useState<{ left: number; width: number }>()
+  useLayoutEffect(() => {
+    const el = buttons.current.get(value)
+    if (el && (el.offsetLeft !== pill?.left || el.offsetWidth !== pill?.width)) setPill({ left: el.offsetLeft, width: el.offsetWidth })
+  })
+  const first = useRef(true)
+  useEffect(() => {
+    first.current = false
+  }, [])
   return (
-    <span role="radiogroup" className="inline-flex h-8 items-center rounded-full bg-muted p-0.5">
+    <span role="radiogroup" className="relative inline-flex h-8 items-center rounded-full bg-muted p-0.5">
+      {pill && (
+        <span
+          aria-hidden
+          className="absolute inset-y-0.5 left-0 rounded-full border border-input bg-input/30"
+          style={{ width: pill.width, transform: `translateX(${pill.left}px)`, transition: first.current ? "none" : "transform 200ms ease-out, width 200ms ease-out" }}
+        />
+      )}
       {options.map(([v, label]) => (
         <button
           key={v}
+          ref={(el) => {
+            if (el) buttons.current.set(v, el)
+          }}
           type="button"
           role="radio"
           aria-checked={v === value}
           onClick={() => onChange(v)}
           className={
-            "h-full rounded-full border px-3.5 text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 " +
-            (v === value ? "border-input bg-input/30 text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")
+            "relative h-full rounded-full border border-transparent px-3.5 text-sm font-medium transition-colors duration-200 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 " +
+            (v === value ? "text-foreground" : "text-muted-foreground hover:text-foreground")
           }
         >
           {label}
@@ -99,11 +129,25 @@ function Choice<T extends string>({ value, options, onChange }: { value: T; opti
 // In the bench, the next key pressed outside a text field binds; a button's name would be the
 // helper's, from its device.
 type Key = string | null | "waiting"
-function TakeControlKey({ start, onBound }: { start: Key; onBound: (key: string | undefined) => void }) {
+function TakeControlKey({ start, onBound, play }: { start: Key; onBound: (key: string | undefined) => void; play?: Play }) {
   const { Button, Kbd } = useUI()
   const [key, setKey] = useState<Key>(start)
   const kept = useRef<string | null>(start === "waiting" ? null : start)
   const [hold, setHold] = useState<"press" | "hold">("hold")
+  // The key's row and the hold's note change in the page's moment.
+  const keyMoment = useMoment(String(key), key)
+  const shownKey = keyMoment.shown
+  const holdMoment = useMoment(hold, hold)
+  useEffect(() => {
+    if (play === "bind") {
+      const timers = [window.setTimeout(() => setKey("waiting"), 700), window.setTimeout(() => ((kept.current = "F9"), setKey("F9")), 2200)]
+      return () => timers.forEach(window.clearTimeout)
+    }
+    if (play === "hold") {
+      const timers = [window.setTimeout(() => setHold("press"), 700), window.setTimeout(() => setHold("hold"), 2200)]
+      return () => timers.forEach(window.clearTimeout)
+    }
+  }, [play])
   useEffect(() => onBound(key === "waiting" || key === null ? undefined : key), [key, onBound])
   useEffect(() => {
     if (key !== "waiting") return
@@ -122,16 +166,17 @@ function TakeControlKey({ start, onBound }: { start: Key; onBound: (key: string 
     <Section title="Take control" foot="Keep it unbound in the sim's own controls, so it does only this">
       <SettingsCard>
         <Row label="Key or button">
-          {key === "waiting" ? (
+          <span className="flex items-center gap-1" style={part(keyMoment.stage, true)}>
+          {shownKey === "waiting" ? (
             <>
               <span className="mr-2 text-sm text-primary">Press a key or button…</span>
               <Button size="sm" variant="secondary" onClick={() => setKey(kept.current)}>
                 Cancel
               </Button>
             </>
-          ) : key ? (
+          ) : shownKey ? (
             <>
-              <Kbd className="mr-2 border border-foreground/70 bg-transparent font-semibold text-foreground/70">{key}</Kbd>
+              <Kbd className="mr-2 border border-foreground/70 bg-transparent font-semibold text-foreground/70">{shownKey}</Kbd>
               <Button size="sm" variant="secondary" onClick={() => setKey("waiting")}>
                 Change
               </Button>
@@ -147,8 +192,9 @@ function TakeControlKey({ start, onBound }: { start: Key; onBound: (key: string 
               </Button>
             </>
           )}
+          </span>
         </Row>
-        <Row label="Take control with a" note={hold === "hold" ? "Takes control once held for 0.35s, like the button" : "Takes control as soon as it's pressed"}>
+        <Row label="Take control with a" note={<span style={part(holdMoment.stage, true)}>{holdMoment.shown === "hold" ? "Takes control once held for 0.35s, like the button" : "Takes control as soon as it's pressed"}</span>}>
           <Choice
             value={hold}
             options={[
@@ -172,17 +218,27 @@ function TakeControlKey({ start, onBound }: { start: Key; onBound: (key: string 
 // default, which a warning under it names, in amber, lighting the tab's dot (the dot mine).
 const DEVICES = ["Headset (USB Audio)", "Speakers (Realtek(R) Audio)", "LG HDR 4K (NVIDIA High Definition Audio)"]
 const GONE = "Speakers (Focusrite USB Audio)"
-function OutputDevice({ missing }: { missing?: boolean }) {
+function OutputDevice({ missing, play }: { missing?: boolean; play?: Play }) {
   const { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectSeparator, SelectItem } = useUI()
-  const [value, setValue] = useState(missing ? GONE : "default")
-  const gone = value === GONE
+  const [value, setValue] = useState(missing || play === "disconnect" ? GONE : "default")
+  // In the play, the picked device is connected, then goes.
+  const [connected, setConnected] = useState(play === "disconnect")
+  useEffect(() => {
+    if (play !== "disconnect") return
+    const t = window.setTimeout(() => setConnected(false), 1200)
+    return () => window.clearTimeout(t)
+  }, [play])
+  const gone = value === GONE && !connected
+  // The warning comes as the device goes, its room opening and its words fading in once it's most
+  // of the way open, and goes the other way.
+  const warning = useReveal(gone)
   useShowDot("settings", gone)
   const items = [{ value: "default", label: "Windows default" }, ...[...DEVICES, GONE].map((d) => ({ value: d, label: d }))]
   return (
     <Section title="Sound">
       <SettingsCard>
-        <div className="flex flex-col gap-3 px-(--card-spacing) py-2">
-          <span className="text-sm">Output device</span>
+        <div className="flex flex-col px-(--card-spacing) py-2">
+          <span className="mb-3 text-sm">Output device</span>
           <Select items={items} value={value} onValueChange={(v: string | null) => v && setValue(v)}>
             <SelectTrigger className="w-full">
               <SelectValue>
@@ -224,12 +280,12 @@ function OutputDevice({ missing }: { missing?: boolean }) {
               </SelectGroup>
             </SelectContent>
           </Select>
-          {gone && (
+          <Room open={warning.open} style={warning.style} pad="pt-3">
             <p className="flex items-baseline gap-2 text-xs text-warning">
               <TriangleAlert className="size-3.5 shrink-0 [transform:translateY(2.7px)]" />
               <span>Not connected, so sound is playing on {DEVICES[0]}</span>
             </p>
-          )}
+          </Room>
         </div>
       </SettingsCard>
     </Section>
@@ -326,19 +382,39 @@ function Recordings() {
 // leave first, and the header shows no update row. The header's View update opens this section,
 // scrolled into view.
 type Update = "current" | "checking" | "downloading" | "ready" | "failed"
-function DualInput({ start, session, show }: { start: Update; session: boolean; show?: boolean }) {
+function DualInput({ start, session, show, play }: { start: Update; session: boolean; show?: boolean; play?: Play }) {
   const { Button, Separator, Spinner } = useUI()
   const [update, setUpdate] = useState(start)
   const [checked, setChecked] = useState("12 minutes ago")
+  const [done, setDone] = useState(42)
+  // The play: Check now, checking, then downloading the update, then ready.
+  useEffect(() => {
+    if (play !== "update") return
+    const timers = [window.setTimeout(() => setUpdate("checking"), 900), window.setTimeout(() => (setDone(0), setUpdate("downloading")), 2400)]
+    for (let i = 1; i <= 20; i++) timers.push(window.setTimeout(() => setDone(i * 5), 2400 + i * 120))
+    timers.push(window.setTimeout(() => setUpdate("ready"), 2400 + 21 * 120 + 300))
+    return () => timers.forEach(window.clearTimeout)
+  }, [play])
+  // The version's note changes in the page's moment; the download's count and bar move as they
+  // come, with no moment, as a count does.
+  const phase = update === "downloading" ? "downloading" : update
+  const noteMoment = useMoment(phase, update)
+  const ready = useReveal(update === "ready")
+  const bar = useReveal(update === "downloading")
   const at = useRef<HTMLElement>(null)
   // Opened from the header, the page starts scrolled to show the section whole, its title kept in
   // view, with no scroll to watch, as a page opened onto a part would. The canvas can draw a frame
-  // before it lays it out, so the place is set again each frame until it holds still.
+  // before it lays it out, so the place is set again each frame until it holds still. When an
+  // update turns ready while the page shows, its box opens, and the page follows it into view the
+  // same way, frame by frame as the box grows, so it isn't left under the tab bar.
+  const readyNow = update === "ready"
   useEffect(() => {
-    if (!show || !at.current) return
+    if (!(show || readyNow) || !at.current) return
     const el = at.current
     let frame = 0
     let last = NaN
+    // It keeps placing for as long as a room takes to open, as well as while the place moves.
+    const began = performance.now()
     const place = () => {
       let box = el.parentElement
       while (box && getComputedStyle(box).overflowY !== "auto") box = box.parentElement
@@ -346,14 +422,14 @@ function DualInput({ start, session, show }: { start: Update; session: boolean; 
       const zoom = box.getBoundingClientRect().height / box.clientHeight || 1
       const top = (el.getBoundingClientRect().top - box.getBoundingClientRect().top) / zoom + box.scrollTop
       box.scrollTop = Math.min(top - 20, top + el.offsetHeight + 20 - box.clientHeight)
-      if (box.scrollTop !== last) {
+      if (box.scrollTop !== last || performance.now() - began < MOMENT.move + MOMENT.in) {
         last = box.scrollTop
         frame = requestAnimationFrame(place)
       }
     }
     frame = requestAnimationFrame(place)
     return () => cancelAnimationFrame(frame)
-  }, [show])
+  }, [show, readyNow])
   const check = () => {
     setUpdate("checking")
     window.setTimeout(() => {
@@ -361,17 +437,20 @@ function DualInput({ start, session, show }: { start: Update; session: boolean; 
       setUpdate("current")
     }, 1500)
   }
+  const shownUpdate = noteMoment.shown
+  // Check now stays through checking, disabled, and goes with the rest of the row otherwise.
+  const checks = (u: Update) => u === "current" || u === "checking"
   const note =
-    update === "current" ? (
+    shownUpdate === "current" ? (
       `Up to date, checked ${checked}`
-    ) : update === "checking" ? (
+    ) : shownUpdate === "checking" ? (
       <span className="flex items-center gap-1.5">
         <Spinner className="size-3" />
         Checking for updates
       </span>
-    ) : update === "downloading" ? (
-      `Downloading ${NEXT}, 42%`
-    ) : update === "failed" ? (
+    ) : shownUpdate === "downloading" ? (
+      `Downloading ${NEXT}, ${done}%`
+    ) : shownUpdate === "failed" ? (
       `Couldn't download ${NEXT}: the connection timed out`
     ) : undefined
   return (
@@ -379,24 +458,24 @@ function DualInput({ start, session, show }: { start: Update; session: boolean; 
       <SettingsCard>
         <SwitchRow label="Start with Windows" />
         <Separator className="my-2" />
-        <Row label={`Version ${VERSION}`} note={note} tone={update === "failed" ? "text-destructive" : undefined}>
-          {(update === "current" || update === "checking") && (
-            <Button size="sm" variant="secondary" disabled={update === "checking"} onClick={check}>
+        <Row label={`Version ${VERSION}`} note={note && <span style={part(noteMoment.stage, true)}>{note}</span>} tone={shownUpdate === "failed" ? "text-destructive" : undefined}>
+          {(shownUpdate === "current" || shownUpdate === "checking") && (
+            <Button size="sm" variant="secondary" disabled={update === "checking"} onClick={check} style={part(noteMoment.stage, !(checks(noteMoment.from) && checks(noteMoment.to)))}>
               Check now
             </Button>
           )}
-          {update === "failed" && (
-            <Button size="sm" variant="secondary" onClick={check}>
+          {shownUpdate === "failed" && (
+            <Button size="sm" variant="secondary" onClick={check} style={part(noteMoment.stage, true)}>
               Try again
             </Button>
           )}
         </Row>
-        {update === "downloading" && (
+        <Room open={bar.open} style={bar.style}>
           <div className="mx-(--card-spacing) mt-1 mb-2 h-1 overflow-hidden rounded-full bg-muted">
-            <div className="h-full rounded-full bg-primary" style={{ width: "42%" }} />
+            <div className="h-full rounded-full bg-primary" style={{ width: `${done}%`, transition: "width 120ms linear" }} />
           </div>
-        )}
-        {update === "ready" && (
+        </Room>
+        <Room open={ready.open} style={ready.style}>
           <div className="mx-(--card-spacing) mt-1.5 mb-2 flex flex-col gap-3 rounded-xl bg-primary/10 px-4 py-3.5">
             <div className="flex items-baseline gap-2.5">
               <CircleArrowUp className="size-4 shrink-0 text-primary [transform:translateY(3px)]" />
@@ -411,21 +490,22 @@ function DualInput({ start, session, show }: { start: Update; session: boolean; 
               </div>
             )}
           </div>
-        )}
+        </Room>
       </SettingsCard>
     </Section>
   )
 }
 
-function SettingsPage({ session, bound, device, update, show }: { session: boolean; bound: Key; device?: "missing"; update: Update; show?: boolean }) {
+function SettingsPage({ session, bound, device, update, show, play }: { session: boolean; bound: Key; device?: "missing"; update: Update; show?: boolean; play?: Play }) {
   const [key, setKey] = useState<string | undefined>(bound && bound !== "waiting" ? bound : undefined)
-  useFlightAround(session, key)
+  // With no key bound, the strip shows no key cap, where the hook's default would show F9.
+  useFlightAround(session, key ?? "")
   return (
     <ScrollPage>
-      <TakeControlKey start={bound} onBound={setKey} />
-      <OutputDevice missing={device === "missing"} />
+      <TakeControlKey start={bound} onBound={setKey} play={play} />
+      <OutputDevice missing={device === "missing"} play={play} />
       <Recordings />
-      <DualInput start={update} session={session} show={show} />
+      <DualInput start={update} session={session} show={show} play={play} />
     </ScrollPage>
   )
 }
@@ -437,6 +517,7 @@ export function SettingsFrame({
   device,
   update = "current",
   show,
+  play,
 }: {
   theme: Theme
   session?: boolean
@@ -444,11 +525,12 @@ export function SettingsFrame({
   device?: "missing"
   update?: Update
   show?: boolean
+  play?: Play
 }) {
   const status: HeaderStatus = update === "ready" ? { update: NEXT } : {}
   return (
     <AppFrame theme={theme} tab="settings" status={status} fixed>
-      <SettingsPage session={session} bound={bound} device={device} update={update} show={show} />
+      <SettingsPage session={session} bound={bound} device={device} update={update} show={show} play={play} />
     </AppFrame>
   )
 }

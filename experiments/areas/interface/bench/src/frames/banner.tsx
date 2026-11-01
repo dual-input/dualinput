@@ -20,7 +20,8 @@ import { ThemeContext, UI, UIContext, useUI } from "@/bench/ui"
 import { themeVars, type Theme } from "@/bench/theme"
 import { FIGURE_COLORS } from "./figure-portrait"
 import { Head } from "./figure-head"
-import { COUNTDOWN, CountdownRing, ReadyButton, StripHead, type HeadState, type Pilot } from "./home"
+import { COUNTDOWN, CountdownRing, ReadyButton, Rolling, StripHead, type HeadState, type Pilot } from "./home"
+import { MOMENT, part, Room, useMoment } from "./ease"
 import { PART_TROUBLE } from "./shell"
 
 // The banner's box on a 1920 by 1080 screen, in pixels: one card wide, 16px in from the screen's
@@ -188,11 +189,44 @@ function useDragAway(onAway?: () => void) {
   return { dx, dragging, start, moved, away }
 }
 
-function NoteCard({ note, onDismiss }: { note: Note; onDismiss?: () => void }) {
+// A held notification whose news moves on, as catching up does into caught up, changes in place,
+// in the page's moment (ease.tsx): its words fade out, the card eases to the new words' height, and
+// they fade in. One that isn't held goes after its lifetime, which pauses while the pointer rests on
+// the card, so it stays as the pilot reaches for it (record/areas/interface/01-apps.md,
+// Notifications).
+function NoteCard({ note: given, noteKey, onDismiss, lifetime, onExpire }: { note: Note; noteKey: string; onDismiss?: () => void; lifetime?: number; onExpire?: () => void }) {
   const { Button, Spinner } = useUI()
   const press = useCardPress()
   const drag = useDragAway(onDismiss)
   const card = useRef<HTMLDivElement>(null)
+  const moment = useMoment(noteKey, given)
+  const note = moment.shown
+  const expire = useRef(onExpire)
+  useEffect(() => {
+    expire.current = onExpire
+  })
+  useEffect(() => {
+    const el = card.current
+    if (!lifetime || !el) return
+    let left = lifetime
+    let since = performance.now()
+    let timer = window.setTimeout(() => expire.current?.(), left)
+    const pause = () => {
+      window.clearTimeout(timer)
+      left -= performance.now() - since
+    }
+    const resume = () => {
+      since = performance.now()
+      timer = window.setTimeout(() => expire.current?.(), left)
+    }
+    el.addEventListener("mouseenter", pause)
+    el.addEventListener("mouseleave", resume)
+    return () => {
+      window.clearTimeout(timer)
+      el.removeEventListener("mouseenter", pause)
+      el.removeEventListener("mouseleave", resume)
+    }
+  }, [noteKey, lifetime])
   // A head is 28px, taller than the title's line, so a card led by one centers on it; an icon
   // stands in a box the title's line tall, so it centers on the title whatever follows it.
   const lead = note.who ? (
@@ -224,20 +258,22 @@ function NoteCard({ note, onDismiss }: { note: Note; onDismiss?: () => void }) {
         }}
         className={LAYER}
       />
-      <div className={"pointer-events-none relative flex gap-3 p-3 " + (note.who ? "items-center" : "items-start")}>
-        {lead}
-        <span className={"flex min-w-0 flex-1 flex-col gap-0.5 " + (onDismiss ? "pr-7" : "")}>
-          <span className="text-sm font-medium">{note.title}</span>
-          {note.detail && <span className="text-xs text-muted-foreground">{note.detail}</span>}
-          {note.list && (
-            <ul className="mt-1 flex flex-col gap-0.5 text-xs">
-              {note.list.map((name) => (
-                <li key={name}>{name}</li>
-              ))}
-            </ul>
-          )}
-        </span>
-      </div>
+      <Room open>
+        <div className={"pointer-events-none relative flex gap-3 p-3 " + (note.who ? "items-center" : "items-start")} style={part(moment.stage, true)}>
+          {lead}
+          <span className={"flex min-w-0 flex-1 flex-col gap-0.5 " + (onDismiss ? "pr-7" : "")}>
+            <span className="text-sm font-medium">{note.title}</span>
+            {note.detail && <span className="text-xs text-muted-foreground">{note.detail}</span>}
+            {note.list && (
+              <ul className="mt-1 flex flex-col gap-0.5 text-xs">
+                {note.list.map((name) => (
+                  <li key={name}>{name}</li>
+                ))}
+              </ul>
+            )}
+          </span>
+        </div>
+      </Room>
       {onDismiss && (
         <span className={"absolute right-2 flex items-center " + (note.detail || note.list ? "top-2" : "inset-y-0")}>
           <Button variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={() => drag.away(width)} className="text-muted-foreground">
@@ -263,16 +299,24 @@ function NoteCard({ note, onDismiss }: { note: Note; onDismiss?: () => void }) {
 // card's edge, since its hover fill would cover an edge drawn by the card under it. Pressing the
 // layer nudges the whole card down 1px, as a notification's press does. It has no ×: it's the
 // banner's whole job during preflight, it leaves when the flight starts, and the toolbar's button
-// closes the banner. The countdown here holds at its last second, where the flight would start.
+// closes the banner. When the countdown ends, the flight starts, and the summary leaves the banner as
+// a card does.
 export type Summary = { pf: boolean; crew: { pilot: Pilot; state: HeadState }[]; settled?: boolean; ready?: boolean; errors?: number; warnings?: number }
-function useCountdown(on: boolean) {
+function useCountdown(on: boolean, onDone?: () => void) {
   const [left, setLeft] = useState<number | null>(null)
+  const done = useRef(onDone)
+  useEffect(() => {
+    done.current = onDone
+  })
   useEffect(() => {
     if (!on) return setLeft(null)
     setLeft(COUNTDOWN)
-    const tick = window.setInterval(() => setLeft((l) => (l !== null && l > 1 ? l - 1 : l)), 1000)
+    const tick = window.setInterval(() => setLeft((l) => (l !== null && l > 0 ? l - 1 : l)), 1000)
     return () => window.clearInterval(tick)
   }, [on])
+  useEffect(() => {
+    if (left === 0) done.current?.()
+  }, [left])
   return left
 }
 function Line({ icon, className, children }: { icon: React.ReactNode; className: string; children: React.ReactNode }) {
@@ -284,10 +328,10 @@ function Line({ icon, className, children }: { icon: React.ReactNode; className:
   )
 }
 const counted = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`
-function PreflightCard({ summary }: { summary: Summary }) {
+function PreflightCard({ summary, onStarted }: { summary: Summary; onStarted?: () => void }) {
   const [ready, setReady] = useState(!!summary.ready)
   const press = useCardPress()
-  const left = useCountdown(ready && summary.crew.every((c) => c.state === "ready"))
+  const left = useCountdown(ready && summary.crew.every((c) => c.state === "ready"), onStarted)
   const heads = [{ pilot: YOU, state: (ready ? "ready" : "waiting") as HeadState }, ...summary.crew]
   const errors = summary.errors ?? 0
   const warnings = summary.warnings ?? 0
@@ -354,48 +398,162 @@ function MoreLine({ count, onDismissAll }: { count: number; onDismissAll: () => 
   const { Button } = useUI()
   return (
     <div className="flex w-full items-center justify-between rounded-4xl bg-card pr-1.5 pl-3 text-xs text-muted-foreground inset-ring inset-ring-foreground/10" style={{ height: MORE_LINE }}>
-      {count} more
+      <span className="flex items-center gap-1">
+        <Rolling value={count} /> more
+      </span>
       <Button variant="ghost" size="xs" onClick={onDismissAll}>
         Dismiss all
       </Button>
     </div>
   )
 }
-function Stack({ summary, notes }: { summary?: Summary; notes: NoteKey[] }) {
-  const [gone, setGone] = useState<NoteKey[]>([])
-  const live = notes.filter((k) => !gone.includes(k))
-  const dismiss = (k: NoteKey) => setGone((g) => [...g, k])
+
+// How the stack moves (user, 2026-11-01: "yes, build it", to my plan, in the page's timings,
+// ease.tsx). A card arriving opens its room, the cards under it sliding down, and slides in 24px from
+// the screen's edge as it fades in, once the room is half open; one going by its lifetime slides 24px
+// toward the edge as it fades, then its room shuts, the cards under it sliding up; one dismissed by
+// its × or a drag has already slid off, so its room shuts at once. Arriving and leaving share the one
+// direction, toward the edge the banner sits on. The summary, and the line counting the cards
+// waiting, come and go as a card does. Each slot holds its gap under it, so a shut room leaves none.
+const SLOT_MS = { out: 160, slide: 24 }
+type SlotStage = "enter" | "open" | "rest" | "out" | "shut"
+function Slot({ fresh, leaving, away, onGone, children }: { fresh: boolean; leaving: boolean; away: boolean; onGone: () => void; children: React.ReactNode }) {
+  const inner = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState(0)
+  const [stage, setStage] = useState<SlotStage>(fresh ? "enter" : "rest")
+  const gone = useRef(onGone)
+  useEffect(() => {
+    gone.current = onGone
+  })
+  useLayoutEffect(() => {
+    const h = inner.current?.offsetHeight ?? 0
+    if (h !== height) setHeight(h)
+  })
+  useEffect(() => {
+    if (!fresh) return
+    let f = requestAnimationFrame(() => (f = requestAnimationFrame(() => setStage("open"))))
+    const t = window.setTimeout(() => setStage((st) => (st === "open" ? "rest" : st)), MOMENT.inAt + MOMENT.in)
+    return () => {
+      cancelAnimationFrame(f)
+      window.clearTimeout(t)
+    }
+  }, [fresh])
+  useEffect(() => {
+    if (!leaving) return
+    const timers: number[] = []
+    if (away) setStage("shut")
+    else {
+      setStage("out")
+      timers.push(window.setTimeout(() => setStage("shut"), SLOT_MS.out))
+    }
+    timers.push(window.setTimeout(() => gone.current(), (away ? 0 : SLOT_MS.out) + MOMENT.move))
+    return () => timers.forEach(window.clearTimeout)
+  }, [leaving, away])
+  const roomHeight = stage === "enter" || stage === "shut" ? 0 : stage === "rest" ? undefined : height
+  const look: React.CSSProperties =
+    stage === "enter"
+      ? { opacity: 0, transform: `translateX(${SLOT_MS.slide}px)` }
+      : stage === "open"
+        ? { opacity: 1, transform: "none", transition: `opacity ${MOMENT.in}ms ease-out ${MOMENT.inAt}ms, transform ${MOMENT.in}ms ease-out ${MOMENT.inAt}ms` }
+        : stage === "out"
+          ? { opacity: 0, transform: `translateX(${SLOT_MS.slide}px)`, transition: `opacity ${SLOT_MS.out}ms ease-in, transform ${SLOT_MS.out}ms ease-in` }
+          : stage === "shut"
+            ? { opacity: 0 }
+            : {}
+  return (
+    <div style={{ height: roomHeight, overflow: stage === "rest" ? "visible" : "hidden", transition: `height ${MOMENT.move}ms ease-in-out` }}>
+      <div ref={inner} style={{ paddingBottom: BANNER.gap }}>
+        <div style={look}>{children}</div>
+      </div>
+    </div>
+  )
+}
+
+// A held notification that becomes another keeps its slot, so it changes in place.
+const SLOT_OF: Partial<Record<NoteKey, string>> = { "catching-up": "catch", "caught-up": "catch", "caught-up-outage": "catch" }
+const slotOf = (k: NoteKey) => SLOT_OF[k] ?? k
+type Item = { id: string; kind: "summary" | "note" | "more"; key?: NoteKey; fresh?: boolean; leaving?: boolean; away?: boolean }
+// The items to show, merged into those shown: one that's gone stays where it was, leaving; one that's
+// new goes in after the item it follows.
+function merge(shown: Item[], want: Item[], awayOf: (it: Item) => boolean): Item[] {
+  const wanted = new Map(want.map((w) => [w.id, w]))
+  const out = shown.map((it) => (wanted.has(it.id) ? { ...it, ...wanted.get(it.id)!, fresh: it.fresh, leaving: false } : it.leaving ? it : { ...it, leaving: true, away: awayOf(it) }))
+  want.forEach((w, i) => {
+    if (out.some((o) => o.id === w.id)) return
+    const before = want
+      .slice(0, i)
+      .reverse()
+      .find((b) => out.some((o) => o.id === b.id))
+    const at = before ? out.findIndex((o) => o.id === before.id) + 1 : 0
+    out.splice(at, 0, { ...w, fresh: true })
+  })
+  return out
+}
+
+function Stack({ summary, notes, timed }: { summary?: Summary; notes: NoteKey[]; timed?: boolean }) {
+  const [gone, setGone] = useState<Map<NoteKey, boolean>>(new Map())
+  const [started, setStarted] = useState(false)
+  const live = notes.filter((k) => !gone.has(k))
+  const leave = (k: NoteKey, away: boolean) => setGone((g) => new Map(g).set(k, away))
   const measure = useRef<HTMLDivElement>(null)
   const summaryBox = useRef<HTMLDivElement>(null)
   const [heights, setHeights] = useState<Record<string, number>>({})
   useLayoutEffect(() => {
-    const next: Record<string, number> = { summary: summaryBox.current?.offsetHeight ?? 0 }
+    const next: Record<string, number> = { summary: summaryBox.current?.offsetHeight ?? heights.summary ?? 0 }
     measure.current?.querySelectorAll<HTMLElement>("[data-measure]").forEach((el) => (next[el.dataset.measure!] = el.offsetHeight))
     if (Object.keys(next).some((k) => next[k] !== heights[k])) setHeights(next)
   })
-  const room = BANNER.height - (summary ? (heights.summary ?? 0) + BANNER.gap : 0)
+  const withSummary = !!summary && !started
+  const room = BANNER.height - (withSummary ? (heights.summary ?? 0) + BANNER.gap : 0)
   const { shown, waiting } = place(live, (k) => heights[k] ?? 0, room)
+  const want: Item[] = [
+    ...(withSummary ? [{ id: "summary", kind: "summary" as const }] : []),
+    ...shown.map((k) => ({ id: slotOf(k), kind: "note" as const, key: k })),
+    ...(waiting > 0 ? [{ id: "more", kind: "more" as const }] : []),
+  ]
+  const wantKey = want.map((w) => w.id + ":" + (w.key ?? "")).join(",")
+  const [items, setItems] = useState<Item[]>(want)
+  useLayoutEffect(() => {
+    setItems((now) => merge(now, want, (it) => (it.key ? !!gone.get(it.key) : false)))
+    // The items follow what's wanted, which the key names.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wantKey])
+  // The line keeps its last count while it leaves.
+  const [count, setCount] = useState(waiting)
+  if (waiting > 0 && waiting !== count) setCount(waiting)
   return (
-    <div className="relative flex flex-col" style={{ width: BANNER.width, gap: BANNER.gap }}>
-      {summary && (
-        <div ref={summaryBox}>
-          <PreflightCard summary={summary} />
-        </div>
-      )}
-      {shown.map((k) => (
-        <NoteCard key={k} note={NOTES[k].note} onDismiss={() => dismiss(k)} />
+    <div className="relative flex flex-col" style={{ width: BANNER.width, marginBottom: -BANNER.gap }}>
+      {items.map((it) => (
+        <Slot key={it.id} fresh={!!it.fresh} leaving={!!it.leaving} away={!!it.away} onGone={() => setItems((all) => all.filter((x) => x.id !== it.id))}>
+          {it.kind === "summary" ? (
+            <div ref={summaryBox}>
+              <PreflightCard summary={summary!} onStarted={() => setStarted(true)} />
+            </div>
+          ) : it.kind === "more" ? (
+            <MoreLine count={count} onDismissAll={() => setGone(new Map(notes.map((k) => [k, false])))} />
+          ) : (
+            <NoteCard
+              note={NOTES[it.key!].note}
+              noteKey={it.key!}
+              onDismiss={() => leave(it.key!, true)}
+              lifetime={timed && !(NOTES[it.key!].note as Note).held ? LIFETIME : undefined}
+              onExpire={() => leave(it.key!, false)}
+            />
+          )}
+        </Slot>
       ))}
-      {waiting > 0 && <MoreLine count={waiting} onDismissAll={() => setGone(notes)} />}
       <div ref={measure} aria-hidden className="pointer-events-none invisible absolute top-0 left-0 flex flex-col" style={{ width: BANNER.width }}>
         {notes.map((k) => (
           <div key={k} data-measure={k}>
-            <NoteCard note={NOTES[k].note} onDismiss={() => {}} />
+            <NoteCard note={NOTES[k].note} noteKey={k} onDismiss={() => {}} />
           </div>
         ))}
       </div>
     </div>
   )
 }
+// A notification that isn't held stays this long, in milliseconds.
+const LIFETIME = 6000
 
 // What every banner frame shares: the theme and the kit, as the app's frame gives them.
 export function Themed({ theme, children }: { theme: Theme; children: React.ReactNode }) {
@@ -413,13 +571,22 @@ export function Themed({ theme, children }: { theme: Theme; children: React.Reac
 
 // The banner's top at the screen's right edge, as wide as the EFB's frames, with the cards at their
 // place.
-// With box, the box's outline shows how much room the stack has.
-export function BannerFrame({ theme, summary, notes = [], box }: { theme: Theme; summary?: Summary; notes?: NoteKey[]; box?: boolean }) {
+// With box, the box's outline shows how much room the stack has. A script plays the notifications
+// as they'd come, each step the list at that time, newest first; timed, the ones that aren't held go
+// after their lifetime.
+export type Script = { at: number; notes: NoteKey[] }[]
+export function BannerFrame({ theme, summary, notes = [], box, script, timed }: { theme: Theme; summary?: Summary; notes?: NoteKey[]; box?: boolean; script?: Script; timed?: boolean }) {
+  const [playing, setPlaying] = useState<NoteKey[]>(script ? script[0].notes : notes)
+  useEffect(() => {
+    if (!script) return
+    const timers = script.map((step) => window.setTimeout(() => setPlaying(step.notes), step.at))
+    return () => timers.forEach(window.clearTimeout)
+  }, [script])
   return (
     <Themed theme={theme}>
       <div className="relative flex justify-end overflow-hidden rounded-xl" style={{ background: SKY, padding: `${BANNER.inset}px ${BANNER.inset}px 48px`, minHeight: box ? BANNER.height + 64 : undefined }}>
         {box && <div className="absolute border border-dashed border-sky-300/80" style={{ top: BANNER.inset, right: BANNER.inset, width: BANNER.width, height: BANNER.height }} />}
-        <Stack summary={summary} notes={notes} />
+        <Stack summary={summary} notes={script ? playing : notes} timed={timed} />
       </div>
     </Themed>
   )
@@ -435,7 +602,7 @@ export function EveryNotificationFrame({ theme }: { theme: Theme }) {
           {(Object.keys(NOTES) as NoteKey[]).map((k) => (
             <div key={k} className="flex flex-col gap-1.5">
               <span className="text-xs text-white/85">{NOTES[k].when}</span>
-              {gone.includes(k) ? <span className="h-5 text-xs text-white/60">Dismissed</span> : <NoteCard note={NOTES[k].note} onDismiss={() => setGone((g) => [...g, k])} />}
+              {gone.includes(k) ? <span className="h-5 text-xs text-white/60">Dismissed</span> : <NoteCard note={NOTES[k].note} noteKey={k} onDismiss={() => setGone((g) => [...g, k])} />}
             </div>
           ))}
         </div>
@@ -480,6 +647,22 @@ export function BannerOnScreenFrame({ theme, summary, notes }: { theme: Theme; s
 // match check's differences; one of the others, with the pilot flying ready; before this pilot's
 // aircraft has settled, so Ready waits; everyone ready, with the countdown running; and a crewmate
 // out of the flight.
+// The plays: notifications coming and going, a held one with two that stay their 6s, arriving a
+// moment apart; and catching up, which becomes caught up in place, then goes.
+export const SCRIPTS: Record<string, Script> = {
+  arrivals: [
+    { at: 0, notes: [] },
+    { at: 500, notes: ["pause"] },
+    { at: 1700, notes: ["control-you", "pause"] },
+    { at: 2900, notes: ["sync-one", "control-you", "pause"] },
+  ],
+  catchUp: [
+    { at: 0, notes: [] },
+    { at: 500, notes: ["catching-up"] },
+    { at: 3500, notes: ["caught-up"] },
+  ],
+}
+
 export const SUMMARIES = {
   pf: { pf: true, crew: [{ pilot: ADAM, state: "ready" }], errors: 1, warnings: 2 },
   others: { pf: false, crew: [{ pilot: { ...JAMES, flying: true }, state: "ready" }], warnings: 1 },

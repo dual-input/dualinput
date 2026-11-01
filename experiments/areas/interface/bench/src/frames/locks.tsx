@@ -21,12 +21,13 @@
 // stage notes; the words are drafts, and the names are examples.
 // The displays here are stand-ins, a primary flight display and a radio's, drawn as plain shapes
 // so the locks can be judged on something like what they cover.
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { CircleX, TriangleAlert } from "lucide-react"
 
 import { useUI } from "@/bench/ui"
 import type { Theme } from "@/bench/theme"
 import { Themed } from "./banner"
+import { MOMENT } from "./ease"
 
 // A display's size on the canvas, in pixels: a primary flight display, a large one, and a radio's,
 // the smallest a lock is likely to cover. A cockpit display's own size varies with the aircraft,
@@ -121,11 +122,13 @@ const hatched = (veil: string, line: string): React.CSSProperties => ({
   backgroundSize: `${HATCH_TILE}px ${HATCH_TILE}px`,
 })
 
-function LockOver({ lock, onDismiss }: { lock: Lock; onDismiss?: () => void }) {
-  if (lock.kind === "flash") return <div className="absolute inset-0" style={{ background: "rgba(255, 84, 32, 0.6)" }} />
+function LockOver({ lock, onDismiss, veil, card }: { lock: Lock; onDismiss?: () => void; veil?: React.CSSProperties; card?: React.CSSProperties }) {
+  if (lock.kind === "flash") return <div className="absolute inset-0" style={{ background: "rgba(255, 84, 32, 0.6)", ...veil }} />
   return (
-    <div className={"absolute inset-0 flex items-center justify-center " + (lock.kind === "silent" ? "pointer-events-none" : "")} style={hatched(VEIL[lock.kind].veil, VEIL[lock.kind].hatch)}>
-      <LockCard lock={lock} onDismiss={onDismiss} />
+    <div className={"absolute inset-0 flex items-center justify-center " + (lock.kind === "silent" ? "pointer-events-none" : "pointer-events-auto")} style={{ ...hatched(VEIL[lock.kind].veil, VEIL[lock.kind].hatch), ...veil }}>
+      <div className="flex w-full justify-center" style={card}>
+        <LockCard lock={lock} onDismiss={onDismiss} />
+      </div>
     </div>
   )
 }
@@ -157,10 +160,95 @@ function RadioStandIn() {
   )
 }
 
+// How a lock moves (user, 2026-11-01: "just build the whole motion pass now"): it fades in over
+// 200ms when it comes and out over 200ms when it goes, as FS Copilot's lock did (FS Copilot fork,
+// overlay.js); one lock becoming another, as the lost link does into catching up when the link
+// comes back, crossfades its tinted veil, while its card follows the page's moment, the old card
+// fading out over 120ms before the new one fades in, so two cards never show at once (ease.tsx); a
+// dismissed warning fades from
+// every display at once. The flash comes the moment a press lands, since it answers the press, and
+// fades over 150ms when the press lets go. Each lock is a layer of its own, so two can be on show
+// while one gives way to the other.
+const FADE = { in: 200, out: 200, flashOut: 150 }
+type Layer = { id: number; lock: Lock; on: boolean; fresh: boolean; after: boolean }
+function LockLayer({ layer, display, onDismiss, onGone }: { layer: Layer; display: { width: number; height: number }; onDismiss: () => void; onGone: () => void }) {
+  const [shown, setShown] = useState(!layer.fresh)
+  const flash = layer.lock.kind === "flash"
+  const gone = useRef(onGone)
+  useEffect(() => {
+    gone.current = onGone
+  })
+  useEffect(() => {
+    if (!layer.fresh) return
+    let f = requestAnimationFrame(() => (f = requestAnimationFrame(() => setShown(true))))
+    return () => cancelAnimationFrame(f)
+  }, [layer.fresh])
+  useEffect(() => {
+    if (layer.on) return
+    setShown(false)
+    const t = window.setTimeout(() => gone.current(), flash ? FADE.flashOut : FADE.out)
+    return () => window.clearTimeout(t)
+  }, [layer.on, flash])
+  const transition = shown ? (flash ? "none" : `opacity ${FADE.in}ms ease-out`) : `opacity ${flash ? FADE.flashOut : FADE.out}ms ease-in`
+  const card: React.CSSProperties = shown
+    ? { opacity: 1, transition: `opacity ${FADE.in}ms ease-out ${layer.after ? MOMENT.out : 0}ms` }
+    : { opacity: 0, transition: `opacity ${MOMENT.out}ms ease-in` }
+  return (
+    <div className="pointer-events-none absolute inset-0" style={{ fontSize: emOf(display, layer.lock) }}>
+      <LockOver lock={layer.lock} onDismiss={onDismiss} veil={{ opacity: shown ? 1 : 0, transition }} card={card} />
+    </div>
+  )
+}
+
+// A play's steps, each the lock at that time: the link to the pilot flying lost, then back, which
+// catches up, then done; a press blocked while another pilot's gesture plays; and Dual Input going
+// silent, which a Dismiss clears.
+export type LockScript = { at: number; lock: Lock | null }[]
+export const LOCK_SCRIPTS: Record<string, LockScript> = {
+  comesAndGoes: [
+    { at: 0, lock: null },
+    { at: 600, lock: { kind: "lost" } },
+    { at: 3600, lock: { kind: "catching-up" } },
+    { at: 6200, lock: null },
+  ],
+  press: [
+    { at: 0, lock: null },
+    { at: 600, lock: { kind: "flash" } },
+    { at: 1400, lock: null },
+  ],
+  silent: [
+    { at: 0, lock: null },
+    { at: 600, lock: { kind: "silent" } },
+  ],
+}
+
 // Displays in their bezels, on a panel's gray, each with the lock over it at its size. A warning
-// dismissed on one display goes from every display in the frame, as it goes from every panel.
-export function LockFrame({ theme, displays = ["pfd"], lock }: { theme: Theme; displays?: DisplayKind[]; lock: Lock }) {
+// dismissed on one display goes from every display in the frame, as it goes from every panel. A
+// frame can play a script, and one that's pressable flashes while a press is held on a display.
+export function LockFrame({ theme, displays = ["pfd"], lock = null, script, pressable }: { theme: Theme; displays?: DisplayKind[]; lock?: Lock | null; script?: LockScript; pressable?: boolean }) {
+  const [scripted, setScripted] = useState<Lock | null>(script ? script[0].lock : lock)
+  useEffect(() => {
+    if (!script) return
+    const timers = script.map((step) => window.setTimeout(() => setScripted(step.lock), step.at))
+    return () => timers.forEach(window.clearTimeout)
+  }, [script])
   const [dismissed, setDismissed] = useState(false)
+  const [pressed, setPressed] = useState(false)
+  const current: Lock | null = pressed ? { kind: "flash" } : dismissed ? null : scripted
+  const currentKind = current?.kind ?? "none"
+  const [layers, setLayers] = useState<Layer[]>(current ? [{ id: 0, lock: current, on: true, fresh: false, after: false }] : [])
+  const next = useRef(1)
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    setLayers((all) => [...all.map((l) => ({ ...l, on: false })), ...(current ? [{ id: next.current++, lock: current, on: true, fresh: true, after: all.some((l) => l.on) }] : [])])
+    // A new layer comes when the lock's kind changes, which the kind names.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentKind])
+  const press = pressable ? { onMouseDown: (e: React.MouseEvent) => e.button === 0 && setPressed(true), onMouseUp: () => setPressed(false), onMouseLeave: () => setPressed(false) } : {}
   return (
     <Themed theme={theme}>
       <div className="flex items-center justify-center gap-6 rounded-xl px-6 py-10" style={{ background: "#3a3d42" }}>
@@ -168,9 +256,11 @@ export function LockFrame({ theme, displays = ["pfd"], lock }: { theme: Theme; d
           const d = DISPLAYS[kind]
           return (
             <div key={i} className="rounded-lg bg-[#111214] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-              <div className="relative overflow-hidden" style={{ width: d.width, height: d.height, fontSize: emOf(d, lock) }}>
+              <div className={"relative overflow-hidden " + (pressable ? "cursor-pointer select-none" : "")} style={{ width: d.width, height: d.height }} {...press}>
                 {kind === "radio" ? <RadioStandIn /> : <PfdStandIn />}
-                {!dismissed && <LockOver lock={lock} onDismiss={() => setDismissed(true)} />}
+                {layers.map((layer) => (
+                  <LockLayer key={layer.id} layer={layer} display={d} onDismiss={() => setDismissed(true)} onGone={() => setLayers((all) => all.filter((l) => l.id !== layer.id))} />
+                ))}
               </div>
             </div>
           )

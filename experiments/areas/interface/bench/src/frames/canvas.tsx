@@ -17,8 +17,8 @@ import { AircraftPickerFrame } from "./aircraft"
 import { AtcFrame, TrafficFrame } from "./traffic"
 import { AvatarsFrame } from "./avatars"
 import { SettingsFrame } from "./settings"
-import { BannerFrame, BannerOnScreenFrame, EveryNotificationFrame, SCREEN, SUMMARIES } from "./banner"
-import { LockFrame } from "./locks"
+import { BannerFrame, BannerOnScreenFrame, EveryNotificationFrame, SCREEN, SCRIPTS, SUMMARIES } from "./banner"
+import { LOCK_SCRIPTS, LockFrame } from "./locks"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
 // one gets a Replay button beside its name, which draws it afresh. A home page with Host and Join
@@ -183,6 +183,10 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Update ready", draw: (t) => <SettingsFrame theme={t} session={false} update="ready" show /> },
       { name: "Update ready in a flight", draw: (t) => <SettingsFrame theme={t} update="ready" show /> },
       { name: "Update failed", draw: (t) => <SettingsFrame theme={t} session={false} update="failed" show /> },
+      { name: "Binding a key", replay: true, draw: (t) => <SettingsFrame theme={t} bound={null} play="bind" /> },
+      { name: "Press, then Hold", replay: true, draw: (t) => <SettingsFrame theme={t} play="hold" /> },
+      { name: "The picked device disconnects", replay: true, draw: (t) => <SettingsFrame theme={t} play="disconnect" /> },
+      { name: "Check now finds an update", replay: true, draw: (t) => <SettingsFrame theme={t} session={false} play="update" show /> },
     ],
   },
   // What the app's window says of itself on any page. The header on home, open over what needs the
@@ -214,7 +218,8 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
     ],
   },
   // The banner over the cockpit, outside the EFB app: the whole screen, to judge its place and its
-  // box; every notification, each under when it shows; a stack of two and of three; several sync
+  // box; every notification, each under when it shows; a stack of two and of three; notifications
+  // coming and going, and catching up turning into caught up, as they'd play; several sync
   // failures as one; more than the box holds; and the preflight summary, for the pilot flying, for the others, before
   // Ready opens, counting down, and with a crewmate out of the flight under it.
   {
@@ -224,12 +229,14 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Every notification", replay: true, draw: (t) => <EveryNotificationFrame theme={t} /> },
       { name: "Two at once", draw: (t) => <BannerFrame theme={t} notes={["control-you", "sync-one"]} /> },
       { name: "Three at once", replay: true, draw: (t) => <BannerFrame theme={t} notes={["crashed", "pause", "sync-one"]} /> },
+      { name: "Coming and going", replay: true, draw: (t) => <BannerFrame theme={t} box script={SCRIPTS.arrivals} timed /> },
+      { name: "Catching up, then caught up", replay: true, draw: (t) => <BannerFrame theme={t} script={SCRIPTS.catchUp} timed /> },
       { name: "Sync failures at one load", draw: (t) => <BannerFrame theme={t} notes={["sync-several"]} /> },
       { name: "More than fit", replay: true, draw: (t) => <BannerFrame theme={t} box notes={["sync-one", "want", "bridge", "lost-pf", "pause", "helper", "module-stopped", "seat"]} /> },
       { name: "Preflight, pilot flying", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.pf} /> },
       { name: "Preflight, the others", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.others} /> },
       { name: "Preflight, before Ready opens", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.settling} /> },
-      { name: "Preflight, counting down", replay: true, draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.counting} /> },
+      { name: "Preflight, counting down", replay: true, draw: (t) => <BannerFrame theme={t} box summary={SUMMARIES.counting} notes={["seat"]} /> },
       { name: "Preflight, a crewmate out", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.out} notes={["crashed"]} /> },
     ],
   },
@@ -241,14 +248,16 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
     name: "Cockpit locks",
     frames: [
       { name: "Lost link", draw: (t) => <LockFrame theme={t} lock={{ kind: "lost" }} /> },
+      { name: "A lock comes, catches up, and goes", replay: true, draw: (t) => <LockFrame theme={t} script={LOCK_SCRIPTS.comesAndGoes} /> },
       { name: "Lost link, a small display", draw: (t) => <LockFrame theme={t} displays={["radio"]} lock={{ kind: "lost" }} /> },
       { name: "Lost link, a large display", width: 896, draw: (t) => <LockFrame theme={t} displays={["large"]} lock={{ kind: "lost" }} /> },
       { name: "Catching up", draw: (t) => <LockFrame theme={t} lock={{ kind: "catching-up" }} /> },
       { name: "Catching up, a small display", draw: (t) => <LockFrame theme={t} displays={["radio"]} lock={{ kind: "catching-up" }} /> },
       { name: "Dual Input stopped responding", replay: true, draw: (t) => <LockFrame theme={t} lock={{ kind: "silent" }} /> },
       { name: "Stopped responding, a small display", replay: true, draw: (t) => <LockFrame theme={t} displays={["radio"]} lock={{ kind: "silent" }} /> },
-      { name: "Stopped responding, two displays, one Dismiss", width: 856, replay: true, draw: (t) => <LockFrame theme={t} displays={["pfd", "radio"]} lock={{ kind: "silent" }} /> },
+      { name: "Stopped responding, two displays, one Dismiss", width: 856, replay: true, draw: (t) => <LockFrame theme={t} displays={["pfd", "radio"]} script={LOCK_SCRIPTS.silent} /> },
       { name: "A blocked press, held", draw: (t) => <LockFrame theme={t} lock={{ kind: "flash" }} /> },
+      { name: "A blocked press, press the display", replay: true, draw: (t) => <LockFrame theme={t} script={LOCK_SCRIPTS.press} pressable /> },
     ],
   },
 ]

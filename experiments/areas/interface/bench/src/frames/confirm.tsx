@@ -65,6 +65,7 @@ export function ConfirmButton({ label, question, go, onConfirm, also, className,
           {also && (
             <Button
               variant="outline"
+              size="sm"
               onClick={() => {
                 setOpen(false)
                 also.onSelect()
@@ -74,6 +75,7 @@ export function ConfirmButton({ label, question, go, onConfirm, also, className,
             </Button>
           )}
           <Button
+            size="sm"
             className={className}
             onClick={() => {
               setOpen(false)

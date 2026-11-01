@@ -342,7 +342,7 @@ function PreflightCard({ summary, onStarted }: { summary: Summary; onStarted?: (
       <div className="pointer-events-none relative flex items-center justify-between gap-3">
         <span className="flex items-center gap-1.5">
           {heads.map(({ pilot, state }) => (
-            <StripHead key={pilot.name} pilot={pilot} state={state} />
+            <StripHead key={pilot.name} pilot={pilot} state={state} still />
           ))}
         </span>
         <span className="pointer-events-auto flex items-center gap-2">
@@ -379,7 +379,7 @@ function PreflightCard({ summary, onStarted }: { summary: Summary; onStarted?: (
 // a copy of every card laid out unseen, since which fit depends on how their words wrap.
 const LEVEL_RANK: Record<Level, number> = { trouble: 0, warning: 1, info: 2 }
 const MORE_LINE = 36
-function place(keys: NoteKey[], height: (k: NoteKey) => number, room: number): { shown: NoteKey[]; waiting: number } {
+function place(keys: NoteKey[], height: (k: NoteKey) => number, room: number): { shown: NoteKey[]; waiting: NoteKey[] } {
   const total = (ks: NoteKey[]) => ks.reduce((sum, k) => sum + height(k), 0) + BANNER.gap * Math.max(0, ks.length - 1)
   const held = (k: NoteKey) => !!(NOTES[k].note as Note).held
   let shown = [...keys]
@@ -388,11 +388,11 @@ function place(keys: NoteKey[], height: (k: NoteKey) => number, room: number): {
     if (!oldest) break
     shown = shown.filter((k) => k !== oldest)
   }
-  if (total(shown) <= room) return { shown, waiting: 0 }
+  if (total(shown) <= room) return { shown, waiting: [] }
   const ranked = [...shown].sort((a, b) => LEVEL_RANK[NOTES[a].note.level as Level] - LEVEL_RANK[NOTES[b].note.level as Level] || keys.indexOf(a) - keys.indexOf(b))
   const kept: NoteKey[] = []
   for (const k of ranked) if (total([...kept, k]) <= room - MORE_LINE - BANNER.gap) kept.push(k)
-  return { shown: keys.filter((k) => kept.includes(k)), waiting: shown.length - kept.length }
+  return { shown: keys.filter((k) => kept.includes(k)), waiting: shown.filter((k) => !kept.includes(k)) }
 }
 function MoreLine({ count, onDismissAll }: { count: number; onDismissAll: () => void }) {
   const { Button } = useUI()
@@ -505,7 +505,24 @@ function Stack({ summary, notes, timed }: { summary?: Summary; notes: NoteKey[];
   })
   const withSummary = !!summary && !started
   const room = BANNER.height - (withSummary ? (heights.summary ?? 0) + BANNER.gap : 0)
-  const { shown, waiting } = place(live, (k) => heights[k] ?? 0, room)
+  const placed = place(live, (k) => heights[k] ?? 0, room)
+  const waiting = placed.waiting.length
+  // A card that was waiting behind the line comes out at the stack's foot, where the line said it
+  // was, rather than at its place by priority and age, so the cards a pilot has read stay where they
+  // were (user, 2026-11-01: "you expect it to appear at the bottom, because that's where '3 more'
+  // were hidden"); a new notification still arrives at the top.
+  const wasWaiting = useRef(new Set<NoteKey>())
+  const order = useRef<NoteKey[]>(placed.shown)
+  const shownNow = placed.shown
+  const kept = order.current.filter((k) => shownNow.includes(k))
+  const added = shownNow.filter((k) => !kept.includes(k))
+  const fromLine = added.filter((k) => wasWaiting.current.has(k))
+  const fresh = added.filter((k) => !wasWaiting.current.has(k))
+  const shown = [...fresh, ...kept, ...fromLine]
+  useLayoutEffect(() => {
+    order.current = shown
+    wasWaiting.current = new Set(placed.waiting)
+  })
   const want: Item[] = [
     ...(withSummary ? [{ id: "summary", kind: "summary" as const }] : []),
     ...shown.map((k) => ({ id: slotOf(k), kind: "note" as const, key: k })),

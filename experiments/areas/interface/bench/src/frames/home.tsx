@@ -608,12 +608,12 @@ const phaseOf = (session: Session, started: boolean): SessionPhase | undefined =
 export type HeadState = "ready" | "out" | "waiting"
 const HEAD_SAYS: Record<HeadState, string> = { ready: "ready", out: "out of the flight", waiting: "not ready" }
 const FILL_MS = 220
-export function StripHead({ pilot, state }: { pilot: Pilot; state?: HeadState }) {
+export function StripHead({ pilot, state, still }: { pilot: Pilot; state?: HeadState; still?: boolean }) {
   const ready = state === "ready"
   const at = "absolute -right-0.5 -bottom-0.5 flex size-3.5 items-center justify-center rounded-full ring-2 ring-card "
   return (
     <span data-fold-morph={`head-${pilot.name}`} className="relative inline-flex" aria-label={state ? `${pilot.name}, ${HEAD_SAYS[state]}` : pilot.name}>
-      <Head hex={hexOf(pilot.hue)} alive={pilot.name} turns slumped={state === "out"} />
+      <Head hex={hexOf(pilot.hue)} alive={still ? undefined : pilot.name} turns={!still} slumped={state === "out"} />
       {state === "out" && (
         <span data-fold-fade className={at + "bg-destructive text-destructive-foreground"}>
           <X className="size-2.5" strokeWidth={3} />
@@ -863,7 +863,10 @@ function Differences({ differences, after, marked }: { differences: Difference[]
 // PF's also opens with the controls Dual Input tracks by counting their events, since no variable
 // shows their value, and counts from where the aircraft starts them (record/areas/product/
 // 03-v1-scope.md, Preflight). Its rows read as an aircraft's checklist does, each control, dots,
-// then its starting value, in capitals, in B612 Mono, the typeface Airbus made for its cockpit
+// then its starting value, as its author wrote it with its first letter a capital, so "cabin PRESS
+// valve" reads "Cabin PRESS valve", as Boeing's checklists are in sentence case and an author's
+// capitals mean something (user, 2026-11-01; tried and dropped: all capitals), in B612 Mono, the
+// typeface Airbus made for its cockpit
 // displays, and a row checked turns green. Each row is the page's width and at least 44px tall, so
 // a VR controller's pointer lands on one without careful aim, and a press nudges it down 1px, as
 // the kit's buttons do. A row checked is the pilot's own note, and Ready doesn't wait for it.
@@ -914,7 +917,7 @@ function Checklist({ items }: { items: ChecklistItem[] }) {
                       that 1px. */}
                   <ChecklistName text={item.name} sliding={pointed === item.id} />
                   <span className="relative top-px min-w-[3ch] flex-1 overflow-hidden whitespace-nowrap opacity-40">{LEADER}</span>
-                  <span className="relative top-px max-w-1/2 shrink-0 text-right break-words uppercase">{item.default}</span>
+                  <span className="relative top-px max-w-1/2 shrink-0 text-right break-words">{capFirst(item.default)}</span>
                 </span>
                 {/* Under the name, past the box and its gap. */}
                 {item.description && <span className="pl-7 text-[11px] leading-snug opacity-60">{item.description}</span>}
@@ -946,7 +949,7 @@ function ChecklistName({ text, sliding }: { text: string; sliding: boolean }) {
   }, [text, sliding])
   const go = sliding && past > 0
   return (
-    <span ref={line} className="relative top-px min-w-0 overflow-hidden whitespace-nowrap uppercase">
+    <span ref={line} className="relative top-px min-w-0 overflow-hidden whitespace-nowrap">
       <span
         ref={name}
         className="inline-block"
@@ -955,11 +958,12 @@ function ChecklistName({ text, sliding }: { text: string; sliding: boolean }) {
           transition: go ? `transform ${(past / SLIDE.pxPerSecond) * 1000}ms linear ${SLIDE.wait}ms` : `transform ${SLIDE.backMs}ms ease-out`,
         }}
       >
-        {text}
+        {capFirst(text)}
       </span>
     </span>
   )
 }
+const capFirst = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
 // A checklist row's box, drawn as an avionics display draws one: a square outline with sharp
 // corners, dimmed while open, and once checked, a check stroked inside it with square ends, both in

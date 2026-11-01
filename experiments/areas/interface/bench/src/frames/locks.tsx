@@ -123,7 +123,9 @@ const hatched = (veil: string, line: string): React.CSSProperties => ({
 })
 
 function LockOver({ lock, onDismiss, veil, card }: { lock: Lock; onDismiss?: () => void; veil?: React.CSSProperties; card?: React.CSSProperties }) {
-  if (lock.kind === "flash") return <div className="absolute inset-0" style={{ background: "rgba(255, 84, 32, 0.6)", ...veil }} />
+  // The flash is our error red, at 55%, where the red-orange at 60% it started at didn't read as
+  // an error (user, 2026-11-01: "let's find a more 'error'-y color for the blocked press overlay").
+  if (lock.kind === "flash") return <div className="absolute inset-0" style={{ background: "rgba(220, 38, 38, 0.55)", ...veil }} />
   return (
     <div className={"absolute inset-0 flex items-center justify-center " + (lock.kind === "silent" ? "pointer-events-none" : "pointer-events-auto")} style={{ ...hatched(VEIL[lock.kind].veil, VEIL[lock.kind].hatch), ...veil }}>
       <div className="flex w-full justify-center" style={card}>

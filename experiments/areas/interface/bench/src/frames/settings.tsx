@@ -137,7 +137,6 @@ function TakeControlKey({ start, onBound, play }: { start: Key; onBound: (key: s
   // The key's row and the hold's note change in the page's moment.
   const keyMoment = useMoment(String(key), key)
   const shownKey = keyMoment.shown
-  const holdMoment = useMoment(hold, hold)
   useEffect(() => {
     if (play === "bind") {
       const timers = [window.setTimeout(() => setKey("waiting"), 700), window.setTimeout(() => ((kept.current = "F9"), setKey("F9")), 2200)]
@@ -176,7 +175,7 @@ function TakeControlKey({ start, onBound, play }: { start: Key; onBound: (key: s
             </>
           ) : shownKey ? (
             <>
-              <Kbd className="mr-2 border border-foreground/70 bg-transparent font-semibold text-foreground/70">{shownKey}</Kbd>
+              <Kbd className="mr-2 border border-foreground/45 bg-transparent font-semibold text-foreground/45">{shownKey}</Kbd>
               <Button size="sm" variant="secondary" onClick={() => setKey("waiting")}>
                 Change
               </Button>
@@ -194,7 +193,7 @@ function TakeControlKey({ start, onBound, play }: { start: Key; onBound: (key: s
           )}
           </span>
         </Row>
-        <Row label="Take control with a" note={<span style={part(holdMoment.stage, true)}>{holdMoment.shown === "hold" ? "Takes control once held for 0.35s, like the button" : "Takes control as soon as it's pressed"}</span>}>
+        <Row label="Take control with a">
           <Choice
             value={hold}
             options={[
@@ -323,7 +322,7 @@ function Recordings() {
       aside={`${total} MB of 1 GB`}
       foot={
         <>
-          The oldest are deleted first. To report a problem, open the run's folder and send us its log.txt on{" "}
+          A record of what Dual Input did in each run, kept on this PC to help us trace a problem you report. The oldest are deleted first. To report one, open the run's folder and send us its log.txt on{" "}
           <button type="button" onClick={() => toast("Opening our Discord in your browser")} className="underline underline-offset-2 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
             Discord
           </button>
@@ -379,7 +378,10 @@ function Recordings() {
 // Try again. A ready update grows a box in the header's news tone, which installs it: the sim
 // closes, the desktop app installs it, and starts the sim again (user, 2026-10-31), which asks
 // first, since it ends the flight; in a session, the session holds the update, so the box says to
-// leave first, and the header shows no update row. The header's View update opens this section,
+// install it outside a flight, and the header shows no update row. To a pilot it's a flight, not a
+// session, since flights are what they host, join, and leave (user, 2026-11-01: "say 'flight' for
+// 'session' to the user"). The box takes the app's other boxes' tint and corners, a 7% wash
+// and 2xl, since the 10% wash at xl read too bright and too sharp (user, 2026-11-01). The header's View update opens this section,
 // scrolled into view.
 type Update = "current" | "checking" | "downloading" | "ready" | "failed"
 function DualInput({ start, session, show, play }: { start: Update; session: boolean; show?: boolean; play?: Play }) {
@@ -470,18 +472,18 @@ function DualInput({ start, session, show, play }: { start: Update; session: boo
             </Button>
           )}
         </Row>
-        <Room open={bar.open} style={bar.style}>
-          <div className="mx-(--card-spacing) mt-1 mb-2 h-1 overflow-hidden rounded-full bg-muted">
+        <Room open={bar.open} style={bar.style} pad="pt-1 pb-3">
+          <div className="mx-(--card-spacing) h-1 overflow-hidden rounded-full bg-muted">
             <div className="h-full rounded-full bg-primary" style={{ width: `${done}%`, transition: "width 120ms linear" }} />
           </div>
         </Room>
-        <Room open={ready.open} style={ready.style}>
-          <div className="mx-(--card-spacing) mt-1.5 mb-2 flex flex-col gap-3 rounded-xl bg-primary/10 px-4 py-3.5">
+        <Room open={ready.open} style={ready.style} pad="pt-1.5 pb-2">
+          <div className="mx-(--card-spacing) flex flex-col gap-3 rounded-2xl bg-primary/[0.07] px-4 py-3">
             <div className="flex items-baseline gap-2.5">
               <CircleArrowUp className="size-4 shrink-0 text-primary [transform:translateY(3px)]" />
               <span className="flex flex-col gap-1">
                 <span className="text-sm font-medium text-primary">Dual Input {NEXT} is ready</span>
-                <span className="text-sm text-foreground/75">{session ? "Leave the session to install it." : "The sim closes, Dual Input updates, and the sim starts again."}</span>
+                <span className="text-sm text-foreground/75">{session ? "Install it when you are not in a flight." : "Close the sim to install."}</span>
               </span>
             </div>
             {!session && (

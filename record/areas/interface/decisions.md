@@ -62,16 +62,20 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 ## The apps draw with a kit of our own components, styled with Tailwind 3
 
-- **Decided:** the EFB app and the desktop app's screens draw with one kit of our own components, styled with Tailwind 3 through msfs-tailwind ([below](#tailwind-3-reaches-the-kit-through-msfs-tailwind-a-preset-of-our-own-for-coherent-gt)), and the banner takes the kit's colors without its components ([below](#the-banner-draws-its-few-lines-in-plain-markup-with-the-kits-colors-and-no-framework)).
-  In the sim and in the desktop app's window alike, the kit's components are the MSFS Avionics Framework's FSComponent components ([decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md)), and they use none of the EFB API's controls, while the EFB API stays the way our app registers with the EFB.
-  No screen of ours uses React, Vite, Tailwind 4, or shadcn's components, which reverses [decision 028](../../decisions/028-desktop-pages-react-vite-tailwind.md)'s React, Vite, and Tailwind for the desktop app's pages.
-  Settled by the user on 2026-10-25.
+- **Decided:** the EFB app and the desktop app's screens draw with one kit of our own React components, styled with Tailwind 3 through msfs-tailwind ([below](#tailwind-3-reaches-the-kit-through-msfs-tailwind-a-preset-of-our-own-for-coherent-gt)), and the banner takes the kit's colors without its components ([below](#the-banner-draws-its-few-lines-in-plain-markup-with-the-kits-colors-and-no-framework)).
+  Each page bundles React, pinned to 19.2.7, at `es2017` ([decision 030](../../decisions/030-in-sim-code-es2017-esbuild.md)).
+  The kit's components use none of the EFB API's controls, while the EFB API stays the way our app registers with the EFB ([below](#the-efb-app-touches-the-framework-only-to-register-through-the-efbs-own-copy)).
+  No screen of ours uses Vite, Tailwind 4, or shadcn's components, which reverses [decision 028](../../decisions/028-desktop-pages-react-vite-tailwind.md)'s Vite and Tailwind 4 for the desktop app's pages and keeps its React, and this reverses what remains of [decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md), the EFB app's drawing on the MSFS Avionics Framework.
+  Settled by the user on 2026-10-25, and moved from FSComponent to React on 2026-11-01.
 - **Because:**
   - The user wants the whole interface in our control and our design (user, 2026-10-25).
   - The sim's look would have reached only the EFB app: it comes from `efb_os.css`, which the EFB's document loads, while the banner is an in-game panel with a page of its own, and no run has had that page link `efb_os.css` ([interface log][efb-styles]).
   - Tailwind 4's output and shadcn's theme draw nothing in Coherent GT ([architecture log][p13]), and a second front end for the desktop app's two screens would cost a second set of components (user, 2026-10-25).
-  - A page of FSComponent components styled with Tailwind 3 passed its checks and drew in an EFB app of ours, and in Edge, the engine WebView2 embeds ([interface log][p19]; [interface log][p18]).
-- **Leaves out:** what [the kit's package](#the-kit-and-dual-inputs-palette-are-one-package-in-this-repository) leaves out.
+  - The frames lean on content that changes shape, about 116 conditional blocks and 65 lists, and FSComponent has neither conditional rendering nor a keyed list, so we'd own a layer for both, which every later feature's part would inherit (user, 2026-11-01; [interface log][p23]).
+  - React took a pilot's real click, wheel, and typing in the EFB's own document, and passed all 11 of p23's checks and the Coherent GT check, on the sim's own engine.
+    On a card-sized change it stayed within 0.1ms of FSComponent, and it costs a 196 KB bundle and about 12ms more at a page's first mount (measured on MSFS 2024, 2026-11-01, [interface log][p23]).
+  - Preact 11.1.1 is smaller, but failed as shipped, since it calls `queueMicrotask`, which Coherent GT lacks (same entry).
+- **Leaves out:** what [the kit's package](#the-kit-and-dual-inputs-palette-are-one-package-in-this-repository) leaves out, and React's times under a flight's load, since p23 measured them at the world map.
 
 ## The banner draws its few lines in plain markup, with the kit's colors and no framework
 
@@ -97,7 +101,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 ## The kit and Dual Input's palette are one package in this repository
 
-- **Decided:** the kit's components, its reset, its stand-ins for the sim's globals, and Dual Input's palette are one npm package in this repository, `@dualinput/ui`, in `src/packages/ui/`, which our code imports by that name.
+- **Decided:** the kit's components, its reset, and Dual Input's palette are one npm package in this repository, `@dualinput/ui`, in `src/packages/ui/`, which our code imports by that name.
   `src/packages/` holds packages that are no tier's units, and the kit is its first.
   The palette is a second entry point of the package, `@dualinput/ui/palette`: the colors as hex, the CSS variables, and the Tailwind config that builds them on msfs-tailwind.
   So the banner and the desktop app's window take it without the components.
@@ -110,27 +114,23 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - npm's `@dualinput/` scope says whose package it is, where a bare `ui` would read as a third-party library, and npm's registry already has one by that name, `ui` 0.2.4 as of 2026-10-25; the package is never published, so the scope needs no account (user, 2026-10-25).
 - **Leaves out:** whether some of our engines or tools belong in `src/packages/` too, which a later review of the workspace may find (user, 2026-10-25).
 
-## Our pages import FSComponent from `@microsoft/msfs-sdk` as npm ships it
+## The EFB app touches the framework only to register, through the EFB's own copy
 
-- **Decided:** the kit imports the framework from npm's `@microsoft/msfs-sdk`, as its documentation and every developer of the sim's interfaces do.
-  The EFB app draws with the EFB's own copy, its global `msfssdk`, so its build leaves the package out of its bundle, and it bundles a copy of its own only if a sim update breaks it through that one.
-  The desktop app's window, which has no such copy, bundles npm's, pinned to 2.3.3, npm's newest as of 2026-10-25, and the banner uses no framework ([above](#the-banner-draws-its-few-lines-in-plain-markup-with-the-kits-colors-and-no-framework)).
+- **Decided:** none of our pages imports `@microsoft/msfs-sdk`.
+  The EFB app's registration uses the EFB's own copy, its global `msfssdk`, for the app's `available` subject and the one host element the EFB renders, into which React mounts, as p23's app does.
+  The desktop app's window, the banner, and the kit's tests and development pages use no framework but React, and need no stand-ins for the sim's globals.
   This settles which copy each page draws with, which [decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md) left to this stage.
-  A page or test outside the sim, such as the desktop app's window or the kit's development server, defines stand-ins for the four sim globals the package reaches for as it loads, `SimVar`, `RunwayDesignator`, `Avionics`, and `BaseInstrument`, before it loads the package.
-  Settled by the user on 2026-10-25.
+  Settled by the user on 2026-11-01.
 - **Because:**
-  - A new developer knows the usual import, where a copy of the framework's modules taken from the package or from Microsoft's source would be one more thing to learn (user, 2026-10-25).
   - Of the 12 EFB apps the EFB loaded on our development machine, 11 draw with the EFB's own global `msfssdk`, Working Title's CIVA among them (read in each app's script as the EFB's document loaded it, 2026-10-25).
   - A bundled copy of npm's build would run, in the EFB's document, top-level code that assigns `SimVar.GetSimVarValue` after the EFB's own copy has (read in `@microsoft/msfs-sdk` 2.3.3, `msfssdk.js`), which the EFB's copy spares us; Working Title's Ground Services app is the one of the 12 whose bundled copy does it (same reading).
-  - A bundled copy would keep a sim update from changing the framework under us, which the user takes on until an update breaks us (user, 2026-10-25), and p19's app showed that a bundled second copy draws beside the EFB's ([interface log][p19]).
-  - npm's build throws outside the sim, since its top-level code assigns to `SimVar`, and with the four stand-ins it loaded in Edge and passed all 10 of p18's checks ([interface log][stand-ins]; [interface log][p18]).
-  - A stand-in answers any call with nothing, so code that reads the sim gets no data outside it, and outside the sim we need only the kit's rendering.
-- **Leaves out:** which version of the framework the EFB's copy is, while the kit builds and tests against npm's 2.3.3.
+  - Registering takes so little of that copy that a sim update changing it reaches only our registration, where drawing with it would have reached every screen (inference).
+- **Leaves out:** which version of the framework the EFB's copy is.
 
 ## The kit follows what the sim gives an EFB app
 
 - **Decided:** the kit:
-  - listens for mouse events, never pointer events;
+  - listens for mouse events, never pointer events, so in React it uses `onMouseDown` and never `onPointerDown`;
   - reads keys by `keyCode` and `charCode`;
   - has its text fields ask the sim for the keyboard the way the EFB's own text box does: the field cancels the press, focuses its input itself, and calls `FOCUS_INPUT_FIELD` on focus and `UNFOCUS_INPUT_FIELD` on blur;
   - carries a reset of its own, scoped to its root, rather than Tailwind's, which would restyle the EFB around our app;
@@ -139,7 +139,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Because:**
   - In the EFB's document, `PointerEvent` is undefined, and a click came as `mousedown`, `mouseup`, and `click` ([interface log][p19]).
   - A key came with its `keyCode` and `charCode`, and with `key` null (same entry).
-  - The EFB's text box cancels the press, focuses its input, and asks for the keyboard (read in MSFS 2024's `efb_os.js`, the text box's `onmousedown` and `onFocusIn`), as Fenix's EFB app's does (read in fnx-aircraft-320 2.4.0.4720, `FenixSimEfbApp.js`).
+  - The EFB's text box cancels the press, focuses its input, and asks for the keyboard (read in MSFS 2024's `efb_os.js`, the text box's `onmousedown` and `onFocusIn`), as Fenix's EFB app's does (read in fnx-aircraft-320 2.4.0.4720, `FenixSimEfbApp.js`), and a React controlled field that does the same took real keys in order ([interface log][p23]).
   - Without Tailwind's reset, p18's page drew no borders in the EFB, since the reset is what sets `border-style` ([interface log][p19]).
   - The EFB loads no app's stylesheet: each app adds its own link, as CIVA's does through efb_api's `loadCss` (same entry).
 - **Leaves out:** whether the sim also acts on keys typed into a field that didn't ask for the keyboard, which p19 saw reach the field but didn't watch the sim for.
@@ -259,14 +259,14 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 ## The frames canvas holds the apps' looks, words, and motion
 
 - **Decided:** the canvas at `experiments/areas/interface/bench/frames.html` shows each screen of the EFB app and the banner, in 13 sections: First run, Home, Session, Preflight, Flying, Traffic, ATC audio, Figures, Settings, App status, Aircraft picker, Banner, and Cockpit locks.
-  Stage 11b rebuilds each frame in the kit, taking its sizes, colors, words, and timings from the frame's source in the bench's `src/frames/`.
+  Stage 11b rebuilds each frame in the kit, taking its sizes, colors, words, and timings from the frame's source in the bench's `src/frames/`, and since the frames are React too, its logic and motion where they don't rest on shadcn's components or a Coherent GT limit.
   The decisions below hold what a frame can't show: when each thing shows, what a press does, and why.
   The calls behind them, with the user's words and what was tried and dropped, are in [the PC session's calls](../../../experiments/areas/interface/bench/stage-11b-calls-pc.md) and [the cloud session's](../../../experiments/areas/interface/bench/stage-11b-calls-cloud.md).
   [The desktop app's own screens](#the-desktop-app-shows-velopacks-windows-and-its-own-figures-and-the-build-designs-the-rest) have no frames, since the build designs them.
   Settled by the user on 2026-11-01.
 - **Because:**
   - A frame's source is the one place each value is written, so this file doesn't repeat it.
-  - Product code never imports from `experiments/`, and the bench draws in React and Tailwind 4, which [no screen of ours uses](#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3), and Tailwind 4's output draws nothing in Coherent GT ([architecture log][p13]).
+  - Product code never imports from `experiments/`, and the bench draws with shadcn's components and Tailwind 4, which [no screen of ours uses](#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3), since Tailwind 4's output draws nothing in Coherent GT ([architecture log][p13]).
 - **Leaves out:** the canvas's own code, which ships nowhere: each frame in a React root of its own behind an error boundary, live only near the view, and a name card below 35% zoom.
   A jump to a frame in the first seconds after the very first load can still drift while every frame is measured once.
 
@@ -666,14 +666,13 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 [coverage]: log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel
 [p22]: log.md#2026-11-01-the-sdks-coherentgt-debugger-runs-our-pages-in-coherent-gt-with-no-sim-and-matches-the-sims-efb-on-1159-of-p14s-1170-css-items-and-on-repeated-work-in-a-loaded-page
+[p23]: log.md#2026-11-01-react-19-runs-in-the-efbs-own-document-and-takes-a-pilots-real-click-wheel-and-typing-and-on-a-card-sized-change-it-stays-within-01ms-of-fscomponent
 [p02]: ../install/log.md#2026-10-25-an-egui-window-in-a-rust-tray-app-takes-96-mb-to-153-mb-while-open-and-leaves-62-mb-to-69-mb-in-the-process-once-it-closes-where-tauris-leaves-37-mb
 [p08]: log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight
 [p10]: log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly
 [p13]: ../architecture/log.md#2026-10-25-coherent-gt-drops-layer-oklch-color-mix-and-every-gap-but-grid-gap-so-tailwind-4s-output-cant-style-a-page-there
 [p14]: ../architecture/log.md#2026-10-25-coherent-gt-keeps-304-of-the-554-css-properties-chromium-152-keeps-and-lays-out-flexbox-and-grid-as-chromium-does-but-for-gap-justify-content-end-and-subgrid
 [p17]: log.md#2026-10-25-by-p14s-measurements-coherent-gt-keeps-82-of-tailwind-3s-output-with-its-colors-written-as-rgba-and-autoprefixers--webkit--twins-and-every-common-variant-but-focus-visible-and-has
-[p18]: log.md#2026-10-25-fscomponent-runs-in-edge-when-a-bundle-takes-only-the-sdk-modules-it-needs-in-81-kb-while-the-sdk-as-npm-ships-it-throws-on-load-outside-the-sim
 [p19]: log.md#2026-10-25-inside-an-efb-app-clicks-the-wheel-hover-focus-and-typing-reach-our-elements-and-a-127001-frame-as-mouse-and-keyboard-events-geist-loads-as-ttf-but-not-woff2-and-p18s-page-renders-there-with-tailwind-3
 [p20]: log.md#2026-10-25-the-efbs-document-cant-make-go-tos-requests-on-the-world-map-and-no-add-ons-script-runs-in-the-toolbars-there-so-an-efb-apps-go-to-still-needs-the-menu-script
-[stand-ins]: log.md#2026-10-25-the-sdk-as-npm-ships-it-loads-in-a-browser-once-four-of-the-sims-globals-have-stand-ins
 [efb-styles]: log.md#2026-10-24-the-sims-efb-styles-its-apps-controls-through---efb--variables-sized-from-a-516-by-716-base-and-an-app-gets-the-controls-by-bundling-the-sdks-efb-api

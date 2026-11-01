@@ -80,8 +80,7 @@ What they lean on is content that changes shape: across 8,370 lines they hold 14
 - **A window in front empties layout:** in a round the user discarded, with another window in front, the app's room and the first load's rows measured 0px and forced layout took about 0.1ms, so a timing there can miss layout altogether.
   p23 now runs a page again if another window comes to the front during it.
 
-**Changed:** nothing in the design yet.
-Moving the EFB app to React is the user's to settle, and until then [the kit's decision](decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3) stands.
+**Changed:** the user moved the kit from FSComponent to React the same day ([the kit's decision](decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3)), and the EFB app touches the framework only to register ([the framework](decisions.md#the-efb-app-touches-the-framework-only-to-register-through-the-efbs-own-copy)).
 
 **Left open:**
 
@@ -90,7 +89,7 @@ Moving the EFB app to React is the user's to settle, and until then [the kit's d
 - Text from the sim's own keyboard, `SetInputTextFromOS`, which never came in this run.
 - How the code reads in each, which timing can't show: `app-fsc.tsx` holds the small layer of kept rows and hand-mounted parts we'd own, on a page far simpler than the frames.
 
-**Affects:** if React is chosen, [the kit](decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3), [which copy of FSComponent our pages import](decisions.md#our-pages-import-fscomponent-from-microsoftmsfs-sdk-as-npm-ships-it), the EFB half of [decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md), and perhaps [the banner's plain markup](decisions.md#the-banner-draws-its-few-lines-in-plain-markup-with-the-kits-colors-and-no-framework).
+**Affects:** the notes atop [decision 028](../../decisions/028-desktop-pages-react-vite-tailwind.md), [decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md), [the apps](01-apps.md), [the spine](../architecture/01-spine.md), and [the code map](../architecture/02-code-map.md); and perhaps [the banner's plain markup](decisions.md#the-banner-draws-its-few-lines-in-plain-markup-with-the-kits-colors-and-no-framework), which is the user's to settle.
 
 **Evidence:** [the probe](../../../experiments/areas/interface/p23-page-frameworks/p23-page-frameworks.mjs), [its run in the debugger](../../../experiments/areas/interface/results/p23-page-frameworks-debugger-2026-11-01-14-17-28.txt), [its run in the EFB](../../../experiments/areas/interface/results/p23-page-frameworks-efb-2026-11-01-14-44-45.txt), and [a screenshot of the app](../../../experiments/areas/interface/results/p23-page-frameworks-2026-11-01-14-42-50/01-react-in-efb.jpg).
 The real input came from a run moments before the timed one, in the same load of the EFB, and the app kept it; that run's timings were lost when the inspector refused a connection before the report saved.
@@ -138,7 +137,7 @@ The real input came from a run moments before the timed one, in the same load of
   - An EFB app at the world map took 51.3ms for its one load ([p19](#2026-10-25-inside-an-efb-app-clicks-the-wheel-hover-focus-and-typing-reach-our-elements-and-a-127001-frame-as-mouse-and-keyboard-events-geist-loads-as-ttf-but-not-woff2-and-p18s-page-renders-there-with-tailwind-3)), close to the first loads here.
 
 **Changed:** a copy of the debugger can stand in for the sim while we develop the kit, for layout, CSS, and the speed of work inside a loaded page, even with the sim running.
-The kit's [stand-ins](decisions.md#our-pages-import-fscomponent-from-microsoftmsfs-sdk-as-npm-ships-it) serve it as they do a browser, since a frame there has no sim globals.
+A frame there has no sim globals, which the kit's pages need none of, since [they use no framework but React](decisions.md#the-efb-app-touches-the-framework-only-to-register-through-the-efbs-own-copy).
 What needs the sim still needs it: `Coherent` calls, the EFB's own styles, and the last check.
 A time taken in the EFB after repeated loads reads 3 to 4 times what the same work takes once a page has run it a few times, so a timing there should load once and measure inside that page.
 Stage 11b's design of the kit's development loop decides whether to use it.

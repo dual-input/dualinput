@@ -2,7 +2,7 @@
 
 > **Note**
 > Stage 11b's tentative decision that [the banner draws its few lines in plain markup](../areas/interface/decisions.md#the-banner-draws-its-few-lines-in-plain-markup-with-the-kits-colors-and-no-framework) reverses this one's banner half: the banner draws with no framework and bundles no copy of it, and the apps' design will number the decision that confirms it.
-> The EFB app still draws with the framework, with the sim's own copy ([tentative decisions](../areas/interface/decisions.md#our-pages-import-fscomponent-from-microsoftmsfs-sdk-as-npm-ships-it)).
+> Stage 11b's tentative decision that [the apps draw with a kit of our own components](../areas/interface/decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3) reverses its EFB half too: the EFB app draws with React, which it bundles, and [touches the framework only to register, through the EFB's own copy](../areas/interface/decisions.md#the-efb-app-touches-the-framework-only-to-register-through-the-efbs-own-copy) (user, 2026-11-01; [interface log](../areas/interface/log.md#2026-11-01-react-19-runs-in-the-efbs-own-document-and-takes-a-pilots-real-click-wheel-and-typing-and-on-a-card-sized-change-it-stays-within-01ms-of-fscomponent)).
 
 The EFB app and the banner panel draw their interface with the MSFS Avionics Framework's FSComponent, in TypeScript, and the EFB app registers with the sim's EFB through Asobo's EFB API.
 The banner panel bundles our own copy of `@microsoft/msfs-sdk`, pinned to one exact version, not the copy the sim provides.

@@ -22,9 +22,8 @@ import path from "node:path"
 
 import { checkFile, format } from "coherent-checks"
 import * as esbuild from "esbuild"
-import type { Plugin } from "postcss"
 
-import { buildCss, KIT } from "./lib/css.ts"
+import { buildCss, forceStates, KIT } from "./lib/css.ts"
 import { click, hover, resize, shoot, type, wheel } from "./lib/dev-window.ts"
 import { fromRoot, ROOT } from "./lib/repo.ts"
 import { sdkFolder } from "./lib/sdk.ts"
@@ -34,25 +33,7 @@ const OUT = path.join(ROOT, "target", "dev")
 
 /** Each page this can run: its entry, and the source files its classes come from, on top of the kit's. */
 const PAGES: Record<string, { entry: string; content: string[] }> = {
-  kit: { entry: "src/packages/ui/dev/kit-page.tsx", content: ["src/packages/ui/dev/**/*.tsx"] },
-}
-
-/**
- * Lets a page show a state it can't hold by itself: an element with data-force="hover" draws as if
- * the mouse were on it, and the same for active and focus. It's the kit's page's alone, so nothing of
- * it reaches a stylesheet we ship.
- */
-function forceStates(): Plugin {
-  return {
-    postcssPlugin: "dualinput-force-states",
-    Rule(rule) {
-      if (rule.selector.includes("data-force")) return
-      // A colon a backslash escapes is part of a class's name, such as hover\:bg-primary.
-      const state = /(?<!\\):(hover|active|focus)\b/g
-      const forced = rule.selectors.filter((s) => s.search(state) >= 0).map((s) => s.replace(state, '[data-force~="$1"]'))
-      if (forced.length) rule.selectors = [...rule.selectors, ...forced]
-    },
-  }
+  kit: { entry: "src/packages/ui/dev/main.tsx", content: ["src/packages/ui/dev/**/*.tsx"] },
 }
 
 // ---------------------------------------------------------------- what the page hears from here

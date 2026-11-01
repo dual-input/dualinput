@@ -7,7 +7,6 @@
 import { ArrowRightLeft, Check, Copy, Headset, Plane, PersonStanding, Settings, Trash2, TriangleAlert, Users, Volume2, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
-import { createRoot } from "react-dom/client"
 
 import { Badge, Button, Card, CardContent, CodeInput, Confirm, Dialog, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
 import type { ButtonProps, ButtonSize, ButtonVariant } from "../src/index.ts"
@@ -15,11 +14,11 @@ import type { ButtonProps, ButtonSize, ButtonVariant } from "../src/index.ts"
 const SCALES = [0.72, 0.884, 1, 1.056, 1.225]
 const VARIANTS: ButtonVariant[] = ["default", "secondary", "outline", "ghost", "destructive", "success", "warning", "danger"]
 const SIZES: ButtonSize[] = ["xs", "sm", "default", "lg"]
-const FORCED: [string, string | undefined, boolean][] = [
-  ["At rest", undefined, false],
-  ["Hover", "hover", false],
-  ["Pressed", "hover active", false],
-  ["Disabled", undefined, true],
+const FORCED: [string, string | undefined, boolean, boolean][] = [
+  ["At rest", undefined, false, false],
+  ["Hover", "hover", false, false],
+  ["Pressed", "hover", false, true],
+  ["Disabled", undefined, true, false],
 ]
 
 function Section({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
@@ -52,9 +51,9 @@ function Buttons() {
       {VARIANTS.map((variant) => (
         <Row key={variant}>
           <div className="w-24 pt-7 text-xs text-muted-foreground">{variant}</div>
-          {FORCED.map(([name, force, disabled]) => (
+          {FORCED.map(([name, force, disabled, pressed]) => (
             <State key={name} name={name}>
-              <Button variant={variant} disabled={disabled} {...({ "data-force": force } as ButtonProps)}>
+              <Button variant={variant} disabled={disabled} {...({ "data-force": force, "data-pressed": pressed ? "" : undefined } as ButtonProps)}>
                 Host a session
               </Button>
             </State>
@@ -122,7 +121,7 @@ function Links() {
         </State>
         <State name="Pressed" width={260}>
           <p className="text-muted-foreground">
-            Something wrong? <Link data-force="hover active">Ask on our Discord</Link>
+            Something wrong? <Link data-force="hover" data-pressed="">Ask on our Discord</Link>
           </p>
         </State>
         <State name="Hover, over lines" width={200}>
@@ -139,7 +138,7 @@ function Links() {
           <Link className="font-medium" data-force="hover">See how</Link>
         </State>
         <State name="Pressed">
-          <Link className="font-medium" data-force="hover active">
+          <Link className="font-medium" data-force="hover" data-pressed="">
             See how
           </Link>
         </State>
@@ -578,8 +577,10 @@ function Type() {
   )
 }
 
-function KitPage() {
-  const [scale, setScale] = useState(1)
+/** The page. Given a size and a scale, it fills them, as it does in the sim's EFB; given none, it fills the window, with buttons for the scale. */
+export function KitPage({ width, height, scale: given }: { width?: number; height?: number; scale?: number }) {
+  const [picked, setScale] = useState(1)
+  const scale = given ?? picked
   const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight })
   useEffect(() => {
     const onResize = () => setSize({ width: window.innerWidth, height: window.innerHeight })
@@ -587,12 +588,12 @@ function KitPage() {
     return () => window.removeEventListener("resize", onResize)
   }, [])
   return (
-    <Root scale={scale} className="bg-background" style={{ width: `${size.width / scale}px`, height: `${size.height / scale}px`, overflow: "hidden" }}>
+    <Root scale={scale} className="bg-background" style={{ width: `${width ?? size.width / scale}px`, height: `${height ?? size.height / scale}px`, overflow: "hidden" }}>
       <div className="flex h-12 items-center border-b bg-card px-5">
         <div className="mr-6 text-sm font-semibold">The kit</div>
-        <div className="mr-3 text-xs text-muted-foreground">Scale, as the tablet's size would set it</div>
+        <div className="mr-3 text-xs text-muted-foreground">{given ? `Scale ${given.toFixed(3)}, from the tablet` : "Scale, as the tablet's size would set it"}</div>
         <div className="flex items-center space-x-1">
-          {SCALES.map((s) => (
+          {!given && SCALES.map((s) => (
             <Button key={s} size="xs" variant={s === scale ? "default" : "secondary"} onClick={() => setScale(s)}>
               {String(s)}
             </Button>
@@ -614,5 +615,3 @@ function KitPage() {
     </Root>
   )
 }
-
-createRoot(document.getElementById("page") as HTMLElement).render(<KitPage />)

@@ -1,0 +1,198 @@
+p24-efb-scale efb, 2026-11-01T16:32:51.222Z
+
+The tablet's size as saved: ""
+Before: {"registered":true,"found":true,"efbOpen":true,"panel":[447,667],"window":[589,781],"zoom":0.8662790656089783,"hair":"1.15436px","host":{"offset":[447,632],"rect":[71,57,447,632]},"root":{"offset":[516,729],"rect":[81.95973205566406,65.79866027832031,516,729.5570678710938]},"font":"\"DualInput Geist\", sans-serif","button":{"offset":[120,35],"rect":[197.39598083496094,781.5033569335938,120.05369567871094,35.78523635864258],"hit at the rect":"nothing","hit at the rect times zoom":"BUTTON.button abstract-button i","hit from the host's corner":"BUTTON.button abstract-button i"},"geistWidth":[230,"serif",210]}
+OPEN_BY_KEY DualInputP24: sent
+Bring the sim to the front. A beep says it's seen, and another says it's done.
+The sim's window: OK in front
+
+Small: sent
+{
+ "registered": true,
+ "found": true,
+ "efbOpen": true,
+ "panel": [
+  447,
+  667
+ ],
+ "window": [
+  589,
+  781
+ ],
+ "zoom": 0.8662790656089783,
+ "hair": "1.15436px",
+ "host": {
+  "offset": [
+   447,
+   632
+  ],
+  "rect": [
+   71,
+   57,
+   447,
+   632
+  ]
+ },
+ "root": {
+  "offset": [
+   516,
+   729
+  ],
+  "rect": [
+   81.95973205566406,
+   65.79866027832031,
+   516,
+   729.5570678710938
+  ]
+ },
+ "font": "\"DualInput Geist\", sans-serif",
+ "button": {
+  "offset": [
+   120,
+   35
+  ],
+  "rect": [
+   197.39598083496094,
+   781.5033569335938,
+   120.05369567871094,
+   35.78523635864258
+  ],
+  "hit at the rect": "nothing",
+  "hit at the rect times zoom": "BUTTON.button abstract-button i",
+  "hit from the host's corner": "BUTTON.button abstract-button i"
+ },
+ "geistWidth": [
+  230,
+  "serif",
+  210
+ ]
+}
+screenshot: experiments/areas/interface/results/p24-efb-scale-efb-2026-11-01-16-32-51/01-small.jpg, 1844 x 1316
+
+Medium: sent
+{
+ "registered": true,
+ "found": true,
+ "efbOpen": true,
+ "panel": [
+  537,
+  799
+ ],
+ "window": [
+  685,
+  915
+ ],
+ "zoom": 1.040697693824768,
+ "hair": "0.960894px",
+ "host": {
+  "offset": [
+   537,
+   759
+  ],
+  "rect": [
+   74,
+   58,
+   537,
+   759
+  ]
+ },
+ "root": {
+  "offset": [
+   516,
+   729
+  ],
+  "rect": [
+   71.10614013671875,
+   55.731842041015625,
+   516,
+   729.3184204101562
+  ]
+ },
+ "font": "\"DualInput Geist\", sans-serif",
+ "button": {
+  "offset": [
+   125,
+   35
+  ],
+  "rect": [
+   185.45249938964844,
+   779.2848510742188,
+   125.87709045410156,
+   35.553070068359375
+  ],
+  "hit at the rect": "DIV.mb-2 text-xs text-muted-",
+  "hit at the rect times zoom": "BUTTON.button abstract-button i",
+  "hit from the host's corner": "BUTTON.button abstract-button i"
+ },
+ "geistWidth": [
+  229,
+  "serif",
+  212
+ ]
+}
+screenshot: experiments/areas/interface/results/p24-efb-scale-efb-2026-11-01-16-32-51/02-medium.jpg, 1844 x 1316
+
+Large: sent
+{
+ "registered": true,
+ "found": true,
+ "efbOpen": true,
+ "panel": [
+  621,
+  925
+ ],
+ "window": [
+  779,
+  1045
+ ],
+ "zoom": 1.2034883499145508,
+ "hair": "0.830918px",
+ "host": {
+  "offset": [
+   621,
+   879
+  ],
+  "rect": [
+   79,
+   60,
+   621,
+   879
+  ]
+ },
+ "root": {
+  "offset": [
+   516,
+   730
+  ],
+  "rect": [
+   65.64251708984375,
+   49.855072021484375,
+   516,
+   730.3768310546875
+  ]
+ },
+ "font": "\"DualInput Geist\", sans-serif",
+ "button": {
+  "offset": [
+   122,
+   35
+  ],
+  "rect": [
+   181.14010620117188,
+   780.23193359375,
+   122.14492797851562,
+   35.729469299316406
+  ],
+  "hit at the rect": "DIV.overflow-y-auto px-5 pt-",
+  "hit at the rect times zoom": "BUTTON.button abstract-button i",
+  "hit from the host's corner": "BUTTON.button abstract-button i"
+ },
+ "geistWidth": [
+  227,
+  "serif",
+  211
+ ]
+}
+screenshot: experiments/areas/interface/results/p24-efb-scale-efb-2026-11-01-16-32-51/03-large.jpg, 1844 x 1316
+
+Back to size 0: sent

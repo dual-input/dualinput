@@ -151,7 +151,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   A mouse event's position alone reads in the window's pixels, which the kit converts with its root's scale.
   A hairline is a border, or takes `--hair`, the length of one real pixel at the root's scale, since a 1px height or shadow rounds down to nothing below a scale of 1.
   If the sim's EFB turns out to differ, the fallback is every size written as `calc(Npx * var(--scale))`, which is how `efb_os.css` sizes itself, by a step on the built stylesheet, with a helper for each number in our code.
-  Settled by us on 2026-11-01, on p24 in the SDK's debugger, for the user to look at with the kit's page.
+  The app starts below the EFB's status bar, which covers the view's top, so it has about 700 of its units for its height, against the frames' 716, and pages take up the difference by scrolling sooner ([interface log][p24-efb]).
+  The user agreed on 2026-11-01, after p24 in the SDK's debugger and in the sim's EFB.
 - **Because:**
   - A transform blurs text in the debugger, at every scale tried, and `zoom` and `calc()` both draw it sharp ([interface log][p24]).
   - Under `zoom`, offsets, rects, `scrollTop`, and a `translateX` all read and move in the frames' units, so the frames' motion carries over with no number changed (same entry).
@@ -159,7 +160,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Leaves out:**
   - The scale itself, which the EFB shell reads from the app's view.
   - A design for landscape, which p21 measured at about 696 by 433 of the EFB's units, and which waits until after the portrait build, with the layout's flex keeping it usable until then (user, 2026-11-01).
-  - How it runs in the sim's EFB, which [the list below](#stage-11b-checks-in-coherent-gt-what-the-frames-lean-on) holds.
+  - A pilot's real presses in the sim's EFB, and what it costs a frame, which [the list below](#stage-11b-checks-in-coherent-gt-what-the-frames-lean-on) holds.
 
 ## Go to from the EFB app runs through the menu script, so BlurPage stays
 
@@ -290,7 +291,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 ## Stage 11b checks in Coherent GT what the frames lean on
 
 - **Decided:** as the build reaches the first screen that uses each of these, it checks it in Coherent GT, since no run has shown it there:
-  - `zoom` on the app's root in the EFB's own document, with its layout, popups, and real input, and what it costs a frame, since p24 ran it only in the SDK's debugger.
+  - A pilot's real presses under `zoom` in the EFB's own document, and what `zoom` costs a frame, since p24 measured its layout and hit tests there and no real input ([interface log][p24-efb]).
+  - The EFB's frame rate in a flight, since it drew 15 frames a second at the world map, and how the frames' motion reads at that rate ([interface log][efb-frames]).
   - Text inside an element with `opacity` below 1, which lost an edge or drew a ghost line at some scales in the debugger, with `zoom`, with `calc()`, and at 1:1 ([interface log][p24]), since disabled states and fades both rest on it.
   - React in the banner panel's page, since p23 ran it only in the EFB's document.
   - `position: -webkit-sticky`, which pins the session card; the engine parses it, and nobody has seen it stick.
@@ -685,6 +687,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Because:** every input is recorded with its time, so a pilot's rough time still finds the moment (user, 2026-10-31).
 
 [coverage]: log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel
+[efb-frames]: log.md#2026-11-01-the-efbs-document-draws-15-frames-a-second-at-the-world-map-half-the-rate-of-the-sims-other-documents-so-a-quick-click-often-lands-between-two-frames
+[p24-efb]: log.md#2026-11-01-in-the-sims-own-efb-zoom-lays-out-and-hit-tests-as-in-the-debugger-the-efbs-status-bar-covers-the-views-top-25px-and-a-picture-taken-with-the-sims-hdr-on-reads-about-twice-too-bright
 [p24]: log.md#2026-11-01-in-the-sdks-debugger-zoom-scales-a-page-with-sharp-text-and-its-layout-motion-scrolling-and-real-input-in-step-where-a-transform-blurs-its-text
 [p22]: log.md#2026-11-01-the-sdks-coherentgt-debugger-runs-our-pages-in-coherent-gt-with-no-sim-and-matches-the-sims-efb-on-1159-of-p14s-1170-css-items-and-on-repeated-work-in-a-loaded-page
 [p23]: log.md#2026-11-01-react-19-runs-in-the-efbs-own-document-and-takes-a-pilots-real-click-wheel-and-typing-and-on-a-card-sized-change-it-stays-within-01ms-of-fscomponent

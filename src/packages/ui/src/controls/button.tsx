@@ -2,9 +2,10 @@ import { Children } from "react"
 import type { ButtonHTMLAttributes, ReactNode, Ref } from "react"
 
 import { cx } from "../lib/cx.ts"
+import { showPress } from "../lib/press.ts"
 
 const BASE =
-  "inline-flex shrink-0 items-center justify-center whitespace-nowrap border bg-clip-padding text-sm font-medium transition-all select-none active:translate-y-[var(--hair)] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0"
+  "inline-flex shrink-0 items-center justify-center whitespace-nowrap border bg-clip-padding text-sm font-medium transition-colors select-none hover:duration-0 data-[pressed]:translate-y-[var(--hair)] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0"
 
 const VARIANTS = {
   default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
@@ -40,9 +41,19 @@ export function spaced(children: ReactNode): ReactNode {
   return Children.map(children, (child) => (typeof child === "string" || typeof child === "number" ? <span>{child}</span> : child))
 }
 
-export function Button({ variant = "default", size = "default", type = "button", className, children, ...rest }: ButtonProps) {
+// A hover shows at once and fades only as it goes, since the EFB's frames, 66.7ms apart at the world
+// map, already add to any ease on the way in (record/areas/interface/log.md, p24's press check).
+export function Button({ variant = "default", size = "default", type = "button", className, children, onMouseDown, ...rest }: ButtonProps) {
   return (
-    <button type={type} className={cx(BASE, VARIANTS[variant], SIZES[size], className)} {...rest}>
+    <button
+      type={type}
+      className={cx(BASE, VARIANTS[variant], SIZES[size], className)}
+      onMouseDown={(event) => {
+        showPress(event)
+        onMouseDown?.(event)
+      }}
+      {...rest}
+    >
       {spaced(children)}
     </button>
   )

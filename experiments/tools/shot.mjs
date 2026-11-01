@@ -9,7 +9,9 @@
  * sim is whatever covers it, and Windows won't always bring the sim forward for
  * a background process, so with the sim behind another window it asks the sim's
  * window to draw itself, with PrintWindow and PW_RENDERFULLCONTENT, which drew
- * the world map and the EFB with the sim covered (p21, 2026-10-30). The sim must
+ * the world map and the EFB with the sim covered (p21, 2026-10-30). With the
+ * sim's HDR on, either way reads the whole window about twice too bright, so a
+ * picture says nothing of color until HDR is off (p24, 2026-11-01). The sim must
  * be in a window or borderless, and not minimized. Each shot is saved as a JPEG
  * 1,200 pixels wide with the top 100 pixels cut off, because Devmode's Project
  * Editor shows the home folder's path in its title bar there (CLAUDE.md,

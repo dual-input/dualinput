@@ -1,0 +1,93 @@
+p24-efb-scale-press, 2026-11-01T16:49:26.365Z
+
+Frames: 226 in 15s; between frames, median 66.6ms, longest 69.6ms
+
+Presses: 17
+  held 33ms, :active seen on a frame false, the button moved on a frame false
+  held 67ms, :active seen on a frame true, the button moved on a frame true
+  held 67ms, :active seen on a frame true, the button moved on a frame false
+  held 67ms, :active seen on a frame true, the button moved on a frame false
+  held 34ms, :active seen on a frame false, the button moved on a frame false
+  held 33ms, :active seen on a frame false, the button moved on a frame false
+  held 33ms, :active seen on a frame false, the button moved on a frame false
+  held 67ms, :active seen on a frame false, the button moved on a frame false
+  held 67ms, :active seen on a frame false, the button moved on a frame false
+  held 33ms, :active seen on a frame false, the button moved on a frame false
+  held 33ms, :active seen on a frame false, the button moved on a frame false
+  held 68ms, :active seen on a frame false, the button moved on a frame false
+  held 34ms, :active seen on a frame false, the button moved on a frame false
+  held 33ms, :active seen on a frame false, the button moved on a frame false
+  held 67ms, :active seen on a frame true, the button moved on a frame false
+  held 34ms, :active seen on a frame true, the button moved on a frame false
+  held 67ms, :active seen on a frame true, the button moved on a frame false
+
+Hovers: 14 entered, 17 color changes
+  The first color change after an enter, by the frames' clock: [{"kind":"hover shows","after":68,"bg":"rgba(235, 122, 119, 0.933333)","frames":28},{"kind":"hover shows","after":135,"bg":"rgba(236, 122, 120, 0.901961)","frames":29},{"kind":"hover shows","after":201,"bg":"rgba(234, 121, 119, 0.901961)","frames":30},{"kind":"hover shows","after":68,"bg":"rgba(235, 122, 119, 0.933333)","frames":41},{"kind":"hover shows","after":134,"bg":"rgba(236, 122, 120, 0.901961)","frames":42},{"kind":"hover shows","after":201,"bg":"rgba(234, 121, 119, 0.901961)","frames":43},{"kind":"hover shows","after":68,"bg":"rgba(235, 122, 119, 0.933333)","frames":61},{"kind":"hover shows","after":135,"bg":"rgba(236, 122, 120, 0.901961)","frames":62},{"kind":"hover shows","after":203,"bg":"rgba(234, 121, 119, 0.901961)","frames":63},{"kind":"hover shows","after":35,"bg":"rgba(116, 212, 255, 0.976471)","frames":86},{"kind":"hover shows","after":102,"bg":"rgba(117, 213, 255, 0.815686)","frames":87},{"kind":"hover shows","after":169,"bg":"rgba(116, 212, 255, 0.8)","frames":88}]
+  Transition durations on what was entered: 0.15s
+
+Every event:
+  {"t":1332.1,"type":"enter","frame":20,"text":"Join","transition":"0.15s"}
+  {"t":1765.7,"type":"enter","frame":26,"text":"Host a session","transition":"0.15s"}
+  {"t":2632,"type":"enter","frame":39,"text":"Host a session","transition":"0.15s"}
+  {"t":2932.3,"type":"down","frame":44,"button":true}
+  {"t":2965.2,"type":"up","frame":44,"heldFor":33,"sawActive":false,"sawMoved":false}
+  {"t":2965.2,"type":"click","frame":44}
+  {"t":3398.7,"type":"down","frame":51,"button":true}
+  {"t":3465.6,"type":"up","frame":52,"heldFor":67,"sawActive":true,"sawMoved":true}
+  {"t":3465.6,"type":"click","frame":52}
+  {"t":3965.3,"type":"enter","frame":59,"text":"Host a session","transition":"0.15s"}
+  {"t":4165,"type":"down","frame":62,"button":true}
+  {"t":4232,"type":"up","frame":63,"heldFor":67,"sawActive":true,"sawMoved":false}
+  {"t":4232,"type":"click","frame":63}
+  {"t":4631.6,"type":"down","frame":69,"button":true}
+  {"t":4698.4,"type":"up","frame":70,"heldFor":67,"sawActive":true,"sawMoved":false}
+  {"t":4698.4,"type":"click","frame":70}
+  {"t":5131.8,"type":"down","frame":77,"button":true}
+  {"t":5165.5,"type":"up","frame":77,"heldFor":34,"sawActive":false,"sawMoved":false}
+  {"t":5165.5,"type":"click","frame":77}
+  {"t":5298.3,"type":"enter","frame":79,"text":"Join","transition":"0.15s"}
+  {"t":5665.1,"type":"enter","frame":85,"text":"Join","transition":"0.15s"}
+  {"t":5998.9,"type":"down","frame":90,"button":true}
+  {"t":6032.1,"type":"up","frame":90,"heldFor":33,"sawActive":false,"sawMoved":false}
+  {"t":6032.1,"type":"click","frame":90}
+  {"t":8065.6,"type":"down","frame":121,"button":false}
+  {"t":8098.8,"type":"up","frame":121,"heldFor":33,"sawActive":false,"sawMoved":false}
+  {"t":8098.8,"type":"click","frame":121}
+  {"t":8731.6,"type":"down","frame":131,"button":false}
+  {"t":8798.5,"type":"up","frame":132,"heldFor":67,"sawActive":false,"sawMoved":false}
+  {"t":8798.5,"type":"click","frame":132}
+  {"t":9364.8,"type":"down","frame":140,"button":false}
+  {"t":9431.7,"type":"up","frame":141,"heldFor":67,"sawActive":false,"sawMoved":false}
+  {"t":9431.7,"type":"click","frame":141}
+  {"t":9865.1,"type":"down","frame":148,"button":false}
+  {"t":9898.4,"type":"up","frame":148,"heldFor":33,"sawActive":false,"sawMoved":false}
+  {"t":9898.4,"type":"click","frame":148}
+  {"t":10331.8,"type":"down","frame":155,"button":false}
+  {"t":10365.2,"type":"up","frame":155,"heldFor":33,"sawActive":false,"sawMoved":false}
+  {"t":10365.2,"type":"click","frame":155}
+  {"t":10665.1,"type":"down","frame":160,"button":false}
+  {"t":10732.6,"type":"up","frame":161,"heldFor":68,"sawActive":false,"sawMoved":false}
+  {"t":10732.7,"type":"click","frame":161}
+  {"t":10965,"type":"down","frame":164,"button":false}
+  {"t":10998.9,"type":"up","frame":165,"heldFor":34,"sawActive":false,"sawMoved":false}
+  {"t":10998.9,"type":"click","frame":165}
+  {"t":11265.1,"type":"down","frame":169,"button":false}
+  {"t":11298.5,"type":"up","frame":169,"heldFor":33,"sawActive":false,"sawMoved":false}
+  {"t":11298.6,"type":"click","frame":169}
+  {"t":11598.7,"type":"enter","frame":174,"text":"Check now","transition":"0.15s"}
+  {"t":11932.1,"type":"enter","frame":179,"text":"Host a session","transition":"0.15s"}
+  {"t":12165.6,"type":"down","frame":182,"button":true}
+  {"t":12232.1,"type":"up","frame":183,"heldFor":67,"sawActive":true,"sawMoved":false}
+  {"t":12232.1,"type":"click","frame":183}
+  {"t":12498.3,"type":"down","frame":187,"button":true}
+  {"t":12532,"type":"up","frame":188,"heldFor":34,"sawActive":true,"sawMoved":false}
+  {"t":12532.1,"type":"click","frame":188}
+  {"t":12765,"type":"down","frame":191,"button":true}
+  {"t":12831.6,"type":"up","frame":192,"heldFor":67,"sawActive":true,"sawMoved":false}
+  {"t":12831.6,"type":"click","frame":192}
+  {"t":13165.5,"type":"enter","frame":197,"text":"Host a session","transition":"0.15s"}
+  {"t":13398.8,"type":"enter","frame":201,"text":"Host a session","transition":"0.15s"}
+  {"t":13665.9,"type":"enter","frame":205,"text":"Host a session","transition":"0.15s"}
+  {"t":13865.4,"type":"enter","frame":208,"text":"Host a session","transition":"0.15s"}
+  {"t":13998.7,"type":"enter","frame":210,"text":"Host a session","transition":"0.15s"}
+  {"t":14265.5,"type":"enter","frame":214,"text":"Take over","transition":"0.15s"}

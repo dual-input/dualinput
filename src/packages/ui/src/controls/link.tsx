@@ -1,6 +1,7 @@
 import type { AnchorHTMLAttributes, ReactNode } from "react"
 
 import { cx } from "../lib/cx.ts"
+import { showPress } from "../lib/press.ts"
 
 const TONES = {
   primary: "text-primary",
@@ -21,9 +22,17 @@ export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & { tone?: LinkT
  * transform doesn't move an inline element. A link on its own reads as a control, so its caller gives
  * it font-medium, and one in a sentence keeps the sentence's weight.
  */
-export function Link({ tone = "primary", disabled, icon, className, children, ...rest }: LinkProps) {
+export function Link({ tone = "primary", disabled, icon, className, children, onMouseDown, ...rest }: LinkProps) {
   return (
-    <a aria-disabled={disabled || undefined} className={cx("group relative cursor-pointer active:top-[var(--hair)]", TONES[tone], disabled && "pointer-events-none opacity-50", className)} {...rest}>
+    <a
+      aria-disabled={disabled || undefined}
+      className={cx("group relative cursor-pointer data-[pressed]:top-[var(--hair)]", TONES[tone], disabled && "pointer-events-none opacity-50", className)}
+      onMouseDown={(event) => {
+        showPress(event)
+        onMouseDown?.(event)
+      }}
+      {...rest}
+    >
       {icon && <span className="mr-3 inline-block align-text-bottom [&_svg]:size-4">{icon}</span>}
       <span className="border-b border-transparent group-hover:border-current">{children}</span>
     </a>

@@ -3,6 +3,72 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-01: The EFB's document draws 15 frames a second at the world map, half the rate of the sim's other documents, so a quick click often lands between two frames
+
+**Asked:** why a quick click on the kit's page in the sim showed no press, and why hover felt late (user, 2026-11-01).
+
+**Expected:** our 150ms ease to be part of it, with the sim's share unknown.
+
+**Found:** on MSFS 2024 1.9.21, at Free flight's world map, with p24's recorder in the EFB's document while the user clicked and swept the mouse for 15s:
+
+- **The frame rate:** `requestAnimationFrame` ran every 66.6ms, the longest gap 69.6ms in 226 frames, and at another moment 66.7ms, while the world map's `atlas`, `mainUi`, and the toolbar ran every 33.3ms to 33.4ms.
+  `GlassCockpitsRefreshRate` is at its highest, `Quality 2`, so that setting doesn't explain it, and we haven't changed it to see.
+- **The presses:** mouse events arrived on a 33ms grid, each press held 33ms to 68ms.
+  Of the 9 presses on a button, the down and the up fell inside one frame on 3, `:active` showed on a frame on 6, and the button had moved on a frame on 1, since the 1px nudge eased in over 150ms.
+- **Hover:** a button's color took three frames to arrive, 68ms, 135ms, and 201ms after the mouse entered, through the same 150ms ease.
+
+**Changed:** the kit holds a press itself, through `data-pressed`, for as long as the mouse does and 134ms at least, two of those frames, with the nudge instant.
+A hover's color arrives at once and fades only as it goes.
+In the debugger the quickest click, a down and an up posted with no wait, then showed for 95ms to 135ms, moved on every frame.
+Every motion the frames draw runs at this rate in the EFB, so a 220ms ease is about three frames.
+
+What we haven't run: the fix in the sim, which the user tries on the sample; the EFB's rate in a flight, which [the list of checks](decisions.md#stage-11b-checks-in-coherent-gt-what-the-frames-lean-on) holds; and the delay between a pilot's hand and the page's event, which the page can't see.
+
+**Affects:** the kit, and the frames' motion in the EFB.
+
+**Evidence:** `experiments/areas/interface/results/p24-efb-scale-press-2026-11-01-16-49-26.txt`.
+
+## 2026-11-01: In the sim's own EFB, zoom lays out and hit-tests as in the debugger, the EFB's status bar covers the view's top 25px, and a picture taken with the sim's HDR on reads about twice too bright
+
+**Asked:** whether `zoom` holds in the EFB's own document, with our app away from the document's corner, before any screen is built on it, since [p24 in the debugger](#2026-11-01-in-the-sdks-debugger-zoom-scales-a-page-with-sharp-text-and-its-layout-motion-scrolling-and-real-input-in-step-where-a-transform-blurs-its-text) couldn't show that.
+
+**Expected:** the debugger's answers, with faded text the open question.
+
+**Found:** on MSFS 2024 1.9.21, in a 1,844 by 1,316 window at Free flight's world map, the kit's page as an EFB app, registered and scaled by `src/platform/efb-shell`:
+
+| Tablet size | `PanelSize` | The view | Scale | The root's layout |
+| --- | --- | --- | --- | --- |
+| Small | 447 by 667 | 447 by 632 | 0.866 | 516 by 729 |
+| Medium | 537 by 799 | 537 by 759 | 1.041 | 516 by 729 |
+| Large | 621 by 925 | 621 by 879 | 1.203 | 516 by 730 |
+
+- **Zoom holds:** the view's shorter side over 516 gave the root the frames' width at every size, and `DualInput Geist` loaded from our package, a test string 230 units wide against 210 in `serif`.
+- **A rect reads as the window's pixels over the zoom,** the root's left edge 81.96 for a view at 71 at 0.866, so a rect times the zoom is where the element is on screen.
+  At Small, `elementFromPoint` there found the switch, the select, the field, and the slider, each itself.
+- **The EFB's status bar sits over the view:** `div.status-bar`, 25px tall at Small, `z-index` 998, covers the view's top, and draws its notifications at the left and the date at the right, over whatever our page has there.
+  It's about 29 of our units at each size, so our app has about 700 of them for its height, against the frames' 716.
+  Presses fall through it to our page, except on its `notifications`, 25px by 15px.
+- **HDR doubles a picture, not the page:** with the sim's HDR on, a picture read the whole window about twice too bright and clipped, the world map's buttons too, while our page's computed colors were right.
+  With it off, the same picture matched our CSS within JPEG's noise:
+
+  | Color | Our CSS | HDR on | HDR off |
+  | --- | --- | --- | --- |
+  | `secondary` | 38, 38, 38 | 76, 76, 76 | 38, 38, 38 |
+  | `muted-foreground` | 161, 161, 161 | 255, 255, 255 | 160, 160, 158 |
+  | `primary` | 116, 212, 255 | 213, 254, 255 | 121, 209, 255 |
+  | `warning` | 241, 190, 77 | 255, 254, 148 | 244, 186, 86 |
+
+  We first blamed the capture method and then the EFB's brightness setting; `SET_MANUAL_BRIGHTNESS` from 0.1 to 1 changed no pixel of a picture here, and the user found it was HDR (user, 2026-11-01).
+
+**Changed:** [the app fits its view with `zoom`](decisions.md#the-efb-app-fits-its-view-with-zoom-on-its-root), and the shell starts below the status bar.
+A probe that reads color from a picture needs the sim's HDR off, which `experiments/tools/shot.mjs` says.
+
+What we haven't run: a pilot's real presses under `zoom`, which the user does on the sample; faded text in the sim, since a picture is scaled down too far to show it; what `zoom` costs a frame; and what a pilot's screen shows with HDR on, since only a picture read too bright.
+
+**Affects:** the EFB shell ([the frames' height](decisions.md#the-efb-app-fits-its-view-with-zoom-on-its-root)).
+
+**Evidence:** `experiments/areas/interface/results/p24-efb-scale-efb-2026-11-01-16-27-54.txt`, and in `p24-efb-scale-efb-pictures/`, the EFB cropped from the sim's window at Small and Large with HDR on, and at Small with it off.
+
 ## 2026-11-01: In the SDK's debugger, zoom scales a page with sharp text and its layout, motion, scrolling, and real input in step, where a transform blurs its text
 
 **Asked:** how one number should fit the EFB app to its view, since [p21](#2026-10-30-in-landscape-an-efb-apps-view-is-its-portrait-view-turned-on-its-side-about-696-by-433-in-the-efbs-own-units-against-468-by-660) found that view 456px to 632px wide at the tablet's three sizes in one window, and the frames are drawn 516 wide.

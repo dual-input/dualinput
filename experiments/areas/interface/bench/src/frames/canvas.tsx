@@ -284,11 +284,32 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 // and 4x pixel density, and the canvas went blank with "Maximum update depth exceeded" (measured in
 // Chromium, 2026-10-31, after the Flying and Traffic sections joined; skipping any one large
 // section stopped it). A frame's first draw comes a task after the canvas's.
+// Frames mount a few at a time, each batch in a task of its own, so their first layout effects
+// don't all run in one commit: with every frame mounting at once, the updates those effects start
+// ran past React's limit of 50 nested updates once the banner's frames joined the canvas
+// (2026-11-01).
+const MOUNT_BATCH = 4
+const toMount: (() => void)[] = []
+let mounting = false
+function mountSoon(go: () => void) {
+  toMount.push(go)
+  if (mounting) return
+  mounting = true
+  const next = () => {
+    toMount.splice(0, MOUNT_BATCH).forEach((g) => g())
+    if (toMount.length) window.setTimeout(next)
+    else mounting = false
+  }
+  window.setTimeout(next)
+}
 const FrameBody = memo(function FrameBody({ entry, theme, play }: { entry: FrameEntry; theme: Theme; play?: Action; zoom: number }) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
-    const t = window.setTimeout(() => setMounted(true))
-    return () => clearTimeout(t)
+    let live = true
+    mountSoon(() => live && setMounted(true))
+    return () => {
+      live = false
+    }
   }, [])
   return mounted ? <>{entry.draw(theme, play)}</> : null
 })

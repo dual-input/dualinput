@@ -448,13 +448,12 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - Once every counted pilot is ready, a green ring just before this pilot's Ready counts the 3s down, so nothing shifts, and un-readying stops it.
   - The crew lists this pilot first, then the pilots the countdown waits on, then the rest, in a window of three rows and part of a fourth, during preflight only.
   - The differences list under the crew rows with no title, an error's red X or a warning's triangle, the difference, then a muted note, in a window of three and part of a fourth; a note says what the difference can cause, and never advises or commands.
-    Once the flight starts they fold to a row of two counts, which opens the list.
+    Once the flight starts they fold to a row of two counts, which opens the list, and a new difference changes the counts without opening it (user, 2026-11-01).
     "No profile for this aircraft" stays among them, since a joiner can reach the flight without passing home's page for it, and the profile hash line goes, against the call of 2026-10-18 that it shows once, while "Unpublished profile" stays as a muted note when every pilot loaded one.
   - Under the card, every pilot gets a line with a hand icon, "Avoid unnecessary cockpit interactions until the flight starts, as some may not sync.", outside the checklist so it shows with no checklist too.
 
   Settled by the user from 2026-10-29 to 2026-10-31.
 - **Because:** nearly every difference names a crewmate, and [the scope](../product/03-v1-scope.md#preflight-match-check) has them beside each Ready (user, 2026-10-30).
-- **Leaves out:** whether a new difference in flight opens the list by itself.
 
 ## The checklist takes any entry an author writes, and every pilot has one
 

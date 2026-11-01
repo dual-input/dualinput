@@ -78,7 +78,7 @@ export const NOTES = {
   bridge: { when: "The panel bridge didn't load, held", note: { level: "trouble", title: "Cockpit screens aren't syncing", detail: "Dual Input couldn't load into the cockpit's panels. Another add-on that replaces VCockpit.js is the likeliest cause." } },
   "module-stopped": { when: "Our module stopped, held", note: { level: "trouble", title: "Dual Input's WASM module stopped", detail: "Restart the sim to fly together again." } },
   "module-missing": { when: "Our module's file missing from a package that loaded, held", note: { level: "trouble", title: "Dual Input's WASM module is missing", detail: "Reinstall Dual Input with the sim closed to fly together again." } },
-  helper: { when: "The Windows helper down, held", note: { level: "trouble", title: "Dual Input's Windows helper is down", detail: "Keybinds and audio won't work until it's back." } },
+  helper: { when: "The Windows helper down, held", note: { level: "trouble", title: "Dual Input's Windows helper is down", detail: "Keybinds, audio, and your figure's pointing won't work until it's back." } },
   want: { when: "A feature's want the helper can't carry out, held", note: { level: "warning", title: "Your take-control key isn't working", detail: "Windows didn't let Dual Input listen for F9." } },
   seat: { when: "This pilot's camera in another figure's seat, held", note: { level: "info", who: JAMES, title: "This seat is taken" } },
 } satisfies Record<string, { when: string; note: Note }>

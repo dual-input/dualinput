@@ -7,12 +7,16 @@
 // centered (user, 2026-11-01: "yes, build it", to my sketch). A lock the core hasn't renewed for 8s
 // to 10s turns into a warning that blocks nothing, since the core is silent and whatever sits in
 // the pilot's input path fails open (record/areas/architecture/02-code-map.md, What the bridge
-// owns): it looks like a lock, its veil and card over the whole display, but presses pass through
-// it, and only its Dismiss takes one, which dismisses the warning on every display at once (user,
-// 2026-11-01: "a full overlay here with a dismiss button that dismisses all not responding
-// overlays at once"; tried and dropped: a strip along the display's top edge). With the core
-// silent, the panels tell each other without it, through a shared `L:` variable perhaps, which no
-// run has tried. And a press blocked while another pilot's gesture plays flashes the display's
+// owns): it looks like a lock, its veil and card over the whole display, with Dismiss, which
+// dismisses the warning on every display at once (user, 2026-11-01: "a full overlay here with a
+// dismiss button that dismisses all not responding overlays at once"; tried and dropped: a strip
+// along the display's top edge). Presses pass through its veil to the display, and its card takes
+// them, since a press on the card would reach a control the card hides; blocking the whole display
+// until Dismiss would hang the release on the pilot, or on the button's own script, where the
+// warning exists to let go by itself (user, 2026-11-01: "might as well block them now that dismiss is
+// a button?", and my answer). With the core silent, the panels tell each other of a dismissal
+// without it, by a CommBus event, `DUALINPUT_BRIDGE_DISMISS`, since the CommBus reached every
+// cockpit panel (measured on MSFS 2024, 2026-10-08, record/areas/interface/log.md). And a press blocked while another pilot's gesture plays flashes the display's
 // whole rect, one solid color with no words, while it's held (user, 2026-10-17). What each says is the content call of 2026-11-01 in the
 // stage notes; the words are drafts, and the names and the key are examples.
 // The displays here are stand-ins, a primary flight display and a radio's, drawn as plain shapes
@@ -38,10 +42,11 @@ type DisplayKind = keyof typeof DISPLAYS
 // too small for it, a 26th of its width, or as much as lets its card's height fit, with no form
 // that drops the words, since a pilot can zoom in far enough to read small text (user, 2026-11-01:
 // "tiny text could work in tiny screens", then of a card that grew with the display: "are we
-// oversizing the overlay card on larger panels? I'd rather not"). The card is the banner's, sized
-// to its words up to 20em or 90% of the display; its height in em, with room around it, is the
-// lost link's 6, the catch-up's 3.5, and the stopped warning's 9, with its button.
-const CARD_EMS = { lost: 6, "catching-up": 3.5, silent: 9, flash: 1 }
+// oversizing the overlay card on larger panels? I'd rather not"). The card is the banner's, one
+// column centered: its icon, its title, its message, and Dismiss where it has one (user,
+// 2026-11-01: "a nicer looking card"), up to 18em or 90% of the display wide; its height in em,
+// with room around it, is the lost link's 8.5, the catch-up's 5.5, and the stopped warning's 11.
+const CARD_EMS = { lost: 8.5, "catching-up": 5.5, silent: 11, flash: 1 }
 const emOf = (d: { width: number; height: number }, lock: Lock) => Math.min(16, d.width / 26, d.height / CARD_EMS[lock.kind])
 
 export type Lock = { kind: "lost"; key?: string } | { kind: "catching-up" } | { kind: "silent" } | { kind: "flash" }
@@ -49,46 +54,42 @@ export type Lock = { kind: "lost"; key?: string } | { kind: "catching-up" } | { 
 const TITLE = { lost: "Reconnecting to James", "catching-up": "Catching up with James", silent: "Dual Input stopped responding" }
 function LockCard({ lock, onDismiss }: { lock: Exclude<Lock, { kind: "flash" }>; onDismiss?: () => void }) {
   const { Spinner } = useUI()
-  const icon = { width: "1.1em", height: "1.1em" }
+  const icon = { width: "1.4em", height: "1.4em" }
   const lead = lock.kind === "lost" ? <TriangleAlert className="text-warning" style={icon} /> : lock.kind === "silent" ? <CircleX className="text-destructive" style={icon} /> : <Spinner className="text-muted-foreground" style={icon} />
   return (
-    <div className="flex items-start bg-card text-card-foreground inset-ring inset-ring-foreground/10" style={{ maxWidth: "min(90%, 20em)", padding: "0.75em 0.9em", gap: "0.6em", borderRadius: "0.6em" }}>
-      <span className="flex shrink-0 items-center" style={{ height: "1.25em" }}>
-        {lead}
+    <div className="pointer-events-auto flex flex-col items-center bg-card text-center text-card-foreground inset-ring inset-ring-foreground/10" style={{ maxWidth: "min(90%, 18em)", padding: "0.9em 1.1em", borderRadius: "0.6em" }}>
+      {lead}
+      <span className="font-semibold" style={{ marginTop: "0.5em", lineHeight: "1.25em" }}>
+        {TITLE[lock.kind]}
       </span>
-      <span className="flex min-w-0 flex-col" style={{ gap: "0.25em" }}>
-        <span className="font-semibold" style={{ lineHeight: "1.25em" }}>
-          {TITLE[lock.kind]}
+      {lock.kind === "lost" && (
+        <span className="text-muted-foreground" style={{ marginTop: "0.25em", fontSize: "0.8em", lineHeight: 1.35 }}>
+          Wait for them to come back.{" "}
+          {lock.key ? (
+            <>
+              If they don't, press <span className="font-semibold text-foreground">{lock.key}</span> to take control.
+            </>
+          ) : (
+            "If they don't, take control in Dual Input's EFB app."
+          )}
         </span>
-        {lock.kind === "silent" && (
-          <>
-            <span className="text-muted-foreground" style={{ fontSize: "0.8em", lineHeight: 1.35 }}>
-              This screen works, but it isn't syncing until Dual Input is back.
-            </span>
-            {/* The kit's secondary button, in em, so it scales with the card. */}
-            <button
-              type="button"
-              onClick={onDismiss}
-              className="pointer-events-auto self-start bg-secondary font-medium text-secondary-foreground outline-none hover:bg-secondary/80 focus-visible:ring-2 focus-visible:ring-ring active:[transform:translateY(1px)]"
-              style={{ marginTop: "0.45em", fontSize: "0.8em", padding: "0.35em 0.8em", borderRadius: "0.45em" }}
-            >
-              Dismiss
-            </button>
-          </>
-        )}
-        {lock.kind === "lost" && (
-          <span className="text-muted-foreground" style={{ fontSize: "0.8em", lineHeight: 1.35 }}>
-            Wait for them to come back.{" "}
-            {lock.key ? (
-              <>
-                If they don't, press <span className="font-semibold text-foreground">{lock.key}</span> to take control.
-              </>
-            ) : (
-              "If they don't, take control in Dual Input's EFB app."
-            )}
+      )}
+      {lock.kind === "silent" && (
+        <>
+          <span className="text-muted-foreground" style={{ marginTop: "0.25em", fontSize: "0.8em", lineHeight: 1.35 }}>
+            This screen works, but it isn't syncing until Dual Input is back.
           </span>
-        )}
-      </span>
+          {/* The kit's secondary button, in em, so it scales with the card. */}
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="bg-secondary font-medium text-secondary-foreground outline-none hover:bg-secondary/80 focus-visible:ring-2 focus-visible:ring-ring active:[transform:translateY(1px)]"
+            style={{ marginTop: "0.7em", fontSize: "0.8em", padding: "0.35em 0.9em", borderRadius: "0.45em" }}
+          >
+            Dismiss
+          </button>
+        </>
+      )}
     </div>
   )
 }

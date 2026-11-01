@@ -9,6 +9,8 @@ import type { CoreLink } from "../../../../engines/page-client/src/core-link.ts"
 export const SETUP_DONE = "app.setup-done"
 export const GUIDE_DONE = "app.guide-done"
 export const NAME = "session.name"
+/** `OUTPUT` in src/platform/core-helper-service/src/lib.rs names the same setting. */
+export const OUTPUT = "core-helper.output"
 /** TODO: when avatars' stage registers the figure's color as a setting, have it use this key, or change this one. A core that doesn't know it refuses the write, and the figure wears its default. */
 export const FIGURE_COLOR = "avatars.color"
 

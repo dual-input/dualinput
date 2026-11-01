@@ -115,21 +115,36 @@ function useNewestFirst(notes: Note[]): Note[] {
   return [...notes].sort((a, b) => arrived.current.get(b.id)! - arrived.current.get(a.id)!)
 }
 
-export function Stack({ notes, summary, onOpen }: { notes: Note[]; summary: ReactNode; onOpen: (note: Note) => void }) {
+/** What a card said, by which a dismissed one stays hidden, so news that moves on under the same ID shows again. */
+const said = (note: Note) => `${note.id}\n${note.text}`
+
+export function Stack({ notes: raised, summary, onOpen }: { notes: Note[]; summary: ReactNode; onOpen: (note: Note) => void }) {
+  // The core keeps a one-time notification for a few seconds, which a pointer resting on its card can outlast, so a card stays for its own time, whatever the core has dropped.
+  const once = useRef(new Map<string, Note>())
+  raised.forEach((note) => {
+    if (note.once) once.current.set(note.id, note)
+    else once.current.delete(note.id)
+  })
+  const notes = [...raised, ...Array.from(once.current.values()).filter((note) => !raised.some((other) => other.id === note.id))]
   const newest = useNewestFirst(notes)
   // Each card a pilot dismissed or that ran out its time, and whether it had already slid off. A held one stays hidden until its cause ends, and shows again if the cause comes back.
   const [gone, setGone] = useState(new Map<string, boolean>())
-  const leave = (id: string, away: boolean) => setGone((now) => new Map(now).set(id, away))
+  const leave = (note: Note, away: boolean) => {
+    once.current.delete(note.id)
+    setGone((now) => new Map(now).set(said(note), away))
+  }
   useEffect(() => {
-    const cleared = Array.from(gone.keys()).filter((id) => !notes.some((note) => note.id === id))
+    const cleared = Array.from(gone.keys()).filter((key) => !notes.some((note) => said(note) === key))
     if (cleared.length === 0) return
     setGone((now) => {
       const next = new Map(now)
-      cleared.forEach((id) => next.delete(id))
+      cleared.forEach((key) => next.delete(key))
       return next
     })
-  }, [notes, gone])
-  const live = newest.filter((note) => !gone.has(note.id))
+    // It looks for what's cleared each time the slice or what's hidden changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [raised, gone])
+  const live = newest.filter((note) => !gone.has(said(note)))
 
   // Which fit depends on how their words wrap, so each is measured from a copy laid out unseen.
   const measure = useRef<HTMLDivElement>(null)
@@ -157,7 +172,7 @@ export function Stack({ notes, summary, onOpen }: { notes: Note[]; summary: Reac
   const wantedKey = wanted.join()
   const [items, setItems] = useState<Item[]>(() => wanted.map((id) => ({ id })))
   useLayoutEffect(() => {
-    setItems((now) => merge(now, wanted, (id) => !!gone.get(id)))
+    setItems((now) => merge(now, wanted, (id) => Array.from(gone.entries()).some(([key, away]) => away && key.split("\n")[0] === id)))
     // The items follow what's wanted, which the key names.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wantedKey])
@@ -177,9 +192,15 @@ export function Stack({ notes, summary, onOpen }: { notes: Note[]; summary: Reac
             {item.id === SUMMARY ? (
               <div ref={summaryBox}>{summary}</div>
             ) : item.id === MORE ? (
-              <MoreLine count={lastCount.current} onDismissAll={() => setGone(new Map(notes.map((one) => [one.id, false])))} />
+              <MoreLine
+                count={lastCount.current}
+                onDismissAll={() => {
+                  once.current.clear()
+                  setGone(new Map(notes.map((one) => [said(one), false])))
+                }}
+              />
             ) : note ? (
-              <NoteCard note={note} lifetime={note.once ? ONCE_MS : undefined} onOpen={() => onOpen(note)} onDismiss={() => leave(item.id, true)} onExpire={() => leave(item.id, false)} />
+              <NoteCard note={note} lifetime={note.once ? ONCE_MS : undefined} onOpen={() => onOpen(note)} onDismiss={() => leave(note, true)} onExpire={() => leave(note, false)} />
             ) : null}
           </Row>
         )

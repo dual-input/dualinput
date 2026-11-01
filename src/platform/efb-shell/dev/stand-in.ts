@@ -21,7 +21,7 @@ import type { ToDesktop } from "../../../engines/messages/ts/desktop/ToDesktop.t
 import { VERSION } from "../../../engines/messages/ts/stamp.ts"
 import type { Socket } from "../../../engines/page-client/src/page-client.ts"
 import type { DesktopEnv } from "../src/desktop-link.ts"
-import { GUIDE_DONE, SETUP_DONE } from "../src/settings/setting.ts"
+import { GUIDE_DONE, OUTPUT, SETUP_DONE } from "../src/settings/setting.ts"
 
 /** A made-up pilot ID, 32 hex digits, which picks the color of their figure. */
 const pilotId = (seed: number) => Array.from({ length: 32 }, (_, at) => ((seed * 7 + at * at * 13 + seed * at) % 16).toString(16)).join("")
@@ -146,6 +146,7 @@ export const SCENES: Record<string, Slices> = {
     [DESKTOP]: { ...LOCAL, firewall: "blocks" },
   },
   "Recording stopped": { wanted: { recordingStopped: "no-space" } },
+  "Output device missing": { settings: [...settings(true, true), { ...setting(OUTPUT, false), kind: { type: "device" }, value: { id: "old", name: "Studio Headphones" } }] },
   "Update ready": { [DESKTOP]: { ...LOCAL, update: { state: "ready", next: "1.0.3" } } },
   "No tray app": { [DESKTOP]: null },
   "Another version": { core: { ...CORE, version: "0.0.9" } },

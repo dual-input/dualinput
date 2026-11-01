@@ -630,6 +630,10 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
     A card coming out from behind that line arrives at the stack's foot, where the line said it was, and a new notification arrives at the top.
 
   Settled by the user on 2026-11-01.
+- **What a card needs comes from the core:** `Notification` carries `detail`, `pilot`, `out`, `busy`, and `once` beside its `text`, the card's title (user, 2026-11-01).
+  A `once` notification stays in the slice about 10s, so a page that reconnects within a moment still shows it and one that opens later doesn't show old news, and the banner keeps a card it's showing for its own 6s, whatever the core has dropped.
+  A dismissed card stays hidden while its words last, so news that moves on under one ID shows again.
+  `list`, for several controls at one load, joins the type with the state sync feature that raises it.
 - **Because:**
   - The sim blurs whatever lies behind a panel's painted pixels, so a translucent pixel would show it, and we know no way to turn it off (unverified: no run has measured it, and a look at a translucent card in the sim settles it).
   - A full-height column would block a third of the cockpit if clicks don't pass through its empty part, which no run has tried ([cases in the sim](01-apps.md#cases-for-the-bench)).

@@ -371,8 +371,7 @@ async function person(s: Session): Promise<void> {
       say(`the device went missing by ${how === "u" ? "being unplugged and plugged into another port" : "being disabled and enabled again in Windows' Sound control panel"}`)
       const used = logLines(core, "plays on this output device").slice(before).map((l) => /output=("[^"]*"|\S+)/.exec(l)?.[1])
       say(`the helper played on: ${used.join(", ")}`)
-      const warned = logLines(core, "core-helper.missing-output").length > 0
-      check(warned, "with the picked headset unplugged, Dual Input warned", logLines(core, "missing-output").at(0) ?? "")
+
       check(used.length >= 2 && used.at(-1)!.includes(headset[1]), "Dual Input played on Windows' default, and went back to the headset in another port")
       await desktop.client.command("clients.set-setting", { key: "core-helper.output", value: null })
     }

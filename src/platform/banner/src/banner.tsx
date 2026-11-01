@@ -61,7 +61,7 @@ export function Banner({ host, link, openWithoutCore }: BannerProps) {
     <Root scale={scale} className="pointer-events-none" style={{ width: BOX.width, height: BOX.height, overflow: "hidden" }}>
       <Stack
         notes={notes}
-        onOpen={(note) => open(note.id, note.landing ?? "session")}
+        onOpen={(note) => open(note.id, note.landing)}
         summary={
           inPreflight(session) && core === "connected" ? (
             <PreflightCard session={session!} network={network} onOpen={() => open(SUMMARY_CLICK, "session")} onReady={(on) => void link.client.command("session.ready", { on }).catch(() => {})} />

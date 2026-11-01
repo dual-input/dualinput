@@ -102,10 +102,8 @@ impl Clients {
             NO_PANEL_NOTIFICATION.into(),
             Notification {
                 id: NO_PANEL_NOTIFICATION.into(),
-                level: Level::Trouble,
-                text: "Dual Input's panel bridge didn't load in the cockpit, so features that run in its panels are off. Another package's VCockpit.js is the likeliest cause.".into(),
-                action: None,
-                landing: Landing::Header,
+                ..Notification::new(Level::Trouble, "Cockpit screens aren't syncing", Landing::Header)
+                    .detail("Dual Input couldn't load into the cockpit's panels. Another add-on that replaces VCockpit.js is the likeliest cause.")
             },
         );
     }

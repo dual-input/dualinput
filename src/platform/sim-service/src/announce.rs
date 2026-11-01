@@ -6,7 +6,7 @@
 
 use std::time::Duration;
 
-use clients::{Clients, Landing, Level};
+use clients::{Clients, Landing, Level, Notification};
 use kernel::{Cx, TimerId, View};
 use messages::clients::{ANNOUNCE, Announce};
 use messages::sim::{Place, SimSlice};
@@ -129,10 +129,12 @@ impl SimService {
                 clients::notify(
                     cx,
                     PACKAGE_NOTIFICATION,
-                    Level::Trouble,
-                    "Dual Input's package in the sim is missing or from another version, so it can't hold or fly the aircraft. Install Dual Input again with the sim closed.",
-                    None,
-                    Landing::Header,
+                    Notification::new(
+                        Level::Trouble,
+                        "Dual Input's WASM module is missing",
+                        Landing::Header,
+                    )
+                    .detail("Reinstall Dual Input with the sim closed to fly together again."),
                 );
             } else {
                 clients::clear_notification(cx, PACKAGE_NOTIFICATION);
@@ -144,10 +146,12 @@ impl SimService {
                 clients::notify(
                     cx,
                     STOPPED_NOTIFICATION,
-                    Level::Trouble,
-                    "Dual Input's module in the sim stopped, so it can't fly or hold the aircraft. A frozen aircraft stays frozen until you take control or leave the session. Restart the sim to bring the module back.",
-                    None,
-                    Landing::Header,
+                    Notification::new(
+                        Level::Trouble,
+                        "Dual Input's WASM module stopped",
+                        Landing::Header,
+                    )
+                    .detail("Restart the sim to fly together again."),
                 );
             } else {
                 clients::clear_notification(cx, STOPPED_NOTIFICATION);

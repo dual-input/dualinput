@@ -4,8 +4,8 @@ import { test } from "node:test"
 import type { Note } from "../src/note.ts"
 import { GAP, merge, MORE_LINE, ordered, place } from "../src/placing.ts"
 
-const held = (id: string, level: Note["level"] = "information"): Note => ({ id, level, text: id })
-const once = (id: string): Note => ({ id, level: "information", text: id, once: true })
+const held = (id: string, level: Note["level"] = "information"): Note => ({ id, level, text: id, landing: "session" })
+const once = (id: string): Note => ({ id, level: "information", text: id, once: true, landing: "session" })
 const ids = (notes: Note[]) => notes.map((note) => note.id)
 const CARD = 60
 const height = () => CARD

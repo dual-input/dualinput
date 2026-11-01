@@ -436,6 +436,7 @@ fn start_with(me: &mut Session, start: Start, cx: &mut Cx) {
         crew: start.crew,
         flight: BTreeMap::new(),
         was_in: BTreeSet::new(),
+        away: BTreeMap::new(),
         ended_seen: false,
         restarted: start.restart > 0,
         file: FileState::default(),

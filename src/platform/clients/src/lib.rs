@@ -20,13 +20,13 @@ mod state;
 
 pub use edge::{SocketOut, SocketUp, Sockets};
 pub use hooks::{ClientsUnit, SettingDef};
-pub use messages::clients::{Landing, Level};
+pub use messages::clients::{Landing, Level, Notification};
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
 
 use kernel::{Cx, Handler, Job, JobId, Moment, Registry, Started, TimerId};
-use messages::clients::{GUIDE_DONE, Hello, Notification, SETUP_DONE, SettingKind, ToClient};
+use messages::clients::{GUIDE_DONE, Hello, SETUP_DONE, SettingKind, ToClient};
 use serde::Serialize;
 use serde_json::{Value, json};
 
@@ -40,6 +40,13 @@ const ALIVE: Duration = Duration::from_secs(2);
 /// A socket the core hasn't heard from in this long, in µs, is closed, since a page's socket
 /// stays open after the page is gone (record/areas/architecture/01-spine.md, "The sim's pages").
 const QUIET: u64 = 8_000_000;
+
+/// How long a one-time notification stays in the slice, in µs: past its card's 6s, so a page that
+/// reconnects within a moment still shows it, and not much longer, so a page that opens later,
+/// as the banner's does at the next flight, doesn't show old news
+/// (record/areas/interface/decisions.md, "The banner is a box of opaque cards at the screen's top
+/// right"). The 2s tick checks, so it can stay up to 2s longer.
+const ONCE_STAYS: u64 = 10_000_000;
 
 /// How often the clients crate builds the slices some client shows, and sends each client
 /// the ones that changed, while any client is connected. The timer bounds the work however
@@ -107,6 +114,8 @@ pub struct Clients {
     unit_messages: BTreeMap<&'static str, Handler<UnitCall>>,
     panel_modules: Vec<panels::PanelModuleRule>,
     notifications: BTreeMap<String, Notification>,
+    /// When each one-time notification up was raised, in µs.
+    once_raised: BTreeMap<String, u64>,
     settings: Settings,
     profile: panels::Profile,
     /// The Windows username, for first-time setup, once its job has read it.
@@ -218,15 +227,14 @@ pub fn send<B: Serialize>(cx: &Cx, to: To, unit: &str, body: &B) {
 
 /// Raises a notification, or changes the one already raised under `id`, which is the running
 /// unit's own: the notification's full ID is the unit's name, `.`, and `id`.
-pub fn notify(cx: &Cx, id: &str, level: Level, text: &str, action: Option<&str>, landing: Landing) {
-    let notification = Notification {
-        id: notification_id(id),
-        level,
-        text: text.to_string(),
-        action: action.map(str::to_string),
-        landing,
-    };
-    cx.call(Clients::raise_notification, notification);
+pub fn notify(cx: &Cx, id: &str, notification: Notification) {
+    cx.call(
+        Clients::raise_notification,
+        Notification {
+            id: notification_id(id),
+            ..notification
+        },
+    );
 }
 
 /// Clears the running unit's notification `id`, if it's raised.
@@ -308,6 +316,16 @@ impl Clients {
         for socket in open {
             me.to(socket, &ToClient::Alive, cx);
         }
+        let over: Vec<String> = me
+            .once_raised
+            .iter()
+            .filter(|(_, raised)| now.saturating_sub(**raised) >= ONCE_STAYS)
+            .map(|(id, _)| id.clone())
+            .collect();
+        for id in over {
+            me.once_raised.remove(&id);
+            me.notifications.remove(&id);
+        }
         me.schedule_tick(cx);
     }
 
@@ -379,15 +397,21 @@ impl Clients {
         }
     }
 
-    fn raise_notification(me: &mut Clients, notification: Notification, _: &mut Cx) {
+    fn raise_notification(me: &mut Clients, notification: Notification, cx: &mut Cx) {
         if me.notifications.get(&notification.id) != Some(&notification) {
             tracing::info!(id = notification.id, level = ?notification.level, text = notification.text, "a notification was raised");
+            if notification.once {
+                me.once_raised.insert(notification.id.clone(), cx.now());
+            } else {
+                me.once_raised.remove(&notification.id);
+            }
             me.notifications
                 .insert(notification.id.clone(), notification);
         }
     }
 
     fn clear(me: &mut Clients, id: String, _: &mut Cx) {
+        me.once_raised.remove(&id);
         if me.notifications.remove(&id).is_some() {
             tracing::info!(id, "a notification was cleared");
         }

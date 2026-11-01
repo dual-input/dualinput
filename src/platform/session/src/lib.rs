@@ -175,6 +175,8 @@ pub(crate) struct Held {
     pub(crate) flight: BTreeMap<PilotId, bool>,
     /// The members that have been in the flight, whose leaving it the crew hears of.
     pub(crate) was_in: BTreeSet<PilotId>,
+    /// Where each crewmate who was in the flight has gone, as the crew last heard it.
+    pub(crate) away: BTreeMap<PilotId, members::Away>,
     /// Whether this core has raised `PreflightEnded`.
     pub(crate) ended_seen: bool,
     /// A core that started from the session file passes control it held once the crew's
@@ -717,6 +719,7 @@ mod tests {
             crew: BTreeMap::new(),
             flight: BTreeMap::new(),
             was_in: BTreeSet::new(),
+            away: BTreeMap::new(),
             ended_seen: false,
             restarted: false,
             file: joining::FileState::default(),

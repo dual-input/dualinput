@@ -4,7 +4,7 @@
 
 use std::time::Duration;
 
-use clients::{Clients, Landing, Level};
+use clients::{Clients, Landing, Level, Notification};
 use kernel::{Cx, Input, TimerId};
 use messages::core_helper::{self, Bound, FromHelper, ToHelper, WantId, Wants};
 
@@ -140,12 +140,17 @@ impl CoreHelper {
         if me.running() || owners.is_empty() {
             return;
         }
-        let text = format!(
-            "Dual Input's helper for input and audio isn't running, so {} can't work until it starts again",
-            owners.join(", ")
+        tracing::warn!(owners = owners.join(", "), "the core helper is down");
+        clients::notify(
+            cx,
+            "down",
+            Notification::new(
+                Level::Trouble,
+                "Dual Input's Windows helper is down",
+                Landing::Header,
+            )
+            .detail("Keybinds, audio, and your figure's pointing won't work until it's back."),
         );
-        tracing::warn!(text, "the core helper is down");
-        clients::notify(cx, "down", Level::Trouble, &text, None, Landing::Header);
     }
 
     fn clear_trouble(&mut self, cx: &Cx) {
@@ -358,7 +363,6 @@ impl CoreHelper {
                     clients::clear_notification(cx, &id);
                 }
                 self.listed.in_use = output;
-                self.check_output(cx);
             }
             FromHelper::Failed { want, error } => {
                 self.failed(want, &error, cx);
@@ -449,10 +453,12 @@ impl CoreHelper {
         clients::notify(
             cx,
             &id,
-            Level::Warning,
-            &format!("{owner}'s {what} isn't working: {error}"),
-            None,
-            Landing::Header,
+            Notification::new(
+                Level::Warning,
+                format!("{owner}'s {what} isn't working"),
+                Landing::Header,
+            )
+            .detail(error),
         );
         self.failed.insert(want, id);
     }

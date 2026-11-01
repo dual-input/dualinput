@@ -7,7 +7,7 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use clients::{Landing, Level};
+use clients::{Landing, Level, Notification};
 use kernel::{Cx, Input, TimerId};
 use messages::net::{Command, EndpointId, Event, HEARTBEAT, Header, Heartbeat, Path, codes};
 
@@ -214,10 +214,12 @@ impl Network {
                 clients::notify(
                     cx,
                     "bind",
-                    Level::Trouble,
-                    &format!("Dual Input couldn't open its connection to other pilots: {error}"),
-                    None,
-                    Landing::Header,
+                    Notification::new(
+                        Level::Trouble,
+                        "Dual Input can't open its connection to other pilots",
+                        Landing::Header,
+                    )
+                    .detail(error.clone()),
                 );
             }
             Event::Connected {
@@ -271,10 +273,11 @@ impl Network {
                     clients::notify(
                         cx,
                         "refused",
-                        Level::Warning,
-                        &format!("Another pilot's PC refused this one's connection: {why}"),
-                        None,
-                        Landing::Session,
+                        Notification::new(
+                            Level::Warning,
+                            format!("Another pilot's PC refused this one's connection: {why}"),
+                            Landing::Session,
+                        ),
                     );
                 }
                 // A member can leave on a connection whose first message hasn't passed yet, which
@@ -467,10 +470,11 @@ impl Network {
         clients::notify(
             cx,
             "refused",
-            Level::Warning,
-            &format!("Another pilot's connection was refused: {reason}"),
-            None,
-            Landing::Session,
+            Notification::new(
+                Level::Warning,
+                format!("Another pilot's connection was refused: {reason}"),
+                Landing::Session,
+            ),
         );
         self.close(conn, code, cx);
     }

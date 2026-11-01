@@ -21,13 +21,13 @@ pub use messages::cockpit::{CockpitKind, Origin, VectorClock};
 use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
 
-use clients::ClientsUnit;
+use clients::{ClientsUnit, Landing, Level, Notification};
 use kernel::{Cx, Moment, Registry, TimerId, View};
 use messages::cockpit::{
     CHANNEL, CLOCKS, CONTROL, Clock, Cockpit as Wire, CockpitMessage, CockpitSlice, Passed, SLICE,
 };
 use messages::net::PilotId;
-use messages::session::{Control, Phase};
+use messages::session::{Control, MEMBER, Phase};
 use network::{LinkUp, NetUnit, Network, Sender, To};
 use session::{
     ControlPassed, FlightChanged, MemberGone, PreflightEnded, Session, SessionEnded,
@@ -103,6 +103,9 @@ struct Live {
     /// A change of control dropped a message this machine applied, so it asks the new pilot
     /// flying for a catch-up once any replay it's receiving ends.
     ask_after_replay: bool,
+    /// Whom the banner says this machine is catching up with, and whether a catch-up, rather
+    /// than a replay, is why.
+    catching_up_with: Option<(PilotId, bool)>,
 }
 
 /// A message the stream holds until its kind's next chance to go.
@@ -235,6 +238,7 @@ impl CockpitStream {
             catch_up: CatchUp::Idle,
             askers: BTreeSet::new(),
             ask_after_replay: false,
+            catching_up_with: None,
         });
     }
 
@@ -514,6 +518,70 @@ impl CockpitStream {
         self.after_pump(cx);
     }
 
+    /// Tells the pilot while this machine catches up, one word for a late joiner's catch-up and
+    /// a short outage's replay, and then that it has, by one notification that changes in place.
+    /// Preflight's end catches up every machine as the flight starts, which is no news
+    /// (record/areas/interface/decisions.md, "The banner carries what a pilot must see without
+    /// the EFB, and the rest shows where it's acted on").
+    fn say_catching_up(&mut self, cx: &Cx) {
+        let Some(live) = self.live.as_mut() else {
+            return;
+        };
+        let now = match &live.catch_up {
+            CatchUp::Asking {
+                preflight_end: true,
+                ..
+            }
+            | CatchUp::Taking {
+                preflight_end: true,
+                ..
+            } => None,
+            CatchUp::Asking { from, .. } | CatchUp::Taking { from, .. } => Some((*from, true)),
+            CatchUp::Idle => live
+                .inbox
+                .replay_senders()
+                .first()
+                .map(|sender| (sender.pilot, false)),
+        };
+        let before = live.catching_up_with;
+        if now == before {
+            return;
+        }
+        live.catching_up_with = now;
+        let name = |pilot: &PilotId| {
+            cx.read::<Session>()
+                .member_key(MEMBER, pilot)
+                .map_or_else(|| "a pilot".to_string(), |entry| entry.name)
+        };
+        let said = match (now, before) {
+            (Some((pilot, _)), _) => Notification::new(
+                Level::Information,
+                format!("Catching up with {}", name(&pilot)),
+                Landing::Session,
+            )
+            .detail("Anything you move in the cockpit now will be reset.")
+            .busy(),
+            (None, Some((pilot, was_catch_up))) => {
+                let who = name(&pilot);
+                let caught_up = Notification::new(
+                    Level::Information,
+                    format!("Caught up with {who}"),
+                    Landing::Session,
+                )
+                .once();
+                if was_catch_up {
+                    caught_up.detail(format!(
+                        "Pages and FMS entries may still differ from {who}'s."
+                    ))
+                } else {
+                    caught_up
+                }
+            }
+            (None, None) => return,
+        };
+        clients::notify(cx, "catch", said);
+    }
+
     /// A replay that ended, and the catch-up a dropped message asks for once none runs.
     fn after_pump(&mut self, cx: &mut Cx) {
         let Some(live) = self.live.as_mut() else {
@@ -526,6 +594,7 @@ impl CockpitStream {
             tracing::info!("a replay of what this machine missed ended");
         }
         self.ask_after_drop(cx);
+        self.say_catching_up(cx);
         // Kept messages go as members' clocks cover them, in `clock_in`, and at once with
         // nobody else in the session, since scanning them all after every message would cost a
         // long cut's handlers their 1ms.
@@ -776,6 +845,7 @@ impl CockpitStream {
             preflight_end,
         };
         network::send(cx, CHANNEL, To::Member(pf), &Wire::CatchUpAsk);
+        self.say_catching_up(cx);
     }
 
     /// Another member asked this machine for a catch-up: the flying machine answers once every

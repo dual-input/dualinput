@@ -80,7 +80,7 @@ function useHeaderStatus(link: CoreLink, desktop: DesktopLink, version: string, 
   const notifications = useSlice<Notification[]>(link, "notifications")
   const local = useDesktopState(desktop)
   const raised = (id: string) => !!notifications?.some((notification) => notification.id === id)
-  const want = notifications?.find((notification) => notification.id.indexOf("core-helper.failed.") === 0) as (Notification & { detail?: string }) | undefined
+  const want = notifications?.find((notification) => notification.id.indexOf("core-helper.failed.") === 0)
   const update = local?.update
   return {
     offline: net?.internet === false,

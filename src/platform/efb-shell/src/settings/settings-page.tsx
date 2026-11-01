@@ -8,6 +8,7 @@ import { CircleArrowUp, FolderOpen, Trash2, TriangleAlert } from "lucide-react"
 import { createElement, useEffect, useRef, useState } from "react"
 import type { ReactNode, Ref } from "react"
 
+import type { DeviceInfo } from "../../../../engines/messages/ts/core_helper/DeviceInfo.ts"
 import type { HelperSlice } from "../../../../engines/messages/ts/core_helper/HelperSlice.ts"
 import type { Update } from "../../../../engines/messages/ts/desktop/Update.ts"
 import type { RecordingSlice } from "../../../../engines/messages/ts/recording/RecordingSlice.ts"
@@ -16,6 +17,7 @@ import type { SessionSlice } from "../../../../engines/messages/ts/session/Sessi
 import { useDesktopState } from "../desktop-link.ts"
 import { useCoreSlice, useShell } from "../part.ts"
 import type { Part } from "../part.ts"
+import { OUTPUT, useSetting, writeSetting } from "./setting.ts"
 import { WANTED } from "../wanted.ts"
 import type { Wanted } from "../wanted.ts"
 
@@ -67,16 +69,15 @@ function OutputDevice() {
   const { link, setDot } = useShell()
   const helper = useCoreSlice<HelperSlice>("core-helper")
   const outputs = helper?.outputs ?? []
-  const [picked, setPicked] = useState<string>("default")
-  const device = outputs.find((output) => output.id === picked)
-  const fallback = helper?.in_use?.name
-  const gone = picked !== "default" && !device
+  const saved = (useSetting(link, OUTPUT) ?? null) as DeviceInfo | null
+  const picked = saved?.id ?? "default"
+  const inUse = helper?.in_use
+  const fallback = inUse?.name
+  // The helper takes a device with the picked name when none has its endpoint ID, since a USB headset plugged into another port may get a new one, so only another name on another ID is a missing device.
+  const gone = !!saved && !!inUse && inUse.id !== saved.id && inUse.name !== saved.name
   const warning = useReveal(gone)
   useEffect(() => setDot("settings", gone), [gone, setDot])
-  const choose = (id: string) => {
-    setPicked(id)
-    void link.client.command("clients.set-setting", { key: "core-helper.output", value: id === "default" ? null : id }).catch(() => {})
-  }
+  const choose = (id: string) => writeSetting(link, OUTPUT, id === "default" ? null : (outputs.find((output) => output.id === id) ?? null))
   const defaultWords = (
     <span className="flex min-w-0">
       <span className="mr-2 shrink-0">Windows default</span>
@@ -89,7 +90,7 @@ function OutputDevice() {
         <div className="flex flex-col px-5 py-2">
           <span className="mb-3 text-sm">Output device</span>
           <Select value={picked} onValueChange={choose}>
-            <SelectTrigger className="w-full">{picked === "default" ? defaultWords : <span className="truncate">{device?.name ?? "Disconnected device"}</span>}</SelectTrigger>
+            <SelectTrigger className="w-full">{picked === "default" ? defaultWords : <span className="truncate">{saved?.name ?? "Disconnected device"}</span>}</SelectTrigger>
             <SelectContent>
               <SelectItem value="default">{defaultWords}</SelectItem>
               {outputs.map((output) => (

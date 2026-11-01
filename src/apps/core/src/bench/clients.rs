@@ -72,10 +72,11 @@ impl BenchClients {
             ClientsAct::Notify { id, text } => clients::notify(
                 cx,
                 &id,
-                clients::Level::Information,
-                &text,
-                None,
-                clients::Landing::Session,
+                clients::Notification::new(
+                    clients::Level::Information,
+                    text,
+                    clients::Landing::Session,
+                ),
             ),
         }
     }

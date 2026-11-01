@@ -39,6 +39,7 @@ impl Feature {
             |me: &Feature, _: &View| json!({ "counter": me.counter }),
         )
         .command("feature.bump", Feature::bump)
+        .command("feature.news", Feature::news)
         .command("feature.read-setting", Feature::read_setting)
         .panel_module("feature-panel", Feature::rule, |view: &View| {
             view.read::<Feature>().panel_needed
@@ -65,6 +66,23 @@ impl Feature {
         } else {
             clients::profile_unloaded(cx);
         }
+    }
+
+    /// Raises a one-time notification.
+    fn news(_: &mut Feature, _: Value, cx: &mut Cx) -> Result<(), String> {
+        clients::notify(
+            cx,
+            "news",
+            clients::Notification::new(
+                clients::Level::Information,
+                "News",
+                clients::Landing::Session,
+            )
+            .detail("A line under it")
+            .about("0".repeat(32))
+            .once(),
+        );
+        Ok(())
     }
 
     fn bump(me: &mut Feature, args: Bump, _: &mut Cx) -> Result<(), String> {
@@ -564,6 +582,29 @@ fn no_cockpit_panel_within_10s_of_the_profile_loading_raises_trouble_until_one_c
     core.join_panel(2, "VCockpit02", &["CLOCK|"]);
     let out = core.advance(core.now + 50_000);
     assert_eq!(states(1, &out), [json!([])]);
+}
+
+#[test]
+fn a_one_time_notification_goes_from_the_slice_after_its_10s_and_says_what_a_card_needs() {
+    let (mut core, _) = Core::new(None);
+    core.join(1, "efb-app", &[]);
+    core.say(1, json!({ "t": "watch", "slices": ["notifications"] }));
+    core.say(
+        1,
+        json!({ "t": "command", "id": 1, "name": "feature.news", "args": null }),
+    );
+    let out = core.advance(core.now + 50_000);
+    assert_eq!(
+        states(1, &out),
+        [
+            json!([{ "id": "feature.news", "level": "information", "text": "News", "detail": "A line under it", "pilot": "0".repeat(32), "once": true, "landing": "session" }])
+        ],
+        "a flag that's off stays out of the JSON"
+    );
+    let out = core.advance_alive(core.now + 8 * SECOND, &[1]);
+    assert_eq!(states(1, &out), Vec::<Value>::new(), "still up at 8s");
+    let out = core.advance_alive(core.now + 4 * SECOND, &[1]);
+    assert_eq!(states(1, &out), [json!([])], "gone by 12s");
 }
 
 #[test]

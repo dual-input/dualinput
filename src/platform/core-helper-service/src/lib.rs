@@ -17,7 +17,7 @@ pub use hooks::{Captured, HelperUnit, Mouse, NextPressed, Press};
 
 use std::collections::BTreeMap;
 
-use clients::{Clients, ClientsUnit, Landing, Level, SettingChanged, SettingDef};
+use clients::{Clients, ClientsUnit, SettingChanged, SettingDef};
 use kernel::{Cx, Registry, TimerId, UnitId, View};
 use messages::clients::SettingKind;
 use messages::core_helper::{
@@ -324,43 +324,9 @@ impl CoreHelper {
 
     fn setting_changed(me: &mut CoreHelper, changed: &SettingChanged, cx: &mut Cx) {
         if changed.key == OUTPUT {
-            // The helper's next `InUse` says whether the new pick is connected.
-            clients::clear_notification(cx, "missing-output");
             me.changed(cx);
         } else if me.bindings.iter().any(|b| b.setting == changed.key) {
             me.changed(cx);
-        }
-    }
-
-    /// Warns while the helper plays on another device than the one the pilot picked, since
-    /// it's missing and the helper plays on Windows' default. The helper takes a device with
-    /// the picked name when no device has its endpoint ID, since a USB headset plugged into
-    /// another port may get a new one. While the helper plays on nothing, a device that
-    /// won't open shows as its `Failed` warning instead.
-    fn check_output(&self, cx: &Cx) {
-        let picked = cx
-            .read::<Clients>()
-            .setting_as::<Option<DeviceInfo>>(OUTPUT)
-            .flatten();
-        let in_use = self.listed.in_use.as_ref();
-        match picked {
-            Some(picked)
-                if self.running()
-                    && in_use.is_some_and(|u| u.id != picked.id && u.name != picked.name) =>
-            {
-                clients::notify(
-                    cx,
-                    "missing-output",
-                    Level::Warning,
-                    &format!(
-                        "{} isn't connected, so Dual Input plays on Windows' default device until it is",
-                        picked.name
-                    ),
-                    None,
-                    Landing::Session,
-                );
-            }
-            _ => clients::clear_notification(cx, "missing-output"),
         }
     }
 }

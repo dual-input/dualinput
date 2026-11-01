@@ -11,9 +11,30 @@ export type Notification = {
  */
 id: string, level: Level, 
 /**
- * In the raising feature's own words.
+ * In the raising feature's own words: the title of its card on the banner.
  */
 text: string, 
+/**
+ * A line under the title, in those words too.
+ */
+detail?: string, 
+/**
+ * The pilot it's about, as 32 hex digits, whose head leads its card.
+ */
+pilot?: string, 
+/**
+ * That pilot is out of the flight, so their head hangs dim.
+ */
+out?: boolean, 
+/**
+ * Something happening now that ends by itself, which a spinner leads.
+ */
+busy?: boolean, 
+/**
+ * Shown once rather than held while its cause lasts: its card stays 6s, and the clients
+ * crate takes it out of the slice soon after, so a page that opens later doesn't show it.
+ */
+once?: boolean, 
 /**
  * The command a click on the notification sends, if any.
  */

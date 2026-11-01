@@ -1,7 +1,7 @@
 //! The members: who takes part in the session, each one's status, and who is in the flight
 //! (record/areas/session/02-units.md, "Members" and "In the flight").
 
-use clients::{Landing, Level};
+use clients::{Landing, Level, Notification};
 use kernel::Cx;
 use messages::net::PilotId;
 use messages::session::{self as wire, Link, Phase, Status};
@@ -88,6 +88,7 @@ impl Session {
     /// A member left the session: its own keys go with it, and every role's key that names it
     /// is cleared.
     pub(crate) fn gone(&mut self, member: PilotId, cx: &mut Cx) {
+        let who = name_of(self, &member);
         let Some(held) = &mut self.held else {
             return;
         };
@@ -97,8 +98,20 @@ impl Session {
         held.left.insert(member);
         held.crew.remove(&member);
         held.was_in.remove(&member);
+        held.away.remove(&member);
         held.store.forget(member);
-        clients::clear_notification(cx, &notification_id(&member));
+        clients::notify(
+            cx,
+            &notification_id(&member),
+            Notification::new(
+                Level::Information,
+                format!("{who} left the session"),
+                Landing::Session,
+            )
+            .about(hex(&member))
+            .out()
+            .once(),
+        );
         if held.flight.remove(&member) == Some(true) {
             cx.raise(FlightChanged {
                 member,
@@ -257,26 +270,37 @@ pub(crate) fn flight_changes(me: &mut Session, cx: &mut Cx) -> bool {
     true
 }
 
-/// The notification for each other member out of the flight, by its pilot ID.
+/// The notification for each other member's comings and goings, by its pilot ID.
 fn notification_id(member: &PilotId) -> String {
-    format!("out-{}", hex(member))
+    format!("crew-{}", hex(member))
 }
 
-/// What the crew hears of members out of the flight once the session has an aircraft: a
-/// member whose sim closed or crashed, one in another aircraft, and one that left the flight
-/// (record/areas/product/03-v1-scope.md, "The connection"); and this pilot's own notification to
-/// load the session's aircraft, such as "Load the L1011-500 Cabin w/ Lounge to fly with
-/// James" (record/areas/session/02-units.md, "In the flight").
+fn name_of(me: &Session, member: &PilotId) -> String {
+    me.member_key(wire::MEMBER, member)
+        .map_or_else(|| "A pilot".to_string(), |e| e.name)
+}
+
+/// Where a crewmate who was in the flight went, which the rest hear once each time it changes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Away {
+    LeftFlight,
+    ClosedSim,
+    Crashed,
+}
+
+/// What the crew hears of a member once the session has an aircraft, each shown once, since their
+/// crew row says the rest: leaving the flight, closing their sim, crashing, and coming back
+/// (record/areas/interface/decisions.md, "The banner carries what a pilot must see without the
+/// EFB, and the rest shows where it's acted on"); and this pilot's own notification to load the
+/// session's aircraft, such as "Load the L1011-500 Cabin w/ Lounge to fly with James"
+/// (record/areas/session/02-units.md, "In the flight").
 pub(crate) fn notifications(me: &mut Session, cx: &Cx) {
     let Some(held) = &me.held else {
         return;
     };
     let mine = held.me;
     let preflight = me.preflight();
-    let name = |m: &PilotId| {
-        me.member_key(wire::MEMBER, m)
-            .map_or_else(|| "A pilot".to_string(), |e| e.name)
-    };
+    let name = |m: &PilotId| name_of(me, m);
     let named = |status: &Status| {
         status
             .title
@@ -295,65 +319,66 @@ pub(crate) fn notifications(me: &mut Session, cx: &Cx) {
         (true, Some(pf), Some(status)) if pf != mine => clients::notify(
             cx,
             "load",
-            Level::Warning,
-            &format!("Load the {} to fly with {}", named(status), name(&pf)),
-            None,
-            Landing::Session,
+            Notification::new(
+                Level::Warning,
+                format!("Load the {} to fly with {}", named(status), name(&pf)),
+                Landing::Session,
+            ),
         ),
         _ => clients::clear_notification(cx, "load"),
     }
     let mut came_in = Vec::new();
+    let mut away_now = Vec::new();
     for member in me.members().into_iter().filter(|m| *m != mine) {
         let in_flight = me.in_flight(&member);
         if in_flight {
             came_in.push(member);
         }
         let status = me.member_key(wire::STATUS, &member).unwrap_or_default();
-        let was_in = held.was_in.contains(&member);
-        let text = match (in_flight, status.stage, status.ended) {
-            (true, _, _) => None,
-            _ if preflight.aircraft.is_none() => None,
-            (_, Stage::Closed, Some(Ending::Crash { .. })) if was_in => Some((
-                Level::Warning,
-                format!(
-                    "{}'s sim crashed. Dual Input rejoins them once they're back in a flight",
-                    name(&member)
-                ),
-            )),
-            (_, Stage::Closed, _) if was_in => Some((
-                Level::Information,
-                format!(
-                    "{}'s sim closed. Dual Input rejoins them once they're back in a flight",
-                    name(&member)
-                ),
-            )),
-            (_, stage, _) if flying(stage) => Some((
-                Level::Information,
-                format!("{} is in the {}", name(&member), named(&status)),
-            )),
-            _ if was_in => Some((
-                Level::Information,
-                format!(
-                    "{} left the flight. Dual Input rejoins them once they're back in it",
-                    name(&member)
-                ),
-            )),
-            _ => None,
+        let away = if in_flight || preflight.aircraft.is_none() || !held.was_in.contains(&member) {
+            None
+        } else {
+            Some(match (status.stage, status.ended) {
+                (Stage::Closed, Some(Ending::Crash { .. })) => Away::Crashed,
+                (Stage::Closed, _) => Away::ClosedSim,
+                _ => Away::LeftFlight,
+            })
         };
-        match text {
-            Some((level, text)) => clients::notify(
-                cx,
-                &notification_id(&member),
-                level,
-                &text,
-                None,
-                Landing::Session,
-            ),
-            None => clients::clear_notification(cx, &notification_id(&member)),
+        let before = held.away.get(&member).copied();
+        if away == before {
+            continue;
         }
+        away_now.push((member, away));
+        let who = name(&member);
+        const STILL_IN: &str = "They're still in the session.";
+        let told = |level, text: String| {
+            Notification::new(level, text, Landing::Session)
+                .about(hex(&member))
+                .once()
+        };
+        let said = match away {
+            Some(Away::LeftFlight) => told(Level::Information, format!("{who} left the flight"))
+                .out()
+                .detail(STILL_IN),
+            Some(Away::ClosedSim) => told(Level::Information, format!("{who} closed their sim"))
+                .out()
+                .detail(STILL_IN),
+            Some(Away::Crashed) => told(Level::Warning, format!("{who}'s sim crashed"))
+                .out()
+                .detail(STILL_IN),
+            None if in_flight => told(Level::Information, format!("{who} is back in the flight")),
+            None => continue,
+        };
+        clients::notify(cx, &notification_id(&member), said);
     }
     if let Some(held) = &mut me.held {
         held.was_in.extend(came_in);
+        for (member, away) in away_now {
+            match away {
+                Some(away) => held.away.insert(member, away),
+                None => held.away.remove(&member),
+            };
+        }
     }
 }
 

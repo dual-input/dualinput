@@ -150,14 +150,83 @@ pub struct Notification {
     /// The raising unit's name, then `.` and its own ID for the notification.
     pub id: String,
     pub level: Level,
-    /// In the raising feature's own words.
+    /// In the raising feature's own words: the title of its card on the banner.
     pub text: String,
+    /// A line under the title, in those words too.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub detail: Option<String>,
+    /// The pilot it's about, as 32 hex digits, whose head leads its card.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub pilot: Option<String>,
+    /// That pilot is out of the flight, so their head hangs dim.
+    #[serde(default, skip_serializing_if = "is_false")]
+    #[ts(as = "Option<bool>", optional)]
+    pub out: bool,
+    /// Something happening now that ends by itself, which a spinner leads.
+    #[serde(default, skip_serializing_if = "is_false")]
+    #[ts(as = "Option<bool>", optional)]
+    pub busy: bool,
+    /// Shown once rather than held while its cause lasts: its card stays 6s, and the clients
+    /// crate takes it out of the slice soon after, so a page that opens later doesn't show it.
+    #[serde(default, skip_serializing_if = "is_false")]
+    #[ts(as = "Option<bool>", optional)]
+    pub once: bool,
     /// The command a click on the notification sends, if any.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[ts(optional)]
     pub action: Option<String>,
     /// Where a click outside its action lands in the EFB app.
     pub landing: Landing,
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
+}
+
+impl Notification {
+    /// A held notification with its title alone, whose `id` `clients::notify` fills in.
+    pub fn new(level: Level, text: impl Into<String>, landing: Landing) -> Self {
+        Self {
+            id: String::new(),
+            level,
+            text: text.into(),
+            detail: None,
+            pilot: None,
+            out: false,
+            busy: false,
+            once: false,
+            action: None,
+            landing,
+        }
+    }
+
+    pub fn detail(mut self, detail: impl Into<String>) -> Self {
+        self.detail = Some(detail.into());
+        self
+    }
+
+    /// Says which pilot it's about, by their ID as 32 hex digits.
+    pub fn about(mut self, pilot: String) -> Self {
+        self.pilot = Some(pilot);
+        self
+    }
+
+    pub fn out(mut self) -> Self {
+        self.out = true;
+        self
+    }
+
+    pub fn busy(mut self) -> Self {
+        self.busy = true;
+        self
+    }
+
+    pub fn once(mut self) -> Self {
+        self.once = true;
+        self
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, TS)]

@@ -195,7 +195,7 @@ test("a want the helper can't carry out warns, naming the feature, until the wan
   await helper.until(() => helper.latest!.closed !== undefined, "its exit once the lists failed")
 })
 
-test("a capture's program and frames reach its feature, and a missing output device warns until the helper plays on it", { timeout: 60_000 }, async (t) => {
+test("a capture's program and frames reach its feature, and the helper's slice says what it plays on when a picked device goes missing", { timeout: 60_000 }, async (t) => {
   const { core, helper, page, notifications } = await withPage(t, "core-helper-capture")
   core.helper({ act: "capture", programs: ["BeyondATC"] })
   await helper.until(() => helper.latest?.wants().at(-1)?.captures.length === 1, "wants a capture")
@@ -209,9 +209,11 @@ test("a capture's program and frames reach its feature, and a missing output dev
   await page.client.command("clients.set-setting", { key: "core-helper.output", value: { id: "headset", name: "Headset" } })
   await helper.until(() => helper.latest!.wants().length >= 2, "the wants with the picked device")
   helper.latest!.act({ act: "in-use", output: { id: "speakers", name: "Speakers" } })
-  await page.until(() => notifications().some((n) => n.id === "core-helper.missing-output"), "the missing headset's warning")
+  const inUse = () => (page.slice("core-helper") as { in_use: { name: string } | null } | undefined)?.in_use?.name
+  await page.until(() => inUse() === "Speakers", "the slice saying it plays on another device, which the Settings tab warns of")
   helper.latest!.act({ act: "in-use", output: { id: "headset-2", name: "Headset" } })
-  await page.until(() => !notifications().some((n) => n.id === "core-helper.missing-output"), "the warning clearing once it plays on a device of the headset's name")
+  await page.until(() => inUse() === "Headset", "the slice saying it plays on a device of the headset's name")
+  assert.deepEqual(notifications(), [], "the banner stays out of it, since the Settings tab shows it")
 })
 
 test("a helper that won't start is tried again while a want is on, even after a want went on and off before the start failed", { timeout: 60_000 }, async (t) => {

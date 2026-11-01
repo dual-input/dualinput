@@ -158,7 +158,7 @@ test("a joiner in another aircraft is a member out of the flight, and enters it 
   let s = await until(b, (s) => s.members.length === 2 && s.preflight.phase === "ended", "the session, after preflight")
   assert.equal(me(s)?.in_flight, false, "a joiner in another aircraft is out of the flight")
   await b.app.until(() => b.app.notifications().some((n) => n.id === "session.load" && n.text === "Load the Baron 58P to fly with James"), "the notification to load the session's aircraft")
-  await a.app.until(() => a.app.notifications().some((n) => n.text === "Adam is in the PA-24 Comanche"), "the crew's notification")
+  assert.ok(!a.app.notifications().some((n) => n.text.includes("is in the")), "the crew row says where a crewmate is, so the banner doesn't")
 
   await toMenu(b)
   await load(b, BARON)
@@ -166,6 +166,11 @@ test("a joiner in another aircraft is a member out of the flight, and enters it 
   assert.match(b.core.log(), /preflight ended, and the session's keys take this much/, "the late joiner raised PreflightEnded")
   assert.equal(await frozen(b), false, "a late joiner skips preflight's hold")
   await b.app.until(() => !b.app.notifications().some((n) => n.id === "session.load"), "the notification clearing")
+
+  await toMenu(b)
+  await a.app.until(() => a.app.notifications().some((n) => n.text === "Adam left the flight" && n.once === true && n.out === true && n.detail === "They're still in the session."), "the crew hearing it once")
+  await load(b, BARON)
+  await a.app.until(() => a.app.notifications().some((n) => n.text === "Adam is back in the flight" && n.once === true && !n.out), "the crew hearing it's back")
 })
 
 test("a pilot flying who loads the wrong aircraft in preflight returns to the menu holding control, and the right one becomes the session's", { timeout: 90_000 }, async (t) => {

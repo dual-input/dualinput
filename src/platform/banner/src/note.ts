@@ -2,33 +2,19 @@
 // while its cause lasts or shown once (record/areas/interface/decisions.md, "The banner carries what a pilot must see
 // without the EFB, and the rest shows where it's acted on").
 
+import type { Landing as CoreLanding } from "../../../engines/messages/ts/clients/Landing.ts"
 import type { Level } from "../../../engines/messages/ts/clients/Level.ts"
 import type { Notification } from "../../../engines/messages/ts/clients/Notification.ts"
 import type { CoreState } from "../../../engines/page-client/src/core-link.ts"
 
-/**
- * Where a click on a card opens the EFB app: the Session tab, the header on the row that repeats the card, the
- * Figures tab, or wherever the app was, for the service gone, whose screen covers every tab.
- */
-export type Landing = "session" | "header" | "figures" | "stay"
+/** Where a click on a card opens the EFB app: where the core says, or for the service gone, whose screen covers every tab, wherever the app was. */
+export type Landing = CoreLanding | "stay"
 
-/**
- * The core's notification, with what the card draws beyond its `text`, each field optional, since the core raises
- * `text` alone until each joins its type. `text` is the card's title, and a note with no `once` is held.
- */
+/** The core's notification, and what the banner adds to it. */
 export type Note = Omit<Notification, "landing"> & {
-  detail?: string
-  /** Each thing a card counts, such as the controls that couldn't sync. */
+  landing: Landing
+  /** Each thing a card counts, such as the controls that couldn't sync. TODO: when state sync raises its failures, add this to the core's `Notification`. */
   list?: string[]
-  /** The pilot it's about, whose head leads it. */
-  pilot?: string
-  /** That pilot is out of the flight. */
-  out?: boolean
-  /** Something happening now that ends by itself, which a spinner leads. */
-  busy?: boolean
-  /** Goes after `ONCE_MS`, rather than staying while its cause lasts. */
-  once?: boolean
-  landing?: Landing
 }
 
 /** How long a one-time card stays, in milliseconds, paused under the pointer. */

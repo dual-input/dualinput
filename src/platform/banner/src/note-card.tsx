@@ -74,7 +74,7 @@ function useDragAway(onAway: () => void, scale: number) {
 }
 
 /** A one-time card goes after its time, which pauses while the pointer rests on it, so it stays as the pilot reaches for it. */
-function useLifetime(element: React.RefObject<HTMLElement | null>, lifetime: number | undefined, onExpire: () => void): void {
+function useLifetime(element: React.RefObject<HTMLElement | null>, lifetime: number | undefined, words: string, onExpire: () => void): void {
   const expire = useRef(onExpire)
   expire.current = onExpire
   useEffect(() => {
@@ -98,7 +98,8 @@ function useLifetime(element: React.RefObject<HTMLElement | null>, lifetime: num
       card.removeEventListener("mouseenter", pause)
       card.removeEventListener("mouseleave", resume)
     }
-  }, [element, lifetime])
+    // A card whose news moves on starts its time over.
+  }, [element, lifetime, words])
 }
 
 /**
@@ -137,7 +138,7 @@ export function NoteCard({ note: given, lifetime, onOpen, onDismiss, onExpire }:
   // A held card whose news moves on changes in place: its words fade out, it eases to the new words' height, and they fade in.
   const moment = useMoment(given.text, given)
   const note = moment.shown
-  useLifetime(card, lifetime, onExpire)
+  useLifetime(card, lifetime, given.text, onExpire)
   const width = card.current?.offsetWidth ?? 0
   return (
     <div

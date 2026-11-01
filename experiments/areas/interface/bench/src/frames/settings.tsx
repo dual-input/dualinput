@@ -322,11 +322,11 @@ function Recordings() {
       aside={`${total} MB of 1 GB`}
       foot={
         <>
-          Each run keeps a log and a recording of what Dual Input did, on this PC only. The oldest are deleted first. To report a problem, send us the run's log.txt on{" "}
+          Dual Input keeps a simple log plus a full recording of every run, on your PC only, within a 1 GB budget, deleting the oldest first. To report a problem, send us the run's log.txt on{" "}
           <button type="button" onClick={() => toast("Opening our Discord in your browser")} className="underline underline-offset-2 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
             Discord
           </button>
-          , and we'll ask for its recording if we need a closer look.
+          , and we may ask for the full recording if we need a closer look.
         </>
       }
     >

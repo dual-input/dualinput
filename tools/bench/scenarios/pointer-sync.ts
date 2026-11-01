@@ -517,7 +517,8 @@ test("with the core suspended, a visible lock turns into a warning within 10s, u
       for (const [i, panel] of [b.panel, other].entries()) {
         if (warned[i] === undefined && !panel.blocked()) warned[i] = panel.page.now() - panel.page.received.at(-1)!.at
       }
-      return warned.length === 2 && warned.every((w) => w !== undefined)
+      // By index, since `every` skips the hole the second panel leaves when it warns first.
+      return warned[0] !== undefined && warned[1] !== undefined
     }, "the warnings", 12_000)
     t.diagnostic(`the locks turned into warnings ${warned.map((w) => w.toFixed(0)).join("ms and ")}ms after the core's last message, against 10,000ms`)
     for (const w of warned) assert.ok(w >= 7_900 && w <= 10_000, `${w.toFixed(0)}ms`)

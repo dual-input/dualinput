@@ -19,13 +19,19 @@ The probes and their raw output are in [experiments/areas/interface](../../../ex
 - **The cost of drawing by pixels:** 1,250 alpha pixels through `fillRect` took 2.2ms of JavaScript in the debugger, each pixel building its color string, so a 28px head at 1,000 pixels costs under 2ms a frame while it turns, and a figure 260px wide would cost tens of milliseconds.
 - **The pin and the folds:** `position: -webkit-sticky` pins the session card in a box that scrolls, and a card's fold, through `-webkit-clip-path` and `-webkit-mask-image` set each frame, draws as the frames do, with the row's parts gliding by transforms.
 - **Two claims we made while finding these were wrong:** a context taken before a canvas is sized draws, and a scrolling box's bottom padding counts toward its scroll, each tested once we doubted it.
+- **No 3D context (user, 2026-11-01: "are you sure we can't live render 3d models?"):** `getContext` returns null for `webgl`, `experimental-webgl`, `webgl2`, and `experimental-webgl2`, `WebGLRenderingContext` and `OffscreenCanvas` aren't defined, and the engine names itself `CoherentGT/2.0` in its user agent.
+  CSS's `preserve-3d`, `perspective`, and `rotate3d` parse, and we haven't looked at how they draw.
+- **SVG strokes have no dashes:** `stroke-dasharray` and `stroke-dashoffset` change nothing, by attribute or style, so the countdown's ring stayed full, while a path's arc draws and redraws when its `d` changes.
+- **Another clock:** a `requestAnimationFrame` timestamp read 2,104,645 where `performance.now()` read 1,171,353, so the heads, which compared the two, never nodded or glanced, and the sim's EFB showed them not following the cursor at all (user, 2026-11-01).
 
-**Changed:** a head draws each of its pixels with a 1px `fillRect`, as a canvas pixel for each real pixel.
+The user then tried the sample in the sim's EFB, which showed what the debugger's first pass had missed, each reproduced and fixed here: the start card clipping a refusal once a turn had run, since the turn's last timer was cancelled with the render it caused; a band of what scrolled under showing above the pinned card; a click lost when the cursor crossed between a row's children, which every child of a pressable thing now ignores the mouse for; and the bottom fade missing until a first scroll, since nothing measured again once a font or a child's slice changed the page's height.
+
+**Changed:** a head draws each of its pixels with a 1px `fillRect`, as a canvas pixel for each real pixel, and the countdown's ring redraws an arc each frame.
 The standing figure and the portrait, which draw hundreds of times as many, wait for a way of drawing that the user picks at the sample's check.
 
-What we haven't run: any of this in the sim's EFB, which the sample's check does, and what `fillRect`s cost the GPU there.
+What we haven't run: `fillRect`'s cost to the GPU in the sim's EFB, its rate in a flight, and the no-3D result in the sim's own documents.
 
-**Affects:** `src/platform/efb-shell/src/heads/`, and the standing figure and the portrait.
+**Affects:** `src/platform/efb-shell/src/heads/`, `src/platform/efb-shell/src/session/`, and the standing figure and the portrait.
 
 ## 2026-11-01: The EFB's document draws 15 frames a second at the world map, half the rate of the sim's other documents, so a quick click often lands between two frames
 

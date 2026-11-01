@@ -82,6 +82,10 @@ Neither probe looked at the paint, so a kept declaration can still paint unlike 
 - **Canvas:** in the SDK's debugger, a 2D canvas draws solid and alpha `fillRect`, `clearRect`, paths, arcs, strokes, and linear gradients, and a radial gradient only with both circles at one center.
   It takes no pixels: `putImageData` and `drawImage` draw nothing, `getImageData` throws `NotSupportedError`, and `toDataURL` returns an empty string, so a page that computes pixels draws each with a 1px `fillRect`, about 2.2ms for 1,250 pixels ([interface log][canvas]).
   A CSS `radial-gradient`, an SVG `radialGradient` with its focus off center, inset `box-shadow`s, and `filter: blur()` all draw.
+  There's no 3D context: `getContext` returns null for `webgl`, `webgl2`, and their prefixed names, and `WebGLRenderingContext` and `OffscreenCanvas` aren't defined, while CSS's `preserve-3d`, `perspective`, and `rotate3d` parse.
+- **SVG:** in the SDK's debugger, a stroke ignores `stroke-dasharray` and `stroke-dashoffset`, by attribute or style, and `getTotalLength` is missing, while an arc in a path draws, and changing its `d` from code redraws it (same entry).
+- **Time:** in the SDK's debugger, a `requestAnimationFrame` callback's timestamp counts from another moment than `performance.now()`, 2,104,645 against 1,171,353 at one reading, so code that compares the two reads `performance.now()` in the callback (same entry).
+- **Shadows:** a `box-shadow` on a box rounded on one side comes out square at its corners in the SDK's debugger, where a border around it follows them (same entry).
 - **Each document's defaults:** mainUi and the toolbar lay out a box with padding and a border as `border-box`, and the EFB's document as `content-box`, so our pages set `box-sizing` themselves.
 - **Fonts:** mainUi and the toolbar declare Roboto as one family, `Roboto-Regular`, at weights 300 to 900, and Roboto Mono as `RobotoMono-Regular`.
   The EFB's document declares a family for each face, such as `Roboto-Bold` and `RobotoMono-Regular`, and sets its body in Verdana, so text there takes Roboto only from a rule that names a face.

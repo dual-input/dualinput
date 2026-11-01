@@ -41,6 +41,8 @@
   outline: none;
 }
 .dualinput-ui button { cursor: pointer; text-align: center; }
+/* What a pressable thing holds takes no mouse, so a press and its release land on one element however the cursor moves between them. */
+.dualinput-ui button *, .dualinput-ui a *, .dualinput-ui [role="checkbox"] *, .dualinput-ui [role="option"] * { pointer-events: none; }
 .dualinput-ui button:disabled { cursor: default; }
 .dualinput-ui a { color: inherit; text-decoration: inherit; }
 .dualinput-ui ol, .dualinput-ui ul { list-style: none; }

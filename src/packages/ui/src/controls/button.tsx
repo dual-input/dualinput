@@ -1,4 +1,4 @@
-import { Children } from "react"
+import { Children, Fragment, isValidElement } from "react"
 import type { ButtonHTMLAttributes, ReactNode, Ref } from "react"
 
 import { cx } from "../lib/cx.ts"
@@ -38,7 +38,10 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 
  * an icon needs an element of its own for the space between them to land on.
  */
 export function spaced(children: ReactNode): ReactNode {
-  return Children.map(children, (child) => (typeof child === "string" || typeof child === "number" ? <span>{child}</span> : child))
+  return Children.map(children, (child) => {
+    if (typeof child === "string" || typeof child === "number") return <span>{child}</span>
+    return isValidElement<{ children?: ReactNode }>(child) && child.type === Fragment ? spaced(child.props.children) : child
+  })
 }
 
 // A hover and a press show at once, with no ease, since the EFB's frames, 66.7ms apart at the world map,

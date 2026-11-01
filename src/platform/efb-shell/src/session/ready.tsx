@@ -87,6 +87,13 @@ export const COUNTDOWN = 3
 
 const RING = { size: 28, stroke: 2.5, out: 150 }
 
+/** An SVG path along `share` of a circle, clockwise from its top. A whole circle's two ends would meet and draw nothing, so it stops just short. */
+function arcFromTop(center: number, radius: number, share: number): string {
+  if (share <= 0) return ""
+  const angle = Math.min(share, 0.9999) * 2 * Math.PI
+  return `M ${center} ${center - radius} A ${radius} ${radius} 0 ${angle > Math.PI ? 1 : 0} 1 ${center + radius * Math.sin(angle)} ${center - radius * Math.cos(angle)}`
+}
+
 /**
  * The countdown: a ring just before this pilot's Ready, the button that stops it, with the seconds left rolling
  * inside it and its arc draining over them, so it takes no row of its own and moves nothing as it comes and goes.
@@ -97,21 +104,33 @@ export function CountdownRing({ left }: { left: number | null }) {
   const running = left !== null
   const last = useRef(left ?? 0)
   if (running) last.current = left
-  // It stays drawn while it shrinks away, and each run drains from full.
+  // It stays drawn while it shrinks away.
   const [held, setHeld] = useState(running)
-  const [run, setRun] = useState(0)
   useEffect(() => {
     if (running) {
       setHeld(true)
-      setRun((n) => n + 1)
       return
     }
     const timer = window.setTimeout(() => setHeld(false), RING.out)
     return () => window.clearTimeout(timer)
   }, [running])
-  if (!running && !held) return null
   const center = RING.size / 2
   const radius = center - RING.stroke / 2
+  // Each run drains from full, a frame at a time, by redrawing its arc, since Coherent GT draws an SVG stroke with no dashes.
+  const arc = useRef<SVGPathElement>(null)
+  useEffect(() => {
+    if (!running) return
+    const start = performance.now()
+    let frame = 0
+    const step = () => {
+      const gone = Math.min(1, (performance.now() - start) / (COUNTDOWN * 1000))
+      arc.current?.setAttribute("d", arcFromTop(center, radius, 1 - gone))
+      if (gone < 1) frame = requestAnimationFrame(step)
+    }
+    step()
+    return () => cancelAnimationFrame(frame)
+  }, [running, center, radius])
+  if (!running && !held) return null
   return (
     <span
       role="timer"
@@ -121,19 +140,7 @@ export function CountdownRing({ left }: { left: number | null }) {
     >
       <svg className="absolute inset-x-0 inset-y-0" width={RING.size} height={RING.size} viewBox={`0 0 ${RING.size} ${RING.size}`} fill="none">
         <circle cx={center} cy={center} r={radius} strokeWidth={RING.stroke} className="stroke-success/20" />
-        <circle
-          key={run}
-          cx={center}
-          cy={center}
-          r={radius}
-          strokeWidth={RING.stroke}
-          strokeLinecap="round"
-          pathLength={100}
-          strokeDasharray={100}
-          transform={`rotate(-90 ${center} ${center})`}
-          className="stroke-current"
-          style={{ animation: `dualinput-drain ${COUNTDOWN}s linear both` }}
-        />
+        <path ref={arc} strokeWidth={RING.stroke} strokeLinecap="round" className="stroke-current" />
       </svg>
       <span className="relative text-xs font-semibold tabular-nums">
         <Rolling value={last.current} />

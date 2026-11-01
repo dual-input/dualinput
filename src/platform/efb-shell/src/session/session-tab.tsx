@@ -71,13 +71,27 @@ export function SessionTab({ parts }: { parts: Part[] }) {
   const [side, setSide] = useState<"start" | "session">(held ? "session" : "start")
   const [turning, setTurning] = useState<"out" | "in" | null>(null)
   const turnedIn = useRef(side === "session")
+  // A turn's timers outlive the render that changes the side halfway through it, so they're kept apart from the effect, and only a turn the other way stops them.
+  const turn = useRef<{ to: "start" | "session"; timers: number[] } | null>(null)
+  const stopTurn = () => {
+    turn.current?.timers.forEach((timer) => window.clearTimeout(timer))
+    turn.current = null
+  }
+  useEffect(() => stopTurn, [])
   useEffect(() => {
     const to = held ? "session" : "start"
-    if (to === side) return
-    const timers: number[] = []
-    const turn = () => {
-      setTurning("out")
-      timers.push(
+    if (turn.current?.to === to) return
+    if (turn.current) {
+      stopTurn()
+      setTurning(null)
+    }
+    // "Session started" shows first, so a turn to the session waits for the attempt's answer, then holds it a moment.
+    if (to === side || (to === "session" && status.kind === "busy")) return
+    const hold = to === "session" && status.kind === "done" ? TURN.hold : 0
+    turn.current = {
+      to,
+      timers: [
+        window.setTimeout(() => setTurning("out"), hold),
         window.setTimeout(() => {
           setSide(to)
           setTurning("in")
@@ -85,14 +99,13 @@ export function SessionTab({ parts }: { parts: Part[] }) {
             setStatus({ kind: "idle" })
             setCode("")
           }
-        }, TURN.out),
-      )
-      timers.push(window.setTimeout(() => setTurning(null), TURN.out + TURN.ease))
+        }, hold + TURN.out),
+        window.setTimeout(() => {
+          setTurning(null)
+          turn.current = null
+        }, hold + TURN.out + TURN.ease),
+      ],
     }
-    if (to === "session" && status.kind === "done") timers.push(window.setTimeout(turn, TURN.hold))
-    else turn()
-    return () => timers.forEach((timer) => window.clearTimeout(timer))
-    // A turn runs when what's held changes, and "Session started" arriving starts its wait.
   }, [held, side, status.kind])
   useEffect(() => {
     if (side === "session" && !turning) turnedIn.current = true
@@ -128,6 +141,8 @@ export function SessionTab({ parts }: { parts: Part[] }) {
           style={scrolls ? { paddingBottom: 20 + fold.pad, ...fadeMask(false, fold.scroller.below, 0, 32) } : undefined}
         >
           <div className={cx("relative flex shrink-0 flex-col", scrolls && "z-20 -mx-5 bg-background px-5")} style={scrolls ? pinned : undefined}>
+            {/* Reaches past the pinned card's top, since Coherent GT pins it a pixel or two below the box's edge, where what scrolls under would show above it. The box's clip cuts this off at its edge. */}
+            {scrolls && <div className="absolute inset-x-0 bottom-full h-2 bg-background" />}
             {/* A layer under the pinned card, where the box's mask can't reach, once something has gone under the folded card; only then, or hanging below it would make a short page scroll by its overhang. */}
             {scrolls && fold.goneUnder && <div className="pointer-events-none absolute inset-x-0 top-full -mt-px h-[25px]" style={{ background: "linear-gradient(to bottom, rgba(var(--background), 1), rgba(var(--background), 0))" }} />}
             <Card flush className="z-10 shrink-0">

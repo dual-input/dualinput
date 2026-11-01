@@ -11,6 +11,7 @@
 //   POST /eval   { "code": "document.title" }      runs JavaScript in the page, and answers its result
 //   POST /shot   { "file": "out.png" }             saves a picture of the window
 //   POST /click  { "x": 100, "y": 100 }            clicks a point of the window's client area
+//   POST /drag   { "x": 100, "y": 100, "toX": 100, "toY": 300, "steps": 8, "every": 16 }   presses, moves, and lets go
 //   POST /hover  { "x": 100, "y": 100 }            moves the mouse there
 //   POST /wheel  { "x": 100, "y": 100, "notches": 3 }   turns the wheel there
 //   POST /type   { "text": "abc" }                 types into the field with the focus
@@ -24,7 +25,7 @@ import { checkFile, format } from "coherent-checks"
 import * as esbuild from "esbuild"
 
 import { buildCss, forceStates, KIT } from "./lib/css.ts"
-import { click, hover, resize, shoot, type, wheel } from "./lib/dev-window.ts"
+import { click, drag, hover, resize, shoot, type, wheel } from "./lib/dev-window.ts"
 import { fromRoot, ROOT } from "./lib/repo.ts"
 import { sdkFolder } from "./lib/sdk.ts"
 
@@ -174,6 +175,9 @@ const server = http.createServer(async (req, res) => {
         return answer(res, { saved: shoot(host.pid!, path.resolve(body.file)) })
       case "/click":
         click(host.pid!, body.x, body.y)
+        return answer(res, {})
+      case "/drag":
+        drag(host.pid!, body.x, body.y, body.toX, body.toY, body.steps ?? 8, body.every ?? 16)
         return answer(res, {})
       case "/hover":
         hover(host.pid!, body.x, body.y)

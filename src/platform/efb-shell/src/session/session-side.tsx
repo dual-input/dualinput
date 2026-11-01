@@ -183,7 +183,7 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
   const leave = () => void link.client.command("session.leave", null)
   const leaveWords = (
     <>
-      <span className="mr-1">Leave</span>
+      Leave
       <LogOut className="size-4" />
     </>
   )
@@ -216,8 +216,9 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
           <div data-fold-fade>
             <Separator />
           </div>
-          <CardContent>
-            <span data-fold-fade className="mb-3 block text-xs text-muted-foreground">
+          {/* A column, so the differences' margins stay their own rather than collapsing with the box that holds them. */}
+          <CardContent className="flex flex-col">
+            <span data-fold-fade className="mb-3 text-xs text-muted-foreground">
               Crew
             </span>
             <ScrollWindow max={preflight && !started ? CREW_WINDOW : undefined}>

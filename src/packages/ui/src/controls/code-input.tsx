@@ -48,11 +48,21 @@ export function CodeInput({ value, onChange, groups = [3, 3], disabled, invalid,
                     key={index}
                     className={cx(
                       "relative flex size-9 items-center justify-center border-b border-r border-t bg-field font-mono text-sm first:rounded-l-3xl first:border-l last:rounded-r-3xl",
-                      invalid ? "border-destructive/60" : "border-input",
-                      isActive && "z-10 ring-3",
-                      isActive && (invalid ? "border-destructive ring-destructive/20" : "border-ring ring-ring/30"),
+                      isActive ? (invalid ? "z-10 border-destructive" : "z-10 border-ring") : invalid ? "border-destructive/60" : "border-input",
                     )}
                   >
+                    {/* The focus ring is a border of its own, around the slot's, since Coherent GT squares off the corners of a box-shadow on a box rounded on one side. */}
+                    {isActive && (
+                      <span
+                        aria-hidden
+                        className={cx(
+                          "pointer-events-none absolute -bottom-1 -right-1 -top-1 border-[3px]",
+                          i === 0 ? "-left-1 rounded-l-[11.8px]" : "-left-[3px]",
+                          i === slots - 1 && "rounded-r-[11.8px]",
+                          invalid ? "border-destructive/20" : "border-ring/30",
+                        )}
+                      />
+                    )}
                     {value[index]}
                     {isActive && value.length < length && <div className="pointer-events-none absolute h-4 animate-caret border-l border-foreground" />}
                   </div>

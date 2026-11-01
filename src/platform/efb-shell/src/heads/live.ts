@@ -94,11 +94,16 @@ let following = false
 function follow(): void {
   if (following) return
   following = true
-  window.addEventListener("mousemove", (event) => {
-    const at = event.target instanceof Element ? event.target : null
-    trail.push({ t: performance.now(), x: event.clientX, y: event.clientY, inApp: !!at?.closest("[data-app-frame]"), cue: at?.closest<HTMLElement>(`[${HEAD_CUE}]`) ?? null })
-    while (trail.length > 2 && trail[0]!.t < performance.now() - 500) trail.shift()
-  })
+  // Capturing, so a handler of the EFB's that stops a mouse event on its way up can't hide the cursor from the heads.
+  window.addEventListener(
+    "mousemove",
+    (event) => {
+      const at = event.target instanceof Element ? event.target : null
+      trail.push({ t: performance.now(), x: event.clientX, y: event.clientY, inApp: !!at?.closest("[data-app-frame]"), cue: at?.closest<HTMLElement>(`[${HEAD_CUE}]`) ?? null })
+      while (trail.length > 2 && trail[0]!.t < performance.now() - 500) trail.shift()
+    },
+    true,
+  )
   document.addEventListener("mouseleave", () => trail.push({ t: performance.now(), x: 0, y: 0, inApp: false, cue: null }))
 }
 
@@ -333,10 +338,12 @@ let loop = 0
 let lastFrame = 0
 let firstLive = 0
 
-function tick(now: number): void {
+function tick(): void {
   // A head that doesn't watch stops needing frames once it's smoothed, so a page of them costs nothing.
   const needed = Array.from(lives).some((head) => head.mind || head.stale || head.still <= LIVE.stillPasses)
   loop = needed ? requestAnimationFrame(tick) : 0
+  // The cursor's samples and a nod's start read this clock, and in Coherent GT a frame's own timestamp counts from another moment (record/areas/architecture/coherent-gt.md).
+  const now = performance.now()
   if (now - lastFrame < 1000 / LIVE.fps - 2) return
   lastFrame = now
   const all = Array.from(lives)

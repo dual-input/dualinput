@@ -49,6 +49,15 @@ export function click(pid: number, x: number, y: number): void {
   run(pid, `$a = [DevWindow]::At(${x}, ${y}); [void][DevWindow]::PostMessage($h, 0x200, [IntPtr]0, $a); Start-Sleep -Milliseconds 40; [void][DevWindow]::PostMessage($h, 0x201, [IntPtr]1, $a); Start-Sleep -Milliseconds 40; [void][DevWindow]::PostMessage($h, 0x202, [IntPtr]0, $a)`)
 }
 
+/** A press at one point of the window's client area, moved in `steps` to another, and let go there, each step `every` milliseconds apart. */
+export function drag(pid: number, x: number, y: number, toX: number, toY: number, steps: number, every: number): void {
+  const moves = Array.from({ length: steps }, (_, step) => {
+    const k = (step + 1) / steps
+    return `[void][DevWindow]::PostMessage($h, 0x200, [IntPtr]1, [DevWindow]::At(${Math.round(x + (toX - x) * k)}, ${Math.round(y + (toY - y) * k)})); Start-Sleep -Milliseconds ${every}`
+  })
+  run(pid, `[void][DevWindow]::PostMessage($h, 0x200, [IntPtr]0, [DevWindow]::At(${x}, ${y})); Start-Sleep -Milliseconds 40; [void][DevWindow]::PostMessage($h, 0x201, [IntPtr]1, [DevWindow]::At(${x}, ${y})); Start-Sleep -Milliseconds 40; ${moves.join("; ")}; [void][DevWindow]::PostMessage($h, 0x202, [IntPtr]0, [DevWindow]::At(${toX}, ${toY}))`)
+}
+
 /** Moves the mouse over a point of the window's client area, so what sits there shows its hover. */
 export function hover(pid: number, x: number, y: number): void {
   run(pid, `[void][DevWindow]::PostMessage($h, 0x200, [IntPtr]0, [DevWindow]::At(${x}, ${y}))`)

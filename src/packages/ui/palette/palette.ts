@@ -108,8 +108,6 @@ export function tailwindConfig(content: string[]) {
           "dualinput-zoom-in": { from: { opacity: "0", transform: "scale(0.5)" }, to: { opacity: "1", transform: "scale(1)" } },
           // What arrives as a card turns to its other side.
           "dualinput-turn-in": { from: { opacity: "0", transform: "translateY(6px)" }, to: { opacity: "1", transform: "translateY(0)" } },
-          // The countdown's arc, whose path counts 100 long and is dashed 100 on and 100 off, so an offset of 100 leaves none of it showing.
-          "dualinput-drain": { from: { "stroke-dashoffset": "0" }, to: { "stroke-dashoffset": "100" } },
           // A digit of a rolling count, as a counter's wheel turns: the old one up out of its window, the new one up in from below.
           "dualinput-roll-in": { from: { opacity: "0", transform: "translateY(100%)" }, to: { opacity: "1", transform: "translateY(0)" } },
           "dualinput-roll-out": { from: { opacity: "1", transform: "translateY(0)" }, to: { opacity: "0", transform: "translateY(-100%)" } },

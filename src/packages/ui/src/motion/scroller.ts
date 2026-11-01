@@ -24,8 +24,10 @@ const VELOCITY_WINDOW = 80
 // the speed the box already has, so letting go of a flick carries straight into it. Its response, in
 // seconds, as SwiftUI's springs give theirs: 0.3s spent its last few pixels creeping and read as soft.
 const SPRING_RESPONSE = 0.2
-/** How far a press moves before it's a drag rather than a click, in the root's units. */
-const DRAG_AFTER = 4
+/** How often a box checks whether there's more of it to scroll to, in milliseconds. */
+const MEASURE_EVERY = 250
+/** How far a press moves before it's a drag rather than a click, in the root's units: as far as a hand drifts during a click, or a VR pointer wavers. */
+const DRAG_AFTER = 8
 
 // A box nested in another, as a list's window in a page, takes a drag only if it can scroll the way the
 // drag goes; otherwise the page takes it, as iOS's nested scroll views do between gestures. The innermost
@@ -57,12 +59,12 @@ export function useScroller({ nested, ...said }: ScrollerOptions = {}) {
     setBelow(box.scrollHeight - box.scrollTop - box.clientHeight > 1)
   }
   useLayoutEffect(measure)
-  // Something easing on the page can shorten the box without a render here, so it measures again when an
-  // easing ends, Coherent GT having no ResizeObserver.
+  // What the box holds can change size with no render here, as a font loads, a child's slice arrives, or a
+  // room eases, and Coherent GT has no ResizeObserver, so it measures a few times a second.
   useEffect(() => {
-    window.addEventListener("transitionend", measure, true)
-    return () => window.removeEventListener("transitionend", measure, true)
-  })
+    const timer = window.setInterval(measure, MEASURE_EVERY)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const frame = useRef(0)
   const pressed = useRef(false)

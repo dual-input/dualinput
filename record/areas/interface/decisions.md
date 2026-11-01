@@ -146,7 +146,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 ## The EFB app fits its view with zoom on its root
 
-- **Decided:** the kit's root takes one number, its scale, as the CSS `zoom` property, so the frames' sizes stay as written, in code and in styles, and the page lays out in those units.
+- **Decided:** the app's layout flexes to the view it gets, so no width or height is fixed to the frames' 516 by 716 (user, 2026-11-01).
+  Then the kit's root takes one number, its scale, which sets how big a frame's pixel is, as the CSS `zoom` property, so the frames' sizes stay as written, in code and in styles, and a bigger tablet draws the same page bigger, as the EFB's own apps do.
   A mouse event's position alone reads in the window's pixels, which the kit converts with its root's scale.
   A hairline is a border, or takes `--hair`, the length of one real pixel at the root's scale, since a 1px height or shadow rounds down to nothing below a scale of 1.
   If the sim's EFB turns out to differ, the fallback is every size written as `calc(Npx * var(--scale))`, which is how `efb_os.css` sizes itself, by a step on the built stylesheet, with a helper for each number in our code.
@@ -156,7 +157,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - Under `zoom`, offsets, rects, `scrollTop`, and a `translateX` all read and move in the frames' units, so the frames' motion carries over with no number changed (same entry).
   - With `calc()`, every number in our code that sets a size or a motion would need a helper, and one that missed it would show only at another scale.
 - **Leaves out:**
-  - The scale itself, which the EFB shell reads from the app's view, and what the frames do in landscape, which p21 measured at about 696 by 433 of the EFB's units and no call has settled.
+  - The scale itself, which the EFB shell reads from the app's view.
+  - A design for landscape, which p21 measured at about 696 by 433 of the EFB's units, and which waits until after the portrait build, with the layout's flex keeping it usable until then (user, 2026-11-01).
   - How it runs in the sim's EFB, which [the list below](#stage-11b-checks-in-coherent-gt-what-the-frames-lean-on) holds.
 
 ## Go to from the EFB app runs through the menu script, so BlurPage stays

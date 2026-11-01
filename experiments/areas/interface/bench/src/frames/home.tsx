@@ -115,7 +115,7 @@ const WHERE: Record<Whereabouts, { when: string; shows: string; trouble?: boolea
 // shares shows on the session page, though the switch lives on the traffic tab (user, 2026-10-31).
 // They're two roles, each declared by its feature and taken by its own switch, so they can sit with
 // two pilots (record/areas/interface/decisions.md, Traffic and ATC audio are shared apart).
-type Pilot = { name: string; hue: string; at?: Whereabouts; flying?: boolean; way?: Way; link?: string; ready?: boolean; traffic?: boolean; atc?: boolean }
+export type Pilot = { name: string; hue: string; at?: Whereabouts; flying?: boolean; way?: Way; link?: string; ready?: boolean; traffic?: boolean; atc?: boolean }
 // A session can open with its flight already started: then whether this pilot's catch-up runs, the
 // binding's name for the take-control strip, and a demo of taking control, which can hand control
 // back to the pilot flying a while later.
@@ -301,7 +301,7 @@ const SESSIONS: Record<
   "flying-hardware": { joined: true, crew: [{ ...JAMES, flying: true, link: LINK }], traffic: DEMO_HOST, atc: DEMO_HOST, preflight: { settled: true, differences: DIFFERENCES.joiner }, flight: { bound: "TCA Sidestick Button 3", demo: "hold" } },
 }
 // How long the countdown runs once every counted pilot is ready, in seconds.
-const COUNTDOWN = 3
+export const COUNTDOWN = 3
 export type SessionKey = keyof typeof SESSIONS
 // The session a frame moves on to, after that many milliseconds.
 export type NextSession = { after: number; session: SessionKey }
@@ -457,7 +457,7 @@ function JoinPf({ way }: { way: Way }) {
 // the check shrinks away and the room closes. The check and the word are one child of the button,
 // so the kit's gap between an icon and its label stays out of the easing.
 const READY_EASE = { room: 200, check: 300, after: 60 }
-function ReadyButton({ ready, settled, onToggle }: { ready: boolean; settled: boolean; onToggle: () => void }) {
+export function ReadyButton({ ready, settled, onToggle }: { ready: boolean; settled: boolean; onToggle: () => void }) {
   const { Button, Tooltip, TooltipContent, TooltipTrigger } = useUI()
   const was = useRef(ready)
   const [pulses, setPulses] = useState(0)
@@ -536,7 +536,7 @@ export function Rolling({ value }: { value: number }) {
 // animates a stroke's dash offset is unmeasured. The arc's path counts 100 long (pathLength), as
 // index.css's countdown-ring takes it.
 const RING = { size: 28, stroke: 2.5, in: 200, out: 150 }
-function CountdownRing({ left }: { left: number | null }) {
+export function CountdownRing({ left }: { left: number | null }) {
   const running = left !== null
   const last = useRef(left ?? 0)
   if (running) last.current = left
@@ -605,10 +605,10 @@ const phaseOf = (session: Session, started: boolean): SessionPhase | undefined =
 // pilot the crew went without has none. A ring in the card's color parts the badge from the head.
 // Tried and dropped for waiting: an hourglass, outlined or solid, which at 14px read as a scribble
 // or an X; and the ring in preflight's information color, which didn't work beside the heads.
-type HeadState = "ready" | "out" | "waiting"
+export type HeadState = "ready" | "out" | "waiting"
 const HEAD_SAYS: Record<HeadState, string> = { ready: "ready", out: "out of the flight", waiting: "not ready" }
 const FILL_MS = 220
-function StripHead({ pilot, state }: { pilot: Pilot; state?: HeadState }) {
+export function StripHead({ pilot, state }: { pilot: Pilot; state?: HeadState }) {
   const ready = state === "ready"
   const at = "absolute -right-0.5 -bottom-0.5 flex size-3.5 items-center justify-center rounded-full ring-2 ring-card "
   return (

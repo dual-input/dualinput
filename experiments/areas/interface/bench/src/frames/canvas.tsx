@@ -16,11 +16,12 @@ import { AircraftPickerFrame } from "./aircraft"
 import { AtcFrame, TrafficFrame } from "./traffic"
 import { AvatarsFrame } from "./avatars"
 import { SettingsFrame } from "./settings"
+import { BannerFrame, BannerOnScreenFrame, EveryNotificationFrame, SCREEN, SUMMARIES } from "./banner"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
 // one gets a Replay button beside its name, which draws it afresh. A home page with Host and Join
 // also gets Play hosting and Play joining, which draw it afresh to play that by itself.
-type FrameEntry = { name: string; tall?: boolean; replay?: boolean; plays?: boolean; draw: (t: Theme, play?: Action) => React.ReactNode }
+type FrameEntry = { name: string; width?: number; tall?: boolean; replay?: boolean; plays?: boolean; draw: (t: Theme, play?: Action) => React.ReactNode }
 const PLAYS: { play: Action; label: string }[] = [
   { play: "host", label: "Play hosting" },
   { play: "join", label: "Play joining" },
@@ -207,6 +208,25 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Installed aircraft", replay: true, draw: (t) => <AircraftPickerFrame theme={t} /> },
       { name: "In a flight", replay: true, draw: (t) => <AircraftPickerFrame theme={t} at="flight" /> },
       { name: "None installed", replay: true, draw: (t) => <AircraftPickerFrame theme={t} noneInstalled /> },
+    ],
+  },
+  // The banner over the cockpit, outside the EFB app: the whole screen, to judge its place and its
+  // box; every notification, each under when it shows; a stack of two and of three; several sync
+  // failures as one; and the preflight summary, for the pilot flying, for the others, before
+  // Ready opens, counting down, and with a crewmate out of the flight under it.
+  {
+    name: "Banner",
+    frames: [
+      { name: "On screen", width: SCREEN.width, draw: (t) => <BannerOnScreenFrame theme={t} summary={SUMMARIES.out} notes={["crashed", "seat"]} /> },
+      { name: "Every notification", draw: (t) => <EveryNotificationFrame theme={t} /> },
+      { name: "Two at once", draw: (t) => <BannerFrame theme={t} notes={["control-you", "sync-one"]} /> },
+      { name: "Three at once", draw: (t) => <BannerFrame theme={t} notes={["crashed", "pause", "sync-one"]} /> },
+      { name: "Sync failures at one load", draw: (t) => <BannerFrame theme={t} notes={["sync-several"]} /> },
+      { name: "Preflight, pilot flying", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.pf} /> },
+      { name: "Preflight, the others", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.others} /> },
+      { name: "Preflight, before Ready opens", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.settling} /> },
+      { name: "Preflight, counting down", replay: true, draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.counting} /> },
+      { name: "Preflight, a crewmate out", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.out} notes={["crashed"]} /> },
     ],
   },
 ]
@@ -467,7 +487,7 @@ export function Canvas() {
                           }}
                           data-frame
                           className="relative"
-                          style={{ width: EFB.width }}
+                          style={{ width: f.width ?? EFB.width }}
                         >
                           <span className={"absolute bottom-full left-0 whitespace-nowrap " + (current === idOf(s, f) ? "text-sky-300" : "text-neutral-400")} style={{ fontSize: fixed(12), paddingBottom: fixed(6) }}>
                             {f.name}

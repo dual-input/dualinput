@@ -322,7 +322,7 @@ function Recordings() {
       aside={`${total} MB of 1 GB`}
       foot={
         <>
-          A record of what Dual Input did in each run, kept on this PC to help us trace a problem you report. The oldest are deleted first. To report one, send us the log.txt from that run's folder on{" "}
+          A record of what Dual Input did in each run, kept on this PC so we can trace problems. The oldest are deleted first. To report a problem, find the run it happened in, open its folder, and send us the log.txt on{" "}
           <button type="button" onClick={() => toast("Opening our Discord in your browser")} className="underline underline-offset-2 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
             Discord
           </button>

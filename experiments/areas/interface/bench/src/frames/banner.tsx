@@ -63,7 +63,7 @@ export const NOTES = {
   "lost-pf": { when: "No link to the pilot flying, held", note: { level: "warning", title: "Reconnecting to James", detail: "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect." } },
   "taken-while-away": { when: "Back after another pilot took control while your link was lost", note: { level: "warning", title: "Adam took control while you were disconnected", detail: "What you changed in that time was undone, and your pages and FMS entries may differ from Adam's." } },
   "catching-up": { when: "Catching up, after joining late or after a short outage, held", note: { level: "info", busy: true, title: "Catching up with James", detail: "Anything you move in the cockpit now will be reset." } },
-  "caught-up": { when: "Caught up after joining late", note: { level: "info", title: "Caught up with James", detail: "Pages and FMS entries may differ from James's." } },
+  "caught-up": { when: "Caught up after joining late", note: { level: "info", title: "Caught up with James", detail: "Pages and FMS entries may still differ from James's." } },
   "caught-up-outage": { when: "Caught up after a short outage", note: { level: "info", title: "Caught up with James" } },
   pause: { when: "The pilot flying in the pause menu, held, on the others' banners", note: { level: "info", who: JAMES, title: "James has paused" } },
   left: { when: "A crewmate goes to the menu or another flight", note: { level: "info", who: ADAM, out: true, title: "Adam left the flight", detail: "They're still in the session." } },

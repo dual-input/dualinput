@@ -3,7 +3,8 @@
 // zooms at the pointer, dragging the empty board pans, and double-clicking it zooms to 100% there.
 // The layers list hides and shows with its button or Ctrl+\, as Figma's panels do. The frames draw
 // in the style bench's theme as it was last saved, so a change made there shows here on reload.
-import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { Component, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { createRoot, type Root } from "react-dom/client"
 import { Frame, LayoutGrid, Minus, PanelLeftClose, PanelLeftOpen, Plus, Scan } from "lucide-react"
 
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -223,7 +224,7 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Two at once", draw: (t) => <BannerFrame theme={t} notes={["control-you", "sync-one"]} /> },
       { name: "Three at once", replay: true, draw: (t) => <BannerFrame theme={t} notes={["crashed", "pause", "sync-one"]} /> },
       { name: "Sync failures at one load", draw: (t) => <BannerFrame theme={t} notes={["sync-several"]} /> },
-      { name: "More than fit", replay: true, draw: (t) => <BannerFrame theme={t} box notes={["sync-one", "want", "bridge", "pause", "helper", "seat"]} /> },
+      { name: "More than fit", replay: true, draw: (t) => <BannerFrame theme={t} box notes={["sync-one", "want", "bridge", "lost-pf", "pause", "helper", "module-stopped", "seat"]} /> },
       { name: "Preflight, pilot flying", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.pf} /> },
       { name: "Preflight, the others", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.others} /> },
       { name: "Preflight, before Ready opens", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.settling} /> },
@@ -250,6 +251,7 @@ function savedTheme(): Theme {
 type View = { x: number; y: number; z: number }
 const VIEW_KEY = "bench.canvas.view"
 const LAYERS_KEY = "bench.canvas.layers"
+const SIZES_KEY = "bench.canvas.sizes"
 function stored<T>(key: string, valid: (v: unknown) => v is T): T | undefined {
   try {
     const v: unknown = JSON.parse(localStorage.getItem(key) ?? "null")
@@ -267,27 +269,27 @@ function store(key: string, value: unknown) {
 }
 const isView = (v: unknown): v is View => !!v && typeof v === "object" && ["x", "y", "z"].every((k) => Number.isFinite((v as Record<string, unknown>)[k])) && (v as View).z > 0
 const isBoolean = (v: unknown): v is boolean => typeof v === "boolean"
+const isSizes = (v: unknown): v is Record<string, number> => !!v && typeof v === "object" && Object.values(v).every((n) => Number.isFinite(n) && (n as number) > 0)
 // The layers list's width, w-60, which the board's place shifts by as it hides or shows.
 const LAYERS_WIDTH = 240
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 
-// A frame's content, drawn again only when its theme or what it plays changes, or the zoom the
-// board is laid out at. The canvas renders on every step of a pan or zoom, and drawing every frame
-// again with it took 12ms a step on the development PC with 20 frames, a third of a 165Hz display's
-// frame rate. Once the zoom rests, though, CSS zoom rounds the text's lines afresh, and a box that
-// measured its contents after a render, as the session card's turning part does, would keep the
-// height from the old zoom, cutting off its last 3px or leaving a gap under it.
-// Each frame mounts in a task of its own. Many frames measure themselves after a render and set
-// state from it, and React counts those updates across one commit, stopping at 50: with every frame
-// on the canvas mounting in the same commit, their chains together passed that on screens at 2x
-// and 4x pixel density, and the canvas went blank with "Maximum update depth exceeded" (measured in
-// Chromium, 2026-10-31, after the Flying and Traffic sections joined; skipping any one large
-// section stopped it). A frame's first draw comes a task after the canvas's.
-// Frames mount a few at a time, each batch in a task of its own, so their first layout effects
-// don't all run in one commit: with every frame mounting at once, the updates those effects start
-// ran past React's limit of 50 nested updates once the banner's frames joined the canvas
-// (2026-11-01).
+// A canvas of many live frames stays fast and whole by three means, as design tools' do (user,
+// 2026-11-01: "what's the right way to do a canvas like this?", then "do all 3"):
+// - Each frame runs in a React root of its own, behind an error boundary, so a frame that crashes
+//   shows why in its own place, and the updates one frame's effects start count toward React's
+//   limit of 50 nested updates for that root alone. Sharing one root, every frame's measuring
+//   after its first render ran in one chain, which passed that limit and blanked the canvas with
+//   "Maximum update depth exceeded" twice: on 2026-10-31, after the Flying and Traffic sections
+//   joined, and on 2026-11-01, after the banner's did (measured in Chromium).
+// - Only frames on the board, or within half the board's size of it, are live; the rest are
+//   placeholders at their last measured height, kept across reloads, so the layout doesn't jump.
+// - Below 35% zoom no frame is live, since zoomed out every frame is on the board at once; each
+//   shows its name on a card its size instead.
+// Frames that come live mount a few at a time, each batch in a task of its own, so the board
+// stays responsive as a pan brings many in.
+const LIVE = { margin: 0.5, minZoom: 0.35, after: 120 }
 const MOUNT_BATCH = 4
 const toMount: (() => void)[] = []
 let mounting = false
@@ -302,7 +304,59 @@ function mountSoon(go: () => void) {
   }
   window.setTimeout(next)
 }
-const FrameBody = memo(function FrameBody({ entry, theme, play }: { entry: FrameEntry; theme: Theme; play?: Action; zoom: number }) {
+
+class FrameBoundary extends Component<{ children: React.ReactNode }, { error?: Error }> {
+  state: { error?: Error } = {}
+  static getDerivedStateFromError(error: Error) {
+    return { error }
+  }
+  render() {
+    if (!this.state.error) return this.props.children
+    return (
+      <div className="flex flex-col items-start gap-3 rounded-xl border border-red-400/40 bg-red-950/40 p-5 text-sm text-red-200">
+        <span className="font-medium">This frame crashed</span>
+        <span className="font-mono text-xs break-all text-red-200/80">{this.state.error.message}</span>
+        <button className="rounded-md bg-white/10 px-3 py-1.5 text-xs hover:bg-white/15" onClick={() => this.setState({ error: undefined })}>
+          Try again
+        </button>
+      </div>
+    )
+  }
+}
+
+// A frame's content in a root of its own, drawn again when its theme or what it plays changes, or
+// the zoom the board is laid out at: once the zoom rests, CSS zoom rounds the text's lines afresh,
+// and a box that measured its contents after a render, as the session card's turning part does,
+// would keep the height from the old zoom, cutting off its last 3px or leaving a gap under it. The
+// root unmounts a task after the frame leaves, since React won't unmount a root while it renders.
+// The host holds the placeholder's height until the root has drawn, two animation frames on, so
+// the frames after it don't jump up and back.
+function LiveFrame({ entry, theme, play, zoom, height }: { entry: FrameEntry; theme: Theme; play?: Action; zoom: number; height?: number }) {
+  const host = useRef<HTMLDivElement>(null)
+  const root = useRef<Root | null>(null)
+  const [held, setHeld] = useState(height)
+  useEffect(() => {
+    let f = requestAnimationFrame(() => (f = requestAnimationFrame(() => setHeld(undefined))))
+    return () => cancelAnimationFrame(f)
+  }, [])
+  useEffect(() => {
+    root.current = createRoot(host.current!)
+    return () => {
+      const r = root.current
+      root.current = null
+      window.setTimeout(() => r?.unmount())
+    }
+  }, [])
+  useEffect(() => {
+    root.current?.render(
+      <TooltipProvider>
+        <FrameBoundary>{entry.draw(theme, play)}</FrameBoundary>
+      </TooltipProvider>
+    )
+  }, [entry, theme, play, zoom])
+  return <div ref={host} style={{ minHeight: held }} />
+}
+function DeferredFrame({ placeholder, ...props }: { entry: FrameEntry; theme: Theme; play?: Action; zoom: number; height?: number; placeholder: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     let live = true
@@ -311,8 +365,8 @@ const FrameBody = memo(function FrameBody({ entry, theme, play }: { entry: Frame
       live = false
     }
   }, [])
-  return mounted ? <>{entry.draw(theme, play)}</> : null
-})
+  return mounted ? <LiveFrame {...props} /> : placeholder
+}
 
 // CSS zoom lays every frame out again, about 100ms a step on the development PC with 20 frames, so
 // while the zoom changes a scale transform carries it, and the board is laid out at the new zoom
@@ -355,6 +409,33 @@ export function Canvas() {
     const t = window.setTimeout(() => setLaidOut(view.z), SETTLE)
     return () => clearTimeout(t)
   }, [view.z, laidOut])
+  // Which frames are live, worked out a moment after the view or the layout's zoom changes, and each
+  // frame's last measured height, which its placeholder keeps.
+  const sizes = useRef<Record<string, number>>(stored(SIZES_KEY, isSizes) ?? {})
+  const [live, setLive] = useState<Set<string>>(new Set())
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      const b = board.current
+      if (!b) return
+      const box = b.getBoundingClientRect()
+      const mx = box.width * LIVE.margin
+      const my = box.height * LIVE.margin
+      const next = new Set<string>()
+      let measured = false
+      for (const [id, el] of frames.current) {
+        if (live.has(id) && el.offsetHeight > 0 && sizes.current[id] !== el.offsetHeight) {
+          sizes.current[id] = el.offsetHeight
+          measured = true
+        }
+        if (laidOut < LIVE.minZoom) continue
+        const r = el.getBoundingClientRect()
+        if (r.right > box.left - mx && r.left < box.right + mx && r.bottom > box.top - my && r.top < box.bottom + my) next.add(id)
+      }
+      if (measured) store(SIZES_KEY, sizes.current)
+      if (next.size !== live.size || [...next].some((id) => !live.has(id))) setLive(next)
+    }, LIVE.after)
+    return () => clearTimeout(t)
+  }, [view, laidOut, live])
   const [current, setCurrent] = useState<string | null>(null)
   const [runs, setRuns] = useState<Record<string, number>>({})
   const [playing, setPlaying] = useState<Record<string, Action | undefined>>({})
@@ -527,7 +608,15 @@ export function Canvas() {
                               ))}
                           </span>
                           <div key={runs[idOf(s, f)] ?? 0}>
-                            <FrameBody entry={f} theme={theme} play={playing[idOf(s, f)]} zoom={laidOut} />
+                            {(() => {
+                              const height = sizes.current[idOf(s, f)] ?? EFB.height
+                              const placeholder = (
+                                <div className="flex items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] px-6 text-center break-words text-neutral-500" style={{ height, fontSize: Math.min(fixed(14), 40) }}>
+                                  {f.name}
+                                </div>
+                              )
+                              return live.has(idOf(s, f)) ? <DeferredFrame entry={f} theme={theme} play={playing[idOf(s, f)]} zoom={laidOut} height={height} placeholder={placeholder} /> : placeholder
+                            })()}
                           </div>
                           {f.tall && (
                             <div className="pointer-events-none absolute inset-x-0 border-t border-dashed border-sky-400/60" style={{ top: EFB.height }}>

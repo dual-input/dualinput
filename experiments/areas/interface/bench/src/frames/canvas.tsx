@@ -217,7 +217,7 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
   {
     name: "Banner",
     frames: [
-      { name: "On screen", width: SCREEN.width, draw: (t) => <BannerOnScreenFrame theme={t} summary={SUMMARIES.out} notes={["crashed", "seat"]} /> },
+      { name: "On screen", width: SCREEN.width, draw: (t) => <BannerOnScreenFrame theme={t} summary={SUMMARIES.out} notes={["crashed", "seat", "sync-one"]} /> },
       { name: "Every notification", draw: (t) => <EveryNotificationFrame theme={t} /> },
       { name: "Two at once", draw: (t) => <BannerFrame theme={t} notes={["control-you", "sync-one"]} /> },
       { name: "Three at once", draw: (t) => <BannerFrame theme={t} notes={["crashed", "pause", "sync-one"]} /> },

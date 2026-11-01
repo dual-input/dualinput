@@ -1,10 +1,11 @@
 // The notification banner: Dual Input's in-game panel over the cockpit, which tells a pilot what
 // needs them while they fly, with the EFB open or not, in VR as on a monitor
-// (record/areas/product/03-v1-scope.md, Notification banner). It sits in the screen's top right,
-// one card wide, its cards stacking down from the top with the newest first, and during preflight
-// the preflight summary leads (user, 2026-11-01). The panel is a fixed box, and whether clicks
-// pass through its empty part is untested, so the box is only as tall as the summary and two
-// notifications, which keeps it above the instrument panel.
+// (record/areas/product/03-v1-scope.md, Notification banner). It sits at the screen's right, about
+// three notifications' height down from the top, one card wide, its cards stacking down from its
+// top with the newest first, and during preflight the preflight summary leads (user, 2026-11-01).
+// The panel is a fixed box, and whether clicks pass through its empty part is untested, so the box
+// is only as tall as the summary and three notifications, which keeps it above the instrument
+// panel.
 // The sim blurs whatever lies behind the pixels a panel paints (record/areas/interface/log.md,
 // 2026-10-04), so every card is opaque: its edge is an inset ring over its own fill, and it casts
 // no shadow, since a translucent pixel shows the blurred cockpit through it (user, 2026-11-01:
@@ -13,7 +14,7 @@
 // stage notes. The words are drafts.
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { CircleX, Hand, Info, TriangleAlert } from "lucide-react"
+import { CircleX, Hand, Info, ListChecks, TriangleAlert } from "lucide-react"
 
 import { ThemeContext, UI, UIContext, useUI } from "@/bench/ui"
 import { themeVars, type Theme } from "@/bench/theme"
@@ -22,10 +23,12 @@ import { Head } from "./figure-head"
 import { COUNTDOWN, CountdownRing, ReadyButton, StripHead, type HeadState, type Pilot } from "./home"
 
 // The banner's box on a 1920 by 1080 screen, in pixels: one card wide, 16px in from the screen's
-// top and right edges, and as tall as the preflight summary and two notifications. The sim sizes a
-// panel in percents of the screen's height (record/areas/interface/log.md, 2026-10-04), so the box
-// is about 33% of the height wide and 28% tall.
-export const BANNER = { width: 360, inset: 16, gap: 8, height: 300 }
+// right edge, its top 210px down, the height of three notifications with a line of detail each,
+// and as tall as the preflight summary and three such notifications (user, 2026-11-01: "make the
+// notifications box taller? and move it down say - 3 notification heights"). The sim sizes a panel
+// in percents of the screen's height (record/areas/interface/log.md, 2026-10-04), so the box is
+// about 33% of the height wide and 36% tall, with its top 19% down.
+export const BANNER = { width: 360, inset: 16, top: 210, gap: 8, height: 390 }
 export const SCREEN = { width: 1920, height: 1080 }
 
 // A stand-in for the cockpit behind the banner: a daytime sky through the windshield, and on the
@@ -86,7 +89,7 @@ export type NoteKey = keyof typeof NOTES
 
 // A card's fill and edge, which every card on the banner shares. The kit's card draws its edge as an
 // outer ring; this one's is inset, so it lies over the card's own fill rather than over the cockpit.
-const CARD = "w-full rounded-3xl bg-card text-card-foreground inset-ring inset-ring-foreground/10"
+const CARD = "w-full rounded-4xl bg-card text-card-foreground inset-ring inset-ring-foreground/10"
 
 // A click anywhere on a card opens Dual Input's app on the EFB, on Home; where each notification
 // lands waits for the frames (user, 2026-11-01).
@@ -94,8 +97,12 @@ const openEfb = () => toast("Opening Dual Input on the EFB")
 
 function NoteCard({ note }: { note: Note }) {
   const { Spinner } = useUI()
-  // A head is 28px, taller than the title's line, so a card led by one centers on it; an icon
-  // stands in a box the title's line tall, so it centers on the title whatever follows it.
+  // A card's padding is 16px on every side, as the kit's cards' is, so a head sits as far from the
+  // card's top as from its side (user, 2026-11-01: 12px above and below and 16px at the sides
+  // "aren't symmetric"). A head is 28px, taller than the title's line, so a card led by one centers
+  // on it; an icon stands in a box the title's line tall, so it centers on the title whatever
+  // follows it. A card nudges down 1px while it's pressed, as the kit's buttons do, through
+  // `transform`, since Coherent GT has no `translate` property (user, 2026-11-01).
   const lead = note.who ? (
     <span className="flex shrink-0">
       <Head hex={hexOf(note.who.hue)} slumped={note.out} />
@@ -104,7 +111,7 @@ function NoteCard({ note }: { note: Note }) {
     <span className="flex h-5 shrink-0 items-center">{note.busy ? <Spinner className="size-4 text-muted-foreground" /> : LEVEL_ICON[note.level]}</span>
   )
   return (
-    <button type="button" onClick={openEfb} className={CARD + " flex gap-3 px-4 py-3 text-left outline-none hover:bg-muted focus-visible:inset-ring-ring " + (note.who ? "items-center" : "items-start")}>
+    <button type="button" onClick={openEfb} className={CARD + " flex gap-3 p-4 text-left outline-none hover:bg-muted focus-visible:inset-ring-ring active:[transform:translateY(1px)] " + (note.who ? "items-center" : "items-start")}>
       {lead}
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-sm font-medium">{note.title}</span>
@@ -124,10 +131,18 @@ function NoteCard({ note }: { note: Note }) {
 // The preflight summary, which leads the banner from the moment preflight starts until the flight
 // does (record/areas/product/03-v1-scope.md, Notification banner): the folded session card's row,
 // every pilot's head badged ready, not ready, or out, then this pilot's Ready with the countdown's
-// ring before it once it runs; then home's hand line, in its words, for every pilot; for the pilot
-// flying, where the checklist is; and the match check's differences as counts, which the EFB app
-// lists. Ready is the card's one action, and a click anywhere else on it opens the EFB app, as a
-// notification's does. The countdown here holds at its last second, where the flight would start.
+// ring before it once it runs; then, 12px under that row, its lines, 6px apart, each led by an icon
+// in one column so their words start in one place: home's hand line, in its words, for every
+// pilot; for the pilot flying, where the checklist is; and the match check's differences, counted
+// and led by the worst one's icon, which the EFB app lists (user, 2026-11-01: "fix the spacing
+// between the elements"). Ready is the card's one action, and a click anywhere else on it opens
+// the EFB app, as a notification's does. That click is a layer of its own under the card's
+// content, which lets presses through to it, so hovering Ready lights Ready and not the card (user,
+// 2026-11-01), with no `:has()`, which Coherent GT isn't measured to have; the layer carries the
+// card's edge, since its hover fill would cover an edge drawn by the card under it. Pressing the
+// layer nudges the whole card down 1px, as a notification's press does, from mouse events, since
+// Coherent GT has no PointerEvent. The countdown here holds at its last second, where the flight
+// would start.
 export type Summary = { pf: boolean; crew: { pilot: Pilot; state: HeadState }[]; settled?: boolean; ready?: boolean; errors?: number; warnings?: number }
 function useCountdown(on: boolean) {
   const [left, setLeft] = useState<number | null>(null)
@@ -139,45 +154,60 @@ function useCountdown(on: boolean) {
   }, [on])
   return left
 }
+function Line({ icon, className, children }: { icon: React.ReactNode; className: string; children: React.ReactNode }) {
+  return (
+    <p className={"flex items-start gap-1.5 " + className}>
+      <span className="flex h-4 shrink-0 items-center [&>svg]:size-3.5">{icon}</span>
+      {children}
+    </p>
+  )
+}
+const counted = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`
 function PreflightCard({ summary }: { summary: Summary }) {
   const [ready, setReady] = useState(!!summary.ready)
+  const [pressed, setPressed] = useState(false)
   const left = useCountdown(ready && summary.crew.every((c) => c.state === "ready"))
   const heads = [{ pilot: YOU, state: (ready ? "ready" : "waiting") as HeadState }, ...summary.crew]
+  const errors = summary.errors ?? 0
+  const warnings = summary.warnings ?? 0
+  const differences = [errors && counted(errors, "error"), warnings && counted(warnings, "warning")].filter(Boolean).join(" and ")
   return (
-    <div role="button" tabIndex={0} onClick={openEfb} className={CARD + " flex cursor-pointer flex-col gap-2 px-4 py-3 outline-none hover:bg-muted focus-visible:inset-ring-ring"}>
-      <div className="flex items-center justify-between gap-3">
+    <div className="relative flex w-full flex-col gap-3 rounded-4xl bg-card p-4 text-card-foreground" style={{ transform: pressed ? "translateY(1px)" : undefined }}>
+      <button
+        type="button"
+        aria-label="Open Dual Input on the EFB"
+        onClick={openEfb}
+        onMouseDown={(e) => e.button === 0 && setPressed(true)}
+        onMouseUp={() => setPressed(false)}
+        onMouseLeave={() => setPressed(false)}
+        className="absolute inset-0 rounded-[inherit] inset-ring inset-ring-foreground/10 outline-none hover:bg-muted focus-visible:inset-ring-ring"
+      />
+      <div className="pointer-events-none relative flex items-center justify-between gap-3">
         <span className="flex items-center gap-1.5">
           {heads.map(({ pilot, state }) => (
             <StripHead key={pilot.name} pilot={pilot} state={state} />
           ))}
         </span>
-        <span className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+        <span className="pointer-events-auto flex items-center gap-2">
           <CountdownRing left={left} />
           <ReadyButton ready={ready} settled={summary.settled ?? true} onToggle={() => setReady((r) => !r)} />
         </span>
       </div>
-      <p className="flex items-start gap-1.5 text-xs text-info">
-        <Hand className="mt-px size-3.5 shrink-0" />
-        Avoid unnecessary cockpit interactions until the flight starts, as some may not sync.
-      </p>
-      {summary.pf && <p className="text-xs text-muted-foreground">Your preflight checklist is in Dual Input's EFB app</p>}
-      {(summary.errors || summary.warnings) && (
-        <p className="flex items-center gap-3 text-xs">
-          {!!summary.errors && (
-            <span className="flex items-center gap-1 text-destructive">
-              <CircleX className="size-3.5" />
-              {summary.errors}
-            </span>
-          )}
-          {!!summary.warnings && (
-            <span className="flex items-center gap-1 text-warning">
-              <TriangleAlert className="size-3.5" />
-              {summary.warnings}
-            </span>
-          )}
-          <span className="text-muted-foreground">Differences between your setups</span>
-        </p>
-      )}
+      <div className="pointer-events-none relative flex flex-col gap-1.5 text-xs">
+        <Line icon={<Hand />} className="text-info">
+          Avoid unnecessary cockpit interactions until the flight starts, as some may not sync.
+        </Line>
+        {summary.pf && (
+          <Line icon={<ListChecks />} className="text-muted-foreground">
+            Your preflight checklist is in Dual Input's EFB app
+          </Line>
+        )}
+        {differences && (
+          <Line icon={errors ? <CircleX className="text-destructive" /> : <TriangleAlert className="text-warning" />} className="text-muted-foreground">
+            {differences} between your setups
+          </Line>
+        )}
+      </div>
     </div>
   )
 }
@@ -210,7 +240,8 @@ function Themed({ theme, children }: { theme: Theme; children: React.ReactNode }
   )
 }
 
-// The screen's top right corner, as wide as the EFB's frames, with the banner at its place.
+// The banner's top at the screen's right edge, as wide as the EFB's frames, with the cards at their
+// place.
 export function BannerFrame({ theme, summary, notes = [] }: { theme: Theme; summary?: Summary; notes?: NoteKey[] }) {
   return (
     <Themed theme={theme}>
@@ -240,7 +271,7 @@ export function EveryNotificationFrame({ theme }: { theme: Theme }) {
 }
 
 // The whole screen at its size, with the banner's box outlined at its place, holding the
-// preflight summary and two notifications, the most it's sized for.
+// preflight summary and three notifications, the most it's sized for.
 const DISPLAYS = [
   { left: 330, width: 300 },
   { left: 660, width: 300 },
@@ -258,12 +289,12 @@ export function BannerOnScreenFrame({ theme, summary, notes }: { theme: Theme; s
             <div key={d.left} className="absolute rounded-md" style={{ left: d.left, width: d.width, top: 90, height: 260, background: "#0d1014" }} />
           ))}
         </div>
-        <div className="absolute border border-dashed border-sky-300/80" style={{ top: BANNER.inset, right: BANNER.inset, width: BANNER.width, height: BANNER.height }}>
+        <div className="absolute border border-dashed border-sky-300/80" style={{ top: BANNER.top, right: BANNER.inset, width: BANNER.width, height: BANNER.height }}>
           <span className="absolute top-full right-0 pt-1.5 text-xs whitespace-nowrap text-white/85">
             The banner's box, {BANNER.width} by {BANNER.height}
           </span>
         </div>
-        <div className="absolute" style={{ top: BANNER.inset, right: BANNER.inset }}>
+        <div className="absolute" style={{ top: BANNER.top, right: BANNER.inset }}>
           <Stack summary={summary} notes={notes} />
         </div>
       </div>

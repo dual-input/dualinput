@@ -12,15 +12,16 @@
 // "let's cancel blur").
 // What each notification is, and which go elsewhere, are the content call of 2026-11-01 in the
 // stage notes. The words are drafts.
-import { useEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { CircleX, Hand, Info, ListChecks, TriangleAlert } from "lucide-react"
+import { CircleX, Hand, Info, ListChecks, TriangleAlert, X } from "lucide-react"
 
 import { ThemeContext, UI, UIContext, useUI } from "@/bench/ui"
 import { themeVars, type Theme } from "@/bench/theme"
 import { FIGURE_COLORS } from "./figure-portrait"
 import { Head } from "./figure-head"
 import { COUNTDOWN, CountdownRing, ReadyButton, StripHead, type HeadState, type Pilot } from "./home"
+import { PART_TROUBLE } from "./shell"
 
 // The banner's box on a 1920 by 1080 screen, in pixels: one card wide, 16px in from the screen's
 // right edge, its top 210px down, the height of three notifications with a line of detail each,
@@ -48,61 +49,131 @@ const hexOf = (hue: string) => FIGURE_COLORS.find((c) => c.name === hue)!.hex
 // that ends by itself, catching up, leads with a spinner in a neutral color, as the take-control
 // strip's line does; the rest lead with their level's icon, as the header's rows do.
 type Level = "info" | "warning" | "trouble"
-type Note = { level: Level; title: string; detail?: string; list?: string[]; who?: Pilot; out?: boolean; busy?: boolean }
+type Note = { level: Level; title: string; detail?: string; list?: string[]; who?: Pilot; out?: boolean; busy?: boolean; held?: boolean }
 const LEVEL_ICON: Record<Level, React.ReactNode> = {
   info: <Info className="size-4 text-info" />,
   warning: <TriangleAlert className="size-4 text-warning" />,
   trouble: <CircleX className="size-4 text-destructive" />,
 }
 
-// Each notification on the banner, with when it shows. A held one stays while its cause lasts; the
-// rest stay 6s, longer while the pointer rests on one. A notification's title has no period, and its
+// Each notification on the banner, with when it shows. A held one stays while its cause lasts, or
+// until the pilot dismisses it; the rest stay 6s, longer while the pointer rests on one. A notification's title has no period, and its
 // detail is sentences, as the header's rows are. The names, the key, and the controls are examples.
 export const NOTES = {
   "control-you": { when: "Control passes to you", note: { level: "info", who: YOU, title: "You have control" } },
   "control-them": { when: "Control passes to another pilot", note: { level: "info", who: JAMES, title: "James has control" } },
   "control-left": { when: "Control passes to you as the pilot flying leaves the flight", note: { level: "info", who: YOU, title: "You have control", detail: "James left the flight." } },
   "refused-catch-up": { when: "Take control refused while you catch up", note: { level: "warning", title: "Couldn't take control", detail: "You're catching up with James." } },
-  "lost-pf": { when: "No link to the pilot flying, held", note: { level: "warning", title: "Reconnecting to James", detail: "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect." } },
+  "lost-pf": { when: "No link to the pilot flying, held", note: { level: "warning", held: true, title: "Reconnecting to James", detail: "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect." } },
   "taken-while-away": { when: "Back after another pilot took control while your link was lost", note: { level: "warning", title: "Adam took control while you were disconnected", detail: "What you changed in that time was undone, and your pages and FMS entries may differ from Adam's." } },
-  "catching-up": { when: "Catching up, after joining late or after a short outage, held", note: { level: "info", busy: true, title: "Catching up with James", detail: "Anything you move in the cockpit now will be reset." } },
+  "catching-up": { when: "Catching up, after joining late or after a short outage, held", note: { level: "info", held: true, busy: true, title: "Catching up with James", detail: "Anything you move in the cockpit now will be reset." } },
   "caught-up": { when: "Caught up after joining late", note: { level: "info", title: "Caught up with James", detail: "Pages and FMS entries may still differ from James's." } },
   "caught-up-outage": { when: "Caught up after a short outage", note: { level: "info", title: "Caught up with James" } },
-  pause: { when: "The pilot flying in the pause menu, held, on the others' banners", note: { level: "info", who: JAMES, title: "James has paused" } },
+  pause: { when: "The pilot flying in the pause menu, held, on the others' banners", note: { level: "info", held: true, who: JAMES, title: "James has paused" } },
   left: { when: "A crewmate goes to the menu or another flight", note: { level: "info", who: ADAM, out: true, title: "Adam left the flight", detail: "They're still in the session." } },
   closed: { when: "A crewmate closes their sim", note: { level: "info", who: ADAM, out: true, title: "Adam closed their sim", detail: "They're still in the session." } },
   crashed: { when: "A crewmate's sim crashes", note: { level: "warning", who: ADAM, out: true, title: "Adam's sim crashed", detail: "They're still in the session." } },
   "left-session": { when: "A crewmate leaves the session", note: { level: "info", who: ADAM, out: true, title: "Adam left the session" } },
   back: { when: "A crewmate is back in the flight", note: { level: "info", who: ADAM, title: "Adam is back in the flight" } },
-  "service-reconnecting": { when: "The service's link lost, held", note: { level: "trouble", title: "Reconnecting to the Dual Input service", detail: "Nothing syncs until it's back." } },
-  "service-down": { when: "The service not running, held", note: { level: "trouble", title: "Dual Input service isn't running", detail: "Nothing syncs until it's back. Open it from the Start menu." } },
+  "service-reconnecting": { when: "The service's link lost, held", note: { level: "trouble", held: true, title: "Reconnecting to the Dual Input service", detail: "Nothing syncs until it's back." } },
+  "service-down": { when: "The service not running, held", note: { level: "trouble", held: true, title: "Dual Input service isn't running", detail: "Nothing syncs until it's back. Open it from the Start menu." } },
   "sync-one": { when: "A control that never matched, once per control for each load", note: { level: "warning", title: "Couldn't sync Beacon", detail: "Yours may differ from James's." } },
   "sync-several": { when: "Several at one load, as one notification", note: { level: "warning", title: "Couldn't sync 3 controls", detail: "Yours may differ from James's:", list: ["Beacon", "Taxi light", "Fuel pump 2"] } },
-  bridge: { when: "The panel bridge didn't load, held", note: { level: "trouble", title: "Cockpit screens aren't syncing", detail: "Dual Input couldn't load into the cockpit's panels. Another add-on that replaces VCockpit.js is the likeliest cause." } },
-  "module-stopped": { when: "Our module stopped, held", note: { level: "trouble", title: "Dual Input's WASM module stopped", detail: "Restart the sim to fly together again." } },
-  "module-missing": { when: "Our module's file missing from a package that loaded, held", note: { level: "trouble", title: "Dual Input's WASM module is missing", detail: "Reinstall Dual Input with the sim closed to fly together again." } },
-  helper: { when: "The Windows helper down, held", note: { level: "trouble", title: "Dual Input's Windows helper is down", detail: "Keybinds, audio, and your figure's pointing won't work until it's back." } },
-  want: { when: "A feature's want the helper can't carry out, held", note: { level: "warning", title: "Your take-control key isn't working", detail: "Windows didn't let Dual Input listen for F9." } },
-  seat: { when: "This pilot's camera in another figure's seat, held", note: { level: "info", who: JAMES, title: "This seat is taken" } },
+  bridge: { when: "The panel bridge didn't load, held", note: { level: "trouble", held: true, ...PART_TROUBLE.bridge } },
+  "module-stopped": { when: "Our module stopped, held", note: { level: "trouble", held: true, ...PART_TROUBLE["module-stopped"] } },
+  "module-missing": { when: "Our module's file missing from a package that loaded, held", note: { level: "trouble", held: true, ...PART_TROUBLE["module-missing"] } },
+  helper: { when: "The Windows helper down, held", note: { level: "trouble", held: true, ...PART_TROUBLE.helper } },
+  want: { when: "A feature's want the helper can't carry out, held", note: { level: "warning", held: true, ...PART_TROUBLE.want } },
+  seat: { when: "This pilot's camera in another figure's seat, held", note: { level: "info", held: true, who: JAMES, title: "This seat is taken" } },
 } satisfies Record<string, { when: string; note: Note }>
 export type NoteKey = keyof typeof NOTES
 
-// A card's fill and edge, which every card on the banner shares. The kit's card draws its edge as an
-// outer ring; this one's is inset, so it lies over the card's own fill rather than over the cockpit.
-const CARD = "w-full rounded-4xl bg-card text-card-foreground inset-ring inset-ring-foreground/10"
+// Every card's edge is an inset ring, where the kit's card draws an outer one, so it lies over the
+// card's own fill rather than over the cockpit (LAYER).
 
 // A click anywhere on a card opens Dual Input's app on the EFB, on Home; where each notification
 // lands waits for the frames (user, 2026-11-01).
 const openEfb = () => toast("Opening Dual Input on the EFB")
 
-function NoteCard({ note }: { note: Note }) {
-  const { Spinner } = useUI()
-  // A card's padding is 16px on every side, as the kit's cards' is, so a head sits as far from the
-  // card's top as from its side (user, 2026-11-01: 12px above and below and 16px at the sides
-  // "aren't symmetric"). A head is 28px, taller than the title's line, so a card led by one centers
-  // on it; an icon stands in a box the title's line tall, so it centers on the title whatever
-  // follows it. A card nudges down 1px while it's pressed, as the kit's buttons do, through
-  // `transform`, since Coherent GT has no `translate` property (user, 2026-11-01).
+// A card's padding is 12px on every side, so a head sits as far from the card's top as from its side
+// (user, 2026-11-01: 12px above and below and 16px at the sides "aren't symmetric", then "try
+// 12px instead of 16"). A card nudges down 1px while it's pressed, as the kit's buttons do,
+// through `transform`, since Coherent GT has no `translate` property, and from mouse events, since
+// it has no PointerEvent (user, 2026-11-01). Its click is a layer under its content, which lets
+// presses through to it, so hovering its × lights the × and not the card (user, 2026-11-01), with
+// no `:has()`, which Coherent GT isn't measured to have; the layer carries the card's edge, since
+// its hover fill would cover an edge drawn under it.
+function useCardPress() {
+  const [pressed, setPressed] = useState(false)
+  return {
+    pressed,
+    handlers: {
+      onMouseDown: (e: React.MouseEvent) => e.button === 0 && setPressed(true),
+      onMouseUp: () => setPressed(false),
+      onMouseLeave: () => setPressed(false),
+    },
+  }
+}
+const LAYER = "absolute inset-0 rounded-[inherit] inset-ring inset-ring-foreground/10 outline-none hover:bg-muted focus-visible:inset-ring-ring"
+
+// A notification goes when its × is pressed, or when it's dragged toward the screen's edge, as a
+// desktop's notifications are (user, 2026-11-01: "how does one dismiss notifications (even held
+// ones, since they can be annoying if the user can't fix them in the moment)?"). The × is always
+// shown, in the muted color, since one that shows only on hover is hard to find, and it's a 28px
+// target, as Figures' swatches are, for a VR pointer, centered on the title's line. A press
+// becomes a drag only past 6px, so a pointer that wobbles still clicks; the card follows it to the
+// right only, fading as it goes, and let go past a third of its width, or flung faster than
+// 0.5px/ms, it slides away, or else springs back. A held notification that's dismissed stays
+// hidden until its cause ends, and shows again if it comes back.
+const DRAG = { start: 6, away: 1 / 3, fling: 0.5, ms: 200 }
+function useDragAway(onAway?: () => void) {
+  const [dx, setDx] = useState(0)
+  const [dragging, setDragging] = useState(false)
+  const moved = useRef(false)
+  const start = (e: React.MouseEvent<HTMLElement>) => {
+    if (e.button !== 0 || !onAway) return
+    moved.current = false
+    const el = e.currentTarget
+    // The canvas zooms its frames, so a screen pixel is this many of the card's.
+    const scale = el.getBoundingClientRect().width / el.offsetWidth
+    const width = el.offsetWidth
+    const x0 = e.clientX
+    let last = { x: x0, t: performance.now() }
+    let speed = 0
+    let d = 0
+    const move = (m: MouseEvent) => {
+      d = Math.max(0, (m.clientX - x0) / scale)
+      if (!moved.current && d < DRAG.start) return
+      moved.current = true
+      const now = performance.now()
+      speed = (m.clientX - last.x) / scale / Math.max(1, now - last.t)
+      last = { x: m.clientX, t: now }
+      setDragging(true)
+      setDx(d)
+    }
+    const up = () => {
+      window.removeEventListener("mousemove", move)
+      window.removeEventListener("mouseup", up)
+      setDragging(false)
+      if (!moved.current) return
+      if (d > width * DRAG.away || speed > DRAG.fling) {
+        setDx(width + BANNER.inset)
+        window.setTimeout(onAway, DRAG.ms)
+      } else setDx(0)
+    }
+    window.addEventListener("mousemove", move)
+    window.addEventListener("mouseup", up)
+  }
+  return { dx, dragging, start, moved }
+}
+
+function NoteCard({ note, onDismiss }: { note: Note; onDismiss?: () => void }) {
+  const { Button, Spinner } = useUI()
+  const press = useCardPress()
+  const drag = useDragAway(onDismiss)
+  const card = useRef<HTMLDivElement>(null)
+  // A head is 28px, taller than the title's line, so a card led by one centers on it; an icon
+  // stands in a box the title's line tall, so it centers on the title whatever follows it.
   const lead = note.who ? (
     <span className="flex shrink-0">
       <Head hex={hexOf(note.who.hue)} slumped={note.out} />
@@ -110,21 +181,50 @@ function NoteCard({ note }: { note: Note }) {
   ) : (
     <span className="flex h-5 shrink-0 items-center">{note.busy ? <Spinner className="size-4 text-muted-foreground" /> : LEVEL_ICON[note.level]}</span>
   )
+  // The title's line is centered 22px down a card, or 26px beside a head with no detail.
+  const xTop = note.who && !note.detail && !note.list ? 12 : 8
+  const width = card.current?.offsetWidth ?? BANNER.width
   return (
-    <button type="button" onClick={openEfb} className={CARD + " flex gap-3 p-4 text-left outline-none hover:bg-muted focus-visible:inset-ring-ring active:[transform:translateY(1px)] " + (note.who ? "items-center" : "items-start")}>
-      {lead}
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-sm font-medium">{note.title}</span>
-        {note.detail && <span className="text-xs text-muted-foreground">{note.detail}</span>}
-        {note.list && (
-          <ul className="mt-1 flex flex-col gap-0.5 text-xs">
-            {note.list.map((name) => (
-              <li key={name}>{name}</li>
-            ))}
-          </ul>
-        )}
-      </span>
-    </button>
+    <div
+      ref={card}
+      className="relative w-full rounded-4xl bg-card text-card-foreground"
+      style={{
+        transform: `translateX(${drag.dx}px)${press.pressed && !drag.moved.current ? " translateY(1px)" : ""}`,
+        opacity: Math.max(0, 1 - drag.dx / width),
+        transition: drag.dragging ? "none" : `transform ${DRAG.ms}ms ease-out, opacity ${DRAG.ms}ms ease-out`,
+      }}
+    >
+      <button
+        type="button"
+        aria-label="Open Dual Input on the EFB"
+        onClick={() => !drag.moved.current && openEfb()}
+        {...press.handlers}
+        onMouseDown={(e) => {
+          press.handlers.onMouseDown(e)
+          drag.start(e)
+        }}
+        className={LAYER}
+      />
+      <div className={"pointer-events-none relative flex gap-3 p-3 " + (note.who ? "items-center" : "items-start")}>
+        {lead}
+        <span className={"flex min-w-0 flex-1 flex-col gap-0.5 " + (onDismiss ? "pr-7" : "")}>
+          <span className="text-sm font-medium">{note.title}</span>
+          {note.detail && <span className="text-xs text-muted-foreground">{note.detail}</span>}
+          {note.list && (
+            <ul className="mt-1 flex flex-col gap-0.5 text-xs">
+              {note.list.map((name) => (
+                <li key={name}>{name}</li>
+              ))}
+            </ul>
+          )}
+        </span>
+      </div>
+      {onDismiss && (
+        <Button variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={onDismiss} className="absolute right-2 text-muted-foreground" style={{ top: xTop }}>
+          <X />
+        </Button>
+      )}
+    </div>
   )
 }
 
@@ -140,9 +240,9 @@ function NoteCard({ note }: { note: Note }) {
 // content, which lets presses through to it, so hovering Ready lights Ready and not the card (user,
 // 2026-11-01), with no `:has()`, which Coherent GT isn't measured to have; the layer carries the
 // card's edge, since its hover fill would cover an edge drawn by the card under it. Pressing the
-// layer nudges the whole card down 1px, as a notification's press does, from mouse events, since
-// Coherent GT has no PointerEvent. The countdown here holds at its last second, where the flight
-// would start.
+// layer nudges the whole card down 1px, as a notification's press does. It has no ×: it's the
+// banner's whole job during preflight, it leaves when the flight starts, and the toolbar's button
+// closes the banner. The countdown here holds at its last second, where the flight would start.
 export type Summary = { pf: boolean; crew: { pilot: Pilot; state: HeadState }[]; settled?: boolean; ready?: boolean; errors?: number; warnings?: number }
 function useCountdown(on: boolean) {
   const [left, setLeft] = useState<number | null>(null)
@@ -165,23 +265,15 @@ function Line({ icon, className, children }: { icon: React.ReactNode; className:
 const counted = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`
 function PreflightCard({ summary }: { summary: Summary }) {
   const [ready, setReady] = useState(!!summary.ready)
-  const [pressed, setPressed] = useState(false)
+  const press = useCardPress()
   const left = useCountdown(ready && summary.crew.every((c) => c.state === "ready"))
   const heads = [{ pilot: YOU, state: (ready ? "ready" : "waiting") as HeadState }, ...summary.crew]
   const errors = summary.errors ?? 0
   const warnings = summary.warnings ?? 0
   const differences = [errors && counted(errors, "error"), warnings && counted(warnings, "warning")].filter(Boolean).join(" and ")
   return (
-    <div className="relative flex w-full flex-col gap-3 rounded-4xl bg-card p-4 text-card-foreground" style={{ transform: pressed ? "translateY(1px)" : undefined }}>
-      <button
-        type="button"
-        aria-label="Open Dual Input on the EFB"
-        onClick={openEfb}
-        onMouseDown={(e) => e.button === 0 && setPressed(true)}
-        onMouseUp={() => setPressed(false)}
-        onMouseLeave={() => setPressed(false)}
-        className="absolute inset-0 rounded-[inherit] inset-ring inset-ring-foreground/10 outline-none hover:bg-muted focus-visible:inset-ring-ring"
-      />
+    <div className="relative flex w-full flex-col gap-3 rounded-4xl bg-card p-3 text-card-foreground" style={{ transform: press.pressed ? "translateY(1px)" : undefined }}>
+      <button type="button" aria-label="Open Dual Input on the EFB" onClick={openEfb} {...press.handlers} className={LAYER} />
       <div className="pointer-events-none relative flex items-center justify-between gap-3">
         <span className="flex items-center gap-1.5">
           {heads.map(({ pilot, state }) => (
@@ -213,15 +305,73 @@ function PreflightCard({ summary }: { summary: Summary }) {
 }
 
 // The banner's stack: the preflight summary first while preflight runs, then the notifications,
-// newest first, 8px apart. With more than fit the box, the oldest of those that stay 6s leaves
-// early, and the held ones stay.
-function Stack({ summary, notes }: { summary?: Summary; notes: NoteKey[] }) {
+// newest first, 8px apart, in the box's height. When they don't fit, the oldest of those that stay
+// 6s leave early; if the held ones still don't fit, the ones that keep a place are trouble before
+// warnings before information, newest first among each, and the rest wait behind a line at the
+// box's foot that counts them and dismisses every notification at once, so dismissing all is there
+// only when it's needed (user, 2026-11-01: "thoughts on a dismiss/clean all button at the
+// bottom?"); as a card leaves, the next one waiting takes its place. The heights are measured from
+// a copy of every card laid out unseen, since which fit depends on how their words wrap.
+const LEVEL_RANK: Record<Level, number> = { trouble: 0, warning: 1, info: 2 }
+const MORE_LINE = 36
+function place(keys: NoteKey[], height: (k: NoteKey) => number, room: number): { shown: NoteKey[]; waiting: number } {
+  const total = (ks: NoteKey[]) => ks.reduce((sum, k) => sum + height(k), 0) + BANNER.gap * Math.max(0, ks.length - 1)
+  const held = (k: NoteKey) => !!(NOTES[k].note as Note).held
+  let shown = [...keys]
+  while (total(shown) > room) {
+    const oldest = [...shown].reverse().find((k) => !held(k))
+    if (!oldest) break
+    shown = shown.filter((k) => k !== oldest)
+  }
+  if (total(shown) <= room) return { shown, waiting: 0 }
+  const ranked = [...shown].sort((a, b) => LEVEL_RANK[NOTES[a].note.level as Level] - LEVEL_RANK[NOTES[b].note.level as Level] || keys.indexOf(a) - keys.indexOf(b))
+  const kept: NoteKey[] = []
+  for (const k of ranked) if (total([...kept, k]) <= room - MORE_LINE - BANNER.gap) kept.push(k)
+  return { shown: keys.filter((k) => kept.includes(k)), waiting: shown.length - kept.length }
+}
+function MoreLine({ count, onDismissAll }: { count: number; onDismissAll: () => void }) {
+  const { Button } = useUI()
   return (
-    <div className="flex flex-col" style={{ width: BANNER.width, gap: BANNER.gap }}>
-      {summary && <PreflightCard summary={summary} />}
-      {notes.map((k) => (
-        <NoteCard key={k} note={NOTES[k].note} />
+    <div className="flex w-full items-center justify-between rounded-4xl bg-card pr-1.5 pl-3 text-xs text-muted-foreground inset-ring inset-ring-foreground/10" style={{ height: MORE_LINE }}>
+      {count} more
+      <Button variant="ghost" size="xs" onClick={onDismissAll}>
+        Dismiss all
+      </Button>
+    </div>
+  )
+}
+function Stack({ summary, notes }: { summary?: Summary; notes: NoteKey[] }) {
+  const [gone, setGone] = useState<NoteKey[]>([])
+  const live = notes.filter((k) => !gone.includes(k))
+  const dismiss = (k: NoteKey) => setGone((g) => [...g, k])
+  const measure = useRef<HTMLDivElement>(null)
+  const summaryBox = useRef<HTMLDivElement>(null)
+  const [heights, setHeights] = useState<Record<string, number>>({})
+  useLayoutEffect(() => {
+    const next: Record<string, number> = { summary: summaryBox.current?.offsetHeight ?? 0 }
+    measure.current?.querySelectorAll<HTMLElement>("[data-measure]").forEach((el) => (next[el.dataset.measure!] = el.offsetHeight))
+    if (Object.keys(next).some((k) => next[k] !== heights[k])) setHeights(next)
+  })
+  const room = BANNER.height - (summary ? (heights.summary ?? 0) + BANNER.gap : 0)
+  const { shown, waiting } = place(live, (k) => heights[k] ?? 0, room)
+  return (
+    <div className="relative flex flex-col" style={{ width: BANNER.width, gap: BANNER.gap }}>
+      {summary && (
+        <div ref={summaryBox}>
+          <PreflightCard summary={summary} />
+        </div>
+      )}
+      {shown.map((k) => (
+        <NoteCard key={k} note={NOTES[k].note} onDismiss={() => dismiss(k)} />
       ))}
+      {waiting > 0 && <MoreLine count={waiting} onDismissAll={() => setGone(notes)} />}
+      <div ref={measure} aria-hidden className="pointer-events-none invisible absolute top-0 left-0 flex flex-col" style={{ width: BANNER.width }}>
+        {notes.map((k) => (
+          <div key={k} data-measure={k}>
+            <NoteCard note={NOTES[k].note} onDismiss={() => {}} />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -242,10 +392,12 @@ function Themed({ theme, children }: { theme: Theme; children: React.ReactNode }
 
 // The banner's top at the screen's right edge, as wide as the EFB's frames, with the cards at their
 // place.
-export function BannerFrame({ theme, summary, notes = [] }: { theme: Theme; summary?: Summary; notes?: NoteKey[] }) {
+// With box, the box's outline shows how much room the stack has.
+export function BannerFrame({ theme, summary, notes = [], box }: { theme: Theme; summary?: Summary; notes?: NoteKey[]; box?: boolean }) {
   return (
     <Themed theme={theme}>
-      <div className="flex justify-end overflow-hidden rounded-xl" style={{ background: SKY, padding: `${BANNER.inset}px ${BANNER.inset}px 48px` }}>
+      <div className="relative flex justify-end overflow-hidden rounded-xl" style={{ background: SKY, padding: `${BANNER.inset}px ${BANNER.inset}px 48px`, minHeight: box ? BANNER.height + 64 : undefined }}>
+        {box && <div className="absolute border border-dashed border-sky-300/80" style={{ top: BANNER.inset, right: BANNER.inset, width: BANNER.width, height: BANNER.height }} />}
         <Stack summary={summary} notes={notes} />
       </div>
     </Themed>
@@ -254,6 +406,7 @@ export function BannerFrame({ theme, summary, notes = [] }: { theme: Theme; summ
 
 // Every notification at once, each under when it shows, in the banner's column.
 export function EveryNotificationFrame({ theme }: { theme: Theme }) {
+  const [gone, setGone] = useState<NoteKey[]>([])
   return (
     <Themed theme={theme}>
       <div className="flex justify-end overflow-hidden rounded-xl" style={{ background: SKY, padding: `${BANNER.inset}px ${BANNER.inset}px 48px` }}>
@@ -261,7 +414,7 @@ export function EveryNotificationFrame({ theme }: { theme: Theme }) {
           {(Object.keys(NOTES) as NoteKey[]).map((k) => (
             <div key={k} className="flex flex-col gap-1.5">
               <span className="text-xs text-white/85">{NOTES[k].when}</span>
-              <NoteCard note={NOTES[k].note} />
+              {gone.includes(k) ? <span className="h-5 text-xs text-white/60">Dismissed</span> : <NoteCard note={NOTES[k].note} onDismiss={() => setGone((g) => [...g, k])} />}
             </div>
           ))}
         </div>

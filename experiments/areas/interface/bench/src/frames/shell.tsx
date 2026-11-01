@@ -86,7 +86,24 @@ export type HeaderStatus = {
   offline?: boolean
   servers?: "reachable" | "unreachable"
   firewall?: "allows" | "blocks"
+  bridge?: boolean
+  module?: "stopped" | "missing"
+  helper?: boolean
+  want?: boolean
   update?: string
+}
+
+// Trouble in Dual Input's own parts, which a session raises: the panel bridge not loading, the WASM
+// module stopped or missing, the Windows helper down, and a request the helper can't carry out.
+// Each is a held notification on the banner, and a row here too, so a pilot who dismisses the
+// card still sees it while it lasts (user, 2026-11-01). Both places take these words, written once
+// here; the key and its name are examples.
+export const PART_TROUBLE = {
+  bridge: { title: "Cockpit screens aren't syncing", detail: "Dual Input couldn't load into the cockpit's panels. Another add-on that replaces VCockpit.js is the likeliest cause." },
+  "module-stopped": { title: "Dual Input's WASM module stopped", detail: "Restart the sim to fly together again." },
+  "module-missing": { title: "Dual Input's WASM module is missing", detail: "Reinstall Dual Input with the sim closed to fly together again." },
+  helper: { title: "Dual Input's Windows helper is down", detail: "Keybinds, audio, and your figure's pointing won't work until it's back." },
+  want: { title: "Your take-control key isn't working", detail: "Windows didn't let Dual Input listen for F9." },
 }
 
 type Tone = "bad" | "warn" | "news"
@@ -141,6 +158,10 @@ function issuesOf(status: HeaderStatus, Button: ReturnType<typeof useUI>["Button
         </Button>
       ),
     })
+  if (status.bridge) issues.push({ tone: "bad", word: "Screens", ...PART_TROUBLE.bridge })
+  if (status.module) issues.push({ tone: "bad", word: "WASM", ...PART_TROUBLE[status.module === "stopped" ? "module-stopped" : "module-missing"] })
+  if (status.helper) issues.push({ tone: "bad", word: "Helper", ...PART_TROUBLE.helper })
+  if (status.want) issues.push({ tone: "warn", word: "Keybind", ...PART_TROUBLE.want })
   if (status.update && !inSession)
     issues.push({
       tone: "news",
@@ -349,6 +370,11 @@ const EVERY_ISSUE: { when: string; status: HeaderStatus; inSession?: boolean }[]
   { when: "In a session: PC offline", status: { offline: true }, inSession: true },
   { when: "In a session: our servers down", status: { servers: "unreachable" }, inSession: true },
   { when: "In a session: firewall blocking", status: { firewall: "blocks" }, inSession: true },
+  { when: "In a session: the panel bridge didn't load", status: { bridge: true }, inSession: true },
+  { when: "In a session: the WASM module stopped", status: { module: "stopped" }, inSession: true },
+  { when: "In a session: the WASM module missing", status: { module: "missing" }, inSession: true },
+  { when: "In a session: the Windows helper down", status: { helper: true }, inSession: true },
+  { when: "In a session: a take-control key Windows refused", status: { want: true }, inSession: true },
 ]
 function EveryIssueSheet() {
   const { Button } = useUI()

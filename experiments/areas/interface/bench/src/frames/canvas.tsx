@@ -196,6 +196,7 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Header, needs attention, at rest", draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" header={{ servers: "unreachable", firewall: "blocks", update: "1.0.3" }} /> },
       { name: "Header in a flight, needs attention", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-pf" header={{ servers: "unreachable", firewall: "blocks", update: "1.0.3" }} headerOpen /> },
       { name: "Header in a flight, offline", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-pf" header={{ offline: true, firewall: "blocks" }} headerOpen /> },
+      { name: "Header in a flight, Dual Input's own trouble", replay: true, draw: (t) => <HomeLaterFrame theme={t} aircraft="supported" session="flying-pf" header={{ bridge: true, helper: true }} headerOpen /> },
       { name: "Header, every issue", tall: true, draw: (t) => <EveryIssueFrame theme={t} /> },
       { name: "Service, reconnecting", replay: true, draw: (t) => <ReconnectingFrame theme={t} /> },
       { name: "Service, not running", draw: (t) => <AppFrame theme={t} core="not-running" fixed /> },
@@ -212,16 +213,17 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
   },
   // The banner over the cockpit, outside the EFB app: the whole screen, to judge its place and its
   // box; every notification, each under when it shows; a stack of two and of three; several sync
-  // failures as one; and the preflight summary, for the pilot flying, for the others, before
+  // failures as one; more than the box holds; and the preflight summary, for the pilot flying, for the others, before
   // Ready opens, counting down, and with a crewmate out of the flight under it.
   {
     name: "Banner",
     frames: [
       { name: "On screen", width: SCREEN.width, draw: (t) => <BannerOnScreenFrame theme={t} summary={SUMMARIES.out} notes={["crashed", "seat", "sync-one"]} /> },
-      { name: "Every notification", draw: (t) => <EveryNotificationFrame theme={t} /> },
+      { name: "Every notification", replay: true, draw: (t) => <EveryNotificationFrame theme={t} /> },
       { name: "Two at once", draw: (t) => <BannerFrame theme={t} notes={["control-you", "sync-one"]} /> },
-      { name: "Three at once", draw: (t) => <BannerFrame theme={t} notes={["crashed", "pause", "sync-one"]} /> },
+      { name: "Three at once", replay: true, draw: (t) => <BannerFrame theme={t} notes={["crashed", "pause", "sync-one"]} /> },
       { name: "Sync failures at one load", draw: (t) => <BannerFrame theme={t} notes={["sync-several"]} /> },
+      { name: "More than fit", replay: true, draw: (t) => <BannerFrame theme={t} box notes={["sync-one", "want", "bridge", "pause", "helper", "seat"]} /> },
       { name: "Preflight, pilot flying", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.pf} /> },
       { name: "Preflight, the others", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.others} /> },
       { name: "Preflight, before Ready opens", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.settling} /> },

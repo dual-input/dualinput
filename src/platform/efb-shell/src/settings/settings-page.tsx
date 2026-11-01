@@ -12,14 +12,13 @@ import type { DeviceInfo } from "../../../../engines/messages/ts/core_helper/Dev
 import type { HelperSlice } from "../../../../engines/messages/ts/core_helper/HelperSlice.ts"
 import type { Update } from "../../../../engines/messages/ts/desktop/Update.ts"
 import type { RecordingSlice } from "../../../../engines/messages/ts/recording/RecordingSlice.ts"
+import type { RecordingStopped } from "../../../../engines/messages/ts/recording/RecordingStopped.ts"
 import type { Run } from "../../../../engines/messages/ts/recording/Run.ts"
 import type { SessionSlice } from "../../../../engines/messages/ts/session/SessionSlice.ts"
 import { useDesktopState } from "../desktop-link.ts"
 import { useCoreSlice, useShell } from "../part.ts"
 import type { Part } from "../part.ts"
 import { OUTPUT, useSetting, writeSetting } from "./setting.ts"
-import { WANTED } from "../wanted.ts"
-import type { Wanted } from "../wanted.ts"
 
 function Section({ title, aside, foot, at, children }: { title: string; aside?: ReactNode; foot?: ReactNode; at?: Ref<HTMLElement>; children: ReactNode }) {
   return (
@@ -133,13 +132,13 @@ const megabytes = (bytes: number) => Math.round(bytes / 1_000_000)
 const RUNS_WINDOW = 36 * 4.5
 
 /** Why a run stopped, which only this page tells the pilot. */
-const STOPPED_WORDS = { "no-space": "Recording stopped: your drive has under 1 GB free", "failed-write": "Recording stopped: Dual Input couldn't write to your drive" }
+const STOPPED_WORDS: Record<RecordingStopped, string> = { "no-space": "Recording stopped: your drive has under 1 GB free", "failed-write": "Recording stopped: Dual Input couldn't write to your drive" }
 
 /** This PC's recordings, newest first. The run in progress can't be deleted, but its folder opens, for a problem the pilot is having now. Open folder's toast says where it opened, since Explorer opens behind the sim, where a pilot in VR won't see it. */
 function Recordings() {
   const { link } = useShell()
   const recording = useCoreSlice<RecordingSlice>("recording")
-  const stopped = useCoreSlice<Wanted>(WANTED)?.recordingStopped
+  const stopped = recording?.stopped
   const stoppedLine = useReveal(!!stopped)
   const lastStopped = useRef(stopped)
   if (stopped) lastStopped.current = stopped
@@ -168,7 +167,7 @@ function Recordings() {
               <li key={run.name} className="flex min-h-8 items-center px-5 py-0.5">
                 <span className="flex flex-1 items-center text-sm">
                   {startOf(run.name)}
-                  {run.in_progress && (
+                  {run.in_progress && !stopped && (
                     <span className="ml-2 flex items-center text-xs text-muted-foreground">
                       <span className="mr-1.5 size-1.5 rounded-full bg-success" />
                       Recording
@@ -177,7 +176,7 @@ function Recordings() {
                 </span>
                 <span className="ml-3 text-sm tabular-nums text-muted-foreground">{megabytes(run.size)} MB</span>
                 <span className="ml-3 flex items-center">
-                  <Button size="icon-sm" variant="ghost" aria-label="Open folder" onClick={() => toast("Opened in File Explorer, on your desktop")}>
+                  <Button size="icon-sm" variant="ghost" aria-label="Open folder" onClick={() => void link.client.command("recording.open-folder", { name: run.name }).then(() => toast("Opened in File Explorer, on your desktop"), () => toast("Couldn't open that folder"))}>
                     <FolderOpen />
                   </Button>
                   {run.in_progress ? (

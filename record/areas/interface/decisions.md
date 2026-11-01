@@ -602,9 +602,9 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - A pilot with the EFB closed doesn't see the app's own screen, so anything that stops every feature, such as the service going, has to reach the banner.
   - A crewmate who leaves the flight, closes their sim, or crashes is still in the session, so their card says so.
   - The pause menu's line stays because it explains a frozen aircraft or says the PF is away from the controls: anyone can open that menu, since Dual Input syncs only active pause, and whether it stops a flying aircraft is unmeasured (user, 2026-11-01).
+- **The panel bridge's check** waits for a panel only under a profile with a panel module that names something it serves, so an aircraft with no cockpit panels, such as a balloon, raises nothing.
 - **Leaves out:**
   - A list of sync failures on the session card, which the user set aside until a need shows (user, 2026-11-01), so a click on one lands on the Session tab with nothing there to list it.
-  - The panel bridge's check, no cockpit panel's `hello` within 10s of the profile loading, which warns falsely in an aircraft with no cockpit panels, such as a balloon, so it needs to know the aircraft has panels.
 
 ## A notification's click opens the EFB app where it's explained or acted on
 
@@ -615,6 +615,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - Wherever the app was, for the service gone, since the app's own screen covers every tab.
 
   Settled by the user on 2026-11-01.
+- **A click carries its landing,** rather than the core looking it up by the ID, since a notification can clear while the click is on its way, and the preflight summary, whose click lands on the Session tab too, is no notification.
+  The order that reaches the EFB app is `{ "t": "open-efb", "landing": "header", "id": "sim-service.stopped" }`, whose `id` picks the header's row.
 - **With the service gone,** no core can carry the click, so the banner's page raises `L:DUALINPUT_BANNER_OPEN_EFB`, and the EFB app reads it every 200ms only while its own link is down, the one way we've measured from a panel to the EFB's document ([log](log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
 
 ## The banner is a box of opaque cards at the screen's top right
@@ -688,7 +690,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 ## The profile format gains a name, a maturity, and an entry's description
 
-- **Decided:** level 1 of the profile format gains `name`, the aircraft's name as the EFB app's list shows it, and `maturity`, `stable` or `experimental`, which the profile's authors set, and [stage 11b](../build/plan.md#11b-the-apps) adds them.
+- **Decided:** level 1 of the profile format gains `maker` and `name`, the aircraft's maker and model, apart, as the EFB app's list shows them, and `maturity`, `stable` or `experimental`, which the profile's authors set, and [stage 11b](../build/plan.md#11b-the-apps) adds them.
   A state entry gains an optional `description`, which the checklist shows under its name ([profile entries](../sync/01-profile-entries.md)).
   The `checklist:` block and the authors' notes come after v1, and the design has made room for both.
   Settled by the user on 2026-10-26 and 2026-10-30.

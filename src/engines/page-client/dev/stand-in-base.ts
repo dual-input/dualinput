@@ -78,7 +78,8 @@ export abstract class StandInBase {
 
   private receive(socket: Socket, text: string): void {
     const message = JSON.parse(text) as FromClient
-    const reply = (body: unknown) => socket.onmessage?.(JSON.stringify(body))
+    // A real socket never answers inside `send`, and the client registers a command's answer after sending it, so an answer given here at once would be lost.
+    const reply = (body: unknown) => void window.setTimeout(() => socket.onmessage?.(JSON.stringify(body)), 0)
     if (message.t === "alive") {
       // Each side sends something every 2s, and the page counts 8s of silence as a core that hung.
       reply({ t: "alive" })

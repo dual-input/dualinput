@@ -145,7 +145,7 @@ export const SCENES: Record<string, Slices> = {
     ],
     [DESKTOP]: { ...LOCAL, firewall: "blocks" },
   },
-  "Recording stopped": { wanted: { recordingStopped: "no-space" } },
+  "Recording stopped": { recording: { runs: RUNS, stopped: "no-space" } },
   "Output device missing": { settings: [...settings(true, true), { ...setting(OUTPUT, false), kind: { type: "device" }, value: { id: "old", name: "Studio Headphones" } }] },
   "Update ready": { [DESKTOP]: { ...LOCAL, update: { state: "ready", next: "1.0.3" } } },
   "No tray app": { [DESKTOP]: null },
@@ -186,7 +186,7 @@ export class StandInCore extends StandInBase {
     this.local = DESKTOP in scene ? (scene[DESKTOP] as DesktopState | null) : LOCAL
     this.tellDesktop()
     this.set({ settings: settings(true, true) })
-    window.setTimeout(() => this.set({ ...healthy, recording: { runs: RUNS }, "core-helper": OUTPUTS, notifications: [], core: CORE, wanted: {}, ...scene }), 0)
+    window.setTimeout(() => this.set({ ...healthy, recording: { runs: RUNS, stopped: null }, "core-helper": OUTPUTS, notifications: [], core: CORE, ...scene }), 0)
   }
 
   protected command(name: string, args: JsonValue): void {

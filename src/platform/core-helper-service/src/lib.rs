@@ -323,9 +323,7 @@ impl CoreHelper {
     }
 
     fn setting_changed(me: &mut CoreHelper, changed: &SettingChanged, cx: &mut Cx) {
-        if changed.key == OUTPUT {
-            me.changed(cx);
-        } else if me.bindings.iter().any(|b| b.setting == changed.key) {
+        if changed.key == OUTPUT || me.bindings.iter().any(|b| b.setting == changed.key) {
             me.changed(cx);
         }
     }

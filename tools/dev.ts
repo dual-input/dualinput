@@ -34,6 +34,7 @@ const OUT = path.join(ROOT, "target", "dev")
 /** Each page this can run: its entry, and the source files its classes come from, on top of the kit's. */
 const PAGES: Record<string, { entry: string; content: string[] }> = {
   kit: { entry: "src/packages/ui/dev/main.tsx", content: ["src/packages/ui/dev/**/*.tsx"] },
+  efb: { entry: "src/platform/efb-shell/dev/main.tsx", content: ["src/platform/efb-shell/src/**/*.{ts,tsx}", "src/platform/efb-shell/dev/**/*.{ts,tsx}"] },
 }
 
 // ---------------------------------------------------------------- what the page hears from here

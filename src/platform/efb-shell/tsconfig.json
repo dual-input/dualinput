@@ -17,5 +17,5 @@
     "noUncheckedIndexedAccess": true,
     "types": []
   },
-  "include": ["src"]
+  "include": ["src", "dev"]
 }

@@ -80,7 +80,7 @@ export function tailwindConfig(content: string[]) {
         colors: { ...Object.fromEntries(Object.keys(colors).map((name) => [name, colorVar(name)])), ...washes },
         // Luma draws each corner from a radius of 4px by a step of its own.
         borderRadius: { sm: "2.4px", md: "3.2px", lg: "4px", xl: "5.6px", "2xl": "7.2px", "3xl": "8.8px", "4xl": "10.4px" },
-        fontFamily: { sans: ["DualInput Geist", "sans-serif"], mono: ["DualInput Geist Mono", "monospace"] },
+        fontFamily: { sans: ["DualInput Geist", "sans-serif"], mono: ["DualInput Geist Mono", "monospace"], checklist: ["DualInput B612 Mono", "monospace"] },
         // A card's edge is one real pixel at any scale, from the length the kit's root sets
         // (src/lib/root.tsx), since a root's zoom would round a 1px ring below 1 down to nothing.
         ringWidth: { 1: "var(--hair)", 3: "3px" },
@@ -94,6 +94,25 @@ export function tailwindConfig(content: string[]) {
           "dualinput-fade-out": { from: { opacity: "1" }, to: { opacity: "0" } },
           "dualinput-rise-in": { from: { opacity: "0", transform: "translateY(8px)" }, to: { opacity: "1", transform: "translateY(0)" } },
           "dualinput-caret": { "0%, 50%": { opacity: "1" }, "51%, 100%": { opacity: "0" } },
+          "dualinput-ping": { "75%, 100%": { transform: "scale(2)", opacity: "0" } },
+          // A head growing out of its window and swelling past its edge before it rests.
+          "dualinput-head-pop": {
+            "0%": { transform: "scale(0)", "animation-timing-function": "cubic-bezier(0.2, 0.8, 0.4, 1)" },
+            "38%": { transform: "scale(1.25)", "animation-timing-function": "ease-in-out" },
+            "62%": { transform: "scale(0.9)", "animation-timing-function": "ease-in-out" },
+            "82%": { transform: "scale(1.05)", "animation-timing-function": "ease-in-out" },
+            "100%": { transform: "scale(1)" },
+          },
+          // A ring that spreads from a button pressed into a good state, in its text color, and fades.
+          "dualinput-ready-pulse": { from: { "box-shadow": "0 0 0 0 currentColor", opacity: "0.6" }, to: { "box-shadow": "0 0 0 8px currentColor", opacity: "0" } },
+          "dualinput-zoom-in": { from: { opacity: "0", transform: "scale(0.5)" }, to: { opacity: "1", transform: "scale(1)" } },
+          // What arrives as a card turns to its other side.
+          "dualinput-turn-in": { from: { opacity: "0", transform: "translateY(6px)" }, to: { opacity: "1", transform: "translateY(0)" } },
+          // The countdown's arc, whose path counts 100 long and is dashed 100 on and 100 off, so an offset of 100 leaves none of it showing.
+          "dualinput-drain": { from: { "stroke-dashoffset": "0" }, to: { "stroke-dashoffset": "100" } },
+          // A digit of a rolling count, as a counter's wheel turns: the old one up out of its window, the new one up in from below.
+          "dualinput-roll-in": { from: { opacity: "0", transform: "translateY(100%)" }, to: { opacity: "1", transform: "translateY(0)" } },
+          "dualinput-roll-out": { from: { opacity: "1", transform: "translateY(0)" }, to: { opacity: "0", transform: "translateY(-100%)" } },
         },
         animation: {
           spin: "dualinput-spin 1s linear infinite",
@@ -103,6 +122,11 @@ export function tailwindConfig(content: string[]) {
           "fade-out": "dualinput-fade-out 100ms ease-in forwards",
           "rise-in": "dualinput-rise-in 200ms ease-out",
           caret: "dualinput-caret 1s step-end infinite",
+          ping: "dualinput-ping 1s cubic-bezier(0, 0, 0.2, 1) infinite",
+          "roll-in": "dualinput-roll-in 250ms ease-out",
+          "roll-out": "dualinput-roll-out 250ms ease-in forwards",
+          "zoom-in": "dualinput-zoom-in 200ms ease-out",
+          "turn-in": "dualinput-turn-in 170ms ease-out",
         },
       },
     },

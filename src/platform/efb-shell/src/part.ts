@@ -1,0 +1,84 @@
+// A feature shows itself in the EFB app through one part, which the app's entry lists in one line, so
+// deleting a feature deletes its folder and that line, and this shell never names a feature
+// (record/areas/interface/01-apps.md, "A feature's parts").
+
+import { createContext, useContext } from "react"
+import type { ComponentType } from "react"
+
+import type { JsonValue } from "../../../engines/messages/ts/serde_json/JsonValue.ts"
+import type { CoreLink } from "./core-link.ts"
+import { useSlice } from "./core-link.ts"
+
+/** What a part reaches of the core: slices, commands, and the `unit` messages it trades with its own unit. */
+export type PartApi = {
+  watch(slice: string, hear: (value: JsonValue) => void): () => void
+  command(name: string, args: JsonValue): Promise<void>
+  onUnit(unit: string, hear: (body: JsonValue) => void): () => void
+  sendUnit(unit: string, body: JsonValue): boolean
+}
+
+export type Part = {
+  /** Its unit's name in the core. */
+  name: string
+  /** Runs when the app loads, for code with no screen of its own. */
+  start?(api: PartApi): void
+  stop?(): void
+  /** A tab of its own, between the Session tab and Settings. */
+  tab?: { icon: ComponentType<{ className?: string }>; label: string; page: ComponentType }
+  /** What shows on the Session tab under the session card during preflight, which the card folds to keep in view. */
+  preflight?: ComponentType
+}
+
+export function definePart(part: Part): Part {
+  return part
+}
+
+/** Starts each part. A part that throws stops only itself. */
+export function startParts(parts: Part[], link: CoreLink): void {
+  const api: PartApi = {
+    watch: (slice, hear) => link.client.watch(slice, hear),
+    command: (name, args) => link.client.command(name, args),
+    onUnit: (unit, hear) => link.client.onUnit(unit, hear),
+    sendUnit: (unit, body) => link.client.sendUnit(unit, body),
+  }
+  for (const part of parts) {
+    try {
+      part.start?.(api)
+    } catch (error) {
+      console.error(`Dual Input: the ${part.name} part's start threw: ${error}`)
+    }
+  }
+}
+
+/** Stops each part, as starting them does. */
+export function stopParts(parts: Part[]): void {
+  for (const part of parts) {
+    try {
+      part.stop?.()
+    } catch (error) {
+      console.error(`Dual Input: the ${part.name} part's stop threw: ${error}`)
+    }
+  }
+}
+
+/** The app around a page: the link to the core, and the frame's own controls. */
+export type Shell = {
+  link: CoreLink
+  /** Opens a tab, as the header's View update opens Settings. */
+  open(tab: string): void
+  /** An amber dot on a tab's icon, while the tab holds a warning. */
+  setDot(tab: string, on: boolean): void
+}
+
+export const ShellContext = createContext<Shell | null>(null)
+
+export function useShell(): Shell {
+  const shell = useContext(ShellContext)
+  if (!shell) throw new Error("a page of the EFB app sits outside its frame")
+  return shell
+}
+
+/** A slice of client state, typed by the message crate's type its unit registered, or undefined until the core has sent it. */
+export function useCoreSlice<T>(name: string): T | undefined {
+  return useSlice<T>(useShell().link, name)
+}

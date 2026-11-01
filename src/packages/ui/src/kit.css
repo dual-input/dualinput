@@ -6,6 +6,8 @@
 @font-face { font-family: "DualInput Geist"; font-weight: 600; src: url("fonts/Geist-SemiBold.ttf") format("truetype"); }
 @font-face { font-family: "DualInput Geist Mono"; font-weight: 400; src: url("fonts/GeistMono-Regular.ttf") format("truetype"); }
 @font-face { font-family: "DualInput Geist Mono"; font-weight: 500; src: url("fonts/GeistMono-Medium.ttf") format("truetype"); }
+/* The typeface Airbus made for its cockpit displays, for the checklist's rows. */
+@font-face { font-family: "DualInput B612 Mono"; font-weight: 400; src: url("fonts/B612Mono-Regular.ttf") format("truetype"); }
 
 /* A reset of our own, scoped to our root, since Tailwind's would restyle the EFB around our app and
    without one nothing draws a border, because Tailwind's reset is what sets border-style

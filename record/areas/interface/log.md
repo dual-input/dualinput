@@ -3,6 +3,30 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-01: Coherent GT's canvas takes no pixels, so a figure drawn by rays can't reach the screen at any size above a head's, while the fold, its pin, and its masks all work
+
+**Asked:** whether what the frames lean on draws in Coherent GT, now that the EFB app's sample runs there: the pilots' heads and figures, the pinned card, and the folds.
+
+**Expected:** `putImageData` to work, since the frames' heads and figures use it in Chromium, and the pin and the masks to be the risk, which [the list of checks](decisions.md#stage-11b-checks-in-coherent-gt-what-the-frames-lean-on) names.
+
+**Found:** in the SDK's CoherentGT Debugger, on the sample and on a canvas of each kind beside it:
+
+- **Pixels:** `putImageData` draws nothing, from `createImageData` or `new ImageData` alike, and `drawImage` from another canvas draws nothing.
+  `getImageData` throws `NotSupportedError`, and `toDataURL` returns an empty string.
+- **What draws:** `fillRect` with a solid or alpha color, `clearRect`, paths, arcs, strokes, linear gradients, and a radial gradient with both circles at one center.
+  A radial gradient with its inner circle off center drew nothing on a canvas, where a CSS `radial-gradient` and an SVG `radialGradient` drew it.
+  Inset `box-shadow`s and `filter: blur()` draw too.
+- **The cost of drawing by pixels:** 1,250 alpha pixels through `fillRect` took 2.2ms of JavaScript in the debugger, each pixel building its color string, so a 28px head at 1,000 pixels costs under 2ms a frame while it turns, and a figure 260px wide would cost tens of milliseconds.
+- **The pin and the folds:** `position: -webkit-sticky` pins the session card in a box that scrolls, and a card's fold, through `-webkit-clip-path` and `-webkit-mask-image` set each frame, draws as the frames do, with the row's parts gliding by transforms.
+- **Two claims we made while finding these were wrong:** a context taken before a canvas is sized draws, and a scrolling box's bottom padding counts toward its scroll, each tested once we doubted it.
+
+**Changed:** a head draws each of its pixels with a 1px `fillRect`, as a canvas pixel for each real pixel.
+The standing figure and the portrait, which draw hundreds of times as many, wait for a way of drawing that the user picks at the sample's check.
+
+What we haven't run: any of this in the sim's EFB, which the sample's check does, and what `fillRect`s cost the GPU there.
+
+**Affects:** `src/platform/efb-shell/src/heads/`, and the standing figure and the portrait.
+
 ## 2026-11-01: The EFB's document draws 15 frames a second at the world map, half the rate of the sim's other documents, so a quick click often lands between two frames
 
 **Asked:** why a quick click on the kit's page in the sim showed no press, and why hover felt late (user, 2026-11-01).

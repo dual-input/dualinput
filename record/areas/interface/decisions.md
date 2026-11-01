@@ -152,11 +152,13 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   A hairline is a border, or takes `--hair`, the length of one real pixel at the root's scale, since a 1px height or shadow rounds down to nothing below a scale of 1.
   If the sim's EFB turns out to differ, the fallback is every size written as `calc(Npx * var(--scale))`, which is how `efb_os.css` sizes itself, by a step on the built stylesheet, with a helper for each number in our code.
   The app starts below the EFB's status bar, which covers the view's top, so it has about 700 of its units for its height, against the frames' 716, and pages take up the difference by scrolling sooner ([interface log][p24-efb]).
+  The scale follows the tablet, the view's shorter side over 516, so a Small tablet draws the same page smaller, about 12px where the frames write 14px at 0.866, which the user kept over text of one size with more room on Large, and over the sim's own text size with less room at every size (user, 2026-11-01).
   The user agreed on 2026-11-01, after p24 in the SDK's debugger and in the sim's EFB.
 - **Because:**
   - A transform blurs text in the debugger, at every scale tried, and `zoom` and `calc()` both draw it sharp ([interface log][p24]).
   - Under `zoom`, offsets, rects, `scrollTop`, and a `translateX` all read and move in the frames' units, so the frames' motion carries over with no number changed (same entry).
   - With `calc()`, every number in our code that sets a size or a motion would need a helper, and one that missed it would show only at another scale.
+  - The EFB's own stylesheet scales with the tablet the same way, by 504, 601, and 696 over 516 at the three sizes, so a pilot's choice of size means the same in our app as in the sim's ([interface log](log.md#2026-10-30-in-landscape-an-efb-apps-view-is-its-portrait-view-turned-on-its-side-about-696-by-433-in-the-efbs-own-units-against-468-by-660)).
 - **Leaves out:**
   - The scale itself, which the EFB shell reads from the app's view.
   - A design for landscape, which p21 measured at about 696 by 433 of the EFB's units, and which waits until after the portrait build, with the layout's flex keeping it usable until then (user, 2026-11-01).

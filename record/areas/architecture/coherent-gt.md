@@ -79,6 +79,9 @@ Neither probe looked at the paint, so a kept declaration can still paint unlike 
 - **Layout:** the engine places boxes on whole pixels where Chromium gives fractions, as `vw` and `space-evenly` showed, and a table cell given a width takes the table's whole width.
   In the SDK's debugger, `width: max-content` under `border-box` comes out short by the box's padding, so words wrap, while an absolute box with its width left alone fits them, and a border inside a rounded `<button>` is cut at the button's corners, though its overflow reads `visible` ([interface log][p24]).
 - **Scaling:** in the SDK's debugger, a `transform: scale()` blurs text, and `zoom` scales layout and keeps text sharp, though a 1px height or `box-shadow` spread rounds down to nothing below a zoom of 1, and a border keeps its pixel (same entry).
+- **Canvas:** in the SDK's debugger, a 2D canvas draws solid and alpha `fillRect`, `clearRect`, paths, arcs, strokes, and linear gradients, and a radial gradient only with both circles at one center.
+  It takes no pixels: `putImageData` and `drawImage` draw nothing, `getImageData` throws `NotSupportedError`, and `toDataURL` returns an empty string, so a page that computes pixels draws each with a 1px `fillRect`, about 2.2ms for 1,250 pixels ([interface log][canvas]).
+  A CSS `radial-gradient`, an SVG `radialGradient` with its focus off center, inset `box-shadow`s, and `filter: blur()` all draw.
 - **Each document's defaults:** mainUi and the toolbar lay out a box with padding and a border as `border-box`, and the EFB's document as `content-box`, so our pages set `box-sizing` themselves.
 - **Fonts:** mainUi and the toolbar declare Roboto as one family, `Roboto-Regular`, at weights 300 to 900, and Roboto Mono as `RobotoMono-Regular`.
   The EFB's document declares a family for each face, such as `Roboto-Bold` and `RobotoMono-Regular`, and sets its body in Verdana, so text there takes Roboto only from a rule that names a face.
@@ -93,3 +96,4 @@ A sim update can change any of this, so re-run [p09](../../../experiments/areas/
 [p13]: log.md#2026-10-25-coherent-gt-drops-layer-oklch-color-mix-and-every-gap-but-grid-gap-so-tailwind-4s-output-cant-style-a-page-there
 [p09]: log.md#2026-10-09-coherent-gt-parses-all-of-es2017-and-object-rest-but-no-other-syntax-from-es2018-on-has-no-built-in-from-es2018-on-of-its-own-but-weakref-and-runs-typescript-compiled-to-es2017-by-tsc-and-by-esbuild
 [research]: log.md#2026-10-09-coherent-gts-makers-last-placed-its-engine-near-safari-101-the-msfs-avionics-framework-and-flybywire-compile-to-es2017-nobody-maintains-a-rule-set-for-the-engine-and-working-title-ships-its-own-pinned-copy-of-the-framework
+[canvas]: ../interface/log.md#2026-11-01-coherent-gts-canvas-takes-no-pixels-so-a-figure-drawn-by-rays-cant-reach-the-screen-at-any-size-above-a-heads-while-the-fold-its-pin-and-its-masks-all-work

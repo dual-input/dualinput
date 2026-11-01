@@ -6,6 +6,12 @@ Depends on:  ../product/03-v1-scope.md, decisions.md, log.md, ../architecture/02
 Decides:     What runs on a pilot's own machine and what on every machine; what a pose carries, and how often it goes; how a seat is taken and held; how a click, a drag, a wheel turn, and a change made without a click become a hand's target; how Figure draws each figure and holds a hand on a yoke; the names the sim shares; the aircraft-model engine and the three engines under it; the authoring tool; which of avatars' tentative decisions this design confirms; the budgets; and the cases for the bench (node 6.13).
 ```
 
+> **Note**
+> Stage 11b's tentative decision on [the Figures tab](../interface/decisions.md#the-figures-tab-holds-the-pilots-figure-and-explains-what-its-figures-can-do) changes avatars' notifications and settings until the apps' design confirms it (user, 2026-10-31).
+> A model that can't be read shows as a note at the top of the tab rather than a notification.
+> [Seeing a held seat](#a-seat)'s notification says only "This seat is taken", held while this pilot's camera is in the seat, rather than naming the free seats, since a profile can list any number of them.
+> Which figures show is four switches: your figure's and the crew's, each inside the aircraft and on a walkaround.
+
 A pilot's own core works out their figure: it reads the camera every frame and the mouse through the core helper, takes a seat by where the camera is, casts each click's ray into the aircraft's own models, and decides where each hand goes and when.
 It sends the whole figure to the crew as a pose, at most every 33ms.
 On every machine, the `Figure` routine in our WASM module eases each hand toward its target, holds a hand on a yoke by that machine's own yoke, works out each figure's 27 joints, and places each figure in the moving cockpit, every frame.

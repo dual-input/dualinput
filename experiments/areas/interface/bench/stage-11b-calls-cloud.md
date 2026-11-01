@@ -1,7 +1,7 @@
 # Stage 11b outline: settled calls from the cloud session
 
-The calls settled in the stage 11b cloud session, from 2026-10-31, kept as the PC's `stage-11b-outline-calls.md` keeps its own: one dated bullet per call, with the user's words where they gave them, and what was tried and dropped.
-They're bullets to append to that file, which holds the calls before this session, and they go into `record/areas/interface/decisions.md` when the outline is done.
+The calls settled in the stage 11b cloud session, from 2026-10-31, one dated bullet per call, with the user's words where they gave them, and what was tried and dropped.
+[The PC session's file](stage-11b-calls-pc.md) holds the calls before these, and [the interface's tentative decisions](../../../../record/areas/interface/decisions.md) hold what both settled.
 
 ## Left for the record
 

@@ -6,6 +6,9 @@ Depends on:  01-profile-entries.md, 02-live-sync.md, 03-catch-up.md, ../network/
 Decides:     What comes back after a link, a core, a sim, or a PC goes down; how a machine records what it applied, drops copies, and skips messages; catch-up's order and pipeline, when it ends, and when control can't pass; how every cockpit message is paced, and how often a state entry is sent; which messages a change of control drops, and who catches up after one; how a core that restarted recovers; how an entry the aircraft drives itself is caught; how a machine puts back a change it may not send; and when an aircraft that loaded before its session counts as settled.
 ```
 
+> **Note**
+> Stage 11b's tentative decision on [the banner's content](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) drops the crash's ask for a bug report, from the crew and the pilot alike, until the apps' design confirms it (user, 2026-11-01): the crew's card says the pilot's sim crashed and that they're still in the session, and the pilot sees the service reconnecting, then catching up.
+
 What comes back depends on what went down.
 A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.
 A pilot whose sim, core, or PC went down comes back as a late joiner, with the profile's entries caught up from the flying machine (user, 2026-10-11 and 2026-10-12).

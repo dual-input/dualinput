@@ -6,6 +6,11 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, 01-loo
 Decides:     The core's WebSocket library and its Origin check; the client protocol's messages; how a unit's state, commands, and messages reach the clients; notifications and settings; the moments the clients crate raises; what a client whose version differs gets; how page-client finds, joins, and rejoins the core; how our VCockpit.js loads the bridge and the bridge loads panel modules; what v1 builds for clients beyond the PC; and the budgets (node 6.2).
 ```
 
+> **Note**
+> Stage 11b's tentative decisions change this design until the apps' design confirms them (user, 2026-11-01).
+> The EFB app, when [a client's version differs](#a-client-whose-version-differs), shows setup's "Add-on version mismatch" box in place of its pages ([without the service](../interface/decisions.md#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-shows-setups-box)), while the core still only logs it.
+> The order that opens the EFB carries where in the EFB app to land ([a notification's click](../interface/decisions.md#a-notifications-click-opens-the-efb-app-where-its-explained-or-acted-on)).
+
 The core serves every client over one protocol of JSON messages on a WebSocket, through tokio-websockets, which iroh already brings into the core.
 A client opens with a `hello` that names it and its version, and from then on each side sends `alive` every 2s, while only the core closes a socket that goes quiet.
 A unit reaches the clients through slices of state, which the `clients` crate sends on a timer to the clients that show them, through commands the clients send it, and through messages of its own to a client by name.

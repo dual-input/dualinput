@@ -13,6 +13,10 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architec
 Decides:     What a gesture sends, and when; how another machine's panel plays it, and when each of its messages counts as applied; how a gesture is timed, and which clock the panel bridge measures a span on; which displays lock, when, and what a pilot's blocked press shows; what pointer sync registers; its known limits; the budgets; and the cases for the bench (node 6.11).
 ```
 
+> **Note**
+> Stage 11b's tentative decision that [a visible lock is a veil over the display with one centered card](../interface/decisions.md#a-visible-lock-is-a-veil-over-the-display-with-one-centered-card) settles the look and words of [locks](#locks) until the apps' design confirms it (user, 2026-11-01), and the flash's color, our error red at 55%.
+> A lock that turns into a warning keeps a lock's look, its card taking presses and its veil passing them, with a Dismiss that clears it on every display.
+
 A gesture is one press or drag on a synced display, an instrument the profile's `displays` names, from a button's down to its up.
 It goes to the crew as it happens: its down, its moves, and its up, each a cockpit message keyed by the display.
 Each other machine's panel plays each message on its own copy of the display, at the same fractions of the display's size, as it arrives.

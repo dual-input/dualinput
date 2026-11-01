@@ -5,7 +5,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 ## Dual Input's one full window is its EFB app
 
-- **Decided:** every screen a pilot uses Dual Input through is in the EFB app: hosting and joining, the crew, preflight and Go to, take-control's button and its binding, the settings, traffic's packs, ATC audio, the recordings, and Quit.
+- **Decided:** every screen a pilot uses Dual Input through is in the EFB app: hosting and joining, the crew, preflight and Go to, take-control's button and its binding, the settings, traffic's packs, ATC audio, and the recordings.
+  Quit lives only in the [tray](#the-desktop-app-shows-velopacks-windows-and-its-own-figures-and-the-build-designs-the-rest).
   The desktop app stays the Tauri program that runs from login as a tray icon and does the watcher's jobs, and its window shows only its own screens: the update's progress, and the last 24 hours of its own and the core's CPU and memory use, which it records itself ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
   No screen of the desktop app's needs the core, so an open window keeps no core running, and the desktop app wants a core while the sim runs or a session file exists.
   The EFB app has no button that brings the desktop app forward, so stage 11b takes out what stage 11a built for it: `clients`' command for the button, and the core's start of the desktop app's program with `--data` ([bringing the desktop app forward](01-apps.md#bringing-the-desktop-app-forward)).
@@ -19,7 +20,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - An update can start from the EFB app: the pilot agrees to restart the sim, and the desktop app closes the sim, installs the update, and starts the sim again (user, 2026-10-25).
     No run has tried that end to end, and whether the desktop app can start the Microsoft Store edition of the sim is unverified; a run that starts each edition from the desktop app settles it.
   - A Rust tray app drawing its screens with egui held 61 MB to 67 MB more than its tray alone once its window closed, 62.6 MB to 68.6 MB in all, where Tauri's held 1.5 MB more, so the desktop app keeps Tauri for its screens ([install log][p02]).
-- **Leaves out:** how the EFB app shows an update and asks for Install now, such as an icon beside the settings icon in its tabs (user, 2026-10-25), how that request reaches the desktop app, which holds the update ([updates](../install/01-installing-and-updating.md#updates)), and what a pilot sees of an update while the sim is closed, all of which the apps' design settles later.
+- **Leaves out:** what a pilot sees of an update while the sim is closed, which the desktop app's design settles during the build; [the fixed local port](#the-desktop-app-tells-the-efb-app-about-updates-and-the-firewall-over-a-fixed-local-port) and [the Settings tab](#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version) settle the rest of how an update reaches the pilot.
 
 ## The apps are dark only
 
@@ -79,7 +80,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   State sync's checklist and the rest of preflight's help are the EFB app's, so the banner shows no part's view in places of its own.
   Settled by the user on 2026-10-25.
 - **Because:** a few cards and lines need no component framework, and a banner without one bundles no copy of it (user, 2026-10-25).
-- **Leaves out:** which lines the banner shows beside its notifications, and their looks and words, which the apps' design settles.
+- **Leaves out:** which lines it shows, which [the banner's content](#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) and [its box](#the-banner-is-a-box-of-opaque-cards-at-the-screens-top-right) settle.
 
 ## Tailwind 3 reaches the kit through msfs-tailwind, a preset of our own for Coherent GT
 
@@ -173,7 +174,6 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Leaves out:**
   - Which entry of the joiner's `game/aircraft/aircraftList` is the PF's aircraft, which the session knows by its folder and preset, and which of `game/aircraft/configurator/liveries` is the PF's livery, which a sim session settles.
   - The runway request, which no run has tried ([the menu script](../session/02-units.md#the-menu-script)).
-  - The words, which the apps' design settles.
 
 ## A display name runs to 20 characters
 
@@ -216,7 +216,6 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Leaves out:**
   - A crew whose ATC and traffic come from two pilots may hear ATC talk about aircraft it doesn't see, since an ATC app works with the traffic in its own pilot's sim (unverified, and likely to differ by app); the crew settles that on voice, as it settles a tussle over a switch ([decision 044](../../decisions/044-table-of-roles.md)).
   - Whether the platform keeps its request that claims several keys together, which only the combined switch sent ([02-code-map](../architecture/02-code-map.md#the-traffic-and-atc-switch)): the user's to decide.
-  - The two tabs' words, which the apps' design settles.
 
 ## The Traffic and ATC audio tabs hold their sharing, settings, and warnings, flagged by a dot on the tab's icon
 
@@ -243,7 +242,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - Comparing the crew's traffic packs automatically, which the count covers.
   - What the list can't show: packs missing from traffic's list of known packs, which starts with `fsltl-traffic-base`, and a streamed pack's version, which it has none of on disk ([traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs)); the scenery, which nothing compares, stays a rule a pilot reads.
   - A warning when ATC breaks up, from the frames the core helper conceals, which waits for a threshold; a warning while the capture waits for an ATC app; and the sim's own ATC, which pilots who know ATC apps have off already (user, 2026-10-31).
-  - What else sets the ATC audio tab's dot, the tabs' words, and their look.
+  - What else sets the ATC audio tab's dot.
 
 ## Traffic polls within the sim's 200km cap, with no radius setting
 
@@ -257,6 +256,418 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - A setting that changes little is one more thing every pilot reads past.
 - **Leaves out:** whether a copy far away costs a receiving sim the frame time one at the gate does, which nobody has measured.
 
+## The frames canvas holds the apps' looks, words, and motion
+
+- **Decided:** the canvas at `experiments/areas/interface/bench/frames.html` shows each screen of the EFB app and the banner, in 13 sections: First run, Home, Session, Preflight, Flying, Traffic, ATC audio, Figures, Settings, App status, Aircraft picker, Banner, and Cockpit locks.
+  Stage 11b rebuilds each frame in the kit, taking its sizes, colors, words, and timings from the frame's source in the bench's `src/frames/`.
+  The decisions below hold what a frame can't show: when each thing shows, what a press does, and why.
+  The calls behind them, with the user's words and what was tried and dropped, are in [the PC session's calls](../../../experiments/areas/interface/bench/stage-11b-calls-pc.md) and [the cloud session's](../../../experiments/areas/interface/bench/stage-11b-calls-cloud.md).
+  [The desktop app's own screens](#the-desktop-app-shows-velopacks-windows-and-its-own-figures-and-the-build-designs-the-rest) have no frames, since the build designs them.
+  Settled by the user on 2026-11-01.
+- **Because:**
+  - A frame's source is the one place each value is written, so this file doesn't repeat it.
+  - Product code never imports from `experiments/`, and the bench draws in React and Tailwind 4, which [no screen of ours uses](#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3), and Tailwind 4's output draws nothing in Coherent GT ([architecture log][p13]).
+- **Leaves out:** the canvas's own code, which ships nowhere: each frame in a React root of its own behind an error boundary, live only near the view, and a name card below 35% zoom.
+  A jump to a frame in the first seconds after the very first load can still drift while every frame is measured once.
+
+## Stage 11b checks in Coherent GT what the frames lean on
+
+- **Decided:** as the build reaches the first screen that uses each of these, it checks it in Coherent GT, since no run has shown it there:
+  - `position: -webkit-sticky`, which pins the session card; the engine parses it, and nobody has seen it stick.
+  - What a masked element costs a frame, for the [scrolling page's fold](#a-scrolling-page-folds-its-surfaces-and-a-change-on-a-page-is-one-moment-in-three-steps), since a browser usually draws one offscreen (unverified in Coherent GT); if it costs too much, the fallback is a hard top edge, with a 1px line under the header while the page is scrolled.
+  - Animating an SVG stroke's dash offset, for the countdown's ring.
+  - `align-items: baseline`, which centers the Traffic check's icons on their lines' capitals.
+  - The figures' ray tracer, whose speed we measured only in Chrome and Node: about 5ms a pass for the standing figure and 0.40ms a head on our development machine, where the EFB shares the sim's frame time.
+  - Whether the wheel glides or steps in an EFB app, for the page's coasting.
+  - Whether clicks reach the cockpit through the banner's empty part, a [case in the sim](01-apps.md#cases-for-the-bench) that the banner's box was sized around.
+- **Because:** Coherent GT drops what it can't parse with no error, and p13 and p14 found three things it parses and then ignores ([architecture log][p13]; [architecture log][p14]), so a frame that draws in a browser says nothing about these.
+- **Leaves out:** the kit's development loop, and whether it uses the SDK's CoherentGT Debugger as a host ([interface log][p22]).
+
+## The desktop app shows Velopack's windows and its own figures, and the build designs the rest
+
+- **Decided:**
+  - Dual Input installs with Velopack's `Setup.exe` as it is, our splash image over its progress bar, with no MSI and no setup program of our own.
+  - `Setup.exe` starts the app with its first-run flag, which opens a small window, "Welcome to Dual Input", with a line pointing to the EFB app and Dismiss as its only action.
+  - While no `UserCfg.opt` exists, that window says MSFS 2024 hasn't run on this PC, so Dual Input can't install its sim components, and gives two steps: start the sim and close it, then start it again and find Dual Input in the EFB.
+  - Applying an update shows Velopack's stock progress dialog, so the pilot sees what's happening while `Update.exe` has our programs stopped.
+  - Quit lives only in the tray, where it asks once, as [installing and updating](../product/03-v1-scope.md#installing-and-updating) has it.
+  - A left click on the tray icon opens the desktop app's main window, and a right click opens a native menu: a usage line with the tray app's own figures, Settings…, a separator, and Quit, where the usage line and Settings… open that window too.
+  - The desktop app's main window shows the 24 hours of figures, the tray app's and the core's, and says in concrete terms what the app does for the pilot and what quitting costs, to persuade the pilot to keep it running and starting with Windows without hiding Quit.
+
+  The rest of these screens is designed during the build: the tray menu's details, the update's progress window, the figures and how often the app samples them, how Start with Windows follows Windows' own switch for the Run value, and how the screen for no `UserCfg.opt` looks ([installing and updating's list](../install/01-installing-and-updating.md#left-to-the-apps-stage); user, 2026-11-01).
+  Settled by the user on 2026-10-25, 2026-10-31, and 2026-11-01.
+- **Because:**
+  - A pilot works in the EFB app, so the first-run window only has to point there.
+  - Offered a Quit in the EFB app's Settings, the user declined it (user, 2026-10-31).
+- **Leaves out:** whether the window keeps a Start with Windows switch beside [the EFB app's](#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version), which the outline's first call put there.
+
+## The desktop app tells the EFB app about updates and the firewall over a fixed local port
+
+- **Decided:** updates stay out of the core: the desktop app serves the update's state and the firewall rule's on a fixed 127.0.0.1 port, and the EFB app connects to it directly.
+  The EFB app shows a new version and asks to restart the sim to install it, and the desktop app then closes the sim, installs, and starts the sim again.
+  A rule that's missing or blocked shows as [the header's](#the-header-shows-only-what-needs-the-pilot) Windows Firewall row with Fix, which the desktop app carries out with the UAC prompt, as the first run does.
+  If another program holds the port, the EFB app shows no update, and a developer's second desktop app runs without the server.
+  Settled by the user on 2026-10-25.
+- **Because:** the desktop app holds the update ([updates](../install/01-installing-and-updating.md#updates)), and an open window keeps no core running ([above](#dual-inputs-one-full-window-is-its-efb-app)), so the core can't carry its state.
+- **Leaves out:**
+  - The port number.
+  - How the desktop app closes the sim cleanly, and whether it can start the Store edition, both unverified, which a run that does each settles.
+  - How Start with Windows reaches the desktop app, which writes the Run value: this link is the likely way, and the build settles it.
+  - A known cost: Fix's UAC prompt opens on the desktop behind the sim, which a pilot in VR can't see.
+
+## First-time setup asks for the name and color once, and checks the PC and our servers
+
+- **Decided:** first-time setup is a screen of the EFB app's own, shown once, with room for more steps later.
+  Its name field starts with the Windows username, cut to [20 characters](#a-display-name-runs-to-20-characters), and the pilot changes it or presses Continue, which changes the call of 2026-10-16 that nothing fills it from the Windows account.
+  The same name and color card serves [the Figures tab](#the-figures-tab-holds-the-pilots-figure-and-explains-what-its-figures-can-do).
+  Its server check tells a PC that's offline from our servers being out of reach.
+  The backend down and both relays down are one failure in setup, since either stops hosting and joining, while the shared check still tells them apart for the core's log and the header.
+  One relay down passes, and every server failure waits and offers Continue anyway.
+  Settled by the user on 2026-10-25 and 2026-10-28.
+- **Leaves out:** a custom color, which the user deferred on 2026-10-28, since the figure in the sim takes only a palette index, so custom means baking a ring of hues after the presets and storing a position on it, a change to avatars' design.
+
+## The core's log keeps display names, and replaces only the home folder's path
+
+- **Decided:** the Windows username and Dual Input's display name are separate everywhere: once set, the display name is its own value, and logs and recordings keep it even when it matches the username.
+  So the core's log stops replacing the bare username (`src/apps/core/src/log.rs`, `hide_word`), and keeps replacing the home folder's path.
+  This changes [the home folder's path](../recording/01-recording-and-bug-reports.md#the-home-folders-path) and [the recording rule](../product/03-v1-scope.md#recording-and-bug-reports) of 2026-10-23, and [stage 11b](../build/plan.md#11b-the-apps) builds it.
+  Settled by the user on 2026-10-25.
+- **Because:** a display name equal to the username would otherwise be scrubbed, and display names make a crew's recordings readable to us.
+
+## The EFB app is a header, five tabs, and take control under the tabs
+
+- **Decided:** the tabs are Session, Traffic, ATC audio, Figures, and Settings, in that order.
+  The Session tab holds home, then the session once Host or Join succeeds.
+  An 8px amber dot at a tab icon's lower right flags a warning on that tab, on every page: traffic's [counts](#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon), and the output device going missing.
+  [Take control](#take-control-is-a-held-button-under-the-tabs-with-one-hold-of-035s) sits under the tab bar on every tab.
+  Settled by the user on 2026-10-29 and 2026-10-31.
+- **Because:** taking control can't wait for a tab switch (user, 2026-10-31).
+
+## The header shows only what needs the pilot
+
+- **Decided:**
+  - Outside a session, the header shows the mark and the version.
+    Once this pilot is in the flight of a session in preflight or flying, the phase stands in their place on every page: a dot, pulsing in preflight, "PREFLIGHT" or "SYNC ACTIVE", and in preflight the line "Sync starts once everyone's ready".
+  - A pill at the right shows each thing wrong with this PC or waiting on its pilot, as a word and an icon, and opens into rows on a hover or a press; with nothing to show there's no pill, and nothing opens.
+  - Its rows are: the PC offline, which takes our servers' place, since with no internet Dual Input can't tell whether they answer; our servers not answering; Windows Firewall blocking Dual Input, with Fix; the connection to other pilots failing to open; an update ready, with View update, which opens Settings on its update section; and, while it lasts, trouble in Dual Input's own parts, in the pill as "Screens", "WASM", "Helper", or "Keybind", so a [dismissed notification](#the-banner-is-a-box-of-opaque-cards-at-the-screens-top-right) loses nothing.
+  - Each row's title says what's wrong, and its detail what that costs.
+    Under them, when something's wrong, but not while offline or for an update alone, a line points to our Discord, since a confused pilot needs a way to people.
+  - In a session each row says what it costs there: offline stays an error, since every link is down, and says Dual Input will reconnect and catch the pilot up; our servers and the firewall become warnings, since a running session doesn't wait on the backend, and the crew still flies on links that may be slower; and the update row hides, since installing restarts the sim.
+
+  It has no row for these:
+  - The service, since [the app's window](#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-shows-setups-box) covers a lost one.
+  - The sim, since the core's link to it ends only with the sim.
+  - The aircraft, which home names.
+  - A crewmate, whose crew row says what's wrong.
+
+  Settled by the user on 2026-10-29, 2026-10-30, 2026-10-31, and 2026-11-01.
+- **Because:**
+  - Nothing said what state Dual Input was in, or explained what preflight is (user, 2026-10-30), and the header shows on every tab.
+  - `iroh` punches again every 60s, so a relayed link could go direct within a minute of the firewall rule landing, which is why Fix stays in a session (inference).
+- **Leaves out:** whether another pilot can still join when only this PC can't reach our servers, which is unverified.
+
+## Without the service the EFB app shows one of three screens, and another version shows setup's box
+
+- **Decided:** the EFB app reaches everything through the core, so losing it is the whole window's state:
+  - Reconnecting, for a socket closed without a `bye` or 8s of silence: the window dims under a pill with a spinner, and the dimming layer catches every press, since every command would fail, while the page stays as it was under it.
+  - Not running, for no core heard, or none 10s into reconnecting: the mark alone, no tabs, and setup's red box, with a line that it's waiting for the service to start.
+  - Closed, after a `bye`: the same with no box or spinner, and how to open it to fly together.
+
+  An EFB app whose version differs from the service's shows setup's "Add-on version mismatch" box in place of its pages, the same way.
+  That overrides [the core's rule](../core/02-clients-and-panel-bridge.md#a-client-whose-version-differs) and [Trouble's row](01-apps.md#trouble) that a page from another version reaches only the log.
+  Settled by the user on 2026-10-29 and 2026-11-01.
+- **Because:**
+  - The desktop app restarts a crashed core 2s after it exits ([when the core goes](01-apps.md#when-the-core-goes)), so most losses end while the page is still under the pill.
+  - The EFB app is part of our package, and nobody can join a flight without seeing it, so it's where a version mismatch shows (user, 2026-11-01).
+
+## Home names the loaded aircraft and offers Host and Join, in any aircraft
+
+- **Decided:** the start card names the loaded aircraft by maker, model, and tail number (`A:ATC ID`), at the world map too, and holds Host and Join.
+  - A first visit shows a guide in the page's room, its pages Flying together, Who flies, Preflight, Profiles, and the aircraft check; Skip guide and Done close it for good, and "Have a nice flight!" fades in as it goes.
+  - A later visit shows the profile authors' notes, once the format holds them, on a slip that looks foreign to Dual Input, scrolling inside the slip and signed from the profile's `authors`.
+  - With no notes, the rest of the page holds the pilot's figure on foot, which follows the cursor, reacts to Host, the code, and Join, leaps away when one succeeds, and slumps when one is refused.
+  - An unsupported aircraft is amber everywhere, not red, and home keeps Host and Join there, listing what still works, then offering the aircraft picker and how to build a profile.
+
+  Traffic and ATC setup stay out of the guide, for their own tabs.
+  Settled by the user on 2026-10-26 and 2026-10-29.
+- **Because:**
+  - The main menu loads the selected aircraft, and SimConnect sends `AircraftLoaded` for it (measured on MSFS 2024, 2026-10-07, [flight-controls log](../flight-controls/log.md)), so home can name it before any flight.
+  - A session in an unsupported aircraft still flies with flight-model sync, control, traffic, and ATC (user, 2026-10-26).
+- **Leaves out:** the page for how to build a profile, disabled with "Coming soon" until it exists.
+
+## Host and Join answer inside the start card
+
+- **Decided:** Host shows that it's starting, then that the session started; Join shows a spinner, then a check; and the code field locks while our servers answer.
+  A refusal opens under the control that asked, in setup's red box: our servers not answering, the PC offline, or one of the backend's four, no such session, this pilot's version older, the host's version older, and too many wrong codes.
+  A code naming no session also marks its slots red, and too many wrong codes says when the pause ends and points to our Discord.
+  This pilot's older version offers "Restart the sim to update", and the host's says they need to leave the session and update, since a host updates only outside one.
+  After 6s with no answer, a plain line opens under the control with a local Cancel, which keeps the code: one line while our servers haven't answered, and another once a join's code is found and it's dialing, which never gives up on its own.
+  Settled by the user on 2026-10-29 and 2026-11-01.
+
+## A dangerous action asks in the kit's popover, with no Cancel
+
+- **Decided:** a press on a dangerous action opens the kit's popover above the button, pointing at it, or below where there's no room, with a short question and one button, such as "Restart the sim?" and "Restart now", or for [Join](#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up) its two answers.
+  It has no explanation, since a simmer knows the consequences, and no Cancel, since a press outside or Escape cancels.
+  The popover takes the focus, so Enter can't confirm, and a double click on the button shuts it rather than confirming.
+  The button that opened it looks pressed in while it asks.
+  It serves restarting the sim to update, setup's add-on failure, Leave once anyone else is in the session, Join, and Delete on a recording; Take over takes over at once, and doesn't ask.
+  Settled by the user on 2026-10-29, 2026-10-30, and 2026-10-31.
+
+## The aircraft picker loads an aircraft through the world map's store, and only at the world map
+
+- **Decided:** home's Switch to a supported aircraft and the guide's "supported aircraft" link open a large popup over the app's window: the installed aircraft Dual Input has a profile for, as tiles with their maturity, then the rest under "Not installed", dimmed, which never load.
+  On the world map, a press on a tile loads it, the others dimming until it's done, and the popup closes with home following the new aircraft.
+  In a flight the rows don't press, and the popup says to end the flight and pick on the world map.
+  Settled by the user on 2026-10-29.
+- **Because:** it works through the world map's store, as Go to does, with `game/aircraft/aircraftList` and `game/aircraft/configurator/setAircraftForConfigurator`, sent by the menu script, since the EFB's document can't send them ([interface log][p20]).
+- **Leaves out:**
+  - Whether the aircraft list holds only owned aircraft, whose entries carry `isUsable` and rental data, and how a profile, matched by SimObjects folder and preset, finds its entry, which a sim session settles.
+  - The world map's aircraft thumbnails on the tiles, once a sim session shows they can be read for the whole list.
+
+## The session page is home once a session starts
+
+- **Decided:** after Host or Join alike, the start card turns into the session card, which ends the page, with no authors' notes:
+  - It holds the invite code with Copy, on every pilot's card, since the code belongs to the session; Leave; and the crew.
+  - The crew lists each pilot by their figure's head, this pilot first, with the PF marked "Pilot flying"; alone, a dashed row says to send the invite code.
+    A head pops in as its pilot's row appears.
+  - Under each name, in small muted text, is where the pilot is, or in the warning color "Connection lost" or "Sim crashed".
+    A pilot with a link shows it as a quiet chip after the name, such as "Relay · 120ms", and each host of [traffic or ATC](#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) a chip of their tab's icon.
+  - [Join](#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up) ends the PF's row on a joiner's card, with where the PF is under their name, and the row's end otherwise shows nothing before preflight.
+
+  Once the flight starts, the card keeps the code, Leave, the crew, and the [differences](#preflight-is-the-session-card-with-ready-the-differences-and-a-checklist-under-it) folded to their counts, and the checklist, the hand line, Ready, the countdown, and the Go without button are gone.
+  Settled by the user on 2026-10-29 and 2026-10-31.
+- **Because:** the host's next milestone is a crewmate joining, so the page points there (user, 2026-10-29).
+
+## Preflight is the session card with Ready, the differences, and a checklist under it
+
+- **Decided:**
+  - Preflight shows from the PF being in a flight on the ground, and a joiner still at the world map sees no checklist and no phase until they're in the flight, while preflight stays session-wide in [the session's units](../session/02-units.md).
+  - Each crew row ends on Ready or "Not ready", and this pilot's own Ready fills green with a check, a press again undoing it, disabled with a tooltip until the aircraft settles ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
+  - A dropped-out pilot stays unready and counted, and once this pilot is ready, their row offers Go without, then "Not counted"; the PF can't be gone without.
+  - Once every counted pilot is ready, a green ring just before this pilot's Ready counts the 3s down, so nothing shifts, and un-readying stops it.
+  - The crew lists this pilot first, then the pilots the countdown waits on, then the rest, in a window of three rows and part of a fourth, during preflight only.
+  - The differences list under the crew rows with no title, an error's red X or a warning's triangle, the difference, then a muted note, in a window of three and part of a fourth; a note says what the difference can cause, and never advises or commands.
+    Once the flight starts they fold to a row of two counts, which opens the list.
+    "No profile for this aircraft" stays among them, since a joiner can reach the flight without passing home's page for it, and the profile hash line goes, against the call of 2026-10-18 that it shows once, while "Unpublished profile" stays as a muted note when every pilot loaded one.
+  - Under the card, every pilot gets a line with a hand icon, "Avoid unnecessary cockpit interactions until the flight starts, as some may not sync.", outside the checklist so it shows with no checklist too.
+
+  Settled by the user from 2026-10-29 to 2026-10-31.
+- **Because:** nearly every difference names a crewmate, and [the scope](../product/03-v1-scope.md#preflight-match-check) has them beside each Ready (user, 2026-10-30).
+- **Leaves out:**
+  - Whether a reload during preflight clears Ready, which the session's units decide.
+  - Whether a new difference in flight opens the list by itself.
+
+## The checklist takes any entry an author writes, and every pilot has one
+
+- **Decided:** the checklist sits on the page under the card, on every pilot's side: the PF's opens with the counted controls, then the items every pilot sets, and the joiner's holds those items alone.
+  Ready doesn't wait on its boxes.
+  Author-written entries have no format rules, since Dual Input makes some entries itself and they can't be hand-fixed:
+  - A value never truncates, and wraps past half the row.
+  - A name is cut hard at the line's edge, and slides to its end while pointed at.
+  - Names and values read as written, with the first letter a capital, so "cabin PRESS valve" reads "Cabin PRESS valve".
+  - An optional `description` shows under the name, at any length.
+  - Rows go by entry ID.
+
+  Reset checklist, under the rows and disabled until a row is checked, unchecks them all with no confirmation, and nothing clears them by itself.
+  While the session card is unfolded, the whole checklist, its title and subtitle included, shows at 50% opacity, and it comes up to full as the card folds, or at once under a pointer or keyboard focus, so it never reads as disabled.
+  Settled by the user on 2026-10-30 and 2026-10-31.
+- **Because:**
+  - Dual Input's own items, the counted controls, are the PF's, and items for every pilot come only from profile authors after v1 ([the profile format's additions](#the-profile-format-gains-a-name-a-maturity-and-an-entrys-description)).
+  - An automatic clear on a reload could clear a pilot's checks on a signal that wasn't a reload (user, 2026-10-31).
+- **Leaves out:**
+  - How a value displays, since v1's `default` is a bare number with no unit, zero padding, or switch labels.
+  - Where the checked rows live; the call that had the core keep them, so a reload of the EFB's panel doesn't lose them, went with the automatic clear.
+
+## The session card folds with the page's scroll while a checklist waits under it
+
+- **Decided:** during preflight, the first stretch of scrolling folds the whole card into a row of heads and Ready, with the checklist rising with its edge, and past it the checklist scrolls under the row; a pill on the card's bottom edge folds and unfolds it.
+  A drag scrubs the fold, a card's content scrolling one for one as each head docks in the row; a click, a snap after letting go, a wheel's rest, a flick's coast, and the flight's start animate it as one motion.
+  In the folded row, each head carries a badge, a green check once ready, a red cross while out of the flight, and an empty ring while the countdown waits on them, and past 7 pilots the row shows 6 heads and +N.
+  The page keeps the whole card's height in flow, so folding never changes the scroll range and can't loop.
+  Before preflight and once the flight starts, nothing waits under the card, so it doesn't fold.
+  Settled by the user on 2026-10-30 and 2026-10-31.
+- **Because:** a card pinned whole left the checklist 143px on a host with differences, or 71px on a joiner (measured in the bench, 2026-10-30), and the fold keeps Ready in view.
+  The session card's fold in the bench is `drawFold` and `FOLD` in `frames/home.tsx`.
+
+## In preflight the heads watch the cursor
+
+- **Decided:** while the cursor is on the EFB, each preflight head watches it, within a 30-degree cone, each a little late, seeded by its pilot's name, so a sweep ripples across the crew.
+  With the cursor off the EFB, heads rest.
+  Over this pilot's unpressed Ready every head looks at it and bobs, over Leave every head shakes slowly, and a pilot who readies nods while the rest turn to them for a moment.
+  A pilot out of the flight slumps, still, at 40% opacity.
+  In the folded row each head turns its back as it docks, so at rest it's a plain colored ball that never redraws.
+  A head draws only while its look moves.
+  Settled by the user on 2026-10-31.
+- **Because:** "things that are alive are constantly in motion" (user, 2026-10-31), and a still cursor costs nothing, where heads that looked around by themselves read as chaotic.
+
+## Take control is a held button under the tabs, with one hold of 0.35s
+
+- **Decided:** one large button sits under the tab bar on every tab.
+  A click does nothing, and holding it fills a narrow bar left of the label, which appears at once on the press, so a fast clicker sees it needs a hold.
+  The hold is 0.35s, and a bound key's long press moves to 0.35s with it, so the gesture has one number; this changes [the binding](../control/01-take-control.md#the-binding)'s and [the scope's](../product/03-v1-scope.md#take-control-key) 1s.
+  The bound key's name shows as an outline at the button's other end, and with no key bound there's none.
+  The PF sees the same element as a state, "You have control", in a sky tint.
+  Lines go under the button with an icon of their own: while catching up, a neutral spinner and "Taking control disabled while you catch up", with the button dimmed; while the link to the PF is lost, the amber triangle and "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect."
+  Settled by the user on 2026-10-31.
+- **Because:** a takeover through a lost link raises control's generation, so on reconnect it wins, the old PF's aircraft moves to the new PF's, and their solo changes are dropped and undone by a catch-up ([between machines](../network/01-between-machines.md#control)), which a pilot reaching for the key should read first.
+- **Leaves out:** left-aligning the label when a binding is set, which the user skipped for now.
+
+## The sharing card is one row in every state, and each tab teaches its feature
+
+- **Decided:** each of [the Traffic and ATC audio tabs](#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon) opens on a sharing card of one row, what's happening on its left and its control on its right:
+  - While nobody's sharing, "Share my traffic" and a switch; while this pilot shares, their head, "You're sharing traffic", and the switch on; while another pilot shares, their head, "James is sharing traffic", and Take over, which takes over at once, with no question.
+  - Outside a session, the row does nothing, its switch off, and says sharing needs a session.
+  - With a switch in it, the whole row is one target out to the card's edges, for a VR pointer.
+
+  Then "How it works", in a sentence or two, the user's words.
+  Traffic's then lists "Rules" while nobody's sharing and outside a session, and "Check" once someone is: on a receiving pilot's tab the two counts, and on the host's nothing.
+  Each rule says why, as a muted line under it: own AI traffic off, the same traffic packs, and the same scenery.
+  The Traffic tab's performance note, under How it works, shows only on the sharing pilot's tab, since it speaks to them.
+  This PC's traffic packs sit at the page's foot in a tinted box, so they hold still as what's above them opens and shuts.
+  The ATC app picker offers Automatic, then every program playing audio, the known ATC apps first; closed, it says what it captures, such as "Automatic · BeyondATC", with a green dot while the capture takes it, and with no ATC app running it reads "Automatic", with no warning.
+  A receiving pilot's output device shows under the volume as one quiet row that opens Settings, and their volume reads "Muted" at 0%.
+  Settled by the user on 2026-10-31.
+- **Because:** people don't understand how a feature works from a switch alone, and a pilot needs one coherent place that explains it and shows its status (user, 2026-10-31).
+- **Leaves out:**
+  - Where Dual Input states that multiplayer must be off, which is a rule for all of Dual Input rather than traffic's (user, 2026-10-31).
+  - Where Dual Input says it carries no voice: the guide left that to the tabs, and the user dropped ATC audio's paragraph on it (2026-10-31), so no frame says it.
+  - Whether a copy in another pack's livery or floating over other scenery counts as missing: the count sees only the creates the sim refused, and whether the sim refuses a title it lacks is a [check in the sim](../traffic-atc/01-traffic-and-atc.md#creating-a-copy).
+
+## The Figures tab holds the pilot's figure and explains what its figures can do
+
+- **Decided:** the tab holds setup's name and color card; in a session, a new name brings a line that it applies in the next flight, since a member's entry is written once per session ([members](../session/02-units.md#members)).
+  It has four switches, "Your figure" and "The crew's figures", each with "Inside the aircraft" and "Walkaround", where [the scope's avatar sync](../product/03-v1-scope.md#avatar-sync) has two.
+  Three guides that open sit at the page's foot: how seats work, how pointing and clicking works, and how to hide the sim's default avatar.
+  A note at the top, in the information color and with no tab dot, says when pointing and clicking won't work because the aircraft's model files can't be read, with a Learn more that opens that guide, or when the profile has no seats, so figures show as floating heads only.
+  Interface copy says "figure" for Dual Input's and "avatar" only for the sim's own.
+  Settled by the user on 2026-10-31.
+- **Because:** a notification that a model can't be read was annoying, popping up again and again (user, 2026-10-31), and this replaces [avatars'](../avatars/01-avatars.md#a-seat) notifications with this note and with "This seat is taken".
+- **Leaves out:**
+  - The steps in the guide that hides the sim's avatar: the menu path comes from forum posts, unverified, and the avatar's name in it is hypothetical.
+  - The rename line's words, "Your new name will apply in your next flight": a member's entry is never rewritten after the first message ([session keys](../session/02-units.md#session-keys)), so a second flight in one session keeps the old name, and whether the line says "next session" is the user's to settle.
+
+## The Settings tab holds the binding, the output device, the recordings, and the version
+
+- **Decided:** four sections, in this order:
+  - Take control: the key or button, one key only, so neither a modifier alone nor a combination binds; Press or Hold; and a line to keep it unbound in the sim's own controls.
+  - Sound: "Output device", since it carries every sound Dual Input plays; a picked device that's missing says what's playing instead, in amber, and lights the tab's dot.
+  - Recordings: the space used of 1 GB, then each run by its start, in the pilot's time, and its size, newest first.
+    The run in progress can be opened but not deleted, since a pilot reporting a problem now needs it, and a recording that stopped, at under 1 GB free or on a failed write, says so here, since nothing else tells the pilot.
+    Open folder's toast says it opened on the desktop, since Explorer opens behind the sim, and a line under the card says what a run keeps and that a report starts with `log.txt` on Discord.
+  - Dual Input: Start with Windows, on at first, then the version with the update's state: up to date with when it checked and Check now, checking, downloading with how far, or failed with the error and Try again.
+    A ready update grows a box: "Close the sim to install." over Install and restart, which asks first, or in a session "Install it when you're not in a session." with no button.
+
+  The name, color, sharing, the ATC app, and the volume stay on their tabs; the microphone comes with the voice phrases, after v1; and the relay list ships with each release.
+  Settled by the user on 2026-10-31 and 2026-11-01.
+- **Because:** [the one full window](#dual-inputs-one-full-window-is-its-efb-app) moves the desktop app's settings here, the runs' list with them, and a report asks for the log first and the recording only when the log isn't enough ([recording and bug reports](../recording/01-recording-and-bug-reports.md)).
+- **Leaves out:** whether the core zips a report's folder, which for now opens in Windows Explorer; and turning off an aircraft plugin, skipped in the design for now.
+
+## The banner carries what a pilot must see without the EFB, and the rest shows where it's acted on
+
+- **Decided:** a notification is information, a warning, or trouble, the last for trouble that costs the pilot a feature, and none carries a button in v1.
+  - On the banner, held while its cause lasts: the lost link; catching up, one word for a late joiner's catch-up and a short outage's replay; the PF in the pause menu, on the others' banners; Dual Input's service gone or reconnecting; the panel bridge not loading; our WASM module stopped or missing; the Windows helper down; a key Windows refuses; and "This seat is taken", while this pilot's camera is in the seat.
+  - On the banner, shown once: control passing or refused, with the reason; for a PF who lost control through the lost link, once back, that what they changed alone was undone; a crewmate leaving the flight or the session, closing their sim, crashing, or coming back; and a control that couldn't sync, once per entry each load, several at one load as one.
+  - Elsewhere: the output device in Settings; traffic's counts on its tab; the unreadable model on the Figures tab; offline, our servers, the firewall, and the update in the header; Host and Join refused in the start card; and a recording that stops in Settings.
+  - Dropped: the warning after a takeover through a lost link, by which time the deed is done, with its words on the lost link's line; "Adam is in the A320", which the crew row shows; the crash's ask for a bug report; our package missing or from another version, which [the EFB app's box](#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-shows-setups-box) shows; and each crewmate's link, which the crew rows show.
+
+  Settled by the user on 2026-11-01.
+- **Because:**
+  - A pilot with the EFB closed doesn't see the app's own screen, so anything that stops every feature, such as the service going, has to reach the banner.
+  - A crewmate who leaves the flight, closes their sim, or crashes is still in the session, so their card says so.
+  - The pause menu's line stays because it explains a frozen aircraft or says the PF is away from the controls: anyone can open that menu, since Dual Input syncs only active pause, and whether it stops a flying aircraft is unmeasured (user, 2026-11-01).
+- **Leaves out:**
+  - Whether the session card lists sync failures, which land on the Session tab with nothing there to list them.
+  - The panel bridge's check, no cockpit panel's `hello` within 10s of the profile loading, which warns falsely in an aircraft with no cockpit panels, such as a balloon, so it needs to know the aircraft has panels.
+
+## A notification's click opens the EFB app where it's explained or acted on
+
+- **Decided:** the order that opens the EFB carries where to land, which [notifications](01-apps.md#notifications) left open:
+  - The Session tab, for control passing or refused, the lost link, a takeover while away, catching up, the pause, a crewmate leaving or back, sync failures, and the preflight summary, since the take-control strip, the crew rows, the checklist, and the differences are there.
+  - The header opened on the row that repeats it, for trouble in the panel bridge, the WASM module, the Windows helper, and a refused key.
+  - The Figures tab, for "This seat is taken", since it explains seats.
+  - Wherever the app was, for the service gone, since the app's own screen covers every tab.
+
+  Settled by the user on 2026-11-01.
+
+## The banner is a box of opaque cards at the screen's top right
+
+- **Decided:** the banner's box sits 16px in from the screen's right edge and 210px down from its top, 360px wide and 390px tall, room for the preflight summary and three notifications, above the instrument panel.
+  - Cards stack down from the top, newest first, with the summary leading during preflight.
+    Each is opaque, with its edge an inset ring and no shadow.
+  - A one-time card stays 6s, paused under the pointer.
+  - An × at a card's top right, always shown, dismisses it, as does dragging it right past a third of its width or flinging it; a click anywhere else opens the EFB app.
+    A held card dismissed stays hidden until its cause ends, and shows again if the cause comes back.
+    The summary has no ×, since it's the banner's whole job during preflight, it leaves when the flight starts, and the toolbar's button closes the banner.
+  - When cards don't fit, the oldest one-time cards leave early; held ones keep their places by trouble, then warnings, then information, newest first in each; and the rest wait behind a line at the box's foot, "3 more" with Dismiss all.
+    A card coming out from behind that line arrives at the stack's foot, where the line said it was, and a new notification arrives at the top.
+
+  Settled by the user on 2026-11-01.
+- **Because:**
+  - The sim blurs whatever lies behind a panel's painted pixels, so a translucent pixel would show it, and we know no way to turn it off (unverified: no run has measured it, and a look at a translucent card in the sim settles it).
+  - A full-height column would block a third of the cockpit if clicks don't pass through its empty part, which no run has tried ([cases in the sim](01-apps.md#cases-for-the-bench)).
+- **Leaves out:** how the banner shows in VR, beyond the same panel.
+
+## A visible lock is a veil over the display with one centered card
+
+- **Decided:** a visible lock is a veil over the whole display, which stays readable through it, tinted for its lock with a fine hatch, and over it a card like the banner's, one centered column of icon, title, message, and Dismiss where it has one, smaller only on a display too small for it.
+  - While this machine has no link up to the PF, in amber: "Reconnecting to James" over "When they reconnect, their actions during the outage will be replayed here."
+  - While it catches up, neutral with a spinner: "Catching up with James", with no way out, since it ends by itself.
+  - Once the core stops renewing the lock, 8s to 10s after its last renewal, tinted from our trouble color: "Dual Input stopped responding" over "This screen works, but won't be synced until Dual Input is back.", with Dismiss.
+    Presses pass through this veil to the display, and only its card takes them.
+    Dismiss clears the warning on every display at once, by the CommBus event `DUALINPUT_BRIDGE_DISMISS`, since the core is silent then.
+  - The unseen lock paints nothing, since the other pilot's figure at the display shows who's pressing, and the blocked press's flash fills the display in our error red at 55% while the press is held.
+
+  This changes [what the bridge owns](../architecture/02-code-map.md#what-the-bridge-owns), whose warning blocks nothing and has no button, and adds to [names the sim shares](../architecture/02-code-map.md#names-the-sim-shares).
+  Settled by the user on 2026-11-01.
+- **Because:**
+  - The CommBus reached every cockpit panel (measured on MSFS 2024, 2026-10-08, [interface log][coverage]).
+  - Anything in the pilot's input path must fail open: blocking the whole display until Dismiss would hang the release on the pilot, or on the button's own script.
+  - "Replayed" is the record's word for how a link cut under 30 minutes comes back, and reads plainly where the sentence says whose actions and where (user, 2026-11-01).
+
+## A scrolling page folds its surfaces, and a change on a page is one moment in three steps
+
+- **Decided:**
+  - A change on a page is one moment: what's going fades, the layout settles, and what's arriving fades in, starting once the layout is about 80% there, so two states never show at once.
+    Pages move only `transform` and opacity, with positions from offsets, for Coherent GT.
+  - The app's scrolling boxes draw no scrollbar; their fades say there's more, and dragging anywhere scrolls, coasting from a fast release.
+  - A scroll box's fades are a mask on the box itself, so they can't part from its clip, except the fade under the Session page's pinned card, which stays a layer, since the card pins inside the box.
+    On every other tab's page, that mask covers only the foot: at the top, a surface folds under the page's top edge, and words and controls outside a surface each fade through a mask of their own.
+  - A guide that opens scrolls the page just enough to show it whole, and not at all when it shows already.
+
+  A surface's fold in the bench, `foldPage` in `frames/scroller.tsx`, isn't the product's shape, since it reads a border's color from a computed `box-shadow` and sets its masks on a card's children.
+  In the product the card owns its fold, as an unclipped wrapper around a clipped layer and a border layer, and one scroll loop sets two numbers, the clip's depth and the fade's strength, from offsets, on the elements each card registers.
+  Settled by the user on 2026-10-30 and 2026-10-31.
+- **Because:** at a fraction of a pixel, a box's clip rounded out to the row its edge fell in, while a fading layer covered only a sliver of that row, so a row of what scrolled under showed at full strength past the fade (measured in Chromium, 2026-10-31).
+- **Leaves out:** what the fold costs a frame ([above](#stage-11b-checks-in-coherent-gt-what-the-frames-lean-on)).
+
+## The apps' words follow a few rules
+
+- **Decided:**
+  - Words name pilots and never use he or she, since Dual Input doesn't know anyone's pronouns.
+  - A status of something happening now takes the progressive, "James is sharing traffic", and present simple stays for how things work.
+  - A tooltip or toast of one sentence takes no period.
+  - A pilot reads "session" where Dual Input means one, not "flight", which would turn "Adam left the flight" into a claim about the main menu.
+  - One word serves a catch-up and a replay on the banner and the header, "catching up", since "replay sounds like it's unrelated to you".
+  - Everything in a colored box takes the box's palette, its hovers and focus rings included.
+
+  Settled by the user on 2026-10-29, 2026-10-31, and 2026-11-01.
+
+## The profile format gains a name, a maturity, and an entry's description
+
+- **Decided:** level 1 of the profile format gains `name`, the aircraft's name as the EFB app's list shows it, and `maturity`, `stable` or `experimental`, which the profile's authors set, and [stage 11b](../build/plan.md#11b-the-apps) adds them.
+  A state entry gains an optional `description`, which the checklist shows under its name ([profile entries](../sync/01-profile-entries.md)).
+  The `checklist:` block and the authors' notes come after v1, and the design has made room for both.
+  Settled by the user on 2026-10-26 and 2026-10-30.
+
+## Mark the moment leaves the EFB app
+
+- **Decided:** the EFB app has no button that marks the moment, and the core's `recording.mark` command (`src/platform/recording/src/lib.rs`) stays, with no sender, for a later button.
+  This changes [marking the moment](../recording/01-recording-and-bug-reports.md#marking-the-moment) and [the scope's EFB app](../product/03-v1-scope.md#efb-app).
+  Settled by the user on 2026-10-31.
+- **Because:** every input is recorded with its time, so a pilot's rough time still finds the moment (user, 2026-10-31).
+
+[coverage]: log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel
+[p22]: log.md#2026-11-01-the-sdks-coherentgt-debugger-runs-our-pages-in-coherent-gt-with-no-sim-and-matches-the-sims-efb-on-1159-of-p14s-1170-css-items-and-on-repeated-work-in-a-loaded-page
 [p02]: ../install/log.md#2026-10-25-an-egui-window-in-a-rust-tray-app-takes-96-mb-to-153-mb-while-open-and-leaves-62-mb-to-69-mb-in-the-process-once-it-closes-where-tauris-leaves-37-mb
 [p08]: log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight
 [p10]: log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly

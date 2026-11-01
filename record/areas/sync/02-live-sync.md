@@ -6,6 +6,10 @@ Depends on:  01-profile-entries.md, ../product/03-v1-scope.md (state sync, the c
 Decides:     What crosses the wire, the order changes apply in, how a conflict resolves, how Dual Input checks that a write landed, and how it keeps a change from applying twice.
 ```
 
+> **Note**
+> Stage 11b's tentative decision on [the banner's content](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) changes [checking that a write landed](#checking-that-a-write-landed)'s notification until the apps' design confirms it (user, 2026-11-01): it names the control with no article, to fit any profile's name, as "Couldn't sync Beacon", and drops the line asking for a bug report.
+> The log's line stays, and [the EFB app has no button that marks the moment](../interface/decisions.md#mark-the-moment-leaves-the-efb-app), though `recording.mark` stays in the core.
+
 A state entry crosses the wire as its new value, and each receiving machine moves its cockpit to that value through the entry's write, then reads it back to check.
 Events and pointer presses cross as what happened.
 All three travel in one stream, in an order every machine agrees on, so a page key always lands before a press on the page it opened.

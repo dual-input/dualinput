@@ -6,6 +6,9 @@ Depends on:  ../product/03-v1-scope.md (state sync), 02-live-sync.md, 03-catch-u
 Decides:     The profile's two blocks, the fields of an entry, the writer API, and what a profile says once per aircraft.
 ```
 
+> **Note**
+> Stage 11b's tentative decision that [the profile format gains a name, a maturity, and an entry's description](../interface/decisions.md#the-profile-format-gains-a-name-a-maturity-and-an-entrys-description) adds an optional `description` to a state entry, which the checklist shows under its name, until the apps' design confirms it (user, 2026-10-30).
+
 A profile describes an aircraft's cockpit in two blocks.
 `state:` holds the controls whose value Dual Input can read, or can track by counting the events that change it: it syncs them as values, checks that each write landed, and brings a cockpit that missed changes back to the flying machine's state.
 `events:` holds what Dual Input can only see happen: it forwards those live, best effort, and never catches them up.

@@ -9,7 +9,12 @@ Decides:     That the desktop app does the watcher's jobs from a tray icon; what
 > **Note**
 > Stage 11b's tentative decision that [Dual Input's one full window is its EFB app](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app) changes what the desktop app's window is for: it shows only the desktop app's own screens, the update's progress and the 24 hours of figures, and the app keeps Tauri for them (user, 2026-10-25).
 > So an open window keeps no core running, where [the sim and the core](#the-sim-and-the-core) and [one program from login](#one-program-from-login) have it hold one, and the core no longer starts the desktop app's program, since the EFB app has no button for it.
-> How the EFB app shows an update and asks for Install now, which the desktop app would carry out by closing the sim, installing, and starting the sim again, the apps' design settles later.
+
+> **Note**
+> Stage 11b's tentative decisions settle part of [left to the apps' stage](#left-to-the-apps-stage) until the apps' design confirms them (user, 2026-10-25 to 2026-11-01).
+> [A fixed local port](../interface/decisions.md#the-desktop-app-tells-the-efb-app-about-updates-and-the-firewall-over-a-fixed-local-port) carries the update's state and the firewall rule's to the EFB app, whose [Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version) shows the update and Start with Windows, and whose [header](../interface/decisions.md#the-header-shows-only-what-needs-the-pilot) offers the firewall's Fix.
+> Quit lives only in the tray, and [the desktop app's own screens](../interface/decisions.md#the-desktop-app-shows-velopacks-windows-and-its-own-figures-and-the-build-designs-the-rest) are designed during the build.
+> The join refusal when the host is behind says they need to leave the session and update ([Host and Join](../interface/decisions.md#host-and-join-answer-inside-the-start-card)).
 
 Dual Input has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.

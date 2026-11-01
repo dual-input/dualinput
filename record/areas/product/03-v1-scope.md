@@ -30,6 +30,15 @@ Decides:     The scope of every v1 feature.
 > **Note**
 > Stage 11b's tentative decision that [traffic polls within the sim's 200km cap, with no radius setting](../interface/decisions.md#traffic-polls-within-the-sims-200km-cap-with-no-radius-setting) takes out [traffic sync](#traffic-sync)'s radius setting until the apps' design confirms it (user, 2026-10-31), since the traffic generators keep their aircraft near the pilot and the airport's own aircraft stay at any radius.
 
+> **Note**
+> Stage 11b's other tentative decisions change this document until the apps' design confirms them (user, 2026-10-25 to 2026-11-01):
+>
+> - [Take-control key](#take-control-key)'s long press holds 0.35s, the button's hold ([take control](../interface/decisions.md#take-control-is-a-held-button-under-the-tabs-with-one-hold-of-035s)).
+> - [The notification banner](#notification-banner)'s place, box, and dismissal are [the banner's box](../interface/decisions.md#the-banner-is-a-box-of-opaque-cards-at-the-screens-top-right), its content is [the banner's content](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on), and this document's example lines give way to the words in the frames: "Couldn't sync Beacon", with no ask for a bug report, and a crash's "They're still in the session."
+> - [The EFB app](#efb-app) has no button that marks the moment ([mark the moment](../interface/decisions.md#mark-the-moment-leaves-the-efb-app)).
+> - [Avatar sync](#avatar-sync) has four switches for which figures show, and its banner says "This seat is taken" rather than naming the free seat ([the Figures tab](../interface/decisions.md#the-figures-tab-holds-the-pilots-figure-and-explains-what-its-figures-can-do)).
+> - [The recording rule](#recording-and-bug-reports) has the log replace the home folder's path alone, not the Windows username ([the core's log](../interface/decisions.md#the-cores-log-keeps-display-names-and-replaces-only-the-home-folders-path)).
+
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
 It says what Dual Input does, not how: mechanisms are for the sync design in `record/areas/sync/` and the architecture, step 7, and screens and wording for a later pass.
@@ -382,7 +391,7 @@ The connection carries everything between the crew's machines, directly when it 
   A pilot whose Dual Input crashed while their sim kept running comes back as a late joiner too, as one whose sim crashed does; Dual Input aims for a core that never crashes, and asks for a bug report when one does (user, 2026-10-12; [04-order-and-recovery](../sync/04-order-and-recovery.md#a-core-that-restarts)).
 - A sim that closes, by a crash or by its pilot, counts as leaving the flight, and its pilot comes back as a late joiner, since a closed sim's pages, FMS, and avionics state can't be restored (user, 2026-10-11; [04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed)).
   A PF's crash passes control to the PM at once.
-  When a pilot's sim crashes, their core stays up, and the others' notification says that pilot's sim crashed rather than that their connection dropped, such as "James's sim crashed. Dual Input rejoins him once he's back in a flight." ([Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed); user, 2026-10-07).
+  When a pilot's sim crashes, their core stays up, and the others' notification says that pilot's sim crashed rather than that their connection dropped, such as "James's sim crashed. Dual Input rejoins them once they're back in a flight." ([Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed); user, 2026-10-07).
   How the core tells a crash from a pilot closing the sim is open (same entry).
 - A pilot who leaves the flight but not the session, by going to the sim's main menu or loading another flight, drops out of flying: control passes to the PM if they were the PF, and the others get a notification.
   Once they're in a flight again, Dual Input rejoins them as a late joiner.

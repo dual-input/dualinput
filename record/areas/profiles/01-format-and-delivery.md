@@ -12,6 +12,9 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 > - An event entry's `write` takes no `toggle` or stepping map, since an event has no value of the cockpit's to compare or step from: a toggle event is written as a name on its own, `write: K('TOGGLE_BEACON_LIGHTS')`, a value the aircraft keeps out of sight is a state entry counting into a shadow value, and an event carrying a count of steps takes a write function.
 > - A write function's `write()` on an `L:` or `A:` variable needs a value, which level 1's declarations require, so TypeScript refuses `write(L('X'))`; and a `K:` event with `value` among its values, written with none, takes the function's own value there.
 
+> **Note**
+> Stage 11b's tentative decision that [the profile format gains a name, a maturity, and an entry's description](../interface/decisions.md#the-profile-format-gains-a-name-a-maturity-and-an-entrys-description) adds `name` and `maturity` to [a profile's top-level keys](#a-profile) at level 1, and an optional `description` to a state entry, until the apps' design confirms it (user, 2026-10-26 and 2026-10-30).
+
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Dual Input defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
 Profiles live as flat files in `profiles/` in Dual Input's own public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules in it, under its hash.

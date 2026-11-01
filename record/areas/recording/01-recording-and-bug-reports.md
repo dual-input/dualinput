@@ -6,6 +6,12 @@ Depends on:  ../core/01-loop-and-edge.md, ../architecture/02-code-map.md, ../net
 Decides:     That a recording holds every input; what a replay runs and checks; how the recording is encoded; what keeps a home folder's path out of the log and the clipboard out of the recording; what each PC keeps; how a bug report reaches us in v1, and how one is uploaded, admitted, kept, and fetched after v1; the budgets; and the cases for the bench (node 6.6).
 ```
 
+> **Note**
+> Stage 11b's tentative decisions change this design until the apps' design confirms them.
+> [The core's log keeps display names](../interface/decisions.md#the-cores-log-keeps-display-names-and-replaces-only-the-home-folders-path), so [the home folder's path](#the-home-folders-path), `log.txt`'s row, and the case for a log line replace the home folder's path alone, not the Windows username (user, 2026-10-25).
+> [The EFB app has no button that marks the moment](../interface/decisions.md#mark-the-moment-leaves-the-efb-app), so `recording.mark` stays with no sender (user, 2026-10-31).
+> [The Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version) lists the runs, opens a run's folder for a report, and says when a recording stopped (user, 2026-10-31).
+
 A recording is a replay log of every input the core takes, so a replay runs every unit and checks every unit's outputs (user, 2026-10-21; [recording log][every]).
 Each PC keeps its runs whole within 1 GB.
 When a pilot reports a problem, we ask for the run's log first, and for its recording only when the log isn't enough, and the pilot sends the run's folder by hand; uploading a part of a report to R2 through our Worker, signed with the key the pilot held in that session, comes after v1.

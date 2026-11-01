@@ -10,6 +10,10 @@ Decides:     How a pilot binds the key or button, as a single or a long press; h
 > Stage 11b's tentative decision that [Dual Input's one full window is its EFB app](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app) moves take-control's section, which binds the input, from the desktop app to the EFB app, and the take-control button is the EFB app's alone (user, 2026-10-25).
 > Binding in the EFB happens with the sim's window in front, where a bound key counts.
 
+> **Note**
+> Stage 11b's tentative decision that [take control is a held button under the tabs](../interface/decisions.md#take-control-is-a-held-button-under-the-tabs-with-one-hold-of-035s) moves a long press's hold from 1s to 0.35s, the button's hold, so the gesture has one number, until the apps' design confirms it (user, 2026-10-31).
+> The warning while the link to the PF is lost reads "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect.", and [the banner's content](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) drops the warning after a takeover through a lost link, since by then the deed is done.
+
 A pilot binds one keyboard key or flight-hardware button in the desktop app, as a single press, which takes control on its down, or a long press, which takes control once it has been held 1s.
 The press, or the take-control button in the EFB app or the desktop app, asks the session crate's `TakeControl`, whose guards decide, and a refused press plays a short refusal cue and shows the guards' reason on the banner.
 When control passes, every machine whose pilot is in the flight plays the control-passed cue and shows who has control, with no recorded line.
@@ -78,7 +82,7 @@ The binding, and the take-control button in either app, make the same request:
 
 - The refusal cue is how a pilot pressing hardware in VR learns of a refusal without looking at the banner.
 - While this core's link to the PF is lost, a press takes control at once, with no confirming step, a catch-up running or not, since the lost-link rules apply instead ([catch-up](../sync/04-order-and-recovery.md#catch-up)).
-  Once control has passed, take-control shows the warning that [while a link is lost](../network/01-between-machines.md#while-a-link-is-lost) asks for as a notification, such as "James may still be flying. If he is, his aircraft will jump to yours when he reconnects."
+  Once control has passed, take-control shows the warning that [while a link is lost](../network/01-between-machines.md#while-a-link-is-lost) asks for as a notification, such as "James may still be flying. If they are, their aircraft will jump to yours when he reconnects."
 - Take-control's slice of client state carries the verdict with each denial's reason, the binding's name and whether it takes a long press, the next press while Bind waits for it, and, while the link to the PF is lost, the warning, so the apps' buttons show it before a press; where each shows is [6.16](../architecture/plan.md#616-the-apps)'s.
 
 ## A pass

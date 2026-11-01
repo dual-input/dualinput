@@ -13,7 +13,7 @@
 #   beside `members`.
 members = ["src/engines/*", "src/platform/*", "src/features/*/core", "src/apps/*", "src/sim-package/*", "tools/msfs-sdk", "tools/profile-builder", "tools/bench/core-helper", "tools/bench/desktop-app", "tools/bench/droplet", "tools/bench/relay", "tools/sim/desk"]
 # TypeScript, and the sim's stock files.
-exclude = ["src/engines/page-client", "src/platform/banner", "src/platform/efb-shell", "src/platform/panel-bridge", "src/sim-package/pages", "src/sim-package/panel", "src/sim-package/stock"]
+exclude = ["src/engines/page-client", "src/platform/banner", "src/platform/desktop-shell", "src/platform/efb-shell", "src/platform/panel-bridge", "src/sim-package/pages", "src/sim-package/panel", "src/sim-package/stock", "src/apps/desktop"]
 # A plain `cargo build` builds these. src/sim-package/'s glob stays out of this list, since our
 # WASM module's build script needs settings only cargo-msfs gives it, so the module's list of
 # routines, which builds anywhere, is named on its own.

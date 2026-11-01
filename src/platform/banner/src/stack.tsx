@@ -48,7 +48,11 @@ function Row({ fresh, leaving, away, onGone, children }: { fresh: boolean; leavi
     }
   }, [fresh])
   useEffect(() => {
-    if (!leaving) return
+    // Wanted again before it had gone, as a line can be when a card leaves and another arrives, it comes straight back.
+    if (!leaving) {
+      setStage((now) => (now === "out" || now === "shut" ? "rest" : now))
+      return
+    }
     const timers: number[] = []
     if (away) setStage("shut")
     else {

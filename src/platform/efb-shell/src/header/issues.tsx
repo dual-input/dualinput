@@ -10,6 +10,8 @@ export type HeaderStatus = {
   offline?: boolean
   servers?: "reachable" | "unreachable"
   firewall?: "allows" | "blocks"
+  /** Asks the desktop app to add the rule, with its UAC prompt. */
+  fixFirewall?: () => void
   /** The connection to other pilots failed to open. */
   connection?: boolean
   module?: "stopped" | "missing"
@@ -70,7 +72,14 @@ export function issuesOf(status: HeaderStatus, inSession: boolean): Issue[] {
       title: "Windows Firewall is blocking Dual Input",
       detail: inSession ? "Connections may run through our relay servers, with more latency." : "You can still connect through our relay servers, but with more latency.",
       action: (
-        <Button size="sm" variant="secondary" onClick={() => toast("Waiting for Windows")}>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => {
+            status.fixFirewall?.()
+            toast("Waiting for Windows")
+          }}
+        >
           Fix
         </Button>
       ),

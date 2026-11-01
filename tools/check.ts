@@ -10,8 +10,10 @@ import fs from "node:fs"
 import path from "node:path"
 import { createRequire } from "node:module"
 
+import { DESKTOP } from "./lib/desktop-pages.ts"
 import { readMessageTypes, writeMessageTypes } from "./lib/messages.ts"
 import { buildModule, clippyModule, missingExports } from "./lib/module.ts"
+import { workspaceVersion } from "./lib/package.ts"
 import { buildPages, checkPages } from "./lib/pages.ts"
 import { panelCompileProblem } from "./lib/panel.ts"
 import { fromRoot, ROOT } from "./lib/repo.ts"
@@ -29,6 +31,7 @@ const checks: [string, () => void | Promise<void>][] = [
   // build's code too, which only src/apps/core's `stand-in` feature compiles.
   ["Clippy", () => run("cargo", ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"])],
   ["the default members' tests", () => run("cargo", ["test"])],
+  ["the desktop app's Rustfmt, Clippy, and tests", checkDesktop],
   ["our WASM module's build and exports", checkModule],
   ["Clippy on our WASM module", clippyModule],
   ["each tsconfig's type check", typeCheck],
@@ -111,6 +114,15 @@ function typeCheck(): void {
 
 function typeScriptTests(): string[] {
   return ["src", "tools"].flatMap((f) => find(path.join(ROOT, f), ".test.ts")).map((f) => fromRoot(f))
+}
+
+/** The desktop app is a Cargo workspace of its own, so the workspace's checks above don't reach it, and its version is written apart from the root's. */
+function checkDesktop(): void {
+  const version = /^version = "([^"]+)"/m.exec(fs.readFileSync(path.join(DESKTOP, "Cargo.toml"), "utf8"))?.[1]
+  if (version !== workspaceVersion()) throw new Failed(`src/apps/desktop/Cargo.toml names version ${version}, and the root Cargo.toml ${workspaceVersion()}`)
+  run("cargo", ["fmt", "--", "--check"], { cwd: DESKTOP })
+  run("cargo", ["clippy", "--all-targets", "--", "-D", "warnings"], { cwd: DESKTOP })
+  run("cargo", ["test"], { cwd: DESKTOP })
 }
 
 /** CI has no sim to compile with, so it checks only that the committed compile came from this source. */

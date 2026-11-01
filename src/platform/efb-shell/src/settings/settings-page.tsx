@@ -9,9 +9,11 @@ import { createElement, useEffect, useRef, useState } from "react"
 import type { ReactNode, Ref } from "react"
 
 import type { HelperSlice } from "../../../../engines/messages/ts/core_helper/HelperSlice.ts"
+import type { Update } from "../../../../engines/messages/ts/desktop/Update.ts"
 import type { RecordingSlice } from "../../../../engines/messages/ts/recording/RecordingSlice.ts"
 import type { Run } from "../../../../engines/messages/ts/recording/Run.ts"
 import type { SessionSlice } from "../../../../engines/messages/ts/session/SessionSlice.ts"
+import { useDesktopState } from "../desktop-link.ts"
 import { useCoreSlice, useShell } from "../part.ts"
 import type { Part } from "../part.ts"
 import { WANTED } from "../wanted.ts"
@@ -204,12 +206,11 @@ function Recordings() {
  * moment, as a count does.
  */
 function DualInput({ version }: { version: string }) {
-  const { link, updateAsks } = useShell()
+  const { desktop, updateAsks } = useShell()
   const scrollTo = useScrollTo()
   const session = useCoreSlice<SessionSlice>("session")
-  const wanted = useCoreSlice<Wanted>(WANTED)
-  const update = wanted?.update ?? { state: "current" as const, next: "", checked: undefined, done: undefined }
-  const [withWindows, setWithWindows] = useState(true)
+  const local = useDesktopState(desktop)
+  const update: Update = local?.update ?? { state: "current", checked: null }
   const moment = useMoment(update.state, update)
   const ready = useReveal(update.state === "ready")
   const bar = useReveal(update.state === "downloading")
@@ -219,11 +220,11 @@ function DualInput({ version }: { version: string }) {
     // The header's View update asks by counting up, and the page is this section's for its life.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateAsks])
-  const check = () => void link.client.command("update.check", null).catch(() => {})
+  const check = () => desktop.ask({ t: "check-for-updates" })
   const shown = moment.shown
   const checks = (state: string) => state === "current" || state === "checking"
   const note =
-    shown.state === "current" ? (
+    !local ? undefined : shown.state === "current" ? (
       `Up to date${shown.checked ? `, checked ${shown.checked}` : ""}`
     ) : shown.state === "checking" ? (
       <span className="flex items-center">
@@ -231,20 +232,25 @@ function DualInput({ version }: { version: string }) {
         Checking for updates
       </span>
     ) : shown.state === "downloading" ? (
-      `Downloading ${shown.next}, ${update.done ?? 0}%`
+      `Downloading ${shown.next}, ${update.state === "downloading" ? update.done : 0}%`
     ) : shown.state === "failed" ? (
-      `Couldn't download ${shown.next}: the connection timed out`
+      `Couldn't download ${shown.next}: ${shown.error}`
     ) : undefined
   return (
     <Section title="Dual Input" at={at}>
       <SettingsCard>
-        <button type="button" className="flex min-h-9 w-full items-center px-5 text-left text-sm" onClick={() => setWithWindows(!withWindows)}>
-          <span className="flex-1">Start with Windows</span>
-          <Switch checked={withWindows} tabIndex={-1} className="pointer-events-none" />
-        </button>
-        <Separator className="my-2" />
+        {/* It's the desktop app that starts with Windows, so with none to ask, there's no switch to show. */}
+        {local && (
+          <>
+            <button type="button" className="flex min-h-9 w-full items-center px-5 text-left text-sm" onClick={() => desktop.ask({ t: "set-start-with-windows", on: !local.start_with_windows })}>
+              <span className="flex-1">Start with Windows</span>
+              <Switch checked={local.start_with_windows} tabIndex={-1} className="pointer-events-none" />
+            </button>
+            <Separator className="my-2" />
+          </>
+        )}
         <Row label={`Version ${version}`} note={note && <span className="block" style={part(moment.stage, true)}>{note}</span>} tone={shown.state === "failed" ? "text-destructive" : undefined}>
-          {checks(shown.state) && (
+          {local && checks(shown.state) && (
             <Button size="sm" variant="secondary" disabled={update.state === "checking"} onClick={check} style={part(moment.stage, !(checks(moment.from.state) && checks(moment.to.state)))}>
               Check now
             </Button>
@@ -257,7 +263,7 @@ function DualInput({ version }: { version: string }) {
         </Row>
         <Room open={bar.open} style={bar.style} pad="pb-3 pt-1">
           <div className="mx-5 h-1 overflow-hidden rounded-full bg-muted">
-            <div className="h-full rounded-full bg-primary" style={{ width: `${update.done ?? 0}%`, transition: `width ${MOMENT.step * 3}ms linear` }} />
+            <div className="h-full rounded-full bg-primary" style={{ width: `${update.state === "downloading" ? update.done : 0}%`, transition: `width ${MOMENT.step * 3}ms linear` }} />
           </div>
         </Room>
         <Room open={ready.open} style={ready.style} pad="pb-2 pt-1.5">
@@ -265,13 +271,13 @@ function DualInput({ version }: { version: string }) {
             <div className="flex items-start">
               <CircleArrowUp className="mr-2.5 mt-0.5 size-4 shrink-0 text-primary" />
               <span className="flex flex-col">
-                <span className="text-sm font-medium text-primary">Dual Input {update.next} is ready</span>
+                <span className="text-sm font-medium text-primary">Dual Input {update.state === "ready" ? update.next : ""} is ready</span>
                 <span className="mt-1 text-sm text-foreground/75">{session?.held ? "Install it when you're not in a session." : "Close the sim to install."}</span>
               </span>
             </div>
             {!session?.held && (
               <div className="mt-3 pl-[26px]">
-                <Confirm size="sm" question="Restart the sim?" go="Restart now" align="start" onConfirm={() => toast("Restarting the sim to update")}>
+                <Confirm size="sm" question="Restart the sim?" go="Restart now" align="start" onConfirm={() => desktop.ask({ t: "install-update" })}>
                   Install and restart
                 </Confirm>
               </div>

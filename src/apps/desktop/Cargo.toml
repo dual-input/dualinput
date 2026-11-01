@@ -1,0 +1,46 @@
+# A workspace of its own, with its own Cargo.lock, since Cargo turns on each crate's features for every crate a build
+# holds: in the root's workspace, Tauri's uuid gave the loop's crates getrandom, which the map check refuses, and would
+# have changed how the core compiles (record/areas/build/log.md, 2026-11-01).
+[workspace]
+
+[package]
+name = "dualinput-desktop"
+# The root Cargo.toml's [workspace.package] names the same version, and tools/check.ts fails if they differ.
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+# Tauri builds the window's webview, and the tray icon it took 2.2 MB to hold (record/areas/install/log.md, p01).
+# custom-protocol serves the pages from the program, as the Tauri CLI's release build does, so a plain `cargo build`
+# needs no CLI.
+[dependencies]
+# The local port's sockets read and write through StreamExt and SinkExt.
+futures-util = { version = "0.3.34", default-features = false, features = ["sink"] }
+messages = { path = "../../engines/messages" }
+serde_json = "1.0.145"
+tauri = { version = "=2.12.1", features = ["custom-protocol", "tray-icon"] }
+# Tauri's own runtime is tokio, so the local port runs on it.
+tokio = { version = "1.53.3", features = ["net", "rt", "sync", "macros"] }
+# The same WebSocket implementation as the core's server, so the workspace stays at one.
+tokio-websockets = { version = "0.13.3", default-features = false, features = ["server", "sha1_smol"] }
+
+[dependencies.windows-sys]
+version = "0.61.2"
+features = ["Win32_Foundation", "Win32_System_Registry"]
+
+[build-dependencies]
+tauri-build = { version = "=2.7.1", features = [] }
+
+# The local port's tests play the EFB app with a WebSocket client.
+[dev-dependencies]
+tokio-websockets = { version = "0.13.3", default-features = false, features = ["client", "fastrand", "server", "sha1_smol"] }
+
+# The root's [workspace.lints] names the same lints, and src/apps/clippy.toml, the nearest, is what they read.
+[lints.clippy]
+iter_over_hash_type = "deny"
+disallowed_methods = "deny"
+
+# Cargo reads profiles only from a workspace's root, so the root's lines are repeated here.
+[profile.release]
+lto = true
+strip = true

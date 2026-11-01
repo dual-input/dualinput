@@ -16,6 +16,8 @@ import type { SimSlice } from "../../../engines/messages/ts/sim/SimSlice.ts"
 import { useCoreState, useSlice } from "../../../engines/page-client/src/core-link.ts"
 import type { CoreLink, CoreState } from "../../../engines/page-client/src/core-link.ts"
 import { BannerPanel } from "./banner-panel.ts"
+import { useDesktopState } from "./desktop-link.ts"
+import type { DesktopLink } from "./desktop-link.ts"
 import { Header, HEADER_HEIGHT } from "./header/header.tsx"
 import { issuesOf } from "./header/issues.tsx"
 import type { HeaderStatus } from "./header/issues.tsx"
@@ -71,18 +73,20 @@ function useBannerPanel(link: CoreLink, sim: SimWindow, session: SessionSlice | 
   }, [panel, core, held, flying, pageOpen])
 }
 
-function useHeaderStatus(link: CoreLink, version: string, viewUpdate: () => void): HeaderStatus {
+function useHeaderStatus(link: CoreLink, desktop: DesktopLink, version: string, viewUpdate: () => void, fixFirewall: () => void): HeaderStatus {
   const net = useSlice<NetSlice>(link, "network")
   const sim = useSlice<SimSlice>(link, "sim")
   const notifications = useSlice<Notification[]>(link, "notifications")
   const wanted = useSlice<Wanted>(link, WANTED)
+  const local = useDesktopState(desktop)
   const raised = (id: string) => !!notifications?.some((notification) => notification.id === id)
   const want = notifications?.find((notification) => notification.id.indexOf("core-helper.failed.") === 0) as (Notification & { detail?: string }) | undefined
-  const update = wanted?.update
+  const update = local?.update
   return {
     offline: net?.internet === false,
     servers: wanted?.servers,
-    firewall: wanted?.firewall,
+    firewall: local?.firewall,
+    fixFirewall,
     connection: raised("network.bind"),
     module: sim?.module === "stopped" ? "stopped" : sim?.module === "missing" ? "missing" : undefined,
     bridge: raised("clients.no-panel"),
@@ -95,6 +99,7 @@ function useHeaderStatus(link: CoreLink, version: string, viewUpdate: () => void
 export type FrameProps = {
   host: HTMLElement
   link: CoreLink
+  desktop: DesktopLink
   sim: SimWindow
   version: string
   parts: Part[]
@@ -102,7 +107,7 @@ export type FrameProps = {
 
 type TabPage = { id: string; icon: ComponentType<{ className?: string }>; label: string; page: ComponentType }
 
-export function Frame({ host, link, sim, version, parts }: FrameProps) {
+export function Frame({ host, link, desktop, sim, version, parts }: FrameProps) {
   const { width, height, scale } = useViewSize(host)
   const inset = useStatusBarInset(scale)
   const core = useCoreState(link)
@@ -111,7 +116,7 @@ export function Frame({ host, link, sim, version, parts }: FrameProps) {
   const setDot = useCallback((id: string, on: boolean) => setDots((now) => (!!now[id] === on ? now : { ...now, [id]: on })), [])
   // Asks Settings to show its update section, by counting up, since the page stays mounted between asks.
   const [updateAsks, setUpdateAsks] = useState(0)
-  const shell = useMemo<Shell>(() => ({ link, open: setTab, setDot, updateAsks }), [link, setDot, updateAsks])
+  const shell = useMemo<Shell>(() => ({ link, desktop, open: setTab, setDot, updateAsks }), [link, desktop, setDot, updateAsks])
   useEffect(() => {
     startParts(parts, link)
     return () => stopParts(parts)
@@ -129,7 +134,7 @@ export function Frame({ host, link, sim, version, parts }: FrameProps) {
     [parts, version],
   )
   const session = useSlice<SessionSlice>(link, "session")
-  const status = useHeaderStatus(link, version, viewUpdate)
+  const status = useHeaderStatus(link, desktop, version, viewUpdate, () => desktop.ask({ t: "fix-firewall" }))
   const down = core === "not-running" || core === "closed"
   const issues = down ? [] : issuesOf(status, !!session?.held)
   useBannerPanel(link, sim, session, core)

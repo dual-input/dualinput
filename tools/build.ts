@@ -15,6 +15,7 @@
 // it doesn't copy a rebuild in, since a rebuild keeps the version
 // (record/areas/build/01-the-build.md, "Our package").
 
+import { buildDesktopPages, DESKTOP } from "./lib/desktop-pages.ts"
 import { install, refuseWhileSimRuns, userCfgs } from "./lib/install.ts"
 import { writeMessageTypes } from "./lib/messages.ts"
 import { buildModule } from "./lib/module.ts"
@@ -35,7 +36,9 @@ main(async () => {
   // build for nothing, and again before it copies, since the sim may start during the build.
   if (installing) refuseWhileSimRuns()
   writeMessageTypes()
+  await buildDesktopPages()
   run("cargo", ["build"])
+  run("cargo", ["build"], { cwd: DESKTOP })
   const pages = await buildPages()
   checkPages(pages)
   layOutPackage(buildModule(), pages)

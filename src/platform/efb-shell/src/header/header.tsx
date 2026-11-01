@@ -74,10 +74,14 @@ export function Header({ version, phase, icons, issues, offline, opened }: Heade
   const [hovered, setHovered] = useState(false)
   const [open, setOpen] = useState(false)
   const [pinned, setPinned] = useState(false)
+  // A row that cleared as the click came leaves nothing to open onto.
+  const hasRows = issues.length > 0
   useEffect(() => {
-    if (opened === 0) return
+    if (opened === 0 || !hasRows) return
     setPinned(true)
     setOpen(true)
+    // Each count opens it once, and a row arriving later opens nothing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opened])
   const place = useRef<HTMLDivElement>(null)
   const rows = useRef<HTMLDivElement>(null)

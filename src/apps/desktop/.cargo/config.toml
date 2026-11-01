@@ -1,0 +1,3 @@
+# Beside the root workspace's builds, under the folder the repository already ignores.
+[build]
+target-dir = "../../../target/desktop"

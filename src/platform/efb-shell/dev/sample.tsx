@@ -7,6 +7,7 @@ import { createPortal } from "react-dom"
 import { createRoot } from "react-dom/client"
 
 import { CoreLink } from "../../../engines/page-client/src/core-link.ts"
+import { DesktopLink } from "../src/desktop-link.ts"
 import { Frame } from "../src/frame.tsx"
 import type { Part } from "../src/part.ts"
 import type { SimWindow } from "../src/sim-window.ts"
@@ -63,13 +64,15 @@ export function mountSample({ host, aside, version, parts }: { host: HTMLElement
   const core = new StandInCore()
   const link = new CoreLink("efb-app", core.env())
   link.start()
+  const desktop = new DesktopLink(core.desktopEnv())
+  desktop.start()
   const corner = document.createElement("div")
   corner.style.cssText = "position:absolute;right:8px;bottom:64px;z-index:997;pointer-events:none"
   host.appendChild(corner)
   const place = aside ?? corner
   const tree = (
     <>
-      <Frame host={host} link={link} sim={NO_SIM} version={version} parts={parts} />
+      <Frame host={host} link={link} desktop={desktop} sim={NO_SIM} version={version} parts={parts} />
       {createPortal(
         <Root>
           <Chooser core={core} compact={!aside} />

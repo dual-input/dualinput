@@ -16,7 +16,7 @@ export type Landing = "session" | "header" | "figures" | "stay"
  * The core's notification, with what the card draws beyond its `text`, each field optional, since the core raises
  * `text` alone until each joins its type. `text` is the card's title, and a note with no `once` is held.
  */
-export type Note = Notification & {
+export type Note = Omit<Notification, "landing"> & {
   detail?: string
   /** Each thing a card counts, such as the controls that couldn't sync. */
   list?: string[]

@@ -19,9 +19,8 @@ export type Wanted = {
   roundTrips?: Record<string, number>
   /** For `session`: a difference's note, by its item. */
   notes?: Record<number, Difference["words"]>
-  /** For `network`: whether our servers answer, and for the desktop app's local port: whether the firewall blocks us. */
+  /** For `network`: whether our servers answer. */
   servers?: "reachable" | "unreachable"
-  firewall?: "allows" | "blocks"
   /** For setup's checks and the setting that records it's done: whether setup still has to run, and what it finds. */
   setup?: { failure?: "addon" | "offline" | "servers" | "firewall"; username: string; addonVersion?: string } | null
   /** For a setting that records the guide's done: whether this is a first visit. */
@@ -34,8 +33,7 @@ export type Wanted = {
   where?: "world-map" | "flight"
   /** For `recording`: why the run in progress stopped, if it has. */
   recordingStopped?: "no-space" | "failed-write"
-  /** For the desktop app's local port: the update's state. */
-  update?: { state: "current" | "checking" | "downloading" | "ready" | "failed"; next: string; done?: number; checked?: string }
+
 }
 
 export const WANTED = "wanted"

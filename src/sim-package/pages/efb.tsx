@@ -7,6 +7,7 @@ import { createRoot } from "react-dom/client"
 import { simEnv } from "../../engines/page-client/src/sim-env.ts"
 import { VERSION } from "../../engines/messages/ts/stamp.ts"
 import { CoreLink } from "../../engines/page-client/src/core-link.ts"
+import { DesktopLink } from "../../platform/efb-shell/src/desktop-link.ts"
 import { Frame } from "../../platform/efb-shell/src/frame.tsx"
 import type { Part } from "../../platform/efb-shell/src/part.ts"
 import { registerEfbApp } from "../../platform/efb-shell/src/register.ts"
@@ -26,9 +27,12 @@ registerEfbApp({
   name: "Dual Input",
   version: VERSION,
   mount(host) {
-    const link = new CoreLink("efb-app", simEnv())
+    const env = simEnv()
+    const link = new CoreLink("efb-app", env)
     link.start()
-    createRoot(host).render(<Frame host={host} link={link} sim={SIM} version={VERSION} parts={PARTS} />)
+    const desktop = new DesktopLink(env)
+    desktop.start()
+    createRoot(host).render(<Frame host={host} link={link} desktop={desktop} sim={SIM} version={VERSION} parts={PARTS} />)
   },
   left: releaseKeyboard,
   shown: viewShown,

@@ -8,6 +8,7 @@ import type { ComponentType } from "react"
 import type { JsonValue } from "../../../engines/messages/ts/serde_json/JsonValue.ts"
 import type { CoreLink } from "../../../engines/page-client/src/core-link.ts"
 import { useSlice } from "../../../engines/page-client/src/core-link.ts"
+import type { DesktopLink } from "./desktop-link.ts"
 
 /** What a part reaches of the core: slices, commands, and the `unit` messages it trades with its own unit. */
 export type PartApi = {
@@ -76,6 +77,7 @@ export function stopParts(parts: Part[]): void {
 /** The app around a page: the link to the core, and the frame's own controls. */
 export type Shell = {
   link: CoreLink
+  desktop: DesktopLink
   /** Opens a tab, as a part's own link to Settings does. */
   open(tab: string): void
   /** An amber dot on a tab's icon, while the tab holds a warning. */

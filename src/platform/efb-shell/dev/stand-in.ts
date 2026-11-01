@@ -10,7 +10,11 @@ import type { SessionSlice } from "../../../engines/messages/ts/session/SessionS
 import type { JsonValue } from "../../../engines/messages/ts/serde_json/JsonValue.ts"
 import type { SliceMember } from "../../../engines/messages/ts/session/SliceMember.ts"
 import type { Status } from "../../../engines/messages/ts/session/Status.ts"
+import type { DesktopState } from "../../../engines/messages/ts/desktop/DesktopState.ts"
+import type { ToDesktop } from "../../../engines/messages/ts/desktop/ToDesktop.ts"
 import { VERSION } from "../../../engines/messages/ts/stamp.ts"
+import type { Socket } from "../../../engines/page-client/src/page-client.ts"
+import type { DesktopEnv } from "../src/desktop-link.ts"
 import type { Wanted } from "../src/wanted.ts"
 
 /** A made-up pilot ID, 32 hex digits, which picks the color of their figure. */
@@ -78,6 +82,9 @@ const netUp = { network: { members: [{ pilot: JAMES, up: true, path: { Relay: { 
 const ROUND_TRIPS = { [JAMES]: 120 }
 const NOTES = { 1: "Some controls may not sync", 2: undefined, 3: undefined } as unknown as Record<number, string>
 
+const DESKTOP = "desktop"
+const LOCAL: DesktopState = { update: { state: "current", checked: "4 minutes ago" }, firewall: "allows", start_with_windows: true }
+
 /** Each state a person looks at, by name, with what it sets on top of the sim's healthy slices. */
 export const SCENES: Record<string, Slices> = {
   "First-time setup": { session: noSession, wanted: { setup: SETUP, aircraft: AIRCRAFT } },
@@ -113,7 +120,7 @@ export const SCENES: Record<string, Slices> = {
   },
   Flying: { ...netUp, session: held({ members: [me(inFlight), james(inFlight)], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, differences: DIFFERENCES, ready: null }), wanted: { roundTrips: ROUND_TRIPS, notes: NOTES } },
   "Header: offline": { session: noSession, network: { members: [], internet: false }, wanted: { aircraft: AIRCRAFT } },
-  "Header: several things": { session: noSession, wanted: { aircraft: AIRCRAFT, servers: "unreachable", firewall: "blocks", update: { state: "ready", next: "1.0.3" } } },
+  "Header: several things": { session: noSession, [DESKTOP]: { ...LOCAL, firewall: "blocks", update: { state: "ready", next: "1.0.3" } }, wanted: { aircraft: AIRCRAFT, servers: "unreachable" } },
   "Header: our own parts": {
     session: held({ members: [me(inFlight), james(inFlight)], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, ready: null }),
     sim: { ...healthy.sim, module: "stopped" },
@@ -123,19 +130,24 @@ export const SCENES: Record<string, Slices> = {
       { id: "network.bind", level: "trouble", text: "" },
       { id: "core-helper.failed.key", level: "warning", text: "Your take-control key isn't working", detail: "Windows didn't let Dual Input listen for F9." },
     ],
-    wanted: { firewall: "blocks", servers: "unreachable" },
+    [DESKTOP]: { ...LOCAL, firewall: "blocks" },
+    wanted: { servers: "unreachable" },
   },
   "Recording stopped": { session: noSession, wanted: { aircraft: AIRCRAFT, recordingStopped: "no-space" } },
-  "Update ready": { session: noSession, wanted: { aircraft: AIRCRAFT, update: { state: "ready", next: "1.0.3" } } },
+  "Update ready": { session: noSession, [DESKTOP]: { ...LOCAL, update: { state: "ready", next: "1.0.3" } }, wanted: { aircraft: AIRCRAFT } },
+  "No tray app": { session: noSession, [DESKTOP]: null, wanted: { aircraft: AIRCRAFT } },
   "Another version": { session: noSession, core: { version: "0.0.9", hash: "", username: null }, wanted: { aircraft: AIRCRAFT } },
 }
 
 const AFTER = { answer: 1000, slowAnswer: 10_000 }
 
+
 /** The stand-in. `scene` jumps to a state, and the commands a pilot presses walk from it as the core would. */
 export class StandInCore extends StandInBase {
   private countdown = 0
   private answer = 0
+  private desktopSocket: Socket | null = null
+  private local: DesktopState | null = LOCAL
   sceneName = "Before a session"
 
   protected greeted(): void {
@@ -155,7 +167,11 @@ export class StandInCore extends StandInBase {
     window.clearTimeout(this.countdown)
     window.clearTimeout(this.answer)
     this.sceneName = name
-    this.set({ ...healthy, recording: { runs: RUNS }, "core-helper": OUTPUTS, notifications: [], core: { version: VERSION, hash: "", username: null }, wanted: {}, ...SCENES[name] })
+    const scene = SCENES[name]!
+    this.desktopSocket?.onclose?.()
+    this.local = DESKTOP in scene ? (scene[DESKTOP] as DesktopState | null) : LOCAL
+    this.tellDesktop()
+    this.set({ ...healthy, recording: { runs: RUNS }, "core-helper": OUTPUTS, notifications: [], core: { version: VERSION, hash: "", username: null }, wanted: {}, ...scene })
   }
 
   protected command(name: string, args: JsonValue): void {
@@ -164,7 +180,6 @@ export class StandInCore extends StandInBase {
     else if (name === "session.leave") this.set({ session: noSession, wanted: { aircraft: AIRCRAFT } })
     else if (name === "session.ready") this.setReady(!!fields.on)
     else if (name === "session.go-without") this.goWithout(String(fields.member))
-    else if (name === "update.check") this.checkForUpdate()
     else if (name === "setup.done") this.set({ wanted: { ...this.wanted(), setup: null, color: String(fields.color) } })
     else if (name === "guide.done") this.set({ wanted: { ...this.wanted(), firstVisit: false } })
   }
@@ -215,13 +230,47 @@ export class StandInCore extends StandInBase {
     }, COUNTDOWN * 1000)
   }
 
+  /** The desktop app's side of the stand-in: the fixed local port, which holds what a scene says, and answers what the EFB app asks. */
+  desktopEnv(): DesktopEnv {
+    return {
+      every: (ms, then) => void window.setInterval(then, ms),
+      connect: () => {
+        const socket: Socket = {
+          onopen: null,
+          onmessage: null,
+          onclose: null,
+          send: (text) => this.askDesktop(JSON.parse(text) as ToDesktop),
+          close: () => {},
+        }
+        this.desktopSocket = socket
+        window.setTimeout(() => this.tellDesktop(), 0)
+        return socket
+      },
+    }
+  }
+
+  private tellDesktop(): void {
+    if (this.local) this.desktopSocket?.onmessage?.(JSON.stringify(this.local))
+  }
+
+  private setLocal(changes: Partial<DesktopState>): void {
+    if (!this.local) return
+    this.local = { ...this.local, ...changes }
+    this.tellDesktop()
+  }
+
+  private askDesktop(what: ToDesktop): void {
+    if (what.t === "set-start-with-windows") this.setLocal({ start_with_windows: what.on })
+    else if (what.t === "fix-firewall") window.setTimeout(() => this.setLocal({ firewall: "allows" }), 1400)
+    else if (what.t === "check-for-updates") this.checkForUpdate()
+  }
+
   /** Check now: checking, then downloading the update, then ready. */
   private checkForUpdate(): void {
-    const set = (update: Wanted["update"]) => this.set({ wanted: { ...this.wanted(), update } })
-    set({ state: "checking", next: "1.0.3" })
+    this.setLocal({ update: { state: "checking" } })
     window.setTimeout(() => {
-      for (let step = 0; step <= 20; step++) window.setTimeout(() => set({ state: "downloading", next: "1.0.3", done: step * 5 }), step * 120)
-      window.setTimeout(() => set({ state: "ready", next: "1.0.3" }), 21 * 120 + 300)
+      for (let step = 0; step <= 20; step++) window.setTimeout(() => this.setLocal({ update: { state: "downloading", next: "1.0.3", done: step * 5 } }), step * 120)
+      window.setTimeout(() => this.setLocal({ update: { state: "ready", next: "1.0.3" } }), 21 * 120 + 300)
     }, 1500)
   }
 }

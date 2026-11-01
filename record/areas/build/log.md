@@ -1,5 +1,20 @@
 # The build: log
 
+## 2026-11-01: Tauri in the root workspace gives the loop's crates getrandom, so the desktop app is a Cargo workspace of its own
+
+**Asked:** whether `src/apps/desktop` can sit in the one Cargo workspace [the code map](../architecture/02-code-map.md#the-workspace) gives every Rust crate.
+
+**Expected:** yes, since the map check reads normal dependencies, and no loop crate depends on Tauri.
+
+**Found:** with the desktop app as a member, on Tauri 2.12.1, the map check failed 10 loop crates, each as "`reaches kernel -> uuid -> getrandom`".
+Cargo turns on a crate's features for every crate one build holds, and Tauri asks for `uuid`'s `v4`, which the kernel's `uuid` keeps off so the loop draws IDs from its seed.
+The same unifying would have changed how the core compiles whenever a build held the desktop app, such as tokio's features.
+
+**Changed:** `src/apps/desktop` is a workspace of its own, with its own `Cargo.lock` and `target/desktop`, and the root's `exclude` names it.
+So a plain `cargo build` or `cargo test` at the root doesn't compile Tauri, `tools/build.ts` builds it apart, and `tools/check.ts` runs its Rustfmt, Clippy, and tests apart, and fails if its version differs from the root's.
+
+**Affects:** [the workspace](../architecture/02-code-map.md#the-workspace), which a blockquote there names.
+
 ## 2026-10-22: The Coherent GT check reads a 2.7 MB bundle in 0.66s and its hook answers in 0.3s, and it fails an `X || fallback` fill-in, which none of its rules passes
 
 **Asked.**

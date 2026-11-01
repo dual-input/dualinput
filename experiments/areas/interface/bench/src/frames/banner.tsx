@@ -45,12 +45,13 @@ const hexOf = (hue: string) => FIGURE_COLORS.find((c) => c.name === hue)!.hex
 // A notification is information, a warning, or trouble that costs the pilot a feature, as the
 // record has them (record/areas/core/02-clients-and-panel-bridge.md, What a unit registers and
 // calls). One about a crewmate, or about who has control, leads with that pilot's head, facing
-// forward whether or not they're in the flight, since a slumped one, as the crew rows draw a pilot
-// who's out, read as turned too far at a card's size (user, 2026-11-01); one about something happening now
+// forward, and at 40% opacity while they're out of the flight, as the crew rows' slumped head is,
+// where the slump itself read as turned too far at a card's size (user, 2026-11-01: "feel free to
+// apply lower opacity in crashes, etc"); one about something happening now
 // that ends by itself, catching up, leads with a spinner in a neutral color, as the take-control
 // strip's line does; the rest lead with their level's icon, as the header's rows do.
 type Level = "info" | "warning" | "trouble"
-type Note = { level: Level; title: string; detail?: string; list?: string[]; who?: Pilot; busy?: boolean; held?: boolean }
+type Note = { level: Level; title: string; detail?: string; list?: string[]; who?: Pilot; out?: boolean; busy?: boolean; held?: boolean }
 const LEVEL_ICON: Record<Level, React.ReactNode> = {
   info: <Info className="size-4 text-info" />,
   warning: <TriangleAlert className="size-4 text-warning" />,
@@ -71,10 +72,10 @@ export const NOTES = {
   "caught-up": { when: "Caught up after joining late", note: { level: "info", title: "Caught up with James", detail: "Pages and FMS entries may still differ from James's." } },
   "caught-up-outage": { when: "Caught up after a short outage", note: { level: "info", title: "Caught up with James" } },
   pause: { when: "The pilot flying in the pause menu, held, on the others' banners", note: { level: "info", held: true, who: JAMES, title: "James has paused" } },
-  left: { when: "A crewmate goes to the menu or another flight", note: { level: "info", who: ADAM, title: "Adam left the flight", detail: "They're still in the session." } },
-  closed: { when: "A crewmate closes their sim", note: { level: "info", who: ADAM, title: "Adam closed their sim", detail: "They're still in the session." } },
-  crashed: { when: "A crewmate's sim crashes", note: { level: "warning", who: ADAM, title: "Adam's sim crashed", detail: "They're still in the session." } },
-  "left-session": { when: "A crewmate leaves the session", note: { level: "info", who: ADAM, title: "Adam left the session" } },
+  left: { when: "A crewmate goes to the menu or another flight", note: { level: "info", who: ADAM, out: true, title: "Adam left the flight", detail: "They're still in the session." } },
+  closed: { when: "A crewmate closes their sim", note: { level: "info", who: ADAM, out: true, title: "Adam closed their sim", detail: "They're still in the session." } },
+  crashed: { when: "A crewmate's sim crashes", note: { level: "warning", who: ADAM, out: true, title: "Adam's sim crashed", detail: "They're still in the session." } },
+  "left-session": { when: "A crewmate leaves the session", note: { level: "info", who: ADAM, out: true, title: "Adam left the session" } },
   back: { when: "A crewmate is back in the flight", note: { level: "info", who: ADAM, title: "Adam is back in the flight" } },
   "service-reconnecting": { when: "The service's link lost, held", note: { level: "trouble", held: true, title: "Reconnecting to the Dual Input service", detail: "Nothing syncs until it's back." } },
   "service-down": { when: "The service not running, held", note: { level: "trouble", held: true, title: "Dual Input service isn't running", detail: "Nothing syncs until it's back. Open it from the Start menu." } },
@@ -182,7 +183,7 @@ function NoteCard({ note, onDismiss }: { note: Note; onDismiss?: () => void }) {
   // A head is 28px, taller than the title's line, so a card led by one centers on it; an icon
   // stands in a box the title's line tall, so it centers on the title whatever follows it.
   const lead = note.who ? (
-    <span className="flex shrink-0">
+    <span className={"flex shrink-0 " + (note.out ? "opacity-40" : "")}>
       <Head hex={hexOf(note.who.hue)} />
     </span>
   ) : (

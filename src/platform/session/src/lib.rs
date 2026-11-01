@@ -392,6 +392,7 @@ pub fn register(r: &mut Registry) {
             wire::command::JOIN_FROM_CLIPBOARD,
             joining::join_from_clipboard,
         )
+        .command(wire::command::COPY_CODE, joining::copy_code)
         .command(wire::command::LEAVE, |me, (): (), cx| {
             me.leave(cx, false);
             Ok(())

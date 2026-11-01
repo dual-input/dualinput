@@ -129,6 +129,23 @@ fn clipboard_read(me: &mut Session, job: JobId, result: Result<Vec<u8>, String>,
     }
 }
 
+/// `session.copy-code`: the session card's Copy, which writes the invite code to the clipboard
+/// as a job.
+pub(crate) fn copy_code(me: &mut Session, (): (), cx: &mut Cx) -> Result<(), String> {
+    let Some(held) = &me.held else {
+        return Err("There's no session".into());
+    };
+    cx.job(
+        Job::copy_text(held.code.clone()),
+        |_: &mut Session, _: JobId, result: Result<Vec<u8>, String>, _: &mut Cx| {
+            if let Err(error) = result {
+                tracing::warn!(error, "the invite code couldn't be copied");
+            }
+        },
+    );
+    Ok(())
+}
+
 /// The backend answered Host, Join, or the network's own lookup after a restart.
 pub(crate) fn answered(me: &mut Session, answered: &BackendAnswered, cx: &mut Cx) {
     match (answered.asked, &answered.answer) {

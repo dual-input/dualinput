@@ -222,6 +222,8 @@ impl Core {
                 )],
             ),
         );
+        // The clients crate's read of the username, as the core starts.
+        core.jobs.clear();
         core
     }
 

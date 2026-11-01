@@ -106,6 +106,8 @@ fn run(jobs: &Jobs, start: &StartJob) -> Result<Vec<u8>, String> {
                 .unwrap_or_default()
                 .into_bytes())
         }
+        Work::CopyText { text } => clipboard::set_text(text).map(|()| Vec::new()),
+        Work::Username => Ok(std::env::var("USERNAME").unwrap_or_default().into_bytes()),
         Work::Fetch(_) => unreachable!("a fetch runs as a task, not on the blocking pool"),
     }
 }
@@ -131,13 +133,78 @@ fn find(folder: &Path, depth: u8, holding: &Path, found: &mut Vec<String>) {
     }
 }
 
-/// The clipboard's text, read through Windows' clipboard functions.
+/// The clipboard's text, read and written through Windows' clipboard functions.
 mod clipboard {
+    use std::time::Duration;
+
+    use windows_sys::Win32::Foundation::GlobalFree;
     use windows_sys::Win32::System::DataExchange::{
-        CloseClipboard, GetClipboardData, OpenClipboard,
+        CloseClipboard, EmptyClipboard, GetClipboardData, OpenClipboard, SetClipboardData,
     };
-    use windows_sys::Win32::System::Memory::{GlobalLock, GlobalSize, GlobalUnlock};
+    use windows_sys::Win32::System::Memory::{
+        GMEM_MOVEABLE, GlobalAlloc, GlobalLock, GlobalSize, GlobalUnlock,
+    };
     use windows_sys::Win32::System::Ole::CF_UNICODETEXT;
+
+    /// Replaces the clipboard's contents with `text`. Only one program holds the clipboard at a
+    /// time, and a clipboard manager may be reading what the last program put there, so a pilot's
+    /// Copy tries for a moment before it fails.
+    pub(super) fn set_text(text: &str) -> Result<(), String> {
+        let mut opened = false;
+        for _ in 0..5 {
+            // SAFETY: a null owner opens the clipboard for this thread, and it's closed below.
+            opened = unsafe { OpenClipboard(std::ptr::null_mut()) } != 0;
+            if opened {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(20));
+        }
+        if !opened {
+            return Err(format!(
+                "another program holds the clipboard: {}",
+                std::io::Error::last_os_error()
+            ));
+        }
+        let set = write(text);
+        // SAFETY: the clipboard is open on this thread.
+        unsafe { CloseClipboard() };
+        set
+    }
+
+    fn write(text: &str) -> Result<(), String> {
+        let units: Vec<u16> = text.encode_utf16().chain([0]).collect();
+        let failed = |what: &str| format!("{what}: {}", std::io::Error::last_os_error());
+        // SAFETY: the clipboard is open on this thread, which `EmptyClipboard` needs.
+        if unsafe { EmptyClipboard() } == 0 {
+            return Err(failed("the clipboard couldn't be emptied"));
+        }
+        // SAFETY: a moveable block of this size, which the clipboard owns once it's set.
+        let block = unsafe { GlobalAlloc(GMEM_MOVEABLE, units.len() * 2) };
+        if block.is_null() {
+            return Err(failed("no memory for the clipboard's text"));
+        }
+        // SAFETY: `block` is a moveable block, locked here and unlocked below.
+        let data = unsafe { GlobalLock(block) } as *mut u16;
+        if data.is_null() {
+            let error = failed("the clipboard's text couldn't be locked");
+            // SAFETY: the clipboard doesn't own the block yet.
+            unsafe { GlobalFree(block) };
+            return Err(error);
+        }
+        // SAFETY: the locked block holds `units.len()` UTF-16 units, and no other memory
+        // overlaps a block just allocated.
+        unsafe { std::ptr::copy_nonoverlapping(units.as_ptr(), data, units.len()) };
+        // SAFETY: the block was locked above.
+        unsafe { GlobalUnlock(block) };
+        // SAFETY: the clipboard is open and empty, and the block holds UTF-16 ending at a 0.
+        if unsafe { SetClipboardData(u32::from(CF_UNICODETEXT), block) }.is_null() {
+            let error = failed("the clipboard refused the text");
+            // SAFETY: a refused block stays this program's.
+            unsafe { GlobalFree(block) };
+            return Err(error);
+        }
+        Ok(())
+    }
 
     pub(super) fn text() -> Option<String> {
         // SAFETY: a null owner opens the clipboard for this thread, and every path below
@@ -341,6 +408,20 @@ mod tests {
         let error =
             fetch(format!("http://127.0.0.1:{port}/v1/lookup")).expect_err("nothing listens there");
         assert!(error.contains("got no answer"), "{error}");
+    }
+
+    /// It takes over the PC's clipboard for a moment, and puts back only text, so it runs by
+    /// hand: cargo test -p dualinput-core -- --ignored text_written_to_the_clipboard
+    #[test]
+    #[ignore = "writes the PC's clipboard"]
+    fn text_written_to_the_clipboard_reads_back() {
+        let before = clipboard::text();
+        clipboard::set_text("KX7P3M").expect("the clipboard should take the text");
+        let read = clipboard::text();
+        if let Some(before) = before {
+            clipboard::set_text(&before).expect("the clipboard should take its text back");
+        }
+        assert_eq!(read.as_deref(), Some("KX7P3M"));
     }
 
     #[test]

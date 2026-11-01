@@ -110,7 +110,15 @@ struct Core {
 const SECOND: u64 = 1_000_000;
 
 impl Core {
+    /// A core past its first input, whose job at start, the username's, has come back empty.
     fn new(settings: Option<&str>) -> (Core, Vec<SocketOut>) {
+        let (mut core, outputs) = Core::start(settings);
+        core.finish_jobs();
+        (core, outputs)
+    }
+
+    /// A core past its first input, with its job at start still out.
+    fn start(settings: Option<&str>) -> (Core, Vec<SocketOut>) {
         let mut registry = Registry::new();
         clients::register(&mut registry);
         Feature::register(&mut registry);
@@ -329,8 +337,12 @@ fn a_settings_file_keeps_a_key_no_unit_registered_and_a_value_that_doesnt_fit_ta
     let [ToClient::State { value, .. }] = sent.as_slice() else {
         panic!("the settings should be sent at once");
     };
+    let loud = value
+        .as_array()
+        .and_then(|settings| settings.iter().find(|s| s["key"] == "feature.loud"))
+        .expect("the settings should list the feature's");
     assert_eq!(
-        value[0]["value"],
+        loud["value"],
         json!(false),
         "a stored value that doesn't fit takes the default"
     );
@@ -351,6 +363,38 @@ fn a_settings_file_keeps_a_key_no_unit_registered_and_a_value_that_doesnt_fit_ta
             error: Some(_)
         }]
     ));
+}
+
+#[test]
+fn the_core_slice_gives_the_version_the_hash_and_the_username_before_setup_is_done() {
+    let (mut core, _) = Core::start(None);
+    let job = core
+        .jobs
+        .pop()
+        .expect("a core before setup reads the username");
+    assert!(matches!(job.job.work, Work::Username));
+    let bytes = job.id.finished(Ok(b"jordan".to_vec()));
+    core.handle(JOBS, bytes);
+    core.join(1, "efb-app", &[]);
+    let out = core.say(1, json!({ "t": "watch", "slices": ["core", "settings"] }));
+    let values = states(1, &out);
+    assert_eq!(
+        values[0],
+        json!({ "version": messages::VERSION, "hash": messages::HASH, "username": "jordan" })
+    );
+    let keys: Vec<&str> = values[1]
+        .as_array()
+        .expect("the settings should be a list")
+        .iter()
+        .filter_map(|s| s["key"].as_str())
+        .collect();
+    assert!(keys.contains(&"app.setup-done") && keys.contains(&"app.guide-done"));
+
+    let (core, _) = Core::start(Some(r#"{ "app.setup-done": true }"#));
+    assert!(
+        core.jobs.is_empty(),
+        "a core past setup never reads the username, so its recordings never hold it"
+    );
 }
 
 #[test]

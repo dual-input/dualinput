@@ -159,6 +159,11 @@ pub enum Work {
     /// program (record/areas/recording/01-recording-and-bug-reports.md, "The clipboard"). The
     /// result is the code, or empty.
     InviteCode,
+    /// Replaces the clipboard's contents with this text. The result is empty.
+    CopyText { text: String },
+    /// Reads the Windows account's name, which first-time setup offers as a display name. The
+    /// result is the name, or empty.
+    Username,
     /// Fetches a URL, as the network's requests to the backend do. The result is a
     /// `Fetched`, whatever its status, and a fetch that got no answer is the job's error.
     Fetch(Fetch),
@@ -262,6 +267,20 @@ impl Job {
     pub fn invite_code() -> Job {
         Job {
             work: Work::InviteCode,
+            then: None,
+        }
+    }
+
+    pub fn copy_text(text: impl Into<String>) -> Job {
+        Job {
+            work: Work::CopyText { text: text.into() },
+            then: None,
+        }
+    }
+
+    pub fn username() -> Job {
+        Job {
+            work: Work::Username,
             then: None,
         }
     }

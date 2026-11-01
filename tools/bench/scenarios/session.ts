@@ -420,7 +420,8 @@ test("the match check: a streamed copy against an installed one is a warning, an
   const s = await until(a, (s) => s.differences.some((d) => d.item === 2), "the version's difference")
   const version = s.differences.find((d) => d.item === 2)!
   assert.equal(version.level, "warning")
-  assert.match(version.words, /compare your versions in the sim/)
+  assert.match(version.words, /keeps no version Dual Input can read/)
+  assert.equal(version.note, "The two copies may differ and some controls may not sync")
   assert.ok(!s.differences.some((d) => d.item === 3), "the same livery shows no difference")
 
   const c = await pilot(run, net, "Rosa", { settings: { "sim.user-cfg": userCfg("Rosa", false) } })

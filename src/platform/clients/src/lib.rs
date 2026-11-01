@@ -25,10 +25,10 @@ pub use messages::clients::{Landing, Level};
 use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
 
-use kernel::{Cx, Handler, Moment, Registry, Started, TimerId};
-use messages::clients::{Hello, Notification, ToClient};
+use kernel::{Cx, Handler, Job, JobId, Moment, Registry, Started, TimerId};
+use messages::clients::{GUIDE_DONE, Hello, Notification, SETUP_DONE, SettingKind, ToClient};
 use serde::Serialize;
-use serde_json::Value;
+use serde_json::{Value, json};
 
 use crate::settings::Settings;
 
@@ -109,6 +109,8 @@ pub struct Clients {
     notifications: BTreeMap<String, Notification>,
     settings: Settings,
     profile: panels::Profile,
+    /// The Windows username, for first-time setup, once its job has read it.
+    username: Option<String>,
     round: Option<TimerId>,
     /// When the 2s tick is due, in µs on the PC's performance counter.
     next_tick: u64,
@@ -189,8 +191,21 @@ const UNIT: &str = "clients";
 pub fn register(r: &mut Registry) {
     let mut me = r.unit::<Clients>(UNIT);
     me.on::<Started>(Clients::started)
-        .start_file(settings::FILE, Clients::settings_file);
+        .start_file(settings::FILE, Clients::settings_file)
+        .setting(SETUP_DONE, done_setting("First-time setup is done"))
+        .setting(GUIDE_DONE, done_setting("The first visit's guide is done"));
     me.source::<Sockets>(Clients::socket);
+}
+
+/// A setting that says something shown once has been shown.
+fn done_setting(label: &'static str) -> SettingDef {
+    SettingDef {
+        label,
+        kind: SettingKind::Bool,
+        default: json!(false),
+        part_only: false,
+        development: false,
+    }
 }
 
 /// Puts out a `unit` message, once: a client that connects later never gets it.
@@ -244,6 +259,18 @@ pub fn bye(cx: &Cx) {
 impl Clients {
     fn started(me: &mut Clients, _: &Started, cx: &mut Cx) {
         me.schedule_tick(cx);
+        // A job's result goes in the recording, and only setup reads the username, so a core
+        // that has finished setup never reads it, and its recordings never hold it.
+        if me.setting_as::<bool>(SETUP_DONE) != Some(true) {
+            cx.job(Job::username(), Clients::username_read);
+        }
+    }
+
+    fn username_read(me: &mut Clients, _: JobId, result: Result<Vec<u8>, String>, _: &mut Cx) {
+        me.username = result
+            .ok()
+            .and_then(|bytes| String::from_utf8(bytes).ok())
+            .filter(|name| !name.is_empty());
     }
 
     /// Every 2s: `alive` to every client, and a close for each socket quiet for 8s.

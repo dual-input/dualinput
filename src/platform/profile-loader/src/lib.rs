@@ -432,6 +432,7 @@ fn compare(values: &[(String, Bundle)]) -> Option<Found> {
         return Some(Found {
             level: Severity::Error,
             words: "No profile for this aircraft".into(),
+            note: Some("The cockpits won't sync".into()),
         });
     }
     let unavailable = names(|v| *v == Bundle::Unavailable);
@@ -442,6 +443,7 @@ fn compare(values: &[(String, Bundle)]) -> Option<Found> {
                 "Couldn't get the session's profile: {}",
                 unavailable.join(", ")
             ),
+            note: Some("Their switches, knobs, and displays won't sync".into()),
         });
     }
     let hashes: BTreeSet<[u8; 32]> = values
@@ -454,6 +456,7 @@ fn compare(values: &[(String, Bundle)]) -> Option<Found> {
     (hashes.len() > 1).then(|| Found {
         level: Severity::Error,
         words: "The pilots loaded different profiles".into(),
+        note: None,
     })
 }
 

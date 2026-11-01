@@ -302,6 +302,12 @@ pub struct Difference {
     pub item: u16,
     pub level: Severity,
     pub words: String,
+    /// What the difference can cause, where its item says, which never advises or commands
+    /// (record/areas/interface/decisions.md, "Preflight is the session card with Ready, the
+    /// differences, and a checklist under it").
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub note: Option<String>,
 }
 
 /// How much a difference matters: an error says something will likely go wrong, and a
@@ -334,6 +340,9 @@ pub mod command {
     /// The EFB app's code box was selected: the core reads the clipboard, and joins with the
     /// code it holds, if it holds one. It takes no arguments.
     pub const JOIN_FROM_CLIPBOARD: &str = "session.join-from-clipboard";
+    /// The session card's Copy: the core writes the invite code to the clipboard, which it can
+    /// do from any app. It takes no arguments.
+    pub const COPY_CODE: &str = "session.copy-code";
     /// Leaves the session. It takes no arguments.
     pub const LEAVE: &str = "session.leave";
     /// Leaves the session if one is held, then quits Dual Input. It takes no arguments.

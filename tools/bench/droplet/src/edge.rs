@@ -155,9 +155,11 @@ pub fn start_job(
             }
             // Only the session crate and the sim service ask these, and the droplet runs
             // neither.
-            Work::Find { .. } | Work::InviteCode => {
+            Work::Find { .. } | Work::InviteCode | Work::CopyText { .. } => {
                 Err("the droplet program has no sim and no clipboard".to_string())
             }
+            // The clients crate asks at its start, for a setup no droplet runs.
+            Work::Username => Ok(Vec::new()),
         };
         let result = match start.job.then {
             Some(then) => result.and_then(then),

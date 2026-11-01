@@ -223,6 +223,29 @@ pub enum EfbAppOrder {
     OpenEfb { landing: Landing, id: String },
 }
 
+/// The slice `core`, a `CoreSlice`.
+pub const CORE: &str = "core";
+
+/// What a client compares or offers of the core itself.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "clients/")]
+pub struct CoreSlice {
+    /// Dual Input's version, which the EFB app compares with its own for setup's "Add-on version
+    /// mismatch" box (record/areas/interface/decisions.md, "Without the service the EFB app
+    /// shows one of three screens, and another version shows setup's box").
+    pub version: String,
+    /// The message crate's hash, `HASH`, as the core's build has it.
+    pub hash: String,
+    /// The Windows username, which first-time setup's name field starts with, in a core that
+    /// started with setup not yet done.
+    pub username: Option<String>,
+}
+
+/// The setting that says first-time setup is done, so it shows once.
+pub const SETUP_DONE: &str = "app.setup-done";
+/// The setting that says the guide on a first visit to home is closed for good.
+pub const GUIDE_DONE: &str = "app.guide-done";
+
 /// The slice `settings`: each setting an app may offer.
 pub const SETTINGS: &str = "settings";
 

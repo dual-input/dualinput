@@ -4,4 +4,10 @@ import type { Severity } from "./Severity.ts";
 /**
  * One difference the match check found, in its item's words.
  */
-export type Difference = { item: number, level: Severity, words: string, };
+export type Difference = { item: number, level: Severity, words: string, 
+/**
+ * What the difference can cause, where its item says, which never advises or commands
+ * (record/areas/interface/decisions.md, "Preflight is the session card with Ready, the
+ * differences, and a checklist under it").
+ */
+note?: string, };

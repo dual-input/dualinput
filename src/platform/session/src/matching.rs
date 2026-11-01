@@ -18,6 +18,8 @@ use crate::Session;
 pub struct Found {
     pub level: Severity,
     pub words: String,
+    /// What the difference can cause, where the item says.
+    pub note: Option<String>,
 }
 
 type CompareBytes = Box<dyn Fn(&[(String, &[u8])]) -> Option<Found>>;
@@ -151,6 +153,7 @@ pub(crate) fn differences(me: &Session) -> Vec<Difference> {
                 item: number,
                 level: found.level,
                 words: found.words,
+                note: found.note,
             })
         })
         .collect()
@@ -192,13 +195,14 @@ pub(crate) fn compare_package(values: &[(String, Installed)]) -> Option<Found> {
             "Your copies of the aircraft come from different places. {}",
             listed(values, place)
         ),
+        note: Some("The same version can differ between stores".into()),
     })
 }
 
 /// The aircraft's version, where both copies have one, as an error. A streamed copy keeps no
-/// version on disk, so a streamed copy against an installed one is a warning that asks the
-/// pilots to compare versions themselves, and two streamed copies show nothing
-/// (record/areas/aircraft/log.md, 2026-10-16).
+/// version on disk, so a streamed copy against an installed one is a warning that this core
+/// can't compare them, and two streamed copies show nothing (record/areas/aircraft/log.md,
+/// 2026-10-16).
 pub(crate) fn compare_version(values: &[(String, Installed)]) -> Option<Found> {
     let streamed = values
         .iter()
@@ -211,12 +215,13 @@ pub(crate) fn compare_version(values: &[(String, Installed)]) -> Option<Found> {
         return Some(Found {
             level: Severity::Warning,
             words: format!(
-                "A streamed copy of the aircraft keeps no version Dual Input can read, so compare your versions in the sim. {}",
+                "A streamed copy of the aircraft keeps no version Dual Input can read. {}",
                 listed(values, |v| v
                     .version
                     .clone()
                     .unwrap_or_else(|| "streamed".into()))
             ),
+            note: Some("The two copies may differ and some controls may not sync".into()),
         });
     }
     let versions: Vec<&Option<String>> = values.iter().map(|(_, v)| &v.version).collect();
@@ -228,6 +233,7 @@ pub(crate) fn compare_version(values: &[(String, Installed)]) -> Option<Found> {
             "Your aircraft's versions differ. {}",
             listed(values, |v| v.version.clone().unwrap_or_default())
         ),
+        note: None,
     })
 }
 
@@ -241,6 +247,7 @@ pub(crate) fn compare_livery(values: &[(String, Option<String>)]) -> Option<Foun
             "Your liveries differ. {}",
             listed(values, |v| v.clone().unwrap_or_else(|| "none".into()))
         ),
+        note: None,
     })
 }
 
@@ -268,10 +275,10 @@ mod tests {
         ))
         .unwrap();
         assert_eq!(found.level, Severity::Warning);
-        assert!(
-            found.words.contains("compare your versions"),
-            "{}",
-            found.words
+        assert!(found.words.contains("keeps no version"), "{}", found.words);
+        assert_eq!(
+            found.note.as_deref(),
+            Some("The two copies may differ and some controls may not sync")
         );
     }
 

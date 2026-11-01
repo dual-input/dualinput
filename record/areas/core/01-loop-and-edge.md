@@ -6,6 +6,9 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, ../arc
 Decides:     The core's threads; how the queue stamps and orders inputs, and what an input is; the kernel's interface for units, their state, hooks, moments, requests, outputs, timers, jobs, and IDs; what a recording holds for a replay, and how a replay finds where it diverged; the core's math; what a panic does; how the core starts, stops, quits, and logs; and the budgets of the loop and the edge (node 6.1).
 ```
 
+> **Note**
+> Stage 11b's tentative decision that [Dual Input's one full window is its EFB app](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app) takes out the EFB app's button that brought the desktop app forward, so the core's edge no longer starts the desktop app's program, as [starting and stopping](#starting-and-stopping) has it (user, 2026-10-25).
+
 The core runs every unit on one thread, the loop, which takes one input at a time from one queue.
 An input is its source and its bytes, stamped under the queue's lock, so the stamps rise in the order the loop takes the inputs, and the unit that owns the source parses the bytes on the loop, so a live run and a replay take one path.
 The kernel calls each handler with its unit's own state, a read-only view of every other unit's, and an outbox, and runs every call one unit asks of another after the asking handler returns.

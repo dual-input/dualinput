@@ -18,10 +18,9 @@ mod settings;
 mod sockets;
 mod state;
 
-pub use apps::StartDesktopApp;
 pub use edge::{SocketOut, SocketUp, Sockets};
 pub use hooks::{ClientsUnit, SettingDef};
-pub use messages::clients::Level;
+pub use messages::clients::{Landing, Level};
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
@@ -204,12 +203,13 @@ pub fn send<B: Serialize>(cx: &Cx, to: To, unit: &str, body: &B) {
 
 /// Raises a notification, or changes the one already raised under `id`, which is the running
 /// unit's own: the notification's full ID is the unit's name, `.`, and `id`.
-pub fn notify(cx: &Cx, id: &str, level: Level, text: &str, action: Option<&str>) {
+pub fn notify(cx: &Cx, id: &str, level: Level, text: &str, action: Option<&str>, landing: Landing) {
     let notification = Notification {
         id: notification_id(id),
         level,
         text: text.to_string(),
         action: action.map(str::to_string),
+        landing,
     };
     cx.call(Clients::raise_notification, notification);
 }

@@ -10,7 +10,8 @@ use std::collections::BTreeMap;
 use crate::blocks::{self, Field};
 use crate::features::{self, EntryFields, Module};
 use crate::format::{
-    Aircraft, Count, EventEntry, Owner, Pace, Profile, StateEntry, Steps, Variant, Watch, Write,
+    Aircraft, Count, EventEntry, Maturity, Owner, Pace, Profile, StateEntry, Steps, Variant, Watch,
+    Write,
 };
 use crate::names::{self, Name};
 use crate::report::{Diagnostic, Place, Report};
@@ -60,6 +61,8 @@ pub(crate) fn check(files: &[File], level: u32, mode: Mode) -> (Checked, Report)
         mode,
         report: Report::default(),
         profile: Profile {
+            name: String::new(),
+            maturity: Maturity::Experimental,
             authors: None,
             aircraft: Aircraft::default(),
             state: Vec::new(),
@@ -199,7 +202,7 @@ impl Checker {
                 &key.at,
                 "module-only",
                 format!(
-                    "A module can't hold `{}`, since variants belong to each profile",
+                    "A module can't hold `{}`, which belongs to each profile",
                     key.text
                 ),
             );
@@ -279,6 +282,20 @@ impl Checker {
                 continue;
             };
             match field.key {
+                "name" => {
+                    if let Some(name) = self.text(node, "`name`") {
+                        self.profile.name = name;
+                    }
+                }
+                "maturity" => match node.str().map(|t| t.text.as_str()) {
+                    Some("stable") => self.profile.maturity = Maturity::Stable,
+                    Some("experimental") => self.profile.maturity = Maturity::Experimental,
+                    _ => self.error(
+                        &node.at,
+                        "maturity",
+                        "`maturity` is `stable` or `experimental`",
+                    ),
+                },
                 "authors" => {
                     let authors = self.text(node, "`authors`");
                     if !file.module {
@@ -315,6 +332,19 @@ impl Checker {
                 "required",
                 "A profile names the aircraft it covers under `aircraft:`; a file without it is a module, which a profile imports",
             );
+        }
+        // The EFB app's list of supported aircraft shows every profile by these two, so a
+        // profile without them would have no row to show.
+        if !file.module {
+            for key in ["name", "maturity"] {
+                if !entries.iter().any(|(k, _)| k.text == key) {
+                    self.error(
+                        &file.root.at,
+                        "required",
+                        format!("A profile needs `{key}`, which the EFB app's list of supported aircraft shows"),
+                    );
+                }
+            }
         }
     }
 
@@ -448,6 +478,7 @@ impl Checker {
             ignore: Vec::new(),
         };
         let mut name = None;
+        let mut description = None;
         let mut watch: Option<(Watch, Place)> = None;
         let mut count: Option<CountAt> = None;
         let mut write: Option<(WriteAt, Place)> = None;
@@ -461,6 +492,7 @@ impl Checker {
             };
             match field.key {
                 "name" => name = self.text(value, "`name`"),
+                "description" => description = self.text(value, "`description`"),
                 "watch" if event => {
                     if let Some(n) = self.name(value, "`watch`", Allowed::EventWatch, false) {
                         placed.watches.push((n.clone(), value.at.clone()));
@@ -589,6 +621,7 @@ impl Checker {
             self.profile.state.push(StateEntry {
                 key: key.text.clone(),
                 name,
+                description,
                 watch,
                 write,
                 owner,

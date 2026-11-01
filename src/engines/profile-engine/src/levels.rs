@@ -128,7 +128,7 @@ pub fn schema(level: u32) -> String {
     let entry = |table: &[Field], of: fn(&Module) -> &'static [Field]| {
         object(with_features(
             fields(table, &|key| match key {
-                "name" => json!({ "type": "string" }),
+                "name" | "description" => json!({ "type": "string" }),
                 "watch" => json!({ "anyOf": [name.clone(), count.clone()] }),
                 "write" => write.clone(),
                 "default" => json!({ "type": "number" }),
@@ -155,7 +155,8 @@ pub fn schema(level: u32) -> String {
     }));
     let top = object(with_features(
         fields(blocks::TOP, &|key| match key {
-            "authors" => json!({ "type": "string" }),
+            "name" | "authors" => json!({ "type": "string" }),
+            "maturity" => json!({ "enum": ["stable", "experimental"] }),
             "aircraft" => aircraft.clone(),
             "import" => text_or_texts.clone(),
             "state" => entries(blocks::STATE_ENTRY, |m| m.state_fields),

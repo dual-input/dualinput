@@ -4,7 +4,7 @@
 
 use std::time::Duration;
 
-use clients::{Clients, Level};
+use clients::{Clients, Landing, Level};
 use kernel::{Cx, Input, TimerId};
 use messages::core_helper::{self, Bound, FromHelper, ToHelper, WantId, Wants};
 
@@ -145,7 +145,7 @@ impl CoreHelper {
             owners.join(", ")
         );
         tracing::warn!(text, "the core helper is down");
-        clients::notify(cx, "down", Level::Trouble, &text, None);
+        clients::notify(cx, "down", Level::Trouble, &text, None, Landing::Header);
     }
 
     fn clear_trouble(&mut self, cx: &Cx) {
@@ -452,6 +452,7 @@ impl CoreHelper {
             Level::Warning,
             &format!("{owner}'s {what} isn't working: {error}"),
             None,
+            Landing::Header,
         );
         self.failed.insert(want, id);
     }

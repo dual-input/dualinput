@@ -212,10 +212,6 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
             )
         })
         .transpose()?;
-    // The clients crate's command for the EFB app's button starts the desktop app's program.
-    if sockets.is_some() {
-        crate::edges::desktop_app::start(runtime.handle(), &options.data, &mut sinks);
-    }
     // Closing the runtime at the exit drops the helper's standard input, which tells it to
     // exit with the core.
     if let Some(source) = helper {

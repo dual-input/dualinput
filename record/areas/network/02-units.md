@@ -6,6 +6,9 @@ Depends on:  01-between-machines.md, ../architecture/02-code-map.md, ../core/01-
 Decides:     What runs on the loop and what in the transport; the network crate's channels, sends, links, moments, and requests, and the hook the session's first message comes through; the transport's commands and events; the heartbeat and its clock stamps; the endpoint key; the backend's framework, storage, requests, and its count of wrong codes; who hosts the relays and where their configuration lives; what the code map changes in 01-between-machines; the budgets; and the cases for the bench (node 6.4).
 ```
 
+> **Note**
+> [Stage 11b](../build/plan.md#11b-the-apps) adds each link's round trip, from the transport's `Stats`, to [the network's slice](#what-the-pilot-sees-and-settings), so the EFB app's crew rows show it beside the link's path (user, 2026-10-26).
+
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.
 The network owns everything between machines, the backend's requests among it, and the session crate fills each connection's first message with the session's keys through one hook.

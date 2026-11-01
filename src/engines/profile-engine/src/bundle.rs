@@ -9,7 +9,7 @@
 use saphyr::Scalar;
 use sha2::{Digest, Sha256};
 
-use crate::format::{Count, EventEntry, Owner, Profile, StateEntry, Steps, Watch, Write};
+use crate::format::{Count, EventEntry, Maturity, Owner, Profile, StateEntry, Steps, Watch, Write};
 use crate::names::Name;
 
 /// SHA-256 over the bytes, in lowercase hex, which Windows' `Get-FileHash` gives too, so anyone
@@ -23,6 +23,14 @@ pub fn hash(bytes: &[u8]) -> String {
 
 pub(crate) fn emit(p: &Profile) -> Vec<u8> {
     let mut out = Out::default();
+    out.line(0, &format!("name: {}", scalar(&p.name)));
+    out.line(
+        0,
+        match p.maturity {
+            Maturity::Stable => "maturity: stable",
+            Maturity::Experimental => "maturity: experimental",
+        },
+    );
     if let Some(authors) = &p.authors {
         out.line(0, &format!("authors: {}", scalar(authors)));
     }
@@ -63,6 +71,9 @@ pub(crate) fn emit(p: &Profile) -> Vec<u8> {
 fn state_entry(out: &mut Out, e: &StateEntry) {
     out.line(1, &format!("{}:", e.key));
     out.line(2, &format!("name: {}", scalar(&e.name)));
+    if let Some(description) = &e.description {
+        out.line(2, &format!("description: {}", scalar(description)));
+    }
     match &e.watch {
         Watch::Name(n) => out.line(2, &format!("watch: {}", name(n))),
         Watch::Count(c) => count(out, c),

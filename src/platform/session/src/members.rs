@@ -1,7 +1,7 @@
 //! The members: who takes part in the session, each one's status, and who is in the flight
 //! (record/areas/session/02-units.md, "Members" and "In the flight").
 
-use clients::Level;
+use clients::{Landing, Level};
 use kernel::Cx;
 use messages::net::PilotId;
 use messages::session::{self as wire, Link, Phase, Status};
@@ -297,6 +297,7 @@ pub(crate) fn notifications(me: &mut Session, cx: &Cx) {
             Level::Warning,
             &format!("Load the {} to fly with {}", named(status), name(&pf)),
             None,
+            Landing::Session,
         ),
         _ => clients::clear_notification(cx, "load"),
     }
@@ -339,9 +340,14 @@ pub(crate) fn notifications(me: &mut Session, cx: &Cx) {
             _ => None,
         };
         match text {
-            Some((level, text)) => {
-                clients::notify(cx, &notification_id(&member), level, &text, None)
-            }
+            Some((level, text)) => clients::notify(
+                cx,
+                &notification_id(&member),
+                level,
+                &text,
+                None,
+                Landing::Session,
+            ),
             None => clients::clear_notification(cx, &notification_id(&member)),
         }
     }

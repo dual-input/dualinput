@@ -4,7 +4,7 @@
 
 use std::collections::BTreeMap;
 
-use clients::{Clients, ClientsUnit, SettingDef, SocketOut, SocketUp, Sockets, StartDesktopApp};
+use clients::{Clients, ClientsUnit, SettingDef, SocketOut, SocketUp, Sockets};
 use kernel::{
     CancelTimer, Cx, FIRST, Input, JOBS, Kernel, Output, Registry, SetTimer, SourceId, StartJob,
     TIMERS, TimerId, View, Work, first_input,
@@ -100,8 +100,6 @@ struct Core {
     now: u64,
     timers: BTreeMap<(u64, TimerId), ()>,
     jobs: Vec<StartJob>,
-    /// How many times the clients crate asked the edge to start the desktop app's program.
-    desktop_starts: usize,
 }
 
 const SECOND: u64 = 1_000_000;
@@ -126,7 +124,6 @@ impl Core {
             now: SECOND,
             timers: BTreeMap::new(),
             jobs: Vec::new(),
-            desktop_starts: 0,
         };
         let outputs = core.handle(FIRST, first_input([1; 32], files));
         (core, outputs)
@@ -164,13 +161,6 @@ impl Core {
             let value = match value.downcast::<StartJob>() {
                 Ok(job) => {
                     self.jobs.push(*job);
-                    continue;
-                }
-                Err(value) => value,
-            };
-            let value = match value.downcast::<StartDesktopApp>() {
-                Ok(_) => {
-                    self.desktop_starts += 1;
                     continue;
                 }
                 Err(value) => value,
@@ -517,8 +507,10 @@ fn no_cockpit_panel_within_10s_of_the_profile_loading_raises_trouble_until_one_c
     let out = core.advance_alive(core.now + 10 * SECOND + 50_000, &[1]);
     let notifications = states(1, &out);
     assert_eq!(
-        notifications.last().map(|n| n[0]["id"].clone()),
-        Some(json!("clients.no-panel"))
+        notifications
+            .last()
+            .map(|n| (n[0]["id"].clone(), n[0]["landing"].clone())),
+        Some((json!("clients.no-panel"), json!("header")))
     );
     core.join_panel(2, "VCockpit02", &["CLOCK|"]);
     let out = core.advance(core.now + 50_000);
@@ -550,18 +542,34 @@ fn a_notification_clicked_outside_its_action_orders_the_efb_app_to_open_the_efb(
     core.join(1, "efb-app", &[]);
     core.join(2, "banner", &[]);
     // `feature.gone` isn't up, as when a notification clears as its click arrives, and the
-    // EFB still opens, since the pilot asked to look.
+    // EFB still opens where the click says, since the pilot asked to look.
     let out = core.say(
         2,
-        json!({ "t": "command", "id": 4, "name": "clients.notification-clicked", "args": { "id": "feature.gone" } }),
+        json!({ "t": "command", "id": 4, "name": "clients.notification-clicked", "args": { "id": "feature.gone", "landing": "header" } }),
     );
     assert_eq!(to(2, &out), [answer(4, None)]);
     assert_eq!(
         to(1, &out),
         [ToClient::Unit {
             unit: "clients".into(),
-            body: json!({ "t": "open-efb" })
+            body: json!({ "t": "open-efb", "landing": "header", "id": "feature.gone" })
         }]
+    );
+    let out = core.say(
+        2,
+        json!({ "t": "command", "id": 6, "name": "clients.notification-clicked", "args": { "id": "feature.gone" } }),
+    );
+    assert!(matches!(
+        to(2, &out).as_slice(),
+        [ToClient::Answer {
+            id: 6,
+            error: Some(_)
+        }]
+    ));
+    assert_eq!(
+        to(1, &out),
+        [],
+        "a click that names no landing orders nothing"
     );
     let out = core.say(
         2,
@@ -579,38 +587,6 @@ fn a_notification_clicked_outside_its_action_orders_the_efb_app_to_open_the_efb(
         [],
         "a click whose arguments don't read orders nothing"
     );
-}
-
-#[test]
-fn the_button_for_the_desktop_app_starts_its_program_whether_or_not_a_desktop_app_is_connected() {
-    let (mut core, _) = Core::new(None);
-    core.join(1, "efb-app", &[]);
-    let forward =
-        json!({ "t": "command", "id": 1, "name": "clients.bring-desktop-forward", "args": null });
-    let out = core.say(1, forward.clone());
-    assert_eq!(to(1, &out), [answer(1, None)]);
-    assert_eq!(core.desktop_starts, 1);
-    core.join(2, "desktop", &[]);
-    let out = core.say(1, forward);
-    assert_eq!(to(1, &out), [answer(1, None)]);
-    assert_eq!(
-        to(2, &out),
-        [],
-        "the desktop app gets no message, since its program's running copy opens its window"
-    );
-    assert_eq!(core.desktop_starts, 2);
-    let out = core.say(
-        1,
-        json!({ "t": "command", "id": 3, "name": "clients.bring-desktop-forward", "args": { "now": true } }),
-    );
-    assert!(matches!(
-        to(1, &out).as_slice(),
-        [ToClient::Answer {
-            id: 3,
-            error: Some(_)
-        }]
-    ));
-    assert_eq!(core.desktop_starts, 2);
 }
 
 /// The value of each `state` message sent to `socket`.

@@ -5,7 +5,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
 
-use clients::{ClientJoined, ClientLeft, Clients, Level};
+use clients::{ClientJoined, ClientLeft, Clients, Landing, Level};
 use kernel::{Cx, Exit, Job, JobId, TimerId};
 use messages::backend::{Kind, Older};
 use messages::clients::component;
@@ -197,7 +197,7 @@ pub(crate) fn answered(me: &mut Session, answered: &BackendAnswered, cx: &mut Cx
                 Refusal::Other(words) => format!("The backend refused: {words}"),
             };
             tracing::info!(text, "the backend refused the session");
-            clients::notify(cx, "refused", Level::Warning, &text, None);
+            clients::notify(cx, "refused", Level::Warning, &text, None, Landing::Session);
         }
         (Asked::Host | Asked::Join, Answer::NoAnswer(why)) => {
             me.asking = None;
@@ -208,6 +208,7 @@ pub(crate) fn answered(me: &mut Session, answered: &BackendAnswered, cx: &mut Cx
                 Level::Warning,
                 "Dual Input's server didn't answer. Check your connection, then try again",
                 None,
+                Landing::Session,
             );
         }
         // The network looks the code up when no member answered a core back from a restart:

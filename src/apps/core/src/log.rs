@@ -38,10 +38,9 @@ pub struct Log {
     /// The home folder's path, which names the pilot's Windows account, as written and
     /// lowercased, since the sim sends paths under it lowercased
     /// (record/areas/recording/01-recording-and-bug-reports.md, "The home folder's path").
+    /// Only the path goes, since a pilot's display name can be the same text as their Windows
+    /// username, and display names make a crew's logs readable to us.
     home: Vec<String>,
-    /// The Windows username, which can also be an ordinary word, such as "User" or
-    /// "Owner", so it's hidden only as a whole word.
-    user: Option<String>,
 }
 
 struct Lines {
@@ -52,8 +51,8 @@ struct Lines {
 
 impl Log {
     pub fn open(path: &Path, cap: Option<u64>, level: LevelFilter) -> std::io::Result<Log> {
-        let named = |name| std::env::var(name).ok().filter(|v: &String| !v.is_empty());
-        Log::with(path, cap, level, named("USERPROFILE"), named("USERNAME"))
+        let home = std::env::var("USERPROFILE").ok().filter(|h| !h.is_empty());
+        Log::with(path, cap, level, home)
     }
 
     fn with(
@@ -61,7 +60,6 @@ impl Log {
         cap: Option<u64>,
         level: LevelFilter,
         home: Option<String>,
-        user: Option<String>,
     ) -> std::io::Result<Log> {
         let file = crate::data_folder::create_run_file(path)?;
         // A field logged with `?`, or a text field, comes out with its backslashes doubled.
@@ -80,7 +78,6 @@ impl Log {
             cap,
             level,
             home,
-            user,
         })
     }
 
@@ -131,36 +128,8 @@ impl Log {
         for form in &self.home {
             line = line.replace(form.as_str(), "%USERPROFILE%");
         }
-        match &self.user {
-            Some(user) => hide_word(&line, user, "%USERNAME%"),
-            None => line,
-        }
+        line
     }
-}
-
-/// `line` with each whole-word `word` replaced by `name`, matching ASCII letters in either
-/// case, so "Al" goes in "Al's path" and "AL" but not in "always".
-fn hide_word(line: &str, word: &str, name: &str) -> String {
-    let (bytes, word) = (line.as_bytes(), word.as_bytes());
-    // A byte of a non-ASCII character counts as a letter, so a word's edge never splits one.
-    let letter = |b: u8| b.is_ascii_alphanumeric() || b == b'_' || b >= 0x80;
-    let mut hidden = String::with_capacity(line.len());
-    let (mut i, mut kept) = (0, 0);
-    while i + word.len() <= bytes.len() {
-        let whole = bytes[i..i + word.len()].eq_ignore_ascii_case(word)
-            && (i == 0 || !letter(bytes[i - 1]))
-            && bytes.get(i + word.len()).is_none_or(|&b| !letter(b));
-        if whole {
-            hidden.push_str(&line[kept..i]);
-            hidden.push_str(name);
-            i += word.len();
-            kept = i;
-        } else {
-            i += 1;
-        }
-    }
-    hidden.push_str(&line[kept..]);
-    hidden
 }
 
 /// Installs the one subscriber of the process, which writes each event to the log of the
@@ -246,7 +215,7 @@ mod tests {
     fn stops_at_the_cap_with_one_line_saying_so_and_keeps_a_panics_line() {
         let path =
             std::env::temp_dir().join(format!("dualinput-log-cap-{}.txt", std::process::id()));
-        let log = Log::with(&path, Some(100), LevelFilter::INFO, None, None).unwrap();
+        let log = Log::with(&path, Some(100), LevelFilter::INFO, None).unwrap();
         for i in 0..20 {
             log.line(&format!("line {i:02} of the run\n"));
         }
@@ -262,7 +231,7 @@ mod tests {
     }
 
     #[test]
-    fn hides_the_home_folders_path() {
+    fn hides_the_home_folders_path_and_keeps_a_display_name_that_matches_the_username() {
         let path =
             std::env::temp_dir().join(format!("dualinput-log-home-{}.txt", std::process::id()));
         let log = Log::with(
@@ -270,24 +239,14 @@ mod tests {
             None,
             LevelFilter::INFO,
             Some(r"C:\Users\Pilot".into()),
-            Some("Pilot".into()),
         )
         .unwrap();
         log.line("read c:\\users\\pilot\\settings.json and C:\\Users\\Pilot\\x as Pilot\n");
         assert_eq!(
             read(&path),
-            "read %USERPROFILE%\\settings.json and %USERPROFILE%\\x as %USERNAME%\n"
+            "read %USERPROFILE%\\settings.json and %USERPROFILE%\\x as Pilot\n"
         );
         drop(log);
         std::fs::remove_file(&path).unwrap();
-    }
-
-    #[test]
-    fn hides_the_username_only_as_a_whole_word() {
-        assert_eq!(
-            hide_word("Al always wrote AL's local file; al.", "Al", "%USERNAME%"),
-            "%USERNAME% always wrote %USERNAME%'s local file; %USERNAME%."
-        );
-        assert_eq!(hide_word("Ålborg Al", "Al", "u"), "Ålborg u");
     }
 }

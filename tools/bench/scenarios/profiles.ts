@@ -191,7 +191,7 @@ test("the pilot flying loads the wrong aircraft, then the right one, and the pin
   t.after(() => net.stop())
   const run = new BenchRun("profiles-aircraft-change", t)
   const copy = copyProfiles(path.join(run.folder, "with-pa24"))
-  fs.writeFileSync(path.join(copy, "aircraft", "a2a-pa24.yaml"), "authors: Dual Input\naircraft:\n  variants:\n    pa24: pa24-250\n")
+  fs.writeFileSync(path.join(copy, "aircraft", "a2a-pa24.yaml"), "name: A\nmaturity: stable\nauthors: Dual Input\naircraft:\n  variants:\n    pa24: pa24-250\n")
   const hashes = net.profiles.publish(copy)
   const baron = hashes.get(BARON_FILE)!
   const pa24 = hashes.get("aircraft/a2a-pa24.yaml")!
@@ -346,7 +346,7 @@ test("a start with nothing new published costs one answer of headers", { timeout
  * aircraft has none of them.
  */
 function largeProfile(): string {
-  let yaml = "authors: Dual Input\naircraft:\n  variants:\n    press: bksq-aircraft-baronpropress\nstate:\n"
+  let yaml = "name: A\nmaturity: stable\nauthors: Dual Input\naircraft:\n  variants:\n    press: bksq-aircraft-baronpropress\nstate:\n"
   for (let i = 0; i < 300; i++) {
     yaml += `  switch_${i}:\n    name: Switch ${i}, a control the bench made up\n    watch: L('BENCH_SWITCH_${i}')\n    write: |\n`
     yaml += `      (value) => {\n        if (value > 0) {\n          write(L('BENCH_SWITCH_${i}'), value)\n          write(H('BENCH_SWITCH_${i}_ON'))\n        } else {\n          write(L('BENCH_SWITCH_${i}'), 0)\n          write(H('BENCH_SWITCH_${i}_OFF'))\n        }\n      }\n`

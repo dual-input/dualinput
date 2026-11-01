@@ -9,12 +9,24 @@ use crate::names::Name;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Profile {
+    /// The aircraft's name as the EFB app's list of supported aircraft shows it, such as
+    /// "Synaptic A220".
+    pub name: String,
+    pub maturity: Maturity,
     pub authors: Option<String>,
     pub aircraft: Aircraft,
     pub state: Vec<StateEntry>,
     pub events: Vec<EventEntry>,
     /// Each feature's blocks, such as avatars' `seats`.
     pub features: Blocks,
+}
+
+/// How far a profile's authors stand behind it, which the EFB app's list of supported aircraft
+/// tags the aircraft with.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Maturity {
+    Stable,
+    Experimental,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
@@ -35,6 +47,8 @@ pub struct Variant {
 pub struct StateEntry {
     pub key: String,
     pub name: String,
+    /// What the checklist shows under `name`.
+    pub description: Option<String>,
     pub watch: Watch,
     pub write: Write,
     pub owner: Owner,
@@ -207,6 +221,8 @@ mod tests {
 
     fn profile(variants: &[(&str, &[&str])]) -> Profile {
         Profile {
+            name: "An aircraft".into(),
+            maturity: Maturity::Stable,
             authors: None,
             aircraft: Aircraft {
                 variants: variants

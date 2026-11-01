@@ -25,6 +25,8 @@ fn tree(files: &[(&str, &str)]) -> Tree {
 }
 
 const PROFILE: &str = "\
+name: A
+maturity: stable
 aircraft:
   variants:
     base: bksq-aircraft-baronpro
@@ -127,35 +129,35 @@ fn a_variant_gets_its_own_seats_and_locations() {
 /// Each error avatars' module adds, at the line and column of what's wrong.
 #[test]
 fn each_error_avatars_adds_is_reported_at_its_place() {
-    let head = "aircraft:\n  variants:\n    a: x\n";
+    let head = "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\n";
     let entry = |rest: &str| {
         format!("{head}state:\n  x:\n    name: X\n    watch: L('X')\n    write: L('X')\n{rest}")
     };
     let seat = |rest: &str| format!("{head}seats:\n  pilot:\n    name: Pilot\n{rest}");
     let full = "    hip: [0, 0, 0]\n    knees: [0, 0]\n    feet: [0, 0]\n    eye: [0, 0]\n";
     for (yaml, code, line, column) in [
-        (entry("    location: [1, 2]\n"), "point", 9, 15),
+        (entry("    location: [1, 2]\n"), "point", 11, 15),
         (
             entry("    location:\n      b: [1, 2, 3]\n"),
             "variant-unknown",
-            10,
+            12,
             7,
         ),
-        (entry("    deadband: -1\n"), "type", 9, 15),
-        (entry("    deadband: big\n"), "type", 9, 15),
-        (seat("    hip: [0, 0, 0]\n"), "required", 5, 3),
-        (seat(&format!("{full}    eye: [0, 0, 0]\n")), "yaml", 11, 5),
-        (seat(&format!("{full}    take_radius: 0\n")), "type", 11, 18),
+        (entry("    deadband: -1\n"), "type", 11, 15),
+        (entry("    deadband: big\n"), "type", 11, 15),
+        (seat("    hip: [0, 0, 0]\n"), "required", 7, 3),
+        (seat(&format!("{full}    eye: [0, 0, 0]\n")), "yaml", 13, 5),
+        (seat(&format!("{full}    take_radius: 0\n")), "type", 13, 18),
         (
             seat(&format!("{full}    only: b\n")),
             "variant-unknown",
-            11,
+            13,
             11,
         ),
         (
             seat(&format!("{full}    lean: 3\n")),
             "unknown-field",
-            11,
+            13,
             5,
         ),
     ] {
@@ -180,7 +182,7 @@ fn a_module_holds_no_seats_or_locations() {
     let files = tree(&[
         (
             "p.yaml",
-            "aircraft:\n  variants:\n    a: x\nimport: modules/m\n",
+            "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nimport: modules/m\n",
         ),
         (
             "modules/m.yaml",

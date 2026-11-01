@@ -5,7 +5,6 @@
 use std::path::PathBuf;
 
 pub mod core_helper;
-pub mod desktop_app;
 pub mod jobs;
 pub mod network;
 // A bench build puts the stand-in sim where the sim edge goes, and starts no sim thread.
@@ -14,9 +13,8 @@ pub mod sim;
 pub mod sockets;
 pub mod timer;
 
-/// The program `name` in the core's own folder, where a release lays out the core helper and
-/// the desktop app beside the core. An absolute `name`, such as a development setting's, stays
-/// as it is.
+/// The program `name` in the core's own folder, where a release lays out the core helper beside
+/// the core. An absolute `name`, such as a development setting's, stays as it is.
 fn beside_core(name: &str) -> PathBuf {
     std::env::current_exe()
         .ok()

@@ -17,7 +17,7 @@ pub use hooks::{Captured, HelperUnit, Mouse, NextPressed, Press};
 
 use std::collections::BTreeMap;
 
-use clients::{Clients, ClientsUnit, Level, SettingChanged, SettingDef};
+use clients::{Clients, ClientsUnit, Landing, Level, SettingChanged, SettingDef};
 use kernel::{Cx, Registry, TimerId, UnitId, View};
 use messages::clients::SettingKind;
 use messages::core_helper::{
@@ -357,6 +357,7 @@ impl CoreHelper {
                         picked.name
                     ),
                     None,
+                    Landing::Session,
                 );
             }
             _ => clients::clear_notification(cx, "missing-output"),

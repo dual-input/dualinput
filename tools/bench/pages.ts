@@ -140,9 +140,8 @@ export function fakeMenuScript(core: Core, master: MenuPage): FakePage {
 
 /**
  * The EFB app, as the bench fakes it: a page that joins as `efb-app`, watches whether a
- * banner page's socket is open, as its code does to open the banner, keeps each order the
- * clients crate sends it, and sends its button's command for the desktop app
- * (record/areas/interface/01-apps.md). `component::EFB_APP` in
+ * banner page's socket is open, as its code does to open the banner, and keeps each order the
+ * clients crate sends it (record/areas/interface/01-apps.md). `component::EFB_APP` in
  * src/engines/messages/src/clients.rs names its component too.
  */
 export class FakeEfbApp extends FakePage {
@@ -158,11 +157,6 @@ export class FakeEfbApp extends FakePage {
   /** Whether a banner page's socket is open, as the core last said. */
   bannerOpen(): boolean {
     return this.slice("banner") === true
-  }
-
-  /** Sends the command of the button that brings the desktop app forward. */
-  bringDesktopForward(): Promise<void> {
-    return this.client.command("clients.bring-desktop-forward", null)
   }
 }
 
@@ -182,9 +176,9 @@ export class FakeBanner extends FakePage {
     return (this.slice("notifications") ?? []) as Notification[]
   }
 
-  /** Clicks the notification `id` outside its action. */
-  click(id: string): Promise<void> {
-    const args: NotificationClicked = { id }
+  /** Clicks a notification outside its action. */
+  click({ id, landing }: Notification): Promise<void> {
+    const args: NotificationClicked = { id, landing }
     return this.client.command("clients.notification-clicked", args)
   }
 }

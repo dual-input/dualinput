@@ -241,6 +241,9 @@ pub struct MemberLink {
     pub up: bool,
     /// The path of the link's connection, while it has one whose path is known.
     pub path: Option<Path>,
+    /// The round trip on that path in ms, from the transport's last `Stats`, while the link's
+    /// connection has one.
+    pub round_trip_ms: Option<u32>,
 }
 
 /// The application codes a core closes a connection with, so the other side tells a leave

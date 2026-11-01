@@ -6,7 +6,7 @@
 
 use std::time::Duration;
 
-use clients::{Clients, Level};
+use clients::{Clients, Landing, Level};
 use kernel::{Cx, TimerId, View};
 use messages::clients::{ANNOUNCE, Announce};
 use messages::sim::SimSlice;
@@ -131,6 +131,7 @@ impl SimService {
                     Level::Trouble,
                     "Dual Input's package in the sim is missing or from another version, so it can't hold or fly the aircraft. Install Dual Input again with the sim closed.",
                     None,
+                    Landing::Header,
                 );
             } else {
                 clients::clear_notification(cx, PACKAGE_NOTIFICATION);
@@ -145,6 +146,7 @@ impl SimService {
                     Level::Trouble,
                     "Dual Input's module in the sim stopped, so it can't fly or hold the aircraft. A frozen aircraft stays frozen until you take control or leave the session. Restart the sim to bring the module back.",
                     None,
+                    Landing::Header,
                 );
             } else {
                 clients::clear_notification(cx, STOPPED_NOTIFICATION);

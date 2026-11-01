@@ -252,6 +252,17 @@
       ],
       "description": "The modules it uses, each by its path from profiles/ without .yaml"
     },
+    "maturity": {
+      "description": "stable or experimental, which that list tags the aircraft with",
+      "enum": [
+        "stable",
+        "experimental"
+      ]
+    },
+    "name": {
+      "description": "The aircraft's name as the EFB app's list of supported aircraft shows it",
+      "type": "string"
+    },
     "seats": {
       "additionalProperties": {
         "additionalProperties": false,
@@ -344,6 +355,10 @@
           "default": {
             "description": "With a counting watch, the shadow value's starting value",
             "type": "number"
+          },
+          "description": {
+            "description": "What the checklist shows under the control's name",
+            "type": "string"
           },
           "ignore": {
             "anyOf": [

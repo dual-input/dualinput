@@ -6,7 +6,7 @@
 use std::time::Duration;
 
 use kernel::{Cx, TimerId, View};
-use messages::clients::{Level, Notification, PanelModule, ToClient, component};
+use messages::clients::{Landing, Level, Notification, PanelModule, ToClient, component};
 
 use crate::Clients;
 
@@ -103,6 +103,7 @@ impl Clients {
                 level: Level::Trouble,
                 text: "Dual Input's panel bridge didn't load in the cockpit, so features that run in its panels are off. Another package's VCockpit.js is the likeliest cause.".into(),
                 action: None,
+                landing: Landing::Header,
             },
         );
     }

@@ -34,6 +34,16 @@ const fn profile_only(key: &'static str, level: u32, about: &'static str) -> Fie
 }
 
 pub(crate) const TOP: &[Field] = &[
+    profile_only(
+        "name",
+        1,
+        "The aircraft's name as the EFB app's list of supported aircraft shows it",
+    ),
+    profile_only(
+        "maturity",
+        1,
+        "stable or experimental, which that list tags the aircraft with",
+    ),
     field(
         "authors",
         1,
@@ -76,6 +86,11 @@ pub(crate) const AIRCRAFT: &[Field] = &[
 
 pub(crate) const STATE_ENTRY: &[Field] = &[
     field("name", 1, "The control's name for people"),
+    field(
+        "description",
+        1,
+        "What the checklist shows under the control's name",
+    ),
     field(
         "watch",
         1,

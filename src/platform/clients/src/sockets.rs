@@ -5,8 +5,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use kernel::{Cx, Input};
 use messages::clients::{
-    BRING_DESKTOP_FORWARD, FromClient, Hello, NOTIFICATION_CLICKED, SET_SETTING, ToClient,
-    component,
+    FromClient, Hello, NOTIFICATION_CLICKED, SET_SETTING, ToClient, component,
 };
 use serde_json::Value;
 
@@ -167,7 +166,6 @@ impl Clients {
         let result = match name {
             SET_SETTING => self.set_setting(args, cx),
             NOTIFICATION_CLICKED => self.notification_clicked(socket, args, cx),
-            BRING_DESKTOP_FORWARD => self.bring_desktop_forward(socket, args, cx),
             _ => {
                 if let Some(handler) = self.commands.get(name) {
                     cx.call_handler(handler, CommandCall { socket, id, args });

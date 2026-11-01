@@ -21,8 +21,8 @@ mod tree;
 
 pub use bundle::hash;
 pub use format::{
-    Aircraft, Count, EventEntry, Owner, Pace, Profile, Resolved, StateEntry, Steps, Variant, Watch,
-    Write,
+    Aircraft, Count, EventEntry, Maturity, Owner, Pace, Profile, Resolved, StateEntry, Steps,
+    Variant, Watch, Write,
 };
 pub use index::{Index, IndexBundle, IndexProfile, covers};
 pub use levels::{declarations, schema};

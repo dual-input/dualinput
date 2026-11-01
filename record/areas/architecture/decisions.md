@@ -1285,6 +1285,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** the log subscriber writes each line with the home folder's path and the Windows username replaced, and the clipboard's job hands up only six characters from the invite code's alphabet; the edge leaves every input as it came.
   Settled in node 6.6 by the user, 2026-10-16, and the inputs left as they came by the user, 2026-10-23 ([recording log][writer]).
+  [The core's log keeps display names](../interface/decisions.md#the-cores-log-keeps-display-names-and-replaces-only-the-home-folders-path), so stage 11b takes the Windows username out of what it replaces (user, 2026-10-25).
 - **Because:**
   - `AircraftLoaded` names a Community aircraft by a path under `%APPDATA%`, in the pilot's home folder, lowercased (measured on MSFS 2024, 2026-10-09, `experiments/areas/architecture/results/p08-flight-2026-10-09-17-12-31.txt`), and a log is what a pilot pastes in public.
   - A pilot sends a recording to us by hand, when we ask, so the home folder's path in its inputs reaches only us.

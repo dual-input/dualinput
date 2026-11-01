@@ -132,13 +132,14 @@ impl Network {
             members: self
                 .links
                 .iter()
-                .map(|(pilot, link)| MemberLink {
-                    pilot: messages::hex(pilot),
-                    up: link.conn.is_some(),
-                    path: link
-                        .conn
-                        .and_then(|c| self.conns.get(&c))
-                        .and_then(|c| c.path.clone()),
+                .map(|(pilot, link)| {
+                    let conn = link.conn.and_then(|c| self.conns.get(&c));
+                    MemberLink {
+                        pilot: messages::hex(pilot),
+                        up: link.conn.is_some(),
+                        path: conn.and_then(|c| c.path.clone()),
+                        round_trip_ms: conn.and_then(|c| c.round_trip_ms),
+                    }
                 })
                 .collect(),
             internet: self.backend.internet,

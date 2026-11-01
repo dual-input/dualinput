@@ -7,7 +7,7 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use clients::Level;
+use clients::{Landing, Level};
 use kernel::{Cx, Input, TimerId};
 use messages::net::{Command, EndpointId, Event, HEARTBEAT, Header, Heartbeat, Path, codes};
 
@@ -75,6 +75,9 @@ pub(crate) struct Conn {
     /// The last heartbeat received on it: its send stamp, and its input's stamp.
     pub(crate) echo: Heartbeat,
     pub(crate) path: Option<Path>,
+    /// The round trip the transport's last `Stats` gave it, in whole ms, so the network's slice
+    /// changes as a pilot would see it change rather than at each µs.
+    pub(crate) round_trip_ms: Option<u32>,
 }
 
 impl Network {
@@ -214,6 +217,7 @@ impl Network {
                     Level::Trouble,
                     &format!("Dual Input couldn't open its connection to other pilots: {error}"),
                     None,
+                    Landing::Header,
                 );
             }
             Event::Connected {
@@ -232,6 +236,7 @@ impl Network {
                         held: Vec::new(),
                         echo: Heartbeat::default(),
                         path: None,
+                        round_trip_ms: None,
                     },
                 );
                 if let Some(opener) = &me.opener {
@@ -269,6 +274,7 @@ impl Network {
                         Level::Warning,
                         &format!("Another pilot's PC refused this one's connection: {why}"),
                         None,
+                        Landing::Session,
                     );
                 }
                 // A member can leave on a connection whose first message hasn't passed yet, which
@@ -315,7 +321,12 @@ impl Network {
                 rtt_us,
                 cwnd,
             } => {
-                tracing::debug!(conn, sent, lost, rtt_us, cwnd, "a connection's stats")
+                tracing::debug!(conn, sent, lost, rtt_us, cwnd, "a connection's stats");
+                if let Some(c) = me.conns.get_mut(&conn) {
+                    // The transport gives 0 while the connection has no chosen path.
+                    c.round_trip_ms =
+                        (rtt_us > 0).then(|| u32::try_from(rtt_us / 1_000).unwrap_or(u32::MAX));
+                }
             }
         }
     }
@@ -459,6 +470,7 @@ impl Network {
             Level::Warning,
             &format!("Another pilot's connection was refused: {reason}"),
             None,
+            Landing::Session,
         );
         self.close(conn, code, cx);
     }

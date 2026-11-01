@@ -407,7 +407,9 @@ pub fn register(r: &mut Registry) {
             wire::NAME,
             SettingDef {
                 label: "The name your crew sees",
-                kind: SettingKind::Text,
+                kind: SettingKind::LimitedText {
+                    max: wire::NAME_MAX_CHARACTERS,
+                },
                 default: json!(""),
                 part_only: false,
                 development: false,

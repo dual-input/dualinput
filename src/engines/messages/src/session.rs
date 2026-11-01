@@ -377,3 +377,8 @@ pub struct Share {
 
 /// The display name setting, the name the crew sees, which Host and Join need.
 pub const NAME: &str = "session.name";
+
+/// The most characters a display name holds. Each place the apps name a pilot has room for a
+/// short name, and Windows holds an account's name to the same 20, so a username fits as it is
+/// (record/areas/interface/decisions.md, "A display name runs to 20 characters").
+pub const NAME_MAX_CHARACTERS: u32 = 20;

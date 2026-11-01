@@ -8,4 +8,9 @@ export type MemberLink = { pilot: string, up: boolean,
 /**
  * The path of the link's connection, while it has one whose path is known.
  */
-path: Path | null, };
+path: Path | null, 
+/**
+ * The round trip on that path in ms, from the transport's last `Stats`, while the link's
+ * connection has one.
+ */
+round_trip_ms: number | null, };

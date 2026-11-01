@@ -156,6 +156,8 @@ pub struct Notification {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[ts(optional)]
     pub action: Option<String>,
+    /// Where a click outside its action lands in the EFB app.
+    pub landing: Landing,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, TS)]
@@ -166,6 +168,22 @@ pub enum Level {
     Warning,
     /// Trouble that costs the pilot a feature.
     Trouble,
+}
+
+/// Where a click on a notification lands in the EFB app: where it's explained or acted on, which
+/// the raising unit knows (record/areas/interface/decisions.md, "A notification's click opens the
+/// EFB app where it's explained or acted on").
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "kebab-case")]
+#[ts(export, export_to = "clients/")]
+pub enum Landing {
+    /// The Session tab, which holds the take-control strip, the crew rows, the checklist, and the
+    /// differences.
+    Session,
+    /// The header, opened on the row that repeats the notification.
+    Header,
+    /// The Figures tab, which explains seats.
+    Figures,
 }
 
 /// The slice `notifications`: every notification up, as a list.
@@ -182,28 +200,27 @@ pub const BANNER: &str = "banner";
 /// `NotificationClicked` as its arguments. It sends the EFB app `EfbAppOrder::OpenEfb`.
 pub const NOTIFICATION_CLICKED: &str = "clients.notification-clicked";
 
-/// The arguments of `NOTIFICATION_CLICKED`.
+/// The arguments of `NOTIFICATION_CLICKED`. A click carries its card's landing, rather than the
+/// core looking it up by the ID, since a notification can clear while the click is on its way,
+/// and the banner's preflight summary, whose click lands on the Session tab too, is no
+/// notification.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "clients/")]
 pub struct NotificationClicked {
     /// The notification's full ID, as the slice `notifications` gives it.
     pub id: String,
+    pub landing: Landing,
 }
 
-/// The command for the EFB app's button that brings the desktop app forward, with `null` as
-/// its arguments. The core starts the desktop app's program whether or not a desktop app is
-/// connected, and the program's one running copy opens its window, so the desktop app gets no
-/// message for it (record/areas/interface/01-apps.md, "Bringing the desktop app forward").
-pub const BRING_DESKTOP_FORWARD: &str = "clients.bring-desktop-forward";
-
 /// What the clients crate orders the EFB app to do, in a `unit` message from `clients`, such as
-/// `{"t":"open-efb"}`.
+/// `{"t":"open-efb","landing":"header","id":"sim-service.stopped"}`.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[serde(tag = "t", rename_all = "kebab-case")]
 #[ts(export, export_to = "clients/")]
 pub enum EfbAppOrder {
-    /// Opens the EFB onto our app, after a click on a notification outside its action.
-    OpenEfb,
+    /// Opens the EFB onto our app, after a click on a notification outside its action, and lands
+    /// where the click said. `id` is the clicked notification's, which picks the header's row.
+    OpenEfb { landing: Landing, id: String },
 }
 
 /// The slice `settings`: each setting an app may offer.
@@ -238,6 +255,10 @@ pub enum SettingKind {
         max: f64,
     },
     Text,
+    /// Text of at most `max` characters, where an app's field stops.
+    LimitedText {
+        max: u32,
+    },
     Choice {
         choices: Vec<String>,
     },
@@ -260,6 +281,9 @@ impl SettingKind {
                 value.as_f64().is_some_and(|n| n >= *min && n <= *max)
             }
             SettingKind::Text => value.is_string(),
+            SettingKind::LimitedText { max } => value
+                .as_str()
+                .is_some_and(|s| s.chars().count() <= *max as usize),
             SettingKind::Choice { choices } => value
                 .as_str()
                 .is_some_and(|s| choices.iter().any(|c| c == s)),

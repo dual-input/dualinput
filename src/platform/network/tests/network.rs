@@ -4,20 +4,23 @@
 
 use std::collections::BTreeMap;
 
+use clients::{SocketOut, SocketUp, Sockets};
 use kernel::{
     CancelTimer, Cx, FIRST, Fetched, Input, JOBS, Kernel, Output, Registry, SetTimer, SourceId,
     StartJob, TIMERS, TimerId, Work, first_input,
 };
 use messages::backend::{Kind, NewSession};
+use messages::clients::ToClient;
 use messages::net::{
-    Channel, Command, Delivery, EndpointId, Event, HEARTBEAT, Header, Heartbeat, PilotId, Relay,
-    codes,
+    Channel, Command, Delivery, EndpointId, Event, HEARTBEAT, Header, Heartbeat, NetSlice, PilotId,
+    Relay, SLICE, codes,
 };
 use network::{
     BackendAnswered, LinkLost, LinkUp, Me, Member, MemberLeft, MemberOut, NetUnit, Network, Opened,
     Sender, To,
 };
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 const SESSION: Channel<String> = Channel::new(100, Delivery::Stream, u8::MAX);
 const DATA: Channel<u32> = Channel::new(101, Delivery::Stream, 10);
@@ -170,12 +173,15 @@ struct Core {
     kernel: Kernel,
     transport: SourceId,
     acts: SourceId,
+    sockets: SourceId,
     seq: u64,
     now: u64,
     timers: BTreeMap<(u64, TimerId), ()>,
     commands: Vec<Command>,
     jobs: Vec<StartJob>,
     saw: Vec<String>,
+    /// The network's slice, as a watching client last got it.
+    slice: Option<NetSlice>,
 }
 
 impl Core {
@@ -192,16 +198,19 @@ impl Core {
         let kernel = Kernel::new(registry);
         let transport = kernel.source::<network::Transport>().unwrap();
         let acts = kernel.source::<Acts>().unwrap();
+        let sockets = kernel.source::<Sockets>().unwrap();
         let mut core = Core {
             kernel,
             transport,
             acts,
+            sockets,
             seq: 0,
             now: SECOND,
             timers: BTreeMap::new(),
             commands: Vec::new(),
             jobs: Vec::new(),
             saw: Vec::new(),
+            slice: None,
         };
         core.handle(
             FIRST,
@@ -258,10 +267,44 @@ impl Core {
                 }
                 Err(value) => value,
             };
+            let value = match value.downcast::<SocketOut>() {
+                Ok(socket) => {
+                    if let SocketOut::Send { text, .. } = *socket
+                        && let Ok(ToClient::State { slice, value }) = serde_json::from_str(&text)
+                        && slice == SLICE
+                    {
+                        self.slice = serde_json::from_value(value).ok();
+                    }
+                    continue;
+                }
+                Err(value) => value,
+            };
             if let Ok(saw) = value.downcast::<Saw>() {
                 self.saw.push(saw.0);
             }
         }
+    }
+
+    /// A client joins and watches the network's slice.
+    fn watch_slice(&mut self) {
+        let opened = SocketUp::Opened { socket: 1 };
+        self.handle(self.sockets, opened.encode());
+        for message in [
+            json!({ "t": "hello", "component": "efb-app", "version": messages::VERSION, "hash": messages::HASH }),
+            json!({ "t": "watch", "slices": [SLICE] }),
+        ] {
+            let text = SocketUp::Text {
+                socket: 1,
+                text: message.to_string(),
+            };
+            self.handle(self.sockets, text.encode());
+        }
+    }
+
+    /// The one member's round trip in the slice, after a round of the clients crate's.
+    fn round_trip_shown(&mut self) -> Option<u32> {
+        self.advance(self.now + 100_000);
+        self.slice.as_ref().unwrap().members[0].round_trip_ms
     }
 
     fn act(&mut self, act: Act) {
@@ -475,6 +518,41 @@ fn a_link_with_nothing_for_5s_is_lost_redials_every_2s_and_comes_back_again() {
     });
     core.their_first(2, 0, "ABC123");
     assert_eq!(core.take().1[0], "up again=true restart=0");
+}
+
+#[test]
+fn a_links_round_trip_shows_from_the_transports_last_stats_while_its_connection_lasts() {
+    let mut core = Core::new();
+    core.linked(1, [7; 32]);
+    core.watch_slice();
+    assert_eq!(core.round_trip_shown(), None, "no stats have come yet");
+    let stats = |rtt_us| Event::Stats {
+        conn: 1,
+        sent: 9,
+        lost: 0,
+        rtt_us,
+        cwnd: 12_000,
+    };
+    core.event(stats(120_400));
+    assert_eq!(core.round_trip_shown(), Some(120));
+    core.event(stats(0));
+    assert_eq!(
+        core.round_trip_shown(),
+        None,
+        "the transport gives 0 while the connection has no chosen path"
+    );
+    core.event(stats(48_000));
+    assert_eq!(core.round_trip_shown(), Some(48));
+    // 5s with nothing loses the link, whose new connection has no stats yet.
+    core.advance(core.now + 5 * SECOND);
+    assert_eq!(core.round_trip_shown(), None);
+    core.event(Event::Connected {
+        conn: 2,
+        endpoint: [7; 32],
+        dialed: true,
+    });
+    core.their_first(2, 0, "ABC123");
+    assert_eq!(core.round_trip_shown(), None);
 }
 
 #[test]

@@ -3,8 +3,8 @@
 use std::collections::BTreeMap;
 
 use profile_engine::{
-    Compiled, Files, LEVEL, Name, Owner, Severity, Watch, Write, check, program, read, source,
-    write,
+    Compiled, Files, LEVEL, Maturity, Name, Owner, Severity, Watch, Write, check, program, read,
+    source, write,
 };
 
 struct Tree(BTreeMap<String, String>);
@@ -25,6 +25,8 @@ fn tree(files: &[(&str, &str)]) -> Tree {
 }
 
 const BARON: &str = "\
+name: Black Square Baron
+maturity: experimental
 authors: Dual Input
 aircraft:
   variants:
@@ -35,6 +37,7 @@ import: modules/radio
 state:
   mixture_1:
     name: Left mixture
+    description: 'Full rich: the lever at its top'
     watch: L('BKSQ_MixtureLeverPosition_1')
     write: L('BKSQ_MixtureLeverPosition_1')
     owner: pilot_flying
@@ -120,7 +123,14 @@ fn a_bundle_written_and_read_back_gives_the_profile_it_was_written_from() {
     assert!(!text.contains('\r'));
     let p = read(&bytes, LEVEL).unwrap_or_else(|r| panic!("{r}\n{text}"));
 
+    assert_eq!(p.name, "Black Square Baron");
+    assert_eq!(p.maturity, Maturity::Experimental);
     assert_eq!(p.authors.as_deref(), Some("Dual Input"));
+    assert_eq!(
+        p.state[0].description.as_deref(),
+        Some("Full rich: the lever at its top")
+    );
+    assert_eq!(p.state[1].description, None);
     let keys: Vec<&str> = p.state.iter().map(|e| e.key.as_str()).collect();
     assert_eq!(
         keys,
@@ -175,7 +185,7 @@ fn a_script_with_blank_lines_at_its_end_or_none_comes_back_the_same() {
             .collect();
         let trailing = "\n".repeat(text.len() - text.trim_end_matches('\n').len());
         let yaml = format!(
-            "aircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: {block}\n{body}{}",
+            "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: {block}\n{body}{}",
             if trailing.len() > 1 {
                 &trailing[1..]
             } else {
@@ -195,84 +205,84 @@ fn a_script_with_blank_lines_at_its_end_or_none_comes_back_the_same() {
 /// Each error a profile's own blocks can have, at the line and column of what's wrong.
 #[test]
 fn each_error_is_reported_at_its_place_with_its_code() {
-    let head = "aircraft:\n  variants:\n    a: x\n    b: y\n";
+    let head = "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\n    b: y\n";
     let entry = |rest: &str| format!("state:\n  x:\n    name: X\n{rest}");
     for (body, code, line, column) in [
-        ("unknown: 1\n".to_string(), "unknown-block", 5, 1),
+        ("unknown: 1\n".to_string(), "unknown-block", 7, 1),
         (
             entry("    watch: L('X')\n    write: L('X')\n    colour: red\n"),
             "unknown-field",
-            10,
+            12,
             5,
         ),
-        ("state:\n  X:\n    name: X\n".to_string(), "key-form", 6, 3),
-        (entry("    watch: L('X')\n"), "required", 6, 3),
+        ("state:\n  X:\n    name: X\n".to_string(), "key-form", 8, 3),
+        (entry("    watch: L('X')\n"), "required", 8, 3),
         (
             "state:\n  x:\n    name: 5\n    watch: L('X')\n    write: L('X')\n".to_string(),
             "type",
-            7,
+            9,
             11,
         ),
         (
             "state:\n  x:\n    name: \"\"\n    watch: L('X')\n    write: L('X')\n".to_string(),
             "type",
-            7,
+            9,
             11,
         ),
         (
             entry("    watch: K('X')\n    write: K('X')\n"),
             "name-kind",
-            8,
+            10,
             12,
         ),
         (
             "events:\n  x:\n    name: X\n    watch: A('X', 'Bool')\n    write: K('X')\n"
                 .to_string(),
             "name-kind",
-            8,
+            10,
             12,
         ),
         (
             "events:\n  x:\n    name: X\n    watch: instrument('G', 'a')\n    write: H('X')\n"
                 .to_string(),
             "name-kind",
-            8,
+            10,
             12,
         ),
         (
             entry("    watch: L('X')\n    write: instrument('G', 'a')\n"),
             "name-kind",
-            9,
+            11,
             12,
         ),
         (
             entry("    watch: L('X')\n    write: L('X')\n    ignore: instrument('G', 'a')\n"),
             "name-kind",
-            10,
+            12,
             13,
         ),
         (
             entry("    watch: L('X')\n    write: H('X', 'Bool')\n"),
             "name",
-            9,
+            11,
             12,
         ),
         (
             entry("    watch: A('X')\n    write: L('X')\n"),
             "name",
-            8,
+            10,
             12,
         ),
         (
             entry("    watch: instrument('G', 'f()')\n    write: H('X')\n"),
             "name",
-            8,
+            10,
             12,
         ),
         (
             entry("    watch: L('X')\n    write:\n      inc: K('I')\n      dec: K('D')\n"),
             "wrap",
-            10,
+            12,
             7,
         ),
         (
@@ -280,13 +290,13 @@ fn each_error_is_reported_at_its_place_with_its_code() {
                 "    watch: L('X')\n    write:\n      inc: K('I')\n      dec: K('D')\n      wrap: true\n",
             ),
             "range",
-            10,
+            12,
             7,
         ),
         (
             entry("    watch: L('X')\n    wrap: true\n    write: L('X')\n"),
             "unknown-field",
-            9,
+            11,
             5,
         ),
         (
@@ -294,7 +304,7 @@ fn each_error_is_reported_at_its_place_with_its_code() {
                 "    watch:\n      inc: K('I')\n      wrap: true\n      range: [0, 9]\n    write: none\n",
             ),
             "default",
-            9,
+            11,
             7,
         ),
         (
@@ -302,7 +312,7 @@ fn each_error_is_reported_at_its_place_with_its_code() {
                 "    default: 0\n    watch:\n      inc: K('I')\n      wrap: true\n    write: none\n",
             ),
             "wrap",
-            10,
+            12,
             7,
         ),
         (
@@ -310,19 +320,19 @@ fn each_error_is_reported_at_its_place_with_its_code() {
                 "    default: 0\n    watch:\n      inc: K('I')\n      wrap: true\n      range: [0, 9]\n    write:\n      inc: K('I')\n      dec: K('D')\n      wrap: true\n",
             ),
             "wrap",
-            16,
+            18,
             13,
         ),
         (
             entry("    default: 0\n    watch: L('X')\n    write: L('X')\n"),
             "default",
-            8,
+            10,
             14,
         ),
         (
             entry("    watch: L('X')\n    write: L('X')\n    only: c\n"),
             "variant-unknown",
-            10,
+            12,
             11,
         ),
         (
@@ -330,39 +340,39 @@ fn each_error_is_reported_at_its_place_with_its_code() {
                 "    watch: L('X')\n    write: L('X')\n  y:\n    name: Y\n    watch: L('X')\n    write: L('Y')\n",
             ),
             "watch-twice",
-            12,
+            14,
             12,
         ),
         (
             entry("    watch: L('X')\n    write: K('X', value, value)\n"),
             "name",
-            9,
+            11,
             12,
         ),
         (
             entry("    watch: L('X')\n    write: L('X')\n    ignore: K('X', value)\n"),
             "value-place",
-            10,
+            12,
             13,
         ),
         (
             "events:\n  x:\n    name: X\n    watch: K('X')\n    write: none\n".to_string(),
             "write",
-            9,
+            11,
             12,
         ),
         (
             "events:\n  x:\n    name: X\n    watch: K('X')\n    write:\n      toggle: K('X')\n"
                 .to_string(),
             "write",
-            10,
+            12,
             7,
         ),
         (
             "events:\n  x:\n    name: X\n    watch: K('X')\n    write:\n      inc: K('I')\n      dec: K('D')\n"
                 .to_string(),
             "write",
-            10,
+            12,
             7,
         ),
         (
@@ -370,22 +380,22 @@ fn each_error_is_reported_at_its_place_with_its_code() {
                 "    watch: L('X')\n    write:\n      inc: K('I')\n      dec: K('D')\n      wrap: false\n      pace: 2 frame\n",
             ),
             "pace",
-            13,
+            15,
             13,
         ),
         (
             entry("    watch: L('X')\n    write:\n      toggle: L('X')\n"),
             "name-kind",
-            10,
+            12,
             15,
         ),
         (
             entry("    watch: L('X')\n    write: L('X')\n    owner: captain\n"),
             "owner",
-            10,
+            12,
             12,
         ),
-        ("import: modules/none\n".to_string(), "module-missing", 5, 9),
+        ("import: modules/none\n".to_string(), "module-missing", 7, 9),
     ] {
         let yaml = format!("{head}{body}");
         let report = match source(&tree(&[("p.yaml", &yaml)]), "p.yaml") {
@@ -419,13 +429,54 @@ fn place_of<'a>(report: &'a profile_engine::Report, code: &str) -> (&'a str, usi
 fn a_variants_path_is_written_with_slashes() {
     let report = check(
         &source(
-            &tree(&[("p.yaml", "aircraft:\n  variants:\n    a: x\\y\n")]),
+            &tree(&[(
+                "p.yaml",
+                "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\\y\n",
+            )]),
             "p.yaml",
         )
         .expect("loads"),
         LEVEL,
     );
-    assert_eq!(place_of(&report, "variant-path"), ("p.yaml", 3, 8));
+    assert_eq!(place_of(&report, "variant-path"), ("p.yaml", 5, 8));
+}
+
+#[test]
+fn a_profile_needs_a_name_and_a_maturity_and_a_module_holds_neither() {
+    let codes = |files: &[(&str, &str)]| -> Vec<String> {
+        let report = check(&source(&tree(files), "p.yaml").expect("loads"), LEVEL);
+        report.errors().map(|d| d.code.clone()).collect()
+    };
+    let head = "aircraft:\n  variants:\n    a: x\n";
+    assert_eq!(codes(&[("p.yaml", head)]), ["required", "required"]);
+    assert_eq!(
+        codes(&[("p.yaml", &format!("name: A\n{head}"))]),
+        ["required"]
+    );
+    assert_eq!(
+        codes(&[("p.yaml", &format!("maturity: beta\nname: A\n{head}"))]),
+        ["maturity"]
+    );
+    assert_eq!(
+        codes(&[
+            (
+                "p.yaml",
+                &format!("name: A\nmaturity: stable\nimport: modules/m\n{head}")
+            ),
+            ("modules/m.yaml", "name: M\nmaturity: stable\n"),
+        ]),
+        ["module-only", "module-only"]
+    );
+}
+
+#[test]
+fn only_a_state_entry_takes_a_description() {
+    let yaml = "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nevents:\n  x:\n    name: X\n    description: An event\n    watch: K('X')\n    write: K('X')\n";
+    let report = check(
+        &source(&tree(&[("p.yaml", yaml)]), "p.yaml").expect("loads"),
+        LEVEL,
+    );
+    assert_eq!(place_of(&report, "unknown-field"), ("p.yaml", 9, 5));
 }
 
 #[test]
@@ -433,7 +484,7 @@ fn a_key_defined_in_a_profile_and_its_module_and_a_module_with_only_fail_in_the_
     let files = tree(&[
         (
             "p.yaml",
-            "aircraft:\n  variants:\n    a: x\nimport: [modules/m]\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: L('X')\n",
+            "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nimport: [modules/m]\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: L('X')\n",
         ),
         (
             "modules/m.yaml",
@@ -452,7 +503,7 @@ fn an_import_cycle_fails_at_the_import_that_closes_it() {
     let files = tree(&[
         (
             "p.yaml",
-            "aircraft:\n  variants:\n    a: x\nimport: modules/m\n",
+            "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nimport: modules/m\n",
         ),
         ("modules/m.yaml", "import: modules/n\n"),
         ("modules/n.yaml", "import: modules/m\n"),
@@ -463,24 +514,24 @@ fn an_import_cycle_fails_at_the_import_that_closes_it() {
 
 #[test]
 fn an_ignore_on_a_watched_variable_is_a_warning() {
-    let yaml = "aircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: L('X')\n  y:\n    name: Y\n    watch: L('Y')\n    write: L('Y')\n    ignore: L('X')\n";
+    let yaml = "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: L('X')\n  y:\n    name: Y\n    watch: L('Y')\n    write: L('Y')\n    ignore: L('X')\n";
     let report = check(
         &source(&tree(&[("p.yaml", yaml)]), "p.yaml").expect("loads"),
         LEVEL,
     );
     assert!(!report.has_errors(), "{report}");
     assert_eq!(report.diagnostics[0].severity, Severity::Warning);
-    assert_eq!(place_of(&report, "ignore-watched"), ("p.yaml", 13, 13));
+    assert_eq!(place_of(&report, "ignore-watched"), ("p.yaml", 15, 13));
 }
 
 #[test]
 fn a_bundle_has_no_import() {
     let report = read(
-        b"aircraft:\n  variants:\n    a: x\nimport: modules/m\n",
+        b"name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nimport: modules/m\n",
         LEVEL,
     )
     .expect_err("an error");
-    assert_eq!(place_of(&report, "import"), ("bundle.yaml", 4, 1));
+    assert_eq!(place_of(&report, "import"), ("bundle.yaml", 6, 1));
 }
 #[test]
 fn each_variants_file_declares_only_its_own_entries() {
@@ -518,7 +569,7 @@ fn a_type_error_lands_at_its_scripts_line_and_column() {
     let d = &report.diagnostics[0];
     assert_eq!(
         (d.at.file.as_str(), d.at.line, d.at.column),
-        ("aircraft/bksq-baronpro.yaml", 30, 9)
+        ("aircraft/bksq-baronpro.yaml", 33, 9)
     );
     assert_eq!(d.code, "TS2345");
     assert_eq!(d.message, "a mistake (on press)");
@@ -538,7 +589,17 @@ fn a_checked_profile_survives_postcard() {
 #[test]
 fn the_levels_files_name_every_field() {
     let schema = profile_engine::schema(LEVEL);
-    for key in ["authors", "variants", "watch", "toggle", "range", "pace"] {
+    for key in [
+        "name",
+        "maturity",
+        "description",
+        "authors",
+        "variants",
+        "watch",
+        "toggle",
+        "range",
+        "pace",
+    ] {
         assert!(schema.contains(&format!("\"{key}\"")), "{key}");
     }
     assert!(profile_engine::declarations(LEVEL).contains("declare function write("));
@@ -548,6 +609,10 @@ fn the_levels_files_name_every_field() {
 /// a core's load both do: here, every field came in at level 1.
 #[test]
 fn a_bundle_using_a_field_above_its_level_fails_to_read() {
-    let report = read(b"authors: X\naircraft:\n  variants:\n    a: x\n", 0).expect_err("level 0");
+    let report = read(
+        b"name: A\nmaturity: stable\nauthors: X\naircraft:\n  variants:\n    a: x\n",
+        0,
+    )
+    .expect_err("level 0");
     assert_eq!(place_of(&report, "above-level"), ("bundle.yaml", 1, 1));
 }

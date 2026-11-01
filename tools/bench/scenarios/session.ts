@@ -10,11 +10,12 @@ import path from "node:path"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
+import type { Setting } from "../../../src/engines/messages/ts/clients/Setting.ts"
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
 import { BenchRun, type Core, type CoreOptions, type Stub } from "../cores.ts"
 import { type Aircraft, BARON, load as loadFlight, PA24, toMenu as endFlight } from "../flights.ts"
 import { app, BenchNetwork, host, join } from "../network.ts"
-import { type FakeApp, FakePage, fakeMenuScript } from "../pages.ts"
+import { FakeApp, FakePage, fakeMenuScript } from "../pages.ts"
 
 const FREEZES = ["IS LATITUDE LONGITUDE FREEZE ON", "IS ALTITUDE FREEZE ON", "IS ATTITUDE FREEZE ON"]
 
@@ -483,4 +484,24 @@ test("a module from another build while Hold is fed raises the sim service's tro
   assert.ok(!a.app.notifications().some((n) => n.id === "sim-service.package"), "no routine is fed yet, so no notification")
   await host(a.core, a.name)
   await a.app.until(() => a.app.notifications().some((n) => n.id === "sim-service.package"), "the package's trouble notification")
+})
+
+test("the settings command refuses a display name over 20 characters from any app", { timeout: 30_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("session-name-limit", t)
+  const core = await run.core("a", net.core())
+  const efb = await FakeApp.open(core, ["settings"], "efb-app")
+  t.after(() => efb.close())
+  const set = (value: string): Promise<string | null> => efb.command("clients.set-setting", { key: "session.name", value })
+  const name = (): Setting | undefined => efb.slice<Setting[]>("settings")?.find((s) => s.key === "session.name")
+  await efb.until(() => name() !== undefined, "the settings' slice")
+  assert.deepEqual(name()!.kind, { type: "limited-text", max: 20 })
+  // Twenty characters of two bytes each, since the limit counts characters.
+  const longest = "İ".repeat(20)
+  assert.equal(await set(longest), null)
+  await efb.until(() => name()!.value === longest, "the 20-character name in the slice")
+  assert.match((await set("x".repeat(21))) ?? "", /doesn't fit session\.name/)
+  await sleep(200)
+  assert.equal(name()!.value, longest, "the refused name changed nothing")
 })

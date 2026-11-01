@@ -8,10 +8,11 @@ import path from "node:path"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
+import type { NetSlice } from "../../../src/engines/messages/ts/net/NetSlice.ts"
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
 import { BenchRun } from "../cores.ts"
 import { app, BenchNetwork, host, join, report, session, took } from "../network.ts"
-import type { FakeApp } from "../pages.ts"
+import { FakeApp } from "../pages.ts"
 
 /** The members the session's slice lists, by name, this pilot first. */
 function names(desktop: FakeApp): string[] {
@@ -147,4 +148,8 @@ test("a join on a direct path links within 3s of the code entered", { timeout: 6
   assert.ok(joinMs < 3_000, `the join took ${joinMs.toFixed(0)}ms`)
   await sleep(3_000)
   assert.match(b.log(), /a connection's path changed conn=\d+ path=Direct/, "the link should move to a direct path")
+  // The crew rows show each link's path and round trip from this slice.
+  const watching = await FakeApp.open(b, ["network"])
+  t.after(() => watching.close())
+  await watching.until(() => watching.slice<NetSlice>("network")?.members.some((m) => m.path === "Direct" && m.round_trip_ms !== null) === true, "the link's path and round trip in the network's slice", 3_000)
 })

@@ -48,6 +48,7 @@ fn state(key: &str, watch: Name, write: Write) -> StateEntry {
     StateEntry {
         key: key.into(),
         name: key.replace('_', " "),
+        description: None,
         watch: Watches::Name(watch),
         write,
         owner: Owner::Shared,

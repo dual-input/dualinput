@@ -69,9 +69,14 @@ impl BenchClients {
                 });
                 cx.timer(every, BenchClients::churn);
             }
-            ClientsAct::Notify { id, text } => {
-                clients::notify(cx, &id, clients::Level::Information, &text, None)
-            }
+            ClientsAct::Notify { id, text } => clients::notify(
+                cx,
+                &id,
+                clients::Level::Information,
+                &text,
+                None,
+                clients::Landing::Session,
+            ),
         }
     }
 

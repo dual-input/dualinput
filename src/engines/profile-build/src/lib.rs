@@ -265,7 +265,7 @@ mod tests {
     #[test]
     fn a_script_quickjs_ng_cant_parse_fails_at_its_place() {
         let profile = One(
-            "aircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => write(L('X'), value)\n",
+            "name: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => write(L('X'), value)\n",
         );
         let p = program(&source(&profile, "p.yaml").expect("loads"), LEVEL);
         let broken = Compiled {
@@ -273,7 +273,7 @@ mod tests {
         };
         let report = parses(&p, &broken);
         let e = report.errors().next().expect("an error");
-        assert_eq!((e.code.as_str(), e.at.line), ("quickjs", 9), "{report}");
+        assert_eq!((e.code.as_str(), e.at.line), ("quickjs", 11), "{report}");
         let fine = Compiled {
             scripts: vec!["(value) => write(L('X'), value)".into()],
         };

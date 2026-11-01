@@ -6,6 +6,12 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, 01-loo
 Decides:     The sim edge's thread and its inputs, the sim's process among them; the sim client's and the sim service's interfaces; sim awareness's stages and its one moment, and that it's an engine; how the core tells a crash from a close, which aircraft and preset loaded, and the loaded aircraft's facts; our WASM module's slots, its status, and what happens to a module from another build; which of the sim's APIs carries each want; the module through a flight load; the core's announcement; and the budgets (node 6.3).
 ```
 
+> **Note**
+> For [home's aircraft line](../interface/decisions.md#home-names-the-loaded-aircraft-and-offers-host-and-join-in-any-aircraft), sim awareness gains `selected`, the aircraft of the last `AircraftLoaded` in any stage, and the slice `sim` gains `where` and names that aircraft (2026-11-01).
+> Its maker and model are `ui_manufacturer` and `ui_type` in its `aircraft.cfg`, found by [the package search](#the-aircrafts-facts), and stay `null` for a streamed copy and for a value that's a localization token (read in community packages on 2026-11-01; whether the Marketplace's aircraft use tokens is unverified).
+> Its tail is `A:ATC ID`, read at each load, and whether it reads at the main menu or the world map is unverified: a sim session settles it, and until then a refused read leaves it `null` until the flight's load.
+> `where` says `world-map` once the menu script reports `MenuPage::WorldMap`, which `src/sim-package/pages/menu.ts` doesn't send yet.
+
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.
 A crash is a sim whose process ends with no quit message before it, and the loaded aircraft is the folder and preset in the path `AircraftLoaded` reports.

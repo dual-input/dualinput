@@ -9,6 +9,14 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 > **Note**
 > [Stage 11b](../build/plan.md#11b-the-apps) adds each link's round trip, from the transport's `Stats`, to [the network's slice](#what-the-pilot-sees-and-settings), so the EFB app's crew rows show it beside the link's path (user, 2026-10-26).
 
+> **Note**
+> Stage 11b widens the check in [what the pilot sees](#what-the-pilot-sees-and-settings), for setup and the header (2026-11-01).
+> It runs from the core's start, in a session or not, every 60s, 5s after a server didn't answer, and at each dial while a link is lost.
+> It asks the backend as well as each relay, with a GET, which only our Worker answers with a 405, and the slice gains `servers`: reachable when the backend and at least one relay answered within 2s.
+> `internet` is whether anything of ours answered, since the backend and the relays run on two providers.
+> The backend's lack of an answer to Host or Join waits for a check, so the session crate tells an offline PC from our servers out of reach.
+> [Lookup's](#its-requests) `other-version` carries the host's version as `theirs`, and `too-many-wrong-codes` carries `until`, when the next hour begins in UTC, which the deployed Worker needs before a core reads either.
+
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.
 The network owns everything between machines, the backend's requests among it, and the session crate fills each connection's first message with the session's keys through one hook.

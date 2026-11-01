@@ -14,6 +14,7 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 
 > **Note**
 > Stage 11b's tentative decision that [the profile format gains a name, a maturity, and an entry's description](../interface/decisions.md#the-profile-format-gains-a-name-a-maturity-and-an-entrys-description) adds `name` and `maturity` to [a profile's top-level keys](#a-profile) at level 1, and an optional `description` to a state entry, until the apps' design confirms it (user, 2026-10-26 and 2026-10-30).
+> A profile also needs `maker`, and `name` holds the model alone, since the aircraft picker's tiles show the two apart (2026-11-01), which the decision doesn't say yet.
 
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Dual Input defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.

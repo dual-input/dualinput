@@ -11,6 +11,7 @@ Decides:     The core's WebSocket library and its Origin check; the client proto
 > The EFB app, when [a client's version differs](#a-client-whose-version-differs), shows setup's "Add-on version mismatch" box in place of its pages ([without the service](../interface/decisions.md#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-shows-setups-box)), while the core still only logs it.
 > The order that opens the EFB carries where in the EFB app to land ([a notification's click](../interface/decisions.md#a-notifications-click-opens-the-efb-app-where-its-explained-or-acted-on)).
 > A panel module also says whether the loaded profile names anything it serves, and `clients` raises [its trouble notification](#cockpit-panels-and-their-modules) over a panel that never connects only when one does ([the apps' note](../interface/01-apps.md)).
+> `clients` gains the slice `core`, with the core's version, its hash, and the Windows username, which a core reads only before first-time setup is done, so a later recording never holds it, and the settings `app.setup-done` and `app.guide-done`.
 
 The core serves every client over one protocol of JSON messages on a WebSocket, through tokio-websockets, which iroh already brings into the core.
 A client opens with a `hello` that names it and its version, and from then on each side sends `alive` every 2s, while only the core closes a socket that goes quiet.

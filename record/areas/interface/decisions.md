@@ -62,7 +62,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 ## The apps draw with a kit of our own components, styled with Tailwind 3
 
-- **Decided:** the EFB app and the desktop app's screens draw with one kit of our own React components, styled with Tailwind 3 through msfs-tailwind ([below](#tailwind-3-reaches-the-kit-through-msfs-tailwind-a-preset-of-our-own-for-coherent-gt)), and the banner takes the kit's colors without its components ([below](#the-banner-draws-its-few-lines-in-plain-markup-with-the-kits-colors-and-no-framework)).
+- **Decided:** the EFB app, [the banner](#the-banner-draws-with-react-and-the-kit), and the desktop app's screens draw with one kit of our own React components, styled with Tailwind 3 through msfs-tailwind ([below](#tailwind-3-reaches-the-kit-through-msfs-tailwind-a-preset-of-our-own-for-coherent-gt)).
   Each page bundles React, pinned to 19.2.7, at `es2017` ([decision 030](../../decisions/030-in-sim-code-es2017-esbuild.md)).
   The kit's components use none of the EFB API's controls, while the EFB API stays the way our app registers with the EFB ([below](#the-efb-app-touches-the-framework-only-to-register-through-the-efbs-own-copy)).
   No screen of ours uses Vite, Tailwind 4, or shadcn's components, which reverses [decision 028](../../decisions/028-desktop-pages-react-vite-tailwind.md)'s Vite and Tailwind 4 for the desktop app's pages and keeps its React, and this reverses what remains of [decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md), the EFB app's drawing on the MSFS Avionics Framework.
@@ -77,13 +77,14 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - Preact 11.1.1 is smaller, but failed as shipped, since it calls `queueMicrotask`, which Coherent GT lacks (same entry).
 - **Leaves out:** what [the kit's package](#the-kit-and-dual-inputs-palette-are-one-package-in-this-repository) leaves out, and React's times under a flight's load, since p23 measured them at the world map.
 
-## The banner draws its few lines in plain markup, with the kit's colors and no framework
+## The banner draws with React and the kit
 
-- **Decided:** the banner's page draws its notifications and a few short lines, such as the preflight countdown and a line asking the pilot to open the EFB app for preflight's help, as plain markup from a small script on page-client, with no FSComponent and no copy of the framework.
-  Its styles take the kit's colors from the same palette, through msfs-tailwind's classes or the kit's color variables, so the palette is written down once.
+- **Decided:** the banner's page draws its notifications and the preflight summary with React and the kit, in a page of its own on page-client, which bundles its own copy of React and no copy of the MSFS Avionics Framework.
   State sync's checklist and the rest of preflight's help are the EFB app's, so the banner shows no part's view in places of its own.
-  Settled by the user on 2026-10-25.
-- **Because:** a few cards and lines need no component framework, and a banner without one bundles no copy of it (user, 2026-10-25).
+  Settled by the user on 2026-10-25, and moved from plain markup to React on 2026-11-01.
+- **Because:**
+  - The banner's frame grew past a few lines, to 689 lines of cards that come, go, reorder, overflow, and drag, so plain markup would hand-build the layer [the kit's move to React](#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3) avoids (user, 2026-11-01).
+  - A second copy of React costs about 2ms to parse and 13ms to mount once, as measured in the EFB's document ([interface log][p23]).
 - **Leaves out:** which lines it shows, which [the banner's content](#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) and [its box](#the-banner-is-a-box-of-opaque-cards-at-the-screens-top-right) settle.
 
 ## Tailwind 3 reaches the kit through msfs-tailwind, a preset of our own for Coherent GT
@@ -104,7 +105,6 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Decided:** the kit's components, its reset, and Dual Input's palette are one npm package in this repository, `@dualinput/ui`, in `src/packages/ui/`, which our code imports by that name.
   `src/packages/` holds packages that are no tier's units, and the kit is its first.
   The palette is a second entry point of the package, `@dualinput/ui/palette`: the colors as hex, the CSS variables, and the Tailwind config that builds them on msfs-tailwind.
-  So the banner and the desktop app's window take it without the components.
   A feature's EFB part imports the kit directly, so the code map's rule on what a part imports names the kit beside its shell and the messages' types ([the code map's rules](../architecture/02-code-map.md#tiers)).
   Settled by the user on 2026-10-25.
 - **Because:**
@@ -273,6 +273,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 ## Stage 11b checks in Coherent GT what the frames lean on
 
 - **Decided:** as the build reaches the first screen that uses each of these, it checks it in Coherent GT, since no run has shown it there:
+  - React in the banner panel's page, since p23 ran it only in the EFB's document.
   - `position: -webkit-sticky`, which pins the session card; the engine parses it, and nobody has seen it stick.
   - What a masked element costs a frame, for the [scrolling page's fold](#a-scrolling-page-folds-its-surfaces-and-a-change-on-a-page-is-one-moment-in-three-steps), since a browser usually draws one offscreen (unverified in Coherent GT); if it costs too much, the fallback is a hard top edge, with a 1px line under the header while the page is scrolled.
   - Animating an SVG stroke's dash offset, for the countdown's ring.

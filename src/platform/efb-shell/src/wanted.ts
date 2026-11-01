@@ -22,6 +22,16 @@ export type Wanted = {
   /** For `network`: whether our servers answer, and for the desktop app's local port: whether the firewall blocks us. */
   servers?: "reachable" | "unreachable"
   firewall?: "allows" | "blocks"
+  /** For setup's checks and the setting that records it's done: whether setup still has to run, and what it finds. */
+  setup?: { failure?: "addon" | "offline" | "servers" | "firewall"; username: string; addonVersion?: string } | null
+  /** For a setting that records the guide's done: whether this is a first visit. */
+  firstVisit?: boolean
+  /** For the figures' feature: this pilot's color, by its name in the palette. */
+  color?: string
+  /** For `profile-loader`: every profile's aircraft, for the picker. */
+  supported?: { maker: string; model: string; maturity: "Stable" | "Experimental"; installed: boolean }[]
+  /** For `sim`: whether the pilot is at Free flight's world map or in a flight, the one place a pick can load. */
+  where?: "world-map" | "flight"
   /** For the desktop app's local port: the update's state. */
   update?: { state: "current" | "checking" | "downloading" | "ready" | "failed"; next: string; done?: number; checked?: string }
 }

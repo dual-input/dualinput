@@ -106,6 +106,12 @@ export function tailwindConfig(content: string[]) {
           // A ring that spreads from a button pressed into a good state, in its text color, and fades.
           "dualinput-ready-pulse": { from: { "box-shadow": "0 0 0 0 currentColor", opacity: "0.6" }, to: { "box-shadow": "0 0 0 8px currentColor", opacity: "0" } },
           "dualinput-zoom-in": { from: { opacity: "0", transform: "scale(0.5)" }, to: { opacity: "1", transform: "scale(1)" } },
+          "dualinput-sink-out": { from: { opacity: "1", transform: "translateY(0)" }, to: { opacity: "0", transform: "translateY(16px)" } },
+          // A page of the guide, drifting 6px the way the turn goes.
+          "dualinput-page-in": { from: { opacity: "0", transform: "translateX(6px)" }, to: { opacity: "1", transform: "translateX(0)" } },
+          "dualinput-page-in-back": { from: { opacity: "0", transform: "translateX(-6px)" }, to: { opacity: "1", transform: "translateX(0)" } },
+          "dualinput-page-out": { from: { opacity: "1", transform: "translateX(0)" }, to: { opacity: "0", transform: "translateX(-6px)" } },
+          "dualinput-page-out-back": { from: { opacity: "1", transform: "translateX(0)" }, to: { opacity: "0", transform: "translateX(6px)" } },
           // What arrives as a card turns to its other side.
           "dualinput-turn-in": { from: { opacity: "0", transform: "translateY(6px)" }, to: { opacity: "1", transform: "translateY(0)" } },
           // A digit of a rolling count, as a counter's wheel turns: the old one up out of its window, the new one up in from below.

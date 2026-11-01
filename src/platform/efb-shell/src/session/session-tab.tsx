@@ -9,10 +9,12 @@ import { createElement, useEffect, useLayoutEffect, useRef, useState } from "rea
 import type { CSSProperties } from "react"
 
 import type { SessionSlice } from "../../../../engines/messages/ts/session/SessionSlice.ts"
+import { FigureSignals } from "../figure/standing-figure.tsx"
 import { useCoreSlice, useShell } from "../part.ts"
 import type { Part } from "../part.ts"
 import { WANTED } from "../wanted.ts"
 import type { Wanted } from "../wanted.ts"
+import { HomeRest } from "./home-rest.tsx"
 import { SessionSide } from "./session-side.tsx"
 import { StartSide } from "./start-side.tsx"
 import type { Action, Status } from "./start-side.tsx"
@@ -40,6 +42,10 @@ export function SessionTab({ parts }: { parts: Part[] }) {
   const started = phase === "ended"
   const preflight = held && (phase === "running" || phase === "countdown") && !!me?.in_flight
 
+  const signals = useRef(new FigureSignals())
+  const pageRef = useRef<HTMLDivElement>(null)
+  // The figure stays through the turn to the session, since it's leaping off the page, and goes once it's gone.
+  const [figureGone, setFigureGone] = useState(false)
   // An attempt: pressed here, answered in the session slice.
   const [status, setStatus] = useState<Status>({ kind: "idle" })
   const [code, setCode] = useState("")
@@ -48,6 +54,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
   useEffect(() => stopSlow, [])
   const attempt = (on: Action) => {
     setStatus({ kind: "busy", on, dialing: false, slow: false })
+    signals.current.onAttempt()
     stopSlow()
     slowTimer.current = window.setTimeout(() => setStatus((now) => (now.kind === "busy" ? { ...now, slow: true } : now)), SLOW_AFTER)
     void link.client.command(on === "host" ? "session.host" : "session.join", on === "host" ? null : { code }).catch(() => {})
@@ -58,9 +65,11 @@ export function SessionTab({ parts }: { parts: Part[] }) {
     if (status.kind !== "busy") return
     if (refused && refused.on === status.on) {
       stopSlow()
+      signals.current.onAnswer(false)
       setStatus({ kind: "refused", on: status.on, refusal: refused })
     } else if (held) {
       stopSlow()
+      signals.current.onAnswer(true)
       setStatus({ kind: "done", on: status.on })
     } else if (status.dialing !== dialing) {
       setStatus({ ...status, dialing })
@@ -98,6 +107,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
           if (to === "start") {
             setStatus({ kind: "idle" })
             setCode("")
+            setFigureGone(false)
           }
         }, hold + TURN.out),
         window.setTimeout(() => {
@@ -129,7 +139,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
   const scrolls = side === "session"
   const canFold = foldable && (fold.scroller.above || fold.scroller.below)
   return (
-    <div className="flex min-h-0 flex-1 flex-col px-5 pb-5">
+    <div ref={pageRef} className="flex min-h-0 flex-1 flex-col px-5 pb-5">
       <div className={cx("relative flex flex-col", scrolls ? "-mx-5 -mb-5 -mt-px min-h-0" : "shrink-0")}>
         <div
           ref={fold.scroller.ref}
@@ -169,6 +179,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
                         onJoin={() => attempt("join")}
                         onCancel={() => {
                           stopSlow()
+                          signals.current.onCancel()
                           setStatus({ kind: "idle" })
                         }}
                         slowText={status.kind === "busy" && status.dialing ? "Still trying to reach the host…" : "This is taking longer than usual."}
@@ -210,6 +221,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
           )}
         </div>
       </div>
+      {!figureGone && (side === "start" || turning) && <HomeRest page={pageRef} signals={signals.current} onFigureGone={() => setFigureGone(true)} />}
     </div>
   )
 }

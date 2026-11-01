@@ -23,6 +23,7 @@ import { Reconnecting, ServiceDown } from "./lost-service.tsx"
 import { ShellContext, startParts, stopParts } from "./part.ts"
 import type { Part, Shell } from "./part.ts"
 import { SessionTab } from "./session/session-tab.tsx"
+import { SetupFlow } from "./setup/setup-flow.tsx"
 import { SettingsPage } from "./settings/settings-page.tsx"
 import { useViewSize } from "./view.ts"
 import { WANTED } from "./wanted.ts"
@@ -102,6 +103,30 @@ export function Frame({ host, link, version, parts }: FrameProps) {
   const status = useHeaderStatus(link, version, setTab)
   const down = core === "not-running" || core === "closed"
   const issues = down ? [] : issuesOf(status, !!session?.held)
+  const setup = useSlice<Wanted>(link, WANTED)?.setup
+  // Setup has the whole window, with no header or tabs, until the pilot has a name.
+  const [setupDone, setSetupDone] = useState(false)
+  if (!down && setup && !setupDone) {
+    return (
+      <ShellContext.Provider value={shell}>
+        <Root scale={scale} style={{ width, height, overflow: "hidden" }}>
+          <div data-app-frame className="relative flex h-full flex-col bg-background" style={{ paddingTop: inset }}>
+            <SetupFlow
+              key={setup.failure ?? "clear"}
+              facts={{ ...setup, version }}
+              onFix={(failure) => void link.client.command("setup.fix", { failure }).catch(() => {})}
+              onDone={(name, color) => {
+                setSetupDone(true)
+                void link.client.command("clients.set-setting", { key: "session.name", value: name }).catch(() => {})
+                void link.client.command("setup.done", { color }).catch(() => {})
+              }}
+            />
+          </div>
+          <Toaster />
+        </Root>
+      </ShellContext.Provider>
+    )
+  }
   return (
     <ShellContext.Provider value={shell}>
       <Root scale={scale} style={{ width, height, overflow: "hidden" }}>

@@ -26,8 +26,12 @@ The probes and their raw output are in [experiments/areas/interface](../../../ex
 
 The user then tried the sample in the sim's EFB, which showed what the debugger's first pass had missed, each reproduced and fixed here: the start card clipping a refusal once a turn had run, since the turn's last timer was cancelled with the render it caused; a band of what scrolled under showing above the pinned card; a click lost when the cursor crossed between a row's children, which every child of a pressable thing now ignores the mouse for; and the bottom fade missing until a first scroll, since nothing measured again once a font or a child's slice changed the page's height.
 
+- **SVG against the tracer (p26):** with its gradients sampled from the tracer's own shading, a ball and nose in SVG match the traced head almost exactly at 180px and stay a little stepped at 44px, where four ways to smooth them failed: a hairline stroke, drawing larger and scaling down, a CSS ball, and a blur, whose least radius softens the whole picture.
+  The whole figure matches closely too, once limbs draw behind the body's balls and a contact shadow is a gradient on a circle the size of its ball.
+
 **Changed:** a head draws each of its pixels with a 1px `fillRect`, as a canvas pixel for each real pixel, and the countdown's ring redraws an arc each frame.
-The standing figure and the portrait, which draw hundreds of times as many, wait for a way of drawing that the user picks at the sample's check.
+The standing figure and the portrait draw as SVG (user, 2026-11-01: "I hope this doesn't compromise on visuals", which is why heads stay traced).
+A dropped pilot's head dims by mixing with its window, so its nose stays solid, and keeps inside the cone a watching head turns in (user, 2026-11-01).
 
 What we haven't run: `fillRect`'s cost to the GPU in the sim's EFB, its rate in a flight, and the no-3D result in the sim's own documents.
 

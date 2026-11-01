@@ -43,8 +43,9 @@ export const HEAD_SIZE = 28
 
 /** A head at rest looks toward the viewer's right, where a row's name sits, and a little down. */
 const REST_LOOK = unit([0.4, -0.1, 1])
-/** A head of a pilot out of the flight hangs looking down and toward the viewer's right. */
-export const SLUMP_LOOK = unit([1, -0.7, 1])
+/** A head of a pilot out of the flight hangs looking down and toward the viewer's right, as far as a watching head can turn, since further looks wrong. */
+const SLUMP_SIN = Math.sin(LIVE.cone * DEG)
+export const SLUMP_LOOK = unit([SLUMP_SIN * 0.82, -SLUMP_SIN * 0.57, Math.cos(LIVE.cone * DEG)])
 /** A head with its back to us, its nose hidden behind it. */
 const AWAY: V = [0, 0, -1]
 
@@ -245,6 +246,20 @@ function reach(shapes: Shape[], w: number, dpr: number, center: number): number[
   return [Math.max(0, Math.floor((x0 - 1) * dpr)), Math.max(0, Math.floor((y0 - 1) * dpr)), Math.min(w, Math.ceil((x1 + 1) * dpr)), Math.min(w, Math.ceil((y1 + 1) * dpr))]
 }
 
+/** How much of its own color a pilot's head keeps while they're out of the flight. */
+const DIM_KEEPS = 0.4
+
+/** Dims a color by mixing it with the head's window, so the head stays solid: at 40% opacity, its nose showed the window and the card through it. */
+function dimToward(color: V, window: V): void {
+  for (let i = 0; i < 3; i++) color[i] = color[i]! * DIM_KEEPS + window[i]! * (1 - DIM_KEEPS)
+}
+
+/** The color a head's window draws in, from the custom property the kit's root sets, as `pass` mixes it. */
+function windowColor(element: Element): V {
+  const [r, g, b] = getComputedStyle(element).getPropertyValue("--muted").split(",").map((part) => Number(part) / 255)
+  return [r ?? 0, g ?? 0, b ?? 0]
+}
+
 /**
  * One pass of a head into `acc`, blended at `blend` with what it held, over the pixels its shapes reach now
  * and reached last frame: inside now's, a hit adds its color and a miss fades what was there; outside it,
@@ -298,6 +313,7 @@ function pass(head: Live, shapes: Shape[], n: number, blend: number, now: number
       }
       shade(rox, roy, pz, nx, ny, nz, shapes, self, tints[self]!, color)
       display(color)
+      if (head.dim) dimToward(color, head.dim)
       acc[o] = acc[o]! + color[0] * blend
       acc[o + 1] = acc[o + 1]! + color[1] * blend
       acc[o + 2] = acc[o + 2]! + color[2] * blend
@@ -315,6 +331,8 @@ type Live = {
   dpr: number
   center: number
   tint: V
+  /** The window's color, while the pilot is out of the flight. */
+  dim: V | null
   crew: Crew | null
   mind: Mind | null
   look: V
@@ -378,8 +396,8 @@ function tick(): void {
   firstLive = (from + k) % (all.length || 1)
 }
 
-/** Draws a head on `canvas`, from when it mounts until it goes. `crew` and `pilot` make it watch, and `look` holds it still. */
-export function useLiveHead(canvas: RefObject<HTMLCanvasElement | null>, hex: string, room: HeadRoom, scale: number, crew: Crew | null, pilot: string | undefined, look: V = REST_LOOK): void {
+/** Draws a head on `canvas`, from when it mounts until it goes. `crew` and `pilot` make it watch, and `look` holds it still, `dimmed` as a pilot out of the flight's is. */
+export function useLiveHead(canvas: RefObject<HTMLCanvasElement | null>, hex: string, room: HeadRoom, scale: number, crew: Crew | null, pilot: string | undefined, look: V = REST_LOOK, dimmed = false): void {
   const lookRef = useRef(look)
   lookRef.current = look
   useLayoutEffect(() => {
@@ -407,6 +425,7 @@ export function useLiveHead(canvas: RefObject<HTMLCanvasElement | null>, hex: st
       dpr,
       center: size / 2,
       tint: albedo(hex),
+      dim: dimmed ? windowColor(element) : null,
       crew,
       mind,
       look: lookRef.current,
@@ -424,5 +443,5 @@ export function useLiveHead(canvas: RefObject<HTMLCanvasElement | null>, hex: st
       lives.delete(head)
       mind?.heads.delete(element)
     }
-  }, [canvas, hex, room, scale, crew, pilot])
+  }, [canvas, hex, room, scale, crew, pilot, dimmed])
 }

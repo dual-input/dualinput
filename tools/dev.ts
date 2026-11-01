@@ -3,7 +3,7 @@
 // the page, and reloads it after each edit. It matches the sim's EFB on 1,159 of 1,170 CSS items
 // (record/areas/interface/log.md, 2026-11-01). Leave it running in a terminal.
 //
-//   node tools/dev.ts [page]       the kit's page by default
+//   node tools/dev.ts [page]       the kit's page by default, or a page's own file
 //
 // While it runs, http://127.0.0.1:5190 serves the page to a browser too, though only the debugger's
 // window draws what the sim's engine draws. These drive that window, from another shell:
@@ -96,9 +96,11 @@ function evalInPage(code: string): Promise<unknown> {
 
 // ---------------------------------------------------------------- the build
 
-const name = process.argv[2] ?? "kit"
-const page = PAGES[name]
-if (!page) throw new Error(`no page called ${name}: ${Object.keys(PAGES).join(", ")}`)
+const asked = process.argv[2] ?? "kit"
+// A path runs that file as the page, with its folder's classes, as a probe under experiments/ does.
+const page = PAGES[asked] ?? (fs.existsSync(asked) ? { entry: asked, content: [`${path.dirname(asked).split(path.sep).join("/")}/**/*.{ts,tsx}`] } : undefined)
+if (!page) throw new Error(`no page or file called ${asked}: ${Object.keys(PAGES).join(", ")}`)
+const name = PAGES[asked] ? asked : path.basename(path.dirname(asked))
 const dir = path.join(OUT, name)
 fs.mkdirSync(dir, { recursive: true })
 fs.cpSync(path.join(KIT, "fonts"), path.join(dir, "fonts"), { recursive: true })

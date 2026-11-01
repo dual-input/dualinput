@@ -46,6 +46,7 @@ export function CodeInput({ value, onChange, groups = [3, 3], disabled, invalid,
                 return (
                   <div
                     key={index}
+                    data-active={isActive || undefined}
                     className={cx(
                       "relative flex size-9 items-center justify-center border-b border-r border-t bg-field font-mono text-sm first:rounded-l-3xl first:border-l last:rounded-r-3xl",
                       isActive ? (invalid ? "z-10 border-destructive" : "z-10 border-ring") : invalid ? "border-destructive/60" : "border-input",

@@ -8,13 +8,22 @@ import type { ReactNode } from "react"
 import { Crew, HEAD_SIZE, LIST_ROOM, SLUMP_LOOK, TURN_ROOM, useLiveHead } from "./live.ts"
 
 /** The palette a pilot's figure takes its color from, without the gray that marks a figure whose pilot is gone or lost. */
-const FIGURE_COLORS = ["#e2453c", "#3b7fe0", "#3fae5a", "#f2b630", "#8e5ad8", "#f0862e", "#2fb3a6", "#e46aa6"]
+export const FIGURE_COLORS = [
+  { name: "red", hex: "#e2453c" },
+  { name: "blue", hex: "#3b7fe0" },
+  { name: "green", hex: "#3fae5a" },
+  { name: "yellow", hex: "#f2b630" },
+  { name: "purple", hex: "#8e5ad8" },
+  { name: "orange", hex: "#f0862e" },
+  { name: "teal", hex: "#2fb3a6" },
+  { name: "pink", hex: "#e46aa6" },
+]
 
 /** A pilot's color, by their ID until the figures' feature says which they picked. */
 export function colorOf(pilot: string): string {
   // FNV-1a, whose high bits spread where a plain sum's low bits would give every pilot one color.
   const hash = Array.from(pilot).reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619), 2166136261) >>> 0
-  return FIGURE_COLORS[(hash >>> 16) % FIGURE_COLORS.length]!
+  return FIGURE_COLORS[(hash >>> 16) % FIGURE_COLORS.length]!.hex
 }
 
 const CrewContext = createContext<Crew | null>(null)
@@ -40,7 +49,7 @@ export type HeadProps = {
   alive?: boolean
   /** Turns its back to us as the card's fold docks it, a folded row's head. */
   turns?: boolean
-  /** A pilot out of the flight: it hangs still at 40% opacity, so who's gone reads apart from the crew still watching. */
+  /** A pilot out of the flight: it hangs still and dim, so who's gone reads apart from the crew still watching. */
   slumped?: boolean
 }
 
@@ -49,12 +58,12 @@ export function Head({ pilot, pop, alive, turns, slumped }: HeadProps) {
   const crew = useContext(CrewContext)
   const { scale } = useRoot()
   const room = turns ? TURN_ROOM : LIST_ROOM
-  useLiveHead(canvas, colorOf(pilot), room, scale, alive && !slumped ? crew : null, pilot, slumped ? SLUMP_LOOK : undefined)
+  useLiveHead(canvas, colorOf(pilot), room, scale, alive && !slumped ? crew : null, pilot, slumped ? SLUMP_LOOK : undefined, !!slumped)
   return (
     <span className="relative inline-block shrink-0" style={{ width: HEAD_SIZE, height: HEAD_SIZE }}>
       <span className="absolute inset-x-0 inset-y-0 rounded-full bg-muted" />
       <span className="absolute inset-x-0 inset-y-0" style={{ animation: pop === undefined ? undefined : `dualinput-head-pop ${POP_MS}ms ${pop}ms both` }}>
-        <canvas ref={canvas} className="pointer-events-none absolute" style={{ opacity: slumped ? 0.4 : undefined }} />
+        <canvas ref={canvas} className="pointer-events-none absolute" />
       </span>
     </span>
   )

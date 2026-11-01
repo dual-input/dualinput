@@ -39,6 +39,20 @@ const held = (rest: Partial<SessionSlice>): SessionSlice => ({ ...noSession, hel
 const running = { aircraft: inFlight.aircraft, phase: "running" as const }
 
 const AIRCRAFT: Wanted["aircraft"] = { maker: "Black Square", model: "Baron 58P", tail: "N58BS", maturity: "Stable" }
+const UNSUPPORTED: Wanted["aircraft"] = { maker: "Fenix", model: "A320", tail: "G-FNXA", maturity: null }
+const SUPPORTED: Wanted["supported"] = [
+  { maker: "Black Square", model: "Baron 58P", maturity: "Stable", installed: true },
+  { maker: "Synaptic Simulations", model: "A220-300", maturity: "Stable", installed: true },
+  { maker: "A2A Simulations", model: "PA24-250 Comanche", maturity: "Experimental", installed: true },
+  { maker: "FSReborn", model: "Phenom 300E", maturity: "Experimental", installed: true },
+  { maker: "PMDG", model: "777-300ER", maturity: "Experimental", installed: true },
+  { maker: "A2A Simulations", model: "Aerostar 600", maturity: "Experimental", installed: false },
+  { maker: "Black Square", model: "Bonanza", maturity: "Stable", installed: false },
+  { maker: "iniBuilds", model: "A350", maturity: "Experimental", installed: false },
+  { maker: "iniBuilds", model: "A380", maturity: "Experimental", installed: false },
+  { maker: "iniBuilds", model: "L-1011 TriStar", maturity: "Experimental", installed: false },
+]
+const SETUP = { username: "jordan" }
 const RUNS = [
   { name: "2026-10-27_21-10-00", size: 64_000_000, in_progress: false },
   { name: "2026-10-28_19-30-00", size: 97_000_000, in_progress: false },
@@ -69,8 +83,16 @@ type Slices = Record<string, unknown>
 
 /** Each state a person looks at, by name, with what it sets on top of the sim's healthy slices. */
 export const SCENES: Record<string, Slices> = {
-  "Before a session": { session: noSession, wanted: { aircraft: AIRCRAFT } },
-  "No profile for the aircraft": { session: noSession, wanted: { aircraft: { ...AIRCRAFT, maturity: null } } },
+  "First-time setup": { session: noSession, wanted: { setup: SETUP, aircraft: AIRCRAFT } },
+  "Setup: add-on mismatch": { session: noSession, wanted: { setup: { ...SETUP, failure: "addon", addonVersion: "0.0.9" }, aircraft: AIRCRAFT } },
+  "Setup: offline": { session: noSession, wanted: { setup: { ...SETUP, failure: "offline" }, aircraft: AIRCRAFT } },
+  "Setup: our servers": { session: noSession, wanted: { setup: { ...SETUP, failure: "servers" }, aircraft: AIRCRAFT } },
+  "Setup: firewall": { session: noSession, wanted: { setup: { ...SETUP, failure: "firewall" }, aircraft: AIRCRAFT } },
+  "First visit": { session: noSession, wanted: { firstVisit: true, aircraft: AIRCRAFT, supported: SUPPORTED } },
+  "First visit, no profile": { session: noSession, wanted: { firstVisit: true, aircraft: UNSUPPORTED, supported: SUPPORTED } },
+  "Before a session": { session: noSession, wanted: { aircraft: AIRCRAFT, supported: SUPPORTED } },
+  "No profile for the aircraft": { session: noSession, wanted: { aircraft: UNSUPPORTED, supported: SUPPORTED } },
+  "No profile, in a flight": { session: noSession, wanted: { aircraft: UNSUPPORTED, supported: SUPPORTED, where: "flight" } },
   "Servers refuse": { session: noSession, wanted: { aircraft: AIRCRAFT, refusing: "servers" } },
   "No session has the code": { session: noSession, wanted: { aircraft: AIRCRAFT, refusing: "no-code" } },
   "Too slow to answer": { session: noSession, wanted: { aircraft: AIRCRAFT, refusing: "slow" } },
@@ -110,7 +132,7 @@ export class StandInCore {
   private answer = 0
   /** How the socket closes, for the screens without the service. */
   private connectionState: ConnectionState = "connected"
-  sceneName = Object.keys(SCENES)[0]!
+  sceneName = "Before a session"
 
   env(): Env {
     return {
@@ -210,6 +232,8 @@ export class StandInCore {
     else if (name === "session.ready") this.setReady(!!fields.on)
     else if (name === "session.go-without") this.goWithout(String(fields.member))
     else if (name === "update.check") this.checkForUpdate()
+    else if (name === "setup.done") this.set({ wanted: { ...this.wanted(), setup: null, color: String(fields.color) } })
+    else if (name === "guide.done") this.set({ wanted: { ...this.wanted(), firstVisit: false } })
   }
 
   private attempt(on: "host" | "join"): void {

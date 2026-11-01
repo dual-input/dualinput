@@ -1,14 +1,15 @@
 // What the app's window shows without the service, since the EFB app reaches everything through it
 // (record/areas/interface/decisions.md, "Without the service the EFB app shows one of three screens").
 
-import { Spinner } from "@dualinput/ui"
+import { cx, Spinner } from "@dualinput/ui"
 import { useEffect, useState } from "react"
+import type { ReactNode } from "react"
 
-/** A failure's box, red, with a line that it's waiting: what setup shows too, so a pilot knows it again. */
-export function FailureBox({ title, detail, waiting }: { title: string; detail: string; waiting?: string }) {
+/** A failure's box, red for one that stops Dual Input and amber for one it can work around, with a line that it's waiting: what setup shows too, so a pilot knows it again. */
+export function FailureBox({ title, detail, waiting, amber, children }: { title: string; detail: string; waiting?: string; amber?: boolean; children?: ReactNode }) {
   return (
-    <div className="w-full max-w-80 animate-fade-in rounded-3xl border border-destructive/20 bg-destructive/10 px-5 py-4 text-center">
-      <p className="text-sm font-medium text-destructive">{title}</p>
+    <div className={cx("w-full max-w-80 animate-fade-in rounded-3xl border px-5 py-4 text-center", amber ? "border-warning/20 bg-warning/10" : "border-destructive/20 bg-destructive/10")}>
+      <p className={cx("text-sm font-medium", amber ? "text-warning" : "text-destructive")}>{title}</p>
       <p className="mt-1 text-sm text-foreground/75">{detail}</p>
       {waiting && (
         <span className="mt-3 flex items-center justify-center text-sm text-foreground/60">
@@ -16,6 +17,7 @@ export function FailureBox({ title, detail, waiting }: { title: string; detail: 
           {waiting}
         </span>
       )}
+      {children}
     </div>
   )
 }

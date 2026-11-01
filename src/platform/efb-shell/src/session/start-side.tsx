@@ -8,6 +8,7 @@ import { Check } from "lucide-react"
 import { useRef } from "react"
 import type { ReactNode } from "react"
 
+import { FIGURE_MARKS } from "../figure/standing-figure.tsx"
 import type { Refusal, Wanted } from "../wanted.ts"
 
 export type Action = "host" | "join"
@@ -93,7 +94,7 @@ export function StartSide({ aircraft, status, code, onCode, onHost, onJoin, onCa
         </>
       )}
       <CardContent>
-        <Button size="lg" className="w-full" disabled={working} onClick={onHost}>
+        <Button size="lg" className="w-full" disabled={working} onClick={onHost} {...{ [FIGURE_MARKS.target]: "", [FIGURE_MARKS.press]: "", [FIGURE_MARKS.host]: "" }}>
           {status.kind === "busy" && status.on === "host" ? (
             <>
               <Spinner />
@@ -115,16 +116,18 @@ export function StartSide({ aircraft, status, code, onCode, onHost, onJoin, onCa
           <Separator className="flex-1" />
         </div>
         <div className="flex items-center justify-between">
-          <CodeInput
-            value={code}
-            disabled={working}
-            invalid={refusedOn("join")?.why === "no-code"}
-            onChange={onCode}
-            onEnter={() => {
-              if (code.length === 6 && !working) onJoin()
-            }}
-          />
-          <Button variant="outline" disabled={code.length < 6 || working} onClick={onJoin}>
+          <span {...{ [FIGURE_MARKS.target]: "" }}>
+            <CodeInput
+              value={code}
+              disabled={working}
+              invalid={refusedOn("join")?.why === "no-code"}
+              onChange={onCode}
+              onEnter={() => {
+                if (code.length === 6 && !working) onJoin()
+              }}
+            />
+          </span>
+          <Button variant="outline" disabled={code.length < 6 || working} onClick={onJoin} {...{ [FIGURE_MARKS.target]: "", [FIGURE_MARKS.press]: "" }}>
             {status.kind === "busy" && status.on === "join" ? <Spinner /> : status.kind === "done" && status.on === "join" ? <Check /> : "Join"}
           </Button>
         </div>

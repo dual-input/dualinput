@@ -5,17 +5,28 @@
 
 export type V = [number, number, number]
 
+/** The figure's sizes, in meters, from the figure the crew sees in the sim, so change them together with src/features/avatars/figure/figure.json. */
 export const SPEC = {
   head: { radius: 0.1 },
   nose: { radius: 0.038, length: 0.099, tip: 0.6 },
+  chest: { radius: 0.134, along: 0.48 },
+  hips: { radius: 0.179 },
+  shoulders: { width: 0.208, down: -0.01 },
+  arm: { radius: 0.015 },
+  hand: { radius: 0.038 },
+  lighten: 0.3,
 }
 
+export const add = (a: V, b: V): V => [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
+export const sub = (a: V, b: V): V => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
 export const scale = (a: V, s: number): V => [a[0] * s, a[1] * s, a[2] * s]
+export const dot = (a: V, b: V): number => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+export const cross = (a: V, b: V): V => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
 export const unit = (a: V): V => scale(a, 1 / Math.hypot(a[0], a[1], a[2]))
-const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x)
+export const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x)
 
 /** A ball, or a stick that tapers from radius `ra` at `a` to `rb` at `b`, with rounded ends. */
-export type Shape = { ball: true; c: V; r: number } | { ball: false; a: V; b: V; ra: number; rb: number }
+export type Shape = { ball: true; c: V; r: number; light?: boolean; hand?: boolean } | { ball: false; a: V; b: V; ra: number; rb: number }
 
 /** The shapes of a head looking along `look`, from its center. The nose leaves the head where its radius meets the head's surface, and its tip is a ball. */
 export function headShapes(look: V): Shape[] {
@@ -221,6 +232,13 @@ const linear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) 
 export function albedo(hex: string): V {
   const n = parseInt(hex.slice(1), 16)
   return [linear(((n >> 16) & 255) / 255), linear(((n >> 8) & 255) / 255), linear((n & 255) / 255)]
+}
+
+/** The lighter tint of a color, which the figure's chest wears. */
+export function lightAlbedo(hex: string): V {
+  const n = parseInt(hex.slice(1), 16)
+  const lifted = (c: number) => linear(c + (1 - c) * SPEC.lighten)
+  return [lifted(((n >> 16) & 255) / 255), lifted(((n >> 8) & 255) / 255), lifted((n & 255) / 255)]
 }
 
 /** Where in its pixel each pass sends its ray: the center first, then the R2 sequence, which spreads any number of rays evenly over the pixel, so the edges smooth a little more with every pass. */

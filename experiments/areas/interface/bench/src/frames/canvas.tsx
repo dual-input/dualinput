@@ -18,6 +18,7 @@ import { AtcFrame, TrafficFrame } from "./traffic"
 import { AvatarsFrame } from "./avatars"
 import { SettingsFrame } from "./settings"
 import { BannerFrame, BannerOnScreenFrame, EveryNotificationFrame, SCREEN, SUMMARIES } from "./banner"
+import { LockFrame } from "./locks"
 
 // A frame that's taller than the EFB gets a line where the EFB's height ends, and an animated
 // one gets a Replay button beside its name, which draws it afresh. A home page with Host and Join
@@ -232,6 +233,23 @@ const SECTIONS: { name: string; frames: FrameEntry[] }[] = [
       { name: "Preflight, a crewmate out", draw: (t) => <BannerFrame theme={t} summary={SUMMARIES.out} notes={["crashed"]} /> },
     ],
   },
+  // The cockpit's locks, over a stand-in display in its bezel: the visible lock while the link to
+  // the pilot flying is lost, with a key bound and without, and on a radio's small display; while
+  // catching up; the warning once Dual Input stops renewing a lock; and a press blocked while
+  // another pilot's gesture plays, held.
+  {
+    name: "Cockpit locks",
+    frames: [
+      { name: "Lost link", draw: (t) => <LockFrame theme={t} lock={{ kind: "lost", key: "F9" }} /> },
+      { name: "Lost link, no key bound", draw: (t) => <LockFrame theme={t} lock={{ kind: "lost" }} /> },
+      { name: "Lost link, a small display", draw: (t) => <LockFrame theme={t} display="radio" lock={{ kind: "lost", key: "F9" }} /> },
+      { name: "Catching up", draw: (t) => <LockFrame theme={t} lock={{ kind: "catching-up" }} /> },
+      { name: "Catching up, a small display", draw: (t) => <LockFrame theme={t} display="radio" lock={{ kind: "catching-up" }} /> },
+      { name: "Dual Input stopped responding", draw: (t) => <LockFrame theme={t} lock={{ kind: "silent" }} /> },
+      { name: "Stopped responding, a small display", draw: (t) => <LockFrame theme={t} display="radio" lock={{ kind: "silent" }} /> },
+      { name: "A blocked press, held", draw: (t) => <LockFrame theme={t} lock={{ kind: "flash" }} /> },
+    ],
+  },
 ]
 
 // A frame's name is short and can repeat across sections, so the canvas knows a frame by both.
@@ -411,7 +429,7 @@ export function Canvas() {
   }, [view.z, laidOut])
   // Which frames are live, worked out a moment after the view or the layout's zoom changes, and each
   // frame's last measured height, which its placeholder keeps.
-  const sizes = useRef<Record<string, number>>(stored(SIZES_KEY, isSizes) ?? {})
+  const [sizes, setSizes] = useState<Record<string, number>>(() => stored(SIZES_KEY, isSizes) ?? {})
   const [live, setLive] = useState<Set<string>>(new Set())
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -421,21 +439,72 @@ export function Canvas() {
       const mx = box.width * LIVE.margin
       const my = box.height * LIVE.margin
       const next = new Set<string>()
+      const heights = { ...sizes }
       let measured = false
       for (const [id, el] of frames.current) {
-        if (live.has(id) && el.offsetHeight > 0 && sizes.current[id] !== el.offsetHeight) {
-          sizes.current[id] = el.offsetHeight
+        if (live.has(id) && el.offsetHeight > 0 && heights[id] !== el.offsetHeight) {
+          heights[id] = el.offsetHeight
           measured = true
         }
         if (laidOut < LIVE.minZoom) continue
         const r = el.getBoundingClientRect()
         if (r.right > box.left - mx && r.left < box.right + mx && r.bottom > box.top - my && r.top < box.bottom + my) next.add(id)
       }
-      if (measured) store(SIZES_KEY, sizes.current)
+      if (measured) {
+        store(SIZES_KEY, heights)
+        setSizes(heights)
+      }
       if (next.size !== live.size || [...next].some((id) => !live.has(id))) setLive(next)
+      // The anchor is the frame nearest the board's middle, the one a jump to a frame centers.
+      const cx = box.left + box.width / 2
+      const cy = box.top + box.height / 2
+      let nearest: string | null = null
+      let best = Infinity
+      for (const [id, el] of frames.current) {
+        const r = el.getBoundingClientRect()
+        const d = Math.hypot(Math.max(r.left - cx, 0, cx - r.right), Math.max(r.top - cy, 0, cy - r.bottom))
+        if (d < best) {
+          best = d
+          nearest = id
+        }
+      }
+      if (nearest !== anchor.current) {
+        anchor.current = nearest
+        anchorAt.current = null
+      }
     }, LIVE.after)
     return () => clearTimeout(t)
-  }, [view, laidOut, live])
+  }, [view, laidOut, live, sizes])
+  // A frame that goes live, or grows, moves every frame after it, and a placeholder's height is only
+  // a guess until its frame has been live once, so the frame in the middle of the board, which a
+  // jump to a frame just centered, could slide away and go back to a placeholder. Each animation
+  // frame, the view moves by however far that frame moved within the board, so it stays where it is
+  // on screen, as a browser anchors its scroll.
+  const anchor = useRef<string | null>(null)
+  const anchorAt = useRef<{ x: number; y: number } | null>(null)
+  const viewNow = useRef(view)
+  useLayoutEffect(() => {
+    viewNow.current = view
+  })
+  useEffect(() => {
+    let frame = 0
+    const hold = () => {
+      const el = anchor.current ? frames.current.get(anchor.current) : undefined
+      const w = world.current
+      if (el && w) {
+        const r = el.getBoundingClientRect()
+        const wr = w.getBoundingClientRect()
+        const z = viewNow.current.z
+        const at = { x: (r.left - wr.left) / z, y: (r.top - wr.top) / z }
+        const was = anchorAt.current
+        if (was && (Math.abs(at.x - was.x) > 0.5 || Math.abs(at.y - was.y) > 0.5)) setView((v) => ({ ...v, x: v.x - (at.x - was.x) * v.z, y: v.y - (at.y - was.y) * v.z }))
+        anchorAt.current = at
+      }
+      frame = requestAnimationFrame(hold)
+    }
+    frame = requestAnimationFrame(hold)
+    return () => cancelAnimationFrame(frame)
+  }, [])
   const [current, setCurrent] = useState<string | null>(null)
   const [runs, setRuns] = useState<Record<string, number>>({})
   const [playing, setPlaying] = useState<Record<string, Action | undefined>>({})
@@ -609,7 +678,7 @@ export function Canvas() {
                           </span>
                           <div key={runs[idOf(s, f)] ?? 0}>
                             {(() => {
-                              const height = sizes.current[idOf(s, f)] ?? EFB.height
+                              const height = sizes[idOf(s, f)] ?? EFB.height
                               const placeholder = (
                                 <div className="flex items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] px-6 text-center break-words text-neutral-500" style={{ height, fontSize: Math.min(fixed(14), 40) }}>
                                   {f.name}

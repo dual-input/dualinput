@@ -385,7 +385,7 @@ function Stack({ summary, notes }: { summary?: Summary; notes: NoteKey[] }) {
 }
 
 // What every banner frame shares: the theme and the kit, as the app's frame gives them.
-function Themed({ theme, children }: { theme: Theme; children: React.ReactNode }) {
+export function Themed({ theme, children }: { theme: Theme; children: React.ReactNode }) {
   const ui = UI[theme.preset] ?? UI.nova
   return (
     <ThemeContext.Provider value={theme}>

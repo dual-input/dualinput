@@ -33,7 +33,7 @@ The stages follow these rules (user, 2026-10-18):
 - No stage builds code that a later stage replaces: what a stage builds is final, and only the bench's stand-ins and test units stand in for what isn't built yet.
 - Nothing on GitHub comes before [stage 22](#22-github): no pull requests, no workflows, no releases, no Pages site, and no repository of ours beside this one, since waiting on pull requests and CI slows the build down (user, 2026-10-18).
   Until then a stage's commits go straight to `main`, and are pushed once the user has reviewed the stage, and stage 22 builds CI as [testing](02-testing.md#what-keeps-ci-green) and [the build](01-the-build.md#ci) design it.
-  The one exception is the private repository that holds the relays' tokens, `dual-input/relay-tokens`, made in stage 7, which needs the tokens before stage 22 (user, 2026-10-22).
+  The exceptions are private repositories, since the rule keeps Dual Input out of public view rather than off GitHub: the one that holds the relays' tokens, `dual-input/relay-tokens`, made in stage 7, which needs the tokens before stage 22 (user, 2026-10-22), and two that stage 11b makes, which Dual Input installs with npm: `dual-input/msfs-tailwind`, a Tailwind 3 preset for Coherent GT, and `dual-input/coherent-checks`, the Coherent GT check's, whose data msfs-tailwind's test reads (user, 2026-10-25).
 
 ## Working a stage
 
@@ -303,7 +303,7 @@ Builds, as [01-recording-and-bug-reports](../recording/01-recording-and-bug-repo
 - `recording`: at the core's start, listing `recordings\` and deleting the oldest runs while all of them together pass 1 GB; a slice of the runs by their folders' names, with their sizes and the newest as the run in progress; a command that marks the moment, which logs a line at info; and a command that deletes a run, refusing the one in progress, then lists the runs again ([slices and commands](../interface/01-apps.md#slices-and-commands))
 
 The rule that each unit logs at info each decision a pilot can notice, with its reason, is in [01-loop-and-edge](../core/01-loop-and-edge.md)'s note of 2026-10-21 on [logging](../core/01-loop-and-edge.md#logging), and each stage's units keep it.
-The report page is the desktop shell's, and comes with [the apps](#11b-the-apps); the clipboard's job, which hands up only an invite code, comes with the first stage whose units start it, as [stage 2](#2-the-cores-loop-and-edge) has the edge's jobs come.
+The report page is the EFB app's, and comes with [the apps](#11b-the-apps); the clipboard's job, which hands up only an invite code, comes with the first stage whose units start it, as [stage 2](#2-the-cores-loop-and-edge) has the edge's jobs come.
 
 Designs first: the budgets for a session's recording and for a run with no session, which rested on partial recording, and which of what keeps the drift from spreading's rules stay, now that every input is recorded ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)'s note of 2026-10-21).
 The user settled both on 2026-10-23, with the writer's flush, the stop under 1 GB free, and the cuts that leave the recording no marks, index, or placeholder for the home folder, as the [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)'s entry of that day has them.
@@ -442,9 +442,25 @@ Done on 2026-10-24.
 ## 11b The apps
 
 Designs first: the apps' looks and words, from [the apps' list](../interface/01-apps.md#left-to-the-apps-stage) and [installing and updating's](../install/01-installing-and-updating.md#left-to-the-apps-stage).
-Builds: the EFB shell, the desktop shell, `src/apps/desktop`'s window and Rust side, and `src/sim-package/pages`' EFB app and banner ([01-apps](../interface/01-apps.md)).
+Builds: the kit our pages draw with, the EFB shell, the desktop shell for the desktop app's own screens, `src/apps/desktop`'s window and Rust side, and `src/sim-package/pages`' EFB app and banner, with every screen a pilot uses Dual Input through in the EFB app ([01-apps](../interface/01-apps.md); [tentative decisions](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app)).
+It takes out what [stage 11a](#11a-the-apps-wiring) built for the EFB app's button that brought the desktop app forward: `clients`' command for it and the core's start of `dualinput-desktop.exe` with `--data`, with the tests and the bench's pieces that serve only them.
+It also extends [the Coherent GT check](01-the-build.md#the-coherent-gt-check) to every CSS file we ship into the sim, passing only what p14 measured the engine keeping ([Coherent GT's JavaScript and CSS](../architecture/coherent-gt.md#css)), with p13's and p14's results as its tests, since the kit our pages in the sim draw with is the first CSS we ship there ([tentative decisions](../interface/decisions.md#the-coherent-gt-check-covers-the-css-we-ship-into-the-sim); user, 2026-10-25).
+It moves the Coherent GT check from `tools/coherent-check/` into the repository of its own that [decision 031](../../decisions/031-coherent-gt-check-tool.md) gives it, `dual-input/coherent-checks`, kept private for now, which Dual Input then installs with npm, since msfs-tailwind's test reads the check's data (user, 2026-10-25).
+It builds `msfs-tailwind`, a Tailwind 3 preset for Coherent GT as p14 measured it, with p17 as its test, in a private repository of its own, `dual-input/msfs-tailwind`, from its first commit, and Dual Input installs it with npm from GitHub, where npm's lockfile pins the commit, with no tags until Dual Input goes public ([tentative decisions](../interface/decisions.md#tailwind-3-reaches-the-kit-through-msfs-tailwind-a-preset-of-our-own-for-coherent-gt); [interface log](../interface/log.md#2026-10-25-by-p14s-measurements-coherent-gt-keeps-82-of-tailwind-3s-output-with-its-colors-written-as-rgba-and-autoprefixers--webkit--twins-and-every-common-variant-but-focus-visible-and-has); user, 2026-10-25).
+Both repositories hold code pushed on 2026-10-25, which the stage checks against these lines, and this repository installs neither yet.
+It stops the core's log from replacing the bare Windows username, and keeps its replacement of the home folder's path, because a pilot's display name can be the same text as their username, and the log keeps display names, which are Dual Input's and never the Windows account's ([the home folder's path](../recording/01-recording-and-bug-reports.md#the-home-folders-path); user, 2026-10-25).
+It adds two top-level keys to the profile format's level 1, which no release has shipped yet: `name`, the aircraft's name as the EFB app's list of supported aircraft shows it, such as "Synaptic A220", and `maturity`, `stable` or `experimental`, which the profile's authors set, since that list tags each aircraft with it ([a profile's top-level keys](../profiles/01-format-and-delivery.md#a-profile); user, 2026-10-26).
+It adds each link's round trip, from the transport's `Stats`, to the network's slice of client state, so the EFB app's crew rows show it beside the link's path ([what the pilot sees](../network/02-units.md#what-the-pilot-sees-and-settings); user, 2026-10-26).
+It builds the desktop app's [fixed local port](../interface/decisions.md#the-desktop-app-tells-the-efb-app-about-updates-and-the-firewall-over-a-fixed-local-port), which carries the update's state and the firewall rule's to the EFB app, and has the order that opens the EFB carry [where to land](../interface/decisions.md#a-notifications-click-opens-the-efb-app-where-its-explained-or-acted-on).
 Each feature's part in the apps comes with that feature's stage.
+The bench's frames are the design's reference, and their code carries over only once it's written as the product's: no shortcut of the bench's reaches the apps, so the code stands as the best work we can do (user, 2026-11-01).
 Needs: 9, 10, and 11a.
+
+The user checks the stage by hand at these points, and the build goes on from each once they've looked (user, 2026-11-01):
+
+1. The kit, on one page that shows every component in every state.
+2. A sample of the EFB app, once what's built holds one of every different kind of thing, such as motion and scrolling, so the whole app isn't built on a bad base.
+3. The whole EFB app.
 
 Tests:
 
@@ -531,7 +547,7 @@ Tests:
 
 - From stage 2: a whole unit's handler panics, the process exits with a code other than 0, the desktop app starts it again, the pilot comes back as a late joiner, and the replay panics at the same input; and the core exits on its own, with 0, and the desktop app doesn't start it again ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
 - From stage 3: a bench core killed under the desktop app comes back as a bench core, with its own data folder ([the bench's own cases](02-testing.md#cases-for-the-bench)).
-- From stage 11a: the core killed while the desktop app's window is open, which the desktop app starts again and connects to within 2s of the new port file, and after an exit with 0, starts none until the sim next starts or its window next opens ([the apps' cases](../interface/01-apps.md#cases-for-the-bench), [budgets](../interface/01-apps.md#budgets)).
+- From stage 11a: the core killed while the sim runs, which the desktop app starts again 2s after it exits, and after an exit with 0, starts none until the sim next starts ([the apps' cases](../interface/01-apps.md#cases-for-the-bench), [the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)).
 
 ## 16 Flight-model sync
 
@@ -607,12 +623,12 @@ Done on 2026-10-25.
 
 ## 20 Take-control
 
-Builds: the take-control feature, with its parts in the EFB app and the desktop app ([take-control](../control/01-take-control.md)).
+Builds: the take-control feature, with its button and its binding section in the EFB app ([take-control](../control/01-take-control.md)).
 Needs: 6 and 11b.
 
 ## 21 Rate and pause, and Go to
 
-Builds: the rate and pause feature with its part in the EFB app, and Go to with its part in the desktop app ([the session's units](../session/02-units.md)).
+Builds: the rate and pause feature with its part in the EFB app, and Go to with its part in the EFB app ([the session's units](../session/02-units.md)).
 From stage 4, it also builds the sim service's `world_map`, and the menu script's requests that carry it out ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [the menu script](../session/02-units.md#the-menu-script)), with the menu script's report of the menu's page, read every 500ms in a session, which only Go to reads.
 Needs: 9 and 11b.
 Tests, from stage 11a, on the bench: rate and pause's `unit` message sent while the EFB app reconnects, and whether active pause catches up ([the apps' cases](../interface/01-apps.md#cases-for-the-bench)).

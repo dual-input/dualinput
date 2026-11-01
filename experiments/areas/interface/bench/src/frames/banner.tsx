@@ -51,7 +51,7 @@ const hexOf = (hue: string) => FIGURE_COLORS.find((c) => c.name === hue)!.hex
 // that ends by itself, catching up, leads with a spinner in a neutral color, as the take-control
 // strip's line does; the rest lead with their level's icon, as the header's rows do.
 type Level = "info" | "warning" | "trouble"
-type Note = { level: Level; title: string; detail?: string; list?: string[]; who?: Pilot; out?: boolean; busy?: boolean; held?: boolean }
+type Note = { level: Level; title: string; detail?: string; list?: string[]; who?: Pilot; out?: boolean; busy?: boolean; held?: boolean; lands?: Landing }
 const LEVEL_ICON: Record<Level, React.ReactNode> = {
   info: <Info className="size-4 text-info" />,
   warning: <TriangleAlert className="size-4 text-warning" />,
@@ -77,25 +77,38 @@ export const NOTES = {
   crashed: { when: "A crewmate's sim crashes", note: { level: "warning", who: ADAM, out: true, title: "Adam's sim crashed", detail: "They're still in the session." } },
   "left-session": { when: "A crewmate leaves the session", note: { level: "info", who: ADAM, out: true, title: "Adam left the session" } },
   back: { when: "A crewmate is back in the flight", note: { level: "info", who: ADAM, title: "Adam is back in the flight" } },
-  "service-reconnecting": { when: "The service's link lost, held", note: { level: "trouble", held: true, title: "Reconnecting to the Dual Input service", detail: "Nothing syncs until it's back." } },
-  "service-down": { when: "The service not running, held", note: { level: "trouble", held: true, title: "Dual Input service isn't running", detail: "Nothing syncs until it's back. Open it from the Start menu." } },
+  "service-reconnecting": { when: "The service's link lost, held", note: { level: "trouble", lands: "stay", held: true, title: "Reconnecting to the Dual Input service", detail: "Nothing syncs until it's back." } },
+  "service-down": { when: "The service not running, held", note: { level: "trouble", lands: "stay", held: true, title: "Dual Input service isn't running", detail: "Nothing syncs until it's back. Open it from the Start menu." } },
   "sync-one": { when: "A control that never matched, once per control for each load", note: { level: "warning", title: "Couldn't sync Beacon", detail: "Yours may differ from James's." } },
   "sync-several": { when: "Several at one load, as one notification", note: { level: "warning", title: "Couldn't sync 3 controls", detail: "Yours may differ from James's:", list: ["Beacon", "Taxi light", "Fuel pump 2"] } },
-  bridge: { when: "The panel bridge didn't load, held", note: { level: "trouble", held: true, ...PART_TROUBLE.bridge } },
-  "module-stopped": { when: "Our module stopped, held", note: { level: "trouble", held: true, ...PART_TROUBLE["module-stopped"] } },
-  "module-missing": { when: "Our module's file missing from a package that loaded, held", note: { level: "trouble", held: true, ...PART_TROUBLE["module-missing"] } },
-  helper: { when: "The Windows helper down, held", note: { level: "trouble", held: true, ...PART_TROUBLE.helper } },
-  want: { when: "A feature's want the helper can't carry out, held", note: { level: "warning", held: true, ...PART_TROUBLE.want } },
-  seat: { when: "This pilot's camera in another figure's seat, held", note: { level: "info", held: true, who: JAMES, title: "This seat is taken" } },
+  bridge: { when: "The panel bridge didn't load, held", note: { level: "trouble", lands: "header", held: true, ...PART_TROUBLE.bridge } },
+  "module-stopped": { when: "Our module stopped, held", note: { level: "trouble", lands: "header", held: true, ...PART_TROUBLE["module-stopped"] } },
+  "module-missing": { when: "Our module's file missing from a package that loaded, held", note: { level: "trouble", lands: "header", held: true, ...PART_TROUBLE["module-missing"] } },
+  helper: { when: "The Windows helper down, held", note: { level: "trouble", lands: "header", held: true, ...PART_TROUBLE.helper } },
+  want: { when: "A feature's want the helper can't carry out, held", note: { level: "warning", lands: "header", held: true, ...PART_TROUBLE.want } },
+  seat: { when: "This pilot's camera in another figure's seat, held", note: { level: "info", lands: "figures", held: true, who: JAMES, title: "This seat is taken" } },
 } satisfies Record<string, { when: string; note: Note }>
 export type NoteKey = keyof typeof NOTES
 
 // Every card's edge is an inset ring, where the kit's card draws an outer one, so it lies over the
 // card's own fill rather than over the cockpit (LAYER).
 
-// A click anywhere on a card opens Dual Input's app on the EFB, on Home; where each notification
-// lands waits for the frames (user, 2026-11-01).
-const openEfb = () => toast("Opening Dual Input on the EFB")
+// A click anywhere on a card opens Dual Input's app on the EFB where the notification is explained or
+// acted on (user, 2026-11-01: "yes", to my table): the Session tab, where the take-control strip,
+// the crew rows, the checklist, and the differences are, for control, the crew, catching up, sync,
+// and preflight; the header opened on the row that repeats it, for trouble in Dual Input's own
+// parts; the Figures tab, which explains seats, for a seat that's taken; and wherever the app was
+// for the service gone, since the app's own screen for that covers every tab. The order that opens
+// the EFB carries where to land (record/areas/interface/01-apps.md, Notifications, left that
+// open).
+type Landing = "session" | "figures" | "header" | "stay"
+const LANDS_ON: Record<Landing, string> = {
+  session: "Opening the Session tab on the EFB",
+  figures: "Opening the Figures tab on the EFB",
+  header: "Opening Dual Input's status on the EFB",
+  stay: "Opening Dual Input on the EFB",
+}
+const openEfb = (lands: Landing = "session") => toast(LANDS_ON[lands])
 
 // A card's padding is 12px on every side, so a head sits as far from the card's top as from its side
 // (user, 2026-11-01: 12px above and below and 16px at the sides "aren't symmetric", then "try
@@ -203,7 +216,7 @@ function NoteCard({ note, onDismiss }: { note: Note; onDismiss?: () => void }) {
       <button
         type="button"
         aria-label="Open Dual Input on the EFB"
-        onClick={() => !drag.moved.current && openEfb()}
+        onClick={() => !drag.moved.current && openEfb(note.lands)}
         {...press.handlers}
         onMouseDown={(e) => {
           press.handlers.onMouseDown(e)
@@ -281,7 +294,7 @@ function PreflightCard({ summary }: { summary: Summary }) {
   const differences = [errors && counted(errors, "error"), warnings && counted(warnings, "warning")].filter(Boolean).join(" and ")
   return (
     <div className="relative flex w-full flex-col gap-3 rounded-4xl bg-card p-3 text-card-foreground" style={{ transform: press.pressed ? "translateY(1px)" : undefined }}>
-      <button type="button" aria-label="Open Dual Input on the EFB" onClick={openEfb} {...press.handlers} className={LAYER} />
+      <button type="button" aria-label="Open Dual Input on the EFB" onClick={() => openEfb("session")} {...press.handlers} className={LAYER} />
       <div className="pointer-events-none relative flex items-center justify-between gap-3">
         <span className="flex items-center gap-1.5">
           {heads.map(({ pilot, state }) => (

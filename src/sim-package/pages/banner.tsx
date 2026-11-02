@@ -28,9 +28,10 @@ class DualInputBanner extends TemplateElement {
     if (!host) return
     const link = new CoreLink("banner", simEnv())
     link.start()
-    // The EFB app acts on a variable changing, so each ask writes a new value.
-    const openWithoutCore = () => void SimVar.SetSimVarValue(OPEN_EFB_VARIABLE, "number", Date.now())
-    const askToReopen = () => void SimVar.SetSimVarValue(RESIZED_VARIABLE, "number", Date.now())
+    // The EFB app acts on a variable changing, so each ask adds one. A time in milliseconds would read back as 0 (measured on MSFS 2024, 2026-11-02, record/areas/interface/log.md).
+    const ask = (variable: string) => void SimVar.SetSimVarValue(variable, "number", SimVar.GetSimVarValue(variable, "number") + 1)
+    const openWithoutCore = () => ask(OPEN_EFB_VARIABLE)
+    const askToReopen = () => ask(RESIZED_VARIABLE)
     const efbAppOnScreen = () => SimVar.GetSimVarValue(ON_SCREEN_VARIABLE, "number") === 1
     createRoot(host).render(<Banner host={host} link={link} openWithoutCore={openWithoutCore} askToReopen={askToReopen} efbAppOnScreen={efbAppOnScreen} />)
   }

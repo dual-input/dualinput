@@ -3,6 +3,40 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-02: A second session in the sim confirms `BootMode` 2, Restart, and a load from the world map, and finds a large `L:` value reads 0 and a canvas repaints only when its element changes
+
+**Asked:** whether the fixes from the entries below hold in the sim, with the real app as the EFB's only Dual Input app.
+
+**Expected:** each to pass, since the debugger now loads the sim's rules.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the Baron 58P:
+
+- With the sample in Community too, the sample registered first on one sim start and the real app on another, from the same order of scripts, since the EFB takes whichever registers first.
+  So nothing that run tried tested the fixes, and the sample comes out of Community before a try of the real package.
+- `BootMode` 2 holds: the EFB app joined the core in the menu, at the same moment as the menu script, with the EFB never opened and nothing drawn yet.
+  Its first opening showed setup from its start, with no flash.
+- The banner came back after a Restart, and after a load from the world map, its page connecting 4.2s after Ready to Fly.
+- A click directly below the cards, inside the panel, reached the cockpit's switch, which answers [the case in the sim](01-apps.md#cases-for-the-bench).
+- The preflight summary hid while our app was on screen: `L:DUALINPUT_EFB_ON_SCREEN` read 1 and the banner's text was empty.
+- The failure box's lines compute `text-align: center`.
+- `SimVar.SetSimVarValue` with `Date.now()`, 1,793,641,814,417, on an `L:` variable read back 0, in the writing document and the other, while 7 and 123,456 read back right, so a click on a card with no core, and a changed window, never reached the EFB app.
+  We didn't measure where between 123,456 and that value the limit lies.
+- The heads in preflight kept their first look on screen though their look followed the cursor: 865 mouse moves reached the page, the head's `look` went to where its code aims it, and it drew 286 times, while pictures of the sim with the cursor at two far corners showed the same head.
+  Changing the canvas's `opacity` between 1 and 0.999 each frame made the head show each look.
+  In the debugger the heads followed with no such change.
+- The EFB's `svg { width: 100%; height: 100%; }` beat the `width` and `height` of the portrait's drawing of its hands, in a box with no size of its own, so the hands drew too small and too high.
+- `FenixBootstrapper.exe`, which the sim starts when Fenix's package is installed, outlived the sim, and Steam refused every launch until it was killed.
+
+**Changed:** each ask of the banner's adds one to its variable.
+Each draw of a head changes its canvas's `opacity`.
+The kit's reset gives an `svg` `width: auto` and `height: auto`, so it keeps its own size.
+The tab bar's tooltips, which drew, are gone (user: "they work now, but I hate them visually").
+The card's words stay "Dual Input service isn't running" (user, asked about "crashed": "Keep isn't running").
+
+**Not tried:** a card's click with no core, a changed window, and the heads, since their fixes came after this session; and a joiner's preflight card, since the bench's stand-in sim ends after 10 minutes, and the second pilot's had.
+
+**Affects:** [Coherent GT's measured limits](../architecture/coherent-gt.md), and [the names the sim shares](../architecture/02-code-map.md#names-the-sim-shares).
+
 ## 2026-11-02: The first whole EFB app and banner in the sim pass their clicks, drag, fade, and frame rate, on a local backend, relay, and second pilot
 
 **Asked:** whether the real EFB app and banner, on the real core with a session, do what the debugger showed, in stage 11b's hand check.
@@ -76,7 +110,7 @@ The debugger loads none of these, which is why it matched the sim's engine on [1
 
 **Changed:** the kit's reset sets `text-align: inherit` on everything in our root, and the inherited font properties on `p` and headings.
 `tools/lib/sim-css.ts` restates the rules, and the dev loop loads them under our stylesheet, so the debugger shows this kind of difference.
-The tab bar uses the kit's `Tooltip`.
+The tab bar took the kit's `Tooltip`, until the pilot saw it ([entry above](#2026-11-02-a-second-session-in-the-sim-confirms-bootmode-2-restart-and-a-load-from-the-world-map-and-finds-a-large-l-value-reads-0-and-a-canvas-repaints-only-when-its-element-changes)).
 
 **Affects:** [Coherent GT's measured limits](../architecture/coherent-gt.md).
 
@@ -87,15 +121,13 @@ The tab bar uses the kit's `Tooltip`.
 **Expected:** a link long up by then, since our app sets `BootMode` 1, which we took to run our code from the sim's start ([entry below](#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)).
 
 **Found:** the EFB's document registered our app in the menu at 17:39:07, and the app's socket joined the core at 17:42:37, as the pilot opened it, 1m44s after Ready to Fly.
-In fs-base-efb's `efb_ui/efb_os/efb_os.js`, `registerApp` calls an app's `render()` for `BootMode` 1, WARM, and 2, HOT, and runs `initAppEntry`, which draws the view and so calls its `onAfterRender`, for HOT only (read, not measured for HOT).
+In fs-base-efb's `efb_ui/efb_os/efb_os.js`, `registerApp` calls an app's `render()` for `BootMode` 1, WARM, and 2, HOT, and runs `initAppEntry`, which draws the view and so calls its `onAfterRender`, for HOT only.
 p09 set `BootMode` 1 too, but its polling ran in its script's top level, outside the view, so its run says nothing of a view.
 A page with no core heard says the service isn't running, which is the flash.
 
 That breaks more than the flash: the EFB app's code opens the banner, so a pilot back in a session after restarting the sim, who hadn't opened the app, would get no banner.
 
 **Changed:** our app sets `BootMode` 2.
-
-**Not tried:** `BootMode` 2 in the sim, which the next session does: no flash, setup from its start, and a banner with the app never opened.
 
 **Affects:** [the EFB app's registration](decisions.md#the-efb-app-touches-the-framework-only-to-register).
 

@@ -59,7 +59,8 @@
 .dualinput-ui button:disabled { cursor: default; }
 .dualinput-ui a { color: inherit; text-decoration: inherit; }
 .dualinput-ui ol, .dualinput-ui ul { list-style: none; }
-.dualinput-ui svg { display: block; }
+/* width and height: the EFB's efb_os.css sizes every svg at 100% of its box, over the svg's own attributes. */
+.dualinput-ui svg { display: block; width: auto; height: auto; }
 .dualinput-ui input { -webkit-user-select: text; text-align: left; }
 .dualinput-ui input::placeholder { color: rgba(var(--muted-foreground), 1); }
 

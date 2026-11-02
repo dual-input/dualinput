@@ -12,6 +12,7 @@
  * Ctrl-C ends it all.
  */
 
+import { spawn } from "node:child_process"
 import fs from "node:fs"
 import path from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
@@ -44,8 +45,9 @@ fs.writeFileSync(path.join(REAL_CORE, "settings.json"), JSON.stringify(settings,
 
 const run = new BenchRun("sim-session")
 const second = await run.core("second-pilot", { settings })
-const sim = run.stub()
-second.act({ act: "watch", process: sim.id })
+// A day's worth, where the bench's Stub ends after 10 minutes, which left the second pilot's sim closed by the time the pilot joined.
+const sim = spawn("ping", ["-n", "86400", "127.0.0.1"], { stdio: "ignore" })
+second.act({ act: "watch", process: sim.pid! })
 await second.hear("stage Starting aircraft none")
 await load(second, BARON)
 const code = await host(second, SECOND_PILOT)
@@ -56,7 +58,7 @@ console.log(`the second pilot hosts ${code}, in a Baron 58P; write a code to ${p
 
 const end = async () => {
   await second.kill()
-  await sim.kill()
+  sim.kill()
   await network.stop()
   process.exit(0)
 }

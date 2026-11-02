@@ -392,6 +392,8 @@ function tick(): void {
     head.drawn = look
     head.stale = false
     present(head.ctx, head.acc, head.w, [Math.min(box[0]!, before[0]!), Math.min(box[1]!, before[1]!), Math.max(box[2]!, before[2]!), Math.max(box[3]!, before[3]!)])
+    // The sim shows a canvas's new pixels only once something about the element changes, so a head drawn with nothing else moving would stay as it was (measured on MSFS 2024, 2026-11-02, record/areas/interface/log.md).
+    head.canvas.style.opacity = head.n % 2 ? "0.999" : "1"
   }
   firstLive = (from + k) % (all.length || 1)
 }

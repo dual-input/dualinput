@@ -7,6 +7,9 @@
  * The Community folder is under %APPDATA%, which the Claude desktop app's shell sees through a private
  * copy, so run this from a terminal outside it, with the sim closed, since the sim reads packages when
  * it starts. To take the package out, delete dualinput-p25-efb from Community.
+ *
+ * Take it out before trying the real package, since the EFB takes one Dual Input app, whichever script
+ * registers first, and which that is differs from one sim start to the next.
  */
 
 import { execFileSync, spawnSync } from "node:child_process"

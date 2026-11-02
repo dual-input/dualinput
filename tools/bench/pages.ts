@@ -186,8 +186,7 @@ export class FakeBanner extends FakePage {
 /**
  * The desktop app, as the bench fakes it: a client that finds the core through its port file
  * and sends no Origin, as the desktop app's Rust side does (decision 013), says `alive` every
- * 2s, and sends commands, such as the session crate's Host and Join. While it's open the core
- * doesn't exit when the sim closes, as with the desktop app's window open.
+ * 2s, and sends commands, such as the session crate's Host and Join.
  */
 export class FakeApp {
   private readonly socket: RawSocket

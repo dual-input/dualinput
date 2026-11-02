@@ -1,5 +1,27 @@
 # Installing and updating: log
 
+## 2026-11-02: Windows 11's Startup apps page writes 01 for off and zeros for on, and tells a running app neither
+
+**Asked.**
+Whether the desktop app reads a pilot's off in Windows' own list, as [the Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version) says it does, from an entry the page itself wrote rather than the ones [we read on 2026-10-18](results/2026-10-18-windows-and-msfs-facts.txt).
+
+**Expected.**
+An odd first byte for off, which the app reads when it starts, with nothing to tell it sooner.
+
+**Found,** with the development build's `Dual Input` value under `Run`, and Settings, Apps, Startup flipped by hand (measured on Windows 11 Pro 10.0.26200, 2026-11-02):
+
+- Off wrote `StartupApproved\Run\Dual Input` as `01 00 00 00 68 D2 9B 9C D3 6A DD 01`.
+- On wrote 12 zero bytes.
+- A running app went on saying `on` after the off, and said `off-in-windows` once restarted.
+- Deleting the `Run` value left the `StartupApproved` entry behind, with its zeros, which read as on.
+
+**What changed.**
+The desktop app reads the switch again every 5s, because the EFB app's note sends a pilot to that page to turn it back on, and they'd return to a switch that stayed off until the app next started.
+A socket then heard `on` with the app still running.
+
+**Docs affected.**
+None, since [the Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version) already has the switch follow Windows' off.
+
 ## 2026-10-25: An egui window in a Rust tray app takes 96 MB to 153 MB while open, and leaves 62 MB to 69 MB in the process once it closes, where Tauri's leaves 3.7 MB
 
 **Asked.**

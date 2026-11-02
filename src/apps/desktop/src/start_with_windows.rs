@@ -159,5 +159,9 @@ mod tests {
         assert!(!reads_as_off(&[2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
         assert!(reads_as_off(&[3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8]));
         assert!(!reads_as_off(&[]));
+        // What Windows 11's Startup apps page wrote for this value (measured, 2026-11-02, record/areas/install/log.md).
+        assert!(reads_as_off(&[
+            0x01, 0, 0, 0, 0x68, 0xD2, 0x9B, 0x9C, 0xD3, 0x6A, 0xDD, 0x01
+        ]));
     }
 }

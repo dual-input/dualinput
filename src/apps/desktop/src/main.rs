@@ -11,6 +11,7 @@ mod port;
 mod start_with_windows;
 
 use std::net::Ipv4Addr;
+use std::time::Duration;
 
 use messages::desktop::{DESKTOP_PORT, DesktopState, Firewall, ToDesktop, Update};
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
@@ -22,6 +23,10 @@ use tokio::sync::{mpsc, watch};
 const WINDOW: &str = "main";
 const OPEN_ITEM: &str = "open";
 const QUIT_ITEM: &str = "quit";
+/// The EFB app's note sends a pilot to Windows' startup list to turn this back on, and Windows tells a running program
+/// nothing of it, so without this the switch stays wrong until the app next starts (measured on Windows 11, 2026-11-02,
+/// record/areas/install/log.md).
+const READ_WINDOWS_EVERY: Duration = Duration::from_secs(5);
 
 /// Opens the window, or brings forward the one that's open.
 fn open_window(app: &AppHandle) {
@@ -84,23 +89,35 @@ fn tray(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
-/// Carries out what the EFB app asks. TODO: when the app holds Velopack's updates, the sim's restart, and the firewall rule, carry them out here.
+/// Carries out what the EFB app asks, and keeps what it shows of Windows' startup list true. TODO: when the app holds Velopack's updates, the sim's restart, and the firewall rule, carry them out here.
 fn ask_handler(say: watch::Sender<DesktopState>) -> mpsc::UnboundedSender<ToDesktop> {
     let (ask, mut asks) = mpsc::unbounded_channel();
     tauri::async_runtime::spawn(async move {
-        while let Some(asked) = asks.recv().await {
-            match asked {
-                ToDesktop::SetStartWithWindows { on } => {
-                    if let Err(error) = start_with_windows::set(on) {
-                        log::line(&format!("starting with Windows didn't change: {error}"));
+        let mut read_again = tokio::time::interval(READ_WINDOWS_EVERY);
+        loop {
+            tokio::select! {
+                asked = asks.recv() => match asked {
+                    Some(ToDesktop::SetStartWithWindows { on }) => {
+                        if let Err(error) = start_with_windows::set(on) {
+                            log::line(&format!("starting with Windows didn't change: {error}"));
+                        }
                     }
-                    say.send_modify(|state| state.start_with_windows = start_with_windows::state());
-                }
-                ToDesktop::CheckForUpdates
-                | ToDesktop::InstallUpdate
-                | ToDesktop::RestartSim
-                | ToDesktop::FixFirewall => {}
+                    Some(
+                        ToDesktop::CheckForUpdates
+                        | ToDesktop::InstallUpdate
+                        | ToDesktop::RestartSim
+                        | ToDesktop::FixFirewall,
+                    ) => {}
+                    None => return,
+                },
+                _ = read_again.tick() => {}
             }
+            let now = start_with_windows::state();
+            say.send_if_modified(|state| {
+                let changed = state.start_with_windows != now;
+                state.start_with_windows = now;
+                changed
+            });
         }
     });
     ask

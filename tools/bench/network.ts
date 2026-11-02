@@ -18,6 +18,12 @@ import { ProfilesSite } from "./profiles.ts"
 export const TOKEN = "bench-token"
 /** The production cap, 256 KiB/s, which src/relays/relays.toml gives each relay. */
 export const CAP = 262144
+/**
+ * How soon after a cut starts a test may see the link lost. A core loses the link 5s after it
+ * last heard from the other, and heartbeats go out every 1s, so a cut comes up to 1s after that
+ * last heartbeat and the link goes 4s to 5s into the cut. This leaves 500ms for a late timer.
+ */
+export const EARLIEST_LOST_MS = 3_500
 
 /** The bench relay that tools/bench.ts built, by the path Cargo reported. */
 function relayProgram(): string {

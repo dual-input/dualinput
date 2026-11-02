@@ -11,7 +11,7 @@ import { setTimeout as sleep } from "node:timers/promises"
 import type { NetSlice } from "../../../src/engines/messages/ts/net/NetSlice.ts"
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
 import { BenchRun } from "../cores.ts"
-import { app, BenchNetwork, host, join, report, session, took } from "../network.ts"
+import { app, BenchNetwork, EARLIEST_LOST_MS, host, join, report, session, took } from "../network.ts"
 import { FakeApp } from "../pages.ts"
 
 /** The members the session's slice lists, by name, this pilot first. */
@@ -41,7 +41,7 @@ test("two cores join through the backend, link through a relay, lose the link, a
   await a.hear(/^net lost /, { after: aBefore, ms: 10_000 })
   await b.hear(/^net lost /, { after: bBefore, ms: 10_000 })
   const lostMs = performance.now() - cut
-  assert.ok(lostMs >= 4_500, `the link was lost ${lostMs.toFixed(0)}ms into the cut, before its 5s`)
+  assert.ok(lostMs >= EARLIEST_LOST_MS, `the link was lost ${lostMs.toFixed(0)}ms into the cut, too soon for 5s of silence`)
   // Both redial every 2s once the cut ends. A dial still running when the link comes back
   // connects too, and the link's rule moves both sides onto the same one of them, raising
   // `LinkUp` again with each move.

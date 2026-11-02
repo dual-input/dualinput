@@ -66,23 +66,22 @@ export type HeaderProps = {
   icons: ReactNode
   issues: Issue[]
   offline: boolean
-  /** Counts the banner's cards that landed on the header, each opening its island on the rows. */
-  opened: number
+  /** Counts the banner's cards that landed on the header, and names the last one's row, each opening its island on the rows. */
+  opened: { times: number; id: string }
 }
 
 export function Header({ version, phase, icons, issues, offline, opened }: HeaderProps) {
   const [hovered, setHovered] = useState(false)
   const [open, setOpen] = useState(false)
   const [pinned, setPinned] = useState(false)
-  // A row that cleared as the click came leaves nothing to open onto.
-  const hasRows = issues.length > 0
   useEffect(() => {
-    if (opened === 0 || !hasRows) return
+    // A row that cleared as the click came leaves nothing to open onto.
+    if (opened.times === 0 || !issues.some((issue) => issue.id === opened.id)) return
     setPinned(true)
     setOpen(true)
     // Each count opens it once, and a row arriving later opens nothing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [opened])
+  }, [opened.times])
   const place = useRef<HTMLDivElement>(null)
   const rows = useRef<HTMLDivElement>(null)
   const timer = useRef(0)
@@ -176,7 +175,7 @@ export function Header({ version, phase, icons, issues, offline, opened }: Heade
               style={{ width: ISLAND.openWidth, opacity: open ? 1 : 0, transition: open ? "opacity 160ms 80ms" : "opacity 100ms" }}
             >
               {issues.map((issue) => (
-                <IssueRow key={issue.word} issue={issue} close={close} />
+                <IssueRow key={issue.id} issue={issue} close={close} />
               ))}
               {!offline && trouble && <HelpLine />}
             </div>
@@ -195,7 +194,7 @@ export function Header({ version, phase, icons, issues, offline, opened }: Heade
             }}
           >
             {issues.map((issue, at) => (
-              <span key={issue.word} className={cx("flex items-center text-muted-foreground", at > 0 && "ml-4")}>
+              <span key={issue.id} className={cx("flex items-center text-muted-foreground", at > 0 && "ml-4")}>
                 {issues.length <= PILL_WORDS && <span className="mr-1">{issue.word}</span>}
                 <span className="[&_svg]:size-3.5">{TONE_ICON[issue.tone]}</span>
               </span>

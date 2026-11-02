@@ -3,7 +3,7 @@
 // says a pick loads it, and each installed aircraft is a tile, the whole of it the button
 // (record/areas/interface/decisions.md, "The aircraft picker loads an aircraft through the world map's store").
 
-import { Badge, cx, Dialog, fadeMask, NO_SCROLLBAR, showPress, Spinner, useScroller } from "@dualinput/ui"
+import { Badge, cx, Dialog, fadeMask, NO_SCROLLBAR, showPress, Spinner, toast, useScroller } from "@dualinput/ui"
 import { Check, ChevronRight } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
@@ -42,11 +42,14 @@ export type AircraftPickerProps = {
   aircraft: PickableAircraft[]
   /** Whether the pilot is at Free flight's world map, the one place a pick can load. */
   canLoad: boolean
-  /** Loads it, resolving once the sim reports it. */
+  inFlight: boolean
+  /** What the sim says is loaded, which tells a pick has landed. */
+  loaded: { maker: string | null; model: string | null } | null
+  /** Asks the core to load it, which refuses or takes the ask. */
   onPick: (aircraft: PickableAircraft) => Promise<void>
 }
 
-export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, onPick }: AircraftPickerProps) {
+export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, inFlight, loaded, onPick }: AircraftPickerProps) {
   const [choice, setChoice] = useState<{ aircraft: PickableAircraft; loaded: boolean } | null>(null)
   const scroller = useScroller()
   const timer = useRef(0)
@@ -57,11 +60,17 @@ export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, onPick }
   const choose = (picked: PickableAircraft) => {
     if (choice) return
     setChoice({ aircraft: picked, loaded: false })
-    void onPick(picked).then(() => {
-      setChoice({ aircraft: picked, loaded: true })
-      timer.current = window.setTimeout(() => onOpenChange(false), LOADED_MS)
+    onPick(picked).catch(() => {
+      setChoice(null)
+      toast("Dual Input couldn't load that aircraft")
     })
   }
+  const landed = !!choice && !choice.loaded && loaded?.maker === choice.aircraft.maker && loaded.model === choice.aircraft.model
+  useEffect(() => {
+    if (!landed) return
+    setChoice((now) => now && { ...now, loaded: true })
+    timer.current = window.setTimeout(() => onOpenChange(false), LOADED_MS)
+  }, [landed, onOpenChange])
   const installed = aircraft.filter((one) => one.installed).sort(byName)
   const others = aircraft.filter((one) => !one.installed).sort(byName)
   const pickable = canLoad && installed.length > 0
@@ -80,7 +89,7 @@ export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, onPick }
       </span>
     )
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} title="Supported aircraft" description={pickable ? "Click one to load it in the sim." : undefined}>
+    <Dialog open={open} onOpenChange={onOpenChange} title="Supported aircraft" description={pickable ? "Click one to load it in the sim." : inFlight ? "To switch aircraft, end this flight and pick one on the world map." : undefined}>
       <div
         ref={scroller.ref}
         onScroll={scroller.onScroll}

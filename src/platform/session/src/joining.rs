@@ -39,6 +39,13 @@ impl Asking {
             Asking::Join { .. } => Attempting::Join,
         }
     }
+
+    fn code(&self) -> Option<String> {
+        match self {
+            Asking::Host { .. } => None,
+            Asking::Join { code, .. } => Some(code.clone()),
+        }
+    }
 }
 
 impl Session {
@@ -48,11 +55,13 @@ impl Session {
             return Some(Attempt {
                 on: asking.on(),
                 dialing: false,
+                code: asking.code(),
             });
         }
-        self.held.as_ref().filter(|h| h.dialing).map(|_| Attempt {
+        self.held.as_ref().filter(|h| h.dialing).map(|h| Attempt {
             on: Attempting::Join,
             dialing: true,
+            code: Some(h.code.clone()),
         })
     }
 }

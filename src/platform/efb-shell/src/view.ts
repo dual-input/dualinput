@@ -4,7 +4,7 @@
 // if we say so (record/areas/interface/decisions.md, "The EFB app fits its view with zoom on its
 // root"). Layout is flexbox's, so nothing here says how anything fills the view.
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useSyncExternalStore } from "react"
 
 /** The width the frames are drawn at, which the view's shorter side counts as. */
 export const DESIGN_WIDTH = 516
@@ -35,13 +35,29 @@ function measure(host: HTMLElement, previous: ViewSize): ViewSize {
 
 /** Each view that follows the tablet, for `viewShown` to tell. */
 const shownListeners = new Set<() => void>()
+let everShown = false
 
 /**
  * The app came back on screen. The pilot can change the tablet's size in the EFB's Settings app, and
  * while another app shows, our view measures nothing, so it keeps the old scale until it's told.
  */
 export function viewShown(): void {
+  everShown = true
   shownListeners.forEach((listener) => listener())
+}
+
+const subscribeShown = (listener: () => void): (() => void) => {
+  shownListeners.add(listener)
+  return () => shownListeners.delete(listener)
+}
+
+/**
+ * Whether the pilot has seen the app yet. The EFB starts our app with the sim, so a page drawn from then on would play
+ * its openings to nobody, and first-time setup would be over before the pilot opened it. The EFB reports the first
+ * opening with `onOpen` and `onResume` (measured on MSFS 2024, 2026-10-06, record/areas/interface/log.md).
+ */
+export function useEverShown(): boolean {
+  return useSyncExternalStore(subscribeShown, () => everShown)
 }
 
 /**

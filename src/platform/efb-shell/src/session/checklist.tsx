@@ -1,5 +1,5 @@
-// The pilot's checklist, under the session card for them to work through before Ready. It's here for state
-// sync's part to draw its rows with, which comes with that feature's stage. Its rows read as an aircraft's
+// The pilot's checklist, under the session card for them to work through before Ready, which state sync's part draws
+// its rows with. Its rows read as an aircraft's
 // checklist does, each control, dots, then its starting value, and a row checked turns green. Each row is at
 // least 44px tall, so a VR controller's pointer lands on one without careful aim. Profile authors write the
 // names, values, and descriptions, and Dual Input makes some entries itself, so the rows take any length rather
@@ -61,7 +61,7 @@ export function Checklist({ items }: { items: ChecklistItem[] }) {
           const checked = done.includes(item.id)
           return (
             <li key={item.id}>
-              {/* Not a button, whose content Coherent GT sizes to fit, so a row's dots couldn't reach its end. */}
+              {/* Not a button, whose content Coherent GT sizes to fit, so a row's dots couldn't reach its end (record/areas/architecture/coherent-gt.md). */}
               <div
                 role="checkbox"
                 tabIndex={0}
@@ -78,7 +78,7 @@ export function Checklist({ items }: { items: ChecklistItem[] }) {
                 <div className="flex items-center">
                   <Box checked={checked} />
                   <Name text={item.name} sliding={pointed === item.id} />
-                  {/* No width of its own, since Coherent GT gives a flex item room for its text however it's clipped; it takes what's left, and keeps at least three dots. */}
+                  {/* No width of its own, since Coherent GT gives a flex item room for its text however it's clipped (record/areas/architecture/coherent-gt.md); it takes what's left, and keeps at least three dots. */}
                   <span className="relative top-px mr-3 w-0 min-w-6 grow overflow-hidden whitespace-nowrap opacity-40">{LEADER}</span>
                   <span className="relative top-px max-w-[50%] shrink-0 break-words text-right">{capFirst(item.default)}</span>
                 </div>

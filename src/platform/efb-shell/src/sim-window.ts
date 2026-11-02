@@ -12,6 +12,8 @@ export type SimWindow = {
   toggleBanner(open: boolean): void
   /** What the banner last wrote to ask for the EFB with no core to carry the click, which changes with each ask. */
   bannerAsked(): number
+  /** Whether the EFB is closed, which nothing tells the app: closing it doesn't pause the app on screen (measured on MSFS 2024, 2026-10-06, record/areas/interface/log.md). */
+  efbClosed(): boolean
 }
 
 /** The panel's ID. `src/sim-package/panel/InGamePanels/dualinput-banner.xml` and `src/sim-package/pages/banner.html` name the same panel, so change all three together. */
@@ -26,10 +28,14 @@ const OPEN_THEN_KEY = 300
  * our app wherever it sits in the EFB (measured on MSFS 2024, 2026-10-06, same log).
  */
 export function simWindow(internalName: string): SimWindow {
+  const efbClosed = () => {
+    const actions = document.querySelector(".panel-ui-actions")
+    return !!actions && actions.className.indexOf("panel-ui-actions--hidden") >= 0
+  }
   return {
+    efbClosed,
     openEfb() {
-      const actions = document.querySelector(".panel-ui-actions")
-      if (actions && actions.className.indexOf("panel-ui-actions--hidden") >= 0) Coherent.call("TOGGLE_EFB")
+      if (efbClosed()) Coherent.call("TOGGLE_EFB")
       window.setTimeout(() => engine.trigger("OPEN_BY_KEY", internalName, "", ""), OPEN_THEN_KEY)
     },
     toggleBanner(open) {

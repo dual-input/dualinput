@@ -6,4 +6,9 @@ export type Attempt = { on: Attempting,
  * Whether the backend found a join's code, and it's reaching the crew, which never gives up
  * on its own, rather than waiting on the backend.
  */
-dialing: boolean, };
+dialing: boolean, 
+/**
+ * The code a join tries, which the EFB app shows in its box, since a join can start from the
+ * clipboard.
+ */
+code: string | null, };

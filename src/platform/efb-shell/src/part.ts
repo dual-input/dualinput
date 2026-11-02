@@ -78,6 +78,10 @@ export function stopParts(parts: Part[]): void {
 export type Shell = {
   link: CoreLink
   desktop: DesktopLink
+  /** The tab that's open. Every tab's page stays mounted, and a hidden one measures nothing, so a page waits for this before it measures, and measures again when it opens. */
+  tab: string
+  /** Whether the EFB is closed, in which case a page has no one to draw for. */
+  efbClosed(): boolean
   /** Opens a tab, as a part's own link to Settings does. */
   open(tab: string): void
   /** An amber dot on a tab's icon, while the tab holds a warning. */

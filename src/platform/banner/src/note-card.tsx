@@ -15,7 +15,7 @@ import type { Note } from "./note.ts"
 
 /**
  * Takes a card's click from under its content, which lets presses through, so hovering its × or Ready lights that and
- * not the card, with no `:has()`, which Coherent GT isn't measured to have. It carries the card's edge, since its hover
+ * not the card, with no `:has()`, which Coherent GT drops (record/areas/architecture/coherent-gt.md). It carries the card's edge, since its hover
  * fill would cover an edge drawn under it.
  */
 export const CARD_LAYER = "absolute inset-x-0 inset-y-0 rounded-4xl ring-1 ring-inset ring-foreground/10 hover:bg-muted"
@@ -28,8 +28,8 @@ const LEVEL_ICON: Record<Level, ReactNode> = {
   trouble: <CircleX className="size-4 text-destructive" />,
 }
 
-/** A press becomes a drag past 6px, so a pointer that wobbles still clicks; let go past a third of its width, or flung faster than 0.5px/ms, a card slides away. */
-const DRAG = { start: 6, away: 1 / 3, fling: 0.5, ms: 200 }
+/** A press becomes a drag past 6px, so a pointer that wobbles still clicks; let go past a third of its width, or flung faster than 0.5px/ms over the last 80ms, a card slides away. */
+const DRAG = { start: 6, away: 1 / 3, fling: 0.5, speedOver: 80, ms: 200 }
 /** How far past the box's edge a card slides, to clear the screen's edge. */
 const CLEAR = 16
 
@@ -45,8 +45,7 @@ function useDragAway(onAway: () => void, scale: number) {
     moved.current = false
     const width = card.offsetWidth
     const from = mouseIn(press, scale).x
-    let last = { x: from, t: performance.now() }
-    let speed = 0
+    const trail: { x: number; t: number }[] = []
     let d = 0
     const move = (event: MouseEvent) => {
       const x = mouseIn(event, scale).x
@@ -54,21 +53,27 @@ function useDragAway(onAway: () => void, scale: number) {
       if (!moved.current && d < DRAG.start) return
       moved.current = true
       const now = performance.now()
-      speed = (x - last.x) / Math.max(1, now - last.t)
-      last = { x, t: now }
+      trail.push({ x, t: now })
+      while (trail.length > 2 && now - trail[0]!.t > DRAG.speedOver) trail.shift()
       setDragging(true)
       setDx(d)
     }
     const up = () => {
       window.removeEventListener("mousemove", move, true)
       window.removeEventListener("mouseup", up, true)
+      document.removeEventListener("mouseleave", up)
       setDragging(false)
       if (!moved.current) return
+      const first = trail[0]
+      const last = trail[trail.length - 1]
+      const speed = first && last && first !== last && performance.now() - last.t < DRAG.speedOver ? (last.x - first.x) / (last.t - first.t) : 0
       if (d > width * DRAG.away || speed > DRAG.fling) away(width)
       else setDx(0)
     }
     window.addEventListener("mousemove", move, true)
     window.addEventListener("mouseup", up, true)
+    // A release outside the panel may never reach it, and the card would follow a cursor with no button down.
+    document.addEventListener("mouseleave", up)
   }
   return { dx, dragging, moved, start, away }
 }
@@ -111,7 +116,7 @@ export function NoteBody({ note, measuring }: { note: Note; measuring?: boolean 
   return (
     <div className={cx("pointer-events-none relative flex p-3", note.pilot ? "items-center" : "items-start")}>
       {note.pilot ? (
-        <span className="mr-3 flex shrink-0">{measuring ? <EmptyHead /> : <Head pilot={note.pilot} slumped={note.out} />}</span>
+        <span className="mr-3 flex shrink-0">{measuring ? <EmptyHead /> : <Head pilot={note.pilot} faded={note.out} />}</span>
       ) : (
         <span className="mr-3 flex h-5 shrink-0 items-center">{note.busy ? <Spinner className="size-4 text-muted-foreground" /> : LEVEL_ICON[note.level]}</span>
       )}

@@ -22,7 +22,7 @@ Decides:     The session crate's members, session keys, control, session file, j
 > Stage 11b's tentative decision that [a display name runs to 20 characters](../interface/decisions.md#a-display-name-runs-to-20-characters) limits the display name setting in [members](#members) to 20 characters, and the session crate refuses a longer name from any app (user, 2026-10-29).
 
 > **Note**
-> For [Host and Join's answers](../interface/decisions.md#host-and-join-answer-inside-the-start-card), the slice `session` gains `attempt`, the Host or Join running on this PC, and `refused`, why the last one was refused, which replaces the notification `session.refused` and clears when the next starts (2026-11-01).
+> For [Host and Join's answers](../interface/decisions.md#host-and-join-answer-inside-the-start-card), the slice `session` gains `attempt`, the Host or Join running on this PC with the code a join tries, since a join can start from the clipboard, and `refused`, why the last one was refused, which replaces the notification `session.refused` and clears when the next starts (2026-11-01).
 > A join shows as `attempt` with `dialing` until its first link is up, and the slice's `held` stays false until then, though the crate already holds the session, its file, and its announcement.
 > `session.cancel` stops the attempt on this PC alone, and `session.copy-code` writes the invite code to the clipboard as a job.
 > A refusal the pilot can't act on, two builds of one version or a refusal the backend words itself, reads as `servers`, with the cause in the log.

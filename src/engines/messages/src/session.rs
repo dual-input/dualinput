@@ -297,13 +297,16 @@ pub enum Attempting {
     Join,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "session/")]
 pub struct Attempt {
     pub on: Attempting,
     /// Whether the backend found a join's code, and it's reaching the crew, which never gives up
     /// on its own, rather than waiting on the backend.
     pub dialing: bool,
+    /// The code a join tries, which the EFB app shows in its box, since a join can start from the
+    /// clipboard.
+    pub code: Option<String>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]

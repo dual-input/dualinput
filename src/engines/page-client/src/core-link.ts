@@ -14,19 +14,30 @@ export type CoreState = "connected" | "reconnecting" | "not-running" | "closed"
 
 /** How long reconnecting lasts before a page says the service isn't running, in milliseconds. */
 const RECONNECT_FOR = 10_000
+/** How often it checks whether that time is up, in milliseconds. */
+const CHECK_EVERY = 1000
 
 export class CoreLink {
   readonly client: PageClient
   private state: CoreState = "not-running"
-  private giveUp = 0
+  /** When a lost link has been reconnecting long enough, while it reconnects. */
+  private giveUpAt: number | null = null
+  private readonly env: Env
   private readonly listeners = new Set<() => void>()
   private readonly slices = new Map<string, JsonValue>()
   private readonly watched = new Set<string>()
 
   /** `component` is what the page's `hello` names, as `component::*` in src/engines/messages/src/clients.rs does. */
   constructor(component: "efb-app" | "banner", env: Env) {
+    this.env = env
     this.client = new PageClient({ component }, env)
     this.client.onState((state) => this.follow(state))
+    env.every(CHECK_EVERY, () => {
+      if (this.giveUpAt !== null && env.now() >= this.giveUpAt) {
+        this.giveUpAt = null
+        this.set("not-running")
+      }
+    })
   }
 
   start(): void {
@@ -34,14 +45,14 @@ export class CoreLink {
   }
 
   private follow(connection: ConnectionState): void {
-    window.clearTimeout(this.giveUp)
+    this.giveUpAt = null
     if (connection === "connected") this.set("connected")
     else if (connection === "quit") this.set("closed")
     else if (connection === "no-core") this.set("not-running")
     else if (this.state === "connected" || this.state === "reconnecting") {
       // A crashed core comes back 2s after it exits, so most losses end under the pill.
       this.set("reconnecting")
-      this.giveUp = window.setTimeout(() => this.set("not-running"), RECONNECT_FOR)
+      this.giveUpAt = this.env.now() + RECONNECT_FOR
     }
   }
 

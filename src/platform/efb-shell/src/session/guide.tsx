@@ -7,6 +7,8 @@ import { Button, Card, CardContent, cx, Link } from "@dualinput/ui"
 import { CircleCheck, TriangleAlert } from "lucide-react"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
+import { useShell } from "../part.ts"
+
 const PAGES = [
   { title: "Flying together", body: "One of you hosts and shares their invite code, and others enter it to join. You each spawn into the same aircraft, preferably cold and dark, and Dual Input keeps you in sync." },
   { title: "Who flies", body: "The host starts as the pilot flying: their yoke, rudder, and throttles move the aircraft. You both work the switches, knobs, and displays. Others can take over as pilot flying at any time (see Settings for keybinds)." },
@@ -54,10 +56,11 @@ export function WelcomeGuide({ supported, onPick, onLeave, onClose }: { supporte
   const [leaving, setLeaving] = useState(false)
   const content = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState<number>()
-  // The card eases to the page's height, measured after every render, since Coherent GT has no ResizeObserver.
+  const { tab } = useShell()
+  // The card eases to the page's height, measured after every render, since Coherent GT has no ResizeObserver. A hidden tab measures nothing.
   useLayoutEffect(() => {
     const measured = content.current?.offsetHeight
-    if (measured !== undefined && measured !== height) setHeight(measured)
+    if (tab === "session" && measured !== undefined && measured !== height) setHeight(measured)
   })
   const turnTimer = useRef(0)
   useEffect(() => () => window.clearTimeout(turnTimer.current), [])

@@ -126,8 +126,8 @@ function grab(t: number): number {
 
 /**
  * Below the portrait's bottom edge only the hands and their shadows draw, so the body stays cropped there. A clip
- * path wipes what's under it in Coherent GT, so the body draws in a box that clips it, and the hands in a drawing
- * of their own over that box, whose edge they hang over.
+ * path wipes what's under it in Coherent GT (record/areas/architecture/coherent-gt.md), so the body draws in a box
+ * that clips it, and the hands in a drawing of their own over that box, whose edge they hang over.
  */
 export function FigurePortrait({ hex, size, aim }: { hex: string; size: number; aim: RefObject<V> }) {
   const bodyHolder = useRef<HTMLDivElement>(null)

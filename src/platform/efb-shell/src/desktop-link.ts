@@ -15,6 +15,9 @@ export const DESKTOP_PORT = 47914
 /** How often it tries again with no socket open, in milliseconds. */
 const RETRY_MS = 3000
 
+/** What a page says when it asks the desktop app for something with no desktop app to hear it. */
+export const NO_DESKTOP_APP = "Dual Input's desktop app isn't running. Open it from the Start menu."
+
 export type DesktopEnv = {
   connect(port: number): Socket
   every(ms: number, then: () => void): void
@@ -24,6 +27,7 @@ export class DesktopLink {
   private readonly env: DesktopEnv
   private readonly listeners = new Set<() => void>()
   private socket: Socket | null = null
+  private open = false
   private state: DesktopState | null = null
 
   constructor(env: DesktopEnv) {
@@ -40,6 +44,9 @@ export class DesktopLink {
   private connect(): void {
     const socket = this.env.connect(DESKTOP_PORT)
     this.socket = socket
+    socket.onopen = () => {
+      if (this.socket === socket) this.open = true
+    }
     socket.onmessage = (text) => {
       if (this.socket !== socket) return
       // What doesn't read comes from another program on the port, which says nothing to us.
@@ -52,6 +59,7 @@ export class DesktopLink {
     socket.onclose = () => {
       if (this.socket !== socket) return
       this.socket = null
+      this.open = false
       this.set(null)
     }
   }
@@ -61,8 +69,11 @@ export class DesktopLink {
     this.listeners.forEach((listener) => listener())
   }
 
-  ask(what: ToDesktop): void {
-    this.socket?.send(JSON.stringify(what))
+  /** Sends what the app asks, and says whether it went: a socket still connecting would throw, and none can carry it. */
+  ask(what: ToDesktop): boolean {
+    if (!this.socket || !this.open) return false
+    this.socket.send(JSON.stringify(what))
+    return true
   }
 
   readonly subscribe = (listener: () => void): (() => void) => {

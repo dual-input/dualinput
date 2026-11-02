@@ -1,7 +1,7 @@
 // What sits under the start card on home: on a first visit the guide, and after it, in an aircraft Dual Input has a
 // profile for, the pilot's figure, waiting for them to host, or in one it doesn't, what a session there still shares.
 
-import { Link, toast, Tooltip } from "@dualinput/ui"
+import { Link, Tooltip } from "@dualinput/ui"
 import { ArrowRightLeft, BookOpen, Check, ExternalLink, TriangleAlert } from "lucide-react"
 import { useState } from "react"
 import type { RefObject } from "react"
@@ -69,7 +69,7 @@ export function HomeRest({ page, signals, aircraft, onFigureGone }: { page: RefO
   const supported = !!aircraft?.maturity
   const guiding = guideDone === false && !guideGone
   const color = FIGURE_COLORS.find((candidate) => candidate.name === figureColor)?.hex ?? FIGURE_COLORS[5]!.hex
-  const onPick = (picked: PickableAircraft) => link.client.command("profiles.pick", { maker: picked.maker, model: picked.model }).catch(() => toast("Dual Input couldn't load that aircraft"))
+  const onPick = (picked: PickableAircraft) => link.client.command("profiles.pick", { maker: picked.maker, model: picked.model })
   return (
     <div className="relative mt-6 flex min-h-0 flex-1 flex-col">
       {guiding ? (
@@ -91,7 +91,7 @@ export function HomeRest({ page, signals, aircraft, onFigureGone }: { page: RefO
         </div>
       ) : null}
       {farewell && <Farewell onGone={() => setFarewell(false)} />}
-      <AircraftPicker open={picking} onOpenChange={setPicking} aircraft={profiles?.supported ?? []} canLoad={sim?.where === "world-map"} onPick={onPick} />
+      <AircraftPicker open={picking} onOpenChange={setPicking} aircraft={profiles?.supported ?? []} canLoad={sim?.where === "world-map"} inFlight={sim?.where === "flight"} loaded={sim?.aircraft ?? null} onPick={onPick} />
     </div>
   )
 }

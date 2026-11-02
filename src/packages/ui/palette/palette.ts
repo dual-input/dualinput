@@ -67,11 +67,50 @@ export function cssVariables(): string {
     .join(" ")
 }
 
+/**
+ * Every keyframe goes in the stylesheet whether or not a class names it, since Tailwind writes a keyframe only for an
+ * `animate-` class in use, and our pages name most of theirs in an inline style, where it can't see them. They share
+ * the document's one namespace too, so ours carry our name.
+ */
+const KEYFRAMES = {
+  "dualinput-spin": { to: { transform: "rotate(360deg)" } },
+  "dualinput-pop-in": { from: { opacity: "0", transform: "scale(0.95)" }, to: { opacity: "1", transform: "scale(1)" } },
+  "dualinput-pop-out": { from: { opacity: "1", transform: "scale(1)" }, to: { opacity: "0", transform: "scale(0.95)" } },
+  "dualinput-fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
+  "dualinput-fade-out": { from: { opacity: "1" }, to: { opacity: "0" } },
+  "dualinput-rise-in": { from: { opacity: "0", transform: "translateY(8px)" }, to: { opacity: "1", transform: "translateY(0)" } },
+  "dualinput-caret": { "0%, 50%": { opacity: "1" }, "51%, 100%": { opacity: "0" } },
+  "dualinput-ping": { "75%, 100%": { transform: "scale(2)", opacity: "0" } },
+  // A head growing out of its window and swelling past its edge before it rests.
+  "dualinput-head-pop": {
+    "0%": { transform: "scale(0)", "animation-timing-function": "cubic-bezier(0.2, 0.8, 0.4, 1)" },
+    "38%": { transform: "scale(1.25)", "animation-timing-function": "ease-in-out" },
+    "62%": { transform: "scale(0.9)", "animation-timing-function": "ease-in-out" },
+    "82%": { transform: "scale(1.05)", "animation-timing-function": "ease-in-out" },
+    "100%": { transform: "scale(1)" },
+  },
+  // A ring that spreads from a button pressed into a good state, in its text color, and fades.
+  "dualinput-ready-pulse": { from: { "box-shadow": "0 0 0 0 currentColor", opacity: "0.6" }, to: { "box-shadow": "0 0 0 8px currentColor", opacity: "0" } },
+  "dualinput-zoom-in": { from: { opacity: "0", transform: "scale(0.5)" }, to: { opacity: "1", transform: "scale(1)" } },
+  "dualinput-sink-out": { from: { opacity: "1", transform: "translateY(0)" }, to: { opacity: "0", transform: "translateY(16px)" } },
+  // A page of the guide, drifting 6px the way the turn goes.
+  "dualinput-page-in": { from: { opacity: "0", transform: "translateX(6px)" }, to: { opacity: "1", transform: "translateX(0)" } },
+  "dualinput-page-in-back": { from: { opacity: "0", transform: "translateX(-6px)" }, to: { opacity: "1", transform: "translateX(0)" } },
+  "dualinput-page-out": { from: { opacity: "1", transform: "translateX(0)" }, to: { opacity: "0", transform: "translateX(-6px)" } },
+  "dualinput-page-out-back": { from: { opacity: "1", transform: "translateX(0)" }, to: { opacity: "0", transform: "translateX(6px)" } },
+  // What arrives as a card turns to its other side.
+  "dualinput-turn-in": { from: { opacity: "0", transform: "translateY(6px)" }, to: { opacity: "1", transform: "translateY(0)" } },
+  // A digit of a rolling count, as a counter's wheel turns: the old one up out of its window, the new one up in from below.
+  "dualinput-roll-in": { from: { opacity: "0", transform: "translateY(100%)" }, to: { opacity: "1", transform: "translateY(0)" } },
+  "dualinput-roll-out": { from: { opacity: "1", transform: "translateY(0)" }, to: { opacity: "0", transform: "translateY(-100%)" } },
+}
+
 /** Tailwind's config for a page: msfs-tailwind, then our colors and sizes, for the source files in `content`. */
 export function tailwindConfig(content: string[]) {
   return {
     presets: [msfsTailwind],
     content,
+    plugins: [({ addBase }: { addBase: (rules: never) => void }) => addBase(Object.fromEntries(Object.entries(KEYFRAMES).map(([name, frames]) => [`@keyframes ${name}`, frames])) as never)],
     // Our stylesheet shares the EFB's document with the EFB and its other apps, so a class of ours
     // named like one of theirs, such as `hidden`, must reach only what's inside our root.
     important: `.${ROOT_CLASS}`,
@@ -85,39 +124,6 @@ export function tailwindConfig(content: string[]) {
         // (src/lib/root.tsx), since a root's zoom would round a 1px ring below 1 down to nothing.
         ringWidth: { 1: "var(--hair)", 3: "3px" },
         spacing: { 5.5: "1.375rem" },
-        // Keyframes share the document's one namespace too, so ours carry our name.
-        keyframes: {
-          "dualinput-spin": { to: { transform: "rotate(360deg)" } },
-          "dualinput-pop-in": { from: { opacity: "0", transform: "scale(0.95)" }, to: { opacity: "1", transform: "scale(1)" } },
-          "dualinput-pop-out": { from: { opacity: "1", transform: "scale(1)" }, to: { opacity: "0", transform: "scale(0.95)" } },
-          "dualinput-fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
-          "dualinput-fade-out": { from: { opacity: "1" }, to: { opacity: "0" } },
-          "dualinput-rise-in": { from: { opacity: "0", transform: "translateY(8px)" }, to: { opacity: "1", transform: "translateY(0)" } },
-          "dualinput-caret": { "0%, 50%": { opacity: "1" }, "51%, 100%": { opacity: "0" } },
-          "dualinput-ping": { "75%, 100%": { transform: "scale(2)", opacity: "0" } },
-          // A head growing out of its window and swelling past its edge before it rests.
-          "dualinput-head-pop": {
-            "0%": { transform: "scale(0)", "animation-timing-function": "cubic-bezier(0.2, 0.8, 0.4, 1)" },
-            "38%": { transform: "scale(1.25)", "animation-timing-function": "ease-in-out" },
-            "62%": { transform: "scale(0.9)", "animation-timing-function": "ease-in-out" },
-            "82%": { transform: "scale(1.05)", "animation-timing-function": "ease-in-out" },
-            "100%": { transform: "scale(1)" },
-          },
-          // A ring that spreads from a button pressed into a good state, in its text color, and fades.
-          "dualinput-ready-pulse": { from: { "box-shadow": "0 0 0 0 currentColor", opacity: "0.6" }, to: { "box-shadow": "0 0 0 8px currentColor", opacity: "0" } },
-          "dualinput-zoom-in": { from: { opacity: "0", transform: "scale(0.5)" }, to: { opacity: "1", transform: "scale(1)" } },
-          "dualinput-sink-out": { from: { opacity: "1", transform: "translateY(0)" }, to: { opacity: "0", transform: "translateY(16px)" } },
-          // A page of the guide, drifting 6px the way the turn goes.
-          "dualinput-page-in": { from: { opacity: "0", transform: "translateX(6px)" }, to: { opacity: "1", transform: "translateX(0)" } },
-          "dualinput-page-in-back": { from: { opacity: "0", transform: "translateX(-6px)" }, to: { opacity: "1", transform: "translateX(0)" } },
-          "dualinput-page-out": { from: { opacity: "1", transform: "translateX(0)" }, to: { opacity: "0", transform: "translateX(-6px)" } },
-          "dualinput-page-out-back": { from: { opacity: "1", transform: "translateX(0)" }, to: { opacity: "0", transform: "translateX(6px)" } },
-          // What arrives as a card turns to its other side.
-          "dualinput-turn-in": { from: { opacity: "0", transform: "translateY(6px)" }, to: { opacity: "1", transform: "translateY(0)" } },
-          // A digit of a rolling count, as a counter's wheel turns: the old one up out of its window, the new one up in from below.
-          "dualinput-roll-in": { from: { opacity: "0", transform: "translateY(100%)" }, to: { opacity: "1", transform: "translateY(0)" } },
-          "dualinput-roll-out": { from: { opacity: "1", transform: "translateY(0)" }, to: { opacity: "0", transform: "translateY(-100%)" } },
-        },
         animation: {
           spin: "dualinput-spin 1s linear infinite",
           "pop-in": "dualinput-pop-in 100ms ease-out",

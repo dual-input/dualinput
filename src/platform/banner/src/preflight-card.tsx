@@ -5,8 +5,7 @@
 // during preflight, it leaves when the flight starts, and the toolbar's button closes the banner
 // (record/areas/interface/decisions.md, "The banner is a box of opaque cards at the screen's top right").
 
-import { BadgedHead, CountdownRing, ReadyButton, useCountdown } from "@dualinput/crew"
-import type { HeadState } from "@dualinput/crew"
+import { BadgedHead, CountdownRing, crewInPreflight, ReadyButton, useCountdown } from "@dualinput/crew"
 import { cx, showPressOn } from "@dualinput/ui"
 import { CircleX, Hand, ListChecks, TriangleAlert } from "lucide-react"
 import { useRef } from "react"
@@ -14,11 +13,7 @@ import type { ReactNode } from "react"
 
 import type { NetSlice } from "../../../engines/messages/ts/net/NetSlice.ts"
 import type { SessionSlice } from "../../../engines/messages/ts/session/SessionSlice.ts"
-import type { SliceMember } from "../../../engines/messages/ts/session/SliceMember.ts"
 import { CARD_LAYER, CARD_NUDGE } from "./note-card.tsx"
-
-/** The heads the row has room for beside Ready and its ring; a bigger crew shows one fewer and a count of the rest. */
-const ROW_HEADS = 7
 
 function Line({ icon, className, children }: { icon: ReactNode; className: string; children: ReactNode }) {
   return (
@@ -31,25 +26,10 @@ function Line({ icon, className, children }: { icon: ReactNode; className: strin
 
 const counted = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`
 
-/** Whether the summary shows: while preflight runs for a pilot in the session's flight. */
-export function inPreflight(session: SessionSlice | undefined): boolean {
-  if (!session?.held) return false
-  const me = session.members.find((member) => member.pilot === session.me)
-  return !!me?.in_flight && (session.preflight.phase === "running" || session.preflight.phase === "countdown")
-}
-
 export function PreflightCard({ session, network, onOpen, onReady }: { session: SessionSlice; network: NetSlice | undefined; onOpen: () => void; onReady: (on: boolean) => void }) {
   const nudge = useRef<HTMLDivElement>(null)
   const left = useCountdown(session.preflight.phase === "countdown")
-  const me = session.members.find((member) => member.pilot === session.me)
-  const others = session.members.filter((member) => member !== me)
-  const stateOf = (member: SliceMember): HeadState => {
-    if (member.ready) return "ready"
-    if (member !== me && network?.members.find((link) => link.pilot === member.pilot)?.up === false) return "out"
-    return "waiting"
-  }
-  const everyone = me ? [me, ...others] : others
-  const inRow = everyone.length > ROW_HEADS ? everyone.slice(0, ROW_HEADS - 1) : everyone
+  const { me, everyone, inRow, notInRow, stateOf } = crewInPreflight(session.members, session.me, true, (pilot) => network?.members.find((link) => link.pilot === pilot)?.up === false)
   const errors = session.differences.filter((difference) => difference.level === "error").length
   const warnings = session.differences.length - errors
   const differences = [errors > 0 && counted(errors, "error"), warnings > 0 && counted(warnings, "warning")].filter(Boolean).join(" and ")
@@ -62,9 +42,9 @@ export function PreflightCard({ session, network, onOpen, onReady }: { session: 
             {inRow.map((member) => (
               <BadgedHead key={member.pilot} pilot={member.pilot} name={member === me ? "You" : member.name} state={stateOf(member)} className="mr-1.5" />
             ))}
-            {everyone.length > inRow.length && (
-              <span aria-label={`${everyone.length - inRow.length} more pilots`} className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium tabular-nums text-muted-foreground">
-                +{everyone.length - inRow.length}
+            {notInRow > 0 && (
+              <span aria-label={`${notInRow} more pilots`} className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium tabular-nums text-muted-foreground">
+                +{notInRow}
               </span>
             )}
           </span>

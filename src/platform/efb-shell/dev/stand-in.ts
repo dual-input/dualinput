@@ -98,6 +98,8 @@ const LOCAL: DesktopState = { update: { state: "current", checked: "4 minutes ag
 
 /** What a scene has the answer to Host or Join be, which is no slice of the core's. */
 const REFUSING = "refusing"
+/** What a scene puts on the clipboard, which is no slice of the core's either. */
+const CLIPBOARD = "clipboard"
 
 /** Each state a person looks at, by name, with what it sets on top of the sim's healthy slices. */
 export const SCENES: Record<string, Slices> = {
@@ -114,6 +116,7 @@ export const SCENES: Record<string, Slices> = {
   "Servers refuse": { [REFUSING]: "servers" },
   "No session has the code": { [REFUSING]: "no-code" },
   "Too slow to answer": { [REFUSING]: "slow" },
+  "A code on the clipboard": { [CLIPBOARD]: CODE },
   "Alone in a session": { session: held({ members: [me(atMenu)] }) },
   "James joins": { session: held({ members: [me(atMenu), james({ ...atMenu, stage: "loading" })] }) },
   Preflight: { ...netUp, session: held({ members: [me(inFlight), james(inFlight, { ready: true })], preflight: running, differences: DIFFERENCES }) },
@@ -121,6 +124,10 @@ export const SCENES: Record<string, Slices> = {
   "Preflight, James dropped": {
     network: { members: [{ pilot: JAMES, up: false, path: null, round_trip_ms: null }], ...reach },
     session: held({ members: [me(inFlight, { ready: true }), james(inFlight)], preflight: running, differences: DIFFERENCES }),
+  },
+  "Preflight, James at the menu": {
+    ...netUp,
+    session: held({ members: [me(inFlight, { ready: true }), james(atMenu)], preflight: running, differences: DIFFERENCES }),
   },
   "Preflight, big crew": {
     ...netUp,
@@ -135,13 +142,13 @@ export const SCENES: Record<string, Slices> = {
   "Header: several things": { network: { members: [], internet: true, servers: "unreachable" }, [DESKTOP]: { ...LOCAL, firewall: "blocks", update: { state: "ready", next: "1.0.3" } } },
   "Header: our own parts": {
     session: held({ members: [me(inFlight), james(inFlight)], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, ready: null }),
-    sim: { ...atWorldMap, module: "stopped" },
     network: { members: [], internet: true, servers: "unreachable" },
     notifications: [
-      { id: "clients.no-panel", level: "trouble", text: "", landing: "header" },
-      { id: "core-helper.down", level: "trouble", text: "", landing: "header" },
-      { id: "network.bind", level: "trouble", text: "", landing: "header" },
-      { id: "core-helper.failed.key", level: "warning", text: "Your take-control key isn't working", detail: "Windows didn't let Dual Input listen for F9.", landing: "header" },
+      { id: "sim-service.module-stopped", level: "trouble", text: "Dual Input's WASM module stopped", detail: "Restart the sim to fly together again.", landing: "header" },
+      { id: "clients.no-panel", level: "trouble", text: "Cockpit screens aren't syncing", detail: "Dual Input couldn't load into the cockpit's panels. Another add-on that replaces VCockpit.js is the likeliest cause.", landing: "header" },
+      { id: "core-helper.down", level: "trouble", text: "Dual Input's Windows helper is down", detail: "Keybinds, audio, and your figure's pointing won't work until it's back.", landing: "header" },
+      { id: "network.bind", level: "trouble", text: "Dual Input can't open its connection to other pilots", detail: "Your crew can't reach you until it opens.", landing: "header" },
+      { id: "core-helper.failed.binding-1", level: "warning", text: "Your take-control key isn't working", detail: "Windows didn't let Dual Input listen for F9.", landing: "header" },
     ],
     [DESKTOP]: { ...LOCAL, firewall: "blocks" },
   },
@@ -159,6 +166,7 @@ export class StandInCore extends StandInBase {
   private countdown = 0
   private answer = 0
   private refusing: string | null = null
+  private clipboard: string | null = null
   private desktopSocket: Socket | null = null
   private local: DesktopState | null = LOCAL
   sceneName = "Before a session"
@@ -182,16 +190,21 @@ export class StandInCore extends StandInBase {
     this.sceneName = name
     const scene = SCENES[name]!
     this.refusing = (scene[REFUSING] as string | undefined) ?? null
+    this.clipboard = (scene[CLIPBOARD] as string | undefined) ?? null
     this.desktopSocket?.onclose?.()
     this.local = DESKTOP in scene ? (scene[DESKTOP] as DesktopState | null) : LOCAL
     this.tellDesktop()
     this.set({ settings: settings(true, true) })
-    window.setTimeout(() => this.set({ ...healthy, recording: { runs: RUNS, stopped: null }, "core-helper": OUTPUTS, notifications: [], core: CORE, ...scene }), 0)
+    window.setTimeout(() => this.set({ ...healthy, recording: { runs: RUNS, stopped: null }, "core-helper": { ...OUTPUTS, outputs: [] }, notifications: [], core: CORE, ...scene }), 0)
   }
 
   protected command(name: string, args: JsonValue): void {
     const fields = (args ?? {}) as Record<string, unknown>
-    if (name === "session.host" || name === "session.join") this.attempt(name === "session.host" ? "host" : "join")
+    if (name === "session.host") this.attempt("host", null)
+    else if (name === "session.join") this.attempt("join", String(fields.code))
+    else if (name === "session.join-from-clipboard") {
+      if (this.clipboard) this.attempt("join", this.clipboard)
+    } else if (name === "core-helper.list") this.set({ "core-helper": OUTPUTS })
     else if (name === "session.cancel") this.cancelAttempt()
     else if (name === "session.leave") this.set({ session: noSession })
     else if (name === "session.ready") this.setReady(!!fields.on)
@@ -210,12 +223,12 @@ export class StandInCore extends StandInBase {
     this.setSession({ attempt: null })
   }
 
-  private attempt(on: "host" | "join"): void {
+  private attempt(on: "host" | "join", code: string | null): void {
     const refusing = this.refusing
-    this.setSession({ refused: null, attempt: { on, dialing: false } })
+    this.setSession({ refused: null, attempt: { on, dialing: false, code } })
     window.clearTimeout(this.answer)
     if (refusing === "slow") {
-      if (on === "join") this.answer = window.setTimeout(() => this.setSession({ attempt: { on, dialing: true } }), AFTER.answer)
+      if (on === "join") this.answer = window.setTimeout(() => this.setSession({ attempt: { on, dialing: true, code } }), AFTER.answer)
       return
     }
     this.answer = window.setTimeout(() => {
@@ -268,7 +281,10 @@ export class StandInCore extends StandInBase {
           close: () => {},
         }
         this.desktopSocket = socket
-        window.setTimeout(() => this.tellDesktop(), 0)
+        window.setTimeout(() => {
+          if (this.local) socket.onopen?.()
+          this.tellDesktop()
+        }, 0)
         return socket
       },
     }

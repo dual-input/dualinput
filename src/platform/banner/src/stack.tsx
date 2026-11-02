@@ -12,10 +12,10 @@ import type { CSSProperties, ReactNode } from "react"
 import { NoteBody, NoteCard } from "./note-card.tsx"
 import { ONCE_MS } from "./note.ts"
 import type { Note } from "./note.ts"
-import { GAP, merge, MORE_LINE, ordered, place } from "./placing.ts"
+import { cleared, GAP, merge, MORE_LINE, ordered, place, said, withKept } from "./placing.ts"
 import type { Item } from "./placing.ts"
 
-/** The box in its own pixels on a 1,080-line screen, one card wide and as tall as the summary and three notifications. */
+/** The box in its own pixels on a 1,080-line screen, one card wide and as tall as the summary and three notifications. src/sim-package/panel/InGamePanels/dualinput-banner.xml holds the same box, so change both together. */
 export const BOX = { width: 360, height: 390 }
 
 const SUMMARY = "banner.summary"
@@ -115,30 +115,23 @@ function useNewestFirst(notes: Note[]): Note[] {
   return [...notes].sort((a, b) => arrived.current.get(b.id)! - arrived.current.get(a.id)!)
 }
 
-/** What a card said, by which a dismissed one stays hidden, so news that moves on under the same ID shows again. */
-const said = (note: Note) => `${note.id}\n${note.text}`
-
 export function Stack({ notes: raised, summary, onOpen }: { notes: Note[]; summary: ReactNode; onOpen: (note: Note) => void }) {
-  // The core keeps a one-time notification for a few seconds, which a pointer resting on its card can outlast, so a card stays for its own time, whatever the core has dropped.
-  const once = useRef(new Map<string, Note>())
-  raised.forEach((note) => {
-    if (note.once) once.current.set(note.id, note)
-    else once.current.delete(note.id)
-  })
-  const notes = [...raised, ...Array.from(once.current.values()).filter((note) => !raised.some((other) => other.id === note.id))]
-  const newest = useNewestFirst(notes)
   // Each card a pilot dismissed or that ran out its time, and whether it had already slid off. A held one stays hidden until its cause ends, and shows again if the cause comes back.
   const [gone, setGone] = useState(new Map<string, boolean>())
+  // The core keeps a one-time notification for a few seconds, which a pointer resting on its card can outlast, so a card stays for its own time, whatever the core has dropped.
+  const once = useRef(new Map<string, Note>())
+  const notes = withKept(raised, once.current, gone)
+  const newest = useNewestFirst(notes)
   const leave = (note: Note, away: boolean) => {
     once.current.delete(note.id)
     setGone((now) => new Map(now).set(said(note), away))
   }
   useEffect(() => {
-    const cleared = Array.from(gone.keys()).filter((key) => !notes.some((note) => said(note) === key))
-    if (cleared.length === 0) return
+    const keys = cleared(gone, notes)
+    if (keys.length === 0) return
     setGone((now) => {
       const next = new Map(now)
-      cleared.forEach((key) => next.delete(key))
+      keys.forEach((key) => next.delete(key))
       return next
     })
     // It looks for what's cleared each time the slice or what's hidden changes.
@@ -159,6 +152,10 @@ export function Stack({ notes: raised, summary, onOpen }: { notes: Note[]; summa
   })
   const room = BOX.height - (summary ? (heights[SUMMARY] ?? 0) + GAP : 0)
   const placed = place(live, (id) => heights[id] ?? 0, room)
+  // A one-time card the box has no room for has left early, for good, so it can't come back later as news.
+  useEffect(() => {
+    live.filter((note) => note.once && !placed.shown.includes(note) && !placed.waiting.includes(note)).forEach((note) => leave(note, false))
+  })
 
   const lastOrder = useRef<string[]>([])
   const wasWaiting = useRef(new Set<string>())
@@ -177,7 +174,9 @@ export function Stack({ notes: raised, summary, onOpen }: { notes: Note[]; summa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wantedKey])
 
-  // A card keeps drawing what it last said while it leaves, as the line keeps its last count.
+  // A card keeps drawing what it last said while it leaves, as the line keeps its last count and the summary its last self.
+  const lastSummary = useRef<ReactNode>(null)
+  if (summary) lastSummary.current = summary
   const last = useRef(new Map<string, Note>())
   live.forEach((note) => last.current.set(note.id, note))
   const lastCount = useRef(0)
@@ -190,7 +189,7 @@ export function Stack({ notes: raised, summary, onOpen }: { notes: Note[]; summa
         return (
           <Row key={item.id} fresh={!!item.fresh} leaving={!!item.leaving} away={!!item.away} onGone={() => setItems((all) => all.filter((other) => other.id !== item.id))}>
             {item.id === SUMMARY ? (
-              <div ref={summaryBox}>{summary}</div>
+              <div ref={summaryBox}>{lastSummary.current}</div>
             ) : item.id === MORE ? (
               <MoreLine
                 count={lastCount.current}

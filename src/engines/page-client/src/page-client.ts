@@ -217,6 +217,7 @@ export class PageClient {
     this.socket = null
     this.open = false
     if (old) old.close()
+    this.failAnswers()
     this.values.clear()
     this.port = port
     const socket = this.env.connect(port)

@@ -10,6 +10,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
 import type { Difference } from "../../../../engines/messages/ts/session/Difference.ts"
+import { useShell } from "../part.ts"
 
 /** A window of three lines and part of a fourth, so the cut line says there's more. */
 const WINDOW = 128
@@ -100,9 +101,11 @@ export function CrewDifferences({ differences, started, onEase }: { differences:
   const counts = useRef<HTMLButtonElement>(null)
   const list = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState<number>()
+  const { tab } = useShell()
   useLayoutEffect(() => {
     const shown = expanded ? list.current : counts.current
-    if (!shown) return
+    // A hidden tab measures nothing.
+    if (!shown || tab !== "session") return
     const measured = shown.offsetHeight + parseFloat(getComputedStyle(shown).marginTop)
     if (measured !== height) setHeight(measured)
   })

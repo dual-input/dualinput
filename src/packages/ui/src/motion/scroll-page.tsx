@@ -131,7 +131,8 @@ export function ScrollPage({ className, children }: { className?: string; childr
     folds.current.forEach((fold) => foldOne(fold, box))
     fades.current.forEach((element) => fadeOne(element, box))
   }
-  const scroller = useScroller({ onMove: run })
+  // A room opening above a fold moves it with no scroll, so the folds run on the box's checks too.
+  const scroller = useScroller({ onMove: run, onMeasure: run })
   useEffect(() => {
     const box = scroller.ref.current
     if (!box) return

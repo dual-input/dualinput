@@ -15,7 +15,7 @@ const LIST_DIM = 0.5
 
 const easeOut = (t: number) => 1 - (1 - t) ** 3
 
-export function useCardFold({ foldable, inner }: { foldable: boolean; inner: RefObject<HTMLElement | null> }) {
+export function useCardFold({ foldable, inner, shown }: { foldable: boolean; inner: RefObject<HTMLElement | null>; shown: boolean }) {
   const foldBox = useRef<HTMLDivElement>(null)
   const spacer = useRef<HTMLDivElement>(null)
   const list = useRef<HTMLDivElement>(null)
@@ -143,6 +143,8 @@ export function useCardFold({ foldable, inner }: { foldable: boolean; inner: Ref
 
   // After every render, since what it measures can change with any of them: the fold's parts, the room under a list that runs past the page by less than the fold, so the card can always fold all the way, and the fold at the page's scroll.
   useLayoutEffect(() => {
+    // A hidden tab measures nothing, which would read as a card with nothing to fold.
+    if (!shown) return
     parts.current = scanFold(inner.current)
     const box = scroller.ref.current
     const found = parts.current

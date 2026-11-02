@@ -622,7 +622,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
   Settled by the user on 2026-11-01.
 - **A click carries its landing,** rather than the core looking it up by the ID, since a notification can clear while the click is on its way, and the preflight summary, whose click lands on the Session tab too, is no notification.
-  The order that reaches the EFB app is `{ "t": "open-efb", "landing": "header", "id": "sim-service.module-stopped" }`, whose `id` picks the header's row.
+  The order that reaches the EFB app is `{ "t": "open-efb", "landing": "header", "id": "sim-service.module-stopped" }`, whose `id` names the header's row, so a row that has cleared opens nothing.
 - **With the service gone,** no core can carry the click, so the banner's page raises `L:DUALINPUT_BANNER_OPEN_EFB`, and the EFB app reads it every 200ms only while its own link is down, the one way we've measured from a panel to the EFB's document ([log](log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
 
 ## The banner is a box of opaque cards at the screen's top right

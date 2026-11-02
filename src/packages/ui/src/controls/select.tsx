@@ -6,6 +6,7 @@ import { createPortal } from "react-dom"
 import { cx } from "../lib/cx.ts"
 import { useAnchored, useDismiss, usePresence } from "../lib/popup.ts"
 import { useRoot } from "../lib/root.tsx"
+import { fadeMask, NO_SCROLLBAR, useScroller } from "../motion/scroller.ts"
 
 type SelectValue = {
   value: string
@@ -78,20 +79,27 @@ export function SelectContent({ className, children, ...rest }: HTMLAttributes<H
   const { mounted, leaving } = usePresence(open)
   const placed = useAnchored(mounted, trigger, popup, { side: "bottom", align: "center", offset: 4 })
   useDismiss(open, [popup, trigger], () => setOpen(false))
+  const scroller = useScroller()
   if (!mounted || !root) return null
   return createPortal(
     <div
       ref={popup}
       role="listbox"
-      className={cx(
-        "absolute z-50 max-h-64 min-w-36 overflow-y-auto overflow-x-hidden rounded-3xl bg-popover p-1.5 text-popover-foreground shadow-lg ring-1 ring-foreground/10 [&::-webkit-scrollbar]:w-0",
-        leaving ? "animate-pop-out" : "animate-pop-in",
-        className,
-      )}
+      className={cx("absolute z-50 min-w-36 rounded-3xl bg-popover text-popover-foreground shadow-lg ring-1 ring-foreground/10", leaving ? "animate-pop-out" : "animate-pop-in", className)}
       style={{ left: placed?.left, top: placed?.top, width: trigger.current?.offsetWidth, visibility: placed ? "visible" : "hidden" }}
       {...rest}
     >
-      {children}
+      {/* It scrolls as every box does, since a VR pointer has no wheel, and it's apart from the popup so its fades leave the popup's edge alone. */}
+      <div
+        ref={scroller.ref}
+        onScroll={scroller.onScroll}
+        onWheel={scroller.onWheel}
+        onMouseDown={scroller.onMouseDown}
+        className={cx("max-h-64 select-none overflow-y-auto p-1.5", NO_SCROLLBAR, scroller.cursor)}
+        style={fadeMask(scroller.above, scroller.below, 24, 24)}
+      >
+        {children}
+      </div>
     </div>,
     root,
   )

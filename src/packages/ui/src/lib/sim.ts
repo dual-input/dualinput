@@ -68,6 +68,11 @@ export function askForKeyboard(field: HTMLInputElement, title: string): void {
   coherent?.on("SetInputTextFromOS", textFromOs)
 }
 
+/** Whether any field holds the keyboard. */
+export function keyboardHeld(): boolean {
+  return holder !== null
+}
+
 /** Whether `field` is the one holding the keyboard. */
 export function holdsKeyboard(field: HTMLInputElement): boolean {
   return holder === field

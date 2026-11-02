@@ -1,7 +1,6 @@
 import { createContext, useContext, useState } from "react"
 import type { CSSProperties, HTMLAttributes, MouseEvent as ReactMouseEvent } from "react"
 
-import { cx } from "./cx.ts"
 import { ROOT_CLASS } from "./root-class.ts"
 
 type RootValue = { element: HTMLElement | null; scale: number }
@@ -25,12 +24,13 @@ export function mouseIn(event: MouseEvent | ReactMouseEvent, scale: number): { x
  * Everything of the kit draws inside one of these. `scale` fits the page to its view with the zoom
  * property, since a transform blurs text in Coherent GT and sizes written through calc() would have
  * to reach every number in our code (record/areas/interface/log.md, p24). `--hair` is the length of
- * one real pixel at that scale, for lines that must neither vanish nor blur.
+ * one real pixel at that scale, for lines that must neither vanish nor blur. It takes no `className`, since the
+ * kit's classes reach only what's inside a root, so one on the root itself would do nothing.
  */
-export function Root({ scale = 1, className, style, children, ...rest }: HTMLAttributes<HTMLDivElement> & { scale?: number }) {
+export function Root({ scale = 1, style, children, ...rest }: Omit<HTMLAttributes<HTMLDivElement>, "className"> & { scale?: number }) {
   const [element, setElement] = useState<HTMLDivElement | null>(null)
   return (
-    <div ref={setElement} className={cx(ROOT_CLASS, className)} style={{ ...style, zoom: scale, "--hair": `${1 / scale}px` } as CSSProperties} {...rest}>
+    <div ref={setElement} className={ROOT_CLASS} style={{ ...style, zoom: scale, "--hair": `${1 / scale}px` } as CSSProperties} {...rest}>
       <RootContext.Provider value={{ element, scale }}>{children}</RootContext.Provider>
     </div>
   )

@@ -3,6 +3,7 @@
 // they scroll as one. The card stays pinned at the top while the rest scrolls under it, so Ready and the countdown
 // never scroll away, and folds to its row as the rest scrolls (use-card-fold.ts).
 
+import { inPreflight } from "@dualinput/crew"
 import { Card, cx, fadeMask, NO_SCROLLBAR, showPress } from "@dualinput/ui"
 import { ChevronDown, Hand } from "lucide-react"
 import { createElement, useEffect, useLayoutEffect, useRef, useState } from "react"
@@ -33,22 +34,20 @@ function stillEasing(box: HTMLElement): number {
 }
 
 export function SessionTab({ parts }: { parts: Part[] }) {
-  const { link } = useShell()
+  const { link, tab } = useShell()
   const session = useCoreSlice<SessionSlice>("session")
   const sim = useCoreSlice<SimSlice>("sim")
   const profiles = useCoreSlice<ProfilesSlice>("profiles")
   const aircraft = sim?.aircraft ? { ...sim.aircraft, maturity: profiles?.loaded?.maturity ?? null } : null
   const held = !!session?.held
-  const me = session?.members.find((member) => member.pilot === session.me)
-  const phase = session?.preflight.phase
-  const started = phase === "ended"
-  const preflight = held && (phase === "running" || phase === "countdown") && !!me?.in_flight
+  const started = session?.preflight.phase === "ended"
+  const preflight = inPreflight(session)
 
   const signals = useRef(new FigureSignals())
   const pageRef = useRef<HTMLDivElement>(null)
   // The figure stays through the turn to the session, since it's leaping off the page, and goes once it's gone.
   const [figureGone, setFigureGone] = useState(false)
-  // An attempt: pressed here, answered in the session slice.
+  // An attempt: pressed here, or started by the core, as a code on the clipboard is, and answered in the session slice.
   const [status, setStatus] = useState<Status>({ kind: "idle" })
   const [code, setCode] = useState("")
   const slowTimer = useRef(0)
@@ -59,31 +58,52 @@ export function SessionTab({ parts }: { parts: Part[] }) {
   const refused = session?.refused ?? null
   const refusedNow = refused && JSON.stringify(refused)
   if (!refusedNow) answered.current = null
-  const attempt = (on: Action) => {
+  const begin = (on: Action) => {
     answered.current = refusedNow
     setStatus({ kind: "busy", on, dialing: false, slow: false })
     signals.current.onAttempt()
     stopSlow()
     slowTimer.current = window.setTimeout(() => setStatus((now) => (now.kind === "busy" ? { ...now, slow: true } : now)), SLOW_AFTER)
-    void link.client.command(on === "host" ? "session.host" : "session.join", on === "host" ? null : { code }).catch(() => {})
   }
-  const dialing = !!session?.attempt?.dialing
-  useEffect(() => {
-    if (status.kind !== "busy") return
-    if (refused && refused.on === status.on && refusedNow !== answered.current) {
+  const attempt = (on: Action) => {
+    begin(on)
+    void link.client.command(on === "host" ? "session.host" : "session.join", on === "host" ? null : { code }).catch((error: Error) => {
       stopSlow()
       signals.current.onAnswer(false)
-      setStatus({ kind: "refused", on: status.on, refusal: refused })
-    } else if (held) {
-      stopSlow()
-      signals.current.onAnswer(true)
-      setStatus({ kind: "done", on: status.on })
-    } else if (status.dialing !== dialing) {
-      setStatus({ ...status, dialing })
+      setStatus({ kind: "rejected", on, why: error.message })
+    })
+  }
+  const running = session?.attempt ?? null
+  const dialing = !!running?.dialing
+  // The core is what knows an attempt runs: it can start one on its own, and a core that restarts has forgotten one.
+  const sawRunning = useRef(false)
+  const canceling = useRef(false)
+  useEffect(() => {
+    if (!running) canceling.current = false
+    if (running?.code && running.code !== code) setCode(running.code)
+    if (status.kind === "busy") {
+      if (refused && refused.on === status.on && refusedNow !== answered.current) {
+        stopSlow()
+        signals.current.onAnswer(false)
+        setStatus({ kind: "refused", on: status.on, refusal: refused })
+      } else if (held) {
+        stopSlow()
+        signals.current.onAnswer(true)
+        setStatus({ kind: "done", on: status.on })
+      } else if (!running && sawRunning.current) {
+        stopSlow()
+        signals.current.onCancel()
+        setStatus({ kind: "idle" })
+      } else if (status.dialing !== dialing) {
+        setStatus({ ...status, dialing })
+      }
+    } else if (running && status.kind !== "done" && !canceling.current) {
+      begin(running.on)
     }
+    sawRunning.current = !!running
     // A refusal counts by its words, since each of the slice's changes makes a new object.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, refusedNow, held, dialing])
+  }, [status, refusedNow, held, dialing, running?.on, running?.code])
 
   // The card turns between its sides as the guide's pages turn: the side it leaves fades out, then the next fades in, rising 6px, as the card eases to its height.
   const [side, setSide] = useState<"start" | "session">(held ? "session" : "start")
@@ -135,11 +155,14 @@ export function SessionTab({ parts }: { parts: Part[] }) {
 
   const sideBox = useRef<HTMLDivElement>(null)
   const inner = useRef<HTMLDivElement>(null)
-  const fold = useCardFold({ foldable, inner })
+  const shown = tab === "session"
+  const fold = useCardFold({ foldable, inner, shown })
   const [sideHeight, setSideHeight] = useState<number>()
   // A room in the session that starts to ease re-renders only itself, so it says so, and the card measures again to the height it's easing to. At rest on Host and Join, the card sets its own, since a refusal's room eases open there and a measured height would clip it.
   const [, remeasure] = useState(0)
   useLayoutEffect(() => {
+    // A hidden tab measures nothing, and the card would grow back from it each time the tab opens.
+    if (!shown) return
     const content = inner.current
     const height = turning === "out" ? sideBox.current?.offsetHeight : (turning === "in" || side === "session") && content ? content.offsetHeight + stillEasing(content) : undefined
     if (height !== sideHeight) setSideHeight(height)
@@ -160,7 +183,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
           style={scrolls ? { paddingBottom: 20 + fold.pad, ...fadeMask(false, fold.scroller.below, 0, 32) } : undefined}
         >
           <div className={cx("relative flex shrink-0 flex-col", scrolls && "z-20 -mx-5 bg-background px-5")} style={scrolls ? pinned : undefined}>
-            {/* Reaches past the pinned card's top, since Coherent GT pins it a pixel or two below the box's edge, where what scrolls under would show above it. The box's clip cuts this off at its edge. */}
+            {/* Reaches past the pinned card's top, since Coherent GT pins it a pixel or two below the box's edge, where what scrolls under would show above it (record/areas/architecture/coherent-gt.md). The box's clip cuts this off at its edge. */}
             {scrolls && <div className="absolute inset-x-0 bottom-full h-2 bg-background" />}
             {/* A layer under the pinned card, where the box's mask can't reach, once something has gone under the folded card; only then, or hanging below it would make a short page scroll by its overhang. */}
             {scrolls && fold.goneUnder && <div className="pointer-events-none absolute inset-x-0 top-full -mt-px h-[25px]" style={{ background: "linear-gradient(to bottom, rgba(var(--background), 1), rgba(var(--background), 0))" }} />}
@@ -182,13 +205,17 @@ export function SessionTab({ parts }: { parts: Part[] }) {
                         code={code}
                         onCode={(next) => {
                           setCode(next)
-                          if (status.kind === "refused" && status.on === "join") setStatus({ kind: "idle" })
+                          if ((status.kind === "refused" || status.kind === "rejected") && status.on === "join") setStatus({ kind: "idle" })
+                        }}
+                        onCodeSelected={() => {
+                          if (!code && status.kind !== "busy" && status.kind !== "done") void link.client.command("session.join-from-clipboard", null).catch(() => {})
                         }}
                         onHost={() => attempt("host")}
                         onJoin={() => attempt("join")}
                         onCancel={() => {
                           stopSlow()
                           signals.current.onCancel()
+                          canceling.current = true
                           setStatus({ kind: "idle" })
                           void link.client.command("session.cancel", null).catch(() => {})
                         }}
@@ -199,7 +226,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
                 </div>
               </div>
             </Card>
-            {/* A pill reads as a handle to grab, as a phone's sheet grabber does, and is wider to hit with a mouse in the sim. It's centered on the card's bottom edge by its offsets, since Coherent GT drops the translate property, and sky, the app's color for what can be pressed. */}
+            {/* A pill reads as a handle to grab, as a phone's sheet grabber does, and is wider to hit with a mouse in the sim. It's centered on the card's bottom edge by its offsets, since Coherent GT drops the translate property (record/areas/architecture/coherent-gt.md), and sky, the app's color for what can be pressed. */}
             {canFold && (
               <button
                 type="button"

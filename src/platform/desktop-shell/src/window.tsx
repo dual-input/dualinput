@@ -7,9 +7,11 @@ import { Root } from "@dualinput/ui"
 
 export function DesktopWindow({ version }: { version: string }) {
   return (
-    <Root className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground">
-      <h1 className="text-lg font-semibold">Dual Input</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Version {version}</p>
+    <Root>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground">
+        <h1 className="text-lg font-semibold">Dual Input</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Version {version}</p>
+      </div>
     </Root>
   )
 }

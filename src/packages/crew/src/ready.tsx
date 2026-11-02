@@ -37,7 +37,7 @@ export function ReadyButton({ ready, why, onToggle }: { ready: boolean; why: str
       {pulses > 0 && <span key={pulses} className="pointer-events-none absolute -bottom-px -left-px -right-px -top-px rounded-4xl text-success" style={{ animation: `dualinput-ready-pulse ${PULSE_MS}ms ease-out both` }} />}
       <Button size="sm" variant={ready ? "success" : "outline"} onClick={onToggle}>
         <span className="inline-flex items-center">
-          {/* The check is out of the flow, since Coherent GT sizes the button by what a room holds, whatever the room's width. */}
+          {/* The check is out of the flow, since Coherent GT sizes the button by what a room holds, whatever the room's width (record/areas/architecture/coherent-gt.md). */}
           <span className="relative inline-block h-4 overflow-hidden" style={{ width: ready ? 20 : 0, transition: `width ${READY_EASE.room}ms ease-out` }}>
             <Check
               className="absolute left-0 top-0 size-4"

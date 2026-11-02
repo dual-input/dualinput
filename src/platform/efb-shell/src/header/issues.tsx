@@ -5,6 +5,8 @@ import { Button, toast } from "@dualinput/ui"
 import { CircleArrowUp, CircleX, TriangleAlert } from "lucide-react"
 import type { ReactNode } from "react"
 
+import type { RaisedRow } from "./raised.ts"
+
 /** What needs this PC's pilot, as the header reads it from the core's slices and the desktop app's local port. */
 export type HeaderStatus = {
   offline?: boolean
@@ -12,13 +14,8 @@ export type HeaderStatus = {
   firewall?: "allows" | "blocks"
   /** Asks the desktop app to add the rule, with its UAC prompt. */
   fixFirewall?: () => void
-  /** The connection to other pilots failed to open. */
-  connection?: boolean
-  module?: "stopped" | "missing"
-  bridge?: boolean
-  helper?: boolean
-  /** Something a feature asked of the Windows helper that it can't carry out, in the feature's own words, as a key Windows refuses. */
-  want?: { title: string; detail?: string }
+  /** What the core raised that lands on the header, in the header's order. */
+  raised: RaisedRow[]
   update?: { next: string; have: string; view: () => void }
 }
 
@@ -32,6 +29,8 @@ export const TONE_ICON: Record<Tone, ReactNode> = {
 
 /** A row's title says what's wrong, as the pilot sees it, and its detail what that costs. */
 export type Issue = {
+  /** A notification's ID for a row of the core's, which is how a click on its card finds it. */
+  id: string
   tone: Tone
   word: string
   title: string
@@ -52,6 +51,7 @@ export function issuesOf(status: HeaderStatus, inSession: boolean): Issue[] {
   const issues: Issue[] = []
   if (status.offline) {
     issues.push({
+      id: "internet",
       tone: "bad",
       word: "Internet",
       title: "Your PC seems offline",
@@ -59,6 +59,7 @@ export function issuesOf(status: HeaderStatus, inSession: boolean): Issue[] {
     })
   } else if (status.servers === "unreachable") {
     issues.push({
+      id: "servers",
       tone: inSession ? "warn" : "bad",
       word: "Servers",
       title: "Can't reach our servers",
@@ -67,6 +68,7 @@ export function issuesOf(status: HeaderStatus, inSession: boolean): Issue[] {
   }
   if (status.firewall === "blocks") {
     issues.push({
+      id: "firewall",
       tone: inSession ? "warn" : "bad",
       word: "Firewall",
       title: "Windows Firewall is blocking Dual Input",
@@ -85,21 +87,10 @@ export function issuesOf(status: HeaderStatus, inSession: boolean): Issue[] {
       ),
     })
   }
-  if (status.connection) {
-    issues.push({
-      tone: "bad",
-      word: "Connection",
-      title: "Dual Input can't open its connection to other pilots",
-      detail: inSession ? "Your crew can't reach you until it opens." : "You can't host or join until it opens.",
-    })
-  }
-  if (status.bridge) issues.push({ tone: "bad", word: "Screens", title: "Cockpit screens aren't syncing", detail: "Dual Input couldn't load into the cockpit's panels. Another add-on that replaces VCockpit.js is the likeliest cause." })
-  if (status.module === "stopped") issues.push({ tone: "bad", word: "WASM", title: "Dual Input's WASM module stopped", detail: "Restart the sim to fly together again." })
-  if (status.module === "missing") issues.push({ tone: "bad", word: "WASM", title: "Dual Input's WASM module is missing", detail: "Reinstall Dual Input with the sim closed to fly together again." })
-  if (status.helper) issues.push({ tone: "bad", word: "Helper", title: "Dual Input's Windows helper is down", detail: "Keybinds, audio, and your figure's pointing won't work until it's back." })
-  if (status.want) issues.push({ tone: "warn", word: "Keybind", title: status.want.title, detail: status.want.detail ?? "" })
+  for (const row of status.raised) issues.push({ id: row.id, tone: row.trouble ? "bad" : "warn", word: row.word, title: row.title, detail: row.detail })
   if (status.update && !inSession) {
     issues.push({
+      id: "update",
       tone: "news",
       word: "Update",
       title: `Dual Input ${status.update.next} is ready`,

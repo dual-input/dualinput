@@ -11,6 +11,8 @@ export const CALL_AGAIN_AFTER = 3000
 export type PanelFacts = {
   /** This pilot's sim is in or loading a flight, in a session. */
   flying: boolean
+  /** This pilot's sim is loading a flight, which begins the next flight whether it came from the menu or a Restart, which has no menu between. */
+  loading: boolean
   held: boolean
   /** A banner page's socket is open, as the `banner` slice says. */
   pageOpen: boolean
@@ -31,31 +33,45 @@ export class BannerPanel {
   private opened = false
   private retry: number | null = null
   private pageOpen = false
+  private wasLoading = false
 
   constructor(env: PanelEnv) {
     this.env = env
   }
 
   follow(facts: PanelFacts): void {
+    const nextFlight = facts.loading && !this.wasLoading
+    this.wasLoading = facts.loading
     this.pageOpen = facts.pageOpen
     if (facts.pageOpen) this.stopRetrying()
     if (!facts.held) {
       this.close()
       return
     }
-    if (!facts.flying) {
+    if (!facts.flying || nextFlight) {
       this.calledThisFlight = false
       this.stopRetrying()
+    }
+    if (!facts.flying || this.calledThisFlight) return
+    if (facts.pageOpen) {
+      // A load may take the page down, and its socket says so only a few seconds later, so while one runs an open page settles nothing.
+      if (!facts.loading) this.calledThisFlight = true
       return
     }
-    if (this.calledThisFlight) return
     this.calledThisFlight = true
-    if (!facts.pageOpen) this.call()
+    this.call()
   }
 
   /** The core said `bye`, so it says nothing more: the panel closes now, with no retry. */
   coreQuit(): void {
     this.close()
+  }
+
+  /** The link to the core dropped, so nothing can say a page came up. Calling stops, and starts again once the core is back. */
+  coreLost(): void {
+    if (this.retry === null) return
+    this.stopRetrying()
+    this.calledThisFlight = false
   }
 
   private call(): void {

@@ -46,8 +46,14 @@ const checkOf = (failure: SetupFailure): Check["id"] => (failure === "offline" ?
 type Phase = { kind: "welcome"; out: boolean } | { kind: "checks"; index: number; step: "enter" | "run" | "result" | "handoff"; failed?: boolean; fixing?: boolean; skipped: number[] } | { kind: "card" }
 
 /** What the window shows in place of its pages when the sim loaded another version of our add-on than the service runs: the box setup's check shows, the same way. */
-export function AddonMismatch({ addon, service, headerHeight, onRestart }: { addon: string; service: string; headerHeight: number; onRestart: () => void }) {
+export function AddonMismatch({ addon, service, headerHeight, onRestart }: { addon: string; service: string; headerHeight: number; onRestart: () => boolean }) {
   const [restarting, setRestarting] = useState(false)
+  // A restart the pilot turns down, or that never happens, stops waiting after a while, and offers itself again.
+  useEffect(() => {
+    if (!restarting) return
+    const timer = window.setTimeout(() => setRestarting(false), STEP.fixWait)
+    return () => window.clearTimeout(timer)
+  }, [restarting])
   const box = failureWords({ addonVersion: addon, version: service }).addon
   return (
     // As much room under it as the header takes above, so it centers in the window.
@@ -65,8 +71,7 @@ export function AddonMismatch({ addon, service, headerHeight, onRestart }: { add
               question="Restart the sim?"
               go="Restart now"
               onConfirm={() => {
-                setRestarting(true)
-                onRestart()
+                if (onRestart()) setRestarting(true)
               }}
             >
               {box.action.label}
@@ -205,8 +210,8 @@ function CrewCard({ username, onDone }: { username: string; onDone: (name: strin
 
 export type SetupFlowProps = {
   facts: SetupFacts
-  /** Asks the desktop app to fix the firewall, or the tray app to restart the sim. */
-  onFix: (failure: SetupFailure) => void
+  /** Asks the desktop app to fix the firewall or restart the sim, and says whether it could ask. */
+  onFix: (failure: SetupFailure) => boolean
   onDone: (name: string, color: string) => void
 }
 
@@ -253,9 +258,7 @@ export function SetupFlow({ facts, onFix, onDone }: SetupFlowProps) {
         phase={phase}
         failing={failing}
         onFix={() => {
-          if (!failure) return
-          onFix(failure)
-          setPhase({ ...phase, fixing: true })
+          if (failure && onFix(failure)) setPhase({ ...phase, fixing: true })
         }}
         onSkip={() => setPhase({ ...phase, failed: false, skipped: [...phase.skipped, phase.index] })}
       />

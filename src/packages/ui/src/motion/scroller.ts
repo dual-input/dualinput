@@ -42,6 +42,8 @@ export type ScrollerOptions = {
   onMove?: () => void
   /** Where a motion of the box's own is going as it starts, and null when a press or a wheel stops one. */
   onMotion?: (to: number | null) => void
+  /** Follows each of the box's checks of what it holds, for what a scroll alone wouldn't redraw. */
+  onMeasure?: () => void
 }
 
 export function useScroller({ nested, ...said }: ScrollerOptions = {}) {
@@ -62,7 +64,10 @@ export function useScroller({ nested, ...said }: ScrollerOptions = {}) {
   // What the box holds can change size with no render here, as a font loads, a child's slice arrives, or a
   // room eases, and Coherent GT has no ResizeObserver, so it measures a few times a second.
   useEffect(() => {
-    const timer = window.setInterval(measure, MEASURE_EVERY)
+    const timer = window.setInterval(() => {
+      measure()
+      told.current.onMeasure?.()
+    }, MEASURE_EVERY)
     return () => window.clearInterval(timer)
   }, [])
 
@@ -142,7 +147,8 @@ export function useScroller({ nested, ...said }: ScrollerOptions = {}) {
    */
   const onMouseDown = (event: ReactMouseEvent) => {
     const box = ref.current
-    if (!box || event.button !== 0) return
+    // React bubbles a press in a popup through the page that opened it, though the popup sits outside the box.
+    if (!box || event.button !== 0 || !box.contains(event.target as Node)) return
     stop()
     pressed.current = true
     const y0 = event.clientY

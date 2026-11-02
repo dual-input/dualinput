@@ -16,6 +16,8 @@ export type CodeInputProps = {
   /** Shows its active slot with no focus, as the kit's page does. */
   focused?: boolean
   onEnter?: () => void
+  /** The pilot selected the box. */
+  onSelected?: () => void
   className?: string
 }
 
@@ -23,7 +25,7 @@ export type CodeInputProps = {
  * An invite code's slots: one real input, which takes the keys and shows nothing, over a slot for each
  * character. It keeps letters and digits, in capitals, since that's what a code holds.
  */
-export function CodeInput({ value, onChange, groups = [3, 3], disabled, invalid, title = "Invite code", focused: focusedFromOutside, onEnter, className }: CodeInputProps) {
+export function CodeInput({ value, onChange, groups = [3, 3], disabled, invalid, title = "Invite code", focused: focusedFromOutside, onEnter, onSelected, className }: CodeInputProps) {
   const own = useRef<HTMLInputElement>(null)
   const [focusedHere, setFocused] = useState(false)
   const focused = focusedFromOutside ?? focusedHere
@@ -88,6 +90,7 @@ export function CodeInput({ value, onChange, groups = [3, 3], disabled, invalid,
         onFocus={(event) => {
           setFocused(true)
           field.onFocus(event)
+          onSelected?.()
         }}
         onBlur={(event) => {
           setFocused(false)

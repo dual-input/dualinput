@@ -19,7 +19,7 @@ export const FIGURE_COLORS = [
   { name: "pink", hex: "#e46aa6" },
 ]
 
-/** A pilot's color, by their ID until the figures' feature says which they picked. */
+/** A pilot's color, by their ID. TODO: once stage 17's figures say which color each pilot picked, read that instead. */
 export function colorOf(pilot: string): string {
   // FNV-1a, whose high bits spread where a plain sum's low bits would give every pilot one color.
   const hash = Array.from(pilot).reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619), 2166136261) >>> 0
@@ -51,14 +51,16 @@ export type HeadProps = {
   turns?: boolean
   /** A pilot out of the flight: it hangs still and dim, so who's gone reads apart from the crew still watching. */
   slumped?: boolean
+  /** Dim and facing forward, for a banner's card, where a slump reads as turned too far at that size (user, 2026-11-01). */
+  faded?: boolean
 }
 
-export function Head({ pilot, pop, alive, turns, slumped }: HeadProps) {
+export function Head({ pilot, pop, alive, turns, slumped, faded }: HeadProps) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const crew = useContext(CrewContext)
   const { scale } = useRoot()
   const room = turns ? TURN_ROOM : LIST_ROOM
-  useLiveHead(canvas, colorOf(pilot), room, scale, alive && !slumped ? crew : null, pilot, slumped ? SLUMP_LOOK : undefined, !!slumped)
+  useLiveHead(canvas, colorOf(pilot), room, scale, alive && !slumped ? crew : null, pilot, slumped ? SLUMP_LOOK : undefined, !!slumped || !!faded)
   return (
     <span className="relative inline-block shrink-0" style={{ width: HEAD_SIZE, height: HEAD_SIZE }}>
       <span className="absolute inset-x-0 inset-y-0 rounded-full bg-muted" />

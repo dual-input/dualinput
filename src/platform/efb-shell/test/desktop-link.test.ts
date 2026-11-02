@@ -54,8 +54,12 @@ test("what another program on the port says changes nothing", () => {
   assert.equal(link.current(), null)
 })
 
-test("it sends what the app asks", () => {
-  const { link, sent } = bench()
-  link.ask({ t: "set-start-with-windows", on: false })
+test("it sends what the app asks once its socket opens, and says when it can't", () => {
+  const { link, sockets, sent } = bench()
+  assert.equal(link.ask({ t: "restart-sim" }), false, "a socket still connecting carries nothing")
+  sockets[0]!.onopen?.()
+  assert.equal(link.ask({ t: "set-start-with-windows", on: false }), true)
   assert.deepEqual(sent.map((text) => JSON.parse(text)), [{ t: "set-start-with-windows", on: false }])
+  sockets[0]!.onclose?.()
+  assert.equal(link.ask({ t: "restart-sim" }), false, "a closed one carries nothing")
 })

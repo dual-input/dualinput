@@ -1,10 +1,13 @@
 import assert from "node:assert/strict"
+import fs from "node:fs"
+import path from "node:path"
 import { test } from "node:test"
 
 import { checkCss } from "coherent-checks"
 import postcss from "postcss"
 
 import { buildCss, remToPx, scopeDefaults, unwrapIs } from "./lib/css.ts"
+import { ROOT } from "./lib/repo.ts"
 
 const run = async (css: string, ...plugins: Parameters<typeof postcss>) => (await postcss(plugins).process(css, { from: undefined })).css
 
@@ -31,4 +34,19 @@ test("the kit's stylesheet passes the Coherent GT check, every rule of it under 
     if (rule.parent?.type === "atrule" && (rule.parent as postcss.AtRule).name === "keyframes") return
     for (const selector of rule.selectors) assert.match(selector, /^\.dualinput-ui/, `${selector} would reach outside our root`)
   })
+})
+
+test("every keyframe a page names in an inline style is in the stylesheet, which Tailwind wouldn't write for it", async () => {
+  const css = await buildCss([])
+  const named = new Set<string>()
+  for (const folder of ["src/packages", "src/platform/banner/src", "src/platform/efb-shell/src"]) {
+    for (const file of fs.readdirSync(path.join(ROOT, folder), { recursive: true }) as string[]) {
+      if (!/\.tsx?$/.test(file) || file.includes("node_modules")) continue
+      for (const line of fs.readFileSync(path.join(ROOT, folder, file), "utf8").split("\n")) {
+        if (line.includes("animation:")) for (const [name] of line.matchAll(/dualinput-[a-z]+(?:-[a-z]+)*/g)) named.add(name)
+      }
+    }
+  }
+  assert.ok(named.has("dualinput-ready-pulse"), "the search found the names")
+  for (const name of named) assert.ok(css.includes(`@keyframes ${name}`), `${name} has no keyframes`)
 })

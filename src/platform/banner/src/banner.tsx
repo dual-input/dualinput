@@ -3,6 +3,7 @@
 // each flight of a session, and the page shows and hides its own content from the slices it watches, so with nothing
 // to say it paints nothing (record/areas/interface/01-apps.md, "The banner").
 
+import { inPreflight } from "@dualinput/crew"
 import { Root } from "@dualinput/ui"
 import { useEffect, useRef, useState } from "react"
 
@@ -12,7 +13,7 @@ import { useCoreState, useSlice } from "../../../engines/page-client/src/core-li
 import type { CoreLink } from "../../../engines/page-client/src/core-link.ts"
 import { serviceNote } from "./note.ts"
 import type { Landing, Note } from "./note.ts"
-import { inPreflight, PreflightCard } from "./preflight-card.tsx"
+import { PreflightCard } from "./preflight-card.tsx"
 import { BOX, Stack } from "./stack.tsx"
 
 /** The command a click sends, and the name a click on the summary goes by, since the summary is no notification. `NOTIFICATION_CLICKED` in src/engines/messages/src/clients.rs names the command too. */
@@ -52,22 +53,27 @@ export function Banner({ host, link, openWithoutCore }: BannerProps) {
   const connectedOnce = useRef(false)
   if (core === "connected") connectedOnce.current = true
   const service = serviceNote(core, connectedOnce.current)
-  const notes = service ? [service, ...(raised ?? [])] : (raised ?? [])
+  // A restart comes back in about 2s, so a card holds through reconnecting, and with the service gone nothing would ever clear it.
+  const held = core === "connected" || core === "reconnecting" ? (raised ?? []) : []
+  const notes = service ? [service, ...held] : held
   const open = (id: string, landing: Landing) => {
-    if (core === "connected") void link.client.command(CLICKED, { id, landing }).catch(() => {})
+    // A click that doesn't reach the core still opens the EFB.
+    if (core === "connected" && landing !== "stay") void link.client.command(CLICKED, { id, landing }).catch(() => openWithoutCore())
     else openWithoutCore()
   }
   return (
-    <Root scale={scale} className="pointer-events-none" style={{ width: BOX.width, height: BOX.height, overflow: "hidden" }}>
-      <Stack
-        notes={notes}
-        onOpen={(note) => open(note.id, note.landing)}
-        summary={
-          inPreflight(session) && core === "connected" ? (
-            <PreflightCard session={session!} network={network} onOpen={() => open(SUMMARY_CLICK, "session")} onReady={(on) => void link.client.command("session.ready", { on }).catch(() => {})} />
-          ) : null
-        }
-      />
+    <Root scale={scale} style={{ width: BOX.width, height: BOX.height, overflow: "hidden" }}>
+      <div className="pointer-events-none">
+        <Stack
+          notes={notes}
+          onOpen={(note) => open(note.id, note.landing)}
+          summary={
+            inPreflight(session) && core === "connected" ? (
+              <PreflightCard session={session!} network={network} onOpen={() => open(SUMMARY_CLICK, "session")} onReady={(on) => void link.client.command("session.ready", { on }).catch(() => {})} />
+            ) : null
+          }
+        />
+      </div>
     </Root>
   )
 }

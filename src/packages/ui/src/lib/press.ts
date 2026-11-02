@@ -19,7 +19,9 @@ export function showPressOn(element: HTMLElement): void {
   element.setAttribute("data-pressed", "")
   const up = () => {
     window.removeEventListener("mouseup", up, true)
+    document.removeEventListener("mouseleave", up)
     window.setTimeout(() => element.removeAttribute("data-pressed"), Math.max(0, AT_LEAST - (performance.now() - from)))
   }
   window.addEventListener("mouseup", up, true)
+  document.addEventListener("mouseleave", up)
 }

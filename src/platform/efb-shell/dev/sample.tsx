@@ -57,6 +57,7 @@ const NO_SIM: SimWindow = {
   openEfb: () => console.log("the EFB opens onto our app"),
   toggleBanner: (open) => console.log(`the banner's panel ${open ? "opens" : "closes"}`),
   bannerAsked: () => 0,
+  efbClosed: () => false,
 }
 
 /** Mounts the app into `host`, on a stand-in core, with the chooser beside it in `aside`, or over its corner with none. */

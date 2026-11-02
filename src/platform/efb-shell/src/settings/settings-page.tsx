@@ -1,6 +1,6 @@
 // The Settings tab: what a pilot sets once for this PC and seldom again, each section a heading over a card
-// (record/areas/interface/decisions.md, "The Settings tab"). A part adds its own section when its stage comes, as
-// take-control's key does. A change a pilot watches happens in the page's moment, its old words fading before its
+// (record/areas/interface/decisions.md, "The Settings tab"). A part adds its own section, as take-control's key
+// does. A change a pilot watches happens in the page's moment, its old words fading before its
 // new ones fade in, so a row never shows two states at once.
 
 import { Button, Card, Confirm, cx, Fades, Link, MOMENT, part, Room, ScrollPage, ScrollWindow, Select, SelectContent, SelectItem, SelectTrigger, Separator, Spinner, Switch, toast, useMoment, useReveal, useScrollTo } from "@dualinput/ui"
@@ -15,6 +15,7 @@ import type { RecordingSlice } from "../../../../engines/messages/ts/recording/R
 import type { RecordingStopped } from "../../../../engines/messages/ts/recording/RecordingStopped.ts"
 import type { Run } from "../../../../engines/messages/ts/recording/Run.ts"
 import type { SessionSlice } from "../../../../engines/messages/ts/session/SessionSlice.ts"
+import { useCoreState } from "../../../../engines/page-client/src/core-link.ts"
 import { useDesktopState } from "../desktop-link.ts"
 import { useCoreSlice, useShell } from "../part.ts"
 import type { Part } from "../part.ts"
@@ -65,7 +66,12 @@ function Row({ label, note, tone, children }: { label: ReactNode; note?: ReactNo
  * the default, which a warning under it names, lighting the tab's dot.
  */
 function OutputDevice() {
-  const { link, setDot } = useShell()
+  const { link, setDot, tab } = useShell()
+  const core = useCoreState(link)
+  // The helper runs only while something wants it, so the devices are asked for each time this tab opens, which also catches a headset plugged in since.
+  useEffect(() => {
+    if (tab === "settings" && core === "connected") void link.client.command("core-helper.list", null).catch(() => {})
+  }, [tab, core, link])
   const helper = useCoreSlice<HelperSlice>("core-helper")
   const outputs = helper?.outputs ?? []
   const saved = (useSetting(link, OUTPUT) ?? null) as DeviceInfo | null

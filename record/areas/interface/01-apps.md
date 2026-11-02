@@ -234,7 +234,7 @@ The apps' own code:
 - The desktop app's WebSocket library, which sends no `Origin` or `coui://html_ui` ([decision 013](../../decisions/013-core-accepts-sim-origin-or-none.md)); its Rust side sends `alive`, since a hidden window's timers may run slowly (unverified).
 - Whether the desktop app's pages and its Rust side trade text through Tauri's commands, events, or channels, and whether tauri-specta types the calls ([messages and their types](../architecture/01-spine.md#messages-and-their-types)).
 - How the desktop app's Rust side brings its window forward while the sim holds the foreground: Windows lets a process take the foreground only on conditions such as being the foreground process or having received the last input, and otherwise "flashes the taskbar button" (documented, [SetForegroundWindow](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setforegroundwindow)), so whether the window comes forward is unverified until the button is pressed in the sim.
-- How an EFB part styles itself, and the banner's panel name, which joins [names the sim shares](../architecture/02-code-map.md#names-the-sim-shares).
+- How an EFB part styles itself.
 
 No v1 page sends a span, so the spine's item on the clock a page measures one on closes for v1 ([01-spine](../architecture/01-spine.md#left-open)).
 

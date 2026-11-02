@@ -588,7 +588,7 @@ export function KitPage({ width, height, scale: given }: { width?: number; heigh
     return () => window.removeEventListener("resize", onResize)
   }, [])
   return (
-    <Root scale={scale} className="" style={{ width: `${width ?? size.width / scale}px`, height: `${height ?? size.height / scale}px`, overflow: "hidden" }}>
+    <Root scale={scale} style={{ width: `${width ?? size.width / scale}px`, height: `${height ?? size.height / scale}px`, overflow: "hidden" }}>
       <div className="h-full bg-background">
       <div className="flex h-12 items-center border-b bg-card px-5">
         <div className="mr-6 text-sm font-semibold">The kit</div>

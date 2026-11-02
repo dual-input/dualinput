@@ -14,7 +14,7 @@ export type TabItem<Id extends string> = {
 export type TabBarProps<Id extends string> = Omit<HTMLAttributes<HTMLElement>, "onSelect"> & { tabs: TabItem<Id>[]; active: Id; onSelect?: (id: Id) => void }
 
 // The dot comes in once a page's moment has settled and leaves with what's fading, and it swells a
-// little past its size as it arrives (experiments/areas/interface/bench/src/frames/shell.tsx).
+// little past its size as it arrives.
 const DOT_IN = "opacity 180ms ease-out 270ms, transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1) 270ms"
 const DOT_OUT = "opacity 120ms ease-in, transform 120ms ease-in"
 

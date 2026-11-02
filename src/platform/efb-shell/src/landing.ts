@@ -16,7 +16,7 @@ export const OPEN_EFB_VARIABLE = "L:DUALINPUT_BANNER_OPEN_EFB"
 const POLL_MS = 200
 
 /** Hears the core's order, and the banner's call while the core is gone, opening the EFB for each. */
-export function useLanding(link: CoreLink, sim: SimWindow, down: boolean, land: (landing: Landing) => void): void {
+export function useLanding(link: CoreLink, sim: SimWindow, down: boolean, land: (landing: Landing, id: string) => void): void {
   const landNow = useRef(land)
   landNow.current = land
   useEffect(
@@ -25,7 +25,7 @@ export function useLanding(link: CoreLink, sim: SimWindow, down: boolean, land: 
         const order = body as EfbAppOrder
         if (order.t !== "open-efb") return
         sim.openEfb()
-        landNow.current(order.landing)
+        landNow.current(order.landing, order.id)
       }),
     [link, sim],
   )

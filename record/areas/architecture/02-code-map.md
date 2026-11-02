@@ -648,7 +648,8 @@ A probe's kind is its ID, as in p08's `L:CROSSCHECK_P08_ECHO`, which carries the
 | `MENU` | The menu document's `window` | The menu script | `DUALINPUT_MENU_LOADED`, which our BlurPage copy sets as it loads the script, so the script loads once in each document |
 | `FIGURE` | SimObject titles, and `Z:` variables | avatars | The figure's title, `DUALINPUT_FIGURE_PILOT`, and `Z:DUALINPUT_FIGURE_` and each joint's channel ([avatars' names](../avatars/01-avatars.md#names)) |
 | `UI` | The EFB document's `window`, and the sim's keyboard calls | The kit, `@dualinput/ui` | `DUALINPUT_UI_RELEASE_KEYBOARD`, which gives back the keyboard a text field took, and `DUALINPUT_UI_FIELD`, the field's name in `UNFOCUS_INPUT_FIELD` |
-| `BANNER` | `L:` variables | The banner's page | `L:DUALINPUT_BANNER_OPEN_EFB`, which a click on a card raises while no core can carry it ([a notification's click](../interface/decisions.md#a-notifications-click-opens-the-efb-app-where-its-explained-or-acted-on)) |
+| `EFB` | The EFB document's `window` | efb-shell | `DUALINPUT_EFB_REGISTERED`, which says our app has registered, so a script loaded twice registers once |
+| `BANNER` | `L:` variables, and the sim's panels and icons | The banner's page | `L:DUALINPUT_BANNER_OPEN_EFB`, which a click on a card raises while no core can carry it ([a notification's click](../interface/decisions.md#a-notifications-click-opens-the-efb-app-where-its-explained-or-acted-on)); and `PANEL_DUALINPUT_BANNER` and `ICON_TOOLBAR_DUALINPUT_BANNER`, the panel and its toolbar icon, which start with what the sim's own names for those start with |
 
 A unit that needs a name of a new kind adds the kind to this table.
 

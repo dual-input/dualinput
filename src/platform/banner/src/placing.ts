@@ -59,3 +59,24 @@ export function merge(shown: Item[], wanted: string[], away: (id: string) => boo
   })
   return out
 }
+
+/** What a card said, by which one that has gone stays hidden, so news that moves on under the same ID shows again. */
+export const said = (note: Note) => `${note.id}\n${note.text}`
+
+/**
+ * What the stack can draw: what the core holds, and each one-time card it has dropped while the card's own time runs,
+ * which it adds to `kept`. A card that has gone isn't kept again, or it would still be there once the core drops it, and
+ * nothing would ever clear its mark.
+ */
+export function withKept(raised: Note[], kept: Map<string, Note>, gone: ReadonlyMap<string, boolean>): Note[] {
+  for (const note of raised) {
+    if (!note.once) kept.delete(note.id)
+    else if (!gone.has(said(note))) kept.set(note.id, note)
+  }
+  return [...raised, ...Array.from(kept.values()).filter((note) => !raised.some((other) => other.id === note.id))]
+}
+
+/** The marks of cards that have gone whose notification has since cleared, so the same words can show again. */
+export function cleared(gone: ReadonlyMap<string, boolean>, notes: Note[]): string[] {
+  return Array.from(gone.keys()).filter((key) => !notes.some((note) => said(note) === key))
+}

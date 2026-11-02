@@ -6,11 +6,12 @@
 // Join winds it up, and once our servers answer it jumps for joy and falls over backward, off the page.
 
 import { useRoot } from "@dualinput/ui"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { RefObject } from "react"
 
 import { add, scale, sub, unit } from "@dualinput/crew/trace"
 import type { V } from "@dualinput/crew/trace"
+import { useShell } from "../part.ts"
 import { FigureDrawing } from "./drawing.ts"
 import { body, BODY_SHADOWS, CHEST_UP, cheerOver, cheerPose, FEET, FOOT, HANDS_ON_HIPS, HEAD_UP, HIPS_UP, lerp, newCheer, SHRUG_HANDS, smooth, standingProjection, stepCheer, TAKEOFF, turnAbout } from "./standing-pose.ts"
 import type { Cheer, Pose } from "./standing-pose.ts"
@@ -53,16 +54,29 @@ export type StandingFigureProps = {
 export function StandingFigure({ hex, page: pageRef, signals, onGone }: StandingFigureProps) {
   const holder = useRef<HTMLDivElement>(null)
   const { scale: rootScale } = useRoot()
+  const { efbClosed } = useShell()
   const goneNow = useRef(onGone)
   goneNow.current = onGone
+
+  // It keeps the size it opens with, from the bottom of the room it's given, so it stays put when the start card grows over a refusal and the room shrinks from the top. The card covers its empty top. It opens at the first frame it measures anything, since a hidden tab measures nothing.
+  const [opened, setOpened] = useState<{ width: number; height: number } | null>(null)
+  useEffect(() => {
+    if (opened) return
+    let frame = 0
+    const look = () => {
+      const element = holder.current
+      if (element && element.offsetWidth > 0 && element.offsetHeight > 0) setOpened({ width: element.offsetWidth, height: element.offsetHeight })
+      else frame = requestAnimationFrame(look)
+    }
+    look()
+    return () => cancelAnimationFrame(frame)
+  }, [opened])
 
   useEffect(() => {
     const element = holder.current
     const page = pageRef.current
-    if (!element || !page) return
-    // It keeps the height it opens with, from the bottom of the room it's given, so it stays put when the start card grows over a refusal and the room shrinks from the top. The card covers its empty top.
-    const width = element.offsetWidth
-    const height = element.offsetHeight
+    if (!element || !page || !opened) return
+    const { width, height } = opened
     const drawing = new FigureDrawing(hex, width, height)
     drawing.svg.style.position = "absolute"
     drawing.svg.style.left = "0"
@@ -239,8 +253,8 @@ export function StandingFigure({ hex, page: pageRef, signals, onGone }: Standing
         stepCheer(cheer, dt)
         if (cheerOver(cheer)) cheer = null
       }
-      // With the page hidden, it keeps time but draws nothing, since drawing is the cost.
-      if (element.offsetParent === null) {
+      // With the page hidden or the EFB closed, it keeps time but draws nothing, since drawing is the cost.
+      if (element.offsetParent === null || efbClosed()) {
         frame = requestAnimationFrame(tick)
         return
       }
@@ -297,7 +311,7 @@ export function StandingFigure({ hex, page: pageRef, signals, onGone }: Standing
     }
     // A new color draws anew; the rest are fixed for the figure's life.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hex])
+  }, [hex, opened])
 
   return <div ref={holder} className="absolute inset-x-0 bottom-0 top-0" />
 }

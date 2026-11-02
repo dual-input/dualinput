@@ -4,8 +4,7 @@
 // (record/areas/interface/decisions.md, "The session page is home once a session starts"). During preflight it
 // has a second form for the card's fold: one row of every pilot's head, badged ready or out, and this pilot's Ready.
 
-import { BadgedHead, CountdownRing, CrewHeads, EmptyHead, Head, HEAD_CUE, ReadyButton, useCountdown, useCrew } from "@dualinput/crew"
-import type { HeadState } from "@dualinput/crew"
+import { BadgedHead, CountdownRing, crewInPreflight, CrewHeads, EmptyHead, Head, HEAD_CUE, inPreflight, ReadyButton, useCountdown, useCrew } from "@dualinput/crew"
 import { Badge, Button, CardContent, Confirm, cx, ScrollWindow, Separator, toast, useRoot } from "@dualinput/ui"
 import { Copy, LogOut } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
@@ -21,8 +20,6 @@ import { CrewDifferences } from "./differences.tsx"
 
 /** A window of three rows and half of a fourth, which covers v1's two pilots with room to spare, during preflight only: outside it nothing waits under the card, so a big crew only lengthens the page. */
 const CREW_WINDOW = 150
-/** The heads the folded row has room for before Ready with its ring; a bigger crew shows one fewer and a count of the rest. */
-const ROW_HEADS = 7
 /** The heads pop in as the card turns to the session, one after another down the list, in milliseconds; a pilot who joins later pops in as their row appears. */
 const POP = { first: 120, stagger: 70 }
 /** What marks a head's badge for the card's fold, which fades it as the head glides. */
@@ -51,7 +48,7 @@ function linkWords(link: MemberLink | undefined): string | undefined {
 /** The code as a pilot reads it out, in two groups. */
 const spaced = (code: string) => `${code.slice(0, 3)}-${code.slice(3)}`
 
-function CrewRow({ member, you, flying, link, pop, alive, end }: { member: SliceMember; you: boolean; flying: boolean; link: MemberLink | undefined; pop?: number; alive: boolean; end?: React.ReactNode }) {
+function CrewRow({ member, you, flying, link, pop, alive, slumped, end }: { member: SliceMember; you: boolean; flying: boolean; link: MemberLink | undefined; pop?: number; alive: boolean; slumped: boolean; end?: React.ReactNode }) {
   // A row's pop is fixed when the row first shows.
   const [popAfter] = useState(pop)
   const under = you ? undefined : whereabouts(member, link)
@@ -59,7 +56,7 @@ function CrewRow({ member, you, flying, link, pop, alive, end }: { member: Slice
   return (
     <li className="flex items-center">
       <span data-fold-glide={`head-${member.pilot}`} className="mr-3 flex shrink-0">
-        <Head pilot={member.pilot} pop={popAfter} alive={alive} slumped={under?.trouble} />
+        <Head pilot={member.pilot} pop={popAfter} alive={alive} slumped={slumped || under?.trouble} />
       </span>
       <div data-fold-fade className="flex min-w-0 flex-col">
         <span className="flex items-center text-sm font-medium">
@@ -102,10 +99,10 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
   const crew = useCrew()
   const { scale } = useRoot()
   crew.scale = scale
-  const me = session.members.find((member) => member.pilot === session.me)
-  const others = session.members.filter((member) => member !== me)
   const phase = session.preflight.phase
-  const preflight = (phase === "running" || phase === "countdown") && !!me?.in_flight
+  const preflight = inPreflight(session)
+  const linkOf = (pilot: string) => net?.members.find((candidate) => candidate.pilot === pilot)
+  const { me, others, everyone, inRow, notInRow, out, counted, stateOf } = crewInPreflight(session.members, session.me, preflight && !started, (pilot) => linkOf(pilot)?.up === false)
   const ready = !!me?.ready
 
   const left = useCountdown(phase === "countdown")
@@ -119,17 +116,6 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
     })
     readyBefore.current = now
   })
-
-  const linkOf = (pilot: string) => net?.members.find((candidate) => candidate.pilot === pilot)
-  const out = (member: SliceMember) => {
-    const where = whereabouts(member, linkOf(member.pilot))
-    return !!where.trouble
-  }
-  const counted = (member: SliceMember) => !me?.without.includes(member.pilot)
-  const waitedOn = (member: SliceMember) => preflight && !started && !member.ready && counted(member)
-  const everyone = me ? [me, ...others.filter(waitedOn), ...others.filter((member) => !waitedOn(member))] : others
-  const inRow = everyone.length > ROW_HEADS ? everyone.slice(0, ROW_HEADS - 1) : everyone
-  const notInRow = everyone.length - inRow.length
 
   const myReady = preflight && !started && (
     <MyReady ready={ready} why={session.ready?.[0]} left={left} onToggle={() => void link.client.command("session.ready", { on: !ready })} />
@@ -146,11 +132,6 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
       )
     }
     return member.ready ? <Badge variant="success">Ready</Badge> : <span className="text-xs text-muted-foreground">Not ready</span>
-  }
-  const stateOf = (member: SliceMember): HeadState | undefined => {
-    if (member.ready) return "ready"
-    if (out(member)) return "out"
-    return member === me || waitedOn(member) ? "waiting" : undefined
   }
   const leave = () => void link.client.command("session.leave", null)
   const leaveWords = (
@@ -202,9 +183,9 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
                     you={member === me}
                     flying={member.pilot === session.pf}
                     link={linkOf(member.pilot)}
-
                     pop={turnedIn ? 0 : POP.first + at * POP.stagger}
                     alive={preflight && !started && !out(member)}
+                    slumped={preflight && !started && out(member)}
                     end={endOf(member)}
                   />
                 ))}

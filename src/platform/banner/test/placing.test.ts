@@ -2,13 +2,42 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 
 import type { Note } from "../src/note.ts"
-import { GAP, merge, MORE_LINE, ordered, place } from "../src/placing.ts"
+import { cleared, GAP, merge, MORE_LINE, ordered, place, said, withKept } from "../src/placing.ts"
 
 const held = (id: string, level: Note["level"] = "information"): Note => ({ id, level, text: id, landing: "session" })
 const once = (id: string): Note => ({ id, level: "information", text: id, once: true, landing: "session" })
 const ids = (notes: Note[]) => notes.map((note) => note.id)
 const CARD = 60
 const height = () => CARD
+
+test("a one-time card whose time ran out shows again once the core has dropped it and raises the same words", () => {
+  const card = once("adam left")
+  const kept = new Map<string, Note>()
+  let gone: ReadonlyMap<string, boolean> = new Map()
+  assert.deepEqual(ids(withKept([card], kept, gone)), ["adam left"])
+
+  // Its time runs out while the core still holds it, so it stays hidden and isn't kept again.
+  kept.delete(card.id)
+  gone = new Map([[said(card), false]])
+  withKept([card], kept, gone)
+  assert.equal(kept.size, 0)
+
+  // The core drops it, which clears its mark.
+  const notes = withKept([], kept, gone)
+  assert.deepEqual(notes, [])
+  assert.deepEqual(cleared(gone, notes), [said(card)])
+  gone = new Map()
+
+  assert.deepEqual(ids(withKept([card], kept, gone)), ["adam left"])
+  assert.equal(kept.size, 1)
+})
+
+test("a one-time card outlasts the core's holding it while its own time runs", () => {
+  const card = once("adam left")
+  const kept = new Map<string, Note>()
+  withKept([card], kept, new Map())
+  assert.deepEqual(ids(withKept([], kept, new Map())), ["adam left"])
+})
 
 test("cards that fit all show, newest first", () => {
   const { shown, waiting } = place([once("c"), held("b"), once("a")], height, 3 * CARD + 2 * GAP)

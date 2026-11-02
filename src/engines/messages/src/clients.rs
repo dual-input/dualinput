@@ -282,7 +282,7 @@ pub struct NotificationClicked {
 }
 
 /// What the clients crate orders the EFB app to do, in a `unit` message from `clients`, such as
-/// `{"t":"open-efb","landing":"header","id":"sim-service.stopped"}`.
+/// `{"t":"open-efb","landing":"header","id":"sim-service.module-stopped"}`.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[serde(tag = "t", rename_all = "kebab-case")]
 #[ts(export, export_to = "clients/")]

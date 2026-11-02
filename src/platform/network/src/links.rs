@@ -23,6 +23,10 @@ const LOST_AFTER: Duration = Duration::from_secs(5);
 /// starts a new one every 2s in place of the last.
 const REDIAL_EVERY: Duration = Duration::from_secs(2);
 const OUT_AFTER: Duration = Duration::from_secs(30 * 60);
+/// The most frames one input delivers. A frame's handler can queue several moments and calls,
+/// and the kernel stops the core at 1,000 of them for one input, so a burst of small frames,
+/// which a crewmate's crafted message can be, goes out over several inputs.
+const MOST_FRAMES: usize = 10;
 
 /// What one of the network's timers is for.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -30,6 +34,14 @@ pub(crate) enum TimerFor {
     Heard(messages::net::PilotId),
     Dial(messages::net::PilotId),
     Out(messages::net::PilotId),
+    Frames { conn: u64, channel: u16 },
+}
+
+/// The length of the whole frame `bytes` starts with, if it holds one.
+fn whole_frame(bytes: &[u8]) -> Option<usize> {
+    let head = bytes.get(..4)?;
+    let length = u32::from_le_bytes(head.try_into().ok()?) as usize;
+    (bytes.len() >= 4 + length).then_some(length)
 }
 
 pub(crate) struct Link {
@@ -67,11 +79,10 @@ pub(crate) struct Conn {
     dialed: bool,
     /// Its first message's sender, once that passed.
     from: Option<Sender>,
-    /// Each stream's bytes that aren't a whole frame yet.
+    /// Each stream's bytes not delivered yet: the start of a frame, whole frames past one input's
+    /// `MOST_FRAMES`, and any other stream's frames before the first message passed, since QUIC
+    /// keeps no order across streams.
     pending: BTreeMap<u16, Vec<u8>>,
-    /// Frames that came on other streams before the first message passed, in arrival order,
-    /// since QUIC keeps no order across streams.
-    held: Vec<(u16, Vec<u8>)>,
     /// The last heartbeat received on it: its send stamp, and its input's stamp.
     pub(crate) echo: Heartbeat,
     pub(crate) path: Option<Path>,
@@ -111,7 +122,7 @@ impl Network {
             cx.out(Command::Dial {
                 endpoint: link.member.endpoint,
             });
-            self.check_reach(cx);
+            self.check_reach_for_dial(cx);
         }
         let timer = self.timer(cx, REDIAL_EVERY, TimerFor::Dial(pilot));
         if let Some(link) = self.links.get_mut(&pilot) {
@@ -129,6 +140,7 @@ impl Network {
         match purpose {
             TimerFor::Dial(pilot) => me.dial(pilot, cx),
             TimerFor::Heard(pilot) => me.heard_check(pilot, cx),
+            TimerFor::Frames { conn, channel } => me.frames(conn, channel, cx),
             TimerFor::Out(pilot) => {
                 if let Some(mut link) = me.links.remove(&pilot) {
                     tracing::info!(
@@ -211,16 +223,20 @@ impl Network {
             }
             Event::Bound(Err(error)) => {
                 tracing::error!(error, "the network's endpoint didn't bind");
-                clients::notify(
-                    cx,
-                    "bind",
-                    Notification::new(
-                        Level::Trouble,
-                        "Dual Input can't open its connection to other pilots",
-                        Landing::Header,
-                    )
-                    .detail(error.clone()),
-                );
+                // A Leave or a Cancel can get ahead of the bind's answer, and then nothing is
+                // waiting on the connection.
+                if me.session.is_some() {
+                    clients::notify(
+                        cx,
+                        "bind",
+                        Notification::new(
+                            Level::Trouble,
+                            "Dual Input can't open its connection to other pilots",
+                            Landing::Header,
+                        )
+                        .detail("Your crew can't reach you until it opens."),
+                    );
+                }
             }
             Event::Connected {
                 conn,
@@ -235,7 +251,6 @@ impl Network {
                         dialed,
                         from: None,
                         pending: BTreeMap::new(),
-                        held: Vec::new(),
                         echo: Heartbeat::default(),
                         path: None,
                         round_trip_ms: None,
@@ -346,18 +361,31 @@ impl Network {
         let Some(c) = self.conns.get_mut(&conn) else {
             return;
         };
-        let pending = c.pending.entry(channel).or_default();
-        pending.extend(bytes);
+        c.pending.entry(channel).or_default().extend(bytes);
+        self.frames(conn, channel, cx);
+    }
+
+    /// Delivers up to `MOST_FRAMES` of a stream's whole frames, and the rest right after, in an
+    /// input of their own. Until the first message has passed, only its stream delivers.
+    fn frames(&mut self, conn: u64, channel: u16, cx: &mut Cx) {
+        let opener = self.opener.as_ref().is_some_and(|o| o.channel == channel);
+        let Some(c) = self.conns.get_mut(&conn) else {
+            return;
+        };
+        if c.from.is_none() && !opener {
+            return;
+        }
+        let Some(pending) = c.pending.get_mut(&channel) else {
+            return;
+        };
         let mut frames = Vec::new();
-        while pending.len() >= 4 {
-            let length =
-                u32::from_le_bytes([pending[0], pending[1], pending[2], pending[3]]) as usize;
-            if pending.len() < 4 + length {
-                break;
-            }
+        while frames.len() < MOST_FRAMES
+            && let Some(length) = whole_frame(pending)
+        {
             frames.push(pending[4..4 + length].to_vec());
             pending.drain(..4 + length);
         }
+        let more = whole_frame(pending).is_some();
         for frame in frames {
             // A refusal, or the link keeping another connection, closes this one, and the
             // frames after its first message belong to no connection.
@@ -369,15 +397,19 @@ impl Network {
                     self.heard(from, conn, cx);
                     self.deliver(from, channel, frame, cx);
                 }
-                None if self.opener.as_ref().is_some_and(|o| o.channel == channel) => {
-                    self.first_message(conn, frame, cx);
-                }
-                None => {
-                    if let Some(c) = self.conns.get_mut(&conn) {
-                        c.held.push((channel, frame));
-                    }
-                }
+                None => self.first_message(conn, frame, cx),
             }
+        }
+        if more {
+            self.frames_next(conn, channel, cx);
+        }
+    }
+
+    /// Delivers more of a stream's frames in an input of their own, unless that's already due.
+    fn frames_next(&mut self, conn: u64, channel: u16, cx: &Cx) {
+        let purpose = TimerFor::Frames { conn, channel };
+        if !self.timer_for.values().any(|waiting| *waiting == purpose) {
+            self.timer(cx, Duration::ZERO, purpose);
         }
     }
 
@@ -556,13 +588,9 @@ impl Network {
         if let Some(link) = self.links.get_mut(&header.pilot) {
             link.timers.push(heard);
         }
-        let held = match self.conns.get_mut(&conn) {
-            Some(c) => {
-                c.from = Some(from);
-                std::mem::take(&mut c.held)
-            }
-            None => Vec::new(),
-        };
+        if let Some(c) = self.conns.get_mut(&conn) {
+            c.from = Some(from);
+        }
         tracing::info!(conn, again, restart = from.restart, "a member's link is up");
         cx.raise(LinkUp { member, again });
         // A link that came up shows this PC isn't refused, whatever an earlier connection was.
@@ -571,8 +599,15 @@ impl Network {
         if let Some(channel) = self.opener.as_ref().map(|o| o.channel) {
             self.deliver(from, channel, keys, cx);
         }
-        for (channel, frame) in held {
-            self.deliver(from, channel, frame, cx);
+        let waiting: Vec<u16> = self.conns.get(&conn).map_or(Vec::new(), |c| {
+            c.pending
+                .iter()
+                .filter(|(_, bytes)| whole_frame(bytes).is_some())
+                .map(|(channel, _)| *channel)
+                .collect()
+        });
+        for channel in waiting {
+            self.frames_next(conn, channel, cx);
         }
     }
 }

@@ -9,6 +9,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use messages::cockpit::{CONTROL, CockpitMessage, Origin, VectorClock};
+use messages::net::PilotId;
 use messages::session::Control;
 
 /// The most a message waits for the gap its sender left before it.
@@ -97,6 +98,11 @@ impl Inbox {
     /// The senders whose replays ran when the clock last moved.
     pub(crate) fn replay_senders(&self) -> Vec<Origin> {
         self.replays.keys().copied().collect()
+    }
+
+    /// Forgets every replay from `pilot`, under any restart count.
+    pub(crate) fn stop_replays_from(&mut self, pilot: PilotId) {
+        self.replays.retain(|origin, _| origin.pilot != pilot);
     }
 
     /// Notes that a message applied, or was skipped, at `at`.

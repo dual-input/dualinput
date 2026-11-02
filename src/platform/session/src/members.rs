@@ -335,16 +335,19 @@ pub(crate) fn notifications(me: &mut Session, cx: &Cx) {
             came_in.push(member);
         }
         let status = me.member_key(wire::STATUS, &member).unwrap_or_default();
+        let before = held.away.get(&member).copied();
         let away = if in_flight || preflight.aircraft.is_none() || !held.was_in.contains(&member) {
             None
         } else {
-            Some(match (status.stage, status.ended) {
-                (Stage::Closed, Some(Ending::Crash { .. })) => Away::Crashed,
-                (Stage::Closed, _) => Away::ClosedSim,
+            Some(match (status.stage, status.ended, before) {
+                (Stage::Closed, Some(Ending::Crash { .. }), _) => Away::Crashed,
+                (Stage::Closed, ..) => Away::ClosedSim,
+                // A sim starting again after it closed or crashed is a pilot coming back, not
+                // one leaving the flight, so nothing new is said until they're back in it.
+                (_, _, Some(closed @ (Away::ClosedSim | Away::Crashed))) => closed,
                 _ => Away::LeftFlight,
             })
         };
-        let before = held.away.get(&member).copied();
         if away == before {
             continue;
         }

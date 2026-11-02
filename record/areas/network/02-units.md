@@ -162,8 +162,8 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 ### What the pilot sees, and settings
 
 - The network keeps a slice of client state: each member with its link's state and its path, direct or the relay's URL, and whether this PC reaches the internet.
-  While any link is lost, each time a dial starts, a job asks every relay in the session's list for `/ping`, which answers with no token ([network log][win]), and the PC reaches the internet when any answers before a 2s timer fires.
-- It registers its settings: the relay list, whose default each release compiles in from `src/relays/` and `dual-input/relay-tokens`; and, for development, sending through relays only, which clears the endpoint's IP transports ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)), and the backend's URL, which the bench points at a local backend.
+  While any link is lost, each time a dial starts, unless a check ended under 5s ago, a job asks every relay in the session's list for `/ping`, which answers with no token ([network log][win]), and the PC reaches the internet when any answers before a 2s timer fires.
+- It registers its settings, all for development, so no page reads or writes them: the relay list, whose default each release compiles in from `src/relays/` and `dual-input/relay-tokens`, and which the bench points at its own relays; sending through relays only, which clears the endpoint's IP transports ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)); and the backend's URL, which the bench points at a local backend.
 
 ## The transport
 

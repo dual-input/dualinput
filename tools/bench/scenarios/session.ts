@@ -563,7 +563,7 @@ test("a join reaching the crew is an attempt until its first link, and a cancel 
   assert.equal(slice(a).members.length, 1, "the host heard of nothing")
   assert.match((await b.app.command("session.cancel")) ?? "", /No Host or Join is running/)
 
-  // A cancelled join leaves nothing that stops the next attempt.
+  // A canceled join leaves nothing that stops the next attempt.
   await join(b.core, code, b.name)
   await until(b, (s) => s.held && s.members.length === 2, "the next join's session")
 })

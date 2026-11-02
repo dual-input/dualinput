@@ -7,8 +7,8 @@ use ts_rs::TS;
 /// The slice of client state that lists the runs in the data folder's `recordings\`.
 pub const SLICE: &str = "recording";
 
-/// The command that marks the moment, from the EFB app's button, which writes a line to the
-/// run's log. It takes no arguments.
+/// The command that marks the moment, which writes a line to the run's log. It takes no
+/// arguments.
 pub const MARK: &str = "recording.mark";
 
 /// The command that deletes a run, whose arguments are a `DeleteRun`.

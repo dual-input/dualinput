@@ -20,6 +20,11 @@ pub(crate) struct Store {
     values: BTreeMap<(u16, Option<PilotId>), Held>,
 }
 
+/// The most members whose own copy of a key this core holds. No crew comes near it, and it bounds
+/// what a crewmate's crafted messages can make this core hold, and dial, since each member it holds
+/// an entry for and has no link to is dialed after every message.
+const MOST_WRITERS: usize = 32;
+
 /// Where a key's value sits: under its writer for a member's own key, and once for the
 /// session otherwise.
 pub(crate) fn slot(number: u16, writer: Writer, stamp_writer: PilotId) -> (u16, Option<PilotId>) {
@@ -66,6 +71,16 @@ impl Store {
             return false;
         }
         let slot = slot(value.key, writer, value.stamp.writer);
+        if writer == Writer::Member
+            && !self.values.contains_key(&slot)
+            && self.members_of(value.key).len() >= MOST_WRITERS
+        {
+            tracing::warn!(
+                key = value.key,
+                "a value from one member too many was dropped"
+            );
+            return false;
+        }
         let replaces = self
             .values
             .get(&slot)
@@ -142,6 +157,25 @@ mod tests {
             stamp: Stamp { control, n, writer },
             value: Some(vec![byte]),
         }
+    }
+
+    /// What each writer's value makes this core hold, and dial, stays bounded whatever a crewmate
+    /// sends, and a member it already holds still updates.
+    #[test]
+    fn a_member_key_holds_at_most_its_most_writers() {
+        let mut store = Store::default();
+        let c1 = control(1, A);
+        let writer = |n: usize| {
+            let mut id = [0; 16];
+            id[..8].copy_from_slice(&(n as u64).to_le_bytes());
+            id
+        };
+        for n in 0..MOST_WRITERS {
+            assert!(store.take(Writer::Member, value(40, c1, 1, writer(n), 1)));
+        }
+        assert!(!store.take(Writer::Member, value(40, c1, 1, writer(MOST_WRITERS), 1)));
+        assert_eq!(store.members_of(40).len(), MOST_WRITERS);
+        assert!(store.take(Writer::Member, value(40, c1, 2, writer(0), 2)));
     }
 
     /// Two pilots who change one key at once, or during a cut, keep the same value on every

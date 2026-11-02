@@ -546,7 +546,10 @@ impl Session {
             return;
         };
         let mine = held.me;
-        let mut assert = Vec::new();
+        // One message can hold many values of one key, and the kernel stops the core at 1,000
+        // moments and calls for one input, so each key acts once however many it holds.
+        let mut assert = BTreeMap::<u16, u64>::new();
+        let mut changed = BTreeSet::new();
         for value in keys.values {
             let Some(declared) = me.declared.get(&value.key).copied() else {
                 tracing::debug!(
@@ -561,14 +564,18 @@ impl Session {
             if declared.writer == Writer::Member && value.stamp.writer == mine {
                 let held_stamp = held.store.get(value.key, Some(mine)).map(|h| h.stamp);
                 if held_stamp.is_none_or(|s: Stamp| value.stamp.outranks(&s)) {
-                    assert.push((value.key, value.stamp.n));
+                    let n = assert.entry(value.key).or_default();
+                    *n = (*n).max(value.stamp.n);
                 }
                 continue;
             }
             let key = value.key;
             if held.store.take(declared.writer, value) {
-                cx.raise(KeyChanged { key });
+                changed.insert(key);
             }
+        }
+        for key in changed {
+            cx.raise(KeyChanged { key });
         }
         for (key, n) in assert {
             me.assert_own(key, n, cx);

@@ -464,6 +464,7 @@ fn a_connection_whose_first_message_passes_links_and_hands_on_what_waited_behind
     });
     assert_eq!(core.take().1, Vec::<String>::new());
     core.their_first(1, 0, "ABC123");
+    core.advance(core.now);
     assert_eq!(
         core.take().1,
         ["up again=false restart=0", "keys their keys", "data 7"]
@@ -480,6 +481,28 @@ fn a_connection_whose_first_message_passes_links_and_hands_on_what_waited_behind
             bytes: framed(&postcard::to_stdvec(&3u32).unwrap())
         }]
     );
+}
+
+/// The kernel stops the core at 1,000 moments and calls for one input.
+#[test]
+fn a_burst_of_small_frames_arrives_whole_over_several_inputs_with_no_panic() {
+    let mut core = Core::new();
+    core.linked(1, [7; 32]);
+    core.take();
+    let burst: Vec<u8> = (0..1_500u32)
+        .flat_map(|n| framed(&postcard::to_stdvec(&n).unwrap()))
+        .collect();
+    core.event(Event::Stream {
+        conn: 1,
+        channel: DATA.number,
+        bytes: burst,
+    });
+    let first = core.take().1.len();
+    assert!(first < 1_500, "one input delivered {first} frames");
+    core.advance(core.now);
+    let saw = core.take().1;
+    assert_eq!(first + saw.len(), 1_500);
+    assert_eq!(saw.last().map(String::as_str), Some("data 1499"));
 }
 
 #[test]

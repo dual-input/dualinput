@@ -167,7 +167,7 @@ pub fn register(r: &mut Registry) {
             kind: SettingKind::Relays,
             default: json!(backend::default_relays()),
             part_only: false,
-            development: false,
+            development: true,
         },
     )
     .setting(
@@ -348,6 +348,7 @@ impl Network {
         me.session = None;
         me.endpoint = None;
         clients::clear_notification(cx, "refused");
+        clients::clear_notification(cx, "bind");
         if let Some(heartbeat) = me.heartbeat.take() {
             cx.cancel_timer(heartbeat);
         }

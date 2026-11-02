@@ -163,6 +163,11 @@ function answer(res: http.ServerResponse, out: unknown): void {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://x")
   if (req.method === "POST") {
+    // These run script on this PC, and any web page can POST to a local port, so only the page we serve and a program, which sends no Origin, get through.
+    if (req.headers.origin !== undefined && req.headers.origin !== `http://127.0.0.1:${PORT}`) {
+      res.writeHead(403)
+      return res.end()
+    }
     const body = JSON.parse((await readBody(req)) || "{}")
     switch (url.pathname) {
       case "/log":

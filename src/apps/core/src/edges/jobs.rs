@@ -260,7 +260,7 @@ fn list(folder: &Path) -> std::io::Result<Vec<Entry>> {
             let entry = entry?;
             Ok(Entry {
                 name: entry.file_name().to_string_lossy().into_owned(),
-                size: size(&entry.path())?,
+                size: size(&entry.path()),
             })
         })
         .collect::<std::io::Result<Vec<_>>>()?;
@@ -268,12 +268,18 @@ fn list(folder: &Path) -> std::io::Result<Vec<Entry>> {
     Ok(entries)
 }
 
-fn size(path: &Path) -> std::io::Result<u64> {
-    let metadata = std::fs::metadata(path)?;
+/// A file's size, or a folder's total. One entry it can't read, such as a junction whose target is
+/// gone, counts as nothing, so it can't blank a whole listing.
+fn size(path: &Path) -> u64 {
+    let Ok(metadata) = std::fs::metadata(path) else {
+        return 0;
+    };
     if !metadata.is_dir() {
-        return Ok(metadata.len());
+        return metadata.len();
     }
-    std::fs::read_dir(path)?.try_fold(0, |total, entry| Ok(total + size(&entry?.path())?))
+    std::fs::read_dir(path).map_or(0, |entries| {
+        entries.flatten().map(|entry| size(&entry.path())).sum()
+    })
 }
 
 async fn fetch_one(http: &reqwest::Client, fetch: Fetch) -> Result<Vec<u8>, String> {

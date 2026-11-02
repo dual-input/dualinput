@@ -52,7 +52,7 @@ pub struct CoreHelper {
     sounds: Vec<SoundReg>,
     /// The features that have their sounds on, by unit, with each one's name.
     sounds_on: BTreeMap<UnitId, &'static str>,
-    /// Whether the desktop app asked for the lists, until the helper answers.
+    /// Whether the EFB app asked for the lists, until the helper answers.
     lists: bool,
     life: life::Life,
     /// The number of the last run started.
@@ -314,7 +314,7 @@ impl CoreHelper {
         }
     }
 
-    /// `LIST`, from the desktop app: the helper lists the output devices and the programs
+    /// `LIST`, from the EFB app: the helper lists the output devices and the programs
     /// that own an audio session, in the slice, once it runs.
     fn list(me: &mut CoreHelper, _: Value, cx: &mut Cx) -> Result<(), String> {
         me.lists = true;

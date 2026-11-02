@@ -3,6 +3,6 @@ import type { Landing } from "./Landing.ts";
 
 /**
  * What the clients crate orders the EFB app to do, in a `unit` message from `clients`, such as
- * `{"t":"open-efb","landing":"header","id":"sim-service.stopped"}`.
+ * `{"t":"open-efb","landing":"header","id":"sim-service.module-stopped"}`.
  */
 export type EfbAppOrder = { "t": "open-efb", landing: Landing, id: string, };

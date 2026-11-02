@@ -85,6 +85,7 @@ impl CoreHelper {
                 cx.out(PipeOut::Stop { run });
                 self.life = Life::Stopping { run };
                 self.sent = None;
+                self.clear_trouble(cx);
             }
             Life::Waiting { timer } if !wanted => {
                 cx.cancel_timer(timer);
@@ -198,6 +199,7 @@ impl CoreHelper {
             (PipeUp::Exited { run, code }, Life::Stopping { run: r }) if run == r => {
                 tracing::info!(run, code, "the core helper exited");
                 me.life = Life::Stopped;
+                me.listed.in_use = None;
                 me.changed(cx);
             }
             (PipeUp::Exited { run, code }, Life::Starting { run: r })
@@ -357,11 +359,6 @@ impl CoreHelper {
                     output = output.as_ref().map(|o| o.name.as_str()),
                     "the core helper plays on this output device"
                 );
-                if output.is_some()
-                    && let Some(id) = self.failed.remove(&WantId::Output)
-                {
-                    clients::clear_notification(cx, &id);
-                }
                 self.listed.in_use = output;
             }
             FromHelper::Failed { want, error } => {
@@ -404,25 +401,32 @@ impl CoreHelper {
     /// A want the helper can't carry out: a warning naming the feature, until the want goes
     /// off or the helper starts again.
     fn failed(&mut self, want: WantId, error: &str, cx: &Cx) {
-        let (owner, what) = match want {
+        let (owner, what, id) = match want {
             WantId::Binding(n) => (
                 self.bindings
                     .iter()
                     .find(|b| b.number == n)
                     .and_then(|b| b.on),
                 "bound key or button",
+                format!("failed.binding-{n}"),
             ),
             WantId::NextPress => (
                 self.next_press.iter().find_map(|o| o.on),
                 "binding of a key or button",
+                "failed.next-press".into(),
             ),
-            WantId::Mouse => (self.mouse.iter().find_map(|o| o.on), "mouse"),
+            WantId::Mouse => (
+                self.mouse.iter().find_map(|o| o.on),
+                "mouse",
+                "failed.mouse".into(),
+            ),
             WantId::Capture(n) => (
                 self.captures
                     .iter()
                     .find(|c| c.number == n)
                     .and_then(|c| Some(c.on.as_ref()?.1)),
                 "audio capture",
+                format!("failed.capture-{n}"),
             ),
             WantId::Stream(n) => (
                 self.streams
@@ -430,9 +434,15 @@ impl CoreHelper {
                     .find(|s| s.number == n)
                     .and_then(|s| Some(s.on.as_ref()?.1)),
                 "playback",
+                format!("failed.stream-{n}"),
             ),
-            WantId::Output => (Some("Dual Input"), "output device"),
-            WantId::Lists => (Some("The desktop app"), "list of devices"),
+            // The output device and the lists are the Settings tab's, which shows what's playing
+            // and what's listed, so these reach only the log
+            // (record/areas/interface/decisions.md, "The banner carries what a pilot must see
+            // without the EFB, and the rest shows where it's acted on").
+            WantId::Output | WantId::Lists => {
+                return tracing::warn!(?want, error, "the core helper couldn't carry out a want");
+            }
         };
         let owner = owner.unwrap_or("Dual Input");
         tracing::warn!(
@@ -441,15 +451,6 @@ impl CoreHelper {
             error,
             "the core helper couldn't carry out a want"
         );
-        let id = match want {
-            WantId::Binding(n) => format!("failed.binding-{n}"),
-            WantId::NextPress => "failed.next-press".into(),
-            WantId::Mouse => "failed.mouse".into(),
-            WantId::Capture(n) => format!("failed.capture-{n}"),
-            WantId::Stream(n) => format!("failed.stream-{n}"),
-            WantId::Output => "failed.output".into(),
-            WantId::Lists => "failed.lists".into(),
-        };
         clients::notify(
             cx,
             &id,
@@ -475,9 +476,8 @@ impl CoreHelper {
                 WantId::Mouse => !wants.mouse,
                 WantId::Capture(n) => !wants.captures.iter().any(|(c, _)| *c == n),
                 WantId::Stream(n) => !wants.streams.iter().any(|(s, _)| *s == n),
-                // The output device is wanted while anything may play on it.
-                WantId::Output => !wants.sounds && wants.streams.is_empty(),
-                WantId::Lists => !wants.lists,
+                // `failed` raises nothing for these.
+                WantId::Output | WantId::Lists => true,
             })
             .collect();
         for want in off {

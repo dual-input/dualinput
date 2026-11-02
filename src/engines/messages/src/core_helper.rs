@@ -39,7 +39,7 @@ pub fn decode<T: DeserializeOwned>(bytes: &[u8]) -> Result<T, postcard::Error> {
 }
 
 /// The slice of client state that lists the output devices and the programs that own an
-/// audio session, for the desktop app.
+/// audio session, for the EFB app.
 pub const SLICE: &str = "core-helper";
 
 /// The command that asks the helper for its lists, which come in the slice.

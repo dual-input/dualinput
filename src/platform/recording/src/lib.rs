@@ -1,8 +1,8 @@
 //! The recording crate keeps the core's runs, each a folder in the data folder's
 //! `recordings\` with the run's recording and log, which a pilot sends us by hand when we ask
 //! for a bug's. When the core starts, it deletes the oldest runs while all of them together
-//! pass 1 GB; it lists the runs for the desktop app; and it takes the commands that mark the
-//! moment and delete a run (record/areas/recording/01-recording-and-bug-reports.md, the note
+//! pass 1 GB; it lists the runs for the EFB app's Settings tab; and it takes the commands that
+//! mark the moment and delete a run (record/areas/recording/01-recording-and-bug-reports.md, the note
 //! of 2026-10-23).
 //!
 //! The core's edge creates the run's folder before the loop starts, named by its start in
@@ -147,8 +147,8 @@ impl Recording {
         }
     }
 
-    /// The EFB app's button: the moment goes in the run's log, and the recording already
-    /// holds this command as an input at that moment.
+    /// `MARK`: the moment goes in the run's log, and the recording already holds this command
+    /// as an input at that moment.
     fn mark(_: &mut Recording, _: Value, _: &mut Cx) -> Result<(), String> {
         tracing::info!("the pilot marked the moment");
         Ok(())

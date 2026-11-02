@@ -48,6 +48,8 @@ pub(crate) struct Reach {
     running: Option<Running>,
     /// The next check's timer, while none runs.
     next: Option<TimerId>,
+    /// When the last check ended.
+    found_at: Option<u64>,
     pub(crate) internet: Option<bool>,
     pub(crate) servers: Option<Servers>,
     /// The backend gave a Host or a Join no answer, which waits for this check, so the session
@@ -58,6 +60,18 @@ pub(crate) struct Reach {
 impl Network {
     pub(crate) fn started(me: &mut Network, _: &Started, cx: &mut Cx) {
         me.check_reach(cx);
+    }
+
+    /// A lost link's dial asks too, except right after a check, since a crewmate gone for 30
+    /// minutes dials every 2s, and a check at each would ask every server 900 times.
+    pub(crate) fn check_reach_for_dial(&mut self, cx: &Cx) {
+        let recent = self
+            .reach
+            .found_at
+            .is_some_and(|at| cx.now() < at + CHECK_AGAIN.as_micros() as u64);
+        if !recent {
+            self.check_reach(cx);
+        }
     }
 
     /// Asks the backend and every relay, unless a check is running. In a session the relays are
@@ -133,6 +147,7 @@ impl Network {
         for job in running.jobs.keys() {
             cx.cancel_job(*job);
         }
+        self.reach.found_at = Some(cx.now());
         let (backend, relay) = (running.backend, running.relay);
         let internet = Some(backend || relay);
         let servers = Some(if backend && relay {
@@ -165,7 +180,7 @@ impl Network {
         self.check_reach(cx);
     }
 
-    /// Drops the lack of an answer the check holds, once the pilot has cancelled what it was for.
+    /// Drops the lack of an answer the check holds, once the pilot has canceled what it was for.
     pub(crate) fn drop_held_answer(&mut self) {
         self.reach.holding = None;
     }

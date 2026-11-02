@@ -25,10 +25,10 @@ let idle = 0
 
 function clearHold(): void {
   window.clearTimeout(idle)
+  holder = null
   const coherent = window.Coherent
   coherent?.off("mousePressOutsideView", pressedOutside)
   coherent?.off("SetInputTextFromOS", textFromOs)
-  holder = null
 }
 
 function pressedOutside(): void {
@@ -43,12 +43,12 @@ function textFromOs(text: string): void {
   holder.dispatchEvent(new Event("input", { bubbles: true }))
 }
 
-/** Gives the keyboard back to the sim, whatever holds it. */
+/** Gives the keyboard back to the sim, whatever holds it. The sim hears first, so nothing that throws after it can keep the pilot's keys from the sim. */
 export function releaseKeyboard(): void {
   const field = holder
+  window.Coherent?.trigger("UNFOCUS_INPUT_FIELD", "DUALINPUT_UI_FIELD")
   clearHold()
   field?.blur()
-  window.Coherent?.trigger("UNFOCUS_INPUT_FIELD", "DUALINPUT_UI_FIELD")
 }
 
 /** Starts or restarts the wait that lets the keyboard go, for each key the field takes. */

@@ -108,6 +108,22 @@ struct Live {
     catching_up_with: Option<(PilotId, bool)>,
 }
 
+impl Live {
+    /// A catch-up that stops unfinished takes back what the banner said, since saying it's caught
+    /// up would be false.
+    fn stop_catch_up(&mut self, cx: &Cx) {
+        self.catch_up = CatchUp::Idle;
+        if matches!(self.catching_up_with, Some((_, true))) {
+            self.take_back_catching_up(cx);
+        }
+    }
+
+    fn take_back_catching_up(&mut self, cx: &Cx) {
+        self.catching_up_with = None;
+        clients::clear_notification(cx, "catch");
+    }
+}
+
 /// A message the stream holds until its kind's next chance to go.
 struct Held {
     kind: u16,
@@ -246,6 +262,7 @@ impl CockpitStream {
         let Some(live) = self.live.take() else {
             return;
         };
+        clients::clear_notification(cx, "catch");
         for timer in [live.flush, live.pace.map(|(t, _)| t), live.clocks]
             .into_iter()
             .flatten()
@@ -731,7 +748,7 @@ impl CockpitStream {
                 tracing::info!(
                     "control reached this pilot during their catch-up, which stops, since they're the source now"
                 );
-                live.catch_up = CatchUp::Idle;
+                live.stop_catch_up(cx);
             }
         } else if let CatchUp::Asking { preflight_end, .. }
         | CatchUp::Taking { preflight_end, .. } = live.catch_up.clone()
@@ -798,7 +815,7 @@ impl CockpitStream {
             }
         } else if !now && was && live.catch_up != CatchUp::Idle {
             tracing::info!("a catch-up step can't take a catch-up any more, so the catch-up stops");
-            live.catch_up = CatchUp::Idle;
+            live.stop_catch_up(cx);
             me.pump(cx);
         }
     }
@@ -832,7 +849,7 @@ impl CockpitStream {
             return;
         };
         if pf == live.me.pilot || !ready {
-            live.catch_up = CatchUp::Idle;
+            live.stop_catch_up(cx);
             return;
         }
         tracing::info!(
@@ -1029,8 +1046,17 @@ impl CockpitStream {
         if let Some(live) = me.live.as_mut() {
             live.acks.remove(&gone.member);
             live.askers.remove(&gone.member);
+            // Nothing more comes of a replay from a member who's gone.
+            live.inbox.stop_replays_from(gone.member);
+            if live
+                .catching_up_with
+                .is_some_and(|(pilot, _)| pilot == gone.member)
+            {
+                live.take_back_catching_up(cx);
+            }
         }
         me.prune(cx);
+        me.pump(cx);
     }
 
     fn flight_changed(me: &mut CockpitStream, changed: &FlightChanged, cx: &mut Cx) {

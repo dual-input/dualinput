@@ -41,7 +41,7 @@ function run(pid: number, body: string): string {
 
 /** Saves a picture of the window as a PNG, taking it again while it comes back white. */
 export function shoot(pid: number, file: string): boolean {
-  return run(pid, `$ok = $false; for ($i = 0; $i -lt 12 -and -not $ok; $i++) { $ok = [DevWindow]::Shoot($h, '${file}'); if (-not $ok) { Start-Sleep -Milliseconds 250 } }; $ok`) === "True"
+  return run(pid, `$ok = $false; for ($i = 0; $i -lt 12 -and -not $ok; $i++) { $ok = [DevWindow]::Shoot($h, '${file.replaceAll("'", "''")}'); if (-not $ok) { Start-Sleep -Milliseconds 250 } }; $ok`) === "True"
 }
 
 /** A click at a point of the window's client area. */

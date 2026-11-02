@@ -115,6 +115,12 @@ fn run(jobs: &Jobs, start: &StartJob) -> Result<Vec<u8>, String> {
             .spawn()
             .map(|_| Vec::new())
             .map_err(|e| format!("couldn't start Explorer on {path}: {e}")),
+        // Explorer hands a web address to the pilot's browser, the same way.
+        Work::OpenLink { url } => std::process::Command::new("explorer")
+            .arg(url)
+            .spawn()
+            .map(|_| Vec::new())
+            .map_err(|e| format!("couldn't start Explorer on {url}: {e}")),
         Work::Fetch(_) => unreachable!("a fetch runs as a task, not on the blocking pool"),
     }
 }

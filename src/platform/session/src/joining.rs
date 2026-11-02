@@ -5,10 +5,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
 
-use clients::{ClientJoined, ClientLeft, Clients};
+use clients::Clients;
 use kernel::{Cx, Exit, Job, JobId, TimerId};
 use messages::backend::{Kind, Older};
-use messages::clients::component;
 use messages::hex;
 use messages::net::{PilotId, Relay};
 use messages::session::{
@@ -554,18 +553,6 @@ fn file_written(me: &mut Session, job: JobId, result: Result<Vec<u8>, String>, c
     }
 }
 
-pub(crate) fn client_joined(me: &mut Session, joined: &ClientJoined, cx: &mut Cx) {
-    if joined.component == component::DESKTOP {
-        me.desktops.insert(joined.socket);
-    }
-    me.settle(cx);
-}
-
-pub(crate) fn client_left(me: &mut Session, left: &ClientLeft, cx: &mut Cx) {
-    me.desktops.remove(&left.socket);
-    me.settle(cx);
-}
-
 impl Session {
     /// Leave: un-readies during preflight, passes control if this pilot holds it, and closes
     /// each connection, 1s after a pass, as `network::leave` orders it.
@@ -656,20 +643,18 @@ impl Session {
     }
 }
 
-/// The core exits once the sim has closed, no session is held, and no desktop app is
-/// connected (record/areas/architecture/01-spine.md, "What moves them"). A core that started
-/// with no sim waits for one, so only a sim that ran and closed counts.
+/// The core exits once the sim has closed and no session is held, whatever the desktop app has
+/// open (record/areas/session/02-units.md, its note on the desktop app). A core that started with
+/// no sim waits for one, so only a sim that ran and closed counts.
 pub(crate) fn check_exit(me: &mut Session, cx: &mut Cx) {
-    if me.held.is_some() || me.asking.is_some() || me.quitting || !me.desktops.is_empty() {
+    if me.held.is_some() || me.asking.is_some() || me.quitting {
         return;
     }
     let awareness = cx.read::<SimAwareness>();
     if awareness.stage != messages::sim::Stage::Closed || awareness.ended.is_none() {
         return;
     }
-    tracing::info!(
-        "the sim closed, no session is held, and no desktop app is connected, so the core exits"
-    );
+    tracing::info!("the sim closed and no session is held, so the core exits");
     me.quitting = true;
     exit(cx);
 }

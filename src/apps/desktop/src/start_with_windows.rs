@@ -1,8 +1,10 @@
 //! Starting with Windows, a value under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` that runs the desktop app with
 //! `--tray`, so it comes up as a tray icon alone (record/areas/install/01-installing-and-updating.md, "One program from
-//! login"). Windows' own switch for the value sits apart, under `StartupApproved`, and following it is unsettled, so this
-//! reads and writes the value alone.
+//! login"). Windows' own switch for the value sits apart, under `StartupApproved`, where a pilot's off stands: a program that
+//! writes over it overrides their choice, so this only reads it, and the EFB app tells them where to turn it back on
+//! (record/areas/install/results/2026-10-18-windows-and-msfs-facts.txt).
 
+use messages::desktop::StartWithWindows;
 use windows_sys::Win32::Foundation::ERROR_SUCCESS;
 use windows_sys::Win32::System::Registry::{
     HKEY, HKEY_CURRENT_USER, KEY_READ, KEY_SET_VALUE, REG_SZ, RegCloseKey, RegDeleteValueW,
@@ -10,28 +12,27 @@ use windows_sys::Win32::System::Registry::{
 };
 
 const RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
+const APPROVED_KEY: &str =
+    r"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run";
 const VALUE: &str = "Dual Input";
 
 fn wide(text: &str) -> Vec<u16> {
     text.encode_utf16().chain(std::iter::once(0)).collect()
 }
 
-/// The Run key, closed when this goes.
+/// A key under the current user, closed when this goes.
 struct RunKey(HKEY);
 
 impl RunKey {
     fn open(access: u32) -> Option<Self> {
+        Self::open_at(RUN_KEY, access)
+    }
+
+    fn open_at(path: &str, access: u32) -> Option<Self> {
         let mut key = std::ptr::null_mut();
         // SAFETY: the path is a NUL-terminated string that outlives the call, and the call writes the handle it's given.
-        let opened = unsafe {
-            RegOpenKeyExW(
-                HKEY_CURRENT_USER,
-                wide(RUN_KEY).as_ptr(),
-                0,
-                access,
-                &mut key,
-            )
-        };
+        let opened =
+            unsafe { RegOpenKeyExW(HKEY_CURRENT_USER, wide(path).as_ptr(), 0, access, &mut key) };
         (opened == ERROR_SUCCESS).then_some(Self(key))
     }
 }
@@ -76,10 +77,42 @@ fn value() -> Option<String> {
     Some(String::from_utf16_lossy(&held[..end]))
 }
 
-/// Whether Windows would run this program: a development build, under a worktree that may be gone, has written the value
+/// Whether the pilot turned the value off in Windows' list. The entry's format is undocumented: a missing one counts as on
+/// and an odd first byte as off, which matched every entry on our development machine (same file).
+fn off_in_windows() -> bool {
+    let Some(key) = RunKey::open_at(APPROVED_KEY, KEY_READ) else {
+        return false;
+    };
+    let mut entry = [0u8; 12];
+    let mut bytes = entry.len() as u32;
+    // SAFETY: the name is a NUL-terminated string that outlives the call, and `bytes` is the length of the buffer it writes to.
+    let read = unsafe {
+        RegQueryValueExW(
+            key.0,
+            wide(VALUE).as_ptr(),
+            std::ptr::null(),
+            std::ptr::null_mut(),
+            entry.as_mut_ptr(),
+            &mut bytes,
+        )
+    };
+    read == ERROR_SUCCESS && reads_as_off(&entry[..bytes as usize])
+}
+
+fn reads_as_off(entry: &[u8]) -> bool {
+    entry.first().is_some_and(|first| first % 2 == 1)
+}
+
+/// Whether Windows would run this program. A development build, under a worktree that may be gone, has written the value
 /// for itself, so another's value says nothing about this one.
-pub fn is_on() -> bool {
-    value().is_some_and(|held| command().is_ok_and(|mine| mine == held))
+pub fn state() -> StartWithWindows {
+    if !value().is_some_and(|held| command().is_ok_and(|mine| mine == held)) {
+        StartWithWindows::Off
+    } else if off_in_windows() {
+        StartWithWindows::OffInWindows
+    } else {
+        StartWithWindows::On
+    }
 }
 
 /// Writes the value to run this program with `--tray`, or deletes it. It says so if Windows wouldn't, so the switch shows what holds.
@@ -114,5 +147,17 @@ pub fn set(on: bool) -> Result<(), String> {
         Ok(())
     } else {
         Err(format!("Windows answered {written}"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn an_entry_reads_as_our_development_machine_held_them() {
+        assert!(!reads_as_off(&[2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+        assert!(reads_as_off(&[3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8]));
+        assert!(!reads_as_off(&[]));
     }
 }

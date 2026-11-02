@@ -87,7 +87,7 @@ An MSI installed per machine prompts for an administrator at every update (read 
 | Velopack's downloads | `%LOCALAPPDATA%\DualInput\packages\` |
 | WebView2's data for the desktop app's window | `%LOCALAPPDATA%\DualInput\webview\`, so an uninstall deletes it with Velopack's folder |
 | The core's data folder | `%APPDATA%\DualInput\` |
-| The desktop app's own files, its figures among them | `%APPDATA%\DualInput\app\` |
+| The desktop app's own files, its log and its figures among them | `%APPDATA%\DualInput\app\` |
 | Our package | `Community` in each packages folder ([the packages folders](#the-packages-folders)) |
 | Our package while the app copies it | A folder the app makes fresh for each copy, beside `Community` or beside the folder a `Community` junction leads to, for the seconds the copy takes while the sim is closed |
 

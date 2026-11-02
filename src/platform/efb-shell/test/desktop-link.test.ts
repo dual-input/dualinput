@@ -4,7 +4,7 @@ import { test } from "node:test"
 import type { Socket } from "../../../engines/page-client/src/page-client.ts"
 import { DESKTOP_PORT, DesktopLink } from "../src/desktop-link.ts"
 
-const READY = { update: { state: "ready", next: "1.0.3" }, firewall: "allows", start_with_windows: true } as const
+const READY = { update: { state: "ready", next: "1.0.3" }, firewall: "allows", start_with_windows: "on" } as const
 
 function bench() {
   const sockets: Socket[] = []

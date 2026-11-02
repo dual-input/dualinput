@@ -25,7 +25,7 @@ pub use messages::session::{Control, Key, MatchItem, Phase, Preflight, Writer};
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use clients::{ClientJoined, ClientLeft, ClientsUnit, SettingDef};
+use clients::{ClientsUnit, SettingDef};
 use kernel::{Cx, Handle, JobId, Moment, Registry, TimerId, Unit};
 use messages::clients::SettingKind;
 use messages::net::{EndpointId, PilotId, Relay};
@@ -136,8 +136,6 @@ pub struct Session {
     /// Why the last Host or Join was refused, until the next starts.
     pub(crate) refused: Option<wire::Refused>,
     pub(crate) held: Option<Held>,
-    /// The desktop app's open sockets, while its window is open.
-    pub(crate) desktops: BTreeSet<u64>,
     /// The job that reads the clipboard for the EFB app's code box.
     pub(crate) clipboard: Option<JobId>,
     /// The session file's write that was still running as the session ended, after which
@@ -385,8 +383,6 @@ pub fn register(r: &mut Registry) {
         .on::<MemberOut>(members::member_out)
         .on::<SimChanged>(|me, _: &SimChanged, cx| me.settle(cx))
         .on::<AircraftChanged>(matching::aircraft_changed)
-        .on::<ClientJoined>(joining::client_joined)
-        .on::<ClientLeft>(joining::client_left)
         .on_sim(preflight::sim)
         .request(control::take, control::build_take)
         .guard(control::own_guard)

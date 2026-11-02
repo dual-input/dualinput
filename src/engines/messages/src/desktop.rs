@@ -51,7 +51,18 @@ pub enum Firewall {
 pub struct DesktopState {
     pub update: Update,
     pub firewall: Firewall,
-    pub start_with_windows: bool,
+    pub start_with_windows: StartWithWindows,
+}
+
+/// Whether Windows runs the desktop app when the pilot logs in.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "kebab-case")]
+#[ts(export, export_to = "desktop/")]
+pub enum StartWithWindows {
+    On,
+    Off,
+    /// The pilot turned it off in Windows' own list of startup apps, which only they can undo there.
+    OffInWindows,
 }
 
 /// What the EFB app asks of the desktop app.

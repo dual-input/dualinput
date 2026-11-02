@@ -31,7 +31,7 @@ pub async fn serve(
             }
             // Out of handles, say, it would fail again at once, so it waits rather than spin a CPU core.
             Err(error) => {
-                eprintln!("a connection to the local port failed: {error}");
+                crate::log::line(&format!("a connection to the local port failed: {error}"));
                 tokio::time::sleep(ACCEPT_AGAIN_AFTER).await;
             }
         }
@@ -112,7 +112,7 @@ mod tests {
         DesktopState {
             update: Update::Current { checked: None },
             firewall: Firewall::Allows,
-            start_with_windows: true,
+            start_with_windows: messages::desktop::StartWithWindows::On,
         }
     }
 

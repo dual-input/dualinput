@@ -6,6 +6,7 @@
 // A release has no console. A debug build keeps one, or its messages would go nowhere.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod log;
 mod port;
 mod start_with_windows;
 
@@ -40,7 +41,7 @@ fn open_window(app: &AppHandle) {
         builder = builder.data_directory(local.join("DualInput").join("webview"));
     }
     if let Err(error) = builder.build() {
-        eprintln!("the window didn't open: {error}");
+        log::line(&format!("the window didn't open: {error}"));
     }
 }
 
@@ -91,9 +92,9 @@ fn ask_handler(say: watch::Sender<DesktopState>) -> mpsc::UnboundedSender<ToDesk
             match asked {
                 ToDesktop::SetStartWithWindows { on } => {
                     if let Err(error) = start_with_windows::set(on) {
-                        eprintln!("starting with Windows didn't change: {error}");
+                        log::line(&format!("starting with Windows didn't change: {error}"));
                     }
-                    say.send_modify(|state| state.start_with_windows = start_with_windows::is_on());
+                    say.send_modify(|state| state.start_with_windows = start_with_windows::state());
                 }
                 ToDesktop::CheckForUpdates
                 | ToDesktop::InstallUpdate
@@ -110,22 +111,28 @@ fn serve_port() {
     let state = DesktopState {
         update: Update::Current { checked: None },
         firewall: Firewall::Allows,
-        start_with_windows: start_with_windows::is_on(),
+        start_with_windows: start_with_windows::state(),
     };
     let (say, hear) = watch::channel(state);
     let asks = ask_handler(say);
     tauri::async_runtime::spawn(async move {
         match tokio::net::TcpListener::bind((Ipv4Addr::LOCALHOST, DESKTOP_PORT)).await {
             Ok(listener) => port::serve(listener, hear, asks).await,
-            Err(error) => eprintln!(
+            Err(error) => log::line(&format!(
                 "the local port {DESKTOP_PORT} is held, so this app runs without it: {error}"
-            ),
+            )),
         }
     });
 }
 
 fn main() {
+    log::start();
     let tray_only = std::env::args().any(|arg| arg == "--tray");
+    log::line(&format!(
+        "Dual Input's desktop app {} starts{}",
+        env!("CARGO_PKG_VERSION"),
+        if tray_only { " in the tray" } else { "" }
+    ));
     let app = tauri::Builder::default()
         .setup(move |app| {
             tray(app.handle())?;

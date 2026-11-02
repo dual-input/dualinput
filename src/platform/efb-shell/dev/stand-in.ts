@@ -94,7 +94,7 @@ const healthy = { network: { members: [], ...reach }, sim: atWorldMap, profiles:
 /** The up link to James the session's scenes share, over a relay at 120ms. */
 const netUp = { network: { members: [{ pilot: JAMES, up: true, path: { Relay: { url: "https://relay.example" } }, round_trip_ms: 120 }], ...reach } }
 const DESKTOP = "desktop"
-const LOCAL: DesktopState = { update: { state: "current", checked: "4 minutes ago" }, firewall: "allows", start_with_windows: true }
+const LOCAL: DesktopState = { update: { state: "current", checked: "4 minutes ago" }, firewall: "allows", start_with_windows: "on" }
 
 /** What a scene has the answer to Host or Join be, which is no slice of the core's. */
 const REFUSING = "refusing"
@@ -156,6 +156,7 @@ export const SCENES: Record<string, Slices> = {
   "Output device missing": { settings: [...settings(true, true), { ...setting(OUTPUT, false), kind: { type: "device" }, value: { id: "old", name: "Studio Headphones" } }] },
   "Update ready": { [DESKTOP]: { ...LOCAL, update: { state: "ready", next: "1.0.3" } } },
   "No tray app": { [DESKTOP]: null },
+  "Turned off in Windows": { [DESKTOP]: { ...LOCAL, start_with_windows: "off-in-windows" } },
   "Another version": { core: { ...CORE, version: "0.0.9" } },
 }
 const AFTER = { answer: 1000, slowAnswer: 10_000 }
@@ -301,7 +302,7 @@ export class StandInCore extends StandInBase {
   }
 
   private askDesktop(what: ToDesktop): void {
-    if (what.t === "set-start-with-windows") this.setLocal({ start_with_windows: what.on })
+    if (what.t === "set-start-with-windows") this.setLocal({ start_with_windows: what.on ? "on" : "off" })
     else if (what.t === "fix-firewall") window.setTimeout(() => this.setLocal({ firewall: "allows" }), 1400)
     else if (what.t === "check-for-updates") this.checkForUpdate()
   }

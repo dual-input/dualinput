@@ -17,6 +17,7 @@ import type { Run } from "../../../../engines/messages/ts/recording/Run.ts"
 import type { SessionSlice } from "../../../../engines/messages/ts/session/SessionSlice.ts"
 import { useCoreState } from "../../../../engines/page-client/src/core-link.ts"
 import { useDesktopState } from "../desktop-link.ts"
+import { openDiscord } from "../discord.ts"
 import { useCoreSlice, useShell } from "../part.ts"
 import type { Part } from "../part.ts"
 import { OUTPUT, useSetting, writeSetting } from "./setting.ts"
@@ -156,7 +157,7 @@ function Recordings() {
       aside={`${total} MB of 1 GB`}
       foot={
         <>
-          Dual Input keeps a simple log plus a full recording of every run. On your PC only and within a 1 GB budget (oldest deleted first). To report a problem, send us the run's log.txt on <Link tone="muted" onClick={() => toast("Opening our Discord in your browser")}>Discord</Link>, and we may ask for the full recording if we need a closer look.
+          Dual Input keeps a simple log plus a full recording of every run. On your PC only and within a 1 GB budget (oldest deleted first). To report a problem, send us the run's log.txt on <Link tone="muted" onClick={() => openDiscord(link)}>Discord</Link>, and we may ask for the full recording if we need a closer look.
         </>
       }
     >
@@ -248,9 +249,12 @@ function DualInput({ version }: { version: string }) {
         {/* It's the desktop app that starts with Windows, so with none to ask, there's no switch to show. */}
         {local && (
           <>
-            <button type="button" className="flex min-h-9 w-full items-center px-5 text-left text-sm" onClick={() => desktop.ask({ t: "set-start-with-windows", on: !local.start_with_windows })}>
-              <span className="flex-1">Start with Windows</span>
-              <Switch checked={local.start_with_windows} tabIndex={-1} className="pointer-events-none" />
+            <button type="button" disabled={local.start_with_windows === "off-in-windows"} className="flex min-h-9 w-full items-center px-5 text-left text-sm" onClick={() => desktop.ask({ t: "set-start-with-windows", on: local.start_with_windows !== "on" })}>
+              <span className="flex min-w-0 flex-1 flex-col py-1.5">
+                Start with Windows
+                {local.start_with_windows === "off-in-windows" && <span className="mt-0.5 text-xs text-muted-foreground">Turned off in Windows. Turn it back on in Settings, under Apps, Startup.</span>}
+              </span>
+              <Switch checked={local.start_with_windows === "on"} tabIndex={-1} className="ml-3 pointer-events-none" />
             </button>
             <Separator className="my-2" />
           </>

@@ -382,7 +382,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - A pill at the right shows each thing wrong with this PC or waiting on its pilot, as a word and an icon, and opens into rows on a hover or a press; with nothing to show there's no pill, and nothing opens.
   - Its rows are: the PC offline, which takes our servers' place, since with no internet Dual Input can't tell whether they answer; our servers not answering; Windows Firewall blocking Dual Input, with Fix; the connection to other pilots failing to open; an update ready, with View update, which opens Settings on its update section; and, while it lasts, trouble in Dual Input's own parts, in the pill as "Screens", "WASM", "Helper", or "Keybind", so a [dismissed notification](#the-banner-is-a-box-of-opaque-cards-at-the-screens-top-right) loses nothing.
   - Each row's title says what's wrong, and its detail what that costs.
-    Under them, when something's wrong, but not while offline or for an update alone, a line points to our Discord, since a confused pilot needs a way to people.
+    Under them, when something's wrong, but not while offline or for an update alone, a line points to our Discord, since a confused pilot needs a way to people, and the core opens it from a link it holds, since any add-on's page in the sim can send a command, and a core that opened what it was told would open anything for any of them.
   - In a session each row says what it costs there: offline stays an error, since every link is down, and says Dual Input will reconnect and catch the pilot up; our servers and the firewall become warnings, since a running session doesn't wait on the backend, and the crew still flies on links that may be slower; and the update row hides, since installing restarts the sim.
 
   It has no row for these:
@@ -581,7 +581,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - Recordings: the space used of 1 GB, then each run by its start, in the pilot's time, and its size, newest first.
     The run in progress can be opened but not deleted, since a pilot reporting a problem now needs it, and a recording that stopped, at under 1 GB free or on a failed write, says so here, since nothing else tells the pilot.
     Open folder's toast says it opened on the desktop, since Explorer opens behind the sim, and a line under the card says what a run keeps and that a report starts with `log.txt` on Discord.
-  - Dual Input: Start with Windows, on at first, then the version with the update's state: up to date with when it checked and Check now, checking, downloading with how far, or failed with the error and Try again.
+  - Dual Input: Start with Windows, on at first, which a pilot's off in Windows' own list of startup apps overrides, so the switch then reads off, can't move, and says where to turn it back on (user, 2026-11-02); then the version with the update's state: up to date with when it checked and Check now, checking, downloading with how far, or failed with the error and Try again.
     A ready update grows a box: "Close the sim to install." over Install and restart, which asks first, or in a session "Install it when you're not in a session." with no button.
 
   The name, color, sharing, the ATC app, and the volume stay on their tabs; the microphone comes with the voice phrases, after v1; and the relay list ships with each release.

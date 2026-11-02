@@ -2,8 +2,8 @@
 //! click on a notification outside its action (record/areas/interface/01-apps.md, "Slices and
 //! commands").
 
-use kernel::Cx;
-use messages::clients::{EfbAppOrder, NotificationClicked, component};
+use kernel::{Cx, Job, JobId};
+use messages::clients::{DISCORD_INVITE, EfbAppOrder, NotificationClicked, component};
 use serde_json::Value;
 
 use crate::{Clients, To, UNIT};
@@ -14,6 +14,19 @@ impl Clients {
         self.sockets
             .values()
             .any(|c| c.component() == component::BANNER)
+    }
+
+    /// `OPEN_DISCORD`, from any client.
+    pub(crate) fn open_discord(&mut self, cx: &Cx) -> Result<(), String> {
+        cx.job(
+            Job::open_link(DISCORD_INVITE),
+            |_: &mut Clients, _: JobId, result: Result<Vec<u8>, String>, _: &mut Cx| {
+                if let Err(error) = result {
+                    tracing::warn!(%error, "our Discord couldn't be opened");
+                }
+            },
+        );
+        Ok(())
     }
 
     /// `NOTIFICATION_CLICKED`, from any client: the EFB app opens the EFB onto our app.

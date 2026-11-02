@@ -477,8 +477,8 @@ test("a quit sent from the EFB app's socket takes effect, and a core with no ses
   b.act({ act: "watch", process: run.stub().id })
   await b.hear("stage Starting aircraft none")
   b.act({ act: "quit" })
-  assert.equal(await b.exited, 0, "the core exits with 0 once its sim closed with no session and no desktop app")
-  assert.match(b.log(), /the sim closed, no session is held, and no desktop app is connected, so the core exits/)
+  assert.equal(await b.exited, 0, "the core exits with 0 once its sim closed with no session")
+  assert.match(b.log(), /the sim closed and no session is held, so the core exits/)
 })
 
 test("a module from another build while Hold is fed raises the sim service's trouble notification for our package", { timeout: 90_000 }, async (t) => {

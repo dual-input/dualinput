@@ -5,7 +5,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use kernel::{Cx, Input};
 use messages::clients::{
-    FromClient, Hello, NOTIFICATION_CLICKED, SET_SETTING, ToClient, component,
+    FromClient, Hello, NOTIFICATION_CLICKED, OPEN_DISCORD, SET_SETTING, ToClient, component,
 };
 use serde_json::Value;
 
@@ -166,6 +166,7 @@ impl Clients {
         let result = match name {
             SET_SETTING => self.set_setting(args, cx),
             NOTIFICATION_CLICKED => self.notification_clicked(socket, args, cx),
+            OPEN_DISCORD => self.open_discord(cx),
             _ => {
                 if let Some(handler) = self.commands.get(name) {
                     cx.call_handler(handler, CommandCall { socket, id, args });

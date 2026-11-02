@@ -153,6 +153,8 @@ pub fn start_job(
             Work::List { path } | Work::Delete { path } | Work::OpenFolder { path } => {
                 Err(format!("{path}: the droplet program keeps no runs"))
             }
+            // Only a page's Discord link asks this, and the droplet has no page.
+            Work::OpenLink { url } => Err(format!("{url}: the droplet program opens no browser")),
             // Only the session crate and the sim service ask these, and the droplet runs
             // neither.
             Work::Find { .. } | Work::InviteCode | Work::CopyText { .. } => {

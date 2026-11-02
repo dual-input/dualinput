@@ -346,6 +346,21 @@ fn a_commands_handler_reads_the_settings_while_the_clients_crate_dispatches_it()
     assert_eq!(to(1, &out), [answer(1, None)]);
 }
 
+/// A real job would open a browser on the PC, so the job is checked here rather than on the bench.
+#[test]
+fn opening_our_discord_opens_the_link_the_core_holds_whatever_a_page_sends() {
+    let (mut core, _) = Core::new(None);
+    core.join(1, "efb-app", &[]);
+    core.finish_jobs();
+    let out = core.say(1, json!({ "t": "command", "id": 1, "name": "clients.open-discord", "args": { "url": "https://example.com" } }));
+    assert_eq!(to(1, &out), [answer(1, None)]);
+    let jobs = core.finish_jobs();
+    let [Work::OpenLink { url }] = jobs.as_slice() else {
+        panic!("the command should open a link: {jobs:?}");
+    };
+    assert_eq!(url, messages::clients::DISCORD_INVITE);
+}
+
 #[test]
 fn a_settings_file_keeps_a_key_no_unit_registered_and_a_value_that_doesnt_fit_takes_its_default() {
     let (mut core, _) = Core::new(Some(r#"{ "feature.loud": "very", "gone.feature": 3 }"#));

@@ -49,7 +49,7 @@ pub mod component {
     /// The menu script, which our copy of BlurPage brings into the sim's menu.
     /// src/sim-package/pages/menu.ts names it too, so change both together.
     pub const MENU_SCRIPT: &str = "menu-script";
-    /// The desktop app, while its window is open.
+    /// The desktop app's Rust side.
     pub const DESKTOP: &str = "desktop";
     /// Our app in the sim's EFB.
     pub const EFB_APP: &str = "efb-app";
@@ -268,6 +268,14 @@ pub const BANNER: &str = "banner";
 /// The command for a click on a notification outside its action, from any client, with
 /// `NotificationClicked` as its arguments. It sends the EFB app `EfbAppOrder::OpenEfb`.
 pub const NOTIFICATION_CLICKED: &str = "clients.notification-clicked";
+
+/// The command that opens our Discord in the pilot's browser, from any client. It takes no
+/// arguments, and the link is the core's to hold, since any add-on's page in the sim can send a
+/// command, and a core that opened what it was told would open anything for any of them.
+pub const OPEN_DISCORD: &str = "clients.open-discord";
+
+/// Where `OPEN_DISCORD` goes.
+pub const DISCORD_INVITE: &str = "https://discord.gg/Z8MqaSFczT";
 
 /// The arguments of `NOTIFICATION_CLICKED`. A click carries its card's landing, rather than the
 /// core looking it up by the ID, since a notification can clear while the click is on its way,

@@ -166,9 +166,9 @@ pub enum Work {
     Username,
     /// Opens a folder in Explorer, without waiting for its window. The result is empty.
     OpenFolder { path: String },
-    /// Opens a web address in the pilot's browser, without waiting for its window. The result is
-    /// empty.
-    OpenLink { url: String },
+    /// Opens `app_url` in the program it's for if the pilot has that program, and otherwise `url`
+    /// in their browser, without waiting for a window. The result is empty.
+    OpenLink { url: String, app_url: String },
     /// Fetches a URL, as the network's requests to the backend do. The result is a
     /// `Fetched`, whatever its status, and a fetch that got no answer is the job's error.
     Fetch(Fetch),
@@ -290,9 +290,12 @@ impl Job {
         }
     }
 
-    pub fn open_link(url: impl Into<String>) -> Job {
+    pub fn open_link(url: impl Into<String>, app_url: impl Into<String>) -> Job {
         Job {
-            work: Work::OpenLink { url: url.into() },
+            work: Work::OpenLink {
+                url: url.into(),
+                app_url: app_url.into(),
+            },
             then: None,
         }
     }

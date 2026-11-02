@@ -346,7 +346,7 @@ fn a_commands_handler_reads_the_settings_while_the_clients_crate_dispatches_it()
     assert_eq!(to(1, &out), [answer(1, None)]);
 }
 
-/// A real job would open a browser on the PC, so the job is checked here rather than on the bench.
+/// A real job would open a window on the PC, so the job is checked here rather than on the bench.
 #[test]
 fn opening_our_discord_opens_the_link_the_core_holds_whatever_a_page_sends() {
     let (mut core, _) = Core::new(None);
@@ -355,10 +355,11 @@ fn opening_our_discord_opens_the_link_the_core_holds_whatever_a_page_sends() {
     let out = core.say(1, json!({ "t": "command", "id": 1, "name": "clients.open-discord", "args": { "url": "https://example.com" } }));
     assert_eq!(to(1, &out), [answer(1, None)]);
     let jobs = core.finish_jobs();
-    let [Work::OpenLink { url }] = jobs.as_slice() else {
+    let [Work::OpenLink { url, app_url }] = jobs.as_slice() else {
         panic!("the command should open a link: {jobs:?}");
     };
     assert_eq!(url, messages::clients::DISCORD_INVITE);
+    assert_eq!(app_url, messages::clients::DISCORD_APP_INVITE);
 }
 
 #[test]

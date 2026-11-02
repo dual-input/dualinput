@@ -3,7 +3,9 @@
 //! commands").
 
 use kernel::{Cx, Job, JobId};
-use messages::clients::{DISCORD_INVITE, EfbAppOrder, NotificationClicked, component};
+use messages::clients::{
+    DISCORD_APP_INVITE, DISCORD_INVITE, EfbAppOrder, NotificationClicked, component,
+};
 use serde_json::Value;
 
 use crate::{Clients, To, UNIT};
@@ -19,7 +21,7 @@ impl Clients {
     /// `OPEN_DISCORD`, from any client.
     pub(crate) fn open_discord(&mut self, cx: &Cx) -> Result<(), String> {
         cx.job(
-            Job::open_link(DISCORD_INVITE),
+            Job::open_link(DISCORD_INVITE, DISCORD_APP_INVITE),
             |_: &mut Clients, _: JobId, result: Result<Vec<u8>, String>, _: &mut Cx| {
                 if let Err(error) = result {
                     tracing::warn!(%error, "our Discord couldn't be opened");

@@ -115,12 +115,21 @@ fn run(jobs: &Jobs, start: &StartJob) -> Result<Vec<u8>, String> {
             .spawn()
             .map(|_| Vec::new())
             .map_err(|e| format!("couldn't start Explorer on {path}: {e}")),
-        // Explorer hands a web address to the pilot's browser, the same way.
-        Work::OpenLink { url } => std::process::Command::new("explorer")
-            .arg(url)
-            .spawn()
-            .map(|_| Vec::new())
-            .map_err(|e| format!("couldn't start Explorer on {url}: {e}")),
+        // Explorer hands a link to the program Windows has for it, the same way. A scheme with no
+        // program brings up Windows' dialog asking for one, over the sim, so the app's link goes
+        // only where its program is on this PC.
+        Work::OpenLink { url, app_url } => {
+            let link = if link_program::installed(app_url) {
+                app_url
+            } else {
+                url
+            };
+            std::process::Command::new("explorer")
+                .arg(link)
+                .spawn()
+                .map(|_| Vec::new())
+                .map_err(|e| format!("couldn't start Explorer on {link}: {e}"))
+        }
         Work::Fetch(_) => unreachable!("a fetch runs as a task, not on the blocking pool"),
     }
 }
@@ -147,6 +156,65 @@ fn find(folder: &Path, depth: u8, holding: &Path, found: &mut Vec<String>) {
 }
 
 /// The clipboard's text, read and written through Windows' clipboard functions.
+/// Which program Windows runs for a link's scheme. The entry can outlive an uninstalled program,
+/// so it counts only while the file it names is there.
+mod link_program {
+    use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+    use windows_sys::Win32::System::Registry::{HKEY_CLASSES_ROOT, RRF_RT_REG_SZ, RegGetValueW};
+
+    fn wide(text: &str) -> Vec<u16> {
+        text.encode_utf16().chain(std::iter::once(0)).collect()
+    }
+
+    /// The command Windows has for `scheme`, which it keeps in the registry under the scheme's name.
+    fn command(scheme: &str) -> Option<String> {
+        let key = wide(&format!(r"{scheme}\shell\open\command"));
+        let mut text = [0u16; 1024];
+        let mut bytes = u32::try_from(size_of_val(&text)).ok()?;
+        // SAFETY: the key is a NUL-terminated string that outlives the call, a null value name
+        // asks for the key's default value, and `bytes` is the length of the buffer it writes to.
+        let read = unsafe {
+            RegGetValueW(
+                HKEY_CLASSES_ROOT,
+                key.as_ptr(),
+                std::ptr::null(),
+                RRF_RT_REG_SZ,
+                std::ptr::null_mut(),
+                text.as_mut_ptr().cast(),
+                &mut bytes,
+            )
+        };
+        if read != ERROR_SUCCESS {
+            return None;
+        }
+        let end = text
+            .iter()
+            .position(|&unit| unit == 0)
+            .unwrap_or(text.len());
+        Some(String::from_utf16_lossy(&text[..end]))
+    }
+
+    /// The program a command runs, which is quoted when its path holds a space, as in
+    /// `"C:\Program Files\App\app.exe" --url -- "%1"`.
+    pub(super) fn program_of(command: &str) -> Option<&str> {
+        let command = command.trim_start();
+        match command.strip_prefix('"') {
+            Some(quoted) => quoted.split('"').next(),
+            None => command.split_whitespace().next(),
+        }
+    }
+
+    /// Whether the program for `url`'s scheme is on this PC.
+    pub(super) fn installed(url: &str) -> bool {
+        url.split(':')
+            .next()
+            .and_then(command)
+            .as_deref()
+            .and_then(program_of)
+            .is_some_and(|program| std::path::Path::new(program).is_file())
+    }
+}
+
 mod clipboard {
     use std::time::Duration;
 
@@ -354,6 +422,25 @@ mod tests {
     use std::io::{Read, Write};
 
     use super::*;
+
+    #[test]
+    fn a_links_program_is_read_from_its_command_quoted_or_not() {
+        let quoted = r#""C:\Program Files\App\app.exe" --url -- "%1""#;
+        assert_eq!(
+            link_program::program_of(quoted),
+            Some(r"C:\Program Files\App\app.exe")
+        );
+        assert_eq!(
+            link_program::program_of(r"C:\App\app.exe %1"),
+            Some(r"C:\App\app.exe")
+        );
+        assert_eq!(link_program::program_of(""), None);
+    }
+
+    #[test]
+    fn a_scheme_windows_has_no_program_for_counts_as_not_installed() {
+        assert!(!link_program::installed("dualinput-no-such-scheme:///x"));
+    }
 
     /// One answer from a server on 127.0.0.1, which hands back the request it got.
     fn serve(answer: &'static [u8]) -> (u16, std::thread::JoinHandle<String>) {

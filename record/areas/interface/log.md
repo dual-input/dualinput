@@ -3,6 +3,22 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-02: A `discord:` link opens an invite in the Discord app, from closed
+
+**Asked:** whether the EFB app's Discord links can reach a pilot's Discord app rather than their browser, and what form an invite takes in the app's link scheme, which Discord documents nowhere we found.
+
+**Expected:** a browser to hand off to the app at best, since the invite page is what a browser opens.
+
+**Found:** opening our invite in a browser with no Discord login shows a form to create an account, with "Log in" under it.
+On our development machine, on Discord 1.0.9266, the app registers `discord` under `HKCU\Software\Classes`, whose `shell\open\command` runs `Discord.exe --url -- "%1"`.
+With no Discord process running, `explorer discord:///invite/<code>` started the app, whose log says `transitionTo - Transitioning to /invite/<code>`, and whose window title became `discord.com/invite/<code> - Discord`.
+`discord://-/invite/<code>` gave the same line in the log.
+We didn't measure whether a normal browser hands off to a running app by itself, since the browser we read the page in is cut off from the rest of the PC.
+
+**Changed:** `clients.open-discord` opens `discord:///invite/<code>` when the registry names a program for the scheme and that file exists, and otherwise the https link.
+
+**Affects:** [the header's help line](decisions.md).
+
 ## 2026-11-01: A flex item with only absolute children keeps its height in Coherent GT until told `min-height: 0`
 
 **Asked:** why, in the debugger, a refusal growing the start card pushed the standing figure down over the tab bar.

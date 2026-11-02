@@ -269,13 +269,18 @@ pub const BANNER: &str = "banner";
 /// `NotificationClicked` as its arguments. It sends the EFB app `EfbAppOrder::OpenEfb`.
 pub const NOTIFICATION_CLICKED: &str = "clients.notification-clicked";
 
-/// The command that opens our Discord in the pilot's browser, from any client. It takes no
-/// arguments, and the link is the core's to hold, since any add-on's page in the sim can send a
+/// The command that opens our Discord, in the pilot's Discord app if they have it and otherwise
+/// in their browser, from any client. It takes no arguments, and the link is the core's to hold, since any add-on's page in the sim can send a
 /// command, and a core that opened what it was told would open anything for any of them.
 pub const OPEN_DISCORD: &str = "clients.open-discord";
 
-/// Where `OPEN_DISCORD` goes.
+/// Where `OPEN_DISCORD` goes in a browser, which for a pilot not signed in there is a form to
+/// create an account.
 pub const DISCORD_INVITE: &str = "https://discord.gg/Z8MqaSFczT";
+
+/// Where `OPEN_DISCORD` goes in the Discord app. Discord documents no form for this, so a later
+/// app may not take it (measured on Discord 1.0.9266, 2026-11-02, record/areas/interface/log.md).
+pub const DISCORD_APP_INVITE: &str = "discord:///invite/Z8MqaSFczT";
 
 /// The arguments of `NOTIFICATION_CLICKED`. A click carries its card's landing, rather than the
 /// core looking it up by the ID, since a notification can clear while the click is on its way,

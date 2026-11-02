@@ -3,6 +3,30 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-02: A third session in the sim passes the heads, a changed window, a card's click with no core, and a joiner's preflight card
+
+**Asked:** whether the fixes from [the second session](#2026-11-02-a-second-session-in-the-sim-confirms-bootmode-2-restart-and-a-load-from-the-world-map-and-finds-a-large-l-value-reads-0-and-a-canvas-repaints-only-when-its-element-changes) hold.
+
+**Expected:** each to pass.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the Baron 58P, with a bench core running beside the real sim's core:
+
+- The heads followed the cursor on the preflight page.
+- A changed window took the banner back to the screen's corner.
+- With the core killed and the EFB closed, a click on the "Dual Input service isn't running" card opened the EFB.
+- A joiner under a pilot flying in a flight saw the preflight card.
+- The EFB app, the banner, and the menu script joined the real sim's core, and none joined the bench core, whose one client was the fake desktop app the bench's own code opens, which answers [stage 5's case](../build/plan.md#11b-the-apps).
+- The banner's page connected 0.45s to 2.05s after a session started, in nine hosts, so about the 2s [budget](01-apps.md#budgets), which counts from the EFB app's first call, up to 100ms after the session starts.
+- The EFB app joined the core 18s after the menu script in this start, and at the same moment in the last, so how soon it joins varies, though both are long before a pilot can open the EFB.
+- A core started again came back to its session and its pages joined within 140ms of its start.
+
+**Changed:** nothing.
+
+**Not tried:** the portrait's hands in the sim, which the pilot didn't look at, though the debugger shows them holding the edge with the EFB's rules loaded.
+The pilot's report of "another subtle figure rendering issue" stays open: we couldn't tell what they saw, and the flat runs we found on a ball's edges show on a flat fill too, so they're how the engine draws a circle this small.
+
+**Affects:** [the apps' cases](01-apps.md#cases-for-the-bench) and [the apps' budgets](01-apps.md#budgets).
+
 ## 2026-11-02: A second session in the sim confirms `BootMode` 2, Restart, and a load from the world map, and finds a large `L:` value reads 0 and a canvas repaints only when its element changes
 
 **Asked:** whether the fixes from the entries below hold in the sim, with the real app as the EFB's only Dual Input app.

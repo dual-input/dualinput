@@ -16,8 +16,8 @@ use messages::net::{
     Relay, SLICE, codes,
 };
 use network::{
-    BackendAnswered, LinkLost, LinkUp, Me, Member, MemberLeft, MemberOut, NetUnit, Network, Opened,
-    Sender, To,
+    BackendAnswered, ConnectionRefused, LinkLost, LinkUp, Me, Member, MemberLeft, MemberOut,
+    NetUnit, Network, Opened, Sender, To,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -43,7 +43,7 @@ enum Act {
     Quit,
     Host,
     Join(String),
-    /// Says what the PC reaches, and whether the refused notification is up.
+    /// Says what the PC reaches.
     Peek,
     /// Stops waiting for the backend's answer.
     Cancel,
@@ -85,6 +85,9 @@ impl Session {
         .on::<LinkLost>(|_: &mut Session, _: &LinkLost, cx: &mut Cx| cx.out(Saw("lost".into())))
         .on::<MemberLeft>(|_: &mut Session, _: &MemberLeft, cx: &mut Cx| cx.out(Saw("left".into())))
         .on::<MemberOut>(|_: &mut Session, _: &MemberOut, cx: &mut Cx| cx.out(Saw("out".into())))
+        .on::<ConnectionRefused>(|_: &mut Session, r: &ConnectionRefused, cx: &mut Cx| {
+            cx.out(Saw(format!("refused {:?}", r.why)))
+        })
         .on::<BackendAnswered>(|_: &mut Session, a: &BackendAnswered, cx: &mut Cx| {
             cx.out(Saw(format!("answered {:?} {:?}", a.asked, a.answer)))
         });
@@ -119,13 +122,7 @@ impl Session {
             Act::Peek => {
                 let internet = cx.read::<Network>().internet();
                 let servers = cx.read::<Network>().servers();
-                let refused = cx
-                    .read::<clients::Clients>()
-                    .notification_up("network.refused")
-                    .is_some();
-                cx.out(Saw(format!(
-                    "internet={internet:?} servers={servers:?} refused={refused}"
-                )));
+                cx.out(Saw(format!("internet={internet:?} servers={servers:?}")));
             }
             Act::Cancel => network::cancel(cx),
             Act::Host => network::host(
@@ -522,7 +519,7 @@ fn a_first_message_with_another_code_is_refused_with_its_code() {
         conn: 1,
         code: codes::WRONG_CODE
     }));
-    assert!(saw.is_empty());
+    assert_eq!(saw, ["refused Code"]);
 }
 
 #[test]
@@ -910,7 +907,7 @@ fn a_core_whose_crew_doesnt_answer_in_10s_looks_the_code_up() {
 /// naming which (record/areas/network/02-units.md, "The first message").
 #[test]
 fn a_first_message_of_another_version_or_hash_is_refused_with_its_code() {
-    for (conn, header, code) in [
+    for (conn, header, code, why) in [
         (
             1,
             Header {
@@ -921,6 +918,7 @@ fn a_first_message_of_another_version_or_hash_is_refused_with_its_code() {
                 restart: 0,
             },
             codes::WRONG_VERSION,
+            r#"refused Version(Some("0.0.1"))"#,
         ),
         (
             2,
@@ -932,6 +930,7 @@ fn a_first_message_of_another_version_or_hash_is_refused_with_its_code() {
                 restart: 0,
             },
             codes::WRONG_HASH,
+            "refused Hash",
         ),
     ] {
         let mut core = Core::new();
@@ -946,7 +945,7 @@ fn a_first_message_of_another_version_or_hash_is_refused_with_its_code() {
         core.their_header(conn, header);
         let (commands, saw) = core.take();
         assert_eq!(commands, [Command::Close { conn, code }]);
-        assert!(saw.is_empty(), "nothing should link: {saw:?}");
+        assert_eq!(saw, [why], "nothing should link");
     }
 }
 
@@ -975,7 +974,7 @@ fn the_check_runs_from_the_cores_start_and_tells_our_servers_from_this_pc_offlin
         core.act(Act::Peek);
         core.take().1.pop().expect("the test unit should say")
     };
-    assert_eq!(peek(&mut core), "internet=None servers=None refused=false");
+    assert_eq!(peek(&mut core), "internet=None servers=None");
 
     let checks = core.checks();
     let [(backend, backend_job), (relay, relay_job)] = &checks[..] else {
@@ -987,7 +986,7 @@ fn the_check_runs_from_the_cores_start_and_tells_our_servers_from_this_pc_offlin
     core.answer(relay_job, 200, "");
     assert_eq!(
         peek(&mut core),
-        "internet=Some(true) servers=Some(Reachable) refused=false"
+        "internet=Some(true) servers=Some(Reachable)"
     );
 
     // With every server answering, the next check waits 60s.
@@ -1004,7 +1003,7 @@ fn the_check_runs_from_the_cores_start_and_tells_our_servers_from_this_pc_offlin
     core.answer(&checks[1].1, 200, "");
     assert_eq!(
         peek(&mut core),
-        "internet=Some(true) servers=Some(Unreachable) refused=false"
+        "internet=Some(true) servers=Some(Unreachable)"
     );
 
     // With a server not answering, the next check waits only 5s, and nothing within 2s means
@@ -1014,7 +1013,7 @@ fn the_check_runs_from_the_cores_start_and_tells_our_servers_from_this_pc_offlin
     core.advance(core.now + 2 * SECOND);
     assert_eq!(
         peek(&mut core),
-        "internet=Some(false) servers=Some(Unreachable) refused=false"
+        "internet=Some(false) servers=Some(Unreachable)"
     );
 }
 
@@ -1045,7 +1044,7 @@ fn a_dial_while_a_link_is_lost_checks_the_sessions_relays() {
     assert!(
         core.take()
             .1
-            .contains(&"internet=Some(true) servers=Some(Unreachable) refused=false".to_string())
+            .contains(&"internet=Some(true) servers=Some(Unreachable)".to_string())
     );
 }
 
@@ -1061,29 +1060,54 @@ fn the_relays_only_setting_clears_the_endpoints_ip_transports() {
 }
 
 /// A close can overtake the first message the other side sent before it, so a close with a
-/// refusal's code shows the refusal even on a connection no link took.
+/// refusal's code raises the refusal even on a connection no link took.
 #[test]
-fn a_close_with_a_refusals_code_shows_the_refused_notification() {
+fn a_close_with_a_refusals_code_raises_the_refusal() {
+    for (conn, code, why) in [
+        (1, codes::WRONG_CODE, "refused Code"),
+        (2, codes::WRONG_VERSION, "refused Version(None)"),
+        (3, codes::WRONG_HASH, "refused Hash"),
+    ] {
+        let mut core = Core::new();
+        core.act(Act::Open {
+            crew: vec![(THEM, 0, [7; 32])],
+        });
+        core.event(Event::Bound(Ok(MY_ENDPOINT)));
+        core.event(Event::Connected {
+            conn,
+            endpoint: [7; 32],
+            dialed: true,
+        });
+        core.take();
+        core.event(Event::Closed {
+            conn,
+            code: Ok(code),
+        });
+        assert_eq!(core.take().1, [why]);
+    }
+}
+
+/// The header's row reads the slice, so an endpoint that didn't bind shows until it binds or the
+/// session ends, and a failure that comes after the session has ended shows nothing.
+#[test]
+fn a_failed_bind_shows_in_the_slice_until_it_binds_or_the_session_ends() {
     let mut core = Core::new();
-    core.act(Act::Open {
-        crew: vec![(THEM, 0, [7; 32])],
-    });
+    core.watch_slice();
+    core.act(Act::Open { crew: Vec::new() });
+    let failed = |core: &mut Core| {
+        core.advance(core.now + 100_000);
+        core.slice.as_ref().unwrap().bind_failed
+    };
+    core.event(Event::Bound(Err("the timeout fired".into())));
+    assert!(failed(&mut core));
     core.event(Event::Bound(Ok(MY_ENDPOINT)));
-    core.event(Event::Connected {
-        conn: 1,
-        endpoint: [7; 32],
-        dialed: true,
-    });
-    core.event(Event::Closed {
-        conn: 1,
-        code: Ok(codes::WRONG_CODE),
-    });
-    core.act(Act::Peek);
-    assert!(
-        core.take()
-            .1
-            .contains(&"internet=None servers=None refused=true".to_string())
-    );
+    assert!(!failed(&mut core));
+    core.event(Event::Bound(Err("the timeout fired".into())));
+    assert!(failed(&mut core));
+    core.act(Act::Leave);
+    assert!(!failed(&mut core));
+    core.event(Event::Bound(Err("the timeout fired".into())));
+    assert!(!failed(&mut core));
 }
 
 #[test]

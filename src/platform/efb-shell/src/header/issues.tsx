@@ -14,6 +14,8 @@ export type HeaderStatus = {
   firewall?: "allows" | "blocks"
   /** Asks the desktop app to add the rule, with its UAC prompt. */
   fixFirewall?: () => void
+  /** The session's connection to other pilots failed to open. */
+  connectionFailed?: boolean
   /** What the core raised that lands on the header, in the header's order. */
   raised: RaisedRow[]
   update?: { next: string; have: string; view: () => void }
@@ -85,6 +87,15 @@ export function issuesOf(status: HeaderStatus, inSession: boolean): Issue[] {
           Fix
         </Button>
       ),
+    })
+  }
+  if (status.connectionFailed) {
+    issues.push({
+      id: "connection",
+      tone: "bad",
+      word: "Connection",
+      title: "Dual Input can't open its connection to other pilots",
+      detail: "Your crew can't reach you until it opens.",
     })
   }
   for (const row of status.raised) issues.push({ id: row.id, tone: row.trouble ? "bad" : "warn", word: row.word, title: row.title, detail: row.detail })

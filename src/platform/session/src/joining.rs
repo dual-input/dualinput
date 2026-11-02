@@ -13,7 +13,9 @@ use messages::net::{PilotId, Relay};
 use messages::session::{
     self as wire, Attempt, Attempting, Join, MemberEntry, Preflight, Ready, Refused, RefusedWhy,
 };
-use network::{Answer, Asked, BackendAnswered, Me, Member, Network, Refusal};
+use network::{
+    Answer, Asked, BackendAnswered, ConnectionRefused, Me, Member, Mismatch, Network, Refusal,
+};
 use sim_service::SimAwareness;
 
 use crate::file::{self, SessionFile};
@@ -95,6 +97,36 @@ fn refused_by_backend(on: Attempting, refusal: &Refusal) -> Refused {
         },
         Refusal::OtherHash | Refusal::Other(_) => refused(on, RefusedWhy::Servers),
     }
+}
+
+/// Whose version is older, as this core sees it. `older` in src/backend/src/index.ts reads versions
+/// the same way, so change both together.
+fn older(mine: &str, theirs: &str) -> Older {
+    let numbers = |version: &str| -> Vec<u64> {
+        version
+            .split('.')
+            .map(|number| number.parse().unwrap_or(0))
+            .collect()
+    };
+    if numbers(mine) < numbers(theirs) {
+        Older::Mine
+    } else {
+        Older::Theirs
+    }
+}
+
+/// How the apps name what a crewmate's core refused: in the words of the backend's refusal for
+/// the same difference, since the two stop one join. A close names no version, so it reads as two
+/// builds of one version do.
+fn refused_by_crew(why: &Mismatch) -> Refused {
+    let refusal = match why {
+        Mismatch::Code => Refusal::NoSuchCode,
+        Mismatch::Version(Some(theirs)) => {
+            Refusal::OtherVersion(older(messages::VERSION, theirs), theirs.clone())
+        }
+        Mismatch::Version(None) | Mismatch::Hash => Refusal::OtherHash,
+    };
+    refused_by_backend(Attempting::Join, &refusal)
 }
 
 /// The session file's write: the core opens its links only once the file holds what it last
@@ -330,6 +362,17 @@ pub(crate) fn answered(me: &mut Session, answered: &BackendAnswered, cx: &mut Cx
         }
         _ => {}
     }
+}
+
+/// A connection was refused. A join still reaching the crew stops there, and the start card says
+/// why. A session under way has no start card, so there the network's log holds it.
+pub(crate) fn connection_refused(me: &mut Session, refused: &ConnectionRefused, cx: &mut Cx) {
+    if !me.held.as_ref().is_some_and(|h| h.dialing) {
+        return;
+    }
+    tracing::info!(why = ?refused.why, "a connection was refused, so the join stops");
+    me.refused = Some(refused_by_crew(&refused.why));
+    me.leave(cx, false);
 }
 
 /// The core started and found a session file: it raises the restart count, writes it, and
@@ -711,5 +754,27 @@ mod tests {
                 RefusedWhy::Servers
             );
         }
+    }
+
+    #[test]
+    fn a_refused_connection_takes_the_words_of_the_backends_refusal() {
+        assert_eq!(refused_by_crew(&Mismatch::Code).why, RefusedWhy::NoCode);
+        let newer = refused_by_crew(&Mismatch::Version(Some("99.0.0".into())));
+        assert_eq!(newer.why, RefusedWhy::YouOlder);
+        assert_eq!(newer.theirs.as_deref(), Some("99.0.0"));
+        assert_eq!(newer.yours.as_deref(), Some(messages::VERSION));
+        assert_eq!(
+            refused_by_crew(&Mismatch::Version(Some("0.0.0".into()))).why,
+            RefusedWhy::HostOlder
+        );
+        for why in [Mismatch::Version(None), Mismatch::Hash] {
+            assert_eq!(refused_by_crew(&why).why, RefusedWhy::Servers);
+        }
+    }
+
+    #[test]
+    fn a_version_reads_by_its_numbers_rather_than_its_letters() {
+        assert_eq!(older("0.9.0", "0.10.0"), Older::Mine);
+        assert_eq!(older("1.0.0", "0.10.0"), Older::Theirs);
     }
 }

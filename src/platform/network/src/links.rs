@@ -7,12 +7,13 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use clients::{Landing, Level, Notification};
 use kernel::{Cx, Input, TimerId};
 use messages::net::{Command, EndpointId, Event, HEARTBEAT, Header, Heartbeat, Path, codes};
 
 use crate::hooks::{Opened, Received, Sender};
-use crate::{LinkLost, LinkUp, Member, MemberLeft, MemberOut, Network, edge};
+use crate::{
+    ConnectionRefused, LinkLost, LinkUp, Member, MemberLeft, MemberOut, Mismatch, Network, edge,
+};
 
 pub(crate) const HEARTBEAT_EVERY: Duration = Duration::from_secs(1);
 /// Starting values, which v1's recordings tune: 5s sits above the 2s a dead direct path
@@ -205,7 +206,7 @@ impl Network {
             Event::Bound(Ok(endpoint)) => {
                 tracing::info!("the network's endpoint is bound");
                 me.endpoint = Some(endpoint);
-                clients::clear_notification(cx, "bind");
+                me.bind_failed = false;
                 let lost: Vec<_> = me
                     .links
                     .iter()
@@ -225,18 +226,7 @@ impl Network {
                 tracing::error!(error, "the network's endpoint didn't bind");
                 // A Leave or a Cancel can get ahead of the bind's answer, and then nothing is
                 // waiting on the connection.
-                if me.session.is_some() {
-                    clients::notify(
-                        cx,
-                        "bind",
-                        Notification::new(
-                            Level::Trouble,
-                            "Dual Input can't open its connection to other pilots",
-                            Landing::Header,
-                        )
-                        .detail("Your crew can't reach you until it opens."),
-                    );
-                }
+                me.bind_failed = me.session.is_some();
             }
             Event::Connected {
                 conn,
@@ -272,28 +262,19 @@ impl Network {
             } => me.one_off(conn, channel, bytes, cx),
             Event::Closed { conn, code } => {
                 let closed = me.conns.remove(&conn);
-                // A close can overtake the first message the other side sent before it, so the
-                // refused side shows the refusal from the close too, under the same notification
-                // its own check raises. A refused connection never joined a link, so this comes
-                // before the link is looked up.
-                if let Ok(
-                    refused @ (codes::WRONG_CODE | codes::WRONG_VERSION | codes::WRONG_HASH),
-                ) = code
-                {
-                    let why = match refused {
-                        codes::WRONG_CODE => "it holds another session's code",
-                        codes::WRONG_VERSION => "it runs another version of Dual Input",
-                        _ => "its build's messages differ from this one's",
-                    };
-                    clients::notify(
-                        cx,
-                        "refused",
-                        Notification::new(
-                            Level::Warning,
-                            format!("Another pilot's PC refused this one's connection: {why}"),
-                            Landing::Session,
-                        ),
-                    );
+                // A close can overtake the first message the other side sent before it, so this
+                // core can learn of a refusal from the close before its own check reads why. A
+                // refused connection never joined a link, so this comes before the link is
+                // looked up.
+                let refused = match code {
+                    Ok(codes::WRONG_CODE) => Some(Mismatch::Code),
+                    Ok(codes::WRONG_VERSION) => Some(Mismatch::Version(None)),
+                    Ok(codes::WRONG_HASH) => Some(Mismatch::Hash),
+                    _ => None,
+                };
+                if let Some(why) = refused {
+                    tracing::warn!(conn, ?why, "another core refused this core's connection");
+                    cx.raise(ConnectionRefused { why });
                 }
                 // A member can leave on a connection whose first message hasn't passed yet, which
                 // no link holds, so a leave finds its link by the member's endpoint too.
@@ -476,39 +457,19 @@ impl Network {
         };
         // The header's version and hash stay first in every release, so a core of another
         // release is always read far enough to be told why it's refused.
-        let (code, reason) = match postcard::take_from_bytes::<Header>(&frame) {
-            Err(_) => (
-                codes::WRONG_VERSION,
-                "its first message didn't read".to_string(),
-            ),
+        let (code, why) = match postcard::take_from_bytes::<Header>(&frame) {
+            Err(_) => (codes::WRONG_VERSION, Mismatch::Version(None)),
             Ok((header, _)) if header.version != messages::VERSION => (
                 codes::WRONG_VERSION,
-                format!(
-                    "it runs Dual Input {}, and this PC {}",
-                    header.version,
-                    messages::VERSION
-                ),
+                Mismatch::Version(Some(header.version)),
             ),
-            Ok((header, _)) if header.hash != messages::HASH => (
-                codes::WRONG_HASH,
-                "its build's messages differ from this one's".into(),
-            ),
-            Ok((header, _)) if header.code != my.code => {
-                (codes::WRONG_CODE, "it named another session's code".into())
-            }
+            Ok((header, _)) if header.hash != messages::HASH => (codes::WRONG_HASH, Mismatch::Hash),
+            Ok((header, _)) if header.code != my.code => (codes::WRONG_CODE, Mismatch::Code),
             Ok((header, keys)) => return self.take(conn, header, keys.to_vec(), cx),
         };
-        tracing::warn!(conn, code, reason, "the network refused a connection");
-        clients::notify(
-            cx,
-            "refused",
-            Notification::new(
-                Level::Warning,
-                format!("Another pilot's connection was refused: {reason}"),
-                Landing::Session,
-            ),
-        );
+        tracing::warn!(conn, code, ?why, "the network refused a connection");
         self.close(conn, code, cx);
+        cx.raise(ConnectionRefused { why });
     }
 
     /// A connection whose first message passed: the link takes it, unless the link's rule
@@ -593,8 +554,6 @@ impl Network {
         }
         tracing::info!(conn, again, restart = from.restart, "a member's link is up");
         cx.raise(LinkUp { member, again });
-        // A link that came up shows this PC isn't refused, whatever an earlier connection was.
-        clients::clear_notification(cx, "refused");
         self.link_came_up(cx);
         if let Some(channel) = self.opener.as_ref().map(|o| o.channel) {
             self.deliver(from, channel, keys, cx);

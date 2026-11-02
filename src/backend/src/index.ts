@@ -191,7 +191,7 @@ async function signer(request: Request, bytes: Uint8Array<ArrayBuffer>): Promise
   return refuse(403, "the signature didn't match")
 }
 
-/** Whose version is older, as the core that looked the code up sees it. */
+/** Whose version is older, as the core that looked the code up sees it. `older` in src/platform/session/src/joining.rs reads versions the same way, so change both together. */
 export function older(mine: string, theirs: string): Older {
   const a = mine.split(".").map(Number)
   const b = theirs.split(".").map(Number)

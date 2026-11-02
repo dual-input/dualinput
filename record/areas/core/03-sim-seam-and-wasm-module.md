@@ -12,6 +12,10 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > Its tail is `A:ATC ID`, read at each load, and whether it reads at the main menu or the world map is unverified: a sim session settles it, and until then a refused read leaves it `null` until the flight's load.
 > `where` says `world-map` once the menu script reports `MenuPage::WorldMap`, which `src/sim-package/pages/menu.ts` doesn't send yet.
 
+> **Note**
+> Stage 11b's tentative decision on [what reaches the banner](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) drops the notification that [the aircraft's facts](#the-aircrafts-facts) gives as the use of `A:TITLE` (user, 2026-11-01).
+> It names the aircraft on a joiner's Join instead, such as "Install the Baron 58P to fly with James".
+
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.
 A crash is a sim whose process ends with no quit message before it, and the loaded aircraft is the folder and preset in the path `AircraftLoaded` reports.

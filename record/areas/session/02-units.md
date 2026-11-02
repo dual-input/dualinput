@@ -28,6 +28,11 @@ Decides:     The session crate's members, session keys, control, session file, j
 > A refusal the pilot can't act on, two builds of one version or a refusal the backend words itself, reads as `servers`, with the cause in the log.
 
 > **Note**
+> Stage 11b's tentative decision on [what reaches the banner](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) drops [in the flight](#in-the-flight)'s notification to load the session's aircraft, and "Adam is in the A320" (user, 2026-11-01).
+> The crew row shows where a crewmate is, and [Join](../interface/decisions.md#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up), disabled while the joiner is in a flight in another aircraft, says how to get in.
+> A connection refused while a join is still reaching the crew stops the join, and `refused` says why in the words of the backend's refusal for the same difference.
+
+> **Note**
 > Stage 11b's tentative decision that [the Traffic and ATC audio tabs hold their sharing, settings, and warnings](../interface/decisions.md#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon) settles what [the match check](#the-match-check) leaves open about traffic (user, 2026-10-31): traffic feeds no item, and its notifications become counts on the Traffic tab.
 
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.

@@ -6,7 +6,6 @@ import type { Notification } from "../../../../engines/messages/ts/clients/Notif
 
 /** The pill's word for each notification, in the header's order, by the start of its ID. The first that fits names it. */
 const WORDS: [string, string][] = [
-  ["network.bind", "Connection"],
   ["clients.no-panel", "Screens"],
   ["sim-service.", "WASM"],
   ["core-helper.down", "Helper"],

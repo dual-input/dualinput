@@ -291,9 +291,7 @@ pub(crate) enum Away {
 /// What the crew hears of a member once the session has an aircraft, each shown once, since their
 /// crew row says the rest: leaving the flight, closing their sim, crashing, and coming back
 /// (record/areas/interface/decisions.md, "The banner carries what a pilot must see without the
-/// EFB, and the rest shows where it's acted on"); and this pilot's own notification to load the
-/// session's aircraft, such as "Load the L1011-500 Cabin w/ Lounge to fly with James"
-/// (record/areas/session/02-units.md, "In the flight").
+/// EFB, and the rest shows where it's acted on").
 pub(crate) fn notifications(me: &mut Session, cx: &Cx) {
     let Some(held) = &me.held else {
         return;
@@ -301,32 +299,6 @@ pub(crate) fn notifications(me: &mut Session, cx: &Cx) {
     let mine = held.me;
     let preflight = me.preflight();
     let name = |m: &PilotId| name_of(me, m);
-    let named = |status: &Status| {
-        status
-            .title
-            .clone()
-            .or_else(|| status.aircraft.as_ref().map(|a| a.folder().to_string()))
-            .unwrap_or_else(|| "another aircraft".into())
-    };
-    let pf_status = me.pf().and_then(|pf| me.member_key(wire::STATUS, &pf));
-    // This pilot, in a flight with another aircraft than the session's.
-    let mine_status = me.member_key(wire::STATUS, &mine);
-    let elsewhere = preflight.aircraft.is_some()
-        && mine_status
-            .as_ref()
-            .is_some_and(|s| flying(s.stage) && !me.in_flight(&mine));
-    match (elsewhere, me.pf(), &pf_status) {
-        (true, Some(pf), Some(status)) if pf != mine => clients::notify(
-            cx,
-            "load",
-            Notification::new(
-                Level::Warning,
-                format!("Load the {} to fly with {}", named(status), name(&pf)),
-                Landing::Session,
-            ),
-        ),
-        _ => clients::clear_notification(cx, "load"),
-    }
     let mut came_in = Vec::new();
     let mut away_now = Vec::new();
     for member in me.members().into_iter().filter(|m| *m != mine) {
@@ -387,7 +359,6 @@ pub(crate) fn notifications(me: &mut Session, cx: &Cx) {
 
 /// Clears every notification of the session's, as it ends.
 pub(crate) fn clear_notifications(held: &crate::Held, cx: &Cx) {
-    clients::clear_notification(cx, "load");
     for member in held.others.keys().chain(held.left.iter()) {
         clients::clear_notification(cx, &notification_id(member));
     }

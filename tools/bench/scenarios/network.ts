@@ -105,7 +105,7 @@ test("a joiner whose first dials fail redials every 2s and links once the proxy 
 
 // The session crate always sends a first message, so a connection that sends none is the
 // network crate's own test, a_connection_whose_first_message_passes_links_and_hands_on_what_waited_behind_it.
-test("a connection with another session's code closes with its code, and the refused side says so", { timeout: 120_000 }, async (t) => {
+test("a connection with another session's code closes with its code, and each core's log says so", { timeout: 120_000 }, async (t) => {
   const net = await BenchNetwork.start()
   const run = new BenchRun("network-refusals", t)
   t.after(() => net.stop())
@@ -121,19 +121,15 @@ test("a connection with another session's code closes with its code, and the ref
   fs.writeFileSync(file, JSON.stringify({ ...saved, code: "ZZZZZZ" }, null, 2))
   const before = a.heard().length
   const wrong = await run.core("b", net.core())
-  const desktop = await app(wrong)
-  await desktop.until(() => desktop.notifications().some((n) => n.id === "network.refused"), "a refusal's notification", 20_000)
-  // Each core checks the other's first message, so whichever reads first refuses: the host,
-  // or the core with the other code.
-  const refuser = [a, wrong].find((c) => /the network refused a connection conn=\d+ code=10/.test(c.log()))
-  assert.ok(refuser, "one side should refuse the other code with code 10")
-  const refused = refuser === a ? wrong : a
-  const said = /a notification was raised id="network\.refused" .*refused this one's connection/
-  for (const started = Date.now(); !said.test(refused.log()); await sleep(50)) {
-    assert.ok(Date.now() - started < 5_000, "the refused side should say it was refused")
+  // Each core checks the other's first message, so either or both can refuse, and a core that
+  // hasn't read the other's yet hears the refusal from the close.
+  const refusal = /the network refused a connection conn=\d+ code=10|another core refused this core's connection conn=\d+ why=Code/
+  for (const core of [a, wrong]) {
+    for (const started = Date.now(); !refusal.test(core.log()); await sleep(50)) {
+      assert.ok(Date.now() - started < 20_000, "each core's log should say the connection was refused")
+    }
   }
   assert.ok(!a.heard().slice(before).some((l) => l.startsWith("net up")), "the host should never link a connection under another code")
-  t.diagnostic(`${refuser === a ? "the host" : "the core with the other code"} refused with code 10, and the other side said it was refused`)
 })
 test("a join on a direct path links within 3s of the code entered", { timeout: 60_000 }, async (t) => {
   const net = await BenchNetwork.start()

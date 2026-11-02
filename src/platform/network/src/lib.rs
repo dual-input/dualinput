@@ -5,8 +5,8 @@
 //! asks the transport, at the core's edge, to carry them out
 //! (record/areas/network/02-units.md, "The network crate").
 //!
-//! Register it after the clients crate, whose settings, slice, and notifications it uses, and
-//! before every unit that registers a channel.
+//! Register it after the clients crate, whose settings and slice it uses, and before every unit
+//! that registers a channel.
 
 mod backend;
 mod clock;
@@ -69,10 +69,29 @@ pub struct MemberOut {
     pub member: PilotId,
 }
 
+/// A core refused a connection over its first message: this core's check, or the other core,
+/// whose close names why.
+pub struct ConnectionRefused {
+    pub why: Mismatch,
+}
+
+/// What the two cores of a refused connection differ on.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Mismatch {
+    /// The session's code.
+    Code,
+    /// Dual Input's version, with the other core's when its first message named it, which a
+    /// close doesn't.
+    Version(Option<String>),
+    /// The message crate's hash, which two builds of one version can differ on.
+    Hash,
+}
+
 impl Moment for LinkUp {}
 impl Moment for LinkLost {}
 impl Moment for MemberLeft {}
 impl Moment for MemberOut {}
+impl Moment for ConnectionRefused {}
 
 /// Whom a send goes to.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -98,6 +117,8 @@ pub struct Network {
     session: Option<InSession>,
     /// This core's endpoint ID, once bound.
     endpoint: Option<EndpointId>,
+    /// Whether the session's endpoint failed to bind.
+    bind_failed: bool,
     links: BTreeMap<PilotId, Link>,
     conns: BTreeMap<u64, Conn>,
     /// Each sender's clock offset, by pilot ID and restart count.
@@ -151,6 +172,7 @@ impl Network {
                 .collect(),
             internet: self.reach.internet,
             servers: self.reach.servers,
+            bind_failed: self.bind_failed,
         }
     }
 }
@@ -347,8 +369,7 @@ impl Network {
         me.forget(cx);
         me.session = None;
         me.endpoint = None;
-        clients::clear_notification(cx, "refused");
-        clients::clear_notification(cx, "bind");
+        me.bind_failed = false;
         if let Some(heartbeat) = me.heartbeat.take() {
             cx.cancel_timer(heartbeat);
         }

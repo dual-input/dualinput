@@ -30,7 +30,9 @@ use kernel::{Cx, Handle, JobId, Moment, Registry, TimerId, Unit};
 use messages::clients::SettingKind;
 use messages::net::{EndpointId, PilotId, Relay};
 use messages::session::{self as wire, KeyValue, Keys, Link, Stamp};
-use network::{BackendAnswered, LinkLost, LinkUp, MemberLeft, MemberOut, NetUnit, To};
+use network::{
+    BackendAnswered, ConnectionRefused, LinkLost, LinkUp, MemberLeft, MemberOut, NetUnit, To,
+};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use serde_json::json;
@@ -377,6 +379,7 @@ pub fn register(r: &mut Registry) {
         .opener(wire::CHANNEL, Session::opened)
         .channel(wire::CHANNEL, Session::keys_in)
         .on::<BackendAnswered>(joining::answered)
+        .on::<ConnectionRefused>(joining::connection_refused)
         .on::<LinkUp>(members::link_up)
         .on::<LinkLost>(members::link_lost)
         .on::<MemberLeft>(|me, left: &MemberLeft, cx| me.gone(left.member, cx))

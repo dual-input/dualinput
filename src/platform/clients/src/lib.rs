@@ -185,12 +185,6 @@ impl Clients {
             .map_or("", Client::component)
             .to_string()
     }
-
-    /// The notification up under its full ID, the raising unit's name, `.`, and its own ID,
-    /// as `network.refused`.
-    pub fn notification_up(&self, id: &str) -> Option<&Notification> {
-        self.notifications.get(id)
-    }
 }
 
 /// The clients crate's unit name, which its own `unit` messages to the EFB app carry.

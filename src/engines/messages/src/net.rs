@@ -233,6 +233,8 @@ pub struct NetSlice {
     pub internet: Option<bool>,
     /// Whether our servers answer, as the last check found, or `None` before the first.
     pub servers: Option<Servers>,
+    /// Whether the session's endpoint failed to bind, so the crew can't reach this pilot.
+    pub bind_failed: bool,
 }
 
 /// Whether hosting and joining can reach what they need: the backend, and at least one relay.

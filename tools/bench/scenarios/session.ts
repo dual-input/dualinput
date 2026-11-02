@@ -157,7 +157,7 @@ test("a joiner in another aircraft is a member out of the flight, and enters it 
   await join(b.core, code, b.name)
   let s = await until(b, (s) => s.members.length === 2 && s.preflight.phase === "ended", "the session, after preflight")
   assert.equal(me(s)?.in_flight, false, "a joiner in another aircraft is out of the flight")
-  await b.app.until(() => b.app.notifications().some((n) => n.id === "session.load" && n.text === "Load the Baron 58P to fly with James"), "the notification to load the session's aircraft")
+  assert.deepEqual(b.app.notifications(), [], "Join says how to get in, so the banner doesn't")
   assert.ok(!a.app.notifications().some((n) => n.text.includes("is in the")), "the crew row says where a crewmate is, so the banner doesn't")
 
   await toMenu(b)
@@ -165,7 +165,6 @@ test("a joiner in another aircraft is a member out of the flight, and enters it 
   s = await until(b, (s) => me(s)?.in_flight === true, "the joiner in the flight")
   assert.match(b.core.log(), /preflight ended, and the session's keys take this much/, "the late joiner raised PreflightEnded")
   assert.equal(await frozen(b), false, "a late joiner skips preflight's hold")
-  await b.app.until(() => !b.app.notifications().some((n) => n.id === "session.load"), "the notification clearing")
 
   await toMenu(b)
   await a.app.until(() => a.app.notifications().some((n) => n.text === "Adam left the flight" && n.once === true && n.out === true && n.detail === "They're still in the session."), "the crew hearing it once")
@@ -618,4 +617,27 @@ test("no answer from the backend is our servers while a relay answers, and this 
   const offline = await pilot(run, net, "Adam", { settings: { "network.backend": down, "network.relays": [{ url: down, token: "t", cap: 1 }] } })
   await reach(offline, { internet: false, servers: "unreachable" })
   assert.deepEqual(await refusal(offline), { on: "host", why: "offline" })
+})
+
+test("a join another core refuses stops, and says why in the words of the backend's refusal", { timeout: 60_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("session-refused-connection", t)
+  const a = await pilot(run, net, "James")
+  const code = await host(a.core, a.name)
+
+  // A core back from a session file naming another code answers to that one, while the backend
+  // still lists it under the first, so a joiner finds it and the two refuse each other.
+  await a.core.kill()
+  const file = path.join(a.core.data, "session.json")
+  const saved = JSON.parse(fs.readFileSync(file, "utf8")) as { code: string }
+  fs.writeFileSync(file, JSON.stringify({ ...saved, code: "ZZZZZZ" }, null, 2))
+  await run.core(a.name, net.core())
+
+  const b = await pilot(run, net, "Adam")
+  await join(b.core, code, b.name)
+  const s = await until(b, (s) => s.refused !== null, "the refusal", 20_000)
+  assert.deepEqual(s.refused, { on: "join", why: "no-code" })
+  assert.equal(s.attempt, null, "the join stopped")
+  assert.deepEqual(b.app.notifications(), [], "the start card says it, so the banner doesn't")
 })

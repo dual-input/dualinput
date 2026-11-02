@@ -17,6 +17,14 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 > The backend's lack of an answer to Host or Join waits for a check, so the session crate tells an offline PC from our servers out of reach.
 > [Lookup's](#its-requests) `other-version` carries the host's version as `theirs`, and `too-many-wrong-codes` carries `until`, when the next hour begins in UTC, which the deployed Worker needs before a core reads either.
 
+> **Note**
+> Stage 11b's tentative decision on [what reaches the banner](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) leaves the network no notifications of its own, so [the first message](#the-first-message)'s two and the bench's refused side no longer hold (user, 2026-11-01).
+> The network raises a moment, `ConnectionRefused { why }`, when it refuses a first message and when a connection closes with a refusal's code.
+> The session crate then stops a join still reaching the crew, and the start card says why in the words of the backend's refusal for the same difference.
+> A close names no version, so a version refusal known only from one reads as our servers not answering.
+> A session under way has no start card, so there only the log says it.
+> An endpoint that failed to bind is `bind_failed` in [the network's slice](#what-the-pilot-sees-and-settings), which [the header](../interface/decisions.md#the-header-shows-only-what-needs-the-pilot) shows as a row.
+
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.
 The network owns everything between machines, the backend's requests among it, and the session crate fills each connection's first message with the session's keys through one hook.

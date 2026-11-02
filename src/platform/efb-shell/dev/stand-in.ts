@@ -88,7 +88,7 @@ const OUTPUTS = {
   in_use: { id: "usb", name: "Headset (USB Audio)" },
 }
 
-const reach = { internet: true, servers: "reachable" as const }
+const reach = { internet: true, servers: "reachable" as const, bind_failed: false }
 const healthy = { network: { members: [], ...reach }, sim: atWorldMap, profiles: { loaded: { maturity: "Stable" }, supported: SUPPORTED }, session: noSession, settings: settings(true, true) }
 
 /** The up link to James the session's scenes share, over a relay at 120ms. */
@@ -105,8 +105,8 @@ const CLIPBOARD = "clipboard"
 export const SCENES: Record<string, Slices> = {
   "First-time setup": firstRun,
   "Setup: add-on mismatch": { ...firstRun, core: { ...firstRun.core, version: "0.0.9" } },
-  "Setup: offline": { ...firstRun, network: { members: [], internet: false, servers: "unreachable" } },
-  "Setup: our servers": { ...firstRun, network: { members: [], internet: true, servers: "unreachable" } },
+  "Setup: offline": { ...firstRun, network: { members: [], ...reach, internet: false, servers: "unreachable" } },
+  "Setup: our servers": { ...firstRun, network: { members: [], ...reach, servers: "unreachable" } },
   "Setup: firewall": { ...firstRun, [DESKTOP]: { ...LOCAL, firewall: "blocks" } },
   "First visit": firstVisit,
   "First visit, no profile": { ...firstVisit, sim: fenix, profiles: NO_PROFILE },
@@ -138,16 +138,15 @@ export const SCENES: Record<string, Slices> = {
     }),
   },
   Flying: { ...netUp, session: held({ members: [me(inFlight), james(inFlight)], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, differences: DIFFERENCES, ready: null }) },
-  "Header: offline": { network: { members: [], internet: false, servers: null } },
-  "Header: several things": { network: { members: [], internet: true, servers: "unreachable" }, [DESKTOP]: { ...LOCAL, firewall: "blocks", update: { state: "ready", next: "1.0.3" } } },
+  "Header: offline": { network: { members: [], ...reach, internet: false, servers: null } },
+  "Header: several things": { network: { members: [], ...reach, servers: "unreachable" }, [DESKTOP]: { ...LOCAL, firewall: "blocks", update: { state: "ready", next: "1.0.3" } } },
   "Header: our own parts": {
     session: held({ members: [me(inFlight), james(inFlight)], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, ready: null }),
-    network: { members: [], internet: true, servers: "unreachable" },
+    network: { members: [], ...reach, servers: "unreachable", bind_failed: true },
     notifications: [
       { id: "sim-service.module-stopped", level: "trouble", text: "Dual Input's WASM module stopped", detail: "Restart the sim to fly together again.", landing: "header" },
       { id: "clients.no-panel", level: "trouble", text: "Cockpit screens aren't syncing", detail: "Dual Input couldn't load into the cockpit's panels. Another add-on that replaces VCockpit.js is the likeliest cause.", landing: "header" },
       { id: "core-helper.down", level: "trouble", text: "Dual Input's Windows helper is down", detail: "Keybinds, audio, and your figure's pointing won't work until it's back.", landing: "header" },
-      { id: "network.bind", level: "trouble", text: "Dual Input can't open its connection to other pilots", detail: "Your crew can't reach you until it opens.", landing: "header" },
       { id: "core-helper.failed.binding-1", level: "warning", text: "Your take-control key isn't working", detail: "Windows didn't let Dual Input listen for F9.", landing: "header" },
     ],
     [DESKTOP]: { ...LOCAL, firewall: "blocks" },

@@ -180,7 +180,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
     Its button takes the sim's own flight-button yellow, `#FFDE03` with `#242934` text, the world map's Start flight button's `--colorSpecial` and `--colorSpecial_Content` (read in fs-base-ui 0.1.10, `components/shared/variables.css`).
 
   So loading a pilot's flight for them, which [03-v1-scope](../product/03-v1-scope.md#preflight) leaves out of v1, is in v1 from the world map, and Go to from any other page stays [an idea](../product/ideas.md#the-pfs-spot-on-the-world-map).
-  Join is disabled, and says why, while the PF has loaded no flight, while the PF's flight names no departure airport, while the joiner lacks the PF's aircraft, and while Dual Input has no copy of BlurPage.
+  Join is disabled, and says why, while the PF has loaded no flight, while the PF's flight names no departure airport, while the joiner lacks the PF's aircraft, while the joiner is in a flight in another aircraft, which it says to end (user, 2026-11-01), and while Dual Input has no copy of BlurPage.
   Its words name the PF and never use he or she, since Dual Input doesn't know a pilot's pronouns (user, 2026-10-29).
   A step that fails says which one ([Go to](../session/02-units.md#go-to)).
   When the world map lists no stand matching the PF's, the airport stays selected with no stand ([the menu script](../session/02-units.md#the-menu-script)), and Join now goes on to the aircraft, the livery, and the flight's start, since Dual Input moves the joiner's aircraft to the PF at the same airport.
@@ -595,8 +595,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Decided:** a notification is information, a warning, or trouble, the last for trouble that costs the pilot a feature, and none carries a button in v1.
   - On the banner, held while its cause lasts: the lost link; catching up, one word for a late joiner's catch-up and a short outage's replay; the PF in the pause menu, on the others' banners; Dual Input's service gone or reconnecting; the panel bridge not loading; our WASM module stopped or missing; the Windows helper down; a key Windows refuses; and "This seat is taken", while this pilot's camera is in the seat.
   - On the banner, shown once: control passing or refused, with the reason; for a PF who lost control through the lost link, once back, that what they changed alone was undone; a crewmate leaving the flight or the session, closing their sim, crashing, or coming back; and a control that couldn't sync, once per entry each load, several at one load as one.
-  - Elsewhere: the output device in Settings; traffic's counts on its tab; the unreadable model on the Figures tab; offline, our servers, the firewall, and the update in the header; Host and Join refused in the start card; and a recording that stops in Settings.
-  - Dropped: the warning after a takeover through a lost link, by which time the deed is done, with its words on the lost link's line; "Adam is in the A320", which the crew row shows; the crash's ask for a bug report; our package missing or from another version, which [the EFB app's box](#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-shows-setups-box) shows; and each crewmate's link, which the crew rows show.
+  - Elsewhere: the output device in Settings; traffic's counts on its tab; the unreadable model on the Figures tab; offline, our servers, the firewall, the connection to other pilots failing to open, and the update in the header; Host and Join refused in the start card, where a pilot's PC refusing the other's connection takes the same words; and a recording that stops in Settings.
+  - Dropped: the warning after a takeover through a lost link, by which time the deed is done, with its words on the lost link's line; "Adam is in the A320", which the crew row shows; "Load the Baron 58P to fly with James", since [Join](#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up) says how to get in; the crash's ask for a bug report; our package missing or from another version, which [the EFB app's box](#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-shows-setups-box) shows; and each crewmate's link, which the crew rows show.
 
   Settled by the user on 2026-11-01.
 - **Because:**
@@ -604,14 +604,9 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - A crewmate who leaves the flight, closes their sim, or crashes is still in the session, so their card says so.
   - The pause menu's line stays because it explains a frozen aircraft or says the PF is away from the controls: anyone can open that menu, since Dual Input syncs only active pause, and whether it stops a flying aircraft is unmeasured (user, 2026-11-01).
 - **The panel bridge's check** waits for a panel only under a profile with a panel module that names something it serves, so an aircraft with no cockpit panels, such as a balloon, raises nothing.
-- **Open:** whether these three are notifications at all, which the user remembers deciding they aren't, and will look at and settle (user, 2026-11-01).
-  [In the flight](../session/02-units.md#in-the-flight) and [the first message](../network/02-units.md#the-first-message) call them notifications, and this decision's lists don't place them.
-  Until it's settled, the core raises them and the banner shows them.
-  - "Load the Baron 58P to fly with James", `session.load`, whose words no tab of the EFB app shows.
-  - A connection refused for its code, version, or hash, `network.refused`.
-  - An endpoint that failed to bind, `network.bind`, which has a row in the header too.
 - **Leaves out:**
   - A list of sync failures on the session card, which the user set aside until a need shows (user, 2026-11-01), so a click on one lands on the Session tab with nothing there to list it.
+  - A connection refused once a session is under way, which has no start card to show it, so only the log says it ([the first message](../network/02-units.md#the-first-message)).
 
 ## A notification's click opens the EFB app where it's explained or acted on
 

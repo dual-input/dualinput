@@ -21,6 +21,7 @@ import { writeMessageTypes } from "./lib/messages.ts"
 import { buildModule } from "./lib/module.ts"
 import { layOutPackage, PACKAGE } from "./lib/package.ts"
 import { buildPages, checkPages } from "./lib/pages.ts"
+import { panelCompileProblem } from "./lib/panel.ts"
 import { Failed, main, run } from "./lib/run.ts"
 import { requireSdk } from "./lib/sdk.ts"
 import { checkStock } from "./lib/stock.ts"
@@ -32,6 +33,9 @@ main(async () => {
 
   requireSdk()
   checkStock()
+  // A definition edited with no compile after it would fly the old panel with no word.
+  const panel = panelCompileProblem()
+  if (panel) throw new Failed(panel)
   // An install refuses before it builds, so a developer with the sim open doesn't wait out a
   // build for nothing, and again before it copies, since the sim may start during the build.
   if (installing) refuseWhileSimRuns()

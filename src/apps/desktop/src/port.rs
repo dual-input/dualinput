@@ -16,6 +16,8 @@ const SIM_ORIGIN: &str = "coui://html_ui";
 /// The largest message a socket takes, far past the few words any of them is.
 const LIMIT: usize = 4 * 1024;
 
+const ACCEPT_AGAIN_AFTER: std::time::Duration = std::time::Duration::from_millis(100);
+
 /// Serves each connection until the listener's task ends with the program.
 pub async fn serve(
     listener: TcpListener,
@@ -27,7 +29,11 @@ pub async fn serve(
             Ok((stream, _)) => {
                 tokio::spawn(socket(stream, state.clone(), asks.clone()));
             }
-            Err(error) => eprintln!("a connection to the local port failed: {error}"),
+            // Out of handles, say, it would fail again at once, so it waits rather than spin a CPU core.
+            Err(error) => {
+                eprintln!("a connection to the local port failed: {error}");
+                tokio::time::sleep(ACCEPT_AGAIN_AFTER).await;
+            }
         }
     }
 }

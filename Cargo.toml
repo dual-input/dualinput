@@ -1,5 +1,6 @@
-# Every Rust crate of Dual Input is in this one workspace, so every program builds with the
-# same version of each dependency, from one Cargo.lock, and shares the settings below.
+# Every Rust crate of Dual Input but the desktop app is in this one workspace, so every program
+# builds with the same version of each dependency, from one Cargo.lock, and shares the settings
+# below. src/apps/desktop/Cargo.toml says why that one is a workspace of its own.
 [workspace]
 # Members are named by folder globs: `src/engines/*` makes every folder under src/engines/ a
 # member, so adding or deleting a crate's folder needs no edit here. Cargo stops with an
@@ -12,7 +13,7 @@
 # - When you add a TypeScript folder that a glob matches, list it in an `exclude` list
 #   beside `members`.
 members = ["src/engines/*", "src/platform/*", "src/features/*/core", "src/apps/*", "src/sim-package/*", "tools/msfs-sdk", "tools/profile-builder", "tools/bench/core-helper", "tools/bench/droplet", "tools/bench/relay", "tools/sim/desk"]
-# TypeScript, and the sim's stock files.
+# TypeScript, the sim's stock files, and the desktop app.
 exclude = ["src/engines/page-client", "src/platform/banner", "src/platform/desktop-shell", "src/platform/efb-shell", "src/platform/panel-bridge", "src/sim-package/pages", "src/sim-package/panel", "src/sim-package/stock", "src/apps/desktop"]
 # A plain `cargo build` builds these. src/sim-package/'s glob stays out of this list, since our
 # WASM module's build script needs settings only cargo-msfs gives it, so the module's list of
@@ -21,7 +22,8 @@ default-members = ["src/engines/*", "src/platform/*", "src/features/*/core", "sr
 resolver = "3"
 
 # Two builds with different versions refuse to connect, rather than misread each other's
-# messages. Every crate inherits this one version, so all of a build's programs agree on it.
+# messages. Every crate inherits this one version, so all of a build's programs agree on it, and
+# src/apps/desktop/Cargo.toml names the same one, which tools/check.ts fails if it differs from.
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
@@ -40,7 +42,8 @@ disallowed_methods = "deny"
 # Our WASM module, the code we load into the sim, is built by cargo-msfs, whose README
 # asks for `lto` and `strip`: `lto` optimizes across crates, and `strip` leaves debug
 # symbols out of the output. Cargo reads profiles only from the workspace's root, so they
-# live here and apply to every program's release build, the module's among them.
+# live here and apply to every program's release build, the module's among them, and
+# src/apps/desktop/Cargo.toml repeats `lto` and `strip`, so change both together.
 #
 # `panic = "abort"` ends the core at a panic on any of its threads, so a panic on an edge
 # thread can't leave the loop running without it, and the desktop app starts the core

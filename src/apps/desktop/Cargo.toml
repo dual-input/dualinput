@@ -20,7 +20,7 @@ messages = { path = "../../engines/messages" }
 serde_json = "1.0.145"
 tauri = { version = "=2.12.1", features = ["custom-protocol", "tray-icon"] }
 # Tauri's own runtime is tokio, so the local port runs on it.
-tokio = { version = "1.53.3", features = ["net", "rt", "sync", "macros"] }
+tokio = { version = "1.53.3", features = ["net", "rt", "sync", "macros", "time"] }
 # The same WebSocket implementation as the core's server, so the workspace stays at one.
 tokio-websockets = { version = "0.13.3", default-features = false, features = ["server", "sha1_smol"] }
 
@@ -35,12 +35,9 @@ tauri-build = { version = "=2.7.1", features = [] }
 [dev-dependencies]
 tokio-websockets = { version = "0.13.3", default-features = false, features = ["client", "fastrand", "server", "sha1_smol"] }
 
-# The root's [workspace.lints] names the same lints, and src/apps/clippy.toml, the nearest, is what they read.
-[lints.clippy]
-iter_over_hash_type = "deny"
-disallowed_methods = "deny"
-
-# Cargo reads profiles only from a workspace's root, so the root's lines are repeated here.
+# Cargo reads profiles only from a workspace's root, so the root's `lto` and `strip` are repeated here. Its
+# `panic = "abort"` isn't, since that leaves the desktop app to start a crashed core again, and nothing would start this
+# app again.
 [profile.release]
 lto = true
 strip = true

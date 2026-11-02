@@ -30,6 +30,7 @@ const LIMIT: usize = 1024 * 1024;
 
 /// What every page we use sent as its `Origin` (measured on MSFS 2024, 2026-10-08,
 /// record/areas/interface/log.md); the desktop app's Rust side sends none (decision 013).
+/// `SIM_ORIGIN` in src/apps/desktop/src/port.rs names the same one.
 const SIM_ORIGIN: &str = "coui://html_ui";
 
 type Senders = Arc<Mutex<BTreeMap<u64, mpsc::UnboundedSender<Message>>>>;

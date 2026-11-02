@@ -241,6 +241,33 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     ]),
   },
   {
+    name: "a package on anything but a package",
+    rules: ["packages"],
+    tree: {
+      ...TS,
+      "src/platform/efb-shell/api.ts": `export const api = 1;\n`,
+      "src/packages/crew/index.ts": `import { api } from "../../platform/efb-shell/api.ts";\nexport const x = api;\n`,
+    },
+  },
+  {
+    name: "a panel module on a package",
+    rules: ["packages"],
+    tree: {
+      ...TS,
+      "src/packages/ui/index.ts": `export const kit = 1;\n`,
+      "src/features/pointer-sync/panel/index.ts": `import { kit } from "../../../packages/ui/index.ts";\nexport const x = kit;\n`,
+    },
+  },
+  {
+    name: "one page's code on the other's",
+    rules: ["pages-apart"],
+    tree: {
+      ...TS,
+      "src/platform/banner/api.ts": `export const api = 1;\n`,
+      "src/platform/efb-shell/index.ts": `import { api } from "../banner/api.ts";\nexport const x = api;\n`,
+    },
+  },
+  {
     name: "a feature's panel module importing another feature's types alone",
     rules: ["feature-on-feature"],
     tree: {

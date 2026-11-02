@@ -10,7 +10,7 @@ import fs from "node:fs"
 import path from "node:path"
 import { createRequire } from "node:module"
 
-import { DESKTOP } from "./lib/desktop-pages.ts"
+import { buildDesktopPages, DESKTOP } from "./lib/desktop-pages.ts"
 import { readMessageTypes, writeMessageTypes } from "./lib/messages.ts"
 import { buildModule, clippyModule, missingExports } from "./lib/module.ts"
 import { workspaceVersion } from "./lib/package.ts"
@@ -116,8 +116,9 @@ function typeScriptTests(): string[] {
   return ["src", "tools"].flatMap((f) => find(path.join(ROOT, f), ".test.ts")).map((f) => fromRoot(f))
 }
 
-/** The desktop app is a Cargo workspace of its own, so the workspace's checks above don't reach it, and its version is written apart from the root's. */
-function checkDesktop(): void {
+/** The desktop app is a Cargo workspace of its own, so the workspace's checks above don't reach it, and its version is written apart from the root's. It embeds its pages as it compiles, so they build first, or Clippy and the tests would compile an old window. */
+async function checkDesktop(): Promise<void> {
+  await buildDesktopPages()
   const version = /^version = "([^"]+)"/m.exec(fs.readFileSync(path.join(DESKTOP, "Cargo.toml"), "utf8"))?.[1]
   if (version !== workspaceVersion()) throw new Failed(`src/apps/desktop/Cargo.toml names version ${version}, and the root Cargo.toml ${workspaceVersion()}`)
   run("cargo", ["fmt", "--", "--check"], { cwd: DESKTOP })

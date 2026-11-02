@@ -813,6 +813,8 @@ The code map's [third test](#tiers) is a script in `tools/` that CI and a develo
 - p10's loop has 11 crates besides itself among its normal dependencies, rquickjs and zstd among them, none on the list (measured on our development machine, 2026-10-15, [architecture log][map]).
   p07's message crate turned on uuid's `v4`, which reaches `getrandom` (read in `experiments/areas/architecture/types/messages/Cargo.toml` and `types/Cargo.lock`), so the message crate keeps it off, as p11's did ([architecture log][p11]), and the kernel draws the IDs from the seed the core's edge hands it.
 - The script also searches our crates' source for a foreign function's declaration outside the two edges and `src/apps/core`'s `_set_FMA3_enable`, which the crate graph can't show.
+  That covers the desktop app, whose workspace `cargo metadata` leaves out, so its dependencies go unchecked: its one of ours is the message crate, which no rule forbids an app.
+- The script holds `src/packages/` too: a package may use only packages, only the pages' shells, their sections, and the programs may use one, and neither page's code may reach into the other's.
 - An outside crate that calls std's file, socket, or clock functions itself, rather than through a crate on the list, passes the check, so we review each new dependency of a loop crate before it's added.
 
 cargo-deny can ban a dependency only by naming, for each crate, which crates may depend on it (read in torrust/torrust-tracker, `deny.toml`, at 9c8bcdf), so it would hold one entry per crate where the script holds each rule once.

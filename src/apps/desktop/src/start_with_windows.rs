@@ -43,23 +43,43 @@ impl Drop for RunKey {
     }
 }
 
-/// Whether the value exists.
-pub fn is_on() -> bool {
-    let Some(key) = RunKey::open(KEY_READ) else {
-        return false;
-    };
-    // SAFETY: the name is a NUL-terminated string that outlives the call, and null out-pointers ask only whether it exists.
-    let found = unsafe {
+/// What the value runs: this program, with `--tray`.
+fn command() -> Result<String, String> {
+    let program = std::env::current_exe().map_err(|error| error.to_string())?;
+    Ok(format!("\"{}\" --tray", program.display()))
+}
+
+/// What the value holds, if it exists and fits a path's longest length.
+fn value() -> Option<String> {
+    let key = RunKey::open(KEY_READ)?;
+    let mut text = [0u16; 1024];
+    let mut bytes = u32::try_from(size_of_val(&text)).ok()?;
+    // SAFETY: the name is a NUL-terminated string that outlives the call, and `bytes` is the length of the buffer it writes to.
+    let read = unsafe {
         RegQueryValueExW(
             key.0,
             wide(VALUE).as_ptr(),
             std::ptr::null(),
             std::ptr::null_mut(),
-            std::ptr::null_mut(),
-            std::ptr::null_mut(),
+            text.as_mut_ptr().cast(),
+            &mut bytes,
         )
     };
-    found == ERROR_SUCCESS
+    if read != ERROR_SUCCESS {
+        return None;
+    }
+    let held = &text[..bytes as usize / 2];
+    let end = held
+        .iter()
+        .position(|&unit| unit == 0)
+        .unwrap_or(held.len());
+    Some(String::from_utf16_lossy(&held[..end]))
+}
+
+/// Whether Windows would run this program: a development build, under a worktree that may be gone, has written the value
+/// for itself, so another's value says nothing about this one.
+pub fn is_on() -> bool {
+    value().is_some_and(|held| command().is_ok_and(|mine| mine == held))
 }
 
 /// Writes the value to run this program with `--tray`, or deletes it. It says so if Windows wouldn't, so the switch shows what holds.
@@ -77,8 +97,7 @@ pub fn set(on: bool) -> Result<(), String> {
             Err(format!("Windows answered {deleted}"))
         };
     }
-    let program = std::env::current_exe().map_err(|error| error.to_string())?;
-    let command = wide(&format!("\"{}\" --tray", program.display()));
+    let command = wide(&command()?);
     let bytes = u32::try_from(command.len() * 2).map_err(|error| error.to_string())?;
     // SAFETY: the name and the command are NUL-terminated strings that outlive the call, and `bytes` is the command's length in bytes.
     let written = unsafe {

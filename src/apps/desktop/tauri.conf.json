@@ -3,7 +3,10 @@
   "productName": "Dual Input",
   "identifier": "com.dualinput.desktop",
   "build": {
-    "frontendDist": "../../../target/desktop-pages"
+    "frontendDist": "../../../target/desktop-pages",
+    "windows": {
+      "staticVCRuntime": false
+    }
   },
   "app": {
     "windows": [],

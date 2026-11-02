@@ -3,7 +3,8 @@
 //! once destroyed, and a hidden one keeps it, so closing the window destroys it (measured on our development machine,
 //! 2026-10-18, record/areas/install/log.md).
 
-#![windows_subsystem = "windows"]
+// A release has no console. A debug build keeps one, or its messages would go nowhere.
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod port;
 mod start_with_windows;
@@ -24,19 +25,27 @@ const QUIT_ITEM: &str = "quit";
 /// Opens the window, or brings forward the one that's open.
 fn open_window(app: &AppHandle) {
     if let Some(window) = app.get_webview_window(WINDOW) {
+        // Focus alone leaves a minimized window where it is (read in tao 0.37.2, window.rs).
+        let _ = window.unminimize();
         let _ = window.set_focus();
         return;
     }
-    if let Err(error) = WebviewWindowBuilder::new(app, WINDOW, WebviewUrl::App("index.html".into()))
+    let mut builder = WebviewWindowBuilder::new(app, WINDOW, WebviewUrl::App("index.html".into()))
         .title("Dual Input")
         .inner_size(520.0, 640.0)
-        .min_inner_size(420.0, 480.0)
-        .build()
-    {
+        .min_inner_size(420.0, 480.0);
+    // WebView2's data goes beside Velopack's folder, so an uninstall deletes it too
+    // (record/areas/install/01-installing-and-updating.md, "On disk").
+    if let Ok(local) = app.path().local_data_dir() {
+        builder = builder.data_directory(local.join("DualInput").join("webview"));
+    }
+    if let Err(error) = builder.build() {
         eprintln!("the window didn't open: {error}");
     }
 }
 
+/// TODO: when stage 15 builds the desktop app's tray, add handing a second start's request to the running app, Quit asking
+/// once and sending the session crate's Quit, and the usage line.
 fn tray(app: &AppHandle) -> tauri::Result<()> {
     let icon = app
         .default_window_icon()

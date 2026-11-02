@@ -541,6 +541,7 @@ Tests:
 Builds: the desktop app's tray icon and its jobs, the installer and updates through Velopack, packed on our development machine, the firewall rule, and writing our package ([installing and updating](../install/01-installing-and-updating.md)).
 From stage 4, the release's folder also holds the C++ runtime's three DLLs that `SimConnect.dll` imports ([the build](01-the-build.md)), and the desktop app copies our package as [installing and updating](../install/01-installing-and-updating.md)'s note of 2026-10-21 has it.
 The release workflow comes in [stage 22](#22-github).
+The desktop app's `messages::HASH` covers the root's `Cargo.lock`, not the one it compiled with, since `src/engines/messages/build.rs` looks for the lock upward from itself, and nothing reads that hash yet, so this stage settles it before it gives the app a socket to the core.
 Needs: 3 and 11b.
 
 Tests:

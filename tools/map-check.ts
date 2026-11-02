@@ -11,6 +11,7 @@
 //                   panels, and in the EFB and desktop apps
 //   src/features/   one folder for each thing a pilot gets, such as pointer sync
 //   src/apps/, src/sim-package/, and tools/   the programs and packages built from the rest
+//   src/packages/   what the apps' pages draw with, which only those pages use
 //
 // Code may use only the tiers below its own, and the rules below narrow that further.
 //
@@ -59,6 +60,8 @@ export type Rule =
   | "foreign-functions" // only the sim edge and our WASM module may declare foreign functions, and src/apps/core only _set_FMA3_enable
   | "feature-moments" // a feature may not implement Moment, since only the platform raises moments, the events features learn of each other through
   | "platform-names-feature" // the platform may not name a feature's module in messages
+  | "packages" // a package may use only packages, and only the pages' shells, their sections, and the programs may use one
+  | "pages-apart" // neither page's code may reach into the other's, so what both draw goes in a package
 
 export type Finding = { rule: Rule; where: string; detail: string }
 
@@ -81,6 +84,8 @@ const CORE_PLATFORM_LINES = [
 ]
 const OUTSIDE_PLATFORM = ["routine-host", "panel-bridge", "efb-shell", "banner", "desktop-shell"]
 const FEATURE_PARTS = ["core", "routines", "panel", "efb", "desktop"]
+// The pages that draw with the kit.
+const PAGE_SHELLS = ["efb-shell", "banner", "desktop-shell"]
 
 // The engines that are edge code, the stand-in sim included, which takes the sim's place
 // in tests. The loop's rules don't hold for them. The comments on the loop's lints in the
@@ -105,7 +110,7 @@ type Unit =
   | { tier: "core-platform"; name: string; line: number }
   | { tier: "outside-platform"; name: string }
   | { tier: "feature"; name: string; part: string }
-  | { tier: "app" | "sim-package" | "tool"; name: string }
+  | { tier: "app" | "sim-package" | "tool" | "package"; name: string }
 
 /**
  * The unit a crate's folder or a TypeScript file belongs to, from its path from the root,
@@ -131,6 +136,8 @@ function unitOf(rel: string): Unit | undefined | null {
     }
     case "features":
       return part && FEATURE_PARTS.includes(part) ? { tier: "feature", name, part } : undefined
+    case "packages":
+      return { tier: "package", name }
     case "apps":
       return { tier: "app", name }
     case "sim-package":
@@ -197,6 +204,12 @@ function importRule(from: Unit, to: Unit, toRel: string, features: Set<string>):
   if (to.tier === "app" || to.tier === "sim-package" || to.tier === "tool") {
     return from.tier === "tool" && to.tier === "tool" ? null : "nothing-on-apps"
   }
+  if (from.tier === "package") return to.tier === "package" ? null : "packages"
+  if (to.tier === "package") {
+    if (from.tier === "app" || from.tier === "sim-package" || from.tier === "tool") return null
+    if (from.tier === "outside-platform" && PAGE_SHELLS.includes(from.name)) return null
+    return from.tier === "feature" && (from.part === "efb" || from.part === "desktop") ? null : "packages"
+  }
   switch (from.tier) {
     case "engine":
       if (to.tier !== "engine") return "down-the-tiers"
@@ -204,6 +217,7 @@ function importRule(from: Unit, to: Unit, toRel: string, features: Set<string>):
     case "core-platform":
     case "outside-platform":
       if (featureTypes) return "platform-names-feature"
+      if (to.tier === "outside-platform" && PAGE_SHELLS.includes(from.name) && PAGE_SHELLS.includes(to.name)) return "pages-apart"
       if (to.tier === "engine" || to.tier === "outside-platform") return null
       return to.tier === "core-platform" ? "outside-the-core" : "down-the-tiers"
     case "feature": {
@@ -278,6 +292,9 @@ function checkCrates(root: string, features: Set<string>, findings: Finding[]): 
     }
     checkRustSource(crate, features, findings, root)
   }
+  // The desktop app is a workspace of its own, which this one's metadata leaves out. Its one dependency of ours is the message crate, which no rule forbids an app, so only its source needs reading.
+  const desktop = path.join(root, "src", "apps", "desktop")
+  if (fs.existsSync(path.join(desktop, "Cargo.toml"))) checkRustSource({ id: "", name: "dualinput-desktop", dir: desktop, rel: "src/apps/desktop", unit: { tier: "app", name: "desktop" } }, features, findings, root)
 }
 
 /** Every crate outside src/apps/, src/sim-package/, tools/, and the edge engines runs on the loop. */
@@ -387,7 +404,7 @@ function withoutComments(source: string): string {
 // tools/map-check.test.ts has a case that fails if they go missing.
 function checkImports(root: string, features: Set<string>, findings: Finding[]): void {
   const tsc = path.join(path.dirname(createRequire(import.meta.url).resolve("typescript/package.json")), "bin", "tsc")
-  const folders = ["src/engines", "src/platform", "src/features", "src/apps", "src/sim-package", "tools"].map((f) => path.join(root, f))
+  const folders = ["src/engines", "src/platform", "src/features", "src/apps", "src/sim-package", "src/packages", "tools"].map((f) => path.join(root, f))
   const configs = folders.flatMap((f) => listFiles(f, (file) => path.basename(file) === "tsconfig.json", ["node_modules", "target"]))
   const seen = new Set<string>()
   for (const config of configs) {

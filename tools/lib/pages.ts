@@ -149,8 +149,8 @@ async function buildBannerAssets(out: string): Promise<Built[]> {
     { file: path.join(pages, "banner.html"), to: `${BANNER}/banner.html` },
     ...fs.readdirSync(fonts).map((font) => ({ file: path.join(fonts, font), to: `${BANNER}/fonts/${font}` })),
     { file: path.join(pages, "banner-icon.svg"), to: "html_ui/icons/toolbar/ICON_TOOLBAR_DUALINPUT_BANNER.svg" },
-    // Compiled by tools/compile-panel.ts, whose check in tools/check.ts fails a tree without it, so a build before the first compile leaves it out.
-    ...(fs.existsSync(path.join(COMPILED, SPB)) ? [{ file: path.join(COMPILED, SPB), to: `InGamePanels/${SPB}` }] : []),
+    // Compiled by tools/compile-panel.ts, and committed.
+    { file: path.join(COMPILED, SPB), to: `InGamePanels/${SPB}` },
   ]
 }
 

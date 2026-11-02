@@ -29,13 +29,15 @@ function clockOf(utc: string): string {
   return `${String(time.getHours()).padStart(2, "0")}:${String(time.getMinutes()).padStart(2, "0")}`
 }
 
-/** A refusal's words: either action's when the PC seems offline or our servers don't answer, and a join's with the backend's four refusals. */
+/** A refusal's words: either action's when the PC seems offline, our servers don't answer, or its connection won't open, and a join's with the backend's four refusals. */
 function refusalWords(refusal: Refusal): { title: string; detail: string; update?: boolean } {
   switch (refusal.why) {
     case "offline":
       return { title: "Your PC seems offline", detail: "Dual Input needs the internet to connect you and your crew. Check your connection and try again?" }
     case "servers":
       return { title: "Couldn't reach our servers", detail: "Dual Input needs them to connect you and your crew. Try again in a moment." }
+    case "no-connection":
+      return { title: "Dual Input couldn't open its connection to other pilots", detail: "Try again in a moment. If it keeps failing, ask on our Discord." }
     case "no-code":
       return { title: "No session has this code", detail: "Check it with your host and try again." }
     case "you-older":

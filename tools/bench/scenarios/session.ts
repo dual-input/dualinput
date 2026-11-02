@@ -642,3 +642,26 @@ test("a join another core refuses stops, and says why in the words of the backen
   assert.equal(s.held, false, "the core let the session go")
   assert.deepEqual(b.app.notifications(), [], "the start card says it, so the banner doesn't")
 })
+
+test("a Host whose connection won't open never starts, says why, and leaves no session to find", { timeout: 60_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("session-no-connection", t)
+  // An address that doesn't read is the one way a bench core's endpoint fails to bind.
+  const a = await pilot(run, net, "James", { settings: { "network.relays": [{ url: "not a url", token: "t", cap: 1 }] } })
+  await a.app.ok("clients.set-setting", { key: "session.name", value: a.name })
+  await a.app.ok("session.host")
+  const s = await until(a, (s) => s.refused !== null, "the refusal", 15_000)
+  assert.deepEqual(s.refused, { on: "host", why: "no-connection" })
+  assert.equal(s.attempt, null, "the Host stopped")
+  assert.equal(s.held, false, "the slice never showed a session")
+  assert.deepEqual(a.app.notifications(), [], "the start card says it, so the banner and the header don't")
+
+  const code = /the session started with its code code="(\w+)"/.exec(a.core.log())?.[1]
+  assert.ok(code, "the backend gave a code")
+  await sleep(1_000)
+  const b = await pilot(run, net, "Adam")
+  await join(b.core, code, b.name)
+  const looked = await until(b, (s) => s.refused !== null, "the joiner's refusal")
+  assert.deepEqual(looked.refused, { on: "join", why: "no-code" }, "the failed Host told the backend to drop its code")
+})

@@ -12,7 +12,8 @@ use messages::net::{Command, EndpointId, Event, HEARTBEAT, Header, Heartbeat, Pa
 
 use crate::hooks::{Opened, Received, Sender};
 use crate::{
-    ConnectionRefused, LinkLost, LinkUp, Member, MemberLeft, MemberOut, Mismatch, Network, edge,
+    BindFailed, ConnectionRefused, EndpointBound, LinkLost, LinkUp, Member, MemberLeft, MemberOut,
+    Mismatch, Network, edge,
 };
 
 pub(crate) const HEARTBEAT_EVERY: Duration = Duration::from_secs(1);
@@ -206,7 +207,7 @@ impl Network {
             Event::Bound(Ok(endpoint)) => {
                 tracing::info!("the network's endpoint is bound");
                 me.endpoint = Some(endpoint);
-                me.bind_failed = false;
+                cx.raise(EndpointBound);
                 let lost: Vec<_> = me
                     .links
                     .iter()
@@ -226,7 +227,9 @@ impl Network {
                 tracing::error!(error, "the network's endpoint didn't bind");
                 // A Leave or a Cancel can get ahead of the bind's answer, and then nothing is
                 // waiting on the connection.
-                me.bind_failed = me.session.is_some();
+                if me.session.is_some() {
+                    cx.raise(BindFailed);
+                }
             }
             Event::Connected {
                 conn,

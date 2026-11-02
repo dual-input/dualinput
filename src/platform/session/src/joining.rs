@@ -14,7 +14,8 @@ use messages::session::{
     self as wire, Attempt, Attempting, Join, MemberEntry, Preflight, Ready, Refused, RefusedWhy,
 };
 use network::{
-    Answer, Asked, BackendAnswered, ConnectionRefused, Me, Member, Mismatch, Network, Refusal,
+    Answer, Asked, BackendAnswered, ConnectionRefused, EndpointBound, Me, Member, Mismatch,
+    Network, Refusal,
 };
 use sim_service::SimAwareness;
 
@@ -59,11 +60,34 @@ impl Session {
                 code: asking.code(),
             });
         }
-        self.held.as_ref().filter(|h| h.dialing).map(|h| Attempt {
-            on: Attempting::Join,
-            dialing: true,
-            code: Some(h.code.clone()),
-        })
+        self.held
+            .as_ref()
+            .filter(|h| h.attempting())
+            .map(|h| Attempt {
+                on: if h.opening {
+                    Attempting::Host
+                } else {
+                    Attempting::Join
+                },
+                dialing: h.dialing,
+                code: h.dialing.then(|| h.code.clone()),
+            })
+    }
+
+    /// The session can't reach anyone, so it ends: a Host or Join stops there, and the start card
+    /// says why. A core back from a restart has no start card waiting, so only its log says it.
+    pub(crate) fn cannot_open(&mut self, cx: &mut Cx) {
+        let Some(held) = &self.held else {
+            return;
+        };
+        let on = if held.opening {
+            Attempting::Host
+        } else {
+            Attempting::Join
+        };
+        tracing::warn!("the session's connection can't open, so the session ends");
+        self.refused = Some(refused(on, RefusedWhy::NoConnection));
+        self.leave(cx, false);
     }
 }
 
@@ -238,8 +262,8 @@ pub(crate) fn cancel(me: &mut Session, (): (), cx: &mut Cx) -> Result<(), String
         me.settle(cx);
         return Ok(());
     }
-    if me.held.as_ref().is_some_and(|h| h.dialing) {
-        tracing::info!("this pilot cancelled a join that hadn't reached the crew");
+    if me.held.as_ref().is_some_and(|h| h.attempting()) {
+        tracing::info!("this pilot cancelled a Host or Join that hadn't finished");
         me.leave(cx, false);
         return Ok(());
     }
@@ -375,6 +399,13 @@ pub(crate) fn connection_refused(me: &mut Session, refused: &ConnectionRefused, 
     me.leave(cx, false);
 }
 
+/// The session's endpoint bound, so a Host has what it needs to show as a session.
+pub(crate) fn endpoint_bound(me: &mut Session, _: &EndpointBound, _: &mut Cx) {
+    if let Some(held) = &mut me.held {
+        held.opening = false;
+    }
+}
+
 /// The core started and found a session file: it raises the restart count, writes it, and
 /// dials the crew it holds, as a late joiner (record/areas/network/01-between-machines.md, "A
 /// session file after a long outage").
@@ -473,6 +504,7 @@ fn start_with(me: &mut Session, start: Start, cx: &mut Cx) {
     let dialing = !start.host && start.restart == 0 && !start.crew.is_empty();
     me.held = Some(Held {
         dialing,
+        opening: start.host,
         id: start.session,
         code: start.code,
         me: start.me.pilot,
@@ -562,10 +594,12 @@ fn file_written(me: &mut Session, job: JobId, result: Result<Vec<u8>, String>, c
     }
     held.file.writing = None;
     if let Err(error) = result {
-        return tracing::error!(
-            error,
-            "the session file didn't write, so the session's links stay shut"
-        );
+        tracing::error!(error, "the session file didn't write");
+        // The first write opens the links, so they stay shut without it.
+        if !held.file.opened {
+            me.cannot_open(cx);
+        }
+        return;
     }
     if !held.file.opened {
         held.file.opened = true;

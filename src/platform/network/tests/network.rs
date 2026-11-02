@@ -16,8 +16,8 @@ use messages::net::{
     Relay, SLICE, codes,
 };
 use network::{
-    BackendAnswered, ConnectionRefused, LinkLost, LinkUp, Me, Member, MemberLeft, MemberOut,
-    NetUnit, Network, Opened, Sender, To,
+    BackendAnswered, BindFailed, ConnectionRefused, LinkLost, LinkUp, Me, Member, MemberLeft,
+    MemberOut, NetUnit, Network, Opened, Sender, To,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -87,6 +87,9 @@ impl Session {
         .on::<MemberOut>(|_: &mut Session, _: &MemberOut, cx: &mut Cx| cx.out(Saw("out".into())))
         .on::<ConnectionRefused>(|_: &mut Session, r: &ConnectionRefused, cx: &mut Cx| {
             cx.out(Saw(format!("refused {:?}", r.why)))
+        })
+        .on::<BindFailed>(|_: &mut Session, _: &BindFailed, cx: &mut Cx| {
+            cx.out(Saw("bind failed".into()))
         })
         .on::<BackendAnswered>(|_: &mut Session, a: &BackendAnswered, cx: &mut Cx| {
             cx.out(Saw(format!("answered {:?} {:?}", a.asked, a.answer)))
@@ -1087,27 +1090,16 @@ fn a_close_with_a_refusals_code_raises_the_refusal() {
     }
 }
 
-/// The header's row reads the slice, so an endpoint that didn't bind shows until it binds or the
-/// session ends, and a failure that comes after the session has ended shows nothing.
+/// A failed bind stops the session, unless a Leave got ahead of it and nothing waits on it.
 #[test]
-fn a_failed_bind_shows_in_the_slice_until_it_binds_or_the_session_ends() {
+fn a_bind_that_fails_says_so_only_while_a_session_waits_on_it() {
     let mut core = Core::new();
-    core.watch_slice();
     core.act(Act::Open { crew: Vec::new() });
-    let failed = |core: &mut Core| {
-        core.advance(core.now + 100_000);
-        core.slice.as_ref().unwrap().bind_failed
-    };
     core.event(Event::Bound(Err("the timeout fired".into())));
-    assert!(failed(&mut core));
-    core.event(Event::Bound(Ok(MY_ENDPOINT)));
-    assert!(!failed(&mut core));
-    core.event(Event::Bound(Err("the timeout fired".into())));
-    assert!(failed(&mut core));
+    assert_eq!(core.take().1, ["bind failed"]);
     core.act(Act::Leave);
-    assert!(!failed(&mut core));
     core.event(Event::Bound(Err("the timeout fired".into())));
-    assert!(!failed(&mut core));
+    assert!(core.take().1.is_empty());
 }
 
 #[test]

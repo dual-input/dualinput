@@ -85,7 +85,6 @@ function useHeaderStatus(link: CoreLink, desktop: DesktopLink, version: string, 
     servers: net?.servers ?? undefined,
     firewall: local?.firewall,
     fixFirewall,
-    connectionFailed: net?.bind_failed,
     raised: raisedRows(notifications ?? []),
     update: update?.state === "ready" ? { next: update.next, have: version, view: viewUpdate } : undefined,
   }

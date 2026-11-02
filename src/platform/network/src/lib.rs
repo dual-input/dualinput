@@ -69,6 +69,12 @@ pub struct MemberOut {
     pub member: PilotId,
 }
 
+/// The session's endpoint bound, so its links can dial.
+pub struct EndpointBound;
+
+/// The session's endpoint didn't bind, and it binds once per session, so no link will come up.
+pub struct BindFailed;
+
 /// A core refused a connection over its first message: this core's check, or the other core,
 /// whose close names why.
 pub struct ConnectionRefused {
@@ -91,6 +97,8 @@ impl Moment for LinkUp {}
 impl Moment for LinkLost {}
 impl Moment for MemberLeft {}
 impl Moment for MemberOut {}
+impl Moment for EndpointBound {}
+impl Moment for BindFailed {}
 impl Moment for ConnectionRefused {}
 
 /// Whom a send goes to.
@@ -117,8 +125,6 @@ pub struct Network {
     session: Option<InSession>,
     /// This core's endpoint ID, once bound.
     endpoint: Option<EndpointId>,
-    /// Whether the session's endpoint failed to bind.
-    bind_failed: bool,
     links: BTreeMap<PilotId, Link>,
     conns: BTreeMap<u64, Conn>,
     /// Each sender's clock offset, by pilot ID and restart count.
@@ -172,7 +178,6 @@ impl Network {
                 .collect(),
             internet: self.reach.internet,
             servers: self.reach.servers,
-            bind_failed: self.bind_failed,
         }
     }
 }
@@ -369,7 +374,6 @@ impl Network {
         me.forget(cx);
         me.session = None;
         me.endpoint = None;
-        me.bind_failed = false;
         if let Some(heartbeat) = me.heartbeat.take() {
             cx.cancel_timer(heartbeat);
         }

@@ -23,7 +23,7 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 > The session crate then stops a join still reaching the crew, and the start card says why in the words of the backend's refusal for the same difference.
 > A close names no version, so a version refusal known only from one reads as our servers not answering.
 > A session under way has no start card, so there only the log says it.
-> An endpoint that failed to bind is `bind_failed` in [the network's slice](#what-the-pilot-sees-and-settings), which [the header](../interface/decisions.md#the-header-shows-only-what-needs-the-pilot) shows as a row.
+> The network raises `EndpointBound` or `BindFailed` for the session's one bind, and the session crate keeps a Host an attempt until the first and ends the session on the second, so the start card says why and [no session that can't reach anyone shows](../interface/decisions.md#host-and-join-answer-inside-the-start-card) (user, 2026-11-02).
 
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.

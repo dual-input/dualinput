@@ -345,6 +345,8 @@ pub enum RefusedWhy {
     HostOlder,
     /// This PC's address got too many codes wrong this hour.
     TooMany,
+    /// This PC's connection to other pilots wouldn't open.
+    NoConnection,
 }
 
 /// A member as the slice shows it.

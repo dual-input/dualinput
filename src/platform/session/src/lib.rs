@@ -31,7 +31,8 @@ use messages::clients::SettingKind;
 use messages::net::{EndpointId, PilotId, Relay};
 use messages::session::{self as wire, KeyValue, Keys, Link, Stamp};
 use network::{
-    BackendAnswered, ConnectionRefused, LinkLost, LinkUp, MemberLeft, MemberOut, NetUnit, To,
+    BackendAnswered, BindFailed, ConnectionRefused, EndpointBound, LinkLost, LinkUp, MemberLeft,
+    MemberOut, NetUnit, To,
 };
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -154,6 +155,9 @@ pub(crate) struct Held {
     /// Whether this is a join whose first link hasn't come up, which the apps show as an attempt
     /// rather than a session.
     pub(crate) dialing: bool,
+    /// Whether this is a Host whose endpoint hasn't bound, which the apps show as an attempt too,
+    /// so a session that can't reach anyone never shows.
+    pub(crate) opening: bool,
     pub(crate) id: String,
     pub(crate) code: String,
     pub(crate) me: PilotId,
@@ -198,6 +202,13 @@ pub(crate) struct Held {
     pub(crate) leaving: Option<(TimerId, bool)>,
     /// How many members have joined, which orders them.
     pub(crate) joined: u64,
+}
+
+impl Held {
+    /// Whether the apps show this as a Host or Join still running rather than a session.
+    pub(crate) fn attempting(&self) -> bool {
+        self.dialing || self.opening
+    }
 }
 
 /// Another member: this core's link to it, and its place in the order members joined.
@@ -380,6 +391,8 @@ pub fn register(r: &mut Registry) {
         .channel(wire::CHANNEL, Session::keys_in)
         .on::<BackendAnswered>(joining::answered)
         .on::<ConnectionRefused>(joining::connection_refused)
+        .on::<EndpointBound>(joining::endpoint_bound)
+        .on::<BindFailed>(|me, _: &BindFailed, cx| me.cannot_open(cx))
         .on::<LinkUp>(members::link_up)
         .on::<LinkLost>(members::link_lost)
         .on::<MemberLeft>(|me, left: &MemberLeft, cx| me.gone(left.member, cx))
@@ -708,6 +721,7 @@ mod tests {
         let declared = std::mem::take(&mut r.state_mut::<Session>().declared);
         let mut held = Held {
             dialing: false,
+            opening: false,
             id: String::new(),
             code: "KX7P3M".into(),
             me: ME,

@@ -13,7 +13,7 @@ use messages::hex;
 pub(crate) fn build(me: &Session, view: &View) -> SessionSlice {
     let attempt = me.attempt();
     let refused = me.refused.clone();
-    let Some(held) = me.held.as_ref().filter(|h| !h.dialing) else {
+    let Some(held) = me.held.as_ref().filter(|h| !h.attempting()) else {
         return SessionSlice {
             attempt,
             refused,

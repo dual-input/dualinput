@@ -11,8 +11,4 @@ internet: boolean | null,
 /**
  * Whether our servers answer, as the last check found, or `None` before the first.
  */
-servers: Servers | null, 
-/**
- * Whether the session's endpoint failed to bind, so the crew can't reach this pilot.
- */
-bind_failed: boolean, };
+servers: Servers | null, };

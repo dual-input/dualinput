@@ -130,6 +130,7 @@ test("a connection with another session's code closes with its code, and each co
     }
   }
   assert.ok(!a.heard().slice(before).some((l) => l.startsWith("net up")), "the host should never link a connection under another code")
+  assert.equal((await app(a)).slice<SessionSlice>("session")?.held, true, "a refusal should leave a running session alone")
 })
 test("a join on a direct path links within 3s of the code entered", { timeout: 60_000 }, async (t) => {
   const net = await BenchNetwork.start()

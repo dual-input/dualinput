@@ -99,8 +99,8 @@ fn refused_by_backend(on: Attempting, refusal: &Refusal) -> Refused {
     }
 }
 
-/// Whose version is older, as this core sees it. `older` in src/backend/src/index.ts reads versions
-/// the same way, so change both together.
+/// Whose version is older, as this core sees it. `older` in src/backend/src/index.ts reads x.y.z
+/// versions the same way, so change both together.
 fn older(mine: &str, theirs: &str) -> Older {
     let numbers = |version: &str| -> Vec<u64> {
         version

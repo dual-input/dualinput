@@ -639,5 +639,6 @@ test("a join another core refuses stops, and says why in the words of the backen
   const s = await until(b, (s) => s.refused !== null, "the refusal", 20_000)
   assert.deepEqual(s.refused, { on: "join", why: "no-code" })
   assert.equal(s.attempt, null, "the join stopped")
+  assert.equal(s.held, false, "the core let the session go")
   assert.deepEqual(b.app.notifications(), [], "the start card says it, so the banner doesn't")
 })

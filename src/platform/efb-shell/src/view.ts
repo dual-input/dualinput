@@ -36,6 +36,7 @@ function measure(host: HTMLElement, previous: ViewSize): ViewSize {
 /** Each view that follows the tablet, for `viewShown` to tell. */
 const shownListeners = new Set<() => void>()
 let everShown = false
+let current = false
 
 /**
  * The app came back on screen. The pilot can change the tablet's size in the EFB's Settings app, and
@@ -43,8 +44,17 @@ let everShown = false
  */
 export function viewShown(): void {
   everShown = true
+  current = true
   shownListeners.forEach((listener) => listener())
 }
+
+/** Another app took the EFB's screen. */
+export function viewLeft(): void {
+  current = false
+}
+
+/** Whether ours is the EFB's current app, on screen unless the EFB itself is closed, which doesn't tell us. */
+export const isCurrentApp = (): boolean => current
 
 const subscribeShown = (listener: () => void): (() => void) => {
   shownListeners.add(listener)

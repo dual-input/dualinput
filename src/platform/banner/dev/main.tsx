@@ -14,8 +14,12 @@ import { SCENES, StandInCore } from "./stand-in.ts"
 const SKY = "linear-gradient(180deg, #56738f 0%, #7d96ab 60%, #a3b5c3 100%)"
 const CONNECTIONS = ["reconnecting", "not-running", "closed", "back"] as const
 
+/** Whether the stand-in says the EFB app is on screen. */
+let efbAppShown = false
+
 function Chooser({ core }: { core: StandInCore }) {
   const [scene, setScene] = useState(core.sceneName)
+  const [shown, setShown] = useState(efbAppShown)
   return (
     <div className="flex w-56 flex-col space-y-1">
       {Object.keys(SCENES).map((name) => (
@@ -37,6 +41,17 @@ function Chooser({ core }: { core: StandInCore }) {
           Service: {state}
         </Button>
       ))}
+      <Button
+        size="xs"
+        variant={shown ? "default" : "ghost"}
+        className="justify-start"
+        onClick={() => {
+          efbAppShown = !efbAppShown
+          setShown(efbAppShown)
+        }}
+      >
+        EFB app on screen
+      </Button>
     </div>
   )
 }
@@ -55,7 +70,9 @@ page.append(sky, aside)
 const core = new StandInCore()
 const link = new CoreLink("banner", core.env())
 link.start()
-createRoot(host).render(<Banner host={host} link={link} openWithoutCore={() => core.clicked("opened with no core")} />)
+const askToReopen = () => console.log("the banner asks for a new opening")
+const efbAppOnScreen = () => efbAppShown
+createRoot(host).render(<Banner host={host} link={link} openWithoutCore={() => core.clicked("opened with no core")} askToReopen={askToReopen} efbAppOnScreen={efbAppOnScreen} />)
 createRoot(aside).render(
   <Root>
     <Chooser core={core} />

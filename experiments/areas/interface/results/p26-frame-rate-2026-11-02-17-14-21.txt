@@ -1,0 +1,4 @@
+shown: Dual Input / v0.1.0 / Black Square / Baron 58P Professional / N513LW
+idle, EFB's document: {"frames":120,"perSecond":15,"p50":66.7,"p99":70.2,"max":71.3}
+idle, toolbar's document: {"frames":241,"perSecond":30,"p50":33.4,"p99":36.4,"max":39}
+tabs changing every 1s, EFB's document: {"frames":126,"perSecond":15,"p50":66.8,"p99":85.3,"max":87}

@@ -1,6 +1,7 @@
 import type { ComponentType, HTMLAttributes } from "react"
 
 import { cx } from "../lib/cx.ts"
+import { Tooltip } from "../surfaces/tooltip.tsx"
 
 export type TabItem<Id extends string> = {
   id: Id
@@ -23,26 +24,27 @@ export function TabBar<Id extends string>({ tabs, active, onSelect, className, .
   return (
     <nav className={cx("flex h-14 shrink-0 border-t", className)} {...rest}>
       {tabs.map(({ id, icon: Icon, label, dot, force }) => (
-        <button
-          key={id}
-          type="button"
-          title={label}
-          aria-current={id === active ? "page" : undefined}
-          data-force={force}
-          className={cx("relative flex flex-1 items-center justify-center hover:text-foreground", id === active ? "text-primary" : "text-muted-foreground")}
-          onClick={() => onSelect?.(id)}
-        >
-          {id === active && <span className="absolute inset-x-4 -top-px h-0.5 rounded-full bg-primary" />}
-          <span className="relative flex">
-            <Icon className="size-5" />
-            <span
-              aria-label={dot ? "Needs attention" : undefined}
-              aria-hidden={!dot}
-              className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-warning ring-2 ring-background"
-              style={{ opacity: dot ? 1 : 0, transform: dot ? "none" : "scale(0.4)", transition: dot ? DOT_IN : DOT_OUT }}
-            />
-          </span>
-        </button>
+        <Tooltip key={id} content={label}>
+          <button
+            type="button"
+            aria-label={label}
+            aria-current={id === active ? "page" : undefined}
+            data-force={force}
+            className={cx("relative flex flex-1 items-center justify-center hover:text-foreground", id === active ? "text-primary" : "text-muted-foreground")}
+            onClick={() => onSelect?.(id)}
+          >
+            {id === active && <span className="absolute inset-x-4 -top-px h-0.5 rounded-full bg-primary" />}
+            <span className="relative flex">
+              <Icon className="size-5" />
+              <span
+                aria-label={dot ? "Needs attention" : undefined}
+                aria-hidden={!dot}
+                className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-warning ring-2 ring-background"
+                style={{ opacity: dot ? 1 : 0, transform: dot ? "none" : "scale(0.4)", transition: dot ? DOT_IN : DOT_OUT }}
+              />
+            </span>
+          </button>
+        </Tooltip>
       ))}
     </nav>
   )

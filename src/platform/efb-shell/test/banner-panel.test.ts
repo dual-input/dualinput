@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
-import { BannerPanel, CALL_AGAIN_AFTER } from "../src/banner-panel.ts"
+import { BannerPanel, CALL_AGAIN_AFTER, OLD_PAGE_CLOSES_WITHIN } from "../src/banner-panel.ts"
 
 /** A panel on a stand-in toolbar and a clock the test moves by hand. */
 function bench() {
@@ -102,6 +102,48 @@ test("a load that takes the open page down opens it again once its socket says s
   assert.deepEqual(calls, [], "the page's socket still says it's open")
   panel.follow({ ...inFlight, loading: true, pageOpen: false })
   assert.deepEqual(calls, [true])
+})
+
+test("a load too short for the old page's socket to close opens the panel at its end, and again when that socket closes", () => {
+  const { panel, calls, wait } = bench()
+  panel.follow(inFlight)
+  panel.follow({ ...inFlight, pageOpen: true })
+  calls.length = 0
+  panel.follow({ ...inFlight, loading: true, pageOpen: true })
+  assert.deepEqual(calls, [])
+  panel.follow({ ...inFlight, pageOpen: true })
+  assert.deepEqual(calls, [true], "the slice can't say yet whether the page outlasted the load, and a call for an open panel changes nothing")
+  panel.follow(inFlight)
+  assert.deepEqual(calls, [true, true], "that page is the load's, not the pilot's")
+  wait(CALL_AGAIN_AFTER)
+  assert.deepEqual(calls, [true, true, true], "the calls go on until a page connects")
+  panel.follow({ ...inFlight, pageOpen: true })
+  wait(CALL_AGAIN_AFTER * 3)
+  assert.deepEqual(calls, [true, true, true])
+})
+
+test("past the time an old page can close, a closing page is the pilot's doing", () => {
+  const { panel, calls, wait } = bench()
+  panel.follow({ ...inFlight, loading: true })
+  panel.follow({ ...inFlight, pageOpen: true })
+  wait(OLD_PAGE_CLOSES_WITHIN)
+  calls.length = 0
+  panel.follow(inFlight)
+  wait(CALL_AGAIN_AFTER * 3)
+  assert.deepEqual(calls, [])
+})
+
+test("reopening closes the panel and opens it, in that order, and leaves the pilot's flight as it was", () => {
+  const { panel, calls, wait } = bench()
+  panel.follow(inFlight)
+  panel.follow({ ...inFlight, pageOpen: true })
+  calls.length = 0
+  panel.reopen()
+  assert.deepEqual(calls, [false, true])
+  panel.follow(inFlight)
+  panel.follow({ ...inFlight, pageOpen: true })
+  wait(CALL_AGAIN_AFTER * 3)
+  assert.deepEqual(calls, [false, true])
 })
 
 test("a lost link stops the calls, and they start again once the core is back", () => {

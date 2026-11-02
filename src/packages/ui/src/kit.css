@@ -31,6 +31,19 @@
   border-style: solid;
   border-color: rgba(255, 255, 255, 0.1);
 }
+/* The sim's stylesheets reach our pages and set on bare elements what should come from the parent: the
+   EFB's reset.css gives nearly every element text-align: left, so a centered box's lines wouldn't center,
+   the panels' common.css gives every p its own size and color, 24px on a 1,440-line screen, and the EFB's
+   efb_os.css gives h2 its own font. tools/lib/sim-css.ts restates those rules for the dev loop (measured on
+   MSFS 2024, 2026-11-02, record/areas/interface/log.md). */
+.dualinput-ui * { text-align: inherit; }
+.dualinput-ui p, .dualinput-ui h1, .dualinput-ui h2, .dualinput-ui h3, .dualinput-ui h4, .dualinput-ui h5, .dualinput-ui h6 {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+}
 .dualinput-ui button, .dualinput-ui input, .dualinput-ui select, .dualinput-ui textarea {
   font-family: inherit;
   font-size: 100%;
@@ -47,7 +60,7 @@
 .dualinput-ui a { color: inherit; text-decoration: inherit; }
 .dualinput-ui ol, .dualinput-ui ul { list-style: none; }
 .dualinput-ui svg { display: block; }
-.dualinput-ui input { -webkit-user-select: text; }
+.dualinput-ui input { -webkit-user-select: text; text-align: left; }
 .dualinput-ui input::placeholder { color: rgba(var(--muted-foreground), 1); }
 
 @tailwind base;

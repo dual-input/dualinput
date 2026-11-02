@@ -631,6 +631,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - An × at a card's top right, always shown, dismisses it, as does dragging it right past a third of its width or flinging it; a click anywhere else opens the EFB app.
     A held card dismissed stays hidden until its cause ends, and shows again if the cause comes back.
     The summary has no ×, since it's the banner's whole job during preflight, it leaves when the flight starts, and the toolbar's button closes the banner.
+  - The summary hides while our EFB app is on screen, which shows the same crew and Ready, and comes back when the EFB closes or moves to another app; other cards stay (user, 2026-11-02).
+  - A change of the sim's window opens the panel anew, since the sim sizes a panel only as it opens, and after that stretches it, which moves the box from the corner ([interface log](log.md#2026-11-02-the-sim-sizes-a-panel-only-as-it-opens-the-toolbars-open-call-changes-nothing-on-an-open-panel-and-a-loads-old-page-closes-after-a-short-load-has-ended)).
   - When cards don't fit, the oldest one-time cards leave early; held ones keep their places by trouble, then warnings, then information, newest first in each; and the rest wait behind a line at the box's foot, "3 more" with Dismiss all.
     A card coming out from behind that line arrives at the stack's foot, where the line said it was, and a new notification arrives at the top.
 

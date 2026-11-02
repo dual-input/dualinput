@@ -57,6 +57,8 @@ const NO_SIM: SimWindow = {
   openEfb: () => console.log("the EFB opens onto our app"),
   toggleBanner: (open) => console.log(`the banner's panel ${open ? "opens" : "closes"}`),
   bannerAsked: () => 0,
+  bannerResized: () => 0,
+  tellBannerOnScreen: () => {},
   efbClosed: () => false,
 }
 

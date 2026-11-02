@@ -12,7 +12,7 @@ import { Frame } from "../../platform/efb-shell/src/frame.tsx"
 import type { Part } from "../../platform/efb-shell/src/part.ts"
 import { registerEfbApp } from "../../platform/efb-shell/src/register.ts"
 import { simWindow } from "../../platform/efb-shell/src/sim-window.ts"
-import { viewShown } from "../../platform/efb-shell/src/view.ts"
+import { viewLeft, viewShown } from "../../platform/efb-shell/src/view.ts"
 
 /** `EFB_APP` in tools/lib/pages.ts names the same folder, so change both together. */
 const INTERNAL_NAME = "DualInput"
@@ -34,6 +34,9 @@ registerEfbApp({
     desktop.start()
     createRoot(host).render(<Frame host={host} link={link} desktop={desktop} sim={SIM} version={VERSION} parts={PARTS} />)
   },
-  left: releaseKeyboard,
+  left() {
+    releaseKeyboard()
+    viewLeft()
+  },
   shown: viewShown,
 })

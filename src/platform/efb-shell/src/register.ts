@@ -72,15 +72,16 @@ function appClass(app: EfbApp) {
     }
   }
 
-  // The members the EFB reads, as the SDK's apps have them. BootMode 1 renders the view as the EFB
-  // starts, so our code runs while the EFB is closed (record/areas/interface/log.md, 2026-10-06).
+  // The members the EFB reads, as the SDK's apps have them. Our code has to run while the EFB is closed,
+  // and only BootMode 2, HOT, renders the view as the EFB starts, where 1, WARM, waits for the app's first
+  // opening (read in fs-base-efb, efb_ui/efb_os/efb_os.js, registerApp).
   return class {
     private installed = false
     private ready = false
     private favorite = -1
     private settings: Record<string, unknown> = {}
     readonly available = msfssdk.Subject.create(true)
-    readonly BootMode = 1
+    readonly BootMode = 2
     readonly SuspendMode = 0
     readonly name = app.name
     readonly icon = `${folder}/Assets/app-icon.svg`

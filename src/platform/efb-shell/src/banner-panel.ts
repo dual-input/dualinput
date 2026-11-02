@@ -1,11 +1,19 @@
 // Opens the banner's panel in each flight of a session, and closes it when the session ends or the core says `bye`
 // (record/areas/interface/01-apps.md, "The banner"). A call to the toolbar can go unheard, since one our toolbar script
 // made once left the panel closed with no error, and nothing but the core's `banner` slice says whether a page came up,
-// so it calls again until the slice says one did. From then on the panel is the pilot's: one closed from its toolbar
-// button stays closed until the next flight.
+// so it calls again until the slice says one did. A call that asks for the state the panel is in changes nothing
+// (measured on MSFS 2024, 2026-11-02, record/areas/interface/log.md), so calling too often costs nothing. From then on
+// the panel is the pilot's: one closed from its toolbar button stays closed until the next flight.
 
-/** How long to wait before calling again, in milliseconds: past the 2s the panel has to open in, since a second call while the first is opening might close it. A session in the sim settles how long it takes. */
+/** How long to wait before calling again, in milliseconds. */
 export const CALL_AGAIN_AFTER = 3000
+
+/**
+ * How long after a load's end the page it took down can still close, in milliseconds. The core closes a socket that has
+ * been quiet for 8s, on a tick every 2s, so after a load as short as a Restart's 9s the slice still says that page is
+ * open when the flight starts (measured on MSFS 2024, 2026-11-02, record/areas/interface/log.md).
+ */
+export const OLD_PAGE_CLOSES_WITHIN = 12_000
 
 /** What the core says that decides the panel. */
 export type PanelFacts = {
@@ -32,6 +40,8 @@ export class BannerPanel {
   /** Whether a call asked for the panel since the last close, so an end with nothing open makes no call. */
   private opened = false
   private retry: number | null = null
+  /** Runs while a closing page may still be the one the last load took down, rather than the pilot's doing. */
+  private oldPage: number | null = null
   private pageOpen = false
   private wasLoading = false
 
@@ -41,6 +51,8 @@ export class BannerPanel {
 
   follow(facts: PanelFacts): void {
     const nextFlight = facts.loading && !this.wasLoading
+    const loadEnded = this.wasLoading && !facts.loading
+    const pageClosed = this.pageOpen && !facts.pageOpen
     this.wasLoading = facts.loading
     this.pageOpen = facts.pageOpen
     if (facts.pageOpen) this.stopRetrying()
@@ -51,8 +63,20 @@ export class BannerPanel {
     if (!facts.flying || nextFlight) {
       this.calledThisFlight = false
       this.stopRetrying()
+      this.stopWatchingOldPage()
     }
-    if (!facts.flying || this.calledThisFlight) return
+    if (!facts.flying) return
+    if (loadEnded) {
+      this.calledThisFlight = true
+      this.watchOldPage()
+      this.call()
+      return
+    }
+    if (pageClosed && this.oldPage !== null) {
+      this.call()
+      return
+    }
+    if (this.calledThisFlight) return
     if (facts.pageOpen) {
       // A load may take the page down, and its socket says so only a few seconds later, so while one runs an open page settles nothing.
       if (!facts.loading) this.calledThisFlight = true
@@ -60,6 +84,12 @@ export class BannerPanel {
     }
     this.calledThisFlight = true
     this.call()
+  }
+
+  /** The sim sizes a panel as it opens, and only stretches it with the window after that, so a changed window needs a new opening. The two calls in a row reload the page (same log). */
+  reopen(): void {
+    this.env.toolbar(false)
+    this.env.toolbar(true)
   }
 
   /** The core said `bye`, so it says nothing more: the panel closes now, with no retry. */
@@ -75,6 +105,7 @@ export class BannerPanel {
   }
 
   private call(): void {
+    this.stopRetrying()
     this.opened = true
     this.env.toolbar(true)
     this.retry = this.env.setTimer(() => {
@@ -85,6 +116,7 @@ export class BannerPanel {
 
   private close(): void {
     this.stopRetrying()
+    this.stopWatchingOldPage()
     this.calledThisFlight = false
     if (!this.opened) return
     this.opened = false
@@ -95,5 +127,18 @@ export class BannerPanel {
     if (this.retry === null) return
     this.env.clearTimer(this.retry)
     this.retry = null
+  }
+
+  private watchOldPage(): void {
+    this.stopWatchingOldPage()
+    this.oldPage = this.env.setTimer(() => {
+      this.oldPage = null
+    }, OLD_PAGE_CLOSES_WITHIN)
+  }
+
+  private stopWatchingOldPage(): void {
+    if (this.oldPage === null) return
+    this.env.clearTimer(this.oldPage)
+    this.oldPage = null
   }
 }

@@ -28,15 +28,16 @@ import { buildCss, forceStates, KIT } from "./lib/css.ts"
 import { click, drag, hover, resize, shoot, type, wheel } from "./lib/dev-window.ts"
 import { fromRoot, ROOT } from "./lib/repo.ts"
 import { sdkFolder } from "./lib/sdk.ts"
+import { EFB_RULES, PANEL_RULES } from "./lib/sim-css.ts"
 
 const PORT = 5190
 const OUT = path.join(ROOT, "target", "dev")
 
-/** Each page this can run: its entry, and the source files its classes come from, on top of the kit's. */
-const PAGES: Record<string, { entry: string; content: string[] }> = {
-  kit: { entry: "src/packages/ui/dev/main.tsx", content: ["src/packages/ui/dev/**/*.tsx"] },
-  efb: { entry: "src/platform/efb-shell/dev/main.tsx", content: ["src/platform/efb-shell/src/**/*.{ts,tsx}", "src/platform/efb-shell/dev/**/*.{ts,tsx}", "src/packages/crew/src/**/*.{ts,tsx}"] },
-  banner: { entry: "src/platform/banner/dev/main.tsx", content: ["src/platform/banner/src/**/*.{ts,tsx}", "src/platform/banner/dev/**/*.{ts,tsx}", "src/packages/crew/src/**/*.{ts,tsx}"] },
+/** Each page this can run: its entry, the source files its classes come from, on top of the kit's, and what the sim's stylesheets would set around it. */
+const PAGES: Record<string, { entry: string; content: string[]; simRules: string }> = {
+  kit: { entry: "src/packages/ui/dev/main.tsx", content: ["src/packages/ui/dev/**/*.tsx"], simRules: EFB_RULES },
+  efb: { entry: "src/platform/efb-shell/dev/main.tsx", content: ["src/platform/efb-shell/src/**/*.{ts,tsx}", "src/platform/efb-shell/dev/**/*.{ts,tsx}", "src/packages/crew/src/**/*.{ts,tsx}"], simRules: EFB_RULES },
+  banner: { entry: "src/platform/banner/dev/main.tsx", content: ["src/platform/banner/src/**/*.{ts,tsx}", "src/platform/banner/dev/**/*.{ts,tsx}", "src/packages/crew/src/**/*.{ts,tsx}"], simRules: PANEL_RULES },
 }
 
 // ---------------------------------------------------------------- what the page hears from here
@@ -99,7 +100,7 @@ function evalInPage(code: string): Promise<unknown> {
 
 const asked = process.argv[2] ?? "kit"
 // A path runs that file as the page, with its folder's classes, as a probe under experiments/ does.
-const page = PAGES[asked] ?? (fs.existsSync(asked) ? { entry: asked, content: [`${path.dirname(asked).split(path.sep).join("/")}/**/*.{ts,tsx}`] } : undefined)
+const page = PAGES[asked] ?? (fs.existsSync(asked) ? { entry: asked, content: [`${path.dirname(asked).split(path.sep).join("/")}/**/*.{ts,tsx}`], simRules: EFB_RULES } : undefined)
 if (!page) throw new Error(`no page or file called ${asked}: ${Object.keys(PAGES).join(", ")}`)
 const name = PAGES[asked] ? asked : path.basename(path.dirname(asked))
 const dir = path.join(OUT, name)
@@ -107,7 +108,7 @@ fs.mkdirSync(dir, { recursive: true })
 fs.cpSync(path.join(KIT, "fonts"), path.join(dir, "fonts"), { recursive: true })
 fs.writeFileSync(
   path.join(dir, "index.html"),
-  `<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="/app.css"></head><body style="margin:0;background:#0a0a0a"><div id="page"></div><script>${DEV_CLIENT}</script><script src="/app.js"></script></body></html>`,
+  `<!doctype html><html><head><meta charset="utf-8"><style>${page.simRules}</style><link rel="stylesheet" href="/app.css"></head><body style="margin:0;background:#0a0a0a"><div id="page"></div><script>${DEV_CLIENT}</script><script src="/app.js"></script></body></html>`,
 )
 
 async function afterBuild(): Promise<void> {

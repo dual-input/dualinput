@@ -34,7 +34,7 @@ import type { SetupFailure } from "./setup/setup-flow.tsx"
 import { FIGURE_COLOR, NAME, SETUP_DONE, useSetting, writeSetting } from "./settings/setting.ts"
 import { SettingsPage } from "./settings/settings-page.tsx"
 import type { SimWindow } from "./sim-window.ts"
-import { useEverShown, useViewSize } from "./view.ts"
+import { isCurrentApp, useEverShown, useViewSize } from "./view.ts"
 
 /**
  * How much of the view's top the EFB's own status bar covers, in the root's units: its notifications and the
@@ -57,6 +57,9 @@ function phaseOf(session: SessionSlice | undefined): SessionPhase | undefined {
   return session?.held && me?.in_flight && session.preflight.phase === "ended" ? "syncing" : undefined
 }
 
+/** How often the app looks at what the sim tells it nothing about, in milliseconds. */
+const WATCH_THE_SIM_EVERY = 500
+
 /** The stages of a pilot's sim that have a flight, or are loading one, in which the banner's panel opens. */
 const IN_A_FLIGHT = ["loading", "ready-to-fly", "flying"]
 
@@ -73,6 +76,16 @@ function useBannerPanel(link: CoreLink, sim: SimWindow, session: SessionSlice | 
     else if (core === "connected") panel.follow({ held, flying, loading, pageOpen })
     else panel.coreLost()
   }, [panel, core, held, flying, loading, pageOpen])
+  // A flight load resets the variable to 0, which is no ask.
+  useEffect(() => {
+    let seen = sim.bannerResized()
+    const timer = window.setInterval(() => {
+      const asked = sim.bannerResized()
+      if (asked !== seen && asked !== 0) panel.reopen()
+      seen = asked
+    }, WATCH_THE_SIM_EVERY)
+    return () => window.clearInterval(timer)
+  }, [panel, sim])
 }
 
 function useHeaderStatus(link: CoreLink, desktop: DesktopLink, version: string, viewUpdate: () => void, fixFirewall: () => void): HeaderStatus {
@@ -150,11 +163,13 @@ export function Frame({ host, link, desktop, sim, version, parts }: FrameProps) 
   useEffect(() => {
     if (setupDone === true) setContinued(false)
   }, [setupDone])
-  // Closing the EFB gives the app no signal (`SimWindow.efbClosed` says how we know), so a field left holding the keyboard would keep the pilot's keys from the sim until its idle release.
+  // Closing the EFB gives the app no signal (`SimWindow.efbClosed` says how we know), so a field left holding the keyboard would keep the pilot's keys from the sim until its idle release, and the banner would go on hiding its preflight card for a screen nobody sees.
   useEffect(() => {
     const timer = window.setInterval(() => {
-      if (keyboardHeld() && sim.efbClosed()) releaseKeyboard()
-    }, 500)
+      const closed = sim.efbClosed()
+      if (keyboardHeld() && closed) releaseKeyboard()
+      sim.tellBannerOnScreen(isCurrentApp() && !closed)
+    }, WATCH_THE_SIM_EVERY)
     return () => window.clearInterval(timer)
   }, [sim])
   const everShown = useEverShown()

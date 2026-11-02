@@ -3,6 +3,102 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-02: The first whole EFB app and banner in the sim pass their clicks, drag, fade, and frame rate, on a local backend, relay, and second pilot
+
+**Asked:** whether the real EFB app and banner, on the real core with a session, do what the debugger showed, in stage 11b's hand check.
+
+**Expected:** a look at sizes and motion, since the debugger had run every screen.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the Baron 58P, with the core's data folder under `target/` and a bench core as the second pilot:
+
+- The EFB's document drew 15 frames a second with our app open and idle, at 66.7ms p50, 70.2ms p99, and 71.3ms at most, against 30 a second in the toolbar's document, the same half the world map showed ([entry below](#2026-11-01-the-efbs-document-draws-15-frames-a-second-at-the-world-map-half-the-rate-of-the-sims-other-documents-so-a-quick-click-often-lands-between-two-frames)).
+  With its tabs changing each second it held 15, at 87ms at most.
+- A code field with the focus gave the keyboard back on Tab: the keys moved the camera, and on Tab again the field held what it had.
+- A click on a control half under the fade at the foot of a scrolled page landed, with the tablet turned to landscape, since no page scrolled in portrait.
+- A card dragged right and let go outside the panel let go.
+- With the core killed, the banner said "Dual Input service isn't running" within 13s, and the EFB app its screen for that.
+  A core started again came back to the session from its session file, and the EFB app, the banner, and the menu script joined it within 133ms of its start.
+- A click on a cockpit switch beside the cards reached the switch, which answers [the case in the sim](01-apps.md#cases-for-the-bench) only as far as it was inside the panel, which we didn't note.
+- A joiner's banner paints nothing while its pilot flying has no sim: the panel opened, 480 by 520, and preflight wasn't running.
+
+The pilot called the figures good enough for now.
+
+**Changed:** nothing, for these.
+
+**Not tried:** a joiner's preflight card under a pilot flying who is in a flight, and a second flight load from the world map.
+
+**Affects:** [the apps' cases](01-apps.md#cases-for-the-bench).
+
+**Evidence:** [the frame rates](../../../experiments/areas/interface/results/p26-frame-rate-2026-11-02-17-14-21.txt), and [the session's stack](../../../experiments/areas/interface/p26-sim-session/stack.ts).
+
+## 2026-11-02: The sim sizes a panel only as it opens, the toolbar's open call changes nothing on an open panel, and a load's old page closes after a short load has ended
+
+**Asked:** why the banner sat far in from the screen's corner after the pilot made the sim's window bigger, and why it stayed away after a Restart.
+
+**Expected:** a panel in percents of the screen to follow the screen, and a load to take the page down in time for the EFB app's next call ([the panel's calls](01-apps.md#the-banner)).
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999:
+
+- Our panel asks for 33.33 by 36.11, which opened in an 1,844 by 1,316 window at about 438 wide, and in a 5,120 by 1,440 window at 480 by 520.
+  Going from the first window to the second without closing it left the panel 1,218 by 520: its height followed the screen, and its width scaled with the window's, as 438.6 x 5,120 / 1,844 is 1,218.
+  So our box, at the panel's left, sat about 790px in from the screen's right, and a window made smaller should leave the panel narrower than the box (unverified).
+- `TOOLBAR_BUTTON_TOGGLE` with `false` then `true`, from the EFB's document, gave a new page at 480 by 520.
+  It did so with the second call 0ms, 150ms, and 500ms after the first, and 3s.
+- `true` on a panel already open kept the same page, unreloaded, at the same size.
+  That answers [the case in the sim](01-apps.md#cases-for-the-bench) on what the call does to a panel in the state it's given.
+- In a Restart, the sim went to `Loading`, then to `ReadyToFly` 8.8s later, and the banner page's socket closed 0.4s after that, 9.2s into the load.
+  The core closes a socket quiet for 8s, on a tick every 2s, so the page died around the load's start and its socket outlived a load this short.
+  The EFB app's code saw an open page as the load ended, took that page for this flight's, and heard the close as the pilot's, so the panel stayed closed.
+
+**Changed:**
+
+- A load's end calls the toolbar, whatever the slice says, and a page that closes within 12s of it counts as the load's, so the calls go on until a page connects.
+- A page whose shape differs by over 1% from the one it opened with, 300ms after the window's last change, writes `L:DUALINPUT_BANNER_RESIZED`, and the EFB app closes and opens the panel.
+
+**Affects:** [the banner's box](decisions.md#the-banner-is-a-box-of-opaque-cards-at-the-screens-top-right), [the names the sim shares](../architecture/02-code-map.md#names-the-sim-shares), and [the apps' cases](01-apps.md#cases-for-the-bench).
+
+## 2026-11-02: The sim's stylesheets set text-align, size, and font on bare elements around our pages, and Coherent GT draws no `title`
+
+**Asked:** why the banner's lines drew at about twice their size in the sim, why the EFB app's failure box drew its title and body off center, and why the tab bar showed no tooltips, none of which the debugger showed.
+
+**Expected:** our reset, scoped to our root, to stand between our pages and the sim's stylesheets.
+
+**Found:** read through the inspector, on MSFS 2024 SunRise 12.2.282174.999:
+
+- The banner's `p` lines computed to 24px under a 12px parent, since the panels' `/SCSS/common.css` has `p { font-weight: 400; font-size: var(--fontSizeParagraph); line-height: 1; color: var(--textColor); }`, and `--fontSizeParagraph` is 24px on a 1,440-line screen.
+- The failure box computed `text-align: center` and its `p`s `left`, since the EFB's `efb_os/Assets/reset.css` gives nearly every element `text-align: left`, along with `font-size: inherit`, which is why nothing else there showed.
+  So a centered parent centers nothing in the EFB unless each child says so.
+- `efb_os.css` has `h2 { font-size: 16px; font-family: Roboto-Bold, ...; color: white; }` and `svg { width: 100%; height: 100%; }`.
+- The EFB's document holds 16 stylesheets, one for each app's.
+- A pilot resting the mouse on a tab saw no tooltip, so Coherent GT draws no `title`.
+
+The debugger loads none of these, which is why it matched the sim's engine on [1,159 of 1,170 CSS items](#2026-11-01-the-sdks-coherentgt-debugger-runs-our-pages-in-coherent-gt-with-no-sim-and-matches-the-sims-efb-on-1159-of-p14s-1170-css-items-and-on-repeated-work-in-a-loaded-page) and still drew these differently.
+
+**Changed:** the kit's reset sets `text-align: inherit` on everything in our root, and the inherited font properties on `p` and headings.
+`tools/lib/sim-css.ts` restates the rules, and the dev loop loads them under our stylesheet, so the debugger shows this kind of difference.
+The tab bar uses the kit's `Tooltip`.
+
+**Affects:** [Coherent GT's measured limits](../architecture/coherent-gt.md).
+
+## 2026-11-02: An EFB app with `BootMode` 1 starts at its first opening, and only 2 starts with the EFB
+
+**Asked:** why the EFB app's first opening flashed "Dual Input service isn't running" for about a second before setup.
+
+**Expected:** a link long up by then, since our app sets `BootMode` 1, which we took to run our code from the sim's start ([entry below](#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)).
+
+**Found:** the EFB's document registered our app in the menu at 17:39:07, and the app's socket joined the core at 17:42:37, as the pilot opened it, 1m44s after Ready to Fly.
+In fs-base-efb's `efb_ui/efb_os/efb_os.js`, `registerApp` calls an app's `render()` for `BootMode` 1, WARM, and 2, HOT, and runs `initAppEntry`, which draws the view and so calls its `onAfterRender`, for HOT only (read, not measured for HOT).
+p09 set `BootMode` 1 too, but its polling ran in its script's top level, outside the view, so its run says nothing of a view.
+A page with no core heard says the service isn't running, which is the flash.
+
+That breaks more than the flash: the EFB app's code opens the banner, so a pilot back in a session after restarting the sim, who hadn't opened the app, would get no banner.
+
+**Changed:** our app sets `BootMode` 2.
+
+**Not tried:** `BootMode` 2 in the sim, which the next session does: no flash, setup from its start, and a banner with the app never opened.
+
+**Affects:** [the EFB app's registration](decisions.md#the-efb-app-touches-the-framework-only-to-register).
+
 ## 2026-11-02: A `discord:` link opens an invite in the Discord app, from closed
 
 **Asked:** whether the EFB app's Discord links can reach a pilot's Discord app rather than their browser, and what form an invite takes in the app's link scheme, which Discord documents nowhere we found.

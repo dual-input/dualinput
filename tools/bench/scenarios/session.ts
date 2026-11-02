@@ -583,7 +583,7 @@ test("a cancel stops an attempt waiting on the backend", { timeout: 30_000 }, as
   await a.app.ok("clients.set-setting", { key: "session.name", value: a.name })
   await a.app.ok("session.host")
   const asking = await until(a, (s) => s.attempt !== null, "the attempt")
-  assert.deepEqual(asking.attempt, { on: "host", dialing: false })
+  assert.deepEqual(asking.attempt, { on: "host", dialing: false, code: null })
   await a.app.ok("session.cancel")
   await until(a, (s) => s.attempt === null, "the attempt stopped")
   assert.equal(slice(a).refused, null)

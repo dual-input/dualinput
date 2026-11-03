@@ -16,6 +16,11 @@ Decides:     That the desktop app does the watcher's jobs from a tray icon; what
 > Quit lives only in the tray, and [the desktop app's own screens](../interface/decisions.md#the-desktop-app-shows-velopacks-windows-and-its-own-figures-and-the-build-designs-the-rest) are designed during the build.
 > The join refusal when the host is behind says they need to leave the session and update ([Host and Join](../interface/decisions.md#host-and-join-answer-inside-the-start-card)).
 
+> **Note**
+> The user changed [when the app checks](#when-the-app-checks) on 2026-11-03: a check that finds a newer release downloads it at once only while the sim is closed.
+> While the sim runs, automatic checks go on, so the EFB app can say a new version exists, and the download waits for the sim to close, unless the pilot presses Check now or Install, which download at once.
+> That adds a state to the local port's `Update`, available and not downloaded.
+
 Dual Input has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.
 The app applies an update only while the sim is closed, no session is held, and the core has exited, and Install now quits the core to get there.
@@ -282,13 +287,13 @@ These need no sim:
 
 ## Left to the apps' stage
 
-These wait for the apps' stage of step 8, with [the apps' list](../interface/01-apps.md#left-to-the-apps-stage):
+Stage 11b settled these, in [the desktop app's screens](../interface/decisions.md#the-desktop-app-shows-velopacks-windows-and-its-own-figures-and-the-build-designs-the-rest), [the fixed local port](../interface/decisions.md#the-desktop-app-tells-the-efb-app-about-updates-and-the-firewall-over-a-fixed-local-port), and [the header](../interface/decisions.md#the-header-shows-only-what-needs-the-pilot):
 
-- The tray icon's menu, the 24 hours of figures and what quitting costs, how often the app samples them, and their words.
-- How the app's setting to start with Windows follows Windows' own switch for its Run value, which Settings and Task Manager keep under `StartupApproved` (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
+- The tray icon's menu, the figures and what quitting costs, a sample a minute, and their words.
+- How the app's setting to start with Windows follows Windows' own switch for its Run value, which Settings and Task Manager keep under `StartupApproved`: the app only reads that switch, every 5s, and the EFB app tells the pilot where to turn it back on (measured on Windows 11, 2026-11-02, [log](log.md#2026-11-02-windows-11s-startup-apps-page-writes-01-for-off-and-zeros-for-on-and-tells-a-running-app-neither)).
 - How the window shows the update's states, Install now, and Check now, and what Install now says while it waits.
-- How the app offers the firewall fix, and what it shows while no `UserCfg.opt` exists.
-- The words of our package's trouble notification, and of the join check's refusal when the host is the one behind, which tells them to leave the session first.
+- How the EFB app's header offers the firewall fix, and what the first run's window shows while no `UserCfg.opt` exists.
+- The join check's refusal when the host is the one behind, which tells them to leave the session first.
 
 ## What this changes elsewhere
 

@@ -32,5 +32,5 @@ export async function buildDesktopPages(): Promise<void> {
   })
   fs.writeFileSync(path.join(OUT, "app.css"), await buildCss(CONTENT))
   fs.cpSync(path.join(KIT, "fonts"), path.join(OUT, "fonts"), { recursive: true })
-  fs.writeFileSync(path.join(OUT, "index.html"), `<!doctype html><html><head><meta charset="utf-8"><title>Dual Input</title><link rel="stylesheet" href="app.css"></head><body style="margin:0;background:#0a0a0a"><div id="page"></div><script src="app.js"></script></body></html>`)
+  fs.writeFileSync(path.join(OUT, "index.html"), `<!doctype html><html><head><meta charset="utf-8"><title>Dual Input</title><link rel="stylesheet" href="app.css"></head><body style="margin:0;background:#0a0a0a;overflow:hidden"><div id="page"></div><script src="app.js"></script></body></html>`)
 }

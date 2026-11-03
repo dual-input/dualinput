@@ -7,13 +7,6 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 ```
 
 > **Note**
-> Stage 11b's tentative decisions change the desktop app's units, pending the apps' design (user, 2026-10-25): no feature has a section in the desktop app, so take-control's and go-to's `desktop/` folders become `efb/` ones ([one full window](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app)); and `efb-shell` and `desktop-shell` draw with one kit of React components, styled with Tailwind 3, so `efb-shell`'s MSFS Avionics Framework, `desktop-shell`'s Tailwind 4, `src/apps/desktop`'s Vite entry, and [building every target](#building-every-target)'s Vite and Tailwind `@source` lines no longer hold ([the kit](../interface/decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3); user, 2026-11-01).
-> The banner's page draws with React and the kit and has no part API, so `efb-shell` holds the EFB app's frame and its part API alone, and the banner is a platform unit of its own outside the core, `src/platform/banner/` ([the banner](../interface/decisions.md#the-banner-draws-with-react-and-the-kit)).
-> What the two draw of a crew, a pilot's head and Ready with its countdown, is a second package, `@dualinput/crew` in `src/packages/crew/`, since neither page's code may reach into the other's.
-> `src/apps/desktop` is a Cargo workspace of its own, with its own `Cargo.lock`, so [the workspace](#the-workspace)'s one Cargo workspace holds every Rust crate but that one ([build log](../build/log.md#2026-11-01-tauri-in-the-root-workspace-gives-the-loops-crates-getrandom-so-the-desktop-app-is-a-cargo-workspace-of-its-own)).
-> [The workspace](#the-workspace) gains `src/packages/`, for packages that are no tier's units, whose first is the kit, `@dualinput/ui` in `src/packages/ui/`, and a feature's EFB part may import it beside its shell and the messages' types ([the kit's package](../interface/decisions.md#the-kit-and-dual-inputs-palette-are-one-package-in-this-repository)).
-> The Coherent GT check leaves `tools/` for its own repository, `dual-input/coherent-checks`, which Dual Input installs with npm ([build plan](../build/plan.md#11b-the-apps)).
-> [The traffic and ATC switch](#the-traffic-and-atc-switch) becomes two switches, each writing its own feature's key, since [traffic and ATC audio are shared apart](../interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) (user, 2026-10-31), so nothing sends the request that claims several keys together.
 > In [what the bridge owns](#what-the-bridge-owns), a lock that turns into a warning keeps a lock's look, with a Dismiss on a card that takes presses while its veil passes them, and Dismiss reaches every panel by the CommBus event `DUALINPUT_BRIDGE_DISMISS`, which joins [names the sim shares](#names-the-sim-shares) under `BRIDGE` ([a visible lock](../interface/decisions.md#a-visible-lock-is-a-veil-over-the-display-with-one-centered-card); user, 2026-11-01).
 
 Dual Input's code is a platform, engines, and features.
@@ -68,13 +61,14 @@ features/     state-sync  pointer-sync  flight-model  avatars  traffic
 platform/     in the core                                          outside the core
                                                                    routine-host
               profile-loader  cockpit-stream                       panel-bridge
-              session                                              efb-shell  desktop-shell
+              session                                              efb-shell  banner  desktop-shell
               sim-service  network  core-helper-service  recording
               clients
               kernel
 engines/      sync-engine  profile-build  sim-edge  stand-in-sim
               sandbox  profile-engine  recording-format  aircraft-model  sim-client  sim-awareness  transport  page-client
               messages  simconnect-types  msfs-gltf  msfs-rpn  ray-cast  object-mirror
+packages/     ui (the kit)  crew      no tier's units: what the apps' pages draw with
 ```
 
 The platform outside the core runs in our WASM module, in each cockpit panel, and in the two apps that take features' sections.
@@ -118,8 +112,9 @@ The platform is split this way, and named the platform rather than the host, bec
 | cockpit-stream | The cockpit stream, catch-up, the platform's guard that holds control back from a pilot whose catch-up or replay runs, and the slice that says whether either runs | "Cockpit sent" | kernel, clients, network, session |
 | routine-host | Our WASM module's side of [work in the sim](#work-in-the-sim): `Routine`, wants, slots, `routines!`, the freeze, and the platform's own routine, `Hold` | | messages |
 | panel-bridge | In TypeScript, [what the bridge owns](#what-the-bridge-owns), and loading panel modules | | page-client, messages' `ts/` |
-| efb-shell | In TypeScript, the EFB app's frame, its session controls and preflight summary, the banner's page, and the API its sections use, on the MSFS Avionics Framework | | page-client, messages' `ts/` |
-| desktop-shell | In TypeScript, the desktop app's frame, the session's view, settings, the report page, the API its sections use, and the components they share, in React and Tailwind | | messages' `ts/` |
+| efb-shell | In TypeScript and React, the EFB app's frame, every screen the platform draws in it, and the API its parts use, drawn with the kit; it touches the MSFS Avionics Framework only to register | | page-client, messages' `ts/`, the kit, crew |
+| banner | In TypeScript and React, the banner's page, drawn with the kit, with no part API | | page-client, messages' `ts/`, the kit, crew |
+| desktop-shell | In TypeScript and React, the desktop app's window, drawn with the kit, with no part of any feature in it | | messages' `ts/`, the kit |
 
 The session crate reads none of the profile loader, state sync, or the cockpit stream: the profile loader writes the bundle a session pins, and state sync and the cockpit stream guard the session crate's Ready and control requests ([the session's units](../session/02-units.md#the-units)).
 The session crate, the profile loader, and the cockpit stream don't depend on the recording crate, since they tell it nothing (user, 2026-10-23; [recording log][stage-8]).
@@ -155,10 +150,10 @@ A feature's section in an app is one part, which the app's list names in one lin
 | --- | --- | --- |
 | `src/apps/core` | `main`, the list of the platform's crates and the features in the order they register, and the core's edge: tokio's sockets, the timer thread, which waits on a high-resolution waitable timer, the WebSocket server, the core helper's pipe, files, HTTPS, the worker pool, the replay log's writer, and the seed of the kernel's random IDs; it declares one foreign function, the C runtime's `_set_FMA3_enable`, to turn FMA3 off in the C runtime it links statically, and stops a build whose `RUSTFLAGS` replaced that static runtime ([the core's math](../core/01-loop-and-edge.md#the-cores-math), [the C runtime](../build/01-the-build.md#the-c-runtime)); and a Cargo feature, `stand-in`, that no release build turns on, which puts the stand-in where the edge goes and registers the test units and the test routine the cases name ([its place](../build/02-testing.md#its-place)) | Every crate on the core's side, the transport, and the sim edge; in its `stand-in` build, the stand-in sim and `src/sim-package/routines` |
 | `src/apps/core-helper` | The core helper: Raw Input and audio, and speech with the voice phrases, a Soon pick | messages |
-| `src/apps/desktop` | Tauri's Rust side, which holds the watcher's jobs and runs from login as a tray icon, and links the `velopack` crate, as no other program does, since a program that runs Velopack's startup applies a downloaded update ([installing and updating](../install/01-installing-and-updating.md#the-installer-and-the-updater)); Vite's entry; and the list of the desktop app's sections | desktop-shell, each feature's `desktop/`, messages |
+| `src/apps/desktop` | Tauri's Rust side, which holds the watcher's jobs, its own figures, and the fixed local port, and runs from login as a tray icon, and links the `velopack` crate, as no other program does, since a program that runs Velopack's startup applies a downloaded update ([installing and updating](../install/01-installing-and-updating.md#the-installer-and-the-updater)); and the window's entry | desktop-shell, messages |
 | `src/sim-package/wasm-module` | The cdylib cargo-msfs builds: the edge on the sim's APIs, whose bindings its build script generates from the SDK's headers | routine-host, `src/sim-package/routines` |
 | `src/sim-package/routines` | The module's list of routines, a library crate of its own, which `src/sim-package/wasm-module` and the bench build of the core both link ([our WASM module](../build/02-testing.md#our-wasm-module)) | routine-host, each feature's `routines/` |
-| `src/sim-package/pages` | The `VCockpit.js` override, the EFB app's entry and its list of sections, the banner's entry, and the menu script, which reports the menu's page and runs the world map's requests | panel-bridge, efb-shell, page-client, each feature's `efb/` |
+| `src/sim-package/pages` | The `VCockpit.js` override, the EFB app's entry and its list of parts, the banner's entry, and the menu script, which reports the menu's page and runs the world map's requests | panel-bridge, efb-shell, banner, page-client, each feature's `efb/` |
 | `tools/profile-builder` | Checks each profile and builds its bundle, for CI and for authors | profile-build |
 | `tools/profile-author` | The seat tool and the click tool ([the authoring tool](../avatars/01-avatars.md#the-authoring-tool)) | sim-client, sim-edge, aircraft-model, messages |
 
@@ -324,9 +319,10 @@ me.guard::<TakeControl>(Instructor::only_the_instructor);   // Allow, or Deny("O
 ### The traffic and ATC switch
 
 Traffic and ATC audio each declare a role's key, the traffic host's and the ATC host's (user, 2026-10-14).
-The platform offers one request that claims several keys together, refused whole if any guard denies one, and the apps' "Share my traffic and ATC" switch sends it with both keys, and shows on while this pilot holds both.
-The platform never knows what either key is for, and deleting traffic removes its key from the switch in the apps, as deleting a feature removes its section in each app.
-Both keys go out in one message on the session channel, and each key's stamp counts that key's own changes ([01-between-machines](../network/01-between-machines.md#channels)).
+Each has a switch of its own in the EFB app, which asks for its own feature's key and shows on while this pilot holds it, since [traffic and ATC audio are shared apart](../interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) (user, 2026-10-31).
+The platform also offers a request that claims several keys together, refused whole if any guard denies one, which nothing sends.
+The platform never knows what either key is for, and deleting traffic removes its switch with its part.
+Each key's stamp counts that key's own changes ([01-between-machines](../network/01-between-machines.md#channels)).
 When both pilots flip the switch at once, both keys carry the same counts, so both settle on the same pilot (unverified; a [node 7](plan.md#7-testing) bench case in which both pilots claim at once settles it).
 This changes [decision 044](../../decisions/044-table-of-roles.md), which gives the two one role that can split, once step 8's decisions are numbered.
 
@@ -669,14 +665,15 @@ dualinput/
   src/
     engines/<name>/      each engine in the units' table, such as messages/ and sync-engine/
     platform/<name>/     each unit of the platform, such as kernel/ and routine-host/
+    packages/<name>/     what the apps' pages draw with: ui/, the kit, and crew/
     features/<name>/
       core/              its crate in the core
       routines/          its routines in our WASM module
       panel/             its panel modules
-      desktop/  efb/     its sections of the desktop app and the EFB app
+      efb/               its part of the EFB app
     apps/
       core/  core-helper/  each program's main, and its list of features
-      desktop/           Tauri: its Rust side, and its pages built by Vite
+      desktop/           Tauri: its Rust side, a Cargo workspace of its own, and its window's entry
       ide/               the Dual Input IDE, once it's built
     sim-package/
       wasm-module/       the cdylib cargo-msfs builds: the edge
@@ -690,7 +687,9 @@ dualinput/
                          profile-builder/, profile-author/, msfs-sdk/, and the bench
 ```
 
-A feature has only the parts it needs: pointer sync has a crate in the core and panel modules, and no routines or sections in the apps.
+A feature has only the parts it needs: pointer sync has a crate in the core and panel modules, and no routines or part in the EFB app.
+`src/apps/desktop` is a Cargo workspace of its own, with its own `Cargo.lock`, and the root's one Cargo workspace holds every other Rust crate ([build log](../build/log.md#2026-11-01-tauri-in-the-root-workspace-gives-the-loops-crates-getrandom-so-the-desktop-app-is-a-cargo-workspace-of-its-own)).
+`src/packages/` holds packages that are no tier's units, and a feature's EFB part may import the kit beside its shell and the messages' types ([the kit's package](../interface/decisions.md#the-kit-and-dual-inputs-palette-are-one-package-in-this-repository)).
 Avatars keeps its figure's SimObject in its folder too, in `src/features/avatars/figure/`.
 Deleting one deletes its folder, its modules in the message crate and the profile engine, and its line and its dependency in each assembly in `src/apps/` and `src/sim-package/`.
 The root `Cargo.toml` names its members by globs, such as `src/features/*/core`, so deleting a feature's folder takes its crates out of the workspace with no edit there, and `default-members` takes the same globs but leaves out `src/sim-package/`, whose module's build script needs what cargo-msfs sets; Cargo took globs in both lists (measured on our development machine, 2026-10-15, [architecture log][p12]).
@@ -701,10 +700,10 @@ A feature's block that a released level of the profile format holds stays in the
 
 | Target | Built by | From |
 | --- | --- | --- |
-| The core, the core helper, the desktop app's Rust side, and the profile builder | `cargo build`, for x86_64 | The workspace's root |
+| The core, the core helper, and the profile builder | `cargo build`, for x86_64 | The workspace's root |
 | Our WASM module | cargo-msfs, for wasm32 | `src/sim-package/wasm-module/` |
 | Our code in the sim: the bridge, panel modules, and the sim's pages | esbuild at `es2017` ([decision 030](../../decisions/030-in-sim-code-es2017-esbuild.md)), then the Coherent GT check ([decision 031](../../decisions/031-coherent-gt-check-tool.md)) | `tools/` |
-| The desktop app's pages and its program | `tauri build --no-bundle`, which runs Vite for the pages and then builds the Rust side ([what a release holds](../build/01-the-build.md#what-a-release-holds)) | `src/apps/desktop/` |
+| The desktop app's pages and its program | esbuild and the kit's stylesheet for the pages, then `cargo build`, which compiles them in ([what a release holds](../build/01-the-build.md#what-a-release-holds)) | `src/apps/desktop/` |
 | The backend | wrangler | `src/backend/` |
 | The messages' TypeScript types | ts-rs, which writes them during `cargo test` into the folder `TS_RS_EXPORT_DIR` names (documented, [ts-rs 12.0.1](https://docs.rs/ts-rs/12.0.1/ts_rs/)) | `src/engines/messages/` |
 | The profiles' bundles | `tools/profile-builder`, on `profile-build` | `profiles/` |
@@ -727,11 +726,10 @@ A feature's block that a released level of the profile format holds stays in the
   The types are committed and imported from there, and CI generates them again and fails on any difference, which answers the spine's [left open](01-spine.md#left-open) item on that check.
   ts-rs's derives built into the module in p11, so the message crate needs no second form for wasm32.
   The message crate's build script writes its hash, running again only when what it hashes changes, and the `cargo test` that writes ts-rs's types also writes `ts/stamp.ts`, with the version and the hash, which that check covers ([the message crate's hash](../build/01-the-build.md#the-message-crates-hash)).
-- **TypeScript** has one lockfile at the root, and two npm workspaces, each with a `package.json` of its own beside the root's: `src/apps/desktop/`, because the Tauri CLI takes the folder it runs in when that holds a `package.json` (read in tauri-apps/tauri, its default branch on 2026-10-15, `crates/tauri-cli/src/helpers/app_paths.rs`), and `src/backend/`, since Cloudflare recommends installing wrangler in the project (documented, [Wrangler's commands](https://developers.cloudflare.com/workers/wrangler/commands/)).
+- **TypeScript** has one lockfile at the root, and one npm workspace glob, `src/packages/*`, whose packages each have a `package.json` of their own; the root's `package.json` holds the rest of what we install, wrangler among them.
   A feature's TypeScript folders have no `package.json` of their own.
   Each target's tsconfig sets its own `lib`: ES2017 for our code in the sim, as decision 030 sets it, the latest with the DOM for the desktop app's pages, and the Workers' types for the backend.
-  The desktop app's stylesheet names `src/features/*/desktop/` as a source with Tailwind's `@source`, since Tailwind's Vite plugin scans only below Vite's root (read in @tailwindcss/vite 4.3.3, `dist/index.mjs`, in node 5.4's review), and a feature's section would otherwise render unstyled.
-- **One version** lives in the root `Cargo.toml`'s `[workspace.package]`, which every crate inherits, as [decision 026](../../decisions/026-first-message-carries-version-and-hash.md) asks; Tauri takes the desktop app's from its crate when `tauri.conf.json` names none (documented, [Tauri's configuration](https://v2.tauri.app/reference/config/#version)), and since Tauri's CLI reads a version the crate inherits and its build script doesn't, the version reaches the desktop app's Windows version resource through `tauri build --config` ([each component's version and hash](../build/01-the-build.md#each-components-version-and-hash)); the build writes it into the Community package's `manifest.json`, where p08's build script wrote a fixed one (read in `experiments/areas/architecture/flight/build.mjs`, `finish`).
+- **One version** lives in the root `Cargo.toml`'s `[workspace.package]`, which every crate of its workspace inherits, as [decision 026](../../decisions/026-first-message-carries-version-and-hash.md) asks; the desktop app's `Cargo.toml` names it again, which `tools/check.ts` compares, and a plain `cargo build` carries it into the program's Windows version resource ([each component's version and hash](../build/01-the-build.md#each-components-version-and-hash)); the build writes it into the Community package's `manifest.json`, where p08's build script wrote a fixed one (read in `experiments/areas/architecture/flight/build.mjs`, `finish`).
 - **`tools/build.ts`** builds every row of the table but the backend's and the profiles', then lays out the Community package with its `layout.json` and `manifest.json`, as p08's build script does.
   Node 22.18 or later runs it by stripping its types, so our build scripts use no `enum` and name each import's `.ts` (documented, [Node's TypeScript support](https://nodejs.org/api/typescript.html)).
   `node tools/build.ts install` copies a development build's package into `Community`, since only an installed desktop app writes it ([our package](../build/01-the-build.md#our-package)).

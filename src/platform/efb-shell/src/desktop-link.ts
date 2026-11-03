@@ -16,7 +16,7 @@ export const DESKTOP_PORT = 47914
 const RETRY_MS = 3000
 
 /** What a page says when it asks the desktop app for something with no desktop app to hear it. */
-export const NO_DESKTOP_APP = "Dual Input's desktop app isn't running. Open it from the Start menu."
+export const NO_DESKTOP_APP = "Dual Input's tray app isn't running. Open it from the Start menu."
 
 export type DesktopEnv = {
   connect(port: number): Socket

@@ -711,6 +711,7 @@ version = "0.1.0"
 dependencies = [
  "futures-util",
  "messages",
+ "serde",
  "serde_json",
  "tauri",
  "tauri-build",

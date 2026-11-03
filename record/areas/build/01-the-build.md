@@ -6,9 +6,6 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, ../arc
 Decides:     What a release holds; how every x86_64 program links the C runtime statically; which SDK the build uses; where the sim's stock files live and how a sim update that changes them shows; our package's folder name, order hint, and contents, and how a development build reaches the sim; how the files only the sim compiles get built; how the Coherent GT check is built and when it runs, and that no for-of rewrite runs; how the message crate is hashed, and how the version and the hash reach each component; how a release is built, checked, and published, when the backend deploys, and how its tests hold a released path's bodies; and that v1 ships no authoring tools (node 6.18).
 ```
 
-> **Note**
-> Stage 11b's tentative decision that [the apps draw with a kit of our own components, styled with Tailwind 3](../interface/decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3) means `tauri build` builds the desktop app's pages as the kit's build makes them, not with Vite, which [what a release holds](#what-a-release-holds) names (user, 2026-10-25).
-
 `tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll` and the three C runtime DLLs it imports, and our one Community package, `dualinput`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.
 The Coherent GT check is a Node tool of its own on acorn, run on every bundle after each edit and in CI, and the message crate's hash is SHA-256 over its own source and the locked versions of what it depends on.
@@ -24,7 +21,7 @@ The research behind it is in this area's [log](log.md).
 
 | In the folder | Built by |
 | --- | --- |
-| `dualinput-desktop.exe` | `tauri build --no-bundle`, which builds the desktop app's pages and then its Rust side with Tauri's `custom-protocol` feature, so the program serves its built pages (read in tauri-apps/tauri at tag tauri-cli-v2.12.3, [results][velopack]); a plain `cargo build` of it would most likely look for Vite's server instead (inference, same results) |
+| `dualinput-desktop.exe` | `tools/build.ts` builds its window's pages with esbuild and the kit's stylesheet into `target/desktop-pages`, then `cargo build` from `src/apps/desktop` compiles them in; the crate turns on Tauri's `custom-protocol` feature, so the program serves them with no Tauri CLI and no bundling step ([the kit](../interface/decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3)) |
 | `dualinput-core.exe` and `dualinput-core-helper.exe` | `cargo build --release` |
 | `SimConnect.dll` | Copied from the pinned SDK ([the SDK](#the-sdk)), for the core, which loads it from its own folder |
 | `VCRUNTIME140.dll`, `VCRUNTIME140_1.dll`, and `MSVCP140.dll` | Copied from the MSVC tools' redistributable folder, for `SimConnect.dll`, which imports them ([the C runtime](#the-c-runtime)) |
@@ -182,13 +179,13 @@ No step of the build rewrites `for`-`of` loops, which settles the spine's [left 
 
 | Component | Its version | Its hash |
 | --- | --- | --- |
-| The core, the core helper, the desktop app's Rust side, and the WASM module | `CARGO_PKG_VERSION`, which each crate inherits from `[workspace.package]` | `messages::HASH` |
-| The desktop app's program, in its Windows version resource | `tauri build --config` | None |
+| The core, the core helper, and the WASM module | `CARGO_PKG_VERSION`, which each crate inherits from `[workspace.package]` | `messages::HASH` |
+| The desktop app's Rust side, and its program's Windows version resource | `CARGO_PKG_VERSION`, from its own `Cargo.toml`, since it's a Cargo workspace of its own, and `tools/check.ts` fails if that differs from the root's | `messages::HASH` |
 | Our code in the sim | `stamp.ts` | `stamp.ts` |
 | Our package's `manifest.json` | `tools/build.ts` | None |
 | The backend | None: it compares the version and hash the host posted with each joiner's | None |
 
-`tauri build` gets the version through `--config` because Tauri's CLI and the running app read a version the crate inherits, while tauri-build sets the program's Windows version resource only from `tauri.conf.json`'s own (read in tauri-apps/tauri at tag tauri-cli-v2.12.3, [results][velopack]; unverified by a build), which settles the code map's [left open](../architecture/02-code-map.md#left-open) item on it.
+With `tauri.conf.json` naming no version, a plain `cargo build` writes the crate's version into the program's Windows version resource, which needs no `--config`, since the crate names its version outright (measured on our development machine, 2026-11-04, [log](log.md#2026-11-04-a-plain-cargo-build-writes-the-desktop-programs-windows-version-resource-from-its-crate)), and that settles the code map's [left open](../architecture/02-code-map.md#left-open) item on it.
 
 ## CI
 

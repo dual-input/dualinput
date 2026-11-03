@@ -200,7 +200,7 @@ Catching a feature's panic and turning that feature off for the session would be
 ## Starting and stopping
 
 The desktop app runs from login as a tray icon, starts the core with the sim, and starts it again after an exit other than 0 ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)).
-The core's edge starts the desktop app's program whenever the EFB app's button asks for it, and the one running copy opens its window ([bringing the desktop app forward](../interface/01-apps.md#bringing-the-desktop-app-forward)).
+The core's edge doesn't start the desktop app's program, since the EFB app has no button that asks for it ([bringing the desktop app forward](../interface/01-apps.md#bringing-the-desktop-app-forward)).
 
 The core starts in this order:
 

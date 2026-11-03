@@ -14,8 +14,9 @@ export const SIM_PROCESS = "FlightSimulator2024.exe"
 /**
  * Where each edition of the sim keeps its UserCfg.opt: Steam's in `%APPDATA%`, and the
  * Microsoft Store's in `%LOCALAPPDATA%` (record/areas/install/01-installing-and-updating.md,
- * "The packages folders"). `USER_CFGS` in src/platform/sim-service/src/aircraft.rs names the
- * same files, so change both together.
+ * "The packages folders"). `USER_CFGS` in src/platform/sim-service/src/aircraft.rs and
+ * `sim_has_run` in src/apps/desktop/src/screens.rs name the same files, so change all three
+ * together.
  */
 export function userCfgs(env: NodeJS.ProcessEnv = process.env): string[] {
   const files: string[] = []

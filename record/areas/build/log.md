@@ -1,5 +1,18 @@
 # The build: log
 
+## 2026-11-04: A plain `cargo build` writes the desktop program's Windows version resource from its crate
+
+**Asked:** what lands in `dualinput-desktop.exe`'s Windows version resource, which [the build](01-the-build.md#each-components-version-and-hash) had reach it through `tauri build --config`, unverified, because tauri-build read only `tauri.conf.json`'s version and the crate inherited its own.
+
+**Expected:** an empty version, or Tauri's default, from a build that passes no `--config`.
+
+**Found:** `tools/build.ts` builds the program with `cargo build` from `src/apps/desktop`, and `tauri.conf.json` names no version.
+The debug program's properties read `FileVersion` 0.1.0, `ProductVersion` 0.1.0, `ProductName` Dual Input, `FileDescription` Dual Input, and `CompanyName` dualinput, which Tauri took from the bundle identifier.
+The crate names its version outright, since `src/apps/desktop` became a Cargo workspace of its own, so nothing is left for `--config` to carry.
+A release build is unmeasured, and stage 22's release job is where one first runs.
+
+**Changed:** [the build](01-the-build.md) drops `tauri build` for the desktop program, and its version's row names the crate.
+
 ## 2026-11-01: fspackagetool names a compiled panel after its source file, and compiled it with a game running
 
 **Asked:** what `node tools/compile-panel.ts` gets from `fspackagetool` for the banner's panel definition, which the first run looked for under the name in the source's `Filename` element.

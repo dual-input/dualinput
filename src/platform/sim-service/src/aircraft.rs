@@ -28,7 +28,8 @@ pub const USER_CFG: &str = "sim.user-cfg";
 
 /// Steam's `UserCfg.opt`, then the Microsoft Store's (record/areas/install/
 /// 01-installing-and-updating.md, "The packages folders"). `userCfgs` in tools/lib/install.ts
-/// names the same files, so change both together.
+/// and `sim_has_run` in src/apps/desktop/src/screens.rs name the same files, so change all three
+/// together.
 const USER_CFGS: &str = r"%APPDATA%\Microsoft Flight Simulator 2024\UserCfg.opt;%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\UserCfg.opt";
 
 /// The facts changed, the search's result included.

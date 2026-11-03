@@ -7,7 +7,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 - **Decided:** every screen a pilot uses Dual Input through is in the EFB app: hosting and joining, the crew, preflight and Go to, take-control's button and its binding, the settings, traffic's packs, ATC audio, and the recordings.
   Quit lives only in the [tray](#the-desktop-app-shows-velopacks-windows-and-its-own-figures-and-the-build-designs-the-rest).
-  The desktop app stays the Tauri program that runs from login as a tray icon and does the watcher's jobs, and its window shows only its own screens: the update's progress, and the last 24 hours of its own and the core's CPU and memory use, which it records itself ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
+  The desktop app stays the Tauri program that runs from login as a tray icon and does the watcher's jobs, and its window shows only its own screens: [the last 24 hours of what it takes of the PC, which it records itself, what it does, Start with Windows, the version, Quit's ask, and the first run's welcome](#the-desktop-app-shows-velopacks-windows-and-its-own-figures-and-the-build-designs-the-rest).
   No screen of the desktop app's needs the core, so an open window keeps no core running, and the desktop app wants a core while the sim runs or a session file exists.
   The EFB app has no button that brings the desktop app forward, so stage 11b takes out what stage 11a built for it: `clients`' command for the button, and the core's start of the desktop app's program with `--data` ([bringing the desktop app forward](01-apps.md#bringing-the-desktop-app-forward)).
   Go to is offered only at Free flight's world map, where the EFB opens, and not from the main menu's home page.
@@ -321,16 +321,26 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - `Setup.exe` starts the app with its first-run flag, which opens a small window, "Welcome to Dual Input", with a line pointing to the EFB app and Dismiss as its only action.
   - While no `UserCfg.opt` exists, that window says MSFS 2024 hasn't run on this PC, so Dual Input can't install its sim components, and gives two steps: start the sim and close it, then start it again and find Dual Input in the EFB.
   - Applying an update shows Velopack's stock progress dialog, so the pilot sees what's happening while `Update.exe` has our programs stopped.
-  - Quit lives only in the tray, where it asks once, as [installing and updating](../product/03-v1-scope.md#installing-and-updating) has it.
+  - Quit lives only in the tray, where it asks once, as [installing and updating](../product/03-v1-scope.md#installing-and-updating) has it: the window turns to Quit's ask, with the 24 hours of figures, "What does this do?" folded, "If you quit" and one sentence in red, and Quit anyway and Keep running.
+    The sentence follows what quitting costs at that moment: in a session, the pilot leaves it, and the EFB app stops working; with the sim running, the EFB app stops working; otherwise Dual Input won't be ready for the next flight, or get updates, and certain features may break on some aircraft.
   - A left click on the tray icon opens the desktop app's main window, and a right click opens a native menu: a usage line with the tray app's own figures, Settings…, a separator, and Quit, where the usage line and Settings… open that window too.
-  - The desktop app's main window shows the 24 hours of figures, the tray app's and the core's, and says in concrete terms what the app does for the pilot and what quitting costs, to persuade the pilot to keep it running and starting with Windows without hiding Quit.
+  - The desktop app's window draws its own title bar, with the screen's title and a close button, in place of Windows' (user, 2026-11-04).
+    A pilot reads the program as "Dual Input Tray App" in the main window's title and "Dual Input's tray app" in the EFB app, and the taskbar and the Start menu say "Dual Input" (user, 2026-11-04).
+  - The desktop app's main window, 400px wide and as tall as what it shows, answers a pilot who asks why it's always running: a sentence that leads into the figures, "What does this do?", Start with Windows, and the version with the update's state.
+  - The figures are a stacked box for each of memory, CPU, and network: the tray app's average memory and CPU, its total downloaded, and a line over the last 24 hours by the clock, with a gap for time it wasn't running.
+    A dot in the line's color marks each time the window opened, on memory and CPU, and each update downloaded, on network, and hovering a line shows that moment's figure in its box, where a dot it lands on takes the place of the box's label, by name and in the dot's color.
+  - The figures leave out the core, since a pilot gives the sim's session whatever it needs and is asking about the app that's always there.
+    They count the window's own WebView2 processes while it's open, so the line ends in a spike for as long as the pilot looks at it, and it agrees with Task Manager.
+    The memory is the private working set, Task Manager's Memory column.
+    The app takes a sample a minute into `%APPDATA%\DualInput\app\usage.jsonl`, and holds none of them in memory.
+  - Turning Start with Windows off shows a warning under the switch, here and under [the EFB app's](#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version).
 
-  The rest of these screens is designed during the build: the tray menu's details, the update's progress window, the figures and how often the app samples them, how Start with Windows follows Windows' own switch for the Run value, and how the screen for no `UserCfg.opt` looks ([installing and updating's list](../install/01-installing-and-updating.md#left-to-the-apps-stage); user, 2026-11-01).
-  Settled by the user on 2026-10-25, 2026-10-31, and 2026-11-01.
+  Settled by the user on 2026-10-25, 2026-10-31, 2026-11-01, and 2026-11-03.
 - **Because:**
   - A pilot works in the EFB app, so the first-run window only has to point there.
   - Offered a Quit in the EFB app's Settings, the user declined it (user, 2026-10-31).
-- **Leaves out:** whether the window keeps a Start with Windows switch beside [the EFB app's](#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version), which the outline's first call put there.
+  - The tray app alone is flat, so a plain average says what it costs, where the core's figures during a flight would have skewed it (user, 2026-11-03).
+  - A window that showed less than Task Manager would read as a lie to the pilot it's trying to reassure (user, 2026-11-03).
 
 ## The desktop app tells the EFB app about updates and the firewall over a fixed local port
 

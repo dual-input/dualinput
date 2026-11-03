@@ -253,6 +253,10 @@ function DualInput({ version }: { version: string }) {
               <span className="flex min-w-0 flex-1 flex-col py-1.5">
                 Start with Windows
                 {local.start_with_windows === "off-in-windows" && <span className="mt-0.5 text-xs text-muted-foreground">Turned off in Windows. Turn it back on in Settings, under Apps, Startup.</span>}
+                {/* The desktop app's window says the same under its switch, src/platform/desktop-shell/src/window.tsx, so change both together. */}
+                {local.start_with_windows !== "on" && (
+                  <span className="mt-0.5 text-xs text-warning">With this off, you'll need to open Dual Input from the Start menu for each flight. Forgetting to launch it early enough can result in certain features breaking in some aircraft. No automatic updates means you may need to restart the sim just as you are preparing to fly.</span>
+                )}
               </span>
               <Switch checked={local.start_with_windows === "on"} tabIndex={-1} className="ml-3 pointer-events-none" />
             </button>

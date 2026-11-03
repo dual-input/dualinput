@@ -10,7 +10,7 @@ Decides:     The scope of every v1 feature.
 > Stage 11b's tentative decision that [Dual Input's one full window is its EFB app](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app) changes several sections until the apps' design confirms it (user, 2026-10-25):
 >
 > - [The EFB app](#efb-app) holds every screen a pilot uses Dual Input through, the report page and the recordings list among them, built on the kit our pages in the sim draw with, so its "Not in v1" no longer holds, and it has no button that brings the desktop app to the front.
-> - What this document puts in the desktop app, such as Leave session, the recordings list, take-control's binding, and where a notification sends the pilot to act, is the EFB app's, and the desktop app's window shows only the update's progress and its 24 hours of CPU and memory use.
+> - What this document puts in the desktop app, such as Leave session, the recordings list, take-control's binding, and where a notification sends the pilot to act, is the EFB app's, and the desktop app's window shows only [its own screens](../interface/decisions.md#the-desktop-app-shows-velopacks-windows-and-its-own-figures-and-the-build-designs-the-rest), whose figures are the tray app's alone, with no core's (user, 2026-11-03).
 > - [Preflight](#preflight)'s Go to is offered from Free flight's world map, where the EFB opens, rather than also from the main menu's home page.
 > - [Installing and updating](#installing-and-updating) may let the pilot start an update from the EFB app, which restarts the sim; how the EFB app learns the update's state is the user's to settle.
 

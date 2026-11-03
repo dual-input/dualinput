@@ -3,7 +3,7 @@
 
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
 use windows_sys::Win32::System::SystemInformation::GetLocalTime;
@@ -23,13 +23,17 @@ fn open(folder: &Path) -> io::Result<File> {
     OpenOptions::new().create(true).append(true).open(path)
 }
 
+/// The folder that holds what the desktop app writes for itself, `%APPDATA%\DualInput\app`.
+pub fn folder() -> Option<PathBuf> {
+    std::env::var_os("APPDATA").map(|data| Path::new(&data).join("DualInput").join("app"))
+}
+
 /// Opens the log, and sends a panic there too, since one on a task of the port's would otherwise end only that task, with
 /// no word.
 pub fn start() {
-    let Some(data) = std::env::var_os("APPDATA") else {
+    let Some(folder) = folder() else {
         return;
     };
-    let folder = Path::new(&data).join("DualInput").join("app");
     match open(&folder) {
         Ok(file) => {
             let _ = FILE.set(Mutex::new(file));

@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "desktop-window",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tools/dev.ts", "desktop"],
+      "port": 5190
+    },
+    {
       "name": "figure-dev",
       "runtimeExecutable": "node",
       "runtimeArgs": ["experiments/areas/avatars/figure/serve.mjs"],

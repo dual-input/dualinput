@@ -3,6 +3,29 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-04: The desktop window's memory figure matches Windows' to within 0.4 MB, its own WebView2 takes about 95 MB to 114 MB, and a window can follow its content frame by frame
+
+**Asked:** whether the desktop window's figures agree with what a pilot would see in Task Manager, what the window costs while it's open, and whether a native window can follow content easing open.
+
+**Expected:** about 70 MB for the window, from the bare window [the install log](../install/log.md) measured on 2026-10-18, and a jittering window edge, since each frame resizes a native window with WebView2 inside it.
+
+**Found:** on our development machine, with a debug build:
+
+- The app recorded 113.8 MB when Windows' `Win32_PerfFormattedData_PerfProc_Process`, whose `WorkingSetPrivate` is Task Manager's Memory column, read 113.4 MB for the same seven processes, 4s apart.
+  `PrivateWorkingSetSize` in `PROCESS_MEMORY_COUNTERS_EX2` is the field that matches.
+- With the window open, the tree read 94.8 MB to 113.8 MB, of which the app alone was 4.3 MB to 4.6 MB.
+  This window, with React, the kit, and its fonts, costs more than the bare window's 70 MB.
+- WebView2's first process is a child of our program, and the walk finds the rest below it, while twelve other `msedgewebview2.exe` processes on the PC, the Claude app's among them, stay out.
+- The user watched the window's edge follow the kit's 220ms ease, resized on each `ResizeObserver` callback, and said it "feels good", so no fallback was needed.
+  That's a judgment by eye on a debug build, with no timing taken.
+- A page that scrolled while it grew flashed a scrollbar until the window caught up, which narrowed its text and jumped its layout, so the page's `overflow` stays hidden, and only a screen too short for the window scrolls.
+- Asked over the local port as the EFB app asks, the real app wrote the `Run` value, reported `on`, deleted it, and reported `off`.
+  The local port refuses a page's origin unless it's the sim's, so no dev page can reach the real app, and the EFB app's row with its warning was checked on the stand-in in the debugger.
+
+**Changed:** [the desktop app's screens](decisions.md#the-desktop-app-shows-velopacks-windows-and-its-own-figures-and-the-build-designs-the-rest) count the window's own processes, so its chart agrees with Task Manager.
+
+What we haven't checked: a release build's figures, and the first-run window when the sim hasn't run, which only the stand-in has shown.
+
 ## 2026-11-02: A third session in the sim passes the heads, a changed window, a card's click with no core, and a joiner's preflight card
 
 **Asked:** whether the fixes from [the second session](#2026-11-02-a-second-session-in-the-sim-confirms-bootmode-2-restart-and-a-load-from-the-world-map-and-finds-a-large-l-value-reads-0-and-a-canvas-repaints-only-when-its-element-changes) hold.

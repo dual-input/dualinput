@@ -11,6 +11,7 @@ use messages::net::{EndpointId, PilotId, Relay};
 use messages::unhex;
 use serde::{Deserialize, Serialize};
 
+/// `SESSION_FILE` in src/apps/desktop/src/screens.rs names the same file, so change both together.
 pub(crate) const NAME: &str = "session.json";
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

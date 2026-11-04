@@ -4,9 +4,9 @@
 //!
 //! The pilot's machine decides every target, the overlap of two hands on a yoke included,
 //! so `Figure` only eases each hand to the target it's given. Every time below is a starting
-//! value, p27's, which this stage tunes in the 58P ([avatars' decisions], "The hands follow a
-//! pilot's habits"). Times are in µs on the core's counter, from the input each change came
-//! in, so a replay moves the hands the same way.
+//! value, p27's, to be tuned in the 58P in the sim (record/areas/avatars/decisions.md, "The hands
+//! follow a pilot's habits"). Times are in µs on the core's counter, from the input each change
+//! came in, so a replay moves the hands the same way.
 
 use messages::avatars::{Hand, Side};
 
@@ -146,9 +146,14 @@ impl Hands {
         self.waiting = None;
     }
 
-    /// While a press is held, its target follows the cursor.
+    /// While a press is held, a hand out to a spot follows the cursor. A hand on the yoke stays
+    /// there, since the mouse's tremor during a press would otherwise take it off the horn.
     pub(crate) fn drag(&mut self, target: Target) {
-        if let Some(o) = self.out.as_mut().filter(|o| o.held) {
+        if let Some(o) = self
+            .out
+            .as_mut()
+            .filter(|o| o.held && matches!(o.target, Target::Point { .. }))
+        {
             o.target = target;
         }
     }
@@ -254,6 +259,14 @@ impl Hands {
         if let Some(h) = rules.holder() {
             hands[h] = rules.grip();
         }
+        // Before a hand that's out, which leaves the yoke at once, and only while this pilot's
+        // figure holds a yoke, so control passed lets go at once too.
+        if let Some((h, until)) = self.letting_go
+            && now < until
+            && rules.holder().is_some()
+        {
+            hands[h] = rules.grip();
+        }
         if let Some(o) = &self.out {
             let hovering = !o.held && now >= o.spot_until;
             hands[o.hand] = match o.target {
@@ -267,11 +280,6 @@ impl Hands {
             if self.yoke_hand(rules) == Some(1 - o.hand) {
                 hands[1 - o.hand] = rules.grip();
             }
-        }
-        if let Some((h, until)) = self.letting_go
-            && now < until
-        {
-            hands[h] = rules.grip();
         }
         hands
     }
@@ -337,6 +345,55 @@ mod tests {
         assert_eq!(hands.targets(&PF_LEFT, 1_349 * MS), [grip, grip]);
         hands.tick(&PF_LEFT, 1_350 * MS);
         assert_eq!(hands.targets(&PF_LEFT, 1_350 * MS), [grip, Hand::Rest]);
+    }
+
+    /// Runs of clicks are the normal case: the hand letting go of the yoke leaves at once for a
+    /// new press, and at once when control passes.
+    #[test]
+    fn a_hand_letting_go_leaves_at_once_for_a_press_and_for_control_passed() {
+        let mut hands = Hands::default();
+        hands.press(0, spot());
+        hands.release(0);
+        hands.tick(&PF_LEFT, 650 * MS);
+        assert_eq!(
+            hands.targets(&PF_LEFT, 650 * MS),
+            [Hand::Grip(Side::Left), Hand::Grip(Side::Left)]
+        );
+        let pm = Rules {
+            pf: false,
+            ..PF_LEFT
+        };
+        assert_eq!(
+            hands.targets(&pm, 650 * MS),
+            [Hand::Rest, Hand::Rest],
+            "control passed lets go of the yoke at once"
+        );
+        hands.press(1, spot());
+        let [left, right] = hands.targets(&PF_LEFT, 800 * MS);
+        assert_eq!(left, Hand::Grip(Side::Left));
+        assert!(
+            matches!(right, Hand::Point(_)),
+            "the hand letting go reaches at once: {right:?}"
+        );
+    }
+
+    /// A press on the wheel with a hand's tremor keeps the hand on the horn.
+    #[test]
+    fn a_drag_moves_a_hand_out_to_a_spot_and_no_hand_on_the_yoke() {
+        let mut hands = Hands::default();
+        hands.press(0, Target::Grip(Side::Left));
+        hands.drag(spot());
+        assert_eq!(hands.targets(&PF_LEFT, 0)[0], Hand::Grip(Side::Left));
+        hands.press(1, Target::Thumb([0.1, 0.0, 0.0]));
+        hands.drag(spot());
+        assert_eq!(hands.targets(&PF_LEFT, 0)[1], Hand::Thumb([0.1, 0.0, 0.0]));
+        hands.press(0, spot());
+        let next = point([0.0, 0.5, 1.9], [0.0, 0.0, -1.0]);
+        hands.drag(next);
+        let Hand::Point(at) = hands.targets(&PF_LEFT, 0)[0] else {
+            panic!()
+        };
+        assert!(v3::distance(at, [0.0, 0.5, 1.9 - HAND_RADIUS]) < 1e-6);
     }
 
     #[test]

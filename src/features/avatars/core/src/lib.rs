@@ -361,6 +361,11 @@ impl Avatars {
         let Some(eye) = me.eye() else {
             return;
         };
+        // The hand's side comes from where the wheel is, which takes a posed model, and no click
+        // may have posed it yet.
+        if let Some(model) = me.model_mut() {
+            model.pose();
+        }
         let toward = v3::unit(v3::sub(eye, point));
         let target = hands::Target::Point {
             at: v3::add(point, v3::scale(toward, hands::HAND_RADIUS)),
@@ -451,10 +456,11 @@ impl Avatars {
 }
 
 /// Whether the camera is inside the aircraft: within the interior model's box, or on a
-/// machine with no model, within the box around every seat's eye grown by 1m.
+/// machine with no model or an aircraft with no interior, within the box around every seat's eye
+/// grown by 1m.
 pub(crate) fn camera_inside(me: &Avatars, camera: &Camera) -> bool {
     let p = v3::of(camera.position);
-    match me.model() {
+    match me.model().filter(|m| m.has_interior()) {
         Some(m) => m.inside(p),
         None => me
             .profile

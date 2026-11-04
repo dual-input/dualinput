@@ -148,7 +148,9 @@ impl Bench {
             StandInAct::StopModule => Act::StopModule,
             StandInAct::ModuleFrom { slots_hash } => {
                 match u64::from_str_radix(slots_hash.trim_start_matches("0x"), 16) {
-                    Ok(hash) => Act::Module(Box::new(BenchModule::new(hash, self.to_bench.clone()))),
+                    Ok(hash) => {
+                        Act::Module(Box::new(BenchModule::new(hash, self.to_bench.clone())))
+                    }
                     Err(_) => return tracing::warn!(slots_hash, "a slots hash that isn't hex"),
                 }
             }

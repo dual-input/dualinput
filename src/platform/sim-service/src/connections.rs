@@ -64,7 +64,7 @@ pub(crate) struct Holder {
     pub(crate) client: Client<Origin>,
     /// Each watch's handle by the request its values come under, and whether it reads once.
     pub(crate) routes: BTreeMap<u32, (Handle, bool)>,
-    /// Each watch by its handle, for a write into its variables.
+    /// Each watch by its handle, for a write into its variables, a read once's until its answer.
     pub(crate) watches: BTreeMap<Handle, Watch>,
     /// Each create's handle by its request, until the object's ID comes.
     pub(crate) creates: BTreeMap<u32, Handle>,

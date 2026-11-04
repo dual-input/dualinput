@@ -380,6 +380,7 @@ In the sim:
 - Whether a following machine's `A:YOKE X POSITION WITH AP LINEAR` and `A:YOKE Y POSITION WITH AP` move with `Follow`'s axis events.
 - Whether a frame maps to a glTF animation's time as the SDK documents, which `aircraft-model` takes and nothing has measured ([log](log.md#2026-10-03-aircraft-mark-their-yoke-grips-with-the-same-node-names-and-the-yokes-own-animations-put-them-on-a-level-wheel)).
 - Whether the interior model's bounding box tells the 58P's chase view from a walk down its cabin.
+- Whether a live figure's `Z:` values survive a reset of the sim's variables, since `Figure` writes a value again only when it changes, and the stand-in keeps them.
 
 ## Known limits
 

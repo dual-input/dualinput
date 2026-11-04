@@ -131,8 +131,11 @@ fn values_read(me: &mut Avatars, watch: Handle, values: &[(usize, Value)], cx: &
         for (_, n) in numbers {
             me.sim.on_foot = n != 0.0;
         }
+        // The aircraft's pose was last read at the profile's load, as far off as the flight since
+        // has been long, so a first pose on foot waits for a fresh one.
         if me.sim.on_foot {
             me.seat = None;
+            me.sim.aircraft = None;
         }
     } else if Some(watch) == me.sim.avatar_watch {
         for (i, n) in numbers {
@@ -176,6 +179,7 @@ fn values_read(me: &mut Avatars, watch: Handle, values: &[(usize, Value)], cx: &
 fn camera_read(me: &mut Avatars, camera: Camera, cx: &mut Cx) {
     me.sim.camera = Some(camera);
     if me.sim.on_foot {
+        crew::seat_held(me, None, cx);
         if camera.referential == WORLD
             && let Some(aircraft) = me.sim.aircraft
         {
@@ -222,11 +226,14 @@ fn in_the_aircraft(me: &mut Avatars, camera: &Camera, cx: &mut Cx) {
         });
         me.seat = seat;
         crew::seat_held(me, in_held, cx);
-    } else if let Some(s) = me.seat.and_then(|i| profile.seats.get(i)) {
-        me.body = Some(Body::Seated {
-            seat: s.key.clone(),
-            eye: s.eye,
-            look: s.forward(),
-        });
+    } else {
+        if let Some(s) = me.seat.and_then(|i| profile.seats.get(i)) {
+            me.body = Some(Body::Seated {
+                seat: s.key.clone(),
+                eye: s.eye,
+                look: s.forward(),
+            });
+        }
+        crew::seat_held(me, None, cx);
     }
 }

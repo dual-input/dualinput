@@ -82,6 +82,8 @@ fn the_58ps_model_builds_poses_and_casts_within_its_budgets() {
     // The recording keeps the model's job's result at each load, compressed at the
     // recording's level (src/engines/recording-format/src/lib.rs, `LEVEL`).
     let recorded = zstd::bulk::compress(&bytes, 3).unwrap().len();
+    // `Model::take` alone. The loop also copies the result in the kernel and for the recording,
+    // which an engine's test can't reach (record/areas/avatars/log.md, 2026-11-04).
     let take = Instant::now();
     let mut model = Model::take(bytes).unwrap();
     let taken = take.elapsed();

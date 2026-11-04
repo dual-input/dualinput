@@ -47,9 +47,9 @@ pub struct YokeSlot {
 #[repr(C)]
 pub struct StageSlot {
     /// The variable, with its prefix, such as `A:YOKE Y POSITION WITH AP`, padded with zero
-    /// bytes, and its unit, such as `percent`.
+    /// bytes, and its unit, such as `percent over 100`.
     pub var: [u8; 64],
-    pub unit: [u8; 16],
+    pub unit: [u8; 32],
     /// The animation's frame is `slope × value + intercept`, out of `length`.
     pub slope: f32,
     pub intercept: f32,

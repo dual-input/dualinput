@@ -153,8 +153,24 @@ impl Gathered {
         postcard::to_stdvec(self).expect("postcard should encode the files a gather read")
     }
 
+    /// Borrowed, then copied whole, since decoding into a `Vec<u8>` takes it a byte at a time,
+    /// and a gather's files can be tens of megabytes. Postcard writes the two the same way.
     pub fn decode(bytes: &[u8]) -> Option<Gathered> {
-        postcard::from_bytes(bytes).ok()
+        #[derive(Deserialize)]
+        struct Borrowed<'a> {
+            context: &'a [u8],
+            #[serde(borrow)]
+            files: Vec<(String, Option<&'a [u8]>)>,
+        }
+        let borrowed: Borrowed<'_> = postcard::from_bytes(bytes).ok()?;
+        Some(Gathered {
+            context: borrowed.context.to_vec(),
+            files: borrowed
+                .files
+                .into_iter()
+                .map(|(path, file)| (path, file.map(<[u8]>::to_vec)))
+                .collect(),
+        })
     }
 }
 

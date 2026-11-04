@@ -372,6 +372,27 @@ fn model() -> Model {
     Model::take(bytes).unwrap()
 }
 
+/// A template that uses itself twice would run 2^32 times, on a thread of the job's pool.
+#[test]
+fn a_template_that_uses_itself_ends_the_walk() {
+    let file = crate::xml::parse(
+        r#"<ModelBehaviors>
+  <Template Name="Twice"><UseTemplate Name="Twice"/><UseTemplate Name="Twice"/></Template>
+  <Component ID="A"><UseTemplate Name="Twice"/></Component>
+</ModelBehaviors>"#,
+    )
+    .unwrap();
+    assert!(crate::behavior::walk(&[file]).animations.is_empty());
+}
+
+/// Past a depth like this, walking or dropping the tree overflows the stack, which ends the core.
+#[test]
+fn elements_nested_past_the_limit_are_refused() {
+    assert!(crate::xml::parse(&"<a>".repeat(100)).is_ok());
+    let error = crate::xml::parse(&"<a>".repeat(100_000)).unwrap_err();
+    assert!(error.contains("nest"), "{error}");
+}
+
 #[test]
 fn the_walk_reads_the_model_files_and_none_the_included_file_names_for_itself() {
     let (read, rounds) = gather(&package());

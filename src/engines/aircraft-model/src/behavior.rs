@@ -20,6 +20,14 @@ use crate::xml::Element;
 const DEEPEST: u32 = 32;
 /// A loop with no `To` stops here, as the sim's does (documented, same page).
 const MOST_LOOPS: i64 = 64;
+/// How deep the walk may go, through templates and their bodies together, so a file can't
+/// overflow the job's stack, which ends the core: `DEEPEST` uses of templates, each 256
+/// elements deep, would be about 8,000 levels.
+const DEEPEST_WALK: u32 = 512;
+/// How many elements one walk visits, since a template that uses itself twice would otherwise
+/// run 2^32 times under `DEEPEST`, holding a thread of the job's pool. A test's fixture needs far
+/// fewer, and reaches the limit in a moment.
+const MOST_ITEMS: u32 = if cfg!(test) { 20_000 } else { 10_000_000 };
 
 /// An animation's code, by the glTF animation it drives.
 #[derive(Clone, Debug, PartialEq)]
@@ -86,6 +94,8 @@ pub(crate) fn walk(files: &[Element]) -> Found {
         saved: BTreeMap::new(),
         found: Found::default(),
         depth: 0,
+        walked: 0,
+        items: 0,
     };
     for component in top {
         walker.item(component, None);
@@ -102,6 +112,10 @@ struct Walker<'d> {
     saved: BTreeMap<String, Vec<(String, String)>>,
     found: Found,
     depth: u32,
+    /// How deep the walk is, in elements.
+    walked: u32,
+    /// How many elements it has visited.
+    items: u32,
 }
 
 impl<'d> Walker<'d> {
@@ -139,10 +153,20 @@ impl<'d> Walker<'d> {
         }
     }
 
-    /// One element in a body: a component, a template's use, parameters, or a program's
-    /// condition, switch, or loop. Anything else, such as a sound event or an update
-    /// script, poses nothing.
+    /// One element in a body, within what the walk may visit.
     fn item(&mut self, e: &'d Element, node: Option<&str>) {
+        if self.walked >= DEEPEST_WALK || self.items >= MOST_ITEMS {
+            return;
+        }
+        self.walked += 1;
+        self.items += 1;
+        self.visit(e, node);
+        self.walked -= 1;
+    }
+
+    /// A component, a template's use, parameters, or a program's condition, switch, or loop.
+    /// Anything else, such as a sound event or an update script, poses nothing.
+    fn visit(&mut self, e: &'d Element, node: Option<&str>) {
         match e.name.as_str() {
             "Component" => {
                 let own = e.attr("Node").map(|n| self.expand(n));

@@ -7,7 +7,9 @@
 //! meshes, each mesh's positions, triangles, and BVH, and each animation's keys. So taking
 //! the 58P's model decodes a few kilobytes, where decoding its nodes' names and keys too took
 //! 0.79ms of a handler's 1ms (measured on our development machine, 2026-10-25,
-//! tests/installed.rs).
+//! tests/installed.rs). Reaching this crate costs the loop more than that: the kernel's copy of
+//! the job's result and the recording's come to 5.1ms for the 58P's 29.2 MB (measured on our
+//! development machine, 2026-11-04, record/areas/avatars/log.md).
 
 use bytemuck::{Pod, Zeroable};
 use msfs_rpn::{Program, Scratch, Var};
@@ -468,6 +470,11 @@ impl Model {
     }
 
     /// Whether `point`, in the aircraft's frame, is inside the interior model's box at rest.
+    /// Whether the aircraft has an interior model, which `inside` asks about.
+    pub fn has_interior(&self) -> bool {
+        self.meta.interior.is_some()
+    }
+
     pub fn inside(&self, point: Vec3) -> bool {
         self.meta.interior.as_ref().is_some_and(|m| {
             Aabb {

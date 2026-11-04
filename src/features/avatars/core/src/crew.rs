@@ -176,9 +176,7 @@ impl Crew {
                 rest,
             });
         }
-        if drawn.is_empty() {
-            return;
-        }
+        // Fed even with none, so `Figure` stops writing objects that are gone.
         let slot = figures::slot(yokes, drawn.into_iter().take(figures::MOST));
         cx.module().feed(wire::FIGURE, &slot);
     }

@@ -37,7 +37,7 @@ use messages::avatars::slots::{
 };
 use routine_host::{Frame, Routine, USER, VarRef, Wants};
 
-use crate::ease::HandEase;
+use crate::ease::{Goal, HandEase};
 use crate::solve::{Body, L3, add, length, scale, sub, unit};
 
 /// The aircraft's pose, which places every figure, read on the pilot's aircraft and written
@@ -257,7 +257,7 @@ impl Drawn {
             facing,
             eye: [0.0; 3],
             look: [0.0; 2],
-            hands: [HandEase::new([0.0; 3]); 2],
+            hands: [HandEase::new([0.0; 3], Goal::Rest); 2],
             phase: 0.0,
             speed: 0.0,
             run: 0.0,
@@ -266,7 +266,7 @@ impl Drawn {
         };
         // A new figure starts where its pose puts it, with nothing easing in from elsewhere.
         let targets = d.targets(s, yokes, slot);
-        d.hands = targets.map(|(at, _)| HandEase::new(at));
+        d.hands = targets.map(|(at, goal)| HandEase::new(at, goal));
         let (eye, look) = d.head_target(s);
         d.eye = eye;
         d.look = look;
@@ -319,9 +319,9 @@ impl Drawn {
         ];
         let chest = solve::chest(&self.body([[0.0; 3]; 2], s));
         let targets = self.targets(s, yokes, slot);
-        for (side, (hand, (target, out))) in self.hands.iter_mut().zip(targets).enumerate() {
+        for (side, (hand, (target, goal))) in self.hands.iter_mut().zip(targets).enumerate() {
             let sign = if side == 0 { -1.0 } else { 1.0 };
-            hand.step(target, out, add(chest, solve::shoulder(sign)), dt);
+            hand.step(target, goal, add(chest, solve::shoulder(sign)), dt);
         }
     }
 
@@ -349,18 +349,17 @@ impl Drawn {
         (eye, look)
     }
 
-    /// Each hand's target in the figure's frame, and whether it's out to a spot rather than
-    /// home at rest or on a grip.
+    /// Each hand's target in the figure's frame, and where that has it going.
     fn targets(
         &self,
         s: &FigureState,
         yokes: &[Option<yoke::Frame3>; 2],
         slot: &FigureSlot,
-    ) -> [(L3, bool); 2] {
+    ) -> [(L3, Goal); 2] {
         let own_yoke = usize::from(s.hip[0] <= 0.0);
         std::array::from_fn(|i| {
             let sign = if i == 0 { -1.0 } else { 1.0 };
-            let rest = (self.rest(s, sign), false);
+            let rest = (self.rest(s, sign), Goal::Rest);
             let Some(h) = s.pose.hands.get(i).filter(|_| s.slumps == 0) else {
                 return rest;
             };
@@ -374,13 +373,13 @@ impl Drawn {
                     let grip = y.grips.get(i).copied().unwrap_or_default();
                     (
                         local(yoke::point(frame, grip), self.root, self.facing),
-                        false,
+                        Goal::Grip(side),
                     )
                 }
                 HAND_THUMB => match yokes.get(own_yoke) {
                     Some(Some(frame)) => (
                         local(yoke::point(frame, h.point), self.root, self.facing),
-                        true,
+                        Goal::Out,
                     ),
                     _ => rest,
                 },
@@ -394,7 +393,7 @@ impl Drawn {
                             at = add(from, scale(unit(d), POINT_AT));
                         }
                     }
-                    (at, true)
+                    (at, Goal::Out)
                 }
                 _ => rest,
             }

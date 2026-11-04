@@ -189,7 +189,7 @@ fn solve_leg(from: L3, knee: L3, foot: Option<L3>) -> [f32; 6] {
 /// Where a knee's curve of equal sticks ends, along the limb and toward the bend, for a bend
 /// of `bend` radians.
 pub(crate) fn bend_end(bend: f32) -> (f32, f32) {
-    let segments = spec::KNEE_SEGMENTS.max(1.0) as u32;
+    let segments = spec::KNEE_SEGMENTS.max(1);
     let piece = spec::KNEE_ARC / segments as f32;
     let (mut along, mut toward) = (0.0, 0.0);
     for k in 1..=segments {

@@ -210,8 +210,11 @@ impl Kernel {
     }
 
     fn finished(&mut self, input: &Input) {
-        let (handle, result): (Handle, Result<Vec<u8>, String>) =
+        // Borrowed, then copied whole, since decoding into a `Vec<u8>` takes it a byte at a time,
+        // and avatars' model is tens of megabytes. Postcard writes the two the same way.
+        let (handle, result): (Handle, Result<&[u8], String>) =
             postcard::from_bytes(&input.bytes).expect("a job's input should decode");
+        let result = result.map(<[u8]>::to_vec);
         match self.work.jobs.remove(&handle) {
             Some(f) => run(
                 &mut self.states,

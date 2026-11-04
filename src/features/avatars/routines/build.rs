@@ -20,7 +20,6 @@ const CONSTANTS: &[(&str, &str)] = &[
     ("LEGS_WIDTH", "/legs/width"),
     ("LEGS_DOWN", "/legs/down"),
     ("KNEE_ARC", "/knee/arc"),
-    ("KNEE_SEGMENTS", "/knee/segments"),
     ("REST_HAND_FWD", "/rest/hand/fwd"),
     ("REST_HAND_RIGHT", "/rest/hand/right"),
     ("REST_HAND_UP", "/rest/hand/up"),
@@ -60,6 +59,14 @@ fn main() {
             .unwrap_or_else(|| panic!("the figure's spec should give a number at {at}"));
         writeln!(out, "pub(crate) const {name}: f32 = {value:?};").expect("a String takes writes");
     }
+    // A whole number here, so `Figure` turns no float into an integer, which the sim's module
+    // check refuses unless the compiler happens to fold it.
+    let segments = spec
+        .pointer("/knee/segments")
+        .and_then(serde_json::Value::as_u64)
+        .expect("the figure's spec should give its knee's segments as a whole number");
+    writeln!(out, "pub(crate) const KNEE_SEGMENTS: u32 = {segments};")
+        .expect("a String takes writes");
     let reach: f64 = spec
         .pointer("/telescope")
         .and_then(serde_json::Value::as_array)

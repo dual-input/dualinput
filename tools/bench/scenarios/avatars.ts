@@ -30,12 +30,14 @@ const GRAY = 8
 const HAND_RADIUS = 0.038
 /** How far `Figure`'s feed may run after the moment it follows: a pose's 33ms, a frame's 11ms, and a busy PC's turn. */
 const LATE_MS = 120
+/** A camera in the cabin, behind both seats and out of both radii. */
+const AWAY: V3 = [0, 1.03, -1.5]
 
 type Pilot = { core: Core; app: FakeApp; helper: StandInHelper; name: string; sim: Stub }
 
 type Options = {
-  /** Adam's copy of the aircraft can't be read. */
-  unreadableB?: boolean
+  /** What differs in Adam's copy of the aircraft. */
+  adamsCopy?: { unreadable?: boolean; interior?: boolean }
   /** Where each pilot's camera sits as the flight loads, James's then Adam's. */
   cameras?: [V3, V3]
   /** Whether the profile gives the aircraft its seats, which it does unless this is false. */
@@ -90,7 +92,7 @@ async function flight(t: TestContext, name: string, options: Options = {}): Prom
     return f
   }
   const a = await pilot(run, bench, "James", writePackage(folder("James")), t)
-  const b = await pilot(run, bench, "Adam", writePackage(folder("Adam"), { unreadable: options.unreadableB ?? false }), t)
+  const b = await pilot(run, bench, "Adam", writePackage(folder("Adam"), options.adamsCopy), t)
   const [atA, atB] = options.cameras ?? [SEATS.pilot.eye, SEATS.copilot.eye]
   camera(a, atA)
   camera(b, atB)
@@ -99,7 +101,7 @@ async function flight(t: TestContext, name: string, options: Options = {}): Prom
   for (const p of [a, b]) await p.app.until(() => slice(p).members.length === 2, `${p.name}: both members`, 15_000)
   for (const p of [a, b]) await loadFlight(p.core, PLANE, { title: TITLE })
   await logged(a.core, /avatars took the aircraft's model/)
-  await logged(b.core, options.unreadableB ? /avatars couldn't read the aircraft's model/ : /avatars took the aircraft's model/)
+  await logged(b.core, options.adamsCopy?.unreadable ? /avatars couldn't read the aircraft's model/ : /avatars took the aircraft's model/)
   for (const p of [a, b]) await mouseOn(p)
   return { run, bench, a, b }
 }
@@ -162,14 +164,29 @@ async function untilVariable(p: Pilot, object: number, name: string, ok: (value:
   throw new Error(`${p.name}: ${what}; ${name} is ${await figureVariable(p, object, name)}`)
 }
 
-test("both cameras in the pilot's seat: the pilot flying keeps it, the other's figure gives it up, and that pilot hears the seat is taken until they move", { timeout: 90_000 }, async (t) => {
-  const { a, b } = await flight(t, "two-in-one-seat", { cameras: [SEATS.pilot.eye, SEATS.pilot.eye] })
-  await untilBoth(a, ({ own, other }) => seatOf(own) === "pilot" && seatOf(other) === "head", "its own figure seated, and the other's a head")
-  await untilBoth(b, ({ own, other }) => seatOf(own) === "head" && seatOf(other) === "pilot" && other.shows === 0, "the seat's holder hidden around its camera")
+test("both cameras take the pilot's seat within a trip: the pilot flying keeps it, the other's figure gives it up, and that pilot hears the seat is taken until they leave it", { timeout: 90_000 }, async (t) => {
+  const { bench, a, b } = await flight(t, "two-in-one-seat", { cameras: [AWAY, AWAY] })
+  for (const p of [a, b]) await untilBoth(p, ({ own, other }) => seatOf(own) === "head" && seatOf(other) === "head", "both figures heads, away from the seats")
+  // Neither hears the other through a cut, so each takes the seat before the other's pose comes.
+  await bench.relays[0]!.cut(0, 2_000)
+  const [afterA, afterB] = [a.core.fed().length, b.core.fed().length]
+  for (const p of [a, b]) camera(p, SEATS.pilot.eye)
+  await untilBoth(a, ({ own }) => seatOf(own) === "pilot", "the seat, in the cut", { after: afterA })
+  await untilBoth(b, ({ own }) => seatOf(own) === "pilot", "the same seat, in the cut", { after: afterB })
+
+  await untilBoth(a, ({ own, other }) => seatOf(own) === "pilot" && seatOf(other) === "head", "its own figure seated, and the other's a head", { after: afterA, ms: 15_000 })
+  await untilBoth(b, ({ own, other }) => seatOf(own) === "head" && seatOf(other) === "pilot" && other.shows === 0, "the seat's holder hidden around its camera", { after: afterB, ms: 15_000 })
   const holder = slice(a).me
   await b.app.until(() => b.app.notifications().some((n) => n.id === "avatars.seat" && n.text === "This seat is taken" && n.pilot === holder), "the seat's notification", 10_000)
   assert.ok(!a.app.notifications().some((n) => n.id === "avatars.seat"), "the pilot flying's seat isn't taken from them")
 
+  // An outside view is no seat: the notification goes, and the holder shows again.
+  camera(b, [0, 2, -8])
+  await untilBoth(b, ({ other }) => other.shows !== 0, "the holder showing from an outside view")
+  await b.app.until(() => !b.app.notifications().some((n) => n.id === "avatars.seat"), "the seat's notification gone in an outside view", 10_000)
+
+  camera(b, SEATS.pilot.eye)
+  await b.app.until(() => b.app.notifications().some((n) => n.id === "avatars.seat"), "the seat's notification back", 10_000)
   camera(b, SEATS.copilot.eye)
   await untilBoth(b, ({ own, other }) => seatOf(own) === "copilot" && other.shows !== 0, "a seat of its own, and the other's figure showing again")
   await untilBoth(a, ({ other }) => seatOf(other) === "copilot", "the other's figure in the copilot's seat")
@@ -177,22 +194,21 @@ test("both cameras in the pilot's seat: the pilot flying keeps it, the other's f
 })
 
 test("a camera moved between the two seats takes the nearer, and with the other seat held, nothing changes", { timeout: 90_000 }, async (t) => {
-  const { a, b } = await flight(t, "between-seats", { cameras: [[0, 1.03, -1.5], SEATS.copilot.eye] })
-  await untilBoth(a, ({ own }) => seatOf(own) === "head", "a head, away from the seats")
+  const { a, b } = await flight(t, "between-seats", { cameras: [AWAY, SEATS.copilot.eye] })
+  await untilBoth(a, ({ own, other }) => seatOf(own) === "head" && seatOf(other) === "copilot", "a head, away from the seats, with the copilot's held")
   const [y, z] = [SEATS.pilot.eye[1], SEATS.pilot.eye[2]]
   // 0.25m from the pilot's eye and 0.35m from the copilot's, both inside the 0.4m radius.
   camera(a, [0.05, y, z])
-  await untilBoth(a, ({ own, other }) => seatOf(own) === "pilot" && seatOf(other) === "copilot", "the nearer seat, with the copilot's held")
+  await untilBoth(a, ({ own }) => seatOf(own) === "pilot", "the nearer seat")
   await untilBoth(b, ({ other }) => seatOf(other) === "pilot", "the other's figure taking that seat")
-  const after = a.core.fed().length
-  await sleep(500)
-  assert.ok(a.core.fed().slice(after).every((fed) => seatOf(fed.figures[0]!) === "pilot"), "the held seat beside it changed nothing")
 
-  // Nearer the seat the other holds, its camera takes nothing, and it keeps the seat it had.
-  camera(b, [0.05, y, z])
-  const held = await untilBoth(b, ({ own, other }) => seatOf(own) === "copilot" && other.shows === 0, "its own seat kept, and the holder of the nearer seat hidden")
-  assert.equal(seatOf(held.figures[1]!), "pilot")
-  await b.app.until(() => b.app.notifications().some((n) => n.id === "avatars.seat"), "the seat's notification", 10_000)
+  // Now nearer the seat the other holds: its camera takes nothing, and it keeps the seat it had.
+  const after = a.core.fed().length
+  camera(a, [-0.05, y, z])
+  await untilBoth(a, ({ other }) => other.shows === 0, "the holder of the nearer seat hidden", { after })
+  await a.app.until(() => a.app.notifications().some((n) => n.id === "avatars.seat"), "the seat's notification", 10_000)
+  await sleep(300)
+  assert.ok(a.core.fed().slice(after).every((fed) => seatOf(fed.figures[0]!) === "pilot"), "the held seat took it from the seat it had")
 })
 
 test("a camera 0.9m behind the hip inside the cabin is a head, and a chase view behind the tail keeps the figure seated, looking forward", { timeout: 90_000 }, async (t) => {
@@ -337,30 +353,31 @@ test("a click on a located switch is one reach, the same switch moved by a key i
   const battery = LOCATED.battery.at
   const eye = SEATS.pilot.eye
 
-  const clicked = a.core.fed().length
-  const cursor = cursorFor(eye, battery)
-  a.helper.latest!.act({ act: "click", x: cursor.x, y: cursor.y })
-  await sendEntry(a, "battery", 1)
-  await untilBoth(a, ({ own }) => own.hands.some(isPoint), "the click's reach", { after: clicked })
-  await handsHome(clicked)
-  assert.equal(reaches(a.core.fed().slice(clicked)).length, 1, "the click and its own change bring one reach")
-
+  // First, so no click has posed the model, which the hand's side still needs.
   const keyed = a.core.fed().length
+  await sendEntry(a, "battery", 1)
   const sent = performance.now()
-  await sendEntry(a, "battery", 0)
   const reached = await untilBoth(a, ({ own }) => own.hands.some(isPoint), "the key's reach", { after: keyed })
   const waited = performance.now() - sent
-  t.diagnostic(`the hand reached ${waited.toFixed(0)}ms after the change went to the core`)
-  assert.ok(waited >= 100, `the hand reached ${waited}ms after the change`)
+  t.diagnostic(`the hand reached ${waited.toFixed(0)}ms after the stream sent the change`)
+  assert.ok(waited >= 100 - LATE_MS / 2 && waited <= 100 + 2 * LATE_MS, `the hand reached ${waited}ms after the stream sent the change`)
   // The hand's center sits a hand's radius from the location, toward the seat's eye. In the left
   // seat a point at the wheel's own x is in the band, so the free right hand reaches.
   const toward = eye.map((v, i) => v - battery[i]!)
   const length = Math.hypot(...toward)
   const expected = battery.map((v, i) => v + (toward[i]! / length) * HAND_RADIUS)
   const hand = both(reached)!.own.hands[1]
-  assert.ok(isPoint(hand) && close(hand.point, expected), `the right hand at the switch: ${JSON.stringify(hand)}`)
+  assert.ok(isPoint(hand) && close(hand.point, expected), `the right hand at the switch: ${JSON.stringify(both(reached)!.own.hands)}`)
   await handsHome(keyed)
   assert.equal(reaches(a.core.fed().slice(keyed)).length, 1, "the key's change brings one reach")
+
+  const clicked = a.core.fed().length
+  const cursor = cursorFor(eye, battery)
+  a.helper.latest!.act({ act: "click", x: cursor.x, y: cursor.y })
+  await sendEntry(a, "battery", 0)
+  await untilBoth(a, ({ own }) => own.hands.some(isPoint), "the click's reach", { after: clicked })
+  await handsHome(clicked)
+  assert.equal(reaches(a.core.fed().slice(clicked)).length, 1, "the click and its own change bring one reach")
 
   const panel = a.core.fed().length
   for (const key of ["battery", "alternator", "avionics"]) {
@@ -446,7 +463,8 @@ test("poses lost in a cut leave a later one carrying the whole figure, with noth
   const moved: V3 = [SEATS.pilot.eye[0], SEATS.pilot.eye[1], SEATS.pilot.eye[2] - 0.1]
   camera(a, moved)
   const started = performance.now()
-  await untilBoth(b, ({ other }) => isPoint(other.hands[0]) && other.body.body === "seated" && close(other.body.eye, moved), "the press and the camera, after the cut", { after, ms: 15_000 })
+  // The link back within 3s, and a pose at least every 1s.
+  await untilBoth(b, ({ other }) => isPoint(other.hands[0]) && other.body.body === "seated" && close(other.body.eye, moved), "the press and the camera, after the cut", { after, ms: 4_000 })
   t.diagnostic(`the whole figure arrived ${(performance.now() - started).toFixed(0)}ms after the changes in a 500ms cut`)
   mouse(a, "LeftUp", cursor.x, cursor.y)
 })
@@ -531,7 +549,7 @@ test("the pilot flying's sim crashing with the link up slumps their figure, turn
 })
 
 test("a model a machine can't read brings no hand from a click and draws grips at rest there, says so in the tab and the match check, and leaves seats and heads as before", { timeout: 120_000 }, async (t) => {
-  const { a, b } = await flight(t, "unreadable", { unreadableB: true })
+  const { a, b } = await flight(t, "unreadable", { adamsCopy: { unreadable: true } })
   const watching = await FakeApp.open(b.core, ["avatars"])
   t.after(() => watching.close())
   await watching.until(() => watching.slice<AvatarsSlice>("avatars")?.note === "model", "the tab's note", 10_000)
@@ -542,7 +560,11 @@ test("a model a machine can't read brings no hand from a click and draws grips a
   // The seat box stands in for the model's: Adam's figure sits, and the pilot flying's grip
   // draws at rest, since this machine has no yoke to put it on.
   const fed = await untilBoth(b, ({ own, other }, f) => seatOf(own) === "copilot" && seatOf(other) === "pilot" && other.hands[0].hand === "grip" && f.yokes === 0, "both seated, with no yokes")
-  assert.equal(fed.yokes, 0)
+  // `Figure` draws that grip at rest, so the left arm's as long as the right, which rests anyway.
+  const object = both(fed)!.other.object
+  const left = await untilVariable(b, object, "ARM_L_LEN", () => true, "the left arm's first write")
+  const right = await untilVariable(b, object, "ARM_R_LEN", () => true, "the right arm's first write")
+  assert.ok(Math.abs(left - right) < 0.002, `the arms' lengths at rest: ${left}, ${right}`)
   await untilBoth(a, ({ other }, f) => seatOf(other) === "copilot" && f.yokes === 2, "the other machine with its two yokes, as usual")
 
   const after = b.core.fed().length
@@ -553,6 +575,16 @@ test("a model a machine can't read brings no hand from a click and draws grips a
 
   camera(b, [-0.3, 1.03, -1.1])
   await untilBoth(b, ({ own }) => seatOf(own) === "head", "a head behind the seat, by the seats' box")
+})
+
+test("an aircraft with no interior model seats its figures by the box around the seats' eyes", { timeout: 90_000 }, async (t) => {
+  const { b } = await flight(t, "no-interior", { adamsCopy: { interior: false } })
+  await untilBoth(b, ({ own, other }, f) => seatOf(own) === "copilot" && seatOf(other) === "pilot" && f.yokes === 0, "both seated, with no yokes")
+  camera(b, [-0.3, 1.03, -1.1])
+  await untilBoth(b, ({ own }) => seatOf(own) === "head", "a head behind the seat")
+  camera(b, [0, 2, -8])
+  await sleep(300)
+  assert.equal(seatOf(b.core.fed().at(-1)!.figures[0]!), "head", "an outside view changes no figure in no seat")
 })
 
 test("a profile with no seats says so in the tab, and each figure is a head", { timeout: 90_000 }, async (t) => {

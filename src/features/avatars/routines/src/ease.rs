@@ -29,38 +29,57 @@ pub(crate) enum Way {
     Home { from: L3, t: f32 },
 }
 
+/// Where a hand is going. A home's place moves on its own, a grip's with the yoke, so a change of
+/// this, rather than of the target's place, starts the hand's way again: from a thigh to a yoke
+/// it takes the curve, and along a moving yoke it follows.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Goal {
+    /// A spot, or a button, on the spring.
+    Out,
+    Rest,
+    /// The yoke on this side.
+    Grip(usize),
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct HandEase {
     pub(crate) at: L3,
     velocity: L3,
+    goal: Goal,
     way: Way,
 }
 
 impl HandEase {
-    pub(crate) fn new(at: L3) -> HandEase {
+    /// A hand already at its target.
+    pub(crate) fn new(at: L3, goal: Goal) -> HandEase {
         HandEase {
             at,
             velocity: [0.0; 3],
-            way: Way::Home {
-                from: at,
-                t: HOME_S,
+            goal,
+            way: match goal {
+                Goal::Out => Way::Out,
+                _ => Way::Home {
+                    from: at,
+                    t: HOME_S,
+                },
             },
         }
     }
 
-    /// One frame of `dt` seconds toward `target`: on the spring while `out`, and home along
-    /// the curve, sagging toward `shoulder`, once it isn't.
-    pub(crate) fn step(&mut self, target: L3, out: bool, shoulder: L3, dt: f32) {
-        match (&mut self.way, out) {
-            (Way::Home { .. }, true) => self.way = Way::Out,
-            (Way::Out, false) => {
+    /// One frame of `dt` seconds toward `target`: on the spring while its goal is a spot, and
+    /// otherwise home along the curve, sagging toward `shoulder`.
+    pub(crate) fn step(&mut self, target: L3, goal: Goal, shoulder: L3, dt: f32) {
+        if goal != self.goal {
+            self.goal = goal;
+            if goal == Goal::Out {
+                self.way = Way::Out;
+            } else {
                 self.way = Way::Home {
                     from: self.at,
                     t: 0.0,
                 };
                 self.velocity = [0.0; 3];
             }
-            _ => {}
         }
         match &mut self.way {
             Way::Out => {
@@ -124,16 +143,16 @@ mod tests {
 
     #[test]
     fn a_hand_out_covers_95_percent_in_0_15s_without_overshooting() {
-        let mut hand = HandEase::new([0.0; 3]);
+        let mut hand = HandEase::new([0.0; 3], Goal::Rest);
         let target = [1.0, 0.0, 0.0];
         let mut most: f32 = 0.0;
         for _ in 0..9 {
-            hand.step(target, true, [0.0; 3], 1.0 / 60.0);
+            hand.step(target, Goal::Out, [0.0; 3], 1.0 / 60.0);
             most = most.max(hand.at[0]);
         }
         assert!((0.94..=0.97).contains(&hand.at[0]), "{:?}", hand.at);
         for _ in 0..120 {
-            hand.step(target, true, [0.0; 3], 1.0 / 60.0);
+            hand.step(target, Goal::Out, [0.0; 3], 1.0 / 60.0);
             most = most.max(hand.at[0]);
         }
         assert!(most <= 1.0, "no overshoot: {most}");
@@ -142,16 +161,37 @@ mod tests {
 
     #[test]
     fn a_hand_home_sags_toward_its_shoulder_and_lands_in_0_3s() {
-        let mut hand = HandEase::new([0.0; 3]);
-        hand.step([1.0, 0.0, 0.0], true, [0.5, 0.0, 1.0], 1.0);
+        let mut hand = HandEase::new([0.0; 3], Goal::Rest);
+        hand.step([1.0, 0.0, 0.0], Goal::Out, [0.5, 0.0, 1.0], 1.0);
         let mut mid = [0.0; 3];
         for i in 0..18 {
-            hand.step([0.0; 3], false, [0.5, 0.0, 1.0], 1.0 / 60.0);
+            hand.step([0.0; 3], Goal::Rest, [0.5, 0.0, 1.0], 1.0 / 60.0);
             if i == 8 {
                 mid = hand.at;
             }
         }
         assert!(mid[2] > 0.0, "it sags toward the shoulder: {mid:?}");
         assert_eq!(hand.at, [0.0; 3]);
+    }
+
+    #[test]
+    fn a_hand_from_rest_to_a_grip_takes_the_curve_and_on_the_grip_follows_the_yoke() {
+        let (rest, grip) = ([0.0; 3], [1.0, 0.0, 0.0]);
+        let mut hand = HandEase::new(rest, Goal::Rest);
+        hand.step(grip, Goal::Grip(0), [0.5, 0.0, 1.0], 1.0 / 60.0);
+        assert!(hand.at[0] < 0.2, "it doesn't jump: {:?}", hand.at);
+        for _ in 0..18 {
+            hand.step(grip, Goal::Grip(0), [0.5, 0.0, 1.0], 1.0 / 60.0);
+        }
+        assert_eq!(hand.at, grip, "it lands in 0.3s");
+        let moved = [1.1, 0.0, 0.0];
+        hand.step(moved, Goal::Grip(0), [0.5, 0.0, 1.0], 1.0 / 60.0);
+        assert_eq!(hand.at, moved, "it stays on the yoke as the yoke moves");
+        hand.step(rest, Goal::Rest, [0.5, 0.0, 1.0], 1.0 / 60.0);
+        assert!(
+            hand.at[0] > 0.8,
+            "letting go takes the curve: {:?}",
+            hand.at
+        );
     }
 }

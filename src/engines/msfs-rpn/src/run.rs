@@ -8,6 +8,10 @@ use crate::compile::{Op, Program, Word};
 /// A program stops after this many steps, against a goto that loops forever.
 const MOST_STEPS: u32 = 100_000;
 
+/// A string stops growing at this many bytes, against a loop that doubles one until the core
+/// runs out of memory, within `MOST_STEPS`. The sim's string words hold names and short labels.
+const LONGEST_TEXT: usize = 1_024;
+
 /// What `rand` gives: posing runs on the core's loop, which draws no random number, and a
 /// part that moves at random poses at its middle.
 const RAND: f64 = 0.5;
@@ -324,7 +328,9 @@ fn word(m: &mut Machine, w: Word) {
         // values takes the nearest, which the SDK doesn't say (unverified).
         Word::Case => {
             let i = m.num();
-            let n = m.num().max(0.0) as usize;
+            // `n` comes from the aircraft's code, where 1e30 would ask for more memory than
+            // there is, so it counts at most what the stack holds.
+            let n = (m.num().max(0.0) as usize).min(m.stack.len());
             let mut values = Vec::with_capacity(n);
             for _ in 0..n {
                 values.push(m.stack.pop().unwrap_or(Value::Number(0.0)));
@@ -350,8 +356,11 @@ fn word(m: &mut Machine, w: Word) {
         }
         Word::Concat => {
             let b = m.pop().text();
-            let a = m.stack.pop().map(|v| v.text()).unwrap_or_default();
-            m.stack.push(Value::Text(a + &b));
+            let mut a = m.stack.pop().map(|v| v.text()).unwrap_or_default();
+            if a.len() + b.len() <= LONGEST_TEXT {
+                a.push_str(&b);
+            }
+            m.stack.push(Value::Text(a));
         }
         Word::FindChar | Word::Find => {
             let b = m.pop().text();

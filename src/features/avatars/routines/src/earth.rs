@@ -29,7 +29,10 @@ impl Pose {
         let turn = |a: f64, b: f64| (a - b + 540.0).rem_euclid(360.0) - 180.0;
         Pose {
             latitude: self.latitude + (self.latitude - last.latitude) * k,
-            longitude: self.longitude + (self.longitude - last.longitude) * k,
+            longitude: turn(
+                self.longitude + turn(self.longitude, last.longitude) * k,
+                0.0,
+            ),
             altitude: self.altitude + (self.altitude - last.altitude) * k,
             heading: (self.heading + turn(self.heading, last.heading) * k).rem_euclid(360.0),
             pitch: self.pitch + (self.pitch - last.pitch) * k,
@@ -98,6 +101,20 @@ pub(crate) fn place(a: &Pose, at: [f32; 3], facing: f32) -> Pose {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_lead_across_the_antimeridian_stays_on_the_earth() {
+        let last = Pose {
+            longitude: 179.999,
+            ..Pose::default()
+        };
+        let now = Pose {
+            longitude: -179.999,
+            ..Pose::default()
+        };
+        let led = now.led(&last, 1.0);
+        assert!((led.longitude + 179.997).abs() < 1e-9, "{}", led.longitude);
+    }
 
     #[test]
     fn a_point_ahead_of_an_aircraft_facing_east_lies_east_and_turns_with_it() {

@@ -175,6 +175,33 @@ fn an_accessor_past_its_buffer_view_is_refused() {
     assert!(error.0.contains("runs past"), "{error}");
 }
 
+/// A count that asks for more memory than there is ends in an error, not an aborted core, and one
+/// whose sum wraps around to a small end doesn't get past the bounds.
+#[test]
+fn an_accessor_whose_count_is_huge_or_wraps_is_refused() {
+    let (mut gltf, bin) = document(&[]);
+    gltf["accessors"][4]["count"] = json!(1_000_000_000_000u64);
+    let error = read(&gltf, &bin).err().unwrap();
+    assert!(error.0.contains("runs past"), "{error}");
+
+    let (mut gltf, bin) = document(&[]);
+    gltf["accessors"][0]["count"] = json!((1u64 << 60) + 1);
+    gltf["bufferViews"][0]["byteStride"] = json!(16);
+    let error = read(&gltf, &bin).err().unwrap();
+    assert!(error.0.contains("runs past"), "{error}");
+}
+
+/// A walk up from a node in a ring would never end, on the core's loop when a click hits it.
+#[test]
+fn nodes_that_are_their_own_ancestors_are_refused() {
+    let (mut gltf, bin) = document(&[]);
+    gltf["nodes"][1]["children"] = json!([2]);
+    gltf["nodes"][2]["children"] = json!([1]);
+    gltf["nodes"][0]["children"] = json!([]);
+    let error = read(&gltf, &bin).err().unwrap();
+    assert!(error.0.contains("their own ancestors"), "{error}");
+}
+
 #[test]
 fn an_index_past_the_vertices_is_refused() {
     let (gltf, mut bin) = document(&[]);

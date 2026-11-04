@@ -6,6 +6,11 @@
 /// itself.
 const DEEPEST: u32 = 16;
 
+/// How many bytes the values one expansion takes in may add up to. `DEEPEST` alone lets a macro
+/// that names another 10 times, and so on down, run 10^16 times. A name past this stays as
+/// written, so its code fails to compile, as any name that isn't known does.
+const MOST_BYTES: usize = 1 << 20;
+
 /// `text` with each `#NAME#` that `param` knows and each `@Name` that `mac` knows replaced by
 /// its value, expanded in turn. A name neither knows stays as written, so code that still
 /// holds one fails to compile, and says which.
@@ -14,7 +19,18 @@ pub fn expand<'a>(
     param: &dyn Fn(&str) -> Option<&'a str>,
     mac: &dyn Fn(&str) -> Option<&'a str>,
 ) -> String {
-    expand_at(text, param, mac, 0)
+    let mut left = MOST_BYTES;
+    expand_at(text, param, mac, 0, &mut left)
+}
+
+/// Takes `value` out of what's `left`, counting an empty one too, if it fits.
+fn spend(left: &mut usize, value: &str) -> bool {
+    let cost = value.len() + 1;
+    let fits = *left >= cost;
+    if fits {
+        *left -= cost;
+    }
+    fits
 }
 
 fn expand_at<'a>(
@@ -22,6 +38,7 @@ fn expand_at<'a>(
     param: &dyn Fn(&str) -> Option<&'a str>,
     mac: &dyn Fn(&str) -> Option<&'a str>,
     depth: u32,
+    left: &mut usize,
 ) -> String {
     if depth > DEEPEST || (!text.contains('#') && !text.contains('@')) {
         return text.to_string();
@@ -40,8 +57,9 @@ fn expand_at<'a>(
             if !name.is_empty()
                 && after[name_len..].starts_with('#')
                 && let Some(value) = param(name)
+                && spend(left, value)
             {
-                out.push_str(&expand_at(value, param, mac, depth + 1));
+                out.push_str(&expand_at(value, param, mac, depth + 1, left));
                 rest = &after[name_len + 1..];
                 continue;
             }
@@ -50,8 +68,10 @@ fn expand_at<'a>(
                 .find(|c: char| !is_macro_char(c))
                 .unwrap_or(after.len());
             let name = &after[..name_len];
-            if let Some(value) = (!name.is_empty()).then(|| mac(name)).flatten() {
-                out.push_str(&expand_at(value, param, mac, depth + 1));
+            if let Some(value) = (!name.is_empty()).then(|| mac(name)).flatten()
+                && spend(left, value)
+            {
+                out.push_str(&expand_at(value, param, mac, depth + 1, left));
                 rest = &after[name_len..];
                 continue;
             }

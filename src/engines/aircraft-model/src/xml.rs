@@ -57,6 +57,10 @@ impl Element {
     }
 }
 
+/// How deep elements may nest, against a file whose depth would overflow the stack of whatever
+/// walks or drops its tree, which ends the core.
+const DEEPEST: usize = 256;
+
 /// The file's root elements, under one element with no name.
 pub(crate) fn parse(text: &str) -> Result<Element, String> {
     let text = text.strip_prefix('\u{feff}').unwrap_or(text);
@@ -68,6 +72,12 @@ pub(crate) fn parse(text: &str) -> Result<Element, String> {
             .read_event()
             .map_err(|e| format!("at byte {}: {e}", reader.buffer_position()))?;
         match event {
+            Event::Start(_) if open.len() > DEEPEST => {
+                return Err(format!(
+                    "at byte {}: elements nest more than {DEEPEST} deep",
+                    reader.buffer_position()
+                ));
+            }
             Event::Start(e) => open.push(element(&e)),
             Event::Empty(e) => {
                 open.push(element(&e));

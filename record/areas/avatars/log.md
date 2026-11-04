@@ -13,6 +13,33 @@ The 58P's and the Comanche's models are glTF with no compression, in vertex layo
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-11-04: The bench runs 17 of 01-avatars' 19 cases on an aircraft of our own, the hands keep their times, and the model costs the loop 5.6ms a load against a budget of 1ms
+
+**Asked:** whether avatars does on two cores what [its cases for the bench](01-avatars.md#cases-for-the-bench) say, off the sim, on an aircraft package of our own, and whether the 58P's model stays inside [its budgets](01-avatars.md#budgets).
+
+**Expected:** the cases to pass, with the times as written, and the model taken within the 1ms of a handler, since the design reads the buffer in place.
+
+**Found:** measured on our development machine, with no sim running.
+
+- `tools/bench/scenarios/avatars.ts` runs every case but two, each with two cores, the stand-in sim and core helper, and the routine host built natively, and every recording replays.
+  The `Follow` case waits for [stage 16](../build/plan.md#16-flight-model-sync), and the 58P's budgets stay a measurement by hand, since its files can't be in the tree.
+- By the core's own stamps, after a left tap the left hand took the yoke 652ms later, against 650ms, and the right let go 604ms after that, against 600ms; a wheel tap held through three notches went home after 2,322ms, against 2,300ms.
+- The 58P's model, by `tests/installed.rs`: built in 0.28s against 2s, 29.2 MB against 60 MB, a cast with its posing at 86µs at p99 against 500µs, and `Model::take` in 0.43ms.
+  A recording keeps it at 14.0 MB with zstd at each load, which is the figure [the recording's budgets](../recording/01-recording-and-bug-reports.md#budgets) left to this stage.
+- `Model::take` isn't the whole cost, which `tests/installed.rs` can't see.
+  For a 29.2 MB buffer, the kernel decoded a job's result a byte at a time in 25.8ms, and now borrows and copies it whole in 2.6ms; the recording's copy takes 2.5ms.
+  With the take, that's about 5.6ms on the loop at each load, against the budget's 1ms.
+  Getting under 1ms would mean sharing input bytes between the kernel, the recording, and a job's handler, which every unit's input goes through.
+- A code review of the whole stage found paths where a broken aircraft file aborted or hung the core: posing code asking for a huge `case`, a string a loop doubled, a glTF accessor's count, nodes that are their own ancestors, deep XML, and templates and macros that fan out.
+  Each now ends in an error or a limit, with a test.
+- The same review found the hands wrong in ways the slot's kinds can't show, each fixed with a test: a hand going between rest and a grip jumped in one frame, one letting go of the yoke held up a new press by up to 600ms, and a tremor during a press took a hand off the horn.
+- A deadband's run isn't quite one reach: changes under the `deadband` don't extend the hand's time on the spot, so below about 3 units a second with a `deadband` of 2 the hand goes home and reaches again, and an entry's first change always brings a hand, having no value to measure from.
+
+**Changed:** [the plan's stage 17](../build/plan.md#17-avatars) has its bench, and 01-avatars' list for the sim gains whether a live figure's `Z:` values survive a reset of the sim's variables, which the stand-in can't show.
+Whether the 1ms budget moves, and whether the deadband's run changes, are the user's to decide.
+
+**Affects:** [01-avatars](01-avatars.md#budgets), the code map's 1ms for a handler in [what a handler sees and does](../architecture/02-code-map.md#what-a-handler-sees-and-does).
+
 ## 2026-10-25: Stage 17 settles five items 01-avatars left open: a run of its own, the seat in the pose, an info item for a model a machine can't read, VR as a known limit, and an eye on what the figure costs
 
 **Asked:** at the start of the build's stage for avatars ([stage 17](../build/plan.md#17-avatars)), the user decided the items [01-avatars](01-avatars.md#left-open) left to it that its code depends on, and how much the figure's cost weighs now.

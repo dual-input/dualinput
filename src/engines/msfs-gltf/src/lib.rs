@@ -278,6 +278,19 @@ impl Reader<'_> {
                 nodes[c as usize].parent = Some(i as u32);
             }
         }
+        // With one parent each, nodes can still sit in a ring, which no root reaches, and a walk
+        // up from one would never end, on the core's loop when a click hits its mesh.
+        let mut reached = 0;
+        let mut below: Vec<u32> = (0..count)
+            .filter(|&i| nodes[i as usize].parent.is_none())
+            .collect();
+        while let Some(n) = below.pop() {
+            reached += 1;
+            below.extend_from_slice(&nodes[n as usize].children);
+        }
+        if reached != nodes.len() {
+            return fail("some nodes are their own ancestors, which no root reaches");
+        }
         let animations = root
             .animations
             .iter()
@@ -421,8 +434,9 @@ impl Reader<'_> {
             "VEC3" => 3,
             _ => 4,
         };
-        let mut out = Vec::with_capacity(a.count as usize * width);
-        for e in self.elements(accessor, width * 4)? {
+        let elements = self.elements(accessor, width * 4)?;
+        let mut out = Vec::with_capacity(elements.len() * width);
+        for e in elements {
             for k in 0..width {
                 out.push(f32_at(e, k * 4));
             }
@@ -447,7 +461,7 @@ impl Reader<'_> {
         &self,
         accessor: u32,
         size: usize,
-    ) -> Result<impl Iterator<Item = &[u8]> + '_, Error> {
+    ) -> Result<impl ExactSizeIterator<Item = &[u8]> + '_, Error> {
         let a = self.accessor(accessor)?;
         let Some(view) = a.buffer_view else {
             return fail(format!("accessor {accessor} has no buffer view"));
@@ -464,16 +478,29 @@ impl Reader<'_> {
                 "buffer view {view} strides {stride} bytes, under its elements' {size}"
             ));
         }
-        let start = v.byte_offset + a.byte_offset;
-        let end = match a.count {
-            0 => start,
-            n => start + (n - 1) * stride + size as u64,
+        // Each sum is checked, since the file gives every term: a count of 2^60 + 1 with a
+        // stride of 16 would wrap around to an end that fits.
+        let span = match a.count {
+            0 => Some(0),
+            n => (n - 1)
+                .checked_mul(stride)
+                .and_then(|s| s.checked_add(size as u64)),
         };
-        if a.byte_offset + end - start > v.byte_length || end > bytes.len() as u64 {
+        let bounds = span.and_then(|span| {
+            let start = v.byte_offset.checked_add(a.byte_offset)?;
+            Some((
+                start,
+                start.checked_add(span)?,
+                a.byte_offset.checked_add(span)?,
+            ))
+        });
+        let Some((start, _, _)) =
+            bounds.filter(|&(_, end, used)| used <= v.byte_length && end <= bytes.len() as u64)
+        else {
             return fail(format!(
                 "accessor {accessor} runs past the end of its buffer view"
             ));
-        }
+        };
         let (start, stride) = (start as usize, stride as usize);
         Ok((0..a.count as usize).map(move |k| {
             let at = start + k * stride;

@@ -9,11 +9,12 @@
 import assert from "node:assert/strict"
 import fs from "node:fs"
 import path from "node:path"
-import { test } from "node:test"
+import { type TestContext, test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import { announcing, BenchRun, type Core } from "../cores.ts"
+import { announcing, BenchRun, type Core, type CoreOptions } from "../cores.ts"
 import { BARON, load } from "../flights.ts"
+import { StandInHelper } from "../helper.ts"
 import { app, BenchNetwork, host } from "../network.ts"
 import { FakePage } from "../pages.ts"
 import { copyProfiles } from "../profiles.ts"
@@ -135,11 +136,22 @@ test("a slice 20 panels watch reaches each under 30 messages a second, though it
   core.checkHandlers("a run with 20 panels in rounds")
 })
 
+/**
+ * A core's options with the bench's network and the stand-in core helper. Avatars wants the mouse
+ * at each profile's load, so a core with no helper to start raises the helper's own trouble
+ * notification, where these scenarios look for the only one up.
+ */
+async function withHelper(net: BenchNetwork, t: TestContext): Promise<CoreOptions> {
+  const helper = await StandInHelper.start()
+  t.after(() => helper.close())
+  return helper.coreOptions(net.core().settings)
+}
+
 test("no cockpit panel within 10s of the profile loading raises the clients crate's trouble notification, cleared once one connects", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-no-panel", t)
   const net = await BenchNetwork.start()
   t.after(() => net.stop())
-  const core = await announcing(run, "a", net.core())
+  const core = await announcing(run, "a", await withHelper(net, t))
   const efb = new FakePage(core, { component: "efb-app" })
   t.after(() => efb.close())
   efb.client.watch("notifications", () => {})
@@ -167,7 +179,7 @@ test("no cockpit panel raises no trouble under a profile whose panel modules nee
   const file = path.join(copy, "aircraft", "bksq-baronpro.yaml")
   fs.writeFileSync(file, fs.readFileSync(file, "utf8").replace("displays: BlackSquareTablet", ""))
   const hash = net.profiles.publish(copy).get("aircraft/bksq-baronpro.yaml")!
-  const core = await announcing(run, "a", net.core())
+  const core = await announcing(run, "a", await withHelper(net, t))
   const efb = new FakePage(core, { component: "efb-app" })
   t.after(() => efb.close())
   efb.client.watch("notifications", () => {})

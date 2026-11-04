@@ -175,8 +175,9 @@ const BEHAVIOR_INT = `<?xml version="1.0" encoding="utf-8"?>
  * Writes `<folder>/packages/Community/...` with the aircraft, and a `UserCfg.opt` naming it, and
  * returns the file for the setting `sim.user-cfg`. With `unreadable`, its glTF files can't be
  * parsed, so the model's job fails, as it does on an aircraft that ships its files as `.fsc`.
+ * With `interior` false, its `model.cfg` names only the exterior.
  */
-export function writePackage(folder: string, { unreadable = false } = {}): string {
+export function writePackage(folder: string, { unreadable = false, interior: hasInterior = true } = {}): string {
   const packages = path.join(folder, "packages")
   const pkg = path.join(packages, "Community", "dualinput-bench-aircraft")
   const plane = path.join(pkg, "SimObjects", "Airplanes", PLANE.path)
@@ -184,7 +185,7 @@ export function writePackage(folder: string, { unreadable = false } = {}): strin
   fs.mkdirSync(model, { recursive: true })
   fs.writeFileSync(path.join(pkg, "manifest.json"), JSON.stringify({ package_version: "1.0.0" }))
   fs.writeFileSync(path.join(plane, "aircraft.cfg"), `[FLTSIM.0]\r\ntitle = "${TITLE}"\r\nmodel = ""\r\nui_manufacturer = "Dual Input"\r\nui_type = "Bench Plane"\r\n`)
-  fs.writeFileSync(path.join(model, "model.cfg"), "[models]\r\nnormal = bench_EXT.xml\r\ninterior = bench_INT.xml\r\n")
+  fs.writeFileSync(path.join(model, "model.cfg"), `[models]\r\nnormal = bench_EXT.xml\r\n${hasInterior ? "interior = bench_INT.xml\r\n" : ""}`)
   fs.writeFileSync(path.join(model, "bench_INT.xml"), BEHAVIOR_INT)
   fs.writeFileSync(path.join(model, "bench_EXT.xml"), `<ModelInfo><LODS><LOD minSize="80" ModelFile="bench_EXT.gltf"/></LODS></ModelInfo>`)
   for (const [name, { json, bin }] of [

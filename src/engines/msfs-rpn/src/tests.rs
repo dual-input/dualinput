@@ -40,6 +40,30 @@ fn the_58ps_yoke_code_runs_and_names_its_variables() {
     );
 }
 
+/// An aircraft's code can ask for anything, and a panic here ends the core, on the loop.
+#[test]
+fn a_case_asking_for_more_than_the_stack_holds_takes_what_is_there() {
+    assert_eq!(run("5 1e30 0 case", &[]), 5.0);
+}
+
+#[test]
+fn a_string_a_loop_doubles_stops_growing() {
+    let program = compile("'a' :0 d scat g0").unwrap();
+    program.run(&mut Scratch::default(), &|_| 0.0);
+}
+
+/// Depth alone would run this macro 10^16 times.
+#[test]
+fn macros_that_fan_out_stop_at_the_expansions_limit() {
+    let macros: Vec<String> = (0..17).map(|i| format!("@m{}", i + 1).repeat(10)).collect();
+    let mac = |name: &str| {
+        let i: usize = name.strip_prefix('m')?.parse().ok()?;
+        macros.get(i).map(String::as_str)
+    };
+    let out = expand("@m0", &|_| None, &mac);
+    assert!(out.len() < 4 << 20, "{} bytes", out.len());
+}
+
 #[test]
 fn if_and_els_take_the_branch_the_condition_picks() {
     let code = "(L:a) if{ 10 } els{ (L:b) if{ 20 } els{ 30 } }";

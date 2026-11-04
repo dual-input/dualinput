@@ -14,6 +14,10 @@ use crate::model::{AnimationMeta, Model, ProgramMeta, Rest, Scene, Yoke, YokeSta
 
 /// The frames across an animation a stage samples, from its first to its last.
 const SAMPLES: usize = 21;
+/// The animated nodes a yoke's grips can sit below, the stages `YokeSlot` in the message crate's
+/// avatars slots holds, so change both together. Past them, the grips would sit in a frame
+/// `Figure` doesn't play, so the hand holds where the centered yoke puts it.
+const MOST_STAGES: usize = 2;
 /// The values a variable is tried at to find a yoke's code linear in it, in its unit: the
 /// yoke's whole travel, in percent.
 const TRIES: [f64; 3] = [-100.0, 0.0, 100.0];
@@ -23,6 +27,7 @@ pub(crate) fn find(model: &mut Model, aircraft: &Aircraft) -> Vec<Yoke> {
     model.pose();
     let model = &*model;
     let mut yokes = Vec::new();
+    let mut marked = 1;
     for k in 1..=4 {
         let (Some(left), Some(right)) = (
             model.find_node(Scene::Interior, &format!("HANDLING_Yoke_{k}_Hand_Left")),
@@ -39,6 +44,7 @@ pub(crate) fn find(model: &mut Model, aircraft: &Aircraft) -> Vec<Yoke> {
         };
         if let Some(y) = yoke(model, aircraft, node, [l, r]) {
             yokes.push(y);
+            marked = k;
         }
     }
     // With one yoke marked, its copy on the other side, by its nodes' names with `_R` for
@@ -57,13 +63,14 @@ pub(crate) fn find(model: &mut Model, aircraft: &Aircraft) -> Vec<Yoke> {
             )
         {
             let back = from.inverse();
-            let marked = ["HANDLING_Yoke_1_Hand_Left", "HANDLING_Yoke_1_Hand_Right"].map(|name| {
+            let grips = ["Left", "Right"].map(|hand| {
+                let name = format!("HANDLING_Yoke_{marked}_Hand_{hand}");
                 let grip = model
-                    .find_node(Scene::Interior, name)
+                    .find_node(Scene::Interior, &name)
                     .and_then(|n| model.world(Scene::Interior, n));
                 to.point(back.point(grip.map_or([0.0; 3], |w| w.columns[3])))
             });
-            if let Some(y) = yoke(model, aircraft, node, marked) {
+            if let Some(y) = yoke(model, aircraft, node, grips) {
                 yokes.push(y);
             }
         }
@@ -162,14 +169,17 @@ fn distance(a: Vec3, b: Vec3) -> f32 {
     ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2) + (a[2] - b[2]).powi(2)).sqrt()
 }
 
-/// Each animated node's stage, or `None` when one of them can't be played from one
-/// variable: moved by two animations, or by code that reads two variables that change it, or
-/// gives a frame that isn't linear in its one.
+/// Each animated node's stage, or `None` when `Figure` can't play them: more than its slot
+/// holds, or one that can't be played from one variable, moved by two animations, or by code
+/// that reads two variables that change it, or gives a frame that isn't linear in its one.
 fn stages<'m>(
     model: &Model,
     chain: &[u32],
     moved_by: &dyn Fn(u32) -> Vec<&'m AnimationMeta>,
 ) -> Option<Vec<YokeStage>> {
+    if chain.len() > MOST_STAGES {
+        return None;
+    }
     let programs = &model.meta().programs;
     let vars = &model.meta().vars;
     let mut out = Vec::new();

@@ -341,8 +341,10 @@ impl SimService {
         let Some(&(watch, once)) = holder.routes.get(&data.request) else {
             return;
         };
+        // A read once is over with its answer, and avatars makes one each frame on foot.
         if once {
             holder.routes.remove(&data.request);
+            holder.watches.remove(&watch);
         }
         self.tell(unit, SimEvent::Values { watch, values }, cx);
     }

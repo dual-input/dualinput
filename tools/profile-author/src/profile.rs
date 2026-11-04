@@ -214,6 +214,9 @@ impl Facts {
     /// The variant that covers the loaded aircraft's path, by the core's own rule.
     pub fn variant(&self, aircraft: &str) -> Option<String> {
         let profile = profile_engine::Profile {
+            maker: String::new(),
+            name: String::new(),
+            maturity: profile_engine::Maturity::Experimental,
             authors: None,
             aircraft: profile_engine::Aircraft {
                 variants: self.variants.clone(),

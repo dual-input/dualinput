@@ -133,7 +133,7 @@ A feature's section in an app is one part, which the app's list names in one lin
 | state-sync | core, routines (`HEvents`), panel (`h-events`, `instrument-reads`), apps | cockpit-stream, session, sim-service, profile-loader, clients, sync-engine |
 | pointer-sync | core, panel | cockpit-stream, session, clients, network |
 | flight-model | core, routines (`Lead`, `Follow`) | network, session, sim-service |
-| avatars | core, routines (`Figure`), the figure's SimObject (`figure/`) | cockpit-stream, core-helper-service, sim-service, profile-loader, network, session, clients, aircraft-model |
+| avatars | core, routines (`Figure`), efb (the Figures tab), the figure's SimObject (`figure/`) | cockpit-stream, core-helper-service, sim-service, profile-loader, network, session, clients, aircraft-model |
 | traffic | core, routines (`Traffic`), apps | session, sim-service, network, clients, object-mirror |
 | atc-audio | core, apps | session, core-helper-service, network, clients |
 | take-control | core, efb, desktop | session, core-helper-service, clients |
@@ -158,7 +158,8 @@ A feature's section in an app is one part, which the app's list names in one lin
 | `src/sim-package/routines` | The module's list of routines, a library crate of its own, which `src/sim-package/wasm-module` and the bench build of the core both link ([our WASM module](../build/02-testing.md#our-wasm-module)) | routine-host, each feature's `routines/` |
 | `src/sim-package/pages` | The `VCockpit.js` override, the EFB app's entry and its list of parts, the banner's entry, and the menu script, which reports the menu's page and runs the world map's requests | panel-bridge, efb-shell, banner, page-client, each feature's `efb/` |
 | `tools/profile-builder` | Checks each profile and builds its bundle, for CI and for authors | profile-build |
-| `tools/profile-author` | The seat tool and the click tool ([the authoring tool](../avatars/01-avatars.md#the-authoring-tool)) | sim-client, sim-edge, aircraft-model, messages |
+| `tools/profile-author` | The seat tool and the click tool ([the authoring tool](../avatars/01-avatars.md#the-authoring-tool)) | sim-client, sim-edge, aircraft-model, profile-engine, messages |
+| `tools/figure-viewer` | A page that draws the figure in the 58P's own geometry, posed by `Figure`'s own code, so its look is tuned by eye off the sim | aircraft-model, avatars-routines, routine-host, messages |
 
 `tools/bench/` holds the bench's scenarios, its fake pages, its local profiles' site, and the stand-in core helper ([where it lives](../build/02-testing.md#where-it-lives)).
 

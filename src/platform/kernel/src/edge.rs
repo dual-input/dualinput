@@ -299,34 +299,22 @@ impl Job {
     }
 
     pub fn copy_text(text: impl Into<String>) -> Job {
-        Job {
-            work: Work::CopyText { text: text.into() },
-            then: None,
-        }
+        Job::of(Work::CopyText { text: text.into() })
     }
 
     pub fn username() -> Job {
-        Job {
-            work: Work::Username,
-            then: None,
-        }
+        Job::of(Work::Username)
     }
 
     pub fn open_link(url: impl Into<String>, app_url: impl Into<String>) -> Job {
-        Job {
-            work: Work::OpenLink {
-                url: url.into(),
-                app_url: app_url.into(),
-            },
-            then: None,
-        }
+        Job::of(Work::OpenLink {
+            url: url.into(),
+            app_url: app_url.into(),
+        })
     }
 
     pub fn open_folder(path: impl Into<String>) -> Job {
-        Job {
-            work: Work::OpenFolder { path: path.into() },
-            then: None,
-        }
+        Job::of(Work::OpenFolder { path: path.into() })
     }
 
     pub fn fetch(fetch: Fetch) -> Job {

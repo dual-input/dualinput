@@ -221,7 +221,7 @@ fn in_the_aircraft(me: &mut Avatars, camera: &Camera, cx: &mut Cx) {
             None => Body::Head { eye: p, look },
         });
         me.seat = seat;
-        crew::seat_held(me, in_held, &others, cx);
+        crew::seat_held(me, in_held, cx);
     } else if let Some(s) = me.seat.and_then(|i| profile.seats.get(i)) {
         me.body = Some(Body::Seated {
             seat: s.key.clone(),

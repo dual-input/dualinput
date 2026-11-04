@@ -3,4 +3,4 @@
 /**
  * A call of the sim the test unit makes.
  */
-export type SimCall = { "call": "watch", vars: Array<[string, string]>, once: boolean, } | { "call": "write", watch: number, values: Array<number>, } | { "call": "key", event: string, value: number, } | { "call": "feed", routine: string, mode: number, } | { "call": "end", routine: string, };
+export type SimCall = { "call": "watch", vars: Array<[string, string]>, once: boolean, } | { "call": "write", watch: number, values: Array<number>, } | { "call": "key", event: string, value: number, } | { "call": "feed", routine: string, mode: number, } | { "call": "end", routine: string, } | { "call": "create", title: string, } | { "call": "frames" };

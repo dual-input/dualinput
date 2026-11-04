@@ -56,7 +56,7 @@ export function sources(s: Spec = spec()) {
   for (const d of DETAILS) {
     const built = buildGltf(s, d)
     const file = `${TITLE}_${d.name}`
-    ;(built.json.buffers as { uri?: string }[])[0].uri = `${file}.bin`
+    ;(built.json.buffers as { uri?: string }[])[0]!.uri = `${file}.bin`
     files.set(`${object}/model/${file}.gltf`, JSON.stringify(built.json, null, 1) + "\n")
     files.set(`${object}/model/${file}.bin`, built.bin)
     costs.push({ name: d.name, cost: built.cost })

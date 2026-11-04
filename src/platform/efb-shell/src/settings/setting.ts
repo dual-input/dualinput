@@ -11,7 +11,7 @@ export const GUIDE_DONE = "app.guide-done"
 export const NAME = "session.name"
 /** `OUTPUT` in src/platform/core-helper-service/src/lib.rs names the same setting. */
 export const OUTPUT = "core-helper.output"
-/** TODO: when avatars' stage registers the figure's color as a setting, have it use this key, or change this one. A core that doesn't know it refuses the write, and the figure wears its default. */
+/** `COLOR` in src/features/avatars/core/src/lib.rs names the same setting, so change both together. A core with no avatars refuses the write. */
 export const FIGURE_COLOR = "avatars.color"
 
 /** A setting's value, or undefined until the core has sent the slice. */

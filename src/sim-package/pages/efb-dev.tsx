@@ -1,8 +1,14 @@
 // The EFB app in the dev loop, as tools/dev.ts runs it: the shell's sample, with each feature's part that's built, one
-// line each, as efb.tsx lists them, and the sample's stand-ins for those that aren't.
+// line each, as efb.tsx lists them. A built part takes its sample's place, so the tabs keep their order.
 
+import { avatars } from "../../features/avatars/efb/part.tsx"
 import takeControl from "../../features/take-control/efb/index.tsx"
 import { mountDev } from "../../platform/efb-shell/dev/main.tsx"
 import { SAMPLE_PARTS } from "../../platform/efb-shell/dev/sample-parts.tsx"
 
-mountDev([...SAMPLE_PARTS, takeControl])
+const BUILT = [takeControl, avatars]
+
+mountDev([
+  ...SAMPLE_PARTS.map((sample) => BUILT.find((part) => part.name === sample.name) ?? sample),
+  ...BUILT.filter((part) => !SAMPLE_PARTS.some((sample) => sample.name === part.name)),
+])

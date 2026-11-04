@@ -92,6 +92,7 @@ These are the ones the apps need that no unit had:
 | `go-to` | The PF's spot, whether Go to is available, and the step that failed | None beyond Go to |
 | `traffic` | This machine's traffic packs, after `LIST_PACKS` | None beyond `LIST_PACKS` |
 | `atc-audio` | The program the core helper captures, or that it's waiting for one | None |
+| `avatars` | Why the figures do less in the loaded aircraft, which [the Figures tab](decisions.md#the-figures-tab-holds-the-pilots-figure-and-explains-what-its-figures-can-do)'s note says | None |
 
 - `recording`'s slice reads the runs' folders, since v1 writes no index (user, 2026-10-23; [recording log][recording 23]), and it says nothing of uploads, since v1 uploads no bug report: the command to upload a session comes after v1 (user, 2026-10-21; [recording log][recording 21]).
 - A match item names its words as it names its level ([the match check](../session/02-units.md#the-match-check)), and a role key registers a label in its feature's words, so the shells show both without naming a feature.

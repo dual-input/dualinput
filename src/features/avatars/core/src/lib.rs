@@ -21,12 +21,12 @@ mod v3;
 
 use std::collections::BTreeMap;
 
-use clients::{ClientsUnit, SettingChanged, SettingDef};
+use clients::{Clients, ClientsUnit, SettingChanged, SettingDef};
 use cockpit_stream::CockpitSent;
 use core_helper_service::HelperUnit;
-use kernel::{Cx, Handle, JobId, Registry};
-use messages::avatars::{self as wire, Body, ModelRead, PALETTE, Pose};
-use messages::clients::{Level, SettingKind};
+use kernel::{Cx, Handle, JobId, Registry, View};
+use messages::avatars::{self as wire, AircraftNote, AvatarsSlice, Body, ModelRead, PALETTE, Pose};
+use messages::clients::SettingKind;
 use network::{LinkLost, LinkUp, NetUnit};
 use profile_engine::features::avatars::Location;
 use profile_loader::{ProfileLoaded, ProfileUnloaded, Profiles};
@@ -37,14 +37,22 @@ use sim_service::{AircraftChanged, Camera, SimService, SimUnit};
 use crate::hands::Hands;
 use crate::seats::Place;
 
-/// The pilot's color: `automatic`, or one of the palette's.
+/// The pilot's color: `automatic`, or one of the palette's. `FIGURE_COLOR` in
+/// src/platform/efb-shell/src/settings/setting.ts names the same setting, so change both
+/// together.
 pub const COLOR: &str = "avatars.color";
-pub const SHOW_MINE: &str = "avatars.show-mine";
-pub const SHOW_CREW: &str = "avatars.show-crew";
+/// Which figures show: this pilot's own and the crew's, each inside the aircraft and on a
+/// walkaround (record/areas/interface/decisions.md, "The Figures tab holds the pilot's figure
+/// and explains what its figures can do"). The Figures tab, in src/features/avatars/efb/part.tsx,
+/// names the same settings, so change both together.
+pub const MINE_INSIDE: &str = "avatars.mine-inside";
+pub const MINE_WALKAROUND: &str = "avatars.mine-walkaround";
+pub const CREW_INSIDE: &str = "avatars.crew-inside";
+pub const CREW_WALKAROUND: &str = "avatars.crew-walkaround";
 
-/// The notifications avatars raises.
-const SEAT_HELD: &str = "seat-held";
-const NO_MODEL: &str = "no-model";
+/// The notification that this pilot's camera sits in a seat another figure holds, whose full
+/// ID, `avatars.seat`, the banner's stand-in shows.
+const SEAT: &str = "seat";
 
 /// The feature's state.
 #[derive(Default)]
@@ -94,16 +102,34 @@ enum ModelState {
 
 struct Settings {
     color: Option<u8>,
-    show_mine: bool,
-    show_crew: bool,
+    mine_inside: bool,
+    mine_walkaround: bool,
+    crew_inside: bool,
+    crew_walkaround: bool,
 }
 
 impl Default for Settings {
     fn default() -> Self {
         Settings {
             color: None,
-            show_mine: true,
-            show_crew: true,
+            mine_inside: true,
+            mine_walkaround: true,
+            crew_inside: true,
+            crew_walkaround: true,
+        }
+    }
+}
+
+impl Settings {
+    fn read(clients: &Clients) -> Settings {
+        let on = |key| clients.setting_as(key).unwrap_or(true);
+        let color = clients.setting_as::<String>(COLOR).unwrap_or_default();
+        Settings {
+            color: PALETTE.iter().position(|c| *c == color).map(|i| i as u8),
+            mine_inside: on(MINE_INSIDE),
+            mine_walkaround: on(MINE_WALKAROUND),
+            crew_inside: on(CREW_INSIDE),
+            crew_walkaround: on(CREW_WALKAROUND),
         }
     }
 }
@@ -124,7 +150,10 @@ pub fn register(r: &mut Registry) {
         .on::<LinkLost>(|me, _, cx| me.redraw(cx))
         .on::<MemberGone>(crew::Crew::gone)
         .on::<SettingChanged>(Avatars::setting_changed)
-        .match_item(wire::MODEL, compare);
+        .match_item(wire::MODEL, compare)
+        .client_state(wire::SLICE, |me: &Avatars, _: &View| AvatarsSlice {
+            note: me.note(),
+        });
     let mut choices = vec!["automatic".to_string()];
     choices.extend(PALETTE.iter().map(|c| c.to_string()));
     me.setting(
@@ -133,34 +162,34 @@ pub fn register(r: &mut Registry) {
             label: "Your figure's color",
             kind: SettingKind::Choice { choices },
             default: json!("automatic"),
-            part_only: false,
-            development: false,
-        },
-    )
-    .setting(
-        SHOW_MINE,
-        SettingDef {
-            label: "Show my figure",
-            kind: SettingKind::Bool,
-            default: json!(true),
-            part_only: false,
-            development: false,
-        },
-    )
-    .setting(
-        SHOW_CREW,
-        SettingDef {
-            label: "Show the crew's figures",
-            kind: SettingKind::Bool,
-            default: json!(true),
-            part_only: false,
+            part_only: true,
             development: false,
         },
     );
+    for (key, label) in [
+        (MINE_INSIDE, "Your figure inside the aircraft"),
+        (MINE_WALKAROUND, "Your figure on a walkaround"),
+        (CREW_INSIDE, "The crew's figures inside the aircraft"),
+        (CREW_WALKAROUND, "The crew's figures on a walkaround"),
+    ] {
+        me.setting(
+            key,
+            SettingDef {
+                label,
+                kind: SettingKind::Bool,
+                default: json!(true),
+                part_only: true,
+                development: false,
+            },
+        );
+    }
 }
 
 /// The match check's comparison: each member whose machine can't read the models is named,
-/// at the `info` level, since nothing went wrong (user, 2026-10-25).
+/// at the `info` level, since nothing went wrong (user, 2026-10-25), in the Figures tab's own
+/// words, since the interface says "figure" for ours and "avatar" only for the sim's
+/// (record/areas/interface/decisions.md, "The Figures tab holds the pilot's figure and
+/// explains what its figures can do").
 fn compare(values: &[(String, ModelRead)]) -> Option<session::Found> {
     let names: Vec<String> = values
         .iter()
@@ -174,7 +203,8 @@ fn compare(values: &[(String, ModelRead)]) -> Option<session::Found> {
     };
     Some(session::Found {
         level: messages::session::Severity::Info,
-        words: format!("Avatar interaction isn't supported in {last} {copies} of this aircraft"),
+        words: format!("Pointing and clicking won't work in {last} {copies} of this aircraft"),
+        note: None,
     })
 }
 
@@ -211,6 +241,7 @@ impl Avatars {
             }
         }
         me.profile = Some(Loaded { seats, located });
+        me.settings = Settings::read(cx.read::<Clients>());
         core_helper_service::mouse(cx, true);
         sim::start(me, cx);
         me.start_model(cx);
@@ -221,13 +252,17 @@ impl Avatars {
     fn unloaded(me: &mut Avatars, _: &ProfileUnloaded, cx: &mut Cx) {
         core_helper_service::mouse(cx, false);
         session::clear_match(cx, wire::MODEL);
-        clients::clear_notification(cx, SEAT_HELD);
-        clients::clear_notification(cx, NO_MODEL);
-        let settings = std::mem::take(&mut me.settings);
-        *me = Avatars {
-            settings,
-            ..Avatars::default()
-        };
+        clients::clear_notification(cx, SEAT);
+        *me = Avatars::default();
+    }
+
+    /// Why the figures do less in the loaded aircraft. One note shows, so the one that takes
+    /// more away comes first: with no seats, no figure sits anywhere.
+    fn note(&self) -> Option<AircraftNote> {
+        if self.profile.as_ref()?.seats.is_empty() {
+            return Some(AircraftNote::Seats);
+        }
+        matches!(self.model, ModelState::Failed { .. }).then_some(AircraftNote::Model)
     }
 
     /// Starts the model's job once both hold, the profile loaded and the aircraft's package
@@ -302,19 +337,11 @@ impl Avatars {
                     watch,
                 };
                 session::set_match(cx, wire::MODEL, &ModelRead::Read);
-                clients::clear_notification(cx, NO_MODEL);
             }
             Err(why) => {
                 tracing::warn!(why, "avatars couldn't read the aircraft's model");
                 me.model = ModelState::Failed { from };
                 session::set_match(cx, wire::MODEL, &ModelRead::Unreadable);
-                clients::notify(
-                    cx,
-                    NO_MODEL,
-                    Level::Information,
-                    "Your copy of this aircraft's model files couldn't be read, so your clicks won't move your figure's hands. Seats, heads, and walking still show.",
-                    None,
-                );
             }
         }
         me.redraw(cx);
@@ -421,16 +448,10 @@ impl Avatars {
     }
 
     fn setting_changed(me: &mut Avatars, changed: &SettingChanged, cx: &mut Cx) {
-        let clients = cx.read::<clients::Clients>();
-        match changed.key.as_str() {
-            COLOR => {
-                let name = clients.setting_as::<String>(COLOR).unwrap_or_default();
-                me.settings.color = PALETTE.iter().position(|c| *c == name).map(|i| i as u8);
-            }
-            SHOW_MINE => me.settings.show_mine = clients.setting_as(SHOW_MINE).unwrap_or(true),
-            SHOW_CREW => me.settings.show_crew = clients.setting_as(SHOW_CREW).unwrap_or(true),
-            _ => return,
+        if !changed.key.starts_with("avatars.") {
+            return;
         }
+        me.settings = Settings::read(cx.read::<Clients>());
         me.redraw(cx);
     }
 
@@ -473,7 +494,7 @@ mod tests {
         assert_eq!(found.level, messages::session::Severity::Info);
         assert_eq!(
             found.words,
-            "Avatar interaction isn't supported in James's copy of this aircraft"
+            "Pointing and clicking won't work in James's copy of this aircraft"
         );
         let both = compare(&[
             read("James", ModelRead::Unreadable),
@@ -482,7 +503,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             both.words,
-            "Avatar interaction isn't supported in James's and Mira's copies of this aircraft"
+            "Pointing and clicking won't work in James's and Mira's copies of this aircraft"
         );
     }
 }

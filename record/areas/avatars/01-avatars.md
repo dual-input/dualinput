@@ -302,7 +302,7 @@ The 58P's two models come to 907,362 triangles as their scenes instance them, no
 
 ## The authoring tool
 
-`tools/profile-author` is one Rust program with two commands, on `sim-client`, `sim-edge`, `aircraft-model`, and the message crate, run with the sim in a flight in the aircraft, and v1 ships it to nobody: the core team runs it from the repository ([authoring tools](../build/01-the-build.md#authoring-tools)).
+`tools/profile-author` is one Rust program with two commands, on `sim-client`, `sim-edge`, `aircraft-model`, `profile-engine`, and the message crate, run with the sim in a flight in the aircraft, and v1 ships it to nobody: the core team runs it from the repository ([authoring tools](../build/01-the-build.md#authoring-tools)).
 Its commands:
 
 - **`seats`** seeds each seat from the seat objects SimConnect lists, then the cockpit model's `PILOT_` nodes, then a point the author marks on the cushion; it creates our figure and feeds `Figure`'s slot, so the author sees the figure seated while tuning the hip, knees, feet, and eye, and it writes the seats into the profile.

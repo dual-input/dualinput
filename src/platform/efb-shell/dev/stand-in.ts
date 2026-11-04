@@ -177,6 +177,8 @@ export const SCENES: Record<string, Slices> = {
   "No tray app": { [DESKTOP]: null },
   "Turned off in Windows": { [DESKTOP]: { ...LOCAL, start_with_windows: "off-in-windows" } },
   "Another version": { core: { ...CORE, version: "0.0.9" } },
+  "Figures: model can't be read": { avatars: { note: "model" } },
+  "Figures: no seats": { avatars: { note: "seats" } },
 }
 const AFTER = { answer: 1000, slowAnswer: 10_000 }
 
@@ -216,7 +218,7 @@ export class StandInCore extends StandInBase {
     this.local = DESKTOP in scene ? (scene[DESKTOP] as DesktopState | null) : LOCAL
     this.tellDesktop()
     this.set({ settings: settings(true, true) })
-    window.setTimeout(() => this.set({ ...healthy, [TAKE_CONTROL]: control({ live: false }), [STREAM]: { catching_up: false, from_preflight_end: false, replaying: false }, recording: { runs: RUNS, stopped: null }, "core-helper": { ...OUTPUTS, outputs: [] }, notifications: [], core: CORE, ...scene }), 0)
+    window.setTimeout(() => this.set({ ...healthy, [TAKE_CONTROL]: control({ live: false }), [STREAM]: { catching_up: false, from_preflight_end: false, replaying: false }, recording: { runs: RUNS, stopped: null }, "core-helper": { ...OUTPUTS, outputs: [] }, notifications: [], core: CORE, avatars: { note: null }, ...scene }), 0)
   }
 
   private setControl(changes: Record<string, unknown>): void {

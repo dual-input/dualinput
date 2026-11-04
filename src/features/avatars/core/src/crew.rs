@@ -5,17 +5,17 @@
 
 use std::collections::BTreeMap;
 
+use clients::{Landing, Level, Notification};
 use kernel::{Cx, Handle};
 use messages::avatars::slots::{SHOWS_ALL, SHOWS_BODY, SHOWS_FADED, SHOWS_HANDS};
 use messages::avatars::{self as wire, Body, Hand, Pose};
-use messages::clients::Level;
 use messages::net::PilotId;
 use network::{Network, Sender, To};
 use session::{MemberGone, Session};
 use sim_service::{InitPosition, SimCx};
 
 use crate::figures::{self, Drawn, Look};
-use crate::{Avatars, seats};
+use crate::{Avatars, Settings, seats};
 
 /// A pose goes out at most this often, in µs, the tick of the probes whose figure our test
 /// pilot judged good (measured on MSFS 2024, 2026-10-03, record/areas/avatars/log.md, "In the
@@ -167,22 +167,12 @@ impl Crew {
                     None => Look::Live,
                 }
             };
-            let shows = if own {
-                match (&pose.body, me.settings.show_mine) {
-                    (_, false) => 0,
-                    // Its head sits at the camera, so it hides its head and neck and fades
-                    // its hands.
-                    (Body::Seated { .. } | Body::Head { .. }, true) => {
-                        SHOWS_BODY | SHOWS_HANDS | SHOWS_FADED
-                    }
-                    (Body::OnFoot { .. }, true) => SHOWS_ALL,
-                }
-            } else if !me.settings.show_crew
-                || place.is_some_and(|s| me.crew.hidden_seat.as_ref() == Some(&s.key))
-            {
+            let hidden =
+                !own && place.is_some_and(|s| me.crew.hidden_seat.as_ref() == Some(&s.key));
+            let shows = if hidden {
                 0
             } else {
-                SHOWS_ALL
+                shows(own, &pose.body, &me.settings)
             };
             let rest = rest_hands(place, pf == Some(pilot), yokes);
             drawn.push(Drawn {
@@ -200,6 +190,24 @@ impl Crew {
         }
         let slot = figures::slot(yokes, drawn.into_iter().take(figures::MOST));
         cx.module().feed(wire::FIGURE, &slot);
+    }
+}
+
+/// What of a figure shows, by the switch for whose it is and where it is: this pilot's own
+/// sits with its head at the camera while inside, so it hides its head and neck and fades its
+/// hands.
+fn shows(own: bool, body: &Body, settings: &Settings) -> u32 {
+    let on_foot = matches!(body, Body::OnFoot { .. });
+    let on = match (own, on_foot) {
+        (true, false) => settings.mine_inside,
+        (true, true) => settings.mine_walkaround,
+        (false, false) => settings.crew_inside,
+        (false, true) => settings.crew_walkaround,
+    };
+    match (on, own && !on_foot) {
+        (false, _) => 0,
+        (true, true) => SHOWS_BODY | SHOWS_HANDS | SHOWS_FADED,
+        (true, false) => SHOWS_ALL,
     }
 }
 
@@ -345,42 +353,79 @@ pub(crate) fn seats_held(me: &Avatars, _: &Cx) -> Vec<String> {
 }
 
 /// While this pilot's camera sits in a seat another figure holds, that figure hides, and a
-/// notification names the free seats; Ready doesn't wait for a seat.
-pub(crate) fn seat_held(me: &mut Avatars, seat: Option<String>, others: &[String], cx: &mut Cx) {
+/// notification says the seat is taken, led by its holder's head; Ready doesn't wait for a
+/// seat.
+pub(crate) fn seat_held(me: &mut Avatars, seat: Option<String>, cx: &mut Cx) {
     if seat == me.crew.hidden_seat {
         return;
     }
-    let Some(profile) = &me.profile else {
-        return;
-    };
     match &seat {
         Some(key) => {
-            let name = |k: &str| {
-                profile
-                    .seats
-                    .iter()
-                    .find(|s| s.key == k)
-                    .map_or(k.to_string(), |s| s.name.clone())
-            };
-            let free: Vec<String> = profile
-                .seats
-                .iter()
-                .filter(|s| !others.contains(&s.key))
-                .map(|s| s.name.clone())
-                .collect();
-            let text = if free.is_empty() {
-                format!("The {} seat is taken, and no seat is free.", name(key))
-            } else {
-                format!(
-                    "The {} seat is taken. Free: {}.",
-                    name(key),
-                    free.join(", ")
-                )
-            };
-            clients::notify(cx, crate::SEAT_HELD, Level::Information, &text, None);
+            let holder = me.crew.poses.iter().find_map(|(pilot, pose)| {
+                matches!(&pose.body, Body::Seated { seat, .. } if seat == key)
+                    .then(|| messages::hex(pilot))
+            });
+            clients::notify(
+                cx,
+                crate::SEAT,
+                Notification {
+                    pilot: holder,
+                    ..Notification::new(Level::Information, "This seat is taken", Landing::Figures)
+                },
+            );
         }
-        None => clients::clear_notification(cx, crate::SEAT_HELD),
+        None => clients::clear_notification(cx, crate::SEAT),
     }
     me.crew.hidden_seat = seat;
     me.redraw(cx);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn each_switch_covers_its_own_figures_where_they_are() {
+        let seated = Body::Head {
+            eye: [0.0; 3],
+            look: [0.0, 0.0, 1.0],
+        };
+        let on_foot = Body::OnFoot {
+            at: [0.0; 3],
+            heading: 0.0,
+            crouch: false,
+        };
+        let inside_own = SHOWS_BODY | SHOWS_HANDS | SHOWS_FADED;
+        let all = Settings::default();
+        assert_eq!(shows(true, &seated, &all), inside_own);
+        assert_eq!(shows(true, &on_foot, &all), SHOWS_ALL);
+        assert_eq!(shows(false, &seated, &all), SHOWS_ALL);
+        assert_eq!(shows(false, &on_foot, &all), SHOWS_ALL);
+        let off = |change: fn(&mut Settings)| {
+            let mut settings = Settings::default();
+            change(&mut settings);
+            [
+                shows(true, &seated, &settings),
+                shows(true, &on_foot, &settings),
+                shows(false, &seated, &settings),
+                shows(false, &on_foot, &settings),
+            ]
+        };
+        assert_eq!(
+            off(|s| s.mine_inside = false),
+            [0, SHOWS_ALL, SHOWS_ALL, SHOWS_ALL]
+        );
+        assert_eq!(
+            off(|s| s.mine_walkaround = false),
+            [inside_own, 0, SHOWS_ALL, SHOWS_ALL]
+        );
+        assert_eq!(
+            off(|s| s.crew_inside = false),
+            [inside_own, SHOWS_ALL, 0, SHOWS_ALL]
+        );
+        assert_eq!(
+            off(|s| s.crew_walkaround = false),
+            [inside_own, SHOWS_ALL, SHOWS_ALL, 0]
+        );
+    }
 }

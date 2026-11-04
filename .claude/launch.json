@@ -8,6 +8,12 @@
       "port": 5190
     },
     {
+      "name": "efb-app",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tools/dev.ts", "efb"],
+      "port": 5190
+    },
+    {
       "name": "figure-dev",
       "runtimeExecutable": "node",
       "runtimeArgs": ["experiments/areas/avatars/figure/serve.mjs"],

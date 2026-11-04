@@ -5,6 +5,7 @@
 pub mod slots;
 
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
 use crate::module::RoutineId;
 use crate::net::{Channel, Delivery, OneOff, Wait};
@@ -19,6 +20,30 @@ pub const MODEL: MatchItem<ModelRead> = MatchItem::new(5);
 pub enum ModelRead {
     Read,
     Unreadable,
+}
+
+/// The slice `avatars`, an `AvatarsSlice`.
+pub const SLICE: &str = "avatars";
+
+/// What the Figures tab shows of the feature's state.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "avatars/")]
+pub struct AvatarsSlice {
+    pub note: Option<AircraftNote>,
+}
+
+/// Why the figures do less in the loaded aircraft, which the tab says at its top rather than
+/// in a notification, since it would come back on every flight in that aircraft
+/// (record/areas/interface/decisions.md, "The Figures tab holds the pilot's figure and explains
+/// what its figures can do").
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "kebab-case")]
+#[ts(export, export_to = "avatars/")]
+pub enum AircraftNote {
+    /// This machine can't read the aircraft's model files, so a click brings no hand.
+    Model,
+    /// The profile has no seats, so figures show as heads alone.
+    Seats,
 }
 
 /// The colors in the figure's palette, which a pilot's setting picks by its place, then the

@@ -62,7 +62,7 @@ export type Channel = { name: string; kind: Kind; axis?: Axis; node?: string; en
  * 3m a hand reaches on foot.
  */
 export function channels(spec: Spec): Channel[] {
-  const reach = 2 * spec.telescope[spec.telescope.length - 1]
+  const reach = 2 * spec.telescope[spec.telescope.length - 1]!
   const moves = ["HEAD", "CHEST"].flatMap((b): Channel[] => [
     { name: `${b}_FWD`, node: `${b.toLowerCase()}_fwd`, kind: "move", axis: "fwd", min: -1, max: 1 },
     { name: `${b}_RIGHT`, node: `${b.toLowerCase()}_right`, kind: "move", axis: "right", min: -1, max: 1 },
@@ -187,7 +187,7 @@ function nose(spec: Spec, d: Detail): Geometry {
 
 /** A palette entry's main and light colors, as linear RGB. */
 export function colors(spec: Spec, index: number) {
-  const hex = spec.palette[index % spec.palette.length].hex
+  const hex = spec.palette[index % spec.palette.length]!.hex
   const n = parseInt(hex.slice(1), 16)
   const srgb = [16, 8, 0].map((s) => ((n >> s) & 255) / 255)
   const linear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
@@ -226,7 +226,7 @@ function packer() {
     return bufferViews.length - 1
   }
   const accessor = (typed: Float32Array | Uint16Array, type: string, componentType: number, target?: number, bounds = false) => {
-    const size = ({ SCALAR: 1, VEC3: 3, VEC4: 4 } as Record<string, number>)[type]
+    const size = ({ SCALAR: 1, VEC3: 3, VEC4: 4 } as Record<string, number>)[type]!
     const a: Record<string, unknown> = { bufferView: view(typed, target), componentType, count: typed.length / size, type }
     if (bounds) {
       const each = (k: number) => Array.from(typed).filter((_, i) => i % size === k)
@@ -294,7 +294,7 @@ export function buildGltf(spec: Spec, detail: Detail): Built {
   mesh("knee_stick", stick(spec.leg.radius, 0, kneePiece, detail.stick))
   mesh("nose", nose(spec, detail))
   // A leg never stretches past 1.5m, so its telescope stops at the pair that reaches it.
-  const legPieces = spec.telescope.filter((s, k) => k === 0 || spec.telescope[k - 1] * 2 < 1.5)
+  const legPieces = spec.telescope.filter((s, k) => k === 0 || spec.telescope[k - 1]! * 2 < 1.5)
   for (const [part, r, pieces] of [["arm", spec.arm.radius, spec.telescope], ["leg", spec.leg.radius, legPieces]] as const) {
     pieces.forEach((s, k) => {
       mesh(`${part}_fore_${k}`, stick(r, 0, s, detail.stick))
@@ -308,7 +308,7 @@ export function buildGltf(spec: Spec, detail: Detail): Built {
     nodes.push(node)
     const i = nodes.length - 1
     at[node.name] = i
-    if (parent !== null) (nodes[parent].children ??= []).push(i)
+    if (parent !== null) (nodes[parent]!.children ??= []).push(i)
     return i
   }
   const rules: Rule[] = []
@@ -444,7 +444,7 @@ export function buildGltf(spec: Spec, detail: Detail): Built {
   let triangles = 0, draws = 0
   for (const n of nodes) {
     if (n.mesh === undefined || hidden.has(n.name)) continue
-    triangles += meshTriangles[n.mesh]
+    triangles += meshTriangles[n.mesh]!
     draws += 1
   }
   return { json, bin, rules, cost: { nodes: nodes.length, draws, triangles, materials: 2 } }

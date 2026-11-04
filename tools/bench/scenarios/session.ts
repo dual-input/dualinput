@@ -619,6 +619,35 @@ test("no answer from the backend is our servers while a relay answers, and this 
   assert.deepEqual(await refusal(offline), { on: "host", why: "offline" })
 })
 
+test("a name or color changed in a session reaches the crew at once, an emptied name keeps the last, and the session file keeps both", { timeout: 60_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("session-renamed", t)
+  const a = await pilot(run, net, "James")
+  const b = await pilot(run, net, "Adam")
+  const code = await host(a.core, a.name)
+  await join(b.core, code, b.name)
+  const pilotA = slice(a).me!
+  const seen = (s: SessionSlice) => s.members.find((member) => member.pilot === pilotA)
+  await until(b, (s) => seen(s)?.name === "James", "the crew seeing the first name")
+
+  await a.app.ok("clients.set-setting", { key: "session.name", value: "Jim" })
+  await a.app.ok("clients.set-setting", { key: "session.color", value: "teal" })
+  await until(b, (s) => seen(s)?.name === "Jim" && seen(s)?.color === 6, "the crew seeing the new name and color")
+  await until(a, (s) => seen(s)?.name === "Jim" && seen(s)?.color === 6, "this pilot's own slice saying so")
+
+  await a.app.ok("clients.set-setting", { key: "session.name", value: "" })
+  await a.app.ok("clients.set-setting", { key: "session.color", value: "pink" })
+  await until(b, (s) => seen(s)?.color === 7, "the crew seeing the next color")
+  assert.equal(seen(slice(b))?.name, "Jim")
+
+  // Long enough for the file's write, a job the crew's message doesn't wait for.
+  await sleep(300)
+  await a.core.kill()
+  const saved = JSON.parse(fs.readFileSync(path.join(a.core.data, "session.json"), "utf8")) as { name: string; color: number }
+  assert.deepEqual([saved.name, saved.color], ["Jim", 7])
+})
+
 test("a join another core refuses stops, and says why in the words of the backend's refusal", { timeout: 60_000 }, async (t) => {
   const net = await BenchNetwork.start()
   t.after(() => net.stop())

@@ -111,16 +111,7 @@ impl Crew {
                 .members()
                 .iter()
                 .any(|m| Some(*m) != my_id && !network.up(m));
-        let mut settings: BTreeMap<PilotId, Option<u8>> = me
-            .crew
-            .poses
-            .iter()
-            .map(|(p, pose)| (*p, pose.color))
-            .collect();
-        if let Some(id) = my_id {
-            settings.insert(id, me.settings.color);
-        }
-        let colors = figures::colors(&settings);
+        let colors = session.colors();
         let yokes = me.model().map_or(&[][..], |m| m.yokes());
         let seat = |pose: &Pose| match &pose.body {
             Body::Seated { seat, .. } => profile.seats.iter().find(|s| s.key == *seat),
@@ -237,14 +228,13 @@ pub(crate) fn own_pose(me: &mut Avatars, cx: &mut Cx) {
     let rules = me.rules(cx);
     let pose = Pose {
         at: now,
-        color: me.settings.color,
         body,
         hands: me.hands.targets(&rules, now),
     };
     let changed = me
         .own
         .as_ref()
-        .is_none_or(|p| p.body != pose.body || p.hands != pose.hands || p.color != pose.color);
+        .is_none_or(|p| p.body != pose.body || p.hands != pose.hands);
     let since = me.sent.map_or(u64::MAX, |s| now.saturating_sub(s));
     if !(changed && since >= EVERY || since >= AT_LEAST) {
         return;

@@ -1,6 +1,8 @@
 //! The members: who takes part in the session, each one's status, and who is in the flight
 //! (record/areas/session/02-units.md, "Members" and "In the flight").
 
+use std::collections::BTreeMap;
+
 use clients::{Landing, Level, Notification};
 use kernel::Cx;
 use messages::net::PilotId;
@@ -273,6 +275,27 @@ pub(crate) fn flight_changes(me: &mut Session, cx: &mut Cx) -> bool {
 /// The notification for each other member's comings and goings, by its pilot ID.
 fn notification_id(member: &PilotId) -> String {
     format!("crew-{}", hex(member))
+}
+
+/// Each member's color: what they picked, or for a member who never picked, the first palette
+/// color no member picked and no member with a lower pilot ID took, so every machine agrees and
+/// nothing writes a setting. Two pilots who picked the same color both show it (user,
+/// 2026-10-17).
+pub(crate) fn colors(picks: &BTreeMap<PilotId, Option<u8>>) -> BTreeMap<PilotId, u8> {
+    let count = wire::PALETTE.len() as u8;
+    let mut taken: Vec<u8> = picks.values().flatten().copied().collect();
+    let mut out = BTreeMap::new();
+    for (&pilot, &pick) in picks {
+        let color = pick.unwrap_or_else(|| {
+            let free = (0..count)
+                .find(|c| !taken.contains(c))
+                .unwrap_or(pilot[0] % count);
+            taken.push(free);
+            free
+        });
+        out.insert(pilot, color);
+    }
+    out
 }
 
 /// Where a crewmate who was in the flight went, which the rest hear once each time it changes.

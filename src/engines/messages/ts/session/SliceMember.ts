@@ -4,7 +4,11 @@ import type { Status } from "./Status.ts";
 /**
  * A member as the slice shows it.
  */
-export type SliceMember = { pilot: string, name: string, status: Status, in_flight: boolean, ready: boolean, 
+export type SliceMember = { pilot: string, name: string, 
+/**
+ * The member's color, by its place in `PALETTE`, which their head and figure wear.
+ */
+color: number, status: Status, in_flight: boolean, ready: boolean, 
 /**
  * Whom this member goes without.
  */

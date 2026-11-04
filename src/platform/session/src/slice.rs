@@ -20,6 +20,7 @@ pub(crate) fn build(me: &Session, view: &View) -> SessionSlice {
             ..SessionSlice::default()
         };
     };
+    let colors = me.colors();
     let members = me
         .members()
         .into_iter()
@@ -31,6 +32,7 @@ pub(crate) fn build(me: &Session, view: &View) -> SessionSlice {
                     .member_key(wire::MEMBER, &pilot)
                     .map(|e| e.name)
                     .unwrap_or_default(),
+                color: colors.get(&pilot).copied().unwrap_or(0),
                 status: me.member_key(wire::STATUS, &pilot).unwrap_or_default(),
                 in_flight: me.in_flight(&pilot),
                 ready: ready.ready,

@@ -3,7 +3,7 @@
 // each flight of a session, and the page shows and hides its own content from the slices it watches, so with nothing
 // to say it paints nothing (record/areas/interface/01-apps.md, "The banner").
 
-import { inPreflight } from "@dualinput/crew"
+import { HeadColors, inPreflight } from "@dualinput/crew"
 import { Root } from "@dualinput/ui"
 import { useEffect, useRef, useState } from "react"
 
@@ -112,17 +112,19 @@ export function Banner({ host, link, openWithoutCore, askToReopen, efbAppOnScree
   }
   return (
     <Root scale={scale} style={{ width: BOX.width, height: BOX.height, overflow: "hidden" }}>
-      <div className="pointer-events-none">
-        <Stack
-          notes={notes}
-          onOpen={(note) => open(note.id, note.landing)}
-          summary={
-            inPreflight(session) && core === "connected" && !overEfbApp ? (
-              <PreflightCard session={session!} network={network} onOpen={() => open(SUMMARY_CLICK, "session")} onReady={(on) => void link.client.command("session.ready", { on }).catch(() => {})} />
-            ) : null
-          }
-        />
-      </div>
+      <HeadColors members={session?.members}>
+        <div className="pointer-events-none">
+          <Stack
+            notes={notes}
+            onOpen={(note) => open(note.id, note.landing)}
+            summary={
+              inPreflight(session) && core === "connected" && !overEfbApp ? (
+                <PreflightCard session={session!} network={network} onOpen={() => open(SUMMARY_CLICK, "session")} onReady={(on) => void link.client.command("session.ready", { on }).catch(() => {})} />
+              ) : null
+            }
+          />
+        </div>
+      </HeadColors>
     </Root>
   )
 }

@@ -17,7 +17,7 @@ const JAMES = pilotId(2)
 const ADAM = pilotId(3)
 
 const inFlight: Status = { stage: "ready-to-fly", aircraft: { path: "baron58p/presets/blacksquare/baron58p" }, title: "Baron 58P", pause: 0, ended: null, links: [] }
-const member = (pilot: string, name: string, rest: Partial<SliceMember> = {}): SliceMember => ({ pilot, name, status: inFlight, in_flight: true, ready: false, without: [], ...rest })
+const member = (pilot: string, name: string, rest: Partial<SliceMember> = {}): SliceMember => ({ pilot, name, color: parseInt(pilot[0]!, 16) % 8, status: inFlight, in_flight: true, ready: false, without: [], ...rest })
 
 const flying: SessionSlice = { held: true, code: "K7R4XM", me: ME, pf: JAMES, members: [member(ME, "You"), member(JAMES, "James")], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, differences: [], ready: null, share: [], roles: [], attempt: null, refused: null }
 const preflight = (rest: Partial<SessionSlice>): SessionSlice => ({ ...flying, preflight: { aircraft: inFlight.aircraft, phase: "running" }, ready: [], ...rest })

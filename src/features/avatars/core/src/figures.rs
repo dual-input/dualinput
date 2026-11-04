@@ -1,15 +1,12 @@
 //! The figures this machine draws, and `Figure`'s slot, which carries them with each yoke
 //! (record/areas/avatars/01-avatars.md, "Drawing on every machine").
 
-use std::collections::BTreeMap;
-
 use aircraft_model::Yoke;
 use messages::avatars::slots::{
     BODY_HEAD, BODY_ON_FOOT, BODY_SEATED, FIGURES, FigureSlot, FigureState, HAND_GRIP, HAND_POINT,
     HAND_REST, HAND_THUMB, HandSlot, PoseSlot, SAMPLES, StageSlot, YokeSlot,
 };
-use messages::avatars::{Body, GRAY, Hand, PALETTE, Pose, Side};
-use messages::net::PilotId;
+use messages::avatars::{Body, GRAY, Hand, Pose, Side};
 
 use crate::seats::Place;
 
@@ -154,29 +151,6 @@ fn hand_slot(hand: Hand) -> HandSlot {
     HandSlot { kind, side, point }
 }
 
-/// Each figure's color: its pilot's setting, or for a figure whose pose carries none, the
-/// first palette color that no member's setting names and no colorless figure with a lower
-/// pilot ID took, so every machine agrees and nothing writes a setting. Two pilots who picked
-/// the same color both show it (user, 2026-10-17).
-pub(crate) fn colors(settings: &BTreeMap<PilotId, Option<u8>>) -> BTreeMap<PilotId, u8> {
-    let mut taken: Vec<u8> = settings.values().flatten().copied().collect();
-    let mut out = BTreeMap::new();
-    for (&pilot, &setting) in settings {
-        let color = match setting {
-            Some(c) => c,
-            None => {
-                let free = (0..PALETTE.len() as u8)
-                    .find(|c| !taken.contains(c))
-                    .unwrap_or(pilot[0] % PALETTE.len() as u8);
-                taken.push(free);
-                free
-            }
-        };
-        out.insert(pilot, color);
-    }
-    out
-}
-
 /// The most figures one slot holds, which a crew of eight fills.
 pub(crate) const MOST: usize = FIGURES;
 
@@ -185,24 +159,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn a_colorless_figure_takes_the_first_color_no_setting_names_by_pilot_id() {
-        let settings = BTreeMap::from([([3; 16], None), ([1; 16], Some(0)), ([2; 16], None)]);
-        let colors = colors(&settings);
-        assert_eq!(colors[&[1; 16]], 0);
-        assert_eq!(
-            colors[&[2; 16]], 1,
-            "the lower pilot ID takes the first free"
-        );
-        assert_eq!(colors[&[3; 16]], 2);
-        let same = BTreeMap::from([([1; 16], Some(4)), ([2; 16], Some(4))]);
-        assert_eq!(super::colors(&same).values().collect::<Vec<_>>(), [&4, &4]);
-    }
-
-    #[test]
     fn a_slumped_figure_turns_gray_and_a_resting_one_rests_its_hands() {
         let pose = Pose {
             at: 0,
-            color: Some(1),
             body: Body::Head {
                 eye: [0.3, 0.8, 1.3],
                 look: [0.0, 0.0, 1.0],

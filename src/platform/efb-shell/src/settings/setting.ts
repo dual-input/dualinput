@@ -5,14 +5,13 @@ import type { JsonValue } from "../../../../engines/messages/ts/serde_json/JsonV
 import { useSlice } from "../../../../engines/page-client/src/core-link.ts"
 import type { CoreLink } from "../../../../engines/page-client/src/core-link.ts"
 
-/** `SETUP_DONE` and `GUIDE_DONE` in src/engines/messages/src/clients.rs, and `NAME` in src/engines/messages/src/session.rs, name the same settings. */
+/** `SETUP_DONE` and `GUIDE_DONE` in src/engines/messages/src/clients.rs, and `NAME` and `COLOR` in src/engines/messages/src/session.rs, name the same settings. */
 export const SETUP_DONE = "app.setup-done"
 export const GUIDE_DONE = "app.guide-done"
 export const NAME = "session.name"
+export const FIGURE_COLOR = "session.color"
 /** `OUTPUT` in src/platform/core-helper-service/src/lib.rs names the same setting. */
 export const OUTPUT = "core-helper.output"
-/** `COLOR` in src/features/avatars/core/src/lib.rs names the same setting, so change both together. A core with no avatars refuses the write. */
-export const FIGURE_COLOR = "avatars.color"
 
 /** A setting's value, or undefined until the core has sent the slice. */
 export function useSetting(link: CoreLink, key: string): JsonValue | undefined {

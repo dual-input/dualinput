@@ -4,7 +4,7 @@
 // names no feature. Layout is flexbox's, so it fills whatever view the tablet gives it. Every tab's page stays
 // mounted, hidden while another shows, so a page keeps its scroll and what's typed into it.
 
-import { inPreflight } from "@dualinput/crew"
+import { HeadColors, inPreflight } from "@dualinput/crew"
 import { keyboardHeld, releaseKeyboard, Root, TabBar, toast, Toaster } from "@dualinput/ui"
 import { Settings as SettingsIcon, Users } from "lucide-react"
 import { createElement, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react"
@@ -183,46 +183,48 @@ export function Frame({ host, link, desktop, sim, version, parts }: FrameProps) 
   return (
     <ShellContext.Provider value={shell}>
       <Root scale={scale} style={{ width, height, overflow: "hidden" }}>
-        <div data-app-frame className="relative flex h-full flex-col bg-background" style={{ paddingTop: inset }}>
-          {inSetup ? (
-            <SetupFlow
-              facts={{ failures, username: coreSlice?.username ?? "", addonVersion: version, version: coreVersion ?? version }}
-              onFix={(failure) => {
-                if (failure === "addon") return restartSim()
-                const sent = desktop.ask({ t: "fix-firewall" })
-                if (!sent) toast(NO_DESKTOP_APP)
-                return sent
-              }}
-              onDone={(name, color) => {
-                setContinued(true)
-                writeSetting(link, NAME, name)
-                writeSetting(link, FIGURE_COLOR, color)
-                writeSetting(link, SETUP_DONE, true)
-              }}
-            />
-          ) : (
-            <>
-              <Header version={version} phase={down || mismatch ? undefined : phaseOf(session)} icons={parts.map((part) => part.phaseIcon && createElement(part.phaseIcon, { key: part.name }))} issues={mismatch ? [] : issues} offline={!!status.offline} opened={headerOpened} />
-              <div className="flex min-h-0 flex-1 flex-col">
-                {down ? (
-                  <ServiceDown closed={core === "closed"} headerHeight={HEADER_HEIGHT} />
-                ) : mismatch ? (
-                  <AddonMismatch addon={version} service={coreVersion} headerHeight={HEADER_HEIGHT} onRestart={restartSim} />
-                ) : (
-                  pages.map(({ id, element }) => (
-                    <div key={id} className="min-h-0 flex-1 flex-col" style={{ display: id === tab ? "flex" : "none" }}>
-                      {element}
-                    </div>
-                  ))
-                )}
-              </div>
-              {!down && !mismatch && <TabBar tabs={tabs.map(({ id, icon, label }) => ({ id, icon, label, dot: dots[id] }))} active={tab} onSelect={setTab} />}
-              {!down && !mismatch && parts.map((part) => part.underTabs && createElement(part.underTabs, { key: part.name }))}
-            </>
-          )}
-          {/* It catches every press, since every command would fail, in setup too, where a Continue would save nothing. */}
-          {!down && <Reconnecting on={core === "reconnecting"} />}
-        </div>
+        <HeadColors members={session?.members}>
+          <div data-app-frame className="relative flex h-full flex-col bg-background" style={{ paddingTop: inset }}>
+            {inSetup ? (
+              <SetupFlow
+                facts={{ failures, username: coreSlice?.username ?? "", addonVersion: version, version: coreVersion ?? version }}
+                onFix={(failure) => {
+                  if (failure === "addon") return restartSim()
+                  const sent = desktop.ask({ t: "fix-firewall" })
+                  if (!sent) toast(NO_DESKTOP_APP)
+                  return sent
+                }}
+                onDone={(name, color) => {
+                  setContinued(true)
+                  writeSetting(link, NAME, name)
+                  writeSetting(link, FIGURE_COLOR, color)
+                  writeSetting(link, SETUP_DONE, true)
+                }}
+              />
+            ) : (
+              <>
+                <Header version={version} phase={down || mismatch ? undefined : phaseOf(session)} icons={parts.map((part) => part.phaseIcon && createElement(part.phaseIcon, { key: part.name }))} issues={mismatch ? [] : issues} offline={!!status.offline} opened={headerOpened} />
+                <div className="flex min-h-0 flex-1 flex-col">
+                  {down ? (
+                    <ServiceDown closed={core === "closed"} headerHeight={HEADER_HEIGHT} />
+                  ) : mismatch ? (
+                    <AddonMismatch addon={version} service={coreVersion} headerHeight={HEADER_HEIGHT} onRestart={restartSim} />
+                  ) : (
+                    pages.map(({ id, element }) => (
+                      <div key={id} className="min-h-0 flex-1 flex-col" style={{ display: id === tab ? "flex" : "none" }}>
+                        {element}
+                      </div>
+                    ))
+                  )}
+                </div>
+                {!down && !mismatch && <TabBar tabs={tabs.map(({ id, icon, label }) => ({ id, icon, label, dot: dots[id] }))} active={tab} onSelect={setTab} />}
+                {!down && !mismatch && parts.map((part) => part.underTabs && createElement(part.underTabs, { key: part.name }))}
+              </>
+            )}
+            {/* It catches every press, since every command would fail, in setup too, where a Continue would save nothing. */}
+            {!down && <Reconnecting on={core === "reconnecting"} />}
+          </div>
+        </HeadColors>
         <Toaster />
       </Root>
     </ShellContext.Provider>

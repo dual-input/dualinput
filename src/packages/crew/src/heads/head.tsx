@@ -7,7 +7,11 @@ import type { ReactNode } from "react"
 
 import { Crew, HEAD_SIZE, LIST_ROOM, SLUMP_LOOK, TURN_ROOM, useLiveHead } from "./live.ts"
 
-/** The palette a pilot's figure takes its color from, without the gray that marks a figure whose pilot is gone or lost. */
+/**
+ * The palette a pilot's figure takes its color from, without the gray that marks a figure whose pilot is gone or lost.
+ * `PALETTE` in src/engines/messages/src/session.rs and the figure's source, in src/features/avatars/figure/, lay out the
+ * same palette in this order, so change all three together.
+ */
 export const FIGURE_COLORS = [
   { name: "red", hex: "#e2453c" },
   { name: "blue", hex: "#3b7fe0" },
@@ -19,11 +23,15 @@ export const FIGURE_COLORS = [
   { name: "pink", hex: "#e46aa6" },
 ]
 
-/** A pilot's color, by their ID. TODO: once stage 17's figures say which color each pilot picked, read that instead. */
-export function colorOf(pilot: string): string {
-  // FNV-1a, whose high bits spread where a plain sum's low bits would give every pilot one color.
-  const hash = Array.from(pilot).reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619), 2166136261) >>> 0
-  return FIGURE_COLORS[(hash >>> 16) % FIGURE_COLORS.length]!.hex
+/** The head of a pilot the session doesn't list, in the gray a figure turns once its pilot is gone. */
+const GONE = "#8a8f98"
+
+const ColorsContext = createContext<ReadonlyMap<string, number>>(new Map())
+
+/** Around everything that draws a head: each member's color, by its place in the palette, as the session's slice says. */
+export function HeadColors({ members, children }: { members: { pilot: string; color: number }[] | undefined; children: ReactNode }) {
+  const colors = useMemo(() => new Map((members ?? []).map((member) => [member.pilot, member.color])), [members])
+  return <ColorsContext.Provider value={colors}>{children}</ColorsContext.Provider>
 }
 
 const CrewContext = createContext<Crew | null>(null)
@@ -58,9 +66,11 @@ export type HeadProps = {
 export function Head({ pilot, pop, alive, turns, slumped, faded }: HeadProps) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const crew = useContext(CrewContext)
+  const color = useContext(ColorsContext).get(pilot)
+  const hex = (color === undefined ? undefined : FIGURE_COLORS[color]?.hex) ?? GONE
   const { scale } = useRoot()
   const room = turns ? TURN_ROOM : LIST_ROOM
-  useLiveHead(canvas, colorOf(pilot), room, scale, alive && !slumped ? crew : null, pilot, slumped ? SLUMP_LOOK : undefined, !!slumped || !!faded)
+  useLiveHead(canvas, hex, room, scale, alive && !slumped ? crew : null, pilot, slumped ? SLUMP_LOOK : undefined, !!slumped || !!faded)
   return (
     <span className="relative inline-block shrink-0" style={{ width: HEAD_SIZE, height: HEAD_SIZE }}>
       <span className="absolute inset-x-0 inset-y-0 rounded-full bg-muted" />

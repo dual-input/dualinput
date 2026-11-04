@@ -126,7 +126,8 @@ pub struct Keys {
     pub values: Vec<KeyValue>,
 }
 
-/// A member's entry, which it writes once, as it first takes part in the session.
+/// A member's entry, which it writes as it first takes part in the session, and again when
+/// its pilot changes their name or color.
 pub const MEMBER: Key<MemberEntry> = Key::new(1, Writer::Member);
 /// A member's sim and its links, which it writes on each change.
 pub const STATUS: Key<Status> = Key::new(2, Writer::Member);
@@ -142,6 +143,8 @@ pub const PREFLIGHT: Key<Preflight> = Key::new(5, Writer::PilotFlying);
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MemberEntry {
     pub name: String,
+    /// The color the pilot picked, by its place in `PALETTE`, or none.
+    pub color: Option<u8>,
     pub kind: Kind,
     pub endpoint: EndpointId,
 }
@@ -355,6 +358,8 @@ pub enum RefusedWhy {
 pub struct SliceMember {
     pub pilot: String,
     pub name: String,
+    /// The member's color, by its place in `PALETTE`, which their head and figure wear.
+    pub color: u8,
     pub status: Status,
     pub in_flight: bool,
     pub ready: bool,
@@ -458,6 +463,19 @@ pub struct Share {
 
 /// The display name setting, the name the crew sees, which Host and Join need.
 pub const NAME: &str = "session.name";
+
+/// The color setting, the color of the pilot's figure and head: `AUTOMATIC`, or a name in
+/// `PALETTE`. `FIGURE_COLOR` in src/platform/efb-shell/src/settings/setting.ts names the same
+/// setting, so change both together.
+pub const COLOR: &str = "session.color";
+pub const AUTOMATIC: &str = "automatic";
+
+/// The colors a pilot picks from. `FIGURE_COLORS` in src/packages/crew/src/heads/head.tsx and
+/// the figure's source, in src/features/avatars/figure/, lay out the same palette in this
+/// order, so change all three together.
+pub const PALETTE: [&str; 8] = [
+    "red", "blue", "green", "yellow", "purple", "orange", "teal", "pink",
+];
 
 /// The most characters a display name holds. Each place the apps name a pilot has room for a
 /// short name, and Windows holds an account's name to the same 20, so a username fits as it is

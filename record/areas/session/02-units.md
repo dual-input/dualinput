@@ -39,6 +39,10 @@ Decides:     The session crate's members, session keys, control, session file, j
 > **Note**
 > Since 2026-10-25, an item's comparison names an error, a warning, or an info, the level for a difference that states a limit rather than something gone wrong, which avatars' item for a model a machine can't read takes ([avatars log](../avatars/log.md#2026-10-25-stage-17-settles-five-items-01-avatars-left-open-a-run-of-its-own-the-seat-in-the-pose-an-info-item-for-a-model-a-machine-cant-read-vr-as-a-known-limit-and-an-eye-on-what-the-figure-costs)).
 
+> **Note**
+> Since 2026-11-04, [members](#members)' `member` key also holds the pilot's color, and is rewritten when their name or color changes, rather than never ([log](log.md#2026-11-04-a-members-entry-is-rewritten-on-a-change-so-a-new-name-or-color-reaches-the-crew-at-once-and-the-color-moves-to-the-session)).
+> The session crate registers the color setting, `session.color`, works out each member's color, and shows it in the slice `session`, and the session file keeps the color beside the name.
+
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.
 The PF's core sets the session's aircraft, runs preflight's countdown, and ends preflight with a key, and its profile loader pins a local bundle that covers that aircraft, or else the one its cached index gives its level.

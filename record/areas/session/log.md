@@ -2,6 +2,27 @@
 
 What we found building and testing the session, newest entry first.
 
+## 2026-11-04: A member's entry is rewritten on a change, so a new name or color reaches the crew at once, and the color moves to the session
+
+**Asked:** could a new name reach the crew in its session rather than the next, and could the apps' heads wear the color a pilot picked, which they computed from the pilot's ID (user, 2026-11-04)?
+
+**Expected:** yes, since "never rewritten" described a key nothing had a reason to change, rather than a rule anything leaned on.
+
+**Found:** `member` is an ordinary key, written as `status`, `ready`, and `match` are, and the session crate's slice and match check read a pilot's name from the current value each time.
+On the bench, a name and a color changed mid-session reached the other core's slice, an emptied name kept the last, and the session file kept both, and all 23 of `node tools/bench.ts session`'s cases pass.
+
+**Changed:**
+
+- The `member` key holds the pilot's color, and is rewritten when their name or color changes.
+- The color setting is the session crate's, `session.color`, and `PALETTE` moved to the message crate's session module, so the apps' shell and the session crate name no feature for it.
+- The session crate works out each member's color, by the rule avatars had for a pilot who never picked, and shows it in the slice `session`, so a head and its figure can't disagree.
+- The pose carries no color.
+- The Figures tab sends a new name 800ms after the last key, so the crew doesn't watch it spelled, and it drops "Your new name will apply in your next session".
+
+A notification already up keeps the old name until it's next raised, which we accept.
+
+**Affects:** [02-units](02-units.md), [the Figures tab](../interface/decisions.md#the-figures-tab-holds-the-pilots-figure-and-explains-what-its-figures-can-do), and [01-avatars](../avatars/01-avatars.md).
+
 ## 2026-10-24: In the sim, the menu script takes the core out of Starting and Hold holds the aircraft through preflight, after two fixes the bench couldn't catch
 
 **Asked:** do [stage 9](../build/plan.md#9-the-session)'s cases in the sim hold: our BlurPage copy brings the menu script, whose master page takes a core that found the sim running out of Starting, and preflight's `Hold` freezes the pilot's aircraft through our WASM module and lets it go when preflight ends?

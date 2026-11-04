@@ -25,22 +25,18 @@ use clients::{Clients, ClientsUnit, SettingChanged, SettingDef};
 use cockpit_stream::CockpitSent;
 use core_helper_service::HelperUnit;
 use kernel::{Cx, Handle, JobId, Registry, View};
-use messages::avatars::{self as wire, AircraftNote, AvatarsSlice, Body, ModelRead, PALETTE, Pose};
+use messages::avatars::{self as wire, AircraftNote, AvatarsSlice, Body, ModelRead, Pose};
 use messages::clients::SettingKind;
 use network::{LinkLost, LinkUp, NetUnit};
 use profile_engine::features::avatars::Location;
 use profile_loader::{ProfileLoaded, ProfileUnloaded, Profiles};
 use serde_json::json;
-use session::{ControlPassed, FlightChanged, MemberGone, Session, SessionUnit};
+use session::{ControlPassed, FlightChanged, KeyChanged, MemberGone, Session, SessionUnit};
 use sim_service::{AircraftChanged, Camera, SimService, SimUnit};
 
 use crate::hands::Hands;
 use crate::seats::Place;
 
-/// The pilot's color: `automatic`, or one of the palette's. `FIGURE_COLOR` in
-/// src/platform/efb-shell/src/settings/setting.ts names the same setting, so change both
-/// together.
-pub const COLOR: &str = "avatars.color";
 /// Which figures show: this pilot's own and the crew's, each inside the aircraft and on a
 /// walkaround (record/areas/interface/decisions.md, "The Figures tab holds the pilot's figure
 /// and explains what its figures can do"). The Figures tab, in src/features/avatars/efb/part.tsx,
@@ -101,7 +97,6 @@ enum ModelState {
 }
 
 struct Settings {
-    color: Option<u8>,
     mine_inside: bool,
     mine_walkaround: bool,
     crew_inside: bool,
@@ -111,7 +106,6 @@ struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Settings {
-            color: None,
             mine_inside: true,
             mine_walkaround: true,
             crew_inside: true,
@@ -123,9 +117,7 @@ impl Default for Settings {
 impl Settings {
     fn read(clients: &Clients) -> Settings {
         let on = |key| clients.setting_as(key).unwrap_or(true);
-        let color = clients.setting_as::<String>(COLOR).unwrap_or_default();
         Settings {
-            color: PALETTE.iter().position(|c| *c == color).map(|i| i as u8),
             mine_inside: on(MINE_INSIDE),
             mine_walkaround: on(MINE_WALKAROUND),
             crew_inside: on(CREW_INSIDE),
@@ -150,22 +142,11 @@ pub fn register(r: &mut Registry) {
         .on::<LinkLost>(|me, _, cx| me.redraw(cx))
         .on::<MemberGone>(crew::Crew::gone)
         .on::<SettingChanged>(Avatars::setting_changed)
+        .on::<KeyChanged>(Avatars::key_changed)
         .match_item(wire::MODEL, compare)
         .client_state(wire::SLICE, |me: &Avatars, _: &View| AvatarsSlice {
             note: me.note(),
         });
-    let mut choices = vec!["automatic".to_string()];
-    choices.extend(PALETTE.iter().map(|c| c.to_string()));
-    me.setting(
-        COLOR,
-        SettingDef {
-            label: "Your figure's color",
-            kind: SettingKind::Choice { choices },
-            default: json!("automatic"),
-            part_only: true,
-            development: false,
-        },
-    );
     for (key, label) in [
         (MINE_INSIDE, "Your figure inside the aircraft"),
         (MINE_WALKAROUND, "Your figure on a walkaround"),
@@ -185,25 +166,22 @@ pub fn register(r: &mut Registry) {
     }
 }
 
-/// The match check's comparison: each member whose machine can't read the models is named,
-/// at the `info` level, since nothing went wrong (user, 2026-10-25), in the Figures tab's own
-/// words, since the interface says "figure" for ours and "avatar" only for the sim's
-/// (record/areas/interface/decisions.md, "The Figures tab holds the pilot's figure and
-/// explains what its figures can do").
+/// The match check's comparison, at the `info` level, since nothing went wrong. It names no
+/// one, since a crew of ten on a Marketplace aircraft would fill the line, and nobody can act
+/// on the names (record/areas/avatars/01-avatars.md's note of 2026-11-04).
 fn compare(values: &[(String, ModelRead)]) -> Option<session::Found> {
-    let names: Vec<String> = values
+    let unreadable = values
         .iter()
         .filter(|(_, v)| *v == ModelRead::Unreadable)
-        .map(|(n, _)| format!("{n}'s"))
-        .collect();
-    let (copies, last) = match names.as_slice() {
-        [] => return None,
-        [one] => ("copy", one.clone()),
-        [rest @ .., last] => ("copies", format!("{} and {last}", rest.join(", "))),
+        .count();
+    let figures = match unreadable {
+        0 => return None,
+        all if all == values.len() => "Figures",
+        _ => "Some figures",
     };
     Some(session::Found {
         level: messages::session::Severity::Info,
-        words: format!("Pointing and clicking won't work in {last} {copies} of this aircraft"),
+        words: format!("{figures} won't be able to interact with the cockpit"),
         note: None,
     })
 }
@@ -455,6 +433,13 @@ impl Avatars {
         me.redraw(cx);
     }
 
+    /// A member's entry changed, which may give their figure another color.
+    fn key_changed(me: &mut Avatars, changed: &KeyChanged, cx: &mut Cx) {
+        if changed.key == messages::session::MEMBER.number {
+            me.redraw(cx);
+        }
+    }
+
     /// Feeds `Figure` again, at most once an input, after this handler and every other
     /// that changes a figure in the same input.
     fn redraw(&mut self, cx: &mut Cx) {
@@ -483,7 +468,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn the_match_item_names_each_pilot_whose_machine_cant_read_the_model_as_an_info() {
+    fn the_match_item_says_figures_or_some_figures_as_an_info() {
         let read = |name: &str, v| (name.to_string(), v);
         assert_eq!(compare(&[read("James", ModelRead::Read)]), None);
         let found = compare(&[
@@ -494,7 +479,7 @@ mod tests {
         assert_eq!(found.level, messages::session::Severity::Info);
         assert_eq!(
             found.words,
-            "Pointing and clicking won't work in James's copy of this aircraft"
+            "Some figures won't be able to interact with the cockpit"
         );
         let both = compare(&[
             read("James", ModelRead::Unreadable),
@@ -503,7 +488,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             both.words,
-            "Pointing and clicking won't work in James's and Mira's copies of this aircraft"
+            "Figures won't be able to interact with the cockpit"
         );
     }
 }

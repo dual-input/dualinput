@@ -84,7 +84,7 @@ These are the ones the apps need that no unit had:
 | Unit | Its slice adds | Its commands add |
 | --- | --- | --- |
 | `clients` | Whether a banner page's socket is open; and `core`, what the setup screens and the header read of the core itself | A notification clicked outside its action |
-| `session` | The members, with each one's name, `status`, and `ready`; control; preflight and its countdown; the invite code; the attempt and its refusal; the match check's differences, each with its level and its owner's words; the verdicts on Ready and on each feature's sharing switch; and the role keys this pilot can claim, each with its label | Each sharing switch, which asks the kernel's request for its role key ([session keys](../session/02-units.md#session-keys)) |
+| `session` | The members, with each one's name, color, `status`, and `ready`; control; preflight and its countdown; the invite code; the attempt and its refusal; the match check's differences, each with its level and its owner's words; the verdicts on Ready and on each feature's sharing switch; and the role keys this pilot can claim, each with its label | Each sharing switch, which asks the kernel's request for its role key ([session keys](../session/02-units.md#session-keys)) |
 | `sim-service` | Sim awareness's stage, page, aircraft, pause, and how the last run ended; where the pilot is, and the aircraft's names; and the module's status ([the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status)) | None |
 | `network` | The servers it can reach ([its units](../network/02-units.md)) | None |
 | `profile-loader` | `profiles`, the supported aircraft and what's loaded | `profiles.pick`, which refuses until the menu script makes the world map's requests |

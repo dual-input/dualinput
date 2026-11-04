@@ -46,13 +46,9 @@ pub enum AircraftNote {
     Seats,
 }
 
-/// The colors in the figure's palette, which a pilot's setting picks by its place, then the
-/// gray a slumped figure turns. The figure's source, in src/features/avatars/figure/, lays
-/// out the same palette, so change both together.
-pub const PALETTE: [&str; 8] = [
-    "red", "blue", "green", "yellow", "purple", "orange", "teal", "pink",
-];
-pub const GRAY: u8 = PALETTE.len() as u8;
+/// The gray a slumped figure turns, which follows `session::PALETTE`'s colors in the figure's
+/// own palette. The figure's source, in src/features/avatars/figure/, lays it out so.
+pub const GRAY: u8 = crate::session::PALETTE.len() as u8;
 
 /// Each pilot's pose, as one-off packets of which only the newest waits to go, handed over
 /// after the flight model's and ATC audio's and before traffic's
@@ -73,8 +69,6 @@ pub const FIGURE: RoutineId = RoutineId {
 pub struct Pose {
     /// When the sender made it, in µs on its counter, which orders one sender's poses.
     pub at: u64,
-    /// The pilot's color setting, a palette index, or none.
-    pub color: Option<u8>,
     pub body: Body,
     /// The left hand, then the right.
     pub hands: [Hand; 2],

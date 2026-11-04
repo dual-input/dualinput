@@ -10,12 +10,13 @@ use std::time::{Duration, Instant};
 
 use aircraft_model::Vec3;
 use aircraft_model::frame::{self, AircraftPose};
+use messages::avatars::FIGURE;
 use messages::avatars::slots::{
     BODY_SEATED, FIGURES, FigureSlot, FigureState, HAND_REST, HandSlot, PoseSlot, SHOWS_ALL,
 };
-use messages::avatars::{FIGURE, PALETTE};
 use messages::module::slots::SlotHeader;
 use messages::module::{ModuleStatus, STATUS};
+use messages::session::PALETTE;
 use profile_engine::features::avatars::Seat;
 use sim_client::message::{Camera, Message};
 use sim_client::{Area, InitPosition, Tag, Value, Var};

@@ -12,7 +12,6 @@ import type { ReactNode } from "react"
 
 import type { AircraftNote } from "../../../engines/messages/ts/avatars/AircraftNote.ts"
 import type { AvatarsSlice } from "../../../engines/messages/ts/avatars/AvatarsSlice.ts"
-import type { SessionSlice } from "../../../engines/messages/ts/session/SessionSlice.ts"
 import { definePart, useCoreSlice, useShell } from "../../../platform/efb-shell/src/part.ts"
 import { FIGURE_COLOR, NAME, useSetting, writeSetting } from "../../../platform/efb-shell/src/settings/setting.ts"
 import { IdentityCard } from "../../../platform/efb-shell/src/setup/identity-card.tsx"
@@ -25,6 +24,9 @@ const CREW_WALKAROUND = "avatars.crew-walkaround"
 
 /** The color a pilot who never picked one starts from, which setup starts from too, in src/platform/efb-shell/src/setup/setup-flow.tsx. */
 const FIRST_COLOR = "orange"
+
+/** How long after the last key a new name goes out, in milliseconds, since the crew sees it as it's written, and shouldn't watch it spelled. */
+const NAME_SETTLES = 800
 
 /** Why the figures do less in the loaded aircraft, in the information color with no tab dot, since the pilot has nothing to fix. */
 function NoteForAircraft({ note, onLearnMore }: { note: AircraftNote; onLearnMore: () => void }) {
@@ -228,20 +230,21 @@ function FiguresPage() {
   const opened = useRef(false)
   if (tab === "avatars") opened.current = true
   const note = useCoreSlice<AvatarsSlice>("avatars")?.note
-  const session = useCoreSlice<SessionSlice>("session")
   const page = useRef<HTMLDivElement>(null)
   const saved = useSetting(link, NAME)
-  // What the pilot is typing, which waits on no answer from the core.
+  // What the pilot is typing, which waits on no answer from the core. An emptied field writes nothing, so a member always has a name.
   const [typed, setTyped] = useState<string>()
   const name = typed ?? (typeof saved === "string" ? saved : "")
+  useEffect(() => {
+    if (!typed?.trim()) return
+    const timer = window.setTimeout(() => writeSetting(link, NAME, typed.trim()), NAME_SETTLES)
+    return () => window.clearTimeout(timer)
+  }, [typed, link])
   const color = useSetting(link, FIGURE_COLOR)
   const picked = FIGURE_COLORS.find((candidate) => candidate.name === color) ?? FIGURE_COLORS.find((candidate) => candidate.name === FIRST_COLOR)!
   const [open, setOpen] = useState({ seats: false, pointing: false, avatar: false })
   const toggle = (guide: keyof typeof open) => () => setOpen((now) => ({ ...now, [guide]: !now[guide] }))
   const [asked, setAsked] = useState(0)
-  // A member's entry, their name in it, is written once per session and never after (record/areas/session/02-units.md, "Members"), so a new name reaches the crew from the next one.
-  const crewName = session?.held ? session.members.find((member) => member.pilot === session.me)?.name : undefined
-  const renamed = useReveal(crewName !== undefined && !!name.trim() && name.trim() !== crewName)
   return (
     <div ref={page} className="flex min-h-0 flex-1 flex-col">
       <ScrollPage>
@@ -254,23 +257,7 @@ function FiguresPage() {
             }}
           />
         )}
-        <div className="flex flex-col">
-          {opened.current && (
-            <IdentityCard
-              name={name}
-              onName={(next) => {
-                setTyped(next)
-                if (next.trim()) writeSetting(link, NAME, next.trim())
-              }}
-              color={picked.name}
-              onColor={(next) => writeSetting(link, FIGURE_COLOR, next)}
-              region={page}
-            />
-          )}
-          <Room open={renamed.open} pad="pt-2.5" style={renamed.style}>
-            <p className="px-1 text-xs text-muted-foreground">Your new name will apply in your next session</p>
-          </Room>
-        </div>
+        {opened.current && <IdentityCard name={name} onName={setTyped} color={picked.name} onColor={(next) => writeSetting(link, FIGURE_COLOR, next)} region={page} />}
         <Visibility />
         <div className="space-y-3">
           <Guide icon={<SeatIcon />} title="How seats work" open={open.seats} onToggle={toggle("seats")}>

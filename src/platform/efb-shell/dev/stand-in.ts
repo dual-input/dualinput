@@ -31,10 +31,10 @@ const JAMES = pilotId(2)
 const inFlight: Status = { stage: "ready-to-fly", aircraft: { path: "baron58p/presets/blacksquare/baron58p" }, title: "Baron 58P", pause: 0, ended: null, links: [] }
 const atMenu: Status = { stage: "menu", aircraft: null, title: null, pause: 0, ended: null, links: [] }
 
-const member = (pilot: string, name: string, status: Status, rest: Partial<SliceMember> = {}): SliceMember => ({ pilot, name, status, in_flight: status === inFlight, ready: false, without: [], ...rest })
-const me = (status: Status, rest: Partial<SliceMember> = {}) => member(ME, "You", status, rest)
-const james = (status: Status, rest: Partial<SliceMember> = {}) => member(JAMES, "James", status, rest)
-const extra = (name: string, seed: number, rest: Partial<SliceMember> = {}) => member(pilotId(seed), name, inFlight, { ready: true, ...rest })
+const member = (pilot: string, name: string, status: Status, rest: Partial<SliceMember> = {}): SliceMember => ({ pilot, name, color: 0, status, in_flight: status === inFlight, ready: false, without: [], ...rest })
+const me = (status: Status, rest: Partial<SliceMember> = {}) => member(ME, "You", status, { color: 5, ...rest })
+const james = (status: Status, rest: Partial<SliceMember> = {}) => member(JAMES, "James", status, { color: 1, ...rest })
+const extra = (name: string, seed: number, rest: Partial<SliceMember> = {}) => member(pilotId(seed), name, inFlight, { color: seed % 8, ready: true, ...rest })
 
 const CODE = "K7R4XM"
 const DIFFERENCES: Difference[] = [

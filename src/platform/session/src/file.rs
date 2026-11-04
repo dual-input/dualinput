@@ -20,6 +20,7 @@ pub(crate) struct SessionFile {
     pub(crate) code: String,
     pub(crate) pilot: String,
     pub(crate) name: String,
+    pub(crate) color: Option<u8>,
     /// Raised by 1 each time the core starts while the file exists, and written before the
     /// core opens any link, since a core that sent under a count it hadn't saved would reuse
     /// it after a crash, and the others would drop its messages as copies.
@@ -69,6 +70,7 @@ mod tests {
             code: "KX7P3M".into(),
             pilot: hex(&[7; 16]),
             name: "James".into(),
+            color: Some(1),
             restart: 2,
             run: Some((4242, 133_000_000_000_000_000)),
             key: hex(&[9; 32]),

@@ -5,7 +5,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
 
-use clients::Clients;
+use clients::{Clients, SettingChanged};
 use kernel::{Cx, Exit, Job, JobId, TimerId};
 use messages::backend::{Kind, Older};
 use messages::hex;
@@ -173,6 +173,47 @@ fn name(cx: &Cx) -> Result<String, String> {
         return Err("Set the name your crew sees first".into());
     }
     Ok(name.to_string())
+}
+
+/// The color the pilot picked, by its place in the palette, or none while it's `automatic`.
+fn color(cx: &Cx) -> Option<u8> {
+    let color = cx
+        .read::<Clients>()
+        .setting_as::<String>(wire::COLOR)
+        .unwrap_or_default();
+    wire::PALETTE
+        .iter()
+        .position(|c| *c == color)
+        .map(|at| at as u8)
+}
+
+/// The pilot changed their name or color: their entry says so at once, so the crew's names,
+/// heads, and figures follow, and the session file keeps it for a core that restarts. An
+/// emptied name keeps the last, since a member always has one.
+pub(crate) fn setting_changed(me: &mut Session, changed: &SettingChanged, cx: &mut Cx) {
+    if changed.key != wire::NAME && changed.key != wire::COLOR {
+        return;
+    }
+    let (name, color) = (name(cx), color(cx));
+    let Some(held) = &mut me.held else {
+        return;
+    };
+    if let Ok(name) = name {
+        held.name = name;
+    }
+    held.color = color;
+    let entry = entry_of(held);
+    me.write(wire::MEMBER, Some(&entry), cx);
+    write_file(me, cx);
+}
+
+fn entry_of(held: &Held) -> MemberEntry {
+    MemberEntry {
+        name: held.name.clone(),
+        color: held.color,
+        kind: Kind::Crew,
+        endpoint: network::endpoint_id(&held.key),
+    }
 }
 
 fn me_now(cx: &Cx) -> Result<Me, String> {
@@ -437,6 +478,7 @@ pub(crate) fn session_file(me: &mut Session, bytes: Option<&[u8]>, cx: &mut Cx) 
             session: saved.session,
             code: saved.code,
             me: my,
+            color: saved.color,
             restart,
             key,
             relays: saved.relays,
@@ -473,6 +515,7 @@ fn start(
             session,
             code,
             me: my,
+            color: color(cx),
             restart,
             key,
             relays,
@@ -488,6 +531,7 @@ struct Start {
     session: String,
     code: String,
     me: Me,
+    color: Option<u8>,
     restart: u32,
     key: [u8; 32],
     relays: Vec<Relay>,
@@ -508,7 +552,8 @@ fn start_with(me: &mut Session, start: Start, cx: &mut Cx) {
         id: start.session,
         code: start.code,
         me: start.me.pilot,
-        name: start.me.name.clone(),
+        name: start.me.name,
+        color: start.color,
         restart: start.restart,
         key: start.key,
         relays: start.relays,
@@ -530,12 +575,8 @@ fn start_with(me: &mut Session, start: Start, cx: &mut Cx) {
         leaving: None,
         joined: 0,
     });
-    let entry = MemberEntry {
-        name: start.me.name,
-        kind: Kind::Crew,
-        endpoint: network::endpoint_id(&start.key),
-    };
-    me.write(wire::MEMBER, Some(&entry), cx);
+    let entry = me.held.as_ref().map(entry_of);
+    me.write(wire::MEMBER, entry.as_ref(), cx);
     me.write(wire::READY, Some(&Ready::default()), cx);
     matching::write_mine(me, cx);
     // The host is the pilot flying when a session starts.
@@ -565,6 +606,7 @@ pub(crate) fn write_file(me: &mut Session, cx: &Cx) {
         code: held.code.clone(),
         pilot: hex(&held.me),
         name: held.name.clone(),
+        color: held.color,
         restart: held.restart,
         run: held.run,
         key: hex(&held.key),

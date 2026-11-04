@@ -4,7 +4,7 @@
 
 export { BadgedHead } from "./badged-head.tsx"
 export type { HeadState } from "./badged-head.tsx"
-export { colorOf, CrewHeads, EmptyHead, FIGURE_COLORS, Head, useCrew } from "./heads/head.tsx"
+export { CrewHeads, EmptyHead, FIGURE_COLORS, Head, HeadColors, useCrew } from "./heads/head.tsx"
 export type { HeadProps } from "./heads/head.tsx"
 export { HEAD_CUE, HEAD_SIZE, setHeadTurn } from "./heads/live.ts"
 export { crewInPreflight, inPreflight } from "./in-preflight.ts"

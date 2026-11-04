@@ -25,7 +25,7 @@ pub use messages::session::{Control, Key, MatchItem, Phase, Preflight, Writer};
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use clients::{ClientsUnit, SettingDef};
+use clients::{ClientsUnit, SettingChanged, SettingDef};
 use kernel::{Cx, Handle, JobId, Moment, Registry, TimerId, Unit};
 use messages::clients::SettingKind;
 use messages::net::{EndpointId, PilotId, Relay};
@@ -162,6 +162,7 @@ pub(crate) struct Held {
     pub(crate) code: String,
     pub(crate) me: PilotId,
     pub(crate) name: String,
+    pub(crate) color: Option<u8>,
     pub(crate) restart: u32,
     pub(crate) key: [u8; 32],
     pub(crate) relays: Vec<Relay>,
@@ -317,6 +318,16 @@ impl Session {
     pub fn differences(&self) -> Vec<wire::Difference> {
         matching::differences(self)
     }
+
+    /// Each member's color, by its place in the palette, which their head and figure wear.
+    pub fn colors(&self) -> BTreeMap<PilotId, u8> {
+        let picks = self
+            .members()
+            .into_iter()
+            .map(|m| (m, self.member_key(wire::MEMBER, &m).and_then(|e| e.color)))
+            .collect();
+        members::colors(&picks)
+    }
 }
 
 /// What a unit declares to the session crate as it registers.
@@ -411,6 +422,7 @@ pub fn register(r: &mut Registry) {
         .on::<MemberLeft>(|me, left: &MemberLeft, cx| me.gone(left.member, cx))
         .on::<MemberOut>(members::member_out)
         .on::<SimChanged>(|me, _: &SimChanged, cx| me.settle(cx))
+        .on::<SettingChanged>(joining::setting_changed)
         .on::<AircraftChanged>(matching::aircraft_changed)
         .on_sim(preflight::sim)
         .request(control::take, control::build_take)
@@ -445,6 +457,21 @@ pub fn register(r: &mut Registry) {
                     max: wire::NAME_MAX_CHARACTERS,
                 },
                 default: json!(""),
+                part_only: false,
+                development: false,
+            },
+        )
+        .setting(
+            wire::COLOR,
+            SettingDef {
+                label: "Your figure's color",
+                kind: SettingKind::Choice {
+                    choices: std::iter::once(wire::AUTOMATIC)
+                        .chain(wire::PALETTE)
+                        .map(str::to_string)
+                        .collect(),
+                },
+                default: json!(wire::AUTOMATIC),
                 part_only: false,
                 development: false,
             },
@@ -739,6 +766,7 @@ mod tests {
             code: "KX7P3M".into(),
             me: ME,
             name: "James".into(),
+            color: None,
             restart: 0,
             key: [0; 32],
             relays: Vec::new(),
@@ -874,11 +902,29 @@ mod tests {
             THEM,
             &MemberEntry {
                 name: "Adam".into(),
+                color: None,
                 kind: Kind::Crew,
                 endpoint: [0; 32],
             },
         );
         assert_eq!(me.members(), vec![ME, THEM]);
         assert_eq!(me.member_key(wire::MEMBER, &THEM).unwrap().name, "Adam");
+    }
+
+    #[test]
+    fn a_member_who_never_picked_a_color_takes_the_first_no_one_picked_by_pilot_id() {
+        let picks = BTreeMap::from([([3; 16], None), ([1; 16], Some(0)), ([2; 16], None)]);
+        let colors = members::colors(&picks);
+        assert_eq!(colors[&[1; 16]], 0);
+        assert_eq!(
+            colors[&[2; 16]], 1,
+            "the lower pilot ID takes the first free"
+        );
+        assert_eq!(colors[&[3; 16]], 2);
+        let same = BTreeMap::from([([1; 16], Some(4)), ([2; 16], Some(4))]);
+        assert_eq!(
+            members::colors(&same).values().collect::<Vec<_>>(),
+            [&4, &4]
+        );
     }
 }

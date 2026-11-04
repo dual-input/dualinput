@@ -19,8 +19,13 @@ function laidOut(t: TestContext, size: number, version: string): string {
   const wasm = path.join(temp, "module.wasm")
   fs.writeFileSync(wasm, Buffer.alloc(size, 7))
   const dir = path.join(temp, PACKAGE_NAME)
-  layOutPackage(wasm, [], dir, version)
+  layOutPackage(wasm, [], dir, version, noFigure(temp))
   return dir
+}
+
+/** A folder that isn't there, for a package these cases want without the figure this tree compiled. */
+function noFigure(temp: string): string {
+  return path.join(temp, "no-figure")
 }
 
 test("the package's folder is dualinput, and it holds the module and its two files", (t) => {
@@ -67,16 +72,35 @@ test("our code in the sim goes where each file says, and layout.json lists it", 
   const bridge = path.join(temp, "bridge.js")
   fs.writeFileSync(bridge, "var a = 1;\n")
   const dir = path.join(temp, PACKAGE_NAME)
-  layOutPackage(wasm, [{ file: bridge, to: "html_ui/DualInput/bridge.js" }], dir, "1.2.3")
+  layOutPackage(wasm, [{ file: bridge, to: "html_ui/DualInput/bridge.js" }], dir, "1.2.3", noFigure(temp))
   assert.equal(fs.readFileSync(path.join(dir, "html_ui", "DualInput", "bridge.js"), "utf8"), "var a = 1;\n")
   const layout = JSON.parse(fs.readFileSync(path.join(dir, "layout.json"), "utf8")) as { content: { path: string }[] }
   assert.deepEqual(layout.content.map((c) => c.path), ["html_ui/DualInput/bridge.js", "modules/dualinput.wasm"])
 })
 
+test("the figure goes where the sim finds a SimObject, and layout.json lists it", (t) => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), "dualinput-package-"))
+  t.after(() => fs.rmSync(temp, { recursive: true, force: true }))
+  const wasm = path.join(temp, "module.wasm")
+  fs.writeFileSync(wasm, Buffer.alloc(10))
+  const figure = path.join(temp, "compiled")
+  fs.mkdirSync(path.join(figure, "model"), { recursive: true })
+  fs.writeFileSync(path.join(figure, "sim.cfg"), "[General]\n")
+  fs.writeFileSync(path.join(figure, "model", "model.CFG"), "[models]\n")
+  const dir = path.join(temp, PACKAGE_NAME)
+  layOutPackage(wasm, [], dir, "1.2.3", figure)
+  const layout = JSON.parse(fs.readFileSync(path.join(dir, "layout.json"), "utf8")) as { content: { path: string }[] }
+  assert.deepEqual(layout.content.map((c) => c.path), [
+    "SimObjects/Misc/DUALINPUT_FIGURE_PILOT/model/model.CFG",
+    "SimObjects/Misc/DUALINPUT_FIGURE_PILOT/sim.cfg",
+    "modules/dualinput.wasm",
+  ])
+})
+
 test("a second layout replaces the first's files", (t) => {
   const dir = laidOut(t, 1234, "1.2.3")
   fs.writeFileSync(path.join(dir, "left-over.txt"), "from an earlier build")
-  layOutPackage(path.join(path.dirname(dir), "module.wasm"), [], dir, "1.2.4")
+  layOutPackage(path.join(path.dirname(dir), "module.wasm"), [], dir, "1.2.4", noFigure(path.dirname(dir)))
   assert.equal(fs.existsSync(path.join(dir, "left-over.txt")), false)
   assert.doesNotMatch(fs.readFileSync(path.join(dir, "layout.json"), "utf8"), /left-over/)
 })

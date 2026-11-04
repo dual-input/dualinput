@@ -1,0 +1,846 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModelInfo version="1.1" guid="{d6dfcff1-619a-3a03-a3b7-104d1a41388b}">
+	<LODS>
+		<LOD minSize="40" ModelFile="DUALINPUT_FIGURE_PILOT_LOD00.gltf"/>
+		<LOD minSize="12" ModelFile="DUALINPUT_FIGURE_PILOT_LOD01.gltf"/>
+		<LOD minSize="0" ModelFile="DUALINPUT_FIGURE_PILOT_LOD02.gltf"/>
+	</LODS>
+	<Animation name="DUALINPUT_FIGURE_HEAD_FWD" guid="{f394ec2c-1b09-7c22-9235-f478e95083aa}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_HEAD_RIGHT" guid="{209519df-e207-e73d-94a4-2183464fde05}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_HEAD_UP" guid="{1de1a45e-9b8f-92a8-b1e4-3ad2fd710f20}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_CHEST_FWD" guid="{6c637d17-68d6-1f39-c66c-ce1b9830d691}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_CHEST_RIGHT" guid="{63c2fc78-2e18-92da-2b3c-17040210d5b2}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_CHEST_UP" guid="{5da92687-e4d0-69b5-2543-33433ac2157d}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_HEAD_YAW" guid="{27528bc6-1f80-c310-aa43-a6e25af50148}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_HEAD_PITCH" guid="{646bf757-2e53-b689-f5f8-20e3a065eb11}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_HEAD_ROLL" guid="{3bc6c3d4-aaa0-13b6-8bca-0c588977619e}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_ARM_L_YAW" guid="{414a9769-c447-6f17-2987-0fb59bae45df}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_ARM_L_PITCH" guid="{717093d4-97b1-d3b2-0474-ec804d3b5b0a}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_ARM_L_LEN" guid="{4b59b55d-5c7d-34b3-bade-9f69e5d1504b}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_ARM_R_YAW" guid="{61863fcf-6d51-7681-38dc-3d732fa3a959}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_ARM_R_PITCH" guid="{3c1063ba-e10a-d09c-63a0-f19eb1f5b104}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_ARM_R_LEN" guid="{687dee3b-4574-1925-26f7-784fb688998d}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_L_YAW" guid="{284cd11f-5853-eb7d-5509-a20bbf959725}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_L_PITCH" guid="{8af0314a-2aac-f5b8-d2e9-1ca6d815b3f0}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_L_LEN" guid="{726e488b-99ac-9041-51e7-c197cf002d99}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_L_ROLL" guid="{a3b1b0f7-c555-f1e5-fdb8-ed8b06161e1d}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_L_BEND" guid="{f830cedf-ea12-86dd-cc56-c793c1100ad5}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_L_SHIN" guid="{15f4be0c-7fd5-fa6a-2b53-d310e2233f62}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_R_YAW" guid="{e6054999-3e5d-544b-2976-063da890b903}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_R_PITCH" guid="{2c543844-11ff-13e6-66ab-7078606692ee}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_R_LEN" guid="{6cea39cd-3db4-49d7-6acd-180119d48e9f}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_R_ROLL" guid="{dfb0ba79-0c7b-51cb-3b8c-6ea589af8393}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_R_BEND" guid="{a47e5191-d89e-c2d3-7c0e-8e9dddd723db}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_LEG_R_SHIN" guid="{22df0bae-379b-ce50-f886-e02a72954cb8}" type="Sim"/>
+	<Animation name="DUALINPUT_FIGURE_COLOR" guid="{d47f92cb-cb73-c479-2119-65178c9b7f01}" type="Sim"/>
+	<Behaviors>
+		<Include ModelBehaviorFile="Asobo\Generic.xml"/>
+		<Component ID="DUALINPUT_FIGURE_HEAD_FWD">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_HEAD_FWD</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_HEAD_FWD) 1 + 60 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_HEAD_RIGHT">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_HEAD_RIGHT</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_HEAD_RIGHT) 1 + 60 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_HEAD_UP">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_HEAD_UP</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_HEAD_UP) 0.5 + 60 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_CHEST_FWD">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_CHEST_FWD</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_CHEST_FWD) 1 + 60 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_CHEST_RIGHT">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_CHEST_RIGHT</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_CHEST_RIGHT) 1 + 60 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_CHEST_UP">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_CHEST_UP</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_CHEST_UP) 0.5 + 60 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_HEAD_YAW">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_HEAD_YAW</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_HEAD_YAW) 180 + 0.333333 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_HEAD_PITCH">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_HEAD_PITCH</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_HEAD_PITCH) 90 + 0.666667 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_HEAD_ROLL">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_HEAD_ROLL</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_HEAD_ROLL) 90 + 0.666667 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_ARM_L_YAW">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_ARM_L_YAW</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_ARM_L_YAW) 180 + 0.333333 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_ARM_L_PITCH">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_ARM_L_PITCH</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_ARM_L_PITCH) 90 + 0.666667 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_ARM_L_LEN">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_ARM_L_LEN</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.01 - 23.483366 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_ARM_R_YAW">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_ARM_R_YAW</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_ARM_R_YAW) 180 + 0.333333 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_ARM_R_PITCH">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_ARM_R_PITCH</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_ARM_R_PITCH) 90 + 0.666667 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_ARM_R_LEN">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_ARM_R_LEN</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.01 - 23.483366 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_L_YAW">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_L_YAW</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_L_YAW) 180 + 0.333333 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_L_PITCH">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_L_PITCH</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_L_PITCH) 90 + 0.666667 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_L_LEN">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_L_LEN</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.01 - 80.536913 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_L_ROLL">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_L_ROLL</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_L_ROLL) 180 + 0.333333 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_L_BEND">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_L_BEND</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_L_BEND) 0.666667 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_L_SHIN">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_L_SHIN</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.01 - 80.536913 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_R_YAW">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_R_YAW</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_R_YAW) 180 + 0.333333 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_R_PITCH">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_R_PITCH</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_R_PITCH) 90 + 0.666667 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_R_LEN">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_R_LEN</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.01 - 80.536913 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_R_ROLL">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_R_ROLL</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_R_ROLL) 180 + 0.333333 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_R_BEND">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_R_BEND</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_R_BEND) 0.666667 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_LEG_R_SHIN">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_LEG_R_SHIN</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.01 - 80.536913 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_COLOR">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>120</ANIM_LENGTH>
+				<ANIM_NAME>DUALINPUT_FIGURE_COLOR</ANIM_NAME>
+				<ANIM_CODE>(Z:DUALINPUT_FIGURE_COLOR) 15 * 0 max 120 min</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_hips_ball" Node="hips_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_head_ball" Node="head_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 2 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_nose_tip" Node="nose_tip">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 2 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_chest_ball" Node="chest_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_ball" Node="arm_l_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 4 &amp; 0 != (Z:DUALINPUT_FIGURE_SHOWS) 8 &amp; 0 == and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_fore_0" Node="arm_l_fore_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_back_0" Node="arm_l_back_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_fore_1" Node="arm_l_fore_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_back_1" Node="arm_l_back_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_fore_2" Node="arm_l_fore_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_back_2" Node="arm_l_back_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_fore_3" Node="arm_l_fore_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_back_3" Node="arm_l_back_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_fore_4" Node="arm_l_fore_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_back_4" Node="arm_l_back_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_fore_5" Node="arm_l_fore_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_back_5" Node="arm_l_back_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_fore_6" Node="arm_l_fore_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 1.28 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 2.56 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_back_6" Node="arm_l_back_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 1.28 &gt;= and (Z:DUALINPUT_FIGURE_ARM_L_LEN) 2.56 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_fore_7" Node="arm_l_fore_7">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 2.56 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_l_back_7" Node="arm_l_back_7">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_L_LEN) 2.56 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_ball" Node="arm_r_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 4 &amp; 0 != (Z:DUALINPUT_FIGURE_SHOWS) 8 &amp; 0 == and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_fore_0" Node="arm_r_fore_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_back_0" Node="arm_r_back_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_fore_1" Node="arm_r_fore_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_back_1" Node="arm_r_back_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_fore_2" Node="arm_r_fore_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_back_2" Node="arm_r_back_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_fore_3" Node="arm_r_fore_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_back_3" Node="arm_r_back_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_fore_4" Node="arm_r_fore_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_back_4" Node="arm_r_back_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_fore_5" Node="arm_r_fore_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_back_5" Node="arm_r_back_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_fore_6" Node="arm_r_fore_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 1.28 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 2.56 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_back_6" Node="arm_r_back_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 1.28 &gt;= and (Z:DUALINPUT_FIGURE_ARM_R_LEN) 2.56 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_fore_7" Node="arm_r_fore_7">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 2.56 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_arm_r_back_7" Node="arm_r_back_7">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_ARM_R_LEN) 2.56 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_fore_0" Node="leg_l_fore_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_back_0" Node="leg_l_back_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_fore_1" Node="leg_l_fore_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_back_1" Node="leg_l_back_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_fore_2" Node="leg_l_fore_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_back_2" Node="leg_l_back_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_fore_3" Node="leg_l_fore_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_back_3" Node="leg_l_back_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_fore_4" Node="leg_l_fore_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_back_4" Node="leg_l_back_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_fore_5" Node="leg_l_fore_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_LEN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_back_5" Node="leg_l_back_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_LEN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_fore_6" Node="leg_l_fore_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 1.28 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_back_6" Node="leg_l_back_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_LEN) 1.28 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg0_ball" Node="leg_l_seg0_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg0_stick" Node="leg_l_seg0_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg1_ball" Node="leg_l_seg1_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg1_stick" Node="leg_l_seg1_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg2_ball" Node="leg_l_seg2_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg2_stick" Node="leg_l_seg2_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg3_ball" Node="leg_l_seg3_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg3_stick" Node="leg_l_seg3_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg4_ball" Node="leg_l_seg4_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg4_stick" Node="leg_l_seg4_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg5_ball" Node="leg_l_seg5_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_seg5_stick" Node="leg_l_seg5_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_ball" Node="leg_l_shin_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_ball" Node="leg_l_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_fore_0" Node="leg_l_shin_fore_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_back_0" Node="leg_l_shin_back_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_fore_1" Node="leg_l_shin_fore_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_back_1" Node="leg_l_shin_back_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_fore_2" Node="leg_l_shin_fore_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_back_2" Node="leg_l_shin_back_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_fore_3" Node="leg_l_shin_fore_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_back_3" Node="leg_l_shin_back_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_fore_4" Node="leg_l_shin_fore_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_back_4" Node="leg_l_shin_back_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_fore_5" Node="leg_l_shin_fore_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_back_5" Node="leg_l_shin_back_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_fore_6" Node="leg_l_shin_fore_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 1.28 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_l_shin_back_6" Node="leg_l_shin_back_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_L_SHIN) 1.28 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_fore_0" Node="leg_r_fore_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_back_0" Node="leg_r_back_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_fore_1" Node="leg_r_fore_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_back_1" Node="leg_r_back_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_fore_2" Node="leg_r_fore_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_back_2" Node="leg_r_back_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_fore_3" Node="leg_r_fore_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_back_3" Node="leg_r_back_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_fore_4" Node="leg_r_fore_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_back_4" Node="leg_r_back_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_fore_5" Node="leg_r_fore_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_LEN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_back_5" Node="leg_r_back_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_LEN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_fore_6" Node="leg_r_fore_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 1.28 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_back_6" Node="leg_r_back_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_LEN) 1.28 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg0_ball" Node="leg_r_seg0_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg0_stick" Node="leg_r_seg0_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg1_ball" Node="leg_r_seg1_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg1_stick" Node="leg_r_seg1_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg2_ball" Node="leg_r_seg2_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg2_stick" Node="leg_r_seg2_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg3_ball" Node="leg_r_seg3_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg3_stick" Node="leg_r_seg3_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg4_ball" Node="leg_r_seg4_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg4_stick" Node="leg_r_seg4_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg5_ball" Node="leg_r_seg5_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_seg5_stick" Node="leg_r_seg5_stick">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_ball" Node="leg_r_shin_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_ball" Node="leg_r_ball">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 !=</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_fore_0" Node="leg_r_shin_fore_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_back_0" Node="leg_r_shin_back_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.04 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_fore_1" Node="leg_r_shin_fore_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_back_1" Node="leg_r_shin_back_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.04 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.08 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_fore_2" Node="leg_r_shin_fore_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_back_2" Node="leg_r_shin_back_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.08 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.16 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_fore_3" Node="leg_r_shin_fore_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_back_3" Node="leg_r_shin_back_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.16 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.32 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_fore_4" Node="leg_r_shin_fore_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_back_4" Node="leg_r_shin_back_4">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.32 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.64 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_fore_5" Node="leg_r_shin_fore_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_back_5" Node="leg_r_shin_back_5">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 0.64 &gt;= and (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 1.28 &lt; and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_fore_6" Node="leg_r_shin_fore_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 1.28 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="DUALINPUT_FIGURE_SHOW_leg_r_shin_back_6" Node="leg_r_shin_back_6">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(Z:DUALINPUT_FIGURE_SHOWS) 1 &amp; 0 != (Z:DUALINPUT_FIGURE_LEG_R_SHIN) 1.28 &gt;= and</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+	</Behaviors>
+</ModelInfo>
+

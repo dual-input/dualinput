@@ -38,7 +38,7 @@ export function layOutPackage(wasm: string, pages: Built[], dir = PACKAGE, versi
     fs.mkdirSync(path.dirname(path.join(dir, to)), { recursive: true })
     fs.copyFileSync(file, path.join(dir, to))
   }
-  // Before its first compile the figure has no compiled/, which tools/check.ts reports.
+  // A tree with no compiled/ fails tools/check.ts, so this copies what's there.
   if (fs.existsSync(figure)) fs.cpSync(figure, path.join(dir, OBJECT), { recursive: true })
 
   // layout.json lists every file with its size and last write as a Windows FILETIME, 100ns

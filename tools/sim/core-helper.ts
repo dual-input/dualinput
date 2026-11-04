@@ -41,6 +41,7 @@ import { Guide } from "./guide.ts"
 const F22 = 0x6d
 const F23 = 0x6e
 const F24 = 0x76
+const LEFT_SHIFT = 0x2a
 const BOUND: Bound = { input: { key: { scan: F24, extended: false } }, name: "F24" }
 
 /** The sim's main window's title starts this (record/areas/core/04-core-helper.md, "Raw Input"). */
@@ -231,6 +232,18 @@ async function desk(s: Session): Promise<void> {
     const next = since(core, from, "next press")
     check(next.length === 1, "the next press crosses whatever is in front, once", next.join("; "))
 
+    core.helper({ act: "next-press", on: true })
+    await sleep(300)
+    from = core.heard().length
+    await main.do(`key ${LEFT_SHIFT} 100`)
+    await sleep(300)
+    check(since(core, from, "next press").length === 0, "while binding, a modifier alone doesn't bind")
+    await main.do(`key ${F24} 200`)
+    await sleep(300)
+    const kept = since(core, from, "next press")
+    const crossed = since(core, from, "press")
+    check(kept.length === 1 && crossed.length === 0, "while binding, the key already bound crosses as the next press alone, so it takes nothing", [...kept, ...crossed].join("; "))
+
   } finally {
     for (const w of [main, popOut, other]) w.close()
   }
@@ -383,6 +396,17 @@ async function person(s: Session): Promise<void> {
       const next = since(core, from, "next press")
       say(`the next press: ${next.join("; ")}`)
       check(next.length === 1 && /button \d+$/.test(next[0]!), "while binding, with a switch held on, only the button pressed crosses, and then nothing")
+      const pressedButton = since(core, from, "next input").at(-1)?.replace("next input ", "")
+      if (pressedButton) {
+        await desktop.client.command("clients.set-setting", { key: "bench.input", value: JSON.parse(pressedButton) })
+        core.helper({ act: "binding", on: true })
+        await sleep(300)
+        const before = core.heard().length
+        await ask(say, "This terminal is in front, so no window of the sim is. Press that same button once more, then press Enter.")
+        const presses = since(core, before, "press")
+        check(presses.length === 2, "a bound button crosses with another program in front", presses.join("; "))
+        core.helper({ act: "binding", on: false })
+      }
     }
 
     if (runs(4) && (await ask(say, "4. If an Xbox controller is connected, press Enter, then press its A button within 10s; otherwise type s.")) !== "s") {

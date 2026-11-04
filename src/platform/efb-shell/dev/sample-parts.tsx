@@ -2,7 +2,7 @@
 // theirs: the checklist state sync's part will draw, on the entries a profile's authors would write, and a tab
 // for each feature with what a page of its kind holds.
 
-import { Button, Card, CardContent, Fades, ScrollPage, Slider, Switch, toast } from "@dualinput/ui"
+import { Card, CardContent, Fades, ScrollPage, Slider, Switch } from "@dualinput/ui"
 import { Headset, Plane, PersonStanding } from "lucide-react"
 import { useState } from "react"
 
@@ -52,29 +52,6 @@ function PlaceholderPage({ title }: { title: string }) {
   )
 }
 
-/** A row under the tabs on every tab, standing where Take control will. */
-function UnderTabs() {
-  return (
-    <div className="shrink-0 px-5 pb-3">
-      <Button variant="secondary" className="w-full" onClick={() => toast("Take control comes with its stage")}>
-        Take control
-      </Button>
-    </div>
-  )
-}
-
-/** A section of Settings, standing where Take control's binding will. */
-function SettingsSection() {
-  return (
-    <section className="flex flex-col">
-      <h2 className="mb-2 text-sm font-medium">Take control</h2>
-      <Card>
-        <CardContent className="text-sm text-muted-foreground">The binding comes with its stage.</CardContent>
-      </Card>
-    </section>
-  )
-}
-
 export const SAMPLE_PARTS = [
   definePart({ name: "state-sync", preflight: () => <Checklist items={ITEMS} /> }),
   definePart({
@@ -96,5 +73,4 @@ export const SAMPLE_PARTS = [
     ),
   }),
   definePart({ name: "avatars", tab: { icon: PersonStanding, label: "Figures", landing: "figures", page: () => <PlaceholderPage title="Figures" /> } }),
-  definePart({ name: "take-control", underTabs: UnderTabs, settings: SettingsSection }),
 ]

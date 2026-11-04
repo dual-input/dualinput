@@ -8,9 +8,14 @@
 //! own: the bench starts the core with `DUALINPUT_BENCH_HELPER` naming a local port, the
 //! stand-in inherits it from the core, connects there, says what the core sent it, and does
 //! what the bench tells it, one JSON line each way.
+//!
+//! A core whose scenario has no business with its helper starts the stand-in with no port, since
+//! every session runs a helper for take-control's sounds. With no line to be told on, it says its
+//! hello at once, so the core counts it up.
 
 use std::io::{BufRead, BufReader, Read, Stdout, Write};
 use std::net::TcpStream;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -20,35 +25,52 @@ use windows_sys::Win32::System::Performance::{QueryPerformanceCounter, QueryPerf
 
 type Shared<T> = Arc<Mutex<T>>;
 
+/// The stamp on the last press the bench told it to make, which a `play` line counts from.
+static LAST_PRESS: AtomicU64 = AtomicU64::new(0);
+
 fn main() {
-    let Some(port) = std::env::var("DUALINPUT_BENCH_HELPER")
-        .ok()
-        .and_then(|p| p.parse::<u16>().ok())
-    else {
-        std::process::exit(1);
-    };
-    let Ok(bench) = TcpStream::connect(("127.0.0.1", port)) else {
-        std::process::exit(1);
-    };
-    let to_bench: Shared<TcpStream> = Arc::new(Mutex::new(
-        bench.try_clone().expect("the bench's line should clone"),
-    ));
     let to_core: Shared<Stdout> = Arc::new(Mutex::new(std::io::stdout()));
-    tell(
-        &to_bench,
-        &StandInHelperLine::Started {
-            process: std::process::id(),
-        },
-    );
-    let core = to_core.clone();
-    std::thread::spawn(move || {
-        for line in BufReader::new(bench).lines() {
-            let Ok(line) = line else { break };
-            if let Ok(act) = serde_json::from_str::<StandInHelperAct>(&line) {
-                act_on(act, &core);
-            }
+    let to_bench = match std::env::var("DUALINPUT_BENCH_HELPER") {
+        Ok(port) => {
+            let Some(bench) = port
+                .parse::<u16>()
+                .ok()
+                .and_then(|port| TcpStream::connect(("127.0.0.1", port)).ok())
+            else {
+                std::process::exit(1);
+            };
+            let to_bench: Shared<TcpStream> = Arc::new(Mutex::new(
+                bench.try_clone().expect("the bench's line should clone"),
+            ));
+            tell(
+                Some(&to_bench),
+                &StandInHelperLine::Started {
+                    process: std::process::id(),
+                },
+            );
+            let core = to_core.clone();
+            std::thread::spawn(move || {
+                for line in BufReader::new(bench).lines() {
+                    let Ok(line) = line else { break };
+                    if let Ok(act) = serde_json::from_str::<StandInHelperAct>(&line) {
+                        act_on(act, &core);
+                    }
+                }
+            });
+            Some(to_bench)
         }
-    });
+        Err(_) => {
+            act_on(
+                StandInHelperAct::Hello {
+                    version: None,
+                    hash: None,
+                },
+                &to_core,
+            );
+            None
+        }
+    };
+    let to_bench = to_bench.as_ref();
     let mut stdin = std::io::stdin().lock();
     loop {
         let mut head = [0; 4];
@@ -65,9 +87,9 @@ fn main() {
         let Ok(message) = core_helper::decode::<ToHelper>(&bytes) else {
             std::process::exit(3);
         };
-        tell(&to_bench, &heard(message));
+        tell(to_bench, &heard(message));
     }
-    tell(&to_bench, &StandInHelperLine::Closed);
+    tell(to_bench, &StandInHelperLine::Closed);
     std::process::exit(0);
 }
 
@@ -87,7 +109,13 @@ fn heard(message: ToHelper) -> StandInHelperLine {
             sound,
             bytes: ogg_opus.len() as u32,
         },
-        ToHelper::Play { sound } => StandInHelperLine::Play { sound },
+        ToHelper::Play { sound } => StandInHelperLine::Play {
+            sound,
+            since_press_us: match LAST_PRESS.load(Ordering::Relaxed) {
+                0 => 0,
+                press => now().saturating_sub(press),
+            },
+        },
         ToHelper::Frame { stream, number, .. } => StandInHelperLine::Frame { stream, number },
     }
 }
@@ -101,14 +129,11 @@ fn act_on(act: StandInHelperAct, core: &Shared<Stdout>) {
                 hash: hash.unwrap_or_else(|| messages::HASH.into()),
             },
         ),
-        StandInHelperAct::Press { binding, down } => send(
-            core,
-            &FromHelper::Press {
-                binding,
-                down,
-                at: now(),
-            },
-        ),
+        StandInHelperAct::Press { binding, down } => {
+            let at = now();
+            LAST_PRESS.store(at, Ordering::Relaxed);
+            send(core, &FromHelper::Press { binding, down, at });
+        }
         StandInHelperAct::NextPress { input, name } => send(
             core,
             &FromHelper::NextPress {
@@ -176,7 +201,10 @@ fn send(core: &Shared<Stdout>, message: &FromHelper) {
     }
 }
 
-fn tell(bench: &Shared<TcpStream>, line: &StandInHelperLine) {
+fn tell(bench: Option<&Shared<TcpStream>>, line: &StandInHelperLine) {
+    let Some(bench) = bench else {
+        return;
+    };
     let mut text = serde_json::to_vec(line).expect("serde_json should write the stand-in's line");
     text.push(b'\n');
     let _ = bench

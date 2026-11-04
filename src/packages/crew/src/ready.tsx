@@ -1,6 +1,6 @@
 // This pilot's Ready and the countdown it starts.
 
-import { Button, cx, Tooltip } from "@dualinput/ui"
+import { arcFromTop, Button, cx, Tooltip } from "@dualinput/ui"
 import { Check } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
@@ -84,13 +84,6 @@ export function Rolling({ value }: { value: number }) {
 export const COUNTDOWN = 3
 
 const RING = { size: 28, stroke: 2.5, out: 150 }
-
-/** An SVG path along `share` of a circle, clockwise from its top. A whole circle's two ends would meet and draw nothing, so it stops just short. */
-function arcFromTop(center: number, radius: number, share: number): string {
-  if (share <= 0) return ""
-  const angle = Math.min(share, 0.9999) * 2 * Math.PI
-  return `M ${center} ${center - radius} A ${radius} ${radius} 0 ${angle > Math.PI ? 1 : 0} 1 ${center + radius * Math.sin(angle)} ${center - radius * Math.cos(angle)}`
-}
 
 /**
  * The countdown: a ring just before this pilot's Ready, the button that stops it, with the seconds left rolling

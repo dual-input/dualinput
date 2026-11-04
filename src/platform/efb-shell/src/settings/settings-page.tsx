@@ -3,10 +3,9 @@
 // does. A change a pilot watches happens in the page's moment, its old words fading before its
 // new ones fade in, so a row never shows two states at once.
 
-import { Button, Card, Confirm, cx, Fades, Link, MOMENT, part, Room, ScrollPage, ScrollWindow, Select, SelectContent, SelectItem, SelectTrigger, Separator, Spinner, Switch, toast, useMoment, useReveal, useScrollTo } from "@dualinput/ui"
+import { Button, Confirm, Link, MOMENT, part, Room, ScrollPage, ScrollWindow, Select, SelectContent, SelectItem, SelectTrigger, Separator, Spinner, Switch, toast, useMoment, useReveal, useScrollTo } from "@dualinput/ui"
 import { CircleArrowUp, FolderOpen, Trash2, TriangleAlert } from "lucide-react"
-import { createElement, useEffect, useRef, useState } from "react"
-import type { ReactNode, Ref } from "react"
+import { createElement, useEffect, useRef } from "react"
 
 import type { DeviceInfo } from "../../../../engines/messages/ts/core_helper/DeviceInfo.ts"
 import type { HelperSlice } from "../../../../engines/messages/ts/core_helper/HelperSlice.ts"
@@ -20,46 +19,8 @@ import { useDesktopState } from "../desktop-link.ts"
 import { openDiscord } from "../discord.ts"
 import { useCoreSlice, useShell } from "../part.ts"
 import type { Part } from "../part.ts"
+import { Row, Section, SettingsCard } from "./section.tsx"
 import { OUTPUT, useSetting, writeSetting } from "./setting.ts"
-
-function Section({ title, aside, foot, at, children }: { title: string; aside?: ReactNode; foot?: ReactNode; at?: Ref<HTMLElement>; children: ReactNode }) {
-  return (
-    <section ref={at} className="flex flex-col">
-      <Fades className="mb-2 flex items-baseline justify-between">
-        <h2 className="text-sm font-medium">{title}</h2>
-        {aside && <span className="text-xs tabular-nums text-muted-foreground">{aside}</span>}
-      </Fades>
-      {children}
-      {foot && (
-        <Fades className="mt-2.5 px-1">
-          <p className="text-xs text-muted-foreground">{foot}</p>
-        </Fades>
-      )}
-    </section>
-  )
-}
-
-/** The card's rows reach its edges, 20px in, each with room above and below of its own. */
-function SettingsCard({ children }: { children: ReactNode }) {
-  return (
-    <Card flush>
-      <div className="py-2">{children}</div>
-    </Card>
-  )
-}
-
-/** A row with its control at the right, 36px tall, as a switch's row is. */
-function Row({ label, note, tone, children }: { label: ReactNode; note?: ReactNode; tone?: string; children?: ReactNode }) {
-  return (
-    <div className={cx("flex min-h-8 items-center px-5", note ? "py-1.5" : "py-0.5")}>
-      <span className="flex min-w-0 flex-1 flex-col text-sm">
-        {label}
-        {note && <span className={cx("mt-0.5 text-xs", tone ?? "text-muted-foreground")}>{note}</span>}
-      </span>
-      {children && <span className="ml-3 flex shrink-0 items-center">{children}</span>}
-    </div>
-  )
-}
 
 /**
  * The device every sound Dual Input plays goes to, set here alone: Windows' default, which Dual Input follows

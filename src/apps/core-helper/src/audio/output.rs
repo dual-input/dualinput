@@ -261,6 +261,9 @@ fn play(
         }
     };
     loop {
+        let _ = event.wait_for_event(WAIT_MS);
+        // Commands come after the wait, so a sound that arrived during it goes into this write,
+        // not the next, which on a device with a 10ms period comes 10ms sooner to the ear.
         while let Ok(command) = commands.try_recv() {
             match command {
                 Command::Streams(streams) => mixer.set_streams(streams),
@@ -295,7 +298,6 @@ fn play(
                 Command::Stop => return Ended::Stop,
             }
         }
-        let _ = event.wait_for_event(WAIT_MS);
         // A device that went makes these fail, and the stream opens again elsewhere.
         let Ok(frames) = client.get_available_space_in_frames() else {
             return Ended::Reopen;
@@ -331,4 +333,94 @@ fn wait(
         }
     }
     Ended::Reopen
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Tells `onsets` the stamp of each sound a loopback of Windows' default output device hears
+    /// start, which is where the audio engine has mixed this stream, past our part of the path.
+    fn listen(onsets: mpsc::Sender<u64>) {
+        let _ = wasapi::initialize_mta();
+        let enumerator = DeviceEnumerator::new().unwrap();
+        let device = enumerator.get_default_device(&Direction::Render).unwrap();
+        let mut client = device.get_iaudioclient().unwrap();
+        let format = WaveFormat::new(32, 32, &SampleType::Float, opus::RATE as usize, 1, None);
+        client
+            .initialize_client(
+                &format,
+                &Direction::Capture,
+                &StreamMode::PollingShared {
+                    autoconvert: true,
+                    buffer_duration_hns: 1_000_000,
+                },
+            )
+            .unwrap();
+        let capture = client.get_audiocaptureclient().unwrap();
+        client.start_stream().unwrap();
+        let mut packet = vec![0u8; 48_000 * 4];
+        let mut sounding = false;
+        loop {
+            let Ok((frames, info)) = capture.read_from_device(&mut packet) else {
+                return;
+            };
+            if frames == 0 {
+                std::thread::sleep(Duration::from_millis(1));
+                continue;
+            }
+            let samples = packet[..frames as usize * 4]
+                .chunks_exact(4)
+                .map(|b| f32::from_le_bytes([b[0], b[1], b[2], b[3]]));
+            let first = samples.clone().position(|s| s.abs() > 0.004);
+            match first {
+                Some(offset) if !sounding => {
+                    let into = offset as u64 * 1_000_000 / u64::from(opus::RATE);
+                    if onsets
+                        .send(clock::from_wasapi(info.timestamp) + into)
+                        .is_err()
+                    {
+                        return;
+                    }
+                    sounding = true;
+                }
+                None => sounding = false,
+                _ => {}
+            }
+        }
+    }
+
+    /// How long a `Play` takes to come out of the stream, which take-control's budget counts. Run
+    /// it by hand on a quiet PC, with `cargo test --release -p dualinput-core-helper -- --ignored
+    /// --nocapture a_sound_leaves`.
+    #[test]
+    #[ignore = "it plays a quiet tone on Windows' default output device, and takes what the PC is doing into its time"]
+    fn a_sound_leaves_the_stream_soon_after_its_play() {
+        let (onsets, heard) = mpsc::channel();
+        std::thread::spawn(move || listen(onsets));
+        let output = Output::start(Out::start(std::io::sink()), None, Vec::new());
+        std::thread::sleep(Duration::from_millis(500));
+        // A tenth of a second of 1 kHz at about −34dBFS, which a pilot barely hears.
+        let tone: Arc<[f32]> = (0..4_800)
+            .map(|i| 0.02 * (2.0 * std::f32::consts::PI * 1_000.0 * i as f32 / 48_000.0).sin())
+            .collect();
+        let mut took: Vec<u64> = Vec::new();
+        for i in 0..40 {
+            // Steps of 3ms through a period of the device, so a play lands anywhere in one.
+            std::thread::sleep(Duration::from_millis(300 + i * 3));
+            while heard.try_recv().is_ok() {}
+            let at = clock::now();
+            output.send(Command::Play(tone.clone()));
+            let onset = heard.recv_timeout(Duration::from_secs(1)).unwrap();
+            took.push(onset.saturating_sub(at));
+        }
+        took.sort_unstable();
+        println!(
+            "budget: a sound left the stream {}µs after its play at p50, {}µs at p99, and {}µs at most, of {} plays",
+            took[took.len() / 2],
+            took[took.len() * 99 / 100],
+            took[took.len() - 1],
+            took.len(),
+        );
+    }
 }

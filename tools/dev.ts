@@ -36,7 +36,7 @@ const OUT = path.join(ROOT, "target", "dev")
 /** Each page this can run: its entry, the source files its classes come from, on top of the kit's, and what the sim's stylesheets would set around it. */
 const PAGES: Record<string, { entry: string; content: string[]; simRules: string }> = {
   kit: { entry: "src/packages/ui/dev/main.tsx", content: ["src/packages/ui/dev/**/*.tsx"], simRules: EFB_RULES },
-  efb: { entry: "src/platform/efb-shell/dev/main.tsx", content: ["src/platform/efb-shell/src/**/*.{ts,tsx}", "src/platform/efb-shell/dev/**/*.{ts,tsx}", "src/packages/crew/src/**/*.{ts,tsx}"], simRules: EFB_RULES },
+  efb: { entry: "src/sim-package/pages/efb-dev.tsx", content: ["src/platform/efb-shell/src/**/*.{ts,tsx}", "src/platform/efb-shell/dev/**/*.{ts,tsx}", "src/features/*/efb/**/*.{ts,tsx}", "src/packages/crew/src/**/*.{ts,tsx}"], simRules: EFB_RULES },
   banner: { entry: "src/platform/banner/dev/main.tsx", content: ["src/platform/banner/src/**/*.{ts,tsx}", "src/platform/banner/dev/**/*.{ts,tsx}", "src/packages/crew/src/**/*.{ts,tsx}"], simRules: PANEL_RULES },
   // The desktop app's window runs in WebView2, so what matters here is the browser's picture, and the sim sets no rules around it.
   desktop: { entry: "src/platform/desktop-shell/dev/main.tsx", content: ["src/platform/desktop-shell/src/**/*.{ts,tsx}", "src/platform/desktop-shell/dev/**/*.{ts,tsx}"], simRules: "" },

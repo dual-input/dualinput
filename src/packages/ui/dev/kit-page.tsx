@@ -8,7 +8,7 @@ import { ArrowRightLeft, Check, Copy, Headset, Plane, PersonStanding, Settings, 
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 
-import { Badge, Button, Card, CardContent, CodeInput, Confirm, Dialog, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
+import { Badge, Button, Card, CardContent, Choice, CodeInput, Confirm, Dialog, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
 import type { ButtonProps, ButtonSize, ButtonVariant } from "../src/index.ts"
 
 const SCALES = [0.72, 0.884, 1, 1.056, 1.225]
@@ -229,8 +229,20 @@ function Fields() {
 function Switches() {
   const [on, setOn] = useState(true)
   const [volume, setVolume] = useState(70)
+  const [choice, setChoice] = useState<"press" | "hold">("hold")
   return (
-    <Section title="Switch and slider">
+    <Section title="Switch, choice, and slider">
+      <Row>
+        <State name="Live">
+          <Choice value={choice} options={[["press", "Press"], ["hold", "Hold"]]} onChange={setChoice} />
+        </State>
+        <State name="First picked">
+          <Choice value="press" options={[["press", "Press"], ["hold", "Hold"]]} />
+        </State>
+        <State name="Second picked">
+          <Choice value="hold" options={[["press", "Press"], ["hold", "Hold"]]} />
+        </State>
+      </Row>
       <Row>
         <State name="Live">
           <Switch checked={on} onCheckedChange={setOn} />

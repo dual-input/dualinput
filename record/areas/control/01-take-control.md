@@ -14,6 +14,17 @@ Decides:     How a pilot binds the key or button, as a single or a long press; h
 > Stage 11b's tentative decision that [take control is a held button under the tabs](../interface/decisions.md#take-control-is-a-held-button-under-the-tabs-with-one-hold-of-035s) moves a long press's hold from 1s to 0.35s, the button's hold, so the gesture has one number, until the apps' design confirms it (user, 2026-10-31).
 > The warning while the link to the PF is lost reads "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect.", and [the banner's content](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) drops the warning after a takeover through a lost link, since by then the deed is done.
 
+> **Note**
+> Stage 20's build changes five things below ([control log](log.md#2026-11-04-stage-20s-take-control-passes-its-cases-on-the-bench-and-a-press-reaches-the-cue-about-80ms-later-past-the-50ms-budget)):
+> take-control depends on the network crate too, for this core's link to the PF and for `LinkUp`: a reconnected link's first message carries control in the same input as its `LinkUp`, so a pass stamped the same was made while the link was lost, and no `status` key shows that input;
+> the part reads the binding's two settings from the slice of settings, since a slice can't read the clients crate's state while that crate builds it, so take-control's slice carries neither;
+> a dimmed button takes no hold, as the frames draw it, so the EFB app's button meets a refusal only when a guard denies during a hold;
+> while Bind waits, a press crosses only as the next press, and Bind stops waiting once the pilot leaves the Settings tab or the app;
+> and the long-press setting starts on, as the frames draw Hold picked, so a pilot who binds a key and changes nothing takes control with a 0.35s hold (user, 2026-11-04).
+>
+> [Budgets](#budgets)' single press is under 100ms, not 50ms, since it took about 80ms on our development machine, and the smallest output buffer we tried still took 53ms at the cost of ATC audio's margin (user, 2026-11-04).
+> The two cues [left open](#left-open) are stand-ins, and [stage 20b](../build/plan.md#20b-the-sounds) makes the real ones (user, 2026-11-04).
+
 A pilot binds one keyboard key or flight-hardware button in the desktop app, as a single press, which takes control on its down, or a long press, which takes control once it has been held 1s.
 The press, or the take-control button in the EFB app or the desktop app, asks the session crate's `TakeControl`, whose guards decide, and a refused press plays a short refusal cue and shows the guards' reason on the banner.
 When control passes, every machine whose pilot is in the flight plays the control-passed cue and shows who has control, with no recorded line.

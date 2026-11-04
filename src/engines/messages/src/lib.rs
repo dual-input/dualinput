@@ -37,6 +37,7 @@ pub mod recording;
 pub mod session;
 pub mod sim;
 pub mod sync;
+pub mod take_control;
 
 /// Bytes as lowercase hex, two digits a byte, the form pilot and endpoint IDs take in the
 /// messages, the backend's requests, and the session file.

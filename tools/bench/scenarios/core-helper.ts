@@ -43,8 +43,10 @@ test("the helper runs only while a want is on, gets the sound and then the wants
   core.helper({ act: "binding", on: true })
   await helper.until(() => binds(helper.latest, KEY_A), "wants binding A")
   const lines = helper.latest!.lines.map((l) => l.line)
-  assert.deepEqual(lines.slice(0, 3), ["started", "sound", "wants"])
-  assert.deepEqual(helper.latest!.lines[1], { line: "sound", sound: 3, bytes: TONE_BYTES })
+  const sent = lines.indexOf("wants")
+  assert.equal(lines[0], "started")
+  assert.ok(sent > 1 && lines.slice(1, sent).every((l) => l === "sound"), "every sound comes before the wants")
+  assert.ok(helper.latest!.lines.some((l) => l.line === "sound" && l.bytes === TONE_BYTES), "the test unit's sound is among them")
 
   core.helper({ act: "binding", on: false })
   await helper.until(() => helper.latest!.closed !== undefined, "its exit")
@@ -58,8 +60,9 @@ test("a press reaches the feature, and a helper killed while a want is on runs a
   t.after(() => helper.close())
   core.helper({ act: "binding", on: true })
   await helper.until(() => binds(helper.latest, KEY_A), "wants binding A")
-  helper.latest!.act({ act: "press", binding: 0, down: true })
-  helper.latest!.act({ act: "press", binding: 0, down: false })
+  const [binding] = helper.latest!.wants().at(-1)!.bindings[0]!
+  helper.latest!.act({ act: "press", binding, down: true })
+  helper.latest!.act({ act: "press", binding, down: false })
   await core.hear(/^press down \d+us after its stamp$/)
   await core.hear(/^press up \d+us after its stamp$/)
 

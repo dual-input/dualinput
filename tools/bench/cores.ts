@@ -120,7 +120,7 @@ export class Core {
     // keeps its keys.
     const file = path.join(data, "settings.json")
     const written = fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, "utf8")) as Record<string, unknown>) : {}
-    const settings = { ...OFFLINE_SETTINGS, ...written, ...options.settings }
+    const settings = { ...benchSettings(), ...written, ...options.settings }
     fs.writeFileSync(file, JSON.stringify(settings, null, 2))
     // A core started on this folder before, and killed, left its port behind.
     const portFile = path.join(data, "bench-port")
@@ -294,8 +294,16 @@ export async function announcing(run: BenchRun, name: string, options: CoreOptio
 /** A port nothing listens on, where a core finds no server. */
 const OFFLINE_SERVER = "http://127.0.0.1:1"
 
-/** What every bench core's `settings.json` holds unless a scenario gave it its own. */
-export const OFFLINE_SETTINGS = { "profiles.site": OFFLINE_SERVER, "network.backend": OFFLINE_SERVER, "network.relays": [], "sim.user-cfg": "no-user-cfg.opt" }
+/**
+ * What every bench core's `settings.json` holds unless a scenario gave it its own. Every session
+ * runs a helper for take-control's sounds, and a bench core mustn't start the real one, which
+ * would read this PC's keyboard and play on its speakers, so it names the stand-in. tools/sim/
+ * runs the bench's cores outside tools/bench.ts, with no stand-in built, and names its own helper.
+ */
+export function benchSettings(): Record<string, unknown> {
+  const standIn = process.env.DUALINPUT_BENCH_STAND_IN_HELPER
+  return { "profiles.site": OFFLINE_SERVER, "network.backend": OFFLINE_SERVER, "network.relays": [], "sim.user-cfg": "no-user-cfg.opt", ...(standIn ? { "core-helper.program": standIn } : {}) }
+}
 
 export type CoreOptions = {
   /** The core's `settings.json`, written into its data folder before it starts. */

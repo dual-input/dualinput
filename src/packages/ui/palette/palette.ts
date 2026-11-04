@@ -92,6 +92,8 @@ const KEYFRAMES = {
   },
   // A ring that spreads from a button pressed into a good state, in its text color, and fades.
   "dualinput-ready-pulse": { from: { "box-shadow": "0 0 0 0 currentColor", opacity: "0.6" }, to: { "box-shadow": "0 0 0 8px currentColor", opacity: "0" } },
+  // A button held down until it took, swelling past its size before it settles.
+  "dualinput-swell": { "0%": { transform: "scale(0.97)" }, "45%": { transform: "scale(1.025)" }, "100%": { transform: "scale(1)" } },
   "dualinput-zoom-in": { from: { opacity: "0", transform: "scale(0.5)" }, to: { opacity: "1", transform: "scale(1)" } },
   "dualinput-sink-out": { from: { opacity: "1", transform: "translateY(0)" }, to: { opacity: "0", transform: "translateY(16px)" } },
   // A page of the guide, drifting 6px the way the turn goes.

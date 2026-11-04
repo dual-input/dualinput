@@ -9,6 +9,9 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > **Note**
 > In [what the bridge owns](#what-the-bridge-owns), a lock that turns into a warning keeps a lock's look, with a Dismiss on a card that takes presses while its veil passes them, and Dismiss reaches every panel by the CommBus event `DUALINPUT_BRIDGE_DISMISS`, which joins [names the sim shares](#names-the-sim-shares) under `BRIDGE` ([a visible lock](../interface/decisions.md#a-visible-lock-is-a-veil-over-the-display-with-one-centered-card); user, 2026-11-01).
 
+> **Note**
+> In [features](#features), take-control has no desktop part, and uses the network too ([control log](../control/log.md#2026-11-04-stage-20s-take-control-passes-its-cases-on-the-bench-and-a-press-reaches-the-cue-about-80ms-later-past-the-50ms-budget)).
+
 Dual Input's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
 A feature reads the platform's state, reaches other features only through moments the platform raises, and reaches the world only through outputs, and a feature that can block a request registers a guard rather than having the platform check on it.

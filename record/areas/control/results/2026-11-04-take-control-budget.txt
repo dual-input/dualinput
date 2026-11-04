@@ -1,0 +1,63 @@
+Take-control's budget: a single press to the cue, from the helper's stamp on the down, under
+50ms when these ran, and under 100ms once the user had seen them.
+Measured 2026-11-04 on our development machine, with no sim or game running.
+
+
+The loop's part, on the bench: node tools/bench.ts take-control, from the stamp on the down
+to the stand-in core helper reading `Play`, of 40 presses that pass control back and forth.
+
+  whole bench, at below-normal priority    168us at p50, 248us at p99, 248us at most
+  the scenarios the review's fixes reach   166us at p50, 218us at p99, 218us at most
+
+A hold, from the stamp on its down to `Play`, against 350,000us:
+
+  whole bench                              350,160us
+  the scenarios the review's fixes reach   350,217us
+
+
+The output stream's part, on the real helper's output thread: cargo test --release -p
+dualinput-core-helper -- --ignored --nocapture a_sound_leaves, from handing the thread a
+`Play` to a loopback of the same device hearing the sound start, of 40 plays of a quiet tone.
+
+Device: Speakers (Focusrite USB Audio), mix format 48,000 Hz, 2 channels, 32 bits.
+Its period is 10ms (default) and 3ms (minimum).
+The stream's buffer is 1,920 frames, 40ms. At each event: 480 frames of space, 1,440 frames
+queued, so a sound written at an event comes out behind 30ms of what's already queued.
+
+The output thread taking its commands before its wait for the device:
+
+  run 1    85,051us at p50, 97,934us at most
+  run 2    88,414us at p50, 96,484us at most
+
+The output thread taking its commands after its wait:
+
+  run 1    75,667us at p50, 86,198us at most
+  run 2    78,908us at p50, 86,478us at most
+  run 3    82,436us at p50, 88,805us at most
+
+
+An experiment on how far ahead the stream writes, in a throwaway test beside the real thread,
+taking commands after the wait, of 30 plays each. Not in the product.
+
+  writes ahead   buffer    at p50      at most
+  40ms           40ms      74,500us    87,082us
+  30ms           40ms      66,091us    72,601us
+  20ms           40ms      63,167us    67,362us
+  20ms           22ms      53,333us    59,662us
+
+
+The real helper's CPU, over 10s each, from node tools/sim/core-helper.ts.
+
+                                                  desk, with a binding      audio, alone
+                                                  and the mouse still on
+  the output device open, nothing playing         0.94%                     0.30%
+  capturing a program that plays silence          0.83%                     0.22%
+  capturing a tone, against 1%                    1.08%                     0.49%
+  capturing it and playing it back                1.29%                     0.70%
+  private working set, against 20 MB              4.4 MB                    4.2 MB
+
+The desk run's cases on the next press, on the real helper:
+
+  ok: while binding, a modifier alone doesn't bind
+  ok: while binding, the key already bound crosses as the next press alone, so it takes nothing
+  a press on the queue within 5ms of the helper's stamp at p99: 118us

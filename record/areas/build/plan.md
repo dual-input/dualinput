@@ -537,6 +537,7 @@ Tests:
 - In this stage's session in the sim: the real core's loop stats after the 58P flight, its slowest inputs and its queue at p99 against 11.2ms, beside the real sim (user, 2026-10-25).
 - From stage 4, in this stage's session in the sim: a group on one connection keeps hearing an event while a group on another is cleared ([a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load)).
 - From stage 19, in this stage's session in the sim: [pointer sync's cases in the sim](../pointer-sync/01-pointer-sync.md#cases-for-the-bench), the A220's ND with a local profile that names its `DisplayUnits`.
+- From stage 20, with a pilot at the hardware for this stage's session, and no sim: a bound button crosses with another program in front, with `node tools/sim/core-helper.ts person 3` ([take-control's cases](../control/01-take-control.md#cases-for-the-bench)).
 
 ## 15 Installing and updating
 
@@ -586,6 +587,7 @@ Tests:
 
 - From stage 2: the core holds under 100 MB of private working set beside QuickJS-ng's runtimes in a busy session, one that hosts traffic ([01-loop-and-edge's budgets](../core/01-loop-and-edge.md#budgets)).
 - From stage 4: v1's connections and their watches add under 0.2ms to the sim's frame ([the sim seam's budgets](../architecture/02-code-map.md#the-sim-seams-budgets)), and `Traffic`'s frame takes under 0.1ms with 25 moving copies ([budgets for work in the sim](../architecture/02-code-map.md#budgets-for-work-in-the-sim)).
+- From stage 20: [the helper's CPU budget](../core/04-core-helper.md#budgets) with take-control's binding on, as in every session, since capturing a tone took 0.49% of a core alone and 1.08% with a binding and the mouse on ([control log](../control/log.md#2026-11-04-stage-20s-take-control-passes-its-cases-on-the-bench-and-a-press-reaches-the-cue-about-80ms-later-past-the-50ms-budget)).
 
 ## 19 Pointer sync
 
@@ -629,8 +631,56 @@ Done on 2026-10-25.
 
 ## 20 Take-control
 
-Builds: the take-control feature, with its button and its binding section in the EFB app ([take-control](../control/01-take-control.md)).
+Builds:
+
+- the message crate's `take_control` module: its two settings' keys, its two commands, and its slice, which holds whether the input is live, whether this pilot holds control, each denial's reason, the warning while the link to the PF is lost, and the next press while Bind waits for it, the part reading the two settings from the slice of settings ([the units](../control/01-take-control.md#the-units), [taking control](../control/01-take-control.md#taking-control))
+- `src/features/take-control/core`: the binding, on for the whole of a session while an input is set, which asks on a press's down or once it has been held 0.35s; the sounds, on for the whole of a session; the request's four steps; the cue and the notification at each pass, which names the pilot who left the flight, and says what a PF who lost control through a lost link had undone; the refusal's cue and notification; and "Reconnecting to James", held while this core's link to the PF is lost ([the binding](../control/01-take-control.md#the-binding), [taking control](../control/01-take-control.md#taking-control), [a pass](../control/01-take-control.md#a-pass), [the banner](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on))
+- `src/features/take-control/efb`: the button under the tab bar, held 0.35s, with its ring, its bound key, and its lines; and the binding's section at the top of Settings ([take control](../interface/decisions.md#take-control-is-a-held-button-under-the-tabs-with-one-hold-of-035s), [the Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version)), rebuilt from the frames in `experiments/areas/interface/bench/src/frames/flight.tsx` and `settings.tsx`, with the kit's `Choice` for Press or Hold
+- two stand-in cues, made by an ignored test of `src/apps/core-helper`, as the bench's tone is, which [stage 20b](#20b-the-sounds) replaces ([left open](../control/01-take-control.md#left-open))
+- the helper's next press, which skips a modifier and any key pressed with one held, so one key binds, and while it's on, a press crosses only as the next press, so pressing the key already bound doesn't also take control ([the Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version))
+- the helper's output thread, which takes its commands after waiting for the device, so a sound goes into that write, 10ms sooner on a device with a 10ms period
+- the core helper service's warning for a binding, in the frames' words, "Your take-control key isn't working" and "Windows didn't let Dual Input listen for F9."
+- the cockpit stream's guard's reason, in the frames' words, "You're catching up with James."
+- on the bench, the stand-in core helper for every bench core that names no other, which says its own hello with no bench line, since every session now runs a helper; and the `play` line's time since the last press
+
 Needs: 6 and 11b.
+
+Tests:
+
+- From [take-control's cases](../control/01-take-control.md#cases-for-the-bench), on the bench, with two cores and a stand-in core helper on each, the hold's two sides moved to its 0.35s:
+  - A single press by the PM: control passes, and both machines play the cue, the PM's notification "You have control" and the PF's "Adam has control".
+  - A long press held 0.2s: nothing; held 0.5s: control passes at 0.35s, before the release.
+  - A press by the PF: nothing.
+  - A press before preflight ends, or out of the flight: nothing, and no cue.
+  - A press during this pilot's catch-up: the refusal cue and a notification with the reason, and control stays.
+  - A press while the link to the PF is lost, with or without a catch-up running: control passes at once, and "Reconnecting to James" clears; the button's slice carried its warning before.
+  - The PM's press and the PF's within 20ms: if the PM's pass hasn't reached the PF's machine, the PF's press does nothing, and each machine plays the cue once; if it has, the PF takes control back, and each plays it twice.
+  - The PF leaving the flight: the PM's machine plays the cue and "You have control", and the PF's, out of the flight, plays nothing.
+  - A pilot with no binding: the helper runs through the session, and the EFB app's request takes control with the cue.
+  - Bind, then a key: the key is bound by its scan code, and shown by its name; Bind, then Cancel: the binding is as before.
+  - Rebinding mid-session: the new key takes control, and the old one does nothing.
+  - The core helper killed mid-session and started again: the binding takes control as before.
+  - The EFB app's request, while a guard denies: the refusal cue and notification, as for the key.
+  - Beyond the cases: a PF whose link came back to find control taken gets "Adam took control while you were disconnected", and a replay on the PF's machine, which the guard refuses control through, tells that pilot nothing.
+- The design's last case needs the real helper, since the helper's Windows calls have no bench.
+  Its bound key, in another program and in a popped-out display, passed in [stage 6's session](../core/log.md#2026-10-23-stage-6s-helper-passes-every-case-at-the-desk-and-in-the-sim-and-captures-within-1-of-a-core-in-opuss-audio-mode-but-never-sees-an-xbox-controllers-buttons-over-usb).
+  This stage's change to the next press runs in `node tools/sim/core-helper.ts desk`.
+  A bound button with another program in front moves to [stage 14](#14-state-sync)'s session, since stage 6's pressed a button only as the next press, and it needs a pilot at the hardware.
+- As the helper's own tests: a modifier and a key pressed with one held don't bind, and a key after they're released does; and both cues are 48 kHz, mono.
+- As the part's own tests: a click takes nothing, a hold takes control once at 0.35s, and letting go early cancels it.
+- [Take-control's budget](../control/01-take-control.md#budgets): a single press to the cue under 100ms from the helper's stamp on the down, the loop's part on the bench, and the output stream's by an ignored test of the helper's on our development machine's default device.
+
+The stage closes on the whole bench, as [working a stage](#working-a-stage) has it.
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the `take-control` scenario among them; on the bench, a press on one core's stand-in helper passes control, and both machines play the cue and show who has control; and the [control log](../control/log.md) has an entry for the cases and the budget.
+Done on 2026-11-04.
+
+## 20b The sounds
+
+Designs first: the style of Dual Input's sounds, which the user picks by ear from a page of a few contrasting styles, each playing the same two cues, with a licensed pack or a sound designer as the way out if none is good enough (user, 2026-11-04).
+Builds: the control-passed and refusal cues in that style, in place of [stage 20](#20-take-control)'s stand-ins, in a family with room for the voice phrases' two cues, the offer opening and the offer timing out ([voice phrases](../product/03-v1-scope.md#voice-phrases)), which come with that Soon pick.
+Needs: 20.
+It changes no code, since each cue is a file the core embeds, and it holds nothing back but v1's release, so it runs whenever the user has the room for it.
 
 ## 21 Rate and pause, and Go to
 

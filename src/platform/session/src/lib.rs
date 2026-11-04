@@ -262,6 +262,19 @@ impl Session {
             .collect()
     }
 
+    /// A member's display name, or "A pilot" for one whose key hasn't arrived.
+    pub fn name_of(&self, member: &PilotId) -> String {
+        self.member_key(wire::MEMBER, member)
+            .map_or_else(|| "A pilot".to_string(), |entry| entry.name)
+    }
+
+    /// Whether this pilot is in the flight and preflight has ended, the only time what they do
+    /// in the cockpit reaches the crew and the take-control input counts
+    /// (record/areas/session/01-roles-and-members.md, "The PF").
+    pub fn live_in_flight(&self) -> bool {
+        self.preflight().phase == Phase::Ended && self.me().is_some_and(|me| self.in_flight(&me))
+    }
+
     /// A session-wide key's value.
     pub fn key<T: DeserializeOwned>(&self, key: Key<T>) -> Option<T> {
         let held = self.held.as_ref()?;

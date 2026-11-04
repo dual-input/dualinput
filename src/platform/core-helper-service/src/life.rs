@@ -451,16 +451,34 @@ impl CoreHelper {
             error,
             "the core helper couldn't carry out a want"
         );
-        clients::notify(
-            cx,
-            &id,
-            Notification::new(
+        // A pilot knows a binding by what it does and its key by its name, and the helper's own
+        // words stay in the log, as a pilot can do nothing with them.
+        let bound = match want {
+            WantId::Binding(n) => self.bindings.iter().find(|b| b.number == n).and_then(|b| {
+                cx.read::<Clients>()
+                    .setting_as::<Option<Bound>>(b.setting)
+                    .flatten()
+            }),
+            _ => None,
+        };
+        let said = match bound {
+            Some(bound) => Notification::new(
+                Level::Warning,
+                format!("Your {owner} key isn't working"),
+                Landing::Header,
+            )
+            .detail(format!(
+                "Windows didn't let Dual Input listen for {}.",
+                bound.name
+            )),
+            None => Notification::new(
                 Level::Warning,
                 format!("{owner}'s {what} isn't working"),
                 Landing::Header,
             )
             .detail(error),
-        );
+        };
+        clients::notify(cx, &id, said);
         self.failed.insert(want, id);
     }
 

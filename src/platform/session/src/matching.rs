@@ -128,12 +128,7 @@ pub(crate) fn differences(me: &Session) -> Vec<Difference> {
         .collect();
     let values: Vec<(String, MatchValues)> = flying
         .iter()
-        .filter_map(|m| {
-            let name = me
-                .member_key(wire::MEMBER, m)
-                .map_or_else(|| "A pilot".to_string(), |e| e.name);
-            Some((name, me.member_key(wire::MATCH, m)?))
-        })
+        .filter_map(|m| Some((me.name_of(m), me.member_key(wire::MATCH, m)?)))
         .collect();
     me.items
         .iter()

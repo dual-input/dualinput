@@ -210,8 +210,14 @@ pub fn register(r: &mut Registry) {
 /// Whether this member may send a feature's message: preflight has ended, and it's in the
 /// flight.
 fn may_send(cx: &Cx) -> bool {
-    let session = cx.read::<Session>();
-    session.preflight().phase == Phase::Ended && in_flight(session)
+    cx.read::<Session>().live_in_flight()
+}
+
+/// A member's display name in the middle of a sentence, for one whose key hasn't arrived too.
+fn name_of(session: &Session, pilot: &PilotId) -> String {
+    session
+        .member_key(MEMBER, pilot)
+        .map_or_else(|| "a pilot".to_string(), |entry| entry.name)
 }
 
 fn in_flight(session: &Session) -> bool {
@@ -565,11 +571,7 @@ impl CockpitStream {
             return;
         }
         live.catching_up_with = now;
-        let name = |pilot: &PilotId| {
-            cx.read::<Session>()
-                .member_key(MEMBER, pilot)
-                .map_or_else(|| "a pilot".to_string(), |entry| entry.name)
-        };
+        let name = |pilot: &PilotId| name_of(cx.read::<Session>(), pilot);
         let said = match (now, before) {
             (Some((pilot, _)), _) => Notification::new(
                 Level::Information,
@@ -771,18 +773,23 @@ impl CockpitStream {
         };
         let network = view.read::<Network>();
         let catching_up = match &live.catch_up {
-            CatchUp::Asking { from, .. } | CatchUp::Taking { from, .. } => network.up(from),
-            CatchUp::Idle => false,
+            CatchUp::Asking { from, .. } | CatchUp::Taking { from, .. } => Some(*from),
+            CatchUp::Idle => None,
         };
-        let replaying = live
-            .inbox
-            .replay_senders()
-            .iter()
-            .any(|o| network.up(&o.pilot));
-        if catching_up || replaying {
-            return Err("You can take control once your cockpit has caught up".into());
+        let from = catching_up.filter(|from| network.up(from)).or_else(|| {
+            live.inbox
+                .replay_senders()
+                .into_iter()
+                .map(|sender| sender.pilot)
+                .find(|pilot| network.up(pilot))
+        });
+        match from {
+            Some(pilot) => Err(format!(
+                "You're catching up with {}.",
+                name_of(view.read::<Session>(), &pilot)
+            )),
+            None => Ok(()),
         }
-        Ok(())
     }
 
     // Catch-up.

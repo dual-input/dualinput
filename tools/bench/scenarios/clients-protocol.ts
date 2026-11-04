@@ -9,7 +9,7 @@ import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import { HASH, VERSION } from "../../../src/engines/messages/ts/stamp.ts"
-import { announcing, BenchRun, OFFLINE_SETTINGS } from "../cores.ts"
+import { announcing, BenchRun, benchSettings } from "../cores.ts"
 import { FakePage, RawSocket } from "../pages.ts"
 
 const hello = (component: string, version = VERSION) => JSON.stringify({ t: "hello", component, version, hash: HASH })
@@ -76,7 +76,7 @@ test("a settings file keeps a key no unit registered through the core's write of
   const file = path.join(core.data, "settings.json")
   await page.until(() => JSON.parse(fs.readFileSync(file, "utf8"))["bench.flag"] === true, "the settings file's write")
   // The bench gives every core its servers, so no core fetches from the internet.
-  assert.deepEqual(JSON.parse(fs.readFileSync(file, "utf8")), { ...OFFLINE_SETTINGS, "gone.feature": 3, "bench.flag": true })
+  assert.deepEqual(JSON.parse(fs.readFileSync(file, "utf8")), { ...benchSettings(), "gone.feature": 3, "bench.flag": true })
 })
 
 test("a slice that changes 100 times a second reaches a page at most once a round", { timeout: 30_000 }, async (t) => {

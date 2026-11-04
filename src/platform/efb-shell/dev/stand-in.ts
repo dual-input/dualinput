@@ -91,6 +91,19 @@ const OUTPUTS = {
 const reach = { internet: true, servers: "reachable" as const }
 const healthy = { network: { members: [], ...reach }, sim: atWorldMap, profiles: { loaded: { maturity: "Stable" }, supported: SUPPORTED }, session: noSession, settings: settings(true, true) }
 
+/**
+ * Take-control's slice and its stream's, by name alone, since no shell names a feature: live once this pilot is in the
+ * flight, with this pilot not flying unless a scene says so.
+ */
+const TAKE_CONTROL = "take-control"
+const STREAM = "cockpit-stream"
+const INPUT = "take-control.input"
+const control = (rest: Record<string, unknown>) => ({ live: true, mine: false, denied: [], warning: null, waiting: false, next_press: null, ...rest })
+const flying = (pf: string): SessionSlice => held({ pf, members: [me(inFlight), james(inFlight)], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, differences: DIFFERENCES, ready: null })
+/** A key the stand-in binds at the next press, as the helper names it. */
+const F9 = { input: { key: { scan: 67, extended: false } }, name: "F9" }
+const boundTo = (name: string) => ({ settings: [...settings(true, true), { ...setting(INPUT, false), kind: { type: "input" as const }, value: { ...F9, name }, default: null }] })
+
 /** The up link to James the session's scenes share, over a relay at 120ms. */
 const netUp = { network: { members: [{ pilot: JAMES, up: true, path: { Relay: { url: "https://relay.example" } }, round_trip_ms: 120 }], ...reach } }
 const DESKTOP = "desktop"
@@ -138,7 +151,13 @@ export const SCENES: Record<string, Slices> = {
       differences: DIFFERENCES,
     }),
   },
-  Flying: { ...netUp, session: held({ members: [me(inFlight), james(inFlight)], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, differences: DIFFERENCES, ready: null }) },
+  Flying: { ...netUp, ...boundTo("F9"), session: flying(ME), [TAKE_CONTROL]: control({ mine: true }) },
+  "James flying": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({}) },
+  "James flying, a key bound": { ...netUp, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({}) },
+  "James flying, a long key's name": { ...netUp, ...boundTo("Thrustmaster TCA Sidestick button 12"), session: flying(JAMES), [TAKE_CONTROL]: control({}) },
+  "James flying, catching up": { ...netUp, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ denied: ["You're catching up with James."] }), [STREAM]: { catching_up: true, from_preflight_end: false, replaying: false } },
+  "James flying, another guard refuses": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({ denied: ["Only the instructor can take control"] }) },
+  "James's link lost": { network: { members: [{ pilot: JAMES, up: false, path: null, round_trip_ms: null }], ...reach }, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ warning: "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect." }) },
   "Header: offline": { network: { members: [], internet: false, servers: null } },
   "Header: several things": { network: { members: [], internet: true, servers: "unreachable" }, [DESKTOP]: { ...LOCAL, firewall: "blocks", update: { state: "ready", next: "1.0.3" } } },
   "Header: our own parts": {
@@ -166,6 +185,7 @@ const AFTER = { answer: 1000, slowAnswer: 10_000 }
 export class StandInCore extends StandInBase {
   private countdown = 0
   private answer = 0
+  private nextPress = 0
   private refusing: string | null = null
   private clipboard: string | null = null
   private desktopSocket: Socket | null = null
@@ -196,7 +216,25 @@ export class StandInCore extends StandInBase {
     this.local = DESKTOP in scene ? (scene[DESKTOP] as DesktopState | null) : LOCAL
     this.tellDesktop()
     this.set({ settings: settings(true, true) })
-    window.setTimeout(() => this.set({ ...healthy, recording: { runs: RUNS, stopped: null }, "core-helper": { ...OUTPUTS, outputs: [] }, notifications: [], core: CORE, ...scene }), 0)
+    window.setTimeout(() => this.set({ ...healthy, [TAKE_CONTROL]: control({ live: false }), [STREAM]: { catching_up: false, from_preflight_end: false, replaying: false }, recording: { runs: RUNS, stopped: null }, "core-helper": { ...OUTPUTS, outputs: [] }, notifications: [], core: CORE, ...scene }), 0)
+  }
+
+  private setControl(changes: Record<string, unknown>): void {
+    this.set({ [TAKE_CONTROL]: { ...(this.slices[TAKE_CONTROL] as Record<string, unknown>), ...changes } })
+  }
+
+  /** The button's request, which takes control unless a guard refuses, as the core's does. */
+  private takeControl(): void {
+    if ((this.slices[TAKE_CONTROL] as { denied: string[] }).denied.length > 0) return
+    this.setSession({ pf: ME })
+    this.setControl({ mine: true, warning: null })
+  }
+
+  /** Bind, whose next press comes 1.5s later, and Cancel, which forgets it. */
+  private bind(on: boolean): void {
+    window.clearTimeout(this.nextPress)
+    this.setControl({ waiting: on, next_press: null })
+    if (on) this.nextPress = window.setTimeout(() => this.setControl({ waiting: false, next_press: F9 }), 1500)
   }
 
   protected command(name: string, args: JsonValue): void {
@@ -211,6 +249,8 @@ export class StandInCore extends StandInBase {
     else if (name === "session.ready") this.setReady(!!fields.on)
     else if (name === "session.go-without") this.goWithout(String(fields.member))
     else if (name === "clients.set-setting") this.setSetting(String(fields.key), fields.value as JsonValue)
+    else if (name === "take-control.request") this.takeControl()
+    else if (name === "take-control.bind") this.bind(!!fields.on)
   }
 
   private setSetting(key: string, value: JsonValue): void {

@@ -18,6 +18,7 @@ const UNITS: &[fn(&mut Registry)] = &[
     profile_loader::register,
     cockpit_stream::register,
     pointer_sync::register,
+    take_control::register,
 ];
 
 fn main() -> ExitCode {

@@ -360,13 +360,18 @@ impl Reader {
             scan: key.0,
             extended: key.1,
         };
+        // While a pilot binds, a press acts on nothing else, or pressing the key already bound
+        // to keep it would take control mid-flight. Its release finds no press that crossed.
         if down && self.armed {
-            self.armed = false;
-            self.out.send(FromHelper::NextPress {
-                input: input.clone(),
-                name: key_name(key),
-                at,
-            });
+            if self.keys.binds(key) {
+                self.armed = false;
+                self.out.send(FromHelper::NextPress {
+                    input,
+                    name: key_name(key),
+                    at,
+                });
+            }
+            return;
         }
         // A bound key counts only while a window of the sim is in front, its main window or
         // a popped-out display, so a key typed in another program takes nothing (user,
@@ -444,13 +449,15 @@ impl Reader {
                 product,
                 button: change.button,
             };
+            // As for a key: while a pilot binds, a press acts on nothing else.
             if change.down && self.armed {
                 self.armed = false;
                 self.out.send(FromHelper::NextPress {
-                    input: input.clone(),
+                    input,
                     name: format!("{name} button {}", change.button),
                     at,
                 });
+                continue;
             }
             // A bound button counts whatever is in front, since nobody types on a yoke.
             self.press(&input, change.down, true, at);

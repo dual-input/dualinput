@@ -63,7 +63,6 @@ mod tests {
     #[test]
     #[ignore = "it writes src/apps/core/src/bench/tone.opus, which is committed"]
     fn writes_the_bench_tone() {
-        use ogg::writing::{PacketWriteEndInfo, PacketWriter};
         let amplitude = 10f32.powf(-20.0 / 20.0) * std::f32::consts::SQRT_2;
         let samples: Vec<f32> = (0..RATE as usize * 2)
             .map(|i| {
@@ -75,6 +74,86 @@ mod tests {
                 amplitude * (2.0 * std::f32::consts::PI * hz * i as f32 / RATE as f32).sin()
             })
             .collect();
+        std::fs::write(TONE, ogg_opus(&samples)).unwrap();
+    }
+
+    /// Where take-control keeps its cues, which its crate embeds.
+    const CUES: &str = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../features/take-control/core/src/sounds"
+    );
+
+    /// Adds a note to `samples`: its fundamental and its overtones, each a multiple of `hz` with
+    /// its own share of `level`, rising in 4ms so it clicks on no speaker, then fading over `fade`
+    /// seconds.
+    fn note(
+        samples: &mut [f32],
+        at: f32,
+        hz: f32,
+        fade: f32,
+        level: f32,
+        overtones: &[(f32, f32)],
+    ) {
+        let rate = RATE as f32;
+        let first = (at * rate) as usize;
+        for (i, sample) in samples.iter_mut().skip(first).enumerate() {
+            let t = i as f32 / rate;
+            let shape = (t / 0.004).min(1.0) * (-t / fade).exp();
+            let tone: f32 = overtones
+                .iter()
+                .map(|(times, share)| share * (2.0 * std::f32::consts::PI * hz * times * t).sin())
+                .sum();
+            *sample += level * shape * tone;
+        }
+    }
+
+    /// Writes take-control's two cues. Run it by hand, with `cargo test -p dualinput-core-helper
+    /// -- --ignored writes_take_controls_cues`, when they should change.
+    ///
+    /// Control passing is a soft two-note chime rising a fifth, which reads as news, not an alarm,
+    /// over an engine. A refusal is two dull notes falling, an octave and a half lower with odd
+    /// overtones, so a pilot in VR tells the two apart without looking.
+    #[test]
+    #[ignore = "it writes src/features/take-control/core/src/sounds, which is committed"]
+    fn writes_take_controls_cues() {
+        let chime = [(1.0, 1.0), (2.0, 0.22), (3.0, 0.05)];
+        let mut passed = vec![0.0; RATE as usize * 11 / 20];
+        note(&mut passed, 0.0, 784.0, 0.11, 0.24, &chime);
+        note(&mut passed, 0.12, 1175.0, 0.15, 0.24, &chime);
+        let dull = [(1.0, 1.0), (3.0, 0.28), (5.0, 0.1)];
+        let mut refused = vec![0.0; RATE as usize * 2 / 5];
+        note(&mut refused, 0.0, 311.0, 0.05, 0.34, &dull);
+        note(&mut refused, 0.13, 233.0, 0.07, 0.34, &dull);
+        std::fs::write(format!("{CUES}/control-passed.opus"), ogg_opus(&passed)).unwrap();
+        std::fs::write(format!("{CUES}/refused.opus"), ogg_opus(&refused)).unwrap();
+    }
+
+    #[test]
+    fn take_controls_cues_are_48khz_mono_short_and_loud_enough_to_hear() {
+        for cue in ["control-passed", "refused"] {
+            let file = std::fs::read(format!("{CUES}/{cue}.opus")).unwrap();
+            let head = PacketReader::new(Cursor::new(&file))
+                .read_packet()
+                .unwrap()
+                .unwrap()
+                .data;
+            assert_eq!(head[9], 1, "{cue} isn't mono");
+            let rate = u32::from_le_bytes([head[12], head[13], head[14], head[15]]);
+            assert_eq!(rate, RATE, "{cue} isn't 48 kHz");
+            let samples = decode(&file).unwrap();
+            let seconds = samples.len() as f32 / RATE as f32;
+            assert!(seconds < 0.7, "{cue} runs {seconds}s");
+            let peak = samples.iter().fold(0.0f32, |peak, s| peak.max(s.abs()));
+            assert!(peak > 0.15 && peak < 0.9, "{cue} peaks at {peak}");
+        }
+    }
+
+    /// An Ogg Opus file of `samples`, at 24 kbps, as the core embeds a sound. A frame's worth of
+    /// silence closes it, since the encoder holds back the end of what it's given.
+    fn ogg_opus(samples: &[f32]) -> Vec<u8> {
+        use ogg::writing::{PacketWriteEndInfo, PacketWriter};
+        let mut samples = samples.to_vec();
+        samples.resize(samples.len().div_ceil(FRAME) * FRAME + FRAME, 0.0);
         let mut encoder = Encoder::new(24_000).unwrap();
         let mut file = Vec::new();
         let mut writer = PacketWriter::new(&mut file);
@@ -106,7 +185,7 @@ mod tests {
                 .write_packet(encoder.encode(frame).unwrap(), 1, end, granule)
                 .unwrap();
         }
-        std::fs::write(TONE, file).unwrap();
+        file
     }
 
     #[test]

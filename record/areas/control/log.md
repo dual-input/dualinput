@@ -2,6 +2,44 @@
 
 What we found about passing control between pilots, by the take-control key and buttons and by voice, newest entry first.
 
+## 2026-11-04: Stage 20's take-control passes its cases on the bench, and a press reaches the cue about 80ms later, past the 50ms budget
+
+**Asked:** do [take-control's cases](01-take-control.md#cases-for-the-bench) hold with two cores, a stand-in core helper on each, and a fake EFB app, and does a single press reach the cue within [the budget](01-take-control.md#budgets)'s 50ms of the helper's stamp?
+
+**Expected:** yes to both, with the loop's part a fraction of a millisecond and the helper's 40ms output buffer taking most of what's left.
+
+**Found:** ([the runs' figures](results/2026-11-04-take-control-budget.txt))
+
+- Every case on the bench passes, with no sim, and a hold's `Play` reached the stand-in helper 350,160µs after its down.
+  The design's last case isn't on the bench: its bound key, in another program and in a popped-out display, passed on the real helper in [stage 6's session](../core/log.md#2026-10-23-stage-6s-helper-passes-every-case-at-the-desk-and-in-the-sim-and-captures-within-1-of-a-core-in-opuss-audio-mode-but-never-sees-an-xbox-controllers-buttons-over-usb), and its bound button with another program in front moves to [stage 14](../build/plan.md#14-state-sync)'s session, which has a pilot at the hardware.
+- The stamp to the `Play` reaching the stand-in helper took 168µs at p50 and 248µs at most, of 40 presses.
+- A `Play` to a loopback of the device hearing the sound took 85ms to 88ms at p50 and 96ms to 98ms at most, on a Focusrite USB interface whose period is 10ms and whose stream kept 30ms queued at each write.
+  So the budget misses at the buffer we ship.
+  Writing 20ms ahead in a 22ms buffer, the least we tried, took 53ms at p50, 3ms past the budget.
+  At most 20ms of that is our wait and queue, so at least 33ms is outside what we write (unverified: we infer it from these runs, and haven't split it between Windows' audio engine and the driver).
+- The output thread took its commands before waiting for the device, so a sound that arrived during the wait missed that write.
+  Taking them after the wait moved the three runs to 76ms to 82ms at p50 and 86ms to 89ms at most.
+- A loopback hears the engine's mix, so what a USB interface or a Bluetooth headset adds after that isn't counted, and we haven't measured it.
+- `node tools/sim/core-helper.ts desk`, on the real helper, found capturing a tone took 1.08% of a core against [6.5's 1%](../core/04-core-helper.md#budgets), with a binding and the mouse still on from its earlier cases.
+  Its audio cases alone, in `node tools/sim/core-helper.ts audio`, took 0.49%, and 0.70% with the tone played back too.
+  So listening through Raw Input costs about 0.6% (inference, from those two runs), and every session now keeps a binding on, so [stage 18](../build/plan.md#18-traffic-and-atc-audio) measures the budget that way.
+
+Building it also found:
+
+- A slice can't read the clients crate's state, since that crate builds the slices: the first run panicked at "unit clients read its own state through the kernel, but its handler already holds it".
+- The code review found a bound key pressed while Bind waited also took control, a PF's replay of the other pilot's changes showed "Taking control disabled while you catch up" under "You have control", and Bind stayed armed on another tab, where the next key typed anywhere would have bound.
+  Each is fixed.
+  The bench covers the replay's line.
+  The bound key's fix passes `node tools/sim/core-helper.ts desk` on the real helper, where the key already bound crossed as the next press alone, and a modifier bound nothing.
+  No test runs the part's watch that ends Bind on another tab.
+
+**Changed because of it:** the output thread takes its commands after its wait.
+We left its buffer alone, since the 30ms it keeps queued is ATC audio's margin against a late thread under the sim's load, and shrinking it for a cue's 20ms would need a measurement in the sim.
+The budget goes from 50ms to 100ms, which this build meets at 89ms at most, since a smaller buffer saves about 25ms on a short cue and risks ATC audio (user, 2026-11-04).
+The user found the two synthesized cues basic and flat, and hasn't settled on a style for Dual Input's sounds, so they stay as stand-ins, and [stage 20b](../build/plan.md#20b-the-sounds) explores the style and makes the real ones (user, 2026-11-04).
+
+**Docs affected:** the notes at the top of [01-take-control](01-take-control.md), [the code map](../architecture/02-code-map.md), and [04-core-helper](../core/04-core-helper.md).
+
 ## 2026-10-17: research puts Silero VAD and sherpa-onnx ahead for recognizing the voice phrases on the pilot's PC, and the voice phrases move to Soon
 
 **Asked:** for node 6.12, which detector should tell a pilot's speech from noise, and which local recognizer should hear the 14 [voice phrases](../product/03-v1-scope.md#voice-phrases) in our core helper, a Rust program on Windows, with no audio leaving the PC, an open-source license, few false accepts, and a phrase counted only when it ends the utterance ([architecture plan, 6.12](../architecture/plan.md#612-control))?

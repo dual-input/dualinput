@@ -206,6 +206,9 @@ pub enum StandInHelperLine {
     },
     Play {
         sound: u16,
+        /// How long after the stamp on the last press the bench told it to make, on the
+        /// performance counter, as take-control's budget counts it. 0 before any press.
+        since_press_us: u64,
     },
     Frame {
         stream: u16,

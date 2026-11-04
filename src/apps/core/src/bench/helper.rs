@@ -142,8 +142,12 @@ impl BenchHelper {
         cx.out(Heard(format!("press {state} {after}us after its stamp")));
     }
 
+    /// Says the press's name, and all of it, which a desk run writes into the binding's setting
+    /// as a feature's part would.
     fn next(_: &mut BenchHelper, next: NextPressed, cx: &mut Cx) {
         cx.out(Heard(format!("next press {}", next.bound.name)));
+        let bound = serde_json::to_string(&next.bound).expect("a bound input should encode");
+        cx.out(Heard(format!("next input {bound}")));
     }
 
     fn mouse(_: &mut BenchHelper, mouse: Mouse, cx: &mut Cx) {

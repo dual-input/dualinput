@@ -88,7 +88,7 @@ impl Session {
     /// A member left the session: its own keys go with it, and every role's key that names it
     /// is cleared.
     pub(crate) fn gone(&mut self, member: PilotId, cx: &mut Cx) {
-        let who = name_of(self, &member);
+        let who = self.name_of(&member);
         let Some(held) = &mut self.held else {
             return;
         };
@@ -275,11 +275,6 @@ fn notification_id(member: &PilotId) -> String {
     format!("crew-{}", hex(member))
 }
 
-fn name_of(me: &Session, member: &PilotId) -> String {
-    me.member_key(wire::MEMBER, member)
-        .map_or_else(|| "A pilot".to_string(), |e| e.name)
-}
-
 /// Where a crewmate who was in the flight went, which the rest hear once each time it changes.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Away {
@@ -298,7 +293,7 @@ pub(crate) fn notifications(me: &mut Session, cx: &Cx) {
     };
     let mine = held.me;
     let preflight = me.preflight();
-    let name = |m: &PilotId| name_of(me, m);
+    let name = |m: &PilotId| me.name_of(m);
     let mut came_in = Vec::new();
     let mut away_now = Vec::new();
     for member in me.members().into_iter().filter(|m| *m != mine) {

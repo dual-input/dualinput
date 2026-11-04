@@ -456,11 +456,10 @@ impl Avatars {
 }
 
 /// Whether the camera is inside the aircraft: within the interior model's box, or on a
-/// machine with no model or an aircraft with no interior, within the box around every seat's eye
-/// grown by 1m.
+/// machine with no model, within the box around every seat's eye grown by 1m.
 pub(crate) fn camera_inside(me: &Avatars, camera: &Camera) -> bool {
     let p = v3::of(camera.position);
-    match me.model().filter(|m| m.has_interior()) {
+    match me.model() {
         Some(m) => m.inside(p),
         None => me
             .profile

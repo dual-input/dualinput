@@ -48,6 +48,13 @@ pub(crate) fn build<'a>(
             &mut large,
         )?);
     }
+    // A cockpit with nothing to cast into brings no hand from any click, so it fails as a model
+    // this machine can't read, which tells the pilot and the crew why. A modular aircraft whose
+    // cockpit is an attachment comes here with a helper glTF of no triangles (read in
+    // inibuilds-aircraft-a350, common/model/interior.xml and a preset's attached_objects.cfg).
+    if meta.report.triangles == 0 {
+        return Err("the aircraft's cockpit model holds no triangles".into());
+    }
     if let Some(files) = &walk.exterior {
         meta.exterior = Some(scene(
             files,

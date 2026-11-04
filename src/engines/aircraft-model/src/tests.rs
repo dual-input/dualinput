@@ -372,6 +372,21 @@ fn model() -> Model {
     Model::take(bytes).unwrap()
 }
 
+/// A cockpit that's an attachment leaves the model's own glTF a helper with nothing in it.
+#[test]
+fn a_cockpit_with_no_triangles_fails_as_a_model_that_cant_be_read() {
+    let mut disk = package();
+    let mut helper = Gltf::new();
+    helper.node(json!({ "name": "Helper" }));
+    let (json, bin) = helper.files("test_INT");
+    let folder = format!(r"{PACKAGE}\SimObjects\Airplanes\test-plane\model");
+    disk.insert(format!(r"{folder}\test_INT.gltf"), json);
+    disk.insert(format!(r"{folder}\test_INT.bin"), bin);
+    let (read, _) = gather(&disk);
+    let error = build(&aircraft(), &|p| lookup(&read, p)).unwrap_err();
+    assert!(error.contains("no triangles"), "{error}");
+}
+
 /// A template that uses itself twice would run 2^32 times, on a thread of the job's pool.
 #[test]
 fn a_template_that_uses_itself_ends_the_walk() {

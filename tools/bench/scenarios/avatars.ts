@@ -37,7 +37,7 @@ type Pilot = { core: Core; app: FakeApp; helper: StandInHelper; name: string; si
 
 type Options = {
   /** What differs in Adam's copy of the aircraft. */
-  adamsCopy?: { unreadable?: boolean; interior?: boolean }
+  adamsCopy?: { unreadable?: boolean; emptyCockpit?: boolean }
   /** Where each pilot's camera sits as the flight loads, James's then Adam's. */
   cameras?: [V3, V3]
   /** Whether the profile gives the aircraft its seats, which it does unless this is false. */
@@ -101,7 +101,8 @@ async function flight(t: TestContext, name: string, options: Options = {}): Prom
   for (const p of [a, b]) await p.app.until(() => slice(p).members.length === 2, `${p.name}: both members`, 15_000)
   for (const p of [a, b]) await loadFlight(p.core, PLANE, { title: TITLE })
   await logged(a.core, /avatars took the aircraft's model/)
-  await logged(b.core, options.adamsCopy?.unreadable ? /avatars couldn't read the aircraft's model/ : /avatars took the aircraft's model/)
+  const unread = options.adamsCopy?.unreadable || options.adamsCopy?.emptyCockpit
+  await logged(b.core, unread ? /avatars couldn't read the aircraft's model/ : /avatars took the aircraft's model/)
   for (const p of [a, b]) await mouseOn(p)
   return { run, bench, a, b }
 }
@@ -446,7 +447,8 @@ test("when control passes, the new pilot flying's figure takes its yoke and the 
   await b.app.until(() => slice(b).pf === slice(b).me, "control", 10_000)
   await untilBoth(b, ({ own }) => own.hands[1].hand === "grip" && own.hands[0].hand === "rest", "its own figure on the yoke", { after: afterB })
   await untilBoth(a, ({ own, other }) => own.hands[0].hand === "rest" && other.hands[1].hand === "grip", "the old pilot flying's figure letting go, and the new one's taking its yoke", { after: afterA })
-  const seen = await untilBoth(b, ({ other }) => other.hands[0].hand === "rest", "the old pilot flying's figure letting go", { after: afterB })
+  // Either pilot's pose can come first, so this waits for the two together.
+  const seen = await untilBoth(b, ({ own, other }) => other.hands[0].hand === "rest" && own.hands[1].hand === "grip", "the old pilot flying's figure letting go, with its own on the yoke", { after: afterB })
   assert.deepEqual(both(seen)!.own.hands, [REST, GRIP_RIGHT], "the copilot's yoke, on the right")
 })
 
@@ -577,14 +579,15 @@ test("a model a machine can't read brings no hand from a click and draws grips a
   await untilBoth(b, ({ own }) => seatOf(own) === "head", "a head behind the seat, by the seats' box")
 })
 
-test("an aircraft with no interior model seats its figures by the box around the seats' eyes", { timeout: 90_000 }, async (t) => {
-  const { b } = await flight(t, "no-interior", { adamsCopy: { interior: false } })
+test("a cockpit with no triangles, as a modular aircraft's is when its cockpit is an attachment, says so as a model that can't be read, and seats figures by the seats' box", { timeout: 90_000 }, async (t) => {
+  const { a, b } = await flight(t, "empty-cockpit", { adamsCopy: { emptyCockpit: true } })
+  const watching = await FakeApp.open(b.core, ["avatars"])
+  t.after(() => watching.close())
+  await watching.until(() => watching.slice<AvatarsSlice>("avatars")?.note === "model", "the tab's note", 10_000)
+  await a.app.until(() => slice(a).differences.some((d) => d.level === "info"), "the match check's item", 15_000)
   await untilBoth(b, ({ own, other }, f) => seatOf(own) === "copilot" && seatOf(other) === "pilot" && f.yokes === 0, "both seated, with no yokes")
   camera(b, [-0.3, 1.03, -1.1])
   await untilBoth(b, ({ own }) => seatOf(own) === "head", "a head behind the seat")
-  camera(b, [0, 2, -8])
-  await sleep(300)
-  assert.equal(seatOf(b.core.fed().at(-1)!.figures[0]!), "head", "an outside view changes no figure in no seat")
 })
 
 test("a profile with no seats says so in the tab, and each figure is a head", { timeout: 90_000 }, async (t) => {

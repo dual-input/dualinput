@@ -17,6 +17,9 @@ Decides:     What runs on a pilot's own machine and what on every machine; what 
 > The match check's item names no one: "Figures won't be able to interact with the cockpit", or "Some figures won't" when only part of the crew can't read the model, since a crew of ten would fill the line (user, 2026-11-04).
 
 > **Note**
+> Since 2026-11-04, taking the model costs the loop more than [its budget](#budgets)'s 1ms, which the user accepted as a known limit, and a cockpit with no triangles counts as a model that machine can't read ([log](log.md#2026-11-04-a-large-model-costs-the-loop-about-023ms-a-megabyte-at-each-load-and-the-a350s-and-a220s-cockpits-are-attachments-we-dont-read)).
+
+> **Note**
 > On 2026-10-25, stage 17 settled five of the items [left open](#left-open) ([log](log.md#2026-10-25-stage-17-settles-five-items-01-avatars-left-open-a-run-of-its-own-the-seat-in-the-pose-an-info-item-for-a-model-a-machine-cant-read-vr-as-a-known-limit-and-an-eye-on-what-the-figure-costs)): the figure runs on foot with a gait of its own past a speed; the seat stays in the pose; a model a machine can't read becomes a match-check item at a new level, `info`, saying avatar interaction isn't supported in that pilot's copy of the aircraft; VR stays a known limit for v1; and the figure's model and `Figure` keep its frame time down now, changing and writing a joint only when it moved past what shows.
 
 A pilot's own core works out their figure: it reads the camera every frame and the mouse through the core helper, takes a seat by where the camera is, casts each click's ray into the aircraft's own models, and decides where each hand goes and when.
@@ -386,6 +389,9 @@ In the sim:
 
 - A figure on foot while the aircraft moves stands off on another machine by up to 0.4s of the aircraft's travel, because a following machine draws the aircraft 0.4s behind; crews don't walk around an aircraft that's taxiing.
 - Until avatars can tell that a pilot is in VR, a VR pilot's clicks may place a hand wrongly.
+- The kernel and the recording each copy the model whole as a load takes it, so the loop stalls once at each load in proportion to the model's size, as [the log](log.md#2026-11-04-a-large-model-costs-the-loop-about-023ms-a-megabyte-at-each-load-and-the-a350s-and-a220s-cockpits-are-attachments-we-dont-read) measures (user, 2026-11-04).
+- A modular aircraft whose cockpit is an attachment, such as the A350 and the A220, brings no hand from a click, since `aircraft-model` reads no attachments; its seats and heads still work, through the box around the seats' eyes.
+- A located entry's slow run isn't one reach: changes under its `deadband` don't hold the hand on the spot, so a slow enough move sends the hand home and back, and an entry's first change always brings a hand; the session in the sim tunes this (user, 2026-11-04).
 
 ## Left open
 

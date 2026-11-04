@@ -13,6 +13,33 @@ The 58P's and the Comanche's models are glTF with no compression, in vertex layo
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-11-04: A large model costs the loop about 0.23ms a megabyte at each load, and the A350's and A220's cockpits are attachments we don't read
+
+**Asked:** the user accepted the 58P's 5.6ms on the loop at each load, and asked what happens with a large aircraft, such as an A350 or an A380.
+
+**Expected:** the same cost, growing with the model's size.
+
+**Found:** measured on our development machine, with no sim running, each aircraft's model built as the model's job builds it, in the first preset of each.
+
+| Aircraft | Model | Triangles | Built | On the loop at the load | In a recording at each load |
+| --- | --- | --- | --- | --- | --- |
+| Baron 58P | 29.2 MB | 802,277 | 0.18s | 5.8ms | 14.0 MB |
+| Bluebird 757-200, `bbs-757-200-pw` | 582.9 MB | 15,512,386 | 4.07s | 136.8ms | 238.6 MB |
+
+- So the 757 runs past three of [01-avatars' budgets](01-avatars.md#budgets): 60 MB for the model and 2s for the job, both set for the 58P, and the loop's 1ms, and its cast stays well inside, at 31µs at p99.
+  The model stays in memory through the flight, and while it's handed over the core holds up to three copies, about 1.7 GB for the 757 (arithmetic from the kernel's copy and the recording's).
+- The A380 ships as `.fsc`, so its `aircraft.cfg` isn't on disk: the job fails at once, and the pilot gets the tab's note and the crew the match item, as [a machine that can't read the models](01-avatars.md#a-machine-that-cant-read-the-models) has it (read in inibuilds-aircraft-a380, in Official2024).
+- The A350 and the A220 are modular: `common/model/interior.xml` names a `Helper.gltf` with nothing in it, and a preset's `attached_objects.cfg` attaches the real cockpit (read in inibuilds-aircraft-a350, in `A350-1000_Default_Cabin`).
+  `aircraft-model` doesn't read attachments, so the job built a model of 0 triangles and called it taken: no click brought a hand, and nothing said why.
+  p27 ran in the A350 on three cockpit files it was pointed at, which `aircraft-model`'s walk doesn't find.
+- The PMDG 777-300ER's job fails too, with `the model names no glTF`, which we haven't looked into.
+
+**Changed:** a cockpit with no triangles now fails the job, so it reads as a model that machine can't read, with a test and a bench case.
+The user accepted the loop's cost as a known limit, and left the deadband's run to tuning in the sim (user, 2026-11-04); 01-avatars' note at the top and its known limits say so.
+
+**Affects:** [01-avatars](01-avatars.md#known-limits).
+Reading a modular aircraft's attachments is unplanned, and whatever does will meet the sizes above, since the A350's parts come to 4.3 GB of glTF and buffers, every level of detail included.
+
 ## 2026-11-04: The bench runs 17 of 01-avatars' 19 cases on an aircraft of our own, the hands keep their times, and the model costs the loop 5.6ms a load against a budget of 1ms
 
 **Asked:** whether avatars does on two cores what [its cases for the bench](01-avatars.md#cases-for-the-bench) say, off the sim, on an aircraft package of our own, and whether the 58P's model stays inside [its budgets](01-avatars.md#budgets).

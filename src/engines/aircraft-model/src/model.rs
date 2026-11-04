@@ -470,11 +470,6 @@ impl Model {
     }
 
     /// Whether `point`, in the aircraft's frame, is inside the interior model's box at rest.
-    /// Whether the aircraft has an interior model, which `inside` asks about.
-    pub fn has_interior(&self) -> bool {
-        self.meta.interior.is_some()
-    }
-
     pub fn inside(&self, point: Vec3) -> bool {
         self.meta.interior.as_ref().is_some_and(|m| {
             Aabb {

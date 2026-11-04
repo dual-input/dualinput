@@ -188,6 +188,29 @@ export class Core {
     this.send({ kind: "cockpit", act })
   }
 
+  /** Each change of what the core fed `Figure`, oldest first. */
+  fed(): Fed[] {
+    return this.lines.read.flatMap((l) => {
+      if (!l.startsWith('{"kind":"fed"')) return []
+      return [JSON.parse(l) as Fed]
+    })
+  }
+
+  /**
+   * Waits until a change of what the core fed `Figure`, among those after the first `after`, is
+   * one `wanted` matches, and returns it.
+   */
+  async untilFed(wanted: (fed: Fed) => boolean, what: string, { after = 0, ms = 10_000 } = {}): Promise<Fed> {
+    const started = Date.now()
+    while (true) {
+      const found = this.fed().slice(after).find(wanted)
+      if (found) return found
+      const left = ms - (Date.now() - started)
+      if (left <= 0) throw new Error(`the core for ${this.data} never fed ${what}; it fed last:\n${JSON.stringify(this.fed().at(-1))}`)
+      await this.lines.more(left)
+    }
+  }
+
   /** Calls `f` with each CommBus call the core makes for JavaScript, as the sim's pages hear it, from now on. */
   onCommBus(f: (name: string, data: string) => void): () => void {
     return this.lines.listen((l) => {
@@ -282,6 +305,7 @@ export class Core {
 }
 
 export type StandInReport = Extract<FromCore, { kind: "stand-in" }>
+export type Fed = Extract<FromCore, { kind: "fed" }>
 
 /** Starts a core in `run` whose stand-in sim runs, so its platform's connection is open and it announces itself, and the fake pages join it. */
 export async function announcing(run: BenchRun, name: string, options: CoreOptions = {}): Promise<Core> {

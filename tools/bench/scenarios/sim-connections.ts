@@ -36,6 +36,39 @@ test("a call with no sim fails at once", { timeout: 30_000 }, async (t) => {
   await core.hear("a call failed")
 })
 
+test("several Frame events in one read each reach the loop as an input of its own", { timeout: 30_000 }, async (t) => {
+  const run = new BenchRun("sim-frame-burst", t)
+  const core = await run.core("a")
+  core.act({ act: "watch", process: run.stub().id })
+  await core.hear("stage Starting aircraft none")
+  // With the sim's own frames stopped, only the burst's reach the unit.
+  core.act({ act: "frames", per_second: 0 })
+  core.call({ call: "frames" })
+  await until(core, (r) => r.calls.some((c) => c.function === "SubscribeToSystemEvent" && /"Frame"/.test(c.arguments)))
+  await sleep(200)
+  const after = core.heard().length
+  core.act({ act: "frame-burst", count: 5 })
+  for (let seen = 0; seen < 5; ) {
+    await core.hear("frame", { after: after + seen })
+    seen = core.heard().slice(after).filter((line) => line === "frame").length
+  }
+  assert.equal(core.heard().slice(after).filter((line) => line === "frame").length, 5, "five Frame events in one read bring five inputs")
+})
+
+test("an AI create whose title the sim lacks has its exception reach the call, and a create it can fill reaches the call too", { timeout: 30_000 }, async (t) => {
+  const run = new BenchRun("sim-create", t)
+  const core = await run.core("a")
+  core.act({ act: "watch", process: run.stub().id })
+  await core.hear("stage Starting aircraft none")
+  core.act({ act: "lack", title: "DUALINPUT_FIGURE_PILOT" })
+  core.call({ call: "create", title: "DUALINPUT_FIGURE_PILOT" })
+  await core.hear(/^exception \d+ for create 0$/)
+  core.call({ call: "create", title: "A title the sim has" })
+  await core.hear(/^created object \d+ for create Some\(1\)$/)
+  const report = await core.report()
+  assert.deepEqual(report.objects.map((o) => o.title), ["A title the sim has"], "only the create the sim could fill made an object")
+})
+
 test("the platform's connection takes its masking group before the sim's open reply", { timeout: 30_000 }, async (t) => {
   const run = new BenchRun("sim-mask", t)
   const core = await run.core("a")

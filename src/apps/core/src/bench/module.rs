@@ -3,9 +3,17 @@
 //! objects (record/areas/build/02-testing.md, "Our WASM module").
 
 use bytemuck::{Pod, Zeroable};
+use messages::avatars::FIGURE;
+use messages::avatars::slots::{
+    BODY_HEAD, BODY_ON_FOOT, FigureSlot, FigureState, HAND_GRIP, HAND_POINT, HAND_THUMB,
+};
+use messages::bench::{FedBody, FedFigure, FedHand, FromCore};
+use messages::module::slots::SlotHeader;
 use messages::module::{RoutineId, STATUS};
 use routine_host::{Flag, Frame, Host, Ids, Named, Routine, Sim, Space, Wants};
 use stand_in_sim::{Aircraft, Module, World};
+
+use super::ToBench;
 
 /// The bench's test routine, whose mode its feed sets, so a scenario can tell what a
 /// routine carried from one feeding into the next, and can stop the module with a panic.
@@ -52,17 +60,86 @@ impl Routine for Probe {
 
 pub struct BenchModule {
     host: Host,
+    to_bench: ToBench,
+    /// What `Figure` was last fed, so only a change makes a line.
+    fed: Option<(u32, Vec<FedFigure>)>,
 }
 
 impl BenchModule {
     /// A module built with `slots_hash`, which is this build's unless a scenario stands in
     /// for a module from another build.
-    pub fn new(slots_hash: u64) -> BenchModule {
+    pub fn new(slots_hash: u64, to_bench: ToBench) -> BenchModule {
         let mut list = routines::list();
         list.push(routine_host::kind::<Probe>());
         BenchModule {
             host: Host::new(list, slots_hash, messages::VERSION),
+            to_bench,
+            fed: None,
         }
+    }
+
+    /// Tells the bench what `Figure`'s slot now holds, when that changed, since a figure's
+    /// seat, hands, and color are what most of avatars' cases look at
+    /// (record/areas/avatars/01-avatars.md, "Cases for the bench").
+    fn tell_fed(&mut self, bytes: &[u8]) {
+        let header = size_of::<SlotHeader>();
+        let Some(body) = bytes.get(header..header + size_of::<FigureSlot>()) else {
+            return;
+        };
+        let at = bytes
+            .get(..header)
+            .map_or(0, |h| bytemuck::pod_read_unaligned::<SlotHeader>(h).counter);
+        let slot: FigureSlot = bytemuck::pod_read_unaligned(body);
+        let figures: Vec<FedFigure> = slot
+            .figures
+            .iter()
+            .take(slot.count as usize)
+            .map(fed_figure)
+            .collect();
+        let yokes = slot.yokes.iter().filter(|y| y.present != 0).count() as u32;
+        let fed = Some((yokes, figures));
+        if fed != self.fed {
+            self.fed = fed;
+            if let Some((yokes, figures)) = &self.fed {
+                self.to_bench.send(&FromCore::Fed {
+                    at,
+                    yokes: *yokes,
+                    figures: figures.clone(),
+                });
+            }
+        }
+    }
+}
+
+fn fed_figure(state: &FigureState) -> FedFigure {
+    let pose = &state.pose;
+    FedFigure {
+        object: state.object,
+        color: state.color,
+        shows: state.shows,
+        slumps: state.slumps != 0,
+        hip: state.hip,
+        body: match pose.body {
+            BODY_HEAD => FedBody::Head {
+                eye: pose.eye,
+                look: pose.look,
+            },
+            BODY_ON_FOOT => FedBody::OnFoot {
+                at: pose.at,
+                heading: pose.heading,
+                crouch: pose.crouch != 0,
+            },
+            _ => FedBody::Seated {
+                eye: pose.eye,
+                look: pose.look,
+            },
+        },
+        hands: pose.hands.map(|hand| match hand.kind {
+            HAND_GRIP => FedHand::Grip { side: hand.side },
+            HAND_THUMB => FedHand::Thumb { point: hand.point },
+            HAND_POINT => FedHand::Point { point: hand.point },
+            _ => FedHand::Rest,
+        }),
     }
 }
 
@@ -84,6 +161,9 @@ impl Module for BenchModule {
             .find(|id| id.slot() == slot);
         if let Some(id) = id {
             self.host.written(id, bytes, clock);
+            if id.name == FIGURE.name {
+                self.tell_fed(bytes);
+            }
         }
     }
 

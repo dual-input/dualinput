@@ -112,7 +112,10 @@ pub fn start(
             let (stand_in, _) = StandIn::start(
                 move |up| queue.push(source, up.encode()),
                 move |name, data| pages.send(&FromCore::CommBus { name, data }),
-                Box::new(module::BenchModule::new(messages::SLOTS_HASH)),
+                Box::new(module::BenchModule::new(
+                    messages::SLOTS_HASH,
+                    to_bench.clone(),
+                )),
             )?;
             let calls = stand_in.clone();
             sinks.on(move |call: SimCall| calls.call(call));

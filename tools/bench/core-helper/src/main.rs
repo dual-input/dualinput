@@ -147,6 +147,7 @@ fn act_on(act: StandInHelperAct, core: &Shared<Stdout>) {
                 send(core, &mouse(kind, x, y));
             }
         }
+        StandInHelperAct::Mouse { kind, x, y } => send(core, &mouse(kind, x, y)),
         StandInHelperAct::Moves { per_second, for_ms } => {
             let core = core.clone();
             std::thread::spawn(move || {

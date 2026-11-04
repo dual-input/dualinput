@@ -10,6 +10,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use messages::bench::{Called, FromCore, Hello, Signal as BenchSignal, StandInAct, ToCore};
+use sim_client::Op;
 use stand_in_sim::{Act, Signal, StandIn};
 
 use super::module::BenchModule;
@@ -147,7 +148,7 @@ impl Bench {
             StandInAct::StopModule => Act::StopModule,
             StandInAct::ModuleFrom { slots_hash } => {
                 match u64::from_str_radix(slots_hash.trim_start_matches("0x"), 16) {
-                    Ok(hash) => Act::Module(Box::new(BenchModule::new(hash))),
+                    Ok(hash) => Act::Module(Box::new(BenchModule::new(hash, self.to_bench.clone()))),
                     Err(_) => return tracing::warn!(slots_hash, "a slots hash that isn't hex"),
                 }
             }
@@ -183,7 +184,14 @@ impl Bench {
                     .calls
                     .into_iter()
                     .map(|called| {
-                        let arguments = format!("{:?}", called.op);
+                        // A slot's bytes, written many times a second while a routine lives,
+                        // would take most of the report, and no scenario reads them here.
+                        let arguments = match &called.op {
+                            Op::SetClientData { area, data, .. } => {
+                                format!("SetClientData {{ area: {area}, bytes: {} }}", data.len())
+                            }
+                            op => format!("{op:?}"),
+                        };
                         let function = arguments
                             .split([' ', '{'])
                             .next()

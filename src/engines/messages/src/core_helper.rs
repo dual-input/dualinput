@@ -203,7 +203,8 @@ pub enum FromHelper {
     Failed { want: WantId, error: String },
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "core_helper/")]
 pub enum MouseKind {
     LeftDown,
     LeftUp,

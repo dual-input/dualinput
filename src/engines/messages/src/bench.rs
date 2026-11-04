@@ -155,6 +155,13 @@ pub enum StandInHelperAct {
     },
     /// A left click in the sim's main window at `x`, `y`.
     Click { x: f32, y: f32 },
+    /// One mouse event at `x`, `y`, from −1 to 1 right and up, as a pilot's press, release, or
+    /// wheel notch comes one at a time.
+    Mouse {
+        kind: crate::core_helper::MouseKind,
+        x: f32,
+        y: f32,
+    },
     /// Sends `per_second` mouse moves a second for `for_ms`, as a pilot dragging a knob would.
     Moves { per_second: u32, for_ms: u64 },
     /// A captured frame of `bytes` bytes for the capture numbered `capture`.
@@ -365,6 +372,57 @@ pub struct Made {
     pub variables: Vec<(String, String)>,
 }
 
+/// One figure as the core fed it to `Figure`, read from the slot the module takes.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "bench/")]
+pub struct FedFigure {
+    pub object: u32,
+    pub color: u32,
+    pub shows: u32,
+    pub slumps: bool,
+    /// The seat's hip, which names the seat, all 0 in no seat.
+    pub hip: [f32; 3],
+    pub body: FedBody,
+    /// The left hand, then the right.
+    pub hands: [FedHand; 2],
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[serde(tag = "body", rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum FedBody {
+    Seated {
+        eye: [f32; 3],
+        look: [f32; 3],
+    },
+    Head {
+        eye: [f32; 3],
+        look: [f32; 3],
+    },
+    OnFoot {
+        at: [f32; 3],
+        heading: f32,
+        crouch: bool,
+    },
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[serde(tag = "hand", rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum FedHand {
+    Rest,
+    /// On the yoke on this side of the centerline, 0 for the left.
+    Grip {
+        side: u32,
+    },
+    Thumb {
+        point: [f32; 3],
+    },
+    Point {
+        point: [f32; 3],
+    },
+}
+
 /// A line from the core besides its first.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", rename_all = "kebab-case")]
@@ -373,6 +431,14 @@ pub enum FromCore {
     /// Something the sim's test unit heard or saw, as one line of text, such as `stage
     /// loading`.
     Heard { what: String },
+    /// `Figure`'s slot changed: each figure and how many yokes it carries, at `at`, the core's
+    /// stamp on the feed in µs on its counter, so a scenario times the hands by the core's own
+    /// clock. The sim service writes an unchanged slot again every 200ms, which sends no line.
+    Fed {
+        at: u64,
+        yokes: u32,
+        figures: Vec<FedFigure>,
+    },
     /// A CommBus call the core made for JavaScript, which the stand-in hands to the sim's
     /// pages, so the bench's fake pages hear the core's announcement.
     CommBus { name: String, data: String },

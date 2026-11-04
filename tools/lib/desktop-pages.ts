@@ -32,5 +32,8 @@ export async function buildDesktopPages(): Promise<void> {
   })
   fs.writeFileSync(path.join(OUT, "app.css"), await buildCss(CONTENT))
   fs.cpSync(path.join(KIT, "fonts"), path.join(OUT, "fonts"), { recursive: true })
+  // The body's color is the kit's `background`: `background_color` in src/apps/desktop/src/screens.rs and `colors` in
+  // src/packages/ui/palette/palette.ts name the same one, so change all three together. Its overflow stays hidden so a page
+  // that grows flashes no scrollbar before the window catches up.
   fs.writeFileSync(path.join(OUT, "index.html"), `<!doctype html><html><head><meta charset="utf-8"><title>Dual Input</title><link rel="stylesheet" href="app.css"></head><body style="margin:0;background:#0a0a0a;overflow:hidden"><div id="page"></div><script src="app.js"></script></body></html>`)
 }

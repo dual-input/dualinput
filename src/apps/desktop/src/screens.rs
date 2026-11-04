@@ -1,7 +1,7 @@
-//! The desktop app's one window, and what its page asks of this side. A window costs about 70 MB while it lives and gives it
-//! back once destroyed, and a hidden one keeps it, so closing it destroys it (measured on our development machine, 2026-10-18,
-//! record/areas/install/log.md). It opens hidden and shows once its page has said how tall it is, so a pilot sees neither a white
-//! frame nor a jump.
+//! The desktop app's one window, and what its page asks of this side. A window costs 73 MB to 114 MB while it lives and gives
+//! it back once destroyed, and a hidden one keeps it, so closing it destroys it (measured on our development machine, 2026-10-18,
+//! record/areas/install/log.md, and 2026-11-04, record/areas/interface/log.md). It opens hidden and shows once its page has said
+//! how tall it is, so a pilot sees neither a white frame nor a jump.
 
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -14,6 +14,7 @@ use tauri::{
 };
 use tokio::sync::{mpsc, watch};
 
+use crate::processes;
 use crate::usage::{self, History, Line, Sampler, Usage};
 
 /// The window's one label, by which a second open finds the first.
@@ -67,11 +68,6 @@ pub struct View {
     sim_has_run: bool,
 }
 
-/// `%APPDATA%\DualInput`, the core's data folder, where the session file is.
-fn data_folder() -> Option<PathBuf> {
-    std::env::var_os("APPDATA").map(|data| PathBuf::from(data).join("DualInput"))
-}
-
 /// Whether the sim has written its `UserCfg.opt`, which names the packages folders our add-on goes in: Steam's, then the
 /// Microsoft Store's. `USER_CFGS` in src/platform/sim-service/src/aircraft.rs and `userCfgs` in tools/lib/install.ts name the
 /// same files, so change all three together.
@@ -109,9 +105,10 @@ pub fn open(app: &AppHandle, screen: Screen) {
         .resizable(false)
         .decorations(false)
         .shadow(true)
-        .center()
         .visible(false)
         .theme(Some(Theme::Dark))
+        // The kit's `background`, for the moment before the page draws. tools/lib/desktop-pages.ts and
+        // src/packages/ui/palette/palette.ts name the same color, so change all three together.
         .background_color(Color(10, 10, 10, 255));
     // WebView2's data goes beside Velopack's folder, so an uninstall deletes it too
     // (record/areas/install/01-installing-and-updating.md, "On disk").
@@ -144,8 +141,9 @@ pub fn view(shared: State<'_, Shared>) -> View {
         screen: shared.screen.lock().map_or(Screen::Main, |screen| *screen),
         usage: figures,
         desktop: shared.state.borrow().clone(),
-        sim_running: usage::sim_running(&usage::running()),
-        session_held: data_folder().is_some_and(|folder| folder.join(SESSION_FILE).exists()),
+        sim_running: processes::sim_running(&processes::running()),
+        session_held: crate::log::data_folder()
+            .is_some_and(|folder| folder.join(SESSION_FILE).exists()),
         sim_has_run: sim_has_run(),
     }
 }
@@ -169,6 +167,8 @@ pub fn fit(window: WebviewWindow, height: f64) -> f64 {
     let shown = height.min(most);
     let _ = window.set_size(LogicalSize::new(WIDTH, shown));
     if !window.is_visible().unwrap_or(true) {
+        // Only now, since centering for any other height could put a tall window's title bar above the screen.
+        let _ = window.center();
         let _ = window.show();
         let _ = window.set_focus();
     }
@@ -186,7 +186,7 @@ pub fn close(window: WebviewWindow) {
     let _ = window.destroy();
 }
 
-/// TODO: when stage 15 has the app hold the core, send the session crate's Quit first.
+/// TODO: when the app holds a socket to the core, send the session crate's Quit first.
 #[tauri::command]
 pub fn quit(app: AppHandle) {
     app.exit(0);

@@ -1,13 +1,12 @@
 //! The desktop app: a tray icon from login, with a window of its own screens the pilot opens from it, and the fixed local
-//! port that tells the EFB app about updates and the firewall. A window costs about 70 MB while it lives and gives it back
-//! once destroyed, and a hidden one keeps it, so closing the window destroys it (measured on our development machine,
-//! 2026-10-18, record/areas/install/log.md).
+//! port that tells the EFB app about updates and the firewall.
 
 // A release has no console. A debug build keeps one, or its messages would go nowhere.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod log;
 mod port;
+mod processes;
 mod screens;
 mod start_with_windows;
 mod usage;
@@ -22,25 +21,35 @@ use tauri::menu::{MenuBuilder, MenuItem, MenuItemBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Manager, RunEvent, Wry};
 use tokio::sync::{mpsc, watch};
+use tokio::time::{Interval, MissedTickBehavior};
 use usage::{History, Line, Sampler};
 
-const OPEN_ITEM: &str = "open";
+const USAGE_ITEM: &str = "usage";
+const SETTINGS_ITEM: &str = "settings";
 const QUIT_ITEM: &str = "quit";
 /// The EFB app's note sends a pilot to Windows' startup list to turn this back on, and Windows tells a running program
 /// nothing of it, so without this the switch stays wrong until the app next starts (measured on Windows 11, 2026-11-02,
 /// record/areas/install/log.md).
 const READ_WINDOWS_EVERY: Duration = Duration::from_secs(5);
 
+/// A timer that drops what it missed, rather than firing it all at once when the PC wakes from a night's sleep, which would
+/// stamp hours of samples with the same few seconds and skew the charts' averages.
+fn every(period: Duration) -> Interval {
+    let mut timer = tokio::time::interval(period);
+    timer.set_missed_tick_behavior(MissedTickBehavior::Skip);
+    timer
+}
+
 /// The tray icon, and the menu's usage line for the samples to keep current. Quit opens the window's ask rather than ending the
-/// app, so a pilot sees what it costs first. TODO: when stage 15 builds the desktop app's tray, add handing a second start's
-/// request to the running app.
+/// app, so a pilot sees what it costs first. TODO: when the app takes a single-instance check, hand a second start's request to
+/// the running app.
 fn tray(app: &AppHandle, first_line: &str) -> tauri::Result<MenuItem<Wry>> {
     let icon = app
         .default_window_icon()
         .cloned()
         .expect("tauri.conf.json names an icon");
-    let usage_line = MenuItemBuilder::with_id(OPEN_ITEM, first_line).build(app)?;
-    let settings = MenuItemBuilder::with_id(OPEN_ITEM, "Settings…").build(app)?;
+    let usage_line = MenuItemBuilder::with_id(USAGE_ITEM, first_line).build(app)?;
+    let settings = MenuItemBuilder::with_id(SETTINGS_ITEM, "Settings…").build(app)?;
     let quit = MenuItemBuilder::with_id(QUIT_ITEM, "Quit").build(app)?;
     let menu = MenuBuilder::new(app)
         .item(&usage_line)
@@ -55,7 +64,7 @@ fn tray(app: &AppHandle, first_line: &str) -> tauri::Result<MenuItem<Wry>> {
         // A left click opens the window, and a right click the menu.
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id().as_ref() {
-            OPEN_ITEM => screens::open(app, Screen::Main),
+            USAGE_ITEM | SETTINGS_ITEM => screens::open(app, Screen::Main),
             QUIT_ITEM => screens::open(app, Screen::Quit),
             _ => {}
         })
@@ -77,12 +86,12 @@ fn tray(app: &AppHandle, first_line: &str) -> tauri::Result<MenuItem<Wry>> {
 fn record_usage(app: AppHandle, usage_line: MenuItem<Wry>) {
     tauri::async_runtime::spawn(async move {
         let shared = app.state::<Shared>();
-        let mut every = tokio::time::interval(usage::SAMPLE_EVERY);
+        let mut sample_again = every(usage::SAMPLE_EVERY);
         // An interval's first tick comes at once, and a first sample would read next to nothing.
-        every.tick().await;
+        sample_again.tick().await;
         let mut until_trim = usage::TRIM_EVERY;
         loop {
-            every.tick().await;
+            sample_again.tick().await;
             let now = usage::now();
             let Ok(sample) = shared.sampler.lock().map(|mut sampler| sampler.take(now)) else {
                 return;
@@ -104,7 +113,7 @@ fn record_usage(app: AppHandle, usage_line: MenuItem<Wry>) {
 fn ask_handler(say: watch::Sender<DesktopState>) -> mpsc::UnboundedSender<ToDesktop> {
     let (ask, mut asks) = mpsc::unbounded_channel();
     tauri::async_runtime::spawn(async move {
-        let mut read_again = tokio::time::interval(READ_WINDOWS_EVERY);
+        let mut read_again = every(READ_WINDOWS_EVERY);
         loop {
             tokio::select! {
                 asked = asks.recv() => match asked {
@@ -203,7 +212,7 @@ fn main() {
         })
         .build(tauri::generate_context!())
         .expect("the Tauri app should build");
-    // With its last window gone, Tauri exits unless told not to, and a tray app has to outlive its window; an exit with a code, from the tray's Quit, still goes through.
+    // With its last window gone, Tauri exits unless told not to, and a tray app has to outlive its window; an exit with a code, from the window's Quit anyway, still goes through.
     app.run(|_app, event| {
         if let RunEvent::ExitRequested {
             code: None, api, ..

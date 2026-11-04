@@ -10,19 +10,20 @@ use std::collections::HashMap;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
-use windows_sys::Win32::Foundation::{CloseHandle, FILETIME, HANDLE, INVALID_HANDLE_VALUE};
-use windows_sys::Win32::System::Diagnostics::ToolHelp::{
-    CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
-};
+use windows_sys::Win32::Foundation::FILETIME;
 use windows_sys::Win32::System::ProcessStatus::{
-    GetProcessMemoryInfo, PROCESS_MEMORY_COUNTERS, PROCESS_MEMORY_COUNTERS_EX2,
+    GetProcessMemoryInfo, PROCESS_MEMORY_COUNTERS, PROCESS_MEMORY_COUNTERS_EX,
+    PROCESS_MEMORY_COUNTERS_EX2,
 };
 use windows_sys::Win32::System::Threading::{
     GetCurrentProcessId, GetProcessTimes, OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION,
 };
+
+use crate::processes::{Object, Running, running};
 
 pub const SAMPLE_EVERY: Duration = Duration::from_secs(60);
 /// How many samples the file adds before it's trimmed, a day's worth, so it holds at most two days.
@@ -31,8 +32,6 @@ const KEEP_SECONDS: u64 = 24 * 60 * 60;
 const NAME: &str = "usage.jsonl";
 /// The program a WebView2 window runs in. Only these of the app's descendants count, since the app will start the core too.
 const WEBVIEW: &str = "msedgewebview2.exe";
-/// The sim's program. `SIM` in src/engines/sim-edge/src/lib.rs names the same one, so change both together.
-const SIM: &str = "FlightSimulator2024.exe";
 
 /// A moment's figures: the memory in bytes, the share of all the PC's cores in percent, and the bytes downloaded since the sample
 /// before. TODO: when the app downloads updates, count them in `network`.
@@ -70,31 +69,39 @@ pub fn now() -> u64 {
         .map_or(0, |since| since.as_secs())
 }
 
-/// The file of samples, one JSON object a line, so adding a sample never rewrites what's there.
+/// The file of samples, one JSON object a line, so adding a sample never rewrites what's there. A sample comes from the
+/// runtime's thread and a window's opening from the main one, so the lock keeps them from running together, or from landing
+/// while a trim rewrites the file.
 pub struct History {
     path: PathBuf,
+    writing: Mutex<()>,
 }
 
 impl History {
     pub fn in_folder(folder: &Path) -> Self {
         Self {
             path: folder.join(NAME),
+            writing: Mutex::new(()),
         }
     }
 
     pub fn add(&self, line: Line) {
         let text = serde_json::to_string(&line).expect("a line of the usage file should encode");
+        let Ok(_writing) = self.writing.lock() else {
+            return;
+        };
         let written = OpenOptions::new()
             .create(true)
             .append(true)
             .open(&self.path)
-            .and_then(|mut file| writeln!(file, "{text}"));
+            .and_then(|mut file| file.write_all(format!("{text}\n").as_bytes()));
         if let Err(error) = written {
             crate::log::line(&format!("a usage sample didn't save: {error}"));
         }
     }
 
-    /// What's within 24 hours of `now`. A line that doesn't read is one a crash cut short, which costs that one sample.
+    /// What's within 24 hours of `now`. A line that doesn't read is one a crash cut short, with no newline, so the line after
+    /// it joins it, and the crash costs those two samples.
     pub fn read(&self, now: u64) -> Usage {
         let mut usage = Usage {
             now,
@@ -115,8 +122,12 @@ impl History {
         usage
     }
 
-    /// Drops what's past 24 hours, so the file doesn't grow without end.
+    /// Drops what's past 24 hours, so the file doesn't grow without end. It writes a new file and renames it over the old, so a
+    /// crash here keeps the day, and an open window never reads half of it.
     pub fn trim(&self, now: u64) {
+        let Ok(_writing) = self.writing.lock() else {
+            return;
+        };
         let Ok(text) = fs::read_to_string(&self.path) else {
             return;
         };
@@ -135,7 +146,8 @@ impl History {
             })
             .flat_map(|line| [line, "\n"])
             .collect();
-        if let Err(error) = fs::write(&self.path, keep) {
+        let new = self.path.with_extension("new");
+        if let Err(error) = fs::write(&new, keep).and_then(|()| fs::rename(&new, &self.path)) {
             crate::log::line(&format!("the usage file wasn't trimmed: {error}"));
         }
     }
@@ -143,57 +155,6 @@ impl History {
 
 fn kept(at: u64, now: u64) -> bool {
     at + KEEP_SECONDS >= now
-}
-
-/// A process as the snapshot lists it.
-pub struct Running {
-    id: u32,
-    parent: u32,
-    program: String,
-}
-
-/// A handle closed when this goes.
-struct Object(HANDLE);
-
-impl Drop for Object {
-    fn drop(&mut self) {
-        // SAFETY: the handle came from the call that opened it, and nothing else closes it.
-        unsafe { CloseHandle(self.0) };
-    }
-}
-
-/// Every running process, which took 2.8ms at 291 processes (measured on our development machine, 2026-10-18,
-/// record/areas/install/results/2026-10-18-windows-and-msfs-facts.txt).
-pub fn running() -> Vec<Running> {
-    let mut all = Vec::new();
-    // SAFETY: a snapshot of every process takes no pointer.
-    let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) };
-    if snapshot == INVALID_HANDLE_VALUE {
-        return all;
-    }
-    let snapshot = Object(snapshot);
-    let mut entry = PROCESSENTRY32W {
-        dwSize: size_of::<PROCESSENTRY32W>() as u32,
-        ..Default::default()
-    };
-    // SAFETY: the snapshot stays open through the walk, and `entry` names its own size, as both calls require.
-    let mut listed = unsafe { Process32FirstW(snapshot.0, &mut entry) } != 0;
-    while listed {
-        let file = &entry.szExeFile;
-        let end = file.iter().position(|&c| c == 0).unwrap_or(file.len());
-        all.push(Running {
-            id: entry.th32ProcessID,
-            parent: entry.th32ParentProcessID,
-            program: String::from_utf16_lossy(&file[..end]),
-        });
-        // SAFETY: as above.
-        listed = unsafe { Process32NextW(snapshot.0, &mut entry) } != 0;
-    }
-    all
-}
-
-pub fn sim_running(all: &[Running]) -> bool {
-    all.iter().any(|one| one.program.eq_ignore_ascii_case(SIM))
 }
 
 /// This app's process and the WebView2 processes below it, however deep.
@@ -235,19 +196,27 @@ fn figures_of(id: u32) -> Option<(u64, u64)> {
     let cpu = time(&times[2]) + time(&times[3]);
     // SAFETY: an all-zero struct of integers is valid.
     let mut memory: PROCESS_MEMORY_COUNTERS_EX2 = unsafe { std::mem::zeroed() };
-    memory.cb = size_of::<PROCESS_MEMORY_COUNTERS_EX2>() as u32;
-    // SAFETY: the handle stays open through the call, and `cb` names the size of the struct the pointer leads to.
-    let read = unsafe {
-        GetProcessMemoryInfo(
-            handle.0,
-            (&raw mut memory).cast::<PROCESS_MEMORY_COUNTERS>(),
-            memory.cb,
-        )
-    };
-    if read == 0 {
+    // A Windows that predates the longer struct may refuse its size or leave its last field at the zero it was given, and
+    // the commit charge is the nearest figure it has (unverified, since we've run on no such Windows).
+    let read = [
+        size_of::<PROCESS_MEMORY_COUNTERS_EX2>(),
+        size_of::<PROCESS_MEMORY_COUNTERS_EX>(),
+    ]
+    .into_iter()
+    .any(|size| {
+        memory.cb = size as u32;
+        // SAFETY: the handle stays open through the call, and the struct the pointer leads to is at least `size` long.
+        unsafe {
+            GetProcessMemoryInfo(
+                handle.0,
+                (&raw mut memory).cast::<PROCESS_MEMORY_COUNTERS>(),
+                size as u32,
+            ) != 0
+        }
+    });
+    if !read {
         return None;
     }
-    // A Windows too old to know this field leaves it at the zero it was given, and the commit charge is the nearest it has.
     let private = match memory.PrivateWorkingSetSize {
         0 => memory.PrivateUsage,
         set => set,
@@ -385,20 +354,21 @@ mod tests {
     }
 
     #[test]
-    fn a_line_a_crash_cut_short_costs_only_itself() {
+    fn a_line_a_crash_cut_short_costs_itself_and_the_one_that_joins_it() {
         let folder = folder("cut");
         let history = History::in_folder(&folder);
         history.add(Line::Sample(sample(100)));
         fs::write(
             folder.join(NAME),
             format!(
-                "{}{{\"t\":\"sam\n",
+                "{}{{\"t\":\"sam",
                 fs::read_to_string(folder.join(NAME)).unwrap()
             ),
         )
         .unwrap();
         history.add(Line::Sample(sample(200)));
-        assert_eq!(history.read(200).samples, [sample(100), sample(200)]);
+        history.add(Line::Sample(sample(300)));
+        assert_eq!(history.read(300).samples, [sample(100), sample(300)]);
         fs::remove_dir_all(&folder).unwrap();
     }
 
@@ -440,12 +410,6 @@ mod tests {
             process(20, 1, "msedgewebview2.exe"),
         ];
         assert_eq!(ours(&all, 10), [10, 11, 12]);
-    }
-
-    #[test]
-    fn the_sim_is_found_whatever_its_case() {
-        assert!(sim_running(&[process(1, 0, "flightsimulator2024.EXE")]));
-        assert!(!sim_running(&[process(1, 0, "FlightSimulator.exe")]));
     }
 
     #[test]

@@ -24,7 +24,7 @@ import { issuesOf } from "./header/issues.tsx"
 import type { HeaderStatus } from "./header/issues.tsx"
 import { raisedRows } from "./header/raised.ts"
 import type { SessionPhase } from "./header/phase.tsx"
-import { useLanding } from "./landing.ts"
+import { askedAgain, useLanding } from "./landing.ts"
 import { Reconnecting, ServiceDown } from "./lost-service.tsx"
 import { ShellContext, startParts, stopParts } from "./part.ts"
 import type { Part, Shell } from "./part.ts"
@@ -76,12 +76,11 @@ function useBannerPanel(link: CoreLink, sim: SimWindow, session: SessionSlice | 
     else if (core === "connected") panel.follow({ held, flying, loading, pageOpen })
     else panel.coreLost()
   }, [panel, core, held, flying, loading, pageOpen])
-  // A flight load resets the variable to 0, which is no ask.
   useEffect(() => {
     let seen = sim.bannerResized()
     const timer = window.setInterval(() => {
       const asked = sim.bannerResized()
-      if (asked !== seen && asked !== 0) panel.reopen()
+      if (askedAgain(asked, seen)) panel.reopen()
       seen = asked
     }, WATCH_THE_SIM_EVERY)
     return () => window.clearInterval(timer)

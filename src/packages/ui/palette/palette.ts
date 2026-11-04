@@ -13,6 +13,7 @@ import { ROOT_CLASS } from "../src/lib/root-class.ts"
 export { ROOT_CLASS }
 
 export const colors = {
+  // `background_color` in src/apps/desktop/src/screens.rs and the page in tools/lib/desktop-pages.ts name the same color, for the moment before this stylesheet draws, so change all three together.
   background: "#0a0a0a",
   foreground: "#fafafa",
   card: "#171717",

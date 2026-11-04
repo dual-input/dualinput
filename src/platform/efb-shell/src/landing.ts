@@ -15,6 +15,11 @@ import type { SimWindow } from "./sim-window.ts"
 export const OPEN_EFB_VARIABLE = "L:DUALINPUT_BANNER_OPEN_EFB"
 const POLL_MS = 200
 
+/** Whether an `L:` variable the banner counts its asks in has a new ask. A flight load resets it to 0, which is no ask (measured on MSFS 2024, 2026-10-08, record/areas/interface/log.md). */
+export function askedAgain(asked: number, seen: number): boolean {
+  return asked !== seen && asked !== 0
+}
+
 /** Hears the core's order, and the banner's call while the core is gone, opening the EFB for each. */
 export function useLanding(link: CoreLink, sim: SimWindow, down: boolean, land: (landing: Landing, id: string) => void): void {
   const landNow = useRef(land)
@@ -35,7 +40,7 @@ export function useLanding(link: CoreLink, sim: SimWindow, down: boolean, land: 
     let seen = sim.bannerAsked()
     const timer = window.setInterval(() => {
       const asked = sim.bannerAsked()
-      if (asked !== seen) sim.openEfb()
+      if (askedAgain(asked, seen)) sim.openEfb()
       seen = asked
     }, POLL_MS)
     return () => window.clearInterval(timer)

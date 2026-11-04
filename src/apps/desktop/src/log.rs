@@ -23,9 +23,14 @@ fn open(folder: &Path) -> io::Result<File> {
     OpenOptions::new().create(true).append(true).open(path)
 }
 
+/// `%APPDATA%\DualInput`, the core's data folder.
+pub fn data_folder() -> Option<PathBuf> {
+    std::env::var_os("APPDATA").map(|data| Path::new(&data).join("DualInput"))
+}
+
 /// The folder that holds what the desktop app writes for itself, `%APPDATA%\DualInput\app`.
 pub fn folder() -> Option<PathBuf> {
-    std::env::var_os("APPDATA").map(|data| Path::new(&data).join("DualInput").join("app"))
+    data_folder().map(|data| data.join("app"))
 }
 
 /// Opens the log, and sends a panic there too, since one on a task of the port's would otherwise end only that task, with

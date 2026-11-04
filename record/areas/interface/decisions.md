@@ -330,16 +330,17 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - The figures are a stacked box for each of memory, CPU, and network: the tray app's average memory and CPU, its total downloaded, and a line over the last 24 hours by the clock, with a gap for time it wasn't running.
     A dot in the line's color marks each time the window opened, on memory and CPU, and each update downloaded, on network, and hovering a line shows that moment's figure in its box, where a dot it lands on takes the place of the box's label, by name and in the dot's color.
   - The figures leave out the core, since a pilot gives the sim's session whatever it needs and is asking about the app that's always there.
-    They count the window's own WebView2 processes while it's open, so the line ends in a spike for as long as the pilot looks at it, and it agrees with Task Manager.
+    They count the window's own WebView2 processes while it's open, so the line ends in a spike for as long as the pilot looks at it.
+    The memory figure matched the Windows counter behind Task Manager's Memory column to within 0.4 MB, in one comparison on a debug build (measured on our development machine, 2026-11-04, [log](log.md#2026-11-04-the-desktop-windows-memory-figure-matches-windows-to-within-04-mb-the-app-and-its-webview2-read-about-95-mb-to-114-mb-with-the-window-open-and-a-window-can-follow-its-content-frame-by-frame)).
     The memory is the private working set, Task Manager's Memory column.
     The app takes a sample a minute into `%APPDATA%\DualInput\app\usage.jsonl`, and holds none of them in memory.
   - Turning Start with Windows off shows a warning under the switch, here and under [the EFB app's](#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version).
 
-  Settled by the user on 2026-10-25, 2026-10-31, 2026-11-01, and 2026-11-03.
+  Settled by the user on 2026-10-25, 2026-10-31, 2026-11-01, 2026-11-03, and 2026-11-04.
 - **Because:**
   - A pilot works in the EFB app, so the first-run window only has to point there.
   - Offered a Quit in the EFB app's Settings, the user declined it (user, 2026-10-31).
-  - The tray app alone is flat, so a plain average says what it costs, where the core's figures during a flight would have skewed it (user, 2026-11-03).
+  - With the core left out, the samples stay flat except for the minutes the window is open, so a plain average says what the tray app cost over the last 24 hours, its window's cost included, where the core's figures during a flight would have skewed it (user, 2026-11-03).
   - A window that showed less than Task Manager would read as a lie to the pilot it's trying to reassure (user, 2026-11-03).
 
 ## The desktop app tells the EFB app about updates and the firewall over a fixed local port

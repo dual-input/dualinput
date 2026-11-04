@@ -10,7 +10,7 @@ declare const SimVar: { GetSimVarValue(name: string, unit: string): number; SetS
 export type SimWindow = {
   openEfb(): void
   toggleBanner(open: boolean): void
-  /** What the banner last wrote to ask for the EFB with no core to carry the click, which changes with each ask. */
+  /** What the banner last wrote to ask for the EFB with no core to carry the click, which changes with each ask, and reads 0 after a flight load. */
   bannerAsked(): number
   /** What the banner last wrote to ask for a new opening once the sim's window changed, which changes with each ask, and reads 0 after a flight load. */
   bannerResized(): number
@@ -59,7 +59,7 @@ export function simWindow(internalName: string): SimWindow {
     bannerResized() {
       return SimVar.GetSimVarValue(RESIZED_VARIABLE, "number")
     },
-    // It reads first, since a flight load resets the variable and only this call puts it back.
+    // It reads first, since a flight load resets the variable and only this call puts it back (measured on MSFS 2024, 2026-10-08, record/areas/interface/log.md).
     tellBannerOnScreen(on) {
       const value = on ? 1 : 0
       if (SimVar.GetSimVarValue(ON_SCREEN_VARIABLE, "number") !== value) void SimVar.SetSimVarValue(ON_SCREEN_VARIABLE, "number", value)

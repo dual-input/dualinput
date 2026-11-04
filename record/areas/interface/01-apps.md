@@ -122,15 +122,18 @@ A one-time notification stays 6s, and that time pauses while the pointer is over
 ## The banner
 
 - The banner's panel stays open through each flight of a session, and its page shows and hides its notifications and the preflight summary itself, from the slices it watches, so no slice says whether it should be open (user, 2026-10-18).
-- `clients`' slice says whether a banner page's socket is open, which `clients` closes 8s after the page's last message ([the protocol](../core/02-clients-and-panel-bridge.md#the-protocol)).
+- `clients`' slice says whether a banner page's socket is open.
+  `clients` closes that socket 8s to 10s after the page's last message, since it checks every 2s ([the protocol](../core/02-clients-and-panel-bridge.md#the-protocol)).
 - In each flight of a session, the EFB app's code opens the panel, calling `TOOLBAR_BUTTON_TOGGLE` again after 3s until a banner page's socket opens.
   A pilot who closes it from its toolbar button keeps it closed until the next flight.
-- The EFB app's code calls again at the end of each load, and treats a socket that closes within 12s of that as the old page's, since a load's old page closes up to 10s late (measured on MSFS 2024, 2026-11-02, [log][panel sizing]).
+- The EFB app's code calls again at the end of each load, and treats a socket that closes within 12s of that as the old page's.
+  In a Restart, the old page's socket closed 0.4s after `ReadyToFly`, 9.2s into the load (measured on MSFS 2024, 2026-11-02, [log][panel sizing]).
 - The sim works out a panel's size only as it opens, so when the window changes shape, the page asks the EFB app through `L:DUALINPUT_BANNER_RESIZED` to close and open it (same entry).
   The call with `true` on an open panel changes nothing, and `false` then `true` gives a new page at the right size (same entry).
 - The EFB app tells the page through `L:DUALINPUT_EFB_ON_SCREEN` when our app is on screen, which hides the preflight summary, since the app shows the same.
 - The EFB app's code closes the panel once, with no retry, when the session ends or the core says `bye`, since the core says nothing more after either.
-- A closed panel's page is destroyed ([log](log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), and its socket stayed open for the 35s the 2026-10-08 run watched ([log][coverage]), so the socket `clients` closes, not the page's own, says the page is gone.
+- A closed panel's page is destroyed ([log](log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), but the sim doesn't close its socket promptly: one stayed open for the 35s the run watched (measured on MSFS 2024, 2026-10-08, [log][coverage]).
+  So `clients` closing the socket is what says the page is gone.
 
 ## Trouble
 
@@ -164,7 +167,7 @@ The EFB app has no button that brings the desktop app forward, and the core neve
 
 | What | Budget |
 | --- | --- |
-| The banner's panel opening, outside a load | Within 2s of the EFB app's code first calling the toolbar for it, which held in nine hosts, at about the budget (measured on MSFS 2024, 2026-11-02, [log][first session]) |
+| The banner's panel opening, outside a load | Within 2s of the EFB app's code first calling the toolbar for it. In nine hosts the page connected 0.45s to 2.05s after the session started, and that first call comes up to 100ms after the start (measured on MSFS 2024, 2026-11-02, [log][third session]) |
 
 ## Cases for the bench
 
@@ -188,7 +191,8 @@ Stage 11b settled what the earlier nodes left to it, in [the tentative decisions
 
 ## Left open
 
-- How soon the banner's panel opens during a flight load, before Ready to fly, which no run has timed; it opens by Ready to fly, and within 4.2s after it after a second load (measured on MSFS 2024, 2026-11-02, [log][third session]).
+- How soon the banner's panel opens during a flight load, before Ready to Fly, which no run has timed.
+  After a Restart, and after a load from the world map, its page connected 4.2s after Ready to Fly (measured on MSFS 2024, 2026-11-02, [log][second session]).
 - How the desktop app sends the session crate's Quit, which waits for the socket to the core that [stage 15](../build/plan.md#15-installing-and-updating) gives it.
 
 ## What this changes elsewhere
@@ -196,7 +200,7 @@ Stage 11b settled what the earlier nodes left to it, in [the tentative decisions
 [The code map](../architecture/02-code-map.md), [the spine](../architecture/01-spine.md), [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [01-loop-and-edge](../core/01-loop-and-edge.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [the session's units](../session/02-units.md), [the sync units](../sync/05-units.md), [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md), [traffic and ATC](../traffic-atc/01-traffic-and-atc.md), [01-between-machines](../network/01-between-machines.md), and [03-v1-scope](../product/03-v1-scope.md) hold what this design changes there, and the [tentative decisions](../architecture/decisions.md#a-feature-shows-itself-in-each-app-through-one-part-the-app-lists-and-no-shell-names-a-feature) give the reasons.
 
 [coverage]: log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel
-[first session]: log.md#2026-11-02-the-first-whole-efb-app-and-banner-in-the-sim-pass-their-clicks-drag-fade-and-frame-rate-on-a-local-backend-relay-and-second-pilot
+[second session]: log.md#2026-11-02-a-second-session-in-the-sim-confirms-bootmode-2-restart-and-a-load-from-the-world-map-and-finds-a-large-l-value-reads-0-and-a-canvas-repaints-only-when-its-element-changes
 [third session]: log.md#2026-11-02-a-third-session-in-the-sim-passes-the-heads-a-changed-window-a-cards-click-with-no-core-and-a-joiners-preflight-card
 [panel sizing]: log.md#2026-11-02-the-sim-sizes-a-panel-only-as-it-opens-the-toolbars-open-call-changes-nothing-on-an-open-panel-and-a-loads-old-page-closes-after-a-short-load-has-ended
 [recording 21]: ../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour

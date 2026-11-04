@@ -467,6 +467,9 @@ Tests:
 - From stage 11a, from [the apps' cases](../interface/01-apps.md#cases-for-the-bench): a part whose `start` throws leaves the app's other parts running; deleting a feature's folder and its line in each list leaves both apps building, while `tools/map-check.test.ts` already fails a shell that names a feature's module of the message crate; in a flight of a session, the stand-in's toolbar call fails twice, and the EFB app's code calls again until the banner's page connects, and once it's open, a banner closed by its toolbar button stays closed until the next flight; and when the session ends, and on a `bye`, the EFB app's code closes the banner with one call.
 - From stage 11a, in this stage's session in the sim: the apps' cases in the sim, and the banner's panel opening, outside a load, within 2s of the EFB app's code first calling the toolbar for it ([the apps' budgets](../interface/01-apps.md#budgets)).
 
+Exit: on our development machine, `node tools/check.ts` and the whole bench pass, which this stage runs because it changes the kernel and the core's edge; three sessions in the sim pass the apps' cases, with the EFB app and the banner connecting only to the real core while a bench core runs beside it ([interface log](../interface/log.md#2026-11-02-a-third-session-in-the-sim-passes-the-heads-a-changed-window-a-cards-click-with-no-core-and-a-joiners-preflight-card)); and the user has looked over the kit, the sample, the whole EFB app, and the desktop app's window.
+Done on 2026-11-04.
+
 ## 12 The sandbox
 
 Builds: the sandbox, on rquickjs 0.14.0 as `profile-build` is ([plugins and the sandbox](../plugins/01-plugins.md)).
@@ -541,7 +544,7 @@ Builds: the desktop app's tray icon and its jobs, the installer and updates thro
 From stage 4, the release's folder also holds the C++ runtime's three DLLs that `SimConnect.dll` imports ([the build](01-the-build.md)), and the desktop app copies our package as [installing and updating](../install/01-installing-and-updating.md)'s note of 2026-10-21 has it.
 The release workflow comes in [stage 22](#22-github).
 The desktop app's `messages::HASH` covers the root's `Cargo.lock`, not the one it compiled with, since `src/engines/messages/build.rs` looks for the lock upward from itself, and nothing reads that hash yet, so this stage settles it before it gives the app a socket to the core.
-From stage 11b, it has Velopack's first run start the app with `--first-run`, which opens the welcome; has Quit anyway send the session crate's Quit before the app exits; and counts what the app downloads in its usage samples' `network`, with an `update-downloaded` line for each update.
+From stage 11b, it has Velopack's first run start the app with `--first-run`, which opens the welcome; hands a second start's request to the running app, since until then a second start makes a second tray icon and a second writer to the usage file; has Quit anyway send the session crate's Quit before the app exits; and counts what the app downloads in its usage samples' `network`, with an `update-downloaded` line for each update.
 While the sim runs, automatic checks go on and an automatic download waits for the sim to close, and Check now or Install downloads at once, which adds a state to the local port's `Update`, available and not downloaded (user, 2026-11-03).
 Open, for the user: the first run's welcome should be nicer than stage 11b left it, a heading, one line, and Dismiss, since it's the first thing a pilot sees of Dual Input (user, 2026-11-04).
 Needs: 3 and 11b.

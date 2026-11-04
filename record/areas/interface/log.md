@@ -3,18 +3,18 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
-## 2026-11-04: The desktop window's memory figure matches Windows' to within 0.4 MB, its own WebView2 takes about 95 MB to 114 MB, and a window can follow its content frame by frame
+## 2026-11-04: The desktop window's memory figure matches Windows' to within 0.4 MB, the app and its WebView2 read about 95 MB to 114 MB with the window open, and a window can follow its content frame by frame
 
 **Asked:** whether the desktop window's figures agree with what a pilot would see in Task Manager, what the window costs while it's open, and whether a native window can follow content easing open.
 
-**Expected:** about 70 MB for the window, from the bare window [the install log](../install/log.md) measured on 2026-10-18, and a jittering window edge, since each frame resizes a native window with WebView2 inside it.
+**Expected:** about 73 MB for the window, from the seven processes [the install log](../install/log.md#2026-10-18-a-tauri-2-app-idles-as-a-tray-icon-in-22-mb-and-gives-back-webview2s-69-mb-once-its-window-is-destroyed-but-not-while-its-hidden) measured with a static page on 2026-10-18, and a jittering window edge, since each frame resizes a native window with WebView2 inside it.
 
 **Found:** on our development machine, with a debug build:
 
 - The app recorded 113.8 MB when Windows' `Win32_PerfFormattedData_PerfProc_Process`, whose `WorkingSetPrivate` is Task Manager's Memory column, read 113.4 MB for the same seven processes, 4s apart.
   `PrivateWorkingSetSize` in `PROCESS_MEMORY_COUNTERS_EX2` is the field that matches.
 - With the window open, the tree read 94.8 MB to 113.8 MB, of which the app alone was 4.3 MB to 4.6 MB.
-  This window, with React, the kit, and its fonts, costs more than the bare window's 70 MB.
+  That's 22 MB to 41 MB above the 72.7 MB a static page took, which we take to be React, the kit, and the fonts (unverified: this is a debug build, and a release build's figures would help settle it).
 - WebView2's first process is a child of our program, and the walk finds the rest below it, while twelve other `msedgewebview2.exe` processes on the PC, the Claude app's among them, stay out.
 - The user watched the window's edge follow the kit's 220ms ease, resized on each `ResizeObserver` callback, and said it "feels good", so no fallback was needed.
   That's a judgment by eye on a debug build, with no timing taken.

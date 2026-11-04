@@ -46,7 +46,8 @@ export type Shape = { line: string; area: string; points: Point[]; dots: Point[]
 /**
  * A chart of the last 24 hours, by the clock. Its height runs from 0 to the highest value or `least`, whichever is more, so a
  * flat line sits low rather than filling the box, which is what the chart is there to show. A dot sits on the first sample at or
- * after its moment, since that's the one that shows what the moment did, or on the last sample if none has come yet.
+ * after its moment, since that's the one that shows what the moment did, or on the last sample if none has come yet, and two
+ * moments on one sample draw one dot.
  */
 export function shapeOf(samples: Sample[], value: (sample: Sample) => number, now: number, least: number, moments: number[]): Shape {
   const top = Math.max(least, ...samples.map(value))
@@ -73,7 +74,7 @@ export function shapeOf(samples: Sample[], value: (sample: Sample) => number, no
     const point = points.find((candidate) => candidate.sample.at >= moment) ?? points[points.length - 1]
     return point ? [point] : []
   })
-  return { line, area, points, dots }
+  return { line, area, points, dots: [...new Set(dots)] }
 }
 
 /** The point nearest `x`, or the dot, if one is about as near, so a thin spike's dot is easy to land on. */
@@ -87,9 +88,9 @@ export function nearest(shape: Shape, x: number, dotReach = 8): { point: Point; 
 
 /** What quitting costs right now, in one sentence or two. */
 export function quitCost(view: Pick<View, "simRunning" | "sessionHeld" | "desktop">): string {
-  const stops = "the EFB app will stop working until you open Dual Input again from the Start menu."
-  if (view.sessionHeld) return `You'll leave your session now, and ${stops}`
-  if (view.simRunning) return `The ${stops.slice(4)}`
+  const stops = "EFB app will stop working until you open Dual Input again from the Start menu."
+  if (view.sessionHeld) return `You'll leave your session now, and the ${stops}`
+  if (view.simRunning) return `The ${stops}`
   // Logging in brings it back only if Windows starts it.
   const until = view.desktop.start_with_windows === "on" ? "log in again or open it" : "open it"
   return `Dual Input won't be ready for your next flight, or get updates, until you ${until} from the Start menu. Certain features may break on some aircraft.`

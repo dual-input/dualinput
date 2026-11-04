@@ -80,8 +80,8 @@ function StartWithWindows({ view, ask }: { view: View; ask: DesktopLink["ask"] }
         <Switch checked={state === "on"} disabled={state === "off-in-windows"} aria-label="Start with Windows" onCheckedChange={(on) => ask({ t: "set-start-with-windows", on })} />
       </div>
       <Room open={warning.open} pad="pt-1" style={warning.style}>
+        {/* The EFB app's Settings tab says these two lines under its switch, src/platform/efb-shell/src/settings/settings-page.tsx, so change both together. */}
         {state === "off-in-windows" && <p className="mb-1 text-xs text-muted-foreground">Turned off in Windows. Turn it back on in Settings, under Apps, Startup.</p>}
-        {/* The EFB app's Settings tab says the same under its switch, src/platform/efb-shell/src/settings/settings-page.tsx, so change both together. */}
         <p className="text-xs text-warning">
           With this off, you'll need to open Dual Input from the Start menu for each flight. Forgetting to launch it early enough can result in certain features breaking in some aircraft. No automatic updates means you may need to restart the sim just as you are preparing to fly.
         </p>
@@ -239,10 +239,12 @@ export function DesktopWindow({ version, link }: { version: string; link: Deskto
   // The window hugs what it shows, since a folded list, the switch's warning, and each screen all differ in height, and it
   // follows them frame by frame as they ease open or shut. What it shows only scrolls when the screen has too little room, and
   // the Rust side says when that is: a page that scrolled whenever it grew would flash a scrollbar until the window caught up,
-  // which narrows the text and jumps the layout.
+  // which narrows the text and jumps the layout. Nothing's measured until the first read has come, since the first fit shows the
+  // window, and an empty page would show it as a strip.
+  const ready = view !== undefined && screen !== undefined
   useLayoutEffect(() => {
     const element = content.current
-    if (!element) return
+    if (!element || !ready) return
     const fit = () => {
       const height = Math.ceil(element.getBoundingClientRect().height) + BAR_HEIGHT
       void link.fit(height).then((shown) => setRoom(shown < height ? shown - BAR_HEIGHT : undefined))
@@ -251,7 +253,7 @@ export function DesktopWindow({ version, link }: { version: string; link: Deskto
     const observer = new ResizeObserver(fit)
     observer.observe(element)
     return () => observer.disconnect()
-  }, [link])
+  }, [link, ready])
 
   return (
     <Root>

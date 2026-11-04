@@ -6,7 +6,7 @@ import type { Sample, Usage } from "./link.ts"
 import { agoText, averageOf, CHART_HEIGHT, CHART_WIDTH, cpuText, memoryText, nearest, networkText, shapeOf, totalOf } from "./usage.ts"
 
 /** A figure's own color, which only its box uses, so nothing here has to mean a status. The first is the kit's primary. */
-const MEMORY = "#74d4ff"
+const MEMORY = "rgb(var(--primary))"
 const CPU = "#c4b5fd"
 const NETWORK = "#f9a8d4"
 

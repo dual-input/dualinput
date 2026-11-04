@@ -63,6 +63,12 @@ test("a dot sits on the first sample at or after its moment, or the last if none
   assert.equal(shape.dots[1]!.sample.at, NOW)
 })
 
+test("two moments on one sample draw one dot", () => {
+  const shape = shapeOf([sample(NOW - 60), sample(NOW)], memory, NOW, MB, [NOW - 30, NOW - 10, NOW])
+  assert.equal(shape.dots.length, 1)
+  assert.equal(shape.dots[0]!.sample.at, NOW)
+})
+
 test("a hover near a dot lands on it, and elsewhere on the nearest sample", () => {
   const shape = shapeOf([sample(NOW - 7200), sample(NOW - 7140), sample(NOW - 60), sample(NOW)], memory, NOW, MB, [NOW])
   assert.deepEqual(nearest(shape, shape.dots[0]!.x - 3), { point: shape.dots[0]!, onDot: true })

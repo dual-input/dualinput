@@ -121,12 +121,13 @@ const HANDS = [HOLD.across, 1 - HOLD.across].map((across) => {
 export const OVERHANG = 0.1
 
 // Studio light: a soft key high on the left, a cool fill from the right, a rim from behind on the
-// right that outlines the shapes against the backdrop, and a sky-and-floor ambient.
-const KEY = { dir: unit([-0.6, 0.75, 0.6]), color: [1.0, 0.96, 0.9] as V, power: 1.2, softness: 2.5 }
-const FILL = { dir: unit([0.85, 0.1, 0.55]), color: [0.75, 0.83, 1.0] as V, power: 0.28 }
-const RIM = { dir: unit([0.6, 0.5, -0.65]), color: [1.0, 0.98, 0.95] as V, power: 1.1 }
-const SKY: V = [0.42, 0.45, 0.52]
-const FLOOR: V = [0.16, 0.14, 0.13]
+// right that outlines the shapes against the backdrop, and a sky-and-floor ambient. The session
+// card's cockpit (cockpit-scene.tsx) lights its scene with the same, so the figures in it match.
+export const KEY = { dir: unit([-0.6, 0.75, 0.6]), color: [1.0, 0.96, 0.9] as V, power: 1.2, softness: 2.5 }
+export const FILL = { dir: unit([0.85, 0.1, 0.55]), color: [0.75, 0.83, 1.0] as V, power: 0.28 }
+export const RIM = { dir: unit([0.6, 0.5, -0.65]), color: [1.0, 0.98, 0.95] as V, power: 1.1 }
+export const SKY: V = [0.42, 0.45, 0.52]
+export const FLOOR: V = [0.16, 0.14, 0.13]
 const ROUGHNESS = 0.72
 
 // The ray tests, shade, display, and both figures' passes run for every pixel of every pass, where

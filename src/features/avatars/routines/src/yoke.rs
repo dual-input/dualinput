@@ -83,7 +83,12 @@ fn stage(s: &StageSlot, value: f32) -> Frame3 {
     } else {
         0.0
     };
-    let i = (at.floor() as usize).min(SAMPLES - 2);
+    // Rust compiles an `as` from a float to `trunc_sat`, which cargo-msfs's check of the module
+    // refuses (measured with Rust 1.95, 2026-11-04), so the sample is counted up to.
+    let i = (1..SAMPLES - 1)
+        .take_while(|&i| i as f32 <= at)
+        .last()
+        .unwrap_or(0);
     let t = (at - i as f32).clamp(0.0, 1.0);
     let (Some(&[ax, ay, az, aqx, aqy, aqz, aqw]), Some(&[bx, by, bz, bqx, bqy, bqz, bqw])) =
         (s.samples.get(i), s.samples.get(i + 1))

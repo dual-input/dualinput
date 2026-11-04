@@ -358,7 +358,10 @@ pub(crate) mod tests {
     use super::*;
 
     /// A profile with two variants, a state entry and an event entry, and comments to keep.
-    pub(crate) const PROFILE: &str = "authors: Dual Input # the team
+    pub(crate) const PROFILE: &str = "maker: Black Square
+name: Baron 58P
+maturity: experimental
+authors: Dual Input # the team
 
 aircraft:
   variants:

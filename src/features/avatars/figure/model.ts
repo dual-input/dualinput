@@ -129,9 +129,9 @@ export type Detail = { name: string; minSize: number; rings: number; segments: n
 
 /** The levels of detail, nearest first, which the model XML lists by `minSize`. */
 export const DETAILS: Detail[] = [
-  { name: "LOD00", minSize: 40, rings: 10, segments: 16, stick: 10 },
-  { name: "LOD01", minSize: 12, rings: 6, segments: 10, stick: 6 },
-  { name: "LOD02", minSize: 0, rings: 4, segments: 6, stick: 4 },
+  { name: "LOD00", minSize: 40, rings: 32, segments: 64, stick: 32 },
+  { name: "LOD01", minSize: 12, rings: 10, segments: 16, stick: 10 },
+  { name: "LOD02", minSize: 0, rings: 6, segments: 10, stick: 6 },
 ]
 
 type Geometry = { pos: number[]; nrm: number[]; idx: number[] }

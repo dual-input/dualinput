@@ -13,6 +13,31 @@ The 58P's and the Comanche's models are glTF with no compression, in vertex layo
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-11-05: The figure's closest level of detail draws 47,104 triangles, since the pilots sit an arm's length apart
+
+**Asked:** how round the figure's closest level of detail should be, with the user's direction of no compromise there, since the pilots sit side by side.
+
+**Expected:** 24 rings, 48 segments, and 24 stick sides to be enough, against today's 10, 16, and 10.
+
+**Found:** the user compared three in `tools/figure-viewer`, each at 46 draw calls.
+
+| Rings, segments, stick sides | Triangles as posed | Vertices |
+| --- | --- | --- |
+| 10, 16, 10 | 4,128 | 4,435 |
+| 24, 48, 24 | 26,880 | 18,958 |
+| 32, 64, 32 | 47,104 | 30,834 |
+
+The second could also work, and the third is smoother (user, 2026-11-05).
+The user took the third: figures in the cockpit are always close, and most flights have no more than two of them.
+Its `LOD00.bin` is 384 KB as compiled.
+What its triangles cost a frame isn't measured, and the session in the sim measures it against p28's figure.
+
+**Changed:** `DETAILS` in `model.ts` holds 32, 64, 32 at LOD00, the old LOD00 at LOD01 with 4,128 triangles, and the old LOD01 at LOD02 with 1,688.
+`BUDGET` in `tools/lib/figure.ts` is 48,000, 6,000, and 2,500 triangles, which keeps LOD01 and LOD02 under the 7,500 and 2,500 of Asobo's characters (read in the MSFS 2024 SDK, `LodProcessingPresets/Characters.xmlod`).
+The `minSize` of each stays at 40, 12, and 0 until the session in the sim shows which bounding sphere the sim measures: at rest, the hidden 2.56m telescope pieces make it 2.57m against about 0.7m for the figure, and a switch at 20m is a `minSize` of about 22 by the first and about 6 by the second, at a 60° vertical field of view (arithmetic).
+
+**Affects:** [stage 17's budget for the figure](../build/plan.md#17-avatars).
+
 ## 2026-11-04: A large model costs the loop about 0.23ms a megabyte at each load, and the A350's and A220's cockpits are attachments we don't read
 
 **Asked:** the user accepted the 58P's 5.6ms on the loop at each load, and asked what happens with a large aircraft, such as an A350 or an A380.

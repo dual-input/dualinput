@@ -20,15 +20,16 @@ export const PACKAGE = "dualinput-figure"
 export const OBJECT = `SimObjects/Misc/${TITLE}`
 
 /**
- * The most each level of detail draws, a starting value this stage sets from the viewer's
- * look against p28's figure, which cost 16µs to 21µs a frame in view standing still (measured
- * on MSFS 2024, 2026-10-05, record/areas/avatars/log.md, "Each figure poses from its own
- * object's variables").
+ * The most each level of detail draws. LOD00 draws a figure in the cockpit, an arm's length from
+ * the other pilot, so it takes what the viewer showed stops its curves looking faceted
+ * (record/areas/avatars/log.md, "The figure's closest level of detail"). LOD01 and LOD02 stay
+ * under what Asobo's characters allow at those levels, 7,500 and 2,500 triangles (read in the
+ * MSFS 2024 SDK, LodProcessingPresets/Characters.xmlod).
  */
 export const BUDGET: Record<string, { triangles: number; draws: number }> = {
-  LOD00: { triangles: 6_000, draws: 60 },
-  LOD01: { triangles: 2_500, draws: 60 },
-  LOD02: { triangles: 900, draws: 60 },
+  LOD00: { triangles: 48_000, draws: 60 },
+  LOD01: { triangles: 6_000, draws: 60 },
+  LOD02: { triangles: 2_500, draws: 60 },
 }
 
 export function spec(figure = FIGURE): Spec {

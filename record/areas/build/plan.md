@@ -568,6 +568,8 @@ Tests:
 - From stage 4, in this stage's session in the sim: `fsVarsAVarSet` holds the pilot's own aircraft's pose; through a second flight load in one run of the sim, `Follow` starts new at its first feed ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)); and our module's update, every routine's frame and the routine host's work together, takes under 0.1ms a frame at p99 ([budgets for work in the sim](../architecture/02-code-map.md#budgets-for-work-in-the-sim)).
 - From stage 11a, on the bench: a restarted core with `Follow` fed, and whether the trouble notification for our package shows before the module's first status write ([the apps' cases](../interface/01-apps.md#cases-for-the-bench)).
 - From stage 19, in the first flight with friends: [pointer sync's cases with friends](../pointer-sync/01-pointer-sync.md#cases-for-the-bench), whether the two PCs give a display the same rect, and whether a drag looks smooth over a relayed link.
+- From stage 17, in this stage's session in the sim: whether an overlay such as Steam's would swallow every click if the core helper checked the window under the cursor, the check that would keep a click on another program's window over the sim's view from bringing a hand ([avatars' known limits](../avatars/01-avatars.md#known-limits)).
+- From stage 17, in this stage's session in the sim: `Figure` timed again beside `Lead` and `Follow` with `experiments/areas/avatars/p29-sim-session/update-timer.patch`, since they share the module's 0.1ms and stage 17 measured the module's update at 127µs to 146µs at p99 with two figures ([avatars log](../avatars/log.md#2026-11-05-a-click-that-took-the-focus-from-the-sim-left-a-figures-hand-out-and-the-rest-of-the-session-passed)).
 
 ## 17 Avatars
 

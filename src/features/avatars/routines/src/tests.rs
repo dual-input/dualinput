@@ -139,6 +139,40 @@ fn a_figure_in_a_moving_aircraft_moves_with_it_led_by_a_frame() {
 }
 
 #[test]
+fn a_pilots_own_figure_on_foot_stands_on_their_avatar_and_another_trails_on_its_spring() {
+    let mut host = Host::new(routine_host::routines![Figure], HASH, "0.1.0");
+    let mut world = World::default();
+    let mut slot = seated();
+    slot.count = 2;
+    slot.figures[1] = slot.figures[0];
+    slot.figures[1].object = OBJECT + 1;
+    for f in &mut slot.figures[..2] {
+        f.pose.body = BODY_ON_FOOT;
+    }
+    slot.figures[0].own = 1;
+    let lat = |w: &World, o| w.values[&(o, "PLANE LATITUDE".to_string())];
+    world.values.insert((0, "PLANE LATITUDE".into()), 47.0);
+    world.values.insert((AVATAR, "PLANE LATITUDE".into()), 47.0);
+    feed(&mut host, 1, &slot, 0);
+    frame(&mut host, &mut world, 1_000);
+    // A step of about 1.1m, with the core still feeding the place it had.
+    world
+        .values
+        .insert((AVATAR, "PLANE LATITUDE".into()), 47.00001);
+    let moved = [0.0, 0.0, 1.1];
+    slot.figures[1].pose.at = moved;
+    feed(&mut host, 2, &slot, 2_000);
+    frame(&mut host, &mut world, 34_333);
+    let own = lat(&world, OBJECT) - 47.00001;
+    assert!(own.abs() < 1e-7, "on the avatar, with no lead: {own}");
+    let trailing = lat(&world, OBJECT + 1) - 47.0;
+    assert!(
+        trailing > 1e-7 && trailing < 0.9e-5,
+        "the other is on its way: {trailing}"
+    );
+}
+
+#[test]
 fn a_figure_on_foot_steps_as_it_moves_and_runs_past_a_speed() {
     let mut host = Host::new(routine_host::routines![Figure], HASH, "0.1.0");
     let mut world = World::default();

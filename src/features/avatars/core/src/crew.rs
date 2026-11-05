@@ -168,6 +168,7 @@ impl Crew {
             let rest = rest_hands(place, pf == Some(pilot), yokes);
             drawn.push(Drawn {
                 object,
+                own,
                 pose,
                 seat: place,
                 color: colors.get(&pilot).copied().unwrap_or(0),
@@ -182,8 +183,8 @@ impl Crew {
     }
 }
 
-/// What of a figure shows, by the switch for whose it is and where it is: this pilot's own
-/// sits with its head at the camera while inside, so it hides its head and neck and fades its
+/// What of a figure shows, by the switch for whose it is and where it is: this pilot's own has
+/// its head at the camera, in a seat and on foot, so it hides its head and neck and fades its
 /// hands.
 fn shows(own: bool, body: &Body, settings: &Settings) -> u32 {
     let on_foot = matches!(body, Body::OnFoot { .. });
@@ -193,7 +194,7 @@ fn shows(own: bool, body: &Body, settings: &Settings) -> u32 {
         (false, false) => settings.crew_inside,
         (false, true) => settings.crew_walkaround,
     };
-    match (on, own && !on_foot) {
+    match (on, own) {
         (false, _) => 0,
         (true, true) => SHOWS_BODY | SHOWS_HANDS | SHOWS_FADED,
         (true, false) => SHOWS_ALL,
@@ -383,10 +384,10 @@ mod tests {
             heading: 0.0,
             crouch: false,
         };
-        let inside_own = SHOWS_BODY | SHOWS_HANDS | SHOWS_FADED;
+        let own = SHOWS_BODY | SHOWS_HANDS | SHOWS_FADED;
         let all = Settings::default();
-        assert_eq!(shows(true, &seated, &all), inside_own);
-        assert_eq!(shows(true, &on_foot, &all), SHOWS_ALL);
+        assert_eq!(shows(true, &seated, &all), own);
+        assert_eq!(shows(true, &on_foot, &all), own);
         assert_eq!(shows(false, &seated, &all), SHOWS_ALL);
         assert_eq!(shows(false, &on_foot, &all), SHOWS_ALL);
         let off = |change: fn(&mut Settings)| {
@@ -401,19 +402,13 @@ mod tests {
         };
         assert_eq!(
             off(|s| s.mine_inside = false),
-            [0, SHOWS_ALL, SHOWS_ALL, SHOWS_ALL]
+            [0, own, SHOWS_ALL, SHOWS_ALL]
         );
         assert_eq!(
             off(|s| s.mine_walkaround = false),
-            [inside_own, 0, SHOWS_ALL, SHOWS_ALL]
+            [own, 0, SHOWS_ALL, SHOWS_ALL]
         );
-        assert_eq!(
-            off(|s| s.crew_inside = false),
-            [inside_own, SHOWS_ALL, 0, SHOWS_ALL]
-        );
-        assert_eq!(
-            off(|s| s.crew_walkaround = false),
-            [inside_own, SHOWS_ALL, SHOWS_ALL, 0]
-        );
+        assert_eq!(off(|s| s.crew_inside = false), [own, own, 0, SHOWS_ALL]);
+        assert_eq!(off(|s| s.crew_walkaround = false), [own, own, SHOWS_ALL, 0]);
     }
 }

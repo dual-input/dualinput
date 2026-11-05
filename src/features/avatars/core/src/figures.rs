@@ -27,6 +27,8 @@ pub(crate) enum Look {
 /// One figure as the slot carries it.
 pub(crate) struct Drawn<'a> {
     pub(crate) object: u32,
+    /// Whether it's this pilot's own.
+    pub(crate) own: bool,
     pub(crate) pose: &'a Pose,
     pub(crate) seat: Option<&'a Place>,
     pub(crate) color: u8,
@@ -105,6 +107,7 @@ fn state(f: &Drawn) -> FigureState {
         color: u32::from(if gray { GRAY } else { f.color }),
         shows: f.shows,
         slumps: u32::from(f.look == Look::Slumped),
+        own: u32::from(f.own),
         hip,
         knees,
         feet,
@@ -170,6 +173,7 @@ mod tests {
         };
         let drawn = |look| Drawn {
             object: 0x100,
+            own: false,
             pose: &pose,
             seat: None,
             color: 1,

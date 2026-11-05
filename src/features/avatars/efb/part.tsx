@@ -12,6 +12,7 @@ import type { ReactNode } from "react"
 
 import type { AircraftNote } from "../../../engines/messages/ts/avatars/AircraftNote.ts"
 import type { AvatarsSlice } from "../../../engines/messages/ts/avatars/AvatarsSlice.ts"
+import type { ProfilesSlice } from "../../../engines/messages/ts/profiles/ProfilesSlice.ts"
 import { definePart, useCoreSlice, useShell } from "../../../platform/efb-shell/src/part.ts"
 import { FIGURE_COLOR, NAME, useSetting, writeSetting } from "../../../platform/efb-shell/src/settings/setting.ts"
 import { IdentityCard } from "../../../platform/efb-shell/src/setup/identity-card.tsx"
@@ -29,7 +30,7 @@ const FIRST_COLOR = "orange"
 const NAME_SETTLES = 800
 
 /** Why the figures do less in the loaded aircraft, in the information color with no tab dot, since the pilot has nothing to fix. */
-function NoteForAircraft({ note, onLearnMore }: { note: AircraftNote; onLearnMore: () => void }) {
+function NoteForAircraft({ note, onLearnMore }: { note: AircraftNote | "no-profile"; onLearnMore: () => void }) {
   return (
     <Card flush tint="bg-info/10 text-info">
       <p className="flex items-start px-4 py-3">
@@ -41,8 +42,10 @@ function NoteForAircraft({ note, onLearnMore }: { note: AircraftNote; onLearnMor
               Learn more
             </button>
           </span>
-        ) : (
+        ) : note === "seats" ? (
           <span>This aircraft's Dual Input profile has no seats, so figures show as floating heads only.</span>
+        ) : (
+          <span>This aircraft has no Dual Input profile yet, so figures won't show.</span>
         )}
       </p>
     </Card>
@@ -229,7 +232,9 @@ function FiguresPage() {
   // Every tab's page stays mounted, and the portrait aims by measuring, which a hidden page can't, so the card waits for the tab's first opening.
   const opened = useRef(false)
   if (tab === "avatars") opened.current = true
-  const note = useCoreSlice<AvatarsSlice>("avatars")?.note
+  const profiles = useCoreSlice<ProfilesSlice>("profiles")
+  // With no profile, avatars loads nothing and so has no note of its own to give.
+  const note = useCoreSlice<AvatarsSlice>("avatars")?.note ?? (profiles && !profiles.loaded ? "no-profile" : null)
   const page = useRef<HTMLDivElement>(null)
   const saved = useSetting(link, NAME)
   // What the pilot is typing, which waits on no answer from the core. An emptied field writes nothing, so a member always has a name.

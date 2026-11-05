@@ -23,9 +23,9 @@ impl Seat {
     pub fn at(hip: [f32; 3]) -> Seat {
         Seat {
             hip,
-            knees: [0.05, 0.45],
-            feet: [-0.42, 0.62],
-            eye: [0.63, -0.05],
+            knees: [-0.044, 0.218],
+            feet: [-0.198, 0.51],
+            eye: [0.643, -0.054],
             facing: 0.0,
         }
     }

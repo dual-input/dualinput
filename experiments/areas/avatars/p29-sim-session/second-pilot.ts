@@ -165,7 +165,13 @@ async function command(line: string): Promise<boolean> {
 let read = 0
 for (let going = true; going; ) {
   await sleep(200)
-  const text = fs.readFileSync(COMMANDS, "utf8")
+  // Windows refuses the read while another program is appending a command.
+  let text = ""
+  try {
+    text = fs.readFileSync(COMMANDS, "utf8")
+  } catch {
+    continue
+  }
   if (text.length > read) {
     for (const line of text.slice(read).split(/\r?\n/).filter(Boolean)) going = (await command(line)) && going
     read = text.length

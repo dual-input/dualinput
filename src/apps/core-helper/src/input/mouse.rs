@@ -82,6 +82,21 @@ impl MouseState {
     }
 }
 
+/// Whether `kind` crosses, with the cursor at `place` in the sim's main window, or `None` while
+/// that window isn't in front, since a click in a popped-out display or another program is
+/// none of the sim's. A click that takes the focus away reads as in front at its press and
+/// not at its release, so a left release always crosses, or the hand its press brought would
+/// stay until the next click. A press off the window's area is such a click on another monitor.
+pub fn crosses(kind: &MouseKind, place: Option<(f32, f32)>) -> bool {
+    match kind {
+        MouseKind::LeftUp => true,
+        MouseKind::Move | MouseKind::RightUp { .. } => place.is_some(),
+        MouseKind::LeftDown | MouseKind::RightDown | MouseKind::Wheel { .. } => {
+            place.is_some_and(|(x, y)| x.abs() <= 1.0 && y.abs() <= 1.0)
+        }
+    }
+}
+
 /// The cursor's place in a client area `width` by `height` pixels, from its pixel in that
 /// area: −1 to 1, right and up. `place` in tools/profile-author's screen.rs reads the cursor
 /// the same way, so change both together.
@@ -173,6 +188,30 @@ mod tests {
             mouse.report(turn(-240), 2),
             [MouseKind::Wheel { notches: -2 }]
         );
+    }
+
+    #[test]
+    fn a_click_that_takes_the_focus_away_crosses_its_press_and_its_release() {
+        let inside = Some((0.2, -0.4));
+        assert!(crosses(&MouseKind::LeftDown, inside));
+        assert!(crosses(&MouseKind::LeftUp, None));
+    }
+
+    #[test]
+    fn with_the_sim_behind_or_the_cursor_off_its_window_only_a_left_release_crosses() {
+        let off = Some((1.4, 0.0));
+        assert!(!crosses(&MouseKind::LeftDown, off));
+        assert!(!crosses(&MouseKind::RightDown, off));
+        assert!(!crosses(&MouseKind::Wheel { notches: 1 }, off));
+        for kind in [
+            MouseKind::LeftDown,
+            MouseKind::RightDown,
+            MouseKind::Move,
+            MouseKind::RightUp { travel: 0 },
+            MouseKind::Wheel { notches: 1 },
+        ] {
+            assert!(!crosses(&kind, None), "{kind:?}");
+        }
     }
 
     #[test]

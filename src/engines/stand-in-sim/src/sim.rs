@@ -419,7 +419,7 @@ impl Sim {
                 flags,
             } => {
                 if period == SIMCONNECT_PERIOD_ONCE {
-                    if let Some(data) = self.data(connection, request, definition, object) {
+                    if let Some(data) = self.data(connection, request, definition, object, true) {
                         self.send(connection, &Message::ObjectData(data));
                     }
                 } else if flags & SIMCONNECT_DATA_REQUEST_FLAG_CHANGED != 0 {
@@ -447,7 +447,7 @@ impl Sim {
                     self.world.objects()
                 };
                 for object in objects {
-                    if let Some(data) = self.data(connection, request, definition, object) {
+                    if let Some(data) = self.data(connection, request, definition, object, false) {
                         self.send(connection, &Message::ObjectData(data));
                     }
                 }
@@ -537,13 +537,16 @@ impl Sim {
         request: u32,
         definition: u32,
         object: u32,
+        tagged: bool,
     ) -> Option<Data> {
         let conn = self.conns.get(&connection)?;
         let datums = conn.definitions.get(&definition)?;
         let vars = self.world.vars(object)?;
         let mut bytes = Vec::new();
         for d in datums {
-            bytes.extend_from_slice(&d.datum.to_le_bytes());
+            if tagged {
+                bytes.extend_from_slice(&d.datum.to_le_bytes());
+            }
             if d.text {
                 let mut field = [0u8; 256];
                 let text = vars.text(&d.name);
@@ -558,8 +561,8 @@ impl Sim {
             request,
             object,
             definition,
-            flags: 2,
-            count: datums.len() as u32,
+            flags: if tagged { 2 } else { 0 },
+            count: if tagged { datums.len() as u32 } else { 1 },
             bytes,
         })
     }
@@ -596,7 +599,7 @@ impl Sim {
             })
             .collect();
         for (connection, request, definition, object) in changed {
-            let Some(data) = self.data(connection, request, definition, object) else {
+            let Some(data) = self.data(connection, request, definition, object, true) else {
                 continue;
             };
             let Some(req) = self

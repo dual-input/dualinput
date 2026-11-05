@@ -7,6 +7,9 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 ```
 
 > **Note**
+> In [budgets for work in the sim](#budgets-for-work-in-the-sim), `Figure` alone takes about 140µs at p99 with two figures, which the user accepted for stage 17, and the sim's WASM Debug window reads 0ms for a standalone module, so `experiments/areas/avatars/p29-sim-session/update-timer.patch` times it ([avatars log](../avatars/log.md#2026-11-05-a-click-that-took-the-focus-from-the-sim-left-a-figures-hand-out-and-the-rest-of-the-session-passed)).
+
+> **Note**
 > In [what the bridge owns](#what-the-bridge-owns), a lock that turns into a warning keeps a lock's look, with a Dismiss on a card that takes presses while its veil passes them, and Dismiss reaches every panel by the CommBus event `DUALINPUT_BRIDGE_DISMISS`, which joins [names the sim shares](#names-the-sim-shares) under `BRIDGE` ([a visible lock](../interface/decisions.md#a-visible-lock-is-a-veil-over-the-display-with-one-centered-card); user, 2026-11-01).
 
 > **Note**

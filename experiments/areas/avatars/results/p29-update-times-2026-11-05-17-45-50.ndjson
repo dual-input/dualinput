@@ -1,0 +1,440 @@
+{"t":1793900750160,"s":0.024,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1793900750162,"s":0.026,"kind":"label","text":"no lead, session starting"}
+{"t":1793900750183,"s":0.047,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1793900750184,"s":0.048,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1793900750184,"s":0.048,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1793900750184,"s":0.048,"kind":"window","text":"no lead, session starting #6: p50 3.0µs, p99 12.9µs, max 16.3µs","label":"no lead, session starting","window":6,"p50":3,"p99":12.9,"max":16.3}
+{"t":1793900751216,"s":1.08,"kind":"window","text":"no lead, session starting #7: p50 2.9µs, p99 12.9µs, max 109.8µs","label":"no lead, session starting","window":7,"p50":2.9,"p99":12.9,"max":109.8}
+{"t":1793900761550,"s":11.414,"kind":"window","text":"no lead, session starting #8: p50 2.8µs, p99 10.9µs, max 59.1µs","label":"no lead, session starting","window":8,"p50":2.8,"p99":10.9,"max":59.1}
+{"t":1793900771885,"s":21.749,"kind":"window","text":"no lead, session starting #9: p50 3.7µs, p99 77.5µs, max 229.5µs","label":"no lead, session starting","window":9,"p50":3.7,"p99":77.5,"max":229.5}
+{"t":1793900782185,"s":32.049,"kind":"window","text":"no lead, session starting #10: p50 77.9µs, p99 149.1µs, max 243.5µs","label":"no lead, session starting","window":10,"p50":77.9,"p99":149.1,"max":243.5}
+{"t":1793900791455,"s":41.319,"kind":"window","text":"no lead, session starting #11: p50 74.8µs, p99 114.8µs, max 120.7µs","label":"no lead, session starting","window":11,"p50":74.8,"p99":114.8,"max":120.7}
+{"t":1793900800436,"s":50.3,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1793900802860,"s":52.724,"kind":"window","text":"no lead, session starting #12: p50 78.8µs, p99 136.8µs, max 167.2µs","label":"no lead, session starting","window":12,"p50":78.8,"p99":136.8,"max":167.2}
+{"t":1793900812164,"s":62.028,"kind":"window","text":"no lead, session starting #13: p50 83.3µs, p99 125.6µs, max 133.3µs","label":"no lead, session starting","window":13,"p50":83.3,"p99":125.6,"max":133.3}
+{"t":1793900820398,"s":70.262,"kind":"label","text":"no lead, on foot"}
+{"t":1793900822465,"s":72.329,"kind":"window","text":"no lead, on foot #14: p50 75.0µs, p99 108.0µs, max 245.4µs","label":"no lead, on foot","window":14,"p50":74.999,"p99":107.999,"max":245.4}
+{"t":1793900832742,"s":82.606,"kind":"window","text":"no lead, on foot #15: p50 73.8µs, p99 107.6µs, max 221.5µs","label":"no lead, on foot","window":15,"p50":73.8,"p99":107.6,"max":221.5}
+{"t":1793900842975,"s":92.839,"kind":"window","text":"no lead, on foot #16: p50 75.9µs, p99 136.0µs, max 320.8µs","label":"no lead, on foot","window":16,"p50":75.9,"p99":136,"max":320.8}
+{"t":1793900852275,"s":102.139,"kind":"window","text":"no lead, on foot #17: p50 76.8µs, p99 121.7µs, max 186.8µs","label":"no lead, on foot","window":17,"p50":76.8,"p99":121.7,"max":186.8}
+{"t":1793900862608,"s":112.472,"kind":"window","text":"no lead, on foot #18: p50 76.0µs, p99 106.8µs, max 192.0µs","label":"no lead, on foot","window":18,"p50":76,"p99":106.8,"max":192}
+{"t":1793900872844,"s":122.708,"kind":"window","text":"no lead, on foot #19: p50 60.5µs, p99 89.0µs, max 203.0µs","label":"no lead, on foot","window":19,"p50":60.5,"p99":89,"max":203}
+{"t":1793900883176,"s":133.04,"kind":"window","text":"no lead, on foot #20: p50 56.3µs, p99 83.0µs, max 91.7µs","label":"no lead, on foot","window":20,"p50":56.3,"p99":83,"max":91.7}
+{"t":1793900892443,"s":142.307,"kind":"window","text":"no lead, on foot #21: p50 58.8µs, p99 101.9µs, max 114.5µs","label":"no lead, on foot","window":21,"p50":58.8,"p99":101.9,"max":114.5}
+{"t":1793900902776,"s":152.64,"kind":"window","text":"no lead, on foot #22: p50 56.3µs, p99 81.0µs, max 138.9µs","label":"no lead, on foot","window":22,"p50":56.3,"p99":81,"max":138.9}
+{"t":1793900913108,"s":162.972,"kind":"window","text":"no lead, on foot #23: p50 56.3µs, p99 92.0µs, max 148.8µs","label":"no lead, on foot","window":23,"p50":56.3,"p99":92,"max":148.8}
+{"t":1793900922409,"s":172.273,"kind":"window","text":"no lead, on foot #24: p50 58.1µs, p99 98.5µs, max 113.1µs","label":"no lead, on foot","window":24,"p50":58.1,"p99":98.5,"max":113.1}
+{"t":1793900932743,"s":182.607,"kind":"window","text":"no lead, on foot #25: p50 56.7µs, p99 88.7µs, max 121.0µs","label":"no lead, on foot","window":25,"p50":56.7,"p99":88.7,"max":121}
+{"t":1793900943076,"s":192.94,"kind":"window","text":"no lead, on foot #26: p50 57.0µs, p99 92.0µs, max 119.9µs","label":"no lead, on foot","window":26,"p50":57,"p99":92,"max":119.9}
+{"t":1793900952376,"s":202.24,"kind":"window","text":"no lead, on foot #27: p50 56.5µs, p99 121.1µs, max 148.8µs","label":"no lead, on foot","window":27,"p50":56.5,"p99":121.1,"max":148.8}
+{"t":1793900962709,"s":212.573,"kind":"window","text":"no lead, on foot #28: p50 56.1µs, p99 83.3µs, max 247.2µs","label":"no lead, on foot","window":28,"p50":56.1,"p99":83.3,"max":247.2}
+{"t":1793900973042,"s":222.906,"kind":"window","text":"no lead, on foot #29: p50 56.1µs, p99 90.1µs, max 146.1µs","label":"no lead, on foot","window":29,"p50":56.1,"p99":90.1,"max":146.1}
+{"t":1793900982276,"s":232.14,"kind":"window","text":"no lead, on foot #30: p50 55.6µs, p99 84.4µs, max 143.3µs","label":"no lead, on foot","window":30,"p50":55.6,"p99":84.4,"max":143.3}
+{"t":1793900992610,"s":242.474,"kind":"window","text":"no lead, on foot #31: p50 56.1µs, p99 92.3µs, max 114.4µs","label":"no lead, on foot","window":31,"p50":56.1,"p99":92.3,"max":114.4}
+{"t":1793901002943,"s":252.807,"kind":"window","text":"no lead, on foot #32: p50 57.2µs, p99 85.4µs, max 88.9µs","label":"no lead, on foot","window":32,"p50":57.2,"p99":85.4,"max":88.9}
+{"t":1793901012210,"s":262.074,"kind":"window","text":"no lead, on foot #33: p50 57.7µs, p99 90.6µs, max 131.3µs","label":"no lead, on foot","window":33,"p50":57.7,"p99":90.6,"max":131.3}
+{"t":1793901022543,"s":272.407,"kind":"window","text":"no lead, on foot #34: p50 56.4µs, p99 86.4µs, max 96.3µs","label":"no lead, on foot","window":34,"p50":56.4,"p99":86.4,"max":96.3}
+{"t":1793901032811,"s":282.675,"kind":"window","text":"no lead, on foot #35: p50 58.2µs, p99 82.8µs, max 103.3µs","label":"no lead, on foot","window":35,"p50":58.2,"p99":82.8,"max":103.3}
+{"t":1793901039498,"s":289.362,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1793901043163,"s":293.027,"kind":"window","text":"no lead, on foot #36: p50 62.4µs, p99 107.2µs, max 146.9µs","label":"no lead, on foot","window":36,"p50":62.4,"p99":107.2,"max":146.9}
+{"t":1793901043636,"s":293.5,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1793901043671,"s":293.535,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1793901043671,"s":293.535,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1793901043764,"s":293.628,"kind":"system","text":"FlightLoaded %APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","event":"FlightLoaded","file":"%APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","signal":true}
+{"t":1793901043771,"s":293.635,"kind":"system","text":"PositionChanged 0","event":"PositionChanged","data":0}
+{"t":1793901043923,"s":293.787,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1793901043923,"s":293.787,"kind":"flow","text":"FLIGHT_END","flow":"FLIGHT_END","id":15,"file":"","signal":false}
+{"t":1793901043923,"s":293.787,"kind":"flow","text":"FLT_LOAD CustomFlight.FLT","flow":"FLT_LOAD","id":1,"file":"CustomFlight.FLT","signal":false}
+{"t":1793901043923,"s":293.787,"kind":"flow","text":"FLT_LOADED CustomFlight.FLT","flow":"FLT_LOADED","id":2,"file":"CustomFlight.FLT","signal":true}
+{"t":1793901043923,"s":293.787,"kind":"flow","text":"TELEPORT_START","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1793901043924,"s":293.788,"kind":"flow","text":"TELEPORT_DONE","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1793901044259,"s":294.123,"kind":"window","text":"no lead, on foot #0: p50 0.0µs, p99 0.0µs, max 0.0µs","label":"no lead, on foot","window":0,"p50":0,"p99":0,"max":0}
+{"t":1793901045025,"s":294.889,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1793901045295,"s":295.159,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1793901045295,"s":295.159,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1793901050244,"s":300.108,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\bksq-aircraft-baronpro\\simobjects\\airplanes\\bksq-aircraft-baronpropress\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\bksq-aircraft-baronpro\\simobjects\\airplanes\\bksq-aircraft-baronpropress\\aircraft.cfg","signal":true}
+{"t":1793901051506,"s":301.37,"kind":"flow","text":"FLIGHT_START","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1793901051506,"s":301.37,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1793901051506,"s":301.37,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1793901051506,"s":301.37,"kind":"flow","text":"RTC_START","flow":"RTC_START","id":10,"file":"","signal":false}
+{"t":1793901052989,"s":302.853,"kind":"flow","text":"RTC_END","flow":"RTC_END","id":11,"file":"","signal":false}
+{"t":1793901055369,"s":305.233,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1793901058893,"s":308.757,"kind":"window","text":"no lead, on foot #37: p50 56.7µs, p99 147.2µs, max 220.8µs","label":"no lead, on foot","window":37,"p50":56.7,"p99":147.2,"max":220.8}
+{"t":1793901064009,"s":313.873,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1793901064057,"s":313.921,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1793901066898,"s":316.762,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1793901066899,"s":316.763,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1793901067008,"s":316.872,"kind":"system","text":"FlightLoaded %APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","event":"FlightLoaded","file":"%APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","signal":true}
+{"t":1793901067015,"s":316.879,"kind":"system","text":"PositionChanged 0","event":"PositionChanged","data":0}
+{"t":1793901067228,"s":317.092,"kind":"flow","text":"FLIGHT_END","flow":"FLIGHT_END","id":15,"file":"","signal":false}
+{"t":1793901067228,"s":317.092,"kind":"flow","text":"FLT_LOAD CustomFlight.FLT","flow":"FLT_LOAD","id":1,"file":"CustomFlight.FLT","signal":false}
+{"t":1793901067228,"s":317.092,"kind":"flow","text":"FLT_LOADED CustomFlight.FLT","flow":"FLT_LOADED","id":2,"file":"CustomFlight.FLT","signal":true}
+{"t":1793901067228,"s":317.092,"kind":"flow","text":"TELEPORT_START","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1793901067229,"s":317.093,"kind":"flow","text":"TELEPORT_DONE","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1793901067490,"s":317.354,"kind":"window","text":"no lead, on foot #0: p50 0.0µs, p99 0.0µs, max 0.0µs","label":"no lead, on foot","window":0,"p50":0,"p99":0,"max":0}
+{"t":1793901068532,"s":318.396,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1793901068807,"s":318.671,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1793901068807,"s":318.671,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1793901071655,"s":321.519,"kind":"window","text":"no lead, on foot #38: p50 96.2µs, p99 138.1µs, max 180.0µs","label":"no lead, on foot","window":38,"p50":96.2,"p99":138.1,"max":180}
+{"t":1793901074223,"s":324.087,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\bksq-aircraft-baronpro\\simobjects\\airplanes\\bksq-aircraft-baronpropress\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\bksq-aircraft-baronpro\\simobjects\\airplanes\\bksq-aircraft-baronpropress\\aircraft.cfg","signal":true}
+{"t":1793901076988,"s":326.852,"kind":"flow","text":"FLIGHT_START","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1793901076988,"s":326.852,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1793901076988,"s":326.852,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1793901077055,"s":326.919,"kind":"flow","text":"RTC_START","flow":"RTC_START","id":10,"file":"","signal":false}
+{"t":1793901078221,"s":328.085,"kind":"flow","text":"RTC_END","flow":"RTC_END","id":11,"file":"","signal":false}
+{"t":1793901086283,"s":336.147,"kind":"window","text":"no lead, on foot #39: p50 55.9µs, p99 139.2µs, max 303.8µs","label":"no lead, on foot","window":39,"p50":55.9,"p99":139.2,"max":303.801}
+{"t":1793901095567,"s":345.431,"kind":"window","text":"no lead, on foot #40: p50 72.5µs, p99 122.6µs, max 209.6µs","label":"no lead, on foot","window":40,"p50":72.499,"p99":122.6,"max":209.601}
+{"t":1793901105710,"s":355.574,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1793901105881,"s":355.745,"kind":"window","text":"no lead, on foot #41: p50 59.2µs, p99 91.3µs, max 203.8µs","label":"no lead, on foot","window":41,"p50":59.2,"p99":91.3,"max":203.8}
+{"t":1793901116149,"s":366.013,"kind":"window","text":"no lead, on foot #42: p50 83.7µs, p99 131.6µs, max 285.8µs","label":"no lead, on foot","window":42,"p50":83.7,"p99":131.6,"max":285.8}
+{"t":1793901126487,"s":376.351,"kind":"window","text":"no lead, on foot #43: p50 82.1µs, p99 146.4µs, max 209.1µs","label":"no lead, on foot","window":43,"p50":82.1,"p99":146.4,"max":209.1}
+{"t":1793901135787,"s":385.651,"kind":"window","text":"no lead, on foot #44: p50 82.3µs, p99 142.7µs, max 193.9µs","label":"no lead, on foot","window":44,"p50":82.3,"p99":142.7,"max":193.9}
+{"t":1793901146120,"s":395.984,"kind":"window","text":"no lead, on foot #45: p50 82.1µs, p99 150.4µs, max 239.7µs","label":"no lead, on foot","window":45,"p50":82.1,"p99":150.4,"max":239.7}
+{"t":1793901156453,"s":406.317,"kind":"window","text":"no lead, on foot #46: p50 81.2µs, p99 163.5µs, max 250.9µs","label":"no lead, on foot","window":46,"p50":81.2,"p99":163.5,"max":250.9}
+{"t":1793901165754,"s":415.618,"kind":"window","text":"no lead, on foot #47: p50 81.7µs, p99 162.4µs, max 198.0µs","label":"no lead, on foot","window":47,"p50":81.7,"p99":162.4,"max":198}
+{"t":1793901176087,"s":425.951,"kind":"window","text":"no lead, on foot #48: p50 79.8µs, p99 122.6µs, max 194.5µs","label":"no lead, on foot","window":48,"p50":79.8,"p99":122.6,"max":194.5}
+{"t":1793901186421,"s":436.285,"kind":"window","text":"no lead, on foot #49: p50 80.4µs, p99 189.3µs, max 284.7µs","label":"no lead, on foot","window":49,"p50":80.4,"p99":189.3,"max":284.7}
+{"t":1793901195721,"s":445.585,"kind":"window","text":"no lead, on foot #50: p50 80.0µs, p99 130.7µs, max 295.6µs","label":"no lead, on foot","window":50,"p50":80,"p99":130.7,"max":295.6}
+{"t":1793901206053,"s":455.917,"kind":"window","text":"no lead, on foot #51: p50 80.6µs, p99 138.6µs, max 194.1µs","label":"no lead, on foot","window":51,"p50":80.6,"p99":138.6,"max":194.1}
+{"t":1793901216387,"s":466.251,"kind":"window","text":"no lead, on foot #52: p50 80.3µs, p99 196.9µs, max 290.4µs","label":"no lead, on foot","window":52,"p50":80.3,"p99":196.9,"max":290.4}
+{"t":1793901225654,"s":475.518,"kind":"window","text":"no lead, on foot #53: p50 80.5µs, p99 119.4µs, max 124.5µs","label":"no lead, on foot","window":53,"p50":80.5,"p99":119.4,"max":124.5}
+{"t":1793901235954,"s":485.818,"kind":"window","text":"no lead, on foot #54: p50 79.3µs, p99 121.7µs, max 213.0µs","label":"no lead, on foot","window":54,"p50":79.3,"p99":121.7,"max":213}
+{"t":1793901246254,"s":496.118,"kind":"window","text":"no lead, on foot #55: p50 81.1µs, p99 197.4µs, max 212.4µs","label":"no lead, on foot","window":55,"p50":81.1,"p99":197.4,"max":212.4}
+{"t":1793901256555,"s":506.419,"kind":"window","text":"no lead, on foot #56: p50 79.9µs, p99 199.4µs, max 242.1µs","label":"no lead, on foot","window":56,"p50":79.9,"p99":199.4,"max":242.1}
+{"t":1793901265821,"s":515.685,"kind":"window","text":"no lead, on foot #57: p50 79.9µs, p99 126.2µs, max 193.3µs","label":"no lead, on foot","window":57,"p50":79.9,"p99":126.2,"max":193.3}
+{"t":1793901276154,"s":526.018,"kind":"window","text":"no lead, on foot #58: p50 81.0µs, p99 136.7µs, max 188.3µs","label":"no lead, on foot","window":58,"p50":81,"p99":136.7,"max":188.3}
+{"t":1793901286455,"s":536.319,"kind":"window","text":"no lead, on foot #59: p50 81.0µs, p99 146.9µs, max 198.3µs","label":"no lead, on foot","window":59,"p50":81,"p99":146.9,"max":198.3}
+{"t":1793901295755,"s":545.619,"kind":"window","text":"no lead, on foot #60: p50 80.0µs, p99 128.3µs, max 205.0µs","label":"no lead, on foot","window":60,"p50":80,"p99":128.3,"max":205}
+{"t":1793901306055,"s":555.919,"kind":"window","text":"no lead, on foot #61: p50 80.9µs, p99 128.1µs, max 228.6µs","label":"no lead, on foot","window":61,"p50":80.9,"p99":128.1,"max":228.6}
+{"t":1793901316355,"s":566.219,"kind":"window","text":"no lead, on foot #62: p50 81.2µs, p99 133.4µs, max 208.5µs","label":"no lead, on foot","window":62,"p50":81.2,"p99":133.4,"max":208.5}
+{"t":1793901325655,"s":575.519,"kind":"window","text":"no lead, on foot #63: p50 80.5µs, p99 178.2µs, max 206.5µs","label":"no lead, on foot","window":63,"p50":80.5,"p99":178.2,"max":206.5}
+{"t":1793901335924,"s":585.788,"kind":"window","text":"no lead, on foot #64: p50 80.5µs, p99 203.7µs, max 297.0µs","label":"no lead, on foot","window":64,"p50":80.5,"p99":203.7,"max":297}
+{"t":1793901346245,"s":596.109,"kind":"window","text":"no lead, on foot #65: p50 85.3µs, p99 192.6µs, max 208.8µs","label":"no lead, on foot","window":65,"p50":85.3,"p99":192.6,"max":208.8}
+{"t":1793901356549,"s":606.413,"kind":"window","text":"no lead, on foot #66: p50 84.6µs, p99 131.5µs, max 210.8µs","label":"no lead, on foot","window":66,"p50":84.6,"p99":131.5,"max":210.8}
+{"t":1793901366883,"s":616.747,"kind":"window","text":"no lead, on foot #67: p50 81.1µs, p99 153.6µs, max 254.1µs","label":"no lead, on foot","window":67,"p50":81.1,"p99":153.6,"max":254.1}
+{"t":1793901376183,"s":626.047,"kind":"window","text":"no lead, on foot #68: p50 83.8µs, p99 143.6µs, max 170.4µs","label":"no lead, on foot","window":68,"p50":83.8,"p99":143.6,"max":170.4}
+{"t":1793901386516,"s":636.38,"kind":"window","text":"no lead, on foot #69: p50 84.9µs, p99 161.0µs, max 166.5µs","label":"no lead, on foot","window":69,"p50":84.9,"p99":161,"max":166.5}
+{"t":1793901396850,"s":646.714,"kind":"window","text":"no lead, on foot #70: p50 82.5µs, p99 126.8µs, max 187.9µs","label":"no lead, on foot","window":70,"p50":82.5,"p99":126.8,"max":187.9}
+{"t":1793901406150,"s":656.014,"kind":"window","text":"no lead, on foot #71: p50 81.2µs, p99 124.8µs, max 175.2µs","label":"no lead, on foot","window":71,"p50":81.2,"p99":124.8,"max":175.2}
+{"t":1793901416490,"s":666.354,"kind":"window","text":"no lead, on foot #72: p50 85.3µs, p99 158.1µs, max 392.2µs","label":"no lead, on foot","window":72,"p50":85.3,"p99":158.1,"max":392.2}
+{"t":1793901426795,"s":676.659,"kind":"window","text":"no lead, on foot #73: p50 82.7µs, p99 134.9µs, max 261.4µs","label":"no lead, on foot","window":73,"p50":82.7,"p99":134.9,"max":261.4}
+{"t":1793901430902,"s":680.766,"kind":"label","text":"no lead, seated, second pilot head turning every 3s"}
+{"t":1793901436095,"s":685.959,"kind":"window","text":"no lead, seated, second pilot head turning every 3s #74: p50 85.5µs, p99 125.5µs, max 132.3µs","label":"no lead, seated, second pilot head turning every 3s","window":74,"p50":85.5,"p99":125.5,"max":132.3}
+{"t":1793901446329,"s":696.193,"kind":"window","text":"no lead, seated, second pilot head turning every 3s #75: p50 83.5µs, p99 131.8µs, max 171.9µs","label":"no lead, seated, second pilot head turning every 3s","window":75,"p50":83.5,"p99":131.8,"max":171.9}
+{"t":1793901456662,"s":706.526,"kind":"window","text":"no lead, seated, second pilot head turning every 3s #76: p50 86.0µs, p99 127.1µs, max 129.9µs","label":"no lead, seated, second pilot head turning every 3s","window":76,"p50":86,"p99":127.1,"max":129.9}
+{"t":1793901466995,"s":716.859,"kind":"window","text":"no lead, seated, second pilot head turning every 3s #77: p50 85.3µs, p99 122.7µs, max 137.6µs","label":"no lead, seated, second pilot head turning every 3s","window":77,"p50":85.3,"p99":122.7,"max":137.6}
+{"t":1793901476296,"s":726.16,"kind":"window","text":"no lead, seated, second pilot head turning every 3s #78: p50 84.8µs, p99 161.1µs, max 207.4µs","label":"no lead, seated, second pilot head turning every 3s","window":78,"p50":84.8,"p99":161.1,"max":207.4}
+{"t":1793901486631,"s":736.495,"kind":"window","text":"no lead, seated, second pilot head turning every 3s #79: p50 86.7µs, p99 199.4µs, max 202.8µs","label":"no lead, seated, second pilot head turning every 3s","window":79,"p50":86.7,"p99":199.4,"max":202.8}
+{"t":1793901496964,"s":746.828,"kind":"window","text":"no lead, seated, second pilot head turning every 3s #80: p50 84.8µs, p99 142.7µs, max 253.9µs","label":"no lead, seated, second pilot head turning every 3s","window":80,"p50":84.8,"p99":142.7,"max":253.9}
+{"t":1793901506231,"s":756.095,"kind":"window","text":"no lead, seated, second pilot head turning every 3s #81: p50 82.9µs, p99 120.8µs, max 131.8µs","label":"no lead, seated, second pilot head turning every 3s","window":81,"p50":82.9,"p99":120.8,"max":131.8}
+{"t":1793901516564,"s":766.428,"kind":"window","text":"no lead, seated, second pilot head turning every 3s #82: p50 83.4µs, p99 124.8µs, max 184.2µs","label":"no lead, seated, second pilot head turning every 3s","window":82,"p50":83.4,"p99":124.8,"max":184.2}
+{"t":1793901526865,"s":776.729,"kind":"window","text":"no lead, seated, second pilot head turning every 3s #83: p50 85.3µs, p99 136.4µs, max 261.7µs","label":"no lead, seated, second pilot head turning every 3s","window":83,"p50":85.3,"p99":136.4,"max":261.7}
+{"t":1793901536131,"s":785.995,"kind":"window","text":"no lead, seated, second pilot head turning every 3s #84: p50 84.4µs, p99 140.0µs, max 181.5µs","label":"no lead, seated, second pilot head turning every 3s","window":84,"p50":84.4,"p99":140,"max":181.5}
+{"t":1793901538172,"s":788.036,"kind":"label","text":"no lead, seated, both idle"}
+{"t":1793901546465,"s":796.329,"kind":"window","text":"no lead, seated, both idle #85: p50 83.4µs, p99 121.2µs, max 195.6µs","label":"no lead, seated, both idle","window":85,"p50":83.4,"p99":121.2,"max":195.6}
+{"t":1793901556765,"s":806.629,"kind":"window","text":"no lead, seated, both idle #86: p50 83.9µs, p99 149.3µs, max 255.7µs","label":"no lead, seated, both idle","window":86,"p50":83.9,"p99":149.3,"max":255.7}
+{"t":1793901567065,"s":816.929,"kind":"window","text":"no lead, seated, both idle #87: p50 83.5µs, p99 125.9µs, max 226.7µs","label":"no lead, seated, both idle","window":87,"p50":83.5,"p99":125.9,"max":226.7}
+{"t":1793901576366,"s":826.23,"kind":"window","text":"no lead, seated, both idle #88: p50 91.9µs, p99 134.9µs, max 170.3µs","label":"no lead, seated, both idle","window":88,"p50":91.9,"p99":134.9,"max":170.3}
+{"t":1793901586665,"s":836.529,"kind":"window","text":"no lead, seated, both idle #89: p50 86.0µs, p99 145.9µs, max 271.9µs","label":"no lead, seated, both idle","window":89,"p50":86,"p99":145.9,"max":271.9}
+{"t":1793901597005,"s":846.869,"kind":"window","text":"no lead, seated, both idle #90: p50 87.5µs, p99 147.4µs, max 166.2µs","label":"no lead, seated, both idle","window":90,"p50":87.501,"p99":147.399,"max":166.2}
+{"t":1793901606305,"s":856.169,"kind":"window","text":"no lead, seated, both idle #91: p50 83.8µs, p99 123.3µs, max 158.6µs","label":"no lead, seated, both idle","window":91,"p50":83.799,"p99":123.3,"max":158.6}
+{"t":1793901608352,"s":858.216,"kind":"label","text":"no lead, seated, second pilot clicking every 1.5s"}
+{"t":1793901616605,"s":866.469,"kind":"window","text":"no lead, seated, second pilot clicking every 1.5s #92: p50 85.3µs, p99 131.4µs, max 207.8µs","label":"no lead, seated, second pilot clicking every 1.5s","window":92,"p50":85.299,"p99":131.401,"max":207.8}
+{"t":1793901626906,"s":876.77,"kind":"window","text":"no lead, seated, second pilot clicking every 1.5s #93: p50 83.2µs, p99 126.6µs, max 194.7µs","label":"no lead, seated, second pilot clicking every 1.5s","window":93,"p50":83.199,"p99":126.601,"max":194.701}
+{"t":1793901636205,"s":886.069,"kind":"window","text":"no lead, seated, second pilot clicking every 1.5s #94: p50 82.4µs, p99 120.2µs, max 125.9µs","label":"no lead, seated, second pilot clicking every 1.5s","window":94,"p50":82.401,"p99":120.199,"max":125.899}
+{"t":1793901646506,"s":896.37,"kind":"window","text":"no lead, seated, second pilot clicking every 1.5s #95: p50 83.5µs, p99 134.6µs, max 315.8µs","label":"no lead, seated, second pilot clicking every 1.5s","window":95,"p50":83.501,"p99":134.6,"max":315.8}
+{"t":1793901656839,"s":906.703,"kind":"window","text":"no lead, seated, second pilot clicking every 1.5s #96: p50 83.5µs, p99 153.7µs, max 216.4µs","label":"no lead, seated, second pilot clicking every 1.5s","window":96,"p50":83.5,"p99":153.699,"max":216.4}
+{"t":1793901666142,"s":916.006,"kind":"window","text":"no lead, seated, second pilot clicking every 1.5s #97: p50 86.0µs, p99 186.3µs, max 287.5µs","label":"no lead, seated, second pilot clicking every 1.5s","window":97,"p50":86,"p99":186.3,"max":287.5}
+{"t":1793901676442,"s":926.306,"kind":"window","text":"no lead, seated, second pilot clicking every 1.5s #98: p50 88.4µs, p99 138.8µs, max 291.6µs","label":"no lead, seated, second pilot clicking every 1.5s","window":98,"p50":88.4,"p99":138.8,"max":291.6}
+{"t":1793901681548,"s":931.412,"kind":"label","text":"no lead, seated, idle after"}
+{"t":1793901686744,"s":936.608,"kind":"window","text":"no lead, seated, idle after #99: p50 87.8µs, p99 141.7µs, max 180.1µs","label":"no lead, seated, idle after","window":99,"p50":87.8,"p99":141.7,"max":180.1}
+{"t":1793901697077,"s":946.941,"kind":"window","text":"no lead, seated, idle after #100: p50 83.7µs, p99 147.2µs, max 191.8µs","label":"no lead, seated, idle after","window":100,"p50":83.7,"p99":147.2,"max":191.8}
+{"t":1793901706378,"s":956.242,"kind":"window","text":"no lead, seated, idle after #101: p50 83.9µs, p99 124.9µs, max 136.3µs","label":"no lead, seated, idle after","window":101,"p50":83.9,"p99":124.9,"max":136.3}
+{"t":1793901716711,"s":966.575,"kind":"window","text":"no lead, seated, idle after #102: p50 85.1µs, p99 148.5µs, max 186.6µs","label":"no lead, seated, idle after","window":102,"p50":85.1,"p99":148.5,"max":186.6}
+{"t":1793901727045,"s":976.909,"kind":"window","text":"no lead, seated, idle after #103: p50 86.0µs, p99 130.5µs, max 240.4µs","label":"no lead, seated, idle after","window":103,"p50":86,"p99":130.5,"max":240.4}
+{"t":1793901736344,"s":986.208,"kind":"window","text":"no lead, seated, idle after #104: p50 82.3µs, p99 128.7µs, max 187.7µs","label":"no lead, seated, idle after","window":104,"p50":82.3,"p99":128.7,"max":187.7}
+{"t":1793901746644,"s":996.508,"kind":"window","text":"no lead, seated, idle after #105: p50 83.0µs, p99 131.1µs, max 211.5µs","label":"no lead, seated, idle after","window":105,"p50":83,"p99":131.1,"max":211.5}
+{"t":1793901756978,"s":1006.842,"kind":"window","text":"no lead, seated, idle after #106: p50 90.0µs, p99 151.3µs, max 186.4µs","label":"no lead, seated, idle after","window":106,"p50":90,"p99":151.3,"max":186.4}
+{"t":1793901766246,"s":1016.11,"kind":"window","text":"no lead, seated, idle after #107: p50 89.2µs, p99 127.8µs, max 162.1µs","label":"no lead, seated, idle after","window":107,"p50":89.2,"p99":127.8,"max":162.1}
+{"t":1793901776579,"s":1026.443,"kind":"window","text":"no lead, seated, idle after #108: p50 83.0µs, p99 125.7µs, max 204.1µs","label":"no lead, seated, idle after","window":108,"p50":83,"p99":125.7,"max":204.1}
+{"t":1793901787907,"s":1037.771,"kind":"window","text":"no lead, seated, idle after #109: p50 82.6µs, p99 120.9µs, max 253.4µs","label":"no lead, seated, idle after","window":109,"p50":82.6,"p99":120.9,"max":253.4}
+{"t":1793901798240,"s":1048.104,"kind":"window","text":"no lead, seated, idle after #110: p50 85.1µs, p99 173.0µs, max 209.0µs","label":"no lead, seated, idle after","window":110,"p50":85.1,"p99":173,"max":209}
+{"t":1793901807507,"s":1057.371,"kind":"window","text":"no lead, seated, idle after #111: p50 82.2µs, p99 154.7µs, max 301.3µs","label":"no lead, seated, idle after","window":111,"p50":82.2,"p99":154.7,"max":301.3}
+{"t":1793901817807,"s":1067.671,"kind":"window","text":"no lead, seated, idle after #112: p50 84.0µs, p99 132.5µs, max 248.1µs","label":"no lead, seated, idle after","window":112,"p50":84,"p99":132.5,"max":248.1}
+{"t":1793901828141,"s":1078.005,"kind":"window","text":"no lead, seated, idle after #113: p50 80.9µs, p99 125.2µs, max 136.2µs","label":"no lead, seated, idle after","window":113,"p50":80.9,"p99":125.2,"max":136.2}
+{"t":1793901837408,"s":1087.272,"kind":"window","text":"no lead, seated, idle after #114: p50 81.2µs, p99 129.6µs, max 177.4µs","label":"no lead, seated, idle after","window":114,"p50":81.2,"p99":129.6,"max":177.4}
+{"t":1793901847741,"s":1097.605,"kind":"window","text":"no lead, seated, idle after #115: p50 83.3µs, p99 123.3µs, max 155.4µs","label":"no lead, seated, idle after","window":115,"p50":83.3,"p99":123.3,"max":155.4}
+{"t":1793901858042,"s":1107.906,"kind":"window","text":"no lead, seated, idle after #116: p50 84.3µs, p99 132.3µs, max 139.3µs","label":"no lead, seated, idle after","window":116,"p50":84.3,"p99":132.3,"max":139.3}
+{"t":1793901867308,"s":1117.172,"kind":"window","text":"no lead, seated, idle after #117: p50 85.1µs, p99 129.7µs, max 150.9µs","label":"no lead, seated, idle after","window":117,"p50":85.1,"p99":129.7,"max":150.9}
+{"t":1793901877608,"s":1127.472,"kind":"window","text":"no lead, seated, idle after #118: p50 88.7µs, p99 150.6µs, max 224.2µs","label":"no lead, seated, idle after","window":118,"p50":88.7,"p99":150.6,"max":224.2}
+{"t":1793901887942,"s":1137.806,"kind":"window","text":"no lead, seated, idle after #119: p50 85.6µs, p99 148.2µs, max 223.1µs","label":"no lead, seated, idle after","window":119,"p50":85.6,"p99":148.2,"max":223.1}
+{"t":1793901898276,"s":1148.14,"kind":"window","text":"no lead, seated, idle after #120: p50 85.2µs, p99 129.9µs, max 206.2µs","label":"no lead, seated, idle after","window":120,"p50":85.2,"p99":129.9,"max":206.2}
+{"t":1793901907544,"s":1157.408,"kind":"window","text":"no lead, seated, idle after #121: p50 86.2µs, p99 128.2µs, max 178.8µs","label":"no lead, seated, idle after","window":121,"p50":86.2,"p99":128.2,"max":178.8}
+{"t":1793901917875,"s":1167.739,"kind":"window","text":"no lead, seated, idle after #122: p50 4.5µs, p99 133.9µs, max 142.0µs","label":"no lead, seated, idle after","window":122,"p50":4.5,"p99":133.9,"max":142}
+{"t":1793901928209,"s":1178.073,"kind":"window","text":"no lead, seated, idle after #123: p50 3.1µs, p99 13.9µs, max 113.7µs","label":"no lead, seated, idle after","window":123,"p50":3.1,"p99":13.9,"max":113.7}
+{"t":1793901937475,"s":1187.339,"kind":"window","text":"no lead, seated, idle after #124: p50 3.0µs, p99 14.4µs, max 32.6µs","label":"no lead, seated, idle after","window":124,"p50":3,"p99":14.4,"max":32.6}
+{"t":1793901947809,"s":1197.673,"kind":"window","text":"no lead, seated, idle after #125: p50 3.0µs, p99 12.5µs, max 290.9µs","label":"no lead, seated, idle after","window":125,"p50":3,"p99":12.5,"max":290.9}
+{"t":1793901958145,"s":1208.009,"kind":"window","text":"no lead, seated, idle after #126: p50 3.0µs, p99 11.8µs, max 12.9µs","label":"no lead, seated, idle after","window":126,"p50":3,"p99":11.8,"max":12.9}
+{"t":1793901967399,"s":1217.263,"kind":"window","text":"no lead, seated, idle after #127: p50 3.3µs, p99 19.4µs, max 31.2µs","label":"no lead, seated, idle after","window":127,"p50":3.3,"p99":19.4,"max":31.2}
+{"t":1793901977864,"s":1227.728,"kind":"window","text":"no lead, seated, idle after #128: p50 3.2µs, p99 13.5µs, max 32.3µs","label":"no lead, seated, idle after","window":128,"p50":3.2,"p99":13.5,"max":32.3}
+{"t":1793901988198,"s":1238.062,"kind":"window","text":"no lead, seated, idle after #129: p50 3.1µs, p99 12.7µs, max 165.7µs","label":"no lead, seated, idle after","window":129,"p50":3.1,"p99":12.7,"max":165.7}
+{"t":1793901997469,"s":1247.333,"kind":"window","text":"no lead, seated, idle after #130: p50 3.2µs, p99 12.9µs, max 14.8µs","label":"no lead, seated, idle after","window":130,"p50":3.2,"p99":12.9,"max":14.8}
+{"t":1793902007803,"s":1257.667,"kind":"window","text":"no lead, seated, idle after #131: p50 3.1µs, p99 12.4µs, max 14.4µs","label":"no lead, seated, idle after","window":131,"p50":3.1,"p99":12.4,"max":14.4}
+{"t":1793902018136,"s":1268,"kind":"window","text":"no lead, seated, idle after #132: p50 3.1µs, p99 16.9µs, max 961.1µs","label":"no lead, seated, idle after","window":132,"p50":3.1,"p99":16.9,"max":961.1}
+{"t":1793902027436,"s":1277.3,"kind":"window","text":"no lead, seated, idle after #133: p50 2.9µs, p99 12.9µs, max 227.4µs","label":"no lead, seated, idle after","window":133,"p50":2.9,"p99":12.9,"max":227.4}
+{"t":1793902037757,"s":1287.621,"kind":"window","text":"no lead, seated, idle after #134: p50 2.9µs, p99 12.0µs, max 26.9µs","label":"no lead, seated, idle after","window":134,"p50":2.9,"p99":12,"max":26.9}
+{"t":1793902048091,"s":1297.955,"kind":"window","text":"no lead, seated, idle after #135: p50 78.1µs, p99 159.3µs, max 198.3µs","label":"no lead, seated, idle after","window":135,"p50":78.1,"p99":159.3,"max":198.3}
+{"t":1793902057391,"s":1307.255,"kind":"window","text":"no lead, seated, idle after #136: p50 79.8µs, p99 117.8µs, max 145.3µs","label":"no lead, seated, idle after","window":136,"p50":79.8,"p99":117.8,"max":145.3}
+{"t":1793902067657,"s":1317.521,"kind":"window","text":"no lead, seated, idle after #137: p50 81.2µs, p99 120.5µs, max 298.2µs","label":"no lead, seated, idle after","window":137,"p50":81.2,"p99":120.5,"max":298.2}
+{"t":1793902077958,"s":1327.822,"kind":"window","text":"no lead, seated, idle after #138: p50 81.7µs, p99 123.7µs, max 129.6µs","label":"no lead, seated, idle after","window":138,"p50":81.7,"p99":123.7,"max":129.6}
+{"t":1793902088295,"s":1338.159,"kind":"window","text":"no lead, seated, idle after #139: p50 83.0µs, p99 116.6µs, max 145.1µs","label":"no lead, seated, idle after","window":139,"p50":83,"p99":116.6,"max":145.1}
+{"t":1793902097528,"s":1347.392,"kind":"window","text":"no lead, seated, idle after #140: p50 83.4µs, p99 133.5µs, max 283.3µs","label":"no lead, seated, idle after","window":140,"p50":83.4,"p99":133.5,"max":283.3}
+{"t":1793902107862,"s":1357.726,"kind":"window","text":"no lead, seated, idle after #141: p50 84.7µs, p99 192.5µs, max 205.8µs","label":"no lead, seated, idle after","window":141,"p50":84.7,"p99":192.5,"max":205.8}
+{"t":1793902118195,"s":1368.059,"kind":"window","text":"no lead, seated, idle after #142: p50 86.0µs, p99 190.1µs, max 210.8µs","label":"no lead, seated, idle after","window":142,"p50":86,"p99":190.1,"max":210.8}
+{"t":1793902127495,"s":1377.359,"kind":"window","text":"no lead, seated, idle after #143: p50 84.0µs, p99 164.3µs, max 214.7µs","label":"no lead, seated, idle after","window":143,"p50":84,"p99":164.3,"max":214.7}
+{"t":1793902137796,"s":1387.66,"kind":"window","text":"no lead, seated, idle after #144: p50 83.5µs, p99 122.6µs, max 195.9µs","label":"no lead, seated, idle after","window":144,"p50":83.5,"p99":122.6,"max":195.9}
+{"t":1793902148129,"s":1397.993,"kind":"window","text":"no lead, seated, idle after #145: p50 83.4µs, p99 127.8µs, max 282.1µs","label":"no lead, seated, idle after","window":145,"p50":83.4,"p99":127.8,"max":282.1}
+{"t":1793902157428,"s":1407.292,"kind":"window","text":"no lead, seated, idle after #146: p50 83.0µs, p99 141.5µs, max 283.5µs","label":"no lead, seated, idle after","window":146,"p50":83,"p99":141.5,"max":283.5}
+{"t":1793902167762,"s":1417.626,"kind":"window","text":"no lead, seated, idle after #147: p50 82.2µs, p99 123.2µs, max 201.3µs","label":"no lead, seated, idle after","window":147,"p50":82.2,"p99":123.2,"max":201.3}
+{"t":1793902178028,"s":1427.892,"kind":"window","text":"no lead, seated, idle after #148: p50 81.3µs, p99 209.9µs, max 243.3µs","label":"no lead, seated, idle after","window":148,"p50":81.3,"p99":209.9,"max":243.3}
+{"t":1793902187328,"s":1437.192,"kind":"window","text":"no lead, seated, idle after #149: p50 84.1µs, p99 181.8µs, max 306.1µs","label":"no lead, seated, idle after","window":149,"p50":84.1,"p99":181.8,"max":306.1}
+{"t":1793902197662,"s":1447.526,"kind":"window","text":"no lead, seated, idle after #150: p50 81.9µs, p99 127.4µs, max 158.8µs","label":"no lead, seated, idle after","window":150,"p50":81.9,"p99":127.4,"max":158.8}
+{"t":1793902207962,"s":1457.826,"kind":"window","text":"no lead, seated, idle after #151: p50 81.6µs, p99 149.7µs, max 210.5µs","label":"no lead, seated, idle after","window":151,"p50":81.6,"p99":149.7,"max":210.5}
+{"t":1793902218296,"s":1468.16,"kind":"window","text":"no lead, seated, idle after #152: p50 81.7µs, p99 156.0µs, max 217.5µs","label":"no lead, seated, idle after","window":152,"p50":81.7,"p99":156,"max":217.5}
+{"t":1793902227562,"s":1477.426,"kind":"window","text":"no lead, seated, idle after #153: p50 80.8µs, p99 117.7µs, max 151.4µs","label":"no lead, seated, idle after","window":153,"p50":80.8,"p99":117.7,"max":151.4}
+{"t":1793902237862,"s":1487.726,"kind":"window","text":"no lead, seated, idle after #154: p50 81.0µs, p99 125.8µs, max 185.9µs","label":"no lead, seated, idle after","window":154,"p50":81,"p99":125.8,"max":185.9}
+{"t":1793902248130,"s":1497.994,"kind":"window","text":"no lead, seated, idle after #155: p50 81.8µs, p99 144.3µs, max 213.2µs","label":"no lead, seated, idle after","window":155,"p50":81.8,"p99":144.3,"max":213.2}
+{"t":1793902257397,"s":1507.261,"kind":"window","text":"no lead, seated, idle after #156: p50 82.3µs, p99 162.6µs, max 216.2µs","label":"no lead, seated, idle after","window":156,"p50":82.3,"p99":162.6,"max":216.2}
+{"t":1793902267730,"s":1517.594,"kind":"window","text":"no lead, seated, idle after #157: p50 81.2µs, p99 144.1µs, max 207.9µs","label":"no lead, seated, idle after","window":157,"p50":81.2,"p99":144.1,"max":207.9}
+{"t":1793902278064,"s":1527.928,"kind":"window","text":"no lead, seated, idle after #158: p50 82.5µs, p99 161.4µs, max 202.2µs","label":"no lead, seated, idle after","window":158,"p50":82.5,"p99":161.4,"max":202.2}
+{"t":1793902287364,"s":1537.228,"kind":"window","text":"no lead, seated, idle after #159: p50 82.4µs, p99 122.8µs, max 233.2µs","label":"no lead, seated, idle after","window":159,"p50":82.4,"p99":122.8,"max":233.2}
+{"t":1793902297697,"s":1547.561,"kind":"window","text":"no lead, seated, idle after #160: p50 81.7µs, p99 186.5µs, max 288.4µs","label":"no lead, seated, idle after","window":160,"p50":81.7,"p99":186.5,"max":288.4}
+{"t":1793902308031,"s":1557.895,"kind":"window","text":"no lead, seated, idle after #161: p50 81.7µs, p99 165.2µs, max 203.9µs","label":"no lead, seated, idle after","window":161,"p50":81.7,"p99":165.2,"max":203.9}
+{"t":1793902317331,"s":1567.195,"kind":"window","text":"no lead, seated, idle after #162: p50 81.8µs, p99 192.8µs, max 264.3µs","label":"no lead, seated, idle after","window":162,"p50":81.8,"p99":192.8,"max":264.3}
+{"t":1793902327664,"s":1577.528,"kind":"window","text":"no lead, seated, idle after #163: p50 80.6µs, p99 144.7µs, max 300.6µs","label":"no lead, seated, idle after","window":163,"p50":80.6,"p99":144.7,"max":300.6}
+{"t":1793902337964,"s":1587.828,"kind":"window","text":"no lead, seated, idle after #164: p50 81.1µs, p99 155.1µs, max 208.9µs","label":"no lead, seated, idle after","window":164,"p50":81.1,"p99":155.1,"max":208.9}
+{"t":1793902348297,"s":1598.161,"kind":"window","text":"no lead, seated, idle after #165: p50 81.1µs, p99 119.7µs, max 201.0µs","label":"no lead, seated, idle after","window":165,"p50":81.1,"p99":119.7,"max":201}
+{"t":1793902357597,"s":1607.461,"kind":"window","text":"no lead, seated, idle after #166: p50 80.1µs, p99 189.9µs, max 238.4µs","label":"no lead, seated, idle after","window":166,"p50":80.1,"p99":189.9,"max":238.4}
+{"t":1793902367930,"s":1617.794,"kind":"window","text":"no lead, seated, idle after #167: p50 82.1µs, p99 166.7µs, max 234.5µs","label":"no lead, seated, idle after","window":167,"p50":82.1,"p99":166.7,"max":234.5}
+{"t":1793902378264,"s":1628.128,"kind":"window","text":"no lead, seated, idle after #168: p50 82.8µs, p99 183.6µs, max 296.5µs","label":"no lead, seated, idle after","window":168,"p50":82.8,"p99":183.6,"max":296.5}
+{"t":1793902387530,"s":1637.394,"kind":"window","text":"no lead, seated, idle after #169: p50 81.5µs, p99 224.3µs, max 294.5µs","label":"no lead, seated, idle after","window":169,"p50":81.5,"p99":224.3,"max":294.5}
+{"t":1793902397831,"s":1647.695,"kind":"window","text":"no lead, seated, idle after #170: p50 83.2µs, p99 164.3µs, max 228.1µs","label":"no lead, seated, idle after","window":170,"p50":83.2,"p99":164.3,"max":228.1}
+{"t":1793902408164,"s":1658.028,"kind":"window","text":"no lead, seated, idle after #171: p50 81.8µs, p99 162.0µs, max 239.0µs","label":"no lead, seated, idle after","window":171,"p50":81.8,"p99":162,"max":239}
+{"t":1793902417464,"s":1667.328,"kind":"window","text":"no lead, seated, idle after #172: p50 81.3µs, p99 148.2µs, max 225.4µs","label":"no lead, seated, idle after","window":172,"p50":81.3,"p99":148.2,"max":225.4}
+{"t":1793902427797,"s":1677.661,"kind":"window","text":"no lead, seated, idle after #173: p50 80.5µs, p99 124.5µs, max 313.0µs","label":"no lead, seated, idle after","window":173,"p50":80.5,"p99":124.5,"max":313}
+{"t":1793902438131,"s":1687.995,"kind":"window","text":"no lead, seated, idle after #174: p50 80.9µs, p99 151.8µs, max 201.4µs","label":"no lead, seated, idle after","window":174,"p50":80.9,"p99":151.8,"max":201.4}
+{"t":1793902447431,"s":1697.295,"kind":"window","text":"no lead, seated, idle after #175: p50 81.6µs, p99 145.7µs, max 211.0µs","label":"no lead, seated, idle after","window":175,"p50":81.6,"p99":145.7,"max":211}
+{"t":1793902457731,"s":1707.595,"kind":"window","text":"no lead, seated, idle after #176: p50 83.5µs, p99 126.0µs, max 223.5µs","label":"no lead, seated, idle after","window":176,"p50":83.5,"p99":126,"max":223.5}
+{"t":1793902468031,"s":1717.895,"kind":"window","text":"no lead, seated, idle after #177: p50 84.6µs, p99 133.3µs, max 251.1µs","label":"no lead, seated, idle after","window":177,"p50":84.6,"p99":133.3,"max":251.1}
+{"t":1793902477331,"s":1727.195,"kind":"window","text":"no lead, seated, idle after #178: p50 79.2µs, p99 128.1µs, max 230.9µs","label":"no lead, seated, idle after","window":178,"p50":79.2,"p99":128.1,"max":230.9}
+{"t":1793902487665,"s":1737.529,"kind":"window","text":"no lead, seated, idle after #179: p50 2.9µs, p99 13.0µs, max 221.3µs","label":"no lead, seated, idle after","window":179,"p50":2.9,"p99":13,"max":221.3}
+{"t":1793902497965,"s":1747.829,"kind":"window","text":"no lead, seated, idle after #180: p50 2.9µs, p99 12.6µs, max 36.0µs","label":"no lead, seated, idle after","window":180,"p50":2.9,"p99":12.6,"max":36}
+{"t":1793902508254,"s":1758.118,"kind":"window","text":"no lead, seated, idle after #181: p50 71.9µs, p99 128.9µs, max 236.1µs","label":"no lead, seated, idle after","window":181,"p50":71.9,"p99":128.9,"max":236.1}
+{"t":1793902517554,"s":1767.418,"kind":"window","text":"no lead, seated, idle after #182: p50 83.1µs, p99 171.4µs, max 251.9µs","label":"no lead, seated, idle after","window":182,"p50":83.1,"p99":171.4,"max":251.9}
+{"t":1793902527888,"s":1777.752,"kind":"window","text":"no lead, seated, idle after #183: p50 82.1µs, p99 192.4µs, max 210.5µs","label":"no lead, seated, idle after","window":183,"p50":82.1,"p99":192.4,"max":210.5}
+{"t":1793902538221,"s":1788.085,"kind":"window","text":"no lead, seated, idle after #184: p50 84.2µs, p99 122.5µs, max 286.2µs","label":"no lead, seated, idle after","window":184,"p50":84.2,"p99":122.5,"max":286.2}
+{"t":1793902547521,"s":1797.385,"kind":"window","text":"no lead, seated, idle after #185: p50 81.2µs, p99 149.0µs, max 199.1µs","label":"no lead, seated, idle after","window":185,"p50":81.2,"p99":149,"max":199.1}
+{"t":1793902557855,"s":1807.719,"kind":"window","text":"no lead, seated, idle after #186: p50 82.0µs, p99 164.1µs, max 200.5µs","label":"no lead, seated, idle after","window":186,"p50":82,"p99":164.1,"max":200.5}
+{"t":1793902568154,"s":1818.018,"kind":"window","text":"no lead, seated, idle after #187: p50 80.6µs, p99 124.8µs, max 200.3µs","label":"no lead, seated, idle after","window":187,"p50":80.6,"p99":124.8,"max":200.3}
+{"t":1793902577422,"s":1827.286,"kind":"window","text":"no lead, seated, idle after #188: p50 80.4µs, p99 158.9µs, max 243.0µs","label":"no lead, seated, idle after","window":188,"p50":80.4,"p99":158.9,"max":243}
+{"t":1793902587721,"s":1837.585,"kind":"window","text":"no lead, seated, idle after #189: p50 81.5µs, p99 168.7µs, max 205.4µs","label":"no lead, seated, idle after","window":189,"p50":81.5,"p99":168.7,"max":205.4}
+{"t":1793902598022,"s":1847.886,"kind":"window","text":"no lead, seated, idle after #190: p50 83.5µs, p99 156.4µs, max 221.6µs","label":"no lead, seated, idle after","window":190,"p50":83.5,"p99":156.4,"max":221.6}
+{"t":1793902608355,"s":1858.219,"kind":"window","text":"no lead, seated, idle after #191: p50 84.8µs, p99 144.3µs, max 201.0µs","label":"no lead, seated, idle after","window":191,"p50":84.8,"p99":144.3,"max":201}
+{"t":1793902617655,"s":1867.519,"kind":"window","text":"no lead, seated, idle after #192: p50 84.8µs, p99 193.5µs, max 198.1µs","label":"no lead, seated, idle after","window":192,"p50":84.8,"p99":193.5,"max":198.1}
+{"t":1793902627989,"s":1877.853,"kind":"window","text":"no lead, seated, idle after #193: p50 83.2µs, p99 186.6µs, max 279.6µs","label":"no lead, seated, idle after","window":193,"p50":83.199,"p99":186.6,"max":279.601}
+{"t":1793902638323,"s":1888.187,"kind":"window","text":"no lead, seated, idle after #194: p50 82.6µs, p99 123.0µs, max 235.6µs","label":"no lead, seated, idle after","window":194,"p50":82.6,"p99":123,"max":235.6}
+{"t":1793902647622,"s":1897.486,"kind":"window","text":"no lead, seated, idle after #195: p50 84.3µs, p99 171.1µs, max 212.6µs","label":"no lead, seated, idle after","window":195,"p50":84.3,"p99":171.1,"max":212.6}
+{"t":1793902657956,"s":1907.82,"kind":"window","text":"no lead, seated, idle after #196: p50 83.8µs, p99 143.5µs, max 256.2µs","label":"no lead, seated, idle after","window":196,"p50":83.801,"p99":143.5,"max":256.2}
+{"t":1793902668289,"s":1918.153,"kind":"window","text":"no lead, seated, idle after #197: p50 82.9µs, p99 136.3µs, max 189.8µs","label":"no lead, seated, idle after","window":197,"p50":82.901,"p99":136.3,"max":189.8}
+{"t":1793902677556,"s":1927.42,"kind":"window","text":"no lead, seated, idle after #198: p50 81.8µs, p99 154.2µs, max 551.8µs","label":"no lead, seated, idle after","window":198,"p50":81.8,"p99":154.2,"max":551.8}
+{"t":1793902687889,"s":1937.753,"kind":"window","text":"no lead, seated, idle after #199: p50 82.3µs, p99 127.0µs, max 199.7µs","label":"no lead, seated, idle after","window":199,"p50":82.3,"p99":127,"max":199.7}
+{"t":1793902698222,"s":1948.086,"kind":"window","text":"no lead, seated, idle after #200: p50 82.4µs, p99 137.1µs, max 174.4µs","label":"no lead, seated, idle after","window":200,"p50":82.4,"p99":137.099,"max":174.4}
+{"t":1793902707490,"s":1957.354,"kind":"window","text":"no lead, seated, idle after #201: p50 84.7µs, p99 161.5µs, max 185.3µs","label":"no lead, seated, idle after","window":201,"p50":84.7,"p99":161.499,"max":185.299}
+{"t":1793902717823,"s":1967.687,"kind":"window","text":"no lead, seated, idle after #202: p50 84.7µs, p99 190.0µs, max 291.6µs","label":"no lead, seated, idle after","window":202,"p50":84.701,"p99":190,"max":291.6}
+{"t":1793902728157,"s":1978.021,"kind":"window","text":"no lead, seated, idle after #203: p50 83.5µs, p99 147.5µs, max 226.7µs","label":"no lead, seated, idle after","window":203,"p50":83.5,"p99":147.5,"max":226.7}
+{"t":1793902737457,"s":1987.321,"kind":"window","text":"no lead, seated, idle after #204: p50 81.6µs, p99 141.2µs, max 294.2µs","label":"no lead, seated, idle after","window":204,"p50":81.6,"p99":141.199,"max":294.2}
+{"t":1793902747757,"s":1997.621,"kind":"window","text":"no lead, seated, idle after #205: p50 82.1µs, p99 120.5µs, max 185.7µs","label":"no lead, seated, idle after","window":205,"p50":82.1,"p99":120.5,"max":185.7}
+{"t":1793902758091,"s":2007.955,"kind":"window","text":"no lead, seated, idle after #206: p50 80.0µs, p99 121.2µs, max 168.1µs","label":"no lead, seated, idle after","window":206,"p50":80,"p99":121.199,"max":168.1}
+{"t":1793902767358,"s":2017.222,"kind":"window","text":"no lead, seated, idle after #207: p50 80.9µs, p99 165.4µs, max 244.7µs","label":"no lead, seated, idle after","window":207,"p50":80.9,"p99":165.4,"max":244.7}
+{"t":1793902777657,"s":2027.521,"kind":"window","text":"no lead, seated, idle after #208: p50 80.6µs, p99 118.0µs, max 223.0µs","label":"no lead, seated, idle after","window":208,"p50":80.6,"p99":118,"max":223}
+{"t":1793902787992,"s":2037.856,"kind":"window","text":"no lead, seated, idle after #209: p50 81.2µs, p99 135.9µs, max 194.4µs","label":"no lead, seated, idle after","window":209,"p50":81.2,"p99":135.9,"max":194.4}
+{"t":1793902798325,"s":2048.189,"kind":"window","text":"no lead, seated, idle after #210: p50 82.0µs, p99 160.4µs, max 195.3µs","label":"no lead, seated, idle after","window":210,"p50":82,"p99":160.4,"max":195.3}
+{"t":1793902807625,"s":2057.489,"kind":"window","text":"no lead, seated, idle after #211: p50 83.5µs, p99 179.4µs, max 220.7µs","label":"no lead, seated, idle after","window":211,"p50":83.5,"p99":179.4,"max":220.7}
+{"t":1793902817958,"s":2067.822,"kind":"window","text":"no lead, seated, idle after #212: p50 84.0µs, p99 196.7µs, max 288.9µs","label":"no lead, seated, idle after","window":212,"p50":84,"p99":196.7,"max":288.9}
+{"t":1793902828292,"s":2078.156,"kind":"window","text":"no lead, seated, idle after #213: p50 82.5µs, p99 141.4µs, max 200.2µs","label":"no lead, seated, idle after","window":213,"p50":82.5,"p99":141.4,"max":200.2}
+{"t":1793902837591,"s":2087.455,"kind":"window","text":"no lead, seated, idle after #214: p50 83.4µs, p99 183.7µs, max 246.4µs","label":"no lead, seated, idle after","window":214,"p50":83.4,"p99":183.7,"max":246.4}
+{"t":1793902847925,"s":2097.789,"kind":"window","text":"no lead, seated, idle after #215: p50 82.3µs, p99 125.7µs, max 193.0µs","label":"no lead, seated, idle after","window":215,"p50":82.3,"p99":125.7,"max":193}
+{"t":1793902858259,"s":2108.123,"kind":"window","text":"no lead, seated, idle after #216: p50 81.6µs, p99 138.7µs, max 198.3µs","label":"no lead, seated, idle after","window":216,"p50":81.6,"p99":138.7,"max":198.3}
+{"t":1793902867558,"s":2117.422,"kind":"window","text":"no lead, seated, idle after #217: p50 82.6µs, p99 145.2µs, max 165.5µs","label":"no lead, seated, idle after","window":217,"p50":82.6,"p99":145.2,"max":165.5}
+{"t":1793902877825,"s":2127.689,"kind":"window","text":"no lead, seated, idle after #218: p50 82.3µs, p99 130.2µs, max 262.3µs","label":"no lead, seated, idle after","window":218,"p50":82.3,"p99":130.2,"max":262.3}
+{"t":1793902888125,"s":2137.989,"kind":"window","text":"no lead, seated, idle after #219: p50 3.6µs, p99 116.7µs, max 284.4µs","label":"no lead, seated, idle after","window":219,"p50":3.6,"p99":116.7,"max":284.4}
+{"t":1793902897425,"s":2147.289,"kind":"window","text":"no lead, seated, idle after #220: p50 2.7µs, p99 13.4µs, max 78.4µs","label":"no lead, seated, idle after","window":220,"p50":2.7,"p99":13.4,"max":78.4}
+{"t":1793902907759,"s":2157.623,"kind":"window","text":"no lead, seated, idle after #221: p50 2.9µs, p99 10.8µs, max 12.8µs","label":"no lead, seated, idle after","window":221,"p50":2.9,"p99":10.8,"max":12.8}
+{"t":1793902918076,"s":2167.94,"kind":"window","text":"no lead, seated, idle after #222: p50 2.7µs, p99 11.1µs, max 24.0µs","label":"no lead, seated, idle after","window":222,"p50":2.7,"p99":11.1,"max":24}
+{"t":1793902920085,"s":2169.949,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1793902920130,"s":2169.994,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1793902928336,"s":2178.2,"kind":"window","text":"no lead, seated, idle after #223: p50 2.8µs, p99 11.3µs, max 28.2µs","label":"no lead, seated, idle after","window":223,"p50":2.8,"p99":11.3,"max":28.2}
+{"t":1793902930411,"s":2180.275,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1793902930427,"s":2180.291,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1793902933460,"s":2183.324,"kind":"window","text":"no lead, seated, idle after #224: p50 2.5µs, p99 10.9µs, max 36.1µs","label":"no lead, seated, idle after","window":224,"p50":2.5,"p99":10.9,"max":36.1}
+{"t":1793902936876,"s":2186.74,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1793902936909,"s":2186.773,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1793902939591,"s":2189.455,"kind":"window","text":"no lead, seated, idle after #225: p50 2.8µs, p99 11.1µs, max 15.5µs","label":"no lead, seated, idle after","window":225,"p50":2.8,"p99":11.1,"max":15.5}
+{"t":1793902943629,"s":2193.493,"kind":"window","text":"no lead, seated, idle after #226: p50 2.3µs, p99 9.5µs, max 11.0µs","label":"no lead, seated, idle after","window":226,"p50":2.3,"p99":9.5,"max":11}
+{"t":1793902945940,"s":2195.804,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1793902945945,"s":2195.809,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1793902948794,"s":2198.658,"kind":"window","text":"no lead, seated, idle after #227: p50 2.6µs, p99 10.7µs, max 12.2µs","label":"no lead, seated, idle after","window":227,"p50":2.6,"p99":10.7,"max":12.2}
+{"t":1793902954876,"s":2204.74,"kind":"window","text":"no lead, seated, idle after #228: p50 2.7µs, p99 10.6µs, max 12.5µs","label":"no lead, seated, idle after","window":228,"p50":2.7,"p99":10.6,"max":12.5}
+{"t":1793902959960,"s":2209.824,"kind":"window","text":"no lead, seated, idle after #229: p50 2.9µs, p99 10.5µs, max 29.4µs","label":"no lead, seated, idle after","window":229,"p50":2.9,"p99":10.5,"max":29.4}
+{"t":1793902966057,"s":2215.921,"kind":"window","text":"no lead, seated, idle after #230: p50 2.8µs, p99 10.4µs, max 76.2µs","label":"no lead, seated, idle after","window":230,"p50":2.8,"p99":10.4,"max":76.2}
+{"t":1793902971135,"s":2220.999,"kind":"window","text":"no lead, seated, idle after #231: p50 2.7µs, p99 10.5µs, max 24.9µs","label":"no lead, seated, idle after","window":231,"p50":2.7,"p99":10.5,"max":24.9}
+{"t":1793902977220,"s":2227.084,"kind":"window","text":"no lead, seated, idle after #232: p50 2.7µs, p99 10.2µs, max 12.0µs","label":"no lead, seated, idle after","window":232,"p50":2.7,"p99":10.2,"max":12}
+{"t":1793902982315,"s":2232.179,"kind":"window","text":"no lead, seated, idle after #233: p50 2.7µs, p99 11.6µs, max 14.3µs","label":"no lead, seated, idle after","window":233,"p50":2.7,"p99":11.6,"max":14.3}
+{"t":1793902987388,"s":2237.252,"kind":"window","text":"no lead, seated, idle after #234: p50 2.7µs, p99 9.8µs, max 12.8µs","label":"no lead, seated, idle after","window":234,"p50":2.7,"p99":9.8,"max":12.8}
+{"t":1793902994467,"s":2244.331,"kind":"window","text":"no lead, seated, idle after #0: p50 NaNµs, p99 NaNµs, max NaNµs","label":"no lead, seated, idle after","window":0,"p50":null,"p99":null,"max":null}
+{"t":1793903005017,"s":2254.881,"kind":"window","text":"no lead, seated, idle after #234: p50 2.7µs, p99 9.8µs, max 12.8µs","label":"no lead, seated, idle after","window":234,"p50":2.7,"p99":9.8,"max":12.8}
+{"t":1793903008084,"s":2257.948,"kind":"window","text":"no lead, seated, idle after #235: p50 2.9µs, p99 12.7µs, max 14.3µs","label":"no lead, seated, idle after","window":235,"p50":2.9,"p99":12.7,"max":14.3}
+{"t":1793903014206,"s":2264.07,"kind":"window","text":"no lead, seated, idle after #236: p50 2.9µs, p99 11.1µs, max 14.5µs","label":"no lead, seated, idle after","window":236,"p50":2.9,"p99":11.1,"max":14.5}
+{"t":1793903021367,"s":2271.231,"kind":"window","text":"no lead, seated, idle after #237: p50 2.9µs, p99 12.1µs, max 27.5µs","label":"no lead, seated, idle after","window":237,"p50":2.9,"p99":12.1,"max":27.5}
+{"t":1793903028491,"s":2278.355,"kind":"window","text":"no lead, seated, idle after #238: p50 3.0µs, p99 12.0µs, max 55.7µs","label":"no lead, seated, idle after","window":238,"p50":3,"p99":12,"max":55.7}
+{"t":1793903033535,"s":2283.399,"kind":"window","text":"no lead, seated, idle after #0: p50 NaNµs, p99 NaNµs, max NaNµs","label":"no lead, seated, idle after","window":0,"p50":null,"p99":null,"max":null}
+{"t":1793903040483,"s":2290.347,"kind":"window","text":"no lead, seated, idle after #238: p50 3.0µs, p99 12.0µs, max 55.7µs","label":"no lead, seated, idle after","window":238,"p50":3,"p99":12,"max":55.7}
+{"t":1793903047467,"s":2297.331,"kind":"window","text":"no lead, seated, idle after #239: p50 2.8µs, p99 11.3µs, max 12.9µs","label":"no lead, seated, idle after","window":239,"p50":2.8,"p99":11.3,"max":12.9}
+{"t":1793903053589,"s":2303.453,"kind":"window","text":"no lead, seated, idle after #240: p50 2.9µs, p99 11.0µs, max 114.9µs","label":"no lead, seated, idle after","window":240,"p50":2.9,"p99":11,"max":114.9}
+{"t":1793903060702,"s":2310.566,"kind":"window","text":"no lead, seated, idle after #241: p50 2.9µs, p99 11.0µs, max 12.8µs","label":"no lead, seated, idle after","window":241,"p50":2.9,"p99":11,"max":12.8}
+{"t":1793903066791,"s":2316.655,"kind":"window","text":"no lead, seated, idle after #242: p50 3.0µs, p99 10.8µs, max 14.1µs","label":"no lead, seated, idle after","window":242,"p50":3,"p99":10.8,"max":14.1}
+{"t":1793903071828,"s":2321.692,"kind":"window","text":"no lead, seated, idle after #0: p50 NaNµs, p99 NaNµs, max NaNµs","label":"no lead, seated, idle after","window":0,"p50":null,"p99":null,"max":null}
+{"t":1793903078780,"s":2328.644,"kind":"window","text":"no lead, seated, idle after #242: p50 3.0µs, p99 10.8µs, max 14.1µs","label":"no lead, seated, idle after","window":242,"p50":3,"p99":10.8,"max":14.1}
+{"t":1793903085721,"s":2335.585,"kind":"window","text":"no lead, seated, idle after #243: p50 2.7µs, p99 10.8µs, max 11.5µs","label":"no lead, seated, idle after","window":243,"p50":2.7,"p99":10.8,"max":11.5}
+{"t":1793903091815,"s":2341.679,"kind":"window","text":"no lead, seated, idle after #244: p50 2.8µs, p99 11.3µs, max 11.8µs","label":"no lead, seated, idle after","window":244,"p50":2.8,"p99":11.3,"max":11.8}
+{"t":1793903097937,"s":2347.801,"kind":"window","text":"no lead, seated, idle after #245: p50 2.9µs, p99 10.7µs, max 12.2µs","label":"no lead, seated, idle after","window":245,"p50":2.9,"p99":10.7,"max":12.2}
+{"t":1793903104040,"s":2353.904,"kind":"window","text":"no lead, seated, idle after #246: p50 2.9µs, p99 10.9µs, max 13.0µs","label":"no lead, seated, idle after","window":246,"p50":2.9,"p99":10.9,"max":13}
+{"t":1793903110146,"s":2360.01,"kind":"window","text":"no lead, seated, idle after #247: p50 2.9µs, p99 11.8µs, max 13.4µs","label":"no lead, seated, idle after","window":247,"p50":2.9,"p99":11.8,"max":13.4}
+{"t":1793903116305,"s":2366.169,"kind":"window","text":"no lead, seated, idle after #248: p50 3.0µs, p99 11.5µs, max 13.1µs","label":"no lead, seated, idle after","window":248,"p50":3,"p99":11.5,"max":13.1}
+{"t":1793903121388,"s":2371.252,"kind":"window","text":"no lead, seated, idle after #249: p50 2.8µs, p99 12.0µs, max 13.2µs","label":"no lead, seated, idle after","window":249,"p50":2.8,"p99":12,"max":13.2}
+{"t":1793903127495,"s":2377.359,"kind":"window","text":"no lead, seated, idle after #250: p50 2.8µs, p99 10.4µs, max 12.4µs","label":"no lead, seated, idle after","window":250,"p50":2.8,"p99":10.4,"max":12.4}
+{"t":1793903133587,"s":2383.451,"kind":"window","text":"no lead, seated, idle after #251: p50 2.8µs, p99 11.5µs, max 14.9µs","label":"no lead, seated, idle after","window":251,"p50":2.8,"p99":11.5,"max":14.9}
+{"t":1793903138683,"s":2388.547,"kind":"window","text":"no lead, seated, idle after #252: p50 2.8µs, p99 10.6µs, max 54.3µs","label":"no lead, seated, idle after","window":252,"p50":2.8,"p99":10.6,"max":54.3}
+{"t":1793903144798,"s":2394.662,"kind":"window","text":"no lead, seated, idle after #253: p50 2.8µs, p99 10.8µs, max 13.5µs","label":"no lead, seated, idle after","window":253,"p50":2.8,"p99":10.8,"max":13.5}
+{"t":1793903149902,"s":2399.766,"kind":"window","text":"no lead, seated, idle after #254: p50 2.7µs, p99 10.9µs, max 24.9µs","label":"no lead, seated, idle after","window":254,"p50":2.7,"p99":10.9,"max":24.9}
+{"t":1793903156033,"s":2405.897,"kind":"window","text":"no lead, seated, idle after #255: p50 2.9µs, p99 10.1µs, max 14.1µs","label":"no lead, seated, idle after","window":255,"p50":2.9,"p99":10.1,"max":14.1}
+{"t":1793903162113,"s":2411.977,"kind":"window","text":"no lead, seated, idle after #256: p50 2.9µs, p99 11.4µs, max 51.2µs","label":"no lead, seated, idle after","window":256,"p50":2.9,"p99":11.4,"max":51.2}
+{"t":1793903167212,"s":2417.076,"kind":"window","text":"no lead, seated, idle after #257: p50 2.8µs, p99 12.4µs, max 24.4µs","label":"no lead, seated, idle after","window":257,"p50":2.8,"p99":12.4,"max":24.4}
+{"t":1793903173305,"s":2423.169,"kind":"window","text":"no lead, seated, idle after #258: p50 2.7µs, p99 10.6µs, max 14.8µs","label":"no lead, seated, idle after","window":258,"p50":2.7,"p99":10.6,"max":14.8}
+{"t":1793903178390,"s":2428.254,"kind":"window","text":"no lead, seated, idle after #259: p50 2.8µs, p99 10.8µs, max 16.4µs","label":"no lead, seated, idle after","window":259,"p50":2.8,"p99":10.8,"max":16.4}
+{"t":1793903184501,"s":2434.365,"kind":"window","text":"no lead, seated, idle after #260: p50 2.8µs, p99 11.8µs, max 40.8µs","label":"no lead, seated, idle after","window":260,"p50":2.8,"p99":11.8,"max":40.8}
+{"t":1793903189592,"s":2439.456,"kind":"window","text":"no lead, seated, idle after #261: p50 2.8µs, p99 10.3µs, max 12.8µs","label":"no lead, seated, idle after","window":261,"p50":2.8,"p99":10.3,"max":12.8}
+{"t":1793903195714,"s":2445.578,"kind":"window","text":"no lead, seated, idle after #262: p50 3.0µs, p99 11.5µs, max 115.1µs","label":"no lead, seated, idle after","window":262,"p50":3,"p99":11.5,"max":115.1}
+{"t":1793903201810,"s":2451.674,"kind":"window","text":"no lead, seated, idle after #263: p50 2.7µs, p99 10.3µs, max 14.3µs","label":"no lead, seated, idle after","window":263,"p50":2.7,"p99":10.3,"max":14.3}
+{"t":1793903206898,"s":2456.762,"kind":"window","text":"no lead, seated, idle after #264: p50 2.7µs, p99 11.8µs, max 100.5µs","label":"no lead, seated, idle after","window":264,"p50":2.7,"p99":11.8,"max":100.5}
+{"t":1793903211963,"s":2461.827,"kind":"window","text":"no lead, seated, idle after #265: p50 2.7µs, p99 11.0µs, max 44.2µs","label":"no lead, seated, idle after","window":265,"p50":2.7,"p99":11,"max":44.2}
+{"t":1793903218065,"s":2467.929,"kind":"window","text":"no lead, seated, idle after #266: p50 2.7µs, p99 10.5µs, max 67.8µs","label":"no lead, seated, idle after","window":266,"p50":2.7,"p99":10.5,"max":67.8}
+{"t":1793903224133,"s":2473.997,"kind":"window","text":"no lead, seated, idle after #267: p50 2.9µs, p99 15.5µs, max 58.4µs","label":"no lead, seated, idle after","window":267,"p50":2.9,"p99":15.5,"max":58.4}
+{"t":1793903229209,"s":2479.073,"kind":"window","text":"no lead, seated, idle after #268: p50 2.8µs, p99 12.3µs, max 13.8µs","label":"no lead, seated, idle after","window":268,"p50":2.8,"p99":12.3,"max":13.8}
+{"t":1793903235327,"s":2485.191,"kind":"window","text":"no lead, seated, idle after #269: p50 2.8µs, p99 10.8µs, max 12.5µs","label":"no lead, seated, idle after","window":269,"p50":2.8,"p99":10.8,"max":12.5}
+{"t":1793903240436,"s":2490.3,"kind":"window","text":"no lead, seated, idle after #270: p50 2.8µs, p99 11.1µs, max 13.8µs","label":"no lead, seated, idle after","window":270,"p50":2.8,"p99":11.1,"max":13.8}
+{"t":1793903246552,"s":2496.416,"kind":"window","text":"no lead, seated, idle after #271: p50 2.7µs, p99 10.7µs, max 12.5µs","label":"no lead, seated, idle after","window":271,"p50":2.7,"p99":10.7,"max":12.5}
+{"t":1793903251654,"s":2501.518,"kind":"window","text":"no lead, seated, idle after #272: p50 2.7µs, p99 10.9µs, max 14.0µs","label":"no lead, seated, idle after","window":272,"p50":2.7,"p99":10.9,"max":14}
+{"t":1793903257959,"s":2507.823,"kind":"window","text":"no lead, seated, idle after #273: p50 2.7µs, p99 11.4µs, max 39.3µs","label":"no lead, seated, idle after","window":273,"p50":2.7,"p99":11.4,"max":39.3}
+{"t":1793903264094,"s":2513.958,"kind":"window","text":"no lead, seated, idle after #274: p50 2.9µs, p99 10.8µs, max 14.0µs","label":"no lead, seated, idle after","window":274,"p50":2.9,"p99":10.8,"max":14}
+{"t":1793903271235,"s":2521.099,"kind":"window","text":"no lead, seated, idle after #275: p50 2.8µs, p99 11.3µs, max 14.1µs","label":"no lead, seated, idle after","window":275,"p50":2.8,"p99":11.3,"max":14.1}
+{"t":1793903277364,"s":2527.228,"kind":"window","text":"no lead, seated, idle after #276: p50 2.9µs, p99 11.4µs, max 25.9µs","label":"no lead, seated, idle after","window":276,"p50":2.9,"p99":11.4,"max":25.9}
+{"t":1793903284503,"s":2534.367,"kind":"window","text":"no lead, seated, idle after #277: p50 3.0µs, p99 13.7µs, max 29.5µs","label":"no lead, seated, idle after","window":277,"p50":3,"p99":13.7,"max":29.5}
+{"t":1793903291631,"s":2541.495,"kind":"window","text":"no lead, seated, idle after #278: p50 3.0µs, p99 12.2µs, max 46.7µs","label":"no lead, seated, idle after","window":278,"p50":3,"p99":12.2,"max":46.7}
+{"t":1793903298726,"s":2548.59,"kind":"window","text":"no lead, seated, idle after #279: p50 3.0µs, p99 11.8µs, max 14.6µs","label":"no lead, seated, idle after","window":279,"p50":3,"p99":11.8,"max":14.6}
+{"t":1793903305030,"s":2554.894,"kind":"window","text":"no lead, seated, idle after #280: p50 2.8µs, p99 12.5µs, max 15.5µs","label":"no lead, seated, idle after","window":280,"p50":2.8,"p99":12.5,"max":15.5}
+{"t":1793903312173,"s":2562.037,"kind":"window","text":"no lead, seated, idle after #281: p50 2.8µs, p99 11.6µs, max 14.9µs","label":"no lead, seated, idle after","window":281,"p50":2.8,"p99":11.6,"max":14.9}
+{"t":1793903318266,"s":2568.13,"kind":"window","text":"no lead, seated, idle after #282: p50 2.8µs, p99 10.6µs, max 12.8µs","label":"no lead, seated, idle after","window":282,"p50":2.8,"p99":10.6,"max":12.8}
+{"t":1793903324406,"s":2574.27,"kind":"window","text":"no lead, seated, idle after #283: p50 2.9µs, p99 10.8µs, max 13.4µs","label":"no lead, seated, idle after","window":283,"p50":2.9,"p99":10.8,"max":13.4}
+{"t":1793903331519,"s":2581.383,"kind":"window","text":"no lead, seated, idle after #284: p50 2.9µs, p99 11.2µs, max 26.1µs","label":"no lead, seated, idle after","window":284,"p50":2.9,"p99":11.2,"max":26.1}
+{"t":1793903337620,"s":2587.484,"kind":"window","text":"no lead, seated, idle after #285: p50 2.9µs, p99 11.6µs, max 13.2µs","label":"no lead, seated, idle after","window":285,"p50":2.9,"p99":11.6,"max":13.2}
+{"t":1793903344918,"s":2594.782,"kind":"window","text":"no lead, seated, idle after #286: p50 2.8µs, p99 11.3µs, max 12.0µs","label":"no lead, seated, idle after","window":286,"p50":2.8,"p99":11.3,"max":12}
+{"t":1793903351014,"s":2600.878,"kind":"window","text":"no lead, seated, idle after #287: p50 2.7µs, p99 10.9µs, max 45.4µs","label":"no lead, seated, idle after","window":287,"p50":2.7,"p99":10.9,"max":45.4}
+{"t":1793903357094,"s":2606.958,"kind":"window","text":"no lead, seated, idle after #288: p50 2.7µs, p99 11.3µs, max 48.0µs","label":"no lead, seated, idle after","window":288,"p50":2.7,"p99":11.3,"max":48}
+{"t":1793903363165,"s":2613.029,"kind":"window","text":"no lead, seated, idle after #289: p50 2.7µs, p99 10.8µs, max 127.8µs","label":"no lead, seated, idle after","window":289,"p50":2.7,"p99":10.8,"max":127.8}
+{"t":1793903369285,"s":2619.149,"kind":"window","text":"no lead, seated, idle after #290: p50 2.9µs, p99 11.5µs, max 55.9µs","label":"no lead, seated, idle after","window":290,"p50":2.9,"p99":11.5,"max":55.9}
+{"t":1793903376409,"s":2626.273,"kind":"window","text":"no lead, seated, idle after #291: p50 2.8µs, p99 10.7µs, max 28.1µs","label":"no lead, seated, idle after","window":291,"p50":2.8,"p99":10.7,"max":28.1}
+{"t":1793903382523,"s":2632.387,"kind":"window","text":"no lead, seated, idle after #292: p50 2.8µs, p99 11.4µs, max 13.4µs","label":"no lead, seated, idle after","window":292,"p50":2.8,"p99":11.4,"max":13.4}
+{"t":1793903387593,"s":2637.457,"kind":"window","text":"no lead, seated, idle after #293: p50 2.8µs, p99 10.2µs, max 13.5µs","label":"no lead, seated, idle after","window":293,"p50":2.8,"p99":10.2,"max":13.5}
+{"t":1793903393684,"s":2643.548,"kind":"window","text":"no lead, seated, idle after #294: p50 2.7µs, p99 10.4µs, max 11.7µs","label":"no lead, seated, idle after","window":294,"p50":2.7,"p99":10.4,"max":11.7}
+{"t":1793903398770,"s":2648.634,"kind":"window","text":"no lead, seated, idle after #295: p50 2.8µs, p99 10.3µs, max 12.4µs","label":"no lead, seated, idle after","window":295,"p50":2.8,"p99":10.3,"max":12.4}
+{"t":1793903404872,"s":2654.736,"kind":"window","text":"no lead, seated, idle after #296: p50 2.7µs, p99 11.1µs, max 77.4µs","label":"no lead, seated, idle after","window":296,"p50":2.7,"p99":11.1,"max":77.4}
+{"t":1793903410959,"s":2660.823,"kind":"window","text":"no lead, seated, idle after #297: p50 2.8µs, p99 11.1µs, max 13.0µs","label":"no lead, seated, idle after","window":297,"p50":2.8,"p99":11.1,"max":13}
+{"t":1793903416053,"s":2665.917,"kind":"window","text":"no lead, seated, idle after #298: p50 2.9µs, p99 10.9µs, max 13.3µs","label":"no lead, seated, idle after","window":298,"p50":2.9,"p99":10.9,"max":13.3}
+{"t":1793903422151,"s":2672.015,"kind":"window","text":"no lead, seated, idle after #299: p50 2.7µs, p99 10.7µs, max 55.2µs","label":"no lead, seated, idle after","window":299,"p50":2.7,"p99":10.7,"max":55.2}
+{"t":1793903428283,"s":2678.147,"kind":"window","text":"no lead, seated, idle after #300: p50 2.8µs, p99 11.4µs, max 113.7µs","label":"no lead, seated, idle after","window":300,"p50":2.8,"p99":11.4,"max":113.7}
+{"t":1793903433366,"s":2683.23,"kind":"window","text":"no lead, seated, idle after #301: p50 2.7µs, p99 10.8µs, max 13.2µs","label":"no lead, seated, idle after","window":301,"p50":2.7,"p99":10.8,"max":13.2}
+{"t":1793903439449,"s":2689.313,"kind":"window","text":"no lead, seated, idle after #302: p50 2.7µs, p99 10.5µs, max 43.1µs","label":"no lead, seated, idle after","window":302,"p50":2.7,"p99":10.5,"max":43.1}
+{"t":1793903444548,"s":2694.412,"kind":"window","text":"no lead, seated, idle after #303: p50 2.8µs, p99 10.9µs, max 11.7µs","label":"no lead, seated, idle after","window":303,"p50":2.8,"p99":10.9,"max":11.7}
+{"t":1793903450665,"s":2700.529,"kind":"window","text":"no lead, seated, idle after #304: p50 2.8µs, p99 11.2µs, max 28.4µs","label":"no lead, seated, idle after","window":304,"p50":2.8,"p99":11.2,"max":28.4}
+{"t":1793903456821,"s":2706.685,"kind":"window","text":"no lead, seated, idle after #305: p50 2.8µs, p99 11.0µs, max 13.3µs","label":"no lead, seated, idle after","window":305,"p50":2.8,"p99":11,"max":13.3}
+{"t":1793903461918,"s":2711.782,"kind":"window","text":"no lead, seated, idle after #306: p50 2.8µs, p99 11.6µs, max 13.4µs","label":"no lead, seated, idle after","window":306,"p50":2.8,"p99":11.6,"max":13.4}
+{"t":1793903468039,"s":2717.903,"kind":"window","text":"no lead, seated, idle after #307: p50 2.9µs, p99 11.3µs, max 12.8µs","label":"no lead, seated, idle after","window":307,"p50":2.9,"p99":11.3,"max":12.8}
+{"t":1793903474120,"s":2723.984,"kind":"window","text":"no lead, seated, idle after #308: p50 2.8µs, p99 11.9µs, max 26.7µs","label":"no lead, seated, idle after","window":308,"p50":2.8,"p99":11.9,"max":26.7}
+{"t":1793903479193,"s":2729.057,"kind":"window","text":"no lead, seated, idle after #309: p50 2.8µs, p99 11.2µs, max 13.8µs","label":"no lead, seated, idle after","window":309,"p50":2.8,"p99":11.2,"max":13.8}
+{"t":1793903485281,"s":2735.145,"kind":"window","text":"no lead, seated, idle after #310: p50 3.0µs, p99 13.1µs, max 15.5µs","label":"no lead, seated, idle after","window":310,"p50":3,"p99":13.1,"max":15.5}
+{"t":1793903491370,"s":2741.234,"kind":"window","text":"no lead, seated, idle after #311: p50 2.8µs, p99 11.0µs, max 13.4µs","label":"no lead, seated, idle after","window":311,"p50":2.8,"p99":11,"max":13.4}
+{"t":1793903497520,"s":2747.384,"kind":"window","text":"no lead, seated, idle after #312: p50 2.7µs, p99 10.5µs, max 12.8µs","label":"no lead, seated, idle after","window":312,"p50":2.7,"p99":10.5,"max":12.8}
+{"t":1793903502615,"s":2752.479,"kind":"window","text":"no lead, seated, idle after #313: p50 2.8µs, p99 10.7µs, max 24.1µs","label":"no lead, seated, idle after","window":313,"p50":2.8,"p99":10.7,"max":24.1}
+{"t":1793903508720,"s":2758.584,"kind":"window","text":"no lead, seated, idle after #314: p50 2.9µs, p99 12.8µs, max 318.1µs","label":"no lead, seated, idle after","window":314,"p50":2.9,"p99":12.8,"max":318.1}
+{"t":1793903514795,"s":2764.659,"kind":"window","text":"no lead, seated, idle after #315: p50 2.9µs, p99 11.2µs, max 37.1µs","label":"no lead, seated, idle after","window":315,"p50":2.9,"p99":11.2,"max":37.1}
+{"t":1793903520875,"s":2770.739,"kind":"window","text":"no lead, seated, idle after #316: p50 2.8µs, p99 10.4µs, max 353.0µs","label":"no lead, seated, idle after","window":316,"p50":2.8,"p99":10.4,"max":353}
+{"t":1793903527003,"s":2776.867,"kind":"window","text":"no lead, seated, idle after #317: p50 3.0µs, p99 12.7µs, max 113.6µs","label":"no lead, seated, idle after","window":317,"p50":3,"p99":12.7,"max":113.6}
+{"t":1793903534152,"s":2784.016,"kind":"window","text":"no lead, seated, idle after #318: p50 3.2µs, p99 12.2µs, max 32.3µs","label":"no lead, seated, idle after","window":318,"p50":3.2,"p99":12.2,"max":32.3}
+{"t":1793903539223,"s":2789.087,"kind":"window","text":"no lead, seated, idle after #319: p50 2.9µs, p99 12.2µs, max 14.5µs","label":"no lead, seated, idle after","window":319,"p50":2.9,"p99":12.2,"max":14.5}
+{"t":1793903545358,"s":2795.222,"kind":"window","text":"no lead, seated, idle after #320: p50 73.8µs, p99 121.2µs, max 218.1µs","label":"no lead, seated, idle after","window":320,"p50":73.8,"p99":121.2,"max":218.1}
+{"t":1793903551473,"s":2801.337,"kind":"window","text":"no lead, seated, idle after #321: p50 77.6µs, p99 120.5µs, max 135.4µs","label":"no lead, seated, idle after","window":321,"p50":77.6,"p99":120.5,"max":135.4}
+{"t":1793903556560,"s":2806.424,"kind":"window","text":"no lead, seated, idle after #322: p50 78.5µs, p99 133.9µs, max 138.4µs","label":"no lead, seated, idle after","window":322,"p50":78.5,"p99":133.9,"max":138.4}
+{"t":1793903562641,"s":2812.505,"kind":"window","text":"no lead, seated, idle after #323: p50 79.6µs, p99 143.2µs, max 226.1µs","label":"no lead, seated, idle after","window":323,"p50":79.6,"p99":143.2,"max":226.1}
+{"t":1793903568723,"s":2818.587,"kind":"window","text":"no lead, seated, idle after #324: p50 2.9µs, p99 79.7µs, max 263.1µs","label":"no lead, seated, idle after","window":324,"p50":2.9,"p99":79.7,"max":263.1}
+{"t":1793903574824,"s":2824.688,"kind":"window","text":"no lead, seated, idle after #325: p50 2.8µs, p99 11.3µs, max 45.3µs","label":"no lead, seated, idle after","window":325,"p50":2.8,"p99":11.3,"max":45.3}
+{"t":1793903579902,"s":2829.766,"kind":"window","text":"no lead, seated, idle after #326: p50 2.9µs, p99 13.0µs, max 27.7µs","label":"no lead, seated, idle after","window":326,"p50":2.9,"p99":13,"max":27.7}
+{"t":1793903586026,"s":2835.89,"kind":"window","text":"no lead, seated, idle after #327: p50 2.8µs, p99 10.8µs, max 15.8µs","label":"no lead, seated, idle after","window":327,"p50":2.8,"p99":10.8,"max":15.8}
+{"t":1793903591099,"s":2840.963,"kind":"window","text":"no lead, seated, idle after #328: p50 2.9µs, p99 9.9µs, max 11.9µs","label":"no lead, seated, idle after","window":328,"p50":2.9,"p99":9.9,"max":11.9}
+{"t":1793903597210,"s":2847.074,"kind":"window","text":"no lead, seated, idle after #329: p50 2.8µs, p99 12.2µs, max 14.1µs","label":"no lead, seated, idle after","window":329,"p50":2.8,"p99":12.2,"max":14.1}
+{"t":1793903603309,"s":2853.173,"kind":"window","text":"no lead, seated, idle after #330: p50 2.8µs, p99 10.9µs, max 58.0µs","label":"no lead, seated, idle after","window":330,"p50":2.8,"p99":10.9,"max":58}
+{"t":1793903608406,"s":2858.27,"kind":"window","text":"no lead, seated, idle after #331: p50 2.8µs, p99 12.5µs, max 32.5µs","label":"no lead, seated, idle after","window":331,"p50":2.8,"p99":12.5,"max":32.5}
+{"t":1793903614519,"s":2864.383,"kind":"window","text":"no lead, seated, idle after #332: p50 2.8µs, p99 11.0µs, max 22.8µs","label":"no lead, seated, idle after","window":332,"p50":2.8,"p99":11,"max":22.8}
+{"t":1793903619600,"s":2869.464,"kind":"window","text":"no lead, seated, idle after #333: p50 2.9µs, p99 11.2µs, max 16.7µs","label":"no lead, seated, idle after","window":333,"p50":2.9,"p99":11.2,"max":16.7}
+{"t":1793903625700,"s":2875.564,"kind":"window","text":"no lead, seated, idle after #334: p50 3.0µs, p99 11.6µs, max 33.6µs","label":"no lead, seated, idle after","window":334,"p50":3,"p99":11.6,"max":33.6}
+{"t":1793903631790,"s":2881.654,"kind":"window","text":"no lead, seated, idle after #335: p50 2.9µs, p99 12.6µs, max 16.8µs","label":"no lead, seated, idle after","window":335,"p50":2.9,"p99":12.6,"max":16.8}
+{"t":1793903637889,"s":2887.753,"kind":"window","text":"no lead, seated, idle after #336: p50 2.9µs, p99 10.0µs, max 12.4µs","label":"no lead, seated, idle after","window":336,"p50":2.9,"p99":10,"max":12.4}
+{"t":1793903644013,"s":2893.877,"kind":"window","text":"no lead, seated, idle after #337: p50 2.9µs, p99 14.6µs, max 34.7µs","label":"no lead, seated, idle after","window":337,"p50":2.9,"p99":14.6,"max":34.7}
+{"t":1793903650120,"s":2899.984,"kind":"window","text":"no lead, seated, idle after #338: p50 3.0µs, p99 11.7µs, max 15.1µs","label":"no lead, seated, idle after","window":338,"p50":3,"p99":11.7,"max":15.1}
+{"t":1793903656254,"s":2906.118,"kind":"window","text":"no lead, seated, idle after #339: p50 3.0µs, p99 13.4µs, max 26.0µs","label":"no lead, seated, idle after","window":339,"p50":3,"p99":13.4,"max":26}
+{"t":1793903661349,"s":2911.213,"kind":"window","text":"no lead, seated, idle after #340: p50 3.0µs, p99 12.5µs, max 21.2µs","label":"no lead, seated, idle after","window":340,"p50":3,"p99":12.5,"max":21.2}
+{"t":1793903667451,"s":2917.315,"kind":"window","text":"no lead, seated, idle after #341: p50 3.0µs, p99 102.0µs, max 151.5µs","label":"no lead, seated, idle after","window":341,"p50":3,"p99":102,"max":151.5}
+{"t":1793903673573,"s":2923.437,"kind":"window","text":"no lead, seated, idle after #342: p50 80.0µs, p99 119.3µs, max 194.5µs","label":"no lead, seated, idle after","window":342,"p50":80,"p99":119.3,"max":194.5}
+{"t":1793903679660,"s":2929.524,"kind":"window","text":"no lead, seated, idle after #343: p50 78.8µs, p99 125.7µs, max 169.3µs","label":"no lead, seated, idle after","window":343,"p50":78.8,"p99":125.7,"max":169.3}
+{"t":1793903684711,"s":2934.575,"kind":"window","text":"no lead, seated, idle after #344: p50 76.2µs, p99 124.2µs, max 233.6µs","label":"no lead, seated, idle after","window":344,"p50":76.2,"p99":124.2,"max":233.6}
+{"t":1793903690843,"s":2940.707,"kind":"window","text":"no lead, seated, idle after #345: p50 2.7µs, p99 10.6µs, max 12.4µs","label":"no lead, seated, idle after","window":345,"p50":2.7,"p99":10.6,"max":12.4}
+{"t":1793903695926,"s":2945.79,"kind":"window","text":"no lead, seated, idle after #346: p50 2.7µs, p99 10.1µs, max 11.6µs","label":"no lead, seated, idle after","window":346,"p50":2.7,"p99":10.1,"max":11.6}
+{"t":1793903702037,"s":2951.901,"kind":"window","text":"no lead, seated, idle after #347: p50 2.7µs, p99 11.0µs, max 40.7µs","label":"no lead, seated, idle after","window":347,"p50":2.7,"p99":11,"max":40.7}
+{"t":1793903707140,"s":2957.004,"kind":"window","text":"no lead, seated, idle after #348: p50 2.7µs, p99 11.3µs, max 26.7µs","label":"no lead, seated, idle after","window":348,"p50":2.7,"p99":11.3,"max":26.7}
+{"t":1793903712224,"s":2962.088,"kind":"window","text":"no lead, seated, idle after #349: p50 2.6µs, p99 11.1µs, max 12.0µs","label":"no lead, seated, idle after","window":349,"p50":2.6,"p99":11.1,"max":12}
+{"t":1793903718287,"s":2968.151,"kind":"window","text":"no lead, seated, idle after #350: p50 2.7µs, p99 10.5µs, max 12.0µs","label":"no lead, seated, idle after","window":350,"p50":2.7,"p99":10.5,"max":12}
+{"t":1793903723344,"s":2973.208,"kind":"window","text":"no lead, seated, idle after #351: p50 2.6µs, p99 10.2µs, max 48.2µs","label":"no lead, seated, idle after","window":351,"p50":2.6,"p99":10.2,"max":48.2}
+{"t":1793903728454,"s":2978.318,"kind":"window","text":"no lead, seated, idle after #352: p50 2.6µs, p99 10.0µs, max 11.1µs","label":"no lead, seated, idle after","window":352,"p50":2.6,"p99":10,"max":11.1}
+{"t":1793903733539,"s":2983.403,"kind":"window","text":"no lead, seated, idle after #353: p50 2.6µs, p99 10.6µs, max 12.4µs","label":"no lead, seated, idle after","window":353,"p50":2.6,"p99":10.6,"max":12.4}
+{"t":1793903738628,"s":2988.492,"kind":"window","text":"no lead, seated, idle after #354: p50 2.6µs, p99 10.9µs, max 12.5µs","label":"no lead, seated, idle after","window":354,"p50":2.6,"p99":10.9,"max":12.5}
+{"t":1793903744721,"s":2994.585,"kind":"window","text":"no lead, seated, idle after #355: p50 2.6µs, p99 10.4µs, max 12.5µs","label":"no lead, seated, idle after","window":355,"p50":2.6,"p99":10.4,"max":12.5}
+{"t":1793903749792,"s":2999.656,"kind":"window","text":"no lead, seated, idle after #356: p50 2.6µs, p99 10.1µs, max 11.4µs","label":"no lead, seated, idle after","window":356,"p50":2.6,"p99":10.1,"max":11.4}
+{"t":1793903754870,"s":3004.734,"kind":"window","text":"no lead, seated, idle after #357: p50 2.6µs, p99 10.7µs, max 13.8µs","label":"no lead, seated, idle after","window":357,"p50":2.6,"p99":10.7,"max":13.8}
+{"t":1793903759943,"s":3009.807,"kind":"window","text":"no lead, seated, idle after #358: p50 2.6µs, p99 10.9µs, max 11.6µs","label":"no lead, seated, idle after","window":358,"p50":2.6,"p99":10.9,"max":11.6}
+{"t":1793903765004,"s":3014.868,"kind":"window","text":"no lead, seated, idle after #359: p50 2.5µs, p99 11.5µs, max 12.5µs","label":"no lead, seated, idle after","window":359,"p50":2.5,"p99":11.5,"max":12.5}
+{"t":1793903771091,"s":3020.955,"kind":"window","text":"no lead, seated, idle after #360: p50 2.6µs, p99 11.2µs, max 30.2µs","label":"no lead, seated, idle after","window":360,"p50":2.6,"p99":11.2,"max":30.2}
+{"t":1793903776195,"s":3026.059,"kind":"window","text":"no lead, seated, idle after #361: p50 2.7µs, p99 10.5µs, max 12.0µs","label":"no lead, seated, idle after","window":361,"p50":2.7,"p99":10.5,"max":12}
+{"t":1793903781301,"s":3031.165,"kind":"window","text":"no lead, seated, idle after #362: p50 2.6µs, p99 10.4µs, max 12.4µs","label":"no lead, seated, idle after","window":362,"p50":2.6,"p99":10.4,"max":12.4}
+{"t":1793903786382,"s":3036.246,"kind":"window","text":"no lead, seated, idle after #363: p50 2.6µs, p99 10.1µs, max 13.1µs","label":"no lead, seated, idle after","window":363,"p50":2.6,"p99":10.1,"max":13.1}
+{"t":1793903792505,"s":3042.369,"kind":"window","text":"no lead, seated, idle after #364: p50 2.6µs, p99 10.6µs, max 12.8µs","label":"no lead, seated, idle after","window":364,"p50":2.6,"p99":10.6,"max":12.8}
+{"t":1793903797600,"s":3047.464,"kind":"window","text":"no lead, seated, idle after #365: p50 2.7µs, p99 11.4µs, max 12.8µs","label":"no lead, seated, idle after","window":365,"p50":2.7,"p99":11.4,"max":12.8}
+{"t":1793903803690,"s":3053.554,"kind":"window","text":"no lead, seated, idle after #366: p50 2.6µs, p99 10.3µs, max 13.8µs","label":"no lead, seated, idle after","window":366,"p50":2.6,"p99":10.3,"max":13.8}
+{"t":1793903808806,"s":3058.67,"kind":"window","text":"no lead, seated, idle after #367: p50 2.8µs, p99 10.5µs, max 57.0µs","label":"no lead, seated, idle after","window":367,"p50":2.8,"p99":10.5,"max":57}
+{"t":1793903813879,"s":3063.743,"kind":"window","text":"no lead, seated, idle after #368: p50 2.6µs, p99 9.8µs, max 11.8µs","label":"no lead, seated, idle after","window":368,"p50":2.6,"p99":9.8,"max":11.8}
+{"t":1793903819986,"s":3069.85,"kind":"window","text":"no lead, seated, idle after #369: p50 2.6µs, p99 10.7µs, max 13.3µs","label":"no lead, seated, idle after","window":369,"p50":2.6,"p99":10.7,"max":13.3}
+{"t":1793903825049,"s":3074.913,"kind":"window","text":"no lead, seated, idle after #370: p50 2.6µs, p99 11.0µs, max 12.5µs","label":"no lead, seated, idle after","window":370,"p50":2.6,"p99":11,"max":12.5}
+{"t":1793903831167,"s":3081.031,"kind":"window","text":"no lead, seated, idle after #371: p50 2.8µs, p99 11.3µs, max 40.2µs","label":"no lead, seated, idle after","window":371,"p50":2.8,"p99":11.3,"max":40.2}
+{"t":1793903839239,"s":3089.103,"kind":"window","text":"no lead, seated, idle after #0: p50 NaNµs, p99 NaNµs, max NaNµs","label":"no lead, seated, idle after","window":0,"p50":null,"p99":null,"max":null}
+{"t":1793903839696,"s":3089.56,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1793903839696,"s":3089.56,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1793903840531,"s":3090.395,"kind":"lost","text":"the sim quit"}

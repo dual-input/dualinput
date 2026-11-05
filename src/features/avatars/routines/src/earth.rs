@@ -66,19 +66,40 @@ fn body_to_ned(p: &Pose) -> [[f64; 3]; 3] {
     ]
 }
 
+/// WGS 84's meridian and normal radii at `latitude`, in meters.
+fn radii(latitude: f64) -> (f64, f64) {
+    let e2 = FLATTENING * (2.0 - FLATTENING);
+    let s = latitude.to_radians().sin();
+    let w = (1.0 - e2 * s * s).sqrt();
+    (EQUATOR_M * (1.0 - e2) / (w * w * w), EQUATOR_M / w)
+}
+
+/// Where `p` lies in the aircraft's frame, x left, y up, z forward, the way back from `place`.
+/// `world_to_frame` in aircraft-model's frame.rs does the same for the core, so change both
+/// together.
+pub(crate) fn in_frame(a: &Pose, p: &Pose) -> [f32; 3] {
+    let (meridian, normal) = radii(a.latitude);
+    let east = (p.longitude - a.longitude + 540.0).rem_euclid(360.0) - 180.0;
+    let ned = [
+        (p.latitude - a.latitude).to_radians() * meridian,
+        east.to_radians() * normal * a.latitude.to_radians().cos(),
+        -(p.altitude - a.altitude) * FT,
+    ];
+    let r = body_to_ned(a);
+    let body: [f64; 3] =
+        std::array::from_fn(|i| r.iter().zip(ned).map(|(row, n)| row[i] * n).sum());
+    [-body[1] as f32, -body[2] as f32, body[0] as f32]
+}
+
 /// The pose of an object at `at` in the aircraft's frame, x left, y up, z forward, turned
 /// `facing` degrees right of the aircraft's nose, by WGS 84's radii at the aircraft's
-/// latitude. `world_to_frame` in aircraft-model's frame.rs turns a point the other way, so
-/// change both together.
+/// latitude. `in_frame` here and `world_to_frame` in aircraft-model's frame.rs turn a point
+/// the other way, so change all three together.
 pub(crate) fn place(a: &Pose, at: [f32; 3], facing: f32) -> Pose {
     let r = body_to_ned(a);
     let body = [f64::from(at[2]), -f64::from(at[0]), -f64::from(at[1])];
     let ned = r.map(|[x, y, z]| x * body[0] + y * body[1] + z * body[2]);
-    let e2 = FLATTENING * (2.0 - FLATTENING);
-    let s = a.latitude.to_radians().sin();
-    let w = (1.0 - e2 * s * s).sqrt();
-    let meridian = EQUATOR_M * (1.0 - e2) / (w * w * w);
-    let normal = EQUATOR_M / w;
+    let (meridian, normal) = radii(a.latitude);
     // The figure's axes: the aircraft's, turned about its own down axis by the facing.
     let (cf, sf) = (
         f64::from(facing).to_radians().cos(),
@@ -145,6 +166,23 @@ mod tests {
         assert!((p.heading - 200.0).abs() < 1e-6);
         assert!((p.pitch + 8.0).abs() < 1e-6);
         assert!((p.bank - 15.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn a_point_placed_in_the_world_comes_back_to_where_it_was_in_the_frame() {
+        let a = Pose {
+            latitude: 41.7,
+            longitude: 179.9999,
+            altitude: 60.0,
+            heading: 200.0,
+            pitch: -8.0,
+            bank: 15.0,
+        };
+        let at = [3.0, 0.9, -12.0];
+        let back = in_frame(&a, &place(&a, at, 40.0));
+        for (got, want) in back.iter().zip(at) {
+            assert!((got - want).abs() < 1e-3, "{back:?}");
+        }
     }
 
     #[test]

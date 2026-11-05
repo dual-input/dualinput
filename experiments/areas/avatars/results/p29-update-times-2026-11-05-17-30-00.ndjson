@@ -1,0 +1,80 @@
+{"t":1793899800712,"s":0.029,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1793899800714,"s":0.031,"kind":"label","text":"pinned, session starting"}
+{"t":1793899800738,"s":0.055,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1793899800738,"s":0.055,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1793899800738,"s":0.055,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1793899800739,"s":0.056,"kind":"window","text":"pinned, session starting #31: p50 2.9µs, p99 12.0µs, max 25.3µs","label":"pinned, session starting","window":31,"p50":2.9,"p99":12,"max":25.3}
+{"t":1793899801771,"s":1.088,"kind":"window","text":"pinned, session starting #32: p50 3.2µs, p99 13.0µs, max 34.8µs","label":"pinned, session starting","window":32,"p50":3.2,"p99":13,"max":34.8}
+{"t":1793899812106,"s":11.423,"kind":"window","text":"pinned, session starting #33: p50 3.1µs, p99 12.1µs, max 27.2µs","label":"pinned, session starting","window":33,"p50":3.1,"p99":12.1,"max":27.2}
+{"t":1793899822373,"s":21.69,"kind":"window","text":"pinned, session starting #34: p50 3.1µs, p99 12.4µs, max 15.3µs","label":"pinned, session starting","window":34,"p50":3.1,"p99":12.4,"max":15.3}
+{"t":1793899831673,"s":30.99,"kind":"window","text":"pinned, session starting #35: p50 3.1µs, p99 13.6µs, max 59.2µs","label":"pinned, session starting","window":35,"p50":3.1,"p99":13.6,"max":59.2}
+{"t":1793899841973,"s":41.29,"kind":"window","text":"pinned, session starting #36: p50 2.8µs, p99 12.2µs, max 25.2µs","label":"pinned, session starting","window":36,"p50":2.8,"p99":12.2,"max":25.2}
+{"t":1793899852288,"s":51.605,"kind":"window","text":"pinned, session starting #37: p50 3.3µs, p99 13.3µs, max 22.1µs","label":"pinned, session starting","window":37,"p50":3.3,"p99":13.3,"max":22.1}
+{"t":1793899862593,"s":61.91,"kind":"window","text":"pinned, session starting #38: p50 3.2µs, p99 13.0µs, max 20.1µs","label":"pinned, session starting","window":38,"p50":3.2,"p99":13,"max":20.1}
+{"t":1793899871827,"s":71.144,"kind":"window","text":"pinned, session starting #39: p50 3.0µs, p99 12.7µs, max 14.5µs","label":"pinned, session starting","window":39,"p50":3,"p99":12.701,"max":14.501}
+{"t":1793899882160,"s":81.477,"kind":"window","text":"pinned, session starting #40: p50 3.0µs, p99 12.2µs, max 13.5µs","label":"pinned, session starting","window":40,"p50":3,"p99":12.2,"max":13.499}
+{"t":1793899892479,"s":91.796,"kind":"window","text":"pinned, session starting #41: p50 73.7µs, p99 118.3µs, max 169.0µs","label":"pinned, session starting","window":41,"p50":73.701,"p99":118.3,"max":169}
+{"t":1793899902783,"s":102.1,"kind":"window","text":"pinned, session starting #42: p50 95.6µs, p99 192.8µs, max 256.3µs","label":"pinned, session starting","window":42,"p50":95.6,"p99":192.8,"max":256.3}
+{"t":1793899912063,"s":111.38,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1793899912083,"s":111.4,"kind":"window","text":"pinned, session starting #43: p50 79.1µs, p99 122.8µs, max 257.6µs","label":"pinned, session starting","window":43,"p50":79.1,"p99":122.8,"max":257.6}
+{"t":1793899922378,"s":121.695,"kind":"window","text":"pinned, session starting #44: p50 82.6µs, p99 174.5µs, max 208.4µs","label":"pinned, session starting","window":44,"p50":82.6,"p99":174.5,"max":208.4}
+{"t":1793899931614,"s":130.931,"kind":"label","text":"pinned, on foot"}
+{"t":1793899932680,"s":131.997,"kind":"window","text":"pinned, on foot #45: p50 63.1µs, p99 107.6µs, max 158.2µs","label":"pinned, on foot","window":45,"p50":63.1,"p99":107.6,"max":158.2}
+{"t":1793899941979,"s":141.296,"kind":"window","text":"pinned, on foot #46: p50 62.1µs, p99 147.3µs, max 176.0µs","label":"pinned, on foot","window":46,"p50":62.1,"p99":147.3,"max":176}
+{"t":1793899952279,"s":151.596,"kind":"window","text":"pinned, on foot #47: p50 62.2µs, p99 106.0µs, max 214.7µs","label":"pinned, on foot","window":47,"p50":62.2,"p99":106,"max":214.7}
+{"t":1793899962613,"s":161.93,"kind":"window","text":"pinned, on foot #48: p50 70.4µs, p99 124.4µs, max 206.2µs","label":"pinned, on foot","window":48,"p50":70.4,"p99":124.4,"max":206.2}
+{"t":1793899972912,"s":172.229,"kind":"window","text":"pinned, on foot #49: p50 61.8µs, p99 117.2µs, max 149.0µs","label":"pinned, on foot","window":49,"p50":61.8,"p99":117.2,"max":149}
+{"t":1793899982195,"s":181.512,"kind":"window","text":"pinned, on foot #50: p50 78.9µs, p99 112.6µs, max 130.7µs","label":"pinned, on foot","window":50,"p50":78.9,"p99":112.6,"max":130.7}
+{"t":1793899992528,"s":191.845,"kind":"window","text":"pinned, on foot #51: p50 74.9µs, p99 116.3µs, max 226.1µs","label":"pinned, on foot","window":51,"p50":74.9,"p99":116.3,"max":226.1}
+{"t":1793900002828,"s":202.145,"kind":"window","text":"pinned, on foot #52: p50 69.4µs, p99 131.2µs, max 200.3µs","label":"pinned, on foot","window":52,"p50":69.4,"p99":131.2,"max":200.3}
+{"t":1793900012128,"s":211.445,"kind":"window","text":"pinned, on foot #53: p50 57.5µs, p99 118.2µs, max 169.2µs","label":"pinned, on foot","window":53,"p50":57.5,"p99":118.2,"max":169.2}
+{"t":1793900022460,"s":221.777,"kind":"window","text":"pinned, on foot #54: p50 67.5µs, p99 105.0µs, max 118.6µs","label":"pinned, on foot","window":54,"p50":67.5,"p99":105,"max":118.6}
+{"t":1793900032794,"s":232.111,"kind":"window","text":"pinned, on foot #55: p50 70.9µs, p99 120.3µs, max 167.0µs","label":"pinned, on foot","window":55,"p50":70.9,"p99":120.3,"max":167}
+{"t":1793900043031,"s":242.348,"kind":"window","text":"pinned, on foot #56: p50 80.8µs, p99 113.5µs, max 230.1µs","label":"pinned, on foot","window":56,"p50":80.8,"p99":113.5,"max":230.1}
+{"t":1793900052332,"s":251.649,"kind":"window","text":"pinned, on foot #57: p50 72.3µs, p99 122.3µs, max 248.3µs","label":"pinned, on foot","window":57,"p50":72.3,"p99":122.3,"max":248.3}
+{"t":1793900062926,"s":262.243,"kind":"window","text":"pinned, on foot #58: p50 73.3µs, p99 147.3µs, max 286.0µs","label":"pinned, on foot","window":58,"p50":73.3,"p99":147.3,"max":286}
+{"t":1793900073212,"s":272.529,"kind":"window","text":"pinned, on foot #59: p50 73.6µs, p99 111.4µs, max 147.8µs","label":"pinned, on foot","window":59,"p50":73.6,"p99":111.4,"max":147.8}
+{"t":1793900083544,"s":282.861,"kind":"window","text":"pinned, on foot #60: p50 59.1µs, p99 124.4µs, max 152.3µs","label":"pinned, on foot","window":60,"p50":59.1,"p99":124.4,"max":152.3}
+{"t":1793900092844,"s":292.161,"kind":"window","text":"pinned, on foot #61: p50 73.7µs, p99 147.8µs, max 171.0µs","label":"pinned, on foot","window":61,"p50":73.7,"p99":147.8,"max":171}
+{"t":1793900103145,"s":302.462,"kind":"window","text":"pinned, on foot #62: p50 70.2µs, p99 119.0µs, max 176.4µs","label":"pinned, on foot","window":62,"p50":70.2,"p99":119,"max":176.4}
+{"t":1793900113478,"s":312.795,"kind":"window","text":"pinned, on foot #63: p50 57.4µs, p99 133.7µs, max 203.5µs","label":"pinned, on foot","window":63,"p50":57.4,"p99":133.7,"max":203.5}
+{"t":1793900122779,"s":322.096,"kind":"window","text":"pinned, on foot #64: p50 56.6µs, p99 81.4µs, max 150.0µs","label":"pinned, on foot","window":64,"p50":56.6,"p99":81.4,"max":150}
+{"t":1793900133078,"s":332.395,"kind":"window","text":"pinned, on foot #65: p50 64.7µs, p99 109.8µs, max 160.4µs","label":"pinned, on foot","window":65,"p50":64.7,"p99":109.8,"max":160.4}
+{"t":1793900143412,"s":342.729,"kind":"window","text":"pinned, on foot #66: p50 75.2µs, p99 107.2µs, max 113.9µs","label":"pinned, on foot","window":66,"p50":75.2,"p99":107.2,"max":113.9}
+{"t":1793900153745,"s":353.062,"kind":"window","text":"pinned, on foot #67: p50 71.1µs, p99 128.3µs, max 181.6µs","label":"pinned, on foot","window":67,"p50":71.1,"p99":128.3,"max":181.6}
+{"t":1793900162979,"s":362.296,"kind":"window","text":"pinned, on foot #68: p50 58.1µs, p99 95.7µs, max 178.5µs","label":"pinned, on foot","window":68,"p50":58.1,"p99":95.7,"max":178.5}
+{"t":1793900173279,"s":372.596,"kind":"window","text":"pinned, on foot #69: p50 55.7µs, p99 82.9µs, max 95.8µs","label":"pinned, on foot","window":69,"p50":55.7,"p99":82.9,"max":95.8}
+{"t":1793900183546,"s":382.863,"kind":"window","text":"pinned, on foot #70: p50 56.5µs, p99 87.2µs, max 157.2µs","label":"pinned, on foot","window":70,"p50":56.5,"p99":87.2,"max":157.2}
+{"t":1793900192846,"s":392.163,"kind":"window","text":"pinned, on foot #71: p50 57.8µs, p99 145.8µs, max 225.8µs","label":"pinned, on foot","window":71,"p50":57.8,"p99":145.8,"max":225.8}
+{"t":1793900203122,"s":402.439,"kind":"window","text":"pinned, on foot #72: p50 64.6µs, p99 97.0µs, max 171.8µs","label":"pinned, on foot","window":72,"p50":64.6,"p99":97,"max":171.8}
+{"t":1793900213422,"s":412.739,"kind":"window","text":"pinned, on foot #73: p50 61.6µs, p99 86.3µs, max 109.3µs","label":"pinned, on foot","window":73,"p50":61.6,"p99":86.3,"max":109.3}
+{"t":1793900223756,"s":423.073,"kind":"window","text":"pinned, on foot #74: p50 58.3µs, p99 119.1µs, max 149.0µs","label":"pinned, on foot","window":74,"p50":58.3,"p99":119.1,"max":149}
+{"t":1793900233023,"s":432.34,"kind":"window","text":"pinned, on foot #75: p50 63.7µs, p99 90.3µs, max 167.8µs","label":"pinned, on foot","window":75,"p50":63.7,"p99":90.3,"max":167.8}
+{"t":1793900243322,"s":442.639,"kind":"window","text":"pinned, on foot #76: p50 56.5µs, p99 88.2µs, max 117.7µs","label":"pinned, on foot","window":76,"p50":56.5,"p99":88.2,"max":117.7}
+{"t":1793900253656,"s":452.973,"kind":"window","text":"pinned, on foot #77: p50 63.0µs, p99 86.9µs, max 153.7µs","label":"pinned, on foot","window":77,"p50":63,"p99":86.9,"max":153.7}
+{"t":1793900262956,"s":462.273,"kind":"window","text":"pinned, on foot #78: p50 56.1µs, p99 82.9µs, max 159.7µs","label":"pinned, on foot","window":78,"p50":56.1,"p99":82.9,"max":159.7}
+{"t":1793900273292,"s":472.609,"kind":"window","text":"pinned, on foot #79: p50 69.6µs, p99 98.3µs, max 189.9µs","label":"pinned, on foot","window":79,"p50":69.6,"p99":98.3,"max":189.9}
+{"t":1793900283626,"s":482.943,"kind":"window","text":"pinned, on foot #80: p50 56.7µs, p99 95.0µs, max 134.5µs","label":"pinned, on foot","window":80,"p50":56.7,"p99":95,"max":134.5}
+{"t":1793900292926,"s":492.243,"kind":"window","text":"pinned, on foot #81: p50 56.8µs, p99 112.7µs, max 140.0µs","label":"pinned, on foot","window":81,"p50":56.8,"p99":112.7,"max":140}
+{"t":1793900303226,"s":502.543,"kind":"window","text":"pinned, on foot #82: p50 59.2µs, p99 108.1µs, max 160.0µs","label":"pinned, on foot","window":82,"p50":59.2,"p99":108.1,"max":160}
+{"t":1793900313559,"s":512.876,"kind":"window","text":"pinned, on foot #83: p50 59.4µs, p99 88.8µs, max 161.1µs","label":"pinned, on foot","window":83,"p50":59.4,"p99":88.8,"max":161.1}
+{"t":1793900322859,"s":522.176,"kind":"window","text":"pinned, on foot #84: p50 60.9µs, p99 90.2µs, max 152.9µs","label":"pinned, on foot","window":84,"p50":60.9,"p99":90.2,"max":152.9}
+{"t":1793900333159,"s":532.476,"kind":"window","text":"pinned, on foot #85: p50 59.4µs, p99 169.1µs, max 228.9µs","label":"pinned, on foot","window":85,"p50":59.4,"p99":169.1,"max":228.9}
+{"t":1793900343493,"s":542.81,"kind":"window","text":"pinned, on foot #86: p50 54.3µs, p99 95.2µs, max 143.1µs","label":"pinned, on foot","window":86,"p50":54.3,"p99":95.2,"max":143.1}
+{"t":1793900352793,"s":552.11,"kind":"window","text":"pinned, on foot #87: p50 53.1µs, p99 86.6µs, max 106.1µs","label":"pinned, on foot","window":87,"p50":53.1,"p99":86.6,"max":106.1}
+{"t":1793900363092,"s":562.409,"kind":"window","text":"pinned, on foot #88: p50 59.6µs, p99 94.9µs, max 158.1µs","label":"pinned, on foot","window":88,"p50":59.6,"p99":94.9,"max":158.1}
+{"t":1793900373426,"s":572.743,"kind":"window","text":"pinned, on foot #89: p50 69.2µs, p99 199.2µs, max 217.0µs","label":"pinned, on foot","window":89,"p50":69.2,"p99":199.2,"max":217}
+{"t":1793900383726,"s":583.043,"kind":"window","text":"pinned, on foot #90: p50 71.0µs, p99 116.0µs, max 144.4µs","label":"pinned, on foot","window":90,"p50":71,"p99":116,"max":144.4}
+{"t":1793900393026,"s":592.343,"kind":"window","text":"pinned, on foot #91: p50 57.9µs, p99 98.0µs, max 152.1µs","label":"pinned, on foot","window":91,"p50":57.9,"p99":98,"max":152.1}
+{"t":1793900403326,"s":602.643,"kind":"window","text":"pinned, on foot #92: p50 60.8µs, p99 136.8µs, max 214.6µs","label":"pinned, on foot","window":92,"p50":60.8,"p99":136.8,"max":214.6}
+{"t":1793900413660,"s":612.977,"kind":"window","text":"pinned, on foot #93: p50 56.6µs, p99 152.3µs, max 205.4µs","label":"pinned, on foot","window":93,"p50":56.601,"p99":152.299,"max":205.399}
+{"t":1793900422960,"s":622.277,"kind":"window","text":"pinned, on foot #94: p50 52.6µs, p99 84.5µs, max 181.0µs","label":"pinned, on foot","window":94,"p50":52.601,"p99":84.5,"max":180.999}
+{"t":1793900433227,"s":632.544,"kind":"window","text":"pinned, on foot #95: p50 52.9µs, p99 81.3µs, max 189.3µs","label":"pinned, on foot","window":95,"p50":52.901,"p99":81.3,"max":189.3}
+{"t":1793900443560,"s":642.877,"kind":"window","text":"pinned, on foot #96: p50 53.7µs, p99 113.4µs, max 164.6µs","label":"pinned, on foot","window":96,"p50":53.699,"p99":113.4,"max":164.6}
+{"t":1793900452861,"s":652.178,"kind":"window","text":"pinned, on foot #97: p50 53.4µs, p99 94.1µs, max 135.4µs","label":"pinned, on foot","window":97,"p50":53.4,"p99":94.101,"max":135.399}
+{"t":1793900463194,"s":662.511,"kind":"window","text":"pinned, on foot #98: p50 56.2µs, p99 95.0µs, max 127.8µs","label":"pinned, on foot","window":98,"p50":56.2,"p99":95,"max":127.8}
+{"t":1793900473527,"s":672.844,"kind":"window","text":"pinned, on foot #99: p50 55.3µs, p99 89.1µs, max 177.7µs","label":"pinned, on foot","window":99,"p50":55.3,"p99":89.1,"max":177.7}
+{"t":1793900482827,"s":682.144,"kind":"window","text":"pinned, on foot #100: p50 56.6µs, p99 145.3µs, max 161.3µs","label":"pinned, on foot","window":100,"p50":56.6,"p99":145.3,"max":161.3}
+{"t":1793900493742,"s":693.059,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1793900493742,"s":693.059,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1793900493979,"s":693.296,"kind":"lost","text":"the sim quit"}

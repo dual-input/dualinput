@@ -35,7 +35,7 @@ use messages::avatars::slots::{
     BODY_HEAD, BODY_ON_FOOT, FigureSlot, FigureState, HAND_GRIP, HAND_POINT, HAND_THUMB,
     SHOWS_FADED, SHOWS_HANDS, SHOWS_HEAD,
 };
-use routine_host::{Frame, Routine, USER, VarRef, Wants};
+use routine_host::{AVATAR, Frame, Routine, USER, VarRef, Wants};
 
 use crate::ease::{Goal, HandEase};
 use crate::solve::{Body, L3, add, length, scale, sub, unit};
@@ -184,22 +184,60 @@ impl Routine for Figure {
         }
         let count = (slot.count as usize).min(slot.figures.len());
         let states = slot.figures.get(..count).unwrap_or_default();
+        let avatar = states
+            .iter()
+            .any(on_own_feet)
+            .then(|| avatar_place(names, want))
+            .flatten()
+            .map(|now| {
+                let facing = (now.heading - lead.heading).rem_euclid(360.0) as f32;
+                (earth::in_frame(&lead, &now), facing)
+            });
         self.figures
             .retain(|d| states.iter().any(|s| s.object == d.object));
         for state in states {
+            let mut state = *state;
+            if let Some((at, heading)) = avatar.filter(|_| on_own_feet(&state)) {
+                state.pose.at = at;
+                state.pose.heading = heading;
+            }
             let at = match self.figures.iter().position(|d| d.object == state.object) {
                 Some(at) => at,
                 None => {
-                    self.figures.push(Drawn::new(state, &yokes, slot));
+                    self.figures.push(Drawn::new(&state, &yokes, slot));
                     self.figures.len() - 1
                 }
             };
             if let Some(drawn) = self.figures.get_mut(at) {
-                drawn.step(state, &yokes, slot, dt);
-                drawn.write(state, names, &lead, want);
+                drawn.step(&state, &yokes, slot, dt);
+                drawn.write(&state, names, &lead, want);
             }
         }
     }
+}
+
+/// Whether this is this pilot's own figure on foot, which stands on their avatar with no spring
+/// and no lead, a frame behind. The place the core feeds, on the spring, left it 150ms behind,
+/// 31cm at 2 m/s. A lead of a frame closed that gap, but the avatar stops dead within a frame,
+/// with no sign of it a frame sooner in its place or its speed, so the figure took one step too
+/// many at every stop and snapped back (measured on MSFS 2024, 2026-11-05,
+/// record/areas/avatars/log.md, "A pilot's own figure on foot stands on its avatar, a frame
+/// behind").
+fn on_own_feet(s: &FigureState) -> bool {
+    s.own != 0 && s.pose.body == BODY_ON_FOOT
+}
+
+/// The avatar's place and heading, or `None` if the sim doesn't give them, in which case the
+/// figure goes where the core feeds.
+fn avatar_place(names: &Names, want: &mut Wants) -> Option<earth::Pose> {
+    let [latitude, longitude, altitude, heading, ..] = names.place;
+    Some(earth::Pose {
+        latitude: want.read(AVATAR, latitude)?,
+        longitude: want.read(AVATAR, longitude)?,
+        altitude: want.read(AVATAR, altitude)?,
+        heading: want.read(AVATAR, heading)?,
+        ..earth::Pose::default()
+    })
 }
 
 /// Where a figure's hips sit and which way it faces, in the aircraft's frame, from its pose.
@@ -284,14 +322,19 @@ impl Drawn {
     ) {
         let (root, facing) = root_of(s);
         if s.pose.body == BODY_ON_FOOT {
-            // On foot the hips follow the avatar on a spring, and the distance they cover
-            // steps the legs.
-            let x0 = sub(self.root, root);
-            let e = (-FOLLOW * dt).exp();
-            let k = add(self.velocity, scale(x0, FOLLOW));
+            // On foot another pilot's hips follow their avatar on a spring, this pilot's own
+            // stand on theirs, and the distance they cover steps the legs.
             let before = self.root;
-            self.root = add(root, scale(add(x0, scale(k, dt)), e));
-            self.velocity = scale(sub(self.velocity, scale(k, FOLLOW * dt)), e);
+            if on_own_feet(s) {
+                self.root = root;
+                self.velocity = [0.0; 3];
+            } else {
+                let x0 = sub(self.root, root);
+                let e = (-FOLLOW * dt).exp();
+                let k = add(self.velocity, scale(x0, FOLLOW));
+                self.root = add(root, scale(add(x0, scale(k, dt)), e));
+                self.velocity = scale(sub(self.velocity, scale(k, FOLLOW * dt)), e);
+            }
             let moved = length([self.root[0] - before[0], 0.0, self.root[2] - before[2]]);
             if dt > 0.0 {
                 self.speed += (moved / dt - self.speed) * (1.0 - (-dt / 0.2).exp());
@@ -310,7 +353,11 @@ impl Drawn {
             self.velocity = [0.0; 3];
             self.speed = 0.0;
         }
-        self.facing = ease::angle(self.facing, facing, dt);
+        self.facing = if on_own_feet(s) {
+            facing
+        } else {
+            ease::angle(self.facing, facing, dt)
+        };
         let (eye, look) = self.head_target(s);
         self.eye = ease::head(self.eye, eye, dt);
         self.look = [

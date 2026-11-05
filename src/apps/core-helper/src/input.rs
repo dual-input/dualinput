@@ -469,18 +469,20 @@ impl Reader {
         if kinds.is_empty() {
             return;
         }
-        // Only while the sim's main window is itself in front, so a click in a popped-out
-        // display or another program crosses nothing.
-        let Some(place) = self.sim.place_if_in_front() else {
-            return;
-        };
+        let place = self.sim.place_if_in_front();
         for kind in kinds {
+            if !mouse::crosses(&kind, place.as_ref().map(|p| (p.x, p.y))) {
+                continue;
+            }
+            let (x, y, width, height) = place
+                .as_ref()
+                .map_or((0.0, 0.0, 0, 0), |p| (p.x, p.y, p.width, p.height));
             self.out.send(FromHelper::Mouse {
                 kind,
-                x: place.x,
-                y: place.y,
-                width: place.width,
-                height: place.height,
+                x,
+                y,
+                width,
+                height,
                 at,
             });
         }

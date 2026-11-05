@@ -27,7 +27,7 @@ mod vars;
 
 pub use freeze::Flag;
 pub use hold::Hold;
-pub use vars::{Ids, Named, Space, USER, VarRef};
+pub use vars::{AVATAR, Ids, Named, Space, USER, VarRef};
 
 use bytemuck::Pod;
 use messages::module::slots::SlotHeader;

@@ -20,6 +20,12 @@ Decides:     What runs on a pilot's own machine and what on every machine; what 
 > Since 2026-11-04, taking the model costs the loop more than [its budget](#budgets)'s 1ms, which the user accepted as a known limit, and a cockpit with no triangles counts as a model that machine can't read ([log](log.md#2026-11-04-a-large-model-costs-the-loop-about-023ms-a-megabyte-at-each-load-and-the-a350s-and-a220s-cockpits-are-attachments-we-dont-read)).
 
 > **Note**
+> Since 2026-11-05, this pilot's own figure on foot hides its head and neck and fades its hands, as it does in a seat, and stands on their avatar: `Figure` reads the avatar's place each frame, with no spring and no lead, through a slot field saying the figure is this pilot's own ([log](log.md#2026-11-05-a-pilots-own-figure-on-foot-stands-on-its-avatar-a-frame-behind-since-the-spring-left-it-150ms-late-and-a-lead-overshoots-every-stop)).
+
+> **Note**
+> Since 2026-11-05, [the budgets](#budgets) for `Figure` and the sim's frame stand at what stage 17 measured, which the user accepted: about 140µs at p99 with two figures, and each figure in view 35µs to 64µs still, 63µs to 105µs moving ([log](log.md#2026-11-05-a-click-that-took-the-focus-from-the-sim-left-a-figures-hand-out-and-the-rest-of-the-session-passed)).
+
+> **Note**
 > On 2026-10-25, stage 17 settled five of the items [left open](#left-open) ([log](log.md#2026-10-25-stage-17-settles-five-items-01-avatars-left-open-a-run-of-its-own-the-seat-in-the-pose-an-info-item-for-a-model-a-machine-cant-read-vr-as-a-known-limit-and-an-eye-on-what-the-figure-costs)): the figure runs on foot with a gait of its own past a speed; the seat stays in the pose; a model a machine can't read becomes a match-check item at a new level, `info`, saying avatar interaction isn't supported in that pilot's copy of the aircraft; VR stays a known limit for v1; and the figure's model and `Figure` keep its frame time down now, changing and writing a joint only when it moved past what shows.
 
 A pilot's own core works out their figure: it reads the camera every frame and the mouse through the core helper, takes a seat by where the camera is, casts each click's ray into the aircraft's own models, and decides where each hand goes and when.
@@ -392,6 +398,12 @@ In the sim:
 - The kernel and the recording each copy the model whole as a load takes it, so the loop stalls once at each load in proportion to the model's size, as [the log](log.md#2026-11-04-a-large-model-costs-the-loop-about-023ms-a-megabyte-at-each-load-and-the-a350s-and-a220s-cockpits-are-attachments-we-dont-read) measures (user, 2026-11-04).
 - A modular aircraft whose cockpit is an attachment, such as the A350 and the A220, brings no hand from a click, since `aircraft-model` reads no attachments; its seats and heads still work, through the box around the seats' eyes.
 - A figure's walk, run, and crouch have visual issues, and a pilot's own arms cover what's behind them; a later pass fixes the first, and tries translucent arms and hands for the second, hiding the pilot's own arms if that fails (user, 2026-11-05).
+- A pilot's own figure on foot runs a frame behind their avatar, 30ms and about 5cm at a walk, as [the log](log.md#2026-11-05-a-pilots-own-figure-on-foot-stands-on-its-avatar-a-frame-behind-since-the-spring-left-it-150ms-late-and-a-lead-overshoots-every-stop) measures, since a lead overshoots at every stop (user, 2026-11-05).
+- When a pilot on foot looks down, the camera cuts their own figure's chest ball open, as a large arch across the lower half of the view; the later pass decides how their own figure looks on foot (user, 2026-11-05).
+- A pilot's own figure has no head from outside it, such as in a chase view, since what shows goes by whose figure it is and not by the camera.
+- A figure's head turns with no slow start, closing most of a turn in about a third of a second, which the later pass may soften.
+- A click on the sim's own menus brings a hand toward whatever is behind the menu, for as long as the click, since the helper can't tell a menu from the view.
+- `Figure` and the figure's frame time run over their first budgets, by [the note above](#avatars-avatar-sync-and-the-aircraft-model), and stage 16's routines share the module's 0.1ms, so it measures them again (user, 2026-11-05).
 - A located entry's slow run isn't one reach: changes under its `deadband` don't hold the hand on the spot, so a slow enough move sends the hand home and back, and an entry's first change always brings a hand; the session in the sim tunes this (user, 2026-11-04).
 
 ## Left open

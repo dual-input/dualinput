@@ -18,6 +18,23 @@ use crate::{InitPosition, Op};
 /// A string variable's value takes this many bytes, `STRING256`'s.
 const TEXT: usize = 256;
 
+/// The value of `var` in `bytes` at `at`, which moves past it.
+fn value_at(var: &Var, bytes: &[u8], at: &mut usize) -> Option<Value> {
+    Some(match var {
+        Var::Number { .. } => {
+            let value = bytes.get(*at..*at + 8)?;
+            *at += 8;
+            Value::Number(f64::from_le_bytes(value.try_into().ok()?))
+        }
+        Var::Text { .. } => {
+            let field = bytes.get(*at..*at + TEXT)?;
+            *at += TEXT;
+            let end = field.iter().position(|&b| b == 0).unwrap_or(TEXT);
+            Value::Text(String::from_utf8_lossy(&field[..end]).into_owned())
+        }
+    })
+}
+
 /// A variable a watch reads, named as the sim spells it, such as `A:IS ALTITUDE FREEZE ON`
 /// in `bool`, or `L:Battery1Switch` in `number`.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -234,25 +251,22 @@ impl<K: Clone> Client<K> {
             self.requests.remove(&data.request);
         }
         let vars = self.definitions.get(&definition)?;
-        let mut values = Vec::new();
         let mut at = 0;
+        // `SimConnect_RequestDataOnSimObjectType` takes no flags, so its answers hold every
+        // variable in the definition's order with no tags, and reading the first bytes of a
+        // title as a tag lost the whole answer.
+        if data.flags & SIMCONNECT_DATA_REQUEST_FLAG_TAGGED == 0 {
+            return vars
+                .iter()
+                .enumerate()
+                .map(|(datum, var)| Some((datum, value_at(var, &data.bytes, &mut at)?)))
+                .collect();
+        }
+        let mut values = Vec::new();
         for _ in 0..data.count {
             let datum = u32::from_le_bytes(data.bytes.get(at..at + 4)?.try_into().ok()?) as usize;
             at += 4;
-            let value = match vars.get(datum)? {
-                Var::Number { .. } => {
-                    let bytes = data.bytes.get(at..at + 8)?;
-                    at += 8;
-                    Value::Number(f64::from_le_bytes(bytes.try_into().ok()?))
-                }
-                Var::Text { .. } => {
-                    let field = data.bytes.get(at..at + TEXT)?;
-                    at += TEXT;
-                    let end = field.iter().position(|&b| b == 0).unwrap_or(TEXT);
-                    Value::Text(String::from_utf8_lossy(&field[..end]).into_owned())
-                }
-            };
-            values.push((datum, value));
+            values.push((datum, value_at(vars.get(datum)?, &data.bytes, &mut at)?));
         }
         Some(values)
     }
@@ -547,18 +561,51 @@ mod tests {
             }]
         );
         for object in [0x10, 0x11] {
-            let mut bytes = 0u32.to_le_bytes().to_vec();
-            bytes.extend_from_slice(&[0; TEXT]);
+            let mut bytes = vec![0; TEXT];
+            bytes[..4].copy_from_slice(b"SEAT");
             let data = Data {
                 request,
                 object,
                 definition: watch.definition,
-                flags: 2,
+                flags: 0,
                 count: 1,
                 bytes,
             };
-            assert!(client.values(&data).is_some(), "object {object:#x}");
+            assert_eq!(
+                client.values(&data),
+                Some(vec![(0, Value::Text("SEAT".into()))]),
+                "object {object:#x}"
+            );
         }
+    }
+
+    #[test]
+    fn an_answer_with_no_tags_holds_every_variable_in_the_definitions_order() {
+        let mut client = Client::<()>::default();
+        let vars = [
+            Var::text("A:TITLE"),
+            Var::number("A:PLANE LATITUDE", "degrees"),
+        ];
+        let (request, _) = client.read_by_type(&(), 1, 50, &vars);
+        let definition = client.requests[&request].0;
+        let mut bytes = vec![0; TEXT];
+        bytes[..4].copy_from_slice(b"SEAT");
+        bytes.extend_from_slice(&41.7f64.to_le_bytes());
+        let data = Data {
+            request,
+            object: 0x10,
+            definition,
+            flags: 0,
+            count: 2,
+            bytes,
+        };
+        assert_eq!(
+            client.values(&data),
+            Some(vec![
+                (0, Value::Text("SEAT".into())),
+                (1, Value::Number(41.7))
+            ])
+        );
     }
 
     #[test]

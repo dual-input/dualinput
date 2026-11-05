@@ -1,0 +1,645 @@
+{"t":1793902972953,"s":0.039,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1793902972970,"s":0.056,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1793902972970,"s":0.056,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1793902972970,"s":0.056,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1793902990989,"s":18.075,"kind":"fps","text":"no figures: 54.4 fps, 18.38ms","label":"no figures","windowMs":15000,"deliveries":817,"fps":54.40362690846056,"maxGapMs":27,"frameEventFps":53.684765304965474,"frameEvents":801}
+{"t":1793902991005,"s":18.091,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 145620997","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991005,"s":18.091,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 145620997","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991005,"s":18.091,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 145620997","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991006,"s":18.092,"kind":"exception","text":"ERROR (1) on release object 145620997, parameter 1","exception":1,"name":"ERROR","sendId":22,"index":1,"sent":"release object 145620997"}
+{"t":1793902991024,"s":18.11,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 145604613","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991025,"s":18.111,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 145604613","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991025,"s":18.111,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 145604613","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991025,"s":18.111,"kind":"exception","text":"ERROR (1) on release object 145604613, parameter 1","exception":1,"name":"ERROR","sendId":30,"index":1,"sent":"release object 145604613"}
+{"t":1793902991025,"s":18.111,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169066496","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991025,"s":18.111,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169066496","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991025,"s":18.111,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169066496","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991026,"s":18.112,"kind":"exception","text":"ERROR (1) on release object 169066496, parameter 1","exception":1,"name":"ERROR","sendId":35,"index":1,"sent":"release object 169066496"}
+{"t":1793902991026,"s":18.112,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169082880","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991026,"s":18.112,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169082880","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991026,"s":18.112,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169082880","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991026,"s":18.112,"kind":"exception","text":"ERROR (1) on release object 169082880, parameter 1","exception":1,"name":"ERROR","sendId":40,"index":1,"sent":"release object 169082880"}
+{"t":1793902991045,"s":18.131,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169099264","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991045,"s":18.131,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169099264","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991045,"s":18.131,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169099264","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991046,"s":18.132,"kind":"exception","text":"ERROR (1) on release object 169099264, parameter 1","exception":1,"name":"ERROR","sendId":45,"index":1,"sent":"release object 169099264"}
+{"t":1793902991046,"s":18.132,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169115648","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991046,"s":18.132,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169115648","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991046,"s":18.132,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169115648","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991046,"s":18.132,"kind":"exception","text":"ERROR (1) on release object 169115648, parameter 1","exception":1,"name":"ERROR","sendId":50,"index":1,"sent":"release object 169115648"}
+{"t":1793902991047,"s":18.133,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169132032","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991047,"s":18.133,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169132032","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991047,"s":18.133,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169132032","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991047,"s":18.133,"kind":"exception","text":"ERROR (1) on release object 169132032, parameter 1","exception":1,"name":"ERROR","sendId":55,"index":1,"sent":"release object 169132032"}
+{"t":1793902991064,"s":18.15,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169148416","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991064,"s":18.15,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169148416","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991064,"s":18.15,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169148416","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991064,"s":18.15,"kind":"exception","text":"ERROR (1) on release object 169148416, parameter 1","exception":1,"name":"ERROR","sendId":60,"index":1,"sent":"release object 169148416"}
+{"t":1793902991082,"s":18.168,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169164800","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991083,"s":18.169,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169164800","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991083,"s":18.169,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169164800","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991083,"s":18.169,"kind":"exception","text":"ERROR (1) on release object 169164800, parameter 1","exception":1,"name":"ERROR","sendId":65,"index":1,"sent":"release object 169164800"}
+{"t":1793902991083,"s":18.169,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169181184","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991083,"s":18.169,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169181184","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991084,"s":18.17,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169181184","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991084,"s":18.17,"kind":"exception","text":"ERROR (1) on release object 169181184, parameter 1","exception":1,"name":"ERROR","sendId":70,"index":1,"sent":"release object 169181184"}
+{"t":1793902991104,"s":18.19,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169197568","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991104,"s":18.19,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169197568","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991104,"s":18.19,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169197568","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991104,"s":18.19,"kind":"exception","text":"ERROR (1) on release object 169197568, parameter 1","exception":1,"name":"ERROR","sendId":75,"index":1,"sent":"release object 169197568"}
+{"t":1793902991125,"s":18.211,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169213952","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991125,"s":18.211,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169213952","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991125,"s":18.211,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169213952","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991125,"s":18.211,"kind":"exception","text":"ERROR (1) on release object 169213952, parameter 1","exception":1,"name":"ERROR","sendId":80,"index":1,"sent":"release object 169213952"}
+{"t":1793902991125,"s":18.211,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169230336","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991125,"s":18.211,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169230336","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991126,"s":18.212,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169230336","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991126,"s":18.212,"kind":"exception","text":"ERROR (1) on release object 169230336, parameter 1","exception":1,"name":"ERROR","sendId":85,"index":1,"sent":"release object 169230336"}
+{"t":1793902991126,"s":18.212,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169246720","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991126,"s":18.212,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169246720","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991126,"s":18.212,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169246720","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991126,"s":18.212,"kind":"exception","text":"ERROR (1) on release object 169246720, parameter 1","exception":1,"name":"ERROR","sendId":90,"index":1,"sent":"release object 169246720"}
+{"t":1793902991127,"s":18.213,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169263104","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991127,"s":18.213,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169263104","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991127,"s":18.213,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169263104","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991127,"s":18.213,"kind":"exception","text":"ERROR (1) on release object 169263104, parameter 1","exception":1,"name":"ERROR","sendId":95,"index":1,"sent":"release object 169263104"}
+{"t":1793902991146,"s":18.232,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169279488","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991146,"s":18.232,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169279488","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991146,"s":18.232,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169279488","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991146,"s":18.232,"kind":"exception","text":"ERROR (1) on release object 169279488, parameter 1","exception":1,"name":"ERROR","sendId":100,"index":1,"sent":"release object 169279488"}
+{"t":1793902991147,"s":18.233,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169295872","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991147,"s":18.233,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169295872","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991147,"s":18.233,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169295872","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991147,"s":18.233,"kind":"exception","text":"ERROR (1) on release object 169295872, parameter 1","exception":1,"name":"ERROR","sendId":105,"index":1,"sent":"release object 169295872"}
+{"t":1793902991167,"s":18.253,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169312256","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991167,"s":18.253,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169312256","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991167,"s":18.253,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169312256","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991168,"s":18.254,"kind":"exception","text":"ERROR (1) on release object 169312256, parameter 1","exception":1,"name":"ERROR","sendId":110,"index":1,"sent":"release object 169312256"}
+{"t":1793902991168,"s":18.254,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169328640","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991168,"s":18.254,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169328640","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991168,"s":18.254,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169328640","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991168,"s":18.254,"kind":"exception","text":"ERROR (1) on release object 169328640, parameter 1","exception":1,"name":"ERROR","sendId":115,"index":1,"sent":"release object 169328640"}
+{"t":1793902991168,"s":18.254,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169345024","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991169,"s":18.255,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169345024","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991169,"s":18.255,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169345024","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991169,"s":18.255,"kind":"exception","text":"ERROR (1) on release object 169345024, parameter 1","exception":1,"name":"ERROR","sendId":120,"index":1,"sent":"release object 169345024"}
+{"t":1793902991169,"s":18.255,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169361408","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991169,"s":18.255,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169361408","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991169,"s":18.255,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169361408","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991169,"s":18.255,"kind":"exception","text":"ERROR (1) on release object 169361408, parameter 1","exception":1,"name":"ERROR","sendId":125,"index":1,"sent":"release object 169361408"}
+{"t":1793902991189,"s":18.275,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169377792","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991190,"s":18.276,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169377792","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991190,"s":18.276,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169377792","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991190,"s":18.276,"kind":"exception","text":"ERROR (1) on release object 169377792, parameter 1","exception":1,"name":"ERROR","sendId":130,"index":1,"sent":"release object 169377792"}
+{"t":1793902991190,"s":18.276,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169394176","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991191,"s":18.277,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169394176","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991191,"s":18.277,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169394176","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991191,"s":18.277,"kind":"exception","text":"ERROR (1) on release object 169394176, parameter 1","exception":1,"name":"ERROR","sendId":135,"index":1,"sent":"release object 169394176"}
+{"t":1793902991211,"s":18.297,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169410560","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991211,"s":18.297,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169410560","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991211,"s":18.297,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169410560","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991211,"s":18.297,"kind":"exception","text":"ERROR (1) on release object 169410560, parameter 1","exception":1,"name":"ERROR","sendId":140,"index":1,"sent":"release object 169410560"}
+{"t":1793902991231,"s":18.317,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169426944","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991231,"s":18.317,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169426944","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991231,"s":18.317,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169426944","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991232,"s":18.318,"kind":"exception","text":"ERROR (1) on release object 169426944, parameter 1","exception":1,"name":"ERROR","sendId":145,"index":1,"sent":"release object 169426944"}
+{"t":1793902991232,"s":18.318,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169443328","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991232,"s":18.318,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169443328","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991232,"s":18.318,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169443328","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991232,"s":18.318,"kind":"exception","text":"ERROR (1) on release object 169443328, parameter 1","exception":1,"name":"ERROR","sendId":150,"index":1,"sent":"release object 169443328"}
+{"t":1793902991233,"s":18.319,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169459712","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991233,"s":18.319,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169459712","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991233,"s":18.319,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169459712","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991233,"s":18.319,"kind":"exception","text":"ERROR (1) on release object 169459712, parameter 1","exception":1,"name":"ERROR","sendId":155,"index":1,"sent":"release object 169459712"}
+{"t":1793902991233,"s":18.319,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169476096","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991234,"s":18.32,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169476096","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991234,"s":18.32,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169476096","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991234,"s":18.32,"kind":"exception","text":"ERROR (1) on release object 169476096, parameter 1","exception":1,"name":"ERROR","sendId":160,"index":1,"sent":"release object 169476096"}
+{"t":1793902991253,"s":18.339,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169492480","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991253,"s":18.339,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169492480","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991253,"s":18.339,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169492480","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991253,"s":18.339,"kind":"exception","text":"ERROR (1) on release object 169492480, parameter 1","exception":1,"name":"ERROR","sendId":165,"index":1,"sent":"release object 169492480"}
+{"t":1793902991254,"s":18.34,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169508864","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991254,"s":18.34,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169508864","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991254,"s":18.34,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169508864","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991254,"s":18.34,"kind":"exception","text":"ERROR (1) on release object 169508864, parameter 1","exception":1,"name":"ERROR","sendId":170,"index":1,"sent":"release object 169508864"}
+{"t":1793902991255,"s":18.341,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169525248","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991255,"s":18.341,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169525248","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991255,"s":18.341,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169525248","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991255,"s":18.341,"kind":"exception","text":"ERROR (1) on release object 169525248, parameter 1","exception":1,"name":"ERROR","sendId":175,"index":1,"sent":"release object 169525248"}
+{"t":1793902991255,"s":18.341,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169541632","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991255,"s":18.341,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169541632","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991255,"s":18.341,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169541632","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991255,"s":18.341,"kind":"exception","text":"ERROR (1) on release object 169541632, parameter 1","exception":1,"name":"ERROR","sendId":180,"index":1,"sent":"release object 169541632"}
+{"t":1793902991275,"s":18.361,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169558016","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991275,"s":18.361,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169558016","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991275,"s":18.361,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169558016","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991275,"s":18.361,"kind":"exception","text":"ERROR (1) on release object 169558016, parameter 1","exception":1,"name":"ERROR","sendId":185,"index":1,"sent":"release object 169558016"}
+{"t":1793902991295,"s":18.381,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169574400","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991295,"s":18.381,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169574400","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991295,"s":18.381,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169574400","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991296,"s":18.382,"kind":"exception","text":"ERROR (1) on release object 169574400, parameter 1","exception":1,"name":"ERROR","sendId":190,"index":1,"sent":"release object 169574400"}
+{"t":1793902991296,"s":18.382,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169590784","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991296,"s":18.382,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169590784","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991296,"s":18.382,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169590784","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991296,"s":18.382,"kind":"exception","text":"ERROR (1) on release object 169590784, parameter 1","exception":1,"name":"ERROR","sendId":195,"index":1,"sent":"release object 169590784"}
+{"t":1793902991297,"s":18.383,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169607168","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991297,"s":18.383,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169607168","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991297,"s":18.383,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169607168","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991297,"s":18.383,"kind":"exception","text":"ERROR (1) on release object 169607168, parameter 1","exception":1,"name":"ERROR","sendId":200,"index":1,"sent":"release object 169607168"}
+{"t":1793902991297,"s":18.383,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169623552","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991297,"s":18.383,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169623552","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991297,"s":18.383,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169623552","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991298,"s":18.384,"kind":"exception","text":"ERROR (1) on release object 169623552, parameter 1","exception":1,"name":"ERROR","sendId":205,"index":1,"sent":"release object 169623552"}
+{"t":1793902991298,"s":18.384,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169639936","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991298,"s":18.384,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169639936","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991298,"s":18.384,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169639936","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991298,"s":18.384,"kind":"exception","text":"ERROR (1) on release object 169639936, parameter 1","exception":1,"name":"ERROR","sendId":210,"index":1,"sent":"release object 169639936"}
+{"t":1793902991299,"s":18.385,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169656320","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991299,"s":18.385,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169656320","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991299,"s":18.385,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169656320","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991299,"s":18.385,"kind":"exception","text":"ERROR (1) on release object 169656320, parameter 1","exception":1,"name":"ERROR","sendId":215,"index":1,"sent":"release object 169656320"}
+{"t":1793902991299,"s":18.385,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169672704","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991299,"s":18.385,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169672704","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991299,"s":18.385,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169672704","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991299,"s":18.385,"kind":"exception","text":"ERROR (1) on release object 169672704, parameter 1","exception":1,"name":"ERROR","sendId":220,"index":1,"sent":"release object 169672704"}
+{"t":1793902991300,"s":18.386,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169689088","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991300,"s":18.386,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169689088","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991300,"s":18.386,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169689088","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991300,"s":18.386,"kind":"exception","text":"ERROR (1) on release object 169689088, parameter 1","exception":1,"name":"ERROR","sendId":225,"index":1,"sent":"release object 169689088"}
+{"t":1793902991319,"s":18.405,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169705472","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991319,"s":18.405,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169705472","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991319,"s":18.405,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169705472","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991320,"s":18.406,"kind":"exception","text":"ERROR (1) on release object 169705472, parameter 1","exception":1,"name":"ERROR","sendId":230,"index":1,"sent":"release object 169705472"}
+{"t":1793902991320,"s":18.406,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169721856","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991320,"s":18.406,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169721856","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991320,"s":18.406,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169721856","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991320,"s":18.406,"kind":"exception","text":"ERROR (1) on release object 169721856, parameter 1","exception":1,"name":"ERROR","sendId":235,"index":1,"sent":"release object 169721856"}
+{"t":1793902991341,"s":18.427,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169738240","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991341,"s":18.427,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169738240","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991341,"s":18.427,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169738240","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991341,"s":18.427,"kind":"exception","text":"ERROR (1) on release object 169738240, parameter 1","exception":1,"name":"ERROR","sendId":240,"index":1,"sent":"release object 169738240"}
+{"t":1793902991342,"s":18.428,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169754624","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991342,"s":18.428,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169754624","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991342,"s":18.428,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169754624","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991342,"s":18.428,"kind":"exception","text":"ERROR (1) on release object 169754624, parameter 1","exception":1,"name":"ERROR","sendId":245,"index":1,"sent":"release object 169754624"}
+{"t":1793902991342,"s":18.428,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169771008","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991342,"s":18.428,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169771008","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991342,"s":18.428,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169771008","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991342,"s":18.428,"kind":"exception","text":"ERROR (1) on release object 169771008, parameter 1","exception":1,"name":"ERROR","sendId":250,"index":1,"sent":"release object 169771008"}
+{"t":1793902991343,"s":18.429,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169787392","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991343,"s":18.429,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169787392","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991343,"s":18.429,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169787392","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991343,"s":18.429,"kind":"exception","text":"ERROR (1) on release object 169787392, parameter 1","exception":1,"name":"ERROR","sendId":255,"index":1,"sent":"release object 169787392"}
+{"t":1793902991344,"s":18.43,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169803776","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991344,"s":18.43,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169803776","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991344,"s":18.43,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169803776","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991344,"s":18.43,"kind":"exception","text":"ERROR (1) on release object 169803776, parameter 1","exception":1,"name":"ERROR","sendId":260,"index":1,"sent":"release object 169803776"}
+{"t":1793902991364,"s":18.45,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169820160","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991364,"s":18.45,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169820160","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991364,"s":18.45,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169820160","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991365,"s":18.451,"kind":"exception","text":"ERROR (1) on release object 169820160, parameter 1","exception":1,"name":"ERROR","sendId":265,"index":1,"sent":"release object 169820160"}
+{"t":1793902991365,"s":18.451,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169836544","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991365,"s":18.451,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169836544","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991365,"s":18.451,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169836544","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793902991365,"s":18.451,"kind":"figures","text":"50 figures, IDs 145604613 to 169836544"}
+{"t":1793902991365,"s":18.451,"kind":"write","text":"L:DUALINPUT_P29_CROWD_FIRST ← 145604613","name":"L:DUALINPUT_P29_CROWD_FIRST","units":"number","value":145604613}
+{"t":1793902991366,"s":18.452,"kind":"write","text":"L:DUALINPUT_P29_CROWD_COUNT ← 24231932","name":"L:DUALINPUT_P29_CROWD_COUNT","units":"number","value":24231932}
+{"t":1793902991366,"s":18.452,"kind":"write","text":"L:DUALINPUT_P29_CROWD_MODE ← 1","name":"L:DUALINPUT_P29_CROWD_MODE","units":"number","value":1}
+{"t":1793902991366,"s":18.452,"kind":"exception","text":"ERROR (1) on release object 169836544, parameter 1","exception":1,"name":"ERROR","sendId":270,"index":1,"sent":"release object 169836544"}
+{"t":1793903009375,"s":36.461,"kind":"fps","text":"LOD0, 50 figures, still: 33.1 fps, 30.21ms","label":"LOD0, 50 figures, still","windowMs":15000,"deliveries":207,"fps":33.103004981520165,"maxGapMs":1877,"frameEventFps":45.56006739981732,"frameEvents":201}
+{"t":1793903009375,"s":36.461,"kind":"write","text":"L:DUALINPUT_P29_CROWD_FIRST ← 145604613","name":"L:DUALINPUT_P29_CROWD_FIRST","units":"number","value":145604613}
+{"t":1793903009375,"s":36.461,"kind":"write","text":"L:DUALINPUT_P29_CROWD_COUNT ← 24231932","name":"L:DUALINPUT_P29_CROWD_COUNT","units":"number","value":24231932}
+{"t":1793903009375,"s":36.461,"kind":"write","text":"L:DUALINPUT_P29_CROWD_MODE ← 2","name":"L:DUALINPUT_P29_CROWD_MODE","units":"number","value":2}
+{"t":1793903027388,"s":54.474,"kind":"fps","text":"LOD0, 50 figures, moving: 43.5 fps, 22.97ms","label":"LOD0, 50 figures, moving","windowMs":15000,"deliveries":653,"fps":43.53051141674456,"maxGapMs":29,"frameEventFps":42.61355463464432,"frameEvents":638}
+{"t":1793903027389,"s":54.475,"kind":"write","text":"L:DUALINPUT_P29_CROWD_FIRST ← 0","name":"L:DUALINPUT_P29_CROWD_FIRST","units":"number","value":0}
+{"t":1793903027389,"s":54.475,"kind":"write","text":"L:DUALINPUT_P29_CROWD_COUNT ← 0","name":"L:DUALINPUT_P29_CROWD_COUNT","units":"number","value":0}
+{"t":1793903027389,"s":54.475,"kind":"write","text":"L:DUALINPUT_P29_CROWD_MODE ← 0","name":"L:DUALINPUT_P29_CROWD_MODE","units":"number","value":0}
+{"t":1793903027389,"s":54.475,"kind":"cost","text":"LOD0: a still figure adds 237µs, moving 92µs"}
+{"t":1793903029411,"s":56.497,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169836545","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029411,"s":56.497,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169836545","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029411,"s":56.497,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169836545","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029411,"s":56.497,"kind":"exception","text":"ERROR (1) on release object 169836545, parameter 1","exception":1,"name":"ERROR","sendId":345,"index":1,"sent":"release object 169836545"}
+{"t":1793903029412,"s":56.498,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169820161","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029412,"s":56.498,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169820161","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029412,"s":56.498,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169820161","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029412,"s":56.498,"kind":"exception","text":"ERROR (1) on release object 169820161, parameter 1","exception":1,"name":"ERROR","sendId":350,"index":1,"sent":"release object 169820161"}
+{"t":1793903029412,"s":56.498,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169803777","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029412,"s":56.498,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169803777","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029413,"s":56.499,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169803777","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029413,"s":56.499,"kind":"exception","text":"ERROR (1) on release object 169803777, parameter 1","exception":1,"name":"ERROR","sendId":355,"index":1,"sent":"release object 169803777"}
+{"t":1793903029413,"s":56.499,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169787393","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029414,"s":56.5,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169787393","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029414,"s":56.5,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169787393","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029414,"s":56.5,"kind":"exception","text":"ERROR (1) on release object 169787393, parameter 1","exception":1,"name":"ERROR","sendId":360,"index":1,"sent":"release object 169787393"}
+{"t":1793903029414,"s":56.5,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169771009","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029414,"s":56.5,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169771009","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029414,"s":56.5,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169771009","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029414,"s":56.5,"kind":"exception","text":"ERROR (1) on release object 169771009, parameter 1","exception":1,"name":"ERROR","sendId":365,"index":1,"sent":"release object 169771009"}
+{"t":1793903029434,"s":56.52,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169754625","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029434,"s":56.52,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169754625","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029434,"s":56.52,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169754625","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029434,"s":56.52,"kind":"exception","text":"ERROR (1) on release object 169754625, parameter 1","exception":1,"name":"ERROR","sendId":370,"index":1,"sent":"release object 169754625"}
+{"t":1793903029435,"s":56.521,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169738241","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029435,"s":56.521,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169738241","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029435,"s":56.521,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169738241","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029435,"s":56.521,"kind":"exception","text":"ERROR (1) on release object 169738241, parameter 1","exception":1,"name":"ERROR","sendId":375,"index":1,"sent":"release object 169738241"}
+{"t":1793903029454,"s":56.54,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169721857","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029454,"s":56.54,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169721857","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029454,"s":56.54,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169721857","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029455,"s":56.541,"kind":"exception","text":"ERROR (1) on release object 169721857, parameter 1","exception":1,"name":"ERROR","sendId":380,"index":1,"sent":"release object 169721857"}
+{"t":1793903029455,"s":56.541,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169705473","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029455,"s":56.541,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169705473","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029455,"s":56.541,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169705473","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029455,"s":56.541,"kind":"exception","text":"ERROR (1) on release object 169705473, parameter 1","exception":1,"name":"ERROR","sendId":385,"index":1,"sent":"release object 169705473"}
+{"t":1793903029456,"s":56.542,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169689089","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029456,"s":56.542,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169689089","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029456,"s":56.542,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169689089","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029456,"s":56.542,"kind":"exception","text":"ERROR (1) on release object 169689089, parameter 1","exception":1,"name":"ERROR","sendId":390,"index":1,"sent":"release object 169689089"}
+{"t":1793903029456,"s":56.542,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169672705","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029456,"s":56.542,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169672705","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029456,"s":56.542,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169672705","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029456,"s":56.542,"kind":"exception","text":"ERROR (1) on release object 169672705, parameter 1","exception":1,"name":"ERROR","sendId":395,"index":1,"sent":"release object 169672705"}
+{"t":1793903029457,"s":56.543,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169656321","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029457,"s":56.543,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169656321","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029457,"s":56.543,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169656321","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029457,"s":56.543,"kind":"exception","text":"ERROR (1) on release object 169656321, parameter 1","exception":1,"name":"ERROR","sendId":400,"index":1,"sent":"release object 169656321"}
+{"t":1793903029457,"s":56.543,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169639937","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029458,"s":56.544,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169639937","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029458,"s":56.544,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169639937","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029458,"s":56.544,"kind":"exception","text":"ERROR (1) on release object 169639937, parameter 1","exception":1,"name":"ERROR","sendId":405,"index":1,"sent":"release object 169639937"}
+{"t":1793903029478,"s":56.564,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169623553","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029478,"s":56.564,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169623553","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029478,"s":56.564,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169623553","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029478,"s":56.564,"kind":"exception","text":"ERROR (1) on release object 169623553, parameter 1","exception":1,"name":"ERROR","sendId":410,"index":1,"sent":"release object 169623553"}
+{"t":1793903029478,"s":56.564,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169607169","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029478,"s":56.564,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169607169","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029478,"s":56.564,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169607169","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029479,"s":56.565,"kind":"exception","text":"ERROR (1) on release object 169607169, parameter 1","exception":1,"name":"ERROR","sendId":415,"index":1,"sent":"release object 169607169"}
+{"t":1793903029479,"s":56.565,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169590785","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029479,"s":56.565,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169590785","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029479,"s":56.565,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169590785","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029480,"s":56.566,"kind":"exception","text":"ERROR (1) on release object 169590785, parameter 1","exception":1,"name":"ERROR","sendId":420,"index":1,"sent":"release object 169590785"}
+{"t":1793903029480,"s":56.566,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169574401","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029480,"s":56.566,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169574401","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029480,"s":56.566,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169574401","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029480,"s":56.566,"kind":"exception","text":"ERROR (1) on release object 169574401, parameter 1","exception":1,"name":"ERROR","sendId":425,"index":1,"sent":"release object 169574401"}
+{"t":1793903029501,"s":56.587,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169558017","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029501,"s":56.587,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169558017","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029501,"s":56.587,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169558017","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029501,"s":56.587,"kind":"exception","text":"ERROR (1) on release object 169558017, parameter 1","exception":1,"name":"ERROR","sendId":430,"index":1,"sent":"release object 169558017"}
+{"t":1793903029502,"s":56.588,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169541633","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029502,"s":56.588,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169541633","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029502,"s":56.588,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169541633","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029522,"s":56.608,"kind":"exception","text":"ERROR (1) on release object 169541633, parameter 1","exception":1,"name":"ERROR","sendId":435,"index":1,"sent":"release object 169541633"}
+{"t":1793903029522,"s":56.608,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169525249","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029522,"s":56.608,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169525249","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029522,"s":56.608,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169525249","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029523,"s":56.609,"kind":"exception","text":"ERROR (1) on release object 169525249, parameter 1","exception":1,"name":"ERROR","sendId":440,"index":1,"sent":"release object 169525249"}
+{"t":1793903029523,"s":56.609,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169508865","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029523,"s":56.609,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169508865","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029523,"s":56.609,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169508865","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029523,"s":56.609,"kind":"exception","text":"ERROR (1) on release object 169508865, parameter 1","exception":1,"name":"ERROR","sendId":445,"index":1,"sent":"release object 169508865"}
+{"t":1793903029524,"s":56.61,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169492481","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029524,"s":56.61,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169492481","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029524,"s":56.61,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169492481","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029524,"s":56.61,"kind":"exception","text":"ERROR (1) on release object 169492481, parameter 1","exception":1,"name":"ERROR","sendId":450,"index":1,"sent":"release object 169492481"}
+{"t":1793903029544,"s":56.63,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169476097","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029544,"s":56.63,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169476097","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029544,"s":56.63,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169476097","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029544,"s":56.63,"kind":"exception","text":"ERROR (1) on release object 169476097, parameter 1","exception":1,"name":"ERROR","sendId":455,"index":1,"sent":"release object 169476097"}
+{"t":1793903029564,"s":56.65,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169459713","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029564,"s":56.65,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169459713","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029564,"s":56.65,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169459713","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029564,"s":56.65,"kind":"exception","text":"ERROR (1) on release object 169459713, parameter 1","exception":1,"name":"ERROR","sendId":460,"index":1,"sent":"release object 169459713"}
+{"t":1793903029565,"s":56.651,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169443329","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029565,"s":56.651,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169443329","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029565,"s":56.651,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169443329","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029565,"s":56.651,"kind":"exception","text":"ERROR (1) on release object 169443329, parameter 1","exception":1,"name":"ERROR","sendId":465,"index":1,"sent":"release object 169443329"}
+{"t":1793903029565,"s":56.651,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169426945","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029565,"s":56.651,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169426945","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029565,"s":56.651,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169426945","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029566,"s":56.652,"kind":"exception","text":"ERROR (1) on release object 169426945, parameter 1","exception":1,"name":"ERROR","sendId":470,"index":1,"sent":"release object 169426945"}
+{"t":1793903029566,"s":56.652,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169410561","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029566,"s":56.652,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169410561","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029566,"s":56.652,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169410561","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029566,"s":56.652,"kind":"exception","text":"ERROR (1) on release object 169410561, parameter 1","exception":1,"name":"ERROR","sendId":475,"index":1,"sent":"release object 169410561"}
+{"t":1793903029586,"s":56.672,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169394177","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029586,"s":56.672,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169394177","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029586,"s":56.672,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169394177","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029586,"s":56.672,"kind":"exception","text":"ERROR (1) on release object 169394177, parameter 1","exception":1,"name":"ERROR","sendId":480,"index":1,"sent":"release object 169394177"}
+{"t":1793903029586,"s":56.672,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169377793","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029586,"s":56.672,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169377793","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029586,"s":56.672,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169377793","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029586,"s":56.672,"kind":"exception","text":"ERROR (1) on release object 169377793, parameter 1","exception":1,"name":"ERROR","sendId":485,"index":1,"sent":"release object 169377793"}
+{"t":1793903029587,"s":56.673,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169361409","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029587,"s":56.673,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169361409","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029587,"s":56.673,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169361409","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029587,"s":56.673,"kind":"exception","text":"ERROR (1) on release object 169361409, parameter 1","exception":1,"name":"ERROR","sendId":490,"index":1,"sent":"release object 169361409"}
+{"t":1793903029588,"s":56.674,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169345025","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029588,"s":56.674,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169345025","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029588,"s":56.674,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169345025","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029588,"s":56.674,"kind":"exception","text":"ERROR (1) on release object 169345025, parameter 1","exception":1,"name":"ERROR","sendId":495,"index":1,"sent":"release object 169345025"}
+{"t":1793903029588,"s":56.674,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169328641","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029588,"s":56.674,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169328641","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029589,"s":56.675,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169328641","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029589,"s":56.675,"kind":"exception","text":"ERROR (1) on release object 169328641, parameter 1","exception":1,"name":"ERROR","sendId":500,"index":1,"sent":"release object 169328641"}
+{"t":1793903029608,"s":56.694,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169312257","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029608,"s":56.694,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169312257","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029608,"s":56.694,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169312257","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029608,"s":56.694,"kind":"exception","text":"ERROR (1) on release object 169312257, parameter 1","exception":1,"name":"ERROR","sendId":505,"index":1,"sent":"release object 169312257"}
+{"t":1793903029629,"s":56.715,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169295873","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029629,"s":56.715,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169295873","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029629,"s":56.715,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169295873","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029630,"s":56.716,"kind":"exception","text":"ERROR (1) on release object 169295873, parameter 1","exception":1,"name":"ERROR","sendId":510,"index":1,"sent":"release object 169295873"}
+{"t":1793903029630,"s":56.716,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169279489","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029630,"s":56.716,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169279489","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029630,"s":56.716,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169279489","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029630,"s":56.716,"kind":"exception","text":"ERROR (1) on release object 169279489, parameter 1","exception":1,"name":"ERROR","sendId":515,"index":1,"sent":"release object 169279489"}
+{"t":1793903029631,"s":56.717,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169263105","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029631,"s":56.717,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169263105","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029631,"s":56.717,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169263105","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029631,"s":56.717,"kind":"exception","text":"ERROR (1) on release object 169263105, parameter 1","exception":1,"name":"ERROR","sendId":520,"index":1,"sent":"release object 169263105"}
+{"t":1793903029631,"s":56.717,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169246721","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029631,"s":56.717,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169246721","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029631,"s":56.717,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169246721","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029631,"s":56.717,"kind":"exception","text":"ERROR (1) on release object 169246721, parameter 1","exception":1,"name":"ERROR","sendId":525,"index":1,"sent":"release object 169246721"}
+{"t":1793903029632,"s":56.718,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169230337","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029632,"s":56.718,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169230337","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029632,"s":56.718,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169230337","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029632,"s":56.718,"kind":"exception","text":"ERROR (1) on release object 169230337, parameter 1","exception":1,"name":"ERROR","sendId":530,"index":1,"sent":"release object 169230337"}
+{"t":1793903029633,"s":56.719,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169213953","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029633,"s":56.719,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169213953","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029633,"s":56.719,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169213953","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029633,"s":56.719,"kind":"exception","text":"ERROR (1) on release object 169213953, parameter 1","exception":1,"name":"ERROR","sendId":535,"index":1,"sent":"release object 169213953"}
+{"t":1793903029652,"s":56.738,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169197569","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029652,"s":56.738,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169197569","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029652,"s":56.738,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169197569","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029653,"s":56.739,"kind":"exception","text":"ERROR (1) on release object 169197569, parameter 1","exception":1,"name":"ERROR","sendId":540,"index":1,"sent":"release object 169197569"}
+{"t":1793903029672,"s":56.758,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169181185","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029672,"s":56.758,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169181185","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029672,"s":56.758,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169181185","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029673,"s":56.759,"kind":"exception","text":"ERROR (1) on release object 169181185, parameter 1","exception":1,"name":"ERROR","sendId":545,"index":1,"sent":"release object 169181185"}
+{"t":1793903029673,"s":56.759,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169164801","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029673,"s":56.759,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169164801","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029673,"s":56.759,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169164801","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029673,"s":56.759,"kind":"exception","text":"ERROR (1) on release object 169164801, parameter 1","exception":1,"name":"ERROR","sendId":550,"index":1,"sent":"release object 169164801"}
+{"t":1793903029674,"s":56.76,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169148417","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029674,"s":56.76,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169148417","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029674,"s":56.76,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169148417","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029674,"s":56.76,"kind":"exception","text":"ERROR (1) on release object 169148417, parameter 1","exception":1,"name":"ERROR","sendId":555,"index":1,"sent":"release object 169148417"}
+{"t":1793903029674,"s":56.76,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169132033","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029674,"s":56.76,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169132033","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029674,"s":56.76,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169132033","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029674,"s":56.76,"kind":"exception","text":"ERROR (1) on release object 169132033, parameter 1","exception":1,"name":"ERROR","sendId":560,"index":1,"sent":"release object 169132033"}
+{"t":1793903029695,"s":56.781,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169115649","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029696,"s":56.782,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169115649","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029696,"s":56.782,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169115649","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029696,"s":56.782,"kind":"exception","text":"ERROR (1) on release object 169115649, parameter 1","exception":1,"name":"ERROR","sendId":565,"index":1,"sent":"release object 169115649"}
+{"t":1793903029696,"s":56.782,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169099265","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029696,"s":56.782,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169099265","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029696,"s":56.782,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169099265","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029696,"s":56.782,"kind":"exception","text":"ERROR (1) on release object 169099265, parameter 1","exception":1,"name":"ERROR","sendId":570,"index":1,"sent":"release object 169099265"}
+{"t":1793903029697,"s":56.783,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169082881","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029697,"s":56.783,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169082881","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029697,"s":56.783,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169082881","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029697,"s":56.783,"kind":"exception","text":"ERROR (1) on release object 169082881, parameter 1","exception":1,"name":"ERROR","sendId":575,"index":1,"sent":"release object 169082881"}
+{"t":1793903029698,"s":56.784,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169066497","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029698,"s":56.784,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169066497","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029698,"s":56.784,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169066497","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029698,"s":56.784,"kind":"exception","text":"ERROR (1) on release object 169066497, parameter 1","exception":1,"name":"ERROR","sendId":580,"index":1,"sent":"release object 169066497"}
+{"t":1793903029698,"s":56.784,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 145604614","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029698,"s":56.784,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 145604614","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029698,"s":56.784,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 145604614","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029698,"s":56.784,"kind":"exception","text":"ERROR (1) on release object 145604614, parameter 1","exception":1,"name":"ERROR","sendId":585,"index":1,"sent":"release object 145604614"}
+{"t":1793903029719,"s":56.805,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 145620998","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029719,"s":56.805,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 145620998","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029719,"s":56.805,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 145620998","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903029719,"s":56.805,"kind":"figures","text":"50 figures, IDs 145604614 to 169836545"}
+{"t":1793903029719,"s":56.805,"kind":"write","text":"L:DUALINPUT_P29_CROWD_FIRST ← 145604614","name":"L:DUALINPUT_P29_CROWD_FIRST","units":"number","value":145604614}
+{"t":1793903029719,"s":56.805,"kind":"write","text":"L:DUALINPUT_P29_CROWD_COUNT ← 24231932","name":"L:DUALINPUT_P29_CROWD_COUNT","units":"number","value":24231932}
+{"t":1793903029719,"s":56.805,"kind":"write","text":"L:DUALINPUT_P29_CROWD_MODE ← 1","name":"L:DUALINPUT_P29_CROWD_MODE","units":"number","value":1}
+{"t":1793903029719,"s":56.805,"kind":"exception","text":"ERROR (1) on release object 145620998, parameter 1","exception":1,"name":"ERROR","sendId":590,"index":1,"sent":"release object 145620998"}
+{"t":1793903047734,"s":74.82,"kind":"fps","text":"LOD1, 50 figures, still: 35.3 fps, 28.35ms","label":"LOD1, 50 figures, still","windowMs":15000,"deliveries":256,"fps":35.2745884631346,"maxGapMs":1896,"frameEventFps":46.81071110534668,"frameEvents":250}
+{"t":1793903047735,"s":74.821,"kind":"write","text":"L:DUALINPUT_P29_CROWD_FIRST ← 145604614","name":"L:DUALINPUT_P29_CROWD_FIRST","units":"number","value":145604614}
+{"t":1793903047735,"s":74.821,"kind":"write","text":"L:DUALINPUT_P29_CROWD_COUNT ← 24231932","name":"L:DUALINPUT_P29_CROWD_COUNT","units":"number","value":24231932}
+{"t":1793903047735,"s":74.821,"kind":"write","text":"L:DUALINPUT_P29_CROWD_MODE ← 2","name":"L:DUALINPUT_P29_CROWD_MODE","units":"number","value":2}
+{"t":1793903065739,"s":92.825,"kind":"fps","text":"LOD1, 50 figures, moving: 47.0 fps, 21.26ms","label":"LOD1, 50 figures, moving","windowMs":15000,"deliveries":705,"fps":47.02738810955243,"maxGapMs":27,"frameEventFps":46.0936107746069,"frameEvents":690}
+{"t":1793903065739,"s":92.825,"kind":"write","text":"L:DUALINPUT_P29_CROWD_FIRST ← 0","name":"L:DUALINPUT_P29_CROWD_FIRST","units":"number","value":0}
+{"t":1793903065740,"s":92.826,"kind":"write","text":"L:DUALINPUT_P29_CROWD_COUNT ← 0","name":"L:DUALINPUT_P29_CROWD_COUNT","units":"number","value":0}
+{"t":1793903065740,"s":92.826,"kind":"write","text":"L:DUALINPUT_P29_CROWD_MODE ← 0","name":"L:DUALINPUT_P29_CROWD_MODE","units":"number","value":0}
+{"t":1793903065740,"s":92.826,"kind":"cost","text":"LOD1: a still figure adds 199µs, moving 58µs"}
+{"t":1793903067758,"s":94.844,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 145620999","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067758,"s":94.844,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 145620999","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067758,"s":94.844,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 145620999","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067758,"s":94.844,"kind":"exception","text":"ERROR (1) on release object 145620999, parameter 1","exception":1,"name":"ERROR","sendId":662,"index":1,"sent":"release object 145620999"}
+{"t":1793903067778,"s":94.864,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 145604615","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067778,"s":94.864,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 145604615","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067778,"s":94.864,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 145604615","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067778,"s":94.864,"kind":"exception","text":"ERROR (1) on release object 145604615, parameter 1","exception":1,"name":"ERROR","sendId":667,"index":1,"sent":"release object 145604615"}
+{"t":1793903067799,"s":94.885,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169066498","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067799,"s":94.885,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169066498","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067799,"s":94.885,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169066498","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067799,"s":94.885,"kind":"exception","text":"ERROR (1) on release object 169066498, parameter 1","exception":1,"name":"ERROR","sendId":672,"index":1,"sent":"release object 169066498"}
+{"t":1793903067799,"s":94.885,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169082882","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067799,"s":94.885,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169082882","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067799,"s":94.885,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169082882","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067800,"s":94.886,"kind":"exception","text":"ERROR (1) on release object 169082882, parameter 1","exception":1,"name":"ERROR","sendId":677,"index":1,"sent":"release object 169082882"}
+{"t":1793903067800,"s":94.886,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169099266","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067800,"s":94.886,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169099266","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067800,"s":94.886,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169099266","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067800,"s":94.886,"kind":"exception","text":"ERROR (1) on release object 169099266, parameter 1","exception":1,"name":"ERROR","sendId":682,"index":1,"sent":"release object 169099266"}
+{"t":1793903067800,"s":94.886,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169115650","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067800,"s":94.886,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169115650","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067800,"s":94.886,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169115650","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067801,"s":94.887,"kind":"exception","text":"ERROR (1) on release object 169115650, parameter 1","exception":1,"name":"ERROR","sendId":687,"index":1,"sent":"release object 169115650"}
+{"t":1793903067801,"s":94.887,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169132034","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067801,"s":94.887,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169132034","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067801,"s":94.887,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169132034","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067801,"s":94.887,"kind":"exception","text":"ERROR (1) on release object 169132034, parameter 1","exception":1,"name":"ERROR","sendId":692,"index":1,"sent":"release object 169132034"}
+{"t":1793903067821,"s":94.907,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169148418","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067821,"s":94.907,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169148418","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067821,"s":94.907,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169148418","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067822,"s":94.908,"kind":"exception","text":"ERROR (1) on release object 169148418, parameter 1","exception":1,"name":"ERROR","sendId":697,"index":1,"sent":"release object 169148418"}
+{"t":1793903067842,"s":94.928,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169164802","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067843,"s":94.929,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169164802","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067843,"s":94.929,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169164802","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067843,"s":94.929,"kind":"exception","text":"ERROR (1) on release object 169164802, parameter 1","exception":1,"name":"ERROR","sendId":702,"index":1,"sent":"release object 169164802"}
+{"t":1793903067843,"s":94.929,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169181186","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067843,"s":94.929,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169181186","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067843,"s":94.929,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169181186","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067843,"s":94.929,"kind":"exception","text":"ERROR (1) on release object 169181186, parameter 1","exception":1,"name":"ERROR","sendId":707,"index":1,"sent":"release object 169181186"}
+{"t":1793903067844,"s":94.93,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169197570","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067844,"s":94.93,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169197570","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067844,"s":94.93,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169197570","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067844,"s":94.93,"kind":"exception","text":"ERROR (1) on release object 169197570, parameter 1","exception":1,"name":"ERROR","sendId":712,"index":1,"sent":"release object 169197570"}
+{"t":1793903067844,"s":94.93,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169213954","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067845,"s":94.931,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169213954","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067845,"s":94.931,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169213954","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067845,"s":94.931,"kind":"exception","text":"ERROR (1) on release object 169213954, parameter 1","exception":1,"name":"ERROR","sendId":717,"index":1,"sent":"release object 169213954"}
+{"t":1793903067845,"s":94.931,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169230338","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067845,"s":94.931,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169230338","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067845,"s":94.931,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169230338","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067845,"s":94.931,"kind":"exception","text":"ERROR (1) on release object 169230338, parameter 1","exception":1,"name":"ERROR","sendId":722,"index":1,"sent":"release object 169230338"}
+{"t":1793903067846,"s":94.932,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169246722","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067846,"s":94.932,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169246722","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067846,"s":94.932,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169246722","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067846,"s":94.932,"kind":"exception","text":"ERROR (1) on release object 169246722, parameter 1","exception":1,"name":"ERROR","sendId":727,"index":1,"sent":"release object 169246722"}
+{"t":1793903067866,"s":94.952,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169263106","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067866,"s":94.952,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169263106","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067866,"s":94.952,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169263106","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067867,"s":94.953,"kind":"exception","text":"ERROR (1) on release object 169263106, parameter 1","exception":1,"name":"ERROR","sendId":732,"index":1,"sent":"release object 169263106"}
+{"t":1793903067867,"s":94.953,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169279490","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067867,"s":94.953,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169279490","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067867,"s":94.953,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169279490","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067867,"s":94.953,"kind":"exception","text":"ERROR (1) on release object 169279490, parameter 1","exception":1,"name":"ERROR","sendId":737,"index":1,"sent":"release object 169279490"}
+{"t":1793903067867,"s":94.953,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169295874","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067868,"s":94.954,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169295874","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067868,"s":94.954,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169295874","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067868,"s":94.954,"kind":"exception","text":"ERROR (1) on release object 169295874, parameter 1","exception":1,"name":"ERROR","sendId":742,"index":1,"sent":"release object 169295874"}
+{"t":1793903067868,"s":94.954,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169312258","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067868,"s":94.954,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169312258","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067868,"s":94.954,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169312258","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067868,"s":94.954,"kind":"exception","text":"ERROR (1) on release object 169312258, parameter 1","exception":1,"name":"ERROR","sendId":747,"index":1,"sent":"release object 169312258"}
+{"t":1793903067869,"s":94.955,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169328642","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067869,"s":94.955,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169328642","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067869,"s":94.955,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169328642","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067869,"s":94.955,"kind":"exception","text":"ERROR (1) on release object 169328642, parameter 1","exception":1,"name":"ERROR","sendId":752,"index":1,"sent":"release object 169328642"}
+{"t":1793903067888,"s":94.974,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169345026","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067888,"s":94.974,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169345026","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067888,"s":94.974,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169345026","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067889,"s":94.975,"kind":"exception","text":"ERROR (1) on release object 169345026, parameter 1","exception":1,"name":"ERROR","sendId":757,"index":1,"sent":"release object 169345026"}
+{"t":1793903067909,"s":94.995,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169361410","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067909,"s":94.995,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169361410","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067909,"s":94.995,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169361410","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067910,"s":94.996,"kind":"exception","text":"ERROR (1) on release object 169361410, parameter 1","exception":1,"name":"ERROR","sendId":762,"index":1,"sent":"release object 169361410"}
+{"t":1793903067910,"s":94.996,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169377794","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067910,"s":94.996,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169377794","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067910,"s":94.996,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169377794","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067910,"s":94.996,"kind":"exception","text":"ERROR (1) on release object 169377794, parameter 1","exception":1,"name":"ERROR","sendId":767,"index":1,"sent":"release object 169377794"}
+{"t":1793903067911,"s":94.997,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169394178","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067911,"s":94.997,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169394178","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067911,"s":94.997,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169394178","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067911,"s":94.997,"kind":"exception","text":"ERROR (1) on release object 169394178, parameter 1","exception":1,"name":"ERROR","sendId":772,"index":1,"sent":"release object 169394178"}
+{"t":1793903067912,"s":94.998,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169410562","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067912,"s":94.998,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169410562","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067912,"s":94.998,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169410562","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067912,"s":94.998,"kind":"exception","text":"ERROR (1) on release object 169410562, parameter 1","exception":1,"name":"ERROR","sendId":777,"index":1,"sent":"release object 169410562"}
+{"t":1793903067933,"s":95.019,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169426946","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067934,"s":95.02,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169426946","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067934,"s":95.02,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169426946","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067934,"s":95.02,"kind":"exception","text":"ERROR (1) on release object 169426946, parameter 1","exception":1,"name":"ERROR","sendId":782,"index":1,"sent":"release object 169426946"}
+{"t":1793903067934,"s":95.02,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169443330","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067934,"s":95.02,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169443330","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067934,"s":95.02,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169443330","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067955,"s":95.041,"kind":"exception","text":"ERROR (1) on release object 169443330, parameter 1","exception":1,"name":"ERROR","sendId":787,"index":1,"sent":"release object 169443330"}
+{"t":1793903067955,"s":95.041,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169459714","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067955,"s":95.041,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169459714","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067955,"s":95.041,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169459714","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067956,"s":95.042,"kind":"exception","text":"ERROR (1) on release object 169459714, parameter 1","exception":1,"name":"ERROR","sendId":792,"index":1,"sent":"release object 169459714"}
+{"t":1793903067956,"s":95.042,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169476098","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067956,"s":95.042,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169476098","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067956,"s":95.042,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169476098","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067956,"s":95.042,"kind":"exception","text":"ERROR (1) on release object 169476098, parameter 1","exception":1,"name":"ERROR","sendId":797,"index":1,"sent":"release object 169476098"}
+{"t":1793903067957,"s":95.043,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169492482","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067957,"s":95.043,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169492482","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067957,"s":95.043,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169492482","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067957,"s":95.043,"kind":"exception","text":"ERROR (1) on release object 169492482, parameter 1","exception":1,"name":"ERROR","sendId":802,"index":1,"sent":"release object 169492482"}
+{"t":1793903067957,"s":95.043,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169508866","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067957,"s":95.043,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169508866","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067957,"s":95.043,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169508866","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067957,"s":95.043,"kind":"exception","text":"ERROR (1) on release object 169508866, parameter 1","exception":1,"name":"ERROR","sendId":807,"index":1,"sent":"release object 169508866"}
+{"t":1793903067958,"s":95.044,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169525250","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067958,"s":95.044,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169525250","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067958,"s":95.044,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169525250","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067958,"s":95.044,"kind":"exception","text":"ERROR (1) on release object 169525250, parameter 1","exception":1,"name":"ERROR","sendId":812,"index":1,"sent":"release object 169525250"}
+{"t":1793903067978,"s":95.064,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169541634","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067978,"s":95.064,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169541634","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067978,"s":95.064,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169541634","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067979,"s":95.065,"kind":"exception","text":"ERROR (1) on release object 169541634, parameter 1","exception":1,"name":"ERROR","sendId":817,"index":1,"sent":"release object 169541634"}
+{"t":1793903067979,"s":95.065,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169558018","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067979,"s":95.065,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169558018","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067979,"s":95.065,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169558018","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067979,"s":95.065,"kind":"exception","text":"ERROR (1) on release object 169558018, parameter 1","exception":1,"name":"ERROR","sendId":822,"index":1,"sent":"release object 169558018"}
+{"t":1793903067999,"s":95.085,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169574402","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903067999,"s":95.085,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169574402","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068000,"s":95.086,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169574402","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068000,"s":95.086,"kind":"exception","text":"ERROR (1) on release object 169574402, parameter 1","exception":1,"name":"ERROR","sendId":827,"index":1,"sent":"release object 169574402"}
+{"t":1793903068000,"s":95.086,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169590786","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068000,"s":95.086,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169590786","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068000,"s":95.086,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169590786","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068000,"s":95.086,"kind":"exception","text":"ERROR (1) on release object 169590786, parameter 1","exception":1,"name":"ERROR","sendId":832,"index":1,"sent":"release object 169590786"}
+{"t":1793903068001,"s":95.087,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169607170","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068001,"s":95.087,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169607170","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068001,"s":95.087,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169607170","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068001,"s":95.087,"kind":"exception","text":"ERROR (1) on release object 169607170, parameter 1","exception":1,"name":"ERROR","sendId":837,"index":1,"sent":"release object 169607170"}
+{"t":1793903068002,"s":95.088,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169623554","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068002,"s":95.088,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169623554","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068002,"s":95.088,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169623554","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068002,"s":95.088,"kind":"exception","text":"ERROR (1) on release object 169623554, parameter 1","exception":1,"name":"ERROR","sendId":842,"index":1,"sent":"release object 169623554"}
+{"t":1793903068002,"s":95.088,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169639938","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068002,"s":95.088,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169639938","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068002,"s":95.088,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169639938","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068002,"s":95.088,"kind":"exception","text":"ERROR (1) on release object 169639938, parameter 1","exception":1,"name":"ERROR","sendId":847,"index":1,"sent":"release object 169639938"}
+{"t":1793903068024,"s":95.11,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169656322","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068024,"s":95.11,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169656322","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068024,"s":95.11,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169656322","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068024,"s":95.11,"kind":"exception","text":"ERROR (1) on release object 169656322, parameter 1","exception":1,"name":"ERROR","sendId":852,"index":1,"sent":"release object 169656322"}
+{"t":1793903068024,"s":95.11,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169672706","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068024,"s":95.11,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169672706","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068024,"s":95.11,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169672706","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068024,"s":95.11,"kind":"exception","text":"ERROR (1) on release object 169672706, parameter 1","exception":1,"name":"ERROR","sendId":857,"index":1,"sent":"release object 169672706"}
+{"t":1793903068025,"s":95.111,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169689090","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068025,"s":95.111,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169689090","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068025,"s":95.111,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169689090","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068025,"s":95.111,"kind":"exception","text":"ERROR (1) on release object 169689090, parameter 1","exception":1,"name":"ERROR","sendId":862,"index":1,"sent":"release object 169689090"}
+{"t":1793903068025,"s":95.111,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169705474","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068025,"s":95.111,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169705474","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068025,"s":95.111,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169705474","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068026,"s":95.112,"kind":"exception","text":"ERROR (1) on release object 169705474, parameter 1","exception":1,"name":"ERROR","sendId":867,"index":1,"sent":"release object 169705474"}
+{"t":1793903068026,"s":95.112,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169721858","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068026,"s":95.112,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169721858","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068026,"s":95.112,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169721858","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068026,"s":95.112,"kind":"exception","text":"ERROR (1) on release object 169721858, parameter 1","exception":1,"name":"ERROR","sendId":872,"index":1,"sent":"release object 169721858"}
+{"t":1793903068027,"s":95.113,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169738242","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068027,"s":95.113,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169738242","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068027,"s":95.113,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169738242","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068027,"s":95.113,"kind":"exception","text":"ERROR (1) on release object 169738242, parameter 1","exception":1,"name":"ERROR","sendId":877,"index":1,"sent":"release object 169738242"}
+{"t":1793903068027,"s":95.113,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169754626","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068027,"s":95.113,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169754626","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068027,"s":95.113,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169754626","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068028,"s":95.114,"kind":"exception","text":"ERROR (1) on release object 169754626, parameter 1","exception":1,"name":"ERROR","sendId":882,"index":1,"sent":"release object 169754626"}
+{"t":1793903068047,"s":95.133,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169771010","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068047,"s":95.133,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169771010","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068047,"s":95.133,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169771010","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068048,"s":95.134,"kind":"exception","text":"ERROR (1) on release object 169771010, parameter 1","exception":1,"name":"ERROR","sendId":887,"index":1,"sent":"release object 169771010"}
+{"t":1793903068048,"s":95.134,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169787394","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068048,"s":95.134,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169787394","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068048,"s":95.134,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169787394","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068049,"s":95.135,"kind":"exception","text":"ERROR (1) on release object 169787394, parameter 1","exception":1,"name":"ERROR","sendId":892,"index":1,"sent":"release object 169787394"}
+{"t":1793903068049,"s":95.135,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169803778","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068049,"s":95.135,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169803778","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068049,"s":95.135,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169803778","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068049,"s":95.135,"kind":"exception","text":"ERROR (1) on release object 169803778, parameter 1","exception":1,"name":"ERROR","sendId":897,"index":1,"sent":"release object 169803778"}
+{"t":1793903068050,"s":95.136,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169820162","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068050,"s":95.136,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169820162","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068050,"s":95.136,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169820162","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068050,"s":95.136,"kind":"exception","text":"ERROR (1) on release object 169820162, parameter 1","exception":1,"name":"ERROR","sendId":902,"index":1,"sent":"release object 169820162"}
+{"t":1793903068050,"s":95.136,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 169836546","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068050,"s":95.136,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 169836546","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068050,"s":95.136,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 169836546","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1793903068050,"s":95.136,"kind":"figures","text":"50 figures, IDs 145604615 to 169836546"}
+{"t":1793903068050,"s":95.136,"kind":"write","text":"L:DUALINPUT_P29_CROWD_FIRST ← 145604615","name":"L:DUALINPUT_P29_CROWD_FIRST","units":"number","value":145604615}
+{"t":1793903068050,"s":95.136,"kind":"write","text":"L:DUALINPUT_P29_CROWD_COUNT ← 24231932","name":"L:DUALINPUT_P29_CROWD_COUNT","units":"number","value":24231932}
+{"t":1793903068050,"s":95.136,"kind":"write","text":"L:DUALINPUT_P29_CROWD_MODE ← 1","name":"L:DUALINPUT_P29_CROWD_MODE","units":"number","value":1}
+{"t":1793903068050,"s":95.136,"kind":"exception","text":"ERROR (1) on release object 169836546, parameter 1","exception":1,"name":"ERROR","sendId":907,"index":1,"sent":"release object 169836546"}
+{"t":1793903086070,"s":113.156,"kind":"fps","text":"LOD2, 50 figures, still: 37.5 fps, 26.64ms","label":"LOD2, 50 figures, still","windowMs":15000,"deliveries":274,"fps":37.530932086884796,"maxGapMs":1872,"frameEventFps":49.44647789713162,"frameEvents":268}
+{"t":1793903086070,"s":113.156,"kind":"write","text":"L:DUALINPUT_P29_CROWD_FIRST ← 145604615","name":"L:DUALINPUT_P29_CROWD_FIRST","units":"number","value":145604615}
+{"t":1793903086070,"s":113.156,"kind":"write","text":"L:DUALINPUT_P29_CROWD_COUNT ← 24231932","name":"L:DUALINPUT_P29_CROWD_COUNT","units":"number","value":24231932}
+{"t":1793903086070,"s":113.156,"kind":"write","text":"L:DUALINPUT_P29_CROWD_MODE ← 2","name":"L:DUALINPUT_P29_CROWD_MODE","units":"number","value":2}
+{"t":1793903104083,"s":131.169,"kind":"fps","text":"LOD2, 50 figures, moving: 48.0 fps, 20.85ms","label":"LOD2, 50 figures, moving","windowMs":15000,"deliveries":720,"fps":47.97171070189485,"maxGapMs":62,"frameEventFps":47.176542753523044,"frameEvents":704}
+{"t":1793903104083,"s":131.169,"kind":"write","text":"L:DUALINPUT_P29_CROWD_FIRST ← 0","name":"L:DUALINPUT_P29_CROWD_FIRST","units":"number","value":0}
+{"t":1793903104083,"s":131.169,"kind":"write","text":"L:DUALINPUT_P29_CROWD_COUNT ← 0","name":"L:DUALINPUT_P29_CROWD_COUNT","units":"number","value":0}
+{"t":1793903104083,"s":131.169,"kind":"write","text":"L:DUALINPUT_P29_CROWD_MODE ← 0","name":"L:DUALINPUT_P29_CROWD_MODE","units":"number","value":0}
+{"t":1793903104083,"s":131.169,"kind":"cost","text":"LOD2: a still figure adds 165µs, moving 49µs"}
+{"t":1793903124105,"s":151.191,"kind":"fps","text":"no figures, after: 52.6 fps, 19.01ms","label":"no figures, after","windowMs":15000,"deliveries":789,"fps":52.6069831096869,"maxGapMs":25,"frameEventFps":51.8143402957177,"frameEvents":774}

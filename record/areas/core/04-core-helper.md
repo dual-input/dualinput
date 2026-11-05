@@ -9,6 +9,9 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > **Note**
 > Stage 20's build changes [Raw Input](#raw-input): the next press skips a modifier and any key pressed with one held, as [the Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version) asks, and while it's on, a press crosses only as the next press, so pressing the key already bound doesn't also take control ([control log](../control/log.md#2026-11-04-stage-20s-take-control-passes-its-cases-on-the-bench-and-a-press-reaches-the-cue-about-80ms-later-past-the-50ms-budget)).
 
+> **Note**
+> Since 2026-11-05, a left release crosses whatever is in front, and a press or a wheel notch with the cursor off the sim's main window doesn't cross, since a click that takes the focus away left a figure's hand out until the next click ([avatars log](../avatars/log.md#2026-11-05-a-click-that-took-the-focus-from-the-sim-left-a-figures-hand-out-and-the-rest-of-the-session-passed)).
+
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.
 Across the helper's standard input and output go postcard messages, each after a 4-byte length, and only what a feature asked for crosses: a bound key's or button's press, the next press while the pilot binds one, the mouse while the sim's main window is in front, and Opus frames.

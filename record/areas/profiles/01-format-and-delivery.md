@@ -57,9 +57,9 @@ seats:
   pilot:
     name: Pilot
     hip: [0.31, 0.12, 1.40]                   # hypothetical numbers
-    knees: [0.05, 0.45]
-    feet: [-0.42, 0.62]
-    eye: [0.63, -0.05]
+    knees: [-0.044, 0.218]
+    feet: [-0.198, 0.51]
+    eye: [0.643, -0.054]
 ```
 
 The 58P's mixture lever drags `L:BKSQ_MixtureLeverPosition_1`, and the aircraft's behavior code writes the stock mixture from it, and its weather radar's gauge fires `H:bksq_wradar1_radarAlertToggle` (read in bksq-aircraft-baronpro 0.1.1, `bksq_wradar1.js`, [Baron study](../aircraft/black-square-baron-pro/study.md)).
@@ -326,15 +326,15 @@ seats:
   pilot:
     name: Pilot
     hip: [0.31, 0.12, 1.40]                   # hypothetical numbers
-    knees: [0.05, 0.45]
-    feet: [-0.42, 0.62]
-    eye: [0.63, -0.05]
+    knees: [-0.044, 0.218]
+    feet: [-0.198, 0.51]
+    eye: [0.643, -0.054]
   copilot:
     name: Copilot
     hip: [-0.31, 0.12, 1.40]
-    knees: [0.05, 0.45]
-    feet: [-0.42, 0.62]
-    eye: [0.63, -0.05]
+    knees: [-0.044, 0.218]
+    feet: [-0.198, 0.51]
+    eye: [0.643, -0.054]
     take_radius: 0.25
 ```
 

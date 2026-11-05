@@ -21,6 +21,11 @@ use crate::Sim;
 /// SimConnect assigned).
 pub const USER: u32 = 0;
 
+/// The pilot's avatar on foot, as a read names its object: the Vars API's
+/// `FS_OBJECT_ID_USER_AVATAR`, `FS_OBJECT_ID_MAX + 1` (read in the MSFS 2024 SDK,
+/// WASM/include/MSFS/MSFS_Core.h).
+pub const AVATAR: u32 = 0xFFFF_FFFF - 128 + 1;
+
 /// Which of the sim's tables a variable is in, by its prefix.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Space {

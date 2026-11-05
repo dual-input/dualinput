@@ -73,6 +73,7 @@ pub fn slot(yokes: &[YokeSlot; 2], seat: &Seat, fed: &Fed) -> FigureSlot {
         color: fed.color,
         shows: fed.shows,
         slumps: u32::from(fed.slumps),
+        own: 0,
         hip: seat.hip,
         knees: seat.knees,
         feet: seat.feet,

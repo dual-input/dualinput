@@ -48,9 +48,9 @@ const STATUS_WAIT: Duration = Duration::from_secs(3);
 
 /// A new seat's knees, feet, and eye, the format's example seat, which the author tunes from
 /// (record/areas/profiles/01-format-and-delivery.md, "Seats").
-const KNEES: [f64; 2] = [0.05, 0.45];
-const FEET: [f64; 2] = [-0.42, 0.62];
-const EYE: [f64; 2] = [0.63, -0.05];
+const KNEES: [f64; 2] = [-0.044, 0.218];
+const FEET: [f64; 2] = [-0.198, 0.51];
+const EYE: [f64; 2] = [0.643, -0.054];
 
 /// A seed this close to a seat already listed is that seat, as p21 paired each seat object
 /// with the `PILOT_` node within 0.3m of it (read in experiments/areas/avatars/p21-yoke-hands.mjs).
@@ -221,6 +221,7 @@ pub fn slot(figures: &[(&Seat, u32)], selected: Option<&str>) -> FigureSlot {
             },
             shows: SHOWS_ALL,
             slumps: 0,
+            own: 0,
             hip: hip(seat),
             knees: seat.knees.map(|v| v as f32),
             feet: seat.feet.map(|v| v as f32),

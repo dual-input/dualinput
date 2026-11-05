@@ -580,7 +580,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Decided:** the tab holds setup's name and color card, and in a session a new name or color reaches the crew at once, since a member's entry is rewritten when either changes (user, 2026-11-04; [session log](../session/log.md#2026-11-04-a-members-entry-is-rewritten-on-a-change-so-a-new-name-or-color-reaches-the-crew-at-once-and-the-color-moves-to-the-session)).
   It has four switches, "Your figure" and "The crew's figures", each with "Inside the aircraft" and "Walkaround", where [the scope's avatar sync](../product/03-v1-scope.md#avatar-sync) has two.
   Three guides that open sit at the page's foot: how seats work, how pointing and clicking works, and how to hide the sim's default avatar.
-  A note at the top, in the information color and with no tab dot, says when pointing and clicking won't work because the aircraft's model files can't be read, with a Learn more that opens that guide, or when the profile has no seats, so figures show as floating heads only.
+  A note at the top, in the information color and with no tab dot, says when pointing and clicking won't work because the aircraft's model files can't be read, with a Learn more that opens that guide, when the profile has no seats, so figures show as floating heads only, or when the aircraft has no profile, so figures don't show (user, 2026-11-05).
   Interface copy says "figure" for Dual Input's and "avatar" only for the sim's own.
   Settled by the user on 2026-10-31.
 - **Because:** a notification that a model can't be read was annoying, popping up again and again (user, 2026-10-31), and this replaces [avatars'](../avatars/01-avatars.md#a-seat) notifications with this note and with "This seat is taken".

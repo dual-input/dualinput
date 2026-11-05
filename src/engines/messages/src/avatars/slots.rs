@@ -74,6 +74,9 @@ pub struct FigureState {
     pub shows: u32,
     /// 1 while the figure slumps, its member out of the flight or out of reach.
     pub slumps: u32,
+    /// 1 for this pilot's own figure, which on foot stands on their avatar rather than
+    /// following the pose's place.
+    pub own: u32,
     /// The seat's hip, in the aircraft's frame, and its knees, feet, and facing, as a
     /// profile's `seats` gives them, while it sits.
     pub hip: [f32; 3],

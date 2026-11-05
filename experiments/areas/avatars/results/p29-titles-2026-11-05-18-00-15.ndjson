@@ -1,0 +1,5 @@
+{"t":1793901615617,"s":0.022,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1793901615639,"s":0.044,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1793901615639,"s":0.044,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1793901615639,"s":0.044,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1793901615706,"s":0.111,"kind":"objects","text":"\n32768:  [CharacterSim]\n3178496: Black Square Baron 58P Professional N513LW [Airplane]\n145588226: SEAT_DEFAULT_Pilot [SimpleObjectSim]\n145604610: DUALINPUT_FIGURE_PILOT [StaticObject]\n145620994: DUALINPUT_FIGURE_PILOT [StaticObject]","lines":["32768:  [CharacterSim]","3178496: Black Square Baron 58P Professional N513LW [Airplane]","145588226: SEAT_DEFAULT_Pilot [SimpleObjectSim]","145604610: DUALINPUT_FIGURE_PILOT [StaticObject]","145620994: DUALINPUT_FIGURE_PILOT [StaticObject]"]}

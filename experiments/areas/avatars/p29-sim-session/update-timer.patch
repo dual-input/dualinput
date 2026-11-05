@@ -1,0 +1,188 @@
+diff --git a/src/sim-package/wasm-module/src/lib.rs b/src/sim-package/wasm-module/src/lib.rs
+index 4ca8b9e..76523f8 100644
+--- a/src/sim-package/wasm-module/src/lib.rs
++++ b/src/sim-package/wasm-module/src/lib.rs
+@@ -105,11 +105,183 @@ pub extern "C" fn module_init() {
+ #[unsafe(no_mangle)]
+ #[allow(non_snake_case)]
+ pub extern "C" fn Update_StandAlone(_: f32) {
++    let started = clock_ns();
+     with_module(|module| {
+         if let Some(module) = module {
+             module.frame();
+         }
+     });
++    let took = clock_ns().saturating_sub(started);
++    TIMER.with(|timer| {
++        if let Ok(mut timer) = timer.try_borrow_mut() {
++            timer.add(took);
++        }
++    });
++    CROWD.with(|crowd| {
++        if let Ok(mut crowd) = crowd.try_borrow_mut() {
++            crowd.frame();
++        }
++    });
++}
++
++/// Shows and moves the figures experiments/areas/avatars/p29-sim-session/crowd.mjs spawns,
++/// since a figure draws nothing until `Z:DUALINPUT_FIGURE_SHOWS` says so, and `Figure` feeds
++/// only a session's figures. Its time stays outside `Timer`'s. The objects from
++/// L:DUALINPUT_P29_CROWD_FIRST, L:DUALINPUT_P29_CROWD_COUNT of them, get
++/// L:DUALINPUT_P29_CROWD_MODE: 0 leaves them, 1 shows them, and 2 also moves every joint.
++struct Crowd {
++    ids: Option<[routine_host::Ids; 3]>,
++    first: u32,
++    count: u32,
++    mode: u32,
++    figures: Vec<(u32, routine_host::Ids, Vec<routine_host::Ids>)>,
++}
++
++const CHANNELS: [&str; 27] = [
++    "HEAD_FWD", "HEAD_RIGHT", "HEAD_UP", "CHEST_FWD", "CHEST_RIGHT", "CHEST_UP", "HEAD_YAW",
++    "HEAD_PITCH", "HEAD_ROLL", "ARM_L_YAW", "ARM_L_PITCH", "ARM_L_LEN", "ARM_R_YAW", "ARM_R_PITCH",
++    "ARM_R_LEN", "LEG_L_YAW", "LEG_L_PITCH", "LEG_L_LEN", "LEG_L_ROLL", "LEG_L_BEND", "LEG_L_SHIN",
++    "LEG_R_YAW", "LEG_R_PITCH", "LEG_R_LEN", "LEG_R_ROLL", "LEG_R_BEND", "LEG_R_SHIN",
++];
++
++fn named(space: routine_host::Space, name: &str) -> routine_host::Named {
++    routine_host::Named {
++        space,
++        name: name.to_string(),
++        unit: "number".to_string(),
++    }
++}
++
++impl Crowd {
++    fn frame(&mut self) {
++        use routine_host::Space::{L, Z};
++        if self.ids.is_none() {
++            let id = |name: &str| vars::look_up(0, &named(L, name));
++            if let (Some(a), Some(b), Some(c)) = (
++                id("DUALINPUT_P29_CROWD_FIRST"),
++                id("DUALINPUT_P29_CROWD_COUNT"),
++                id("DUALINPUT_P29_CROWD_MODE"),
++            ) {
++                self.ids = Some([a, b, c]);
++            }
++        }
++        let Some([first, count, mode]) = self.ids else {
++            return;
++        };
++        // `as` from a float compiles to an instruction the sim's WASM toolchain refuses.
++        let read = |ids| {
++            let value = vars::get(0, L, ids).unwrap_or(0.0);
++            if (0.0..4e9).contains(&value) {
++                // SAFETY: the range above fits a u32.
++                unsafe { value.to_int_unchecked::<u32>() }
++            } else {
++                0
++            }
++        };
++        let (first, count, mode) = (read(first), read(count), read(mode));
++        let changed = first != self.first || count != self.count;
++        if changed {
++            self.first = first;
++            self.count = count;
++            self.figures.clear();
++            for object in first..first.saturating_add(count) {
++                let Some(shows) = vars::look_up(object, &named(Z, "DUALINPUT_FIGURE_SHOWS")) else {
++                    continue;
++                };
++                let joints = CHANNELS
++                    .iter()
++                    .filter_map(|c| vars::look_up(object, &named(Z, &format!("DUALINPUT_FIGURE_{c}"))))
++                    .collect();
++                self.figures.push((object, shows, joints));
++            }
++        }
++        if changed || mode != self.mode {
++            self.mode = mode;
++            if mode >= 1 {
++                for (object, shows, _) in &self.figures {
++                    vars::set(*object, Z, *shows, 7.0);
++                }
++            }
++        }
++        if mode == 2 {
++            let t = clock_ns() as f64 / 1e9;
++            for (object, _, joints) in &self.figures {
++                for (i, joint) in joints.iter().enumerate() {
++                    let length = matches!(i, 0..=5 | 11 | 14 | 17 | 20 | 23 | 26);
++                    let size = if length { 0.1 } else { 20.0 };
++                    let at = t * 2.0 + i as f64 + f64::from(*object);
++                    vars::set(*object, Z, *joint, 0.2 * f64::from(u8::from(length)) + size * at.sin());
++                }
++            }
++        }
++    }
++}
++
++thread_local! {
++    static CROWD: RefCell<Crowd> = const { RefCell::new(Crowd { ids: None, first: 0, count: 0, mode: 0, figures: Vec::new() }) };
++}
++
++/// How long the module's updates took, over a window of frames, as `L:` variables a client
++/// reads: DUALINPUT_P29_UPDATE_P50, _P99, and _MAX, in ns, and _WINDOW, which counts windows.
++/// The sim's WASM Debug window reads 0ms for a standalone module
++/// (record/areas/core/log.md, 2026-10-21), and this is the one way we have to time it.
++struct Timer {
++    took: Vec<u64>,
++    ids: Option<[routine_host::Ids; 4]>,
++    windows: u64,
++}
++
++impl Timer {
++    const FRAMES: usize = 300;
++
++    fn add(&mut self, took: u64) {
++        self.took.push(took);
++        if self.took.len() < Self::FRAMES {
++            return;
++        }
++        if self.ids.is_none() {
++            let id = |name: &str| {
++                vars::look_up(
++                    0,
++                    &routine_host::Named {
++                        space: routine_host::Space::L,
++                        name: name.to_string(),
++                        unit: "number".to_string(),
++                    },
++                )
++            };
++            if let (Some(a), Some(b), Some(c), Some(d)) = (
++                id("DUALINPUT_P29_UPDATE_P50"),
++                id("DUALINPUT_P29_UPDATE_P99"),
++                id("DUALINPUT_P29_UPDATE_MAX"),
++                id("DUALINPUT_P29_UPDATE_WINDOW"),
++            ) {
++                self.ids = Some([a, b, c, d]);
++            }
++        }
++        self.took.sort_unstable();
++        self.windows += 1;
++        if let Some([p50, p99, max, window]) = self.ids {
++            let at = |share: usize| self.took.get(share * (Self::FRAMES - 1) / 100).copied().unwrap_or(0) as f64;
++            vars::set(0, routine_host::Space::L, p50, at(50));
++            vars::set(0, routine_host::Space::L, p99, at(99));
++            vars::set(0, routine_host::Space::L, max, at(100));
++            vars::set(0, routine_host::Space::L, window, self.windows as f64);
++        }
++        self.took.clear();
++    }
++}
++
++thread_local! {
++    static TIMER: RefCell<Timer> = const { RefCell::new(Timer { took: Vec::new(), ids: None, windows: 0 }) };
++}
++
++fn clock_ns() -> u64 {
++    const MONOTONIC: u32 = 1;
++    let mut ns = 0;
++    // SAFETY: the sim writes the time into `ns`, which outlives the call.
++    unsafe { clock_time_get(MONOTONIC, 1, &mut ns) };
++    ns
+ }
+ 
+ /// The sim calls this as it unloads the module.

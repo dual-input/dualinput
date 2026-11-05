@@ -13,6 +13,103 @@ The 58P's and the Comanche's models are glTF with no compression, in vertex layo
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-11-05: A click that took the focus from the sim left a figure's hand out, and the rest of the session passed
+
+**Asked:** the checks left from [the session's first half](#2026-11-05-the-session-in-the-sim-the-figure-spawns-and-sits-the-sim-sizes-it-by-its-257m-at-rest-sphere-and-a-pilot-on-foot-read-as-seated), in the Baron 58P at KPVD, with a real core and the scripted second pilot: on foot, a flight restart, a hand on a yoke that moves, the yoke's buttons, the hand that seemed to stay after a click on the sim's menus, `profile-author`'s seat objects, and the two budgets.
+
+**Expected:** the checks to pass, and each budget to hold or to say how far off it is.
+
+**Found:** measured on MSFS 2024 1.9.21.0.
+
+- **On foot:** with `E:IS AVATAR` fixed, the second pilot's `Figure` read this pilot as `on-foot`, and the seat emptied.
+- **A flight restart:** through two restarts the second pilot's figure stayed in its seat and posed, seen from the cockpit and from outside, and its head then turned on command (user).
+  Neither the core's log nor the module's says whether a restart resets the sim's variables, so [the case about a reset](01-avatars.md#cases-for-the-bench) passes for a restart and stays open for a reset (unverified).
+- **A yoke that moves:** the second pilot's hand stayed on its yoke through the yoke's full travel (user), so a frame maps to an animation's time as `aircraft-model` takes it, as far as the eye can tell.
+- **The yoke's buttons:** in the 58P they're nodes below `Yoke_L` and `Yoke_R` (read in bksq-aircraft-baronpro 0.1.1, `BaronProfessional_Base_INT.gltf`), and a click on the autopilot disconnect brought a `thumb`.
+- **The hand that stayed:** a click that takes the focus from the sim reads as in front at its press and not at its release, and the helper crossed the mouse only while the sim's window was in front, so the press crossed and the release didn't.
+  The hand stayed out for 38s in one case, until the next click.
+  With a left release crossing whatever is in front, a hand on a yoke button and one on a panel switch each let go within about 3s of a hold with Alt+Tab in the middle of it.
+- **The sim's menus:** a click on the top menu bar brought a `point` for as long as the click, about 1s each, and it let go, so the first half's hand that stayed was this focus bug or a held press (unverified which).
+- **`profile-author`'s seat objects:** `SimConnect_RequestDataOnSimObjectType` takes no flags, so its answers carry no tags, and `sim-client` read the first bytes of `SEAT_DEFAULT_Pilot` as a tag and lost the answer.
+  The stand-in sent tags, which hid it.
+  With the answers read in order, the tool lists `SEAT_DEFAULT_Pilot`.
+- **The module's update:** Developer Mode's WASM Debug window reads 0ms for a standalone module ([core log](../core/log.md)), so `experiments/areas/avatars/p29-sim-session/update-timer.patch` times `module.frame()` with WASI's clock, and `update-times.mjs` reads it each 300 frames.
+  Stages 16 and 18 share this budget and can apply the same patch.
+
+  | State, with two figures | p50, median of windows | p99, median of windows | Most |
+  | --- | --- | --- | --- |
+  | Before the session | 3µs | 11µs | 115µs |
+  | Seated, both idle | 86µs | 146µs | 272µs |
+  | Seated, the second pilot's head turning | 85µs | 136µs | 262µs |
+  | Seated, the second pilot clicking | 85µs | 139µs | 316µs |
+  | This pilot on foot | 80µs | 127µs | 392µs |
+
+  The cost barely moves with what the figures do, so it's the work done every frame, not the writes.
+  An earlier run of the same seated idle read 68µs and 113µs, so runs differ by about a quarter.
+  The sim has flagged our modules' DLLs as a debug build beside a release WASM build ([architecture log](../architecture/log.md)), which may inflate these, and we haven't timed the module outside Developer Mode (unverified).
+- **The sim's frame:** `crowd.mjs` spawned 50 figures at each level's distance and showed 48, with the frame rate uncapped and the sim in front, at 54.8 fps before and 54.7 fps after, and the screenshots show each crowd in view.
+
+  | Each figure in view | Still | Every joint moving |
+  | --- | --- | --- |
+  | LOD0, about 2m to 3m from the camera | 64µs | 105µs |
+  | LOD1, from about 8m | 43µs | 81µs |
+  | LOD2, from about 30m | 35µs | 63µs |
+  | p28's figure, the budget | 16µs to 21µs | 26µs to 37µs |
+
+  Moving includes the module writing all 27 joints each frame, which `Figure` doesn't do for a joint that didn't move.
+  The first run is invalid: the sim's object IDs come in clusters millions apart, and the probe's range of 24 million stalled the sim for seconds just before each still measurement.
+- The parked 58P's pitch is −1.4°, which over about 0.9m of hips comes to about 2cm, the offset the figure on foot holds (arithmetic).
+
+**Changed:**
+
+- A left release crosses whatever is in front, and a press or a notch with the cursor off the sim's window doesn't cross ([core helper](../core/04-core-helper.md)).
+- `sim-client` reads an answer with no tags in the definition's order, and the stand-in answers a by-type read so.
+- The user accepted both budgets as measured for this stage: two figures in the cockpit cost about 0.13ms to 0.21ms of an 18ms frame, and the module about 0.14ms (user, 2026-11-05).
+- New seats start from the 58P's tuned knees, feet, and eye, and the Figures tab says when an aircraft has no profile (user, 2026-11-05).
+
+**Affects:** [01-avatars](01-avatars.md), [04-core-helper](../core/04-core-helper.md), [the code map](../architecture/02-code-map.md), and [stage 17](../build/plan.md#17-avatars).
+
+**Evidence:** [the update times](../../../experiments/areas/avatars/results/p29-update-times-2026-11-05-17-45-50.ndjson), [the crowd](../../../experiments/areas/avatars/results/p29-crowd-2026-11-05-18-27-18.ndjson), its [invalid first run](../../../experiments/areas/avatars/results/p29-crowd-2026-11-05-18-22-52.ndjson), and [the objects near the aircraft](../../../experiments/areas/avatars/results/p29-titles-2026-11-05-18-00-15.ndjson).
+
+## 2026-11-05: A pilot's own figure on foot stands on its avatar, a frame behind, since the spring left it 150ms late and a lead overshoots every stop
+
+**Asked:** the user saw their own figure trail their avatar on foot, and asked how late it was and whether it could be pinned.
+Then, with it pinned and led by a frame, they saw a flicker at each stop, and asked whether the lead caused it.
+
+**Expected:** about 2 to 3 frames in transit plus 100ms from the spring, whose steady lag is 2 divided by its rate of 20 (arithmetic), and from burst screenshots we'd written down about 0.2s to 0.3s.
+
+**Found:** measured on MSFS 2024 1.9.21.0, in the Baron 58P at KPVD, at about 30 fps, by `experiments/areas/avatars/p29-sim-session/own-figure-lag.mjs`, which reads the avatar and the figure on `SIM_FRAME` and finds the delay that best lines up their paths.
+
+| How the figure gets its place | Delay | Gap moving, median | Gap moving, max | After a stop |
+| --- | --- | --- | --- | --- |
+| From the core, on the spring | 150ms | 31cm | 93cm | Arrives within 3cm in 168ms |
+| From the avatar in `Figure`, led by a frame | 0ms | 2cm | 8cm | One step too far, then snaps back |
+| From the avatar in `Figure`, with no lead | 30ms | 5cm | 9cm | Takes its last step and holds |
+
+The first run's median speed was 2.03 m/s and its top speed 6.13 m/s, and the others kept to about 2 m/s, since the user only walked.
+
+- `Figure` can read the avatar through `FS_OBJECT_ID_USER_AVATAR`, `FS_OBJECT_ID_MAX + 1`, on the same `A:PLANE` variables as an aircraft.
+- The avatar stops dead: at each of 11 stops with the lead on, its step went from 6.7cm to 0 in one frame.
+  The figure stepped 6.5cm to 6.8cm more, 5cm to 8cm past it, and stepped back the frame after.
+- The lead by a frame is right while walking, so a write lands a frame after the read, as in an aircraft.
+- The avatar's `A:GROUND VELOCITY` and `A:VELOCITY WORLD X` and `Z` fell to 0 on the same frame its step did, so its speed gives a lead no warning of a stop, and neither does its place.
+  `A:VELOCITY BODY Z` read 0 throughout.
+- The figure stands about 2cm off the avatar when both are still, whichever way it faces, and that didn't change between the runs; the aircraft's tilt, which turns the figure's hips off vertical, is the likely cause (unverified).
+- A burst of screenshots with the camera looking down at the led figure shows it in one spot on screen, where the spring's burst showed it swinging around the camera.
+  At that spot the camera cuts the chest ball open, as a large arch across the lower half of the view, with the hips and limbs inside it, also cut.
+
+**Changed:**
+
+- The figure's slot gains `own`, and `Figure` places this pilot's own figure on foot on the avatar's place with no spring, no lead, and no ease on its facing.
+  If the sim doesn't give the avatar's place, it goes where the core feeds, with no spring.
+- The user judged it by eye: no flicker, and the lag is noticeable but acceptable at this stage (user, 2026-11-05).
+- The same run settled that this pilot's own figure on foot hides its head and neck and fades its hands, as in a seat (user, 2026-11-05).
+- The arch waits for the later pass on the figure (user, 2026-11-05).
+
+**Affects:** [01-avatars](01-avatars.md), and [stage 17](../build/plan.md#17-avatars).
+
+**Evidence:** [the spring](../../../experiments/areas/avatars/results/p29-own-figure-lag-2026-11-05-17-10-42.ndjson), [the lead](../../../experiments/areas/avatars/results/p29-own-figure-lag-2026-11-05-17-32-10.ndjson), [the lead, with the avatar's speeds](../../../experiments/areas/avatars/results/p29-own-figure-lag-2026-11-05-17-38-19.ndjson), and [no lead](../../../experiments/areas/avatars/results/p29-own-figure-lag-2026-11-05-17-46-58.ndjson).
+
 ## 2026-11-05: The session in the sim: the figure spawns and sits, the sim sizes it by its 2.57m at-rest sphere, and a pilot on foot read as seated
 
 **Asked:** stage 17's checks in the sim, in the Baron 58P at KPVD, with a real core and a scripted second pilot on a bench core (`experiments/areas/avatars/p29-sim-session/second-pilot.ts`).

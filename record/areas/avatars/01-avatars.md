@@ -403,6 +403,7 @@ In the sim:
 - A pilot's own figure has no head from outside it, such as in a chase view, since what shows goes by whose figure it is and not by the camera.
 - A figure's head turns with no slow start, closing most of a turn in about a third of a second, which the later pass may soften.
 - A click on the sim's own menus brings a hand toward whatever is behind the menu, for as long as the click, since the helper can't tell a menu from the view.
+- A click on another program's window or a popped-out display lying over the sim's view brings a hand for as long as the click, since the sim still reads as in front at the press; the helper could check the window under the cursor, which waits for stage 16's session, where the sim can show whether an overlay such as Steam's would then swallow every click (user, 2026-11-05).
 - `Figure` and the figure's frame time run over their first budgets, by [the note above](#avatars-avatar-sync-and-the-aircraft-model), and stage 16's routines share the module's 0.1ms, so it measures them again (user, 2026-11-05).
 - A located entry's slow run isn't one reach: changes under its `deadband` don't hold the hand on the spot, so a slow enough move sends the hand home and back, and an entry's first change always brings a hand; the session in the sim tunes this (user, 2026-11-04).
 

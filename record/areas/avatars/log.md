@@ -46,7 +46,8 @@ The session stopped early at the user's word, so part of the list is still open.
 - The legs as first seeded were wrong: the seat's `feet` stretched the shin to the floor in a hairpin, where the probes' figure had short legs that curve and hang.
   The knee had 6 segments, against the probes' tuned 12, with no reason recorded anywhere, and it showed kinks.
 - `node tools/bench.ts session` passed 22 of 23 with the sim running.
-  `both pilots ready` failed its check that no input takes over 1ms, slowest 2,566µs, which we take to be the 58P's model now that its profile has seats (unverified).
+  `both pilots ready` failed its check that no input takes over 1ms, slowest 2,566µs.
+  With the sim closed, on the tree with the seats, `avatars` and `session` passed all 42, so the load from the sim is the likely cause (unverified).
 
 **Changed:**
 
@@ -54,7 +55,7 @@ The session stopped early at the user's word, so part of the list is still open.
   LOD00 draws 60,160 triangles and 70 draw calls, LOD01 5,328, and LOD02 2,192.
 - `minSize` is 100 and 18, so by the readings above LOD0 holds to about 3.7m and LOD1 to about 20m (arithmetic; we haven't watched the switch since).
 - The 58P's profile has its two seats, hip `[±0.282, 0.212, -0.09]`, knees `[-0.044, 0.218]`, feet `[-0.198, 0.51]`, and eye `[0.643, -0.054]`.
-- `sim-client` and the stand-in take `E:` off a variable's name, with a test, not yet built or run in the sim.
+- `sim-client` and the stand-in take `E:` off a variable's name, with a test, built and installed but not yet run in the sim.
 - The user passed walking, running, and crouching for this stage with visual issues, and moved those and translucent arms and hands to a later pass, with the pilot's own arms hidden if translucency fails (user, 2026-11-05).
 
 **Still to do in the sim:** on foot again with the fix, a live figure's `Z:` values across a reset, a hand on a yoke that moves, the 58P's yoke buttons, `Figure` against 0.1ms with two figures, and frame time against p28.

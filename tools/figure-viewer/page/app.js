@@ -39,6 +39,7 @@ const state = {
   shows: "",
   view: "copilot",
   running: false,
+  onFoot: false,
 }
 
 // ---------------------------------------------------------------- the scene
@@ -175,6 +176,51 @@ async function buildFigure() {
   showCost()
 }
 
+/**
+ * A seated figure's leg channels from the Legs sliders, as `Figure` solves them from the foot
+ * footFor gives, so a slider draws at once without running the scripts again. A seated leg
+ * doesn't change between frames, so nothing the scripts wrote is lost.
+ */
+function seatedLegs(names, values) {
+  const [up, forward] = state.seatEdit.knees
+  const rise = up + state.spec.legs.down
+  const set = (name, value) => {
+    const i = names.indexOf(name)
+    if (i >= 0) values[i] = value
+  }
+  for (const s of ["L", "R"]) {
+    set(`LEG_${s}_YAW`, 0)
+    set(`LEG_${s}_PITCH`, THREE.MathUtils.radToDeg(Math.atan2(rise, forward)))
+    set(`LEG_${s}_LEN`, Math.hypot(rise, forward))
+    set(`LEG_${s}_ROLL`, 0)
+    set(`LEG_${s}_BEND`, state.spec.rest.leg.bend)
+    set(`LEG_${s}_SHIN`, state.spec.rest.leg.shin)
+  }
+}
+
+/**
+ * The seat's `feet`, [up, forward] from the hip, that put a leg at figure.json's rest bend and
+ * shin: the thigh to the seat's knee, then the curve of `bend_end` in
+ * src/features/avatars/routines/src/solve.rs, which this repeats, so change both together, then
+ * the shin. `Figure` solves that foot back to the same bend and shin.
+ */
+function footFor(seat, spec) {
+  const [kneeUp, kneeForward] = seat.knees
+  const rise = kneeUp + spec.legs.down
+  const thigh = Math.hypot(rise, kneeForward) || 1
+  const bend = rad(spec.rest.leg.bend)
+  const piece = spec.knee.arc / spec.knee.segments
+  let along = spec.rest.leg.shin * Math.cos(bend)
+  let toward = spec.rest.leg.shin * Math.sin(bend)
+  for (let k = 1; k <= spec.knee.segments; k++) {
+    along += piece * Math.cos((k * bend) / spec.knee.segments)
+    toward += piece * Math.sin((k * bend) / spec.knee.segments)
+  }
+  const [dirForward, dirUp] = [kneeForward / thigh, rise / thigh]
+  const round = (v) => Math.round(v * 1000) / 1000
+  return [round(kneeUp + along * dirUp - toward * dirForward), round(kneeForward + along * dirForward + toward * dirUp)]
+}
+
 const current = () => state.scripts.scripts[state.script]
 const frameIndex = () => Math.min(current().frames.length - 1, Math.round(state.t * state.scripts.fps))
 let lastRoot = null
@@ -189,6 +235,7 @@ function pose() {
   const values = f.values.slice()
   if (state.color !== "") values[names.indexOf("COLOR")] = Number(state.color)
   if (state.shows !== "") values[names.indexOf("SHOWS")] = Number(state.shows)
+  if (!state.onFoot) seatedLegs(names, values)
   const read = reader(names, values)
   for (const ch of [...channels(state.spec), colorChannel(state.spec)]) {
     const action = figure.actions.get(variable(ch.name))
@@ -298,7 +345,9 @@ function put(obj, pointer, value) {
 }
 
 /** A slider beside a number box, over a range around `value`, calling `change` with each new value. */
-function numberRow(label, value, change, around) {
+function numberRow(label, exact, change, around) {
+  // The program writes a seat's numbers back as 32-bit floats, 0.218 as 0.21799999.
+  const value = Number(exact.toFixed(4))
   const row = document.createElement("div")
   row.className = "num"
   const whole = Number.isInteger(value) && Math.abs(value) >= 1
@@ -333,7 +382,7 @@ function buildSizes() {
   const groups = new Map()
   for (const leaf of leaves(state.written)) {
     const top = leaf.pointer.split("/")[1]
-    if (top === "palette") continue
+    if (top === "palette" || LEG_SIZES.some(([, pointer]) => pointer === leaf.pointer)) continue
     if (!groups.has(top)) groups.set(top, [])
     groups.get(top).push(leaf)
   }
@@ -354,11 +403,44 @@ function buildSizes() {
 
 const SEAT = [
   ["hip x, left", "/hip/0"], ["hip y, up", "/hip/1"], ["hip z, forward", "/hip/2"],
-  ["knees up", "/knees/0"], ["knees forward", "/knees/1"], ["feet up", "/feet/0"], ["feet forward", "/feet/1"],
   ["eye up", "/eye/0"], ["eye forward", "/eye/1"], ["facing", "/facing"],
 ]
 
+/** The Legs sliders that are figure.json's, each with its label, pointer, and range around its value. */
+const LEG_SIZES = [["knee arc", "/knee/arc", 0.2], ["knee bend, °", "/rest/leg/bend", 60], ["shin", "/rest/leg/shin", 0.14]]
+/** The Legs sliders that are the seat's. */
+const LEG_SEAT = [["thigh forward", "/knees/1", 0.2], ["thigh up", "/knees/0", 0.15]]
+
+/** Keeps the seat's feet where the Legs sliders put them, since a pilot tunes the leg, not the foot. */
+function legsChanged(meshChanged) {
+  state.seatEdit.feet = footFor(state.seatEdit, state.spec)
+  if (meshChanged) sizesChanged()
+  else showStatus()
+}
+
+function buildLegs() {
+  const host = $("legs")
+  host.innerHTML = ""
+  for (const [label, pointer, around] of LEG_SEAT) {
+    const row = numberRow(label, at(state.seat, pointer), (v) => {
+      put(state.seatEdit, pointer, v)
+      row.classList.toggle("changed", v !== at(state.seat, pointer))
+      legsChanged(false)
+    }, around)
+    host.append(row)
+  }
+  for (const [label, pointer, around] of LEG_SIZES) {
+    const row = numberRow(label, at(state.written, pointer), (v) => {
+      put(state.spec, pointer, v)
+      row.classList.toggle("changed", v !== at(state.written, pointer))
+      legsChanged(pointer === "/knee/arc")
+    }, around)
+    host.append(row)
+  }
+}
+
 function buildSeat() {
+  buildLegs()
   const host = $("seat")
   host.innerHTML = ""
   for (const [label, pointer] of SEAT) {
@@ -434,6 +516,7 @@ function pickScript(i) {
   loadParts(s).catch(fail)
   const hip = state.seat.hip
   const onFoot = Math.hypot(s.frames[0].at[0] - hip[0], s.frames[0].at[2] - hip[2]) > 1
+  state.onFoot = onFoot
   setView(onFoot ? "follow" : "copilot")
   $("exterior").value = onFoot ? "solid" : "ghost"
   showExterior()

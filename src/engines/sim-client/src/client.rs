@@ -211,7 +211,7 @@ impl<K: Clone> Client<K> {
                 by,
                 Op::AddToDataDefinition {
                     definition,
-                    name: sim_name(name, "A:").to_string(),
+                    name: var_name(name).to_string(),
                     unit,
                     datatype,
                     datum: datum as u32,
@@ -448,8 +448,18 @@ impl<K: Clone> Client<K> {
     }
 }
 
+/// The name SimConnect takes for a variable, so `A:TITLE` is `TITLE`, while `L:` stays on.
+/// SimConnect reads an environment variable with no prefix too, so `E:IS AVATAR` is `IS AVATAR`,
+/// and it answers `NAME_UNRECOGNIZED` to the prefix, which left a pilot on foot seated (measured
+/// on MSFS 2024, 2026-11-05, record/areas/avatars/log.md, "The session in the sim").
+fn var_name(name: &str) -> &str {
+    name.strip_prefix("A:")
+        .or_else(|| name.strip_prefix("E:"))
+        .unwrap_or(name)
+}
+
 /// The name SimConnect takes: a variable's or event's name without the prefix it takes by
-/// default, so `A:TITLE` is `TITLE` and `K:PAUSE_SET` is `PAUSE_SET`, while `L:` stays on.
+/// default, so `K:PAUSE_SET` is `PAUSE_SET`.
 fn sim_name<'n>(name: &'n str, default: &str) -> &'n str {
     name.strip_prefix(default).unwrap_or(name)
 }
@@ -458,6 +468,13 @@ fn sim_name<'n>(name: &'n str, default: &str) -> &'n str {
 mod tests {
     use super::*;
     use crate::message::Data;
+
+    #[test]
+    fn simconnect_takes_a_variable_with_no_prefix_but_an_l_variable_keeps_its_own() {
+        assert_eq!(var_name("A:TITLE"), "TITLE");
+        assert_eq!(var_name("E:IS AVATAR"), "IS AVATAR");
+        assert_eq!(var_name("L:DUALINPUT_P01"), "L:DUALINPUT_P01");
+    }
 
     #[test]
     fn a_watch_reads_its_tagged_values_by_place() {

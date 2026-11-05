@@ -27,9 +27,9 @@ export const OBJECT = `SimObjects/Misc/${TITLE}`
  * MSFS 2024 SDK, LodProcessingPresets/Characters.xmlod).
  */
 export const BUDGET: Record<string, { triangles: number; draws: number }> = {
-  LOD00: { triangles: 48_000, draws: 60 },
-  LOD01: { triangles: 6_000, draws: 60 },
-  LOD02: { triangles: 2_500, draws: 60 },
+  LOD00: { triangles: 62_000, draws: 80 },
+  LOD01: { triangles: 6_000, draws: 80 },
+  LOD02: { triangles: 2_500, draws: 80 },
 }
 
 export function spec(figure = FIGURE): Spec {

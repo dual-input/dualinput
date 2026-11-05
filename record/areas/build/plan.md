@@ -606,6 +606,8 @@ Tests:
 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the engines' and avatars' tests and its scenarios among them; on the bench, a left tap by one core's pilot moves its figure's hand on the other core's stand-in, and a camera moved between the seats takes the nearer seat; in this stage's session in the sim, our figure sits in the 58P's seats from its profile, reaches where the pilot clicks, and walks and crouches as the user approved by eye; and the [avatars log](../avatars/log.md) has an entry for the cases and budgets.
 
+Left for a later pass on the figure, outside this Exit (user, 2026-11-05): the visual issues in its walk, run, and crouch, and translucent arms and hands for a pilot's own figure, with its arms hidden if that fails.
+
 ## 18 Traffic and ATC audio
 
 Builds: the traffic feature, its routine `Traffic`, `object-mirror`, and the ATC audio feature, with their parts in the apps ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md)).

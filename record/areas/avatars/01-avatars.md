@@ -391,6 +391,7 @@ In the sim:
 - Until avatars can tell that a pilot is in VR, a VR pilot's clicks may place a hand wrongly.
 - The kernel and the recording each copy the model whole as a load takes it, so the loop stalls once at each load in proportion to the model's size, as [the log](log.md#2026-11-04-a-large-model-costs-the-loop-about-023ms-a-megabyte-at-each-load-and-the-a350s-and-a220s-cockpits-are-attachments-we-dont-read) measures (user, 2026-11-04).
 - A modular aircraft whose cockpit is an attachment, such as the A350 and the A220, brings no hand from a click, since `aircraft-model` reads no attachments; its seats and heads still work, through the box around the seats' eyes.
+- A figure's walk, run, and crouch have visual issues, and a pilot's own arms cover what's behind them; a later pass fixes the first, and tries translucent arms and hands for the second, hiding the pilot's own arms if that fails (user, 2026-11-05).
 - A located entry's slow run isn't one reach: changes under its `deadband` don't hold the hand on the spot, so a slow enough move sends the hand home and back, and an entry's first change always brings a hand; the session in the sim tunes this (user, 2026-11-04).
 
 ## Left open

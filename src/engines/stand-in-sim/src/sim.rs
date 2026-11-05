@@ -85,6 +85,14 @@ enum Due {
     Signal(Signal),
 }
 
+/// A variable's name as SimConnect takes it, the name a connection's data definition holds.
+/// `var_name` in src/engines/sim-client/src/client.rs does the same, so change both together.
+fn bare(name: &str) -> &str {
+    name.strip_prefix("A:")
+        .or_else(|| name.strip_prefix("E:"))
+        .unwrap_or(name)
+}
+
 /// What the core set up on one connection.
 #[derive(Default)]
 struct Conn {
@@ -267,8 +275,7 @@ impl Sim {
                 }
             }
             Act::Reject { name } => {
-                self.rejected
-                    .insert(name.strip_prefix("A:").unwrap_or(&name).to_string());
+                self.rejected.insert(bare(&name).to_string());
             }
             Act::OpenReply { delay } => self.open_reply = delay,
             Act::Frames { per_second } => {
@@ -283,21 +290,15 @@ impl Sim {
             }
             Act::Set { numbers, texts } => {
                 for (name, value) in numbers {
-                    self.world
-                        .aircraft
-                        .set_number(name.strip_prefix("A:").unwrap_or(&name), value);
+                    self.world.aircraft.set_number(bare(&name), value);
                 }
                 for (name, value) in texts {
-                    self.world
-                        .aircraft
-                        .set_text(name.strip_prefix("A:").unwrap_or(&name), &value);
+                    self.world.aircraft.set_text(bare(&name), &value);
                 }
             }
             Act::SetAvatar { numbers } => {
                 for (name, value) in numbers {
-                    self.world
-                        .avatar
-                        .set_number(name.strip_prefix("A:").unwrap_or(&name), value);
+                    self.world.avatar.set_number(bare(&name), value);
                 }
             }
             Act::Camera(camera) => {

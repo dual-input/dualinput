@@ -11,3 +11,16 @@ aircraft:
 # bksq-aircraft-baronpro 0.1.1, record/areas/aircraft/black-square-baron-pro/study.md,
 # "Displays").
 displays: BlackSquareTablet
+seats:
+  copilot:
+    name: Copilot
+    hip: [-0.282, 0.212, -0.09]
+    knees: [-0.044, 0.218]
+    feet: [-0.198, 0.51]
+    eye: [0.643, -0.054]
+  pilot:
+    name: Pilot
+    hip: [0.282, 0.212, -0.09]
+    knees: [-0.044, 0.218]
+    feet: [-0.198, 0.51]
+    eye: [0.643, -0.054]

@@ -2,17 +2,17 @@
   "head": { "radius": 0.1, "eyeForward": 0.06 },
   "nose": { "radius": 0.038, "length": 0.099, "tip": 0.6 },
   "chest": { "radius": 0.134, "at": 0.48 },
-  "hips": { "radius": 0.179 },
+  "hips": { "radius": 0.16 },
   "shoulders": { "width": 0.208, "down": -0.01 },
   "legs": { "width": 0.16, "down": 0.066 },
   "arm": { "radius": 0.015 },
   "leg": { "radius": 0.018 },
-  "knee": { "arc": 0.296, "segments": 6 },
+  "knee": { "arc": 0.249, "segments": 12 },
   "hand": { "radius": 0.038 },
   "foot": { "radius": 0.045 },
   "rest": {
     "hand": { "fwd": 0.2, "right": 0.17, "up": 0.1 },
-    "leg": { "bend": 60, "shin": 0.14 }
+    "leg": { "bend": 50, "shin": 0.0945 }
   },
   "stand": { "hips": 0.92, "crouch": 0.55, "head": 1.62 },
   "walk": { "stride": 0.7, "lift": 0.07, "swing": 0.18 },

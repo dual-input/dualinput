@@ -108,9 +108,9 @@ export function animCode(ch: Channel): string {
 export type Rule = { node: string; part: keyof typeof SHOWS; channel?: string; lo?: number; hi?: number }
 
 /**
- * The model XML's VISIBILITY_CODE for a rule. Faded hands hide until the sim session settles
- * whether the sim can fade the figure's material, as 01-avatars allows (record/areas/avatars/
- * 01-avatars.md, "The figures this machine draws").
+ * The model XML's VISIBILITY_CODE for a rule. Faded hands hide, since nothing has shown the sim
+ * can fade the figure's material, as 01-avatars allows (record/areas/avatars/01-avatars.md, "The
+ * figures this machine draws").
  */
 export function visibilityCode(rule: Rule): string {
   const shows = `(Z:${variable("SHOWS")})`
@@ -129,8 +129,8 @@ export type Detail = { name: string; minSize: number; rings: number; segments: n
 
 /** The levels of detail, nearest first, which the model XML lists by `minSize`. */
 export const DETAILS: Detail[] = [
-  { name: "LOD00", minSize: 40, rings: 32, segments: 64, stick: 32 },
-  { name: "LOD01", minSize: 12, rings: 10, segments: 16, stick: 10 },
+  { name: "LOD00", minSize: 100, rings: 32, segments: 64, stick: 32 },
+  { name: "LOD01", minSize: 18, rings: 10, segments: 16, stick: 10 },
   { name: "LOD02", minSize: 0, rings: 6, segments: 10, stick: 6 },
 ]
 

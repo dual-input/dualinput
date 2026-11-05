@@ -13,6 +13,54 @@ The 58P's and the Comanche's models are glTF with no compression, in vertex layo
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-11-05: The session in the sim: the figure spawns and sits, the sim sizes it by its 2.57m at-rest sphere, and a pilot on foot read as seated
+
+**Asked:** stage 17's checks in the sim, in the Baron 58P at KPVD, with a real core and a scripted second pilot on a bench core (`experiments/areas/avatars/p29-sim-session/second-pilot.ts`).
+The session stopped early at the user's word, so part of the list is still open.
+
+**Expected:** the checks in [stage 17's tests](../build/plan.md#17-avatars) to pass, and the sim to size the figure by either of two spheres, unknown until now.
+
+**Found:** measured on MSFS 2024 1.9.21.0.
+
+- The figure spawned from our `PANEL_PATCH` package, and ending `profile-author` removed every figure it made, so closing a connection removes its AI objects.
+- The sim sizes the figure by its meshes at rest, hidden telescope pieces included: Debug LODs drew a sphere around the cockpit, and the level followed `minSize` as documented.
+
+  | Distance from the reference point | Level, at `minSize` 40 and 12 | Size on screen |
+  | --- | --- | --- |
+  | A seat away | LOD0 | 375% |
+  | 7m | LOD0 | 50.4% |
+  | 10m | LOD1 | 35.8% |
+  | 20m | LOD1 | 18.2% |
+  | 35m | LOD2 | 10.5% |
+
+  Each reading comes to about 368 divided by the camera's distance in meters, at the default cockpit zoom.
+- A click passed through the pilot's own figure to the switch behind it (user).
+  Their own arms cover what's behind them, which the user wants gone.
+- The second pilot's figure took the 58P's right yoke, and its click brought its other hand to the panel, in the sim.
+- The chase view kept the pilot's seat, and the camera moved back into the cabin made them a head, read from the order the user went through the views.
+- A pilot on foot stayed seated.
+  The core logged `the sim refused a call of avatars'` with exception 7, `NAME_UNRECOGNIZED`, then 3, at the load: SimConnect takes `IS AVATAR` with no prefix, as p01's comment had said, and `sim-client` passed `E:IS AVATAR` on.
+- `profile-author` listed no seat objects within 50m in this flight, where the checklist expected `SEAT_DEFAULT_Pilot`, and we haven't looked into why.
+  It seeded the right seat from `PILOT_1`, and the left seat is that seat's mirror.
+- The real pilot's pose held a `point` hand from 12:13:14 to at least 12:14:25 while their camera menu was open, so a click on the sim's own menus may bring a hand, and it may stay (unverified).
+- The legs as first seeded were wrong: the seat's `feet` stretched the shin to the floor in a hairpin, where the probes' figure had short legs that curve and hang.
+  The knee had 6 segments, against the probes' tuned 12, with no reason recorded anywhere, and it showed kinks.
+- `node tools/bench.ts session` passed 22 of 23 with the sim running.
+  `both pilots ready` failed its check that no input takes over 1ms, slowest 2,566µs, which we take to be the 58P's model now that its profile has seats (unverified).
+
+**Changed:**
+
+- The user tuned the figure in `tools/figure-viewer`, whose new Legs section draws at once: hips 0.16m, knee arc 0.249m in 12 segments, bend 50°, shin 0.0945m.
+  LOD00 draws 60,160 triangles and 70 draw calls, LOD01 5,328, and LOD02 2,192.
+- `minSize` is 100 and 18, so by the readings above LOD0 holds to about 3.7m and LOD1 to about 20m (arithmetic; we haven't watched the switch since).
+- The 58P's profile has its two seats, hip `[±0.282, 0.212, -0.09]`, knees `[-0.044, 0.218]`, feet `[-0.198, 0.51]`, and eye `[0.643, -0.054]`.
+- `sim-client` and the stand-in take `E:` off a variable's name, with a test, not yet built or run in the sim.
+- The user passed walking, running, and crouching for this stage with visual issues, and moved those and translucent arms and hands to a later pass, with the pilot's own arms hidden if translucency fails (user, 2026-11-05).
+
+**Still to do in the sim:** on foot again with the fix, a live figure's `Z:` values across a reset, a hand on a yoke that moves, the 58P's yoke buttons, `Figure` against 0.1ms with two figures, and frame time against p28.
+
+**Affects:** [01-avatars](01-avatars.md#known-limits), and [stage 17](../build/plan.md#17-avatars).
+
 ## 2026-11-05: The figure's closest level of detail draws 47,104 triangles, since the pilots sit an arm's length apart
 
 **Asked:** how round the figure's closest level of detail should be, with the user's direction of no compromise there, since the pilots sit side by side.

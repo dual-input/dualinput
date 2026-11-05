@@ -1032,9 +1032,12 @@ mod tests {
         assert_eq!((a.object, a.color, b.color), (0x101, OTHER, SELECTED));
         assert_eq!(a.hip, [0.28, 0.12, -0.05]);
         assert_eq!(a.pose.body, BODY_SEATED);
+        let [up, forward] = EYE.map(|v| v as f32);
         assert!(
-            (a.pose.eye[1] - (0.12 + 0.63)).abs() < 1e-6
-                && (a.pose.eye[2] - (-0.05 - 0.05)).abs() < 1e-6
+            (a.pose.eye[1] - (0.12 + up)).abs() < 1e-6
+                && (a.pose.eye[2] - (-0.05 + forward)).abs() < 1e-6,
+            "{:?}",
+            a.pose.eye
         );
         assert!(
             (b.pose.look[0] + 1.0).abs() < 1e-6,

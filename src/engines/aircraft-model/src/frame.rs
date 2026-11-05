@@ -91,8 +91,9 @@ pub fn on_foot(view: &View, x: f32, y: f32, aspect: f32, aircraft: &AircraftPose
 /// A point given by latitude, longitude, and altitude in feet, in the aircraft's frame, by
 /// WGS 84's radii at the aircraft's latitude, which accounted for the whole of the 14cm a
 /// sphere put a point 26m forward of the A350's reference point off (measured on MSFS 2024,
-/// 2026-10-04, record/areas/avatars/log.md, "The module's sphere earth"). `place` in the
-/// avatars routines' earth.rs turns a point the other way, so change both together.
+/// 2026-10-04, record/areas/avatars/log.md, "The module's sphere earth"). `in_frame` in the
+/// avatars routines' earth.rs does the same inside the module, and `place` there turns a point
+/// the other way, so change all three together.
 pub fn world_to_frame(a: &AircraftPose, lat: f64, lon: f64, alt_ft: f64) -> Vec3 {
     let (meridian, normal) = radii(a.latitude);
     let north = (lat - a.latitude).to_radians() * meridian;

@@ -529,8 +529,8 @@ impl Sim {
         }
     }
 
-    /// A request's values, tagged, each with its datum's ID, or `None` for an object the sim
-    /// doesn't hold.
+    /// A request's values, each after its datum's ID when `tagged`, or `None` for an object the
+    /// sim doesn't hold. A by-type read's answer has no tags, as the sim's has none.
     fn data(
         &self,
         connection: Connection,

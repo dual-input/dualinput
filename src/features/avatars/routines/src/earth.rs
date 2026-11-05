@@ -79,16 +79,16 @@ fn radii(latitude: f64) -> (f64, f64) {
 /// together.
 pub(crate) fn in_frame(a: &Pose, p: &Pose) -> [f32; 3] {
     let (meridian, normal) = radii(a.latitude);
-    let east = (p.longitude - a.longitude + 540.0).rem_euclid(360.0) - 180.0;
-    let ned = [
-        (p.latitude - a.latitude).to_radians() * meridian,
-        east.to_radians() * normal * a.latitude.to_radians().cos(),
-        -(p.altitude - a.altitude) * FT,
-    ];
-    let r = body_to_ned(a);
-    let body: [f64; 3] =
-        std::array::from_fn(|i| r.iter().zip(ned).map(|(row, n)| row[i] * n).sum());
-    [-body[1] as f32, -body[2] as f32, body[0] as f32]
+    let turn = (p.longitude - a.longitude + 540.0).rem_euclid(360.0) - 180.0;
+    let north = (p.latitude - a.latitude).to_radians() * meridian;
+    let east = turn.to_radians() * normal * a.latitude.to_radians().cos();
+    let down = -(p.altitude - a.altitude) * FT;
+    // The rotation's transpose turns north, east, and down back into the body's axes.
+    let [[f0, r0, d0], [f1, r1, d1], [f2, r2, d2]] = body_to_ned(a);
+    let forward = f0 * north + f1 * east + f2 * down;
+    let right = r0 * north + r1 * east + r2 * down;
+    let below = d0 * north + d1 * east + d2 * down;
+    [-right as f32, -below as f32, forward as f32]
 }
 
 /// The pose of an object at `at` in the aircraft's frame, x left, y up, z forward, turned

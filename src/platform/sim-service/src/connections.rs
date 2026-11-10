@@ -75,6 +75,12 @@ pub(crate) struct Holder {
     /// Each `frames` call's handle by the client event its `Frame` messages carry, which
     /// the next connection subscribes again with the rest of the setup.
     pub(crate) frames: BTreeMap<u32, Handle>,
+    /// Each `listen` call's handle by the client event its messages carry.
+    pub(crate) listens: BTreeMap<u32, Handle>,
+    /// Each `input` call's handle, by the request its first value comes under, until it comes.
+    pub(crate) input_reads: BTreeMap<u32, Handle>,
+    /// The `input` calls reading each input event, by its hash, since two entries can.
+    pub(crate) inputs: BTreeMap<u64, Vec<Handle>>,
     /// The tag of the unit's next call, from the unit's own count, and each recent call's
     /// origin by its tag.
     next_tag: u64,
@@ -94,6 +100,9 @@ impl Holder {
             objects: BTreeSet::new(),
             cameras: VecDeque::new(),
             frames: BTreeMap::new(),
+            listens: BTreeMap::new(),
+            input_reads: BTreeMap::new(),
+            inputs: BTreeMap::new(),
             next_tag: 0,
             tags: BTreeMap::new(),
         }

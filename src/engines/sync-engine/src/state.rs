@@ -627,6 +627,40 @@ impl Engine {
                 self.flag(i, Flagged::NeverLanded { wanted, reading }, out);
             }
         }
+        self.unread_catch_up(cx, out);
+    }
+
+    /// A catch-up write still held for its entry's first reading a check after the catch-up
+    /// started is made, and flagged as never landed. Without this, an `instrument()` entry no
+    /// panel reads holds the catch-up open, and the stream holds everything this machine sends
+    /// for as long as it's open: six of the Baron 58P's did (measured on MSFS 2024, 2026-11-09,
+    /// record/areas/sync/log.md).
+    fn unread_catch_up(&mut self, cx: Ctx, out: &mut Vec<Out>) {
+        let Some(c) = self.catch_up.as_ref() else {
+            return;
+        };
+        if cx.at < c.started.saturating_add(CHECK) {
+            return;
+        }
+        let unread: Vec<usize> = c
+            .outstanding
+            .iter()
+            .copied()
+            .filter(|&i| {
+                self.state
+                    .get(i)
+                    .and_then(|s| s.waiting.as_ref())
+                    .is_some_and(|(_, how)| how.catch_up)
+            })
+            .collect();
+        for i in unread {
+            let Some((wanted, _)) = self.state.get_mut(i).and_then(|s| s.waiting.take()) else {
+                continue;
+            };
+            self.made(i);
+            let reading = None;
+            self.flag(i, Flagged::NeverLanded { wanted, reading }, out);
+        }
     }
 
     /// Flags an entry, once for each load.
@@ -739,7 +773,10 @@ impl Engine {
     /// when control passes during one, starts over and skips what already matches.
     pub fn take(&mut self, state: &CatchUpState, cx: Ctx) -> Vec<Out> {
         let mut out = Vec::new();
-        self.catch_up = Some(CatchUpRun::default());
+        self.catch_up = Some(CatchUpRun {
+            started: cx.at,
+            ..CatchUpRun::default()
+        });
         for e in &state.entries {
             let Some(Slot::State(i)) = self.keys.get(&e.key).copied() else {
                 continue;

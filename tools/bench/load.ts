@@ -9,6 +9,7 @@
 import fs from "node:fs"
 import path from "node:path"
 
+import { simRunning } from "../lib/install.ts"
 import { ROOT } from "../lib/repo.ts"
 import { BenchRun } from "./cores.ts"
 
@@ -26,6 +27,10 @@ const REPLAY_S_PER_HOUR = 360
 const plays = Number(process.argv[2])
 if (!Number.isInteger(plays) || plays < 1) throw new Error(`plays should be a whole number from 1, not ${process.argv[2]}`)
 
+// Beside the sim, Windows gives the sim the CPU in turns, and a handler the loop's thread
+// waits through takes over 1ms by the wall clock, so there the queue's wait alone judges the
+// loop (user, 2026-11-10; record/areas/build/02-testing.md, "The loop under load").
+const besideSim = simRunning()
 const run = new BenchRun("load")
 const core = await run.core("a")
 const times = plays === 1 ? "once" : `${plays} times over`
@@ -55,7 +60,7 @@ const us = (n: number | string) => {
   return v >= 1_000 ? `${(v / 1_000).toFixed(1)}ms` : `${v}µs`
 }
 const report = [
-  `the loop under load: ${path.basename(CAPTURE)} played ${times}, a run of ${seconds.toFixed(0)}s, in ${run.folder}`,
+  `the loop under load: ${path.basename(CAPTURE)} played ${times}, a run of ${seconds.toFixed(0)}s, ${besideSim ? "beside the sim" : "with no sim running"}, in ${run.folder}`,
   `inputs\t${whole.inputs}, ${(Number(whole.inputs) / seconds).toFixed(0)} a second`,
   `queue wait, p50\t${us(whole.wait_p50_us!)}`,
   `queue wait, p99\t${us(whole.wait_p99_us!)}\tbudget ${us(QUEUE_P99_US)}\t${verdict(Number(whole.wait_p99_us) <= QUEUE_P99_US)}`,
@@ -66,7 +71,11 @@ const report = [
   `queue wait, p99.9\t${us(whole.wait_p999_us!)}`,
   `queue wait, most\t${us(whole.wait_max_us!)}`,
   `busy\t${whole.busy_percent}%\tbudget ${BUSY_PERCENT}%\t${verdict(Number(whole.busy_percent) < BUSY_PERCENT)}`,
-  `inputs over 1ms\t${whole.over_1ms}, of which the load's 100ms stops are ${stops} or ${stops - 1}\tbudget 1ms but the stops\t${verdict(Number(whole.over_1ms) <= stops)}`,
+  // The input that loads the engine compiles its 100 write functions, which took 1.1ms on a
+  // quiet PC and counts against the profile's load, not a handler's 1ms.
+  besideSim
+    ? `inputs over 1ms\t${whole.over_1ms}, of which the load's 100ms stops are ${stops} or ${stops - 1}, and the engine's load 1\tbeside the sim, recorded with no budget`
+    : `inputs over 1ms\t${whole.over_1ms}, of which the load's 100ms stops are ${stops} or ${stops - 1}, and the engine's load 1\tbudget 1ms but the stops and the load\t${verdict(Number(whole.over_1ms) <= stops + 1)}`,
   `slowest input\t${us(whole.slowest_us!)}, #${whole.slowest_seq}`,
   `replay\t${(replayed.ms / 1_000).toFixed(1)}s for ${replayed.inputs} inputs, ${replayPerHour.toFixed(1)}s an hour\tbudget ${REPLAY_S_PER_HOUR}s an hour\t${verdict(replayPerHour < REPLAY_S_PER_HOUR)}`,
   // The playback, the timer thread, and tokio's jobs push at once, and the

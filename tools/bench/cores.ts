@@ -219,6 +219,14 @@ export class Core {
     })
   }
 
+  /** Calls `f` with each `H:` event our module fired or the stand-in's aircraft fired, as the sim's pages hear it, from now on. */
+  onHEvent(f: (name: string) => void): () => void {
+    return this.lines.listen((l) => {
+      const line = JSON.parse(l) as FromCore
+      if (line.kind === "h-event") f(line.name)
+    })
+  }
+
   /** The port the core's WebSocket server listens on, from its port file. */
   port(): number {
     return (JSON.parse(fs.readFileSync(path.join(this.data, "port.json"), "utf8")) as PortFile).port
@@ -238,12 +246,12 @@ export class Core {
    * may hold one input over 1ms if it's under 2ms, and a handler slow each time it runs still
    * fails (record/areas/build/02-testing.md, "Building what it runs").
    */
-  checkHandlers(run: string): void {
+  checkHandlers(run: string, { pauseUs = 2_000 } = {}): void {
     const stats = this.log().split("\n").filter((l) => l.includes("the loop's stats")).at(-1) ?? ""
     const slowest = Number(/slowest_us=(\d+)/.exec(stats)?.[1])
     const over = Number(/over_1ms=(\d+)/.exec(stats)?.[1])
-    console.log(`budget: ${run}: the slowest input took ${slowest}µs, ${over} over 1ms, against 1,000µs for a handler with one pause under 2ms allowed`)
-    assert.ok(over <= 1 && slowest < 2_000, `inputs took over 1ms: ${stats}`)
+    console.log(`budget: ${run}: the slowest input took ${slowest}µs, ${over} over 1ms, against 1,000µs for a handler with one pause under ${pauseUs.toLocaleString("en-US")}µs allowed`)
+    assert.ok(over <= 1 && slowest < pauseUs, `inputs took over 1ms: ${stats}`)
   }
 
   /** Every line the sim's test unit has told the bench so far, oldest first. */
@@ -326,7 +334,8 @@ const OFFLINE_SERVER = "http://127.0.0.1:1"
  */
 export function benchSettings(): Record<string, unknown> {
   const standIn = process.env.DUALINPUT_BENCH_STAND_IN_HELPER
-  return { "profiles.site": OFFLINE_SERVER, "network.backend": OFFLINE_SERVER, "network.relays": [], "sim.user-cfg": "no-user-cfg.opt", ...(standIn ? { "core-helper.program": standIn } : {}) }
+  // A flight counts as settled at once, since every session scenario flies a profile's aircraft, which would otherwise wait the 30s each.
+  return { "profiles.site": OFFLINE_SERVER, "network.backend": OFFLINE_SERVER, "network.relays": [], "sim.user-cfg": "no-user-cfg.opt", "state-sync.settle-ms": 0, ...(standIn ? { "core-helper.program": standIn } : {}) }
 }
 
 export type CoreOptions = {

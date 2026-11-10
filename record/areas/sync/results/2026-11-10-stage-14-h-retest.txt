@@ -1,0 +1,50 @@
+Stage 14's H: retest in the sim, MSFS 2024 SunRise 12.2.282174.999, with our module firing H: events as calculator code. Each run's report.txt, under its run's folder name.
+
+=== run 2026-11-10_09-17-08-state-sync
+Start the sim, and wait at the main menu.
+
+=== iniBuilds L-1011
+Load a flight in the iniBuilds L-1011, on the ground at a stand, with its power on, not cold and dark, and press Ready to fly.
+the sim is flying inibuilds-l1011/presets/inibuilds/l1011-500-stair-pod; hosting the session
+waiting up to 75s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+The iniBuilds L-1011's cases are ready. Press Page Up when you are. Press Page Up for yes.
+PASSED: the fuel pump switch's L: variable takes the second pilot's write: 0, after 135ms
+PASSED: the flight engineer acts on our module's H:FUEL, after the switch: 0, after 132ms
+Done with this aircraft. End the flight, back to the main menu.
+
+=== Black Square Baron 58P
+Load a flight in the Black Square Baron 58P, on the ground at a stand, cold and dark if the aircraft offers it, and press Ready to fly.
+the sim is flying bksq-aircraft-baronpropress; hosting the session
+waiting up to 75s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+The Black Square Baron 58P's cases are ready. Press Page Up when you are. Press Page Up for yes.
+PASSED: an L: variable the second pilot sets moves in the sim: 1, after 133ms
+PASSED: an L: variable set in the sim moves on the second pilot's: 0, after 111ms
+PASSED: our module's call of an input event's preset moves the sim's battery switch: 1, after 133ms
+PASSED: a K: event with one value, sent by the legacy call, moves the sim's pitot heat switch: 1, after 132ms
+Flip the beacon switch on, with the mouse.
+PASSED: a switch flipped in the sim reaches the second pilot's input event: 1, after 5359ms
+Turn the battery and the avionics master on, and the ADF radio's power if it stays dark.
+PASSED: the KR87A has power
+PASSED: our module fires an H: event a JavaScript instrument hears, both of two in a burst: 2, after 2034ms
+Press the ADF timer's SET RST button, with the mouse.
+PASSED: the h-events handler hears an H: event beside the stock one: 1, after 7375ms
+Press the ADF's BFO button, with the mouse.
+PASSED: the KR87A takes the press, its bfoMode changing: 1, after 3066ms
+PASSED: instrument-reads sees the BFO change and the second pilot toggles it: 1, after 177ms
+Move the yoke forward and back, and keep moving it until the next beep.
+FAILED: a group on one connection keeps hearing: before the clear, the listener heard 0 and the other 0
+Open the tablet, and press Page Up once it shows. Press Page Up for yes.
+The second pilot taps the tablet, then holds a press on it, then drags across it.
+PASSED: a tap plays one down, one up, and one click: mousedown@350,512 mouseup@350,512 click@350,512
+PASSED: a press held 3s plays through to its up: mousedown@280,410 mouseup@280,410 click@280,410
+PASSED: a drag plays its down, its moves, and its up: mousedown@140,205 mousemove@175,256 mousemove@689,871 mousemove@644,966 mousemove@621,1004 mousemove@210,307 mousemove@245,358 mousemove@280,410 mouseup@280,410
+The second pilot is holding a press on the tablet. Press it yourself, with the mouse: does it flash? Press Page Up for yes.
+PASSED: a press under the other pilot's lock flashes
+Press on the tablet, drag off its edge, and let go off it.
+PASSED: your press on the tablet plays on the second pilot's display
+PASSED: a press let go off the tablet ends on the second pilot's display, and leaves it unlocked
+That's every aircraft. Leave this flight loaded. Whoever runs the script stops it with q in its terminal, which replays the core's recording.
+the real core's last loop stats: 5156142199µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1744 busy_percent=0.13 wait_p50_us=9 wait_p99_us=53 wait_p999_us=863 wait_max_us=923 over_1ms=0 slowest_us=347 slowest_seq=38453 slowest_stamp=5129249864
+the core's replay: replayed 39354 inputs, and all 604 checkpoints matched, up to the last flush of a cut recording

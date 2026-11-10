@@ -300,7 +300,7 @@ pub(crate) fn created(me: &mut Avatars, call: Handle, object: u32, cx: &mut Cx) 
     figure.creating = None;
     figure.object = Some(object);
     for event in FREEZES {
-        cx.sim().key_on(object, event, 1);
+        cx.sim().key_on(object, event, &[1]);
     }
     me.redraw(cx);
 }

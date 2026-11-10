@@ -81,6 +81,15 @@ pub enum SimEvent {
     /// The sim drew a frame, which a `frames` call subscribed to: its frame rate in frames
     /// a second, and the sim's rate, 1 at normal speed.
     Frame { call: Handle, rate: f32, speed: f32 },
+    /// An event a `listen` call hears, with the values it carried, each as SimConnect gives it.
+    Heard { call: Handle, data: [u32; 5] },
+    /// The value of the input event an `input` call reads: its value at the call when `first`,
+    /// and each change after it.
+    Input {
+        call: Handle,
+        value: Value,
+        first: bool,
+    },
     /// The unit's connection was lost, and what it set up or created in the sim with it.
     Lost,
 }

@@ -7,6 +7,9 @@ Decides:     The profile's two blocks, the fields of an entry, the writer API, a
 ```
 
 > **Note**
+> In [the writer API](#the-writer-api), state sync's routine fires `H:` events as calculator code, `(>H:<name>)`, in our own module, where no profile's code runs, since `fsEventsHEventCall` reached no panel; authors still write no calculator code ([sync log](log.md#2026-11-10-the-sdks-h-event-call-fails-on-msfs-2024-so-our-module-fires-h-events-as-calculator-code-which-reached-every-panel); user, 2026-11-10).
+
+> **Note**
 > Stage 11b's tentative decision that [the profile format gains a name, a maturity, and an entry's description](../interface/decisions.md#the-profile-format-gains-a-name-a-maturity-and-an-entrys-description) adds an optional `description` to a state entry, which the checklist shows under its name, until the apps' design confirms it (user, 2026-10-30).
 
 A profile describes an aircraft's cockpit in two blocks.

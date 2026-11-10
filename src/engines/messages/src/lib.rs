@@ -37,6 +37,7 @@ pub mod profiles;
 pub mod recording;
 pub mod session;
 pub mod sim;
+pub mod state_sync;
 pub mod sync;
 pub mod take_control;
 

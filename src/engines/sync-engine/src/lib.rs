@@ -27,14 +27,17 @@ use crate::script::Script;
 use crate::state::StateSlot;
 
 /// A value still pending this long after its write, or after a stepping write's last step, is
-/// flagged. It covers the slowest readout we timed, the Fenix's battery lamp at 1.2s
-/// (measured on MSFS 2024, 2026-10-05, record/areas/sync/log.md).
-const CHECK: u64 = 1_500_000;
+/// flagged. A profile watches the switch it writes, which shows a write within a few frames, as
+/// the Fenix's switches did in about 130ms, and the slowest watch is an `instrument()` entry,
+/// which its panel module reads every 250ms, so 1.5s leaves a wide margin (measured on MSFS
+/// 2024, 2026-11-09, record/areas/sync/log.md). State sync waits as long after a load before
+/// its catch-up step can give, for every watch's first reading.
+pub const CHECK: u64 = 1_500_000;
 /// A token, or an `ignore`, that no occurrence uses within this long expires, since an aircraft
 /// that masks an event never reports it, and the token would swallow the pilot's next press.
 const TOKEN: u64 = 1_000_000;
 /// An aircraft counts as settled this long after Ready to fly (decision 048).
-const SETTLE: u64 = 30_000_000;
+pub const SETTLE: u64 = 30_000_000;
 /// The largest value a change carries, as sent (decision 046).
 const MOST_BYTES: usize = 4 * 1024;
 
@@ -79,6 +82,8 @@ pub enum Ready {
 pub struct Load {
     pub at: u64,
     pub ready: Ready,
+    /// How long after Ready to fly the aircraft counts as settled, `SETTLE` in a flight.
+    pub settle: u64,
 }
 
 /// What state sync watches for one entry, by its place in `watches`.
@@ -245,6 +250,8 @@ pub(crate) enum Role {
 /// A catch-up this machine takes.
 #[derive(Debug, Default)]
 pub(crate) struct CatchUpRun {
+    /// When the catch-up was taken.
+    pub(crate) started: u64,
     /// The state entries whose catch-up write isn't made yet.
     pub(crate) outstanding: std::collections::BTreeSet<usize>,
     pub(crate) made: bool,
@@ -269,6 +276,7 @@ pub struct Engine {
     pub(crate) frame: u64,
     pub(crate) loaded_at: u64,
     pub(crate) ready: Ready,
+    pub(crate) settle_after: u64,
     pub(crate) settled: bool,
     pub(crate) catch_up: Option<CatchUpRun>,
     /// Last of the fields, since its runtime has to outlive every function it compiled.
@@ -293,6 +301,7 @@ impl Engine {
             frame: 0,
             loaded_at: load.at,
             ready: load.ready,
+            settle_after: load.settle,
             settled: false,
             catch_up: None,
             script: Script::new(sandbox),
@@ -320,6 +329,14 @@ impl Engine {
     /// What each entry reads or hears, each by its place, which `Seen` names.
     pub fn watches(&self) -> &[Watch] {
         &self.watches
+    }
+
+    /// The name a pilot reads for the entry `key`, such as "Battery".
+    pub fn entry_name(&self, key: &str) -> Option<&str> {
+        match self.keys.get(key)? {
+            Slot::State(i) => self.state.get(*i).map(|s| s.entry.name.as_str()),
+            Slot::Event(i) => self.events.get(*i).map(|e| e.entry.name.as_str()),
+        }
     }
 
     /// Whether the aircraft has settled, as of the last call.
@@ -397,7 +414,7 @@ impl Engine {
     fn settle(&mut self, at: u64) {
         self.settled = match self.ready {
             Ready::Yet => false,
-            Ready::At(t) => at >= t.saturating_add(SETTLE),
+            Ready::At(t) => at >= t.saturating_add(self.settle_after),
             Ready::Missed => true,
         };
     }

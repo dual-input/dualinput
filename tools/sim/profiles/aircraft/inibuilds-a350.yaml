@@ -1,0 +1,22 @@
+# The A350's stepped baro, for state sync's cases in the sim (record/areas/sync/05-units.md): the
+# captain's baro knob has no value of its own, and its commands move it 1 hPa each at most one
+# command every 2 frames (measured on MSFS 2024, 2026-10-05, record/areas/sync/log.md).
+maker: iniBuilds
+name: A350 session check
+maturity: experimental
+authors: Dual Input
+aircraft:
+  variants:
+    a350: A350
+  pace: 2 frames
+
+state:
+  baro:
+    name: Captain's baro
+    watch: A('KOHLSMAN SETTING MB:1', 'Millibars')
+    write: |
+      (value) => {
+        const steps = Math.round(value - state.baro)
+        if (steps > 0) write(L('INI_BARO1_INC_COMMAND'), 1).repeat(steps)
+        if (steps < 0) write(L('INI_BARO1_DEC_COMMAND'), 1).repeat(-steps)
+      }

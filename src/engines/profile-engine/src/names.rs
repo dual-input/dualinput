@@ -85,6 +85,17 @@ impl Name {
     }
 }
 
+/// Whether a key a profile names opts in an instrument by its key: a bare identifier, such as
+/// `FCP`, names every instrument that carries it, whatever its url's query, and a full key names
+/// exactly that instrument (record/areas/profiles/01-format-and-delivery.md, "Displays").
+pub fn key_names(named: &str, instrument: &str) -> bool {
+    if named.contains('|') {
+        named == instrument
+    } else {
+        instrument.split('|').next() == Some(named)
+    }
+}
+
 /// Why a text isn't a name, said to the author.
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct NotAName(pub(crate) String);
@@ -375,6 +386,19 @@ impl fmt::Display for Name {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_bare_identifier_names_every_instrument_that_carries_it_and_a_full_key_names_one() {
+        assert!(key_names("DisplayUnits", "DisplayUnits|config=N324DU"));
+        assert!(key_names("BlackSquareTablet", "BlackSquareTablet"));
+        assert!(!key_names(
+            "DisplayUnits|config=Default",
+            "DisplayUnits|config=N324DU"
+        ));
+        assert!(key_names("CTP|side=left", "CTP|side=left"));
+        assert!(!key_names("CTP|side=left", "CTP|side=right"));
+        assert!(!key_names("Display", "DisplayUnits"));
+    }
 
     #[test]
     fn each_call_reads_and_writes_back_the_same() {

@@ -526,18 +526,26 @@ Done on 2026-10-25.
 
 ## 14 State sync
 
-Builds: the state sync feature, its routine `HEvents`, its panel modules `h-events` and `instrument-reads`, its parts in the apps, and the Baron 58P profile's `state` and `events` blocks ([the sync units](../sync/05-units.md), [reading it in the panel](../plugins/01-plugins.md#reading-it-in-the-panel)).
-From stage 4, it also builds the sim service's `listen`, `input`, and `set_input`, with `sim-client`'s `B:` names; the routine host's `H:` events; and the stand-in's answers to each, with the rules a scenario scripts for its aircraft's own behavior ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [the sim client](../core/03-sim-seam-and-wasm-module.md#the-sim-client), [what a routine can ask for](../architecture/02-code-map.md#what-a-routine-can-ask-for), [what it models](02-testing.md#what-it-models)).
+Builds: the state sync feature, its routine `NamedEvents`, its panel modules `h-events` and `instrument-reads`, its parts in the apps, and the Baron 58P profile's `state` and `events` blocks ([the sync units](../sync/05-units.md), [reading it in the panel](../plugins/01-plugins.md#reading-it-in-the-panel)).
+From stage 4, it also builds the sim service's `listen` and `input`, with `sim-client`'s `B:` names; the routine host's `H:` events and input event presets; and the stand-in's answers to each, with the rules a scenario scripts for its aircraft's own behavior ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [the sim client](../core/03-sim-seam-and-wasm-module.md#the-sim-client), [what a routine can ask for](../architecture/02-code-map.md#what-a-routine-can-ask-for), [what it models](02-testing.md#what-it-models)).
 It ends with the first session in the sim, with a bench core as the second pilot ([how the stages are ordered](#how-the-stages-are-ordered)).
+
+Designs first: how a write that names an input event's preset reaches the sim, settled in the [sync log](../sync/log.md#2026-11-09-writes-to-input-events-go-through-our-wasm-module-since-simconnects-list-has-none-of-their-presets) (user, 2026-11-09).
+
 Needs: 11b and 13.
 
 Tests:
 
+- From [the sync units' cases](../sync/05-units.md#cases-for-the-bench) that need state sync's calls of the stand-in sim or a display's panel, on the bench with two cores, in a scenario of their own: a switch flipped on one core's aircraft moves on the other's, and nothing comes back; an input event read once and then by its subscription, and written; a `K:` event heard through `listen`, and our own send of it using up its token; an `H:` event fired through `HEvents` and heard in one panel; an `instrument()` value read in its panel and written through `H:` events; a pulse set and cleared within one frame, which never fires its event entry; a press on a display that sets a variable the profile also syncs, the variable's change reaching the core before the press; a `toggle` over a lamp the stand-in lights 2s late, which shows one notification; Ready denied until 30s after `RTC_END`; and a late joiner's catch-up onto the stand-in's aircraft, the battery before the APU master.
+- [The sync units' cases in the sim](../sync/05-units.md#cases-for-the-bench), in this stage's session.
 - From stage 3: [the loop under load](02-testing.md#the-loop-under-load) again, by hand, with the stand-in's sim inputs and state sync's write functions in place of the test unit's stand-ins for them, beside MSFS flying the iniBuilds A350, reading the queue at p99 against 11.2ms (user, 2026-10-25).
 - In this stage's session in the sim: the real core's loop stats after the 58P flight, its slowest inputs and its queue at p99 against 11.2ms, beside the real sim (user, 2026-10-25).
 - From stage 4, in this stage's session in the sim: a group on one connection keeps hearing an event while a group on another is cleared ([a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load)).
 - From stage 19, in this stage's session in the sim: [pointer sync's cases in the sim](../pointer-sync/01-pointer-sync.md#cases-for-the-bench), the A220's ND with a local profile that names its `DisplayUnits`.
 - From stage 20, with a pilot at the hardware for this stage's session, and no sim: a bound button crosses with another program in front, with `node tools/sim/core-helper.ts person 3` ([take-control's cases](../control/01-take-control.md#cases-for-the-bench)).
+
+Exit: on our development machine, `node tools/check.ts` and the whole of `node tools/bench.ts` pass, since stage 17 left the full bench to this stage; in a session in the sim in the 58P, with a bench core as the second pilot, a switch flipped in the sim moves on the bench core's aircraft, and one the bench core flips moves in the sim's cockpit; and the [sync log](../sync/log.md) has an entry for the cases in the sim and the loop's stats.
+Done on 2026-11-10: the whole bench ran once and passed 147 of 149 scenarios, the two failures being panel scenarios that predated the 58P profile's `H:` and `instrument()` entries; those two and the scenarios the code review's fixes reach, 109 in all, then passed, and `node tools/check.ts` passed after the fixes ([sync log](../sync/log.md#2026-11-10-stage-14s-code-review-found-a-catch-up-answered-with-no-values-a-preset-fired-again-after-a-gap-and-a-stream-stalled-by-an-unload)).
 
 ## 15 Installing and updating
 
@@ -569,6 +577,7 @@ Tests:
 - From stage 11a, on the bench: a restarted core with `Follow` fed, and whether the trouble notification for our package shows before the module's first status write ([the apps' cases](../interface/01-apps.md#cases-for-the-bench)).
 - From stage 19, in the first flight with friends: [pointer sync's cases with friends](../pointer-sync/01-pointer-sync.md#cases-for-the-bench), whether the two PCs give a display the same rect, and whether a drag looks smooth over a relayed link.
 - From stage 17, in this stage's session in the sim: whether an overlay such as Steam's would swallow every click if the core helper checked the window under the cursor, the check that would keep a click on another program's window over the sim's view from bringing a hand ([avatars' known limits](../avatars/01-avatars.md#known-limits)).
+- From stage 14, in this stage's session in the sim: a write through a `_Set` preset with a value, such as the Baron 58P's `B:INSTRUMENT_Heading_Bug_Set`, since stage 14's session wrote only `_Toggle` presets ([sync log](../sync/log.md#2026-11-10-stage-14s-code-review-found-a-catch-up-answered-with-no-values-a-preset-fired-again-after-a-gap-and-a-stream-stalled-by-an-unload)).
 - From stage 17, in this stage's session in the sim: `Figure` timed again beside `Lead` and `Follow` with `experiments/areas/avatars/p29-sim-session/update-timer.patch`, since they share the module's 0.1ms and stage 17 measured the module's update at 127µs to 146µs at p99 with two figures ([avatars log](../avatars/log.md#2026-11-05-a-click-that-took-the-focus-from-the-sim-left-a-figures-hand-out-and-the-rest-of-the-session-passed)).
 
 ## 17 Avatars

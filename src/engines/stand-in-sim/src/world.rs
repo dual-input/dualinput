@@ -27,6 +27,23 @@ pub struct World {
     ids: BTreeMap<i32, (Option<u32>, String)>,
     next_id: i32,
     reset: bool,
+    /// The aircraft's input events, by name, each with its hash and value.
+    pub(crate) inputs: BTreeMap<String, Input>,
+    /// The `H:` events the module fired and the presets it called since the stand-in last
+    /// looked, in order.
+    fired: Vec<Fired>,
+}
+
+/// An event the module made in the sim.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) enum Fired {
+    H(String),
+    Preset { name: String, value: Option<f64> },
+}
+
+pub(crate) struct Input {
+    pub(crate) hash: u64,
+    pub(crate) value: f64,
 }
 
 struct Object {
@@ -78,6 +95,25 @@ impl World {
     /// Whether the sim's variables reset since the last ask, as the Vars API tells a module.
     pub fn take_reset(&mut self) -> bool {
         std::mem::take(&mut self.reset)
+    }
+
+    /// The module fired the `H:` event `name`, which the stand-in hands to the sim's pages once
+    /// the module's frame ends, as every JavaScript instrument hears one.
+    pub fn fire_h(&mut self, name: &str) {
+        self.fired.push(Fired::H(name.to_string()));
+    }
+
+    /// The module called an input event's preset, which the stand-in carries out once the
+    /// module's frame ends.
+    pub fn call_preset(&mut self, name: &str, value: Option<f64>) {
+        self.fired.push(Fired::Preset {
+            name: name.to_string(),
+            value,
+        });
+    }
+
+    pub(crate) fn take_fired(&mut self) -> Vec<Fired> {
+        std::mem::take(&mut self.fired)
     }
 
     pub(crate) fn reset_vars(&mut self) {

@@ -26,7 +26,7 @@ pub use format::{
 };
 pub use index::{Index, IndexBundle, IndexProfile, Shown, covers};
 pub use levels::{declarations, schema};
-pub use names::{Arg, Name};
+pub use names::{Arg, Name, key_names};
 pub use program::{Compiled, Program, ProgramFile, TypeError};
 pub use report::{Diagnostic, Place, Report, Severity};
 pub use source::{Files, Source, source};

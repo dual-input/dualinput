@@ -15,5 +15,9 @@
 use routine_host::{Kind, routines};
 
 pub fn list() -> Vec<Kind> {
-    routines![routine_host::Hold, avatars_routines::Figure]
+    routines![
+        routine_host::Hold,
+        avatars_routines::Figure,
+        state_sync_routines::NamedEvents
+    ]
 }

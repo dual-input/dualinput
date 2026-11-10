@@ -69,12 +69,21 @@ test("panels connect only in a session, each of 20 is answered within 1s of the 
   const answered = performance.now() - loading
   console.log(`budget: 20 panels answered ${answered.toFixed(0)}ms after the flight's load began, the profile's among it, against 1,000ms from the profile's`)
   assert.ok(answered < 1_000, `the panels were answered ${answered.toFixed(0)}ms after the flight's load began`)
+  // The Baron watches `H:` events, so state sync's `h-events` goes to one panel, whichever the
+  // core answered first, with every instrument it holds.
+  type Module = { name: string; instruments: string[] }
+  const modules = panels.map((p) => (p.messages("load")[0] as { modules: Module[] } | undefined)?.modules ?? [])
+  const hEvents = modules.flatMap((m, i) => (m.some((x) => x.name === "h-events") ? [i] : []))
+  assert.equal(hEvents.length, 1, `h-events went to panels ${hEvents.join(", ")}`)
+  assert.deepEqual(modules[hEvents[0]!]!.find((x) => x.name === "h-events")!.instruments, instruments(hEvents[0]!))
   for (const [i, p] of panels.entries()) {
-    if (i < 3) assert.deepEqual(p.messages("load"), [{ t: "load", modules: [{ name: "bench-panel", instruments: [`PFD_${i}|side=${i}`] }] }])
+    const others = modules[i]!.filter((x) => x.name !== "h-events")
+    if (i < 3) assert.deepEqual(others, [{ name: "bench-panel", instruments: [`PFD_${i}|side=${i}`] }])
+    else if (i === hEvents[0]) assert.deepEqual(others, [])
     else assert.deepEqual(p.messages("none"), [{ t: "none" }])
   }
 
-  const told = panels[5]!
+  const told = panels.find((_, i) => i >= 3 && i !== hEvents[0])!
   await sleep(4_500)
   assert.equal(told.opened.length, 1, "a panel told none connected again in the same session")
   // A session's end closes every panel's socket, those with modules among them (decision 011).
@@ -157,8 +166,8 @@ test("no cockpit panel within 10s of the profile loading raises the clients crat
   efb.client.watch("notifications", () => {})
   await efb.until(() => efb.slice("notifications") !== undefined, "the notifications")
   await host(core, "Host")
-  // The tree's Baron names a display, which is what makes pointer sync's panel module need a
-  // panel, with no pick for the test unit's module.
+  // The tree's Baron names a display, `H:` events, and `instrument()` entries, so pointer sync's
+  // and state sync's panel modules need a panel, with no pick for the test unit's module.
   await load(core, BARON)
   const ids = () => ((efb.slice("notifications") ?? []) as { id: string }[]).map((n) => n.id)
   await sleep(9_000)
@@ -173,11 +182,14 @@ test("no cockpit panel raises no trouble under a profile whose panel modules nee
   const run = new BenchRun("clients-no-panel-needed", t)
   const net = await BenchNetwork.start()
   t.after(() => net.stop())
-  // The Baron without its one display stands in for a profile of an aircraft with no cockpit
-  // panels, since the tree has no such aircraft.
+  // The Baron with its battery alone stands in for a profile of an aircraft with no cockpit
+  // panels, since the tree has no such aircraft: its display, its `H:` events, and its
+  // `instrument()` entries each need a panel.
   const copy = copyProfiles(path.join(run.folder, "no-displays"))
   const file = path.join(copy, "aircraft", "bksq-baronpro.yaml")
-  fs.writeFileSync(file, fs.readFileSync(file, "utf8").replace("displays: BlackSquareTablet", ""))
+  const head = fs.readFileSync(file, "utf8").split("\nstate:\n")[0]!.replace("displays: BlackSquareTablet", "")
+  const battery = ["state:", "  battery:", "    name: Battery", "    watch: B('ELECTRICAL_Battery_1')", "    write: {toggle: B('ELECTRICAL_Battery_1_Toggle')}", ""]
+  fs.writeFileSync(file, `${head}\n${battery.join("\n")}`)
   const hash = net.profiles.publish(copy).get("aircraft/bksq-baronpro.yaml")!
   const core = await announcing(run, "a", await withHelper(net, t))
   const efb = new FakePage(core, { component: "efb-app" })

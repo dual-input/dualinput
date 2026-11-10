@@ -111,6 +111,74 @@ pub enum Act {
     /// Resets the sim's variables, as an aircraft change does: the module hears the reset,
     /// and every ID the Vars API gave it names nothing.
     ResetVars,
+    /// Sets the aircraft's input events, each with its value, the ones
+    /// `SimConnect_EnumerateInputEvents` lists. It reports nothing, as a load reports nothing.
+    Inputs { events: Vec<(String, f64)> },
+    /// Moves the input event `name` to `value`, and reports it to each connection subscribed to
+    /// it. Moved twice, it plays the sim's double report of one flip.
+    SetInput { name: String, value: f64 },
+    /// The aircraft or its pilot fires the event `name` with `data`, which each connection
+    /// listening to it hears.
+    SendEvent { name: String, data: u32 },
+    /// Scripts the aircraft's own behavior from now on, as a scenario's system needs it.
+    Rule(Rule),
+}
+
+/// One thing the aircraft does on its own, such as "when this variable is written, set that one
+/// 2s later" (record/areas/build/02-testing.md, "What it models").
+#[derive(Clone, Debug, PartialEq)]
+pub struct Rule {
+    pub when: When,
+    /// How long after `when` it acts.
+    pub after: Duration,
+    pub then: Then,
+}
+
+/// What sets a rule off. A name is spelled as the sim spells it, its prefix optional.
+#[derive(Clone, Debug, PartialEq)]
+pub enum When {
+    /// A connection wrote this variable.
+    Written(String),
+    /// Someone sent this `K:` event.
+    Sent(String),
+    /// Our WASM module fired this `H:` event.
+    Fired(String),
+    /// Once each time this passes, from now.
+    Every(Duration),
+}
+
+/// What a rule does. A value left out takes the value that set the rule off, 0 if none did.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Then {
+    Set {
+        name: String,
+        value: Option<f64>,
+    },
+    /// Sets the variable to 1 when it's 0, and to 0 otherwise.
+    Flip {
+        name: String,
+    },
+    SetInput {
+        name: String,
+        value: Option<f64>,
+    },
+    /// The aircraft fires this `H:` event, as its own code does on a click.
+    Fire {
+        name: String,
+    },
+    Send {
+        name: String,
+        data: Option<u32>,
+    },
+}
+
+/// What the sim hands its JavaScript.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Page {
+    /// A CommBus call the core made for JavaScript, by its event's name and its text.
+    CommBus { name: String, data: String },
+    /// An `H:` event, with no `H:` on its name, as an instrument receives it.
+    HEvent { name: String },
 }
 
 /// What the stand-in tells the bench when asked.
@@ -122,6 +190,8 @@ pub struct Report {
     pub calls: Vec<Called>,
     /// The aircraft's variables, each with its value as text.
     pub variables: Vec<(String, String)>,
+    /// The aircraft's input events, each with its value.
+    pub inputs: Vec<(String, f64)>,
     /// The objects connections created and the sim still holds, with their variables.
     pub objects: Vec<Made>,
     /// Whether the module stopped.
@@ -153,13 +223,12 @@ pub struct StandIn {
 
 impl StandIn {
     /// Starts the stand-in's thread, running `module` in its frames, which hands each input
-    /// up through `up`, as the edge hands its own to the core's queue, and each CommBus call
-    /// the core makes for JavaScript to `pages`, by its event's name and its text, as the sim
-    /// hands it to every page listening, so the bench's fake pages hear the core's
-    /// announcement (record/areas/build/02-testing.md, "The sim's pages").
+    /// up through `up`, as the edge hands its own to the core's queue, and hands `pages` each
+    /// `Page` the sim would hand its JavaScript, so the bench's fake pages hear the core's
+    /// announcement and each `H:` event (record/areas/build/02-testing.md, "The sim's pages").
     pub fn start(
         up: impl FnMut(Up) + Send + 'static,
-        pages: impl FnMut(String, String) + Send + 'static,
+        pages: impl FnMut(Page) + Send + 'static,
         module: Box<dyn Module>,
     ) -> std::io::Result<(StandIn, JoinHandle<()>)> {
         // SAFETY: an auto-reset event with no name and no security attributes.

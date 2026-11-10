@@ -47,6 +47,16 @@ export async function evaluate<T>(page: Page, expression: string, ms = 10_000): 
     if (answer.result?.wasThrown) throw new Error(`page ${page.id} threw ${answer.result.result?.description}`)
     return answer.result?.result?.value as T
   } finally {
-    ws.close()
+    // The inspector takes one connection to a page at a time, and refused the next call's
+    // while this one still closed, so the close is waited for, a second at most.
+    await new Promise<void>((resolve) => {
+      if (ws.readyState === WebSocket.CLOSED) return resolve()
+      const timer = setTimeout(resolve, 1_000)
+      ws.onclose = () => {
+        clearTimeout(timer)
+        resolve()
+      }
+      ws.close()
+    })
   }
 }

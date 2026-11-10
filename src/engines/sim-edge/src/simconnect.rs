@@ -57,6 +57,29 @@ unsafe extern "system" {
         group: SIMCONNECT_NOTIFICATION_GROUP_ID,
         flags: SIMCONNECT_EVENT_FLAG,
     ) -> HRESULT;
+    #[allow(clippy::too_many_arguments)]
+    fn SimConnect_TransmitClientEvent_EX1(
+        handle: HANDLE,
+        object: SIMCONNECT_OBJECT_ID,
+        event: SIMCONNECT_CLIENT_EVENT_ID,
+        group: SIMCONNECT_NOTIFICATION_GROUP_ID,
+        flags: SIMCONNECT_EVENT_FLAG,
+        data0: DWORD,
+        data1: DWORD,
+        data2: DWORD,
+        data3: DWORD,
+        data4: DWORD,
+    ) -> HRESULT;
+    fn SimConnect_EnumerateInputEvents(
+        handle: HANDLE,
+        request: SIMCONNECT_DATA_REQUEST_ID,
+    ) -> HRESULT;
+    fn SimConnect_GetInputEvent(
+        handle: HANDLE,
+        request: SIMCONNECT_DATA_REQUEST_ID,
+        hash: u64,
+    ) -> HRESULT;
+    fn SimConnect_SubscribeInputEvent(handle: HANDLE, hash: u64) -> HRESULT;
     fn SimConnect_AddClientEventToNotificationGroup(
         handle: HANDLE,
         group: SIMCONNECT_NOTIFICATION_GROUP_ID,
@@ -193,6 +216,20 @@ pub(crate) unsafe fn make(handle: HANDLE, op: Op) -> HRESULT {
                 group,
                 flags,
             } => SimConnect_TransmitClientEvent(handle, object, event, data, group, flags),
+            Op::TransmitClientEventEx1 {
+                object,
+                event,
+                group,
+                flags,
+                data,
+            } => SimConnect_TransmitClientEvent_EX1(
+                handle, object, event, group, flags, data[0], data[1], data[2], data[3], data[4],
+            ),
+            Op::EnumerateInputEvents { request } => {
+                SimConnect_EnumerateInputEvents(handle, request)
+            }
+            Op::GetInputEvent { request, hash } => SimConnect_GetInputEvent(handle, request, hash),
+            Op::SubscribeInputEvent { hash } => SimConnect_SubscribeInputEvent(handle, hash),
             Op::AddClientEventToNotificationGroup {
                 group,
                 event,

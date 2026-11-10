@@ -1,0 +1,3 @@
+# The module's cargo output and the package's build folder.
+module/target/
+build/

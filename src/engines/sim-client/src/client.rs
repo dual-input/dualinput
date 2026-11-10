@@ -2,7 +2,7 @@
 //! up, and what turns a unit's call into SimConnect's calls
 //! (record/areas/core/03-sim-seam-and-wasm-module.md, "The sim client").
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use simconnect_types::{
     SIMCONNECT_CLIENT_DATA_PERIOD_ON_SET, SIMCONNECT_DATA_REQUEST_FLAG_CHANGED,
@@ -102,6 +102,59 @@ pub struct Client<K> {
     once: BTreeMap<Vec<Var>, u32>,
     /// The client event each sim event is mapped to.
     events: BTreeMap<String, u32>,
+    /// The one group `listen` adds its events to, once a first event is in it.
+    listening: Option<u32>,
+    inputs: Inputs<K>,
+}
+
+/// The loaded aircraft's input events on this connection. The sim names each by a hash that
+/// only `EnumerateInputEvents` gives, so a `B:` call waits until the list is whole
+/// (record/areas/core/03-sim-seam-and-wasm-module.md, "The sim client").
+struct Inputs<K> {
+    /// The request the list's pages come under, once asked for.
+    asked: Option<u32>,
+    /// Each name's hash, from the pages so far, under the name in capitals. The sim lists names
+    /// in capitals, the Baron 58P's `ELECTRICAL_Battery_1` as `ELECTRICAL_BATTERY_1`, while an
+    /// aircraft's files and our profiles spell them as the aircraft declares them (measured on
+    /// MSFS 2024, 2026-11-09, record/areas/sync/log.md).
+    hashes: BTreeMap<String, u64>,
+    /// Whether the last page has come.
+    whole: bool,
+    /// The calls waiting for the whole list.
+    waiting: Vec<(K, String)>,
+    /// The hashes already subscribed to, since two entries can read one input event.
+    subscribed: BTreeSet<u64>,
+}
+
+impl<K> Default for Inputs<K> {
+    fn default() -> Self {
+        Inputs {
+            asked: None,
+            hashes: BTreeMap::new(),
+            whole: false,
+            waiting: Vec::new(),
+            subscribed: BTreeSet::new(),
+        }
+    }
+}
+
+/// A call that reads an input event by name, once the connection knows its hash.
+#[derive(Debug, PartialEq)]
+pub struct InputReady<K> {
+    pub by: K,
+    pub name: String,
+    /// The request its first value comes under and its hash, or `None` for a name the sim
+    /// doesn't list.
+    pub found: Option<(u32, u64)>,
+    pub ops: Vec<Op>,
+}
+
+/// What came of asking to read an input event.
+#[derive(Debug, PartialEq)]
+pub enum InputAsk<K> {
+    /// The list isn't whole yet, so the call waits for `input_page`; these calls ask for it.
+    Waiting(Vec<Op>),
+    Ready(InputReady<K>),
 }
 
 /// SimConnect's IDs, each kind counted from 1 on each connection, on the loop, so a replay
@@ -132,6 +185,8 @@ impl<K: Clone> Default for Client<K> {
             requests: BTreeMap::new(),
             once: BTreeMap::new(),
             events: BTreeMap::new(),
+            listening: None,
+            inputs: Inputs::default(),
         }
     }
 }
@@ -189,6 +244,18 @@ impl<K: Clone> Client<K> {
             },
             ops,
         )
+    }
+
+    /// A definition of `var` on the pilot's aircraft for writing alone, which reads nothing, as
+    /// a write function's target that no entry watches.
+    pub fn define(&mut self, by: &K, var: &Var) -> (Watch, Vec<Op>) {
+        let (definition, ops) = self.definition(by, std::slice::from_ref(var), false);
+        let watch = Watch {
+            request: 0,
+            definition,
+            object: SIMCONNECT_OBJECT_ID_USER,
+        };
+        (watch, ops)
     }
 
     /// Reads `vars` once on each object of `kind` within `radius` meters of the pilot's
@@ -307,15 +374,146 @@ impl<K: Clone> Client<K> {
     /// Sends the sim's event `name` to the object `object`, as avatars freezes each figure
     /// it creates.
     pub fn key_on(&mut self, by: &K, object: u32, name: &str, data: u32) -> Vec<Op> {
+        self.key_values(by, object, name, &[data])
+    }
+
+    /// Sends the sim's event `name` with `values`, by the legacy call for one value or none and
+    /// by `_EX1` only for more, since the PMDG 777's module dropped a masked axis sent with
+    /// `_EX1` and acted on the same event sent with the legacy call (measured on MSFS 2024,
+    /// 2026-10-01, record/areas/flight-controls/log.md). Delivery starts at the highest priority,
+    /// so our own sends reach the group `listen` adds its events to.
+    pub fn key_values(&mut self, by: &K, object: u32, name: &str, values: &[u32]) -> Vec<Op> {
         let (event, mut ops) = self.event(by, name);
-        ops.push(Op::TransmitClientEvent {
-            object,
-            event,
-            data,
-            group: SIMCONNECT_GROUP_PRIORITY_HIGHEST,
-            flags: SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY,
+        let group = SIMCONNECT_GROUP_PRIORITY_HIGHEST;
+        let flags = SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY;
+        ops.push(if values.len() <= 1 {
+            Op::TransmitClientEvent {
+                object,
+                event,
+                data: values.first().copied().unwrap_or(0),
+                group,
+                flags,
+            }
+        } else {
+            let mut data = [0; 5];
+            for (to, from) in data.iter_mut().zip(values) {
+                *to = *from;
+            }
+            Op::TransmitClientEventEx1 {
+                object,
+                event,
+                group,
+                flags,
+                data,
+            }
         });
         ops
+    }
+
+    /// Hears the sim's event `name` from now on, through one group of the connection's that
+    /// never masks, at the highest priority, as FS Copilot hears a profile's `K:` entries
+    /// (record/areas/sync/05-units.md, "Reaching the sim"). Returns the client event its
+    /// messages carry, and the calls that make it. The sim refused a priority for a group with
+    /// no events in it, so the group's first event goes in first (measured on MSFS 2024,
+    /// 2026-10-07, record/areas/flight-controls/log.md).
+    pub fn listen(&mut self, by: &K, name: &str) -> (u32, Vec<Op>) {
+        let (event, mut ops) = self.event(by, name);
+        let first = self.listening.is_none();
+        let group = match self.listening {
+            Some(group) => group,
+            None => {
+                let group = take(&mut self.next.group);
+                self.listening = Some(group);
+                group
+            }
+        };
+        ops.push(self.set_up(
+            by,
+            Op::AddClientEventToNotificationGroup {
+                group,
+                event,
+                maskable: false,
+            },
+        ));
+        if first {
+            ops.push(self.set_up(
+                by,
+                Op::SetNotificationGroupPriority {
+                    group,
+                    priority: SIMCONNECT_GROUP_PRIORITY_HIGHEST,
+                },
+            ));
+        }
+        (event, ops)
+    }
+
+    /// Reads the input event `name` once and subscribes to its changes, since subscribing alone
+    /// reports nothing until the value changes (measured on MSFS 2024, fsc-editor,
+    /// `docs/sim-vars/build/v1-log.md`). The first `B:` call on a connection asks for the list
+    /// of input events, and every call waits until it's whole.
+    pub fn input(&mut self, by: &K, name: &str) -> InputAsk<K> {
+        let name = sim_name(name, "B:").to_string();
+        if self.inputs.whole {
+            return InputAsk::Ready(self.input_ready(by.clone(), name));
+        }
+        self.inputs.waiting.push((by.clone(), name));
+        if self.inputs.asked.is_some() {
+            return InputAsk::Waiting(Vec::new());
+        }
+        let request = take(&mut self.next.request);
+        self.inputs.asked = Some(request);
+        let op = self.set_up(by, Op::EnumerateInputEvents { request });
+        InputAsk::Waiting(vec![op])
+    }
+
+    /// One page of the list of input events. Once the last has come, every waiting call goes.
+    /// `dwEntryNumber` counts the sends the list is chopped into, from 0 to `dwOutOf` − 1 (read
+    /// in MSFS 2024 SDK 1.7.3, `SimConnect.h`).
+    pub fn input_page(
+        &mut self,
+        request: u32,
+        entry: u32,
+        out_of: u32,
+        events: Vec<crate::message::InputEvent>,
+    ) -> Vec<InputReady<K>> {
+        if self.inputs.asked != Some(request) || self.inputs.whole {
+            return Vec::new();
+        }
+        for event in events {
+            self.inputs
+                .hashes
+                .insert(event.name.to_ascii_uppercase(), event.hash);
+        }
+        if entry + 1 < out_of {
+            return Vec::new();
+        }
+        self.inputs.whole = true;
+        std::mem::take(&mut self.inputs.waiting)
+            .into_iter()
+            .map(|(by, name)| self.input_ready(by, name))
+            .collect()
+    }
+
+    fn input_ready(&mut self, by: K, name: String) -> InputReady<K> {
+        let Some(&hash) = self.inputs.hashes.get(&name.to_ascii_uppercase()) else {
+            return InputReady {
+                by,
+                name,
+                found: None,
+                ops: Vec::new(),
+            };
+        };
+        let request = take(&mut self.next.request);
+        let mut ops = vec![Op::GetInputEvent { request, hash }];
+        if self.inputs.subscribed.insert(hash) {
+            ops.push(self.set_up(&by, Op::SubscribeInputEvent { hash }));
+        }
+        InputReady {
+            by,
+            name,
+            found: Some((request, hash)),
+            ops,
+        }
     }
 
     /// Creates an object of the SimObject `title`. Returns the request its object ID comes
@@ -606,6 +804,89 @@ mod tests {
                 (1, Value::Number(41.7))
             ])
         );
+    }
+
+    #[test]
+    fn a_key_with_several_values_goes_by_ex1_and_one_or_none_by_the_legacy_call() {
+        let mut client = Client::<()>::default();
+        let ops = client.key_values(&(), 0, "K:KOHLSMAN_SET", &[16_272, 2]);
+        assert!(matches!(
+            ops[1],
+            Op::TransmitClientEventEx1 {
+                data: [16_272, 2, 0, 0, 0],
+                ..
+            }
+        ));
+        let none = client.key_values(&(), 0, "K:KOHLSMAN_SET", &[]);
+        assert!(matches!(
+            none[..],
+            [Op::TransmitClientEvent { data: 0, .. }]
+        ));
+    }
+
+    #[test]
+    fn listening_adds_every_event_to_one_group_and_sets_its_priority_once() {
+        let mut client = Client::<()>::default();
+        let (first, ops) = client.listen(&(), "K:AP_MASTER");
+        assert_eq!(ops.len(), 3, "the map, the add, and the priority");
+        assert!(
+            matches!(ops[2], Op::SetNotificationGroupPriority { group: 1, .. }),
+            "the priority comes after the group has an event"
+        );
+        let (second, ops) = client.listen(&(), "K:TOGGLE_FLIGHT_DIRECTOR");
+        assert_ne!(first, second);
+        assert_eq!(ops.len(), 2, "the map and the add");
+        assert!(matches!(
+            ops[1],
+            Op::AddClientEventToNotificationGroup {
+                group: 1,
+                maskable: false,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn an_input_waits_for_the_whole_list_and_a_name_it_lacks_is_found_missing() {
+        use crate::message::InputEvent;
+        let mut client = Client::<u8>::default();
+        // The aircraft's spelling, which the sim lists in capitals.
+        let InputAsk::Waiting(ops) = client.input(&1, "B:LIGHTING_Beacon_1") else {
+            panic!("the list isn't known yet");
+        };
+        let [Op::EnumerateInputEvents { request }] = ops[..] else {
+            panic!("the first call asks for the list: {ops:?}");
+        };
+        assert_eq!(
+            client.input(&2, "NOT_ON_THE_LIST"),
+            InputAsk::Waiting(Vec::new()),
+            "the list is asked for once"
+        );
+        let page = |name: &str, hash| {
+            vec![InputEvent {
+                name: name.into(),
+                hash,
+            }]
+        };
+        assert!(
+            client
+                .input_page(request, 0, 2, page("LIGHTING_BEACON_1", 7))
+                .is_empty()
+        );
+        let ready = client.input_page(request, 1, 2, page("LIGHTING_NAV_1", 8));
+        assert_eq!(ready.len(), 2);
+        assert_eq!(ready[0].by, 1);
+        let (get, hash) = ready[0].found.unwrap();
+        assert_eq!(hash, 7);
+        assert_eq!(
+            ready[0].ops,
+            [
+                Op::GetInputEvent { request: get, hash },
+                Op::SubscribeInputEvent { hash }
+            ]
+        );
+        assert_eq!(ready[1].by, 2);
+        assert_eq!(ready[1].found, None);
     }
 
     #[test]

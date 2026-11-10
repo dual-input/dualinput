@@ -9,4 +9,5 @@ publish = false
 # can link (record/areas/build/02-testing.md, "Our WASM module").
 [dependencies]
 avatars-routines = { path = "../../features/avatars/routines" }
+state-sync-routines = { path = "../../features/state-sync/routines" }
 routine-host = { path = "../../platform/routine-host" }

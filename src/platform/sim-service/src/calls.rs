@@ -82,21 +82,72 @@ impl Sim<'_, '_> {
         handle
     }
 
-    /// Sends the sim's event `event`, such as `K:PAUSE_SET`, with one value, to the pilot's
-    /// aircraft.
-    pub fn key(&self, event: &str, value: u32) -> Handle {
-        self.key_on(SIMCONNECT_OBJECT_ID_USER, event, value)
+    /// Watches each of `vars` on the pilot's aircraft, on a definition of its own, so a refused
+    /// variable fails only its own watch and a write takes no other variable with it. One call
+    /// of the service makes them all, since a profile names any number of them and the kernel
+    /// allows 1,000 queued calls in one input. Returns a handle for each, in order.
+    pub fn watch_each(&self, vars: &[Var], period: Period) -> Vec<Handle> {
+        let watches: Vec<(Origin, Var)> = vars
+            .iter()
+            .map(|var| (self.origin().1, var.clone()))
+            .collect();
+        let handles = watches.iter().filter_map(|(o, _)| o.handle).collect();
+        self.cx.call(
+            SimService::watch_each_for,
+            (watches, SIMCONNECT_OBJECT_ID_USER, period),
+        );
+        handles
+    }
+
+    /// A definition of `var` on the pilot's aircraft that only `write` uses, for a target no
+    /// watch reads.
+    pub fn define(&self, var: &Var) -> Handle {
+        let (handle, origin) = self.origin();
+        self.cx.call(SimService::define_for, (origin, var.clone()));
+        handle
+    }
+
+    /// Sends the sim's event `event`, such as `K:KOHLSMAN_SET`, with `values`, to the pilot's
+    /// aircraft, by the legacy call for one value or none and by `_EX1` for more.
+    pub fn key(&self, event: &str, values: &[u32]) -> Handle {
+        self.key_on(SIMCONNECT_OBJECT_ID_USER, event, values)
     }
 
     /// Sends the sim's event `event` to the object `object`, as avatars freezes each figure
     /// it creates.
-    pub fn key_on(&self, object: u32, event: &str, value: u32) -> Handle {
+    pub fn key_on(&self, object: u32, event: &str, values: &[u32]) -> Handle {
         let (handle, origin) = self.origin();
         self.cx.call(
             SimService::key_for,
-            (origin, object, event.to_string(), value),
+            (origin, object, event.to_string(), values.to_vec()),
         );
         handle
+    }
+
+    /// Hears each of the sim's `events` from now on, through a group that never masks. Each
+    /// occurrence arrives as `SimEvent::Heard` with that event's handle. Returns a handle for
+    /// each, in order, from one call of the service, as `watch_each` does.
+    pub fn listen(&self, events: &[String]) -> Vec<Handle> {
+        let listens: Vec<(Origin, String)> = events
+            .iter()
+            .map(|event| (self.origin().1, event.clone()))
+            .collect();
+        let handles = listens.iter().filter_map(|(o, _)| o.handle).collect();
+        self.cx.call(SimService::listen_for, listens);
+        handles
+    }
+
+    /// Reads each of the input events `names`, once and then at each change, as
+    /// `SimEvent::Input` with that name's handle, or `SimEvent::Failed` for a name the loaded
+    /// aircraft doesn't have. Returns a handle for each, in order.
+    pub fn input(&self, names: &[String]) -> Vec<Handle> {
+        let reads: Vec<(Origin, String)> = names
+            .iter()
+            .map(|name| (self.origin().1, name.clone()))
+            .collect();
+        let handles = reads.iter().filter_map(|(o, _)| o.handle).collect();
+        self.cx.call(SimService::input_for, reads);
+        handles
     }
 
     /// Creates an object of the SimObject titled `title`, such as `DUALINPUT_FIGURE_PILOT`, in
@@ -215,16 +266,143 @@ impl SimService {
         }
     }
 
+    fn define_for(me: &mut SimService, (origin, var): (Origin, Var), cx: &mut Cx) {
+        let Some(client) = me.client(origin, cx) else {
+            return;
+        };
+        let (watch, ops) = client.define(&origin, &var);
+        if let (Some(holder), Some(handle)) =
+            (me.holders.get_mut(&origin.unit.place()), origin.handle)
+        {
+            holder.watches.insert(handle, watch);
+        }
+        me.make(origin, ops, cx);
+    }
+
+    fn watch_each_for(
+        me: &mut SimService,
+        (watches, object, period): (Vec<(Origin, Var)>, u32, Period),
+        cx: &mut Cx,
+    ) {
+        for (origin, var) in watches {
+            SimService::watch_for(me, (origin, object, vec![var], period), cx);
+        }
+    }
+
     fn key_for(
         me: &mut SimService,
-        (origin, object, event, value): (Origin, u32, String, u32),
+        (origin, object, event, values): (Origin, u32, String, Vec<u32>),
         cx: &mut Cx,
     ) {
         let Some(client) = me.client(origin, cx) else {
             return;
         };
-        let ops = client.key_on(&origin, object, &event, value);
+        let ops = client.key_values(&origin, object, &event, &values);
         me.make(origin, ops, cx);
+    }
+
+    fn listen_for(me: &mut SimService, listens: Vec<(Origin, String)>, cx: &mut Cx) {
+        for (origin, event) in listens {
+            let Some(client) = me.client(origin, cx) else {
+                continue;
+            };
+            let (client_event, ops) = client.listen(&origin, &event);
+            if let (Some(holder), Some(handle)) =
+                (me.holders.get_mut(&origin.unit.place()), origin.handle)
+            {
+                holder.listens.insert(client_event, handle);
+            }
+            me.make(origin, ops, cx);
+        }
+    }
+
+    fn input_for(me: &mut SimService, reads: Vec<(Origin, String)>, cx: &mut Cx) {
+        for (origin, name) in reads {
+            let Some(client) = me.client(origin, cx) else {
+                continue;
+            };
+            match client.input(&origin, &name) {
+                sim_client::InputAsk::Waiting(ops) => me.make(origin, ops, cx),
+                sim_client::InputAsk::Ready(ready) => me.input_ready(ready, cx),
+            }
+        }
+    }
+
+    /// One page of the list of input events: once the last has come, every read that waited
+    /// for the list goes out by its name's hash.
+    pub(crate) fn input_page(
+        &mut self,
+        unit: UnitId,
+        request: u32,
+        entry: u32,
+        out_of: u32,
+        events: Vec<sim_client::message::InputEvent>,
+        cx: &Cx,
+    ) {
+        let Some(holder) = self.holders.get_mut(&unit.place()) else {
+            return;
+        };
+        let readies = holder.client.input_page(request, entry, out_of, events);
+        for ready in readies {
+            self.input_ready(ready, cx);
+        }
+    }
+
+    fn input_ready(&mut self, ready: sim_client::InputReady<Origin>, cx: &Cx) {
+        let origin = ready.by;
+        let Some(call) = origin.handle else {
+            return;
+        };
+        let Some((request, hash)) = ready.found else {
+            tracing::info!(
+                name = ready.name,
+                "the loaded aircraft has no input event of this name"
+            );
+            self.tell(origin.unit, SimEvent::Failed { call }, cx);
+            return;
+        };
+        if let Some(holder) = self.holders.get_mut(&origin.unit.place()) {
+            holder.input_reads.insert(request, call);
+            holder.inputs.entry(hash).or_default().push(call);
+        }
+        self.make(origin, ready.ops, cx);
+    }
+
+    pub(crate) fn input_value(&mut self, unit: UnitId, request: u32, value: Value, cx: &Cx) {
+        let Some(call) = self
+            .holders
+            .get_mut(&unit.place())
+            .and_then(|h| h.input_reads.remove(&request))
+        else {
+            return;
+        };
+        let first = true;
+        self.tell(unit, SimEvent::Input { call, value, first }, cx);
+    }
+
+    pub(crate) fn input_changed(&mut self, unit: UnitId, hash: u64, value: Value, cx: &Cx) {
+        let calls = self
+            .holders
+            .get(&unit.place())
+            .and_then(|h| h.inputs.get(&hash))
+            .cloned()
+            .unwrap_or_default();
+        for call in calls {
+            let value = value.clone();
+            let first = false;
+            self.tell(unit, SimEvent::Input { call, value, first }, cx);
+        }
+    }
+
+    /// An event the unit listens for, which the sim handed to its group.
+    pub(crate) fn heard(&self, unit: UnitId, event: u32, data: [u32; 5], cx: &Cx) {
+        if let Some(&call) = self
+            .holders
+            .get(&unit.place())
+            .and_then(|h| h.listens.get(&event))
+        {
+            self.tell(unit, SimEvent::Heard { call, data }, cx);
+        }
     }
 
     fn create_for(

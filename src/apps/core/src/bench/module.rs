@@ -237,4 +237,12 @@ impl Sim for Plane<'_> {
     fn reset(&mut self) -> bool {
         self.0.take_reset()
     }
+
+    fn fire_h(&mut self, name: &str) {
+        self.0.fire_h(name);
+    }
+
+    fn call_preset(&mut self, name: &str, value: Option<f64>) {
+        self.0.call_preset(name, value);
+    }
 }

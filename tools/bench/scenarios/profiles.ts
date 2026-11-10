@@ -438,7 +438,7 @@ function largeProfile(): string {
   return yaml
 }
 
-test("a 200 KB profile of 300 write functions builds within 2s, and its load takes a handler under 1ms", { timeout: 120_000 }, async (t) => {
+test("a 200 KB profile of 300 write functions builds within 2s, and its load stays inside 10ms, the sync engine's compile of them included", { timeout: 120_000 }, async (t) => {
   const net = await BenchNetwork.start(1, { emptySite: true })
   t.after(() => net.stop())
   const run = new BenchRun("profiles-large", t)
@@ -464,5 +464,6 @@ test("a 200 KB profile of 300 write functions builds within 2s, and its load tak
   a.core.send({ kind: "exit" })
   assert.equal(await a.core.exited, 0)
   console.log(`budget: the bundle is ${size.toLocaleString("en-US")} bytes`)
-  a.core.checkHandlers(`a run that loaded a ${size.toLocaleString("en-US")}-byte bundle`)
+  // The compile is the sync engine's own 10ms budget for 300 write functions, the one input of the load that takes more than a handler's 1ms (record/areas/sync/05-units.md, "Budgets").
+  a.core.checkHandlers(`a run that loaded a ${size.toLocaleString("en-US")}-byte bundle`, { pauseUs: 10_000 })
 })

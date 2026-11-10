@@ -65,7 +65,7 @@ impl Probe {
                     .write(watch, values.into_iter().map(Value::Number).collect());
             }
             SimCall::Key { event, value } => {
-                cx.sim().key(&event, value);
+                cx.sim().key(&event, &[value]);
             }
             SimCall::Feed { routine, mode } => match routine.as_str() {
                 "HOLD" => cx.module().feed(HOLD, &HoldSlot {}),
@@ -117,6 +117,8 @@ impl Probe {
             ),
             SimEvent::Camera { camera, .. } => format!("camera {}", camera.referential),
             SimEvent::Frame { .. } => "frame".to_string(),
+            SimEvent::Heard { data, .. } => format!("heard an event with {}", data[0]),
+            SimEvent::Input { value, first, .. } => format!("input {value:?} first={first}"),
         };
         cx.out(Heard(heard));
     }

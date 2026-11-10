@@ -1,0 +1,25 @@
+Start the sim, and wait at the main menu.
+
+=== Black Square Baron 58P
+Load a flight in the Black Square Baron 58P, on the ground at a stand, cold and dark if the aircraft offers it, and press Ready to fly.
+the sim is flying bksq-aircraft-baronpropress; hosting the session
+waiting up to 45s for your aircraft to settle
+preflight ended; waiting 5s for the second pilot's catch-up
+FAILED: an L: variable the second pilot sets moves in the sim: never held within 8000ms, read 0
+PASSED: an L: variable set in the sim moves on the second pilot's: 0, after 16ms
+FAILED: our module's call of an input event's preset turns on the sim's battery: never held within 8000ms, read 0
+Turn the beacon switch on, with the mouse.
+FAILED: a switch flipped in the sim reaches the second pilot's input event: never held within 30000ms, read 0
+FAILED: a K: event sent by the legacy call acts: never held within 5000ms, read 0
+FAILED: our module fires an H: event a JavaScript instrument hears, both of two in a burst: never held within 8000ms, read 0
+Press the ADF timer's SET RST button, with the mouse.
+FAILED: the h-events handler hears an H: event beside the stock one: never held within 30000ms, read 0
+Press the ADF's BFO button, with the mouse.
+FAILED: instrument-reads sees the BFO change and the second pilot toggles it: never held within 30000ms, read 0
+Move the yoke forward and back, and keep moving it until the next beep.
+PASSED: a group on one connection keeps hearing while a group on another is cleared: 20 heard after the clear, and 0 by the cleared group
+Watch the tablet: the second pilot taps it.
+FAILED: a tap plays a down, an up, and a click: 
+Did the tablet act on that tap? Press Page Up for yes.
+FAILED: the tablet acted on the tap
+FAILED: a press held 3s plays through to its up: 0 events

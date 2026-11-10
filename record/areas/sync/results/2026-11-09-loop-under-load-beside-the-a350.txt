@@ -1,0 +1,31 @@
+The loop under load, node tools/bench.ts load 1, beside MSFS 2024 flying the iniBuilds A350 at a busy airport with traffic, the sim out of focus, so for comparison only. Each run's report.txt.
+
+=== run 2026-11-09_23-13-38-load
+the loop under load: flight-58p-egll-600s.bin.zst played once, a run of 600s, in <repo>\target\bench\runs\2026-11-09_23-13-38-load
+inputs	449310, 749 a second
+queue wait, p50	26µs
+queue wait, p99	1.5ms	budget 11.2ms	within
+queue wait, p99 of the worst minute	2.4ms
+queue wait, p99.9	59.4ms
+queue wait, most	101.0ms
+busy	4.68%	budget 20%	within
+inputs over 1ms	12273, of which the load's 100ms stops are 10 or 9	budget 1ms but the stops	MISSED
+slowest input	101.0ms, #114919
+replay	15.4s for 449310 inputs, 92.4s an hour	budget 360s an hour	within
+stamps rise	449310 of 449310 inputs recorded in order		within
+recording	17.1 MB
+
+=== run 2026-11-09_23-30-06-load
+the loop under load: flight-58p-egll-600s.bin.zst played once, a run of 600s, in <repo>\target\bench\runs\2026-11-09_23-30-06-load
+inputs	449309, 749 a second
+queue wait, p50	25µs
+queue wait, p99	1.2ms	budget 11.2ms	within
+queue wait, p99 of the worst minute	1.8ms
+queue wait, p99.9	57.3ms
+queue wait, most	100.1ms
+busy	2.17%	budget 20%	within
+inputs over 1ms	942, of which the load's 100ms stops are 10 or 9	budget 1ms but the stops	MISSED
+slowest input	100.0ms, #76036
+replay	9.1s for 449309 inputs, 54.4s an hour	budget 360s an hour	within
+stamps rise	449309 of 449309 inputs recorded in order		within
+recording	17.1 MB

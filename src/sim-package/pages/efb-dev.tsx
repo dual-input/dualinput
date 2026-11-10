@@ -2,11 +2,12 @@
 // line each, as efb.tsx lists them. A built part takes its sample's place, so the tabs keep their order.
 
 import { avatars } from "../../features/avatars/efb/part.tsx"
+import { stateSync } from "../../features/state-sync/efb/part.tsx"
 import takeControl from "../../features/take-control/efb/index.tsx"
 import { mountDev } from "../../platform/efb-shell/dev/main.tsx"
 import { SAMPLE_PARTS } from "../../platform/efb-shell/dev/sample-parts.tsx"
 
-const BUILT = [takeControl, avatars]
+const BUILT = [takeControl, avatars, stateSync]
 
 mountDev([
   ...SAMPLE_PARTS.map((sample) => BUILT.find((part) => part.name === sample.name) ?? sample),

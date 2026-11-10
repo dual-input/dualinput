@@ -13,7 +13,7 @@ export type Landing = CoreLanding | "stay"
 /** The core's notification, and what the banner adds to it. */
 export type Note = Omit<Notification, "landing"> & {
   landing: Landing
-  /** Each thing a card counts, such as the controls that couldn't sync. TODO: when state sync raises its failures, add this to the core's `Notification`. */
+  /** Each thing a card counts, such as the controls that couldn't sync. */
   list?: string[]
 }
 

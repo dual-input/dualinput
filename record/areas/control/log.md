@@ -2,6 +2,23 @@
 
 What we found about passing control between pilots, by the take-control key and buttons and by voice, newest entry first.
 
+## 2026-11-10: A bound button crosses with another program in front, about 70µs after the helper's stamp
+
+**Asked:** does a button bound for take-control cross to the core while another program has the focus, and does a switch held on while binding keep the binding to the button pressed, as [take-control's cases](01-take-control.md#cases-for-the-bench) ask of a pilot at the hardware?
+
+**Expected:** yes to both, since the core helper reads buttons through Raw Input in sink mode, which hears them whatever window is in front.
+
+**Found:** on our development machine, with no sim running, through `node tools/sim/core-helper.ts person 3`, in four runs ([the runs' reports](results/2026-11-10-bound-button-desk-check.txt)):
+
+- In two runs, one on the T.A320 Pilot sidestick's button 4 and one on the Bravo Throttle Quadrant's button 1, with a quadrant switch held on, only the button pressed crossed while binding, and then nothing; and with the terminal in front, the bound button's down and up crossed 65µs to 84µs after the helper's stamp.
+- In a third run, on the quadrant's button 4, the binding held, and the second press crossed nothing; the pilot likely pressed a different button the second time.
+- In the first run, no press came, since the pilot was away.
+- Every run's recording replayed to every checkpoint.
+
+**Changed:** nothing.
+
+**Affects:** nothing.
+
 ## 2026-11-04: Stage 20's take-control passes its cases on the bench, and a press reaches the cue about 80ms later, past the 50ms budget
 
 **Asked:** do [take-control's cases](01-take-control.md#cases-for-the-bench) hold with two cores, a stand-in core helper on each, and a fake EFB app, and does a single press reach the cue within [the budget](01-take-control.md#budgets)'s 50ms of the helper's stamp?

@@ -1,0 +1,43 @@
+The desk check of take-control's bound button, node tools/sim/core-helper.ts person 3, with no sim running, on our development machine, 2026-11-10. Each run's report.txt, under its run's folder name. The first had no press; in the second, the pilot likely pressed a different button the second time.
+
+=== run 2026-11-10_08-16-54-core-helper-person
+a bench core started in target\bench\runs\2026-11-10_08-16-54-core-helper-person, with the real helper
+3. Turn a switch on your throttle quadrant on, and leave it on. Then press Enter, or type s to skip.
+Now press a button on the yoke or throttle, not that switch, then press Enter.
+the next press: 
+FAILED: while binding, with a switch held on, only the button pressed crosses, and then nothing
+Done. Set Windows' default output device back as you had them.
+the core's recordings replayed to every checkpoint; 1 FAILED
+
+=== run 2026-11-10_08-37-03-core-helper-person
+a bench core started in target\bench\runs\2026-11-10_08-37-03-core-helper-person, with the real helper
+3. Turn a switch on your throttle quadrant on, and leave it on. Then press Enter, or type s to skip.
+Now press a button on the yoke or throttle, not that switch, then press Enter.
+the next press: next press Bravo Throttle Quadrant button 4
+ok: while binding, with a switch held on, only the button pressed crosses, and then nothing
+This terminal is in front, so no window of the sim is. Press that same button once more, then press Enter.
+FAILED: a bound button crosses with another program in front
+Done. Set Windows' default output device back as you had them.
+the core's recordings replayed to every checkpoint; 1 FAILED
+
+=== run 2026-11-10_08-37-58-core-helper-person
+a bench core started in target\bench\runs\2026-11-10_08-37-58-core-helper-person, with the real helper
+3. Turn a switch on your throttle quadrant on, and leave it on. Then press Enter, or type s to skip.
+Now press a button on the yoke or throttle, not that switch, then press Enter.
+the next press: next press T.A320 Pilot button 4
+ok: while binding, with a switch held on, only the button pressed crosses, and then nothing
+This terminal is in front, so no window of the sim is. Press that same button once more, then press Enter.
+ok: a bound button crosses with another program in front: press down 70us after its stamp; press up 84us after its stamp
+Done. Set Windows' default output device back as you had them.
+the core's recordings replayed to every checkpoint; every case passed
+
+=== run 2026-11-10_08-38-45-core-helper-person
+a bench core started in target\bench\runs\2026-11-10_08-38-45-core-helper-person, with the real helper
+3. Turn a switch on your throttle quadrant on, and leave it on. Then press Enter, or type s to skip.
+Now press a button on the yoke or throttle, not that switch, then press Enter.
+the next press: next press Bravo Throttle Quadrant button 1
+ok: while binding, with a switch held on, only the button pressed crosses, and then nothing
+This terminal is in front, so no window of the sim is. Press that same button once more, then press Enter.
+ok: a bound button crosses with another program in front: press down 69us after its stamp; press up 65us after its stamp
+Done. Set Windows' default output device back as you had them.
+the core's recordings replayed to every checkpoint; every case passed

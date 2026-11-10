@@ -1,0 +1,20 @@
+# The L-1011's fuel pump, for state sync's cases in the sim (record/areas/sync/05-units.md): its
+# click flips the switch and fires `H:FUEL`, and the flight engineer's script acts only on the
+# event (read in inibuilds-aircraft-l1011 1.0.8, record/areas/aircraft/inibuilds-l1011/study.md).
+maker: iniBuilds
+name: L-1011 session check
+maturity: experimental
+authors: Dual Input
+aircraft:
+  variants:
+    l1011: inibuilds-l1011
+
+state:
+  fuel_pump_1_1:
+    name: Fuel pump 1-1
+    watch: L('SWITCH_FUEL_PUMP_1_1')
+    write: |
+      (value) => {
+        write(L('SWITCH_FUEL_PUMP_1_1'), value)
+        write(H('FUEL'))
+      }

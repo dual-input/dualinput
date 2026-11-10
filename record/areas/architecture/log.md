@@ -3,6 +3,19 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-11-09: A group on one SimConnect connection keeps hearing an event while a group on another is cleared
+
+**Asked:** does a notification group on one SimConnect connection keep hearing a sim event while a group on another connection, holding the same event, is cleared, as [a connection for each feature](02-code-map.md#a-connection-for-each-feature-for-each-load) left unmeasured?
+
+**Expected:** that it keeps hearing, since the case that cut a group off, clearing another group of the same client, held both groups on one connection.
+
+**Found:** in stage 14's session in the sim, on MSFS 2024 SunRise 12.2.282174.999, in the Baron 58P, two of p08's clients ran as two connections: one heard `K:AXIS_ELEVATOR_SET` in a group at the highest priority, not maskable, and the other held it in a maskable group, which it then cleared while the pilot moved the yoke ([the runs' reports](../sync/results/2026-11-09-stage-14-session-reruns.txt)).
+In each of two runs, the listening group heard 20 and then 21 of the yoke's events after the clear, and the cleared group heard none.
+
+**Changed:** the spine's rule that the core clears no group while another of its groups hears that sim event holds for each connection alone, since a clear on one connection leaves another's groups hearing.
+
+**Affects:** [the code map](02-code-map.md), with a note at its top.
+
 ## 2026-10-25: Coherent GT keeps 304 of the 554 CSS properties Chromium 152 keeps, and lays out flexbox and grid as Chromium does but for `gap`, `justify-content: end`, and subgrid
 
 **Asked:** what of the whole of CSS Coherent GT keeps, so the Coherent GT check can pass only what the engine draws, rather than fail only what p13 tried (user, 2026-10-25)?

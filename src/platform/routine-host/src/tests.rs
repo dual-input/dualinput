@@ -67,6 +67,8 @@ struct Aircraft {
     next_id: i32,
     reset: bool,
     lookups: u32,
+    /// Each `H:` event and preset made, in order.
+    fired: Vec<String>,
 }
 
 impl Aircraft {
@@ -116,6 +118,105 @@ impl Sim for Aircraft {
     fn reset(&mut self) -> bool {
         std::mem::take(&mut self.reset)
     }
+
+    fn fire_h(&mut self, name: &str) {
+        self.fired.push(format!("H {name}"));
+    }
+
+    fn call_preset(&mut self, name: &str, value: Option<f64>) {
+        self.fired.push(format!("B {name} {value:?}"));
+    }
+}
+
+/// Asks for an `H:` event and a preset, in that order, once each feed.
+#[derive(Default)]
+struct Fires {
+    due: bool,
+}
+
+const FIRES: RoutineId = RoutineId {
+    name: "FIRES",
+    freezes: false,
+};
+
+impl Routine for Fires {
+    const ID: RoutineId = FIRES;
+    const FEED_ONCE: bool = true;
+    type Slot = NoteSlot;
+
+    fn on_slot(&mut self, _: &NoteSlot) {
+        self.due = true;
+    }
+
+    fn frame(&mut self, _: &Frame, want: &mut Wants) {
+        if std::mem::take(&mut self.due) {
+            want.fire_h("FUEL");
+            want.call_preset("ELECTRICAL_Battery_1_Toggle", None);
+            want.call_preset("INSTRUMENT_HEADING_BUG_Set", Some(180.0));
+        }
+    }
+}
+
+#[test]
+fn h_events_and_presets_go_after_the_frames_in_the_order_asked() {
+    let mut host = Host::new(vec![kind::<Fires>()], HASH, "");
+    let mut sim = Aircraft::default();
+    let mut bytes = bytemuck::bytes_of(&SlotHeader {
+        feeds: 1,
+        end: 0,
+        slots_hash: HASH,
+        counter: 0,
+    })
+    .to_vec();
+    bytes.extend_from_slice(bytemuck::bytes_of(&NoteSlot { n: 1 }));
+    host.written(FIRES, &bytes, 0);
+    host.frame(0, &mut sim);
+    assert_eq!(
+        sim.fired,
+        [
+            "H FUEL",
+            "B ELECTRICAL_Battery_1_Toggle None",
+            "B INSTRUMENT_HEADING_BUG_Set Some(180.0)"
+        ]
+    );
+    host.frame(1, &mut sim);
+    assert_eq!(sim.fired.len(), 3, "each fires once, not each frame");
+}
+
+#[test]
+fn a_routine_whose_feed_goes_once_starts_again_after_a_gap_without_it() {
+    let mut host = Host::new(vec![kind::<Fires>()], HASH, "");
+    let mut sim = Aircraft::default();
+    host.written(FIRES, &write(1, 0, HASH, 0, 1), 0);
+    host.frame(0, &mut sim);
+    assert_eq!(sim.fired.len(), 3);
+    host.frame(1_100_000, &mut sim);
+    host.written(FIRES, &write(1, 0, HASH, 1_200_000, 1), 1_200_000);
+    host.frame(1_200_001, &mut sim);
+    assert_eq!(
+        sim.fired.len(),
+        3,
+        "the rewrite after the gap fired nothing again"
+    );
+    host.written(FIRES, &write(2, 0, HASH, 1_400_000, 2), 1_400_000);
+    host.frame(1_400_001, &mut sim);
+    assert_eq!(sim.fired.len(), 6, "the next feed fires");
+}
+
+#[test]
+fn a_routine_left_unfed_starts_again_on_the_same_feed() {
+    let mut host = host();
+    let mut sim = Aircraft::default();
+    host.written(NOTE, &write(1, 0, HASH, 0, 2), 0);
+    host.frame(1_100_000, &mut sim);
+    host.written(NOTE, &write(1, 0, HASH, 1_200_000, 2), 1_200_000);
+    heard();
+    host.frame(1_200_001, &mut sim);
+    assert!(
+        sim.on[0],
+        "the restarted routine holds the freeze its feed asks for"
+    );
+    heard();
 }
 
 #[derive(Clone, Copy, Pod, Zeroable)]

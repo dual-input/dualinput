@@ -1,0 +1,230 @@
+Stage 14's session in the sim, MSFS 2024 SunRise 12.2.282174.999, every run after the first, in order. Each run's report.txt, as tools/sim/state-sync.ts wrote it, under the run's folder name.
+
+=== run 2026-11-09_22-01-18-state-sync
+
+=== Black Square Baron 58P
+the sim is flying bksq-aircraft-baronpropress; hosting the session
+waiting up to 45s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+PASSED: an L: variable the second pilot sets moves in the sim: 1, after 86ms
+PASSED: an L: variable set in the sim moves on the second pilot's: 0, after 130ms
+PASSED: our module's call of an input event's preset turns on the sim's battery: 1, after 168ms
+Turn the beacon switch on, with the mouse.
+PASSED: a switch flipped in the sim reaches the second pilot's input event: 1, after 2ms
+FAILED: a K: event sent by the legacy call acts: never held within 5000ms, read 0
+FAILED: our module fires an H: event a JavaScript instrument hears, both of two in a burst: never held within 8000ms, read 0
+Press the ADF timer's SET RST button, with the mouse.
+PASSED: the h-events handler hears an H: event beside the stock one: 1, after 6470ms
+Press the ADF's BFO button, with the mouse.
+FAILED: instrument-reads sees the BFO change and the second pilot toggles it: never held within 30000ms, read 0
+Move the yoke forward and back, and keep moving it until the next beep.
+PASSED: a group on one connection keeps hearing while a group on another is cleared: 21 heard after the clear, and 0 by the cleared group
+Open the tablet, and press Page Up once it shows. Press Page Up for yes.
+Watch the tablet: the second pilot taps its middle.
+PASSED: a tap plays a down, an up, and a click: mousedown@350,512 mousedown@350,512 mouseup@350,512 mouseup@350,512 click@350,512 click@350,512
+Did whatever is in the middle of the tablet react to that tap? Press Page Up for yes.
+FAILED: the tablet acted on the tap
+PASSED: a press held 3s plays through to its up: 4 events
+FAILED: Black Square Baron 58P's cases stopped: the inspector refused page 14
+Done with this aircraft. End the flight, back to the main menu.
+the real core's last loop stats: 55773243562µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1746 busy_percent=0.16 wait_p50_us=9 wait_p99_us=51 wait_p999_us=575 wait_max_us=665 over_1ms=0 slowest_us=781 slowest_seq=35887 slowest_stamp=55767427361
+the core's replay: replayed 37620 inputs, and all 593 checkpoints matched, up to the last flush of a cut recording
+
+=== run 2026-11-09_22-14-56-state-sync
+
+=== Black Square Baron 58P
+the sim is flying bksq-aircraft-baronpropress; hosting the session
+waiting up to 45s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+PASSED: an L: variable the second pilot sets moves in the sim: 1, after 100ms
+PASSED: an L: variable set in the sim moves on the second pilot's: 0, after 136ms
+PASSED: our module's call of an input event's preset moves the sim's battery switch: 1, after 101ms
+PASSED: a K: event with one value, sent by the legacy call, moves the sim's pitot heat switch: 1, after 99ms
+Flip the beacon switch on, with the mouse.
+PASSED: a switch flipped in the sim reaches the second pilot's input event: 1, after 4489ms
+Turn the battery and the avionics master on, and the ADF radio's power if it stays dark.
+PASSED: the KR87A has power
+FAILED: our module fires an H: event a JavaScript instrument hears, both of two in a burst: never held within 8000ms, read 0
+Press the ADF timer's SET RST button, with the mouse.
+PASSED: the h-events handler hears an H: event beside the stock one: 1, after 4260ms
+Press the ADF's BFO button, with the mouse.
+PASSED: the KR87A takes the press, its bfoMode changing: 1, after 3366ms
+PASSED: instrument-reads sees the BFO change and the second pilot toggles it: 1, after 115ms
+Move the yoke forward and back, and keep moving it until the next beep.
+PASSED: a group on one connection keeps hearing while a group on another is cleared: 21 heard after the clear, and 0 by the cleared group
+Open the tablet, and press Page Up once it shows. Press Page Up for yes.
+The second pilot taps the tablet, then holds a press on it, then drags across it.
+PASSED: a tap plays one down, one up, and one click: mousemove@28,489 mousedown@350,512 mouseup@350,512 click@350,512 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,489 mousemove@28,493 mousemove@27,495 mousemove@27,501 mousemove@27,514 mousemove@25,542 mousemove@28,577 mousemove@30,590 mousemove@38,613 mousemove@49,636
+FAILED: a press held 3s plays through to its up: mousemove@64,668 mousemove@65,671 mousedown@280,410 mousemove@69,688 mousemove@77,734 mousemove@85,796 mousemove@96,914 mousemove@420,968 mousemove@381,701 mousemove@329,438 mousemove@313,303 mousemove@304,247 mousemove@283,186 mousemove@273,169 mousemove@266,158 mousemove@266,153 mousemove@252,130 mousemove@227,100 mousemove@142,205 mousemove@130,270 mousemove@119,339 mousemove@115,364 mousemove@112,380 mousemove@106,399 mousemove@59,466 mousemove@5,527 mouseup@280,410 click@280,410
+FAILED: a drag plays its down, its moves, and its up: mousedown@140,205 mouseup@280,410
+The second pilot is holding a press on the tablet. Press it yourself, with the mouse: does it flash? Press Page Up for yes.
+PASSED: a press under the other pilot's lock flashes
+Press on the tablet, drag off its edge, and let go off it.
+PASSED: your press on the tablet plays on the second pilot's display
+PASSED: a press let go off the tablet ends on the second pilot's display, and leaves it unlocked
+Done with this aircraft. End the flight, back to the main menu.
+That's every aircraft. Press q in the terminal to stop the core and replay its recording.
+the real core's last loop stats: 56110730432µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=10445 busy_percent=0.64 wait_p50_us=9 wait_p99_us=287 wait_p999_us=1151 wait_max_us=2022 over_1ms=4 slowest_us=4562 slowest_seq=347 slowest_stamp=56051245541
+the core's replay: replayed 12476 inputs, and all 85 checkpoints matched, up to the last flush of a cut recording
+
+=== run 2026-11-09_22-20-12-state-sync
+Start the sim, and wait at the main menu.
+
+=== iniBuilds L-1011
+Load a flight in the iniBuilds L-1011, on the ground at a stand, with its power on, not cold and dark, and press Ready to fly.
+the sim is flying inibuilds-l1011/presets/inibuilds/l1011-500-stair-pod; hosting the session
+waiting up to 45s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+PASSED: the fuel pump switch's L: variable takes the second pilot's write: 0, after 66ms
+FAILED: the flight engineer acts on our module's H:FUEL, after the switch: never held within 10000ms, read 1
+Done with this aircraft. End the flight, back to the main menu.
+
+=== Fenix A320
+Load a flight in the Fenix A320, on the ground at a stand, cold and dark if the aircraft offers it, and press Ready to fly.
+the sim is flying fnx_32x/presets/fnx/fnx_320_cfm_sl; hosting the session
+waiting up to 45s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+FAILED: the battery lamp follows a write: never held within 6000ms, read 0
+the lamp took nullms, against the 1.5s check
+FAILED: no notification followed: [{"id":"state-sync.couldnt-sync","level":"warning","text":"Couldn't sync Battery 1","detail":"Yours may differ from Second pilot's.","once":true,"landing":"session"}]
+PASSED: the battery lamp goes out again: 0, after 75ms
+now the APU's catch-up: the second pilot flies alone with the battery and APU on, and you join late
+FAILED: catch-up writes the battery first, and the APU master then takes: never held within 20000ms, read 0
+Done with this aircraft. End the flight, back to the main menu.
+
+=== Synaptic A220
+Load a flight in the Synaptic A220, on the ground at a stand, cold and dark if the aircraft offers it, and press Ready to fly.
+the sim is flying synaptic_a220/presets/inibuilds/a220-300; hosting the session
+waiting up to 45s for your aircraft to settle
+
+=== run 2026-11-09_22-37-18-state-sync
+
+=== Synaptic A220
+the sim is flying synaptic_a220/presets/inibuilds/a220-300; hosting the session
+waiting up to 75s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+Turn the taxi lights switch one notch, with the mouse.
+PASSED: an input event reported twice goes out once: 1, after 3415ms
+Now leave it alone for a moment.
+PASSED: the double report stayed one write
+the A220's display panels: VCockpit02 - DisplayUnits
+The second pilot taps the ND, then holds a press on it, then drags across it.
+FAILED: a tap plays one down, one up, and one click: 
+FAILED: a press held 3s plays through to its up: mousemove@1488,939 mousemove@1530,865 mousemove@1563,806 mousemove@1585,766 mousemove@1598,742 mousemove@1607,727 mousemove@1613,716 mouseup@1617,709 mousemove@1617,709 mousemove@1620,704 mousemove@1622,700 mousemove@1623,698 mousemove@1624,696 mousemove@1625,695 mousemove@1625,694 mousemove@1625,694 mousemove@1605,727 mousemove@1564,732 mousemove@1538,733 mousemove@1538,733 mousemove@1538,733 mousemove@1539,733 mousemove@1536,725 mousemove@1424,709 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706 mousemove@723,706
+FAILED: a drag plays its down, its moves, and its up: 
+The second pilot is holding a press on the ND. Press it yourself, with the mouse: does it flash? Press Page Up for yes.
+the real core's last loop stats: none
+the core's replay: replayed 4683 inputs, and all 43 checkpoints matched, up to the last flush of a cut recording
+
+=== run 2026-11-09_22-38-46-state-sync
+
+=== Synaptic A220
+the sim is flying synaptic_a220/presets/inibuilds/a220-300; hosting the session
+waiting up to 75s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+Turn the taxi lights switch one notch, with the mouse.
+PASSED: an input event reported twice goes out once: 1, after 8878ms
+Now leave it alone for a moment.
+PASSED: the double report stayed one write
+the A220's display panels: VCockpit02 - DisplayUnits
+The second pilot taps the ND, then holds a press on it, then drags across it.
+FAILED: a tap plays one down, one up, and one click: mousemove@1755,331 mousemove@1758,336 mousemove@1758,336 mousemove@1758,336 mousemove@1758,336 mousemove@1763,351 mousemove@1781,382 mousemove@1781,382 mousemove@1781,382 mousemove@1781,382 mousemove@1781,382 mousemove@1781,382 mousemove@1781,381 mousemove@1781,381 mousemove@1781,381 mousemove@1781,381 mousemove@1781,381 mousemove@1776,380 mousemove@1735,369 mousemove@1552,320 mousemove@1253,198 mousemove@954,103 mousemove@984,86 mousemove@964,81 mousemove@877,62 mousemove@652,13
+FAILED: a press held 3s plays through to its up: mousemove@700,88 mousemove@787,388 mousemove@880,674 mousemove@956,934
+FAILED: a drag plays its down, its moves, and its up: 
+The second pilot is holding a press on the ND. Press it yourself, with the mouse: does it flash? Press Page Up for yes.
+FAILED: a press under the other pilot's lock flashes
+Press on the ND, drag off its edge, and let go off it.
+FAILED: your press on the ND plays on the second pilot's display
+FAILED: a press let go off the ND ends on the second pilot's display, and leaves it unlocked
+Done with this aircraft. End the flight, back to the main menu.
+the real core's last loop stats: 57600374348µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=8986 busy_percent=0.39 wait_p50_us=8 wait_p99_us=43 wait_p999_us=191 wait_max_us=942 over_1ms=0 slowest_us=923 slowest_seq=11107 slowest_stamp=57562044784
+the core's replay: replayed 16816 inputs, and all 130 checkpoints matched, up to the last flush of a cut recording
+
+=== run 2026-11-09_22-41-40-state-sync
+
+=== Synaptic A220
+the sim is flying synaptic_a220/presets/inibuilds/a220-300; hosting the session
+waiting up to 75s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+Turn the taxi lights switch one notch, with the mouse.
+FAILED: an input event reported twice goes out once: never held within 30000ms, read 0
+Now leave it alone for a moment.
+FAILED: the double report stayed one write
+the A220's display panels: VCockpit02 - DisplayUnits
+The second pilot taps the ND, then holds a press on it, then drags across it.
+PASSED: a tap plays one down, one up, and one click: mousedown@3705,555 mouseup@3705,555 click@3705,555
+PASSED: a press held 3s plays through to its up: mousedown@2964,444 mouseup@2964,444 click@2964,444
+FAILED: a drag plays its down, its moves, and its up: mousedown@1482,222 mouseup@2964,444
+The second pilot is holding a press on the ND. Press it yourself, with the mouse: does it flash? Press Page Up for yes.
+the real core's last loop stats: 57715011665µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=7308 busy_percent=0.35 wait_p50_us=9 wait_p99_us=49 wait_p999_us=799 wait_max_us=3311 over_1ms=0 slowest_us=869 slowest_seq=4898 slowest_stamp=57699944317
+the core's replay: replayed 8598 inputs, and all 68 checkpoints matched, up to the last flush of a cut recording
+
+=== run 2026-11-09_22-43-18-state-sync
+
+=== Synaptic A220
+the sim is flying synaptic_a220/presets/inibuilds/a220-300; hosting the session
+waiting up to 75s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+The Synaptic A220's cases are ready. Press Page Up when you are. Press Page Up for yes.
+Turn the taxi lights switch one notch, with the mouse.
+PASSED: an input event reported twice goes out once: 1, after 3016ms
+Now leave it alone for a moment.
+PASSED: the double report stayed one write
+the A220's display panels: VCockpit02 - DisplayUnits
+The second pilot taps the ND, then holds a press on it, then drags across it.
+PASSED: a tap plays one down, one up, and one click: mousedown@3705,555 mouseup@3705,555 click@3705,555
+PASSED: a press held 3s plays through to its up: mousedown@2964,444 mouseup@2964,444 click@2964,444
+PASSED: a drag plays its down, its moves, and its up: mousedown@1482,222 mousemove@1853,278 mousemove@2223,333 mousemove@2593,388 mousemove@2964,444 mouseup@2964,444
+The second pilot is holding a press on the ND. Press it yourself, with the mouse: does it flash? Press Page Up for yes.
+PASSED: a press under the other pilot's lock flashes
+Press on the ND, drag off its edge, and let go off it.
+PASSED: your press on the ND plays on the second pilot's display
+PASSED: a press let go off the ND ends on the second pilot's display, and leaves it unlocked
+Done with this aircraft. End the flight, back to the main menu.
+
+=== iniBuilds A350
+Load a flight in the iniBuilds A350, at a busy airport, such as EGLL, with traffic on, on the ground at a stand, with its power on, not cold and dark, and press Ready to fly.
+the real core's last loop stats: 57932538900µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1744 busy_percent=0.14 wait_p50_us=9 wait_p99_us=31 wait_p999_us=71 wait_max_us=76 over_1ms=0 slowest_us=180 slowest_seq=9583 slowest_stamp=57877865658
+the core's replay: replayed 12348 inputs, and all 220 checkpoints matched, up to the last flush of a cut recording
+
+=== run 2026-11-09_22-48-08-state-sync
+
+=== Fenix A320
+Load a flight in the Fenix A320, on the ground at a stand, cold and dark if the aircraft offers it, and press Ready to fly.
+the real core's last loop stats: 58161135041µs  INFO dualinput_core::loop_stats: the loop's stats window="run" seconds=118.6 inputs=3280 busy_percent=0.06 wait_p50_us=8 wait_p99_us=29 wait_p999_us=431 wait_max_us=7011 over_1ms=0 slowest_us=242 slowest_seq=52 slowest_stamp=58043308663
+the real core's last loop stats: 58161135041µs  INFO dualinput_core::loop_stats: the loop's stats window="run" seconds=118.6 inputs=3280 busy_percent=0.06 wait_p50_us=8 wait_p99_us=29 wait_p999_us=431 wait_max_us=7011 over_1ms=0 slowest_us=242 slowest_seq=52 slowest_stamp=58043308663
+the core's replay: replayed 3280 inputs, and all 119 checkpoints matched
+
+=== run 2026-11-09_22-51-01-state-sync
+Start the sim, and wait at the main menu.
+
+=== Fenix A320
+Load a flight in the Fenix A320, on the ground at a stand, cold and dark if the aircraft offers it, and press Ready to fly.
+the sim is flying fnx_32x/presets/fnx/fnx_320_cfm_sl; hosting the session
+waiting up to 75s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+The Fenix A320's cases are ready. Press Page Up when you are. Press Page Up for yes.
+PASSED: battery 1's switch takes the second pilot's write: 1, after 133ms
+PASSED: battery 2's OFF light follows, as the Fenix computes it: 1, after 1233ms
+the light took 1234ms after the write, against the 1.5s check
+PASSED: no notification followed: []
+PASSED: battery 1's switch goes off again, and battery 2's OFF light with it: 0, after 289ms
+now the APU's catch-up: the second pilot flies alone with the battery and APU on, and you join late
+PASSED: catch-up writes L:S_OH_ELEC_BAT1: 1, after 248ms
+PASSED: catch-up writes L:S_OH_ELEC_BAT2: 1, after 132ms
+PASSED: catch-up writes L:S_OH_ELEC_APU_MASTER: 1, after 132ms
+PASSED: the APU master's ON light comes on, with both batteries on: 1, after 1000ms
+Done with this aircraft. End the flight, back to the main menu.
+
+=== iniBuilds A350
+Load a flight in the iniBuilds A350, at a busy airport, such as EGLL, with traffic on, on the ground at a stand, with its power on, not cold and dark, and press Ready to fly.
+the sim is flying a350/presets/inibuilds/a350-900_default_cabin; hosting the session
+waiting up to 75s for your aircraft to settle
+preflight ended; waiting up to 20s for the second pilot's catch-up to end
+The iniBuilds A350's cases are ready. Press Page Up when you are. Press Page Up for yes.
+the captain's baro reads 1013.25
+PASSED: ten baro commands at 2 frames move it 10 hPa: 1023.25, after 882ms
+Done with this aircraft. End the flight, back to the main menu.
+That's every aircraft. Press q in the terminal to stop the core and replay its recording.
+the real core's last loop stats: 59114501388µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=6487 busy_percent=0.40 wait_p50_us=9 wait_p99_us=271 wait_p999_us=2687 wait_max_us=5375 over_1ms=3 slowest_us=2615 slowest_seq=33030 slowest_stamp=59105081649
+the core's replay: replayed 36138 inputs, and all 930 checkpoints matched, up to the last flush of a cut recording

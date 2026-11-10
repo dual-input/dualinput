@@ -1,0 +1,8 @@
+p30 H: events, 2026-11-10T08:45:22.811Z, 18 cockpit panels listening
+the module's frame count went from 4680 to 4710 in 1.5s
+way 1, fsEventsHEventCall, size 0, a null array (our module's way): fired, id 0, returned 4294967295, heard in 0 of 18 panels
+way 2, fsEventsHEventCall, size 0, an array that points at a value: fired, id 1, returned 4294967295, heard in 0 of 18 panels
+way 3, fsEventsHEventCall, one integer value, 0: fired, id 2, returned 4294967295, heard in 0 of 18 panels
+way 4, fsEventsRegisterHEvent of the name with its H:: fired, id 3, returned 4294967295, heard in 0 of 18 panels
+way 5, execute_calculator_code("(>H:...)"), FS Copilot's way: fired, id -1, returned 1, heard in 18 of 18 panels (VCockpit18 - iniFAPA350, VCockpit17 - iniFAPA350, VCockpit16 - WasmInstrument, VCockpit15 - WasmInstrument, VCockpit14 - WasmInstrument, VCockpit13 - WasmInstrument, VCockpit12 - WasmInstrument, VCockpit11 - WasmInstrument, VCockpit10 - WasmInstrument, VCockpit09 - iniEfbA350, VCockpit08 - iniEfbA350, VCockpit07 - WasmInstrument, VCockpit06 - WasmInstrument, VCockpit05 - WasmInstrument, VCockpit04 - WasmInstrument, VCockpit03 - WasmInstrument, VCockpit02 - WasmInstrument, VCockpit01 - WasmInstrument - WasmInstrument - WasmInstrument)
+every H: event the panels heard: DUALINPUT_P30_TEST_5

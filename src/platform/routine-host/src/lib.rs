@@ -54,6 +54,18 @@ pub trait Sim {
     /// Whether the sim has removed or reset its variables since the last ask, after which
     /// every ID it gave may name nothing, or another variable.
     fn reset(&mut self) -> bool;
+    /// Fires the `H:` event `name`, its name with no `H:`.
+    fn fire_h(&mut self, name: &str);
+    /// Calls the preset of an input event `name` names, such as `ELECTRICAL_Battery_1_Toggle`,
+    /// with `value` when it takes one.
+    fn call_preset(&mut self, name: &str, value: Option<f64>);
+}
+
+/// An `H:` event or a preset a routine asked for, carried out once every routine's frame has
+/// run, in the order asked, so a write function's two kinds keep their call order.
+enum Fire {
+    H(String),
+    Preset { name: String, value: Option<f64> },
 }
 
 /// A slot that goes this long with no write from the core leaves its routine unfed, and the
@@ -65,6 +77,11 @@ const UNFED: u64 = 1_000_000;
 /// feed, so it carries nothing from one feeding into the next.
 pub trait Routine: Default + Send + 'static {
     const ID: RoutineId;
+    /// Whether each feed is carried out once, as an `H:` event or a preset is. The host drops
+    /// a routine left unfed for 1s, and the core's next rewrite starts it again on the same
+    /// feed, which a routine that holds a pose needs, and one that fires events mustn't take,
+    /// since a toggle fired twice puts a switch back.
+    const FEED_ONCE: bool = false;
     /// What its feature feeds it, read in place from the routine's slot.
     type Slot: Pod;
     /// A new feed, which the core's rewrites of the same feed don't repeat.
@@ -90,6 +107,7 @@ pub struct Wants<'f> {
     sim: &'f mut dyn Sim,
     vars: &'f mut Vars,
     writes: &'f mut Vec<Write>,
+    fires: &'f mut Vec<Fire>,
 }
 
 impl Wants<'_> {
@@ -117,12 +135,26 @@ impl Wants<'_> {
     pub fn write(&mut self, object: u32, var: VarRef, value: f64) {
         self.writes.push(Write { object, var, value });
     }
+
+    /// Fires the `H:` event `name`, once every routine's frame has run.
+    pub fn fire_h(&mut self, name: &str) {
+        self.fires.push(Fire::H(name.to_string()));
+    }
+
+    /// Calls the input event's preset `name`, once every routine's frame has run.
+    pub fn call_preset(&mut self, name: &str, value: Option<f64>) {
+        self.fires.push(Fire::Preset {
+            name: name.to_string(),
+            value,
+        });
+    }
 }
 
 /// A routine of the module's list, with its type erased, so one list holds every routine.
 pub struct Kind {
     id: RoutineId,
     size: usize,
+    feed_once: bool,
     make: fn() -> Box<dyn Running>,
 }
 
@@ -131,6 +163,7 @@ pub fn kind<R: Routine>() -> Kind {
     Kind {
         id: R::ID,
         size: size_of::<R::Slot>(),
+        feed_once: R::FEED_ONCE,
         make: || Box::new(R::default()),
     }
 }
@@ -184,6 +217,8 @@ pub struct Host {
     vars: Vars,
     /// The frame's writes, kept from frame to frame so a frame allocates nothing.
     writes: Vec<Write>,
+    /// The frame's `H:` events and presets, kept the same way.
+    fires: Vec<Fire>,
 }
 
 impl Host {
@@ -209,6 +244,7 @@ impl Host {
             freeze: Freeze::default(),
             vars: Vars::default(),
             writes: Vec::new(),
+            fires: Vec::new(),
         }
     }
 
@@ -255,7 +291,9 @@ impl Host {
             Some(_) => {}
             None => {
                 let mut running = (slot.kind.make)();
-                running.on_slot(body);
+                if new_feed || !slot.kind.feed_once {
+                    running.on_slot(body);
+                }
                 slot.running = Some(running);
             }
         }
@@ -279,6 +317,7 @@ impl Host {
             sim: &mut *sim,
             vars: &mut self.vars,
             writes: &mut self.writes,
+            fires: &mut self.fires,
         };
         for slot in &mut self.slots {
             if slot.running.is_some() && clock.saturating_sub(slot.written) > UNFED {
@@ -294,6 +333,12 @@ impl Host {
                 (self.vars.space(w.var), self.vars.ids(w.var, w.object, sim))
             {
                 sim.set(w.object, space, ids, w.value);
+            }
+        }
+        for fire in self.fires.drain(..) {
+            match fire {
+                Fire::H(name) => sim.fire_h(&name),
+                Fire::Preset { name, value } => sim.call_preset(&name, value),
             }
         }
         self.freeze.carry_out(freeze, sim);

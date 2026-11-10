@@ -99,7 +99,12 @@ impl Machine {
     }
 
     fn loaded(me: Origin, profile: &Resolved, ready: Ready) -> Machine {
-        let (engine, out) = Engine::load(profile, Sandbox::new(), Load { at: START, ready });
+        let load = Load {
+            at: START,
+            ready,
+            settle: sync_engine::SETTLE,
+        };
+        let (engine, out) = Engine::load(profile, Sandbox::new(), load);
         let mut m = Machine {
             engine,
             me,
@@ -932,6 +937,40 @@ fn a_write_waits_for_the_entrys_first_reading() {
     );
     pm.arrive("x", 0.0, stamp(PF, 2, &[]));
     assert_eq!(pm.acts().len(), 1);
+}
+
+#[test]
+fn a_catch_up_write_whose_entry_never_reads_is_made_and_flagged_a_check_later() {
+    // An `instrument()` entry that no panel reads gets no first reading and no refusal.
+    let x = l("X");
+    let p = profile(
+        vec![state("x", x.clone(), Write::Toggle(k("TOGGLE_X")))],
+        vec![],
+    );
+    let mut pm = Machine::new(PM, &p);
+    pm.catching_up = true;
+    let out = pm.engine.take(
+        &CatchUpState {
+            entries: vec![entry("x", 1.0)],
+        },
+        pm.cx(),
+    );
+    pm.out.extend(out);
+    pm.wait(SECOND);
+    let out = pm.take();
+    assert!(
+        !out.contains(&Out::CatchUpMade),
+        "the write waits for the entry's first reading: {out:?}"
+    );
+    pm.wait(SECOND);
+    assert_eq!(pm.flags(), 1, "the write never landed");
+    let out = pm.take();
+    assert!(out.contains(&Out::CatchUpMade), "{out:?}");
+    assert!(out.contains(&Out::CatchUpDone), "{out:?}");
+    assert!(
+        !out.iter().any(|o| matches!(o, Out::Act(_))),
+        "a toggle never flips blind: {out:?}"
+    );
 }
 
 #[test]

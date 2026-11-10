@@ -9,9 +9,11 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
-use messages::bench::{Called, FromCore, Hello, Signal as BenchSignal, StandInAct, ToCore};
+use messages::bench::{
+    Called, FromCore, Hello, RuleThen, RuleWhen, Signal as BenchSignal, StandInAct, ToCore,
+};
 use sim_client::Op;
-use stand_in_sim::{Act, Signal, StandIn};
+use stand_in_sim::{Act, Rule, Signal, StandIn, Then, When};
 
 use super::module::BenchModule;
 use super::{Sources, ToBench, playback};
@@ -174,6 +176,29 @@ impl Bench {
             StandInAct::Lack { title } => Act::Lack { title },
             StandInAct::FrameBurst { count } => Act::FrameBurst { count },
             StandInAct::ResetVars => Act::ResetVars,
+            StandInAct::Inputs { events } => Act::Inputs { events },
+            StandInAct::SetInput { name, value } => Act::SetInput { name, value },
+            StandInAct::SendEvent { name, data } => Act::SendEvent { name, data },
+            StandInAct::Rule {
+                when,
+                after_ms,
+                then,
+            } => Act::Rule(Rule {
+                when: match when {
+                    RuleWhen::Written { name } => When::Written(name),
+                    RuleWhen::Sent { name } => When::Sent(name),
+                    RuleWhen::Fired { name } => When::Fired(name),
+                    RuleWhen::Every { ms } => When::Every(Duration::from_millis(ms)),
+                },
+                after: Duration::from_millis(after_ms),
+                then: match then {
+                    RuleThen::Set { name, value } => Then::Set { name, value },
+                    RuleThen::Flip { name } => Then::Flip { name },
+                    RuleThen::SetInput { name, value } => Then::SetInput { name, value },
+                    RuleThen::Fire { name } => Then::Fire { name },
+                    RuleThen::Send { name, data } => Then::Send { name, data },
+                },
+            }),
             StandInAct::Stale { unit: name } => match unit(&name) {
                 Some(place) => Act::Stale { unit: place as u32 },
                 None => return tracing::warn!(name, "the bench named no unit of the core's"),
@@ -212,6 +237,7 @@ impl Bench {
                     opens: report.opened.iter().map(|c| (c.unit, c.open)).collect(),
                     calls,
                     variables: report.variables,
+                    inputs: report.inputs,
                     objects: report
                         .objects
                         .into_iter()

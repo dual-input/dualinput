@@ -177,6 +177,10 @@ pub struct Notification {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[ts(optional)]
     pub action: Option<String>,
+    /// Each thing a card counts, such as the controls that couldn't sync.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[ts(as = "Option<Vec<String>>", optional)]
+    pub list: Vec<String>,
     /// Where a click outside its action lands in the EFB app.
     pub landing: Landing,
 }
@@ -198,8 +202,15 @@ impl Notification {
             busy: false,
             once: false,
             action: None,
+            list: Vec::new(),
             landing,
         }
+    }
+
+    /// Each thing the card counts.
+    pub fn list(mut self, list: Vec<String>) -> Self {
+        self.list = list;
+        self
     }
 
     pub fn detail(mut self, detail: impl Into<String>) -> Self {

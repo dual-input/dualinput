@@ -612,8 +612,15 @@ test("the profile loading before the aircraft's package folder is found starts t
   let released = false
   const server = net.createServer((socket) => {
     socket.on("error", () => {})
-    if (released) socket.end(text)
-    else held.push(socket)
+    if (released) {
+      socket.end(text)
+      return
+    }
+    // Each held read takes one of the core's 4 job threads, so holding every search's read left
+    // none for the bundle's read, and the profile never loaded. The package search the model's
+    // job waits on is the last to start, so the earlier ones go free.
+    held.push(socket)
+    if (held.length > 2) held.shift()!.end(text)
   })
   await new Promise<void>((resolve) => server.listen(pipe, resolve))
   t.after(() => server.close())

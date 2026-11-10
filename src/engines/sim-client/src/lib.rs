@@ -14,7 +14,7 @@
 mod client;
 pub mod message;
 
-pub use client::{Area, Client, Period, Value, Var, Watch};
+pub use client::{Area, Client, InputAsk, InputReady, Period, Value, Var, Watch};
 
 use serde::{Deserialize, Serialize};
 
@@ -115,6 +115,20 @@ pub enum Op {
         group: u32,
         flags: u32,
     },
+    /// `SimConnect_TransmitClientEvent_EX1`, with up to five values, the rest 0.
+    TransmitClientEventEx1 {
+        object: u32,
+        event: u32,
+        group: u32,
+        flags: u32,
+        data: [u32; 5],
+    },
+    /// `SimConnect_EnumerateInputEvents`, whose answers carry `request`.
+    EnumerateInputEvents { request: u32 },
+    /// `SimConnect_GetInputEvent`, whose answer carries `request` and no hash.
+    GetInputEvent { request: u32, hash: u64 },
+    /// `SimConnect_SubscribeInputEvent`.
+    SubscribeInputEvent { hash: u64 },
     /// `SimConnect_AddClientEventToNotificationGroup`.
     AddClientEventToNotificationGroup {
         group: u32,

@@ -7,6 +7,21 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 ```
 
 > **Note**
+> In [`H:` events](#h-events), `fsEventsHEventCall` returned `FS_EVENTS_ERROR_FAIL` and reached no panel, so the routine host fires each `H:` event as calculator code, `(>H:<name>)`, as that section's fallback has it ([sync log](log.md#2026-11-10-the-sdks-h-event-call-fails-on-msfs-2024-so-our-module-fires-h-events-as-calculator-code-which-reached-every-panel); user, 2026-11-10).
+
+> **Note**
+> The 1.5s check in [checking a write](#checking-a-write) rests on an `instrument()` entry's reads every 250ms with a wide margin, not on the Fenix's battery lamp, since a profile watches the switch it writes, which landed in about 130ms on the Fenix, whose lamps are annunciators that hang on other switches too; and in the sim, the Fenix lights its APU master's ON light whatever order catch-up writes its switches in, so the battery-before-APU order is the bench's case alone ([sync log](log.md#2026-11-09-stage-14s-session-in-the-sim-passed-in-four-aircraft-and-no-aircraft-took-an-h-event-our-module-fired); user, 2026-11-10).
+
+> **Note**
+> State sync calls `step_ready` 1.5s after its profile loads, not at the load, since `give` leaves out an entry with no reading, and a catch-up asked before the load would be answered before any watch had read; `h-events` says yes for a counting entry's `H:` events too ([sync log](log.md#2026-11-10-stage-14s-code-review-found-a-catch-up-answered-with-no-values-a-preset-fired-again-after-a-gap-and-a-stream-stalled-by-an-unload)).
+
+> **Note**
+> A catch-up write still held for its entry's first reading 1.5s after the catch-up starts counts as made, and the engine flags it as never landed, so an entry that never reads can't hold a catch-up open ([sync log](log.md#2026-11-09-the-first-session-in-the-sim-stopped-on-a-catch-up-that-six-unread-instrument-entries-held-open); user, 2026-11-09).
+
+> **Note**
+> Every write to an input event goes through our WASM module, not `set_input`, and the routine `HEvents` below also calls input event presets, under the name `NamedEvents` and the slot `DUALINPUT_ROUTINE_NAMED_EVENTS` ([sync log](log.md#2026-11-09-writes-to-input-events-go-through-our-wasm-module-since-simconnects-list-has-none-of-their-presets); user, 2026-11-09).
+
+> **Note**
 > Each `panel_module` call below takes a third argument, a function that says whether the loaded profile names anything the module serves, and `clients` raises its trouble over a panel that never connects only when one says yes ([the apps' note](../interface/01-apps.md); user, 2026-11-01).
 > `h-events` says yes when the loaded variant's `watches` holds an `H:` event, and `instrument-reads` when they hold an `instrument()`.
 
@@ -118,6 +133,7 @@ A rule that remembered written values for a time would have swallowed that turn 
 ### Events
 
 - An event entry's firing on this machine sends its occurrence, with the event's value if it carried one, and another machine's arrives as `Arrived::Fired`, which the engine fires through the entry's `write`.
+- A pulse's firing carries the value the pulse rose to, so an event entry that writes its own pulse variable replays it.
 - Firing an event entry, by whatever its `write` does, leaves a token for the name the entry watches, and a counting entry's step leaves one for the step's name; the next occurrence of that name on this machine uses the token up and isn't sent, and a token no occurrence uses within 1s expires.
   So an entry that watches an `H:` event and writes an input event, as [event entries](01-profile-entries.md#event-entries)' example does, doesn't send back the `H:` event its write makes the aircraft fire.
   A counting entry's shadow moves on an occurrence that uses a token.
@@ -204,7 +220,8 @@ me.cockpit_kind(state_sync::FIRED, StateSync::fire);
 ### Sending
 
 - `cx.cockpit().send(kind, key, body)` sends, or holds when the kind holds, and `cx.cockpit().withdraw(kind, key)` drops what's held for that key.
-- When a message goes, the stream adds 1 to its own counter, fills in the clock, the control value, and the gap, keeps the message, sends it `To::Crew`, and raises `CockpitSent`, the code map's ["cockpit sent"](../architecture/02-code-map.md#what-a-handler-sees-and-does), which also hands state sync the stamp of its change.
+- A held message carries the control value it was made under, not the one in force when it goes, as [a change of control](04-order-and-recovery.md#a-change-of-control) needs.
+- When a message goes, the stream adds 1 to its own counter, fills in the clock and the gap, keeps the message, sends it `To::Crew`, and raises `CockpitSent`, the code map's ["cockpit sent"](../architecture/02-code-map.md#what-a-handler-sees-and-does), which also hands state sync the stamp of its change.
   `CockpitSent` carries the kind, the key, the clock, and, for a kind that declares an entry, the entry and its number.
 - It sends no message of a feature's kind before preflight ends or while this member is out of the flight ([in the flight](../session/02-units.md#in-the-flight)); its own `CONTROL`, `Replay`, and catch-up's messages go whatever the member's flight.
 
@@ -215,6 +232,7 @@ me.cockpit_kind(state_sync::FIRED, StateSync::fire);
 3. It waits what's left of its gap, capped at 2s, counted from when the message before it applied, through a timer ([the replay](04-order-and-recovery.md#the-replay)).
 4. Its kind's handler applies it, and once it's done or skipped, the receiver's clock takes its number.
 
+- The stream applies at most 50 messages in one input, and the rest in the inputs of a timer, since applying one queues two calls, the kernel panics past 1,000 queued in one input, and one 64 KiB read of a replay can hold about 540 messages.
 - Messages queue, applying nothing, while this member is out of the flight and while its catch-up waits for its answer ([catch-up](#catch-up)).
   A member in the flight with no profile loaded applies them, and state sync skips its own kinds then, so a `CONTROL` still applies and a replay still ends; a profile that loads later catches up.
 - A message of a kind no unit here registered is skipped, which a crew on one release never sends.
@@ -232,6 +250,7 @@ me.cockpit_kind(state_sync::FIRED, StateSync::fire);
 
 - On `ControlPassed` with `made_here`, the core that made the change sends a `CONTROL` message whose body is the new control value, so its clock is the maker's ([the session's units](../session/02-units.md#control)).
 - Once the session's control has changed, a message the superseded PF made under the value it lost waits until that change's `CONTROL` message arrives, then applies if the `CONTROL` message's clock includes it and is skipped if not, live or in a replay ([a change of control](04-order-and-recovery.md#a-change-of-control)).
+  The stream judges a message against the newest control value it or the session crate knows, since the change's `CONTROL` message can come before the session's key.
 - If a machine other than the new PF counts more of the superseded PF's messages than the `CONTROL` message's clock does, it applied a message the change drops, and it asks the new PF for a catch-up once any replay it's receiving ends.
 
 ### Catch-up
@@ -251,9 +270,13 @@ The catching-up machine asks for its catch-up, since after a pass only it knows 
 ```rust
 // a sketch: state sync's step, the one step in v1's pipeline
 me.catch_up_step(state_sync::STATE, StateSync::give, StateSync::take);   // give on the flying machine, take on the catching-up one
+cx.cockpit().step_ready(state_sync::STATE, true);   // while its profile is loaded
 cx.cockpit().step_made(state_sync::STATE);    // every write made, a stepping write's last step included
 cx.cockpit().step_done(state_sync::STATE);    // made, and the aircraft settled
 ```
+
+- A step's unit says whether it can give and take through `step_ready`, since the stream can't read the profile loader.
+  A machine asks for its catch-up, and the flying machine answers, only while every step can, so a core with no step ready never asks.
 
 - The catching-up machine takes the answer's clock as [catch-up](04-order-and-recovery.md#catch-up) has it, so queued copies drop, and hands each step its payload in the pipeline's order.
   It applies the rest of its queue once every step has called `step_made`, and ends the catch-up once every step has called `step_done`.

@@ -3,6 +3,25 @@
 What the build's stages found about pointer sync, which plays one pilot's presses and drags on a synced display on the crew's copies of it, newest entry first.
 Each entry's raw output is in the `results/` folder beside this log.
 
+## 2026-11-09: Pointer sync's cases in the sim pass on the A220's ND and the Baron's tablet, once the second pilot's display carries the A220's livery
+
+**Asked:** do [pointer sync's cases in the sim](01-pointer-sync.md#cases-for-the-bench) hold, in stage 14's session, with the real core hosting and a bench core's fake cockpit panel as the second pilot's display, on the Baron 58P's tablet and on the A220's ND with a local profile that names its `DisplayUnits`?
+
+**Expected:** each case to pass.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999 ([the runs' reports](../sync/results/2026-11-09-stage-14-session-reruns.txt)):
+
+- On the A220's ND, with its power on, every case passed: the second pilot's tap played as one down, one up, and one click; their press held 3s played through to its up; their drag, a step every 100ms, played its down, four moves, and its up; the pilot's press under their lock flashed; and the pilot's press, dragged off the ND and let go, played on the second pilot's display and ended there, leaving it unlocked.
+- The A220's five screens are one panel, `VCockpit02 - DisplayUnits`, whose key carries the livery, `DisplayUnits|config=C-GUAC`.
+  With a fake display keyed plain `DisplayUnits`, nothing played either way, as the known limit of the entry below has it, so the second pilot's display takes the sim's key.
+- On the Baron's tablet, the tap played as one down, one up, and one click, the held press played through, the pilot's press under the lock flashed, and the press dragged off ended on the second pilot's display.
+- A drag whose moves went in the same instant as its press and up played as a down at its start and an up at its end, with no moves between, on both displays.
+  No hand drags that way, and the paced drag passed.
+
+**Changed:** the session's script gives the second pilot's display the sim's key, and drags at a hand's pace.
+
+**Affects:** nothing in the design.
+
 ## 2026-10-25: Stage 19 builds pointer sync, and a PF's press made before the PM's catch-up ask reaches the PF drops on the PM
 
 **Asked:** do [stage 19](../build/plan.md#19-pointer-sync)'s cases hold between bench cores, each with a fake cockpit panel running the panel bridge and the `pointer-sync` module over a fake document, and do [pointer sync's budgets](01-pointer-sync.md#budgets)?

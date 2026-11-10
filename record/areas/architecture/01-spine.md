@@ -7,6 +7,9 @@ Decides:     Which components Dual Input runs, where each runs, and what each ow
 ```
 
 > **Note**
+> In [the core](#the-core), state sync's routine is `NamedEvents`, and it fires `H:` events as calculator code, `(>H:<name>)`, since `fsEventsHEventCall` reached no panel ([sync log](../sync/log.md#2026-11-10-the-sdks-h-event-call-fails-on-msfs-2024-so-our-module-fires-h-events-as-calculator-code-which-reached-every-panel); user, 2026-11-10).
+
+> **Note**
 > Stage 11b's tentative decisions change the desktop app's pages, pending the apps' design (user, 2026-10-25): the desktop app's window shows only its own screens, every other screen is the EFB app's ([one full window](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app)), and the desktop app's pages and the EFB app draw with one kit of React components, styled with Tailwind 3, not Vite and Tailwind 4 ([the kit](../interface/decisions.md#the-apps-draw-with-a-kit-of-our-own-components-styled-with-tailwind-3); user, 2026-11-01).
 > So [Frameworks](#frameworks)' desktop app row, its rule that the two apps share no interface, and its EFB app and banner rows no longer hold.
 > The EFB app [touches the MSFS Avionics Framework only to register](../interface/decisions.md#the-efb-app-touches-the-framework-only-to-register-through-the-efbs-own-copy), and the banner draws with React and no copy of it ([the banner](../interface/decisions.md#the-banner-draws-with-react-and-the-kit)), so [left open](#left-open)'s questions on which copy of the framework we pin close.

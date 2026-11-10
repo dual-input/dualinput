@@ -1,0 +1,26 @@
+# The Fenix's batteries and APU master, for state sync's cases in the sim
+# (record/areas/sync/05-units.md). Each entry watches its own switch, as a profile does: the
+# Fenix's lights are the pushbuttons' annunciators, which hang on other switches too, as battery
+# 2's OFF light, `L:I_OH_ELEC_BAT2_L`, lit for battery 1 only while battery 2 was off (measured
+# on MSFS 2024, 2026-11-09, record/areas/sync/log.md).
+maker: Fenix
+name: A320 session check
+maturity: experimental
+authors: Dual Input
+aircraft:
+  variants:
+    a320: FNX_32X
+
+state:
+  battery_1:
+    name: Battery 1
+    watch: L('S_OH_ELEC_BAT1')
+    write: L('S_OH_ELEC_BAT1')
+  battery_2:
+    name: Battery 2
+    watch: L('S_OH_ELEC_BAT2')
+    write: L('S_OH_ELEC_BAT2')
+  apu_master:
+    name: APU master
+    watch: L('S_OH_ELEC_APU_MASTER')
+    write: L('S_OH_ELEC_APU_MASTER')

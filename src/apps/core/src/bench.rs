@@ -111,7 +111,12 @@ pub fn start(
             let pages = to_bench.clone();
             let (stand_in, _) = StandIn::start(
                 move |up| queue.push(source, up.encode()),
-                move |name, data| pages.send(&FromCore::CommBus { name, data }),
+                move |page| match page {
+                    stand_in_sim::Page::CommBus { name, data } => {
+                        pages.send(&FromCore::CommBus { name, data })
+                    }
+                    stand_in_sim::Page::HEvent { name } => pages.send(&FromCore::HEvent { name }),
+                },
                 Box::new(module::BenchModule::new(
                     messages::SLOTS_HASH,
                     to_bench.clone(),

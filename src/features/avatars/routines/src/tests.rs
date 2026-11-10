@@ -44,6 +44,10 @@ impl Sim for World {
     fn reset(&mut self) -> bool {
         false
     }
+
+    fn fire_h(&mut self, _: &str) {}
+
+    fn call_preset(&mut self, _: &str, _: Option<f64>) {}
 }
 
 fn seated() -> FigureSlot {

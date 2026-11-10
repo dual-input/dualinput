@@ -7,6 +7,12 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 ```
 
 > **Note**
+> In [wants and the sim's APIs](#wants-and-the-sims-apis), an `H:` event goes as calculator code, `(>H:<name>)`, through `execute_calculator_code`, since `fsEventsHEventCall` returned `FS_EVENTS_ERROR_FAIL` and reached no panel, while calculator code reached every one ([sync log](../sync/log.md#2026-11-10-the-sdks-h-event-call-fails-on-msfs-2024-so-our-module-fires-h-events-as-calculator-code-which-reached-every-panel); user, 2026-11-10).
+
+> **Note**
+> `set_input` isn't built: every write to an input event goes through our WASM module, as `fsVarsBVarCall` on a preset's name, beside the `H:` events ([sync log](../sync/log.md#2026-11-09-writes-to-input-events-go-through-our-wasm-module-since-simconnects-list-has-none-of-their-presets); user, 2026-11-09).
+
+> **Note**
 > For [home's aircraft line](../interface/decisions.md#home-names-the-loaded-aircraft-and-offers-host-and-join-in-any-aircraft), sim awareness gains `selected`, the aircraft of the last `AircraftLoaded` in any stage, and the slice `sim` gains `where` and names that aircraft (2026-11-01).
 > Its maker and model are `ui_manufacturer` and `ui_type` in its `aircraft.cfg`, found by [the package search](#the-aircrafts-facts), and stay `null` for a streamed copy and for a value that's a localization token (read in community packages on 2026-11-01; whether the Marketplace's aircraft use tokens is unverified).
 > Its tail is `A:ATC ID`, read at each load, and whether it reads at the main menu or the world map is unverified: a sim session settles it, and until then a refused read leaves it `null` until the flight's load.

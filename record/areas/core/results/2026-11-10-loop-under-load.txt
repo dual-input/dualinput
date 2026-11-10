@@ -1,0 +1,31 @@
+The loop under load, node tools/bench.ts load 1, on our development machine, 2026-11-10: first beside MSFS 2024 flying the iniBuilds A350 at a busy airport with traffic, in focus, its frame rate locked and DLSS frame generation on; then with no sim running. Each run's report.txt.
+
+=== run 2026-11-10_08-50-57-load
+the loop under load: flight-58p-egll-600s.bin.zst played once, a run of 600s, in <repo>\target\bench\runs\2026-11-10_08-50-57-load
+inputs	449315, 749 a second
+queue wait, p50	25µs
+queue wait, p99	639µs	budget 11.2ms	within
+queue wait, p99 of the worst minute	895µs
+queue wait, p99.9	57.3ms
+queue wait, most	100.1ms
+busy	2.01%	budget 20%	within
+inputs over 1ms	651, of which the load's 100ms stops are 10 or 9	budget 1ms but the stops	MISSED
+slowest input	100.0ms, #153087
+replay	8.4s for 449315 inputs, 50.3s an hour	budget 360s an hour	within
+stamps rise	449315 of 449315 inputs recorded in order		within
+recording	17.1 MB
+
+=== run 2026-11-10_09-30-39-load
+the loop under load: flight-58p-egll-600s.bin.zst played once, a run of 600s, in <repo>\target\bench\runs\2026-11-10_09-30-39-load
+inputs	449320, 749 a second
+queue wait, p50	17µs
+queue wait, p99	119µs	budget 11.2ms	within
+queue wait, p99 of the worst minute	335µs
+queue wait, p99.9	57.3ms
+queue wait, most	100.0ms
+busy	1.32%	budget 20%	within
+inputs over 1ms	11, of which the load's 100ms stops are 10 or 9	budget 1ms but the stops	MISSED
+slowest input	100.0ms, #76041
+replay	6.0s for 449320 inputs, 36.2s an hour	budget 360s an hour	within
+stamps rise	449320 of 449320 inputs recorded in order		within
+recording	17.0 MB

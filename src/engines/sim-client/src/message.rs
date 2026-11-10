@@ -10,17 +10,24 @@ use std::mem::offset_of;
 
 use serde::{Deserialize, Serialize};
 use simconnect_types::{
-    DWORD, SIMCONNECT_DATA_CAMERA, SIMCONNECT_DATA_PBH, SIMCONNECT_DATA_XYZ, SIMCONNECT_RECV,
-    SIMCONNECT_RECV_ASSIGNED_OBJECT_ID, SIMCONNECT_RECV_CAMERA_DATA, SIMCONNECT_RECV_EVENT,
-    SIMCONNECT_RECV_EVENT_FILENAME, SIMCONNECT_RECV_EVENT_FRAME, SIMCONNECT_RECV_EXCEPTION,
-    SIMCONNECT_RECV_FLOW_EVENT, SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID,
-    SIMCONNECT_RECV_ID_CAMERA_DATA, SIMCONNECT_RECV_ID_CLIENT_DATA, SIMCONNECT_RECV_ID_EVENT,
-    SIMCONNECT_RECV_ID_EVENT_FILENAME, SIMCONNECT_RECV_ID_EVENT_FRAME,
-    SIMCONNECT_RECV_ID_EXCEPTION, SIMCONNECT_RECV_ID_FLOW_EVENT, SIMCONNECT_RECV_ID_OPEN,
-    SIMCONNECT_RECV_ID_QUIT, SIMCONNECT_RECV_ID_SIMOBJECT_DATA,
-    SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE, SIMCONNECT_RECV_ID_SYSTEM_STATE,
-    SIMCONNECT_RECV_OPEN, SIMCONNECT_RECV_SIMOBJECT_DATA, SIMCONNECT_RECV_SYSTEM_STATE,
+    DWORD, SIMCONNECT_DATA_CAMERA, SIMCONNECT_DATA_PBH, SIMCONNECT_DATA_XYZ,
+    SIMCONNECT_INPUT_EVENT_DESCRIPTOR, SIMCONNECT_INPUT_EVENT_TYPE_DOUBLE,
+    SIMCONNECT_INPUT_EVENT_TYPE_STRING, SIMCONNECT_RECV, SIMCONNECT_RECV_ASSIGNED_OBJECT_ID,
+    SIMCONNECT_RECV_CAMERA_DATA, SIMCONNECT_RECV_ENUMERATE_INPUT_EVENTS, SIMCONNECT_RECV_EVENT,
+    SIMCONNECT_RECV_EVENT_EX1, SIMCONNECT_RECV_EVENT_FILENAME, SIMCONNECT_RECV_EVENT_FRAME,
+    SIMCONNECT_RECV_EXCEPTION, SIMCONNECT_RECV_FLOW_EVENT, SIMCONNECT_RECV_GET_INPUT_EVENT,
+    SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID, SIMCONNECT_RECV_ID_CAMERA_DATA,
+    SIMCONNECT_RECV_ID_CLIENT_DATA, SIMCONNECT_RECV_ID_ENUMERATE_INPUT_EVENTS,
+    SIMCONNECT_RECV_ID_EVENT, SIMCONNECT_RECV_ID_EVENT_EX1, SIMCONNECT_RECV_ID_EVENT_FILENAME,
+    SIMCONNECT_RECV_ID_EVENT_FRAME, SIMCONNECT_RECV_ID_EXCEPTION, SIMCONNECT_RECV_ID_FLOW_EVENT,
+    SIMCONNECT_RECV_ID_GET_INPUT_EVENT, SIMCONNECT_RECV_ID_OPEN, SIMCONNECT_RECV_ID_QUIT,
+    SIMCONNECT_RECV_ID_SIMOBJECT_DATA, SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE,
+    SIMCONNECT_RECV_ID_SUBSCRIBE_INPUT_EVENT, SIMCONNECT_RECV_ID_SYSTEM_STATE,
+    SIMCONNECT_RECV_OPEN, SIMCONNECT_RECV_SIMOBJECT_DATA, SIMCONNECT_RECV_SUBSCRIBE_INPUT_EVENT,
+    SIMCONNECT_RECV_SYSTEM_STATE,
 };
+
+use crate::Value;
 
 /// The version in the header of each message the sim hands over: every one of the 312,702
 /// records in p10's capture of a flight on MSFS 2024 carried 6 (read in
@@ -47,6 +54,23 @@ pub enum Message {
     },
     /// A client event or system event, such as `Pause_EX1` with its flags in `data`.
     Event { group: u32, event: u32, data: u32 },
+    /// A client event sent with several values, as `SimConnect_TransmitClientEvent_EX1` sends one.
+    EventEx1 {
+        group: u32,
+        event: u32,
+        data: [u32; 5],
+    },
+    /// One page of `SimConnect_EnumerateInputEvents`' answer: send `entry` of `out_of`.
+    InputEvents {
+        request: u32,
+        entry: u32,
+        out_of: u32,
+        events: Vec<InputEvent>,
+    },
+    /// `SimConnect_GetInputEvent`'s answer, which names only the request that asked.
+    InputValue { request: u32, value: Value },
+    /// A subscribed input event's new value.
+    InputChanged { hash: u64, value: Value },
     /// A system event that names a file, such as `AircraftLoaded` with the aircraft's
     /// `aircraft.cfg`.
     Filename { event: u32, file: String },
@@ -73,6 +97,14 @@ pub enum Message {
     Camera(Camera),
     /// A kind of message nothing of ours asks for yet.
     Other { id: u32 },
+}
+
+/// An input event of the loaded aircraft, as `SimConnect_EnumerateInputEvents` lists it. The list
+/// holds input events, not their presets (read in `record/learn/foundations/04-02-events.md`).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct InputEvent {
+    pub name: String,
+    pub hash: u64,
 }
 
 /// Where the camera is and where it looks, as `SimConnect_CameraGet` gives it.
@@ -147,6 +179,62 @@ impl Message {
                     group: u32_at(record, offset_of!(R, uGroupID))?,
                     event: u32_at(record, offset_of!(R, uEventID))?,
                     data: u32_at(record, offset_of!(R, dwData))?,
+                }
+            }
+            SIMCONNECT_RECV_ID_EVENT_EX1 => {
+                type R = SIMCONNECT_RECV_EVENT_EX1;
+                Message::EventEx1 {
+                    group: u32_at(record, offset_of!(R, uGroupID))?,
+                    event: u32_at(record, offset_of!(R, uEventID))?,
+                    data: [
+                        u32_at(record, offset_of!(R, dwData0))?,
+                        u32_at(record, offset_of!(R, dwData1))?,
+                        u32_at(record, offset_of!(R, dwData2))?,
+                        u32_at(record, offset_of!(R, dwData3))?,
+                        u32_at(record, offset_of!(R, dwData4))?,
+                    ],
+                }
+            }
+            SIMCONNECT_RECV_ID_ENUMERATE_INPUT_EVENTS => {
+                type R = SIMCONNECT_RECV_ENUMERATE_INPUT_EVENTS;
+                type D = SIMCONNECT_INPUT_EVENT_DESCRIPTOR;
+                let count = u32_at(record, offset_of!(R, _base.dwArraySize))? as usize;
+                let first = offset_of!(R, rgData);
+                let mut events = Vec::new();
+                for i in 0..count {
+                    let at = first + i * size_of::<D>();
+                    events.push(InputEvent {
+                        name: text_at(record, at + offset_of!(D, Name), 64)?,
+                        hash: u64_at(record, at + offset_of!(D, Hash))?,
+                    });
+                }
+                Message::InputEvents {
+                    request: u32_at(record, offset_of!(R, _base.dwRequestID))?,
+                    entry: u32_at(record, offset_of!(R, _base.dwEntryNumber))?,
+                    out_of: u32_at(record, offset_of!(R, _base.dwOutOf))?,
+                    events,
+                }
+            }
+            SIMCONNECT_RECV_ID_GET_INPUT_EVENT => {
+                type R = SIMCONNECT_RECV_GET_INPUT_EVENT;
+                Message::InputValue {
+                    request: u32_at(record, offset_of!(R, dwRequestID))?,
+                    value: input_value(
+                        record,
+                        u32_at(record, offset_of!(R, eType))?,
+                        offset_of!(R, Value),
+                    )?,
+                }
+            }
+            SIMCONNECT_RECV_ID_SUBSCRIBE_INPUT_EVENT => {
+                type R = SIMCONNECT_RECV_SUBSCRIBE_INPUT_EVENT;
+                Message::InputChanged {
+                    hash: u64_at(record, offset_of!(R, Hash))?,
+                    value: input_value(
+                        record,
+                        u32_at(record, offset_of!(R, eType))?,
+                        offset_of!(R, Value),
+                    )?,
                 }
             }
             SIMCONNECT_RECV_ID_EVENT_FILENAME => Message::Filename {
@@ -258,6 +346,64 @@ impl Message {
                 put_u32(&mut r, offset_of!(R, uGroupID), *group);
                 put_u32(&mut r, offset_of!(R, uEventID), *event);
                 put_u32(&mut r, offset_of!(R, dwData), *data);
+                r
+            }
+            Message::EventEx1 { group, event, data } => {
+                type R = SIMCONNECT_RECV_EVENT_EX1;
+                let mut r = fixed::<R>(SIMCONNECT_RECV_ID_EVENT_EX1);
+                put_u32(&mut r, offset_of!(R, uGroupID), *group);
+                put_u32(&mut r, offset_of!(R, uEventID), *event);
+                put_u32(&mut r, offset_of!(R, dwData0), data[0]);
+                put_u32(&mut r, offset_of!(R, dwData1), data[1]);
+                put_u32(&mut r, offset_of!(R, dwData2), data[2]);
+                put_u32(&mut r, offset_of!(R, dwData3), data[3]);
+                put_u32(&mut r, offset_of!(R, dwData4), data[4]);
+                r
+            }
+            Message::InputEvents {
+                request,
+                entry,
+                out_of,
+                events,
+            } => {
+                type R = SIMCONNECT_RECV_ENUMERATE_INPUT_EVENTS;
+                type D = SIMCONNECT_INPUT_EVENT_DESCRIPTOR;
+                let first = offset_of!(R, rgData);
+                let mut r = fixed::<R>(SIMCONNECT_RECV_ID_ENUMERATE_INPUT_EVENTS);
+                r.resize(first + events.len() * size_of::<D>(), 0);
+                put_u32(&mut r, offset_of!(R, _base.dwRequestID), *request);
+                put_u32(
+                    &mut r,
+                    offset_of!(R, _base.dwArraySize),
+                    events.len() as u32,
+                );
+                put_u32(&mut r, offset_of!(R, _base.dwEntryNumber), *entry);
+                put_u32(&mut r, offset_of!(R, _base.dwOutOf), *out_of);
+                for (i, event) in events.iter().enumerate() {
+                    let at = first + i * size_of::<D>();
+                    put_text(&mut r, at + offset_of!(D, Name), 64, &event.name);
+                    put_u64(&mut r, at + offset_of!(D, Hash), event.hash);
+                    put_u32(
+                        &mut r,
+                        at + offset_of!(D, eType),
+                        SIMCONNECT_INPUT_EVENT_TYPE_DOUBLE,
+                    );
+                }
+                set_size(&mut r);
+                r
+            }
+            Message::InputValue { request, value } => {
+                type R = SIMCONNECT_RECV_GET_INPUT_EVENT;
+                let mut r = fixed::<R>(SIMCONNECT_RECV_ID_GET_INPUT_EVENT);
+                put_u32(&mut r, offset_of!(R, dwRequestID), *request);
+                put_input_value(&mut r, offset_of!(R, eType), offset_of!(R, Value), value);
+                r
+            }
+            Message::InputChanged { hash, value } => {
+                type R = SIMCONNECT_RECV_SUBSCRIBE_INPUT_EVENT;
+                let mut r = fixed::<R>(SIMCONNECT_RECV_ID_SUBSCRIBE_INPUT_EVENT);
+                put_u64(&mut r, offset_of!(R, Hash), *hash);
+                put_input_value(&mut r, offset_of!(R, eType), offset_of!(R, Value), value);
                 r
             }
             Message::Filename { event, file } => {
@@ -375,9 +521,41 @@ fn data_record(id: i32, d: &Data) -> Vec<u8> {
     ] {
         put_u32(&mut r, offset, value);
     }
-    let size = r.len() as u32;
-    put_u32(&mut r, offset_of!(SIMCONNECT_RECV, dwSize), size);
+    set_size(&mut r);
     r
+}
+
+/// Writes a message's length into its header, once its variable part is on it.
+fn set_size(record: &mut [u8]) {
+    let size = record.len() as u32;
+    put_u32(record, offset_of!(SIMCONNECT_RECV, dwSize), size);
+}
+
+/// An input event's value at `offset`: a number, or else text to the message's end.
+fn input_value(record: &[u8], kind: u32, offset: usize) -> Option<Value> {
+    if kind == SIMCONNECT_INPUT_EVENT_TYPE_DOUBLE {
+        Some(Value::Number(f64_at(record, offset)?))
+    } else {
+        let len = record.len().checked_sub(offset)?;
+        Some(Value::Text(text_at(record, offset, len)?))
+    }
+}
+
+/// Puts an input event's value at the end of `record`, whose fixed part may end before it.
+fn put_input_value(record: &mut Vec<u8>, kind_at: usize, value_at: usize, value: &Value) {
+    match value {
+        Value::Number(n) => {
+            put_u32(record, kind_at, SIMCONNECT_INPUT_EVENT_TYPE_DOUBLE);
+            record.resize(value_at + 8, 0);
+            put_f64(record, value_at, *n);
+        }
+        Value::Text(t) => {
+            put_u32(record, kind_at, SIMCONNECT_INPUT_EVENT_TYPE_STRING);
+            record.resize(value_at + t.len() + 1, 0);
+            record[value_at..value_at + t.len()].copy_from_slice(t.as_bytes());
+        }
+    }
+    set_size(record);
 }
 
 /// A message of `T`'s size, all zero but its header.
@@ -400,6 +578,15 @@ fn u32_at(record: &[u8], offset: usize) -> Option<u32> {
 
 fn put_u32(record: &mut [u8], offset: usize, value: u32) {
     record[offset..offset + 4].copy_from_slice(&value.to_le_bytes());
+}
+
+fn u64_at(record: &[u8], offset: usize) -> Option<u64> {
+    let bytes = record.get(offset..offset + 8)?;
+    Some(u64::from_le_bytes(bytes.try_into().ok()?))
+}
+
+fn put_u64(record: &mut [u8], offset: usize, value: u64) {
+    record[offset..offset + 8].copy_from_slice(&value.to_le_bytes());
 }
 
 fn f64_at(record: &[u8], offset: usize) -> Option<f64> {
@@ -449,6 +636,38 @@ mod tests {
                 group: 1,
                 event: 3,
                 data: 8,
+            },
+            Message::EventEx1 {
+                group: 2,
+                event: 3,
+                data: [16_272, 2, 0, 0, 0],
+            },
+            Message::InputEvents {
+                request: 7,
+                entry: 0,
+                out_of: 1,
+                events: vec![
+                    InputEvent {
+                        name: "ELECTRICAL_Battery_1".into(),
+                        hash: 0x1234_5678_9ABC_DEF0,
+                    },
+                    InputEvent {
+                        name: "LIGHTING_BEACON_1".into(),
+                        hash: 2,
+                    },
+                ],
+            },
+            Message::InputValue {
+                request: 8,
+                value: Value::Number(1.0),
+            },
+            Message::InputChanged {
+                hash: 9,
+                value: Value::Number(0.5),
+            },
+            Message::InputChanged {
+                hash: 9,
+                value: Value::Text("on".into()),
             },
             Message::Filename {
                 event: 2,

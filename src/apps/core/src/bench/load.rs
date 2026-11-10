@@ -1,17 +1,28 @@
-//! The loop under load's test unit, which stands in for the sim service, the network, and
-//! state sync's write functions until they exist (record/areas/build/02-testing.md, "The
-//! loop under load"). The playback feeds it.
+//! The loop under load's test unit, which stands in for the sim service and the network, and
+//! runs state sync's write functions, in one sync engine of its own
+//! (record/areas/build/02-testing.md, "The loop under load"). The playback feeds it.
 //!
 //! The rates and costs are p10's, the probe that first ran this load on a loop of its own:
 //! a flight's capture at the pace it was captured, made-up inputs at a session's rates, 100
 //! write functions on each flight-model input, and a write function stopped at its limit
 //! once a minute (record/areas/architecture/log.md, 2026-10-16).
+//!
+//! The engine gets what state sync gives it: a frame before each flight-model input, and each
+//! write back as the sim's reading of it. Without both, every write's value stayed pending, and
+//! a run grew slower each minute, to 12,273 inputs over 1ms (measured on our development
+//! machine, 2026-11-09, record/areas/sync/log.md).
 
 use std::collections::BTreeMap;
 use std::time::{Duration, Instant};
 
 use kernel::{Cx, Exit, Input, Job, JobId, Registry, TimerId};
+use messages::cockpit::{Origin, VectorClock};
+use messages::session::Control;
+use messages::sync::{Stamp, Value};
+use profile_engine::{Name, Owner, Resolved, StateEntry, Watch, Write};
+use sandbox::Sandbox;
 use serde::Serialize;
+use sync_engine::{Action, Arrived, Ctx, Engine, Load as EngineLoad, Out, Ready, SETTLE, Seen};
 
 // Each input's bytes start with its kind, two bytes little-endian. The capture's own kinds
 // are p10's, from 1 to 13, as tools/bench/fixtures/README.md lists them.
@@ -37,9 +48,17 @@ pub fn input(kind: u16, bytes: &[u8]) -> Vec<u8> {
 /// Where the values start in `SIMCONNECT_RECV_SIMOBJECT_DATA`: after its 12-byte header and
 /// seven DWORDs.
 const DATA_AT: usize = 40;
-/// How long p10's 100 write functions kept its loop on each flight-model input, on average.
-const WRITE_FUNCTIONS: Duration = Duration::from_nanos(98_700);
 const WRITES: u16 = 100;
+/// The two machines of the load's one engine: this one, and the pilot flying whose changes it
+/// applies.
+const ME: Origin = Origin {
+    pilot: [2; 16],
+    restart: 0,
+};
+const PF: Origin = Origin {
+    pilot: [1; 16],
+    restart: 0,
+};
 /// The limit a write function is stopped at (record/areas/architecture/02-code-map.md,
 /// "Budgets").
 const LIMIT: Duration = Duration::from_millis(100);
@@ -80,6 +99,46 @@ pub struct Load {
     inputs: BTreeMap<u16, u64>,
     ticks: u64,
     stops: u64,
+    /// One sync engine, whose 100 entries each write through a function, and how many changes
+    /// the pilot flying has made of them.
+    engine: Option<Engine>,
+    changes: u64,
+    /// Each entry's watch, by the entry's place, which a write's reading comes back under.
+    watch_of: Vec<usize>,
+}
+
+/// An entry that reads a variable and writes it through a function that reads the state object,
+/// as a write function that guards on another entry does.
+fn entry(place: u16) -> StateEntry {
+    let name = format!("BENCH_{place}");
+    let function = format!(
+        "(value) => {{ if (state.e{} !== undefined) write(L('{name}'), value) }}",
+        (place + 1) % WRITES,
+    );
+    StateEntry {
+        key: format!("e{place}"),
+        name: format!("Entry {place}"),
+        description: None,
+        watch: Watch::Name(Name::L { name, unit: None }),
+        write: Write::Function(function),
+        owner: Owner::Shared,
+        only: Vec::new(),
+        ignore: Vec::new(),
+        features: Default::default(),
+    }
+}
+
+fn ctx(at: u64) -> Ctx {
+    Ctx {
+        at,
+        me: ME,
+        control: Control {
+            generation: 0,
+            pf: PF.pilot,
+        },
+        catching_up: false,
+        preflight_ended: true,
+    }
 }
 
 impl Load {
@@ -88,7 +147,6 @@ impl Load {
     }
 
     fn input(me: &mut Load, input: &Input, cx: &mut Cx) {
-        let started = Instant::now();
         let Some((kind, bytes)) = input.bytes.split_first_chunk::<2>() else {
             return;
         };
@@ -101,17 +159,44 @@ impl Load {
                 cx.timer(JOB_EVERY, Load::job);
                 let file = cx.random_bytes::<1024>().to_vec();
                 cx.job(Job::write(JOB_FILE, file), Load::written);
+                me.load_engine(cx);
             }
             FLIGHT_MODEL => {
                 let values: Vec<u64> = words(bytes.get(DATA_AT..).unwrap_or_default()).collect();
+                me.changes += 1;
+                let number = me.changes;
+                let at = cx.now();
+                let Some(engine) = me.engine.as_mut() else {
+                    return;
+                };
+                engine.frame(ctx(at));
+                let mut clock = VectorClock::default();
+                clock.set(PF, number);
                 for entry in 0..WRITES {
                     let bits = match values.len() {
                         0 => 0,
                         n => values[usize::from(entry) % n],
                     };
-                    cx.out(Wrote::Entry { entry, bits });
+                    let change = Arrived::Change {
+                        value: Value::Number(bits as f64),
+                        stamp: Stamp {
+                            origin: PF,
+                            number,
+                            clock: clock.clone(),
+                            pilot_flying: PF.pilot,
+                        },
+                    };
+                    let (_, out) = engine.arrived(&format!("e{entry}"), change, ctx(at));
+                    for out in out {
+                        if let Out::Act(Action::Set { value, .. }) = out {
+                            let bits = value.number().unwrap_or(0.0).to_bits();
+                            cx.out(Wrote::Entry { entry, bits });
+                            if let Some(&watch) = me.watch_of.get(usize::from(entry)) {
+                                engine.seen(Seen::Value { watch, value }, ctx(at));
+                            }
+                        }
+                    }
                 }
-                hold(started, WRITE_FUNCTIONS);
             }
             PROFILE => {
                 for item in bytes.get(DATA_AT..).unwrap_or_default().chunks_exact(12) {
@@ -134,6 +219,42 @@ impl Load {
             END => cx.out(Exit),
             _ => cx.out(Wrote::Passed(bytes.to_vec())),
         }
+    }
+
+    /// Loads the engine, with each entry's first reading, since the engine holds a write until
+    /// its entry has one.
+    fn load_engine(&mut self, cx: &Cx) {
+        let profile = Resolved {
+            variant: "bench".into(),
+            pace: None,
+            state: (0..WRITES).map(entry).collect(),
+            events: Vec::new(),
+            features: Default::default(),
+        };
+        let load = EngineLoad {
+            at: cx.now(),
+            ready: Ready::At(0),
+            settle: SETTLE,
+        };
+        let (mut engine, _) = Engine::load(&profile, Sandbox::new(), load);
+        self.watch_of = (0..WRITES)
+            .map(|place| {
+                let key = format!("e{place}");
+                engine
+                    .watches()
+                    .iter()
+                    .position(|w| w.entry == key)
+                    .unwrap_or(usize::MAX)
+            })
+            .collect();
+        for watch in 0..engine.watches().len() {
+            let seen = Seen::Value {
+                watch,
+                value: Value::Number(0.0),
+            };
+            engine.seen(seen, ctx(cx.now()));
+        }
+        self.engine = Some(engine);
     }
 
     fn tick(me: &mut Load, _: TimerId, cx: &mut Cx) {

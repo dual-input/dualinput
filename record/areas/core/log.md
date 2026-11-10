@@ -3,6 +3,29 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-11-10: Beside the A350, the loop's queue keeps its budget, and the sim's share of the CPU puts about 640 inputs over a handler's 1ms
+
+**Asked:** does the loop under load keep its budgets once state sync's write functions run in it, on a quiet PC and beside MSFS flying the A350, as [stage 14](../build/plan.md#14-state-sync) asks?
+
+**Expected:** the stage 3 run's figures, with the real engine's 100 write functions in place of the 98.7µs hold.
+
+**Found:** on our development machine, each run p10's 600s capture played once with a session's made-up inputs, and an engine of 100 write functions on every flight-model input ([the runs' reports](results/2026-11-10-loop-under-load.txt)):
+
+| Run | Queue wait, p99 | Busy | Inputs over 1ms, but the 10 stops | Replay |
+| --- | --- | --- | --- | --- |
+| Beside the A350 at a busy airport, in focus, frame rate locked, DLSS frame generation on | 639µs | 2.01% | 641 | 50s an hour |
+| No sim running | 119µs | 1.32% | 1 | 36s an hour |
+
+- Against the code map's budgets, of 11.2ms for the queue's wait at p99, 20% busy, and 360s an hour of replay, both runs kept all three, and every input was recorded in order.
+- With no sim running, the one input over 1ms beside the stops took 1,137µs in the run's first minute, the input that loads the engine and compiles its 100 write functions, which a pilot's core pays in a profile's load.
+- The night before, beside the A350 out of focus, the queue's wait at p99 was 1.2ms, and 942 inputs took over 1ms ([sync log](../sync/log.md#2026-11-09-stage-14s-session-in-the-sim-passed-in-four-aircraft-and-no-aircraft-took-an-h-event-our-module-fired)).
+- So the inputs over 1ms beside the sim come from the sim's share of the CPU, since the loop's stats time an input by the wall clock, which counts the turns Windows gives the sim, as [testing](../build/02-testing.md#building-what-it-runs) found of a pause of the loop's thread.
+
+**Changed:** the loop under load holds a handler's 1ms on a quiet PC alone, with the input that loads the engine counted as a load beside the stops; beside the sim, the queue's wait judges the loop, and the inputs over 1ms are recorded with no budget (user, 2026-11-10).
+`tools/bench/load.ts` reports so.
+
+**Affects:** [testing](../build/02-testing.md), with a note at its top.
+
 ## 2026-10-24: Our WASM module read none of the core's writes, because its dispatch callback reached its buffer through the context pointer; with a thread's own slot it reads them, and Hold freezes the aircraft
 
 **Asked:** why didn't preflight's `Hold` freeze the aircraft in [stage 9](../build/plan.md#9-the-session)'s sim session, where the core fed it from Ready to fly and a cockpit panel read all three freezes off 10s into the flight?

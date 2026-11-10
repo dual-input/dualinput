@@ -292,8 +292,55 @@ pub enum StandInAct {
     FrameBurst { count: u32 },
     /// Resets the sim's variables, as an aircraft change does.
     ResetVars,
+    /// Sets the aircraft's input events, each with its value, which the sim lists.
+    Inputs { events: Vec<(String, f64)> },
+    /// Moves an input event and reports it to each connection subscribed to it.
+    SetInput { name: String, value: f64 },
+    /// The aircraft or its pilot fires a `K:` event, which each listening connection hears.
+    SendEvent { name: String, data: u32 },
+    /// Scripts the aircraft's own behavior from now on.
+    Rule {
+        when: RuleWhen,
+        after_ms: u64,
+        then: RuleThen,
+    },
     /// Answers with a `FromCore::StandIn` line.
     Report,
+}
+
+/// What sets off a rule of the stand-in's aircraft.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[serde(tag = "when", rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum RuleWhen {
+    /// A connection wrote this variable.
+    Written {
+        name: String,
+    },
+    /// Someone sent this `K:` event.
+    Sent {
+        name: String,
+    },
+    /// Our WASM module fired this `H:` event.
+    Fired {
+        name: String,
+    },
+    Every {
+        ms: u64,
+    },
+}
+
+/// What a rule of the stand-in's aircraft does. A value left out takes the value that set the
+/// rule off.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[serde(tag = "then", rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum RuleThen {
+    Set { name: String, value: Option<f64> },
+    Flip { name: String },
+    SetInput { name: String, value: Option<f64> },
+    Fire { name: String },
+    Send { name: String, data: Option<u32> },
 }
 
 /// One of the sim's signals the stand-in plays.
@@ -442,6 +489,8 @@ pub enum FromCore {
     /// A CommBus call the core made for JavaScript, which the stand-in hands to the sim's
     /// pages, so the bench's fake pages hear the core's announcement.
     CommBus { name: String, data: String },
+    /// An `H:` event reached the sim's pages, as an instrument receives it, with no `H:`.
+    HEvent { name: String },
     /// What the stand-in was called for, and what its aircraft holds.
     StandIn {
         /// Each connection opened while the sim took connections, as its unit's place and
@@ -449,6 +498,7 @@ pub enum FromCore {
         opens: Vec<(u32, u32)>,
         calls: Vec<Called>,
         variables: Vec<(String, String)>,
+        inputs: Vec<(String, f64)>,
         objects: Vec<Made>,
         module_stopped: bool,
     },

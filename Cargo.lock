@@ -1043,6 +1043,7 @@ dependencies = [
  "messages",
  "network",
  "pointer-sync",
+ "profile-engine",
  "profile-loader",
  "recording",
  "recording-format",
@@ -1050,6 +1051,7 @@ dependencies = [
  "routine-host",
  "routines",
  "rustls",
+ "sandbox",
  "serde",
  "serde_json",
  "session",
@@ -1060,6 +1062,8 @@ dependencies = [
  "sim-service",
  "simconnect-types",
  "stand-in-sim",
+ "state-sync",
+ "sync-engine",
  "take-control",
  "tokio",
  "tokio-websockets",
@@ -3649,6 +3653,7 @@ version = "0.1.0"
 dependencies = [
  "avatars-routines",
  "routine-host",
+ "state-sync-routines",
 ]
 
 [[package]]
@@ -4289,6 +4294,33 @@ dependencies = [
  "sim-client",
  "simconnect-types",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "state-sync"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "cockpit-stream",
+ "kernel",
+ "messages",
+ "postcard",
+ "profile-engine",
+ "profile-loader",
+ "sandbox",
+ "serde_json",
+ "session",
+ "sim-service",
+ "sync-engine",
+ "tracing",
+]
+
+[[package]]
+name = "state-sync-routines"
+version = "0.1.0"
+dependencies = [
+ "messages",
+ "routine-host",
 ]
 
 [[package]]

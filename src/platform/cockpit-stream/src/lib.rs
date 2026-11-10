@@ -57,6 +57,8 @@ pub struct CockpitSent {
     pub kind: u16,
     pub key: String,
     pub clock: VectorClock,
+    /// The control value it was made under, which the conflict rule keeps with its value.
+    pub control: Control,
     pub names_entry: bool,
     pub number: Option<f64>,
 }
@@ -394,6 +396,7 @@ impl CockpitStream {
                 kind,
                 key: message.key.clone(),
                 clock: message.clock.clone(),
+                control: message.control,
                 names_entry: entry.is_some(),
                 number: entry.and_then(|f| f(&message.body)),
             });

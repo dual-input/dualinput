@@ -1405,13 +1405,13 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## State sync fires `H:` events from a routine in our WASM module, and hears them through one panel's own handler
 
-- **Decided:** state sync's routine `HEvents` fires each name fed to it with `fsEventsRegisterHEvent` and `fsEventsHEventCall`; its panel module `h-events`, in the first panel asked about once a profile that watches an `H:` event loads, registers its own handler with `Coherent.on("OnInteractionEvent", …)`.
+- **Decided:** state sync's routine `NamedEvents` fires each name fed to it as calculator code, `(>H:<name>)`, through `execute_calculator_code`; its panel module `h-events`, in the first panel asked about once a profile that watches an `H:` event loads, registers its own handler with `Coherent.on("OnInteractionEvent", …)`.
   This settles the spine's item on how the profile engine fires `H:` events ([left open](01-spine.md#left-open)).
-  Settled in node 6.9 by the user, 2026-10-16 ([`H:` events](../sync/05-units.md#h-events)).
+  Settled in node 6.9 by the user, 2026-10-16 ([`H:` events](../sync/05-units.md#h-events)), with `fsEventsHEventCall`, which a case in the sim then found reaches no panel, so the routine fires calculator code, the fallback node 6.9 set (user, 2026-11-10).
 - **Because:**
-  - The SDK documents that `fsEventsHEventCall` reaches `OnInteractionEvent` in every JavaScript VCockpit ([fsEventsHEventCall](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/wasm/event-api/fseventsheventcall/index.md)), and documents no SimConnect route to an `H:` event ([SimConnect_MapClientEventToSimEvent](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Events_And_Data/SimConnect_MapClientEventToSimEvent.htm)).
+  - `fsEventsHEventCall` returned `FS_EVENTS_ERROR_FAIL` and reached none of 18 panels, with or without parameters, while `execute_calculator_code` reached all 18 (measured on MSFS 2024, 2026-11-10, [sync log](../sync/log.md#2026-11-10-the-sdks-h-event-call-fails-on-msfs-2024-so-our-module-fires-h-events-as-calculator-code-which-reached-every-panel)), and the SDK documents no SimConnect route to an `H:` event ([SimConnect_MapClientEventToSimEvent](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Events_And_Data/SimConnect_MapClientEventToSimEvent.htm)).
   - A handler beside the stock one blocks nothing, where wrapping each instrument's `onInteractionEvent`, as FS Copilot does, puts our code in the path of the pilot's input ([03-02](../../learn/foundations/03-02-events-and-other-namespaces.md#h-html-events)).
-- **Leaves out:** whether `fsEventsHEventCall` reaches an instrument, with calculator code in the routine if not, and whether an event sent to one instrument reaches another document, which cases in the sim settle.
+- **Leaves out:** whether an event sent to one instrument reaches another document, which no case has sent.
 
 ## The sync engine starts the bench from a pending write, one attempt checked within 1.5s, and steps it counts itself
 

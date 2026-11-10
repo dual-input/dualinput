@@ -6,6 +6,9 @@ Depends on:  01-the-build.md, ../architecture/02-code-map.md, ../architecture/01
 Decides:     The four levels of testing, and where and when each runs; which tests a merge and a release need green, and which run outside CI; what the bench runs, touches, and checks, and how it runs only what it built; the stand-in sim's place, rules, model, frames, WASM module, pages, and process; the stand-in core helper; the replay check; the loop under load; the check before a release; and that no second MSFS runs in a virtual machine (node 7).
 ```
 
+> **Note**
+> In [the loop under load](#the-loop-under-load), the test unit runs a real sync engine of 100 write functions, fed a frame before each flight-model input and its writes back as readings, in place of the 98.7µs hold; a handler's 1ms holds on a quiet PC alone, with the input that loads the engine counted as a load beside the stops, and beside the sim the queue's wait judges the loop while the inputs over 1ms are recorded with no budget, since the sim's share of the CPU put about 640 over it ([core log](../core/log.md#2026-11-10-beside-the-a350-the-loops-queue-keeps-its-budget-and-the-sims-share-of-the-cpu-puts-about-640-inputs-over-a-handlers-1ms); user, 2026-11-10).
+
 Dual Input is tested at four levels: each crate's and each TypeScript part's own tests; the bench, two or three real cores on one PC, each on a stand-in sim; our own MSFS; and friends on two PCs.
 CI runs the first two on every pull request that changes code, and the release workflow runs them again, so a merge and a release each need both green.
 [The four levels](#the-four-levels) gives when the sim and friends come in.

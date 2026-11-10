@@ -169,6 +169,18 @@ impl SimService {
             Message::Event { event, data, .. } if platform && event == self.platform.pause => {
                 Step::signal(cx, Step::Pause(data));
             }
+            Message::Event { event, data, .. } => {
+                self.heard(unit, event, [data, 0, 0, 0, 0], cx);
+            }
+            Message::EventEx1 { event, data, .. } => self.heard(unit, event, data, cx),
+            Message::InputEvents {
+                request,
+                entry,
+                out_of,
+                events,
+            } => self.input_page(unit, request, entry, out_of, events, cx),
+            Message::InputValue { request, value } => self.input_value(unit, request, value, cx),
+            Message::InputChanged { hash, value } => self.input_changed(unit, hash, value, cx),
             Message::Filename { event, file } if platform => {
                 if event == self.platform.aircraft_loaded {
                     Step::signal(cx, Step::AircraftLoaded(file));

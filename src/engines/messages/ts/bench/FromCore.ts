@@ -6,9 +6,9 @@ import type { Made } from "./Made.ts";
 /**
  * A line from the core besides its first.
  */
-export type FromCore = { "kind": "heard", what: string, } | { "kind": "fed", at: number, yokes: number, figures: Array<FedFigure>, } | { "kind": "comm-bus", name: string, data: string, } | { "kind": "stand-in", 
+export type FromCore = { "kind": "heard", what: string, } | { "kind": "fed", at: number, yokes: number, figures: Array<FedFigure>, } | { "kind": "comm-bus", name: string, data: string, } | { "kind": "h-event", name: string, } | { "kind": "stand-in", 
 /**
  * Each connection opened while the sim took connections, as its unit's place and
  * that unit's count of opens.
  */
-opens: Array<[number, number]>, calls: Array<Called>, variables: Array<[string, string]>, objects: Array<Made>, module_stopped: boolean, };
+opens: Array<[number, number]>, calls: Array<Called>, variables: Array<[string, string]>, inputs: Array<[string, number]>, objects: Array<Made>, module_stopped: boolean, };

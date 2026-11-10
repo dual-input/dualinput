@@ -11,6 +11,8 @@ use cockpit_stream::{Answer, CockpitCx, CockpitSent, CockpitStream, CockpitUnit,
 use kernel::{Cx, Input, Registry, TimerId, Verdict, View};
 use messages::bench::{BenchKind, CockpitAct, EVENT, HELD, PILOT_FLYING, STEP, ToCore};
 use messages::cockpit::CockpitKind;
+use messages::state_sync::STATE;
+use profile_loader::Profiles;
 use session::{FlightChanged, Session, TakeControl};
 
 use super::sim::Heard;
@@ -137,7 +139,14 @@ impl BenchCockpit {
     fn tell_ready(&self, cx: &Cx) {
         let session = cx.read::<Session>();
         let in_flight = session.me().is_some_and(|me| session.in_flight(&me));
-        cx.cockpit().step_ready(STEP, self.ready && in_flight);
+        let ready = self.ready && in_flight;
+        cx.cockpit().step_ready(STEP, ready);
+        // State sync's step is ready only under a loaded profile, which the scenarios that use
+        // this unit in its place have none of, so with this unit standing in, it's ready too.
+        // A catch-up takes every step, and state sync's makes and ends at once with no engine.
+        if cx.read::<Profiles>().loaded().is_none() {
+            cx.cockpit().step_ready(STATE, ready);
+        }
     }
 
     fn send(&mut self, mut s: Sending, cx: &Cx) {

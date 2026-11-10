@@ -40,6 +40,10 @@ once?: boolean,
  */
 action?: string, 
 /**
+ * Each thing a card counts, such as the controls that couldn't sync.
+ */
+list?: Array<string>, 
+/**
  * Where a click outside its action lands in the EFB app.
  */
 landing: Landing, };

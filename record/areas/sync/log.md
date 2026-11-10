@@ -4,6 +4,162 @@ What our experiments and the build's stages found about keeping cockpits in sync
 The probes are in [experiments/areas/sync](../../../experiments/areas/sync), and their raw output is in its `results/` folder.
 Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on our development machine with Flow Pro 26.33.5, ChasePlane 2026.39.1.16, and GSX Pro 4.0.19 installed, with the frame rate capped near 30 fps unless the entry says otherwise.
 
+## 2026-11-10: Stage 14's code review found a catch-up answered with no values, a preset fired again after a gap, and a stream stalled by an unload
+
+**Asked:** does stage 14's code hold against its plan stage, [the sync units](05-units.md), and the repository's rules, as the `code-reviewer` agent reads it?
+
+**Expected:** a few comment fixes, since the bench and the sim session had passed.
+
+**Found:** six faults neither had reached, each read in the code:
+
+- A catch-up asked before the pilot flying's profile loaded was answered in the same input as the load, before any watch had read, and `give` leaves out an entry with no reading, so the answer held only counting entries' defaults.
+  A pin that goes from none to a bundle after an airborne start loads both profiles at once, so the follower's ask can reach the pilot flying first.
+- The routine host drops a routine left unfed for 1s, and the core's next rewrite of the same feed starts it again on that feed, so `NamedEvents` would fire its last batch a second time, and a `_Toggle` preset fired twice puts the switch back.
+- A profile unloaded while a stepping write ran left the stream waiting on that arrival for the rest of the session, holding every later cockpit message, pointer sync's among them.
+- `h-events` went to no panel once its panel joined again naming an instrument the sim created after its `hello`, so every `H:` entry stopped syncing.
+- A failed `instrument()` path told the pilot "Couldn't sync" with the entry's key, such as `radar_alert`, rather than its name.
+- `h-events` loaded only for a profile with an `H:` event entry, though a counting entry can count `H:` events.
+
+It also found that no `_Set` preset with a value has been written into a cockpit: the session wrote only `_Toggle` presets, so whether `fsVarsBVarCall` takes a `_Set`'s value as one double is unmeasured, and the Baron's heading bug, altimeters, gear, parking brake, and cabin heat write through `_Set`.
+
+**Changed:**
+
+- State sync's catch-up step turns ready 1.5s after the load, the engine's check, by which every watch has read.
+- A routine can say each feed is carried out once, as `NamedEvents` does, and the host then starts it again after a gap without that feed.
+- State sync counts each stepping write's arrival applied as its profile unloads.
+- `h-events` goes to the panel whose instruments include every one it was given before.
+- The notice names the entry, and `h-events` loads for a counting entry's `H:` events too.
+- [Stage 16](../build/plan.md#16-flight-model-sync)'s session in the sim writes a `_Set` preset with a value.
+
+**Affects:** [the sync units](05-units.md) and [the code map](../architecture/02-code-map.md), each with a note at its top.
+
+## 2026-11-10: The SDK's H: event call fails on MSFS 2024, so our module fires H: events as calculator code, which reached every panel
+
+**Asked:** why did no aircraft take an `H:` event our module fired, in the session of the entry below, and which way of firing one reaches the cockpit?
+
+**Expected:** that our call lacked something, such as a parameter array, since the SDK's own `SimUtils/HEvent.cpp` makes the same two calls (read in MSFS 2024 SDK 1.7.3).
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the iniBuilds A350, p30's module fired a test `H:` event five ways, while a handler listened in each of the 18 cockpit panels ([p30's results](../../../experiments/areas/sync/results/p30-h-events-2026-11-10-08-45-37.txt)):
+
+- `fsEventsRegisterHEvent` gave IDs 0 to 3, and `fsEventsHEventCall` returned `FS_EVENTS_ERROR_FAIL` every time: with a null array of size 0, with an array of size 0 that pointed at a value, with one integer value, and with the name registered with its `H:`.
+  No panel heard any of the four.
+- `execute_calculator_code("(>H:DUALINPUT_P30_TEST_5)")` returned 1, and all 18 panels heard the event.
+- Neither the SDK's page for `fsEventsHEventCall` nor a forum thread we found says the call fails or limits it to some kind of module; the page's one example passes a `Vec3d`, a type p30 didn't try ([fsEventsHEventCall](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/wasm/event-api/fseventsheventcall/index.md), read on 2026-11-10).
+  So whether the call is broken on this version of the sim, or works with a `Vec3d` or a string, or only from a gauge's module rather than a standalone one, is unknown.
+- With our module firing `H:` events as calculator code, the TriStar's flight engineer acted on `H:FUEL` 132ms after the switch's write, and a burst of two `H:adf_SetRst` reached a panel of the Baron's, both of them ([the retest's report](results/2026-11-10-stage-14-h-retest.txt)).
+  Every other case of the Baron's passed again, apart from stage 4's, whose yoke nobody moved, and which passed twice in the entry below.
+- `fsVarsBVarCall` moved the Baron's battery switch through its `_Toggle` preset in 133ms, as it did in the entry below, so presets need no calculator code.
+
+**Changed:** our module fires each `H:` event as calculator code alone, `(>H:name)`, which SDK 1.7.3 marks deprecated, as FS Copilot fires them, and as [the sync units](05-units.md#h-events) planned should `fsEventsHEventCall` reach no instrument (user, 2026-11-10).
+It no longer calls `fsEventsRegisterHEvent` or `fsEventsHEventCall`.
+A name that could close the code's parenthesis or add a word to it fires nothing.
+Input event presets stay on `fsVarsBVarCall`.
+Should a sim update drop calculator code, the SDK's call is the one to try again, with the kinds of parameter and module p30 left untried.
+
+**Affects:** [the sync units](05-units.md), [the sim seam](../core/03-sim-seam-and-wasm-module.md), [the spine](../architecture/01-spine.md), and [the profile entries](01-profile-entries.md), each with a note at its top; [the architecture's decisions](../architecture/decisions.md), in place; and [the plan](../build/plan.md#14-state-sync)'s stage 14, whose open item this closes.
+
+## 2026-11-09: Stage 14's session in the sim passed in four aircraft, and no aircraft took an H: event our module fired
+
+**Asked:** after the fixes of the entry below, do the sync units' cases hold in the sim, with the real core hosting and a bench core on the stand-in sim as the second pilot, in the Baron 58P, the TriStar, the Fenix A320, the A220, and the A350; and what do the real core's loop and the loop under load measure beside them?
+
+**Expected:** each case to pass.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, on our development machine ([the runs' reports](results/2026-11-09-stage-14-session-reruns.txt)):
+
+- In the Baron 58P, bksq-aircraft-baronpro 0.1.1, 14 of 17 cases passed:
+  - windshield heat's `L:` variable moved both ways;
+  - our module's call of `ELECTRICAL_Battery_1_Toggle` moved the battery switch in 101ms;
+  - pitot heat's `K:` event, with one value by the legacy call, moved its switch in 99ms;
+  - a beacon flipped by the mouse reached the second pilot's input event;
+  - SET RST's `H:` event was heard beside the stock handler;
+  - the KR87A's own `bfoMode`, read by `instrument-reads`, changed on the pilot's press, and the second pilot's toggled 115ms later;
+  - the tablet took the second pilot's tap, as one down, one up, and one click, and their held press, and the pilot's press under their lock flashed.
+- In the Baron, our module's `H:adf_SetRst`, fired twice, reached no listener in any cockpit panel.
+  The Baron's two other failures were the script's: the held press played through, but the pilot's own mouse over the tablet came before its down, and the drag's moves went in the same instant as its press and up.
+- The KR87A acts on no event without power, since its handler opens on `isElectricityAvailable()` (read in bksq-aircraft-baronpro 0.1.1, KR87A.js, `onInteractionEvent`), so the first run's BFO case, cold and dark, had nothing to sync; with the battery and avionics on, it passed.
+- In the TriStar, inibuilds-aircraft-l1011 1.0.8, the fuel pump switch's `L:` variable took the second pilot's write in 66ms, and the flight engineer never acted on our module's `H:FUEL`.
+- In the Fenix A320, 9 of 9 passed with a profile that watches the switches:
+  - each switch write landed in about 130ms, with no notification;
+  - a late joiner's catch-up wrote both batteries and the APU master, whose ON light, `L:I_OH_ELEC_APU_MASTER_L`, then lit.
+- The Fenix's lights are its pushbuttons' annunciators: battery 1 coming on lit battery 2's OFF light, `L:I_OH_ELEC_BAT2_L`, 1,234ms later, as in the 2026-10-05 entry, and only while battery 2 was off.
+  The session's first Fenix profile watched lights as the switches' state, and the 1.5s check flagged writes that had landed.
+  The Fenix lit the APU master's ON light whatever order its switches came in, so the sim can't show catch-up's order, and the bench's case does.
+- In the A220, with its power on, 8 of 8 passed:
+  - the taxi lights' input event, reported twice, went out once;
+  - the second pilot's tap, held press, and drag, paced at a step every 100ms, played on the ND;
+  - the pilot's press under the second pilot's lock flashed;
+  - the pilot's press, dragged off the ND, played on the second pilot's display, and its end left that display unlocked.
+- The A220's display key carries its livery, `DisplayUnits|config=C-GUAC`, so the second pilot's display took the sim's key, as the known limit of 2026-10-25 ([pointer sync's log](../pointer-sync/log.md)) leaves it.
+- 7s after the A220's first move into Flying, the sim went back to Loading, a second load of the aircraft's own, so the script counts a flight loaded once it has flown 15s straight.
+- In the A350, ten baro commands at 2 frames moved it 10 hPa, from 1013.25 to 1023.25, in 882ms.
+- The real core's loop, by the minute in each flight, held its queue wait at p99 between 31µs and 287µs, against 11.2ms, and its slowest input took 4.6ms, in the Baron's load.
+  Every recording of the real core replayed with each checkpoint matching.
+- The loop under load, beside the A350 at a busy airport with traffic, ran with the sim out of focus, so it's for comparison only ([its reports](results/2026-11-09-loop-under-load-beside-the-a350.txt)):
+  - queue wait at p99 was 1.2ms, against 11.2ms; busy was 2.17%, against 20%; replay took 54s an hour, against 360s; and every input was recorded in order;
+  - 942 inputs took over 1ms, against only the load's 10 planned 100ms stops.
+- A first run of the loop grew slower each minute, to 12,273 inputs over 1ms, because the bench's load unit never ran the engine's frame or fed its writes back as readings, so every write's value stayed pending.
+- The inspector takes one connection to a page at a time: a call made while the last one still closed was refused, which stopped two runs.
+
+**Changed:**
+
+- The 1.5s check stays, resting on an `instrument()` entry's reads every 250ms with a wide margin, since a profile watches the switch it writes (user, 2026-11-10).
+- The session's script sets up the state each case needs, checks a change the case caused, asks the pilot only about what shows in front of them, and waits for Page Up before an aircraft's cases.
+- The bench's load unit runs the engine's frame before each flight-model input and feeds each write back as its reading.
+- `tools/sim/inspector.ts` waits for each connection's close before the next call.
+- A probe of how our module fires `H:` events, and the TriStar's and the Baron's `H:` cases again, are open in [the plan](../build/plan.md#14-state-sync), with the loop under load beside the A350 run again in focus (user, 2026-11-10).
+
+**Affects:** [the sync units](05-units.md), with a note at its top, and the plan's stage 14.
+
+## 2026-11-09: The first session in the sim stopped on a catch-up that six unread instrument() entries held open
+
+**Asked:** do the sync units' cases hold in the sim, in [stage 14](../build/plan.md#14-state-sync)'s session, with the real core hosting in the Baron 58P and a bench core on the stand-in sim as the second pilot?
+
+**Expected:** each case in `tools/sim/state-sync.ts` to pass or fail on its own.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in bksq-aircraft-baronpro 0.1.1, every case in which the second pilot acted failed, and so did the beacon switch flipped in the sim ([the run's report](results/2026-11-09-stage-14-session-first-run.txt)):
+
+- The second pilot's catch-up never ended, and while a catch-up runs, the cockpit stream holds everything its machine sends.
+  A replay of the second pilot's recording, with a log line added to the engine, named what the catch-up waited on: a stepping write to decision height, which ended, and six `instrument()` entries, `kas_arm`, `kas_armed_vs`, `radar_alert`, `radar_profile`, `radar_hold`, and `radar_track`, each holding its write for a first reading.
+  The stand-in had no panel to read those instruments, so neither a reading nor a refusal came.
+- SimConnect listed the 58P's 127 input events in capitals, such as `ELECTRICAL_BATTERY_1` and `LIGHTING_BEACON_1`, while the aircraft's files and our profile spell them `ELECTRICAL_Battery_1`, so the core's exact match found none of the four electrical ones the profile reads.
+- With two of p08's clients as two SimConnect connections, a group on one heard 20 of the yoke's `K:AXIS_ELEVATOR_SET` after the other connection cleared its group, which heard none after.
+- The windshield heat set in the sim passed only because the second pilot already read 0, so the script sets the value the second pilot doesn't hold.
+
+**Changed:**
+
+- A catch-up write still held for its entry's first reading 1.5s after the catch-up starts counts as made, and the engine flags it as never landed, so an entry that never reads can't hold a catch-up open (user, 2026-11-09).
+  An `instrument()` path that reads an error already counts as a refused read, which drops its held writes; this covers an instrument that no panel holds, which sends neither.
+- The sim client matches an input event's name in capitals, and the stand-in lists its names in capitals, as the sim does.
+- The session's script checks that the second pilot's catch-up ended before it runs an aircraft's cases.
+
+**Affects:** [the sync units](05-units.md), with a note at its top.
+
+## 2026-11-09: Writes to input events go through our WASM module, since SimConnect's list has none of their presets
+
+**Asked:** how does a write that names an input event's preset, such as `B('ELECTRICAL_Battery_1_Toggle')`, reach the sim, when [reaching the sim](05-units.md#reaching-the-sim) gives every input event write to `set_input`?
+
+**Expected:** that `SimConnect_SetInputEvent` carries them, as the design assumed.
+
+**Found:** no run has tried it, and the records leave it nothing to send:
+
+- `SimConnect_SetInputEvent` takes a hash, and `SimConnect_EnumerateInputEvents` is our only source of hashes.
+  That list held `SAFETY_ELT_1` and neither `_ON` nor `_Set` on the Baron 58P, though both of those presets worked in calculator code (measured on MSFS 2024, 2026-08-29, fsc-editor, `docs/sim-vars/build/v1-log.md`, "b-preset-unknown calibrated in the sim, and it finds real dead code").
+  The A220's list held none of the `_Push` spellings its Behaviors window shows (measured on MSFS 2024, 2026-09-03, same log, "The input-event table lists IDs; the preset rules were reading it as names").
+- `1 (>B:ELECTRICAL_Battery_1)` changed nothing on the 58P, and `(>B:ELECTRICAL_Battery_1_Toggle)` turned its battery on (measured on MSFS 2024, 2026-08-29, same log, "The arity probes: bare K: pops one and broadcasts; bare B: writes are per-preset dead air").
+- FS Copilot writes every preset as calculator code that its WASM module runs through `execute_calculator_code` (read in the FS Copilot fork, `FsCopilot/Simulation/Definitions.cs` and `FsCopilot.Bridge.Wasm/wasm_module.cpp`), and SDK 1.7.3 marks that call deprecated (read in `WASM/include/MSFS/Legacy/gauges.h`).
+- `fsVarsBVarCall` takes an ID from `fsVarsGetBVarId`, which takes the name a preset has, and calls it with its value (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_Vars.h`); no run of ours has called it.
+
+**Changed:** every write to an input event goes through our WASM module (user, 2026-11-09):
+
+- The routine that fires `H:` events also calls input event presets, so a write function's `H:` and `B:` actions keep their call order.
+  It's named `NamedEvents`, since it no longer carries only `H:` events.
+- A `B:` name in a `write` names a preset, as `_Toggle` or `_Set`, and takes the value `_Set` needs; a bare name calls nothing, and the 1.5s check flags it.
+- `set_input` isn't built.
+- `L:` and `A:` writes and `K:` events stay on SimConnect, where six aircraft took them in the 2026-10-05 entry below, since a module's `K:` send might not reach our listening group, and a stopped module would otherwise lose every write (user, 2026-11-09).
+- If `fsVarsBVarCall` reaches no preset in this stage's session in the sim, the routine host runs calculator code instead, and nothing outside it changes.
+
+**Affects:** [the sync units](05-units.md), [the sim seam](../core/03-sim-seam-and-wasm-module.md), and [what a routine can ask for](../architecture/02-code-map.md#what-a-routine-can-ask-for), each with a note at its top.
+
 ## 2026-10-24: Stage 13's sync engine passes every case that needs no sim, and its cockpit stream replays a cut at its sender's gaps and catches a late joiner up between bench cores
 
 **Asked:** do [stage 13](../build/plan.md#13-the-sync-engine-and-the-cockpit-stream)'s cases hold: the sync engine's, with no core, and the cockpit stream's, between bench cores with a test unit in state sync's and pointer sync's place; and do its budgets?

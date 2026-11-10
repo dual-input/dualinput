@@ -7,8 +7,8 @@ use std::panic::AssertUnwindSafe;
 use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
-use sim_client::message::{Camera, Data, Message};
-use sim_client::{Connection, Op, SimCall, Tag, Up};
+use sim_client::message::{Camera, Data, InputEvent, Message};
+use sim_client::{Connection, Op, SimCall, Tag, Up, Value};
 use simconnect_types::{
     SIMCONNECT_COMM_BUS_BROADCAST_TO_JS, SIMCONNECT_DATA_REQUEST_FLAG_CHANGED,
     SIMCONNECT_DATATYPE_STRING256, SIMCONNECT_EXCEPTION_CREATE_OBJECT_FAILED,
@@ -20,7 +20,10 @@ use windows_sys::Win32::System::Threading::{
     PROCESS_SYNCHRONIZE, WaitForMultipleObjects, WaitForSingleObject,
 };
 
-use crate::{Act, Called, Message as ToThread, Module, Object, Report, Signal, World};
+use crate::world::{Fired, Input};
+use crate::{
+    Act, Called, Message as ToThread, Module, Object, Page, Report, Rule, Signal, Then, When, World,
+};
 
 /// What the sim's open message names, as MSFS 2024's did on three sim releases: SunRise
 /// 12.2, build 282174.999, and SimConnect 12.2.0.0 (measured,
@@ -45,9 +48,9 @@ const FREEZES: [(&str, &str); 3] = [
 
 pub(crate) struct Sim {
     up: Box<dyn FnMut(Up) + Send>,
-    /// The sim's pages, which hear each CommBus call the core makes for JavaScript, by its
-    /// event's name and its text.
-    pages: Box<dyn FnMut(String, String) + Send>,
+    /// The sim's pages, which hear each CommBus call the core makes for JavaScript and each
+    /// `H:` event.
+    pages: Box<dyn FnMut(Page) + Send>,
     module: Box<dyn Module>,
     module_stopped: bool,
     /// The stand-in's own clock, which the module reads its time from.
@@ -78,11 +81,43 @@ pub(crate) struct Sim {
     due: Vec<(Instant, Due)>,
     opened: Vec<Connection>,
     calls: Vec<Called>,
+    /// The rules a scenario scripted for the aircraft.
+    rules: Vec<Rule>,
 }
 
 enum Due {
     OpenReply(Connection),
     Signal(Signal),
+    /// A rule acting, with the value that set it off.
+    Then(Then, Option<f64>),
+    /// An `Every` rule's next turn, by its place in the rules.
+    Every(usize),
+}
+
+/// How many input events one page of the list holds, so a scenario sees the list come in
+/// several sends, as the SDK says a long one does.
+const INPUT_PAGE: usize = 100;
+
+/// What a rule can watch for.
+enum Trigger<'a> {
+    Written(&'a str),
+    Sent(&'a str),
+    Fired(&'a str),
+}
+
+/// A name with no prefix, so a scenario may spell it either way.
+fn no_prefix(name: &str) -> &str {
+    name.strip_prefix("K:")
+        .or_else(|| name.strip_prefix("H:"))
+        .or_else(|| name.strip_prefix("B:"))
+        .unwrap_or(bare(name))
+}
+
+/// A hash of an input event's name, as the sim hands out for each.
+fn input_hash(name: &str) -> u64 {
+    name.bytes().fold(0xCBF2_9CE4_8422_2325, |hash, byte| {
+        (hash ^ u64::from(byte)).wrapping_mul(0x0000_0100_0000_01B3)
+    })
 }
 
 /// A variable's name as SimConnect takes it, the name a connection's data definition holds.
@@ -105,6 +140,10 @@ struct Conn {
     areas: BTreeMap<u32, String>,
     /// Each area read as it's set, by its request.
     area_reads: BTreeMap<u32, u32>,
+    /// The events its groups hear, each by the sim's name, with its group and client event.
+    listening: BTreeMap<String, (u32, u32)>,
+    /// The input events it subscribed to, by hash.
+    inputs: BTreeSet<u64>,
 }
 
 struct Datum {
@@ -123,7 +162,7 @@ struct Request {
 impl Sim {
     pub(crate) fn new(
         up: Box<dyn FnMut(Up) + Send>,
-        pages: Box<dyn FnMut(String, String) + Send>,
+        pages: Box<dyn FnMut(Page) + Send>,
         module: Box<dyn Module>,
     ) -> Sim {
         let started = Instant::now();
@@ -150,6 +189,7 @@ impl Sim {
             due: Vec::new(),
             opened: Vec::new(),
             calls: Vec::new(),
+            rules: Vec::new(),
         }
     }
 
@@ -313,6 +353,21 @@ impl Sim {
                 }
             }
             Act::ResetVars => self.world.reset_vars(),
+            Act::Inputs { events } => {
+                for (name, value) in events {
+                    let hash = input_hash(&name);
+                    self.world.inputs.insert(name, Input { hash, value });
+                }
+            }
+            Act::SetInput { name, value } => self.set_input(&name, value),
+            Act::SendEvent { name, data } => self.event_sent(&name, [data, 0, 0, 0, 0], false),
+            Act::Rule(rule) => {
+                if let When::Every(every) = rule.when {
+                    let at = Instant::now() + every;
+                    self.schedule(at, Due::Every(self.rules.len()));
+                }
+                self.rules.push(rule);
+            }
             Act::Stale { unit } => {
                 if let Some(&connection) = self.gone.get(&unit) {
                     self.hand_up(Up::Message {
@@ -335,6 +390,12 @@ impl Sim {
             opened: self.opened.clone(),
             calls: self.calls.clone(),
             variables: self.world.aircraft.variables(),
+            inputs: self
+                .world
+                .inputs
+                .iter()
+                .map(|(name, input)| (name.clone(), input.value))
+                .collect(),
             objects: self.world.made(),
             module_stopped: self.module_stopped,
         }
@@ -366,9 +427,31 @@ impl Sim {
                 {
                     vars.set_number(var, f64::from(data));
                 }
+                self.event_sent(&name, [data, 0, 0, 0, 0], false);
             }
-            Op::AddClientEventToNotificationGroup { .. }
-            | Op::SetNotificationGroupPriority { .. } => {}
+            Op::TransmitClientEventEx1 { event, data, .. } => {
+                let name = conn.events.get(&event).cloned().unwrap_or_default();
+                self.event_sent(&name, data, true);
+            }
+            Op::EnumerateInputEvents { request } => self.list_inputs(connection, request),
+            Op::GetInputEvent { request, hash } => {
+                if let Some(input) = self.world.inputs.values().find(|i| i.hash == hash) {
+                    let message = Message::InputValue {
+                        request,
+                        value: Value::Number(input.value),
+                    };
+                    self.send(connection, &message);
+                }
+            }
+            Op::SubscribeInputEvent { hash } => {
+                conn.inputs.insert(hash);
+            }
+            Op::AddClientEventToNotificationGroup { group, event, .. } => {
+                if let Some(name) = conn.events.get(&event).cloned() {
+                    conn.listening.insert(name, (group, event));
+                }
+            }
+            Op::SetNotificationGroupPriority { .. } => {}
             Op::SubscribeToSystemEvent { event, name } => {
                 conn.system.insert(name, event);
             }
@@ -461,6 +544,7 @@ impl Sim {
                     return;
                 };
                 let mut at = 0;
+                let mut written = Vec::new();
                 for d in conn.definitions.get(&definition).into_iter().flatten() {
                     if d.text {
                         let Some(field) = data.get(at..at + 256) else {
@@ -475,8 +559,12 @@ impl Sim {
                         };
                         let value = f64::from_le_bytes(bytes.try_into().unwrap_or([0; 8]));
                         vars.set_number(&d.name, value);
+                        written.push((d.name.clone(), value));
                         at += 8;
                     }
+                }
+                for (name, value) in written {
+                    self.trigger(Trigger::Written(&name), Some(value));
                 }
             }
             Op::MapClientDataNameToId { name, area } => {
@@ -502,7 +590,7 @@ impl Sim {
                 data,
             } => {
                 if broadcast & SIMCONNECT_COMM_BUS_BROADCAST_TO_JS != 0 {
-                    (self.pages)(name, data);
+                    (self.pages)(Page::CommBus { name, data });
                 }
             }
             Op::AICreateSimulatedObject { title, request, .. } => {
@@ -586,6 +674,15 @@ impl Sim {
                     }
                 }
                 Err(_) => self.module_stopped = true,
+            }
+            for fired in self.world.take_fired() {
+                match fired {
+                    Fired::H(name) => {
+                        self.h_event(&name);
+                        self.trigger(Trigger::Fired(&name), None);
+                    }
+                    Fired::Preset { name, value } => self.call_preset(&name, value),
+                }
             }
         }
         self.frame_events();
@@ -680,7 +777,163 @@ impl Sim {
                     }
                 }
                 Due::Signal(signal) => self.signal(signal),
+                Due::Then(then, value) => self.then(then, value),
+                Due::Every(place) => {
+                    if let Some(rule) = self.rules.get(place).cloned()
+                        && let When::Every(every) = rule.when
+                    {
+                        let at = Instant::now() + rule.after;
+                        self.schedule(at, Due::Then(rule.then, None));
+                        self.schedule(Instant::now() + every, Due::Every(place));
+                    }
+                }
             }
+        }
+    }
+
+    /// Sets off each rule watching for `what`, each after its own delay.
+    fn trigger(&mut self, what: Trigger, value: Option<f64>) {
+        let due: Vec<(Duration, Then)> = self
+            .rules
+            .iter()
+            .filter(|rule| match (&rule.when, &what) {
+                (When::Written(a), Trigger::Written(b))
+                | (When::Sent(a), Trigger::Sent(b))
+                | (When::Fired(a), Trigger::Fired(b)) => no_prefix(a) == no_prefix(b),
+                _ => false,
+            })
+            .map(|rule| (rule.after, rule.then.clone()))
+            .collect();
+        for (after, then) in due {
+            self.schedule(Instant::now() + after, Due::Then(then, value));
+        }
+    }
+
+    /// A rule's action, with the value that set it off.
+    fn then(&mut self, then: Then, value: Option<f64>) {
+        match then {
+            Then::Set { name, value: to } => {
+                let to = to.or(value).unwrap_or(0.0);
+                self.world.aircraft.set_number(bare(&name), to);
+            }
+            Then::Flip { name } => {
+                let name = bare(&name);
+                let to = if self.world.aircraft.number(name) == 0.0 {
+                    1.0
+                } else {
+                    0.0
+                };
+                self.world.aircraft.set_number(name, to);
+            }
+            Then::SetInput { name, value: to } => {
+                self.set_input(&name, to.or(value).unwrap_or(0.0));
+            }
+            Then::Fire { name } => self.h_event(&name),
+            Then::Send { name, data } => {
+                let data = data.or(value.map(|v| v as u32)).unwrap_or(0);
+                self.event_sent(&name, [data, 0, 0, 0, 0], false);
+            }
+        }
+    }
+
+    /// An `H:` event reaches the sim's pages.
+    fn h_event(&mut self, name: &str) {
+        (self.pages)(Page::HEvent {
+            name: no_prefix(name).to_string(),
+        });
+    }
+
+    /// The event `name` fired, as a `K:` event sent by anyone: each connection listening hears
+    /// it, and each rule watching for it acts.
+    fn event_sent(&mut self, name: &str, data: [u32; 5], ex1: bool) {
+        let name = no_prefix(name);
+        let hearers: Vec<(Connection, u32, u32)> = self
+            .conns
+            .iter()
+            .filter_map(|(&c, conn)| conn.listening.get(name).map(|&(g, e)| (c, g, e)))
+            .collect();
+        for (connection, group, event) in hearers {
+            let message = if ex1 {
+                Message::EventEx1 { group, event, data }
+            } else {
+                Message::Event {
+                    group,
+                    event,
+                    data: data[0],
+                }
+            };
+            self.send(connection, &message);
+        }
+        self.trigger(Trigger::Sent(name), Some(f64::from(data[0] as i32)));
+    }
+
+    /// The module called a preset, named as its input event and an operation, such as
+    /// `ELECTRICAL_Battery_1_Toggle`: its input event moves by the operation, and a name with
+    /// no such input event or operation does nothing, as a bare
+    /// write of an input event did nothing on the Baron 58P (measured on MSFS 2024, 2026-08-29,
+    /// fsc-editor, `docs/sim-vars/build/v1-log.md`).
+    fn call_preset(&mut self, name: &str, value: Option<f64>) {
+        self.trigger(Trigger::Fired(name), value);
+        let Some((event, operation)) = name.rsplit_once('_') else {
+            return;
+        };
+        let Some(now) = self.world.inputs.get(event).map(|i| i.value) else {
+            return;
+        };
+        let to = match operation.to_ascii_lowercase().as_str() {
+            "set" => value.unwrap_or(now),
+            "toggle" => 1.0 - now.clamp(0.0, 1.0),
+            "on" => 1.0,
+            "off" => 0.0,
+            "inc" => now + 1.0,
+            "dec" => now - 1.0,
+            _ => return,
+        };
+        self.set_input(event, to);
+    }
+
+    /// Moves an input event, and tells each connection subscribed to it.
+    fn set_input(&mut self, name: &str, value: f64) {
+        let Some(input) = self.world.inputs.get_mut(no_prefix(name)) else {
+            return;
+        };
+        input.value = value;
+        let hash = input.hash;
+        let subscribed: Vec<Connection> = self
+            .conns
+            .iter()
+            .filter(|(_, conn)| conn.inputs.contains(&hash))
+            .map(|(&c, _)| c)
+            .collect();
+        for connection in subscribed {
+            let value = Value::Number(value);
+            self.send(connection, &Message::InputChanged { hash, value });
+        }
+    }
+
+    /// `SimConnect_EnumerateInputEvents`' answer, in pages, with each name in capitals, as the
+    /// sim listed the Baron 58P's `ELECTRICAL_Battery_1` as `ELECTRICAL_BATTERY_1` (measured
+    /// on MSFS 2024, 2026-11-09, record/areas/sync/log.md).
+    fn list_inputs(&mut self, connection: Connection, request: u32) {
+        let events: Vec<InputEvent> = self
+            .world
+            .inputs
+            .iter()
+            .map(|(name, input)| InputEvent {
+                name: name.to_ascii_uppercase(),
+                hash: input.hash,
+            })
+            .collect();
+        let out_of = events.len().div_ceil(INPUT_PAGE).max(1) as u32;
+        let mut pages = events.chunks(INPUT_PAGE).map(<[_]>::to_vec);
+        for entry in 0..out_of {
+            let message = Message::InputEvents {
+                request,
+                entry,
+                out_of,
+                events: pages.next().unwrap_or_default(),
+            };
+            self.send(connection, &message);
         }
     }
 

@@ -23,6 +23,7 @@ use kernel::{Cx, Registry, TimerId, View};
 use messages::pointer_sync::{FromPanel, GESTURE, Gesture, Lock, NAME, Play};
 use messages::session::Phase;
 use network::Network;
+use profile_engine::key_names;
 use profile_loader::Profiles;
 use session::Session;
 
@@ -65,18 +66,6 @@ pub fn register(r: &mut Registry) {
     me.cockpit_kind(GESTURE, PointerSync::play);
 }
 
-/// Whether one of the profile's displays opts in an instrument by its key: a bare identifier,
-/// such as `FCP`, names every instrument that carries it, whatever its url's query, and a full
-/// key names exactly that instrument (record/areas/profiles/01-format-and-delivery.md,
-/// "Displays").
-fn names(display: &str, instrument: &str) -> bool {
-    if display.contains('|') {
-        display == instrument
-    } else {
-        instrument.split('|').next() == Some(display)
-    }
-}
-
 /// The loaded profile's displays, or none while no profile is loaded.
 fn profile_displays<'v>(view: &'v View<'_>) -> &'v [String] {
     view.read::<Profiles>()
@@ -92,7 +81,7 @@ impl PointerSync {
         let displays = profile_displays(view);
         instruments
             .iter()
-            .filter(|i| displays.iter().any(|d| names(d, i)))
+            .filter(|i| displays.iter().any(|d| key_names(d, i)))
             .cloned()
             .collect()
     }
@@ -252,8 +241,6 @@ mod tests {
     use messages::pointer_sync::{GESTURE, Gesture, Point};
     use messages::session::Control;
 
-    use super::names;
-
     /// A drag sends about 30 moves a second, so at about 100 bytes each, the design's estimate,
     /// it costs about 3 KB/s before packet headers, and 120 bytes, 3.6 KB/s, is past "about"
     /// (record/areas/pointer-sync/01-pointer-sync.md, "Budgets"). Pilot IDs, in the sender, the
@@ -288,18 +275,5 @@ mod tests {
             .len();
         println!("budget: a move's cockpit message is {bytes} bytes, against about 100");
         assert!(bytes <= 120, "{bytes} bytes");
-    }
-
-    #[test]
-    fn a_bare_identifier_names_every_instrument_that_carries_it_and_a_full_key_names_one() {
-        assert!(names("DisplayUnits", "DisplayUnits|config=N324DU"));
-        assert!(names("BlackSquareTablet", "BlackSquareTablet"));
-        assert!(!names(
-            "DisplayUnits|config=Default",
-            "DisplayUnits|config=N324DU"
-        ));
-        assert!(names("CTP|side=left", "CTP|side=left"));
-        assert!(!names("CTP|side=left", "CTP|side=right"));
-        assert!(!names("Display", "DisplayUnits"));
     }
 }

@@ -21,10 +21,10 @@ import path from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import type { SessionSlice } from "../../src/engines/messages/ts/session/SessionSlice.ts"
-import { HASH, VERSION } from "../../src/engines/messages/ts/stamp.ts"
 import { type LocalBackend, startBackend } from "../lib/backend.ts"
 import { ROOT } from "../lib/repo.ts"
 import { Failed, main } from "../lib/run.ts"
+import { desktop } from "./desktop.ts"
 import { Guide } from "./guide.ts"
 import { evaluate, listPages } from "./inspector.ts"
 
@@ -79,9 +79,10 @@ async function run(program: string): Promise<void> {
   const menu = /the sim's stage changed stage=Menu/.test(log(data))
   result(menu, "our BlurPage copy brought the menu script, whose master page took the core from Starting to Menu")
 
-  const app = await desktop(data)
+  const app = await desktop(data, ["session"])
+  const slice = () => app.slice<SessionSlice>("session")
   await app.command("session.host", null)
-  const code = await until(() => app.slice()?.code ?? undefined, 30_000)
+  const code = await until(() => slice()?.code ?? undefined, 30_000)
   say(`hosted the session ${code}`)
   say("Load a flight on the ground in any aircraft, then press Ready to fly.", true)
   await until(() => (/the sim's stage changed stage=Flying/.test(log(data)) ? true : undefined), 60 * 60_000)
@@ -93,7 +94,7 @@ async function run(program: string): Promise<void> {
   result(holding && frozen.every(Boolean), `preflight's Hold froze the aircraft: the core fed Hold ${holding}, and the freezes read ${JSON.stringify(frozen)}`)
 
   await app.command("session.ready", { on: true })
-  await until(() => (app.slice()?.preflight.phase === "ended" ? true : undefined), 15_000)
+  await until(() => (slice()?.preflight.phase === "ended" ? true : undefined), 15_000)
   say("preflight ended; waiting 3s for the routine host to drop Hold")
   await sleep(3_000)
   const freed = await freezes()
@@ -112,37 +113,6 @@ async function freezes(): Promise<boolean[]> {
     }
   }
   throw new Failed("no cockpit panel read the aircraft's freezes")
-}
-
-/** A WebSocket to the core, as the desktop app's Rust side holds one: no Origin, `alive` every 2s. */
-async function desktop(data: string): Promise<{ command(name: string, args: unknown): Promise<void>; slice(): SessionSlice | undefined }> {
-  const port = (JSON.parse(fs.readFileSync(path.join(data, "port.json"), "utf8")) as { port: number }).port
-  const ws = new WebSocket(`ws://127.0.0.1:${port}`)
-  await new Promise<void>((resolve, reject) => {
-    ws.onopen = () => resolve()
-    ws.onerror = () => reject(new Failed(`the core's WebSocket on ${port} didn't open`))
-  })
-  let session: SessionSlice | undefined
-  const answers = new Map<number, (error: string | null) => void>()
-  ws.onmessage = (event) => {
-    const message = JSON.parse(String(event.data)) as { t: string; slice?: string; value?: unknown; id?: number; error?: string }
-    if (message.t === "state" && message.slice === "session") session = message.value as SessionSlice
-    if (message.t === "answer") answers.get(message.id!)?.(message.error ?? null)
-  }
-  ws.send(JSON.stringify({ t: "hello", component: "desktop", version: VERSION, hash: HASH }))
-  ws.send(JSON.stringify({ t: "watch", slices: ["session"] }))
-  setInterval(() => ws.send(JSON.stringify({ t: "alive" })), 2_000).unref()
-  let next = 1
-  return {
-    command(name, args) {
-      const id = next++
-      return new Promise((resolve, reject) => {
-        answers.set(id, (error) => (error === null ? resolve() : reject(new Failed(`the core refused ${name}: ${error}`))))
-        ws.send(JSON.stringify({ t: "command", id, name, args }))
-      })
-    },
-    slice: () => session,
-  }
 }
 
 function log(data: string): string {

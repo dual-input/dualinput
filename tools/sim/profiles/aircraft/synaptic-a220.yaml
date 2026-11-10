@@ -1,0 +1,17 @@
+# The A220's ND and an input event, for the cases in the sim of state sync and pointer sync
+# (record/areas/sync/05-units.md and record/areas/pointer-sync/01-pointer-sync.md): `DisplayUnits`
+# is a bare identifier, since the key carries the livery.
+maker: Synaptic Simulations
+name: A220 session check
+maturity: experimental
+authors: Dual Input
+aircraft:
+  variants:
+    a220: Synaptic_A220
+displays: DisplayUnits
+
+state:
+  taxi_lights:
+    name: Taxi lights
+    watch: B('AIRLINER_OVH_LTS_TAXI')
+    write: B('AIRLINER_OVH_LTS_TAXI_Set')

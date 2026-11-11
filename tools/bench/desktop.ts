@@ -310,9 +310,26 @@ export class DesktopLink {
   }
 }
 
+/**
+ * The PowerShell that prints a process's CPU time in ms from the cycles Windows counts for it, over the processor's base
+ * clock, at which its cycle counter runs. `TotalProcessorTime` can't judge an app this quiet: Windows charges it a whole
+ * 15.625ms tick at a time, to whichever thread runs as the clock interrupt fires, so an app working in 1ms bursts read 5 to
+ * 9 ticks over the same quiet minute, 0.130% to 0.234% of a core around a 0.2% budget (measured on our development
+ * machine, 2026-11-11, record/areas/install/log.md).
+ */
+const CPU_MS = (pid: number) => `
+Add-Type -Namespace DualInputBench -Name Cycles -MemberDefinition '[DllImport("kernel32.dll")] public static extern bool QueryProcessCycleTime(IntPtr process, out ulong cycles);'
+$cycles = [uint64]0
+if (-not [DualInputBench.Cycles]::QueryProcessCycleTime((Get-Process -Id ${pid}).Handle, [ref]$cycles)) { throw 'QueryProcessCycleTime failed' }
+$mhz = (Get-ItemProperty 'HKLM:\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0').'~MHz'
+$cycles / ($mhz * 1000)`
+
 /** The private working set of `pid` in bytes, Task Manager's Memory column, and its CPU time in ms. */
 export function figures(pid: number): { memory: number; cpuMs: number } {
-  const cpu = spawnSync("powershell", ["-NoProfile", "-Command", `(Get-Process -Id ${pid}).TotalProcessorTime.TotalMilliseconds`], { encoding: "utf8" })
+  const encoded = Buffer.from(CPU_MS(pid), "utf16le").toString("base64")
+  const cpu = spawnSync("powershell", ["-NoProfile", "-EncodedCommand", encoded], { encoding: "utf8" })
+  const cpuMs = Number(cpu.stdout.trim())
+  assert.ok(Number.isFinite(cpuMs) && cpuMs >= 0, `the app's CPU didn't read: ${cpu.stdout}${cpu.stderr}`)
   const set = spawnSync(
     "powershell",
     ["-NoProfile", "-Command", `(Get-CimInstance Win32_PerfFormattedData_PerfProc_Process -Filter "IDProcess=${pid}").WorkingSetPrivate`],
@@ -320,5 +337,5 @@ export function figures(pid: number): { memory: number; cpuMs: number } {
   )
   const memory = Number(set.stdout.trim())
   assert.ok(Number.isFinite(memory) && memory > 0, `the app's memory didn't read: ${set.stdout}${set.stderr}`)
-  return { memory, cpuMs: Number(cpu.stdout.trim()) }
+  return { memory, cpuMs }
 }

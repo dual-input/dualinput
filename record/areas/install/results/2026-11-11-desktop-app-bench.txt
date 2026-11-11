@@ -50,3 +50,36 @@ ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of on
 # tests 8
 # pass 8
 # fail 0
+
+=== The CPU read from the cycles Windows counts for the process, over the base clock, 4,200 MHz on this Ryzen 7 7800X3D
+A check against a known load: a child spinning one thread for 3,000ms of wall time read 2995.1ms from cycles and 3000.0ms from TotalProcessorTime.
+--- the scenario alone, run 1
+ok 1 - the sim's start starts a core within 3s, and an app that starts while the sim runs starts one too
+# the core started 1796ms after the sim's process appeared
+ok 2 - a core that crashes while the sim runs comes back within 3s as a bench core, and one that exits with 0 stays down until the sim starts again
+# the core started again 2115ms after the crash
+ok 3 - a sim that starts again as the core exits for the last one gets a core
+ok 4 - a unit's panic in a session crashes the core, which the app starts again, comes back as a late joiner, and replays to the same input; with the sim closed, the session held brings a crashed core back too
+ok 5 - a second start hands its request to the running app and exits
+ok 6 - our package goes into Community at the app's start and each time the sim closes, where it's missing or of another version, and never while the sim runs
+ok 7 - Check now goes through checking to up to date, and to failed with the error when the feed can't be reached; a release found while the sim runs waits for it to close, unless asked for
+ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
+# the app held 3.88 MB and used 0.154% of one CPU core over 60s
+# tests 8
+# pass 8
+# fail 0
+--- the scenario alone, run 2
+ok 1 - the sim's start starts a core within 3s, and an app that starts while the sim runs starts one too
+# the core started 1801ms after the sim's process appeared
+ok 2 - a core that crashes while the sim runs comes back within 3s as a bench core, and one that exits with 0 stays down until the sim starts again
+# the core started again 2443ms after the crash
+ok 3 - a sim that starts again as the core exits for the last one gets a core
+ok 4 - a unit's panic in a session crashes the core, which the app starts again, comes back as a late joiner, and replays to the same input; with the sim closed, the session held brings a crashed core back too
+ok 5 - a second start hands its request to the running app and exits
+ok 6 - our package goes into Community at the app's start and each time the sim closes, where it's missing or of another version, and never while the sim runs
+ok 7 - Check now goes through checking to up to date, and to failed with the error when the feed can't be reached; a release found while the sim runs waits for it to close, unless asked for
+ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
+# the app held 3.85 MB and used 0.139% of one CPU core over 60s
+# tests 8
+# pass 8
+# fail 0

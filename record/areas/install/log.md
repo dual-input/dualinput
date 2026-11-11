@@ -1,5 +1,27 @@
 # Installing and updating: log
 
+## 2026-11-11: The bench read the desktop app's CPU in whole 15.6ms clock ticks; read from cycles, the app uses 0.14% to 0.15% of a core
+
+**Asked.**
+Why the desktop app's CPU over a quiet minute read 0.130% to 0.234% of a core across three runs that did the same work, which the entry below put down to the PC around it.
+
+**Expected.**
+A reading that moved with the PC's load, through the walk's cost.
+
+**Found** (measured on our development machine, 2026-11-11, Windows 11 Pro 10.0.26200, AMD Ryzen 7 7800X3D, [the scenario's output](results/2026-11-11-desktop-app-bench.txt)):
+
+- `TotalProcessorTime`, which the bench read, came in whole 15.625ms clock ticks in all 120 processes sampled: Windows charges a tick to whichever thread runs as its clock interrupt fires.
+- So an app working in 1ms bursts gets a whole tick or nothing, and every reading of the app was a whole number of ticks over 60s, each 0.026% of a core: 0.130% was 5 ticks, 0.182% 7, and 0.234% 9, around a 0.2% budget of 7.7.
+- The cycles Windows counts for a process, `QueryProcessCycleTime`, over the base clock, 4,200 MHz, read a child spinning one thread for 3,000ms of wall time as 2,995.1ms, where `TotalProcessorTime` read 3,000.0ms.
+- Read from cycles, the scenario's budget case read 0.154% and then 0.139% of a core, at 3.88 MB and 3.85 MB, and passed both times, 8 of 8 in all.
+- The 2026-11-10 runs below read their CPU in ticks too, so their CPU column can't rank runs 2 to 4; their walks' cost, timed over 200 walks in a row, and their memory stand.
+
+**What changed.**
+The bench reads the app's CPU from cycles, and the budget stays at 0.2% of a core.
+
+**Docs affected.**
+None.
+
 ## 2026-11-11: The whole bench passed 155 of 157 tests at stage 15's close, and the desktop app's CPU over a minute ranged 0.130% to 0.234% of a core across three runs
 
 **Asked.**

@@ -9,4 +9,4 @@ import type { StandInAct } from "./StandInAct.ts";
 /**
  * A line from the bench, such as `{"kind":"count","n":3}`.
  */
-export type ToCore = { "kind": "count", n: number, } | { "kind": "load", capture: string, plays: number, } | { "kind": "exit" } | { "kind": "stand-in", act: StandInAct, } | { "kind": "sim", call: SimCall, } | { "kind": "clients", act: ClientsAct, } | { "kind": "helper", act: HelperAct, } | { "kind": "net", act: NetAct, } | { "kind": "cockpit", act: CockpitAct, };
+export type ToCore = { "kind": "count", n: number, } | { "kind": "load", capture: string, plays: number, } | { "kind": "exit" } | { "kind": "panic" } | { "kind": "stand-in", act: StandInAct, } | { "kind": "sim", call: SimCall, } | { "kind": "clients", act: ClientsAct, } | { "kind": "helper", act: HelperAct, } | { "kind": "net", act: NetAct, } | { "kind": "cockpit", act: CockpitAct, };

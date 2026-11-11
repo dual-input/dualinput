@@ -21,6 +21,14 @@ Decides:     That the desktop app does the watcher's jobs from a tray icon; what
 > While the sim runs, automatic checks go on, so the EFB app can say a new version exists, and the download waits for the sim to close, unless the pilot presses Check now or Install, which download at once.
 > That adds a state to the local port's `Update`, available and not downloaded.
 
+> **Note**
+> On the first run, the welcome's firewall step asks the pilot before the UAC prompt shows, where [the firewall rule](#the-firewall-rule) has the app run itself elevated at once, and no core waits on the rule, since one that waited would leave Dual Input dead in the sim for a pilot who left the welcome open; a core that starts before the rule is in may raise Windows' own prompt, unverified, and the EFB app's Fix mends what that leaves ([the desktop app's screens](../interface/decisions.md#the-desktop-app-shows-velopacks-windows-and-its-own-figures-and-the-build-designs-the-rest); user, 2026-11-10).
+> The welcome no longer has a screen for a sim that has never run, which [left to the apps' stage](#left-to-the-apps-stage) names.
+
+> **Note**
+> Stage 15 found that a `CreateToolhelp32Snapshot` walk every 2s takes about 0.15% of one CPU core by itself, most of the app's 0.2%.
+> So where [the sim and the core](#the-sim-and-the-core) has the app walk with Toolhelp, it asks `NtQuerySystemInformation` for the process list instead, at 1.02ms of CPU a walk against Toolhelp's 2.66ms to 3.05ms, and keeps Toolhelp for its figures' once-a-minute walk ([log](log.md#2026-11-10-the-desktop-app-starts-the-core-18s-after-the-sim-and-20s-to-24s-after-a-crash-and-holds-its-02-of-a-core-only-with-a-walk-cheaper-than-toolhelps)).
+
 Dual Input has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.
 The app applies an update only while the sim is closed, no session is held, and the core has exited, and Install now quits the core to get there.

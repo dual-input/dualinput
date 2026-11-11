@@ -3,8 +3,8 @@
 //! record/areas/install/log.md, and 2026-11-04, record/areas/interface/log.md). It opens hidden and shows once its page has said
 //! how tall it is, so a pilot sees neither a white frame nor a jump.
 
-use std::path::PathBuf;
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use messages::desktop::{DesktopState, ToDesktop};
 use serde::Serialize;
@@ -14,8 +14,9 @@ use tauri::{
 };
 use tokio::sync::{mpsc, watch};
 
-use crate::processes;
+use crate::jobs::Event;
 use crate::usage::{self, History, Line, Sampler, Usage};
+use crate::{places, processes};
 
 /// The window's one label, by which a second open finds the first.
 const WINDOW: &str = "main";
@@ -24,9 +25,6 @@ const WINDOW: &str = "main";
 const WIDTH: f64 = 400.0;
 /// What stays clear of a screen's height, for its taskbar.
 const SCREEN_MARGIN: f64 = 60.0;
-/// The session file, which the core writes in the data folder while a session is held. `NAME` in
-/// src/platform/session/src/file.rs names the same file, so change both together.
-const SESSION_FILE: &str = "session.json";
 
 /// What the window shows.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize)]
@@ -38,12 +36,18 @@ pub enum Screen {
 }
 
 impl Screen {
-    fn name(self) -> &'static str {
+    pub fn name(self) -> &'static str {
         match self {
             Screen::Main => "main",
             Screen::Quit => "quit",
             Screen::Welcome => "welcome",
         }
+    }
+
+    pub fn from_name(name: &str) -> Option<Self> {
+        [Screen::Main, Screen::Quit, Screen::Welcome]
+            .into_iter()
+            .find(|screen| screen.name() == name)
     }
 }
 
@@ -53,7 +57,23 @@ pub struct Shared {
     pub history: Option<History>,
     pub screen: Mutex<Screen>,
     pub state: watch::Receiver<DesktopState>,
-    pub asks: mpsc::UnboundedSender<ToDesktop>,
+    pub jobs: mpsc::UnboundedSender<Event>,
+    /// Whether the firewall's fix runs, from its ask until the rules are read again, which the welcome waits on.
+    pub fixing_firewall: AtomicBool,
+}
+
+impl Shared {
+    /// Hands an ask, from the window or the EFB app, to the jobs. The welcome takes the rule still missing with no fix running
+    /// for a declined UAC prompt, and reads the view again once its ask returns, so a fix is marked running here, before the
+    /// jobs loop takes the ask. A fix asked while one runs goes nowhere.
+    pub fn ask(&self, ask: ToDesktop) {
+        if matches!(ask, ToDesktop::FixFirewall)
+            && self.fixing_firewall.swap(true, Ordering::Relaxed)
+        {
+            return;
+        }
+        let _ = self.jobs.send(Event::Asked(ask));
+    }
 }
 
 /// All the page shows, which it reads again every few seconds while it's open.
@@ -65,23 +85,7 @@ pub struct View {
     desktop: DesktopState,
     sim_running: bool,
     session_held: bool,
-    sim_has_run: bool,
-}
-
-/// Whether the sim has written its `UserCfg.opt`, which names the packages folders our add-on goes in: Steam's, then the
-/// Microsoft Store's. `USER_CFGS` in src/platform/sim-service/src/aircraft.rs and `userCfgs` in tools/lib/install.ts name the
-/// same files, so change all three together.
-fn sim_has_run() -> bool {
-    let steam = std::env::var_os("APPDATA")
-        .map(|data| PathBuf::from(data).join(r"Microsoft Flight Simulator 2024\UserCfg.opt"));
-    let store = std::env::var_os("LOCALAPPDATA").map(|data| {
-        PathBuf::from(data)
-            .join(r"Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\UserCfg.opt")
-    });
-    [steam, store]
-        .into_iter()
-        .flatten()
-        .any(|file| file.exists())
+    fixing_firewall: bool,
 }
 
 /// Opens the window on `screen`, or brings forward the one that's open and turns it there.
@@ -137,20 +141,22 @@ pub fn view(shared: State<'_, Shared>) -> View {
     if let Ok(sampler) = shared.sampler.lock() {
         figures.samples.push(sampler.peek(now));
     }
+    // The welcome takes the rule missing with no fix running for a declined prompt, and the jobs write the rules' state
+    // before they clear the flag, so the flag is read first: a cleared flag then comes with the state written before it.
+    let fixing_firewall = shared.fixing_firewall.load(Ordering::Acquire);
     View {
         screen: shared.screen.lock().map_or(Screen::Main, |screen| *screen),
         usage: figures,
         desktop: shared.state.borrow().clone(),
-        sim_running: processes::sim_running(&processes::running()),
-        session_held: crate::log::data_folder()
-            .is_some_and(|folder| folder.join(SESSION_FILE).exists()),
-        sim_has_run: sim_has_run(),
+        sim_running: processes::sim_runs(),
+        session_held: places::session_held(),
+        fixing_firewall,
     }
 }
 
 #[tauri::command]
 pub fn ask(ask: ToDesktop, shared: State<'_, Shared>) {
-    let _ = shared.asks.send(ask);
+    shared.ask(ask);
 }
 
 /// Sizes the window to its page, as far as the screen lets it, shows it the first time, and answers the height it took, so a
@@ -186,8 +192,8 @@ pub fn close(window: WebviewWindow) {
     let _ = window.destroy();
 }
 
-/// TODO: when the app holds a socket to the core, send the session crate's Quit first.
+/// Quit anyway: the core leaves any session and exits before the app ends, so the crew sees a leave rather than a lost link.
 #[tauri::command]
-pub fn quit(app: AppHandle) {
-    app.exit(0);
+pub fn quit(shared: State<'_, Shared>) {
+    let _ = shared.jobs.send(Event::Quit);
 }

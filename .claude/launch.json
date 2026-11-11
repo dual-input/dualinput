@@ -8,6 +8,12 @@
       "port": 5190
     },
     {
+      "name": "welcome-window",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tools/dev.ts", "welcome"],
+      "port": 5190
+    },
+    {
       "name": "efb-app",
       "runtimeExecutable": "node",
       "runtimeArgs": ["tools/dev.ts", "efb"],

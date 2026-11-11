@@ -28,7 +28,7 @@ pub const USER_CFG: &str = "sim.user-cfg";
 
 /// Steam's `UserCfg.opt`, then the Microsoft Store's (record/areas/install/
 /// 01-installing-and-updating.md, "The packages folders"). `userCfgs` in tools/lib/install.ts,
-/// `sim_has_run` in src/apps/desktop/src/screens.rs, and `USER_CFGS` in tools/profile-author's
+/// `USER_CFGS` in src/apps/desktop/src/places.rs, and `USER_CFGS` in tools/profile-author's
 /// cockpit.rs name the same files, so change all four together.
 const USER_CFGS: &str = r"%APPDATA%\Microsoft Flight Simulator 2024\UserCfg.opt;%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\UserCfg.opt";
 
@@ -501,8 +501,9 @@ const ROOTS: [(&str, u8, Location); 4] = [
 
 /// The folder `UserCfg.opt`'s `InstalledPackagesPath` line names, matched by its name and a
 /// space, so a longer name such as `InstalledPackagesPathNextBoot` doesn't match.
-/// `packagesFolders` in tools/lib/install.ts and `packages_folders` in tools/profile-author's
-/// cockpit.rs read the line the same way, so change all three together.
+/// `packagesFolders` in tools/lib/install.ts, `packages_folder` in src/apps/desktop/src/places.rs,
+/// and `packages_folders` in tools/profile-author's cockpit.rs read the line the same way, so change
+/// all four together.
 fn packages_folder(cfg: &str) -> Option<String> {
     let line = cfg
         .lines()

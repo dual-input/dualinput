@@ -317,9 +317,16 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 ## The desktop app shows Velopack's windows and its own figures, and the build designs the rest
 
 - **Decided:**
-  - Dual Input installs with Velopack's `Setup.exe` as it is, our splash image over its progress bar, with no MSI and no setup program of our own.
-  - `Setup.exe` starts the app with its first-run flag, which opens a small window, "Welcome to Dual Input", with a line pointing to the EFB app and Dismiss as its only action.
-  - While no `UserCfg.opt` exists, that window says MSFS 2024 hasn't run on this PC, so Dual Input can't install its sim components, and gives two steps: start the sim and close it, then start it again and find Dual Input in the EFB.
+  - Dual Input installs with Velopack's `Setup.exe` as it is, with no MSI and no setup program of our own.
+    Its splash is our pixel-art night approach in a Cessna 172, down a 3-degree path toward a runway's approach lights, over a progress bar in the kit's sky.
+    The install hook waits 3s, which keeps the splash up that long, where an install alone shows it for 0.3s to 1.0s (measured on our development machine, 2026-11-10, [install log](../install/log.md#2026-11-10-velopacks-splash-stays-up-03s-to-10s-on-our-install-so-the-apps-install-hook-holds-it-3s-for-the-splash-to-play)).
+  - Velopack's first run after each install by `Setup.exe`, a reinstall's too, opens the welcome: a window 400px wide and one height on every step, with no title bar and no close button, since three short steps ask little, and Alt+F4 or the taskbar still close it.
+    It greets the pilot, "Welcome to [mark] Dual Input", as the EFB app's setup does, then takes them through three steps, each a picture, a heading, a line or two, and one button beside the step's dots:
+    1. "Let other pilots reach you": two PCs joined by a line with a shield on it, why Dual Input adds a Windows Firewall rule, and Add the rule, which shows the UAC prompt and says "Waiting for Windows" until the rule is in, with Not now beside it.
+       A pilot who declines the prompt reads that relays still connect them, with more latency, and gets Try again.
+       The step shows only when the rule is missing or blocked, so a reinstall over the rule an uninstall left behind skips it.
+    2. "Dual Input lives in your tray": the taskbar's corner with its hidden icons open and ours among them, and "It starts with Windows and gets everything ready every time you start the sim. In the background, it uses about 5 MB of memory and practically no CPU."
+    3. "Fly from the EFB": a Tab keycap and our EFB app's icon, "In the sim, press Tab, then open Dual Input. It works at the world map and in any flight.", and under it, "Don't see it? Restart the sim.", which covers a pilot who installed with the sim running, and Done.
   - Applying an update shows Velopack's stock progress dialog, so the pilot sees what's happening while `Update.exe` has our programs stopped.
   - Quit lives only in the tray, where it asks once, as [installing and updating](../product/03-v1-scope.md#installing-and-updating) has it: the window turns to Quit's ask, with the 24 hours of figures, "What does this do?" folded, "If you quit" and one sentence in red, and Quit anyway and Keep running.
     The sentence follows what quitting costs at that moment: in a session, the pilot leaves it, and the EFB app stops working; with the sim running, the EFB app stops working; otherwise Dual Input won't be ready for the next flight, or get updates, and certain features may break on some aircraft.
@@ -336,9 +343,10 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
     The app takes a sample a minute into `%APPDATA%\DualInput\app\usage.jsonl`, and holds none of them in memory.
   - Turning Start with Windows off shows a warning under the switch, here and under [the EFB app's](#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version).
 
-  Settled by the user on 2026-10-25, 2026-10-31, 2026-11-01, 2026-11-03, and 2026-11-04.
+  Settled by the user on 2026-10-25, 2026-10-31, 2026-11-01, 2026-11-03, 2026-11-04, and 2026-11-10.
 - **Because:**
-  - A pilot works in the EFB app, so the first-run window only has to point there.
+  - A pilot works in the EFB app, so the welcome ends by pointing there, after saying why Windows asks about the firewall and why a tray app runs at all (user, 2026-11-10).
+  - A screen for a sim that has never run would almost never show, and is easy to forget to keep working, so the welcome's one line about restarting the sim covers that case and a pilot who installed with the sim running (user, 2026-11-10).
   - Offered a Quit in the EFB app's Settings, the user declined it (user, 2026-10-31).
   - With the core left out, the samples stay flat except for the minutes the window is open, so a plain average says what the tray app cost over the last 24 hours, its window's cost included, where the core's figures during a flight would have skewed it (user, 2026-11-03).
   - A window that showed less than Task Manager would read as a lie to the pilot it's trying to reassure (user, 2026-11-03).
@@ -353,7 +361,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Because:** the desktop app holds the update ([updates](../install/01-installing-and-updating.md#updates)), and an open window keeps no core running ([above](#dual-inputs-one-full-window-is-its-efb-app)), so the core can't carry its state.
 - **Leaves out:**
   - The port number.
-  - How the desktop app closes the sim cleanly, and whether it can start the Store edition, both unverified, which a run that does each settles.
+  - Whether the desktop app can close and start the Store edition, unverified until a run on a pilot's PC; the Steam edition closed on the app's window message, asking the pilot nothing, and started again through Steam (measured on MSFS 2024, 2026-11-10, [install log](../install/log.md#2026-11-10-a-release-installs-with-one-uac-prompt-and-updates-within-3s-of-the-sims-process-ending-but-the-welcome-took-the-prompt-for-declined-before-the-pilot-answered-it)).
   - How Start with Windows reaches the desktop app, which writes the Run value: this link is the likely way, and the build settles it.
   - A known cost: Fix's UAC prompt opens on the desktop behind the sim, which a pilot in VR can't see.
 
@@ -391,7 +399,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - Outside a session, the header shows the mark and the version.
     Once this pilot is in the flight of a session in preflight or flying, the phase stands in their place on every page: a dot, pulsing in preflight, "PREFLIGHT" or "SYNC ACTIVE", and in preflight the line "Sync starts once everyone's ready".
   - A pill at the right shows each thing wrong with this PC or waiting on its pilot, as a word and an icon, and opens into rows on a hover or a press; with nothing to show there's no pill, and nothing opens.
-  - Its rows are: the PC offline, which takes our servers' place, since with no internet Dual Input can't tell whether they answer; our servers not answering; Windows Firewall blocking Dual Input, with Fix; an update ready, with View update, which opens Settings on its update section; and, while it lasts, trouble in Dual Input's own parts, in the pill as "Screens", "WASM", "Helper", or "Keybind", so a [dismissed notification](#the-banner-is-a-box-of-opaque-cards-at-the-screens-top-right) loses nothing.
+  - Its rows are: the PC offline, which takes our servers' place, since with no internet Dual Input can't tell whether they answer; our servers not answering; Windows Firewall blocking Dual Input, with Fix; a new version, "Dual Input 1.0.3 is available", whether or not it has downloaded, with View update, which opens Settings on its update section; and, while it lasts, trouble in Dual Input's own parts, in the pill as "Screens", "WASM", "Helper", or "Keybind", so a [dismissed notification](#the-banner-is-a-box-of-opaque-cards-at-the-screens-top-right) loses nothing.
   - Each row's title says what's wrong, and its detail what that costs.
     Under them, when something's wrong, but not while offline or for an update alone, a line points to our Discord, since a confused pilot needs a way to people, and the core opens it from a link it holds, since any add-on's page in the sim can send a command, and a core that opened what it was told would open anything for any of them.
     It opens in the pilot's Discord app if they have it, and otherwise in their browser, since the browser offers a pilot not signed in there a form to create an account ([log](log.md#2026-11-02-a-discord-link-opens-an-invite-in-the-discord-app-from-closed)).
@@ -403,7 +411,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - The aircraft, which home names.
   - A crewmate, whose crew row says what's wrong.
 
-  Settled by the user on 2026-10-29, 2026-10-30, 2026-10-31, and 2026-11-01.
+  Settled by the user on 2026-10-29, 2026-10-30, 2026-10-31, 2026-11-01, and 2026-11-10.
 - **Because:**
   - Nothing said what state Dual Input was in, or explained what preflight is (user, 2026-10-30), and the header shows on every tab.
   - `iroh` punches again every 60s, so a relayed link could go direct within a minute of the firewall rule landing, which is why Fix stays in a session (inference).
@@ -595,10 +603,12 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
     The run in progress can be opened but not deleted, since a pilot reporting a problem now needs it, and a recording that stopped, at under 1 GB free or on a failed write, says so here, since nothing else tells the pilot.
     Open folder's toast says it opened on the desktop, since Explorer opens behind the sim, and a line under the card says what a run keeps and that a report starts with `log.txt` on Discord.
   - Dual Input: Start with Windows, on at first, which a pilot's off in Windows' own list of startup apps overrides, so the switch then reads off, can't move, and says where to turn it back on (user, 2026-11-02); then the version with the update's state: up to date with when it checked and Check now, checking, downloading with how far, or failed with the error and Try again.
-    A ready update grows a box: "Close the sim to install." over Install and restart, which asks first, or in a session "Install it when you're not in a session." with no button.
+    A new version grows a box headed "Dual Input 1.0.3 is available", the same whether the release is found, downloading, or downloaded, since to the pilot those are one thing (user, 2026-11-10).
+    Outside a session the box says "Close the sim to install." over Install and restart, which asks first, then downloads whatever hasn't downloaded, then closes the sim.
+    In a session it says "Install it when you're not in a session." with no button.
 
   The name, color, sharing, the ATC app, and the volume stay on their tabs; the microphone comes with the voice phrases, after v1; and the relay list ships with each release.
-  Settled by the user on 2026-10-31 and 2026-11-01.
+  Settled by the user on 2026-10-31, 2026-11-01, and 2026-11-10.
 - **Because:** [the one full window](#dual-inputs-one-full-window-is-its-efb-app) moves the desktop app's settings here, the runs' list with them, and a report asks for the log first and the recording only when the log isn't enough ([recording and bug reports](../recording/01-recording-and-bug-reports.md)).
 - **Leaves out:** whether the core zips a report's folder, which for now opens in Windows Explorer; and turning off an aircraft plugin, skipped in the design for now.
 

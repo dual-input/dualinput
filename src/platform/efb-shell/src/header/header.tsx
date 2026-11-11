@@ -4,13 +4,12 @@
 // window dims under it. A press keeps it open, so its actions don't close under the pointer; then a press
 // elsewhere or Escape closes it.
 
-import { cx, Link } from "@dualinput/ui"
+import { cx, Link, Mark } from "@dualinput/ui"
 import { ExternalLink } from "lucide-react"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
 import { openDiscord } from "../discord.ts"
-import { Mark } from "../mark.tsx"
 import { useShell } from "../part.ts"
 import { TONE_ICON } from "./issues.tsx"
 import type { Issue } from "./issues.tsx"

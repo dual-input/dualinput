@@ -10,13 +10,14 @@ import { Failed } from "./run.ts"
 
 /**
  * Runs `cargo build` with `args`, such as `["-p", "dualinput-core"]`, and returns each of
- * `programs`' executables, by its target's name, as Cargo reported it.
+ * `programs`' executables, by its target's name, as Cargo reported it. `cwd` is the
+ * workspace's folder, the root's unless another, such as the desktop app's, is given.
  */
-export function buildPrograms<const N extends string>(args: string[], programs: readonly N[]): Record<N, string> {
+export function buildPrograms<const N extends string>(args: string[], programs: readonly N[], cwd = ROOT): Record<N, string> {
   const command = ["build", ...args]
   console.log(`> cargo ${command.join(" ")}`)
   const result = spawnSync("cargo", [...command, "--message-format", "json-render-diagnostics"], {
-    cwd: ROOT,
+    cwd,
     encoding: "utf8",
     maxBuffer: 1 << 28,
     stdio: ["ignore", "pipe", "inherit"],

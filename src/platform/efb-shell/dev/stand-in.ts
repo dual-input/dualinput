@@ -173,6 +173,7 @@ export const SCENES: Record<string, Slices> = {
   },
   "Recording stopped": { recording: { runs: RUNS, stopped: "no-space" } },
   "Output device missing": { settings: [...settings(true, true), { ...setting(OUTPUT, false), kind: { type: "device" }, value: { id: "old", name: "Studio Headphones" } }] },
+  "Update available": { [DESKTOP]: { ...LOCAL, update: { state: "available", next: "1.0.3" } } },
   "Update ready": { [DESKTOP]: { ...LOCAL, update: { state: "ready", next: "1.0.3" } } },
   "No tray app": { [DESKTOP]: null },
   "Turned off in Windows": { [DESKTOP]: { ...LOCAL, start_with_windows: "off-in-windows" } },

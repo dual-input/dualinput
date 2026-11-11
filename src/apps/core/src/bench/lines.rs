@@ -32,6 +32,11 @@ impl Lines {
                 cx.out(Counted(n));
             }
             Ok(ToCore::Exit) => cx.out(Exit),
+            // A bug in a unit's handler, which crashes the core, so the bench sees the desktop app start it again and
+            // the replay panic at the same input.
+            Ok(ToCore::Panic) => {
+                panic!("the bench's test unit panics in its handler, as a unit's bug would")
+            }
             // The socket hands a load to the playback, an act to the stand-in, and each test
             // unit's line to that unit, not to this one.
             Ok(

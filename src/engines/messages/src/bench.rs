@@ -32,6 +32,8 @@ pub enum ToCore {
     Load { capture: String, plays: u32 },
     /// Has a test unit put out the core's exit.
     Exit,
+    /// Has a test unit's handler panic.
+    Panic,
     /// Acts on the stand-in sim, as something happens to the sim. It goes to the stand-in's
     /// thread, and is no input of the core's.
     StandIn { act: StandInAct },

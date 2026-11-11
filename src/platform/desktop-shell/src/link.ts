@@ -10,11 +10,13 @@ export type Sample = { at: number; memory: number; cpu: number; network: number 
 
 export type Usage = { samples: Sample[]; windowOpened: number[]; updateDownloaded: number[]; now: number }
 
-export type View = { screen: Screen; usage: Usage; desktop: DesktopState; simRunning: boolean; sessionHeld: boolean; simHasRun: boolean }
+/** What the window shows, with `fixingFirewall` true from the firewall's fix's ask until the rules are read again. */
+export type View = { screen: Screen; usage: Usage; desktop: DesktopState; simRunning: boolean; sessionHeld: boolean; fixingFirewall: boolean }
 
 export type DesktopLink = {
   view(): Promise<View>
-  ask(ask: ToDesktop): void
+  /** Resolves once the Rust side has taken the ask, while what it asked for may still run. */
+  ask(ask: ToDesktop): Promise<void>
   /** Sizes the window to the page, as far as the screen lets it, shows it the first time, and answers the height it took. */
   fit(height: number): Promise<number>
   /** Moves the window with the mouse, until the button comes up. */
@@ -34,7 +36,7 @@ declare global {
 
 export const tauriLink: DesktopLink = {
   view: () => window.__TAURI__.core.invoke<View>("view"),
-  ask: (ask) => void window.__TAURI__.core.invoke("ask", { ask }),
+  ask: (ask) => window.__TAURI__.core.invoke<void>("ask", { ask }),
   fit: (height) => window.__TAURI__.core.invoke<number>("fit", { height }),
   drag: () => void window.__TAURI__.core.invoke("drag"),
   close: () => void window.__TAURI__.core.invoke("close"),

@@ -21,6 +21,11 @@ pub enum Update {
         checked: Option<String>,
     },
     Checking,
+    /// `next` is out, and its download waits for the sim to close, unless the pilot asks for it
+    /// at once (record/areas/install/01-installing-and-updating.md's note of 2026-11-03).
+    Available {
+        next: String,
+    },
     /// Downloading `next`, `done` percent of the way.
     Downloading {
         next: String,
@@ -29,8 +34,9 @@ pub enum Update {
     Ready {
         next: String,
     },
+    /// A check or a download failed, with `next` the version a download was for.
     Failed {
-        next: String,
+        next: Option<String>,
         error: String,
     },
 }

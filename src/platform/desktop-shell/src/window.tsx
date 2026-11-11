@@ -12,6 +12,7 @@ import { ChevronDown, X } from "lucide-react"
 import type { DesktopLink, Screen, View } from "./link.ts"
 import { UsageChart } from "./usage-chart.tsx"
 import { quitCost } from "./usage.ts"
+import { Welcome } from "./welcome.tsx"
 
 /** How often an open window reads the figures and the states again. */
 const READ_EVERY = 5000
@@ -19,7 +20,7 @@ const READ_EVERY = 5000
 const READ_AFTER_ASK = 150
 const BAR_HEIGHT = 32
 
-const TITLES: Record<Screen, string> = { main: "Dual Input Tray App", quit: "Quit Dual Input?", welcome: "Dual Input" }
+const TITLES: Record<Exclude<Screen, "welcome">, string> = { main: "Dual Input Tray App", quit: "Quit Dual Input?" }
 
 /** The window's own title bar, since the one dark look has to reach the top of the window. It moves the window as Windows' does. */
 function TitleBar({ title, link }: { title: string; link: DesktopLink }) {
@@ -108,8 +109,8 @@ function Version({ version, view, ask }: { version: string; view: View; ask: Des
             </span>
           )}
           {update.state === "downloading" && `Downloading ${update.next}, ${update.done}%`}
-          {update.state === "ready" && `Version ${update.next} is ready.${held}`}
-          {update.state === "failed" && `Couldn't download ${update.next}: ${update.error}`}
+          {(update.state === "available" || update.state === "ready") && `Version ${update.next} is available.${held}`}
+          {update.state === "failed" && (update.next === null ? `Couldn't check for updates: ${update.error}` : `Couldn't download ${update.next}: ${update.error}`)}
         </div>
       </div>
       {(update.state === "current" || update.state === "checking") && (
@@ -117,7 +118,8 @@ function Version({ version, view, ask }: { version: string; view: View; ask: Des
           Check now
         </Button>
       )}
-      {update.state === "ready" && (
+      {/* Found or downloaded, it's one new version to the pilot, and Install now downloads what it hasn't. */}
+      {(update.state === "available" || update.state === "ready") && (
         <Button size="sm" className="ml-3" disabled={held !== ""} onClick={() => ask({ t: "install-update" })}>
           Install now
         </Button>
@@ -182,30 +184,6 @@ function Quit({ view, link }: { view: View; link: DesktopLink }) {
   )
 }
 
-/** The first run's window, which only points to the EFB app, unless the sim has yet to run, which our add-on waits for. */
-function Welcome({ view, link }: { view: View; link: DesktopLink }) {
-  return (
-    <>
-      <h1 className="text-lg font-medium">Welcome to Dual Input</h1>
-      {view.simHasRun ? (
-        <p className="mt-1 text-foreground/80">Dual Input is in your sim's EFB, ready for your next flight.</p>
-      ) : (
-        <>
-          <p className="mt-1 text-foreground/80">MSFS 2024 hasn't run on this PC, so Dual Input can't install its sim components yet.</p>
-          <ol className="mt-2 list-decimal space-y-1 pl-4 text-foreground/80">
-            <li>Start the sim and close it.</li>
-            <li>Start it again and find Dual Input in the EFB.</li>
-          </ol>
-        </>
-      )}
-      <div className="mt-4 flex justify-end">
-        <Button size="sm" onClick={link.close}>
-          Dismiss
-        </Button>
-      </div>
-    </>
-  )
-}
 
 export function DesktopWindow({ version, link }: { version: string; link: DesktopLink }) {
   const [view, setView] = useState<View>()
@@ -214,12 +192,14 @@ export function DesktopWindow({ version, link }: { version: string; link: Deskto
   const [room, setRoom] = useState<number>()
   const content = useRef<HTMLDivElement>(null)
 
-  const read = useCallback(() => {
-    void link.view().then((next) => {
-      setView(next)
-      setScreen((shown) => shown ?? next.screen)
-    })
-  }, [link])
+  const read = useCallback(
+    () =>
+      link.view().then((next) => {
+        setView(next)
+        setScreen((shown) => shown ?? next.screen)
+      }),
+    [link],
+  )
 
   useEffect(() => {
     window.dualInputShow = setScreen
@@ -232,8 +212,8 @@ export function DesktopWindow({ version, link }: { version: string; link: Deskto
   }, [read])
 
   const ask: DesktopLink["ask"] = (asked) => {
-    link.ask(asked)
     setTimeout(read, READ_AFTER_ASK)
+    return link.ask(asked)
   }
 
   // The window hugs what it shows, since a folded list, the switch's warning, and each screen all differ in height, and it
@@ -242,31 +222,38 @@ export function DesktopWindow({ version, link }: { version: string; link: Deskto
   // which narrows the text and jumps the layout. Nothing's measured until the first read has come, since the first fit shows the
   // window, and an empty page would show it as a strip.
   const ready = view !== undefined && screen !== undefined
+  // The welcome draws no title bar, since it's a short sequence the pilot steps through and closes with its last button.
+  const bar = screen === "welcome" ? 0 : BAR_HEIGHT
   useLayoutEffect(() => {
     const element = content.current
     if (!element || !ready) return
     const fit = () => {
-      const height = Math.ceil(element.getBoundingClientRect().height) + BAR_HEIGHT
-      void link.fit(height).then((shown) => setRoom(shown < height ? shown - BAR_HEIGHT : undefined))
+      const height = Math.ceil(element.getBoundingClientRect().height) + bar
+      void link.fit(height).then((shown) => setRoom(shown < height ? shown - bar : undefined))
     }
     fit()
     const observer = new ResizeObserver(fit)
     observer.observe(element)
     return () => observer.disconnect()
-  }, [link, ready])
+  }, [link, ready, bar])
 
   return (
     <Root>
       <div className="bg-background text-[13px] leading-snug text-foreground">
-        <TitleBar title={screen ? TITLES[screen] : TITLES.main} link={link} />
+        {bar > 0 && <TitleBar title={screen && screen !== "welcome" ? TITLES[screen] : TITLES.main} link={link} />}
         <div style={room === undefined ? undefined : { height: room, overflowY: "auto" }}>
-          {/* The kit's root turns selection off for the sim's pages, and a window on the desktop reads like any other, so its words can be copied. */}
-          {/* A line of text has room above its capitals, so a thinner top looks the same as the left. */}
-          <div ref={content} className="px-3.5 pb-3.5 pt-2.5" style={{ WebkitUserSelect: "text" }}>
-            {view && screen === "main" && <Main version={version} view={view} ask={ask} />}
-            {view && screen === "quit" && <Quit view={view} link={link} />}
-            {view && screen === "welcome" && <Welcome view={view} link={link} />}
-          </div>
+          {view && screen === "welcome" ? (
+            <div ref={content}>
+              <Welcome view={view} link={link} read={read} />
+            </div>
+          ) : (
+            // The kit's root turns selection off for the sim's pages, and a window on the desktop reads like any other, so its
+            // words can be copied. A line of text has room above its capitals, so a thinner top looks the same as the left.
+            <div ref={content} className="px-3.5 pb-3.5 pt-2.5" style={{ WebkitUserSelect: "text" }}>
+              {view && screen === "main" && <Main version={version} view={view} ask={ask} />}
+              {view && screen === "quit" && <Quit view={view} link={link} />}
+            </div>
+          )}
         </div>
       </div>
     </Root>

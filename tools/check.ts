@@ -17,7 +17,7 @@ import { workspaceVersion } from "./lib/package.ts"
 import { buildPages, checkPages } from "./lib/pages.ts"
 import { panelCompileProblem } from "./lib/panel.ts"
 import { fromRoot, ROOT } from "./lib/repo.ts"
-import { Failed, main, run } from "./lib/run.ts"
+import { Failed, main, output, run } from "./lib/run.ts"
 import { requireSdk } from "./lib/sdk.ts"
 import { stockMismatches } from "./lib/stock.ts"
 import { mismatches as figureMismatches } from "./lib/figure.ts"
@@ -33,6 +33,7 @@ const checks: [string, () => void | Promise<void>][] = [
   ["Clippy", () => run("cargo", ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"])],
   ["the default members' tests", () => run("cargo", ["test"])],
   ["the desktop app's Rustfmt, Clippy, and tests", checkDesktop],
+  ["the desktop app's message crate against messages::HASH", checkDesktopMessages],
   ["our WASM module's build and exports", checkModule],
   ["Clippy on our WASM module", clippyModule],
   ["each tsconfig's type check", typeCheck],
@@ -126,6 +127,30 @@ async function checkDesktop(): Promise<void> {
   run("cargo", ["fmt", "--", "--check"], { cwd: DESKTOP })
   run("cargo", ["clippy", "--all-targets", "--", "-D", "warnings"], { cwd: DESKTOP })
   run("cargo", ["test"], { cwd: DESKTOP })
+}
+
+/**
+ * Two builds whose messages would encode differently refuse to talk, because each program's first message carries
+ * `messages::HASH`, which covers the version of every package the message crate reaches. Build.rs finds the root's
+ * Cargo.lock above the crate, so the desktop app's build takes its hash from that lock while compiling against its
+ * own. This fails when the desktop app's lock gives the message crate a package version the root's lock doesn't, so
+ * the hash covers what the desktop app compiles.
+ */
+function checkDesktopMessages(): void {
+  const reached = (cwd: string, edges: string) =>
+    new Set(
+      output("cargo", ["tree", "--package", "messages", "--edges", edges, "--target", "all", "--prefix", "none", "--format", "{p}", "--locked"], { cwd })
+        .split("\n")
+        .map((line) => line.replace(/ \((\*|proc-macro)\)/g, "").trim())
+        // A path package, the message crate among them, ends with its folder, as in `messages v0.1.0 (C:\...\messages)`, which differs between the two.
+        .filter((line) => line && !/ \((?:[A-Za-z]:)?[\\/]/.test(line)),
+    )
+  // The root's lock also holds the message crate's dev-dependencies, which the hash covers too.
+  const root = reached(ROOT, "normal,build,dev")
+  const missing = [...reached(DESKTOP, "normal,build")].filter((pkg) => !root.has(pkg)).sort()
+  if (missing.length) {
+    throw new Failed(`src/apps/desktop/Cargo.lock gives the message crate ${missing.join(", ")}, which the root's Cargo.lock doesn't, so messages::HASH doesn't cover them: cargo update each package in one lock or the other until both pin the same versions`)
+  }
 }
 
 /** CI has no sim to compile with, so it checks only that the committed compile came from this source. */

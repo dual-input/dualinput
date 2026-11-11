@@ -1,0 +1,265 @@
+Stage 15 release cases, 2026-11-10, our development machine (Windows 11 Pro 10.0.26200), MSFS 2024 Steam edition.
+Releases 0.1.0, 0.1.1, and 0.1.2, packed from one tree by node tools/release.ts pack, the version bumped in an uncommitted patch.
+The data folder held settings.json with desktop.update-feed naming a local folder, which held each release in turn.
+Paths: <user> is the account folder, <repo> the checkout.
+
+=== Processes of ours, the sim's, and Velopack's, polled every 200ms (+ started, - ended)
+20:36:15.662 watching
+20:50:35.819 + DualInput-win-Setup [25248] <repo>\target\sim-session\feed-0.1.0\DualInput-win-Setup.exe
+20:51:16.152 - DualInput-win-Setup [25248] <repo>\target\sim-session\feed-0.1.0\DualInput-win-Setup.exe
+20:51:33.023 + DualInput-win-Setup [28064] <repo>\target\sim-session\feed-0.1.0\DualInput-win-Setup.exe
+20:51:33.461 + dualinput-desktop [12576] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+20:51:36.519 + dualinput-desktop [29272] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+20:51:36.520 - DualInput-win-Setup [28064] <repo>\target\sim-session\feed-0.1.0\DualInput-win-Setup.exe
+20:51:36.521 - dualinput-desktop [12576] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+20:51:44.369 + dualinput-desktop [33572] 
+20:51:44.581 - dualinput-desktop [33572] 
+20:58:41.433 + dualinput-desktop [28396] <repo>\target\sim-session\fixed-install\current\dualinput-desktop.exe
+20:59:10.946 + dualinput-desktop [26656] 
+20:59:11.166 - dualinput-desktop [26656] 
+21:01:09.051 - dualinput-desktop [28396] <repo>\target\sim-session\fixed-install\current\dualinput-desktop.exe
+21:01:22.389 + dualinput-desktop [27668] <repo>\target\sim-session\fixed-install-2\current\dualinput-desktop.exe
+21:02:11.196 + dualinput-desktop [32184] 
+21:02:11.415 - dualinput-desktop [32184] 
+21:02:33.163 - dualinput-desktop [27668] 
+21:02:41.260 + dualinput-core [18152] <repo>\target\sim-session\outside\dualinput-core.exe
+21:02:44.301 + FlightSimulator2024 [31464] C:\Program Files (x86)\Steam\steamapps\common\Limitless\FlightSimulator2024.exe
+21:02:44.734 + dualinput-core [11740] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-core.exe
+21:12:28.270 + Update [17212] C:\Users\<user>\AppData\Local\DualInput\Update.exe
+21:12:29.136 - Update [17212] C:\Users\<user>\AppData\Local\DualInput\Update.exe
+21:13:16.828 - dualinput-core [11740] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-core.exe
+21:13:26.367 + dualinput-desktop [24832] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+21:13:26.368 - FlightSimulator2024 [31464] 
+21:13:26.369 - dualinput-desktop [29272] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+21:16:24.509 - dualinput-core [18152] <repo>\target\sim-session\outside\dualinput-core.exe
+21:16:27.334 + FlightSimulator2024 [35152] C:\Program Files (x86)\Steam\steamapps\common\Limitless\FlightSimulator2024.exe
+21:16:28.419 + dualinput-core [34388] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-core.exe
+21:20:19.121 + Update [35352] C:\Users\<user>\AppData\Local\DualInput\Update.exe
+21:20:20.005 - Update [35352] C:\Users\<user>\AppData\Local\DualInput\Update.exe
+21:21:26.699 - dualinput-core [34388] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-core.exe
+21:21:37.084 + dualinput-desktop [27572] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+21:21:37.085 - FlightSimulator2024 [35152] 
+21:21:37.085 - dualinput-desktop [24832] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+21:21:43.190 + FlightSimulator2024 [4400] C:\Program Files (x86)\Steam\steamapps\common\Limitless\FlightSimulator2024.exe
+21:21:43.191 + dualinput-core [27324] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-core.exe
+21:24:53.793 + Update [38408] C:\Users\<user>\AppData\Local\DualInput\Update.exe
+21:24:54.010 - dualinput-desktop [27572] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+21:24:54.011 - dualinput-core [27324] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-core.exe
+21:24:57.545 - Update [38408] C:\Users\<user>\AppData\Local\DualInput\Update.exe
+21:25:53.873 + DualInput-win-Setup [35636] <repo>\target\sim-session\feed-0.1.0\DualInput-win-Setup.exe
+21:25:54.326 + dualinput-desktop [30748] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+21:25:57.396 + dualinput-desktop [33308] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+21:25:57.397 - DualInput-win-Setup [35636] <repo>\target\sim-session\feed-0.1.0\DualInput-win-Setup.exe
+21:25:57.398 - dualinput-desktop [30748] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+21:25:57.616 + dualinput-core [15788] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-core.exe
+21:25:57.832 + dualinput-core-helper [14612] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-core-helper.exe
+21:25:58.049 - dualinput-core-helper [14612] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-core-helper.exe
+21:28:20.561 + dualinput-desktop [37692] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+21:28:20.562 - dualinput-desktop [33308] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+21:28:38.578 - dualinput-desktop [37692] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe
+21:31:03.688 - dualinput-core [15788] C:\Users\<user>\AppData\Local\DualInput\current\dualinput-core.exe
+21:31:05.140 - FlightSimulator2024 [4400] 
+
+=== The desktop app's log, first install to the uninstall with the sim running
+2026-11-10 20:51:36 Dual Input's desktop app 0.1.0 starts for the first time
+2026-11-10 20:51:36 velopack: Auto-locating app manifest...
+2026-11-10 20:51:36 velopack: Auto-locating app manifest...
+2026-11-10 20:51:36 velopack: Found Update.exe by current path pattern search in directory: C:\Users\<user>\AppData\Local\DualInput
+2026-11-10 20:51:36 velopack: Root directory 'C:\Users\<user>\AppData\Local\DualInput' writable: true
+2026-11-10 20:51:36 velopack: Using root packages directory: C:\Users\<user>\AppData\Local\DualInput\packages
+2026-11-10 20:51:36 velopack: Searching for local packages in: "C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages"
+2026-11-10 20:51:36 velopack: Found 0.1.0: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.0-full.nupkg"'
+2026-11-10 20:51:36 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 20:51:36 velopack: Generated new staging userId: 36d0d264-88cf-4844-8a1a-d2732ebf6a1f
+2026-11-10 20:51:36 velopack: Reading releases from file: "<repo>\\target\\sim-session\\feed\\releases.win.json"
+2026-11-10 20:51:36 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 20:51:36 no newer release is out
+2026-11-10 20:51:36 wrote our package into C:\Users\<user>\AppData\Roaming\Microsoft Flight Simulator 2024\Packages\Community
+2026-11-10 20:51:42 asking Windows to let the core take connections, through the UAC prompt
+2026-11-10 21:02:44 the sim started, as process 31464
+2026-11-10 21:02:44 started the core, as process 11740
+2026-11-10 21:12:28 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:12:28 velopack: Found existing staged user id...
+2026-11-10 21:12:28 velopack: Reading releases from file: "<repo>\\target\\sim-session\\feed\\releases.win.json"
+2026-11-10 21:12:28 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:12:28 velopack: Found newer remote release available (0.1.0 -> 0.1.1).
+2026-11-10 21:12:28 velopack: Searching for local packages in: "C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages"
+2026-11-10 21:12:28 velopack: Found 0.1.0: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.0-full.nupkg"'
+2026-11-10 21:12:28 velopack: Found 1 delta updates between 0.1.0 and 0.1.1.
+2026-11-10 21:12:28 version 0.1.1 is out
+2026-11-10 21:12:28 velopack: Attempting to acquire exclusive lock on packages directory (non-blocking)...
+2026-11-10 21:12:28 velopack: Beginning delta update process.
+2026-11-10 21:12:28 velopack: Downloading delta package: 'DualInput-0.1.1-delta.nupkg'
+2026-11-10 21:12:28 velopack: About to copy from file '"<repo>\\target\\sim-session\\feed\\DualInput-0.1.1-delta.nupkg"' to file '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-delta.partial"'
+2026-11-10 21:12:28 velopack: Applying 1 patches to "C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-full.partial".
+2026-11-10 21:12:29 velopack: Successfully applied delta updates.
+2026-11-10 21:12:29 velopack: Renaming partial file to final target: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-full.nupkg"'
+2026-11-10 21:12:29 velopack: Bundle loaded successfully.
+2026-11-10 21:12:29 velopack: Deleting up old package: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.0-full.nupkg"'
+2026-11-10 21:12:29 velopack: Deleting up old package: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-delta.nupkg"'
+2026-11-10 21:12:29 version 0.1.1 is downloaded, and waits to install
+2026-11-10 21:13:16 the core exited with 0x0
+2026-11-10 21:13:25 the sim closed
+2026-11-10 21:13:25 installing version 0.1.1
+2026-11-10 21:13:25 velopack: About to launch: 'WideString("C:\\Users\\<user>\\AppData\\Local\\DualInput\\Update.exe")' in dir 'Some(WideString("C:\\Users\\<user>\\AppData\\Local\\DualInput"))' with arguments: WideString("\"C:\\Users\\<user>\\AppData\\Local\\DualInput\\Update.exe\" apply --package C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-full.nupkg --waitPid 29272 --root C:\\Users\\<user>\\AppData\\Local\\DualInput --packageDir C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages -- --tray\0")
+2026-11-10 21:13:25 velopack: Environment block present: true, flags: PROCESS_CREATION_FLAGS(134218752)
+2026-11-10 21:13:26 Dual Input's desktop app 0.1.1 starts in the tray
+2026-11-10 21:13:26 velopack: Auto-locating app manifest...
+2026-11-10 21:13:26 velopack: Auto-locating app manifest...
+2026-11-10 21:13:26 velopack: Found Update.exe by current path pattern search in directory: C:\Users\<user>\AppData\Local\DualInput
+2026-11-10 21:13:26 velopack: Root directory 'C:\Users\<user>\AppData\Local\DualInput' writable: true
+2026-11-10 21:13:26 velopack: Using root packages directory: C:\Users\<user>\AppData\Local\DualInput\packages
+2026-11-10 21:13:26 velopack: Searching for local packages in: "C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages"
+2026-11-10 21:13:26 velopack: Found 0.1.1: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-full.nupkg"'
+2026-11-10 21:13:26 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:13:26 velopack: Found existing staged user id...
+2026-11-10 21:13:26 velopack: Reading releases from file: "<repo>\\target\\sim-session\\feed\\releases.win.json"
+2026-11-10 21:13:26 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:13:26 no newer release is out
+2026-11-10 21:13:26 wrote our package into C:\Users\<user>\AppData\Roaming\Microsoft Flight Simulator 2024\Packages\Community
+2026-11-10 21:16:28 the sim started, as process 35152
+2026-11-10 21:16:28 started the core, as process 34388
+2026-11-10 21:20:18 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:20:18 velopack: Found existing staged user id...
+2026-11-10 21:20:18 velopack: Reading releases from file: "<repo>\\target\\sim-session\\feed\\releases.win.json"
+2026-11-10 21:20:18 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:20:18 velopack: Found newer remote release available (0.1.1 -> 0.1.2).
+2026-11-10 21:20:18 velopack: Searching for local packages in: "C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages"
+2026-11-10 21:20:18 velopack: Found 0.1.1: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-full.nupkg"'
+2026-11-10 21:20:18 velopack: Found 1 delta updates between 0.1.1 and 0.1.2.
+2026-11-10 21:20:18 version 0.1.2 is out
+2026-11-10 21:20:18 velopack: Attempting to acquire exclusive lock on packages directory (non-blocking)...
+2026-11-10 21:20:18 velopack: Beginning delta update process.
+2026-11-10 21:20:18 velopack: Downloading delta package: 'DualInput-0.1.2-delta.nupkg'
+2026-11-10 21:20:18 velopack: About to copy from file '"<repo>\\target\\sim-session\\feed\\DualInput-0.1.2-delta.nupkg"' to file '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.2-delta.partial"'
+2026-11-10 21:20:18 velopack: Applying 1 patches to "C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.2-full.partial".
+2026-11-10 21:20:19 velopack: Successfully applied delta updates.
+2026-11-10 21:20:19 velopack: Renaming partial file to final target: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.2-full.nupkg"'
+2026-11-10 21:20:19 velopack: Bundle loaded successfully.
+2026-11-10 21:20:19 velopack: Deleting up old package: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-full.nupkg"'
+2026-11-10 21:20:19 velopack: Deleting up old package: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.2-delta.nupkg"'
+2026-11-10 21:20:19 version 0.1.2 is downloaded, and waits to install
+2026-11-10 21:21:23 asked the sim to close, to install the update
+2026-11-10 21:21:26 the core exited with 0x0
+2026-11-10 21:21:36 the sim closed
+2026-11-10 21:21:36 installing version 0.1.2
+2026-11-10 21:21:36 velopack: About to launch: 'WideString("C:\\Users\\<user>\\AppData\\Local\\DualInput\\Update.exe")' in dir 'Some(WideString("C:\\Users\\<user>\\AppData\\Local\\DualInput"))' with arguments: WideString("\"C:\\Users\\<user>\\AppData\\Local\\DualInput\\Update.exe\" apply --package C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.2-full.nupkg --waitPid 24832 --root C:\\Users\\<user>\\AppData\\Local\\DualInput --packageDir C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages -- --tray --start-sim \"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Limitless\\FlightSimulator2024.exe\"\0")
+2026-11-10 21:21:36 velopack: Environment block present: true, flags: PROCESS_CREATION_FLAGS(134218752)
+2026-11-10 21:21:37 Dual Input's desktop app 0.1.2 starts in the tray
+2026-11-10 21:21:37 velopack: Auto-locating app manifest...
+2026-11-10 21:21:37 velopack: Auto-locating app manifest...
+2026-11-10 21:21:37 velopack: Found Update.exe by current path pattern search in directory: C:\Users\<user>\AppData\Local\DualInput
+2026-11-10 21:21:37 velopack: Root directory 'C:\Users\<user>\AppData\Local\DualInput' writable: true
+2026-11-10 21:21:37 velopack: Using root packages directory: C:\Users\<user>\AppData\Local\DualInput\packages
+2026-11-10 21:21:37 velopack: Searching for local packages in: "C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages"
+2026-11-10 21:21:37 velopack: Found 0.1.2: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.2-full.nupkg"'
+2026-11-10 21:21:37 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:21:37 velopack: Found existing staged user id...
+2026-11-10 21:21:37 velopack: Reading releases from file: "<repo>\\target\\sim-session\\feed\\releases.win.json"
+2026-11-10 21:21:37 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:21:37 no newer release is out
+2026-11-10 21:21:37 wrote our package into C:\Users\<user>\AppData\Roaming\Microsoft Flight Simulator 2024\Packages\Community
+2026-11-10 21:21:37 started the sim from steam://rungameid/2537590
+2026-11-10 21:21:43 the sim started, as process 4400
+2026-11-10 21:21:43 started the core, as process 27324
+
+=== The desktop app's log, the reinstall with the sim running, and the start at sign-in
+2026-11-10 21:25:57 Dual Input's desktop app 0.1.0 starts for the first time
+2026-11-10 21:25:57 velopack: Auto-locating app manifest...
+2026-11-10 21:25:57 velopack: Auto-locating app manifest...
+2026-11-10 21:25:57 velopack: Found Update.exe by current path pattern search in directory: C:\Users\<user>\AppData\Local\DualInput
+2026-11-10 21:25:57 velopack: Root directory 'C:\Users\<user>\AppData\Local\DualInput' writable: true
+2026-11-10 21:25:57 velopack: Using root packages directory: C:\Users\<user>\AppData\Local\DualInput\packages
+2026-11-10 21:25:57 velopack: Searching for local packages in: "C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages"
+2026-11-10 21:25:57 velopack: Found 0.1.0: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.0-full.nupkg"'
+2026-11-10 21:25:57 the sim started, as process 4400
+2026-11-10 21:25:57 started the core, as process 15788
+2026-11-10 21:25:57 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:25:57 velopack: Generated new staging userId: 47a72086-6edb-4ceb-bc56-313a359d0d87
+2026-11-10 21:25:57 velopack: Reading releases from file: "<repo>\\target\\sim-session\\feed\\releases.win.json"
+2026-11-10 21:25:57 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:25:57 no newer release is out
+2026-11-10 21:27:47 handed Open(Main) to the app already running, and exits
+2026-11-10 21:28:00 handed Open(Main) to the app already running, and exits
+2026-11-10 21:28:13 handed Open(Main) to the app already running, and exits
+2026-11-10 21:28:20 Dual Input's desktop app 0.1.0 starts in the tray
+2026-11-10 21:28:20 velopack: Auto-locating app manifest...
+2026-11-10 21:28:20 velopack: Auto-locating app manifest...
+2026-11-10 21:28:20 velopack: Found Update.exe by current path pattern search in directory: C:\Users\<user>\AppData\Local\DualInput
+2026-11-10 21:28:20 velopack: Root directory 'C:\Users\<user>\AppData\Local\DualInput' writable: true
+2026-11-10 21:28:20 velopack: Using root packages directory: C:\Users\<user>\AppData\Local\DualInput\packages
+2026-11-10 21:28:20 velopack: Searching for local packages in: "C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages"
+2026-11-10 21:28:20 velopack: Found 0.1.0: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.0-full.nupkg"'
+2026-11-10 21:28:20 the sim started, as process 4400
+2026-11-10 21:28:20 found the core 15788 running
+2026-11-10 21:28:20 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:28:20 velopack: Found existing staged user id...
+2026-11-10 21:28:20 velopack: Reading releases from file: "<repo>\\target\\sim-session\\feed\\releases.win.json"
+2026-11-10 21:28:20 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:28:20 no newer release is out
+2026-11-10 21:32:47 Dual Input's desktop app 0.1.0 starts in the tray
+2026-11-10 21:32:47 velopack: Auto-locating app manifest...
+2026-11-10 21:32:47 velopack: Auto-locating app manifest...
+2026-11-10 21:32:47 velopack: Found Update.exe by current path pattern search in directory: C:\Users\<user>\AppData\Local\DualInput
+2026-11-10 21:32:47 velopack: Root directory 'C:\Users\<user>\AppData\Local\DualInput' writable: true
+2026-11-10 21:32:47 velopack: Using root packages directory: C:\Users\<user>\AppData\Local\DualInput\packages
+2026-11-10 21:32:47 velopack: Searching for local packages in: "C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages"
+2026-11-10 21:32:47 velopack: Found 0.1.0: '"C:\\Users\\<user>\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.0-full.nupkg"'
+2026-11-10 21:32:47 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:32:47 velopack: Found existing staged user id...
+2026-11-10 21:32:47 velopack: Reading releases from file: "<repo>\\target\\sim-session\\feed\\releases.win.json"
+2026-11-10 21:32:47 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:32:47 no newer release is out
+2026-11-10 21:32:47 wrote our package into C:\Users\<user>\AppData\Roaming\Microsoft Flight Simulator 2024\Packages\Community
+
+=== The fixed app's log, run as a first run from a copy of the install with its own data folder
+2026-11-10 20:58:41 Dual Input's desktop app 0.1.0 starts for the first time
+2026-11-10 20:58:41 velopack: Auto-locating app manifest...
+2026-11-10 20:58:41 velopack: Auto-locating app manifest...
+2026-11-10 20:58:41 velopack: Found Update.exe by current path pattern search in directory: <repo>\target\sim-session\fixed-install
+2026-11-10 20:58:41 velopack: Root directory '<repo>\target\sim-session\fixed-install' writable: true
+2026-11-10 20:58:41 velopack: Using root packages directory: <repo>\target\sim-session\fixed-install\packages
+2026-11-10 20:58:41 velopack: Searching for local packages in: "<repo>\\target\\sim-session\\fixed-install\\packages"
+2026-11-10 20:58:41 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 20:58:41 velopack: Couldn't write out staging userId.
+2026-11-10 20:58:41 velopack: Reading releases from file: "<repo>\\target\\sim-session\\feed\\releases.win.json"
+2026-11-10 20:58:41 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 20:58:41 no newer release is out
+2026-11-10 20:59:08 asking Windows to let the core take connections, through the UAC prompt
+2026-11-10 21:01:22 Dual Input's desktop app 0.1.0 starts for the first time
+2026-11-10 21:01:22 velopack: Auto-locating app manifest...
+2026-11-10 21:01:22 velopack: Auto-locating app manifest...
+2026-11-10 21:01:22 velopack: Found Update.exe by current path pattern search in directory: <repo>\target\sim-session\fixed-install-2
+2026-11-10 21:01:22 velopack: Root directory '<repo>\target\sim-session\fixed-install-2' writable: true
+2026-11-10 21:01:22 velopack: Using root packages directory: <repo>\target\sim-session\fixed-install-2\packages
+2026-11-10 21:01:22 velopack: Searching for local packages in: "<repo>\\target\\sim-session\\fixed-install-2\\packages"
+2026-11-10 21:01:22 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:01:22 velopack: Couldn't write out staging userId.
+2026-11-10 21:01:22 velopack: Reading releases from file: "<repo>\\target\\sim-session\\feed\\releases.win.json"
+2026-11-10 21:01:22 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-10 21:01:22 no newer release is out
+2026-11-10 21:02:02 asking Windows to let the core take connections, through the UAC prompt
+2026-11-10 21:02:03 the firewall's fix didn't run: the UAC prompt was declined or failed
+2026-11-10 21:02:07 asking Windows to let the core take connections, through the UAC prompt
+2026-11-10 21:02:08 the firewall's fix didn't run: the UAC prompt was declined or failed
+2026-11-10 21:02:09 asking Windows to let the core take connections, through the UAC prompt
+
+=== The window's memory, private working set, from the desk script (target/sim-session/desk-window.ps1, not committed), the sim running
+tray alone                         app    4.9 MB   WebView2  0 processes    0.0 MB   total    4.9 MB
+window open, round 1               app    5.8 MB   WebView2  6 processes   78.0 MB   total   83.8 MB
+window closed, round 1             app    4.9 MB   WebView2  0 processes    0.0 MB   total    4.9 MB
+window open, round 2               app    6.1 MB   WebView2  6 processes   74.3 MB   total   80.3 MB
+window closed, round 2             app    6.0 MB   WebView2  0 processes    0.0 MB   total    6.0 MB
+window open, before the kill       app    5.3 MB   WebView2  6 processes   74.0 MB   total   79.3 MB
+after the kill: 0 WebView2 processes left, 0.1s after it
+webview\ renamed and back: nothing in it is held
+the app started again in the tray, minutes later: 3.1 MB
+
+=== What each uninstall left, both from Windows' Installed apps
+install folder: gone; data folder: gone; our package in Community: gone; Run value: gone; Windows' entry: gone; Start-menu shortcut: gone
+firewall: the inbound allow rule for C:\Users\<user>\AppData\Local\DualInput\current\dualinput-core.exe stayed
+
+=== Sign-in
+logon session started 21:31:35, explorer.exe 21:31:36
+dualinput-desktop.exe started 21:32:47, parent explorer.exe, command line "C:\Users\<user>\AppData\Local\DualInput\current\dualinput-desktop.exe" --tray
+Run entries for the account: Steam, Discord, Navigraph Simlink, NVIDIA Broadcast, 1Password, Twinkle Tray, Firefox, Dual Input, Microsoft Edge

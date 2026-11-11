@@ -98,7 +98,8 @@ function useHeaderStatus(link: CoreLink, desktop: DesktopLink, version: string, 
     firewall: local?.firewall,
     fixFirewall,
     raised: raisedRows(notifications ?? []),
-    update: update?.state === "ready" ? { next: update.next, have: version, view: viewUpdate } : undefined,
+    // Found, downloading, or downloaded, it's one new version to the pilot: Install and restart downloads what it hasn't.
+    update: update && (update.state === "available" || update.state === "downloading" || update.state === "ready") ? { next: update.next, have: version, view: viewUpdate } : undefined,
   }
 }
 

@@ -42,6 +42,7 @@ export class BenchRun {
   private readonly cores: Core[] = []
   private readonly stubs: Stub[] = []
   private readonly replayed = new Set<string>()
+  private readonly first: (() => Promise<void>)[] = []
 
   /**
    * `test`, a scenario's test context, gets the run's end as its last step, so a scenario
@@ -65,6 +66,27 @@ export class BenchRun {
     return core
   }
 
+  /**
+   * Reaches a core the desktop app started on the data folder `data`, as the process `pid`,
+   * which the run ends and replays as it does its own.
+   */
+  async attach(data: string, pid: number): Promise<Core> {
+    const core = await Core.attach(data, pid)
+    this.cores.push(core)
+    return core
+  }
+
+  /** Runs `step` first as the run ends, such as ending a desktop app that would start a killed core again. */
+  atEnd(step: () => Promise<void>): void {
+    this.first.push(step)
+  }
+
+  /** Replays `file`, a run that ended in a panic, as `replayPanic` does, so the run's end doesn't replay it again. */
+  replayPanic(file: string): { run: number; replay: number } {
+    this.replayed.add(file)
+    return replayPanic(file)
+  }
+
   /** Starts a stub for a sim's process, which the run kills at its end if a step hasn't. */
   stub(): Stub {
     const stub = new Stub()
@@ -86,6 +108,7 @@ export class BenchRun {
    * replayed, as every scenario ends, and fails on any whose replay parts from its run.
    */
   async end(): Promise<void> {
+    for (const step of this.first) await step()
     for (const core of this.cores) await core.kill()
     for (const stub of this.stubs) await stub.kill()
     for (const core of this.cores) {
@@ -94,15 +117,25 @@ export class BenchRun {
   }
 }
 
+/**
+ * What the bench reads of a core's process: its ID, whether it has ended, and a way to end
+ * it. A core the bench started is its child; one the desktop app started is the app's, and
+ * the bench reaches it by its ID.
+ */
+export type Spawned = Pick<ChildProcess, "pid" | "exitCode" | "signalCode" | "kill">
+
 export class Core {
   readonly data: string
-  readonly process: ChildProcess
-  /** The core's exit code once it has exited, or null once `kill` ended it, since Node gives no code for a process it ended. */
+  readonly process: Spawned
+  /**
+   * The core's exit code once it has exited, or null once `kill` ended it, since Node gives no
+   * code for a process it ended, nor for one it didn't start.
+   */
   readonly exited: Promise<number | null>
   private readonly socket: net.Socket
   private readonly lines: Lines
 
-  private constructor(data: string, process: ChildProcess, exited: Promise<number | null>, socket: net.Socket, lines: Lines) {
+  private constructor(data: string, process: Spawned, exited: Promise<number | null>, socket: net.Socket, lines: Lines) {
     this.data = data
     this.process = process
     this.exited = exited
@@ -130,25 +163,67 @@ export class Core {
     const child = spawn(benchCore(), ["--data", data], { stdio: ["ignore", out, out], env })
     fs.closeSync(out)
     const exited = new Promise<number | null>((resolve) => child.on("exit", resolve))
+    return Core.connect(data, child, exited)
+  }
+
+  /**
+   * Reaches a core the desktop app started on the data folder `data`, as the process `pid`,
+   * through the bench socket it opens there. A bench-port an earlier core left names a port
+   * nothing answers on, so it tries again until this core has written its own.
+   */
+  static async attach(data: string, pid: number): Promise<Core> {
+    const exited = (async () => {
+      while (runs(pid)) await sleep(50)
+      return null
+    })()
+    let gone = false
+    void exited.then(() => (gone = true))
+    const spawned: Spawned = {
+      pid,
+      get exitCode() {
+        return gone ? 0 : null
+      },
+      signalCode: null,
+      kill: () => {
+        if (runs(pid)) process.kill(pid)
+        return true
+      },
+    }
+    return Core.connect(data, spawned, exited)
+  }
+
+  private static async connect(data: string, spawned: Spawned, exited: Promise<number | null>): Promise<Core> {
+    const portFile = path.join(data, "bench-port")
     let gone = false
     void exited.then(() => (gone = true))
     let socket: net.Socket | undefined
     try {
-      for (let waited = 0; !fs.existsSync(portFile); waited += 25) {
+      for (let waited = 0; ; waited += 25) {
         if (gone) throw new Error(`the core for ${data} exited before it opened its socket; see ${data}-output.txt`)
-        if (waited > 15_000) throw new Error(`the core for ${data} wrote no bench-port within 15s`)
+        if (waited > 15_000) throw new Error(`the core for ${data} opened no bench socket within 15s`)
+        if (fs.existsSync(portFile)) {
+          const port = Number(fs.readFileSync(portFile, "utf8"))
+          const opened = net.connect({ host: "127.0.0.1", port })
+          const ok = await new Promise<boolean>((resolve) => {
+            opened.once("connect", () => resolve(true))
+            opened.once("error", () => resolve(false))
+          })
+          if (ok) {
+            socket = opened
+            break
+          }
+        }
         await sleep(25)
       }
-      socket = net.connect({ host: "127.0.0.1", port: Number(fs.readFileSync(portFile, "utf8")) })
       // A killed core resets the connection, which ends the socket and nothing else.
       socket.on("error", () => {})
       const lines = new Lines(socket)
       const hello = JSON.parse(await lines.next()) as Hello
       assert.deepEqual(hello, { version: VERSION, hash: HASH }, "the core was built from another tree than the bench's types")
-      return new Core(data, child, exited, socket, lines)
+      return new Core(data, spawned, exited, socket, lines)
     } catch (error) {
       socket?.destroy()
-      child.kill()
+      spawned.kill()
       await exited
       throw error
     }
@@ -425,6 +500,32 @@ export class Stub {
     if (this.process.exitCode === null && this.process.signalCode === null) this.process.kill()
     await this.ended
   }
+}
+
+/** Whether the process `pid` runs. */
+function runs(pid: number): boolean {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Replays `file`, a run that ended in a panic, and returns the input the replay panicked at,
+ * which a replay reproduces (record/areas/core/01-loop-and-edge.md, "A panic"). The panic hook
+ * in src/apps/core/src/panic.rs logs "panic at input <n>", so change both together.
+ */
+export function replayPanic(file: string): { run: number; replay: number } {
+  const result = spawnSync(benchCore(), ["replay", file], { encoding: "utf8" })
+  assert.notEqual(result.status, 0, `the replay of ${file} should panic as its run did:\n${result.stdout}${result.stderr}`)
+  const at = (log: string) => {
+    const found = /panic at input (\d+)/.exec(fs.existsSync(log) ? fs.readFileSync(log, "utf8") : "")
+    assert.ok(found, `${log} should say where the panic came`)
+    return Number(found[1])
+  }
+  return { run: at(path.join(path.dirname(file), "log.txt")), replay: at(path.join(path.dirname(file), "replay", "log.txt")) }
 }
 
 export type Replayed = {

@@ -1,0 +1,52 @@
+The bench's desktop-app scenario, 2026-11-11, our development machine (Windows 11 Pro 10.0.26200), the PC idle but for its own startup programs.
+
+=== The whole bench (node tools/bench.ts): the desktop-app scenario's tests, then the run's totals
+ok 53 - the sim's start starts a core within 3s, and an app that starts while the sim runs starts one too
+# the core started 1814ms after the sim's process appeared
+ok 54 - a core that crashes while the sim runs comes back within 3s as a bench core, and one that exits with 0 stays down until the sim starts again
+# the core started again 2138ms after the crash
+ok 55 - a sim that starts again as the core exits for the last one gets a core
+not ok 56 - a unit's panic in a session crashes the core, which the app starts again, comes back as a late joiner, and replays to the same input; with the sim closed, the session held brings a crashed core back too
+  error: |-
+    the core's test unit never said /^net up \S+ again=\S+ restart=0$/; it said:
+ok 57 - a second start hands its request to the running app and exits
+ok 58 - our package goes into Community at the app's start and each time the sim closes, where it's missing or of another version, and never while the sim runs
+ok 59 - Check now goes through checking to up to date, and to failed with the error when the feed can't be reached; a release found while the sim runs waits for it to close, unless asked for
+not ok 60 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
+  error: 'the app used 0.234% of one CPU core, over 0.2%'
+# the app held 3.96 MB and used 0.234% of one CPU core over 60s
+# tests 157
+# pass 155
+# fail 2
+
+=== The scenario alone (node tools/bench.ts desktop-app), before the panic case waited on the core's log
+ok 1 - the sim's start starts a core within 3s, and an app that starts while the sim runs starts one too
+# the core started 2199ms after the sim's process appeared
+ok 2 - a core that crashes while the sim runs comes back within 3s as a bench core, and one that exits with 0 stays down until the sim starts again
+# the core started again 2052ms after the crash
+ok 3 - a sim that starts again as the core exits for the last one gets a core
+ok 4 - a unit's panic in a session crashes the core, which the app starts again, comes back as a late joiner, and replays to the same input; with the sim closed, the session held brings a crashed core back too
+ok 5 - a second start hands its request to the running app and exits
+ok 6 - our package goes into Community at the app's start and each time the sim closes, where it's missing or of another version, and never while the sim runs
+ok 7 - Check now goes through checking to up to date, and to failed with the error when the feed can't be reached; a release found while the sim runs waits for it to close, unless asked for
+ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
+# the app held 3.85 MB and used 0.130% of one CPU core over 60s
+# tests 8
+# pass 8
+# fail 0
+
+=== The scenario alone, after it
+ok 1 - the sim's start starts a core within 3s, and an app that starts while the sim runs starts one too
+# the core started 1816ms after the sim's process appeared
+ok 2 - a core that crashes while the sim runs comes back within 3s as a bench core, and one that exits with 0 stays down until the sim starts again
+# the core started again 2427ms after the crash
+ok 3 - a sim that starts again as the core exits for the last one gets a core
+ok 4 - a unit's panic in a session crashes the core, which the app starts again, comes back as a late joiner, and replays to the same input; with the sim closed, the session held brings a crashed core back too
+ok 5 - a second start hands its request to the running app and exits
+ok 6 - our package goes into Community at the app's start and each time the sim closes, where it's missing or of another version, and never while the sim runs
+ok 7 - Check now goes through checking to up to date, and to failed with the error when the feed can't be reached; a release found while the sim runs waits for it to close, unless asked for
+ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
+# the app held 3.84 MB and used 0.182% of one CPU core over 60s
+# tests 8
+# pass 8
+# fail 0

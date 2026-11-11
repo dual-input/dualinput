@@ -6,6 +6,10 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, ../arc
 Decides:     What a release holds; how every x86_64 program links the C runtime statically; which SDK the build uses; where the sim's stock files live and how a sim update that changes them shows; our package's folder name, order hint, and contents, and how a development build reaches the sim; how the files only the sim compiles get built; how the Coherent GT check is built and when it runs, and that no for-of rewrite runs; how the message crate is hashed, and how the version and the hash reach each component; how a release is built, checked, and published, when the backend deploys, and how its tests hold a released path's bodies; and that v1 ships no authoring tools (node 6.18).
 ```
 
+> **Note**
+> Stage 15 packs with `node tools/release.ts pack`, the build job's step 6 below, which installs `vpk` into `target/vpk`.
+> It also passes `--runtime win-x64`, since `vpk` 1.2.161 packs for x86 when no runtime is named, and `--splashImage` and `--splashProgressColor` for Setup.exe's splash, which `node tools/splash.ts` draws ([installing log](../install/log.md#2026-11-10-the-desktop-app-starts-the-core-18s-after-the-sim-and-20s-to-24s-after-a-crash-and-holds-its-02-of-a-core-only-with-a-walk-cheaper-than-toolhelps)).
+
 `tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll` and the three C runtime DLLs it imports, and our one Community package, `dualinput`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.
 The Coherent GT check is a Node tool of its own on acorn, run on every bundle after each edit and in CI, and the message crate's hash is SHA-256 over its own source and the locked versions of what it depends on.
@@ -171,6 +175,8 @@ No step of the build rewrites `for`-`of` loops, which settles the spine's [left 
   It tells Cargo to run it again only when one of those files changes, since a build script with no `rerun-if-changed` runs again on any change in its package (documented, [Cargo's build scripts](https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-changed)), and `tools/build.ts` writes the crate's `ts/` folder on every build.
 - So the hash covers each message's fields and every encoding its types take, JSON, postcard, a data slot's struct, or the helper's binary, and a new version of a codec, where FS Copilot's fingerprint covers a type's fields and not its codec ([09-05](../../learn/foundations/09-05-versions-and-security.md#serialization-protocol-versioning-and-compatibility-between-app-versions)).
 - Two development builds that differ by a comment in the crate refuse each other, which costs a release nothing, since every component of a release carries one commit's hash.
+- **In the desktop app.** The desktop app, a Cargo workspace of its own, compiles the message crate against its own `Cargo.lock`, while the build script hashes the root's, the first lock it finds above the crate.
+  So `tools/check.ts` fails when `cargo tree` shows the message crate reaching a package version through the desktop app's lock that it doesn't reach through the root's, so whenever the check passes, the hash covers what the desktop app compiles.
 - **To TypeScript.** `.cargo/config.toml`'s `[env]` table, beside [the C runtime](#the-c-runtime)'s entry, sets ts-rs's `TS_RS_EXPORT_DIR` to the message crate's `ts/` and `TS_RS_LARGE_INT` to `number`, so a plain `cargo test` writes the types there ([log][workspace]), and `TS_RS_IMPORT_EXTENSION` to `ts`, so a generated type imports another by its whole file name, as Node resolves our tools' imports ([log][package]).
   The same `cargo test` that writes ts-rs's types writes `src/engines/messages/ts/stamp.ts`, holding the version and the hash, so it's committed beside the types, and CI's check for a difference after it generates them again covers it ([building every target](../architecture/02-code-map.md#building-every-target)).
   The hash covers nothing in `ts/`, so writing the stamp never changes it.
@@ -180,7 +186,7 @@ No step of the build rewrites `for`-`of` loops, which settles the spine's [left 
 | Component | Its version | Its hash |
 | --- | --- | --- |
 | The core, the core helper, and the WASM module | `CARGO_PKG_VERSION`, which each crate inherits from `[workspace.package]` | `messages::HASH` |
-| The desktop app's Rust side, and its program's Windows version resource | `CARGO_PKG_VERSION`, from its own `Cargo.toml`, since it's a Cargo workspace of its own, and `tools/check.ts` fails if that differs from the root's | `messages::HASH` |
+| The desktop app's Rust side, and its program's Windows version resource | `CARGO_PKG_VERSION`, from its own `Cargo.toml`, since it's a Cargo workspace of its own, and `tools/check.ts` fails if that differs from the root's | `messages::HASH`, from the root's `Cargo.lock` ([the message crate's hash](#the-message-crates-hash)) |
 | Our code in the sim | `stamp.ts` | `stamp.ts` |
 | Our package's `manifest.json` | `tools/build.ts` | None |
 | The backend | None: it compares the version and hash the host posted with each joiner's | None |

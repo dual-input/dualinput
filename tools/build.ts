@@ -9,12 +9,21 @@
 //
 //   node tools/build.ts
 //   node tools/build.ts install
+//   node tools/build.ts release
 //
 // `install` then copies the package into each of the sim's Community folders, and refuses
 // while the sim runs. Only an installed desktop app writes our package there otherwise, and
 // it doesn't copy a rebuild in, since a rebuild keeps the version
 // (record/areas/build/01-the-build.md, "Our package").
+//
+// `release` then builds the programs a release ships with Cargo's release profile, and lays out
+// the folder Setup.exe installs as `current\` in target/release-folder, which
+// `node tools/release.ts pack` packs (record/areas/build/01-the-build.md, "What a release
+// holds").
 
+import path from "node:path"
+
+import { buildPrograms } from "./lib/cargo.ts"
 import { buildDesktopPages, DESKTOP } from "./lib/desktop-pages.ts"
 import { install, refuseWhileSimRuns, userCfgs } from "./lib/install.ts"
 import { writeMessageTypes } from "./lib/messages.ts"
@@ -22,14 +31,15 @@ import { buildModule } from "./lib/module.ts"
 import { layOutPackage, PACKAGE } from "./lib/package.ts"
 import { buildPages, checkPages } from "./lib/pages.ts"
 import { panelCompileProblem } from "./lib/panel.ts"
+import { layOutRelease, RELEASE_FOLDER } from "./lib/release.ts"
 import { Failed, main, run } from "./lib/run.ts"
 import { requireSdk } from "./lib/sdk.ts"
 import { checkStock } from "./lib/stock.ts"
 
 main(async () => {
   const args = process.argv.slice(2)
-  const installing = args.length === 1 && args[0] === "install"
-  if (args.length && !installing) throw new Failed(`unknown arguments: ${args.join(" ")}; run node tools/build.ts [install]`)
+  const step = args.length === 1 && ["install", "release"].includes(args[0]!) ? args[0] : undefined
+  if (args.length && !step) throw new Failed(`unknown arguments: ${args.join(" ")}; run node tools/build.ts [install|release]`)
 
   requireSdk()
   checkStock()
@@ -38,7 +48,7 @@ main(async () => {
   if (panel) throw new Failed(panel)
   // An install refuses before it builds, so a developer with the sim open doesn't wait out a
   // build for nothing, and again before it copies, since the sim may start during the build.
-  if (installing) refuseWhileSimRuns()
+  if (step === "install") refuseWhileSimRuns()
   writeMessageTypes()
   await buildDesktopPages()
   run("cargo", ["build"])
@@ -48,7 +58,17 @@ main(async () => {
   layOutPackage(buildModule(), pages)
   console.log(`laid out our package in ${PACKAGE}`)
 
-  if (installing) {
+  if (step === "install") {
     for (const copy of install(PACKAGE, userCfgs())) console.log(`installed our package in ${copy}`)
+  }
+  if (step === "release") {
+    const { "dualinput-core": core, "dualinput-core-helper": helper } = buildPrograms(
+      ["--release", "-p", "dualinput-core", "-p", "dualinput-core-helper"],
+      ["dualinput-core", "dualinput-core-helper"],
+    )
+    const { "dualinput-desktop": desktop } = buildPrograms(["--release"], ["dualinput-desktop"], DESKTOP)
+    // The sim edge's build script copies the SDK's SimConnect.dll beside the core it builds.
+    layOutRelease({ desktop, core, helper, simConnect: path.join(path.dirname(core), "SimConnect.dll") }, PACKAGE)
+    console.log(`laid out the release in ${RELEASE_FOLDER}; pack it with node tools/release.ts pack`)
   }
 })

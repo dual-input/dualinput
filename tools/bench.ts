@@ -17,12 +17,16 @@ import path from "node:path"
 
 import { level } from "./bench/profiles.ts"
 import { buildPrograms } from "./lib/cargo.ts"
+import { buildDesktopPages, DESKTOP } from "./lib/desktop-pages.ts"
 import { writeMessageTypes } from "./lib/messages.ts"
 import { fromRoot, ROOT } from "./lib/repo.ts"
 import { Failed, main, run } from "./lib/run.ts"
 import { requireSdk } from "./lib/sdk.ts"
 
-main(() => {
+/** The scenarios that run the desktop app, which the bench builds only when one of them runs. */
+const WITH_DESKTOP = ["desktop-app"]
+
+main(async () => {
   const args = process.argv.slice(2)
   const [what, plays] = args
   const scenarios = path.join(ROOT, "tools", "bench", "scenarios")
@@ -39,7 +43,7 @@ main(() => {
   // with overflow checks and debug assertions on, and without `lto`, which only slows their
   // build (record/areas/build/02-testing.md, "Building what it runs").
   const built = buildBench(what === "load")
-  const env = {
+  const env: NodeJS.ProcessEnv = {
     ...process.env,
     DUALINPUT_BENCH_CORE: built.core,
     DUALINPUT_BENCH_STAND_IN_HELPER: built.helper,
@@ -51,7 +55,14 @@ main(() => {
     run(process.execPath, [path.join("tools", "bench", "load.ts"), plays ?? "6"], { env })
     return
   }
-  const files = (named.length > 0 ? named : all).map((n) => fromRoot(path.join(scenarios, `${n}.ts`)))
+  const chosen = named.length > 0 ? named : all
+  // The desktop app's own workspace builds with the release profile a pilot's runs, since its
+  // scenario measures what the app takes of the PC.
+  if (chosen.some((n) => WITH_DESKTOP.includes(n))) {
+    await buildDesktopPages()
+    env.DUALINPUT_BENCH_DESKTOP = buildPrograms(["--release"], ["dualinput-desktop"], DESKTOP)["dualinput-desktop"]
+  }
+  const files = chosen.map((n) => fromRoot(path.join(scenarios, `${n}.ts`)))
   // One scenario at a time, so no scenario's cores take CPU from another's timing; and each
   // scenario's process exits once its tests end, whatever handle a failed one left open.
   run(process.execPath, ["--test", "--test-concurrency=1", "--test-force-exit", ...files], { env })

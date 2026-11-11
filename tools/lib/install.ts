@@ -14,9 +14,9 @@ export const SIM_PROCESS = "FlightSimulator2024.exe"
 /**
  * Where each edition of the sim keeps its UserCfg.opt: Steam's in `%APPDATA%`, and the
  * Microsoft Store's in `%LOCALAPPDATA%` (record/areas/install/01-installing-and-updating.md,
- * "The packages folders"). `USER_CFGS` in src/platform/sim-service/src/aircraft.rs and
- * `sim_has_run` in src/apps/desktop/src/screens.rs name the same files, so change all three
- * together.
+ * "The packages folders"). `USER_CFGS` in src/platform/sim-service/src/aircraft.rs, in
+ * src/apps/desktop/src/places.rs, and in tools/profile-author's cockpit.rs name the same
+ * files, so change all four together.
  */
 export function userCfgs(env: NodeJS.ProcessEnv = process.env): string[] {
   const files: string[] = []
@@ -32,8 +32,8 @@ export function userCfgs(env: NodeJS.ProcessEnv = process.env): string[] {
  * `InstalledPackagesPath "D:\MSFS 2024\Packages"`. The line's name must be followed by a
  * space, since a longer name, `InstalledPackagesPathNextBoot`, starts with the same letters
  * (read in flybywiresim/installer v3.7.2, `src/renderer/actions/install-path.utils.tsx`).
- * `packages_folder` in src/platform/sim-service/src/aircraft.rs reads the line the same way,
- * so change both together.
+ * `packages_folder` in src/platform/sim-service/src/aircraft.rs and in src/apps/desktop/src/places.rs
+ * read the line the same way, so change all three together.
  */
 export function packagesFolders(cfgs: string[]): string[] {
   const folders = new Map<string, string>()
@@ -84,6 +84,7 @@ export function install(pkg: string, cfgs: string[], simProcess = SIM_PROCESS): 
  * package, since the sim names each folder there by its name, and our FS Copilot
  * exerciser's sync that deleted before it copied "deleted 349 of 355 files" before it
  * reached one in use (record/areas/install/01-installing-and-updating.md, "Our package").
+ * `write` in src/apps/desktop/src/jobs/package.rs copies the same way, so change both together.
  */
 function copyInto(pkg: string, community: string): string {
   fs.mkdirSync(community, { recursive: true })

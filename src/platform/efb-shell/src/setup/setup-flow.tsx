@@ -3,12 +3,11 @@
 // (record/areas/interface/decisions.md, "First-time setup asks for the name and color once, and checks the PC and
 // our servers").
 
-import { Button, Confirm, Link, Room, Spinner, useReveal } from "@dualinput/ui"
+import { Button, Confirm, Link, MarkTile, Room, Spinner, useReveal } from "@dualinput/ui"
 import { CircleCheck, CircleX, TriangleAlert } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { FailureBox } from "../lost-service.tsx"
-import { MarkTile } from "../mark.tsx"
 import { IdentityCard, NAME_MAX } from "./identity-card.tsx"
 
 /** How long each step holds, in milliseconds. Each check runs for a slightly different time, so the sequence doesn't tick like a metronome. */
@@ -83,6 +82,7 @@ export function AddonMismatch({ addon, service, headerHeight, onRestart }: { add
   )
 }
 
+/** The greeting. The desktop app's welcome, src/platform/desktop-shell/src/welcome.tsx, draws the same one with the same timings, so change both together. */
 function Welcome({ out }: { out: boolean }) {
   return (
     <div className="flex flex-1 items-center justify-center" style={{ opacity: out ? 0 : 1, transition: `opacity ${STEP.welcomeOut}ms ease-out` }}>

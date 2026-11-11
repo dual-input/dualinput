@@ -93,7 +93,7 @@ export function issuesOf(status: HeaderStatus, inSession: boolean): Issue[] {
       id: "update",
       tone: "news",
       word: "Update",
-      title: `Dual Input ${status.update.next} is ready`,
+      title: `Dual Input ${status.update.next} is available`,
       detail: `You have ${status.update.have}.`,
       actionCloses: true,
       action: (

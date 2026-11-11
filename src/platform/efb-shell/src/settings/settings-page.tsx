@@ -168,8 +168,9 @@ function Recordings() {
 
 /**
  * Dual Input itself: starting with Windows, and its version with the update's state: up to date, checking,
- * downloading, ready, or failed. A ready update grows a box in the header's news tone, which installs it, asking
- * first, since it ends the flight; in a session, the session holds the update, so the box says to install it
+ * downloading, or failed. A new version, found, downloading, or downloaded, grows one box in the header's news tone,
+ * since to the pilot it's one thing, and its Install and restart downloads what it hasn't, asking first, since it ends
+ * the flight; in a session, the session holds the update, so the box says to install it
  * outside one. The version's note changes in the page's moment, and the download's count moves as it comes, with no
  * moment, as a count does.
  */
@@ -180,7 +181,11 @@ function DualInput({ version }: { version: string }) {
   const local = useDesktopState(desktop)
   const update: Update = local?.update ?? { state: "current", checked: null }
   const moment = useMoment(update.state, update)
-  const ready = useReveal(update.state === "ready")
+  const next = update.state === "available" || update.state === "downloading" || update.state === "ready" ? update.next : null
+  const ready = useReveal(next !== null)
+  // The box holds the version it showed while it shuts.
+  const shownNext = useRef(next)
+  if (next !== null) shownNext.current = next
   const bar = useReveal(update.state === "downloading")
   const at = useRef<HTMLElement>(null)
   useEffect(() => {
@@ -202,7 +207,7 @@ function DualInput({ version }: { version: string }) {
     ) : shown.state === "downloading" ? (
       `Downloading ${shown.next}, ${update.state === "downloading" ? update.done : 0}%`
     ) : shown.state === "failed" ? (
-      `Couldn't download ${shown.next}: ${shown.error}`
+      shown.next === null ? `Couldn't check for updates: ${shown.error}` : `Couldn't download ${shown.next}: ${shown.error}`
     ) : undefined
   return (
     <Section title="Dual Input" at={at}>
@@ -246,7 +251,7 @@ function DualInput({ version }: { version: string }) {
             <div className="flex items-start">
               <CircleArrowUp className="mr-2.5 mt-0.5 size-4 shrink-0 text-primary" />
               <span className="flex flex-col">
-                <span className="text-sm font-medium text-primary">Dual Input {update.state === "ready" ? update.next : ""} is ready</span>
+                <span className="text-sm font-medium text-primary">Dual Input {shownNext.current} is available</span>
                 <span className="mt-1 text-sm text-foreground/75">{session?.held ? "Install it when you're not in a session." : "Close the sim to install."}</span>
               </span>
             </div>

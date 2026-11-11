@@ -39,15 +39,26 @@ function Page() {
   const [screen, setScreen] = useState<Screen>("main")
   const [simRunning, setSimRunning] = useState(false)
   const [sessionHeld, setSessionHeld] = useState(false)
-  const [simHasRun, setSimHasRun] = useState(true)
+  const [fixing, setFixing] = useState(false)
+  const [declines, setDeclines] = useState(false)
   const [fresh, setFresh] = useState(false)
   const [desktop, setDesktop] = useState(DESKTOP)
+  const [welcomes, setWelcomes] = useState(0)
   const [height, setHeight] = useState(0)
-  const view: View = { screen, usage: fresh ? OPENED_MOMENTS_AGO : aDay(), desktop, simRunning, sessionHeld, simHasRun }
+  const view: View = { screen, usage: fresh ? OPENED_MOMENTS_AGO : aDay(), desktop, simRunning, sessionHeld, fixingFirewall: fixing }
   const link: DesktopLink = {
     view: () => Promise.resolve(view),
     ask: (ask) => {
       if (ask.t === "set-start-with-windows") setDesktop({ ...desktop, start_with_windows: ask.on ? "on" : "off" })
+      // Windows' UAC prompt, which the pilot answers 2s later, yes unless "declines" is on.
+      if (ask.t === "fix-firewall") {
+        setFixing(true)
+        window.setTimeout(() => {
+          setFixing(false)
+          if (!declines) setDesktop({ ...desktop, firewall: "allows" })
+        }, 2000)
+      }
+      return Promise.resolve()
     },
     fit: (asked) => {
       setHeight(asked)
@@ -66,7 +77,7 @@ function Page() {
   return (
     <div className="flex">
       {/* A new key per state, since the window reads its link once a poll, and this should show at once. */}
-      <div style={{ width: WIDTH }} key={JSON.stringify([screen, simRunning, sessionHeld, simHasRun, fresh, desktop])}>
+      <div style={{ width: WIDTH }} key={JSON.stringify(screen === "welcome" ? [screen, welcomes] : [screen, simRunning, sessionHeld, fresh, desktop])}>
         <DesktopWindow version="0.1.0" link={link} />
       </div>
       <Root>
@@ -78,8 +89,14 @@ function Page() {
           <div className="space-x-1">
             {toggle("sim running", simRunning, setSimRunning)}
             {toggle("in a session", sessionHeld, setSessionHeld)}
-            {toggle("sim has run", simHasRun, setSimHasRun)}
             {toggle("first minutes", fresh, setFresh)}
+          </div>
+          <div className="space-x-1">
+            {toggle("firewall blocks", desktop.firewall === "blocks", (on) => setDesktop({ ...desktop, firewall: on ? "blocks" : "allows" }))}
+            {toggle("UAC declined", declines, setDeclines)}
+            <Button size="xs" variant="outline" onClick={() => setWelcomes(welcomes + 1)}>
+              replay welcome
+            </Button>
           </div>
           <div className="space-x-1">
             {(["on", "off", "off-in-windows"] as const).map((one) => toggle(one, desktop.start_with_windows === one, () => setDesktop({ ...desktop, start_with_windows: one })))}
@@ -88,6 +105,7 @@ function Page() {
             {toggle("current", desktop.update.state === "current", () => setDesktop({ ...desktop, update: DESKTOP.update }))}
             {toggle("checking", desktop.update.state === "checking", () => setDesktop({ ...desktop, update: { state: "checking" } }))}
             {toggle("downloading", desktop.update.state === "downloading", () => setDesktop({ ...desktop, update: { state: "downloading", next: "0.2.0", done: 42 } }))}
+            {toggle("available", desktop.update.state === "available", () => setDesktop({ ...desktop, update: { state: "available", next: "0.2.0" } }))}
             {toggle("ready", desktop.update.state === "ready", () => setDesktop({ ...desktop, update: { state: "ready", next: "0.2.0" } }))}
             {toggle("failed", desktop.update.state === "failed", () => setDesktop({ ...desktop, update: { state: "failed", next: "0.2.0", error: "The connection dropped" } }))}
           </div>

@@ -1,0 +1,43 @@
+Velopack splash timing, 2026-11-10, our development machine (AMD Ryzen 7 7800X3D, 8 cores, 16 threads), Windows 11 Pro 10.0.26200,
+Defender real-time protection on, tixati running.
+
+A throwaway Setup.exe, DualInputSplashTrial-win-Setup.exe (23.6 MB), packed by vpk 1.2.161 with --runtime win-x64 --framework webview2
+--shortcuts StartMenuRoot --noPortable --splashProgressColor #74d4ff, from the 0.1.0 release's 52 files (31.2 MB) with a stand-in
+main exe that exits at once, and a 400x344 GIF of 91 frames (or that GIF's first frame as a PNG). Each run started Setup.exe suspended
+in a job object, resumed it, and polled every 1ms for a visible WS_EX_LAYERED window of its process; the throwaway was uninstalled with
+Update.exe uninstall --silent between runs. Run from a terminal outside the Claude app's sandbox.
+
+Times in ms from launch. appear: the splash first shows. shown: how long it stays. exit: Setup.exe ends.
+
+case                                         appear    shown     exit
+first run, files new to Defender, GIF           170     1044     1228
+this PC, GIF                                    163      306      484
+this PC, GIF                                    133      314      459
+this PC, GIF                                    131      319      462
+this PC, GIF                                    141      311      465
+this PC, still PNG                               54      425      487
+this PC, still PNG                               20      421      451
+this PC, still PNG                               19      417      446
+4 cores                                         144      351      507
+4 cores                                         141      312      466
+4 cores                                         145      308      467
+2 cores at half speed                           205      346      563
+2 cores at half speed                           234      437      684
+2 cores at half speed                           215      329      556
+busy PC, 16 threads of load                     428      480      953
+busy PC, 16 threads of load                     325      514      862
+busy PC, 16 threads of load                     362      600     1007
+disk capped at 50 MB/s (cap failed: 1)          142      309      464
+disk capped at 50 MB/s (cap failed: 1)          133      313      459
+disk capped at 50 MB/s (cap failed: 1)          144      304      461
+2 cores half speed, disk cap (cap failed: 1)    224      497      735
+2 cores half speed, disk cap (cap failed: 1)    209      332      554
+2 cores half speed, disk cap (cap failed: 1)    223      315      549
+stand-in waits 4s in its install hook, bar      171     4319     4504
+stand-in waits 4s in its install hook, bar      135     4316     4466
+stand-in waits 4s in its install hook, no bar   168     4316     4498
+stand-in waits 4s in its install hook, no bar   152     4339     4509
+
+"4 cores" and "2 cores" set the job's affinity; "half speed" capped the job's CPU rate at 6% of the machine (JOB_OBJECT_CPU_RATE_CONTROL
+hard cap), about half of 2 cores. "16 threads of load" ran 16 busy threads at normal priority in the timing process. The disk cap,
+SetIoRateControlInformationJobObject with a 50 MB/s MaxBandwidth, returned 1 (ERROR_INVALID_FUNCTION), so those runs had no cap.

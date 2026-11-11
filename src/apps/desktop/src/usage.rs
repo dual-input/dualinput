@@ -33,8 +33,8 @@ const NAME: &str = "usage.jsonl";
 /// The program a WebView2 window runs in. Only these of the app's descendants count, since the app will start the core too.
 const WEBVIEW: &str = "msedgewebview2.exe";
 
-/// A moment's figures: the memory in bytes, the share of all the PC's cores in percent, and the bytes downloaded since the sample
-/// before. TODO: when the app downloads updates, count them in `network`.
+/// A moment's figures: the memory in bytes, the share of all the PC's cores in percent, and the bytes the app's updates
+/// downloaded since the sample before.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Sample {
     pub at: u64,
@@ -230,6 +230,8 @@ pub struct Sampler {
     cores: f64,
     seen: HashMap<u32, u64>,
     taken: Instant,
+    /// What updates downloaded since the last sample.
+    downloaded: u64,
 }
 
 impl Sampler {
@@ -242,7 +244,13 @@ impl Sampler {
             cores: std::thread::available_parallelism().map_or(1.0, |n| n.get() as f64),
             seen,
             taken: Instant::now(),
+            downloaded: 0,
         }
+    }
+
+    /// Counts what an update's download took toward the next sample.
+    pub fn downloaded(&mut self, bytes: u64) {
+        self.downloaded += bytes;
     }
 
     /// A sample that the next one counts from.
@@ -250,6 +258,7 @@ impl Sampler {
         let (sample, seen) = self.read(at);
         self.seen = seen;
         self.taken = Instant::now();
+        self.downloaded = 0;
         sample
     }
 
@@ -264,7 +273,7 @@ impl Sampler {
             at,
             memory,
             cpu: cpu_share(&self.seen, &now, self.taken.elapsed(), self.cores),
-            network: 0,
+            network: self.downloaded,
         };
         (sample, now)
     }

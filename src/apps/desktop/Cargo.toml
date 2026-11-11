@@ -16,24 +16,49 @@ publish = false
 [dependencies]
 # The local port's sockets read and write through StreamExt and SinkExt.
 futures-util = { version = "0.3.34", default-features = false, features = ["sink"] }
+# Velopack writes what it does through `log`, which the app's log takes in.
+log = "0.4.35"
 messages = { path = "../../engines/messages" }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 tauri = { version = "=2.12.1", features = ["custom-protocol", "tray-icon"] }
 # Tauri's own runtime is tokio, so the local port runs on it.
 tokio = { version = "1.53.3", features = ["net", "rt", "sync", "macros", "time"] }
-# The same WebSocket implementation as the core's server, so the workspace stays at one.
-tokio-websockets = { version = "0.13.3", default-features = false, features = ["server", "sha1_smol"] }
+# The same WebSocket implementation as the core's server, so the workspace stays at one. The client sends the core its
+# Quit, and masks what it sends with fastrand's numbers.
+tokio-websockets = { version = "0.13.3", default-features = false, features = ["client", "fastrand", "server", "sha1_smol"] }
+# Installs and updates the app per user, swapping one release's folder for the next by rename, and downloads deltas
+# (record/areas/install/01-installing-and-updating.md, "The installer and the updater"). Its Update.exe is the one `vpk`
+# packs, so tools/lib/release.ts runs `vpk` at the version Cargo.lock gives this crate.
+velopack = "=1.2.161"
+
+# Windows Firewall's rules are COM objects, which windows-sys doesn't wrap. Tauri already builds this crate, at this version.
+[dependencies.windows]
+version = "0.62.2"
+features = [
+    "Win32_Foundation",
+    "Win32_NetworkManagement_WindowsFirewall",
+    "Win32_System_Com",
+    "Win32_System_Ole",
+    "Win32_System_Variant",
+]
 
 [dependencies.windows-sys]
 version = "0.61.2"
 features = [
+    "Wdk_System_SystemInformation",
     "Win32_Foundation",
+    "Win32_Globalization",
+    "Win32_Storage_FileSystem",
     "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_Pipes",
     "Win32_System_ProcessStatus",
     "Win32_System_Registry",
     "Win32_System_SystemInformation",
     "Win32_System_Threading",
+    "Win32_System_WindowsProgramming",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
 ]
 
 [build-dependencies]

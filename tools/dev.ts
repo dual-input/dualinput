@@ -40,6 +40,7 @@ const PAGES: Record<string, { entry: string; content: string[]; simRules: string
   banner: { entry: "src/platform/banner/dev/main.tsx", content: ["src/platform/banner/src/**/*.{ts,tsx}", "src/platform/banner/dev/**/*.{ts,tsx}", "src/packages/crew/src/**/*.{ts,tsx}"], simRules: PANEL_RULES },
   // The desktop app's window runs in WebView2, so what matters here is the browser's picture, and the sim sets no rules around it.
   desktop: { entry: "src/platform/desktop-shell/dev/main.tsx", content: ["src/platform/desktop-shell/src/**/*.{ts,tsx}", "src/platform/desktop-shell/dev/**/*.{ts,tsx}"], simRules: "" },
+  welcome: { entry: "src/platform/desktop-shell/dev/welcome.tsx", content: ["src/platform/desktop-shell/src/**/*.{ts,tsx}", "src/platform/desktop-shell/dev/**/*.{ts,tsx}"], simRules: "" },
 }
 
 // ---------------------------------------------------------------- what the page hears from here

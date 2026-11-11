@@ -3,4 +3,4 @@
 /**
  * The update, as the EFB app's Settings tab shows it.
  */
-export type Update = { "state": "current", checked: string | null, } | { "state": "checking" } | { "state": "downloading", next: string, done: number, } | { "state": "ready", next: string, } | { "state": "failed", next: string, error: string, };
+export type Update = { "state": "current", checked: string | null, } | { "state": "checking" } | { "state": "available", next: string, } | { "state": "downloading", next: string, done: number, } | { "state": "ready", next: string, } | { "state": "failed", next: string | null, error: string, };

@@ -13,6 +13,63 @@ The 58P's and the Comanche's models are glTF with no compression, in vertex layo
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-11-12: On a following machine in flight the camera reads 1m to 3m behind the pilot's seat, so the crew sees that pilot as a head in the cabin
+
+**Asked:** in [stage 16](../build/plan.md#16-flight-model-sync)'s first flight with friends, the pilot flying saw the other pilot, whose camera was in a pilot's seat, as a head and a hand floating in the rear of the cabin.
+Where did the following pilot's own core read its camera?
+
+**Expected:** at the seat's eye, since `SimConnect_CameraGet`'s `SIMOBJECT` referential gave the camera in the aircraft's frame at up to 185 kt GS ([entry below](#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)), in an aircraft the sim flew.
+
+**Found:** from a replay of each pilot's recording of the flight, 2026-11-11, on MSFS 2024 SunRise 12.2.282174.999, with a temporary log line in avatars' `camera_read` for every 10th read, since taken out.
+
+| The pilot's PC | While that pilot flew | While they followed, on the ground | While they followed, in flight |
+| --- | --- | --- | --- |
+| The host's | z = -0.14m at the median, -0.15m to -0.06m | -0.14m to -0.12m | -1.0m to -3.2m at the median of each 30s, -4.6m at most |
+| The joiner's | -0.15m at the median, -0.14m at p90, -1.53m to 0.26m, with 12 of 4,177 reads sent as a head | -0.13m to -0.12m | -2.7m to -3.2m at the median of each 30s, -3.7m at most |
+
+- z is the camera's place along the aircraft, forward positive, and the 58P profile's two seats have their eyes at -0.144m.
+  The camera's x and y read the same following as flying.
+- **In flight, a following pilot's core took them out of their seat and sent a head at the place it read**: in the 30s windows whose median passed 0.9m behind the seat, 6,602 of the host's 6,665 logged reads and all 364 of the joiner's gave a head.
+  The host's other 63 are 62 in the window where the shift first passed 1m and one read at -0.45m.
+  We haven't looked at when the joiner's 12 heads while flying fell.
+  On the host's PC the shift grew as the aircraft began to move, with 30s medians of -0.23m to -0.38m, before it passed 1m.
+- The shift fits one frame of the aircraft's travel: at a ground speed of 85 m/s, which we take for the Baron's cruise since the logs hold no speed, 1/30s is 2.8m and 1/60s 1.4m (arithmetic; neither PC's frame rate was logged).
+  `Follow` writes the frozen aircraft's pose once a frame, so the sim may answer `SimConnect_CameraGet` with the camera where the last frame's pose put it, against the pose this frame wrote (unverified).
+- The pilot's own view isn't shifted: both pilots flew and followed from their seats with the cockpit where it belongs.
+- The stage's sessions in the sim couldn't show this: their only following machine was the real one, whose own figure no one sees, and the second pilot's camera was a constant.
+- The click's ray is cast from the same camera, so a following pilot's hand may reach the wrong place too (read in `src/features/avatars/core/src/mouse.rs`, `cast`; unverified in the sim).
+
+Both recordings replayed with every checkpoint matching, the host's on another CPU than recorded it, an AMD Ryzen 9 9950X against our AMD Ryzen 7 7800X3D.
+
+**Changed:** nothing in the code yet.
+A correction worked out in the core, the aircraft's velocity times the frame's time, would leave the head moving by decimeters wherever frame times vary, since 5ms more or less at 85 m/s is 0.43m (arithmetic).
+What would settle the fix is a read, on a following 58P in flight, of the camera in each of `SimConnect_CameraGet`'s referentials beside the pose `Follow` wrote that frame, to find a reading the pose's write doesn't shift.
+
+**Affects:** [01-avatars](01-avatars.md), through a note at its top.
+
+**Evidence:** [results/2026-11-12-camera-read-on-a-following-machine.txt](results/2026-11-12-camera-read-on-a-following-machine.txt), and the recordings' logs in [the flight's entry](../flight-model/log.md#2026-11-12-two-pilots-on-two-pcs-flew-one-58p-smoothly-through-13-handovers-over-a-relayed-link-and-after-a-handover-with-the-autopilot-engaged-the-aircraft-drifted).
+
+## 2026-11-11: With Steam's overlay open, the window under the cursor is still the sim's
+
+**Asked:** [01-avatars' known limits](01-avatars.md#known-limits) leave a click on another program's window over the sim's view bringing a hand, and name a check of the window under the cursor that would stop it.
+Would that check swallow every click while an overlay such as Steam's is open over the sim?
+
+**Expected:** no prediction: an overlay can be a window of its own or drawn inside the game's.
+
+**Found:** in [stage 16](../build/plan.md#16-flight-model-sync)'s two sessions in the sim, on MSFS 2024 SunRise 12.2.282174.999, 2026-11-11, `tools/sim/flight-model.ts` read `WindowFromPoint` under the cursor and the foreground window 5 times a second while the pilot opened Steam's overlay with Shift and Tab, clicked over the cockpit, and closed it.
+
+- In the first session all 34 reads gave the sim's own window, `FlightSimulator2024` with the class `AceApp`, under the cursor and in front, and the pilot confirmed the overlay had opened (user, 2026-11-11).
+  Steam draws its overlay inside the sim's window, so a check of the window under the cursor passes a click made through it.
+- In the second session the pilot also used Discord and the Claude app during the step, and the reads gave each of those windows while the cursor was over it, and 5 reads gave another program's window with the sim still in front, 4 of them the Claude app's.
+  That's the case the check is for: another program's window under the cursor while the sim reads as in front.
+
+**Changed:** nothing in the code.
+The check would swallow no click through Steam's overlay, and it can't tell a click on the overlay from one on the cockpit, so a hand still comes for a click in the overlay.
+
+**Affects:** [01-avatars](01-avatars.md), whose known limit can take the check when a stage builds it.
+
+**Evidence:** [the first session's report](../flight-model/results/2026-11-11-stage-16-session-first-run.txt) and [the second's](../flight-model/results/2026-11-11-stage-16-session-second-run.txt).
+
 ## 2026-11-05: A click that took the focus from the sim left a figure's hand out, and the rest of the session passed
 
 **Asked:** the checks left from [the session's first half](#2026-11-05-the-session-in-the-sim-the-figure-spawns-and-sits-the-sim-sizes-it-by-its-257m-at-rest-sphere-and-a-pilot-on-foot-read-as-seated), in the Baron 58P at KPVD, with a real core and the scripted second pilot: on foot, a flight restart, a hand on a yoke that moves, the yoke's buttons, the hand that seemed to stay after a click on the sim's menus, `profile-author`'s seat objects, and the two budgets.

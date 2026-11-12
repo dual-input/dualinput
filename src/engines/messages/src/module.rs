@@ -30,6 +30,12 @@ impl RoutineId {
     pub fn slot(self) -> String {
         format!("DUALINPUT_ROUTINE_{}", self.name)
     }
+
+    /// The client data area the module writes the routine's reports into, which only the
+    /// module can write.
+    pub fn report_slot(self) -> String {
+        format!("DUALINPUT_REPORT_{}", self.name)
+    }
 }
 
 /// Preflight's routine, which holds the pilot's aircraft frozen.

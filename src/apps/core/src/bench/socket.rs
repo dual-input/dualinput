@@ -176,6 +176,10 @@ impl Bench {
             StandInAct::Lack { title } => Act::Lack { title },
             StandInAct::FrameBurst { count } => Act::FrameBurst { count },
             StandInAct::ResetVars => Act::ResetVars,
+            StandInAct::LateReport { delay_ms } => Act::LateReport {
+                delay: Duration::from_millis(delay_ms),
+            },
+            StandInAct::Track { names } => Act::Track { names },
             StandInAct::Inputs { events } => Act::Inputs { events },
             StandInAct::SetInput { name, value } => Act::SetInput { name, value },
             StandInAct::SendEvent { name, data } => Act::SendEvent { name, data },

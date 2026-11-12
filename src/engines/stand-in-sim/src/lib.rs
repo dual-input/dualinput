@@ -13,6 +13,7 @@
 //! answers to its own units' calls, beside the edge that makes them in the sim.
 
 mod aircraft;
+mod motion;
 mod sim;
 mod world;
 
@@ -40,9 +41,15 @@ pub trait Module: Send {
     /// stand-in's clock.
     fn written(&mut self, slot: &str, bytes: &[u8], clock: u64);
     /// One frame at `clock`, on the sim's aircraft and objects. Returns each area the module
-    /// wrote, by name, with its bytes.
+    /// wrote, by name, with its bytes: its status, and each routine's report, whose area's
+    /// name starts with `REPORT_PREFIX`.
     fn frame(&mut self, clock: u64, world: &mut World) -> Vec<(String, Vec<u8>)>;
 }
+
+/// What the name of each report's client data area starts with, by which `Act::LateReport`
+/// tells a report from the module's status. `RoutineId::report_slot` in
+/// src/engines/messages/src/module.rs makes those names, so change both together.
+pub const REPORT_PREFIX: &str = "DUALINPUT_REPORT_";
 
 /// A signal of the sim's that a scenario plays, as the sim sends it around a flight load.
 #[derive(Clone, Debug, PartialEq)]
@@ -122,6 +129,15 @@ pub enum Act {
     SendEvent { name: String, data: u32 },
     /// Scripts the aircraft's own behavior from now on, as a scenario's system needs it.
     Rule(Rule),
+    /// Hands up the module's next report this long after the module made it, as a variable
+    /// requested through SimConnect once came 193ms after the slot from its frame (measured on
+    /// MSFS 2024, 2026-10-09, record/areas/architecture/log.md). The reports after it come on
+    /// time, so the late one arrives behind newer ones.
+    LateReport { delay: Duration },
+    /// Hands the sim's pages the aircraft's variables `names`, as numbers, once each frame
+    /// from now on, after the module's frame, or stops with no names. A scenario follows the
+    /// aircraft's path by them, frame by frame.
+    Track { names: Vec<String> },
 }
 
 /// One thing the aircraft does on its own, such as "when this variable is written, set that one
@@ -179,6 +195,9 @@ pub enum Page {
     CommBus { name: String, data: String },
     /// An `H:` event, with no `H:` on its name, as an instrument receives it.
     HEvent { name: String },
+    /// The variables `Act::Track` named, after one frame, at `at`, in µs of the PC's own
+    /// time since 1970, which two stand-ins on one PC share.
+    Track { at: u64, values: Vec<f64> },
 }
 
 /// What the stand-in tells the bench when asked.

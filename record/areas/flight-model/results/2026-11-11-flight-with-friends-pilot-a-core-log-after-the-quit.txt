@@ -1,0 +1,142 @@
+54568330699µs  INFO dualinput_core::run: the core started commit="7859de22eb5cc21739523d2efcf43df73917a623" uncommitted=Some("deb2e369306bc66a1ddf70675b7f64725f86656aff5730729fbd98122303c293") profile="release" messages="b4a1b2556f5104a1321900218b8a7146d1aa9ad069b125c56b69f5192740b1b1"
+54568334036µs  INFO dualinput_core::edges::sockets: the clients' WebSocket server listens on 127.0.0.1 port=54215
+54568333364µs #1 [clients]  INFO clients::sockets: the core's WebSocket server listens on 127.0.0.1 port=54215
+54568339683µs #6 [sim-service]  INFO sim_service::seam: the sim's process was found process=37252 created=134389091265070230
+54568339683µs #6 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Starting
+54568340525µs #7 [sim-service]  INFO sim_service::seam: a connection to the sim opened connection=Connection { unit: 2, open: 1 }
+54568360091µs #9 [sim-service]  INFO sim_service::seam: the sim's open reply arrived connection=Connection { unit: 2, open: 1 } application="SunRise" version=[12, 2, 282174, 999] simconnect=[12, 2, 0, 0]
+54568440544µs #19 [clients]  INFO clients::sockets: a client joined socket=0 component="efb-app" instruments=0
+54568480894µs #22 [clients]  INFO clients::sockets: a client joined socket=1 component="menu-script" instruments=0
+54568480903µs #23 [core-helper]  INFO core_helper_service::life: the core helper starts run=1 program=""
+54568487445µs #24 [core-helper]  INFO core_helper_service::life: the core helper's process started run=1 process=32424
+54568497427µs #25 [core-helper]  INFO core_helper_service::life: the core helper said hello run=1 process=32424
+54568501844µs #26 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=InGame
+54568501844µs #26 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+54568506863µs #27 [sim-service]  INFO sim_service::aircraft: the loaded aircraft's title and livery title="Black Square Baron 58P Professional N513LW" aircraft="bksq-aircraft-baronpropress"
+54568524406µs #30 [core-helper]  INFO core_helper_service::life: the core helper listed its devices and programs outputs=2 programs=4
+54568524406µs #30 [core-helper]  INFO core_helper_service::life: nothing is wanted of the core helper, so it stops run=1
+54568527507µs #31 [core-helper]  INFO core_helper_service::life: the core helper exited run=1 code=0
+54568621001µs #35 [profile-loader]  INFO profile_loader::cache: the profiles' index is unchanged since this core last fetched it
+54568623367µs #37 [network]  INFO network::reach: what this PC reaches changed backend=true relay=true
+54569305996µs #54 [sim-service]  INFO sim_service::module: our WASM module is running module="0.1.0"
+54574595996µs #208 [session]  INFO session::joining: the clipboard holds no invite code
+54597147476µs #851 [session]  INFO session::joining: this pilot joins a session code="XZD67Z"
+54597147476µs #851 [network]  INFO network::backend: the network looks an invite code up
+54597230121µs #854 [network]  INFO network::backend: the backend answered asked=Join answer=Found { session: "428b195d-6dac-48e2-b674-16a25e3761d2", relays: [Relay { url: "https://cookie-gif-lawyer-seniors.trycloudflare.com", token: "bench-token", cap: 262144 }], crew: [Entry { pilot: "bd785a342891437a87b838de477aa271", name: "pilot-b", kind: Crew, endpoint: "2b87e1e64052624756624eae4a46ca05ea1ab60683dea27694bffd56c097308d" }] }
+54597230121µs #854 [session]  INFO session::joining: the session the code names was found code="XZD67Z"
+54597230121µs #854 [sim-service]  INFO sim_service::announce: the core announces that a session started session=true
+54597230121µs #854 [core-helper]  INFO core_helper_service::life: the core helper starts run=2 program=""
+54597231403µs #857 [network]  INFO network: the network opens the session code="XZD67Z" restart=0 crew=1
+54597234721µs #858 [core-helper]  INFO core_helper_service::life: the core helper's process started run=2 process=17872
+54597239065µs #860 [sim-service]  INFO sim_service::aircraft: the aircraft's package package="bksq-aircraft-baronpro" location=Community version="0.1.1" aircraft="bksq-aircraft-baronpropress"
+54597244352µs #862 [core-helper]  INFO core_helper_service::life: the core helper said hello run=2 process=17872
+54597255918µs #863 [core-helper]  INFO core_helper_service::life: the core helper plays on this output device output="Speakers (Focusrite USB Audio)"
+54597267325µs  INFO transport: the transport bound its endpoint relays=1 ip=true
+54597267344µs #867 [network]  INFO network::links: the network's endpoint is bound
+54597286644µs #878 [clients]  INFO clients::sockets: a client joined socket=2 component="panel-bridge" panel="VCockpit80" instruments=1
+54597286666µs #879 [clients]  INFO clients::sockets: a client joined socket=4 component="panel-bridge" panel="VCockpit75" instruments=1
+54597286671µs #880 [clients]  INFO clients::sockets: a client joined socket=3 component="panel-bridge" panel="VCockpit79" instruments=1
+54597287661µs #882 [clients]  INFO clients::sockets: a client joined socket=7 component="panel-bridge" panel="VCockpit73" instruments=1
+54597287666µs #883 [clients]  INFO clients::sockets: a client joined socket=5 component="panel-bridge" panel="VCockpit72" instruments=1
+54597287669µs #884 [clients]  INFO clients::sockets: a client joined socket=8 component="panel-bridge" panel="VCockpit69" instruments=1
+54597287670µs #885 [clients]  INFO clients::sockets: a client joined socket=6 component="panel-bridge" panel="VCockpit74" instruments=1
+54597287696µs #886 [clients]  INFO clients::sockets: a client joined socket=9 component="panel-bridge" panel="VCockpit71" instruments=1
+54597291458µs #887 [clients]  INFO clients::sockets: a client joined socket=12 component="panel-bridge" panel="VCockpit66" instruments=1
+54597291462µs #888 [clients]  INFO clients::sockets: a client joined socket=10 component="panel-bridge" panel="VCockpit65" instruments=1
+54597291465µs #889 [clients]  INFO clients::sockets: a client joined socket=11 component="panel-bridge" panel="VCockpit78" instruments=1
+54597291475µs #890 [clients]  INFO clients::sockets: a client joined socket=14 component="panel-bridge" panel="VCockpit62" instruments=1
+54597291476µs #891 [clients]  INFO clients::sockets: a client joined socket=13 component="panel-bridge" panel="VCockpit61" instruments=1
+54597317989µs #900 [clients]  INFO clients::sockets: a client joined socket=15 component="panel-bridge" panel="VCockpit76" instruments=1
+54597319007µs #901 [clients]  INFO clients::sockets: a client joined socket=17 component="panel-bridge" panel="VCockpit70" instruments=1
+54597319015µs #902 [clients]  INFO clients::sockets: a client joined socket=16 component="panel-bridge" panel="VCockpit68" instruments=1
+54597320496µs #903 [clients]  INFO clients::sockets: a client joined socket=20 component="panel-bridge" panel="VCockpit63" instruments=1
+54597320501µs #904 [clients]  INFO clients::sockets: a client joined socket=19 component="panel-bridge" panel="VCockpit64" instruments=1
+54597320502µs #905 [clients]  INFO clients::sockets: a client joined socket=18 component="panel-bridge" panel="VCockpit67" instruments=1
+54597320985µs #906 [clients]  INFO clients::sockets: a client joined socket=21 component="panel-bridge" panel="VCockpit77" instruments=1
+54597708105µs #920 [network]  INFO network::links: a connection to another core opened conn=1 dialed=true
+54597708105µs #920 [session]  INFO session: a connection's first message carries this core's keys conn=1 bytes=340
+54597708129µs #921 [network]  INFO network::links: a connection's path changed conn=1 path=Relay { url: "https://cookie-gif-lawyer-seniors.trycloudflare.com/" }
+54597986853µs #932 [network]  INFO network::links: a member's link is up conn=1 again=false restart=0
+54597986853µs #932 [session]  INFO session::members: a member joined the session member="bd785a342891437a87b838de477aa271"
+54597986853µs #932 [session]  INFO session::control: control passed generation=15 pf="bd785a342891437a87b838de477aa271"
+54597986853µs #932 [session]  INFO session::members: a member entered the flight member="e8954c59a301408d8152f68cc24b070f" in_flight=true
+54597986853µs #932 [session]  INFO session::members: a member entered the flight member="bd785a342891437a87b838de477aa271" in_flight=true
+54597986853µs #932 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=1274 members=2
+54597986853µs #932 [flight-model]  INFO flight_model: another pilot flies, so flight-model sync starts Follow pf="bd785a342891437a87b838de477aa271"
+54597987403µs #933 [sim-service]  INFO sim_service::seam: a connection to the sim opened connection=Connection { unit: 13, open: 1 }
+54597989266µs #934 [profile-loader]  INFO profile_loader: the profile loaded hash="9d15392d23ce0f9de2252985df58e8c517421d5325fc1180b145fab46117a8b1" local=false variant="press"
+54597989266µs #934 [avatars]  INFO avatars: avatars builds the aircraft's model package="%USERPROFILE%\\AppData\\Roaming\\Microsoft Flight Simulator 2024\\Packages\\Community\\bksq-aircraft-baronpro" path="bksq-aircraft-baronpropress"
+54597989266µs #934 [clients]  INFO clients::panels: the profile loaded, so the clients crate answers each cockpit panel panels=20
+54597991235µs #935 [sim-service]  INFO sim_service::seam: a connection to the sim opened connection=Connection { unit: 10, open: 1 }
+54597991532µs #936 [sim-service]  INFO sim_service::seam: a connection to the sim opened connection=Connection { unit: 12, open: 1 }
+54598018766µs #939 [sim-service]  INFO sim_service::seam: the sim's open reply arrived connection=Connection { unit: 13, open: 1 } application="SunRise" version=[12, 2, 282174, 999] simconnect=[12, 2, 0, 0]
+54598028761µs #942 [sim-service]  INFO sim_service::seam: the sim's open reply arrived connection=Connection { unit: 10, open: 1 } application="SunRise" version=[12, 2, 282174, 999] simconnect=[12, 2, 0, 0]
+54598040137µs #943 [sim-service]  INFO sim_service::seam: the sim's open reply arrived connection=Connection { unit: 12, open: 1 } application="SunRise" version=[12, 2, 282174, 999] simconnect=[12, 2, 0, 0]
+54598068507µs #1130 [clients]  INFO clients: a notification was raised id="avatars.seat" level=Information text="This seat is taken"
+54598071154µs #1132 [clients]  INFO clients::sockets: a client's socket closed socket=19 component="panel-bridge"
+54598071207µs #1133 [clients]  INFO clients::sockets: a client's socket closed socket=18 component="panel-bridge"
+54598071226µs #1134 [clients]  INFO clients::sockets: a client's socket closed socket=11 component="panel-bridge"
+54598071252µs #1135 [clients]  INFO clients::sockets: a client's socket closed socket=21 component="panel-bridge"
+54598071286µs #1136 [clients]  INFO clients::sockets: a client's socket closed socket=14 component="panel-bridge"
+54598071336µs #1137 [clients]  INFO clients::sockets: a client's socket closed socket=7 component="panel-bridge"
+54598071375µs #1138 [clients]  INFO clients::sockets: a client's socket closed socket=5 component="panel-bridge"
+54598071404µs #1139 [clients]  INFO clients::sockets: a client's socket closed socket=16 component="panel-bridge"
+54598071423µs #1140 [clients]  INFO clients::sockets: a client's socket closed socket=13 component="panel-bridge"
+54598071426µs #1141 [clients]  INFO clients::sockets: a client's socket closed socket=12 component="panel-bridge"
+54598072096µs #1142 [clients]  INFO clients::sockets: a client's socket closed socket=10 component="panel-bridge"
+54598072100µs #1143 [clients]  INFO clients::sockets: a client's socket closed socket=9 component="panel-bridge"
+54598072131µs #1144 [clients]  INFO clients::sockets: a client's socket closed socket=20 component="panel-bridge"
+54598072139µs #1145 [clients]  INFO clients::sockets: a client's socket closed socket=15 component="panel-bridge"
+54598072199µs #1146 [clients]  INFO clients::sockets: a client's socket closed socket=8 component="panel-bridge"
+54598108919µs #1152 [clients]  INFO clients: a notification was cleared id="avatars.seat"
+54598304088µs #1202 [avatars]  INFO avatars: avatars took the aircraft's model posed=319 animation_codes=240 visibility_codes=241 yokes=2
+54598403397µs #1231 [clients]  INFO clients::sockets: a client joined socket=22 component="banner" instruments=0
+54599489392µs #1485 [cockpit-stream]  INFO cockpit_stream: this machine asks the pilot flying for a catch-up preflight_end=false
+54599489392µs #1485 [clients]  INFO clients: a notification was raised id="cockpit-stream.catch" level=Information text="Catching up with pilot-b"
+54599799295µs #1558 [cockpit-stream]  INFO cockpit_stream: this machine takes the flying machine's catch-up
+54599799295µs #1558 [cockpit-stream]  INFO cockpit_stream: this machine's catch-up ended
+54599799295µs #1558 [clients]  INFO clients: a notification was raised id="cockpit-stream.catch" level=Information text="Caught up with pilot-b"
+54600270885µs  INFO endpoint{id=852903f681}:relay-actor: iroh::socket::transports::relay::actor: home is now relay https://cookie-gif-lawyer-seniors.trycloudflare.com/, was None
+54600270918µs  INFO transport: the endpoint's home relay is https://cookie-gif-lawyer-seniors.trycloudflare.com/
+54628334452µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=4799 event_wakes=4740 timeout_wakes=22995 timeout_messages=33 event_to_up_p50_us=6 event_to_up_p99_us=37 event_to_up_p999_us=111 event_to_up_max_us=363
+54628335903µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=8190 busy_percent=0.45 wait_p50_us=8 wait_p99_us=103 wait_p999_us=1215 wait_max_us=22891 over_1ms=2 slowest_us=4996 slowest_seq=1202 slowest_stamp=54598304088
+54653415744µs #13972 [core-helper]  INFO core_helper_service::life: the core helper listed its devices and programs outputs=2 programs=5
+54688335538µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=9085 event_wakes=9062 timeout_wakes=21548 timeout_messages=69 event_to_up_p50_us=6 event_to_up_p99_us=47 event_to_up_p999_us=135 event_to_up_max_us=218
+54688342139µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=13842 busy_percent=0.68 wait_p50_us=8 wait_p99_us=107 wait_p999_us=431 wait_max_us=721 over_1ms=0 slowest_us=632 slowest_seq=18443 slowest_stamp=54672798493
+54722866716µs #29846 [clients]  INFO clients: a notification was raised id="avatars.seat" level=Information text="This seat is taken"
+54724502876µs #29958 [session]  INFO session::control: control passed generation=16 pf="e8954c59a301408d8152f68cc24b070f"
+54724502876µs #29958 [session]  INFO session::members: a member left the flight member="bd785a342891437a87b838de477aa271" in_flight=false
+54724502876µs #29958 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+54724502876µs #29958 [clients]  INFO clients: a notification was raised id="session.crew-bd785a342891437a87b838de477aa271" level=Information text="pilot-b left the flight"
+54724502876µs #29958 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="You have control"
+54725015978µs #29973 [clients]  INFO clients::sockets: a client's socket closed socket=0 component="efb-app"
+54725076723µs #29975 [clients]  INFO clients::sockets: a client's socket closed socket=22 component="banner"
+54725207297µs #29979 [clients]  INFO clients::sockets: a client's socket closed socket=1 component="menu-script"
+54725227451µs #29981 [clients]  INFO clients::sockets: a client's socket closed socket=2 component="panel-bridge"
+54725247794µs #29982 [clients]  INFO clients::sockets: a client's socket closed socket=3 component="panel-bridge"
+54725288668µs #29986 [clients]  INFO clients::sockets: a client's socket closed socket=4 component="panel-bridge"
+54725309024µs #29987 [clients]  INFO clients::sockets: a client's socket closed socket=6 component="panel-bridge"
+54725350107µs #29992 [clients]  INFO clients::sockets: a client's socket closed socket=17 component="panel-bridge"
+54725359643µs #29993 [sim-service]  WARN sim_service::module: our WASM module stopped with a routine live, so the aircraft stays frozen until the routine ends still_ms=3126
+54725359643µs #29993 [clients]  INFO clients: a notification was raised id="sim-service.module-stopped" level=Trouble text="Dual Input's WASM module stopped"
+54726354879µs #30005 [sim-service]  INFO sim_service::seam: the sim sent its quit message
+54726354879µs #30005 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Closed aircraft="bksq-aircraft-baronpropress"
+54726354879µs #30005 [session]  INFO session::members: a member left the flight member="e8954c59a301408d8152f68cc24b070f" in_flight=false
+54726354879µs #30005 [session]  INFO session::members: preflight has ended and no member is in the flight, so the session ends
+54726354879µs #30005 [session]  INFO session::joining: this pilot leaves the session quit=false
+54726354879µs #30005 [session]  INFO session::joining: the session ended for this core code="XZD67Z"
+54726354879µs #30005 [profile-loader]  INFO profile_loader: the profile unloaded
+54726354879µs #30005 [flight-model]  INFO flight_model: flight-model sync runs no routine
+54726354879µs #30005 [network]  INFO network: the network leaves the session quit=false
+54726354879µs #30005 [sim-service]  INFO sim_service::announce: the core announces that a session ended session=false
+54726354879µs #30005 [clients]  INFO clients: a notification was cleared id="session.crew-bd785a342891437a87b838de477aa271"
+54726354879µs #30005 [session]  INFO session::joining: the sim closed and no session is held, so the core exits
+54726354879µs #30005 [core-helper]  INFO core_helper_service::life: nothing is wanted of the core helper, so it stops run=2
+54726354879µs #30005 [clients]  INFO clients: a notification was cleared id="avatars.seat"
+54726354879µs #30005 [clients]  INFO clients: a notification was cleared id="sim-service.module-stopped"
+54726357150µs  INFO dualinput_core::run: the core is exiting seq=30005
+54726357156µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=38.0 inputs=7974 busy_percent=0.62 wait_p50_us=8 wait_p99_us=95 wait_p999_us=511 wait_max_us=2239 over_1ms=1 slowest_us=2230 slowest_seq=30005 slowest_stamp=54726354879
+54726357165µs  INFO dualinput_core::loop_stats: the loop's stats window="run" seconds=158.0 inputs=30006 busy_percent=0.58 wait_p50_us=8 wait_p99_us=103 wait_p999_us=575 wait_max_us=22891 over_1ms=3 slowest_us=4996 slowest_seq=1202 slowest_stamp=54598304088
+54726567401µs  INFO transport: the transport closed its endpoint
+54726796671µs  INFO sim_edge::stats: the sim edge's stats seconds=38.5 messages=5250 event_wakes=5239 timeout_wakes=13816 timeout_messages=36 event_to_up_p50_us=6 event_to_up_p99_us=43 event_to_up_p999_us=107 event_to_up_max_us=162
+54726797461µs  INFO dualinput_core::run: the core exited exit_took_ms=440

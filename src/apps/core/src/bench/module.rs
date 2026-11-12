@@ -10,7 +10,7 @@ use messages::avatars::slots::{
 use messages::bench::{FedBody, FedFigure, FedHand, FromCore};
 use messages::module::slots::SlotHeader;
 use messages::module::{RoutineId, STATUS};
-use routine_host::{Flag, Frame, Host, Ids, Named, Routine, Sim, Space, Wants};
+use routine_host::{Flag, Frame, Host, Ids, Key, Named, Routine, Sim, Space, Wants};
 use stand_in_sim::{Aircraft, Module, World};
 
 use super::ToBench;
@@ -40,6 +40,7 @@ struct Probe {
 impl Routine for Probe {
     const ID: RoutineId = PROBE;
     type Slot = ProbeSlot;
+    type Report = ();
 
     fn on_slot(&mut self, slot: &ProbeSlot) {
         self.mode = slot.mode;
@@ -168,20 +169,31 @@ impl Module for BenchModule {
     }
 
     fn frame(&mut self, clock: u64, world: &mut World) -> Vec<(String, Vec<u8>)> {
-        self.host
-            .frame(clock, &mut Plane(world))
-            .map(|status| (STATUS.to_string(), bytemuck::bytes_of(&status).to_vec()))
-            .into_iter()
-            .collect()
+        let status = self.host.frame(clock, &mut Plane(world));
+        let mut wrote: Vec<(String, Vec<u8>)> = self
+            .host
+            .reports()
+            .map(|(routine, report)| (routine.report_slot(), report))
+            .collect();
+        wrote.extend(status.map(|s| (STATUS.to_string(), bytemuck::bytes_of(&s).to_vec())));
+        wrote
     }
 }
 
 /// The stand-in's aircraft and objects, as the routine host reaches them. The module turns a
 /// freeze on and off through the sim's events, and the stand-in sets the variable each sets.
-/// Each table holds a variable by the name SimConnect takes: an `A:` one with no prefix, and
-/// an `L:` or `Z:` one with its own, so the two don't meet; every `L:` one is the aircraft's,
-/// since the sim keeps one table of them.
+/// Each table holds a variable by the name SimConnect takes: an `A:` or `E:` one with no
+/// prefix, and an `L:` or `Z:` one with its own, so the two don't meet; every `E:` and `L:`
+/// one is the aircraft's, since the sim keeps one table of each.
+///
+/// A table holds one number for a variable, whatever unit a reader names, and holds an angle
+/// in degrees, as avatars reads the aircraft's pose. `Lead` and `Follow` read and write the
+/// pose in radians, so a read or a write in `radians` converts, and the unit's ID says which:
+/// 1 for radians, 0 for any other.
 struct Plane<'a>(&'a mut World);
+
+/// The unit ID `Plane` gives `radians`.
+const RADIANS: i32 = 1;
 
 impl Plane<'_> {
     /// The table a variable is in, and its name there, from the ID the world gave it.
@@ -189,6 +201,7 @@ impl Plane<'_> {
         let (own, name) = self.0.var_named(ids.var)?;
         let (object, key) = match space {
             Space::A => (object, name.to_string()),
+            Space::E => (0, name.to_string()),
             Space::L => (0, format!("L:{name}")),
             Space::Z => (own?, format!("Z:{name}")),
         };
@@ -219,16 +232,30 @@ impl Sim for Plane<'_> {
         let own = (named.space == Space::Z).then_some(object);
         Some(Ids {
             var: self.0.var_id(own, &named.name),
-            unit: 0,
+            unit: i32::from(named.unit.eq_ignore_ascii_case("radians")),
         })
     }
 
     fn get(&mut self, object: u32, space: Space, ids: Ids) -> Option<f64> {
         let (vars, key) = self.find(object, space, ids)?;
-        Some(vars.number(&key))
+        let value = vars.number(&key);
+        Some(if ids.unit == RADIANS {
+            value.to_radians()
+        } else {
+            value
+        })
     }
 
     fn set(&mut self, object: u32, space: Space, ids: Ids, value: f64) {
+        // The sim gives no write for an `E:` variable.
+        if space == Space::E {
+            return;
+        }
+        let value = if ids.unit == RADIANS {
+            value.to_degrees()
+        } else {
+            value
+        };
         if let Some((vars, key)) = self.find(object, space, ids) {
             vars.set_number(&key, value);
         }
@@ -244,5 +271,9 @@ impl Sim for Plane<'_> {
 
     fn call_preset(&mut self, name: &str, value: Option<f64>) {
         self.0.call_preset(name, value);
+    }
+
+    fn key(&mut self, key: Key, value: i32) {
+        self.0.key(key.name(), value);
     }
 }

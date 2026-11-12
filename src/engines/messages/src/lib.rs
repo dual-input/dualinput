@@ -30,6 +30,7 @@ pub mod clients;
 pub mod cockpit;
 pub mod core_helper;
 pub mod desktop;
+pub mod flight_model;
 pub mod module;
 pub mod net;
 pub mod pointer_sync;

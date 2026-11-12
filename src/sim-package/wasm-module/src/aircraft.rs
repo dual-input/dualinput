@@ -7,7 +7,7 @@ use std::ffi::{CString, c_void};
 use std::ptr;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use routine_host::{Flag, Ids, Named, Sim, Space};
+use routine_host::{Flag, Ids, Key, Named, Sim, Space};
 
 use crate::vars;
 
@@ -15,10 +15,12 @@ use crate::bindings::{
     FS_OBJECT_ID_USER_AIRCRAFT, FS_VAR_ERROR_NONE, FS_VAR_UPDATE_OP_REMOVE, FS_VAR_UPDATE_OP_RESET,
     FsAVarId, FsBVarId, FsEventId, FsObjectId, FsUnitId, FsVarParamArray, FsVarParamTypeDouble,
     FsVarParamTypeInteger, FsVarParamVariant, FsVarParamVariant__bindgen_ty_1, FsVarTypeFlags,
-    FsVarUpdateOp, KEY_FREEZE_ALTITUDE_SET, KEY_FREEZE_ATTITUDE_SET,
-    KEY_FREEZE_LATITUDE_LONGITUDE_SET, execute_calculator_code, fsEventsTriggerKeyEvent,
-    fsVarsAVarGet, fsVarsBVarCall, fsVarsGetAVarId, fsVarsGetBVarId, fsVarsGetUnitId,
-    fsVarsRegisterVarsStatusUpdateHandler, fsVarsUnregisterVarsStatusUpdateHandler,
+    FsVarUpdateOp, KEY_AXIS_AILERONS_SET, KEY_AXIS_ELEVATOR_SET, KEY_AXIS_LEFT_BRAKE_SET,
+    KEY_AXIS_RIGHT_BRAKE_SET, KEY_AXIS_RUDDER_SET, KEY_FREEZE_ALTITUDE_SET,
+    KEY_FREEZE_ATTITUDE_SET, KEY_FREEZE_LATITUDE_LONGITUDE_SET, execute_calculator_code,
+    fsEventsTriggerKeyEvent, fsVarsAVarGet, fsVarsBVarCall, fsVarsGetAVarId, fsVarsGetBVarId,
+    fsVarsGetUnitId, fsVarsRegisterVarsStatusUpdateHandler,
+    fsVarsUnregisterVarsStatusUpdateHandler,
 };
 
 /// Set when the sim removes or resets variables, which fsc-editor's module heard on an
@@ -183,6 +185,31 @@ impl Sim for Aircraft {
         };
         // SAFETY: the sim reads at most the one value, which outlives the call.
         unsafe { fsVarsBVarCall(id, params, FS_OBJECT_ID_USER_AIRCRAFT) };
+    }
+
+    /// Sends the event with its value as an integer, the type SimConnect sends an event's
+    /// value as. The Events API's integer is unsigned, so a negative value goes as its two's
+    /// complement, as SimConnect's `DWORD` carries one.
+    fn key(&mut self, key: Key, value: i32) {
+        let event = match key {
+            Key::AxisAilerons => KEY_AXIS_AILERONS_SET,
+            Key::AxisElevator => KEY_AXIS_ELEVATOR_SET,
+            Key::AxisRudder => KEY_AXIS_RUDDER_SET,
+            Key::AxisLeftBrake => KEY_AXIS_LEFT_BRAKE_SET,
+            Key::AxisRightBrake => KEY_AXIS_RIGHT_BRAKE_SET,
+        };
+        let mut param = FsVarParamVariant {
+            type_: FsVarParamTypeInteger,
+            __bindgen_anon_1: FsVarParamVariant__bindgen_ty_1 {
+                intValue: value as u32,
+            },
+        };
+        let params = FsVarParamArray {
+            size: 1,
+            array: &mut param,
+        };
+        // SAFETY: the sim reads the one value, which outlives the call.
+        unsafe { fsEventsTriggerKeyEvent(event as FsEventId, params) };
     }
 
     fn look_up(&mut self, object: u32, named: &Named) -> Option<Ids> {

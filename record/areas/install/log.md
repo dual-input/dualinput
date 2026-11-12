@@ -1,5 +1,40 @@
 # Installing and updating: log
 
+## 2026-11-12: In a session an update downloads and waits, then installs as the sim closes, the tray's Quit reads as a leave, and a session raised no firewall prompt from Windows
+
+**Asked.**
+Whether the cases that need a session on two PCs hold, in [stage 16](../build/plan.md#16-flight-model-sync)'s first flight with friends, with each PC on a release installed from its Setup.exe.
+
+**Expected.**
+What the bench's stand-ins showed: a session holds a downloaded update, the tray's Quit is a leave, and the core's UDP socket raises Windows' firewall prompt on a PC with no rule naming it.
+
+**Found** (measured on MSFS 2024, from 2026-11-11 23:16 to 2026-11-12 00:06 local, on two PCs, ours on Windows 11 Pro 10.0.26200, [our desktop app's log](results/2026-11-12-flight-with-friends-desktop-log.txt), and the cores' logs with [the flight's entry](../flight-model/log.md#2026-11-12-two-pilots-on-two-pcs-flew-one-58p-smoothly-through-13-handovers-over-a-relayed-link-and-after-a-handover-with-the-autopilot-engaged-the-aircraft-drifted)):
+
+- **The installed apps read their settings from tunnels.**
+  With `network.backend`, `network.relays`, `profiles.site`, and `desktop.update-feed` in `settings.json`, each naming a Cloudflare quick tunnel to our development machine, the app's first check read the feed and found no newer release, and each core reached the backend and the relay and fetched the profiles' index.
+- **No firewall prompt came from Windows.**
+  On the other pilot's PC, where the welcome's firewall step was answered Not now, so no rule named the core, the session opened with no prompt from Windows, they said.
+  The EFB app's header showed its firewall warning, and its Fix, through one UAC prompt, cleared it.
+  Windows showed no prompt, so no one could cancel one, and the case of the block rules a canceled prompt leaves wasn't run.
+  We don't know why Windows showed none, and the same session on a second PC with no rule would tell whether that PC was the exception.
+  What the other pilot saw is theirs, by eye, and the rest is read from the logs.
+- **A session held a downloaded update.**
+  In the session, Check now found 0.1.1 where 0.1.0 ran, took the delta, 3,101,946 bytes in the feed's folder, and built the full package in 2s, and the log says `version 0.1.1 is downloaded, and waits to install`.
+  We didn't note what the window said.
+- **The tray's Quit in a session read as a leave.**
+  The quitting core logged `this pilot quits Dual Input` and exited in 438ms, the app ended, and the other pilot's core logged `a member left the session` and showed that the pilot left the session, with no lost link.
+  Started again from the Start menu, the app found the sim running and the update still waiting, started a core, and the pilot joined the session again.
+- **The update installed as the sim closed.**
+  The core exited with 0 as the pilot left, and 10s later, in the second the sim closed, the app logged `installing version 0.1.1`, 0.1.1 started in the tray, and it wrote our package into Community at 0.1.1.
+
+Three more cases weren't run: Setup.exe over the install during a session, an uninstall a crewmate sees as a lost link, and a host who is behind.
+
+**What changed.**
+The three cases, and the canceled prompt's, move to [stage 22](../build/plan.md#22-github), on releases the release workflow makes and the servers it deploys (user, 2026-11-12).
+
+**Docs affected.**
+None.
+
 ## 2026-11-11: The bench read the desktop app's CPU in whole 15.6ms clock ticks; read from cycles, the app uses 0.14% to 0.15% of a core
 
 **Asked.**

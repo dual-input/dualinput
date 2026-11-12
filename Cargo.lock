@@ -1038,6 +1038,7 @@ dependencies = [
  "clients",
  "cockpit-stream",
  "core-helper-service",
+ "flight-model",
  "futures-util",
  "kernel",
  "messages",
@@ -1250,6 +1251,28 @@ checksum = "6e634e2e0ebac1ee034020da1ca582e17ffe4e0f5e985823721e168928136dcb"
 dependencies = [
  "crc32fast",
  "miniz_oxide",
+]
+
+[[package]]
+name = "flight-model"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "kernel",
+ "messages",
+ "network",
+ "session",
+ "sim-service",
+ "tracing",
+]
+
+[[package]]
+name = "flight-model-routines"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "messages",
+ "routine-host",
 ]
 
 [[package]]
@@ -3652,6 +3675,9 @@ name = "routines"
 version = "0.1.0"
 dependencies = [
  "avatars-routines",
+ "bytemuck",
+ "flight-model-routines",
+ "messages",
  "routine-host",
  "state-sync-routines",
 ]

@@ -2,8 +2,9 @@
 //! three functions it exports: `module_init` as it loads the module, `Update_StandAlone`
 //! once a frame, and `module_deinit` as it unloads it. Each frame, the module hands the
 //! routine host the core's writes to the routines' slots, runs the host's frame, which
-//! carries out the routines' wants on the pilot's aircraft, and writes the status the host
-//! returns (record/areas/core/03-sim-seam-and-wasm-module.md, "Our WASM module").
+//! carries out the routines' wants on the pilot's aircraft, and writes the routines' reports
+//! and the status the host returns (record/areas/core/03-sim-seam-and-wasm-module.md, "Our
+//! WASM module").
 
 // A panic puts our module in the sim's `DIRTY` state, and the sim stops running it, so one
 // mistake here would stop every routine, and the routine host with them, which then never
@@ -52,7 +53,11 @@ impl Module {
     /// runs on every feed that arrived since the last frame.
     fn frame(&mut self) {
         let clock = self.take_writes();
-        if let Some(status) = self.host.frame(clock, &mut self.aircraft) {
+        let status = self.host.frame(clock, &mut self.aircraft);
+        for (routine, report) in self.host.reports() {
+            self.connection.write_report(routine, &report);
+        }
+        if let Some(status) = status {
             self.connection.write_status(&status);
         }
     }
@@ -87,7 +92,7 @@ pub extern "C" fn module_init() {
     let host = Host::new(routines::list(), messages::SLOTS_HASH, messages::VERSION);
     // Without a connection the module runs nothing and writes no status, so the core reports
     // it as missing.
-    let Some(connection) = Connection::open(&host.slots()) else {
+    let Some(connection) = Connection::open(&host.slots(), &host.report_slots()) else {
         return;
     };
     aircraft::listen();

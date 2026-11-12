@@ -1,0 +1,83 @@
+The camera as each core read it in the first flight with friends, 2026-11-11, from a replay of each pilot's recording
+with a temporary log line in avatars' camera_read (src/features/avatars/core/src/sim.rs), one line for every 10th read:
+the camera's position in SimConnect's SIMOBJECT referential (x left, y up, z forward, in meters), the body the core gave
+this pilot's figure, and whether this pilot flew. The 58P profile's seats have their eyes at z = -0.144.
+Reads kept: referential SIMOBJECT, within 6m of the reference point along z and 1.5m across, which leaves out outside views.
+Both replays matched every checkpoint: pilot-b's 2,832 over 821,299 inputs, recorded on an AMD Ryzen 9 9950X and replayed
+on an AMD Ryzen 7 7800X3D, and pilot-a's 2,662 over 446,841 inputs.
+
+=== pilot-b, who hosted: 12212 lines
+flies=true: n=2863, z min -0.15, p10 -0.14, p50 -0.14, p90 -0.11, max -0.06; body head 0, seated 2863
+flies=false: n=8334, z min -4.58, p10 -1.75, p50 -1.25, p90 -0.12, max -0.07; body head 6602, seated 1732
+while this pilot followed, by 30s window of the core's clock:
+t=15240s n=131  z min  -0.14 p50  -0.14 max  -0.14  x p50   0.25  y p50  0.90  head   0
+t=15270s n=159  z min  -0.23 p50  -0.14 max  -0.07  x p50  -0.30  y p50  0.90  head   0
+t=15300s n=128  z min  -0.12 p50  -0.12 max  -0.12  x p50  -0.24  y p50  0.86  head   0
+t=15330s n=125  z min  -0.12 p50  -0.12 max  -0.12  x p50  -0.24  y p50  0.86  head   0
+t=15360s n=133  z min  -0.12 p50  -0.12 max  -0.12  x p50  -0.24  y p50  0.86  head   0
+t=15390s n=121  z min  -0.17 p50  -0.12 max  -0.11  x p50  -0.24  y p50  0.86  head   0
+t=15420s n=121  z min  -0.12 p50  -0.12 max  -0.11  x p50  -0.24  y p50  0.86  head   0
+t=15450s n=122  z min  -0.12 p50  -0.12 max  -0.12  x p50  -0.24  y p50  0.86  head   0
+t=15480s n=125  z min  -0.84 p50  -0.23 max  -0.13  x p50  -0.24  y p50  0.86  head   0
+t=15510s n=126  z min  -0.41 p50  -0.34 max  -0.28  x p50  -0.24  y p50  0.86  head   0
+t=15540s n=123  z min  -0.57 p50  -0.25 max  -0.20  x p50  -0.24  y p50  0.86  head   0
+t=15570s n=135  z min  -0.46 p50  -0.38 max  -0.20  x p50  -0.24  y p50  0.86  head   0
+t=15600s n=120  z min  -0.20 p50  -0.12 max  -0.11  x p50  -0.24  y p50  0.86  head   0
+t=15630s n=151  z min  -1.43 p50  -1.01 max  -0.11  x p50  -0.24  y p50  0.88  head  89
+t=15660s n=191  z min  -1.56 p50  -1.16 max  -0.81  x p50  -0.23  y p50  0.91  head 191
+t=15690s n=201  z min  -1.75 p50  -1.15 max  -0.94  x p50  -0.24  y p50  0.89  head 201
+t=15720s n=242  z min  -1.56 p50  -1.07 max  -0.87  x p50  -0.24  y p50  0.89  head 242
+t=15750s n=236  z min  -1.53 p50  -1.10 max  -0.91  x p50  -0.24  y p50  0.89  head 236
+t=15780s n=225  z min  -1.47 p50  -1.17 max  -0.64  x p50  -0.24  y p50  0.89  head 225
+t=15810s n=130  z min  -1.44 p50  -1.23 max  -0.82  x p50  -0.25  y p50  0.89  head 130
+t=15840s n= 99  z min  -2.83 p50  -1.78 max  -0.98  x p50  -0.25  y p50  0.88  head  99
+t=15870s n=219  z min  -1.98 p50  -1.40 max  -1.09  x p50  -0.25  y p50  0.87  head 219
+t=15900s n=195  z min  -3.70 p50  -1.48 max  -1.09  x p50  -0.25  y p50  0.87  head 195
+t=15930s n=143  z min  -1.81 p50  -1.21 max  -1.02  x p50  -0.25  y p50  0.88  head 143
+t=15990s n= 73  z min  -1.40 p50  -1.12 max  -0.85  x p50  -0.26  y p50  0.88  head  73
+t=16020s n= 50  z min  -1.51 p50  -0.97 max  -0.74  x p50  -0.26  y p50  0.88  head  50
+t=16050s n=169  z min  -1.83 p50  -1.36 max  -0.94  x p50  -0.26  y p50  0.88  head 169
+t=16080s n=224  z min  -1.67 p50  -1.33 max  -1.02  x p50  -0.26  y p50  0.87  head 224
+t=16110s n=186  z min  -1.76 p50  -1.21 max  -1.03  x p50  -0.26  y p50  0.87  head 186
+t=16140s n=182  z min  -2.63 p50  -1.42 max  -0.90  x p50  -0.24  y p50  0.87  head 182
+t=16170s n=207  z min  -2.87 p50  -1.41 max  -1.14  x p50  -0.23  y p50  0.87  head 207
+t=16200s n=219  z min  -1.93 p50  -1.37 max  -1.15  x p50  -0.24  y p50  0.87  head 219
+t=16230s n=127  z min  -3.47 p50  -2.57 max  -1.20  x p50  -0.23  y p50  0.88  head 127
+t=16260s n=164  z min  -3.07 p50  -1.51 max  -1.13  x p50  -0.25  y p50  0.87  head 164
+t=16290s n=249  z min  -1.77 p50  -1.26 max  -1.04  x p50  -0.26  y p50  0.86  head 249
+t=16320s n=240  z min  -2.12 p50  -1.30 max  -1.08  x p50  -0.26  y p50  0.86  head 240
+t=16350s n=235  z min  -1.68 p50  -1.33 max  -1.02  x p50  -0.26  y p50  0.86  head 235
+t=16380s n=231  z min  -1.75 p50  -1.32 max  -1.00  x p50  -0.24  y p50  0.87  head 231
+t=16410s n=232  z min  -2.33 p50  -1.27 max  -0.86  x p50  -0.21  y p50  0.89  head 232
+t=16440s n=236  z min  -3.47 p50  -1.22 max  -0.45  x p50  -0.20  y p50  0.88  head 235
+t=16470s n=239  z min  -2.56 p50  -1.21 max  -1.00  x p50  -0.19  y p50  0.89  head 239
+t=16500s n=221  z min  -2.49 p50  -1.28 max  -1.03  x p50  -0.21  y p50  0.89  head 221
+t=16530s n=209  z min  -2.74 p50  -1.33 max  -1.05  x p50  -0.28  y p50  0.86  head 209
+t=16560s n=126  z min  -3.21 p50  -2.35 max  -1.87  x p50  -0.25  y p50  0.91  head 126
+t=16590s n=134  z min  -2.89 p50  -2.31 max  -1.19  x p50  -0.20  y p50  0.91  head 134
+t=16620s n=225  z min  -2.08 p50  -1.50 max  -1.19  x p50  -0.29  y p50  0.89  head 225
+t=16650s n=117  z min  -3.78 p50  -3.16 max  -1.26  x p50  -0.28  y p50  0.88  head 117
+t=16680s n=101  z min  -4.58 p50  -3.17 max  -2.43  x p50  -0.13  y p50  0.89  head 101
+t=16710s n=106  z min  -3.67 p50  -2.97 max  -1.20  x p50  -0.15  y p50  0.91  head 106
+t=16740s n=131  z min  -2.39 p50  -1.44 max  -1.10  x p50  -0.23  y p50  0.88  head 131
+
+=== pilot-a, who joined: 5404 lines
+flies=true: n=4177, z min -1.53, p10 -0.15, p50 -0.15, p90 -0.14, max 0.26; body head 12, seated 4165
+flies=false: n=1035, z min -3.67, p10 -3.01, p50 -0.13, p90 -0.12, max -0.12; body head 365, seated 670
+while this pilot followed, by 30s window of the core's clock:
+t=52800s n= 62  z min  -0.15 p50  -0.13 max  -0.12  x p50  -0.24  y p50  0.81  head    
+t=52830s n= 90  z min  -0.14 p50  -0.12 max  -0.12  x p50  -0.23  y p50  0.80  head   0
+t=52860s n= 90  z min  -0.13 p50  -0.12 max  -0.12  x p50  -0.23  y p50  0.80  head   0
+t=52890s n= 81  z min  -0.13 p50  -0.12 max  -0.12  x p50  -0.23  y p50  0.80  head   0
+t=52920s n= 89  z min  -0.13 p50  -0.12 max  -0.12  x p50  -0.24  y p50  0.80  head   0
+t=52950s n= 90  z min  -0.13 p50  -0.13 max  -0.12  x p50  -0.22  y p50  0.80  head   0
+t=52980s n= 90  z min  -0.14 p50  -0.12 max  -0.12  x p50  -0.23  y p50  0.81  head   0
+t=53010s n= 79  z min  -0.12 p50  -0.12 max  -0.12  x p50  -0.23  y p50  0.80  head   0
+t=53610s n= 53  z min  -2.96 p50  -2.73 max  -1.97  x p50   0.21  y p50  0.97  head  53
+t=53640s n= 30  z min  -3.51 p50  -2.82 max  -2.57  x p50   0.28  y p50  0.94  head  30
+t=53730s n= 49  z min  -3.40 p50  -3.02 max  -2.11  x p50   0.20  y p50  0.90  head  49
+t=53760s n= 90  z min  -3.67 p50  -2.94 max  -2.65  x p50   0.20  y p50  0.93  head  90
+t=53790s n= 53  z min  -3.04 p50  -2.69 max  -1.97  x p50   0.17  y p50  0.93  head  53
+t=53820s n= 54  z min  -3.22 p50  -2.91 max  -1.91  x p50   0.16  y p50  0.90  head  54
+t=53910s n= 32  z min  -3.54 p50  -3.24 max  -2.25  x p50   0.23  y p50  1.03  head  32
+t=54540s n=  3  z min  -3.19 p50  -2.60 max  -2.60  x p50   0.26  y p50  0.90  head   3

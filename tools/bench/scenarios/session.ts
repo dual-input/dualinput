@@ -164,7 +164,9 @@ test("a joiner in another aircraft is a member out of the flight, and enters it 
   await load(b, BARON)
   s = await until(b, (s) => me(s)?.in_flight === true, "the joiner in the flight")
   assert.match(b.core.log(), /preflight ended, and the session's keys take this much/, "the late joiner raised PreflightEnded")
-  assert.equal(await frozen(b), false, "a late joiner skips preflight's hold")
+  assert.doesNotMatch(b.core.log(), /this core holds the aircraft for preflight on=true/, "a late joiner skips preflight's hold")
+  // Its aircraft is frozen all the same, since flight-model sync's Follow draws it behind the pilot flying's.
+  await untilFrozen(b, true)
 
   await toMenu(b)
   await a.app.until(() => a.app.notifications().some((n) => n.text === "Adam left the flight" && n.once === true && n.out === true && n.detail === "They're still in the session."), "the crew hearing it once")
@@ -236,7 +238,9 @@ test("both pilots ready: the countdown ends preflight on both, each held until t
   await until(a, (s) => s.preflight.phase === "ended", "preflight's end", 6_000)
   await until(b, (s) => s.preflight.phase === "ended", "preflight's end on the other core")
   await untilFrozen(a, false)
-  await untilFrozen(b, false)
+  // The other pilot's hold ends too, and flight-model sync's Follow keeps their aircraft frozen, drawn behind the pilot flying's.
+  assert.match(b.core.log(), /this core holds the aircraft for preflight on=false/, "the other pilot's hold ended")
+  assert.ok(await frozen(b), "the following aircraft stays frozen")
   // Both cores read one PC's counter, so their stamps compare.
   const ended = "preflight ended, and the session's keys take this much"
   const apart = Math.abs(stamp(a.core, ended) - stamp(b.core, ended)) / 1_000

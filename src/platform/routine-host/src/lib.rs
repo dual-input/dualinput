@@ -23,10 +23,12 @@
 
 mod freeze;
 mod hold;
+mod key;
 mod vars;
 
 pub use freeze::Flag;
 pub use hold::Hold;
+pub use key::Key;
 pub use vars::{AVATAR, Ids, Named, Space, USER, VarRef};
 
 use bytemuck::Pod;
@@ -59,6 +61,8 @@ pub trait Sim {
     /// Calls the preset of an input event `name` names, such as `ELECTRICAL_Battery_1_Toggle`,
     /// with `value` when it takes one.
     fn call_preset(&mut self, name: &str, value: Option<f64>);
+    /// Sends the pilot's aircraft the event `key` with `value`, as its hardware would.
+    fn key(&mut self, key: Key, value: i32);
 }
 
 /// An `H:` event or a preset a routine asked for, carried out once every routine's frame has
@@ -84,6 +88,10 @@ pub trait Routine: Default + Send + 'static {
     const FEED_ONCE: bool = false;
     /// What its feature feeds it, read in place from the routine's slot.
     type Slot: Pod;
+    /// What it reports to its feature through `Wants::report`, which the module writes into
+    /// the routine's report slot, or `()` for a routine that reports nothing, which gets no
+    /// report slot.
+    type Report: Pod;
     /// A new feed, which the core's rewrites of the same feed don't repeat.
     fn on_slot(&mut self, slot: &Self::Slot);
     fn frame(&mut self, frame: &Frame, want: &mut Wants);
@@ -98,16 +106,36 @@ pub struct Frame {
     pub now: u64,
 }
 
+/// The pilot's aircraft's pose, as the sim's variables give it: `A:PLANE LATITUDE` and
+/// `A:PLANE LONGITUDE` in radians, `A:PLANE ALTITUDE` in feet MSL, and `A:PLANE PITCH DEGREES`,
+/// `A:PLANE BANK DEGREES`, and `A:PLANE HEADING DEGREES TRUE` in radians, pitch and bank
+/// negative for nose up and right wing down.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Pose {
+    pub latitude: f64,
+    pub longitude: f64,
+    pub altitude: f64,
+    pub pitch: f64,
+    pub bank: f64,
+    pub heading: f64,
+}
+
 /// What the routines ask of the sim in one frame: reads, which the host makes at once, and
 /// the rest, which it carries out once every routine's frame has run. A routine that needs
 /// a want this lacks adds it here (record/areas/architecture/02-code-map.md, "What a
 /// routine can ask for").
 pub struct Wants<'f> {
     freeze: bool,
+    placed: Option<Pose>,
     sim: &'f mut dyn Sim,
     vars: &'f mut Vars,
     writes: &'f mut Vec<Write>,
+    keys: &'f mut Vec<(Key, i32)>,
     fires: &'f mut Vec<Fire>,
+    reports: &'f mut Vec<(RoutineId, Vec<u8>)>,
+    /// The routine whose frame is running, and the size of its report, which a report is
+    /// kept under and checked against.
+    running: (RoutineId, usize),
 }
 
 impl Wants<'_> {
@@ -119,9 +147,26 @@ impl Wants<'_> {
 
     /// The host's place for the variable `name`, such as `A:PLANE LATITUDE` or
     /// `Z:DUALINPUT_FIGURE_HEAD_YAW`, in `unit`. A routine asks once and keeps the place.
-    /// `None` for a name with no `A:`, `L:`, or `Z:` prefix.
+    /// `None` for a name with no `A:`, `E:`, `L:`, or `Z:` prefix.
     pub fn var(&mut self, name: &str, unit: &str) -> Option<VarRef> {
         self.vars.place(name, unit)
+    }
+
+    /// Says where this routine's writes put the pilot's aircraft this frame, for the routines
+    /// after it in the list. A read gives the sim's value, and the sim takes the frame's
+    /// writes only once every routine has run, so a later routine that places something on
+    /// the aircraft, as `Figure` seats its figures, would read the pose of the frame before.
+    /// At 130 m/s, with frames of 12ms to 22ms, that puts a figure up to 1.3m from its seat,
+    /// forward and back, as the test in src/sim-package/routines shows without this.
+    pub fn place(&mut self, pose: Pose) {
+        self.placed = Some(pose);
+    }
+
+    /// Where a routine earlier in the list put the pilot's aircraft this frame, if one did.
+    /// With `None`, no routine before this one wrote the aircraft's pose this frame, so a read
+    /// gives it.
+    pub fn placed(&self) -> Option<Pose> {
+        self.placed
     }
 
     /// The value of `var` on `object`, `USER` for the pilot's aircraft, read now.
@@ -131,9 +176,27 @@ impl Wants<'_> {
         self.sim.get(object, space, ids)
     }
 
-    /// Writes `value` into `var` on `object`, once every routine's frame has run.
+    /// Writes `value` into `var` on `object`, once every routine's frame has run. The sim
+    /// has no write for an `E:` variable, so a write to one does nothing.
     pub fn write(&mut self, object: u32, var: VarRef, value: f64) {
         self.writes.push(Write { object, var, value });
+    }
+
+    /// Sends the pilot's aircraft the event `key` with `value`, once every routine's frame
+    /// has run, after the writes.
+    pub fn key(&mut self, key: Key, value: i32) {
+        self.keys.push((key, value));
+    }
+
+    /// Reports `report` to the routine's feature, once every routine's frame has run. It
+    /// must be the routine's `Report`: one of another size is dropped, since the report slot
+    /// holds exactly one.
+    pub fn report<T: Pod>(&mut self, report: &T) {
+        let (routine, size) = self.running;
+        if size != 0 && size == size_of::<T>() {
+            self.reports
+                .push((routine, bytemuck::bytes_of(report).to_vec()));
+        }
     }
 
     /// Fires the `H:` event `name`, once every routine's frame has run.
@@ -154,6 +217,8 @@ impl Wants<'_> {
 pub struct Kind {
     id: RoutineId,
     size: usize,
+    /// The size of its report, 0 for a routine that reports nothing.
+    report: usize,
     feed_once: bool,
     make: fn() -> Box<dyn Running>,
 }
@@ -163,6 +228,7 @@ pub fn kind<R: Routine>() -> Kind {
     Kind {
         id: R::ID,
         size: size_of::<R::Slot>(),
+        report: size_of::<R::Report>(),
         feed_once: R::FEED_ONCE,
         make: || Box::new(R::default()),
     }
@@ -217,8 +283,13 @@ pub struct Host {
     vars: Vars,
     /// The frame's writes, kept from frame to frame so a frame allocates nothing.
     writes: Vec<Write>,
+    /// The frame's events with values, kept the same way.
+    keys: Vec<(Key, i32)>,
     /// The frame's `H:` events and presets, kept the same way.
     fires: Vec<Fire>,
+    /// The frame's reports, which the module's edge takes with `reports` and writes into
+    /// each routine's report slot.
+    reports: Vec<(RoutineId, Vec<u8>)>,
 }
 
 impl Host {
@@ -244,7 +315,9 @@ impl Host {
             freeze: Freeze::default(),
             vars: Vars::default(),
             writes: Vec::new(),
+            keys: Vec::new(),
             fires: Vec::new(),
+            reports: Vec::new(),
         }
     }
 
@@ -255,6 +328,22 @@ impl Host {
             .iter()
             .map(|s| (s.kind.id, (size_of::<SlotHeader>() + s.kind.size) as u32))
             .collect()
+    }
+
+    /// Each routine that reports, with its report's size in bytes, which the module creates
+    /// a report slot for as it starts.
+    pub fn report_slots(&self) -> Vec<(RoutineId, u32)> {
+        self.slots
+            .iter()
+            .filter(|s| s.kind.report != 0)
+            .map(|s| (s.kind.id, s.kind.report as u32))
+            .collect()
+    }
+
+    /// The reports the last frame's routines made, each for the module's edge to write into
+    /// its routine's report slot.
+    pub fn reports(&mut self) -> std::vec::Drain<'_, (RoutineId, Vec<u8>)> {
+        self.reports.drain(..)
     }
 
     /// The core wrote `id`'s slot, which the module read at `clock`, in µs on its clock.
@@ -309,21 +398,28 @@ impl Host {
                 .map_or(clock, |offset| clock.saturating_add_signed(offset)),
         };
         self.writes.clear();
+        // A report the edge didn't take is stale by now.
+        self.reports.clear();
         if sim.reset() {
             self.vars.forget();
         }
         let mut want = Wants {
             freeze: false,
+            placed: None,
             sim: &mut *sim,
             vars: &mut self.vars,
             writes: &mut self.writes,
+            keys: &mut self.keys,
             fires: &mut self.fires,
+            reports: &mut self.reports,
+            running: (messages::module::HOLD, 0),
         };
         for slot in &mut self.slots {
             if slot.running.is_some() && clock.saturating_sub(slot.written) > UNFED {
                 slot.running = None;
             }
             if let Some(running) = &mut slot.running {
+                want.running = (slot.kind.id, slot.kind.report);
                 running.frame(&frame, &mut want);
             }
         }
@@ -334,6 +430,9 @@ impl Host {
             {
                 sim.set(w.object, space, ids, w.value);
             }
+        }
+        for (key, value) in self.keys.drain(..) {
+            sim.key(key, value);
         }
         for fire in self.fires.drain(..) {
             match fire {

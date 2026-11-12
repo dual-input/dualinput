@@ -6,6 +6,27 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architec
 Decides:     Who reads the flying aircraft, and how often; what a sample carries; the clock our WASM module stamps on, and how it learns the core's; whether a page's arrival stamp matters; how a following machine takes a sample, draws the aircraft, carries it through a gap, eases it back, and starts; how it eases the clock offset; when each routine runs; what this adds to our module; the budgets; and the cases for the bench (node 6.10).
 ```
 
+> **Note**
+> In [what this adds to our WASM module](#what-this-adds-to-our-wasm-module), `Follow` also says where it puts the aircraft each frame, through a want of the routine host, and `Figure` seats its figures on that pose, where they sat still in flight (seen on MSFS 2024, 2026-11-11, [flight-model log](log.md#2026-11-11-seated-on-the-pose-follow-says-it-writes-a-figure-keeps-its-seat-on-the-following-machine-and-the-58p-banks-and-pitches-with-the-aircraft-it-follows)).
+> In [cases for the bench](#cases-for-the-bench), the cases with friends have their answers: two PCs with the same scenery agreed on the ground's elevation, and the following pilot saw the aircraft move smoothly in flight and through 13 handovers over a relayed link (seen on MSFS 2024, 2026-11-11, [flight-model log](log.md#2026-11-12-two-pilots-on-two-pcs-flew-one-58p-smoothly-through-13-handovers-over-a-relayed-link-and-after-a-handover-with-the-autopilot-engaged-the-aircraft-drifted)).
+> A following machine's own camera reads behind the pilot's seat in flight, which is avatars' to answer ([avatars log](../avatars/log.md#2026-11-12-on-a-following-machine-in-flight-the-camera-reads-1m-to-3m-behind-the-pilots-seat-so-the-crew-sees-that-pilot-as-a-head-in-the-cabin)).
+> In [cases for the bench](#cases-for-the-bench), the 58P's brakes don't read what the PF's do between the ends of their travel: `K:AXIS_LEFT_BRAKE_SET` follows a curve, and a brake the PF holds at 73% reads 51% on the following aircraft.
+> `A:BRAKE LEFT POSITION` and `A:BRAKE RIGHT POSITION` carry the parking brake too, so a PF parked with it set shows as full toe brakes on a following aircraft.
+> Both stay as they are for now, as known limits: a frozen aircraft's brakes change only what the pilot sees, not how it moves, and the curve was read on the 58P alone (user, 2026-11-11; measured on MSFS 2024, 2026-11-11, [flight-model log](log.md#2026-11-11-in-the-sim-the-58p-follows-a-stand-ins-path-within-centimeters-a-figure-on-the-following-machine-slid-along-the-aircraft-and-the-brake-events-follow-a-curve)).
+
+> **Note**
+> In [through a gap](#through-a-gap), `Follow` eases at every step in where the aircraft belongs: when a sample is old enough to draw from again, and when a carry goes on from a newer sample, as when a gap's samples arrive together.
+> While every sample it holds is ahead of the frame's time, it holds the aircraft where it was.
+> In [its first frames](#its-first-frames), it carries its own motion for at most 2s, then holds, as it does past its newest sample.
+> In [taking a sample](#taking-a-sample), the link's first offset can take about 2s, two heartbeats, not 1s.
+> In [the sample](#the-sample), `Lead`'s report and the sample between cores are one struct, `Sample`, and the feed that starts `Follow` carries no sample ([flight-model log](log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump)).
+
+> **Note**
+> A known limit: a profile that unloads while its pilot stays in the flight ends `Lead` for good, and the flying machine sends no more samples until control passes.
+> The sim service ends every feature's routines at a profile's unload, and flight-model sync starts none again.
+> Nothing in v1 unloads a profile mid-flight, since the pin changes only from none once preflight has ended ([the pin](../profiles/02-units.md#the-pin)), so v1 builds nothing for it (user, 2026-11-11).
+> The IDE's reload of a profile mid-session is the first thing that can, and its design adds the fix: a feature that follows the session says so as it registers, and the sim service ends its routines and closes its connection at the session's end, not at a profile's unload ([flight-model log](log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump)).
+
 On the flying machine, the PF's, a routine in our WASM module, `Lead`, reads the aircraft's pose, velocities, control surfaces, and toe brakes about 20 times a second, each read stamped with its frame's time, and the core sends each read to the crew as a sample.
 On each following machine, any other pilot's, `Follow` draws the aircraft 400ms behind those samples, along straight lines between them, carries it on through a gap of up to 2s, and eases it back over 3s.
 Our module keeps an estimate of the core's counter, from a stamp the core puts in every slot it writes, so every routine runs on the core's timeline and the core never estimates the module's clock.

@@ -4,6 +4,53 @@ What our experiments and the build's stages found about keeping cockpits in sync
 The probes are in [experiments/areas/sync](../../../experiments/areas/sync), and their raw output is in its `results/` folder.
 Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on our development machine with Flow Pro 26.33.5, ChasePlane 2026.39.1.16, and GSX Pro 4.0.19 installed, with the frame rate capped near 30 fps unless the entry says otherwise.
 
+## 2026-11-12: In the first flight with friends 14 of state sync's writes read another value 1.5s later, 11 on the following machine, the elevator trim and autopilot modes among them
+
+**Asked:** in [stage 16](../build/plan.md#16-flight-model-sync)'s first flight with friends, two pilots on two PCs in one Baron 58P through 13 handovers, does state sync keep the two cockpits the same, and does a `_Set` preset with a value, `B:LANDING_GEAR_ParkingBrake_Set`, set the other pilot's parking brake?
+
+**Expected:** the cockpits to match as they did in stage 14's session in the sim, where the second pilot was a bench core's stand-in.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999 on both PCs, from 2026-11-11 23:18 to 2026-11-12 00:06 local, with the release 0.1.0 of [the flight-model log's entry for the flight](../flight-model/log.md#2026-11-12-two-pilots-on-two-pcs-flew-one-58p-smoothly-through-13-handovers-over-a-relayed-link-and-after-a-handover-with-the-autopilot-engaged-the-aircraft-drifted).
+The pilots saw the cockpits follow each other through the flight, the parking brake each way among them.
+The two cores' logs hold 14 lines `a write never landed`, each a write whose watch read another value 1.5s after it, the sync engine's `CHECK`, and each raised a "Couldn't sync" notification, with the values in each entry's own unit, the trim's in percent:
+
+| Entry | Machine | Flying or following | Wanted | Read |
+| --- | --- | --- | --- | --- |
+| `cowl_flap_1`, `cowl_flap_2` | joiner's | following, in the catch-up at preflight's end | 16384 | 0 |
+| `parking_brake` | joiner's | following | 1 | 0 |
+| `kas_armed_vs` | joiner's | flying | 2000 | 1000 |
+| `elevator_trim` | joiner's | following, 1.8s after a handover | -12.45 | -15.07 |
+| `ap_vertical_speed` | joiner's | flying | 100 | 0 |
+| `heading_bug` | host's | flying | 1.0 | 1.0107 |
+| `kas_arm` | host's | following | 0 | 1 |
+| `kas_armed_vs` | host's | following | 1200 | 1000 |
+| `gear` | host's | following | 1 | 0 |
+| `elevator_trim` | host's | following | -5.79 | -16.33 |
+| `ap_nav_mode` | host's | following | 1 | 0 |
+| `ap_altitude_hold`, `ap_vs_hold` | host's | following | 1, 0 | 0, 1 |
+
+- **After a handover with the autopilot engaged the aircraft drifted, mainly sideways**, the pilot who watched it said, and thought the trim was off.
+  The host's machine hadn't taken the nav mode 67s before it next took control, nor altitude hold in place of vertical speed hold 41s before, so it may have taken over in other modes than the pilot who handed over flew in (unverified: the log has no later reading of those entries).
+- **Some notifications showed for controls that looked in sync**, the pilots said, the altitude arm and the vertical speed mode among them.
+  The check reads once, 1.5s after the write, so a value that lands later is flagged though it lands (unverified which of the 14 did).
+- The aileron and rudder trims, written straight to `A:AILERON TRIM PCT` and `A:RUDDER TRIM PCT`, have no such line.
+
+We don't know the cause, and three leads fit what the logs show, none verified:
+
+- The following sim runs its own autopilot on its frozen aircraft, which trims and holds modes against what we write: `elevator_trim` read -15.07 and -16.33 on the two following machines against wanted values 2.6 and 10.5 percent of trim away.
+- The 58P profile's entries: `ap_nav_mode` and `ap_vs_hold` write a toggle, `ap_altitude_hold` writes one of two events by the state it last read, `kas_armed_vs` steps by 100 and skips while vertical speed hold is on, and `heading_bug` missed by 0.01°, which may be the preset's rounding.
+- The check's 1.5s, for a control that takes longer on a following machine.
+
+Each pilot's recording holds every reading both cores took, so replaying them would give each entry's values around each handover.
+
+**Changed:** nothing in the code or the profile.
+Finding the cause is work of its own after stage 16 (user, 2026-11-12).
+The parking brake's `_Set` preset with a value, the case stage 14 left, held by eye each way, with one logged miss on the joiner's machine, the table's `parking_brake` row.
+
+**Affects:** none yet.
+
+**Evidence:** the two cores' logs in the flight-model area's results, [the joiner's](../flight-model/results/2026-11-11-flight-with-friends-pilot-a-core-log.txt) and [the host's](../flight-model/results/2026-11-11-flight-with-friends-pilot-b-core-log.txt).
+
 ## 2026-11-10: Stage 14's code review found a catch-up answered with no values, a preset fired again after a gap, and a stream stalled by an unload
 
 **Asked:** does stage 14's code hold against its plan stage, [the sync units](05-units.md), and the repository's rules, as the `code-reviewer` agent reads it?

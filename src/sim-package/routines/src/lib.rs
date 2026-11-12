@@ -14,9 +14,14 @@
 
 use routine_host::{Kind, routines};
 
+#[cfg(test)]
+mod tests;
+
 pub fn list() -> Vec<Kind> {
     routines![
         routine_host::Hold,
+        flight_model_routines::Lead,
+        flight_model_routines::Follow,
         avatars_routines::Figure,
         state_sync_routines::NamedEvents
     ]

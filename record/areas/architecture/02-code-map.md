@@ -7,6 +7,10 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 ```
 
 > **Note**
+> In [what a routine can ask for](#what-a-routine-can-ask-for), a routine can also say where its writes put the pilot's aircraft this frame, and a routine after it in the module's list can ask for that pose, as `Follow` says it and `Figure` asks ([flight-model log](../flight-model/log.md#2026-11-11-in-the-sim-the-58p-follows-a-stand-ins-path-within-centimeters-a-figure-on-the-following-machine-slid-along-the-aircraft-and-the-brake-events-follow-a-curve); user, 2026-11-11).
+> In [budgets for work in the sim](#budgets-for-work-in-the-sim), with `Lead` or `Follow` running, our module's update took 91µs to 335µs at p99 against 0.1ms, which the user accepted for stage 16 ([flight-model log](../flight-model/log.md#2026-11-11-seated-on-the-pose-follow-says-it-writes-a-figure-keeps-its-seat-on-the-following-machine-and-the-58p-banks-and-pitches-with-the-aircraft-it-follows)).
+
+> **Note**
 > In [a connection for each feature](#a-connection-for-each-feature-for-each-load), a group on one connection kept hearing an event while a group on another was cleared, so the rule against clearing a group while another hears that event holds for each connection alone ([architecture log](log.md#2026-11-09-a-group-on-one-simconnect-connection-keeps-hearing-an-event-while-a-group-on-another-is-cleared)).
 
 > **Note**
@@ -17,6 +21,9 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 
 > **Note**
 > In [budgets for work in the sim](#budgets-for-work-in-the-sim), `Figure` alone takes about 140µs at p99 with two figures, which the user accepted for stage 17, and the sim's WASM Debug window reads 0ms for a standalone module, so `experiments/areas/avatars/p29-sim-session/update-timer.patch` times it ([avatars log](../avatars/log.md#2026-11-05-a-click-that-took-the-focus-from-the-sim-left-a-figures-hand-out-and-the-rest-of-the-session-passed)).
+
+> **Note**
+> In [what a routine can ask for](#what-a-routine-can-ask-for), a routine also reads `E:` variables, as `Follow` reads `E:SIMULATION RATE`; a routine picks an event with a value from the routine host's enum, `Key`, which holds the five axis events so far, since the sim's Events API takes an event's number; and a routine names its report's type, which gives it a report slot ([flight-model log](../flight-model/log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump)).
 
 > **Note**
 > In [what the bridge owns](#what-the-bridge-owns), a lock that turns into a warning keeps a lock's look, with a Dismiss on a card that takes presses while its veil passes them, and Dismiss reaches every panel by the CommBus event `DUALINPUT_BRIDGE_DISMISS`, which joins [names the sim shares](#names-the-sim-shares) under `BRIDGE` ([a visible lock](../interface/decisions.md#a-visible-lock-is-a-veil-over-the-display-with-one-centered-card); user, 2026-11-01).
@@ -662,7 +669,7 @@ A probe's kind is its ID, as in p08's `L:CROSSCHECK_P08_ECHO`, which carries the
 | `UI` | The EFB document's `window`, and the sim's keyboard calls | The kit, `@dualinput/ui` | `DUALINPUT_UI_RELEASE_KEYBOARD`, which gives back the keyboard a text field took, and `DUALINPUT_UI_FIELD`, the field's name in `UNFOCUS_INPUT_FIELD` |
 | `EFB` | The EFB document's `window`, and `L:` variables | efb-shell | `DUALINPUT_EFB_REGISTERED`, which says our app has registered, so a script loaded twice registers once; and `L:DUALINPUT_EFB_ON_SCREEN`, which says our app is on screen, so the banner hides what the app shows ([the banner's box](../interface/decisions.md#the-banner-is-a-box-of-opaque-cards-at-the-screens-top-right)) |
 | `BANNER` | `L:` variables, and the sim's panels and icons | The banner's page | `L:DUALINPUT_BANNER_OPEN_EFB`, which a click on a card raises while no core can carry it ([a notification's click](../interface/decisions.md#a-notifications-click-opens-the-efb-app-where-its-explained-or-acted-on)); `L:DUALINPUT_BANNER_RESIZED`, which asks the EFB app to open the panel anew once the sim's window changed; and `PANEL_DUALINPUT_BANNER` and `ICON_TOOLBAR_DUALINPUT_BANNER`, the panel and its toolbar icon, which start with what the sim's own names for those start with |
-| `CHECK` | A cockpit panel's `window` | tools/sim/'s session scripts | `DUALINPUT_CHECK_HEARD`, the `H:` events a panel heard, and `DUALINPUT_CHECK_MOUSE`, the mouse events on a display, which a script reads through the inspector |
+| `CHECK` | A cockpit panel's `window` | tools/sim/'s session scripts | `DUALINPUT_CHECK_HEARD`, the `H:` events a panel heard, `DUALINPUT_CHECK_MOUSE`, the mouse events on a display, and `DUALINPUT_CHECK_FLIGHT`, the aircraft's pose and velocities at each of a panel's frames, which a script reads through the inspector |
 
 A unit that needs a name of a new kind adds the kind to this table.
 

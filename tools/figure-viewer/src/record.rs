@@ -69,6 +69,8 @@ impl Sim for World {
     fn fire_h(&mut self, _: &str) {}
 
     fn call_preset(&mut self, _: &str, _: Option<f64>) {}
+
+    fn key(&mut self, _: routine_host::Key, _: i32) {}
 }
 
 impl World {

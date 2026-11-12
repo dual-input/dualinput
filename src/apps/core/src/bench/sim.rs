@@ -119,6 +119,7 @@ impl Probe {
             SimEvent::Frame { .. } => "frame".to_string(),
             SimEvent::Heard { data, .. } => format!("heard an event with {}", data[0]),
             SimEvent::Input { value, first, .. } => format!("input {value:?} first={first}"),
+            SimEvent::Report { bytes, .. } => format!("a report of {} bytes", bytes.len()),
         };
         cx.out(Heard(heard));
     }

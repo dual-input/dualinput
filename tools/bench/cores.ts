@@ -286,6 +286,16 @@ export class Core {
     }
   }
 
+  /** Each frame of the stand-in's aircraft since a `track` act named the variables to follow, oldest first, among the lines after the first `after`. */
+  tracked(after = 0): Tracked[] {
+    return this.lines.read.slice(after).flatMap((l) => (l.startsWith('{"kind":"track"') ? [JSON.parse(l) as Tracked] : []))
+  }
+
+  /** How many lines the core has sent, which a later `tracked` starts after. */
+  lineCount(): number {
+    return this.lines.read.length
+  }
+
   /** Calls `f` with each CommBus call the core makes for JavaScript, as the sim's pages hear it, from now on. */
   onCommBus(f: (name: string, data: string) => void): () => void {
     return this.lines.listen((l) => {
@@ -368,6 +378,14 @@ export class Core {
     throw new Error("the stand-in didn't report within 5s")
   }
 
+  /** How many times the core's flight-model sync has written `Follow`'s slot, feeds and the sim service's rewrites together, or 0 before its first. */
+  async followWrites(): Promise<number> {
+    const { calls } = await this.report()
+    const mapped = calls.find((c) => c.function === "MapClientDataNameToId" && c.arguments.includes("DUALINPUT_ROUTINE_FOLLOW"))
+    if (!mapped) return 0
+    return calls.filter((c) => c.unit === mapped.unit && c.open === mapped.open && c.function === "SetClientData").length
+  }
+
   /** Ends the core at once, as a crash would, if it's still running, and waits until it has. */
   async kill(): Promise<void> {
     this.socket.destroy()
@@ -389,6 +407,7 @@ export class Core {
 
 export type StandInReport = Extract<FromCore, { kind: "stand-in" }>
 export type Fed = Extract<FromCore, { kind: "fed" }>
+export type Tracked = Extract<FromCore, { kind: "track" }>
 
 /** Starts a core in `run` whose stand-in sim runs, so its platform's connection is open and it announces itself, and the fake pages join it. */
 export async function announcing(run: BenchRun, name: string, options: CoreOptions = {}): Promise<Core> {

@@ -116,6 +116,9 @@ pub fn start(
                         pages.send(&FromCore::CommBus { name, data })
                     }
                     stand_in_sim::Page::HEvent { name } => pages.send(&FromCore::HEvent { name }),
+                    stand_in_sim::Page::Track { at, values } => {
+                        pages.send(&FromCore::Track { at, values })
+                    }
                 },
                 Box::new(module::BenchModule::new(
                     messages::SLOTS_HASH,

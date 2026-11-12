@@ -204,6 +204,7 @@ impl SimService {
             Message::ClientData(data) if platform && data.request == self.platform.status => {
                 self.status_read(&data.bytes, cx);
             }
+            Message::ClientData(data) => self.report_read(unit, data.request, data.bytes, cx),
             other => tracing::trace!(?connection, ?other, "a message nothing reads"),
         }
     }

@@ -1,0 +1,80 @@
+Stage 16's second session in the sim, 2026-11-11, on our development machine: MSFS 2024 SunRise
+12.2.282174.999, the Black Square Baron 58P Professional, the release core of the tree at 0.1.0
+with Follow saying where it places the aircraft and Figure seating its figures there, and a bench
+core on a stand-in sim as the second pilot. The report tools/sim/flight-model.ts wrote.
+
+During the Steam overlay step the pilot used other programs, so its reads of the window under the
+cursor include theirs. The parking brake's case set the stand-in's variable to the value it already
+held, since the stand-in runs no preset and so never took the catch-up's value, and read nothing.
+Start the sim, load a flight in the Baron 58P on the ground at a stand, engines running, and press Ready to fly.
+The session is starting. Keep your hands off the controls until a step asks for them.
+the sim is flying bksq-aircraft-baronpropress; hosting the session
+
+=== On the ground
+PASSED: the bench core's aircraft follows the 58P: the stand-in stands 0.00m from it
+PASSED: Lead reports about 20 times a second at the sim's frame rate: the second pilot's core wrote Follow's slot 250 times in 10s, 250 with its rewrites
+our module's update with Lead, with the 58P flying: 42µs at p50, 180µs at p99, 200µs at most, over its last 300 frames, against 100µs
+waiting up to 75s for your aircraft to settle
+FAILED: a _Set preset with a value, LANDING_GEAR_ParkingBrake_Set 0, moves the sim's parking brake: never held within 8000ms, read 1
+PASSED: and back: 1, after 106ms
+Open Steam's overlay with Shift and Tab, move the mouse over the cockpit and click a few times, then close the overlay. Press Page Up when that's done.
+the window under the cursor and the one in front, 5 times a second, as process/class and how often:
+  53 × under=FlightSimulator2024/AceApp front=FlightSimulator2024/AceApp
+  16 × under=Discord/Chrome_WidgetWin_1 front=Discord/Chrome_WidgetWin_1
+  6 × under=claude/Chrome_WidgetWin_1 front=claude/Chrome_WidgetWin_1
+  4 × under=claude/Chrome_WidgetWin_1 front=FlightSimulator2024/AceApp
+  2 × under=FlightSimulator2024/AceApp front=claude/Chrome_WidgetWin_1
+  1 × under=explorer/Progman front=Discord/Chrome_WidgetWin_1
+  1 × under=explorer/VirtualDesktopHotkeySwitcher front=Discord/Chrome_WidgetWin_1
+  1 × under=explorer/VirtualDesktopHotkeySwitcher front=FlightSimulator2024/AceApp
+FAILED: another window came under the cursor, so a check of the window under it would swallow clicks there
+The second pilot takes control. Your aircraft will rise 5 feet and slide forward for 10 seconds, then come back.
+PASSED: Follow froze the 58P through fsEventsTriggerKeyEvent: 3, after 2197ms
+PASSED: fsVarsAVarSet holds the pilot's own aircraft's pose: the 58P moved 23.3m and rose 7.2ft with the stand-in, 0.02m from its path 400ms before at the median, 0.02m at p99, 1.38m at most, over 116 frames
+the 58P's controls before the stand-in moved its own: {"aileron":85,"elevator":34,"rudder":-1,"brakeLeft":32767,"brakeRight":32767,"yokeX":0.518798828125,"yokeY":0.20751953125}
+and after: {"aileron":-8000.0001220703125,"elevator":6000.0001220703125,"rudder":-4999.999755859375,"brakeLeft":17807.235846579075,"brakeRight":4523.513316303492,"yokeX":-48.82812574505806,"yokeY":36.62109449505806}
+PASSED: the three axis events moved the 58P's surfaces to the PF's: aileron -8000, elevator 6000, rudder -5000, against -8000, 6000, -5000
+FAILED: each brake reads what the PF's does: left 17807, right 4524, against 24000 and 8000
+PASSED: the yoke's variables moved with the events: YOKE X POSITION WITH AP LINEAR 0.5 to -48.8, YOKE Y POSITION WITH AP 0.2 to 36.6
+Look at the yoke. Is it held turned to one side? Press Page Up for yes, or Page Down for no.
+PASSED: the pilot saw the yoke held over by the events
+our module's update with Follow, with the 58P following: 51µs at p50, 246µs at p99, 483µs at most, over its last 300 frames, against 100µs
+PASSED: the 58P unfroze as its pilot took control: 0, after 2173ms
+
+=== In the air
+Take off, climb to about 3000 feet, and engage the autopilot with heading and altitude hold. Press Page Up when that's done.
+Look at the second pilot's figure in the right seat. Is it steady, with no part jittering? Press Page Up for yes, or Page Down for no.
+PASSED: on the flying machine, no part of the figure skips a frame in flight
+our module's update with Lead and Figure, in flight: 47µs at p50, 91µs at p99, 160µs at most, over its last 300 frames, against 100µs
+The second pilot takes control for about a minute. Keep your hands off the controls.
+through the handover the 58P's speed over the ground, frame by frame: 89.1 m/s before it, 64.4 m/s at the least and 103.2 m/s at the most after, and 89.4 m/s at the end; the largest change between two frames was 26.0 m/s; Follow froze it 2134ms into the recording
+Was the handover smooth, with no jump or lurch? Press Page Up for yes, or Page Down for no.
+PASSED: the pilot saw a smooth handover in flight
+PASSED: the 58P follows the stand-in in straight flight: 0.40m from its path 400ms before at the median, 0.42m at p99, 0.44m at most, over 221 frames
+the 58P's velocities against the ones written, frame by frame: body 0.00, 0.00, 0.00 ft/s at most on x, y, and z, and rotation 0.000, 0.000, 0.000 rad/s, where p02's writes from outside the frame read up to 7.6 ft/s and 2.3 rad/s
+Did the aircraft fly smoothly, with no jumps or shaking? Press Page Up for yes, or Page Down for no.
+PASSED: the pilot saw the following aircraft fly smoothly
+Is the second pilot's figure in the right seat still steady? Press Page Up for yes, or Page Down for no.
+PASSED: on the following machine, no part of the figure skips a frame in flight
+The aircraft banks and turns right for 20 seconds, with its yoke moving.
+PASSED: the 58P follows the stand-in through a turn: it turned 60.0°, 0.48m from the path at p99, 0.62m at most
+PASSED: the 58P banks and pitches with the stand-in: its bank went from 0.2° to -25.0°, where the sim's bank is negative to the right, and frame by frame its pitch read 0.14° at most from the stand-in's 400ms before and its bank 1.18°
+Did the aircraft bank into the turn and roll out of it smoothly? Press Page Up for yes, or Page Down for no.
+PASSED: the pilot saw the following aircraft bank into the turn and out of it
+the 58P's autopilot master read 1 before the handover and 0 after the turn; the catch-up from the stand-in's cockpit sets it too, so this run can't tell whether the axis events leave it engaged
+our module's update with Follow and Figure, in flight: 49µs at p50, 207µs at p99, 403µs at most, over its last 300 frames, against 100µs
+The aircraft jumps 50 kilometers north. Watch whether the sim stalls.
+the 58P went 49.3km, and the longest gap between two of the panel's frames was 75ms
+Did the sim keep running through the jump, with no long freeze? Press Page Up for yes, or Page Down for no.
+PASSED: the sim loads the scenery 50km on without stalling
+You take control back for a few seconds, the sim runs at twice its rate, and the second pilot takes control again. Hold the aircraft level while it's yours.
+PASSED: the simulation rate is 2: 2, after 134ms
+PASSED: at a simulation rate of 2 the ex-PF's aircraft carries on at the speed it flew: 133.3 m/s before the handover, 123.8 m/s in Follow's first 400ms
+
+=== A second flight load
+Restart the flight from the pause menu, and press Ready to fly when it has loaded.
+PASSED: after the second load, Follow froze the 58P again: 3, after 2178ms
+FAILED: and wrote it at the stand-in's place: 201.5m from it
+That's every case. Whoever runs the script stops it with q in its terminal, which replays the core's recording.
+the real core's last loop stats: 43735680164µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=10260 busy_percent=0.53 wait_p50_us=8 wait_p99_us=167 wait_p999_us=2687 wait_max_us=8351 over_1ms=3 slowest_us=4340 slowest_seq=97496 slowest_stamp=43693916897
+the core's replay: replayed 116560 inputs, and all 587 checkpoints matched, up to the last flush of a cut recording

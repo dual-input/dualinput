@@ -76,6 +76,7 @@ fn main() {
         .allowlist_var("SIMCONNECT_.*")
         .allowlist_var("FS_OBJECT_ID_USER_AIRCRAFT")
         .allowlist_var("KEY_FREEZE_(LATITUDE_LONGITUDE|ALTITUDE|ATTITUDE)_SET")
+        .allowlist_var("KEY_AXIS_(AILERONS|ELEVATOR|RUDDER|LEFT_BRAKE|RIGHT_BRAKE)_SET")
         // SimConnect's and the SDK's names already start with their enum's, as in
         // SIMCONNECT_RECV_ID_OPEN, so bindgen adds no second prefix.
         .prepend_enum_name(false)

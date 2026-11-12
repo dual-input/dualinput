@@ -10,6 +10,10 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > In [wants and the sim's APIs](#wants-and-the-sims-apis), an `H:` event goes as calculator code, `(>H:<name>)`, through `execute_calculator_code`, since `fsEventsHEventCall` returned `FS_EVENTS_ERROR_FAIL` and reached no panel, while calculator code reached every one ([sync log](../sync/log.md#2026-11-10-the-sdks-h-event-call-fails-on-msfs-2024-so-our-module-fires-h-events-as-calculator-code-which-reached-every-panel); user, 2026-11-10).
 
 > **Note**
+> In [what a feature calls](#what-a-feature-calls), `cx.module().reports` takes the report's type, and a second call for the same routine moves its reports to the new handle, so a feature calls it each time it starts the routine.
+> In [wants and the sim's APIs](#wants-and-the-sims-apis), a routine reads an `E:` variable through `fsVarsGetEVarId` and `fsVarsEVarGet`, and an event's value goes as the Events API's unsigned integer, a negative one as its two's complement ([flight-model log](../flight-model/log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump)).
+
+> **Note**
 > `set_input` isn't built: every write to an input event goes through our WASM module, as `fsVarsBVarCall` on a preset's name, beside the `H:` events ([sync log](../sync/log.md#2026-11-09-writes-to-input-events-go-through-our-wasm-module-since-simconnects-list-has-none-of-their-presets); user, 2026-11-09).
 
 > **Note**

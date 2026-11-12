@@ -1,0 +1,345 @@
+14102723413µs  INFO dualinput_core::run: the core started commit="7859de22eb5cc21739523d2efcf43df73917a623" uncommitted=Some("deb2e369306bc66a1ddf70675b7f64725f86656aff5730729fbd98122303c293") profile="release" messages="b4a1b2556f5104a1321900218b8a7146d1aa9ad069b125c56b69f5192740b1b1"
+14102726695µs  INFO dualinput_core::edges::sockets: the clients' WebSocket server listens on 127.0.0.1 port=52860
+14102725853µs #1 [clients]  INFO clients::sockets: the core's WebSocket server listens on 127.0.0.1 port=52860
+14102733005µs #5 [sim-service]  INFO sim_service::seam: the sim's process was found process=21980 created=134389091383970402
+14102733005µs #5 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Starting
+14103493345µs #10 [profile-loader]  INFO profile_loader::cache: the profiles' index was fetched profiles=1
+14103554852µs #18 [network]  INFO network::reach: what this PC reaches changed backend=true relay=true
+14162727054µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=415 busy_percent=0.01 wait_p50_us=7 wait_p99_us=29 wait_p999_us=2280 wait_max_us=2280 over_1ms=0 slowest_us=239 slowest_seq=0 slowest_stamp=14102724648
+14162736346µs #417 [sim-service]  INFO sim_service::seam: a connection to the sim opened connection=Connection { unit: 2, open: 31 }
+14178375715µs #522 [sim-service]  INFO sim_service::seam: the sim's open reply arrived connection=Connection { unit: 2, open: 31 } application="SunRise" version=[12, 2, 282174, 999] simconnect=[12, 2, 0, 0]
+14185778430µs #587 [sim-service]  INFO sim_service::module: our WASM module is running module="0.1.0"
+14186853517µs #598 [clients]  INFO clients::sockets: a client joined socket=0 component="menu-script" instruments=0
+14186873672µs #600 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Main
+14186873672µs #600 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Menu
+14198860808µs #940 [clients]  INFO clients::sockets: a client joined socket=1 component="efb-app" instruments=0
+14222729331µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1207 busy_percent=0.06 wait_p50_us=6 wait_p99_us=33 wait_p999_us=79 wait_max_us=118 over_1ms=0 slowest_us=179 slowest_seq=1564 slowest_stamp=14220734249
+14222737823µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=50 event_wakes=50 timeout_wakes=23747 timeout_messages=0 event_to_up_p50_us=7 event_to_up_p99_us=58 event_to_up_p999_us=58 event_to_up_max_us=58
+14282624505µs #3337 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=WorldMap
+14282730836µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1719 busy_percent=0.11 wait_p50_us=6 wait_p99_us=37 wait_p999_us=57 wait_max_us=63 over_1ms=0 slowest_us=124 slowest_seq=2209 slowest_stamp=14243011204
+14282738320µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=58 event_wakes=58 timeout_wakes=25183 timeout_messages=0 event_to_up_p50_us=7 event_to_up_p99_us=37 event_to_up_p999_us=37 event_to_up_max_us=37
+14342732637µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1720 busy_percent=0.11 wait_p50_us=6 wait_p99_us=33 wait_p999_us=83 wait_max_us=88 over_1ms=0 slowest_us=133 slowest_seq=4678 slowest_stamp=14329308409
+14342739634µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=59 event_wakes=59 timeout_wakes=25236 timeout_messages=0 event_to_up_p50_us=7 event_to_up_p99_us=12 event_to_up_p999_us=12 event_to_up_max_us=12
+14402734588µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1715 busy_percent=0.11 wait_p50_us=6 wait_p99_us=30 wait_p999_us=83 wait_max_us=93 over_1ms=0 slowest_us=133 slowest_seq=5097 slowest_stamp=14343958900
+14402741586µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=56 event_wakes=56 timeout_wakes=25254 timeout_messages=0 event_to_up_p50_us=7 event_to_up_p99_us=13 event_to_up_p999_us=13 event_to_up_max_us=13
+14462736400µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1715 busy_percent=0.11 wait_p50_us=6 wait_p99_us=33 wait_p999_us=55 wait_max_us=59 over_1ms=0 slowest_us=176 slowest_seq=8408 slowest_stamp=14459807058
+14462741872µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=57 event_wakes=57 timeout_wakes=25286 timeout_messages=0 event_to_up_p50_us=7 event_to_up_p99_us=13 event_to_up_p999_us=13 event_to_up_max_us=13
+14522737913µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1716 busy_percent=0.11 wait_p50_us=6 wait_p99_us=29 wait_p999_us=57 wait_max_us=62 over_1ms=0 slowest_us=130 slowest_seq=8735 slowest_stamp=14471146719
+14522742392µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=57 event_wakes=57 timeout_wakes=25404 timeout_messages=0 event_to_up_p50_us=7 event_to_up_p99_us=14 event_to_up_p999_us=14 event_to_up_max_us=14
+14582739766µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1716 busy_percent=0.10 wait_p50_us=6 wait_p99_us=37 wait_p999_us=103 wait_max_us=107 over_1ms=0 slowest_us=99 slowest_seq=11330 slowest_stamp=14562008710
+14582744248µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=57 event_wakes=57 timeout_wakes=24925 timeout_messages=1 event_to_up_p50_us=6 event_to_up_p99_us=12 event_to_up_p999_us=12 event_to_up_max_us=12
+14642741317µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1715 busy_percent=0.11 wait_p50_us=6 wait_p99_us=31 wait_p999_us=43 wait_max_us=46 over_1ms=0 slowest_us=105 slowest_seq=12106 slowest_stamp=14589001332
+14642745306µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=57 event_wakes=57 timeout_wakes=25161 timeout_messages=0 event_to_up_p50_us=7 event_to_up_p99_us=12 event_to_up_p999_us=12 event_to_up_max_us=12
+14650565680µs #13868 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Main
+14654646689µs #13988 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=WorldMap
+14660403100µs #14153 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Loading
+14660789729µs #14170 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Unknown
+14679004620µs #14699 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=ReadyToFly aircraft="bksq-aircraft-baronpropress"
+14679028133µs #14701 [sim-service]  INFO sim_service::aircraft: the loaded aircraft's title and livery title="Black Square Baron 58P Professional N513LW" aircraft="bksq-aircraft-baronpropress"
+14679145894µs #14705 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=InGame
+14681000476µs #14760 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+14702743281µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1742 busy_percent=0.12 wait_p50_us=6 wait_p99_us=39 wait_p999_us=75 wait_max_us=1476 over_1ms=0 slowest_us=186 slowest_seq=14202 slowest_stamp=14661802159
+14702746737µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=77 event_wakes=76 timeout_wakes=24726 timeout_messages=0 event_to_up_p50_us=7 event_to_up_p99_us=16 event_to_up_p999_us=16 event_to_up_max_us=16
+14757721692µs #16957 [clients]  INFO clients::settings: a setting changed key="session.name" value="pilot-b"
+14757721696µs #16958 [clients]  INFO clients::settings: a setting changed key="session.color" value="teal"
+14757721697µs #16959 [clients]  INFO clients::settings: a setting changed key="app.setup-done" value=true
+14760304240µs #17045 [session]  INFO session::joining: the clipboard holds no invite code
+14762744877µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1734 busy_percent=0.12 wait_p50_us=6 wait_p99_us=43 wait_p999_us=183 wait_max_us=246 over_1ms=0 slowest_us=521 slowest_seq=15502 slowest_stamp=14706913529
+14762748360µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=59 event_wakes=59 timeout_wakes=24470 timeout_messages=2 event_to_up_p50_us=7 event_to_up_p99_us=23 event_to_up_p999_us=23 event_to_up_max_us=23
+14822746489µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1720 busy_percent=0.17 wait_p50_us=6 wait_p99_us=39 wait_p999_us=255 wait_max_us=595 over_1ms=0 slowest_us=472 slowest_seq=18193 slowest_stamp=14800359273
+14822750481µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=59 event_wakes=59 timeout_wakes=24599 timeout_messages=0 event_to_up_p50_us=7 event_to_up_p99_us=13 event_to_up_p999_us=13 event_to_up_max_us=13
+14824756417µs #18892 [session]  INFO session::joining: this pilot hosts a session session="428b195d-6dac-48e2-b674-16a25e3761d2"
+14824756417µs #18892 [network]  INFO network::backend: the network asks the backend for a code
+14825025128µs #18904 [network]  INFO network::backend: the backend answered asked=Host answer=Created { code: "XZD67Z" }
+14825025128µs #18904 [session]  INFO session::joining: the session started with its code code="XZD67Z"
+14825025128µs #18904 [session]  INFO session::control: this core passed control generation=1 pf="bd785a342891437a87b838de477aa271"
+14825025128µs #18904 [sim-service]  INFO sim_service::announce: the core announces that a session started session=true
+14825025128µs #18904 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+14825025128µs #18904 [session]  INFO session::members: a member entered the flight member="bd785a342891437a87b838de477aa271" in_flight=true
+14825025128µs #18904 [core-helper]  INFO core_helper_service::life: the core helper starts run=1 program=""
+14825025128µs #18904 [profile-loader]  INFO profile_loader: the pilot flying pinned the session's profile hash="9d15392d23ce0f9de2252985df58e8c517421d5325fc1180b145fab46117a8b1" local=false aircraft="bksq-aircraft-baronpropress"
+14825025128µs #18904 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+14825026242µs #18907 [sim-service]  INFO sim_service::seam: a connection to the sim opened connection=Connection { unit: 6, open: 1 }
+14825026652µs #18908 [sim-service]  INFO sim_service::seam: a connection to the sim opened connection=Connection { unit: 13, open: 1 }
+14825026852µs #18909 [network]  INFO network: the network opens the session code="XZD67Z" restart=0 crew=0
+14825029346µs #18910 [profile-loader]  INFO profile_loader: the profile loaded hash="9d15392d23ce0f9de2252985df58e8c517421d5325fc1180b145fab46117a8b1" local=false variant="press"
+14825029346µs #18910 [clients]  INFO clients::panels: the profile loaded, so the clients crate answers each cockpit panel panels=0
+14825030774µs #18912 [sim-service]  INFO sim_service::seam: a connection to the sim opened connection=Connection { unit: 10, open: 1 }
+14825030813µs #18913 [sim-service]  INFO sim_service::aircraft: the aircraft's package package="bksq-aircraft-baronpro" location=Community version="0.1.1" aircraft="bksq-aircraft-baronpropress"
+14825030813µs #18913 [avatars]  INFO avatars: avatars builds the aircraft's model package="%USERPROFILE%\\AppData\\Roaming\\Microsoft Flight Simulator 2024\\Packages\\Community\\bksq-aircraft-baronpro" path="bksq-aircraft-baronpropress"
+14825031073µs #18914 [sim-service]  INFO sim_service::seam: a connection to the sim opened connection=Connection { unit: 12, open: 1 }
+14825056382µs #18916 [sim-service]  INFO sim_service::seam: the sim's open reply arrived connection=Connection { unit: 6, open: 1 } application="SunRise" version=[12, 2, 282174, 999] simconnect=[12, 2, 0, 0]
+14825061674µs #18917 [sim-service]  INFO sim_service::seam: the sim's open reply arrived connection=Connection { unit: 13, open: 1 } application="SunRise" version=[12, 2, 282174, 999] simconnect=[12, 2, 0, 0]
+14825061681µs #18918 [session]  INFO session::preflight: this core holds the aircraft for preflight on=true
+14825066307µs #18919 [sim-service]  INFO sim_service::seam: the sim's open reply arrived connection=Connection { unit: 10, open: 1 } application="SunRise" version=[12, 2, 282174, 999] simconnect=[12, 2, 0, 0]
+14825071850µs #18920 [sim-service]  INFO sim_service::seam: the sim's open reply arrived connection=Connection { unit: 12, open: 1 } application="SunRise" version=[12, 2, 282174, 999] simconnect=[12, 2, 0, 0]
+14825097730µs  INFO transport: the transport bound its endpoint relays=1 ip=true
+14825097782µs #19105 [network]  INFO network::links: the network's endpoint is bound
+14825124051µs #19130 [core-helper]  INFO core_helper_service::life: the core helper's process started run=1 process=18960
+14825131953µs #19135 [core-helper]  INFO core_helper_service::life: the core helper said hello run=1 process=18960
+14825144607µs #19138 [core-helper]  INFO core_helper_service::life: the core helper plays on this output device output="Logitech (PRO X)"
+14825148272µs #19140 [clients]  INFO clients::sockets: a client joined socket=9 component="panel-bridge" panel="VCockpit71" instruments=1
+14825148279µs #19141 [clients]  INFO clients::sockets: a client joined socket=7 component="panel-bridge" panel="VCockpit73" instruments=1
+14825148281µs #19142 [clients]  INFO clients::sockets: a client joined socket=2 component="panel-bridge" panel="VCockpit80" instruments=1
+14825148283µs #19143 [clients]  INFO clients::sockets: a client joined socket=6 component="panel-bridge" panel="VCockpit75" instruments=1
+14825148286µs #19144 [clients]  INFO clients::sockets: a client joined socket=5 component="panel-bridge" panel="VCockpit74" instruments=1
+14825148289µs #19145 [clients]  INFO clients::sockets: a client joined socket=4 component="panel-bridge" panel="VCockpit79" instruments=1
+14825148294µs #19146 [clients]  INFO clients::sockets: a client joined socket=3 component="panel-bridge" panel="VCockpit76" instruments=1
+14825148340µs #19147 [clients]  INFO clients::sockets: a client joined socket=8 component="panel-bridge" panel="VCockpit72" instruments=1
+14825148344µs #19148 [clients]  INFO clients::sockets: a client joined socket=16 component="panel-bridge" panel="VCockpit65" instruments=1
+14825148347µs #19149 [clients]  INFO clients::sockets: a client joined socket=10 component="panel-bridge" panel="VCockpit70" instruments=1
+14825148350µs #19150 [clients]  INFO clients::sockets: a client joined socket=12 component="panel-bridge" panel="VCockpit68" instruments=1
+14825148353µs #19151 [clients]  INFO clients::sockets: a client joined socket=11 component="panel-bridge" panel="VCockpit69" instruments=1
+14825148357µs #19152 [clients]  INFO clients::sockets: a client joined socket=13 component="panel-bridge" panel="VCockpit67" instruments=1
+14825148358µs #19153 [clients]  INFO clients::sockets: a client joined socket=14 component="panel-bridge" panel="VCockpit63" instruments=1
+14825148360µs #19154 [clients]  INFO clients::sockets: a client joined socket=15 component="panel-bridge" panel="VCockpit66" instruments=1
+14825148364µs #19155 [clients]  INFO clients::sockets: a client joined socket=17 component="panel-bridge" panel="VCockpit64" instruments=1
+14825148735µs #19156 [clients]  INFO clients::sockets: a client joined socket=19 component="panel-bridge" panel="VCockpit77" instruments=1
+14825148741µs #19157 [clients]  INFO clients::sockets: a client joined socket=18 component="panel-bridge" panel="VCockpit78" instruments=1
+14825148742µs #19158 [clients]  INFO clients::sockets: a client joined socket=20 component="panel-bridge" panel="VCockpit62" instruments=1
+14825149231µs #19159 [clients]  INFO clients::sockets: a client joined socket=21 component="panel-bridge" panel="VCockpit61" instruments=1
+14825188403µs #19165 [clients]  INFO clients::sockets: a client's socket closed socket=8 component="panel-bridge"
+14825188404µs #19166 [clients]  INFO clients::sockets: a client's socket closed socket=3 component="panel-bridge"
+14825188489µs #19167 [clients]  INFO clients::sockets: a client's socket closed socket=15 component="panel-bridge"
+14825188499µs #19169 [clients]  INFO clients::sockets: a client's socket closed socket=14 component="panel-bridge"
+14825188508µs #19170 [clients]  INFO clients::sockets: a client's socket closed socket=11 component="panel-bridge"
+14825188521µs #19171 [clients]  INFO clients::sockets: a client's socket closed socket=17 component="panel-bridge"
+14825188521µs #19172 [clients]  INFO clients::sockets: a client's socket closed socket=7 component="panel-bridge"
+14825188532µs #19173 [clients]  INFO clients::sockets: a client's socket closed socket=12 component="panel-bridge"
+14825188535µs #19174 [clients]  INFO clients::sockets: a client's socket closed socket=16 component="panel-bridge"
+14825188547µs #19175 [clients]  INFO clients::sockets: a client's socket closed socket=2 component="panel-bridge"
+14825188548µs #19176 [clients]  INFO clients::sockets: a client's socket closed socket=13 component="panel-bridge"
+14825188871µs #19177 [clients]  INFO clients::sockets: a client's socket closed socket=19 component="panel-bridge"
+14825188873µs #19178 [clients]  INFO clients::sockets: a client's socket closed socket=18 component="panel-bridge"
+14825188903µs #19179 [clients]  INFO clients::sockets: a client's socket closed socket=20 component="panel-bridge"
+14825189367µs #19180 [clients]  INFO clients::sockets: a client's socket closed socket=21 component="panel-bridge"
+14825298778µs #19212 [avatars]  INFO avatars: avatars took the aircraft's model posed=319 animation_codes=240 visibility_codes=241 yokes=2
+14828106100µs  INFO endpoint{id=2b87e1e640}:relay-actor: iroh::socket::transports::relay::actor: home is now relay https://cookie-gif-lawyer-seniors.trycloudflare.com/, was None
+14828905274µs  INFO transport: the endpoint's home relay is https://cookie-gif-lawyer-seniors.trycloudflare.com/
+14865150327µs #27337 [core-helper]  INFO core_helper_service::life: the core helper listed its devices and programs outputs=5 programs=5
+14882748101µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=12092 busy_percent=0.61 wait_p50_us=8 wait_p99_us=75 wait_p999_us=143 wait_max_us=350 over_1ms=2 slowest_us=6102 slowest_seq=19212 slowest_stamp=14825298778
+14882751568µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=10043 event_wakes=10018 timeout_wakes=22220 timeout_messages=14 event_to_up_p50_us=7 event_to_up_p99_us=17 event_to_up_p999_us=26 event_to_up_max_us=58
+14895043803µs #33413 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Unknown
+14907286068µs #36765 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=InGame
+14929561152µs #43121 [core-helper]  INFO core_helper_service::life: the core helper listed its devices and programs outputs=5 programs=5
+14942750371µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=15694 busy_percent=0.64 wait_p50_us=7 wait_p99_us=71 wait_p999_us=123 wait_max_us=597 over_1ms=0 slowest_us=808 slowest_seq=32725 slowest_stamp=14891584872
+14942752422µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=13487 event_wakes=13480 timeout_wakes=21320 timeout_messages=16 event_to_up_p50_us=5 event_to_up_p99_us=16 event_to_up_p999_us=27 event_to_up_max_us=45
+14955025003µs #49657 [network]  INFO network::links: a connection to another core opened conn=1 dialed=false
+14955025003µs #49657 [session]  INFO session: a connection's first message carries this core's keys conn=1 bytes=537
+14955025016µs #49658 [network]  INFO network::links: a connection's path changed conn=1 path=Relay { url: "https://cookie-gif-lawyer-seniors.trycloudflare.com/" }
+14955109417µs #49679 [network]  INFO network::links: a member's link is up conn=1 again=false restart=0
+14955109417µs #49679 [session]  INFO session::members: a member joined the session member="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+14955109417µs #49679 [session]  INFO session::members: a member entered the flight member="11bc00e2cfec4bd7a25bbd3ca66c6efa" in_flight=true
+14975953963µs #55671 [core-helper]  INFO core_helper_service::life: the core helper listed its devices and programs outputs=5 programs=5
+14982787717µs #57563 [session]  INFO session::preflight: this pilot is ready
+14982787717µs #57563 [session]  INFO session::preflight: every counted member is ready, so the countdown runs
+14985788122µs #58397 [session]  INFO session::preflight: the countdown ran out, so preflight ended
+14985788122µs #58397 [session]  INFO session::preflight: this core holds the aircraft for preflight on=false
+14985788122µs #58397 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=1313 members=2
+14985999087µs #58456 [cockpit-stream]  INFO cockpit_stream: the flying machine answers a catch-up bytes=4421
+14998981066µs #62717 [clients]  INFO clients::sockets: a client joined socket=22 component="banner" instruments=0
+15000919637µs #63346 [clients]  INFO clients::sockets: a client's socket closed socket=22 component="banner"
+15002751855µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=17307 busy_percent=0.74 wait_p50_us=6 wait_p99_us=83 wait_p999_us=135 wait_max_us=627 over_1ms=0 slowest_us=547 slowest_seq=58310 slowest_stamp=14985478526
+15002754325µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=14452 event_wakes=14443 timeout_wakes=20891 timeout_messages=25 event_to_up_p50_us=4 event_to_up_p99_us=16 event_to_up_p999_us=28 event_to_up_max_us=93
+15002926546µs #63973 [clients]  INFO clients::sockets: a client joined socket=23 component="banner" instruments=0
+15003760168µs #64191 [clients]  INFO clients::sockets: a client's socket closed socket=23 component="banner"
+15004943188µs #64496 [clients]  INFO clients::sockets: a client joined socket=24 component="banner" instruments=0
+15006010261µs #64754 [clients]  INFO clients::sockets: a client's socket closed socket=24 component="banner"
+15047124247µs #77329 [state-sync]  INFO state_sync::carry: a write never landed entry="heading_bug" wanted=Number(1.0) reading=Some(Number(1.0107421875)) retries=0
+15047124247µs #77329 [clients]  INFO clients: a notification was raised id="state-sync.couldnt-sync" level=Warning text="Couldn't sync Heading bug"
+15062753445µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=18003 busy_percent=0.81 wait_p50_us=5 wait_p99_us=71 wait_p999_us=151 wait_max_us=577 over_1ms=0 slowest_us=950 slowest_seq=76605 slowest_stamp=15044735171
+15062754836µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=14157 event_wakes=14157 timeout_wakes=20106 timeout_messages=11 event_to_up_p50_us=4 event_to_up_p99_us=14 event_to_up_p999_us=26 event_to_up_max_us=44
+15102949684µs #93296 [clients]  INFO clients::sockets: a client joined socket=25 component="banner" instruments=0
+15122755251µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=13165 event_wakes=13165 timeout_wakes=19875 timeout_messages=17 event_to_up_p50_us=4 event_to_up_p99_us=13 event_to_up_p999_us=35 event_to_up_max_us=56
+15122755315µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=17188 busy_percent=0.80 wait_p50_us=5 wait_p99_us=67 wait_p999_us=191 wait_max_us=728 over_1ms=0 slowest_us=575 slowest_seq=89994 slowest_stamp=15091283429
+15156349512µs #108937 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Unknown
+15182756112µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=13513 event_wakes=13513 timeout_wakes=19869 timeout_messages=11 event_to_up_p50_us=5 event_to_up_p99_us=14 event_to_up_p999_us=23 event_to_up_max_us=82
+15182756657µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=18108 busy_percent=0.85 wait_p50_us=5 wait_p99_us=67 wait_p999_us=199 wait_max_us=652 over_1ms=0 slowest_us=492 slowest_seq=99411 slowest_stamp=15123767261
+15186732182µs #118258 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=InGame
+15241947799µs #135052 [session]  INFO session::control: control passed generation=2 pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+15241947799µs #135052 [flight-model]  INFO flight_model: another pilot flies, so flight-model sync starts Follow pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+15241947799µs #135052 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="pilot-a has control"
+15242756674µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=13952 event_wakes=13952 timeout_wakes=19519 timeout_messages=21 event_to_up_p50_us=5 event_to_up_p99_us=14 event_to_up_p999_us=24 event_to_up_max_us=173
+15242756736µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=18102 busy_percent=0.88 wait_p50_us=5 wait_p99_us=71 wait_p999_us=271 wait_max_us=936 over_1ms=0 slowest_us=681 slowest_seq=121610 slowest_stamp=15196655227
+15275327237µs #144702 [clients]  INFO clients: a notification was raised id="avatars.seat" level=Information text="This seat is taken"
+15279450331µs #146135 [clients]  INFO clients: a notification was cleared id="avatars.seat"
+15283771200µs #147568 [clients]  INFO clients: a notification was raised id="avatars.seat" level=Information text="This seat is taken"
+15286391531µs #148417 [clients]  INFO clients: a notification was cleared id="avatars.seat"
+15302759044µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=12479 event_wakes=12479 timeout_wakes=19356 timeout_messages=16 event_to_up_p50_us=5 event_to_up_p99_us=13 event_to_up_p999_us=35 event_to_up_max_us=102
+15302759079µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=17611 busy_percent=0.86 wait_p50_us=5 wait_p99_us=71 wait_p999_us=431 wait_max_us=692 over_1ms=0 slowest_us=671 slowest_seq=145328 slowest_stamp=15277127442
+15305926871µs #153686 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Unknown
+15306963299µs #153885 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=InGame
+15309986830µs #154818 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Unknown
+15312008239µs #155255 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=InGame
+15362760243µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=10771 event_wakes=10771 timeout_wakes=20040 timeout_messages=13 event_to_up_p50_us=5 event_to_up_p99_us=13 event_to_up_p999_us=22 event_to_up_max_us=66
+15362760268µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=16062 busy_percent=0.83 wait_p50_us=5 wait_p99_us=75 wait_p999_us=271 wait_max_us=623 over_1ms=1 slowest_us=1006 slowest_seq=163718 slowest_stamp=15342122917
+15422760323µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=12935 event_wakes=12935 timeout_wakes=19852 timeout_messages=13 event_to_up_p50_us=4 event_to_up_p99_us=12 event_to_up_p999_us=39 event_to_up_max_us=69
+15422760340µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=18351 busy_percent=0.86 wait_p50_us=5 wait_p99_us=71 wait_p999_us=287 wait_max_us=780 over_1ms=1 slowest_us=1003 slowest_seq=175976 slowest_stamp=15383947293
+15459170417µs #197992 [state-sync]  INFO state_sync::carry: a write never landed entry="kas_arm" wanted=Number(0.0) reading=Some(Number(1.0)) retries=0
+15459170417µs #197992 [clients]  INFO clients: a notification was raised id="state-sync.couldnt-sync" level=Warning text="Couldn't sync Altitude arm"
+15473070501µs #202031 [state-sync]  INFO state_sync::carry: a write never landed entry="kas_armed_vs" wanted=Number(1200.0) reading=Some(Number(1000.0)) retries=0
+15473070501µs #202031 [clients]  INFO clients: a notification was raised id="state-sync.couldnt-sync" level=Warning text="Couldn't sync Armed vertical speed"
+15482762006µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=12289 event_wakes=12289 timeout_wakes=19848 timeout_messages=13 event_to_up_p50_us=4 event_to_up_p99_us=11 event_to_up_p999_us=35 event_to_up_max_us=103
+15482763045µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=17513 busy_percent=0.82 wait_p50_us=5 wait_p99_us=71 wait_p999_us=335 wait_max_us=966 over_1ms=0 slowest_us=533 slowest_seq=197993 slowest_stamp=15459176821
+15533555500µs #219914 [state-sync]  INFO state_sync::carry: a write never landed entry="gear" wanted=Number(1.0) reading=Some(Number(0.0)) retries=0
+15533555500µs #219914 [clients]  INFO clients: a notification was raised id="state-sync.couldnt-sync" level=Warning text="Couldn't sync Landing gear"
+15542763343µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=12571 event_wakes=12571 timeout_wakes=20151 timeout_messages=23 event_to_up_p50_us=4 event_to_up_p99_us=12 event_to_up_p999_us=35 event_to_up_max_us=71
+15542764574µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=17686 busy_percent=0.84 wait_p50_us=5 wait_p99_us=75 wait_p999_us=319 wait_max_us=949 over_1ms=0 slowest_us=918 slowest_seq=209221 slowest_stamp=15497455196
+15602765176µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=13130 event_wakes=13130 timeout_wakes=20077 timeout_messages=22 event_to_up_p50_us=4 event_to_up_p99_us=11 event_to_up_p999_us=39 event_to_up_max_us=72
+15602766207µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=18386 busy_percent=0.86 wait_p50_us=5 wait_p99_us=71 wait_p999_us=271 wait_max_us=788 over_1ms=0 slowest_us=817 slowest_seq=228443 slowest_stamp=15562340588
+15662765798µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=14021 event_wakes=14020 timeout_wakes=20012 timeout_messages=15 event_to_up_p50_us=4 event_to_up_p99_us=13 event_to_up_p999_us=37 event_to_up_max_us=64
+15662767319µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=19614 busy_percent=0.94 wait_p50_us=5 wait_p99_us=83 wait_p999_us=367 wait_max_us=971 over_1ms=1 slowest_us=1221 slowest_seq=247384 slowest_stamp=15624627242
+15722767968µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=19992 event_wakes=19992 timeout_wakes=18128 timeout_messages=25 event_to_up_p50_us=6 event_to_up_p99_us=14 event_to_up_p999_us=27 event_to_up_max_us=99
+15722769501µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25395 busy_percent=1.16 wait_p50_us=5 wait_p99_us=67 wait_p999_us=215 wait_max_us=896 over_1ms=0 slowest_us=938 slowest_seq=261339 slowest_stamp=15664833559
+15754613955µs #302037 [state-sync]  INFO state_sync::carry: a write never landed entry="elevator_trim" wanted=Number(-5.7894323234935445) reading=Some(Number(-16.334868222475052)) retries=0
+15754613955µs #302037 [clients]  INFO clients: a notification was raised id="state-sync.couldnt-sync" level=Warning text="Couldn't sync Elevator trim"
+15782769941µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=26462 event_wakes=26459 timeout_wakes=16495 timeout_messages=23 event_to_up_p50_us=5 event_to_up_p99_us=12 event_to_up_p999_us=31 event_to_up_max_us=154
+15782771469µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=32674 busy_percent=1.51 wait_p50_us=5 wait_p99_us=79 wait_p999_us=143 wait_max_us=395 over_1ms=0 slowest_us=472 slowest_seq=310644 slowest_stamp=15769363599
+15827835290µs #343959 [session]  INFO session::control: this core passed control generation=3 pf="bd785a342891437a87b838de477aa271"
+15827835290µs #343959 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+15827835290µs #343959 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="You have control"
+15828049443µs #344078 [cockpit-stream]  INFO cockpit_stream: the flying machine answers a catch-up bytes=7310
+15842771086µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=26930 event_wakes=26926 timeout_wakes=17156 timeout_messages=25 event_to_up_p50_us=5 event_to_up_p99_us=12 event_to_up_p999_us=37 event_to_up_max_us=176
+15842773315µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=33482 busy_percent=1.63 wait_p50_us=5 wait_p99_us=87 wait_p999_us=175 wait_max_us=342 over_1ms=0 slowest_us=469 slowest_seq=347633 slowest_stamp=15834451139
+15855597272µs #358678 [session]  INFO session::control: control passed generation=4 pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+15855597272µs #358678 [flight-model]  INFO flight_model: another pilot flies, so flight-model sync starts Follow pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+15855597272µs #358678 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="pilot-a has control"
+15902771220µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=22943 event_wakes=22943 timeout_wakes=17584 timeout_messages=34 event_to_up_p50_us=6 event_to_up_p99_us=13 event_to_up_p999_us=23 event_to_up_max_us=117
+15902774778µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=28505 busy_percent=1.24 wait_p50_us=5 wait_p99_us=71 wait_p999_us=191 wait_max_us=562 over_1ms=0 slowest_us=701 slowest_seq=379458 slowest_stamp=15900290381
+15949296335µs #401399 [session]  INFO session::control: this core passed control generation=5 pf="bd785a342891437a87b838de477aa271"
+15949296335µs #401399 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+15949296335µs #401399 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="You have control"
+15962773106µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=21139 event_wakes=21137 timeout_wakes=17772 timeout_messages=28 event_to_up_p50_us=6 event_to_up_p99_us=13 event_to_up_p999_us=35 event_to_up_max_us=77
+15962776655µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26579 busy_percent=1.19 wait_p50_us=5 wait_p99_us=71 wait_p999_us=191 wait_max_us=554 over_1ms=0 slowest_us=695 slowest_seq=395051 slowest_stamp=15935622424
+16004058696µs #425125 [session]  INFO session::control: control passed generation=6 pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+16004058696µs #425125 [flight-model]  INFO flight_model: another pilot flies, so flight-model sync starts Follow pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+16004058696µs #425125 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="pilot-a has control"
+16012095621µs #428593 [session]  INFO session::control: this core passed control generation=7 pf="bd785a342891437a87b838de477aa271"
+16012095621µs #428593 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+16012095621µs #428593 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="You have control"
+16017467352µs #430946 [session]  INFO session::control: control passed generation=8 pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+16017467352µs #430946 [flight-model]  INFO flight_model: another pilot flies, so flight-model sync starts Follow pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+16017467352µs #430946 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="pilot-a has control"
+16021084129µs #432576 [session]  INFO session::control: this core passed control generation=9 pf="bd785a342891437a87b838de477aa271"
+16021084129µs #432576 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+16021084129µs #432576 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="You have control"
+16022773422µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=22015 event_wakes=22015 timeout_wakes=17660 timeout_messages=26 event_to_up_p50_us=6 event_to_up_p99_us=14 event_to_up_p999_us=30 event_to_up_max_us=155
+16022777414µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26165 busy_percent=1.14 wait_p50_us=5 wait_p99_us=71 wait_p999_us=127 wait_max_us=447 over_1ms=0 slowest_us=585 slowest_seq=431038 slowest_stamp=16017676059
+16026857194µs #435138 [session]  INFO session::control: control passed generation=10 pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+16026857194µs #435138 [flight-model]  INFO flight_model: another pilot flies, so flight-model sync starts Follow pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+16026857194µs #435138 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="pilot-a has control"
+16032139615µs #437502 [session]  INFO session::control: this core passed control generation=11 pf="bd785a342891437a87b838de477aa271"
+16032139615µs #437502 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+16032139615µs #437502 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="You have control"
+16049424271µs #445138 [session]  INFO session::control: control passed generation=12 pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+16049424271µs #445138 [flight-model]  INFO flight_model: another pilot flies, so flight-model sync starts Follow pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+16049424271µs #445138 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="pilot-a has control"
+16065405015µs #452230 [state-sync]  INFO state_sync::carry: a write never landed entry="ap_nav_mode" wanted=Number(1.0) reading=Some(Number(0.0)) retries=0
+16065405015µs #452230 [clients]  INFO clients: a notification was raised id="state-sync.couldnt-sync" level=Warning text="Couldn't sync Autopilot nav mode"
+16070234430µs #454493 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Unknown
+16072256111µs #455482 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Main
+16075271506µs #457062 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Unknown
+16076295340µs #457436 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=InGame
+16082775358µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=22516 event_wakes=22515 timeout_wakes=17564 timeout_messages=36 event_to_up_p50_us=5 event_to_up_p99_us=13 event_to_up_p999_us=22 event_to_up_max_us=110
+16082778423µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=27716 busy_percent=1.22 wait_p50_us=5 wait_p99_us=75 wait_p999_us=159 wait_max_us=284 over_1ms=0 slowest_us=456 slowest_seq=445430 slowest_stamp=16050096383
+16091446421µs #465970 [state-sync]  INFO state_sync::carry: a write never landed entry="ap_altitude_hold" wanted=Number(1.0) reading=Some(Number(0.0)) retries=0
+16091446421µs #465970 [state-sync]  INFO state_sync::carry: a write never landed entry="ap_vs_hold" wanted=Number(0.0) reading=Some(Number(1.0)) retries=0
+16091446421µs #465970 [clients]  INFO clients: a notification was raised id="state-sync.couldnt-sync" level=Warning text="Couldn't sync Autopilot altitude hold"
+16091446421µs #465970 [clients]  INFO clients: a notification was raised id="state-sync.couldnt-sync" level=Warning text="Couldn't sync 2 controls"
+16132813132µs #490243 [session]  INFO session::control: this core passed control generation=13 pf="bd785a342891437a87b838de477aa271"
+16132813132µs #490243 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+16132813132µs #490243 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="You have control"
+16133032637µs #490364 [cockpit-stream]  INFO cockpit_stream: the flying machine answers a catch-up bytes=7623
+16142776727µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=27833 event_wakes=27828 timeout_wakes=17057 timeout_messages=21 event_to_up_p50_us=5 event_to_up_p99_us=12 event_to_up_p999_us=37 event_to_up_max_us=82
+16142780260µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=34494 busy_percent=1.67 wait_p50_us=5 wait_p99_us=83 wait_p999_us=143 wait_max_us=342 over_1ms=0 slowest_us=424 slowest_seq=472764 slowest_stamp=16103923432
+16143857573µs #496130 [session]  INFO session::control: control passed generation=14 pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+16143857573µs #496130 [cockpit-stream]  INFO cockpit_stream: a change of control dropped a message this machine applied, so it catches up from the new pilot flying
+16143857573µs #496130 [cockpit-stream]  INFO cockpit_stream: this machine asks the pilot flying for a catch-up preflight_end=false
+16143857573µs #496130 [flight-model]  INFO flight_model: another pilot flies, so flight-model sync starts Follow pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+16143857573µs #496130 [clients]  INFO clients: a notification was raised id="cockpit-stream.catch" level=Information text="Catching up with pilot-a"
+16143857573µs #496130 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="pilot-a has control"
+16144131676µs #496267 [cockpit-stream]  INFO cockpit_stream: this machine takes the flying machine's catch-up
+16144131676µs #496267 [cockpit-stream]  INFO cockpit_stream: this machine's catch-up ended
+16144131676µs #496267 [clients]  INFO clients: a notification was raised id="cockpit-stream.catch" level=Information text="Caught up with pilot-a"
+16202777258µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=23086 event_wakes=23083 timeout_wakes=17722 timeout_messages=21 event_to_up_p50_us=5 event_to_up_p99_us=12 event_to_up_p999_us=39 event_to_up_max_us=133
+16202781306µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=29129 busy_percent=1.38 wait_p50_us=5 wait_p99_us=83 wait_p999_us=191 wait_max_us=451 over_1ms=0 slowest_us=593 slowest_seq=502031 slowest_stamp=16155225071
+16262778911µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=16941 event_wakes=16941 timeout_wakes=18932 timeout_messages=22 event_to_up_p50_us=5 event_to_up_p99_us=12 event_to_up_p999_us=26 event_to_up_max_us=80
+16262783520µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=22221 busy_percent=0.98 wait_p50_us=5 wait_p99_us=67 wait_p999_us=191 wait_max_us=376 over_1ms=0 slowest_us=422 slowest_seq=536923 slowest_stamp=16229399912
+16322779250µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=21366 event_wakes=21366 timeout_wakes=17688 timeout_messages=32 event_to_up_p50_us=5 event_to_up_p99_us=12 event_to_up_p999_us=41 event_to_up_max_us=94
+16322784800µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26643 busy_percent=1.10 wait_p50_us=5 wait_p99_us=63 wait_p999_us=135 wait_max_us=340 over_1ms=0 slowest_us=411 slowest_seq=551516 slowest_stamp=16277788716
+16382780531µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=23726 event_wakes=23726 timeout_wakes=17024 timeout_messages=28 event_to_up_p50_us=5 event_to_up_p99_us=12 event_to_up_p999_us=30 event_to_up_max_us=169
+16382785362µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=29390 busy_percent=1.17 wait_p50_us=5 wait_p99_us=59 wait_p999_us=143 wait_max_us=469 over_1ms=0 slowest_us=438 slowest_seq=577288 slowest_stamp=16330132037
+16442782782µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=23496 event_wakes=23496 timeout_wakes=17214 timeout_messages=46 event_to_up_p50_us=5 event_to_up_p99_us=12 event_to_up_p999_us=41 event_to_up_max_us=136
+16442785603µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=29954 busy_percent=1.21 wait_p50_us=5 wait_p99_us=61 wait_p999_us=135 wait_max_us=513 over_1ms=0 slowest_us=721 slowest_seq=611732 slowest_stamp=16400288299
+16453134494µs #637869 [clients]  INFO clients::sockets: a client joined socket=27 component="panel-bridge" panel="VCockpit78" instruments=0
+16453134495µs #637870 [clients]  INFO clients::sockets: a client joined socket=26 component="panel-bridge" panel="VCockpit77" instruments=0
+16453154549µs #637878 [clients]  INFO clients::sockets: a client's socket closed socket=27 component="panel-bridge"
+16453154552µs #637879 [clients]  INFO clients::sockets: a client's socket closed socket=26 component="panel-bridge"
+16457139979µs #639765 [clients]  INFO clients::sockets: a client joined socket=28 component="panel-bridge" panel="VCockpit62" instruments=1
+16457139984µs #639766 [clients]  INFO clients::sockets: a client joined socket=29 component="panel-bridge" panel="VCockpit61" instruments=1
+16457160066µs #639779 [clients]  INFO clients::sockets: a client's socket closed socket=28 component="panel-bridge"
+16457160070µs #639780 [clients]  INFO clients::sockets: a client's socket closed socket=29 component="panel-bridge"
+16502783298µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=23814 event_wakes=23814 timeout_wakes=17104 timeout_messages=33 event_to_up_p50_us=5 event_to_up_p99_us=11 event_to_up_p999_us=37 event_to_up_max_us=146
+16502790268µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=29611 busy_percent=1.13 wait_p50_us=5 wait_p99_us=57 wait_p999_us=111 wait_max_us=364 over_1ms=0 slowest_us=413 slowest_seq=656551 slowest_stamp=16491319172
+16562784919µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=21217 event_wakes=21215 timeout_wakes=18004 timeout_messages=25 event_to_up_p50_us=4 event_to_up_p99_us=12 event_to_up_p999_us=23 event_to_up_max_us=45
+16562791111µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26685 busy_percent=1.05 wait_p50_us=5 wait_p99_us=59 wait_p999_us=119 wait_max_us=452 over_1ms=0 slowest_us=429 slowest_seq=688522 slowest_stamp=16560633651
+16622787346µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=13490 event_wakes=13490 timeout_wakes=19998 timeout_messages=10 event_to_up_p50_us=4 event_to_up_p99_us=11 event_to_up_p999_us=22 event_to_up_max_us=65
+16622792910µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=18650 busy_percent=0.82 wait_p50_us=5 wait_p99_us=67 wait_p999_us=143 wait_max_us=476 over_1ms=0 slowest_us=383 slowest_seq=706314 slowest_stamp=16619294786
+16682788313µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=16732 event_wakes=16732 timeout_wakes=19064 timeout_messages=14 event_to_up_p50_us=5 event_to_up_p99_us=12 event_to_up_p999_us=41 event_to_up_max_us=75
+16682794086µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=22055 busy_percent=0.94 wait_p50_us=5 wait_p99_us=63 wait_p999_us=127 wait_max_us=564 over_1ms=0 slowest_us=553 slowest_seq=720683 slowest_stamp=16650069285
+16742790254µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=11013 event_wakes=11012 timeout_wakes=20718 timeout_messages=9 event_to_up_p50_us=4 event_to_up_p99_us=11 event_to_up_p999_us=25 event_to_up_max_us=42
+16742794996µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=16198 busy_percent=0.73 wait_p50_us=5 wait_p99_us=61 wait_p999_us=135 wait_max_us=232 over_1ms=0 slowest_us=366 slowest_seq=737484 slowest_stamp=16712289892
+16758149048µs #752939 [session]  INFO session::control: control passed generation=15 pf="bd785a342891437a87b838de477aa271"
+16758149048µs #752939 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+16758149048µs #752939 [clients]  INFO clients: a notification was raised id="take-control.pass" level=Information text="You have control"
+16759145692µs #753379 [network]  INFO network::links: a member left the session conn=1
+16759145692µs #753379 [session]  INFO session::members: a member left the session member="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+16759145692µs #753379 [clients]  INFO clients: a notification was raised id="session.crew-11bc00e2cfec4bd7a25bbd3ca66c6efa" level=Information text="pilot-a left the session"
+16802792057µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=21822 event_wakes=21822 timeout_wakes=18481 timeout_messages=31 event_to_up_p50_us=5 event_to_up_p99_us=13 event_to_up_p999_us=39 event_to_up_max_us=202
+16802798611µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=24646 busy_percent=0.90 wait_p50_us=5 wait_p99_us=59 wait_p999_us=115 wait_max_us=463 over_1ms=0 slowest_us=489 slowest_seq=746496 slowest_stamp=16743686635
+16803302877µs #770913 [network]  INFO network::links: a connection to another core opened conn=2 dialed=false
+16803302877µs #770913 [session]  INFO session: a connection's first message carries this core's keys conn=2 bytes=571
+16803302893µs #770914 [network]  INFO network::links: a connection's path changed conn=2 path=Relay { url: "https://cookie-gif-lawyer-seniors.trycloudflare.com/" }
+16803381667µs #770943 [network]  INFO network::links: a member's link is up conn=2 again=false restart=0
+16803381667µs #770943 [session]  INFO session::members: a member joined the session member="e8954c59a301408d8152f68cc24b070f"
+16803381667µs #770943 [session]  INFO session::members: a member entered the flight member="e8954c59a301408d8152f68cc24b070f" in_flight=true
+16805077237µs #771552 [cockpit-stream]  INFO cockpit_stream: the flying machine answers a catch-up bytes=7699
+16862792981µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=22021 event_wakes=22020 timeout_wakes=18104 timeout_messages=20 event_to_up_p50_us=5 event_to_up_p99_us=13 event_to_up_p999_us=39 event_to_up_max_us=68
+16862799206µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25955 busy_percent=1.02 wait_p50_us=5 wait_p99_us=63 wait_p999_us=123 wait_max_us=300 over_1ms=0 slowest_us=482 slowest_seq=779289 slowest_stamp=16822106430
+16922795256µs  INFO sim_edge::stats: the sim edge's stats seconds=60.0 messages=18625 event_wakes=18625 timeout_wakes=18852 timeout_messages=17 event_to_up_p50_us=5 event_to_up_p99_us=14 event_to_up_p999_us=35 event_to_up_max_us=161
+16922802331µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=22505 busy_percent=0.91 wait_p50_us=5 wait_p99_us=67 wait_p999_us=119 wait_max_us=244 over_1ms=0 slowest_us=307 slowest_seq=810888 slowest_stamp=16896558467
+16928615890µs #820754 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Unknown
+16929860134µs #821162 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Menu aircraft="bksq-aircraft-baronpropress"
+16929860134µs #821162 [session]  INFO session::control: this core passed control generation=16 pf="e8954c59a301408d8152f68cc24b070f"
+16929860134µs #821162 [session]  INFO session::members: a member left the flight member="bd785a342891437a87b838de477aa271" in_flight=false
+16929860134µs #821162 [profile-loader]  INFO profile_loader: the profile unloaded
+16929860134µs #821162 [flight-model]  INFO flight_model: flight-model sync runs no routine
+16929882859µs #821164 [clients]  INFO clients::sockets: a client's socket closed socket=5 component="panel-bridge"
+16929882916µs #821165 [clients]  INFO clients::sockets: a client's socket closed socket=9 component="panel-bridge"
+16929882921µs #821166 [clients]  INFO clients::sockets: a client's socket closed socket=10 component="panel-bridge"
+16929882936µs #821168 [clients]  INFO clients::sockets: a client's socket closed socket=4 component="panel-bridge"
+16929882964µs #821169 [clients]  INFO clients::sockets: a client's socket closed socket=6 component="panel-bridge"
+16930082521µs #821175 [clients]  INFO clients::sockets: a client's socket closed socket=25 component="banner"
+16930636429µs #821192 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Main
+16931940779µs #821242 [network]  INFO network::links: a member left the session conn=2
+16931940779µs #821242 [session]  INFO session::members: a member left the session member="e8954c59a301408d8152f68cc24b070f"
+16931940779µs #821242 [clients]  INFO clients: a notification was raised id="session.crew-e8954c59a301408d8152f68cc24b070f" level=Information text="pilot-a left the session"
+16931940779µs #821242 [session]  INFO session::members: preflight has ended and no member is in the flight, so the session ends
+16931940779µs #821242 [session]  INFO session::joining: this pilot leaves the session quit=false
+16931940779µs #821242 [session]  INFO session::joining: the session ended for this core code="XZD67Z"
+16931940779µs #821242 [network]  INFO network: the network leaves the session quit=false
+16931940779µs #821242 [sim-service]  INFO sim_service::announce: the core announces that a session ended session=false
+16931940779µs #821242 [clients]  INFO clients: a notification was cleared id="session.crew-e8954c59a301408d8152f68cc24b070f"
+16931940779µs #821242 [core-helper]  INFO core_helper_service::life: nothing is wanted of the core helper, so it stops run=1
+16931941320µs  INFO transport: the transport closed its endpoint
+16931944443µs #821245 [core-helper]  INFO core_helper_service::life: the core helper exited run=1 code=0
+16933513302µs #821292 [clients]  INFO clients::sockets: a client's socket closed socket=1 component="efb-app"
+16933553343µs #821294 [clients]  INFO clients::sockets: a client's socket closed socket=0 component="menu-script"
+16934103648µs #821298 [sim-service]  INFO sim_service::seam: the sim sent its quit message
+16934103648µs #821298 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Closed aircraft="bksq-aircraft-baronpropress"
+16934103648µs #821298 [session]  INFO session::joining: the sim closed and no session is held, so the core exits
+16934103937µs  INFO dualinput_core::run: the core is exiting seq=821298
+16934103941µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=11.3 inputs=2096 busy_percent=0.55 wait_p50_us=5 wait_p99_us=67 wait_p999_us=115 wait_max_us=2919 over_1ms=1 slowest_us=2895 slowest_seq=821162 slowest_stamp=16929860134
+16934103948µs  INFO dualinput_core::loop_stats: the loop's stats window="run" seconds=2831.4 inputs=821299 busy_percent=0.78 wait_p50_us=5 wait_p99_us=71 wait_p999_us=175 wait_max_us=2919 over_1ms=6 slowest_us=6102 slowest_seq=19212 slowest_stamp=14825298778
+16934205568µs  INFO sim_edge::stats: the sim edge's stats seconds=11.4 messages=1493 event_wakes=1493 timeout_wakes=4009 timeout_messages=7 event_to_up_p50_us=5 event_to_up_p99_us=13 event_to_up_p999_us=18 event_to_up_max_us=34
+16934206517µs  INFO dualinput_core::run: the core exited exit_took_ms=102

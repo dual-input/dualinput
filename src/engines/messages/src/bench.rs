@@ -306,6 +306,11 @@ pub enum StandInAct {
         after_ms: u64,
         then: RuleThen,
     },
+    /// Hands up our module's next report this long after the module made it.
+    LateReport { delay_ms: u64 },
+    /// Sends a `FromCore::Track` line with the aircraft's variables `names` after each frame
+    /// from now on, or stops with no names.
+    Track { names: Vec<String> },
     /// Answers with a `FromCore::StandIn` line.
     Report,
 }
@@ -493,6 +498,9 @@ pub enum FromCore {
     CommBus { name: String, data: String },
     /// An `H:` event reached the sim's pages, as an instrument receives it, with no `H:`.
     HEvent { name: String },
+    /// The aircraft's variables `StandInAct::Track` named, after one of the stand-in's
+    /// frames, at `at`, in µs of the PC's own time since 1970.
+    Track { at: u64, values: Vec<f64> },
     /// What the stand-in was called for, and what its aircraft holds.
     StandIn {
         /// Each connection opened while the sim took connections, as its unit's place and

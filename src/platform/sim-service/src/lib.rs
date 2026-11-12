@@ -90,6 +90,9 @@ pub enum SimEvent {
         value: Value,
         first: bool,
     },
+    /// One report of a routine, which a `cx.module().reports` call asked for: the bytes of
+    /// the routine's `Report`, as our WASM module wrote them into its report slot.
+    Report { call: Handle, bytes: Vec<u8> },
     /// The unit's connection was lost, and what it set up or created in the sim with it.
     Lost,
 }

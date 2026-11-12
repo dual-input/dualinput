@@ -1,5 +1,5 @@
 //! The module's own SimConnect connection, which carries the core's writes to the routines'
-//! slots in and the module's status out.
+//! slots in, and the module's status and its routines' reports out.
 
 use std::cell::RefCell;
 use std::ffi::{CString, c_void};
@@ -20,7 +20,8 @@ use crate::bindings::{
 
 /// The status slot's client data area on this connection, and its definition's ID. Each
 /// routine's slot takes the next area, in the order `Host::slots` lists them, and its area's
-/// number for its definition and its request too.
+/// number for its definition and its request too. Each report slot takes the next after
+/// those, in the order `Host::report_slots` lists them.
 const STATUS_AREA: u32 = 0;
 
 /// What `gather` collects: each client data message's request and bytes.
@@ -30,13 +31,19 @@ pub(crate) struct Connection {
     handle: HANDLE,
     /// Each routine's slot, by its area less one.
     routines: Vec<RoutineId>,
+    /// Each routine that reports, with its report's size, by its area less the first
+    /// report slot's.
+    reports: Vec<(RoutineId, u32)>,
 }
 
 impl Connection {
-    /// Opens the connection, creates the status slot and each routine's slot in `slots`,
-    /// with its size in bytes, and asks for each routine's slot whenever the core sets it.
-    /// None when SimConnect refuses the connection.
-    pub(crate) fn open(slots: &[(RoutineId, u32)]) -> Option<Connection> {
+    /// Opens the connection, creates the status slot, each routine's slot in `slots`, and
+    /// each report slot in `reports`, with its size in bytes, and asks for each routine's
+    /// slot whenever the core sets it. None when SimConnect refuses the connection.
+    pub(crate) fn open(
+        slots: &[(RoutineId, u32)],
+        reports: &[(RoutineId, u32)],
+    ) -> Option<Connection> {
         let mut handle: HANDLE = 0;
         // SAFETY: SimConnect writes the connection's handle into `handle`, and reads the
         // name, which outlives the call.
@@ -56,6 +63,7 @@ impl Connection {
         let connection = Connection {
             handle,
             routines: slots.iter().map(|&(id, _)| id).collect(),
+            reports: reports.to_vec(),
         };
         // The core trusts the status slot to say whether our module runs, and the read-only
         // flag lets only the slot's creator, this connection, write it
@@ -90,7 +98,22 @@ impl Connection {
                 )
             };
         }
+        // A feature trusts a report to be its routine's, and the read-only flag lets only
+        // this connection write the slot, as it does the status slot.
+        for (area, &(id, size)) in (connection.first_report()..).zip(reports) {
+            connection.create(
+                area,
+                &id.report_slot(),
+                size,
+                SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY,
+            );
+        }
         Some(connection)
+    }
+
+    /// The first report slot's area, after the status slot's and every routine's.
+    fn first_report(&self) -> u32 {
+        STATUS_AREA + 1 + self.routines.len() as u32
     }
 
     /// Maps `name` to `area`, creates it with `size` bytes, and defines it as one block of
@@ -145,6 +168,33 @@ impl Connection {
                 0,
                 size_of::<ModuleStatus>() as DWORD,
                 (&raw mut status).cast(),
+            );
+        }
+    }
+
+    /// Writes `routine`'s report into its report slot, which the feature's connection hears
+    /// as it's set. A report of another size than the slot's, or of a routine with no report
+    /// slot, is dropped.
+    pub(crate) fn write_report(&self, routine: RoutineId, report: &[u8]) {
+        let Some(index) = self
+            .reports
+            .iter()
+            .position(|&(id, size)| id == routine && size as usize == report.len())
+        else {
+            return;
+        };
+        let area = self.first_report() + index as u32;
+        // SAFETY: SimConnect copies the report's bytes out during the call, and writes
+        // nothing through the pointer.
+        unsafe {
+            SimConnect_SetClientData(
+                self.handle,
+                area,
+                area,
+                SIMCONNECT_CLIENT_DATA_SET_FLAG_DEFAULT,
+                0,
+                report.len() as DWORD,
+                report.as_ptr().cast_mut().cast(),
             );
         }
     }

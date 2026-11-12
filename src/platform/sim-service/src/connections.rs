@@ -81,6 +81,9 @@ pub(crate) struct Holder {
     pub(crate) input_reads: BTreeMap<u32, Handle>,
     /// The `input` calls reading each input event, by its hash, since two entries can.
     pub(crate) inputs: BTreeMap<u64, Vec<Handle>>,
+    /// Each routine whose reports the unit reads, by the request they come under: the
+    /// routine's name, and the handle of the unit's latest `reports` call for it.
+    pub(crate) reports: BTreeMap<u32, (&'static str, Handle)>,
     /// The tag of the unit's next call, from the unit's own count, and each recent call's
     /// origin by its tag.
     next_tag: u64,
@@ -103,6 +106,7 @@ impl Holder {
             listens: BTreeMap::new(),
             input_reads: BTreeMap::new(),
             inputs: BTreeMap::new(),
+            reports: BTreeMap::new(),
             next_tag: 0,
             tags: BTreeMap::new(),
         }

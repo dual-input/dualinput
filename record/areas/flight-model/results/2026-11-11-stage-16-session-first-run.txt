@@ -1,0 +1,108 @@
+Stage 16's first session in the sim, 2026-11-11, on our development machine: MSFS 2024 SunRise
+12.2.282174.999, the Black Square Baron 58P Professional, the release core of the tree at 0.1.0,
+and a bench core on a stand-in sim as the second pilot. Three parts: the report tools/sim/flight-model.ts
+wrote, a sweep of the brake axis events, and the parking brake's preset.
+
+The report's "our module's update" lines print the timer's nanoseconds as µs, so each figure
+there is 1,000 times too large: 41400 is 41.4µs. The core helper in the release folder was of
+another build, 0.1.1, and the core killed it every 2s through the session.
+
+=== 1. tools/sim/flight-model.ts's report
+Start the sim, load a flight in the Baron 58P on the ground at a stand, engines running, and press Ready to fly.
+The session is starting. Keep your hands off the controls until a step asks for them.
+the sim is flying bksq-aircraft-baronpropress; hosting the session
+
+=== On the ground
+PASSED: the bench core's aircraft follows the 58P: the stand-in stands 0.00m from it
+PASSED: Lead reports about 20 times a second at the sim's frame rate: the second pilot's core wrote Follow's slot 250 times in 10s, 250 with its rewrites
+our module's update with Lead, with the 58P flying: 41400µs at p50, 134500µs at p99, 197600µs at most, over its last 300 frames, against 100µs
+waiting up to 75s for your aircraft to settle
+FAILED: a _Set preset with a value, LANDING_GEAR_ParkingBrake_Set 1, moves the sim's parking brake: never held within 8000ms, read 0
+PASSED: and back: 0, after 107ms
+Open Steam's overlay with Shift and Tab, move the mouse over the cockpit and click a few times, then close the overlay. Press Page Up when that's done.
+the window under the cursor and the one in front, 5 times a second, as process/class and how often:
+  34 × under=FlightSimulator2024/AceApp front=FlightSimulator2024/AceApp
+PASSED: with Steam's overlay open, the window under the cursor stayed the sim's, so a check of it would swallow no click
+The second pilot takes control. Your aircraft will rise 5 feet and slide forward for 10 seconds, then come back.
+PASSED: Follow froze the 58P through fsEventsTriggerKeyEvent: 3, after 2200ms
+PASSED: fsVarsAVarSet holds the pilot's own aircraft's pose: the 58P moved 23.2m and rose 7.3ft with the stand-in, 0.02m from its path 400ms before at the median, 0.02m at p99, 0.03m at most, over 116 frames
+the 58P's controls before the stand-in moved its own: {"aileron":92,"elevator":70,"rudder":1,"brakeLeft":0,"brakeRight":0,"yokeX":0.5615234375,"yokeY":0.42724609375}
+and after: {"aileron":-8000,"elevator":6000,"rudder":-4999.9998779296875,"brakeLeft":16766.931657612324,"brakeRight":2559.438247181475,"yokeX":-48.828125,"yokeY":36.62109375}
+PASSED: the three axis events moved the 58P's surfaces to the PF's: aileron -8000, elevator 6000, rudder -5000, against -8000, 6000, -5000
+FAILED: each brake reads what the PF's does: left 16767, right 2559, against 24000 and 8000
+PASSED: the yoke's variables moved with the events: YOKE X POSITION WITH AP LINEAR 0.6 to -48.8, YOKE Y POSITION WITH AP 0.4 to 36.6
+Look at the yoke. Is it held turned to one side? Press Page Up for yes, or Page Down for no.
+PASSED: the pilot saw the yoke held over by the events
+our module's update with Follow, with the 58P following: 54100µs at p50, 334900µs at p99, 622100µs at most, over its last 300 frames, against 100µs
+PASSED: the 58P unfroze as its pilot took control: 0, after 2167ms
+
+=== In the air
+Take off, climb to about 3000 feet, and engage the autopilot with heading and altitude hold. Press Page Up when that's done.
+Look at the second pilot's figure in the right seat. Is it steady, with no part jittering? Press Page Up for yes, or Page Down for no.
+PASSED: on the flying machine, no part of the figure skips a frame in flight
+our module's update with Lead and Figure, in flight: 46600µs at p50, 111900µs at p99, 208100µs at most, over its last 300 frames, against 100µs
+The second pilot takes control for about a minute. Keep your hands off the controls.
+PASSED: the 58P follows the stand-in in straight flight: 0.59m from its path 400ms before at the median, 0.61m at p99, 0.66m at most, over 221 frames
+the 58P's velocities against the ones written, frame by frame: body 0.00, 0.00, 0.00 ft/s at most on x, y, and z, and rotation 0.000, 0.000, 0.000 rad/s, where p02's writes from outside the frame read up to 7.6 ft/s and 2.3 rad/s
+Did the aircraft fly smoothly, with no jumps or shaking? Press Page Up for yes, or Page Down for no.
+FAILED: the pilot answered no: the pilot saw the following aircraft fly smoothly
+Is the second pilot's figure in the right seat still steady? Press Page Up for yes, or Page Down for no.
+FAILED: the pilot answered no: on the following machine, no part of the figure skips a frame in flight
+The aircraft turns right for 20 seconds, with its yoke moving.
+PASSED: the 58P follows the stand-in through a turn: it turned 58.8°, 0.57m from the path at p99, 0.60m at most
+FAILED: the axis events left the following aircraft's autopilot engaged
+our module's update with Follow and Figure, in flight: 49300µs at p50, 313300µs at p99, 438200µs at most, over its last 300 frames, against 100µs
+The aircraft jumps 50 kilometers north. Watch whether the sim stalls.
+the 58P went 49.2km, and the longest gap between two of the panel's frames was 77ms
+Did the sim keep running through the jump, with no long freeze? Press Page Up for yes, or Page Down for no.
+PASSED: the sim loads the scenery 50km on without stalling
+You take control back, the sim runs at twice its rate, and the second pilot takes control again.
+PASSED: the simulation rate is 2: 2, after 135ms
+PASSED: at a simulation rate of 2 the ex-PF's aircraft carries on at the speed it flew: 130.8 m/s before the handover, 123.3 m/s in Follow's first 400ms
+
+=== A second flight load
+Restart the flight from the pause menu, and press Ready to fly when it has loaded.
+PASSED: after the second load, Follow froze the 58P again: 3, after 2141ms
+PASSED: and wrote it at the stand-in's place: 179.9m from it
+FAILED: secondLoad stopped: gave up after 15s
+That's every case. Whoever runs the script stops it with q in its terminal, which replays the core's recording.
+the real core's last loop stats: 38230560689µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=12339 busy_percent=0.57 wait_p50_us=8 wait_p99_us=151 wait_p999_us=1279 wait_max_us=9495 over_1ms=1 slowest_us=1601 slowest_seq=89956 slowest_stamp=38228412600
+the core's replay: replayed 99560 inputs, and all 470 checkpoints matched, up to the last flush of a cut recording
+
+=== 2. The brake axis events, swept from a cockpit panel through the inspector
+
+Each value was sent as K:AXIS_LEFT_BRAKE_SET and K:AXIS_RIGHT_BRAKE_SET every frame for 0.7s, with
+the parking brake set and the aircraft on the ground, and the variables were read at the end, in
+position 32k.
+
+event value | BRAKE LEFT POSITION | BRAKE RIGHT POSITION | BRAKE LEFT POSITION EX1 | parking brake
+-16383 | 2130 | 2130 | 0 | 1
+-12000 | 3442 | 3442 | 1402 | 1
+-8384 | 4523 | 4523 | 2559 | 1
+-4000 | 7559 | 7559 | 5806 | 1
+0 | 10402 | 10402 | 8846 | 1
+4000 | 14291 | 14291 | 13006 | 1
+7616 | 17807 | 17807 | 16767 | 1
+12000 | 25061 | 25061 | 24525 | 1
+16383 | 32767 | 32767 | 32767 | 1
+-16383 | 2130 | 2130 | 0 | 1
+
+Before the sweep, at rest with the parking brake set, BRAKE LEFT POSITION and BRAKE RIGHT POSITION
+read 32766.9.
+
+=== 3. The parking brake's preset, from a cockpit panel, with the pilot's hardware enabled
+
+Each was sent once, 300ms into a recording of 2.5s, and the lines give each change of
+A:BRAKE PARKING POSITION as [ms, parking, BRAKE LEFT POSITION EX1, BRAKE LEFT POSITION].
+
+the parking brake at the start: 1
+B:LANDING_GEAR_ParkingBrake_Set 0: [[2,1,0,32767],[402,0,0,0]]; at the end [2536,0,0,0], over 39 frames
+B:LANDING_GEAR_ParkingBrake_Set 1: [[36,0,0,0],[369,1,0,32767]]; at the end [2502,1,0,32767], over 38 frames
+B:LANDING_GEAR_ParkingBrake_Set 0: [[1,1,0,32767],[402,0,0,0]]; at the end [2536,0,0,0], over 39 frames
+B:LANDING_GEAR_ParkingBrake_Set 1: [[35,0,0,0],[369,1,0,32767]]; at the end [2503,1,0,32767], over 38 frames
+K:PARKING_BRAKE_SET 0: [[2,1,0,32767],[399,0,0,0]]; at the end [2532,0,0,0], over 39 frames
+K:PARKING_BRAKE_SET 1: [[35,0,0,0],[368,1,0,32767]]; at the end [2502,1,0,32767], over 38 frames
+the parking brake at the end: 1
+
+A run before it, with the hardware disabled, read the same for the preset; K:PARKING_BRAKE_SET 1
+then read 0 at the end, with the brake back at 1 by the next read.

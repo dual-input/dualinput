@@ -32,6 +32,7 @@ impl Routine for NamedEvents {
     const ID: RoutineId = NAMED_EVENTS;
     const FEED_ONCE: bool = true;
     type Slot = NamedEventsSlot;
+    type Report = ();
 
     fn on_slot(&mut self, slot: &NamedEventsSlot) {
         self.due.extend(named_events(slot));

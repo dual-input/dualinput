@@ -13,6 +13,7 @@ pub struct Hold;
 impl Routine for Hold {
     const ID: messages::module::RoutineId = HOLD;
     type Slot = HoldSlot;
+    type Report = ();
 
     fn on_slot(&mut self, _: &HoldSlot) {}
 

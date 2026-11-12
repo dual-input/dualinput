@@ -216,9 +216,69 @@ impl ModuleCalls<'_, '_> {
     pub fn end(&self, routine: RoutineId) {
         self.cx.call(SimService::end, (self.cx.unit(), routine));
     }
+
+    /// Reads each report `routine` makes, a `R`, as the module writes it: each arrives as
+    /// `SimEvent::Report` with this handle. The read lasts as long as the unit's connection,
+    /// so a unit calls it each time it starts the routine, and a second call for the same
+    /// routine only moves its reports to the new handle.
+    pub fn reports<R: Pod>(&self, routine: RoutineId) -> Handle {
+        let handle = self.cx.handle();
+        let origin = Origin {
+            unit: self.cx.unit(),
+            handle: Some(handle),
+        };
+        let size = size_of::<R>() as u32;
+        self.cx
+            .call(SimService::reports_for, (origin, routine, size));
+        handle
+    }
 }
 
 impl SimService {
+    /// Maps the routine's report slot on the unit's connection and asks for it each time the
+    /// module sets it, or, when the connection reads it already, hands its reports to the new
+    /// call.
+    fn reports_for(
+        me: &mut SimService,
+        (origin, routine, size): (Origin, RoutineId, u32),
+        cx: &mut Cx,
+    ) {
+        let Some(call) = origin.handle else {
+            return;
+        };
+        if me.client(origin, cx).is_none() {
+            return;
+        }
+        let Some(holder) = me.holders.get_mut(&origin.unit.place()) else {
+            return;
+        };
+        if let Some(read) = holder
+            .reports
+            .values_mut()
+            .find(|(name, _)| *name == routine.name)
+        {
+            read.1 = call;
+            return;
+        }
+        let (area, mut ops) = holder.client.area(&origin, &routine.report_slot(), size);
+        let (request, op) = holder.client.read_area(&origin, area);
+        ops.push(op);
+        holder.reports.insert(request, (routine.name, call));
+        me.make(origin, ops, cx);
+    }
+
+    /// A routine's report, which the module wrote into its report slot: the unit's latest
+    /// `reports` call for the routine hears it.
+    pub(crate) fn report_read(&self, unit: UnitId, request: u32, bytes: Vec<u8>, cx: &Cx) {
+        if let Some(&(_, call)) = self
+            .holders
+            .get(&unit.place())
+            .and_then(|h| h.reports.get(&request))
+        {
+            self.tell(unit, SimEvent::Report { call, bytes }, cx);
+        }
+    }
+
     fn watch_for(
         me: &mut SimService,
         (origin, object, vars, period): (Origin, u32, Vec<Var>, Period),

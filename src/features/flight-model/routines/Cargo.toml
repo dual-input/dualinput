@@ -1,0 +1,15 @@
+[package]
+name = "flight-model-routines"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+messages = { path = "../../../engines/messages" }
+routine-host = { path = "../../../platform/routine-host" }
+
+[dev-dependencies]
+bytemuck = "1.25.2"
+
+[lints]
+workspace = true

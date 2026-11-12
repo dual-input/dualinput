@@ -3,6 +3,25 @@
 What the build's stages found about pointer sync, which plays one pilot's presses and drags on a synced display on the crew's copies of it, newest entry first.
 Each entry's raw output is in the `results/` folder beside this log.
 
+## 2026-11-12: Between two PCs over a relayed link, taps and a drag on the Baron's tablet played on the other display, and a display in use held the other pilot's press off
+
+**Asked:** do [pointer sync's cases with friends](01-pointer-sync.md#cases-for-the-bench) hold, in [stage 16](../build/plan.md#16-flight-model-sync)'s first flight with friends: do the two PCs give a display the same rect, and does a drag look smooth on the other display over a relayed link?
+
+**Expected:** taps at the same spot on both tablets, since the messages carry fractions of the display's rect, and a drag about as smooth as the bench's.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999 on both PCs, 2026-11-11, in flight in the Black Square Baron 58P Professional, each PC on the installed release 0.1.0, with the link on the relay through a Cloudflare quick tunnel for the whole session ([the flight's entry](../flight-model/log.md#2026-11-12-two-pilots-on-two-pcs-flew-one-58p-smoothly-through-13-handovers-over-a-relayed-link-and-after-a-handover-with-the-autopilot-engaged-the-aircraft-drifted)).
+The pilots judged each by eye, each way:
+
+- A tap on the tablet answered on the other PC's tablet.
+- A drag played on the other display, and the pilots found nothing wrong with it.
+- While one pilot's gesture held a display, the other pilot's press on it was held off.
+
+The cores log no rect, so whether the two PCs gave the tablet the same rect is unverified beyond the taps landing where they were made, and a read of both panels' rects in a later flight would settle it.
+
+**Changed:** nothing.
+
+**Affects:** none.
+
 ## 2026-11-09: Pointer sync's cases in the sim pass on the A220's ND and the Baron's tablet, once the second pilot's display carries the A220's livery
 
 **Asked:** do [pointer sync's cases in the sim](01-pointer-sync.md#cases-for-the-bench) hold, in stage 14's session, with the real core hosting and a bench core's fake cockpit panel as the second pilot's display, on the Baron 58P's tablet and on the A220's ND with a local profile that names its `DisplayUnits`?

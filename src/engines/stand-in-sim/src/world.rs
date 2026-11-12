@@ -38,7 +38,15 @@ pub struct World {
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) enum Fired {
     H(String),
-    Preset { name: String, value: Option<f64> },
+    Preset {
+        name: String,
+        value: Option<f64>,
+    },
+    /// One of the sim's events with its value, by its name with no `K:`.
+    Key {
+        name: String,
+        value: i32,
+    },
 }
 
 pub(crate) struct Input {
@@ -107,6 +115,15 @@ impl World {
     /// module's frame ends.
     pub fn call_preset(&mut self, name: &str, value: Option<f64>) {
         self.fired.push(Fired::Preset {
+            name: name.to_string(),
+            value,
+        });
+    }
+
+    /// The module sent the sim's event `name` with `value`, which the stand-in carries out
+    /// once the module's frame ends.
+    pub fn key(&mut self, name: &str, value: i32) {
+        self.fired.push(Fired::Key {
             name: name.to_string(),
             value,
         });

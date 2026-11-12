@@ -5,7 +5,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::panic::AssertUnwindSafe;
 use std::sync::mpsc;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use sim_client::message::{Camera, Data, InputEvent, Message};
 use sim_client::{Connection, Op, SimCall, Tag, Up, Value};
@@ -22,7 +22,8 @@ use windows_sys::Win32::System::Threading::{
 
 use crate::world::{Fired, Input};
 use crate::{
-    Act, Called, Message as ToThread, Module, Object, Page, Report, Rule, Signal, Then, When, World,
+    Act, Called, Message as ToThread, Module, Object, Page, REPORT_PREFIX, Report, Rule, Signal,
+    Then, When, World, motion,
 };
 
 /// What the sim's open message names, as MSFS 2024's did on three sim releases: SunRise
@@ -77,6 +78,15 @@ pub(crate) struct Sim {
     /// Frames a second, which each `Frame` event carries.
     frame_rate: u32,
     next_frame: Instant,
+    /// When the last frame ran, which times how far the aircraft moves in this one.
+    last_frame: Option<Instant>,
+    /// The flags of the last `Pause_EX1` a scenario played, 0 when nothing pauses the sim. A
+    /// paused aircraft stays where it is.
+    paused: u32,
+    /// How late the module's next report goes up, when a scenario asked for a late one.
+    late_report: Option<Duration>,
+    /// The aircraft's variables a scenario follows frame by frame.
+    track: Vec<String>,
     /// What's due later, such as a held-back open message or a played signal, in order.
     due: Vec<(Instant, Due)>,
     opened: Vec<Connection>,
@@ -92,6 +102,8 @@ enum Due {
     Then(Then, Option<f64>),
     /// An `Every` rule's next turn, by its place in the rules.
     Every(usize),
+    /// A report the module made a while ago, by its area's name.
+    Area(String, Vec<u8>),
 }
 
 /// How many input events one page of the list holds, so a scenario sees the list come in
@@ -186,6 +198,10 @@ impl Sim {
             frame_every: Some(Duration::from_secs(1) / FRAMES),
             frame_rate: FRAMES,
             next_frame: started,
+            last_frame: None,
+            paused: 0,
+            late_report: None,
+            track: Vec::new(),
             due: Vec::new(),
             opened: Vec::new(),
             calls: Vec::new(),
@@ -322,6 +338,13 @@ impl Sim {
                 self.frame_every = (per_second > 0).then(|| Duration::from_secs(1) / per_second);
                 self.frame_rate = per_second;
                 self.next_frame = Instant::now();
+                // With its frames stopped, as through a load, the aircraft stands still, and
+                // doesn't jump on by the whole stop when they start again.
+                self.last_frame = None;
+            }
+            Act::LateReport { delay } => self.late_report = Some(delay),
+            Act::Track { names } => {
+                self.track = names.iter().map(|n| bare(n).to_string()).collect();
             }
             Act::StopModule => self.module_stopped = true,
             Act::Module(module) => {
@@ -426,6 +449,9 @@ impl Sim {
                     && let Some(vars) = self.world.vars_mut(object)
                 {
                     vars.set_number(var, f64::from(data));
+                }
+                if object == 0 {
+                    self.move_control(&name, data as i32);
                 }
                 self.event_sent(&name, [data, 0, 0, 0, 0], false);
             }
@@ -655,12 +681,21 @@ impl Sim {
         })
     }
 
-    /// One frame: the module's, unless it stopped, then the `Frame` events, then each watch
-    /// whose values changed.
+    /// One frame: the aircraft moves by its velocities, then the module's frame runs, unless
+    /// it stopped, then the `Frame` events go up, then each watch whose values changed.
     fn frame(&mut self) {
         self.next_frame += self.frame_every.unwrap_or(Duration::ZERO);
-        if self.next_frame < Instant::now() {
-            self.next_frame = Instant::now();
+        let now = Instant::now();
+        if self.next_frame < now {
+            self.next_frame = now;
+        }
+        // A frame that comes late, as after the thread waited on a busy PC, moves the
+        // aircraft by the time that passed, so its speed over the ground stays what its
+        // velocity says.
+        if let Some(last) = self.last_frame.replace(now)
+            && self.paused == 0
+        {
+            motion::fly(&mut self.world.aircraft, (now - last).as_secs_f64());
         }
         if !self.module_stopped {
             let clock = self.clock();
@@ -670,7 +705,13 @@ impl Sim {
             match std::panic::catch_unwind(AssertUnwindSafe(|| module.frame(clock, world))) {
                 Ok(writes) => {
                     for (slot, bytes) in writes {
-                        self.area_written(&slot, &bytes);
+                        match self.late_report.filter(|_| slot.starts_with(REPORT_PREFIX)) {
+                            Some(delay) => {
+                                self.late_report = None;
+                                self.schedule(Instant::now() + delay, Due::Area(slot, bytes));
+                            }
+                            None => self.area_written(&slot, &bytes),
+                        }
                     }
                 }
                 Err(_) => self.module_stopped = true,
@@ -682,8 +723,23 @@ impl Sim {
                         self.trigger(Trigger::Fired(&name), None);
                     }
                     Fired::Preset { name, value } => self.call_preset(&name, value),
+                    Fired::Key { name, value } => {
+                        self.move_control(&name, value);
+                        self.event_sent(&name, [value as u32, 0, 0, 0, 0], false);
+                    }
                 }
             }
+        }
+        if !self.track.is_empty() {
+            let at = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .map_or(0, |d| d.as_micros() as u64);
+            let values = self
+                .track
+                .iter()
+                .map(|name| self.world.aircraft.number(name))
+                .collect();
+            (self.pages)(Page::Track { at, values });
         }
         self.frame_events();
         let changed: Vec<(Connection, u32, u32, u32)> = self
@@ -777,6 +833,7 @@ impl Sim {
                     }
                 }
                 Due::Signal(signal) => self.signal(signal),
+                Due::Area(slot, bytes) => self.area_written(&slot, &bytes),
                 Due::Then(then, value) => self.then(then, value),
                 Due::Every(place) => {
                     if let Some(rule) = self.rules.get(place).cloned()
@@ -867,6 +924,35 @@ impl Sim {
         self.trigger(Trigger::Sent(name), Some(f64::from(data[0] as i32)));
     }
 
+    /// An axis event moves the pilot's aircraft's control: each surface's variable takes its
+    /// event's value negated, in Position 16k, as each read on the Baron 58P through our
+    /// masking probe (measured on MSFS 2024, 2026-10-01,
+    /// experiments/areas/flight-controls/results/p01-mask-2026-10-01-20-28-54.txt), and each
+    /// brake's takes its event's value plus 16,384, which is unverified
+    /// (record/areas/flight-model/01-flight-model-sync.md, "Drawing").
+    fn move_control(&mut self, name: &str, value: i32) {
+        let aircraft = &mut self.world.aircraft;
+        let value = f64::from(value);
+        match no_prefix(name) {
+            "AXIS_AILERONS_SET" => aircraft.set_number("AILERON POSITION", -value),
+            "AXIS_ELEVATOR_SET" => aircraft.set_number("ELEVATOR POSITION", -value),
+            "AXIS_RUDDER_SET" => aircraft.set_number("RUDDER POSITION", -value),
+            "AXIS_LEFT_BRAKE_SET" => {
+                aircraft.set_number(
+                    "BRAKE LEFT POSITION",
+                    (value + 16_384.0).clamp(0.0, 32_767.0),
+                );
+            }
+            "AXIS_RIGHT_BRAKE_SET" => {
+                aircraft.set_number(
+                    "BRAKE RIGHT POSITION",
+                    (value + 16_384.0).clamp(0.0, 32_767.0),
+                );
+            }
+            _ => {}
+        }
+    }
+
     /// The module called a preset, named as its input event and an operation, such as
     /// `ELECTRICAL_Battery_1_Toggle`: its input event moves by the operation, and a name with
     /// no such input event or operation does nothing, as a bare
@@ -941,6 +1027,9 @@ impl Sim {
     fn signal(&mut self, signal: Signal) {
         if let Signal::AircraftLoaded(path) = &signal {
             self.aircraft_path = path.clone();
+        }
+        if let Signal::Pause(flags) = &signal {
+            self.paused = *flags;
         }
         let hearers: Vec<(Connection, Message)> = self
             .conns

@@ -7,6 +7,15 @@ Decides:     What runs on a pilot's own machine and what on every machine; what 
 ```
 
 > **Note**
+> In [`Figure`, each frame](#figure-each-frame), on a following machine `Figure` seats its figures on the pose `Follow` says it writes that frame, with no lead.
+> Reading the aircraft back and leading it by a frame, as on the flying machine, let a figure slide forward and back along the aircraft, since the read gives the pose `Follow` wrote the frame before (seen on MSFS 2024, 2026-11-11, [flight-model log](../flight-model/log.md#2026-11-11-in-the-sim-the-58p-follows-a-stand-ins-path-within-centimeters-a-figure-on-the-following-machine-slid-along-the-aircraft-and-the-brake-events-follow-a-curve)).
+> Seated on `Follow`'s pose, the figure sat still in flight (seen on MSFS 2024, 2026-11-11, [flight-model log](../flight-model/log.md#2026-11-11-seated-on-the-pose-follow-says-it-writes-a-figure-keeps-its-seat-on-the-following-machine-and-the-58p-banks-and-pitches-with-the-aircraft-it-follows)).
+> In [a seat](#a-seat), a pilot who follows in flight doesn't hold their seat: their own core reads the camera 1m to 3m behind the seat's eye, takes them out of the seat, and the crew sees a head in the cabin.
+> The shift fits one frame of the aircraft's travel (unverified: no frame rate was logged).
+> The design has no answer to it yet (measured on MSFS 2024, 2026-11-11, [avatars log](log.md#2026-11-12-on-a-following-machine-in-flight-the-camera-reads-1m-to-3m-behind-the-pilots-seat-so-the-crew-sees-that-pilot-as-a-head-in-the-cabin)).
+> In [known limits](#known-limits), the check of the window under the cursor has its answer: with Steam's overlay open, that window is still the sim's, so the check would swallow no click made through the overlay ([avatars log](log.md#2026-11-11-with-steams-overlay-open-the-window-under-the-cursor-is-still-the-sims)).
+
+> **Note**
 > Stage 11b's tentative decision on [the Figures tab](../interface/decisions.md#the-figures-tab-holds-the-pilots-figure-and-explains-what-its-figures-can-do) changes avatars' notifications and settings until the apps' design confirms it (user, 2026-10-31).
 > A model that can't be read shows as a note at the top of the tab rather than a notification.
 > [Seeing a held seat](#a-seat)'s notification says only "This seat is taken", held while this pilot's camera is in the seat, rather than naming the free seats, since a profile can list any number of them.

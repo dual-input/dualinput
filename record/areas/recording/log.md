@@ -2,6 +2,30 @@
 
 What we found about the recording, replays, and bug reports, newest entry first.
 
+## 2026-11-12: A friend's recording of a 47-minute flight replayed on our PC, with another CPU, and every checkpoint matched
+
+**Asked:** does a recording made on a pilot's PC replay on ours, with another CPU, which [the core's math](../architecture/decisions.md#the-cores-timers-wait-on-a-high-resolution-waitable-timer-and-the-core-links-the-c-runtime-statically-with-its-fma3-math-off) left to a friend's recording; and how big is a real flight's recording against the 60 MB an hour it's budgeted?
+
+**Expected:** a match, with the C runtime linked in and its FMA3 math off, though no run had tried two CPUs.
+
+**Found:** from [stage 16](../build/plan.md#16-flight-model-sync)'s first flight with friends, 2026-11-11, each PC on the release 0.1.0, replayed on our development machine on 2026-11-12 by a development build of the same tree with one more log line in it:
+
+| Recording | Recorded on | Run | Size | An hour | Replayed on an AMD Ryzen 7 7800X3D |
+| --- | --- | --- | --- | --- | --- |
+| The host's | AMD Ryzen 9 9950X | 2,830s | 39.1 MB | 49.8 MB | all 2,832 checkpoints matched, over 821,299 inputs, in 67s |
+| The joiner's | AMD Ryzen 7 7800X3D | 2,662s | 28.0 MB | 37.9 MB | all 2,662 checkpoints matched, over 446,841 inputs |
+
+- Both CPUs are AMD's, so a recording from an Intel CPU is still untried.
+- Both sizes are under the budget, in a flight with state sync, flight-model sync, avatars, and pointer sync running and no traffic or ATC audio.
+- The joiner's second run, 158s from a start of Dual Input with the sim in flight through joining the session again, recorded 15.5 MB over 30,006 inputs, where the first run's inputs average 63 bytes.
+  So a run that joins a session in an aircraft starts with about 14 MB that doesn't grow with time, and the sizes an hour above overstate a flight's rate by it.
+  What those inputs are is unverified: the files avatars reads to build the aircraft's model are the likeliest, and a count of the recording's inputs by kind would settle it.
+- The replay gave what the run's log didn't hold: with one log line added, it printed every 10th camera read of both cores, which found why a following pilot's figure left its seat ([avatars log](../avatars/log.md#2026-11-12-on-a-following-machine-in-flight-the-camera-reads-1m-to-3m-behind-the-pilots-seat-so-the-crew-sees-that-pilot-as-a-head-in-the-cabin)).
+
+**Changed:** nothing.
+
+**Affects:** [architecture's tentative decisions](../architecture/decisions.md#the-cores-timers-wait-on-a-high-resolution-waitable-timer-and-the-core-links-the-c-runtime-statically-with-its-fma3-math-off), where this is the first answer to whether two CPUs give the same bits.
+
 ## 2026-10-23: One zstd frame flushed each second keeps a busy flight's recording at 42.6 MB an hour, where a frame ended each second takes 66.7 MB
 
 **Asked:** what budget a session's recording gets now that every input is recorded, since [budgets](01-recording-and-bug-reports.md#budgets)' 4 MB an hour rested on partial recording; and how big the core's own writer makes a busy flight's recording, since p10's 45 MB an hour compressed its 600s as one stream, while the writer ends a zstd frame each second.

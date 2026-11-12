@@ -1023,7 +1023,8 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Because:**
   - tokio's sleep woke up to 16.9ms late, and after `timeBeginPeriod(1)` as late in three of four runs, while a high-resolution waitable timer woke at most 1.46ms late (measured on our development machine, 2026-10-15, [core log][c01]).
   - Rust's `f64` math and QuickJS-ng's `Math` both call the C runtime's functions, whose results changed with the FMA3 switch, alike in both, and differed between the runtime's DLL that comes with Windows and the one linked into the program, even with FMA3 off (same entry).
-- **Leaves out:** whether two CPUs give the same bits from one build with FMA3 off, which replaying a friend's recording on ours settles; and the timers with the sim running and the PC busy, for [node 7](plan.md#7-testing)'s bench.
+  - A friend's recording of a 47-minute flight, made on an AMD Ryzen 9 9950X, replayed on our AMD Ryzen 7 7800X3D with all 2,832 checkpoints matching (measured, 2026-11-12, [recording log](../recording/log.md#2026-11-12-a-friends-recording-of-a-47-minute-flight-replayed-on-our-pc-with-another-cpu-and-every-checkpoint-matched)).
+- **Leaves out:** whether an Intel CPU and an AMD one give the same bits from one build with FMA3 off, which replaying such a pilot's recording on ours settles; and the timers with the sim running and the PC busy, for [node 7](plan.md#7-testing)'s bench.
 
 ## A panic crashes the core, which comes back as a late joiner
 

@@ -1,0 +1,1083 @@
+> cargo test -p messages --lib
+node :     Finished `test` profile [unoptimized + debuginfo] target(s) in 3.44s
+At line:1 char:440
++ ... final.txt"; node tools/bench.ts avatars cockpit flight-model killed-c ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (    Finished `t...get(s) in 3.44s:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+     Running unittests src\lib.rs (target\debug\deps\messages-3ace63241a56e568.exe)
+
+running 131 tests
+test backend::export_bindings_kind ... ok
+test avatars::export_bindings_aircraftnote ... ok
+test bench::export_bindings_called ... ok
+test bench::export_bindings_benchkind ... ok
+test bench::export_bindings_clientsact ... ok
+test backend::export_bindings_leave ... ok
+test backend::export_bindings_older ... ok
+test backend::export_bindings_created ... ok
+test backend::export_bindings_refused ... ok
+test backend::export_bindings_lookup ... ok
+test backend::export_bindings_taken ... ok
+test bench::export_bindings_delivery ... ok
+test avatars::export_bindings_avatarsslice ... ok
+test bench::export_bindings_fedbody ... ok
+test bench::export_bindings_fedhand ... ok
+test backend::export_bindings_entry ... ok
+test bench::export_bindings_hello ... ok
+test bench::export_bindings_helperact ... ok
+test bench::export_bindings_made ... ok
+test bench::export_bindings_cockpitact ... ok
+test bench::export_bindings_rulethen ... ok
+test bench::export_bindings_rulewhen ... ok
+test bench::export_bindings_signal ... ok
+test bench::export_bindings_simcall ... ok
+test backend::export_bindings_renew ... ok
+test bench::export_bindings_netact ... ok
+test bench::export_bindings_played ... ok
+test clients::export_bindings_announce ... ok
+test clients::export_bindings_coreslice ... ok
+test bench::export_bindings_fedfigure ... ok
+test clients::export_bindings_hello ... ok
+test bench::export_bindings_standinhelperline ... ok
+test backend::export_bindings_newsession ... ok
+test clients::export_bindings_landing ... ok
+test clients::export_bindings_level ... ok
+test clients::export_bindings_panelmodule ... ok
+test clients::export_bindings_efbapporder ... ok
+test clients::export_bindings_portfile ... ok
+test backend::export_bindings_lookedup ... ok
+test clients::export_bindings_settingkind ... ok
+test cockpit::export_bindings_cockpitslice ... ok
+test clients::export_bindings_notificationclicked ... ok
+test core_helper::tests::a_bound_key_reads_from_its_setting ... ok
+test core_helper::tests::a_frame_is_its_length_then_its_postcard ... ok
+test core_helper::tests::a_length_over_the_most_is_none ... ok
+test core_helper::tests::hello_is_the_first_variant ... ok
+test core_helper::export_bindings_deviceinfo ... ok
+test core_helper::export_bindings_input ... ok
+test core_helper::export_bindings_mousekind ... ok
+test clients::export_bindings_notification ... ok
+test core_helper::export_bindings_wantid ... ok
+test flight_model::tests::a_sample_is_under_90_bytes_in_postcard ... ok
+test core_helper::export_bindings_bound ... ok
+test desktop::export_bindings_firewall ... ok
+test clients::export_bindings_fromclient ... ok
+test bench::export_bindings_fromcore ... ok
+test bench::export_bindings_standinact ... ok
+test clients::export_bindings_setsetting ... ok
+test core_helper::export_bindings_helperslice ... ok
+test bench::export_bindings_standinhelperact ... ok
+test desktop::export_bindings_startwithwindows ... ok
+test desktop::export_bindings_todesktop ... ok
+test pointer_sync::tests::a_gesture_reads_back_from_postcard_and_json ... ok
+test desktop::export_bindings_update ... ok
+test clients::export_bindings_setting ... ok
+test clients::export_bindings_toclient ... ok
+test net::export_bindings_path ... ok
+test net::export_bindings_relay ... ok
+test net::export_bindings_servers ... ok
+test pointer_sync::export_bindings_lock ... ok
+test pointer_sync::export_bindings_point ... ok
+test profiles::export_bindings_maturity ... ok
+test net::export_bindings_memberlink ... ok
+test profiles::export_bindings_pick ... ok
+test recording::export_bindings_deleterun ... ok
+test recording::export_bindings_openfolder ... ok
+test pointer_sync::export_bindings_gesture ... ok
+test recording::export_bindings_recordingstopped ... ok
+test profiles::export_bindings_loadedprofile ... ok
+test desktop::export_bindings_desktopstate ... ok
+test recording::export_bindings_run ... ok
+test session::export_bindings_attempting ... ok
+test profiles::export_bindings_supportedaircraft ... ok
+test pointer_sync::export_bindings_frompanel ... ok
+test pointer_sync::export_bindings_play ... ok
+test session::export_bindings_gowithout ... ok
+test session::export_bindings_join ... ok
+test net::export_bindings_netslice ... ok
+test session::export_bindings_link ... ok
+test session::export_bindings_phase ... ok
+test session::export_bindings_attempt ... ok
+test session::export_bindings_refusedwhy ... ok
+test session::export_bindings_role ... ok
+test session::export_bindings_difference ... ok
+test session::export_bindings_setready ... ok
+test session::export_bindings_severity ... ok
+test recording::export_bindings_recordingslice ... ok
+test session::export_bindings_share ... ok
+test sim::export_bindings_aircraft ... ok
+test profiles::export_bindings_profilesslice ... ok
+test sim::export_bindings_ending ... ok
+test sim::export_bindings_location ... ok
+test sim::export_bindings_menupage ... ok
+test sim::export_bindings_modulestate ... ok
+test sim::export_bindings_namedaircraft ... ok
+test sim::export_bindings_place ... ok
+test session::export_bindings_preflight ... ok
+test session::export_bindings_refused ... ok
+test sim::export_bindings_stage ... ok
+test state_sync::tests::a_batch_longer_than_a_slot_goes_in_several_in_order ... ok
+test state_sync::tests::a_batch_reads_back_in_call_order ... ok
+test state_sync::tests::a_name_too_long_for_a_slot_is_left_out_and_the_rest_go ... ok
+test state_sync::export_bindings_checklistrow ... ok
+test state_sync::export_bindings_heardh ... ok
+test sim::export_bindings_menureport ... ok
+test tests::hash_is_sha256_hex ... ok
+test tests::writes_the_stamp ... ok
+test state_sync::export_bindings_instrumentpath ... ok
+test state_sync::export_bindings_reading ... ok
+test sim::export_bindings_aircraftfacts ... ok
+test take_control::export_bindings_bind ... ok
+test bench::export_bindings_tocore ... ok
+test state_sync::export_bindings_instrumentpaths ... ok
+test state_sync::export_bindings_pathreading ... ok
+test state_sync::export_bindings_statesyncslice ... ok
+test state_sync::export_bindings_frominstrumentreads ... ok
+test session::export_bindings_status ... ok
+test take_control::export_bindings_takecontrolslice ... ok
+test session::export_bindings_slicemember ... ok
+test sim::export_bindings_simslice ... ok
+test session::export_bindings_sessionslice ... ok
+
+test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.56s
+
+> cargo build -p dualinput-core -p stand-in-core-helper -p bench-relay -p dualinput-profile-builder --features dualinput-core/stand-in --target-dir target\bench --profile release-with-checks
+   Compiling messages v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\engines\messages)
+   Compiling profile-engine v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\engines\profile-engine)
+   Compiling profile-build v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\engines\profile-build)
+   Compiling dualinput-core v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\apps\core)
+   Compiling clients v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\platform\clients)
+   Compiling sim-awareness v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\engines\sim-awareness)
+   Compiling routine-host v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\platform\routine-host)
+   Compiling sync-engine v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\engines\sync-engine)
+   Compiling transport v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\engines\transport)
+   Compiling flight-model-routines v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\features\flight-model\routines)
+   Compiling avatars-routines v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\features\avatars\routines)
+   Compiling state-sync-routines v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\features\state-sync\routines)
+   Compiling dualinput-profile-builder v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\tools\profile-builder)
+   Compiling routines v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\sim-package\routines)
+   Compiling network v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\platform\network)
+   Compiling sim-service v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\platform\sim-service)
+   Compiling core-helper-service v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\platform\core-helper-service)
+   Compiling recording v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\platform\recording)
+   Compiling stand-in-core-helper v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\tools\bench\core-helper)
+   Compiling session v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\platform\session)
+   Compiling profile-loader v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\platform\profile-loader)
+   Compiling cockpit-stream v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\platform\cockpit-stream)
+   Compiling flight-model v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\features\flight-model\core)
+   Compiling take-control v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\features\take-control\core)
+   Compiling avatars v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\features\avatars\core)
+   Compiling pointer-sync v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\features\pointer-sync\core)
+   Compiling state-sync v0.1.0 
+(%USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\src\features\state-sync\core)
+    Finished `release-with-checks` profile [optimized] target(s) in 25.26s
+> %USERPROFILE%\dev\crosscheck\.claude\worktrees\stage-16-flight-model-53b280\target\bench\release-with-checks\dualinput-profile-builder.exe publish --released 1 --profiles profiles --pages target/bench/profiles
+aircraft/bksq-baronpro.yaml: level 1, 9d15392d23ce0f9de2252985df58e8c517421d5325fc1180b145fab46117a8b1
+> node --test --test-concurrency=1 --test-force-exit tools/bench/scenarios/avatars.ts tools/bench/scenarios/cockpit.ts tools/bench/scenarios/flight-model.ts tools/bench/scenarios/killed-core.ts tools/bench/scenarios/network.ts tools/bench/scenarios/network-loss.ts tools/bench/scenarios/network-outages.ts tools/bench/scenarios/network-relays.ts tools/bench/scenarios/pointer-sync.ts tools/bench/scenarios/profiles.ts tools/bench/scenarios/recording.ts tools/bench/scenarios/session.ts tools/bench/scenarios/sim-connections.ts tools/bench/scenarios/sim-load.ts tools/bench/scenarios/sim-module.ts tools/bench/scenarios/sim-runs.ts tools/bench/scenarios/state-sync.ts tools/bench/scenarios/take-control.ts
+TAP version 13
+# Subtest: both cameras take the pilot's seat within a trip: the pilot flying keeps it, the other's figure gives it up, and that pilot hears the seat is taken until they leave it
+ok 1 - both cameras take the pilot's seat within a trip: the pilot flying keeps it, the other's figure gives it up, and that pilot hears the seat is taken until they leave it
+  ---
+  duration_ms: 11955.3853
+  type: 'test'
+  ...
+# Subtest: a camera moved between the two seats takes the nearer, and with the other seat held, nothing changes
+ok 2 - a camera moved between the two seats takes the nearer, and with the other seat held, nothing changes
+  ---
+  duration_ms: 9447.9284
+  type: 'test'
+  ...
+# Subtest: a camera 0.9m behind the hip inside the cabin is a head, and a chase view behind the tail keeps the figure seated, looking forward
+ok 3 - a camera 0.9m behind the hip inside the cabin is a head, and a chase view behind the tail keeps the figure seated, looking forward
+  ---
+  duration_ms: 9031.2886
+  type: 'test'
+  ...
+# Subtest: a left tap by the pilot flying moves their figure's hand on the other core's stand-in, the right takes the yoke at once, and the hands swap back at their times
+ok 4 - a left tap by the pilot flying moves their figure's hand on the other core's stand-in, the right takes the yoke at once, and the hands swap back at their times
+  ---
+  duration_ms: 10314.6029
+  type: 'test'
+  ...
+# the left arm's length on the other core's stand-in went from 0.895m to 0.987m
+# the left took the yoke 652ms after the tap, and the right let go 605ms after that
+# Subtest: a tap on a chock on foot brings the hand on that side, and no hand goes to a yoke
+ok 5 - a tap on a chock on foot brings the hand on that side, and no hand goes to a yoke
+  ---
+  duration_ms: 10314.2734
+  type: 'test'
+  ...
+# Subtest: a right press held 210ms with 34 counts brings no hand, and one up in 150ms with 4 counts does
+ok 6 - a right press held 210ms with 34 counts brings no hand, and one up in 150ms with 4 counts does
+  ---
+  duration_ms: 9886.9671
+  type: 'test'
+  ...
+# Subtest: three wheel notches 400ms apart are one tap held through them, home 1.5s after the last
+ok 7 - three wheel notches 400ms apart are one tap held through them, home 1.5s after the last
+  ---
+  duration_ms: 11359.6749
+  type: 'test'
+  ...
+# the hand went home 2318ms after the first notch, where 800ms of notches and 1,500ms after the last make 2,300ms
+# Subtest: a click on a located switch is one reach, the same switch moved by a key is one reach after 100ms, and three located switches in 50ms are none
+ok 8 - a click on a located switch is one reach, the same switch moved by a key is one reach after 100ms, and three located switches in 50ms are none
+  ---
+  duration_ms: 14424.1862
+  type: 'test'
+  ...
+# the hand reached 114ms after the stream sent the change
+# Subtest: a throttle with a deadband of 2 jittering by 0.5 brings no hand, and moved by 10 over a second, 50ms apart, brings one reach, home after the run ends
+ok 9 - a throttle with a deadband of 2 jittering by 0.5 brings no hand, and moved by 10 over a second, 50ms apart, brings one reach, home after the run ends
+  ---
+  duration_ms: 15970.5954
+  type: 'test'
+  ...
+# the hand went home 652ms after the run's last change
+# Subtest: two pilots who never picked a color wear the first two palette colors, by pilot ID, the same on both, and a color picked changes the figure at once
+ok 10 - two pilots who never picked a color wear the first two palette colors, by pilot ID, the same on both, and a color picked changes the figure at once
+  ---
+  duration_ms: 9081.2944
+  type: 'test'
+  ...
+# Subtest: when control passes, the new pilot flying's figure takes its yoke and the old one's lets go, on both machines
+ok 11 - when control passes, the new pilot flying's figure takes its yoke and the old one's lets go, on both machines
+  ---
+  duration_ms: 12222.6748
+  type: 'test'
+  ...
+# Subtest: poses lost in a cut leave a later one carrying the whole figure, with nothing changing after them
+ok 12 - poses lost in a cut leave a later one carrying the whole figure, with nothing changing after them
+  ---
+  duration_ms: 10297.2446
+  type: 'test'
+  ...
+# the whole figure arrived 701ms after the changes in a 500ms cut
+# Subtest: a link lost: on a PC that reaches the internet the figure slumps and turns gray, and on one that doesn't, the other figures rest in their colors, the pilot flying's on its yoke, and the own figure turns gray
+ok 13 - a link lost: on a PC that reaches the internet the figure slumps and turns gray, and on one that doesn't, the other figures rest in their colors, the pilot flying's on its yoke, and the own figure turns gray
+  ---
+  duration_ms: 16378.6239
+  type: 'test'
+  ...
+# Subtest: the pilot flying's sim crashing with the link up slumps their figure, turns it gray, and lets go of its yoke at once
+ok 14 - the pilot flying's sim crashing with the link up slumps their figure, turns it gray, and lets go of its yoke at once
+  ---
+  duration_ms: 9157.4391
+  type: 'test'
+  ...
+# the slumped figure's left arm went from 0.895m on the yoke to 0.645m
+# Subtest: a model a machine can't read brings no hand from a click and draws grips at rest there, says so in the tab and the match check, and leaves seats and heads as before
+ok 15 - a model a machine can't read brings no hand from a click and draws grips at rest there, says so in the tab and the match check, and leaves seats and heads as before
+  ---
+  duration_ms: 9714.2135
+  type: 'test'
+  ...
+# Subtest: a cockpit with no triangles, as a modular aircraft's is when its cockpit is an attachment, says so as a model that can't be read, and seats figures by the seats' box
+ok 16 - a cockpit with no triangles, as a modular aircraft's is when its cockpit is an attachment, says so as a model that can't be read, and seats figures by the seats' box
+  ---
+  duration_ms: 9258.0209
+  type: 'test'
+  ...
+# Subtest: a profile with no seats says so in the tab, and each figure is a head
+ok 17 - a profile with no seats says so in the tab, and each figure is a head
+  ---
+  duration_ms: 9375.8723
+  type: 'test'
+  ...
+# Subtest: the profile loading before the aircraft's package folder is found starts the model's job once the folder arrives
+ok 18 - the profile loading before the aircraft's package folder is found starts the model's job once the folder arrives
+  ---
+  duration_ms: 6560.3607
+  type: 'test'
+  ...
+# Subtest: after a reset of the sim's variables Figure's writes still land, and after a flight load the figures are created again and its writes land
+ok 19 - after a reset of the sim's variables Figure's writes still land, and after a flight load the figures are created again and its writes land
+  ---
+  duration_ms: 9715.0922
+  type: 'test'
+  ...
+# after the reset, the head turned from 0.0 to 16.4 degrees
+# Subtest: a following machine's yoke moved through Follow's events keeps the pilot flying's hand on its horn
+ok 20 - a following machine's yoke moved through Follow's events keeps the pilot flying's hand on its horn
+  ---
+  duration_ms: 12958.9878
+  type: 'test'
+  ...
+# the pilot flying's left arm on the following machine went from 0.895m to 0.940m with the yoke
+# budget: James's run, with a lever changed 60 times a second: the slowest input took 1327µs, 1 over 1ms, against 1,000µs for a handler with one pause under 2,000µs allowed
+# budget: Adam's run, with a lever changed 60 times a second: the slowest input took 1352µs, 1 over 1ms, against 1,000µs for a handler with one pause under 2,000µs allowed
+# Subtest: a lever changed 60 times a second goes out at most 20 times a second, its last value before the press after it
+ok 21 - a lever changed 60 times a second goes out at most 20 times a second, its last value before the press after it
+  ---
+  duration_ms: 15076.709
+  type: 'test'
+  ...
+# budget: 120 changes over about 2s went out as 30 messages, against 20 a second
+# Subtest: a 60s cut replays at the sender's gaps, collapses runs of the pilot flying's changes, and denies take-control until it ends
+ok 22 - a 60s cut replays at the sender's gaps, collapses runs of the pilot flying's changes, and denies take-control until it ends
+  ---
+  duration_ms: 78473.1103
+  type: 'test'
+  ...
+# the replay waited 2000ms for a gap of 3.2s, against its 2s cap
+# Subtest: a takeover during a cut drops the old pilot flying's solo changes, and the ex-pilot flying catches up from the new one
+ok 23 - a takeover during a cut drops the old pilot flying's solo changes, and the ex-pilot flying catches up from the new one
+  ---
+  duration_ms: 46712.4405
+  type: 'test'
+  ...
+# Subtest: a late joiner asks, is answered once the pilot flying can give, asks again after a cut, and drops the copies it queued
+ok 24 - a late joiner asks, is answered once the pilot flying can give, asks again after a cut, and drops the copies it queued
+  ---
+  duration_ms: 30025.1
+  type: 'test'
+  ...
+# Subtest: control passing between two others during a catch-up has the catching-up core ask the new pilot flying
+ok 25 - control passing between two others during a catch-up has the catching-up core ask the new pilot flying
+  ---
+  duration_ms: 16048.8874
+  type: 'test'
+  ...
+# Subtest: a pilot flying who leaves the flight during the other's replay hands over everything it sent
+ok 26 - a pilot flying who leaves the flight during the other's replay hands over everything it sent
+  ---
+  duration_ms: 32893.0198
+  type: 'test'
+  ...
+# Subtest: a member whose aircraft has no profile applies the change of control, ends its replay, and may take control
+ok 27 - a member whose aircraft has no profile applies the change of control, ends its replay, and may take control
+  ---
+  duration_ms: 45811.8858
+  type: 'test'
+  ...
+# budget: flight-model: the following aircraft was within 0.00m of where the flying one was 400ms before, over 779 frames, so at most about 400ms behind against 400ms plus the modules' shortfalls
+# budget: flight-model: Adam's core wrote Follow's slot 250 times in 10s, against about 250 for 20 samples a second and 5 rewrites
+# budget: James's run, with a sample 20 times a second: the slowest input took 1294µs, 1 over 1ms, against 1,000µs for a handler with one pause under 2,000µs allowed
+# budget: Adam's run, with a sample 20 times a second: the slowest input took 1183µs, 1 over 1ms, against 1,000µs for a handler with one pause under 2,000µs allowed
+# Subtest: one core's aircraft moves on the other's 400ms behind it, with its yoke and brake, 20 samples a second, and after a take-control the two swap
+ok 28 - one core's aircraft moves on the other's 400ms behind it, with its yoke and brake, 20 samples a second, and after a take-control the two swap
+  ---
+  duration_ms: 28155.4667
+  type: 'test'
+  ...
+# Subtest: a report 193ms late leaves the following aircraft's path where it was, and a pilot flying in the pause menu has it hold, whether or not the module updates
+ok 29 - a report 193ms late leaves the following aircraft's path where it was, and a pilot flying in the pause menu has it hold, whether or not the module updates
+  ---
+  duration_ms: 27110.2235
+  type: 'test'
+  ...
+# Subtest: the 2s move to the relay is carried and eased back, and a 20s gap is carried 2s, held frozen, and written at once when samples return
+not ok 30 - the 2s move to the relay is carried and eased back, and a 20s gap is carried 2s, held frozen, and written at once when samples return
+  ---
+  duration_ms: 18206.2801
+  type: 'test'
+  location: '%USERPROFILE%\\dev\\crosscheck\\.claude\\worktrees\\stage-16-flight-model-53b280\\tools\\bench\\scenarios\\flight-model.ts:271:1'
+  failureType: 'testCodeFailure'
+  error: 'it eased back onto the path: 14.69m off'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///%USERPROFILE%/dev/crosscheck/.claude/worktrees/stage-16-flight-model-53b280/tools/bench/scenarios/flight-model.ts:287:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a joiner 10m from the pilot flying's stand eases there over 3s, and stays frozen as preflight's hold ends
+ok 31 - a joiner 10m from the pilot flying's stand eases there over 3s, and stays frozen as preflight's hold ends
+  ---
+  duration_ms: 19624.6797
+  type: 'test'
+  ...
+# Subtest: with three cores, across a change of pilot flying, the third machine takes the new one's samples
+ok 32 - with three cores, across a change of pilot flying, the third machine takes the new one's samples
+  ---
+  duration_ms: 19253.8535
+  type: 'test'
+  ...
+# Subtest: a restarted core that follows shows no trouble for our package before the module's first status write
+ok 33 - a restarted core that follows shows no trouble for our package before the module's first status write
+  ---
+  duration_ms: 17085.4955
+  type: 'test'
+  ...
+# Subtest: after a flight ends, the routine ends, and the aircraft is the pilot's own again
+ok 34 - after a flight ends, the routine ends, and the aircraft is the pilot's own again
+  ---
+  duration_ms: 12941.0049
+  type: 'test'
+  ...
+# Subtest: a killed core's recording replays to its last flush, losing at most its last second
+ok 35 - a killed core's recording replays to its last flush, losing at most its last second
+  ---
+  duration_ms: 4733.0861
+  type: 'test'
+  ...
+# 256 of 300 lines reached the recording, which lost the last 680ms before the kill and stopped after its last flush
+# Subtest: at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+ok 36 - at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+  ---
+  duration_ms: 92559.1232
+  type: 'test'
+  ...
+# 22ms away at 1%: p99 stream 40.4ms, newest 39.8ms, deadline 40.2ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 22ms away at 3%: p99 stream 40.3ms, newest 40.6ms, deadline 40.4ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 1%: p99 stream 139.5ms, newest 142.4ms, deadline 143.9ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 3%: p99 stream 149.0ms, newest 148.7ms, deadline 148.9ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# Subtest: holding one core's relay connection back leaves the other pair's messages on time
+ok 37 - holding one core's relay connection back leaves the other pair's messages on time
+  ---
+  duration_ms: 23391.5917
+  type: 'test'
+  ...
+# p99 to the core not held back: newest 0.3ms, stream 0.3ms; to the held one: newest 148.4ms
+# Subtest: v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+ok 38 - v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+  ---
+  duration_ms: 71264.6094
+  type: 'test'
+  ...
+# join through the relay 1096ms; the sender's peak through the relay 35339 bytes in a second, 34826 a second on average
+# CPU of one core over the mix: the sender 1.44%, the receiver 1.75%
+# received: 4615 newest, 3250 deadline, 1300 stream; p99 0.3ms, 0.3ms, 0.3ms
+# the receiver's loop: 55844619410µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=10767 busy_percent=0.18 wait_p50_us=7 wait_p99_us=19 wait_p999_us=43 wait_max_us=2372 over_1ms=0 slowest_us=179 slowest_seq=21 slowest_stamp=55784786175
+# Subtest: the link is lost 4s to 5s into each outage, and comes back after it
+ok 39 - the link is lost 4s to 5s into each outage, and comes back after it
+  ---
+  duration_ms: 401766.3015
+  type: 'test'
+  ...
+# a 30s cut: lost after 5000ms, up again 18630ms after it ended
+# a 60s cut: lost after 4342ms, up again 31103ms after it ended
+# a 120s cut: lost after 4263ms, up again 13956ms after it ended
+# the relay down for 40s: lost after 4325ms, up again 11297ms after it came back
+# a core suspended for 60s: up again 0ms after it resumed
+# Subtest: with the cores homed at different relays, both directions cross the dialed core's home relay
+ok 40 - with the cores homed at different relays, both directions cross the dialed core's home relay
+  ---
+  duration_ms: 74020.7279
+  type: 'test'
+  ...
+# homes: the host http://127.0.0.1:55115/, the joiner http://127.0.0.1:55117/
+# bytes into each relay over 5s: the host 125003 and 0, the joiner 125122 and 0
+# the host's home relay cut for 60s: the link was lost, and up again 2003ms after the cut ended; homes then: http://127.0.0.1:55115/ then http://127.0.0.1:55117/
+# Subtest: two cores join through the backend, link through a relay, lose the link, and link again
+ok 41 - two cores join through the backend, link through a relay, lose the link, and link again
+  ---
+  duration_ms: 37380.5051
+  type: 'test'
+  ...
+# from the code entered to the link up through the relay: 1093ms
+# a 10s cut: the link lost after 4972ms, and up again 8018ms after the cut ended
+# LinkUp after the cut: 1 on the host, 1 on the joiner
+# clock offsets: -22, 15µs
+# Subtest: a core killed and started again links under a higher restart count, with no member counted out
+ok 42 - a core killed and started again links under a higher restart count, with no member counted out
+  ---
+  duration_ms: 4459.0247
+  type: 'test'
+  ...
+# the restarted core linked 18ms after it started; the other core said: net up 96678888 again=false restart=1
+# Subtest: a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+ok 43 - a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+  ---
+  duration_ms: 11802.3582
+  type: 'test'
+  ...
+# linked 8511ms after the join, through an 8s cut
+# Subtest: a connection with another session's code closes with its code, and each core's log says so
+ok 44 - a connection with another session's code closes with its code, and each core's log says so
+  ---
+  duration_ms: 4432.265
+  type: 'test'
+  ...
+# Subtest: a join on a direct path links within 3s of the code entered
+ok 45 - a join on a direct path links within 3s of the code entered
+  ---
+  duration_ms: 7452.274
+  type: 'test'
+  ...
+# from the code entered to the link up: 1089ms
+# Subtest: a tap plays at the same fractions, a 3s drag's moves arrive while it's made, and a 5s hold keeps the lock, replayed after a cut too
+ok 46 - a tap plays at the same fractions, a 3s drag's moves arrive while it's made, and a 5s hold keeps the lock, replayed after a cut too
+  ---
+  duration_ms: 53563.001
+  type: 'test'
+  ...
+# budget: a 3s drag sent 64 moves, 21.3 a second, against about 30
+# budget: the drag brought 66 messages to the other panel, 22.0 a second, against under 30
+# the hold made during a cut replayed as a 5006ms press, against 5,000ms
+# Subtest: a state change sent while a display press is held goes out between its down and its up
+ok 47 - a state change sent while a display press is held goes out between its down and its up
+  ---
+  duration_ms: 11785.7421
+  type: 'test'
+  ...
+# Subtest: a 10s cut partway through a drag ends it, then replays it from its next message, and a late up starts its lapsed tap again and clicks
+ok 48 - a 10s cut partway through a drag ends it, then replays it from its next message, and a late up starts its lapsed tap again and clicks
+  ---
+  duration_ms: 40692.7149
+  type: 'test'
+  ...
+# Subtest: the sending core killed partway through a drag: the other display's lock lapses within 2s of the last move, and nothing more plays
+ok 49 - the sending core killed partway through a drag: the other display's lock lapses within 2s of the last move, and nothing more plays
+  ---
+  duration_ms: 17623.2825
+  type: 'test'
+  ...
+# the lock lapsed 2017ms after the last move, against 2,000ms
+# Subtest: a press under another pilot's gesture flashes and reaches nothing, and another pilot's down while this pilot's button is down locks at this pilot's up
+ok 50 - a press under another pilot's gesture flashes and reaches nothing, and another pilot's down while this pilot's button is down locks at this pilot's up
+  ---
+  duration_ms: 12473.4424
+  type: 'test'
+  ...
+# Subtest: an up no panel answers applies after 1s with a line in the log, one whose panel reloads applies at once, and a module that fails partway leaves no lock
+ok 51 - an up no panel answers applies after 1s with a line in the log, one whose panel reloads applies at once, and a module that fails partway leaves no lock
+  ---
+  duration_ms: 24561.6656
+  type: 'test'
+  ...
+# the lock went 2018ms after the module failed, against 2,000ms
+# Subtest: a down during a late joiner's catch-up is skipped while its displays lock, a press in preflight goes nowhere, and the PF's press during preflight's end's catch-up plays
+ok 52 - a down during a late joiner's catch-up is skipped while its displays lock, a press in preflight goes nowhere, and the PF's press during preflight's end's catch-up plays
+  ---
+  duration_ms: 20524.2399
+  type: 'test'
+  ...
+# Subtest: the PM's displays lock with no link to the PF, until it takes control or its replay ends, and a PF's unheard Leave leaves them locked until then
+ok 53 - the PM's displays lock with no link to the PF, until it takes control or its replay ends, and a PF's unheard Leave leaves them locked until then
+  ---
+  duration_ms: 107152.0693
+  type: 'test'
+  ...
+# the PM's displays locked 5002ms after the cut, as the link was lost 5s in
+# Subtest: with the core suspended, a visible lock turns into a warning within 10s, unlock removes it, and with the core's socket closed every lock drops at once
+ok 54 - with the core suspended, a visible lock turns into a warning within 10s, unlock removes it, and with the core's socket closed every lock drops at once
+  ---
+  duration_ms: 25746.434
+  type: 'test'
+  ...
+# the locks turned into warnings 8770ms and 8708ms after the core's last message, against 10,000ms
+# Subtest: the pilot flying's fetch finishing after the session's aircraft is set takes the pin from none to the bundle, which every core in the flight loads, and a replay loads the same
+ok 55 - the pilot flying's fetch finishing after the session's aircraft is set takes the pin from none to the bundle, which every core in the flight loads, and a replay loads the same
+  ---
+  duration_ms: 10171.1288
+  type: 'test'
+  ...
+# Subtest: a member whose cache holds an older bundle fetches the pinned one by its hash and loads it, and a pass of control before preflight ends keeps the pin
+ok 56 - a member whose cache holds an older bundle fetches the pinned one by its hash and loads it, and a pass of control before preflight ends keeps the pin
+  ---
+  duration_ms: 10241.7121
+  type: 'test'
+  ...
+# Subtest: a member offline whose cache lacks the pin shows the error, loads nothing, and fetches it when it next enters the flight online
+ok 57 - a member offline whose cache lacks the pin shows the error, loads nothing, and fetches it when it next enters the flight online
+  ---
+  duration_ms: 9203.0076
+  type: 'test'
+  ...
+# Subtest: the pilot flying pins a local bundle: a member with the same file loads it, and one without it fetches nothing and shows the error
+ok 58 - the pilot flying pins a local bundle: a member with the same file loads it, and one without it fetches nothing and shows the error
+  ---
+  duration_ms: 11286.0288
+  type: 'test'
+  ...
+# Subtest: the pilot flying loads the wrong aircraft, then the right one, and the pin follows; a member in the new aircraft before the new pin loads nothing for it, then the new bundle
+ok 59 - the pilot flying loads the wrong aircraft, then the right one, and the pin follows; a member in the new aircraft before the new pin loads nothing for it, then the new bundle
+  ---
+  duration_ms: 9440.4161
+  type: 'test'
+  ...
+# Subtest: a member leaves the flight and comes back: the profile unloads, and the same pin loads again, though a newer bundle was published meanwhile
+ok 60 - a member leaves the flight and comes back: the profile unloads, and the same pin loads again, though a newer bundle was published meanwhile
+  ---
+  duration_ms: 9148.1753
+  type: 'test'
+  ...
+# Subtest: a session that starts airborne with the pilot flying's cache empty pins the bundle once the fetch finishes, after preflight ended
+ok 61 - a session that starts airborne with the pilot flying's cache empty pins the bundle once the fetch finishes, after preflight ended
+  ---
+  duration_ms: 5361.7704
+  type: 'test'
+  ...
+# Subtest: a bundle whose fetch failed at start is fetched again when the pilot hosts, and the pin goes from none to it
+ok 62 - a bundle whose fetch failed at start is fetched again when the pilot hosts, and the pin goes from none to it
+  ---
+  duration_ms: 5479.707
+  type: 'test'
+  ...
+# Subtest: a cached bundle whose bytes don't match its name is deleted and fetched again
+ok 63 - a cached bundle whose bytes don't match its name is deleted and fetched again
+  ---
+  duration_ms: 5339.6788
+  type: 'test'
+  ...
+# Subtest: a fetch's result that arrives after this member left the flight loads nothing, and the bundle loads from the cache when it comes back
+ok 64 - a fetch's result that arrives after this member left the flight loads nothing, and the bundle loads from the cache when it comes back
+  ---
+  duration_ms: 10508.4129
+  type: 'test'
+  ...
+# Subtest: a session in an aircraft with no published profile shows the loader's error
+ok 65 - a session in an aircraft with no published profile shows the loader's error
+  ---
+  duration_ms: 8612.2485
+  type: 'test'
+  ...
+# Subtest: the apps see where the pilot is, the aircraft the sim last loaded by name, and every profile's aircraft, with no session
+ok 66 - the apps see where the pilot is, the aircraft the sim last loaded by name, and every profile's aircraft, with no session
+  ---
+  duration_ms: 7149.5576
+  type: 'test'
+  ...
+# Subtest: a profile's aircraft no package on disk holds shows as not installed, and an aircraft with no package has no name
+ok 67 - a profile's aircraft no package on disk holds shows as not installed, and an aircraft with no package has no name
+  ---
+  duration_ms: 6215.0958
+  type: 'test'
+  ...
+# budget: a start with nothing new got [{"path":"/index.json","status":304}], against one answer of headers
+# Subtest: a start with nothing new published costs one answer of headers
+ok 68 - a start with nothing new published costs one answer of headers
+  ---
+  duration_ms: 3576.3207
+  type: 'test'
+  ...
+# budget: the builder checked and built a profile of 300 write functions in 1669ms, its compiler's load included, against 2,000ms for the build
+# budget: the bundle is 221,190 bytes
+# budget: a run that loaded a 221,190-byte bundle: the slowest input took 5510µs, 1 over 1ms, against 1,000µs for a handler with one pause under 10,000µs allowed
+# Subtest: a 200 KB profile of 300 write functions builds within 2s, and its load stays inside 10ms, the sync engine's compile of them included
+ok 69 - a 200 KB profile of 300 write functions builds within 2s, and its load stays inside 10ms, the sync engine's compile of them included
+  ---
+  duration_ms: 8856.7512
+  type: 'test'
+  ...
+# Subtest: a page deletes an older run, is refused the one in progress, and marks the moment
+ok 70 - a page deletes an older run, is refused the one in progress, and marks the moment
+  ---
+  duration_ms: 2134.341
+  type: 'test'
+  ...
+# Subtest: the run in progress's size stays live, and a run that hasn't stopped says so
+ok 71 - the run in progress's size stays live, and a run that hasn't stopped says so
+  ---
+  duration_ms: 10075.7777
+  type: 'test'
+  ...
+# Subtest: a host who starts before the sim runs: the joiner sees no aircraft yet, then the session's once the host loads one
+ok 72 - a host who starts before the sim runs: the joiner sees no aircraft yet, then the session's once the host loads one
+  ---
+  duration_ms: 7537.2453
+  type: 'test'
+  ...
+# Subtest: a host who starts from a flight sets the aircraft at once, and preflight runs on the ground, or ends at once in the air
+ok 73 - a host who starts from a flight sets the aircraft at once, and preflight runs on the ground, or ends at once in the air
+  ---
+  duration_ms: 7582.1446
+  type: 'test'
+  ...
+# Subtest: a joiner in another aircraft is a member out of the flight, and enters it as a late joiner once it loads the session's aircraft
+ok 74 - a joiner in another aircraft is a member out of the flight, and enters it as a late joiner once it loads the session's aircraft
+  ---
+  duration_ms: 10913.307
+  type: 'test'
+  ...
+# Subtest: a pilot flying who loads the wrong aircraft in preflight returns to the menu holding control, and the right one becomes the session's
+ok 75 - a pilot flying who loads the wrong aircraft in preflight returns to the menu holding control, and the right one becomes the session's
+  ---
+  duration_ms: 8545.5172
+  type: 'test'
+  ...
+# Subtest: a pilot flying who leaves the session in preflight, with the other at the menu, passes control, and preflight runs once the new one is in a flight
+ok 76 - a pilot flying who leaves the session in preflight, with the other at the menu, passes control, and preflight runs once the new one is in a flight
+  ---
+  duration_ms: 9490.1179
+  type: 'test'
+  ...
+# budget: preflight ended on the two cores 0.3ms apart, against one network delay
+# budget: James's run: the slowest input took 1273µs, 1 over 1ms, against 1,000µs for a handler with one pause under 2,000µs allowed
+# budget: Adam's run: the slowest input took 1152µs, 1 over 1ms, against 1,000µs for a handler with one pause under 2,000µs allowed
+# Subtest: both pilots ready: the countdown ends preflight on both, each held until then; an un-ready inside it cancels it
+ok 77 - both pilots ready: the countdown ends preflight on both, each held until then; an un-ready inside it cancels it
+  ---
+  duration_ms: 16060.2246
+  type: 'test'
+  ...
+# Subtest: a lost link during the countdown cancels it, and a ready pilot whose sim crashes comes back unready
+ok 78 - a lost link during the countdown cancels it, and a ready pilot whose sim crashes comes back unready
+  ---
+  duration_ms: 24711.5342
+  type: 'test'
+  ...
+# Subtest: going without a pilot whose sim kept running ends preflight, and that pilot raises PreflightEnded on return; nobody goes without the pilot flying
+ok 79 - going without a pilot whose sim kept running ends preflight, and that pilot raises PreflightEnded on return; nobody goes without the pilot flying
+  ---
+  duration_ms: 32719.6454
+  type: 'test'
+  ...
+# Subtest: a pilot flying who leaves the flight after preflight passes control, and the session ends once nobody is in the flight
+ok 80 - a pilot flying who leaves the flight after preflight passes control, and the session ends once nobody is in the flight
+  ---
+  duration_ms: 11663.1536
+  type: 'test'
+  ...
+# budget: control reached the other pilot 63ms after the leave, against 1,000ms
+# Subtest: a pilot flying who leaves mid-flight hands control over within 1s and is a leave, not an outage; one who quits does the same, and exits
+ok 81 - a pilot flying who leaves mid-flight hands control over within 1s and is a leave, not an outage; one who quits does the same, and exits
+  ---
+  duration_ms: 15794.8406
+  type: 'test'
+  ...
+# Subtest: a restarted core with a session file comes back under a higher restart count, announces the session, and passes control it held before it enters the flight
+ok 82 - a restarted core with a session file comes back under a higher restart count, announces the session, and passes control it held before it enters the flight
+  ---
+  duration_ms: 13688.3938
+  type: 'test'
+  ...
+# Subtest: the match check: a streamed copy against an installed one is a warning, and two streamed copies show nothing
+ok 83 - the match check: a streamed copy against an installed one is a warning, and two streamed copies show nothing
+  ---
+  duration_ms: 14991.0495
+  type: 'test'
+  ...
+# Subtest: a connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the state's aircraft, by the menu script's master page
+ok 84 - a connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the state's aircraft, by the menu script's master page
+  ---
+  duration_ms: 5090.3556
+  type: 'test'
+  ...
+# Subtest: a quit sent from the EFB app's socket takes effect, and a core with no session and no desktop app exits once its sim closes
+ok 85 - a quit sent from the EFB app's socket takes effect, and a core with no session and no desktop app exits once its sim closes
+  ---
+  duration_ms: 4097.78
+  type: 'test'
+  ...
+# Subtest: a module from another build while Hold is fed raises the sim service's trouble notification for our package
+ok 86 - a module from another build while Hold is fed raises the sim service's trouble notification for our package
+  ---
+  duration_ms: 5828.4864
+  type: 'test'
+  ...
+# Subtest: the settings command refuses a display name over 20 characters from any app
+ok 87 - the settings command refuses a display name over 20 characters from any app
+  ---
+  duration_ms: 3275.6048
+  type: 'test'
+  ...
+# Subtest: a wrong code shows why in the slice, and the next attempt clears it
+ok 88 - a wrong code shows why in the slice, and the next attempt clears it
+  ---
+  duration_ms: 8470.0638
+  type: 'test'
+  ...
+# Subtest: a join reaching the crew is an attempt until its first link, and a cancel stops it on this PC alone
+ok 89 - a join reaching the crew is an attempt until its first link, and a cancel stops it on this PC alone
+  ---
+  duration_ms: 8524.8516
+  type: 'test'
+  ...
+# Subtest: a cancel stops an attempt waiting on the backend
+ok 90 - a cancel stops an attempt waiting on the backend
+  ---
+  duration_ms: 5043.3535
+  type: 'test'
+  ...
+# Subtest: no answer from the backend is our servers while a relay answers, and this PC offline while nothing does
+ok 91 - no answer from the backend is our servers while a relay answers, and this PC offline while nothing does
+  ---
+  duration_ms: 17369.9294
+  type: 'test'
+  ...
+# Subtest: a name or color changed in a session reaches the crew at once, an emptied name keeps the last, and the session file keeps both
+ok 92 - a name or color changed in a session reaches the crew at once, an emptied name keeps the last, and the session file keeps both
+  ---
+  duration_ms: 8836.034
+  type: 'test'
+  ...
+# Subtest: a join another core refuses stops, and says why in the words of the backend's refusal
+ok 93 - a join another core refuses stops, and says why in the words of the backend's refusal
+  ---
+  duration_ms: 7336.7788
+  type: 'test'
+  ...
+# Subtest: a Host whose connection won't open never starts, says why, and leaves no session to find
+ok 94 - a Host whose connection won't open never starts, says why, and leaves no session to find
+  ---
+  duration_ms: 8331.0484
+  type: 'test'
+  ...
+# Subtest: a call with no sim fails at once
+ok 95 - a call with no sim fails at once
+  ---
+  duration_ms: 62.1235
+  type: 'test'
+  ...
+# Subtest: several Frame events in one read each reach the loop as an input of its own
+ok 96 - several Frame events in one read each reach the loop as an input of its own
+  ---
+  duration_ms: 2248.8976
+  type: 'test'
+  ...
+# Subtest: an AI create whose title the sim lacks has its exception reach the call, and a create it can fill reaches the call too
+ok 97 - an AI create whose title the sim lacks has its exception reach the call, and a create it can fill reaches the call too
+  ---
+  duration_ms: 2036.0291
+  type: 'test'
+  ...
+# Subtest: the platform's connection takes its masking group before the sim's open reply
+ok 98 - the platform's connection takes its masking group before the sim's open reply
+  ---
+  duration_ms: 2035.9188
+  type: 'test'
+  ...
+# Subtest: a lost connection opens again with its setup made again, and the gone one's messages are dropped
+ok 99 - a lost connection opens again with its setup made again, and the gone one's messages are dropped
+  ---
+  duration_ms: 2639.3913
+  type: 'test'
+  ...
+# Subtest: a variable the sim rejects leaves the watch's other values arriving
+ok 100 - a variable the sim rejects leaves the watch's other values arriving
+  ---
+  duration_ms: 2054.4877
+  type: 'test'
+  ...
+# Subtest: p08's flight load raises one Loading, one Ready to fly, and one Flying, with the PA-24
+ok 101 - p08's flight load raises one Loading, one Ready to fly, and one Flying, with the PA-24
+  ---
+  duration_ms: 2726.6822
+  type: 'test'
+  ...
+# Subtest: a module from another build runs none of the core's feeds, and the core reports it differs
+ok 102 - a module from another build runs none of the core's feeds, and the core reports it differs
+  ---
+  duration_ms: 2758.5754
+  type: 'test'
+  ...
+# Subtest: the sim's exit ends every routine, and the next run of the sim starts none and reads Missing until its module writes
+ok 103 - the sim's exit ends every routine, and the next run of the sim starts none and reads Missing until its module writes
+  ---
+  duration_ms: 8713.3249
+  type: 'test'
+  ...
+# Subtest: a routine fed again after its end starts with nothing from its last feeding
+ok 104 - a routine fed again after its end starts with nothing from its last feeding
+  ---
+  duration_ms: 2719.7032
+  type: 'test'
+  ...
+# Subtest: a module stopped by a routine's panic, with a routine live in Flying, keeps the aircraft frozen until the routine ends
+ok 105 - a module stopped by a routine's panic, with a routine live in Flying, keeps the aircraft frozen until the routine ends
+  ---
+  duration_ms: 6812.6466
+  type: 'test'
+  ...
+# the core took the module as stopped 3042ms after it stopped
+# the aircraft unfroze 31ms after the last routine that held the freeze ended
+# Subtest: a module that stops while Loading isn't taken as stopped, and leaves the aircraft frozen
+ok 106 - a module that stops while Loading isn't taken as stopped, and leaves the aircraft frozen
+  ---
+  duration_ms: 6891.2804
+  type: 'test'
+  ...
+# Subtest: a module that stops while paused isn't taken as stopped, and leaves the aircraft frozen
+ok 107 - a module that stops while paused isn't taken as stopped, and leaves the aircraft frozen
+  ---
+  duration_ms: 6894.0098
+  type: 'test'
+  ...
+# Subtest: a module that stops with no routine live isn't taken as stopped, and leaves the aircraft frozen
+ok 108 - a module that stops with no routine live isn't taken as stopped, and leaves the aircraft frozen
+  ---
+  duration_ms: 6686.8156
+  type: 'test'
+  ...
+# Subtest: a stopped module's 3s count only from the end of a pause
+ok 109 - a stopped module's 3s count only from the end of a pause
+  ---
+  duration_ms: 9456.5768
+  type: 'test'
+  ...
+# Subtest: the quit message then the exit is a close, nothing opens between them, and an exit alone is a crash
+ok 110 - the quit message then the exit is a close, nothing opens between them, and an exit alone is a crash
+  ---
+  duration_ms: 9109.9553
+  type: 'test'
+  ...
+# Subtest: two bench cores each see only their own stub, and killing one ends that core's sim alone
+ok 111 - two bench cores each see only their own stub, and killing one ends that core's sim alone
+  ---
+  duration_ms: 2598.0464
+  type: 'test'
+  ...
+# Subtest: a switch flipped on one core's aircraft moves on the other's, and nothing comes back
+ok 112 - a switch flipped on one core's aircraft moves on the other's, and nothing comes back
+  ---
+  duration_ms: 13002.7591
+  type: 'test'
+  ...
+# Subtest: an input event is read once and then by its subscription, and written through its preset
+ok 113 - an input event is read once and then by its subscription, and written through its preset
+  ---
+  duration_ms: 12482.6402
+  type: 'test'
+  ...
+# Subtest: a K: event is heard through listen, and our own send of it uses up its token
+ok 114 - a K: event is heard through listen, and our own send of it uses up its token
+  ---
+  duration_ms: 12441.8126
+  type: 'test'
+  ...
+# Subtest: an H: event is heard in one panel and fired through our module, and its own firing isn't sent back
+ok 115 - an H: event is heard in one panel and fired through our module, and its own firing isn't sent back
+  ---
+  duration_ms: 12417.2558
+  type: 'test'
+  ...
+# Subtest: an instrument() value is read in its panel and written through an H: event
+ok 116 - an instrument() value is read in its panel and written through an H: event
+  ---
+  duration_ms: 13566.5461
+  type: 'test'
+  ...
+# Subtest: a pulse set and cleared within one frame never fires its event entry
+ok 117 - a pulse set and cleared within one frame never fires its event entry
+  ---
+  duration_ms: 14247.0471
+  type: 'test'
+  ...
+# Subtest: a press on a display that sets a variable the profile also syncs, the variable first, ends on one value
+ok 118 - a press on a display that sets a variable the profile also syncs, the variable first, ends on one value
+  ---
+  duration_ms: 12605.3134
+  type: 'test'
+  ...
+# Subtest: a toggle over a lamp the stand-in lights 2s late flips once, and shows one notification
+ok 119 - a toggle over a lamp the stand-in lights 2s late flips once, and shows one notification
+  ---
+  duration_ms: 15129.5859
+  type: 'test'
+  ...
+# measure: Ready opened 30081ms after Ready to fly, against 30s
+# Subtest: Ready is denied until 30s after Ready to fly, and allowed then
+ok 120 - Ready is denied until 30s after Ready to fly, and allowed then
+  ---
+  duration_ms: 35699.8137
+  type: 'test'
+  ...
+# Subtest: a late joiner catches up onto the aircraft, the battery before the APU master, and its queued copies drop
+ok 121 - a late joiner catches up onto the aircraft, the battery before the APU master, and its queued copies drop
+  ---
+  duration_ms: 11451.5851
+  type: 'test'
+  ...
+# budget: a single press to the cue reached the helper in 204µs at p50, 306µs at p99, and 306µs at most, of 40 presses, against 10,000µs, the output stream's own time and this making the budget's 100,000µs
+# Subtest: a press passes control with a cue and a notification on both machines, and does nothing from the pilot flying or before preflight has ended
+ok 122 - a press passes control with a cue and a notification on both machines, and does nothing from the pilot flying or before preflight has ended
+  ---
+  duration_ms: 14346.3275
+  type: 'test'
+  ...
+# a hold took control 350652µs after its down, against 350,000µs
+# Subtest: a hold takes control at 0.35s before its release, and a shorter one takes nothing
+ok 123 - a hold takes control at 0.35s before its release, and a shorter one takes nothing
+  ---
+  duration_ms: 13012.611
+  type: 'test'
+  ...
+# Subtest: a press during this pilot's catch-up is refused with a cue and the reason, from the key and from the button alike
+ok 124 - a press during this pilot's catch-up is refused with a cue and the reason, from the key and from the button alike
+  ---
+  duration_ms: 17749.9372
+  type: 'test'
+  ...
+# Subtest: while the link to the pilot flying is lost a press takes control at once, the warning goes, and the old pilot flying is told once back
+ok 125 - while the link to the pilot flying is lost a press takes control at once, the warning goes, and the old pilot flying is told once back
+  ---
+  duration_ms: 28709.1724
+  type: 'test'
+  ...
+# Subtest: a replay on the pilot flying's machine, which the guard refuses control through, tells that pilot nothing
+ok 126 - a replay on the pilot flying's machine, which the guard refuses control through, tells that pilot nothing
+  ---
+  duration_ms: 28264.1423
+  type: 'test'
+  ...
+# Subtest: a press while the link to the pilot flying is lost takes control with a catch-up running
+ok 127 - a press while the link to the pilot flying is lost takes control with a catch-up running
+  ---
+  duration_ms: 16654.7328
+  type: 'test'
+  ...
+# Subtest: the pilot monitoring's press and the pilot flying's within a trip of each other leave one pilot flying, with one cue or two as each pass arrived
+ok 128 - the pilot monitoring's press and the pilot flying's within a trip of each other leave one pilot flying, with one cue or two as each pass arrived
+  ---
+  duration_ms: 12870.6482
+  type: 'test'
+  ...
+# Subtest: the pilot flying leaving the flight plays the cue on the other machine alone, naming who left
+ok 129 - the pilot flying leaving the flight plays the cue on the other machine alone, naming who left
+  ---
+  duration_ms: 12000.7576
+  type: 'test'
+  ...
+# Subtest: a pilot with no binding has the helper through the session and takes control from the button, and binding, rebinding, and clearing take effect mid-session
+ok 130 - a pilot with no binding has the helper through the session and takes control from the button, and binding, rebinding, and clearing take effect mid-session
+  ---
+  duration_ms: 12183.3207
+  type: 'test'
+  ...
+# Subtest: the helper killed mid-session and started again: the binding takes control as before
+ok 131 - the helper killed mid-session and started again: the binding takes control as before
+  ---
+  duration_ms: 13636.3684
+  type: 'test'
+  ...
+1..131
+# tests 131
+# suites 0
+# pass 130
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2461674.5295
+
+node --test --test-concurrency=1 --test-force-exit tools/bench/scenarios/avatars.ts tools/bench/scenarios/cockpit.ts 
+tools/bench/scenarios/flight-model.ts tools/bench/scenarios/killed-core.ts tools/bench/scenarios/network.ts 
+tools/bench/scenarios/network-loss.ts tools/bench/scenarios/network-outages.ts tools/bench/scenarios/network-relays.ts 
+tools/bench/scenarios/pointer-sync.ts tools/bench/scenarios/profiles.ts tools/bench/scenarios/recording.ts 
+tools/bench/scenarios/session.ts tools/bench/scenarios/sim-connections.ts tools/bench/scenarios/sim-load.ts 
+tools/bench/scenarios/sim-module.ts tools/bench/scenarios/sim-runs.ts tools/bench/scenarios/state-sync.ts 
+tools/bench/scenarios/take-control.ts exited with 1
+exit 1

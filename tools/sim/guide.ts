@@ -1,6 +1,7 @@
 // What a session in the sim needs to guide someone who can't see the terminal behind the sim:
 // Windows' own voice for each step, a high beep for a pass and a low one for a fail, and Page Up,
 // read globally, to skip a step, as experiments/tools/guide.mjs did for our probes in the sim.
+// Page Down, read the same way, answers no where a script asks a question.
 // It also tells each left click, wherever it lands, since a click that should cross nothing
 // leaves no trace of its own to wait for.
 //
@@ -15,7 +16,7 @@ function powershell(script: string, stdio: StdioOptions): ChildProcess {
   return spawn("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encoded], { stdio })
 }
 
-// VK_PRIOR (0x21) is Page Up, and VK_LBUTTON (0x01) the left mouse button.
+// VK_PRIOR (0x21) is Page Up, VK_NEXT (0x22) Page Down, and VK_LBUTTON (0x01) the left mouse button.
 const INPUT_PS = `
 Add-Type @"
 using System.Runtime.InteropServices;
@@ -24,10 +25,10 @@ public static class DualInputGuide {
 }
 "@
 [Console]::Out.WriteLine("ready")
-$names = @{ 0x21 = "skip"; 0x01 = "click" }
-$was = @{ 0x21 = $false; 0x01 = $false }
+$names = @{ 0x21 = "skip"; 0x22 = "no"; 0x01 = "click" }
+$was = @{ 0x21 = $false; 0x22 = $false; 0x01 = $false }
 while ($true) {
-  foreach ($k in @(0x21, 0x01)) {
+  foreach ($k in @(0x21, 0x22, 0x01)) {
     $now = ([DualInputGuide]::GetAsyncKeyState($k) -band 0x8000) -ne 0
     if ($now -and -not $was[$k]) { [Console]::Out.WriteLine($names[$k]) }
     $was[$k] = $now
@@ -50,6 +51,7 @@ while (($line = [Console]::In.ReadLine()) -ne $null) {
 
 export class Guide {
   private skips = 0
+  private nos = 0
   private clickCount = 0
   private readonly children: ChildProcess[]
 
@@ -66,6 +68,7 @@ export class Guide {
       createInterface({ input: input.stdout! }).on("line", (line) => {
         if (line === "ready") ready()
         else if (line === "skip") guide.skips++
+        else if (line === "no") guide.nos++
         else if (line === "click") guide.clickCount++
       })
     })
@@ -95,6 +98,13 @@ export class Guide {
     const skipped = this.skips > 0
     this.skips = 0
     return skipped
+  }
+
+  /** Whether Page Down was pressed since the last call. */
+  declined(): boolean {
+    const declined = this.nos > 0
+    this.nos = 0
+    return declined
   }
 
   /** Left clicks since the guide started. */

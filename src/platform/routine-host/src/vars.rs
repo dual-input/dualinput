@@ -31,6 +31,9 @@ pub const AVATAR: u32 = 0xFFFF_FFFF - 128 + 1;
 pub enum Space {
     /// `A:`, the sim's variables of an aircraft or an object.
     A,
+    /// `E:`, the sim's own, such as `E:SIMULATION RATE`, which a routine can read and the sim
+    /// gives no write for.
+    E,
     /// `L:`, shared by everything in the sim.
     L,
     /// `Z:`, an object's own, which the Vars API registers on each object apart, as p12
@@ -59,8 +62,8 @@ pub struct Ids {
 }
 
 /// The host's table of every variable a routine has named, which lasts as long as the host,
-/// so a routine fed again gets the same places, and the sim's IDs for each place: an `A:` or
-/// `L:` variable's by its place, and a `Z:` variable's by its place and its object.
+/// so a routine fed again gets the same places, and the sim's IDs for each place: an `A:`,
+/// `E:`, or `L:` variable's by its place, and a `Z:` variable's by its place and its object.
 #[derive(Default)]
 pub(crate) struct Vars {
     named: Vec<Named>,
@@ -70,10 +73,11 @@ pub(crate) struct Vars {
 
 impl Vars {
     /// The place of `name`, such as `A:PLANE LATITUDE`, in `unit`, which it takes on the
-    /// first ask. `None` for a name with no prefix of the three.
+    /// first ask. `None` for a name with no prefix of the four.
     pub(crate) fn place(&mut self, name: &str, unit: &str) -> Option<VarRef> {
         let (space, rest) = match name.split_at_checked(2)? {
             ("A:", rest) => (Space::A, rest),
+            ("E:", rest) => (Space::E, rest),
             ("L:", rest) => (Space::L, rest),
             ("Z:", rest) => (Space::Z, rest),
             _ => return None,
@@ -104,7 +108,7 @@ impl Vars {
         let named = self.named.get(var.0 as usize)?;
         let kept = match named.space {
             Space::Z => self.own.get(&(var, object)),
-            Space::A | Space::L => self.shared.get(&var),
+            Space::A | Space::E | Space::L => self.shared.get(&var),
         };
         if let Some(ids) = kept {
             return Some(*ids);
@@ -112,7 +116,7 @@ impl Vars {
         let ids = sim.look_up(object, named)?;
         match named.space {
             Space::Z => self.own.insert((var, object), ids),
-            Space::A | Space::L => self.shared.insert(var, ids),
+            Space::A | Space::E | Space::L => self.shared.insert(var, ids),
         };
         Some(ids)
     }

@@ -1,0 +1,66 @@
+2026-11-11 23:16:27 Dual Input's desktop app 0.1.0 starts for the first time
+2026-11-11 23:16:27 velopack: Auto-locating app manifest...
+2026-11-11 23:16:27 velopack: Auto-locating app manifest...
+2026-11-11 23:16:27 velopack: Found Update.exe by current path pattern search in directory: %USERPROFILE%\AppData\Local\DualInput
+2026-11-11 23:16:27 velopack: Root directory '%USERPROFILE%\AppData\Local\DualInput' writable: true
+2026-11-11 23:16:27 velopack: Using root packages directory: %USERPROFILE%\AppData\Local\DualInput\packages
+2026-11-11 23:16:27 velopack: Searching for local packages in: "%USERPROFILE%\\AppData\\Local\\DualInput\\packages"
+2026-11-11 23:16:27 velopack: Found 0.1.0: '"%USERPROFILE%\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.0-full.nupkg"'
+2026-11-11 23:16:27 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-11 23:16:27 velopack: Generated new staging userId: 5aae542a-e3e3-4759-99a6-e310b87ea311
+2026-11-11 23:16:27 velopack: Downloading releases for channel win from: https://build-working-slot-obj.trycloudflare.com/releases.win.json?localVersion=0.1.0&id=DualInput&stagingId=5aae542a-e3e3-4759-99a6-e310b87ea311
+2026-11-11 23:16:27 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-11 23:16:27 no newer release is out
+2026-11-11 23:18:47 the sim started, as process 37252
+2026-11-11 23:18:47 started the core, as process 21508
+2026-11-12 00:02:31 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-12 00:02:31 velopack: Found existing staged user id...
+2026-11-12 00:02:31 velopack: Downloading releases for channel win from: https://build-working-slot-obj.trycloudflare.com/releases.win.json?localVersion=0.1.0&id=DualInput&stagingId=5aae542a-e3e3-4759-99a6-e310b87ea311
+2026-11-12 00:02:31 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-12 00:02:31 velopack: Found newer remote release available (0.1.0 -> 0.1.1).
+2026-11-12 00:02:31 velopack: Searching for local packages in: "%USERPROFILE%\\AppData\\Local\\DualInput\\packages"
+2026-11-12 00:02:31 velopack: Found 0.1.0: '"%USERPROFILE%\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.0-full.nupkg"'
+2026-11-12 00:02:31 velopack: Found 1 delta updates between 0.1.0 and 0.1.1.
+2026-11-12 00:02:31 version 0.1.1 is out
+2026-11-12 00:02:31 velopack: Attempting to acquire exclusive lock on packages directory (non-blocking)...
+2026-11-12 00:02:31 velopack: Beginning delta update process.
+2026-11-12 00:02:31 velopack: Downloading delta package: 'DualInput-0.1.1-delta.nupkg'
+2026-11-12 00:02:31 velopack: About to download from URL 'https://build-working-slot-obj.trycloudflare.com/DualInput-0.1.1-delta.nupkg' to file '"%USERPROFILE%\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-delta.partial"'
+2026-11-12 00:02:32 velopack: Applying 1 patches to "%USERPROFILE%\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-full.partial".
+2026-11-12 00:02:33 velopack: Successfully applied delta updates.
+2026-11-12 00:02:33 velopack: Renaming partial file to final target: '"%USERPROFILE%\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-full.nupkg"'
+2026-11-12 00:02:33 velopack: Bundle loaded successfully.
+2026-11-12 00:02:33 velopack: Deleting up old package: '"%USERPROFILE%\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.0-full.nupkg"'
+2026-11-12 00:02:33 velopack: Deleting up old package: '"%USERPROFILE%\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-delta.nupkg"'
+2026-11-12 00:02:33 version 0.1.1 is downloaded, and waits to install
+2026-11-12 00:03:08 the core quit
+2026-11-12 00:03:23 Dual Input's desktop app 0.1.0 starts
+2026-11-12 00:03:23 velopack: Auto-locating app manifest...
+2026-11-12 00:03:23 velopack: Auto-locating app manifest...
+2026-11-12 00:03:23 velopack: Found Update.exe by current path pattern search in directory: %USERPROFILE%\AppData\Local\DualInput
+2026-11-12 00:03:23 velopack: Root directory '%USERPROFILE%\AppData\Local\DualInput' writable: true
+2026-11-12 00:03:23 velopack: Using root packages directory: %USERPROFILE%\AppData\Local\DualInput\packages
+2026-11-12 00:03:23 velopack: Searching for local packages in: "%USERPROFILE%\\AppData\\Local\\DualInput\\packages"
+2026-11-12 00:03:23 velopack: Found 0.1.1: '"%USERPROFILE%\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-full.nupkg"'
+2026-11-12 00:03:23 version 0.1.1 was downloaded before, and waits to install
+2026-11-12 00:03:23 the sim started, as process 37252
+2026-11-12 00:03:23 started the core, as process 37812
+2026-11-12 00:06:01 the core exited with 0x0
+2026-11-12 00:06:11 the sim closed
+2026-11-12 00:06:11 installing version 0.1.1
+2026-11-12 00:06:11 velopack: About to launch: 'WideString("%USERPROFILE%\\AppData\\Local\\DualInput\\Update.exe")' in dir 'Some(WideString("%USERPROFILE%\\AppData\\Local\\DualInput"))' with arguments: WideString("\"%USERPROFILE%\\AppData\\Local\\DualInput\\Update.exe\" apply --package %USERPROFILE%\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-full.nupkg --waitPid 33488 --root %USERPROFILE%\\AppData\\Local\\DualInput --packageDir %USERPROFILE%\\AppData\\Local\\DualInput\\packages -- --tray\0")
+2026-11-12 00:06:11 velopack: Environment block present: true, flags: PROCESS_CREATION_FLAGS(134218752)
+2026-11-12 00:06:11 Dual Input's desktop app 0.1.1 starts in the tray
+2026-11-12 00:06:11 velopack: Auto-locating app manifest...
+2026-11-12 00:06:11 velopack: Auto-locating app manifest...
+2026-11-12 00:06:11 velopack: Found Update.exe by current path pattern search in directory: %USERPROFILE%\AppData\Local\DualInput
+2026-11-12 00:06:11 velopack: Root directory '%USERPROFILE%\AppData\Local\DualInput' writable: true
+2026-11-12 00:06:11 velopack: Using root packages directory: %USERPROFILE%\AppData\Local\DualInput\packages
+2026-11-12 00:06:11 velopack: Searching for local packages in: "%USERPROFILE%\\AppData\\Local\\DualInput\\packages"
+2026-11-12 00:06:11 velopack: Found 0.1.1: '"%USERPROFILE%\\AppData\\Local\\DualInput\\packages\\DualInput-0.1.1-full.nupkg"'
+2026-11-12 00:06:11 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-12 00:06:11 velopack: Found existing staged user id...
+2026-11-12 00:06:11 velopack: Downloading releases for channel win from: https://build-working-slot-obj.trycloudflare.com/releases.win.json?localVersion=0.1.1&id=DualInput&stagingId=5aae542a-e3e3-4759-99a6-e310b87ea311
+2026-11-12 00:06:11 wrote our package into %USERPROFILE%\AppData\Roaming\Microsoft Flight Simulator 2024\Packages\Community
+2026-11-12 00:06:12 velopack: Chosen channel for updates: "win" (explicit=None, memorized="win")
+2026-11-12 00:06:12 no newer release is out

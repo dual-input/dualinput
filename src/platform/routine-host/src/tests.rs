@@ -37,6 +37,7 @@ struct Note {
 impl Routine for Note {
     const ID: RoutineId = NOTE;
     type Slot = NoteSlot;
+    type Report = ();
 
     fn on_slot(&mut self, slot: &NoteSlot) {
         self.seen.push(slot.n);
@@ -72,11 +73,11 @@ struct Aircraft {
 }
 
 impl Aircraft {
-    fn key(&self, object: u32, space: Space, ids: Ids) -> Option<(u32, String)> {
+    fn place(&self, object: u32, space: Space, ids: Ids) -> Option<(u32, String)> {
         let (own, name) = self.ids.get(&ids.var)?;
         let object = match space {
             Space::A => object,
-            Space::L => 0,
+            Space::E | Space::L => 0,
             Space::Z => (*own)?,
         };
         Some((object, name.clone()))
@@ -105,12 +106,12 @@ impl Sim for Aircraft {
     }
 
     fn get(&mut self, object: u32, space: Space, ids: Ids) -> Option<f64> {
-        let key = self.key(object, space, ids)?;
+        let key = self.place(object, space, ids)?;
         self.values.get(&key).copied()
     }
 
     fn set(&mut self, object: u32, space: Space, ids: Ids, value: f64) {
-        if let Some(key) = self.key(object, space, ids) {
+        if let Some(key) = self.place(object, space, ids) {
             self.values.insert(key, value);
         }
     }
@@ -125,6 +126,10 @@ impl Sim for Aircraft {
 
     fn call_preset(&mut self, name: &str, value: Option<f64>) {
         self.fired.push(format!("B {name} {value:?}"));
+    }
+
+    fn key(&mut self, key: Key, value: i32) {
+        self.fired.push(format!("K {} {value}", key.name()));
     }
 }
 
@@ -143,6 +148,7 @@ impl Routine for Fires {
     const ID: RoutineId = FIRES;
     const FEED_ONCE: bool = true;
     type Slot = NoteSlot;
+    type Report = ();
 
     fn on_slot(&mut self, _: &NoteSlot) {
         self.due = true;
@@ -240,6 +246,7 @@ const COPY: RoutineId = RoutineId {
 impl Routine for Double {
     const ID: RoutineId = COPY;
     type Slot = CopySlot;
+    type Report = ();
 
     fn on_slot(&mut self, slot: &CopySlot) {
         self.object = slot.object;
@@ -472,4 +479,215 @@ fn the_status_goes_out_at_the_first_frame_then_once_a_second() {
         (status.slots_hash, status.version()),
         (HASH, "0.1.0".into())
     );
+}
+
+#[derive(Clone, Copy, Pod, Zeroable)]
+#[repr(C)]
+struct Reading {
+    rate: f64,
+}
+
+/// Reads `E:SIMULATION RATE` each frame, reports it, and sends two axis events, the second
+/// with a negative value.
+#[derive(Default)]
+struct Reporter;
+
+const REPORTER: RoutineId = RoutineId {
+    name: "REPORTER",
+    freezes: false,
+};
+
+impl Routine for Reporter {
+    const ID: RoutineId = REPORTER;
+    type Slot = NoteSlot;
+    type Report = Reading;
+
+    fn on_slot(&mut self, _: &NoteSlot) {}
+
+    fn frame(&mut self, _: &Frame, want: &mut Wants) {
+        let rate = want.var("E:SIMULATION RATE", "number").unwrap();
+        let reading = Reading {
+            rate: want.read(USER, rate).unwrap_or(0.0),
+        };
+        want.report(&reading);
+        // A report of another size than the routine's own is dropped.
+        want.report(&0u8);
+        want.key(Key::AxisAilerons, 8_000);
+        want.key(Key::AxisElevator, -16_383);
+    }
+}
+
+#[test]
+fn only_a_routine_that_reports_gets_a_report_slot() {
+    let host = Host::new(routines![Note, Reporter, Hold], HASH, "");
+    assert_eq!(host.report_slots(), [(REPORTER, 8)]);
+}
+
+#[test]
+fn a_report_and_events_with_values_go_out_once_every_frame_has_run() {
+    let mut host = Host::new(routines![Reporter, Fires], HASH, "");
+    let mut sim = Aircraft::default();
+    sim.values.insert((0, "SIMULATION RATE".into()), 2.0);
+    host.written(REPORTER, &write(1, 0, HASH, 0, 0), 0);
+    host.written(FIRES, &write(1, 0, HASH, 0, 0), 0);
+    host.frame(1_000, &mut sim);
+    let reports: Vec<_> = host.reports().collect();
+    assert_eq!(
+        reports,
+        [(REPORTER, bytemuck::bytes_of(&2.0f64).to_vec())],
+        "the E: variable's value, reported once"
+    );
+    assert_eq!(
+        sim.fired[..2],
+        ["K AXIS_AILERONS_SET 8000", "K AXIS_ELEVATOR_SET -16383"],
+        "the events go before the H: events and presets"
+    );
+    host.frame(2_000, &mut sim);
+    host.frame(3_000, &mut sim);
+    assert_eq!(
+        host.reports().count(),
+        1,
+        "a report the edge didn't take goes with the next frame"
+    );
+}
+
+/// Flight-model sync's case: with the module's clock 12s behind the core's counter, and write
+/// delays drawn from the round trips of 2026-10-09's flight, 10.2ms at least, 16.6ms at the
+/// median, 22.1ms at the 95th percentile, and 44.6ms at most, the host's offset settles
+/// within 2ms of where it ends, 10s after its first header, keeps it through a flight load
+/// with no header, and holds through a 2-hour run
+/// (record/areas/flight-model/01-flight-model-sync.md, "Cases for the bench" and "Budgets").
+#[test]
+fn the_offset_settles_within_2ms_in_10s_and_holds_for_2_hours() {
+    const BEHIND: u64 = 12_000_000;
+    // A delay in µs from a number in 0..1, along the round trips' percentiles.
+    fn delay(u: f64) -> u64 {
+        let points = [
+            (0.0, 10_200.0),
+            (0.5, 16_600.0),
+            (0.95, 22_100.0),
+            (1.0, 44_600.0),
+        ];
+        let at = points.windows(2).find(|w| u <= w[1].0).unwrap();
+        let share = (u - at[0].0) / (at[1].0 - at[0].0);
+        (at[0].1 + share * (at[1].1 - at[0].1)) as u64
+    }
+    let mut seed = 0x2026_1009u64;
+    let mut draw = || {
+        seed = seed
+            .wrapping_mul(6_364_136_223_846_793_005)
+            .wrapping_add(1_442_695_040_888_963_407);
+        (seed >> 11) as f64 / (1u64 << 53) as f64
+    };
+    let mut host = host();
+    let mut sim = Aircraft::default();
+    // The core's counter at a frame, as the host estimates it, less the true one.
+    let mut error_at = |host: &mut Host, core: u64| {
+        heard();
+        host.frame(core - BEHIND, &mut sim);
+        let frame = heard().pop().unwrap();
+        let now: i64 = frame.strip_prefix("frame at ").unwrap().parse().unwrap();
+        now - core as i64
+    };
+    // The core writes the slot again every 200ms, and each write reaches the module late.
+    let first = 20_000_000;
+    let mut write_at = |host: &mut Host, core: u64| {
+        let read = core + delay(draw());
+        host.written(NOTE, &write(1, 0, HASH, core, 1), read - BEHIND);
+    };
+    for n in 0..50 {
+        write_at(&mut host, first + n * 200_000);
+    }
+    let settled = error_at(&mut host, first + 10_000_000);
+    assert!(settled <= 0, "the estimate never passes the core's counter");
+    // A flight load: 90s with no header, through which the offset stays.
+    let after_load = first + 100_000_000;
+    host.written(
+        NOTE,
+        &write(1, 0, HASH, after_load, 1),
+        after_load + 20_000 - BEHIND,
+    );
+    assert_eq!(error_at(&mut host, after_load + 100_000), settled);
+    for n in 0..36_000 {
+        write_at(&mut host, after_load + 200_000 + n * 200_000);
+    }
+    let end = error_at(&mut host, after_load + 7_200_000_000 + 400_000);
+    assert!(end <= 0 && end >= settled);
+    assert!(
+        end - settled <= 2_000,
+        "10s in, the offset was {}µs from where it ended",
+        end - settled
+    );
+}
+
+/// Says where it put the pilot's aircraft, in the frames after a feed numbered 1.
+#[derive(Default)]
+struct Places {
+    on: bool,
+}
+
+const PLACES: RoutineId = RoutineId {
+    name: "PLACES",
+    freezes: false,
+};
+
+impl Routine for Places {
+    const ID: RoutineId = PLACES;
+    type Slot = NoteSlot;
+    type Report = ();
+
+    fn on_slot(&mut self, slot: &NoteSlot) {
+        self.on = slot.n == 1;
+    }
+
+    fn frame(&mut self, _: &Frame, want: &mut Wants) {
+        if self.on {
+            want.place(Pose {
+                latitude: 0.82,
+                ..Pose::default()
+            });
+        }
+    }
+}
+
+/// Hears where a routine before it put the pilot's aircraft, each frame.
+#[derive(Default)]
+struct Asks;
+
+const ASKS: RoutineId = RoutineId {
+    name: "ASKS",
+    freezes: false,
+};
+
+impl Routine for Asks {
+    const ID: RoutineId = ASKS;
+    type Slot = NoteSlot;
+    type Report = ();
+
+    fn on_slot(&mut self, _: &NoteSlot) {}
+
+    fn frame(&mut self, _: &Frame, want: &mut Wants) {
+        let placed = want.placed().map(|p| p.latitude);
+        HEARD.with(|h| h.borrow_mut().push(format!("placed {placed:?}")));
+    }
+}
+
+#[test]
+fn a_pose_one_routine_places_reaches_the_routines_after_it_for_that_frame_alone() {
+    let mut sim = Aircraft::default();
+    let mut host = Host::new(routines![Places, Asks], HASH, "0.1.0");
+    host.written(PLACES, &write(1, 0, HASH, 0, 1), 0);
+    host.written(ASKS, &write(1, 0, HASH, 0, 1), 0);
+    host.frame(1_000, &mut sim);
+    host.written(PLACES, &write(2, 0, HASH, 2_000, 2), 2_000);
+    host.frame(3_000, &mut sim);
+    assert_eq!(heard(), ["placed Some(0.82)", "placed None"]);
+
+    // A routine before the one that places hears nothing of it.
+    let mut host = Host::new(routines![Asks, Places], HASH, "0.1.0");
+    host.written(PLACES, &write(1, 0, HASH, 0, 1), 0);
+    host.written(ASKS, &write(1, 0, HASH, 0, 1), 0);
+    host.frame(1_000, &mut sim);
+    host.frame(2_000, &mut sim);
+    assert_eq!(heard(), ["placed None", "placed None"]);
 }

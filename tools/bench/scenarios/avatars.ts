@@ -670,3 +670,24 @@ test("after a reset of the sim's variables Figure's writes still land, and after
   camera(a, SEATS.pilot.eye, { yaw: -40 })
   await untilVariable(a, again.own.object, "HEAD_YAW", (v) => Math.abs(v - head) > 10, "Figure's writes on the new figure landing")
 })
+
+test("a following machine's yoke moved through Follow's events keeps the pilot flying's hand on its horn", { timeout: 120_000 }, async (t) => {
+  const { a, b } = await flight(t, "following-yoke")
+  await untilBoth(a, ({ own, other }) => seatOf(own) === "pilot" && seatOf(other) === "copilot", "both seated")
+  await pastPreflight(a, b)
+  const onB = await untilBoth(b, ({ other }) => seatOf(other) === "pilot" && other.hands[0].hand === "grip", "the pilot flying on the yoke")
+  const object = both(onB)!.other.object
+  // The aircraft's own code moves its yoke from the axis event, and the fixture's yoke reads it in percent, so a small value serves as both.
+  b.core.act({ act: "rule", when: { when: "sent", name: "K:AXIS_ELEVATOR_SET" }, after_ms: 0, then: { then: "set", name: "A:YOKE Y POSITION WITH AP", value: null } })
+  const held = await untilVariable(b, object, "ARM_L_LEN", () => true, "the arm on the yoke")
+  // The pilot flying pulls: the following machine's Follow sends the elevator's axis event, its yoke moves, and the hand goes with it.
+  a.core.act({ act: "set", numbers: [["A:ELEVATOR POSITION", -60]], texts: [] })
+  const pulled = await untilVariable(b, object, "ARM_L_LEN", (v) => Math.abs(v - held) > 0.01, "the hand following the yoke")
+  t.diagnostic(`the pilot flying's left arm on the following machine went from ${held.toFixed(3)}m to ${pulled.toFixed(3)}m with the yoke`)
+  // Follow draws the elevator along a line between two samples, so the yoke passes through the values between on its way.
+  let yoke: string | undefined
+  for (const started = Date.now(); yoke !== "60" && Date.now() - started < 5_000; await sleep(50)) {
+    yoke = new Map((await b.core.report()).variables).get("YOKE Y POSITION WITH AP")
+  }
+  assert.equal(yoke, "60", "the following machine's yoke moved by the axis event")
+})

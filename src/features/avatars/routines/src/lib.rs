@@ -4,7 +4,8 @@
 //! Avatars feeds it each figure's pose, seat, color, and state, and this machine's yokes.
 //! Each frame it eases each hand and the head, holds a hand on a yoke from this machine's own
 //! yoke variables, solves the 27 joints, walks or runs a figure on foot, and places each
-//! figure through the aircraft's pose led by 1 frame. It writes a joint only when it moved
+//! figure through the aircraft's pose: led by 1 frame where the sim flies the aircraft, and
+//! as `Follow` says it writes it on a following machine. It writes a joint only when it moved
 //! past what shows, and the figure's place only when it moved, since drawing and animating
 //! changed joints is what a figure costs a frame (user, 2026-10-25;
 //! record/areas/avatars/log.md, "Each figure poses from its own object's variables").
@@ -128,6 +129,7 @@ struct Drawn {
 impl Routine for Figure {
     const ID: messages::module::RoutineId = FIGURE;
     type Slot = FigureSlot;
+    type Report = ();
 
     fn on_slot(&mut self, slot: &FigureSlot) {
         self.slot = Some(Box::new(*slot));
@@ -154,23 +156,45 @@ impl Routine for Figure {
             }
         }
         let read = |want: &mut Wants, r: VarRef| want.read(USER, r).unwrap_or(0.0);
-        let mut pose = [0.0; 6];
-        for (v, r) in pose.iter_mut().zip(names.place) {
-            *v = read(want, r);
-        }
-        let [latitude, longitude, altitude, heading, pitch, bank] = pose;
-        let aircraft = earth::Pose {
-            latitude,
-            longitude,
-            altitude,
-            heading,
-            pitch,
-            bank,
+        // On a following machine `Follow`, before `Figure` in the module's list, says where it
+        // puts the aircraft this frame, and the figures sit on that pose as it is. A read
+        // would give the pose `Follow` wrote the frame before, and a lead from it lands
+        // right only when two frames take the same time.
+        let placed = want.placed();
+        let aircraft = match placed {
+            Some(p) => earth::Pose {
+                latitude: p.latitude.to_degrees(),
+                longitude: p.longitude.to_degrees(),
+                altitude: p.altitude,
+                heading: p.heading.to_degrees(),
+                pitch: p.pitch.to_degrees(),
+                bank: p.bank.to_degrees(),
+            },
+            None => {
+                let mut pose = [0.0; 6];
+                for (v, r) in pose.iter_mut().zip(names.place) {
+                    *v = read(want, r);
+                }
+                let [latitude, longitude, altitude, heading, pitch, bank] = pose;
+                earth::Pose {
+                    latitude,
+                    longitude,
+                    altitude,
+                    heading,
+                    pitch,
+                    bank,
+                }
+            }
         };
         let (dt, lead) = match self.last {
             Some((at, last)) => (
                 (frame.now.saturating_sub(at) as f32 / 1e6).min(0.1),
-                aircraft.led(&last, 1.0),
+                // Only an aircraft the sim flies moves on between this read and its drawing.
+                if placed.is_some() {
+                    aircraft
+                } else {
+                    aircraft.led(&last, 1.0)
+                },
             ),
             None => (0.0, aircraft),
         };

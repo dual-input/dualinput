@@ -726,7 +726,7 @@ Builds:
 - the message crate's `take_control` module: its two settings' keys, its two commands, and its slice, which holds whether the input is live, whether this pilot holds control, each denial's reason, the warning while the link to the PF is lost, and the next press while Bind waits for it, the part reading the two settings from the slice of settings ([the units](../control/01-take-control.md#the-units), [taking control](../control/01-take-control.md#taking-control))
 - `src/features/take-control/core`: the binding, on for the whole of a session while an input is set, which asks on a press's down or once it has been held 0.35s; the sounds, on for the whole of a session; the request's four steps; the cue and the notification at each pass, which names the pilot who left the flight, and says what a PF who lost control through a lost link had undone; the refusal's cue and notification; and "Reconnecting to James", held while this core's link to the PF is lost ([the binding](../control/01-take-control.md#the-binding), [taking control](../control/01-take-control.md#taking-control), [a pass](../control/01-take-control.md#a-pass), [the banner](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on))
 - `src/features/take-control/efb`: the button under the tab bar, held 0.35s, with its ring, its bound key, and its lines; and the binding's section at the top of Settings ([take control](../interface/decisions.md#take-control-is-a-held-button-under-the-tabs-with-one-hold-of-035s), [the Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version)), rebuilt from the frames in `experiments/areas/interface/bench/src/frames/flight.tsx` and `settings.tsx`, with the kit's `Choice` for Press or Hold
-- two stand-in cues, made by an ignored test of `src/apps/core-helper`, as the bench's tone is, which [stage 20b](#20b-the-sounds) replaces ([left open](../control/01-take-control.md#left-open))
+- two cues, made by an ignored test of `src/apps/core-helper`, as the bench's tone is, which [stage 20b](#20b-the-sounds) kept for v1 ([left open](../control/01-take-control.md#left-open))
 - the helper's next press, which skips a modifier and any key pressed with one held, so one key binds, and while it's on, a press crosses only as the next press, so pressing the key already bound doesn't also take control ([the Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version))
 - the helper's output thread, which takes its commands after waiting for the device, so a sound goes into that write, 10ms sooner on a device with a 10ms period
 - the core helper service's warning for a binding, in the frames' words, "Your take-control key isn't working" and "Windows didn't let Dual Input listen for F9."
@@ -782,9 +782,12 @@ Needs: 16 and 17.
 ## 20b The sounds
 
 Designs first: the style of Dual Input's sounds, which the user picks by ear from a page of a few contrasting styles, each playing the same two cues, with a licensed pack or a sound designer as the way out if none is good enough (user, 2026-11-04).
-Builds: the control-passed and refusal cues in that style, in place of [stage 20](#20-take-control)'s stand-ins, in a family with room for the voice phrases' two cues, the offer opening and the offer timing out ([voice phrases](../product/03-v1-scope.md#voice-phrases)), which come with that Soon pick.
+Builds: no new cues, since the user picked [stage 20](#20-take-control)'s two over four rounds of candidates, so v1 keeps them; and the voice phrases' two cues, the offer opening and the offer timing out ([voice phrases](../product/03-v1-scope.md#voice-phrases)), sketched in their style in `experiments/areas/control/sounds/make.mjs` for that Soon pick ([control log](../control/log.md#2026-11-15-four-rounds-of-candidate-cues-didnt-beat-stage-20s-stand-ins-so-v1-keeps-them); user, 2026-11-15).
 Needs: 20.
-It changes no code, since each cue is a file the core embeds, and it holds nothing back but v1's release, so it runs whenever the user has the room for it.
+Tests: none of its own, since it changes no code; the helper's test from stage 20 still checks that both cues are 48 kHz, mono.
+
+Exit: the user has heard the candidates and picked the cues v1 ships, and the [control log](../control/log.md) has an entry for the rounds.
+Done on 2026-11-15.
 
 ## 21 Rate and pause, and Go to
 

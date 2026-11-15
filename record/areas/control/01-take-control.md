@@ -25,6 +25,10 @@ Decides:     How a pilot binds the key or button, as a single or a long press; h
 > [Budgets](#budgets)' single press is under 100ms, not 50ms, since it took about 80ms on our development machine, and the smallest output buffer we tried still took 53ms at the cost of ATC audio's margin (user, 2026-11-04).
 > The two cues [left open](#left-open) are stand-ins, and [stage 20b](../build/plan.md#20b-the-sounds) makes the real ones (user, 2026-11-04).
 
+> **Note**
+> Stage 20b kept stage 20's two cues as v1's, since four rounds of candidates didn't beat them, and sketched the voice phrases' two cues in their style ([control log](log.md#2026-11-15-four-rounds-of-candidate-cues-didnt-beat-stage-20s-stand-ins-so-v1-keeps-them); user, 2026-11-15).
+> Richer cues would come from a licensed pack or a sound designer.
+
 A pilot binds one keyboard key or flight-hardware button in the desktop app, as a single press, which takes control on its down, or a long press, which takes control once it has been held 1s.
 The press, or the take-control button in the EFB app or the desktop app, asks the session crate's `TakeControl`, whose guards decide, and a refused press plays a short refusal cue and shows the guards' reason on the banner.
 When control passes, every machine whose pilot is in the flight plays the control-passed cue and shows who has control, with no recorded line.

@@ -1,0 +1,330 @@
+<title>Dual Input sounds</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* One column of style cards, two side by side from 720px, under a sticky bar that holds the cockpit noise. */
+  :root {
+    --bg: #f5f6fa;
+    --surface: #ffffff;
+    --ink: #171a29;
+    --muted: #5a6077;
+    --line: #dde0ea;
+    --wave: #c3c8db;
+    --accent: #a8247f;
+    --accent-ink: #ffffff;
+    --accent-soft: #f6e4f0;
+    --display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+    --text: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d101a; --surface: #151927; --ink: #e7e9f3; --muted: #979db5; --line: #262b3e;
+      --wave: #3b4262; --accent: #e070c4; --accent-ink: #1b0e18; --accent-soft: #2b1a29;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d101a; --surface: #151927; --ink: #e7e9f3; --muted: #979db5; --line: #262b3e;
+    --wave: #3b4262; --accent: #e070c4; --accent-ink: #1b0e18; --accent-soft: #2b1a29;
+    color-scheme: dark;
+  }
+
+  body { background: var(--bg); color: var(--ink); font-family: var(--text); font-size: 15px; line-height: 1.5; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+  .page {
+    max-width: 920px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 48px;
+    display: grid; gap: 20px;
+  }
+
+  .intro { display: grid; gap: 10px; max-width: 64ch; }
+  .eyebrow { margin: 0; font-family: var(--data); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+  h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: clamp(30px, 6vw, 40px); line-height: 1.05; letter-spacing: 0.01em; text-wrap: balance; }
+  .intro p { margin: 0; }
+  .fine { font-size: 13px; color: var(--muted); }
+
+  .bar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+    padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 500 14px var(--text); color: var(--ink);
+    padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); cursor: pointer;
+  }
+  .toggle .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--wave); }
+  .toggle[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .toggle[aria-pressed="true"] .dot { background: var(--accent); }
+  .level { display: flex; align-items: center; gap: 8px; flex: 1 1 180px; min-width: 0; font-size: 13px; color: var(--muted); }
+  .level input { flex: 1; min-width: 0; accent-color: var(--accent); }
+  .level output { font-family: var(--data); font-variant-numeric: tabular-nums; min-width: 6ch; text-align: right; color: var(--ink); }
+
+  .styles { display: grid; gap: 26px; }
+  .family { display: grid; gap: 10px; }
+  .family h2 { margin: 0; font-family: var(--data); font-weight: 500; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .cards { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 720px) { .cards { grid-template-columns: 1fr 1fr; } }
+  .tag { font: 500 11px var(--data); letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px; vertical-align: 3px; margin-left: 6px; }
+
+  .style {
+    display: grid; gap: 12px; align-content: start; min-width: 0;
+    padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+  }
+  .style header { display: grid; gap: 4px; }
+  .style h3 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 24px; line-height: 1.1; letter-spacing: 0.01em; }
+  .style p { margin: 0; color: var(--muted); font-size: 14px; }
+  .style.reference { border-style: dashed; background: transparent; }
+
+  .cues { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cue {
+    display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; gap: 6px 8px; align-items: end;
+    min-width: 0; padding: 10px 12px 9px; text-align: left; cursor: pointer;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink);
+    font: 600 14px var(--text);
+    transition: border-color 120ms ease, background-color 120ms ease;
+  }
+  .cue svg { grid-column: 1 / -1; width: 100%; height: 30px; display: block; color: var(--wave); }
+  .cue .seconds { font: 400 12px var(--data); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .cue:hover { border-color: var(--muted); }
+  .cue.playing { border-color: var(--accent); background: var(--accent-soft); }
+  .cue.playing svg { color: var(--accent); }
+
+  .later { display: grid; gap: 6px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .later .label { font-size: 12px; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font: 500 13px var(--text); color: var(--ink); cursor: pointer;
+    padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); background: transparent;
+  }
+  .chip:hover { border-color: var(--muted); }
+  .chip.playing { border-color: var(--accent); background: var(--accent-soft); }
+
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .reply { max-width: 64ch; margin: 0; font-size: 14px; color: var(--muted); }
+  .reply strong { color: var(--ink); font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce) { .cue { transition: none; } }
+</style>
+
+<main class="page">
+  <header class="intro">
+    <p class="eyebrow">Stage 20b · Take-control's sounds · Round four</p>
+    <h1>Pick a sound style</h1>
+    <p>Dual Input plays a short sound when control passes from one pilot to the other, and another when a press to take control is refused. Pick the version you'd want in your headset, beside ATC and the engines.</p>
+    <p>Stage 20's stand-ins fit best, but each note is close to one pure tone. These keep their tune and shape, and fill out each note.</p>
+    <p class="fine">Under each style are sketches of the two sounds the voice handover adds after v1: the pilot flying says "You have control", and the offer times out if nobody answers within 5s.</p>
+    <p class="fine">Every sound is set to the stand-ins' loudness and encoded as Dual Input ships it, in Opus at 24 kbps. Start with your volume low. On an iPhone, turn off silent mode, or nothing plays.</p>
+  </header>
+
+  <div class="bar" role="group" aria-label="Cockpit noise">
+    <button class="toggle" id="noise" type="button" aria-pressed="false"><span class="dot" aria-hidden="true"></span><span id="noise-label">Cockpit noise off</span></button>
+    <label class="level" for="noise-level">Level
+      <input type="range" id="noise-level" min="-40" max="-12" step="1" value="-26">
+      <output id="noise-db" for="noise-level">−26 dB</output>
+    </label>
+  </div>
+
+  <section class="styles" id="styles" aria-label="Styles"></section>
+
+  <p class="reply"><strong>Reply in chat</strong> with the name of the style you'd pick, or say none is good enough, and we look at a licensed pack or a sound designer instead.</p>
+</main>
+
+<script>
+/* CUES */
+
+(function () {
+  const list = document.getElementById('styles');
+  const later = 'Voice handover, after v1';
+
+  function wave(shape) {
+    const bars = shape.map(function (p, i) {
+      const h = Math.max(0.6, (p / 100) * 28);
+      return '<rect x="' + (i * 2) + '" y="' + (15 - h / 2).toFixed(2) + '" width="1.2" height="' + h.toFixed(2) + '" rx="0.6" fill="currentColor"></rect>';
+    }).join('');
+    return '<svg viewBox="0 0 112 30" preserveAspectRatio="none" aria-hidden="true">' + bars + '</svg>';
+  }
+
+  function cueButton(style, cue, label) {
+    const c = style.cues[cue];
+    return '<button class="cue" type="button" data-style="' + style.id + '" data-cue="' + cue + '" aria-label="Play ' + style.name + ', ' + label + '">' +
+      wave(c.shape) + '<span>' + label + '</span><span class="seconds">' + c.seconds.toFixed(2) + 's</span></button>';
+  }
+
+  function card(style) {
+    const reference = style.id === 'stand-in';
+    const tag = style.round === 1 ? '<span class="tag">Round one</span>' : '';
+    return '<article class="style' + (reference ? ' reference' : '') + '" id="' + style.id + '">' +
+      '<header><h3>' + style.name + tag + '</h3><p>' + style.blurb + '</p></header>' +
+      '<div class="cues">' + cueButton(style, 'passed', 'Control passed') + cueButton(style, 'refused', 'Refused') + '</div>' +
+      (reference ? '' :
+        '<div class="later"><span class="label">' + later + '</span><div class="chips">' +
+        '<button class="chip" type="button" data-style="' + style.id + '" data-cue="offer">Offer opens</button>' +
+        '<button class="chip" type="button" data-style="' + style.id + '" data-cue="offer passed">Offer, then passed</button>' +
+        '<button class="chip" type="button" data-style="' + style.id + '" data-cue="timeout">Offer times out</button>' +
+        '</div></div>') +
+      '</article>';
+  }
+
+  const families = [];
+  DATA.styles.forEach(function (style) {
+    let family = families.find(function (f) { return f.name === style.family; });
+    if (!family) families.push(family = { name: style.family, styles: [] });
+    family.styles.push(style);
+  });
+  list.innerHTML = families.map(function (family) {
+    return '<section class="family" aria-label="' + family.name + '"><h2>' + family.name + '</h2>' +
+      '<div class="cards">' + family.styles.map(card).join('') + '</div></section>';
+  }).join('');
+
+  const byId = {};
+  DATA.styles.forEach(function (s) { byId[s.id] = s; });
+
+  let context = null;
+  let playing = [];
+  let lit = null;
+  const decoded = {};
+
+  function audio() {
+    if (!context) {
+      const Context = window.AudioContext || window.webkitAudioContext;
+      context = new Context();
+    }
+    if (context.state === 'suspended') context.resume();
+    return context;
+  }
+
+  function bytes(base64) {
+    const text = atob(base64);
+    const out = new Uint8Array(text.length);
+    for (let i = 0; i < text.length; i++) out[i] = text.charCodeAt(i);
+    return out.buffer;
+  }
+
+  function buffer(style, cue) {
+    const key = style.id + '/' + cue;
+    if (!decoded[key]) {
+      decoded[key] = new Promise(function (ok, fail) {
+        audio().decodeAudioData(bytes(style.cues[cue].audio), ok, fail);
+      });
+    }
+    return decoded[key];
+  }
+
+  function stop() {
+    playing.forEach(function (source) { try { source.stop(); } catch (e) { /* already ended */ } });
+    playing = [];
+    if (lit) lit.classList.remove('playing');
+    lit = null;
+  }
+
+  // A pilot answers an offer about a second after it opens, so "Offer, then passed" waits 1.3s.
+  function play(button) {
+    const style = byId[button.dataset.style];
+    const cues = button.dataset.cue.split(' ');
+    const ctx = audio();
+    stop();
+    lit = button;
+    button.classList.add('playing');
+    Promise.all(cues.map(function (cue) { return buffer(style, cue); })).then(function (buffers) {
+      if (lit !== button) return;
+      const start = ctx.currentTime + 0.03;
+      let end = 0;
+      const mine = buffers.map(function (b, i) {
+        const source = ctx.createBufferSource();
+        source.buffer = b;
+        source.connect(ctx.destination);
+        source.start(start + i * 1.3);
+        end = Math.max(end, i * 1.3 + b.duration);
+        return source;
+      });
+      playing = mine;
+      setTimeout(function () {
+        if (playing === mine) { button.classList.remove('playing'); lit = null; }
+      }, (end + 0.08) * 1000);
+    }).catch(function () {
+      button.classList.remove('playing');
+      lit = null;
+    });
+  }
+
+  list.addEventListener('click', function (event) {
+    const button = event.target.closest('button[data-cue]');
+    if (button) play(button);
+  });
+
+  // Cockpit noise: pink noise below 1.4kHz with a low drone at 92Hz, its level in dB of full scale.
+  const toggle = document.getElementById('noise');
+  const toggleLabel = document.getElementById('noise-label');
+  const slider = document.getElementById('noise-level');
+  const readout = document.getElementById('noise-db');
+  let noise = null;
+
+  function makeNoise(ctx) {
+    const length = ctx.sampleRate * 4;
+    const buf = ctx.createBuffer(1, length, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, sum = 0;
+    for (let i = 0; i < length; i++) {
+      const w = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759;
+      b2 = 0.969 * b2 + w * 0.153852; b3 = 0.8665 * b3 + w * 0.3104856;
+      b4 = 0.55 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.016898;
+      d[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362;
+      b6 = w * 0.115926;
+      sum += d[i] * d[i];
+    }
+    const scale = 1 / Math.sqrt(sum / length);
+    for (let i = 0; i < length; i++) d[i] *= scale;
+    const source = ctx.createBufferSource();
+    source.buffer = buf;
+    source.loop = true;
+    const low = ctx.createBiquadFilter();
+    low.type = 'lowpass';
+    low.frequency.value = 1400;
+    const drone = ctx.createOscillator();
+    drone.type = 'sawtooth';
+    drone.frequency.value = 92;
+    const droneLow = ctx.createBiquadFilter();
+    droneLow.type = 'lowpass';
+    droneLow.frequency.value = 320;
+    const droneLevel = ctx.createGain();
+    droneLevel.gain.value = 0.35;
+    const level = ctx.createGain();
+    level.gain.value = 0;
+    source.connect(low).connect(level);
+    drone.connect(droneLow).connect(droneLevel).connect(level);
+    level.connect(ctx.destination);
+    source.start();
+    drone.start();
+    return level;
+  }
+
+  function setNoise() {
+    const db = Number(slider.value);
+    readout.textContent = (db < 0 ? '−' : '') + Math.abs(db) + ' dB';
+    const on = toggle.getAttribute('aria-pressed') === 'true';
+    toggleLabel.textContent = on ? 'Cockpit noise on' : 'Cockpit noise off';
+    if (!noise) return;
+    const ctx = audio();
+    noise.gain.setTargetAtTime(on ? Math.pow(10, db / 20) : 0, ctx.currentTime, 0.08);
+  }
+
+  toggle.addEventListener('click', function () {
+    const on = toggle.getAttribute('aria-pressed') !== 'true';
+    toggle.setAttribute('aria-pressed', String(on));
+    if (on && !noise) noise = makeNoise(audio());
+    setNoise();
+  });
+  slider.addEventListener('input', setNoise);
+  setNoise();
+})();
+</script>

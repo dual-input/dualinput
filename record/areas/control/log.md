@@ -2,6 +2,33 @@
 
 What we found about passing control between pilots, by the take-control key and buttons and by voice, newest entry first.
 
+## 2026-11-15: Four rounds of candidate cues didn't beat stage 20's stand-ins, so v1 keeps them
+
+**Asked:** which style should Dual Input's control-passed and refusal cues take, picked by ear from candidates that each play both and sketch the voice phrases' two cues, the offer opening and the offer timing out ([stage 20b](../build/plan.md#20b-the-sounds))?
+
+**Expected:** that one of a few contrasting styles made in code would beat stage 20's stand-ins, which the user found basic and flat on 2026-11-04.
+
+**Found:** the user picked none over the stand-ins, in four rounds on one listening page ([the experiment](../../../experiments/areas/control/sounds/make.mjs)).
+Every candidate played at the stand-ins' loudness, −20.1 LUFS momentary at its loudest, through Opus at 24 kbps as the core embeds a sound, with a cockpit-noise switch to play under it.
+
+- Round one, six styles made in code: marimba, glass, electric piano, knock, panel tone, and soft synth.
+  Soft synth went out first, panel tone sounded generically digital, and knock, and glass a little, started too suddenly and sharply.
+- Round two, wider rather than narrower: vibraphone with and without its motor, felt piano, handpan, kalimba, harp, wooden flute, horn, and water drops, made in code, and three styles cut from the University of Iowa's instrument recordings, a marimba with yarn mallets, a piano played softly, and a bowed vibraphone.
+  The Iowa vibraphone struck with mallets was left out, since its notes sit 45dB to 50dB below full scale and each still rings under the next.
+  After this round the user found the stand-ins the best fit of every style.
+- Round three, the stand-ins as they are and with one thing changed in each: a 12ms start, a small room, a ring 1.6 times as long, a second voice 4Hz above, every note a fourth lower, and control passing rising a fourth.
+  None was better, and the user heard each note as close to a single tone, not rich: its two overtones are 22% and 5% of it.
+- Round four, the stand-ins with fuller notes: six overtones, an octave below, chords, and the three together in a small room.
+  None was better.
+
+The agent making the candidates couldn't hear them, so each change was chosen from numbers, which is the main limit of making cues this way.
+
+**Changed because of it:** v1 keeps stage 20's two cues, and stage 20b changes no file the core embeds (user, 2026-11-15).
+The voice phrases' two cues are sketched in the stand-ins' style in the experiment: the offer taps G5 twice, and its timing out falls from G5 to D5, 3dB softer.
+Richer cues would come from a licensed pack or a sound designer, the way out the user set on 2026-11-04, rather than from more rounds made in code.
+
+**Docs affected:** the notes at the top of [01-take-control](01-take-control.md), and [stage 20b](../build/plan.md#20b-the-sounds).
+
 ## 2026-11-10: A bound button crosses with another program in front, about 70µs after the helper's stamp
 
 **Asked:** does a button bound for take-control cross to the core while another program has the focus, and does a switch held on while binding keep the binding to the button pressed, as [take-control's cases](01-take-control.md#cases-for-the-bench) ask of a pilot at the hardware?

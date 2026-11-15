@@ -17,10 +17,11 @@ The probes are in [experiments/areas/traffic-atc](../../../experiments/areas/tra
   The moving aircraft read all five on too, except one aircraft in each of four captures with its landing light off, and the ground objects read none.
 - FS Copilot never checked the lights it wrote: its log says only that the sim accepted them, while it read the engines back after writing them (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 0 capture read; TrafficInject built and smoke-tested — Q01, Q08 settled" and "2026-09-06 · First visual replay; engines, pushback, ground vehicles").
 
-**Changed:** the report implies the host's sim drew its parked aircraft dark (unverified), which would mean a parked AI aircraft's `ON` variables don't follow what the sim draws, while the receiver writes what they read into each copy's switches.
-[Polling](01-traffic-and-atc.md#polling) reads FS Copilot's state, so it would light every parked copy the same way.
-Stage 18's session in the sim reads the switches beside the `ON` variables on parked and moving AI aircraft at a busy gate, compares both with what the sim draws, and fixes the poll's light variables by the result.
-The same reads compare `FLAPS HANDLE INDEX` with the flap surfaces, `TRAILING EDGE FLAPS LEFT PERCENT` and the others, since nothing measured says an AI aircraft's handle follows its surfaces.
+**Changed:** the tester's report implies the host's sim drew its parked aircraft dark (unverified).
+If it did, a parked AI aircraft's `ON` variables don't follow what the sim draws, and FS Copilot's receiver wrote their values into each copy's switches.
+[Polling](01-traffic-and-atc.md#polling) read FS Copilot's state, so it would have lit every parked copy the same way.
+So polling reads the five switches, which traffic writes on each copy, and the four flap surfaces, `TRAILING EDGE FLAPS LEFT PERCENT` and the others, which traffic writes on each copy in place of `FLAPS HANDLE INDEX`, since nothing measured says an AI aircraft's handle follows its surfaces.
+Stage 18's session in the sim checks the switches and surfaces against what the sim draws on AI aircraft, and that a copy takes what traffic writes, as [01-traffic-and-atc](01-traffic-and-atc.md)'s note lists.
 
 **Affects:** [01-traffic-and-atc](01-traffic-and-atc.md)'s polling and its dress, through a note.
 

@@ -18,7 +18,10 @@ Decides:     What the traffic host polls, how often, and which objects it carrie
 
 > **Note**
 > FS Copilot's host read all five `LIGHT … ON` variables as on for every parked AI aircraft, which lit every parked copy ([log](log.md#2026-11-15-fs-copilots-host-read-all-five-lights-on-for-every-parked-ai-aircraft-so-its-copies-lit-up-at-the-gate)).
-> Stage 18 builds [polling](#polling) and [creating a copy](#creating-a-copy) as written, and its session in the sim then picks the variables polling reads for the lights and the flaps, by the reads that log entry lists.
+> So [polling](#polling) reads the five light switches, `LIGHT STROBE`, `LIGHT LANDING`, `LIGHT TAXI`, `LIGHT BEACON`, and `LIGHT NAV`, the variables [creating a copy](#creating-a-copy) writes, in place of FS Copilot's `LIGHT … ON`.
+> Polling reads, and creating a copy writes, the four flap surfaces, `TRAILING EDGE FLAPS LEFT PERCENT`, `TRAILING EDGE FLAPS RIGHT PERCENT`, `LEADING EDGE FLAPS LEFT PERCENT`, and `LEADING EDGE FLAPS RIGHT PERCENT`, in place of `FLAPS HANDLE INDEX`, so a copy shows the surfaces the original's model draws.
+> Each surface goes out as a byte of percent, which makes a batch about 23 states rather than 25 (arithmetic).
+> Stage 18's session in the sim adds four checks to the [in-sim cases](#cases-for-the-bench), on AI aircraft parked at a busy gate and then on AI aircraft taxiing: that the five switches and four surfaces follow what the sim draws, read beside the five `LIGHT … ON` variables; that a copy takes a written surface; that one write of the dress holds on a released copy; and that each light's write takes on a copy of an FSLTL aircraft.
 
 On the traffic host, traffic polls the sim's AI aircraft and helicopters within the radius setting, and the ground objects within 1km whose titles it allows, twice a second.
 It sends each object's identity once, and its state when it changes or every 5s.

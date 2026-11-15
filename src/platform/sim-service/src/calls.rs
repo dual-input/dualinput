@@ -11,7 +11,7 @@ use sim_client::message::{Camera, Data};
 use sim_client::{InitPosition, Period, Value, Var};
 use simconnect_types::SIMCONNECT_OBJECT_ID_USER;
 
-use crate::connections::Origin;
+use crate::connections::{Holder, Origin};
 use crate::{SimEvent, SimService};
 
 /// Registers what a unit hears from the sim.
@@ -102,8 +102,38 @@ impl Sim<'_, '_> {
     /// A definition of `var` on the pilot's aircraft that only `write` uses, for a target no
     /// watch reads.
     pub fn define(&self, var: &Var) -> Handle {
+        self.definition(std::slice::from_ref(var))
+    }
+
+    /// A definition of `vars` that only `write` and `write_into` use: on the pilot's aircraft,
+    /// or through `write_into` on an object the unit created, so one definition dresses every
+    /// object.
+    pub fn definition(&self, vars: &[Var]) -> Handle {
         let (handle, origin) = self.origin();
-        self.cx.call(SimService::define_for, (origin, var.clone()));
+        self.cx
+            .call(SimService::define_for, (origin, vars.to_vec()));
+        handle
+    }
+
+    /// Writes `values` into the variables of `definition`, a `definition` or a watch of the
+    /// unit's, on the object `object`, one for each, in its order.
+    pub fn write_into(&self, definition: Handle, object: u32, values: Vec<Value>) -> Handle {
+        let (handle, origin) = self.origin();
+        self.cx.call(
+            SimService::write_into_for,
+            (origin, definition, object, values),
+        );
+        handle
+    }
+
+    /// Reads `vars` once on each object of `kind`, a `SIMCONNECT_SIMOBJECT_TYPE`, within
+    /// `radius` meters of the pilot's aircraft. Each object's values arrive as
+    /// `SimEvent::Polled` with this handle and its number among them, and an answer that
+    /// found none has a count of 0.
+    pub fn poll(&self, kind: i32, radius: u32, vars: &[Var]) -> Handle {
+        let (handle, origin) = self.origin();
+        self.cx
+            .call(SimService::poll_for, (origin, kind, radius, vars.to_vec()));
         handle
     }
 
@@ -163,7 +193,31 @@ impl Sim<'_, '_> {
         handle
     }
 
-    /// Removes an object the unit created.
+    /// Creates an aircraft or a helicopter of the SimObject titled `title`, in `livery`, with
+    /// the tail `tail`, at `at`, which no ATC flies. Its ID arrives as `SimEvent::Created` with
+    /// this handle, or an exception does, as `create_ai`'s does.
+    pub fn create_aircraft(
+        &self,
+        title: &str,
+        livery: &str,
+        tail: &str,
+        at: InitPosition,
+    ) -> Handle {
+        let (handle, origin) = self.origin();
+        let names = (title.to_string(), livery.to_string(), tail.to_string());
+        self.cx
+            .call(SimService::create_aircraft_for, (origin, names, at));
+        handle
+    }
+
+    /// Takes an object the unit created away from the sim's AI, which would otherwise move it.
+    pub fn release(&self, object: u32) -> Handle {
+        let (handle, origin) = self.origin();
+        self.cx.call(SimService::release_for, (origin, object));
+        handle
+    }
+
+    /// Removes an object the unit created, unless its connection went and took it.
     pub fn remove(&self, object: u32) -> Handle {
         let (handle, origin) = self.origin();
         self.cx.call(SimService::remove_for, (origin, object));
@@ -326,15 +380,63 @@ impl SimService {
         }
     }
 
-    fn define_for(me: &mut SimService, (origin, var): (Origin, Var), cx: &mut Cx) {
+    fn define_for(me: &mut SimService, (origin, vars): (Origin, Vec<Var>), cx: &mut Cx) {
         let Some(client) = me.client(origin, cx) else {
             return;
         };
-        let (watch, ops) = client.define(&origin, &var);
+        let (watch, ops) = client.define(&origin, &vars);
         if let (Some(holder), Some(handle)) =
             (me.holders.get_mut(&origin.unit.place()), origin.handle)
         {
             holder.watches.insert(handle, watch);
+        }
+        me.make(origin, ops, cx);
+    }
+
+    fn write_into_for(
+        me: &mut SimService,
+        (origin, definition, object, values): (Origin, Handle, u32, Vec<Value>),
+        cx: &mut Cx,
+    ) {
+        let found = me
+            .holders
+            .get(&origin.unit.place())
+            .and_then(|h| h.watches.get(&definition))
+            .map(|watch| watch.on(object));
+        let Some(client) = me.client(origin, cx) else {
+            return;
+        };
+        match found.and_then(|watch| client.write(watch, &values)) {
+            Some(op) => me.make(origin, vec![op], cx),
+            None => {
+                tracing::warn!(
+                    unit = origin.unit.place(),
+                    "a write named no definition of its unit, or values that don't fit it"
+                );
+                if let Some(call) = origin.handle {
+                    me.tell(origin.unit, SimEvent::Failed { call }, cx);
+                }
+            }
+        }
+    }
+
+    fn poll_for(
+        me: &mut SimService,
+        (origin, kind, radius, vars): (Origin, i32, u32, Vec<Var>),
+        cx: &mut Cx,
+    ) {
+        let Some(client) = me.client(origin, cx) else {
+            return;
+        };
+        let (request, ops) = client.poll(&origin, kind, radius, &vars);
+        if let (Some(holder), Some(handle)) =
+            (me.holders.get_mut(&origin.unit.place()), origin.handle)
+        {
+            // The client forgets a poll whose answers never all came, once enough newer ones
+            // wait, and its handle goes with it.
+            let Holder { client, polls, .. } = holder;
+            polls.retain(|r, _| client.polling(*r));
+            polls.insert(request, handle);
         }
         me.make(origin, ops, cx);
     }
@@ -482,7 +584,43 @@ impl SimService {
         me.make(origin, vec![op], cx);
     }
 
+    fn create_aircraft_for(
+        me: &mut SimService,
+        (origin, (title, livery, tail), at): (Origin, (String, String, String), InitPosition),
+        cx: &mut Cx,
+    ) {
+        let Some(client) = me.client(origin, cx) else {
+            return;
+        };
+        let (request, op) = client.create_aircraft(&title, &livery, &tail, at);
+        if let (Some(holder), Some(handle)) =
+            (me.holders.get_mut(&origin.unit.place()), origin.handle)
+        {
+            holder.creates.insert(request, handle);
+        }
+        me.make(origin, vec![op], cx);
+    }
+
+    fn release_for(me: &mut SimService, (origin, object): (Origin, u32), cx: &mut Cx) {
+        let Some(client) = me.client(origin, cx) else {
+            return;
+        };
+        let op = client.release(object);
+        me.make(origin, vec![op], cx);
+    }
+
     fn remove_for(me: &mut SimService, (origin, object): (Origin, u32), cx: &mut Cx) {
+        // A remove made as the unit leaves the flight runs after a profile's unload has closed
+        // the unit's connection, which took the object with it, so a remove of an object the
+        // connection no longer holds makes no call, rather than opening a new connection to
+        // remove what isn't there.
+        let held = me
+            .holders
+            .get(&origin.unit.place())
+            .is_some_and(|h| h.objects.contains(&object));
+        if !held {
+            return;
+        }
         let Some(client) = me.client(origin, cx) else {
             return;
         };
@@ -566,6 +704,20 @@ impl SimService {
         let Some(values) = holder.client.values(data) else {
             return;
         };
+        if let Some(&call) = holder.polls.get(&data.request) {
+            if !holder.client.polling(data.request) {
+                holder.polls.remove(&data.request);
+            }
+            let event = SimEvent::Polled {
+                call,
+                object: data.object,
+                values,
+                entry: data.entry,
+                out_of: data.out_of,
+            };
+            self.tell(unit, event, cx);
+            return;
+        }
         if unit == me {
             if self.aware.read == Some(data.request) {
                 self.aware.read = None;

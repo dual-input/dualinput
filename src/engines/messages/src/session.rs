@@ -279,7 +279,7 @@ pub struct SessionSlice {
     pub differences: Vec<Difference>,
     /// Why Ready can't be clicked now, empty when it can, or `None` outside a session.
     pub ready: Option<Vec<String>>,
-    /// Why "Share my traffic and ATC" can't be turned on now, empty when it can.
+    /// Why a sharing card's switch can't be turned on now, empty when it can.
     pub share: Option<Vec<String>>,
     /// The role keys this pilot can claim, each with its label and its holder.
     pub roles: Vec<Role>,
@@ -428,8 +428,8 @@ pub mod command {
     pub const READY: &str = "session.ready";
     /// Goes without a counted member who dropped out, with a `GoWithout`.
     pub const GO_WITHOUT: &str = "session.go-without";
-    /// "Share my traffic and ATC": claims every role's key for this pilot, or releases each
-    /// this pilot holds, with a `Share`.
+    /// A sharing card's switch, such as "Share my traffic": claims one role's key for this
+    /// pilot, from whoever holds it, or releases it, with a `Share`.
     pub const SHARE: &str = "session.share";
 }
 
@@ -454,10 +454,12 @@ pub struct GoWithout {
     pub member: String,
 }
 
-/// `session.share`'s arguments.
+/// `session.share`'s arguments: the role's key, as the slice's `roles` gives it, and whether to
+/// claim it or release it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "session/")]
 pub struct Share {
+    pub key: u16,
     pub on: bool,
 }
 

@@ -100,6 +100,12 @@ impl Probe {
                     .collect();
                 format!("values of watch {:?}: {}", watch(&w), values.join(" "))
             }
+            SimEvent::Polled {
+                object,
+                entry,
+                out_of,
+                ..
+            } => format!("polled object {object}, {entry} of {out_of}"),
             SimEvent::Exception {
                 call, exception, ..
             } => match call.and_then(|c| me.creates.iter().position(|h| *h == c)) {

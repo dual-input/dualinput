@@ -53,7 +53,7 @@ export function Select({ value, onValueChange, open: openFromOutside, onOpenChan
   )
 }
 
-/** What shows while the list is shut: whatever it's given, since a choice can read as more than its row, and a chevron. */
+/** What shows while the list is shut: whatever it's given, since a choice can read as more than its row, and a chevron. What it's given fills the room up to the chevron, so a child can set a mark beside it. */
 export function SelectTrigger({ className, children, ...rest }: ButtonHTMLAttributes<HTMLButtonElement>) {
   const { open, setOpen, trigger } = useSelect()
   return (
@@ -66,7 +66,7 @@ export function SelectTrigger({ className, children, ...rest }: ButtonHTMLAttrib
       onClick={() => setOpen(!open)}
       {...rest}
     >
-      <span className="flex min-w-0 items-center space-x-1.5">{children}</span>
+      <span className="flex min-w-0 flex-1 items-center space-x-1.5">{children}</span>
       <ChevronDown className="pointer-events-none ml-1.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
     </button>
   )
@@ -103,6 +103,20 @@ export function SelectContent({ className, children, ...rest }: HTMLAttributes<H
     </div>,
     root,
   )
+}
+
+/** A caption over the items after it, which nobody picks, as shadcn's SelectLabel is; its 12px start lines up with the items' words. */
+export function SelectLabel({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cx("select-none px-3 pb-1.5 pt-2 text-xs text-muted-foreground", className)} {...rest}>
+      {children}
+    </div>
+  )
+}
+
+/** A rule between groups of items, as shadcn's SelectSeparator is, out to the list's edges past its 6px padding. */
+export function SelectSeparator({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return <div role="separator" className={cx("pointer-events-none -mx-1.5 my-1.5 h-px bg-border", className)} {...rest} />
 }
 
 export function SelectItem({ value, disabled, className, children, ...rest }: HTMLAttributes<HTMLDivElement> & { value: string; disabled?: boolean }) {

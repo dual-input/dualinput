@@ -209,6 +209,19 @@ pub enum Op {
         at: InitPosition,
         request: u32,
     },
+    /// `SimConnect_AICreateNonATCAircraft_EX1`: an aircraft or a helicopter of the SimObject
+    /// titled `title`, in `livery`, with the tail `tail`, at `at`, which no ATC flies. Its object
+    /// ID comes back under `request`.
+    AICreateNonAtcAircraft {
+        title: String,
+        livery: String,
+        tail: String,
+        at: InitPosition,
+        request: u32,
+    },
+    /// `SimConnect_AIReleaseControl`, which takes an object the connection created away from the
+    /// sim's AI.
+    AIReleaseControl { object: u32, request: u32 },
     /// `SimConnect_AIRemoveObject`.
     AIRemoveObject { object: u32, request: u32 },
     /// `SimConnect_CameraGet`, in the referential `referential`, such as

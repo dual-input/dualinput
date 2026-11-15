@@ -43,6 +43,10 @@ Decides:     The session crate's members, session keys, control, session file, j
 > Since 2026-11-04, [members](#members)' `member` key also holds the pilot's color, and is rewritten when their name or color changes, rather than never ([log](log.md#2026-11-04-a-members-entry-is-rewritten-on-a-change-so-a-new-name-or-color-reaches-the-crew-at-once-and-the-color-moves-to-the-session)).
 > The session crate registers the color setting, `session.color`, works out each member's color, and shows it in the slice `session`, and the session file keeps the color beside the name.
 
+> **Note**
+> Since [traffic and ATC audio are shared apart](../interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own), [session keys](#session-keys)' "Share my traffic and ATC" switch is two, each a sharing card's switch, and the session crate's `session.share` takes the switch's role key, which it claims for this pilot or releases, where it claimed every role's key at once (user, 2026-11-15).
+> The apps still show the verdict the kernel builds as this pilot claiming every role's key, since a guard refuses a role's key whether a request writes it alone or with others.
+
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.
 The PF's core sets the session's aircraft, runs preflight's countdown, and ends preflight with a key, and its profile loader pins a local bundle that covers that aircraft, or else the one its cached index gives its level.

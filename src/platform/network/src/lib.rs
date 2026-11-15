@@ -14,6 +14,7 @@ mod edge;
 mod hooks;
 mod links;
 mod reach;
+mod slewed;
 
 pub use backend::{
     Answer, Asked, BACKEND, BackendAnswered, Host, Join, Me, RELAYS, RELAYS_ONLY, Refusal, cancel,
@@ -22,6 +23,7 @@ pub use backend::{
 pub use edge::{Transport, encode as encode_event};
 pub use hooks::{NetUnit, Opened, Sender};
 pub use messages::net::OneOff;
+pub use slewed::Slewed;
 
 use std::collections::BTreeMap;
 
@@ -132,8 +134,20 @@ pub struct Network {
     heartbeat: Option<TimerId>,
     /// What each of the links' timers is for.
     timer_for: BTreeMap<TimerId, links::TimerFor>,
+    /// The channels a bench scenario holds, each with the messages that came on it meanwhile,
+    /// oldest first.
+    held: BTreeMap<u16, Vec<(Sender, Vec<u8>)>>,
     backend: backend::Backend,
     reach: reach::Reach,
+}
+
+/// Holds every message that comes on the channel numbered `channel` for `ms`, then delivers
+/// them in the order they came. Loss on a direct path can bring one channel's message after a
+/// later one of another's, as traffic's states before their identities, which the bench's relay
+/// never does, since it keeps every byte in order; the bench's network unit calls this so a
+/// scenario can.
+pub fn hold(cx: &Cx, channel: u16, ms: u64) {
+    cx.call(Network::hold_for, (channel, ms));
 }
 
 impl Network {

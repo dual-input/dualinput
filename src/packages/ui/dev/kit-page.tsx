@@ -8,7 +8,7 @@ import { ArrowRightLeft, Check, Copy, Headset, Plane, PersonStanding, Settings, 
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 
-import { Badge, Button, Card, CardContent, Choice, CodeInput, Confirm, Dialog, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
+import { Badge, Button, Card, CardContent, Choice, CodeInput, Confirm, Dialog, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
 import type { ButtonProps, ButtonSize, ButtonVariant } from "../src/index.ts"
 
 const SCALES = [0.72, 0.884, 1, 1.056, 1.225]
@@ -303,8 +303,10 @@ function Selects() {
         <State name="Closed, with a status" width={240}>
           <Select value="auto" onValueChange={() => {}}>
             <SelectTrigger className="w-full">
-              <span className="size-2 rounded-full bg-success" />
-              <span>Automatic · BeyondATC</span>
+              <span className="flex min-w-0 flex-1 items-center">
+                Automatic<span className="ml-1.5 text-muted-foreground">· BeyondATC</span>
+                <span className="ml-auto mr-1 size-1.5 shrink-0 rounded-full bg-success" />
+              </span>
             </SelectTrigger>
           </Select>
         </State>
@@ -326,6 +328,17 @@ function Selects() {
               <SelectItem value="d" disabled>
                 Disabled
               </SelectItem>
+            </Select>
+          </div>
+        </State>
+        <State name="Grouped, with a label" width={240}>
+          <div className="rounded-3xl bg-popover p-1.5 shadow-lg ring-1 ring-foreground/10">
+            <Select value="auto" onValueChange={() => {}}>
+              <SelectItem value="auto">Automatic</SelectItem>
+              <SelectSeparator />
+              <SelectLabel>Playing audio</SelectLabel>
+              <SelectItem value="BeyondATC">BeyondATC</SelectItem>
+              <SelectItem value="Discord">Discord</SelectItem>
             </Select>
           </div>
         </State>

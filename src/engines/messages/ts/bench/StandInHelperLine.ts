@@ -4,7 +4,15 @@ import type { Input } from "../core_helper/Input.ts";
 /**
  * What the stand-in core helper tells the bench.
  */
-export type StandInHelperLine = { "line": "started", process: number, } | { "line": "wants", bindings: Array<[number, Input]>, next_press: boolean, mouse: boolean, captures: Array<number>, streams: Array<number>, sounds: boolean, lists: boolean, } | { "line": "sound", sound: number, bytes: number, } | { "line": "play", sound: number, 
+export type StandInHelperLine = { "line": "started", process: number, } | { "line": "wants", bindings: Array<[number, Input]>, next_press: boolean, mouse: boolean, captures: Array<number>, streams: Array<number>, 
+/**
+ * Each capture's programs, in the order the helper looks for them.
+ */
+programs: Array<[number, Array<string>]>, 
+/**
+ * Each stream's gain.
+ */
+gains: Array<[number, number]>, sounds: boolean, lists: boolean, } | { "line": "sound", sound: number, bytes: number, } | { "line": "play", sound: number, 
 /**
  * How long after the stamp on the last press the bench told it to make, on the
  * performance counter, as take-control's budget counts it. 0 before any press.

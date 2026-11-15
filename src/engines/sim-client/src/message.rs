@@ -137,6 +137,12 @@ pub struct Data {
     pub flags: u32,
     /// How many entries `bytes` holds: a tagged request's datums, or 1.
     pub count: u32,
+    /// For a by-type request's answer, which object of how many this is, counted from 1, as
+    /// FS Copilot's host found a poll complete once an answer's number reached its count; and
+    /// an answer that found no object has a count of 0 (read in the FS Copilot fork,
+    /// `FsCopilot/Simulation/TrafficHost.cs`, `OnByType`). Every other answer is 1 of 1.
+    pub entry: u32,
+    pub out_of: u32,
     pub bytes: Vec<u8>,
 }
 
@@ -501,7 +507,10 @@ fn data(record: &[u8]) -> Option<Data> {
         definition: u32_at(record, offset_of!(R, dwDefineID))?,
         flags: u32_at(record, offset_of!(R, dwFlags))?,
         count: u32_at(record, offset_of!(R, dwDefineCount))?,
-        bytes: record.get(start..)?.to_vec(),
+        entry: u32_at(record, offset_of!(R, dwentrynumber))?,
+        out_of: u32_at(record, offset_of!(R, dwoutof))?,
+        // An answer that found no object may end before its data, which then holds nothing.
+        bytes: record.get(start..).map(<[u8]>::to_vec).unwrap_or_default(),
     })
 }
 
@@ -515,8 +524,8 @@ fn data_record(id: i32, d: &Data) -> Vec<u8> {
         (offset_of!(R, dwObjectID), d.object),
         (offset_of!(R, dwDefineID), d.definition),
         (offset_of!(R, dwFlags), d.flags),
-        (offset_of!(R, dwentrynumber), 1),
-        (offset_of!(R, dwoutof), 1),
+        (offset_of!(R, dwentrynumber), d.entry),
+        (offset_of!(R, dwoutof), d.out_of),
         (offset_of!(R, dwDefineCount), d.count),
     ] {
         put_u32(&mut r, offset, value);
@@ -679,6 +688,8 @@ mod tests {
                 definition: 1,
                 flags: 2,
                 count: 1,
+                entry: 1,
+                out_of: 1,
                 bytes: 1.5f64.to_le_bytes().to_vec(),
             }),
             Message::ClientData(Data {
@@ -687,6 +698,8 @@ mod tests {
                 definition: 2,
                 flags: 0,
                 count: 1,
+                entry: 1,
+                out_of: 1,
                 bytes: vec![1, 2, 3, 4],
             }),
             Message::SystemState {
@@ -730,6 +743,8 @@ mod tests {
             definition: 3,
             flags: 2,
             count: 1,
+            entry: 1,
+            out_of: 1,
             bytes: 2.5f64.to_le_bytes().to_vec(),
         };
         let mut record = Message::ObjectData(data.clone()).record();

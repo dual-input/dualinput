@@ -10,9 +10,13 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use messages::bench::{
-    Called, FromCore, Hello, RuleThen, RuleWhen, Signal as BenchSignal, StandInAct, ToCore,
+    AiKind, Called, FromCore, Hello, RuleThen, RuleWhen, Signal as BenchSignal, StandInAct, ToCore,
 };
 use sim_client::Op;
+use simconnect_types::{
+    SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT, SIMCONNECT_SIMOBJECT_TYPE_GROUND,
+    SIMCONNECT_SIMOBJECT_TYPE_HELICOPTER,
+};
 use stand_in_sim::{Act, Rule, Signal, StandIn, Then, When};
 
 use super::module::BenchModule;
@@ -180,6 +184,23 @@ impl Bench {
                 delay: Duration::from_millis(delay_ms),
             },
             StandInAct::Track { names } => Act::Track { names },
+            StandInAct::Ai { objects } => Act::Ai(
+                objects
+                    .into_iter()
+                    .map(|o| stand_in_sim::Ai {
+                        id: o.id,
+                        kind: match o.kind {
+                            AiKind::Aircraft => SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT,
+                            AiKind::Helicopter => SIMCONNECT_SIMOBJECT_TYPE_HELICOPTER,
+                            AiKind::Ground => SIMCONNECT_SIMOBJECT_TYPE_GROUND,
+                        },
+                        numbers: o.numbers,
+                        texts: o.texts,
+                    })
+                    .collect(),
+            ),
+            StandInAct::AiGone { ids } => Act::AiGone { ids },
+            StandInAct::HoldPolls { count } => Act::HoldPolls { count },
             StandInAct::Inputs { events } => Act::Inputs { events },
             StandInAct::SetInput { name, value } => Act::SetInput { name, value },
             StandInAct::SendEvent { name, data } => Act::SendEvent { name, data },

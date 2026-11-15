@@ -512,11 +512,10 @@ fn seat_objects(cockpit: &mut Cockpit) -> Result<Vec<(String, Vec3)>, String> {
         Var::number("A:PLANE LONGITUDE", "degrees"),
         Var::number("A:PLANE ALTITUDE", "feet"),
     ];
-    let (request, ops) =
-        cockpit
-            .sim
-            .client
-            .read_by_type(&(), SIMCONNECT_SIMOBJECT_TYPE_ALL, NEAR, &vars);
+    let (request, ops) = cockpit
+        .sim
+        .client
+        .poll(&(), SIMCONNECT_SIMOBJECT_TYPE_ALL, NEAR, &vars);
     cockpit.sim.make(ops);
     let mut found = Vec::new();
     let end = Instant::now() + LISTING;

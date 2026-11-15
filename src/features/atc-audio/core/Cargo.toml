@@ -1,0 +1,18 @@
+[package]
+name = "atc-audio"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+clients = { path = "../../../platform/clients" }
+core-helper-service = { path = "../../../platform/core-helper-service" }
+kernel = { path = "../../../platform/kernel" }
+messages = { path = "../../../engines/messages" }
+network = { path = "../../../platform/network" }
+serde_json = "1.0.145"
+session = { path = "../../../platform/session" }
+tracing = "0.1.44"
+
+[lints]
+workspace = true

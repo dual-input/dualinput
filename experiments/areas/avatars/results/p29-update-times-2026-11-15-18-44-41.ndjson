@@ -1,0 +1,49 @@
+{"t":1794768281249,"s":0.029,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1794768281280,"s":0.06,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1794768281281,"s":0.061,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1794768281281,"s":0.061,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794768281282,"s":0.062,"kind":"window","text":"start #81: p50 107.1µs, p99 247.3µs, max 338.6µs","label":"start","window":81,"p50":107.1,"p99":247.3,"max":338.6}
+{"t":1794768285392,"s":4.172,"kind":"label","text":"C: copies, write only changes"}
+{"t":1794768287452,"s":6.232,"kind":"window","text":"C: copies, write only changes #82: p50 104.6µs, p99 352.0µs, max 630.9µs","label":"C: copies, write only changes","window":82,"p50":104.6,"p99":352,"max":630.9}
+{"t":1794768297754,"s":16.534,"kind":"window","text":"C: copies, write only changes #83: p50 102.5µs, p99 311.3µs, max 503.7µs","label":"C: copies, write only changes","window":83,"p50":102.499,"p99":311.3,"max":503.7}
+{"t":1794768308054,"s":26.834,"kind":"window","text":"C: copies, write only changes #84: p50 98.4µs, p99 193.8µs, max 409.0µs","label":"C: copies, write only changes","window":84,"p50":98.4,"p99":193.8,"max":409}
+{"t":1794768317320,"s":36.1,"kind":"window","text":"C: copies, write only changes #85: p50 101.1µs, p99 181.1µs, max 504.6µs","label":"C: copies, write only changes","window":85,"p50":101.1,"p99":181.099,"max":504.6}
+{"t":1794768327600,"s":46.38,"kind":"window","text":"C: copies, write only changes #86: p50 104.8µs, p99 226.2µs, max 431.9µs","label":"C: copies, write only changes","window":86,"p50":104.799,"p99":226.2,"max":431.9}
+{"t":1794768337899,"s":56.679,"kind":"window","text":"C: copies, write only changes #87: p50 105.6µs, p99 366.7µs, max 851.0µs","label":"C: copies, write only changes","window":87,"p50":105.6,"p99":366.699,"max":851}
+{"t":1794768348156,"s":66.936,"kind":"window","text":"C: copies, write only changes #88: p50 106.8µs, p99 330.3µs, max 444.6µs","label":"C: copies, write only changes","window":88,"p50":106.799,"p99":330.3,"max":444.599}
+{"t":1794768357451,"s":76.231,"kind":"window","text":"C: copies, write only changes #89: p50 103.5µs, p99 259.9µs, max 407.5µs","label":"C: copies, write only changes","window":89,"p50":103.5,"p99":259.9,"max":407.499}
+{"t":1794768360530,"s":79.31,"kind":"label","text":"C: none"}
+{"t":1794768367755,"s":86.535,"kind":"window","text":"C: none #90: p50 47.7µs, p99 213.4µs, max 1495.8µs","label":"C: none","window":90,"p50":47.7,"p99":213.4,"max":1495.799}
+{"t":1794768378058,"s":96.838,"kind":"window","text":"C: none #91: p50 41.3µs, p99 120.8µs, max 330.5µs","label":"C: none","window":91,"p50":41.3,"p99":120.8,"max":330.5}
+{"t":1794768387358,"s":106.138,"kind":"window","text":"C: none #92: p50 35.8µs, p99 136.5µs, max 220.5µs","label":"C: none","window":92,"p50":35.8,"p99":136.5,"max":220.5}
+{"t":1794768397649,"s":116.429,"kind":"window","text":"C: none #93: p50 36.8µs, p99 216.1µs, max 429.7µs","label":"C: none","window":93,"p50":36.8,"p99":216.1,"max":429.7}
+{"t":1794768407937,"s":126.717,"kind":"window","text":"C: none #94: p50 37.9µs, p99 390.8µs, max 494.1µs","label":"C: none","window":94,"p50":37.9,"p99":390.8,"max":494.1}
+{"t":1794768418239,"s":137.019,"kind":"window","text":"C: none #95: p50 39.9µs, p99 212.4µs, max 684.8µs","label":"C: none","window":95,"p50":39.9,"p99":212.4,"max":684.8}
+{"t":1794768426494,"s":145.274,"kind":"label","text":"C: copies again"}
+{"t":1794768427518,"s":146.298,"kind":"window","text":"C: copies again #96: p50 42.2µs, p99 348.9µs, max 397.1µs","label":"C: copies again","window":96,"p50":42.2,"p99":348.9,"max":397.1}
+{"t":1794768437785,"s":156.565,"kind":"window","text":"C: copies again #97: p50 95.9µs, p99 242.3µs, max 444.4µs","label":"C: copies again","window":97,"p50":95.9,"p99":242.3,"max":444.4}
+{"t":1794768448102,"s":166.882,"kind":"window","text":"C: copies again #98: p50 100.2µs, p99 278.9µs, max 315.6µs","label":"C: copies again","window":98,"p50":100.2,"p99":278.9,"max":315.6}
+{"t":1794768458459,"s":177.239,"kind":"window","text":"C: copies again #99: p50 102.6µs, p99 279.5µs, max 367.4µs","label":"C: copies again","window":99,"p50":102.6,"p99":279.5,"max":367.4}
+{"t":1794768468712,"s":187.492,"kind":"window","text":"C: copies again #100: p50 110.1µs, p99 335.2µs, max 410.3µs","label":"C: copies again","window":100,"p50":110.1,"p99":335.2,"max":410.3}
+{"t":1794768477970,"s":196.75,"kind":"window","text":"C: copies again #101: p50 107.2µs, p99 195.6µs, max 284.9µs","label":"C: copies again","window":101,"p50":107.2,"p99":195.6,"max":284.9}
+{"t":1794768488200,"s":206.98,"kind":"window","text":"C: copies again #102: p50 108.7µs, p99 254.7µs, max 356.3µs","label":"C: copies again","window":102,"p50":108.7,"p99":254.7,"max":356.3}
+{"t":1794768498541,"s":217.321,"kind":"window","text":"C: copies again #103: p50 104.5µs, p99 169.4µs, max 379.4µs","label":"C: copies again","window":103,"p50":104.5,"p99":169.4,"max":379.4}
+{"t":1794768508817,"s":227.597,"kind":"window","text":"C: copies again #104: p50 112.8µs, p99 425.8µs, max 680.9µs","label":"C: copies again","window":104,"p50":112.8,"p99":425.8,"max":680.9}
+{"t":1794768519037,"s":237.817,"kind":"window","text":"C: copies again #105: p50 102.6µs, p99 282.3µs, max 591.4µs","label":"C: copies again","window":105,"p50":102.6,"p99":282.3,"max":591.4}
+{"t":1794768528271,"s":247.051,"kind":"window","text":"C: copies again #106: p50 103.8µs, p99 218.5µs, max 296.2µs","label":"C: copies again","window":106,"p50":103.8,"p99":218.5,"max":296.2}
+{"t":1794768538604,"s":257.384,"kind":"window","text":"C: copies again #107: p50 99.9µs, p99 313.2µs, max 1160.2µs","label":"C: copies again","window":107,"p50":99.9,"p99":313.2,"max":1160.2}
+{"t":1794768548921,"s":267.701,"kind":"window","text":"C: copies again #108: p50 103.4µs, p99 365.8µs, max 562.3µs","label":"C: copies again","window":108,"p50":103.4,"p99":365.8,"max":562.3}
+{"t":1794768558156,"s":276.936,"kind":"window","text":"C: copies again #109: p50 103.5µs, p99 232.0µs, max 295.8µs","label":"C: copies again","window":109,"p50":103.5,"p99":232,"max":295.8}
+{"t":1794768568390,"s":287.17,"kind":"window","text":"C: copies again #110: p50 105.0µs, p99 173.2µs, max 192.1µs","label":"C: copies again","window":110,"p50":105,"p99":173.2,"max":192.1}
+{"t":1794768578675,"s":297.455,"kind":"window","text":"C: copies again #111: p50 108.1µs, p99 348.7µs, max 817.4µs","label":"C: copies again","window":111,"p50":108.1,"p99":348.7,"max":817.4}
+{"t":1794768588984,"s":307.764,"kind":"window","text":"C: copies again #112: p50 100.1µs, p99 246.3µs, max 314.1µs","label":"C: copies again","window":112,"p50":100.1,"p99":246.3,"max":314.1}
+{"t":1794768598285,"s":317.065,"kind":"window","text":"C: copies again #113: p50 101.7µs, p99 237.3µs, max 275.1µs","label":"C: copies again","window":113,"p50":101.7,"p99":237.3,"max":275.1}
+{"t":1794768608584,"s":327.364,"kind":"window","text":"C: copies again #114: p50 100.9µs, p99 194.2µs, max 291.8µs","label":"C: copies again","window":114,"p50":100.9,"p99":194.2,"max":291.8}
+{"t":1794768618803,"s":337.583,"kind":"window","text":"C: copies again #115: p50 106.7µs, p99 248.8µs, max 717.1µs","label":"C: copies again","window":115,"p50":106.7,"p99":248.8,"max":717.1}
+{"t":1794768629102,"s":347.882,"kind":"window","text":"C: copies again #116: p50 102.6µs, p99 201.0µs, max 326.5µs","label":"C: copies again","window":116,"p50":102.6,"p99":201,"max":326.5}
+{"t":1794768638370,"s":357.15,"kind":"window","text":"C: copies again #117: p50 98.1µs, p99 242.2µs, max 479.3µs","label":"C: copies again","window":117,"p50":98.1,"p99":242.2,"max":479.3}
+{"t":1794768648652,"s":367.432,"kind":"window","text":"C: copies again #118: p50 97.6µs, p99 164.9µs, max 252.9µs","label":"C: copies again","window":118,"p50":97.6,"p99":164.9,"max":252.9}
+{"t":1794768658917,"s":377.697,"kind":"window","text":"C: copies again #119: p50 95.2µs, p99 197.5µs, max 508.2µs","label":"C: copies again","window":119,"p50":95.2,"p99":197.5,"max":508.2}
+{"t":1794768669197,"s":387.977,"kind":"window","text":"C: copies again #120: p50 99.3µs, p99 280.7µs, max 399.3µs","label":"C: copies again","window":120,"p50":99.3,"p99":280.7,"max":399.3}
+{"t":1794768679438,"s":398.218,"kind":"window","text":"C: copies again #121: p50 89.2µs, p99 281.7µs, max 410.6µs","label":"C: copies again","window":121,"p50":89.2,"p99":281.7,"max":410.6}
+{"t":1794768688680,"s":407.46,"kind":"window","text":"C: copies again #122: p50 96.2µs, p99 217.1µs, max 438.9µs","label":"C: copies again","window":122,"p50":96.2,"p99":217.1,"max":438.9}

@@ -138,6 +138,27 @@ pub enum Act {
     /// from now on, after the module's frame, or stops with no names. A scenario follows the
     /// aircraft's path by them, frame by frame.
     Track { names: Vec<String> },
+    /// Puts each of the sim's own AI objects in the sim, or sets more of its variables, as an
+    /// ATC app's traffic. Each moves by its velocities from then on, as the stand-in's
+    /// aircraft does, and a by-type request of its kind finds it.
+    Ai(Vec<Ai>),
+    /// Takes the AI objects `ids` out of the sim, as an ATC app removes an aircraft that
+    /// landed.
+    AiGone { ids: Vec<u32> },
+    /// Holds back the last answer of each of the next `count` by-type requests, so none is
+    /// whole, as a busy sim's poll can be.
+    HoldPolls { count: u32 },
+}
+
+/// One of the sim's own AI objects, by an ID the scenario gives it, clear of the IDs the
+/// stand-in gives the objects connections create.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Ai {
+    pub id: u32,
+    /// Its `SIMCONNECT_SIMOBJECT_TYPE`, such as `SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT`.
+    pub kind: i32,
+    pub numbers: Vec<(String, f64)>,
+    pub texts: Vec<(String, String)>,
 }
 
 /// One thing the aircraft does on its own, such as "when this variable is written, set that one

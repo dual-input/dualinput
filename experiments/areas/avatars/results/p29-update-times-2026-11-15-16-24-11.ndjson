@@ -1,0 +1,635 @@
+{"t":1794759851558,"s":0.033,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1794759851559,"s":0.034,"kind":"label","text":"A: sim pilot hosts, sim AI and BeyondATC"}
+{"t":1794759851590,"s":0.065,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1794759851590,"s":0.065,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1794759851591,"s":0.066,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794759851591,"s":0.066,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #57: p50 39.5µs, p99 131.5µs, max 1553.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":57,"p50":39.5,"p99":131.5,"max":1553.6}
+{"t":1794759854645,"s":3.12,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #58: p50 43.7µs, p99 137.3µs, max 227.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":58,"p50":43.7,"p99":137.3,"max":227.7}
+{"t":1794759864941,"s":13.416,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #59: p50 40.3µs, p99 175.5µs, max 225.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":59,"p50":40.3,"p99":175.5,"max":225.1}
+{"t":1794759872096,"s":20.571,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794759874315,"s":22.79,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794759875239,"s":23.714,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #60: p50 42.3µs, p99 177.5µs, max 355.2µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":60,"p50":42.3,"p99":177.5,"max":355.2}
+{"t":1794759876315,"s":24.79,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794759885805,"s":34.28,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #61: p50 40.4µs, p99 162.1µs, max 250.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":61,"p50":40.4,"p99":162.1,"max":250.7}
+{"t":1794759896040,"s":44.515,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #62: p50 39.1µs, p99 169.8µs, max 370.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":62,"p50":39.1,"p99":169.8,"max":370.6}
+{"t":1794759906318,"s":54.793,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #63: p50 39.2µs, p99 164.1µs, max 260.5µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":63,"p50":39.2,"p99":164.1,"max":260.5}
+{"t":1794759909269,"s":57.744,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794759917566,"s":66.041,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #64: p50 41.9µs, p99 240.1µs, max 848.5µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":64,"p50":41.9,"p99":240.1,"max":848.5}
+{"t":1794759922414,"s":70.889,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794759923705,"s":72.18,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794759927812,"s":76.287,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #65: p50 38.2µs, p99 99.4µs, max 145.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":65,"p50":38.2,"p99":99.4,"max":145.4}
+{"t":1794759934833,"s":83.308,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794759936085,"s":84.56,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794759936905,"s":85.38,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794759938126,"s":86.601,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #66: p50 41.8µs, p99 128.2µs, max 207.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":66,"p50":41.8,"p99":128.2,"max":207.4}
+{"t":1794759938700,"s":87.175,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794759948343,"s":96.818,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #67: p50 39.7µs, p99 227.1µs, max 379.2µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":67,"p50":39.7,"p99":227.1,"max":379.2}
+{"t":1794759956861,"s":105.336,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794759957636,"s":106.111,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #68: p50 40.9µs, p99 122.1µs, max 248.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":68,"p50":40.9,"p99":122.1,"max":248.4}
+{"t":1794759957996,"s":106.471,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794759963225,"s":111.7,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794759964279,"s":112.754,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794759967969,"s":116.444,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #69: p50 40.9µs, p99 169.6µs, max 443.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":69,"p50":40.9,"p99":169.6,"max":443}
+{"t":1794759973764,"s":122.239,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794759974744,"s":123.219,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794759978221,"s":126.696,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #70: p50 35.7µs, p99 112.5µs, max 144.9µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":70,"p50":35.7,"p99":112.5,"max":144.9}
+{"t":1794759988499,"s":136.974,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #71: p50 37.8µs, p99 199.6µs, max 232.3µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":71,"p50":37.8,"p99":199.6,"max":232.3}
+{"t":1794759998846,"s":147.321,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #72: p50 35.2µs, p99 133.4µs, max 251.3µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":72,"p50":35.2,"p99":133.4,"max":251.3}
+{"t":1794759999730,"s":148.205,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1794760002331,"s":150.806,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1794760002331,"s":150.806,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1794760002517,"s":150.992,"kind":"system","text":"FlightLoaded %APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","event":"FlightLoaded","file":"%APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","signal":true}
+{"t":1794760002528,"s":151.003,"kind":"system","text":"PositionChanged 0","event":"PositionChanged","data":0}
+{"t":1794760002659,"s":151.134,"kind":"flow","text":"FLIGHT_END","flow":"FLIGHT_END","id":15,"file":"","signal":false}
+{"t":1794760002660,"s":151.135,"kind":"flow","text":"FLT_LOAD CustomFlight.FLT","flow":"FLT_LOAD","id":1,"file":"CustomFlight.FLT","signal":false}
+{"t":1794760002660,"s":151.135,"kind":"flow","text":"FLT_LOADED CustomFlight.FLT","flow":"FLT_LOADED","id":2,"file":"CustomFlight.FLT","signal":true}
+{"t":1794760002660,"s":151.135,"kind":"flow","text":"TELEPORT_START","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1794760002660,"s":151.135,"kind":"flow","text":"TELEPORT_DONE","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1794760003103,"s":151.578,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #0: p50 0.0µs, p99 0.0µs, max 0.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":0,"p50":0,"p99":0,"max":0}
+{"t":1794760004096,"s":152.571,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1794760004491,"s":152.966,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1794760004492,"s":152.967,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1794760011718,"s":160.193,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\bksq-aircraft-baronpro\\simobjects\\airplanes\\bksq-aircraft-baronpropress\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\bksq-aircraft-baronpro\\simobjects\\airplanes\\bksq-aircraft-baronpropress\\aircraft.cfg","signal":true}
+{"t":1794760013785,"s":162.26,"kind":"flow","text":"FLIGHT_START","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1794760013785,"s":162.26,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1794760013785,"s":162.26,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1794760013854,"s":162.329,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #73: p50 4.4µs, p99 183.0µs, max 306.5µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":73,"p50":4.4,"p99":183,"max":306.5}
+{"t":1794760013870,"s":162.345,"kind":"flow","text":"RTC_START","flow":"RTC_START","id":10,"file":"","signal":false}
+{"t":1794760015346,"s":163.821,"kind":"flow","text":"RTC_END","flow":"RTC_END","id":11,"file":"","signal":false}
+{"t":1794760023823,"s":172.298,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1794760026765,"s":175.24,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794760026807,"s":175.282,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1794760026808,"s":175.283,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1794760026911,"s":175.386,"kind":"system","text":"FlightLoaded %APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","event":"FlightLoaded","file":"%APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","signal":true}
+{"t":1794760026918,"s":175.393,"kind":"system","text":"PositionChanged 0","event":"PositionChanged","data":0}
+{"t":1794760027006,"s":175.481,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #0: p50 0.0µs, p99 0.0µs, max 0.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":0,"p50":0,"p99":0,"max":0}
+{"t":1794760027042,"s":175.517,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794760027043,"s":175.518,"kind":"flow","text":"FLIGHT_END","flow":"FLIGHT_END","id":15,"file":"","signal":false}
+{"t":1794760027043,"s":175.518,"kind":"flow","text":"FLT_LOAD CustomFlight.FLT","flow":"FLT_LOAD","id":1,"file":"CustomFlight.FLT","signal":false}
+{"t":1794760027044,"s":175.519,"kind":"flow","text":"FLT_LOADED CustomFlight.FLT","flow":"FLT_LOADED","id":2,"file":"CustomFlight.FLT","signal":true}
+{"t":1794760027044,"s":175.519,"kind":"flow","text":"TELEPORT_START","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1794760027044,"s":175.519,"kind":"flow","text":"TELEPORT_DONE","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1794760028522,"s":176.997,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1794760028826,"s":177.301,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1794760028827,"s":177.302,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1794760032467,"s":180.942,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #74: p50 62.5µs, p99 736.5µs, max 1497.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":74,"p50":62.5,"p99":736.5,"max":1497.8}
+{"t":1794760036710,"s":185.185,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\bksq-aircraft-baronpro\\simobjects\\airplanes\\bksq-aircraft-baronpropress\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\bksq-aircraft-baronpro\\simobjects\\airplanes\\bksq-aircraft-baronpropress\\aircraft.cfg","signal":true}
+{"t":1794760042332,"s":190.807,"kind":"flow","text":"FLIGHT_START","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1794760042333,"s":190.808,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1794760042333,"s":190.808,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1794760042333,"s":190.808,"kind":"flow","text":"RTC_START","flow":"RTC_START","id":10,"file":"","signal":false}
+{"t":1794760043595,"s":192.07,"kind":"flow","text":"RTC_END","flow":"RTC_END","id":11,"file":"","signal":false}
+{"t":1794760048902,"s":197.377,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #75: p50 3.8µs, p99 30.0µs, max 46.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":75,"p50":3.8,"p99":30,"max":46}
+{"t":1794760050795,"s":199.27,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794760053942,"s":202.417,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794760054692,"s":203.167,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794760060191,"s":208.666,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #76: p50 3.5µs, p99 13.5µs, max 40.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":76,"p50":3.5,"p99":13.5,"max":40.1}
+{"t":1794760061370,"s":209.845,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794760062114,"s":210.589,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794760070428,"s":218.903,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #77: p50 3.7µs, p99 107.1µs, max 315.9µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":77,"p50":3.7,"p99":107.1,"max":315.9}
+{"t":1794760080663,"s":229.138,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #78: p50 39.1µs, p99 159.5µs, max 380.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":78,"p50":39.1,"p99":159.5,"max":380.4}
+{"t":1794760090924,"s":239.399,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #79: p50 41.6µs, p99 342.0µs, max 1351.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":79,"p50":41.6,"p99":342,"max":1351.8}
+{"t":1794760101185,"s":249.66,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #80: p50 38.5µs, p99 289.1µs, max 1140.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":80,"p50":38.5,"p99":289.1,"max":1140.7}
+{"t":1794760110348,"s":258.823,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #81: p50 41.7µs, p99 363.3µs, max 455.2µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":81,"p50":41.7,"p99":363.3,"max":455.2}
+{"t":1794760120652,"s":269.127,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #82: p50 38.0µs, p99 178.9µs, max 328.9µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":82,"p50":38,"p99":178.9,"max":328.9}
+{"t":1794760130984,"s":279.459,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #83: p50 36.4µs, p99 318.1µs, max 494.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":83,"p50":36.4,"p99":318.1,"max":494.8}
+{"t":1794760141214,"s":289.689,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #84: p50 37.0µs, p99 244.1µs, max 405.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":84,"p50":37,"p99":244.101,"max":405.7}
+{"t":1794760150475,"s":298.95,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #85: p50 35.5µs, p99 123.1µs, max 174.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":85,"p50":35.5,"p99":123.1,"max":174.7}
+{"t":1794760160750,"s":309.225,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #86: p50 36.6µs, p99 165.5µs, max 217.9µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":86,"p50":36.6,"p99":165.499,"max":217.899}
+{"t":1794760171009,"s":319.484,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #87: p50 39.9µs, p99 207.3µs, max 384.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":87,"p50":39.9,"p99":207.3,"max":384.7}
+{"t":1794760179075,"s":327.55,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794760181261,"s":329.736,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #88: p50 42.2µs, p99 205.1µs, max 338.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":88,"p50":42.201,"p99":205.1,"max":338.6}
+{"t":1794760183251,"s":331.726,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794760191477,"s":339.952,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #89: p50 42.3µs, p99 121.4µs, max 314.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":89,"p50":42.299,"p99":121.401,"max":314.799}
+{"t":1794760201778,"s":350.253,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #90: p50 46.7µs, p99 116.7µs, max 295.5µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":90,"p50":46.7,"p99":116.7,"max":295.5}
+{"t":1794760212048,"s":360.523,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #91: p50 41.6µs, p99 143.7µs, max 191.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":91,"p50":41.6,"p99":143.699,"max":191.6}
+{"t":1794760222355,"s":370.83,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #92: p50 39.3µs, p99 118.8µs, max 293.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":92,"p50":39.3,"p99":118.8,"max":293.8}
+{"t":1794760232533,"s":381.008,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #93: p50 37.7µs, p99 218.1µs, max 365.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":93,"p50":37.7,"p99":218.1,"max":365.8}
+{"t":1794760241762,"s":390.237,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #94: p50 3.6µs, p99 14.0µs, max 46.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":94,"p50":3.6,"p99":14,"max":46.4}
+{"t":1794760252001,"s":400.476,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #95: p50 32.9µs, p99 165.2µs, max 252.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":95,"p50":32.9,"p99":165.2,"max":252.6}
+{"t":1794760258152,"s":406.627,"kind":"label","text":"A: sim pilot hosts, sim AI and BeyondATC"}
+{"t":1794760262279,"s":410.754,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #96: p50 38.0µs, p99 181.2µs, max 280.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":96,"p50":38,"p99":181.2,"max":280.8}
+{"t":1794760272546,"s":421.021,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #97: p50 36.2µs, p99 98.1µs, max 187.3µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":97,"p50":36.2,"p99":98.1,"max":187.3}
+{"t":1794760282863,"s":431.338,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #98: p50 38.0µs, p99 194.2µs, max 942.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":98,"p50":38,"p99":194.2,"max":942.8}
+{"t":1794760292109,"s":440.584,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #99: p50 39.0µs, p99 168.1µs, max 238.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":99,"p50":39,"p99":168.1,"max":238.8}
+{"t":1794760302335,"s":450.81,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #100: p50 37.8µs, p99 118.9µs, max 471.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":100,"p50":37.8,"p99":118.9,"max":471.8}
+{"t":1794760312577,"s":461.052,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #101: p50 38.6µs, p99 161.4µs, max 214.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":101,"p50":38.6,"p99":161.4,"max":214.6}
+{"t":1794760322885,"s":471.36,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #102: p50 38.2µs, p99 171.3µs, max 240.3µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":102,"p50":38.2,"p99":171.3,"max":240.3}
+{"t":1794760332153,"s":480.628,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #103: p50 38.3µs, p99 197.8µs, max 226.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":103,"p50":38.3,"p99":197.8,"max":226.4}
+{"t":1794760342425,"s":490.9,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #104: p50 37.0µs, p99 159.7µs, max 260.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":104,"p50":37,"p99":159.7,"max":260.6}
+{"t":1794760352704,"s":501.179,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #105: p50 37.3µs, p99 164.3µs, max 206.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":105,"p50":37.3,"p99":164.3,"max":206.1}
+{"t":1794760362887,"s":511.362,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #106: p50 36.6µs, p99 195.6µs, max 266.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":106,"p50":36.6,"p99":195.6,"max":266}
+{"t":1794760373089,"s":521.564,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #107: p50 38.9µs, p99 162.3µs, max 311.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":107,"p50":38.9,"p99":162.3,"max":311.4}
+{"t":1794760382307,"s":530.782,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #108: p50 40.2µs, p99 267.9µs, max 363.9µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":108,"p50":40.2,"p99":267.9,"max":363.9}
+{"t":1794760392552,"s":541.027,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #109: p50 38.3µs, p99 145.3µs, max 179.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":109,"p50":38.3,"p99":145.3,"max":179.8}
+{"t":1794760402835,"s":551.31,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #110: p50 37.2µs, p99 139.6µs, max 188.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":110,"p50":37.2,"p99":139.6,"max":188.1}
+{"t":1794760411195,"s":559.67,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794760413124,"s":561.599,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #111: p50 42.3µs, p99 278.7µs, max 944.2µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":111,"p50":42.3,"p99":278.7,"max":944.2}
+{"t":1794760414596,"s":563.071,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794760423383,"s":571.858,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #112: p50 39.1µs, p99 165.2µs, max 313.2µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":112,"p50":39.1,"p99":165.2,"max":313.2}
+{"t":1794760433653,"s":582.128,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #113: p50 36.4µs, p99 115.5µs, max 307.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":113,"p50":36.4,"p99":115.5,"max":307.7}
+{"t":1794760443838,"s":592.313,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #114: p50 36.6µs, p99 96.9µs, max 187.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":114,"p50":36.6,"p99":96.9,"max":187}
+{"t":1794760454134,"s":602.609,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #115: p50 37.0µs, p99 151.0µs, max 312.2µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":115,"p50":37,"p99":151,"max":312.2}
+{"t":1794760463376,"s":611.851,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #116: p50 37.0µs, p99 148.2µs, max 277.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":116,"p50":37,"p99":148.2,"max":277}
+{"t":1794760473671,"s":622.146,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #117: p50 37.9µs, p99 157.0µs, max 303.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":117,"p50":37.9,"p99":157,"max":303.1}
+{"t":1794760483911,"s":632.386,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #118: p50 39.3µs, p99 191.6µs, max 212.5µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":118,"p50":39.3,"p99":191.6,"max":212.5}
+{"t":1794760494185,"s":642.66,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #119: p50 39.1µs, p99 217.8µs, max 612.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":119,"p50":39.1,"p99":217.8,"max":612}
+{"t":1794760504394,"s":652.869,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #120: p50 41.6µs, p99 132.5µs, max 246.2µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":120,"p50":41.6,"p99":132.5,"max":246.2}
+{"t":1794760513621,"s":662.096,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #121: p50 41.5µs, p99 166.2µs, max 679.3µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":121,"p50":41.5,"p99":166.2,"max":679.3}
+{"t":1794760523866,"s":672.341,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #122: p50 44.0µs, p99 166.5µs, max 353.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":122,"p50":44,"p99":166.5,"max":353}
+{"t":1794760534105,"s":682.58,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #123: p50 39.6µs, p99 123.2µs, max 186.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":123,"p50":39.6,"p99":123.2,"max":186.4}
+{"t":1794760544310,"s":692.785,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #124: p50 41.2µs, p99 176.0µs, max 226.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":124,"p50":41.2,"p99":176,"max":226.7}
+{"t":1794760554631,"s":703.106,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #125: p50 41.3µs, p99 130.0µs, max 641.9µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":125,"p50":41.3,"p99":130,"max":641.9}
+{"t":1794760564882,"s":713.357,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #126: p50 41.5µs, p99 173.6µs, max 315.3µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":126,"p50":41.5,"p99":173.6,"max":315.3}
+{"t":1794760575078,"s":723.553,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #127: p50 42.0µs, p99 114.9µs, max 798.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":127,"p50":42,"p99":114.9,"max":798.7}
+{"t":1794760585360,"s":733.835,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #128: p50 44.0µs, p99 117.1µs, max 179.5µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":128,"p50":44,"p99":117.1,"max":179.5}
+{"t":1794760595620,"s":744.095,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #129: p50 39.7µs, p99 127.1µs, max 269.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":129,"p50":39.7,"p99":127.1,"max":269.1}
+{"t":1794760605929,"s":754.404,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #130: p50 43.7µs, p99 131.9µs, max 258.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":130,"p50":43.7,"p99":131.9,"max":258.6}
+{"t":1794760616224,"s":764.699,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #131: p50 40.7µs, p99 152.1µs, max 441.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":131,"p50":40.7,"p99":152.1,"max":441.7}
+{"t":1794760625498,"s":773.973,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #132: p50 38.3µs, p99 206.5µs, max 381.3µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":132,"p50":38.3,"p99":206.5,"max":381.3}
+{"t":1794760635788,"s":784.263,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #133: p50 42.8µs, p99 173.6µs, max 303.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":133,"p50":42.8,"p99":173.6,"max":303.4}
+{"t":1794760646091,"s":794.566,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #134: p50 40.9µs, p99 73.1µs, max 243.5µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":134,"p50":40.9,"p99":73.1,"max":243.5}
+{"t":1794760656418,"s":804.893,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #135: p50 41.1µs, p99 158.5µs, max 385.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":135,"p50":41.1,"p99":158.5,"max":385.4}
+{"t":1794760665638,"s":814.113,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #136: p50 42.1µs, p99 208.1µs, max 548.3µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":136,"p50":42.1,"p99":208.1,"max":548.3}
+{"t":1794760675883,"s":824.358,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #137: p50 37.2µs, p99 121.4µs, max 186.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":137,"p50":37.2,"p99":121.4,"max":186.4}
+{"t":1794760686177,"s":834.652,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #138: p50 37.9µs, p99 216.4µs, max 440.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":138,"p50":37.9,"p99":216.4,"max":440.6}
+{"t":1794760696422,"s":844.897,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #139: p50 39.1µs, p99 168.8µs, max 615.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":139,"p50":39.1,"p99":168.8,"max":615.6}
+{"t":1794760706720,"s":855.195,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #140: p50 40.6µs, p99 180.1µs, max 254.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":140,"p50":40.6,"p99":180.1,"max":254.8}
+{"t":1794760715895,"s":864.37,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #141: p50 38.9µs, p99 163.8µs, max 260.9µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":141,"p50":38.9,"p99":163.8,"max":260.9}
+{"t":1794760726119,"s":874.594,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #142: p50 40.1µs, p99 136.3µs, max 186.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":142,"p50":40.1,"p99":136.3,"max":186.4}
+{"t":1794760736336,"s":884.811,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #143: p50 40.6µs, p99 162.0µs, max 302.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":143,"p50":40.6,"p99":162,"max":302.8}
+{"t":1794760746581,"s":895.056,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #144: p50 40.9µs, p99 146.5µs, max 297.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":144,"p50":40.9,"p99":146.5,"max":297.1}
+{"t":1794760756826,"s":905.301,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #145: p50 40.3µs, p99 162.9µs, max 352.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":145,"p50":40.3,"p99":162.9,"max":352.7}
+{"t":1794760767081,"s":915.556,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #146: p50 40.6µs, p99 175.8µs, max 202.3µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":146,"p50":40.6,"p99":175.8,"max":202.3}
+{"t":1794760776258,"s":924.733,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #147: p50 42.0µs, p99 133.5µs, max 292.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":147,"p50":42,"p99":133.5,"max":292.7}
+{"t":1794760786539,"s":935.014,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #148: p50 43.6µs, p99 188.3µs, max 253.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":148,"p50":43.6,"p99":188.3,"max":253.7}
+{"t":1794760796821,"s":945.296,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #149: p50 38.6µs, p99 219.1µs, max 778.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":149,"p50":38.6,"p99":219.1,"max":778.1}
+{"t":1794760807091,"s":955.566,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #150: p50 43.3µs, p99 313.8µs, max 985.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":150,"p50":43.3,"p99":313.8,"max":985}
+{"t":1794760817296,"s":965.771,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #151: p50 36.4µs, p99 148.8µs, max 240.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":151,"p50":36.4,"p99":148.8,"max":240.7}
+{"t":1794760827657,"s":976.132,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #152: p50 41.4µs, p99 286.5µs, max 435.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":152,"p50":41.4,"p99":286.5,"max":435.6}
+{"t":1794760837914,"s":986.389,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #153: p50 39.6µs, p99 193.3µs, max 334.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":153,"p50":39.6,"p99":193.3,"max":334.6}
+{"t":1794760852545,"s":1001.02,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #154: p50 40.8µs, p99 183.0µs, max 248.3µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":154,"p50":40.8,"p99":183,"max":248.3}
+{"t":1794760862800,"s":1011.275,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #155: p50 42.0µs, p99 159.4µs, max 375.2µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":155,"p50":42,"p99":159.4,"max":375.2}
+{"t":1794760872998,"s":1021.473,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #156: p50 39.2µs, p99 228.9µs, max 343.8µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":156,"p50":39.2,"p99":228.9,"max":343.8}
+{"t":1794760884223,"s":1032.698,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #157: p50 37.4µs, p99 151.4µs, max 299.9µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":157,"p50":37.4,"p99":151.4,"max":299.9}
+{"t":1794760894451,"s":1042.926,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #158: p50 37.3µs, p99 216.7µs, max 357.5µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":158,"p50":37.3,"p99":216.7,"max":357.5}
+{"t":1794760905739,"s":1054.214,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #159: p50 41.1µs, p99 187.8µs, max 875.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":159,"p50":41.1,"p99":187.8,"max":875.1}
+{"t":1794760917938,"s":1066.413,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #160: p50 45.4µs, p99 216.0µs, max 396.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":160,"p50":45.4,"p99":216,"max":396.7}
+{"t":1794760929101,"s":1077.576,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #161: p50 39.9µs, p99 254.6µs, max 408.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":161,"p50":39.9,"p99":254.6,"max":408.1}
+{"t":1794760940349,"s":1088.824,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #162: p50 40.2µs, p99 167.1µs, max 269.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":162,"p50":40.2,"p99":167.1,"max":269.1}
+{"t":1794760943416,"s":1091.891,"kind":"label","text":"A: on foot"}
+{"t":1794760951531,"s":1100.006,"kind":"window","text":"A: on foot #163: p50 39.6µs, p99 155.4µs, max 263.0µs","label":"A: on foot","window":163,"p50":39.6,"p99":155.4,"max":263}
+{"t":1794760961715,"s":1110.19,"kind":"window","text":"A: on foot #164: p50 39.3µs, p99 183.5µs, max 336.0µs","label":"A: on foot","window":164,"p50":39.3,"p99":183.5,"max":336}
+{"t":1794760972957,"s":1121.432,"kind":"window","text":"A: on foot #165: p50 36.6µs, p99 95.8µs, max 161.0µs","label":"A: on foot","window":165,"p50":36.6,"p99":95.8,"max":161}
+{"t":1794760983131,"s":1131.606,"kind":"window","text":"A: on foot #166: p50 36.0µs, p99 93.6µs, max 291.5µs","label":"A: on foot","window":166,"p50":36,"p99":93.6,"max":291.5}
+{"t":1794760984832,"s":1133.307,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794760995570,"s":1144.045,"kind":"window","text":"A: on foot #167: p50 45.5µs, p99 188.6µs, max 375.2µs","label":"A: on foot","window":167,"p50":45.5,"p99":188.6,"max":375.2}
+{"t":1794761007759,"s":1156.234,"kind":"window","text":"A: on foot #168: p50 45.9µs, p99 168.1µs, max 227.4µs","label":"A: on foot","window":168,"p50":45.9,"p99":168.1,"max":227.4}
+{"t":1794761019036,"s":1167.511,"kind":"window","text":"A: on foot #169: p50 41.8µs, p99 102.7µs, max 143.1µs","label":"A: on foot","window":169,"p50":41.8,"p99":102.7,"max":143.1}
+{"t":1794761021679,"s":1170.154,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794761030311,"s":1178.786,"kind":"window","text":"A: on foot #170: p50 43.6µs, p99 242.7µs, max 496.6µs","label":"A: on foot","window":170,"p50":43.6,"p99":242.7,"max":496.6}
+{"t":1794761041520,"s":1189.995,"kind":"window","text":"A: on foot #171: p50 41.5µs, p99 412.5µs, max 1272.9µs","label":"A: on foot","window":171,"p50":41.5,"p99":412.5,"max":1272.9}
+{"t":1794761043557,"s":1192.032,"kind":"label","text":"A: pushback"}
+{"t":1794761053799,"s":1202.274,"kind":"window","text":"A: pushback #172: p50 41.9µs, p99 166.3µs, max 449.7µs","label":"A: pushback","window":172,"p50":41.9,"p99":166.3,"max":449.7}
+{"t":1794761065072,"s":1213.547,"kind":"window","text":"A: pushback #173: p50 39.0µs, p99 197.9µs, max 907.2µs","label":"A: pushback","window":173,"p50":39,"p99":197.9,"max":907.2}
+{"t":1794761077331,"s":1225.806,"kind":"window","text":"A: pushback #174: p50 38.4µs, p99 282.9µs, max 354.2µs","label":"A: pushback","window":174,"p50":38.4,"p99":282.9,"max":354.2}
+{"t":1794761088630,"s":1237.105,"kind":"window","text":"A: pushback #175: p50 37.4µs, p99 317.7µs, max 357.5µs","label":"A: pushback","window":175,"p50":37.4,"p99":317.7,"max":357.5}
+{"t":1794761098799,"s":1247.274,"kind":"window","text":"A: pushback #176: p50 36.2µs, p99 292.7µs, max 438.1µs","label":"A: pushback","window":176,"p50":36.2,"p99":292.7,"max":438.1}
+{"t":1794761109991,"s":1258.466,"kind":"window","text":"A: pushback #177: p50 36.0µs, p99 150.1µs, max 357.3µs","label":"A: pushback","window":177,"p50":36,"p99":150.1,"max":357.3}
+{"t":1794761120212,"s":1268.687,"kind":"window","text":"A: pushback #178: p50 35.4µs, p99 131.6µs, max 353.6µs","label":"A: pushback","window":178,"p50":35.4,"p99":131.6,"max":353.6}
+{"t":1794761130402,"s":1278.877,"kind":"window","text":"A: pushback #179: p50 36.1µs, p99 297.6µs, max 451.6µs","label":"A: pushback","window":179,"p50":36.1,"p99":297.6,"max":451.6}
+{"t":1794761142663,"s":1291.138,"kind":"window","text":"A: pushback #180: p50 46.7µs, p99 189.0µs, max 662.4µs","label":"A: pushback","window":180,"p50":46.7,"p99":189,"max":662.4}
+{"t":1794761154894,"s":1303.369,"kind":"window","text":"A: pushback #181: p50 41.0µs, p99 206.8µs, max 241.0µs","label":"A: pushback","window":181,"p50":41,"p99":206.8,"max":241}
+{"t":1794761166179,"s":1314.654,"kind":"window","text":"A: pushback #182: p50 38.3µs, p99 131.6µs, max 503.0µs","label":"A: pushback","window":182,"p50":38.301,"p99":131.601,"max":502.999}
+{"t":1794761172848,"s":1321.323,"kind":"system","text":"Pause_EX1 4 (active pause)","event":"Pause_EX1","data":4}
+{"t":1794761175421,"s":1323.896,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794761176499,"s":1324.974,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794761178444,"s":1326.919,"kind":"window","text":"A: pushback #183: p50 42.7µs, p99 155.6µs, max 249.3µs","label":"A: pushback","window":183,"p50":42.7,"p99":155.601,"max":249.301}
+{"t":1794761179215,"s":1327.69,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1794761180384,"s":1328.859,"kind":"system","text":"Pause_EX1 4 (active pause)","event":"Pause_EX1","data":4}
+{"t":1794761181173,"s":1329.648,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1794761189641,"s":1338.116,"kind":"window","text":"A: pushback #184: p50 41.5µs, p99 101.8µs, max 697.2µs","label":"A: pushback","window":184,"p50":41.5,"p99":101.8,"max":697.2}
+{"t":1794761200855,"s":1349.33,"kind":"window","text":"A: pushback #185: p50 43.7µs, p99 163.6µs, max 279.9µs","label":"A: pushback","window":185,"p50":43.699,"p99":163.6,"max":279.9}
+{"t":1794761213119,"s":1361.594,"kind":"window","text":"A: pushback #186: p50 42.4µs, p99 186.1µs, max 1619.6µs","label":"A: pushback","window":186,"p50":42.4,"p99":186.1,"max":1619.6}
+{"t":1794761225382,"s":1373.857,"kind":"window","text":"A: pushback #187: p50 45.9µs, p99 153.9µs, max 322.2µs","label":"A: pushback","window":187,"p50":45.9,"p99":153.9,"max":322.2}
+{"t":1794761234391,"s":1382.866,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794761236704,"s":1385.179,"kind":"window","text":"A: pushback #188: p50 43.2µs, p99 134.8µs, max 316.2µs","label":"A: pushback","window":188,"p50":43.2,"p99":134.801,"max":316.2}
+{"t":1794761248966,"s":1397.441,"kind":"window","text":"A: pushback #189: p50 40.2µs, p99 202.6µs, max 221.8µs","label":"A: pushback","window":189,"p50":40.2,"p99":202.599,"max":221.801}
+{"t":1794761256511,"s":1404.986,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794761262206,"s":1410.681,"kind":"window","text":"A: pushback #190: p50 43.4µs, p99 258.4µs, max 392.2µs","label":"A: pushback","window":190,"p50":43.401,"p99":258.4,"max":392.2}
+{"t":1794761274542,"s":1423.017,"kind":"window","text":"A: pushback #191: p50 38.7µs, p99 198.9µs, max 360.4µs","label":"A: pushback","window":191,"p50":38.7,"p99":198.901,"max":360.4}
+{"t":1794761286734,"s":1435.209,"kind":"window","text":"A: pushback #192: p50 38.4µs, p99 156.1µs, max 210.5µs","label":"A: pushback","window":192,"p50":38.4,"p99":156.101,"max":210.501}
+{"t":1794761297994,"s":1446.469,"kind":"window","text":"A: pushback #193: p50 37.2µs, p99 101.7µs, max 270.0µs","label":"A: pushback","window":193,"p50":37.2,"p99":101.7,"max":270}
+{"t":1794761310210,"s":1458.685,"kind":"window","text":"A: pushback #194: p50 37.2µs, p99 95.5µs, max 127.7µs","label":"A: pushback","window":194,"p50":37.2,"p99":95.5,"max":127.7}
+{"t":1794761320427,"s":1468.902,"kind":"window","text":"A: pushback #195: p50 36.8µs, p99 125.1µs, max 143.1µs","label":"A: pushback","window":195,"p50":36.8,"p99":125.1,"max":143.1}
+{"t":1794761331654,"s":1480.129,"kind":"window","text":"A: pushback #196: p50 36.2µs, p99 148.9µs, max 279.5µs","label":"A: pushback","window":196,"p50":36.2,"p99":148.9,"max":279.5}
+{"t":1794761342917,"s":1491.392,"kind":"window","text":"A: pushback #197: p50 36.9µs, p99 85.8µs, max 141.5µs","label":"A: pushback","window":197,"p50":36.9,"p99":85.8,"max":141.5}
+{"t":1794761354147,"s":1502.622,"kind":"window","text":"A: pushback #198: p50 37.3µs, p99 80.1µs, max 96.5µs","label":"A: pushback","window":198,"p50":37.3,"p99":80.1,"max":96.5}
+{"t":1794761364405,"s":1512.88,"kind":"window","text":"A: pushback #199: p50 37.2µs, p99 144.3µs, max 176.2µs","label":"A: pushback","window":199,"p50":37.2,"p99":144.3,"max":176.2}
+{"t":1794761370956,"s":1519.431,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794761371902,"s":1520.377,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794761375626,"s":1524.101,"kind":"window","text":"A: pushback #200: p50 39.8µs, p99 126.2µs, max 222.6µs","label":"A: pushback","window":200,"p50":39.8,"p99":126.2,"max":222.6}
+{"t":1794761381209,"s":1529.684,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794761387314,"s":1535.789,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794761387858,"s":1536.333,"kind":"window","text":"A: pushback #201: p50 40.8µs, p99 200.4µs, max 242.4µs","label":"A: pushback","window":201,"p50":40.8,"p99":200.4,"max":242.4}
+{"t":1794761399036,"s":1547.511,"kind":"window","text":"A: pushback #202: p50 45.2µs, p99 161.1µs, max 308.2µs","label":"A: pushback","window":202,"p50":45.2,"p99":161.1,"max":308.2}
+{"t":1794761410342,"s":1558.817,"kind":"window","text":"A: pushback #203: p50 43.5µs, p99 173.3µs, max 610.3µs","label":"A: pushback","window":203,"p50":43.5,"p99":173.3,"max":610.3}
+{"t":1794761423610,"s":1572.085,"kind":"window","text":"A: pushback #204: p50 46.2µs, p99 142.3µs, max 264.9µs","label":"A: pushback","window":204,"p50":46.2,"p99":142.3,"max":264.9}
+{"t":1794761435898,"s":1584.373,"kind":"window","text":"A: pushback #205: p50 47.8µs, p99 178.9µs, max 213.2µs","label":"A: pushback","window":205,"p50":47.8,"p99":178.9,"max":213.2}
+{"t":1794761447155,"s":1595.63,"kind":"window","text":"A: pushback #206: p50 45.0µs, p99 169.6µs, max 1047.8µs","label":"A: pushback","window":206,"p50":45,"p99":169.6,"max":1047.8}
+{"t":1794761459415,"s":1607.89,"kind":"window","text":"A: pushback #207: p50 41.6µs, p99 105.3µs, max 223.2µs","label":"A: pushback","window":207,"p50":41.6,"p99":105.3,"max":223.2}
+{"t":1794761468763,"s":1617.238,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794761470730,"s":1619.205,"kind":"window","text":"A: pushback #208: p50 40.0µs, p99 197.9µs, max 368.3µs","label":"A: pushback","window":208,"p50":40,"p99":197.9,"max":368.3}
+{"t":1794761481923,"s":1630.398,"kind":"window","text":"A: pushback #209: p50 35.7µs, p99 211.9µs, max 319.2µs","label":"A: pushback","window":209,"p50":35.7,"p99":211.9,"max":319.2}
+{"t":1794761492118,"s":1640.593,"kind":"window","text":"A: pushback #210: p50 35.0µs, p99 74.3µs, max 164.9µs","label":"A: pushback","window":210,"p50":35,"p99":74.3,"max":164.9}
+{"t":1794761502127,"s":1650.602,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794761504479,"s":1652.954,"kind":"window","text":"A: pushback #211: p50 39.8µs, p99 204.1µs, max 218.6µs","label":"A: pushback","window":211,"p50":39.8,"p99":204.1,"max":218.6}
+{"t":1794761515701,"s":1664.176,"kind":"window","text":"A: pushback #212: p50 40.3µs, p99 157.4µs, max 208.2µs","label":"A: pushback","window":212,"p50":40.3,"p99":157.4,"max":208.2}
+{"t":1794761527951,"s":1676.426,"kind":"window","text":"A: pushback #213: p50 40.0µs, p99 173.8µs, max 389.2µs","label":"A: pushback","window":213,"p50":40,"p99":173.8,"max":389.2}
+{"t":1794761539172,"s":1687.647,"kind":"window","text":"A: pushback #214: p50 37.4µs, p99 133.1µs, max 280.4µs","label":"A: pushback","window":214,"p50":37.4,"p99":133.1,"max":280.4}
+{"t":1794761547312,"s":1695.787,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794761547364,"s":1695.839,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1794761552446,"s":1700.921,"kind":"window","text":"A: pushback #215: p50 42.0µs, p99 137.4µs, max 290.5µs","label":"A: pushback","window":215,"p50":42,"p99":137.4,"max":290.5}
+{"t":1794761564617,"s":1713.092,"kind":"window","text":"A: pushback #216: p50 38.7µs, p99 161.6µs, max 207.7µs","label":"A: pushback","window":216,"p50":38.7,"p99":161.6,"max":207.7}
+{"t":1794761575821,"s":1724.296,"kind":"window","text":"A: pushback #217: p50 36.7µs, p99 138.6µs, max 340.6µs","label":"A: pushback","window":217,"p50":36.7,"p99":138.6,"max":340.6}
+{"t":1794761588072,"s":1736.547,"kind":"window","text":"A: pushback #218: p50 39.5µs, p99 219.5µs, max 680.1µs","label":"A: pushback","window":218,"p50":39.5,"p99":219.5,"max":680.1}
+{"t":1794761599339,"s":1747.814,"kind":"window","text":"A: pushback #219: p50 36.0µs, p99 115.9µs, max 215.1µs","label":"A: pushback","window":219,"p50":36,"p99":115.9,"max":215.1}
+{"t":1794761610517,"s":1758.992,"kind":"window","text":"A: pushback #220: p50 36.2µs, p99 138.3µs, max 162.0µs","label":"A: pushback","window":220,"p50":36.2,"p99":138.3,"max":162}
+{"t":1794761621781,"s":1770.256,"kind":"window","text":"A: pushback #221: p50 36.0µs, p99 124.7µs, max 264.6µs","label":"A: pushback","window":221,"p50":36,"p99":124.7,"max":264.6}
+{"t":1794761631941,"s":1780.416,"kind":"window","text":"A: pushback #222: p50 35.5µs, p99 122.0µs, max 313.8µs","label":"A: pushback","window":222,"p50":35.5,"p99":122,"max":313.8}
+{"t":1794761642158,"s":1790.633,"kind":"window","text":"A: pushback #223: p50 36.1µs, p99 128.4µs, max 149.9µs","label":"A: pushback","window":223,"p50":36.1,"p99":128.4,"max":149.9}
+{"t":1794761653377,"s":1801.852,"kind":"window","text":"A: pushback #224: p50 35.7µs, p99 81.7µs, max 249.3µs","label":"A: pushback","window":224,"p50":35.7,"p99":81.7,"max":249.3}
+{"t":1794761664607,"s":1813.082,"kind":"window","text":"A: pushback #225: p50 35.8µs, p99 58.0µs, max 95.6µs","label":"A: pushback","window":225,"p50":35.8,"p99":58,"max":95.6}
+{"t":1794761675782,"s":1824.257,"kind":"window","text":"A: pushback #226: p50 35.7µs, p99 145.8µs, max 237.1µs","label":"A: pushback","window":226,"p50":35.7,"p99":145.8,"max":237.1}
+{"t":1794761687025,"s":1835.5,"kind":"window","text":"A: pushback #227: p50 37.0µs, p99 166.2µs, max 217.9µs","label":"A: pushback","window":227,"p50":37,"p99":166.2,"max":217.9}
+{"t":1794761697180,"s":1845.655,"kind":"window","text":"A: pushback #228: p50 35.7µs, p99 109.2µs, max 131.9µs","label":"A: pushback","window":228,"p50":35.7,"p99":109.2,"max":131.9}
+{"t":1794761701280,"s":1849.755,"kind":"flow","text":"FLIGHT_END","flow":"FLIGHT_END","id":15,"file":"","signal":false}
+{"t":1794761710623,"s":1859.098,"kind":"window","text":"A: pushback #229: p50 3.9µs, p99 178.5µs, max 500.7µs","label":"A: pushback","window":229,"p50":3.9,"p99":178.5,"max":500.7}
+{"t":1794761724222,"s":1872.697,"kind":"window","text":"A: pushback #230: p50 3.6µs, p99 14.7µs, max 21.8µs","label":"A: pushback","window":230,"p50":3.6,"p99":14.7,"max":21.8}
+{"t":1794761734485,"s":1882.96,"kind":"window","text":"A: pushback #231: p50 3.3µs, p99 12.9µs, max 13.2µs","label":"A: pushback","window":231,"p50":3.3,"p99":12.9,"max":13.2}
+{"t":1794761744946,"s":1893.421,"kind":"window","text":"A: pushback #232: p50 3.5µs, p99 13.7µs, max 35.9µs","label":"A: pushback","window":232,"p50":3.5,"p99":13.7,"max":35.9}
+{"t":1794761755207,"s":1903.682,"kind":"window","text":"A: pushback #233: p50 3.5µs, p99 15.0µs, max 72.3µs","label":"A: pushback","window":233,"p50":3.5,"p99":15,"max":72.3}
+{"t":1794761755570,"s":1904.045,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1794761755570,"s":1904.045,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1794761755686,"s":1904.161,"kind":"system","text":"FlightLoaded %APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","event":"FlightLoaded","file":"%APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","signal":true}
+{"t":1794761755693,"s":1904.168,"kind":"system","text":"PositionChanged 0","event":"PositionChanged","data":0}
+{"t":1794761755941,"s":1904.416,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1794761755942,"s":1904.417,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1794761755942,"s":1904.417,"kind":"flow","text":"FLT_LOAD CustomFlight.FLT","flow":"FLT_LOAD","id":1,"file":"CustomFlight.FLT","signal":false}
+{"t":1794761755942,"s":1904.417,"kind":"flow","text":"FLT_LOADED CustomFlight.FLT","flow":"FLT_LOADED","id":2,"file":"CustomFlight.FLT","signal":true}
+{"t":1794761755942,"s":1904.417,"kind":"flow","text":"TELEPORT_START","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1794761755942,"s":1904.417,"kind":"flow","text":"TELEPORT_DONE","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1794761756209,"s":1904.684,"kind":"window","text":"A: pushback #0: p50 0.0µs, p99 0.0µs, max 0.0µs","label":"A: pushback","window":0,"p50":0,"p99":0,"max":0}
+{"t":1794761757116,"s":1905.591,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1794761757391,"s":1905.866,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1794761757394,"s":1905.869,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1794761765783,"s":1914.258,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\bksq-aircraft-baronpro\\simobjects\\airplanes\\bksq-aircraft-baronpropress\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\bksq-aircraft-baronpro\\simobjects\\airplanes\\bksq-aircraft-baronpropress\\aircraft.cfg","signal":true}
+{"t":1794761769497,"s":1917.972,"kind":"window","text":"A: pushback #234: p50 3.7µs, p99 16.9µs, max 42.7µs","label":"A: pushback","window":234,"p50":3.7,"p99":16.9,"max":42.7}
+{"t":1794761777697,"s":1926.172,"kind":"flow","text":"FLIGHT_START","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1794761777698,"s":1926.173,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1794761777698,"s":1926.173,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1794761777779,"s":1926.254,"kind":"flow","text":"RTC_START","flow":"RTC_START","id":10,"file":"","signal":false}
+{"t":1794761778915,"s":1927.39,"kind":"flow","text":"RTC_END","flow":"RTC_END","id":11,"file":"","signal":false}
+{"t":1794761788257,"s":1936.732,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794761788365,"s":1936.84,"kind":"window","text":"A: pushback #235: p50 20.8µs, p99 411.6µs, max 1203.1µs","label":"A: pushback","window":235,"p50":20.8,"p99":411.6,"max":1203.1}
+{"t":1794761794239,"s":1942.714,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794761800593,"s":1949.068,"kind":"window","text":"A: pushback #236: p50 44.9µs, p99 144.9µs, max 213.7µs","label":"A: pushback","window":236,"p50":44.9,"p99":144.9,"max":213.7}
+{"t":1794761805643,"s":1954.118,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794761806646,"s":1955.121,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794761808278,"s":1956.753,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794761809303,"s":1957.778,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794761810389,"s":1958.864,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794761812855,"s":1961.33,"kind":"window","text":"A: pushback #237: p50 43.3µs, p99 124.6µs, max 308.5µs","label":"A: pushback","window":237,"p50":43.3,"p99":124.6,"max":308.5}
+{"t":1794761824087,"s":1972.562,"kind":"window","text":"A: pushback #238: p50 39.3µs, p99 185.0µs, max 293.0µs","label":"A: pushback","window":238,"p50":39.3,"p99":185,"max":293}
+{"t":1794761835271,"s":1983.746,"kind":"window","text":"A: pushback #239: p50 37.2µs, p99 169.2µs, max 217.0µs","label":"A: pushback","window":239,"p50":37.2,"p99":169.2,"max":217}
+{"t":1794761844441,"s":1992.916,"kind":"window","text":"A: pushback #240: p50 36.4µs, p99 96.2µs, max 305.9µs","label":"A: pushback","window":240,"p50":36.4,"p99":96.2,"max":305.9}
+{"t":1794761854627,"s":2003.102,"kind":"window","text":"A: pushback #241: p50 36.4µs, p99 139.3µs, max 294.7µs","label":"A: pushback","window":241,"p50":36.4,"p99":139.3,"max":294.7}
+{"t":1794761865888,"s":2014.363,"kind":"window","text":"A: pushback #242: p50 40.9µs, p99 216.0µs, max 544.3µs","label":"A: pushback","window":242,"p50":40.9,"p99":216,"max":544.3}
+{"t":1794761876090,"s":2024.565,"kind":"window","text":"A: pushback #243: p50 36.4µs, p99 140.9µs, max 199.3µs","label":"A: pushback","window":243,"p50":36.4,"p99":140.9,"max":199.3}
+{"t":1794761887276,"s":2035.751,"kind":"window","text":"A: pushback #244: p50 42.6µs, p99 270.8µs, max 344.5µs","label":"A: pushback","window":244,"p50":42.6,"p99":270.8,"max":344.5}
+{"t":1794761897448,"s":2045.923,"kind":"window","text":"A: pushback #245: p50 36.9µs, p99 175.3µs, max 219.7µs","label":"A: pushback","window":245,"p50":36.9,"p99":175.3,"max":219.7}
+{"t":1794761907649,"s":2056.124,"kind":"window","text":"A: pushback #246: p50 36.7µs, p99 248.1µs, max 510.3µs","label":"A: pushback","window":246,"p50":36.7,"p99":248.1,"max":510.3}
+{"t":1794761917841,"s":2066.316,"kind":"window","text":"A: pushback #247: p50 41.9µs, p99 246.9µs, max 432.0µs","label":"A: pushback","window":247,"p50":41.9,"p99":246.9,"max":432}
+{"t":1794761929033,"s":2077.508,"kind":"window","text":"A: pushback #248: p50 37.5µs, p99 229.3µs, max 243.2µs","label":"A: pushback","window":248,"p50":37.5,"p99":229.3,"max":243.2}
+{"t":1794761939160,"s":2087.635,"kind":"window","text":"A: pushback #249: p50 36.8µs, p99 157.9µs, max 259.8µs","label":"A: pushback","window":249,"p50":36.8,"p99":157.9,"max":259.8}
+{"t":1794761949325,"s":2097.8,"kind":"window","text":"A: pushback #250: p50 36.3µs, p99 105.3µs, max 204.0µs","label":"A: pushback","window":250,"p50":36.3,"p99":105.3,"max":204}
+{"t":1794761959502,"s":2107.977,"kind":"window","text":"A: pushback #251: p50 36.0µs, p99 134.8µs, max 466.6µs","label":"A: pushback","window":251,"p50":36,"p99":134.8,"max":466.6}
+{"t":1794761969696,"s":2118.171,"kind":"window","text":"A: pushback #252: p50 36.4µs, p99 100.7µs, max 206.4µs","label":"A: pushback","window":252,"p50":36.4,"p99":100.7,"max":206.4}
+{"t":1794761979877,"s":2128.352,"kind":"window","text":"A: pushback #253: p50 36.2µs, p99 119.7µs, max 137.1µs","label":"A: pushback","window":253,"p50":36.2,"p99":119.7,"max":137.1}
+{"t":1794761990080,"s":2138.555,"kind":"window","text":"A: pushback #254: p50 36.3µs, p99 155.0µs, max 288.4µs","label":"A: pushback","window":254,"p50":36.3,"p99":155,"max":288.4}
+{"t":1794761999230,"s":2147.705,"kind":"window","text":"A: pushback #255: p50 36.3µs, p99 163.1µs, max 251.0µs","label":"A: pushback","window":255,"p50":36.3,"p99":163.1,"max":251}
+{"t":1794762010458,"s":2158.933,"kind":"window","text":"A: pushback #256: p50 37.2µs, p99 166.1µs, max 399.4µs","label":"A: pushback","window":256,"p50":37.2,"p99":166.1,"max":399.4}
+{"t":1794762014505,"s":2162.98,"kind":"label","text":"A2: BeyondATC alone"}
+{"t":1794762020643,"s":2169.118,"kind":"window","text":"A2: BeyondATC alone #257: p50 41.1µs, p99 205.1µs, max 1095.4µs","label":"A2: BeyondATC alone","window":257,"p50":41.1,"p99":205.1,"max":1095.4}
+{"t":1794762028943,"s":2177.418,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794762031444,"s":2179.919,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794762031834,"s":2180.309,"kind":"window","text":"A2: BeyondATC alone #258: p50 38.2µs, p99 182.9µs, max 615.9µs","label":"A2: BeyondATC alone","window":258,"p50":38.2,"p99":182.9,"max":615.9}
+{"t":1794762043467,"s":2191.942,"kind":"window","text":"A2: BeyondATC alone #259: p50 38.8µs, p99 139.8µs, max 184.1µs","label":"A2: BeyondATC alone","window":259,"p50":38.8,"p99":139.8,"max":184.1}
+{"t":1794762043815,"s":2192.29,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794762056857,"s":2205.332,"kind":"window","text":"A2: BeyondATC alone #260: p50 41.8µs, p99 187.0µs, max 435.6µs","label":"A2: BeyondATC alone","window":260,"p50":41.8,"p99":187,"max":435.6}
+{"t":1794762068359,"s":2216.834,"kind":"window","text":"A2: BeyondATC alone #261: p50 41.3µs, p99 171.5µs, max 355.0µs","label":"A2: BeyondATC alone","window":261,"p50":41.3,"p99":171.5,"max":355}
+{"t":1794762078608,"s":2227.083,"kind":"window","text":"A2: BeyondATC alone #262: p50 39.2µs, p99 157.5µs, max 243.8µs","label":"A2: BeyondATC alone","window":262,"p50":39.2,"p99":157.5,"max":243.8}
+{"t":1794762088777,"s":2237.252,"kind":"window","text":"A2: BeyondATC alone #263: p50 37.6µs, p99 83.4µs, max 130.5µs","label":"A2: BeyondATC alone","window":263,"p50":37.6,"p99":83.4,"max":130.5}
+{"t":1794762098945,"s":2247.42,"kind":"window","text":"A2: BeyondATC alone #264: p50 37.3µs, p99 243.4µs, max 393.8µs","label":"A2: BeyondATC alone","window":264,"p50":37.3,"p99":243.4,"max":393.8}
+{"t":1794762109106,"s":2257.581,"kind":"window","text":"A2: BeyondATC alone #265: p50 35.8µs, p99 198.2µs, max 312.8µs","label":"A2: BeyondATC alone","window":265,"p50":35.8,"p99":198.2,"max":312.8}
+{"t":1794762120312,"s":2268.787,"kind":"window","text":"A2: BeyondATC alone #266: p50 36.0µs, p99 131.1µs, max 227.7µs","label":"A2: BeyondATC alone","window":266,"p50":36,"p99":131.1,"max":227.7}
+{"t":1794762129497,"s":2277.972,"kind":"window","text":"A2: BeyondATC alone #267: p50 38.1µs, p99 188.9µs, max 652.6µs","label":"A2: BeyondATC alone","window":267,"p50":38.1,"p99":188.9,"max":652.6}
+{"t":1794762140651,"s":2289.126,"kind":"window","text":"A2: BeyondATC alone #268: p50 37.4µs, p99 217.5µs, max 338.3µs","label":"A2: BeyondATC alone","window":268,"p50":37.4,"p99":217.5,"max":338.3}
+{"t":1794762150813,"s":2299.288,"kind":"window","text":"A2: BeyondATC alone #269: p50 37.4µs, p99 147.0µs, max 490.3µs","label":"A2: BeyondATC alone","window":269,"p50":37.4,"p99":147,"max":490.3}
+{"t":1794762160962,"s":2309.437,"kind":"window","text":"A2: BeyondATC alone #270: p50 40.2µs, p99 172.1µs, max 253.2µs","label":"A2: BeyondATC alone","window":270,"p50":40.2,"p99":172.1,"max":253.2}
+{"t":1794762171140,"s":2319.615,"kind":"window","text":"A2: BeyondATC alone #271: p50 40.3µs, p99 205.3µs, max 406.6µs","label":"A2: BeyondATC alone","window":271,"p50":40.3,"p99":205.3,"max":406.6}
+{"t":1794762181308,"s":2329.783,"kind":"window","text":"A2: BeyondATC alone #272: p50 35.6µs, p99 151.4µs, max 482.5µs","label":"A2: BeyondATC alone","window":272,"p50":35.6,"p99":151.4,"max":482.5}
+{"t":1794762191493,"s":2339.968,"kind":"window","text":"A2: BeyondATC alone #273: p50 34.8µs, p99 140.2µs, max 315.1µs","label":"A2: BeyondATC alone","window":273,"p50":34.8,"p99":140.2,"max":315.1}
+{"t":1794762200700,"s":2349.175,"kind":"window","text":"A2: BeyondATC alone #274: p50 34.8µs, p99 150.5µs, max 191.2µs","label":"A2: BeyondATC alone","window":274,"p50":34.8,"p99":150.5,"max":191.2}
+{"t":1794762210883,"s":2359.358,"kind":"window","text":"A2: BeyondATC alone #275: p50 35.3µs, p99 236.3µs, max 706.7µs","label":"A2: BeyondATC alone","window":275,"p50":35.3,"p99":236.3,"max":706.7}
+{"t":1794762221085,"s":2369.56,"kind":"window","text":"A2: BeyondATC alone #276: p50 35.1µs, p99 78.0µs, max 164.1µs","label":"A2: BeyondATC alone","window":276,"p50":35.1,"p99":78,"max":164.1}
+{"t":1794762231327,"s":2379.802,"kind":"window","text":"A2: BeyondATC alone #277: p50 34.8µs, p99 99.6µs, max 146.2µs","label":"A2: BeyondATC alone","window":277,"p50":34.8,"p99":99.6,"max":146.2}
+{"t":1794762241565,"s":2390.04,"kind":"window","text":"A2: BeyondATC alone #278: p50 34.6µs, p99 113.2µs, max 145.4µs","label":"A2: BeyondATC alone","window":278,"p50":34.6,"p99":113.2,"max":145.4}
+{"t":1794762251765,"s":2400.24,"kind":"window","text":"A2: BeyondATC alone #279: p50 35.4µs, p99 179.5µs, max 311.0µs","label":"A2: BeyondATC alone","window":279,"p50":35.4,"p99":179.5,"max":311}
+{"t":1794762261030,"s":2409.505,"kind":"window","text":"A2: BeyondATC alone #280: p50 35.4µs, p99 90.9µs, max 293.7µs","label":"A2: BeyondATC alone","window":280,"p50":35.4,"p99":90.9,"max":293.7}
+{"t":1794762271205,"s":2419.68,"kind":"window","text":"A2: BeyondATC alone #281: p50 34.5µs, p99 66.2µs, max 78.4µs","label":"A2: BeyondATC alone","window":281,"p50":34.5,"p99":66.2,"max":78.4}
+{"t":1794762281415,"s":2429.89,"kind":"window","text":"A2: BeyondATC alone #282: p50 35.9µs, p99 165.6µs, max 237.5µs","label":"A2: BeyondATC alone","window":282,"p50":35.9,"p99":165.6,"max":237.5}
+{"t":1794762291614,"s":2440.089,"kind":"window","text":"A2: BeyondATC alone #283: p50 35.2µs, p99 122.9µs, max 221.9µs","label":"A2: BeyondATC alone","window":283,"p50":35.2,"p99":122.9,"max":221.9}
+{"t":1794762301752,"s":2450.227,"kind":"window","text":"A2: BeyondATC alone #284: p50 39.1µs, p99 267.9µs, max 1415.1µs","label":"A2: BeyondATC alone","window":284,"p50":39.1,"p99":267.9,"max":1415.1}
+{"t":1794762311921,"s":2460.396,"kind":"window","text":"A2: BeyondATC alone #285: p50 38.7µs, p99 102.2µs, max 117.8µs","label":"A2: BeyondATC alone","window":285,"p50":38.7,"p99":102.2,"max":117.8}
+{"t":1794762322083,"s":2470.558,"kind":"window","text":"A2: BeyondATC alone #286: p50 37.0µs, p99 89.4µs, max 262.0µs","label":"A2: BeyondATC alone","window":286,"p50":37,"p99":89.4,"max":262}
+{"t":1794762332263,"s":2480.738,"kind":"window","text":"A2: BeyondATC alone #287: p50 34.8µs, p99 156.3µs, max 266.2µs","label":"A2: BeyondATC alone","window":287,"p50":34.8,"p99":156.3,"max":266.2}
+{"t":1794762342429,"s":2490.904,"kind":"window","text":"A2: BeyondATC alone #288: p50 35.9µs, p99 151.6µs, max 412.1µs","label":"A2: BeyondATC alone","window":288,"p50":35.9,"p99":151.6,"max":412.1}
+{"t":1794762352586,"s":2501.061,"kind":"window","text":"A2: BeyondATC alone #289: p50 40.1µs, p99 205.4µs, max 332.6µs","label":"A2: BeyondATC alone","window":289,"p50":40.1,"p99":205.4,"max":332.6}
+{"t":1794762362777,"s":2511.252,"kind":"window","text":"A2: BeyondATC alone #290: p50 37.9µs, p99 142.2µs, max 196.9µs","label":"A2: BeyondATC alone","window":290,"p50":37.9,"p99":142.2,"max":196.9}
+{"t":1794762372974,"s":2521.449,"kind":"window","text":"A2: BeyondATC alone #291: p50 39.4µs, p99 201.8µs, max 294.4µs","label":"A2: BeyondATC alone","window":291,"p50":39.4,"p99":201.8,"max":294.4}
+{"t":1794762384183,"s":2532.658,"kind":"window","text":"A2: BeyondATC alone #292: p50 38.5µs, p99 95.5µs, max 215.6µs","label":"A2: BeyondATC alone","window":292,"p50":38.5,"p99":95.5,"max":215.6}
+{"t":1794762394448,"s":2542.923,"kind":"window","text":"A2: BeyondATC alone #293: p50 36.8µs, p99 194.9µs, max 531.4µs","label":"A2: BeyondATC alone","window":293,"p50":36.8,"p99":194.9,"max":531.4}
+{"t":1794762405666,"s":2554.141,"kind":"window","text":"A2: BeyondATC alone #294: p50 42.5µs, p99 233.8µs, max 347.3µs","label":"A2: BeyondATC alone","window":294,"p50":42.5,"p99":233.8,"max":347.3}
+{"t":1794762415852,"s":2564.327,"kind":"window","text":"A2: BeyondATC alone #295: p50 38.8µs, p99 145.1µs, max 190.2µs","label":"A2: BeyondATC alone","window":295,"p50":38.8,"p99":145.1,"max":190.2}
+{"t":1794762425059,"s":2573.534,"kind":"window","text":"A2: BeyondATC alone #296: p50 40.1µs, p99 148.2µs, max 560.8µs","label":"A2: BeyondATC alone","window":296,"p50":40.1,"p99":148.2,"max":560.8}
+{"t":1794762435282,"s":2583.757,"kind":"window","text":"A2: BeyondATC alone #297: p50 35.9µs, p99 171.7µs, max 210.0µs","label":"A2: BeyondATC alone","window":297,"p50":35.9,"p99":171.7,"max":210}
+{"t":1794762445495,"s":2593.97,"kind":"window","text":"A2: BeyondATC alone #298: p50 41.0µs, p99 175.3µs, max 238.1µs","label":"A2: BeyondATC alone","window":298,"p50":41,"p99":175.3,"max":238.1}
+{"t":1794762455733,"s":2604.208,"kind":"window","text":"A2: BeyondATC alone #299: p50 41.3µs, p99 200.5µs, max 339.4µs","label":"A2: BeyondATC alone","window":299,"p50":41.3,"p99":200.5,"max":339.4}
+{"t":1794762465933,"s":2614.408,"kind":"window","text":"A2: BeyondATC alone #300: p50 39.0µs, p99 139.9µs, max 257.6µs","label":"A2: BeyondATC alone","window":300,"p50":39,"p99":139.9,"max":257.6}
+{"t":1794762476144,"s":2624.619,"kind":"window","text":"A2: BeyondATC alone #301: p50 35.8µs, p99 117.8µs, max 163.7µs","label":"A2: BeyondATC alone","window":301,"p50":35.8,"p99":117.8,"max":163.7}
+{"t":1794762486401,"s":2634.876,"kind":"window","text":"A2: BeyondATC alone #302: p50 38.6µs, p99 138.2µs, max 283.1µs","label":"A2: BeyondATC alone","window":302,"p50":38.6,"p99":138.2,"max":283.1}
+{"t":1794762496625,"s":2645.1,"kind":"window","text":"A2: BeyondATC alone #303: p50 37.0µs, p99 153.5µs, max 423.2µs","label":"A2: BeyondATC alone","window":303,"p50":37,"p99":153.5,"max":423.2}
+{"t":1794762506801,"s":2655.276,"kind":"window","text":"A2: BeyondATC alone #304: p50 35.0µs, p99 101.2µs, max 250.7µs","label":"A2: BeyondATC alone","window":304,"p50":35,"p99":101.2,"max":250.7}
+{"t":1794762517037,"s":2665.512,"kind":"window","text":"A2: BeyondATC alone #305: p50 38.5µs, p99 144.5µs, max 256.6µs","label":"A2: BeyondATC alone","window":305,"p50":38.5,"p99":144.5,"max":256.6}
+{"t":1794762526197,"s":2674.672,"kind":"window","text":"A2: BeyondATC alone #306: p50 41.7µs, p99 188.4µs, max 260.8µs","label":"A2: BeyondATC alone","window":306,"p50":41.7,"p99":188.4,"max":260.8}
+{"t":1794762536391,"s":2684.866,"kind":"window","text":"A2: BeyondATC alone #307: p50 35.8µs, p99 179.6µs, max 370.5µs","label":"A2: BeyondATC alone","window":307,"p50":35.8,"p99":179.6,"max":370.5}
+{"t":1794762546614,"s":2695.089,"kind":"window","text":"A2: BeyondATC alone #308: p50 35.5µs, p99 80.3µs, max 316.7µs","label":"A2: BeyondATC alone","window":308,"p50":35.5,"p99":80.3,"max":316.7}
+{"t":1794762556858,"s":2705.333,"kind":"window","text":"A2: BeyondATC alone #309: p50 35.1µs, p99 84.2µs, max 149.8µs","label":"A2: BeyondATC alone","window":309,"p50":35.1,"p99":84.2,"max":149.8}
+{"t":1794762567138,"s":2715.613,"kind":"window","text":"A2: BeyondATC alone #310: p50 40.7µs, p99 127.6µs, max 370.8µs","label":"A2: BeyondATC alone","window":310,"p50":40.7,"p99":127.6,"max":370.8}
+{"t":1794762577366,"s":2725.841,"kind":"window","text":"A2: BeyondATC alone #311: p50 36.7µs, p99 168.8µs, max 213.1µs","label":"A2: BeyondATC alone","window":311,"p50":36.7,"p99":168.8,"max":213.1}
+{"t":1794762587552,"s":2736.027,"kind":"window","text":"A2: BeyondATC alone #312: p50 40.5µs, p99 291.5µs, max 455.6µs","label":"A2: BeyondATC alone","window":312,"p50":40.5,"p99":291.5,"max":455.6}
+{"t":1794762597727,"s":2746.202,"kind":"window","text":"A2: BeyondATC alone #313: p50 41.2µs, p99 142.2µs, max 200.3µs","label":"A2: BeyondATC alone","window":313,"p50":41.2,"p99":142.2,"max":200.3}
+{"t":1794762607886,"s":2756.361,"kind":"window","text":"A2: BeyondATC alone #314: p50 38.7µs, p99 179.9µs, max 243.6µs","label":"A2: BeyondATC alone","window":314,"p50":38.7,"p99":179.9,"max":243.6}
+{"t":1794762618075,"s":2766.55,"kind":"window","text":"A2: BeyondATC alone #315: p50 37.1µs, p99 163.8µs, max 211.7µs","label":"A2: BeyondATC alone","window":315,"p50":37.1,"p99":163.8,"max":211.7}
+{"t":1794762628320,"s":2776.795,"kind":"window","text":"A2: BeyondATC alone #316: p50 36.5µs, p99 72.6µs, max 134.8µs","label":"A2: BeyondATC alone","window":316,"p50":36.5,"p99":72.6,"max":134.8}
+{"t":1794762638520,"s":2786.995,"kind":"window","text":"A2: BeyondATC alone #317: p50 36.7µs, p99 146.0µs, max 253.5µs","label":"A2: BeyondATC alone","window":317,"p50":36.7,"p99":146,"max":253.5}
+{"t":1794762648719,"s":2797.194,"kind":"window","text":"A2: BeyondATC alone #318: p50 38.6µs, p99 200.1µs, max 452.6µs","label":"A2: BeyondATC alone","window":318,"p50":38.6,"p99":200.1,"max":452.6}
+{"t":1794762658875,"s":2807.35,"kind":"window","text":"A2: BeyondATC alone #319: p50 41.1µs, p99 129.3µs, max 152.7µs","label":"A2: BeyondATC alone","window":319,"p50":41.1,"p99":129.3,"max":152.7}
+{"t":1794762669100,"s":2817.575,"kind":"window","text":"A2: BeyondATC alone #320: p50 39.0µs, p99 161.2µs, max 345.9µs","label":"A2: BeyondATC alone","window":320,"p50":39,"p99":161.2,"max":345.9}
+{"t":1794762678290,"s":2826.765,"kind":"window","text":"A2: BeyondATC alone #321: p50 39.2µs, p99 107.6µs, max 207.6µs","label":"A2: BeyondATC alone","window":321,"p50":39.2,"p99":107.6,"max":207.6}
+{"t":1794762688473,"s":2836.948,"kind":"window","text":"A2: BeyondATC alone #322: p50 39.9µs, p99 119.8µs, max 252.4µs","label":"A2: BeyondATC alone","window":322,"p50":39.9,"p99":119.8,"max":252.4}
+{"t":1794762698777,"s":2847.252,"kind":"window","text":"A2: BeyondATC alone #323: p50 38.8µs, p99 148.6µs, max 177.2µs","label":"A2: BeyondATC alone","window":323,"p50":38.8,"p99":148.6,"max":177.2}
+{"t":1794762708993,"s":2857.468,"kind":"window","text":"A2: BeyondATC alone #324: p50 41.6µs, p99 91.7µs, max 263.6µs","label":"A2: BeyondATC alone","window":324,"p50":41.6,"p99":91.7,"max":263.6}
+{"t":1794762719202,"s":2867.677,"kind":"window","text":"A2: BeyondATC alone #325: p50 46.0µs, p99 180.7µs, max 409.8µs","label":"A2: BeyondATC alone","window":325,"p50":46,"p99":180.7,"max":409.8}
+{"t":1794762731550,"s":2880.025,"kind":"window","text":"A2: BeyondATC alone #326: p50 48.5µs, p99 192.0µs, max 415.5µs","label":"A2: BeyondATC alone","window":326,"p50":48.5,"p99":192,"max":415.5}
+{"t":1794762742738,"s":2891.213,"kind":"window","text":"A2: BeyondATC alone #327: p50 47.7µs, p99 166.6µs, max 216.6µs","label":"A2: BeyondATC alone","window":327,"p50":47.7,"p99":166.6,"max":216.6}
+{"t":1794762753983,"s":2902.458,"kind":"window","text":"A2: BeyondATC alone #328: p50 47.8µs, p99 217.5µs, max 410.6µs","label":"A2: BeyondATC alone","window":328,"p50":47.8,"p99":217.5,"max":410.6}
+{"t":1794762764185,"s":2912.66,"kind":"window","text":"A2: BeyondATC alone #329: p50 47.8µs, p99 127.6µs, max 351.9µs","label":"A2: BeyondATC alone","window":329,"p50":47.8,"p99":127.6,"max":351.9}
+{"t":1794762775422,"s":2923.897,"kind":"window","text":"A2: BeyondATC alone #330: p50 48.4µs, p99 216.5µs, max 312.7µs","label":"A2: BeyondATC alone","window":330,"p50":48.4,"p99":216.5,"max":312.7}
+{"t":1794762785659,"s":2934.134,"kind":"window","text":"A2: BeyondATC alone #331: p50 44.3µs, p99 97.0µs, max 293.1µs","label":"A2: BeyondATC alone","window":331,"p50":44.3,"p99":97,"max":293.1}
+{"t":1794762795854,"s":2944.329,"kind":"window","text":"A2: BeyondATC alone #332: p50 43.3µs, p99 141.9µs, max 511.9µs","label":"A2: BeyondATC alone","window":332,"p50":43.3,"p99":141.9,"max":511.9}
+{"t":1794762805048,"s":2953.523,"kind":"window","text":"A2: BeyondATC alone #333: p50 41.9µs, p99 161.1µs, max 447.3µs","label":"A2: BeyondATC alone","window":333,"p50":41.9,"p99":161.1,"max":447.3}
+{"t":1794762815225,"s":2963.7,"kind":"window","text":"A2: BeyondATC alone #334: p50 43.7µs, p99 198.8µs, max 244.9µs","label":"A2: BeyondATC alone","window":334,"p50":43.7,"p99":198.8,"max":244.9}
+{"t":1794762825400,"s":2973.875,"kind":"window","text":"A2: BeyondATC alone #335: p50 42.8µs, p99 132.9µs, max 222.6µs","label":"A2: BeyondATC alone","window":335,"p50":42.8,"p99":132.9,"max":222.6}
+{"t":1794762835591,"s":2984.066,"kind":"window","text":"A2: BeyondATC alone #336: p50 44.7µs, p99 206.4µs, max 354.9µs","label":"A2: BeyondATC alone","window":336,"p50":44.7,"p99":206.4,"max":354.9}
+{"t":1794762845848,"s":2994.323,"kind":"window","text":"A2: BeyondATC alone #337: p50 44.0µs, p99 191.4µs, max 902.9µs","label":"A2: BeyondATC alone","window":337,"p50":44,"p99":191.4,"max":902.9}
+{"t":1794762856036,"s":3004.511,"kind":"window","text":"A2: BeyondATC alone #338: p50 44.4µs, p99 211.3µs, max 358.3µs","label":"A2: BeyondATC alone","window":338,"p50":44.4,"p99":211.3,"max":358.3}
+{"t":1794762866297,"s":3014.772,"kind":"window","text":"A2: BeyondATC alone #339: p50 44.9µs, p99 137.4µs, max 259.8µs","label":"A2: BeyondATC alone","window":339,"p50":44.9,"p99":137.4,"max":259.8}
+{"t":1794762876445,"s":3024.92,"kind":"window","text":"A2: BeyondATC alone #340: p50 42.4µs, p99 272.8µs, max 468.9µs","label":"A2: BeyondATC alone","window":340,"p50":42.4,"p99":272.8,"max":468.9}
+{"t":1794762886702,"s":3035.177,"kind":"window","text":"A2: BeyondATC alone #341: p50 37.3µs, p99 122.8µs, max 359.6µs","label":"A2: BeyondATC alone","window":341,"p50":37.3,"p99":122.8,"max":359.6}
+{"t":1794762896934,"s":3045.409,"kind":"window","text":"A2: BeyondATC alone #342: p50 43.3µs, p99 308.7µs, max 788.5µs","label":"A2: BeyondATC alone","window":342,"p50":43.3,"p99":308.7,"max":788.5}
+{"t":1794762907311,"s":3055.786,"kind":"window","text":"A2: BeyondATC alone #343: p50 48.2µs, p99 177.0µs, max 444.6µs","label":"A2: BeyondATC alone","window":343,"p50":48.2,"p99":177,"max":444.6}
+{"t":1794762917518,"s":3065.993,"kind":"window","text":"A2: BeyondATC alone #344: p50 47.9µs, p99 131.4µs, max 195.5µs","label":"A2: BeyondATC alone","window":344,"p50":47.9,"p99":131.4,"max":195.5}
+{"t":1794762927739,"s":3076.214,"kind":"window","text":"A2: BeyondATC alone #345: p50 42.1µs, p99 221.2µs, max 297.7µs","label":"A2: BeyondATC alone","window":345,"p50":42.1,"p99":221.2,"max":297.7}
+{"t":1794762937970,"s":3086.445,"kind":"window","text":"A2: BeyondATC alone #346: p50 41.4µs, p99 172.0µs, max 2390.2µs","label":"A2: BeyondATC alone","window":346,"p50":41.4,"p99":172,"max":2390.2}
+{"t":1794762948205,"s":3096.68,"kind":"window","text":"A2: BeyondATC alone #347: p50 43.1µs, p99 254.1µs, max 566.4µs","label":"A2: BeyondATC alone","window":347,"p50":43.1,"p99":254.1,"max":566.4}
+{"t":1794762958360,"s":3106.835,"kind":"window","text":"A2: BeyondATC alone #348: p50 40.9µs, p99 175.8µs, max 365.3µs","label":"A2: BeyondATC alone","window":348,"p50":40.9,"p99":175.8,"max":365.3}
+{"t":1794762968564,"s":3117.039,"kind":"window","text":"A2: BeyondATC alone #349: p50 42.8µs, p99 173.9µs, max 331.7µs","label":"A2: BeyondATC alone","window":349,"p50":42.8,"p99":173.9,"max":331.7}
+{"t":1794762978787,"s":3127.262,"kind":"window","text":"A2: BeyondATC alone #350: p50 42.4µs, p99 200.4µs, max 380.2µs","label":"A2: BeyondATC alone","window":350,"p50":42.4,"p99":200.4,"max":380.2}
+{"t":1794762988002,"s":3136.477,"kind":"window","text":"A2: BeyondATC alone #351: p50 41.2µs, p99 228.8µs, max 381.7µs","label":"A2: BeyondATC alone","window":351,"p50":41.2,"p99":228.8,"max":381.7}
+{"t":1794762998206,"s":3146.681,"kind":"window","text":"A2: BeyondATC alone #352: p50 38.4µs, p99 169.5µs, max 209.1µs","label":"A2: BeyondATC alone","window":352,"p50":38.4,"p99":169.5,"max":209.1}
+{"t":1794763008412,"s":3156.887,"kind":"window","text":"A2: BeyondATC alone #353: p50 37.3µs, p99 114.7µs, max 221.9µs","label":"A2: BeyondATC alone","window":353,"p50":37.3,"p99":114.7,"max":221.9}
+{"t":1794763018678,"s":3167.153,"kind":"window","text":"A2: BeyondATC alone #354: p50 35.6µs, p99 101.7µs, max 292.7µs","label":"A2: BeyondATC alone","window":354,"p50":35.6,"p99":101.7,"max":292.7}
+{"t":1794763028964,"s":3177.439,"kind":"window","text":"A2: BeyondATC alone #355: p50 45.6µs, p99 292.4µs, max 1524.3µs","label":"A2: BeyondATC alone","window":355,"p50":45.6,"p99":292.4,"max":1524.3}
+{"t":1794763040254,"s":3188.729,"kind":"window","text":"A2: BeyondATC alone #356: p50 48.1µs, p99 201.7µs, max 887.6µs","label":"A2: BeyondATC alone","window":356,"p50":48.1,"p99":201.7,"max":887.6}
+{"t":1794763050563,"s":3199.038,"kind":"window","text":"A2: BeyondATC alone #357: p50 48.0µs, p99 183.9µs, max 637.8µs","label":"A2: BeyondATC alone","window":357,"p50":48,"p99":183.9,"max":637.8}
+{"t":1794763060821,"s":3209.296,"kind":"window","text":"A2: BeyondATC alone #358: p50 47.4µs, p99 163.8µs, max 422.3µs","label":"A2: BeyondATC alone","window":358,"p50":47.4,"p99":163.8,"max":422.3}
+{"t":1794763071093,"s":3219.568,"kind":"window","text":"A2: BeyondATC alone #359: p50 47.5µs, p99 209.4µs, max 562.6µs","label":"A2: BeyondATC alone","window":359,"p50":47.5,"p99":209.4,"max":562.6}
+{"t":1794763081352,"s":3229.827,"kind":"window","text":"A2: BeyondATC alone #360: p50 47.0µs, p99 285.7µs, max 13200.3µs","label":"A2: BeyondATC alone","window":360,"p50":47,"p99":285.7,"max":13200.3}
+{"t":1794763091619,"s":3240.094,"kind":"window","text":"A2: BeyondATC alone #361: p50 47.5µs, p99 302.8µs, max 375.5µs","label":"A2: BeyondATC alone","window":361,"p50":47.5,"p99":302.8,"max":375.5}
+{"t":1794763101914,"s":3250.389,"kind":"window","text":"A2: BeyondATC alone #362: p50 47.5µs, p99 230.1µs, max 316.2µs","label":"A2: BeyondATC alone","window":362,"p50":47.5,"p99":230.1,"max":316.2}
+{"t":1794763113251,"s":3261.726,"kind":"window","text":"A2: BeyondATC alone #363: p50 47.0µs, p99 196.2µs, max 255.3µs","label":"A2: BeyondATC alone","window":363,"p50":47,"p99":196.2,"max":255.3}
+{"t":1794763123511,"s":3271.986,"kind":"window","text":"A2: BeyondATC alone #364: p50 47.1µs, p99 309.2µs, max 3348.6µs","label":"A2: BeyondATC alone","window":364,"p50":47.1,"p99":309.2,"max":3348.6}
+{"t":1794763133730,"s":3282.205,"kind":"window","text":"A2: BeyondATC alone #365: p50 45.9µs, p99 209.2µs, max 462.9µs","label":"A2: BeyondATC alone","window":365,"p50":45.9,"p99":209.2,"max":462.9}
+{"t":1794763142948,"s":3291.423,"kind":"window","text":"A2: BeyondATC alone #366: p50 40.8µs, p99 256.4µs, max 545.6µs","label":"A2: BeyondATC alone","window":366,"p50":40.8,"p99":256.4,"max":545.6}
+{"t":1794763154141,"s":3302.616,"kind":"window","text":"A2: BeyondATC alone #367: p50 43.8µs, p99 194.2µs, max 373.2µs","label":"A2: BeyondATC alone","window":367,"p50":43.8,"p99":194.2,"max":373.2}
+{"t":1794763163376,"s":3311.851,"kind":"window","text":"A2: BeyondATC alone #368: p50 44.2µs, p99 130.6µs, max 320.7µs","label":"A2: BeyondATC alone","window":368,"p50":44.2,"p99":130.6,"max":320.7}
+{"t":1794763173571,"s":3322.046,"kind":"window","text":"A2: BeyondATC alone #369: p50 46.5µs, p99 151.0µs, max 252.5µs","label":"A2: BeyondATC alone","window":369,"p50":46.5,"p99":151,"max":252.5}
+{"t":1794763183846,"s":3332.321,"kind":"window","text":"A2: BeyondATC alone #370: p50 46.3µs, p99 165.4µs, max 817.6µs","label":"A2: BeyondATC alone","window":370,"p50":46.3,"p99":165.4,"max":817.6}
+{"t":1794763194035,"s":3342.51,"kind":"window","text":"A2: BeyondATC alone #371: p50 45.5µs, p99 342.5µs, max 628.7µs","label":"A2: BeyondATC alone","window":371,"p50":45.5,"p99":342.5,"max":628.7}
+{"t":1794763204388,"s":3352.863,"kind":"window","text":"A2: BeyondATC alone #372: p50 46.2µs, p99 194.5µs, max 501.2µs","label":"A2: BeyondATC alone","window":372,"p50":46.2,"p99":194.5,"max":501.2}
+{"t":1794763214622,"s":3363.097,"kind":"window","text":"A2: BeyondATC alone #373: p50 44.7µs, p99 205.4µs, max 252.5µs","label":"A2: BeyondATC alone","window":373,"p50":44.7,"p99":205.4,"max":252.5}
+{"t":1794763224857,"s":3373.332,"kind":"window","text":"A2: BeyondATC alone #374: p50 44.8µs, p99 211.1µs, max 721.9µs","label":"A2: BeyondATC alone","window":374,"p50":44.799,"p99":211.1,"max":721.9}
+{"t":1794763236090,"s":3384.565,"kind":"window","text":"A2: BeyondATC alone #375: p50 44.4µs, p99 152.4µs, max 211.3µs","label":"A2: BeyondATC alone","window":375,"p50":44.4,"p99":152.4,"max":211.3}
+{"t":1794763245262,"s":3393.737,"kind":"window","text":"A2: BeyondATC alone #376: p50 39.4µs, p99 163.2µs, max 210.7µs","label":"A2: BeyondATC alone","window":376,"p50":39.4,"p99":163.201,"max":210.7}
+{"t":1794763255507,"s":3403.982,"kind":"window","text":"A2: BeyondATC alone #377: p50 35.0µs, p99 171.4µs, max 824.6µs","label":"A2: BeyondATC alone","window":377,"p50":35,"p99":171.4,"max":824.6}
+{"t":1794763264713,"s":3413.188,"kind":"label","text":"B: none, before copies"}
+{"t":1794763265774,"s":3414.249,"kind":"window","text":"B: none, before copies #378: p50 37.0µs, p99 305.0µs, max 521.2µs","label":"B: none, before copies","window":378,"p50":37,"p99":305,"max":521.199}
+{"t":1794763276095,"s":3424.57,"kind":"window","text":"B: none, before copies #379: p50 37.5µs, p99 187.2µs, max 266.7µs","label":"B: none, before copies","window":379,"p50":37.5,"p99":187.201,"max":266.7}
+{"t":1794763286356,"s":3434.831,"kind":"label","text":"B: copies"}
+{"t":1794763286357,"s":3434.832,"kind":"window","text":"B: copies #380: p50 41.3µs, p99 236.7µs, max 420.9µs","label":"B: copies","window":380,"p50":41.3,"p99":236.699,"max":420.9}
+{"t":1794763296563,"s":3445.038,"kind":"window","text":"B: copies #381: p50 114.5µs, p99 402.2µs, max 865.6µs","label":"B: copies","window":381,"p50":114.501,"p99":402.199,"max":865.6}
+{"t":1794763306849,"s":3455.324,"kind":"window","text":"B: copies #382: p50 121.0µs, p99 305.7µs, max 362.4µs","label":"B: copies","window":382,"p50":121,"p99":305.7,"max":362.4}
+{"t":1794763317176,"s":3465.651,"kind":"window","text":"B: copies #383: p50 122.4µs, p99 324.0µs, max 624.0µs","label":"B: copies","window":383,"p50":122.399,"p99":324,"max":624.001}
+{"t":1794763326389,"s":3474.864,"kind":"window","text":"B: copies #384: p50 121.5µs, p99 329.4µs, max 375.4µs","label":"B: copies","window":384,"p50":121.5,"p99":329.401,"max":375.4}
+{"t":1794763336650,"s":3485.125,"kind":"window","text":"B: copies #385: p50 122.3µs, p99 308.0µs, max 825.1µs","label":"B: copies","window":385,"p50":122.3,"p99":308,"max":825.1}
+{"t":1794763346913,"s":3495.388,"kind":"window","text":"B: copies #386: p50 125.5µs, p99 299.2µs, max 442.4µs","label":"B: copies","window":386,"p50":125.501,"p99":299.2,"max":442.4}
+{"t":1794763357162,"s":3505.637,"kind":"window","text":"B: copies #387: p50 129.0µs, p99 239.5µs, max 471.8µs","label":"B: copies","window":387,"p50":129,"p99":239.501,"max":471.8}
+{"t":1794763367454,"s":3515.929,"kind":"window","text":"B: copies #388: p50 132.4µs, p99 274.1µs, max 426.1µs","label":"B: copies","window":388,"p50":132.399,"p99":274.099,"max":426.1}
+{"t":1794763377692,"s":3526.167,"kind":"window","text":"B: copies #389: p50 123.7µs, p99 285.5µs, max 358.3µs","label":"B: copies","window":389,"p50":123.7,"p99":285.499,"max":358.301}
+{"t":1794763386943,"s":3535.418,"kind":"window","text":"B: copies #390: p50 137.0µs, p99 281.0µs, max 426.3µs","label":"B: copies","window":390,"p50":137,"p99":281,"max":426.3}
+{"t":1794763397151,"s":3545.626,"kind":"window","text":"B: copies #391: p50 125.4µs, p99 251.8µs, max 485.1µs","label":"B: copies","window":391,"p50":125.4,"p99":251.8,"max":485.099}
+{"t":1794763407422,"s":3555.897,"kind":"window","text":"B: copies #392: p50 130.5µs, p99 338.6µs, max 878.5µs","label":"B: copies","window":392,"p50":130.5,"p99":338.6,"max":878.5}
+{"t":1794763417575,"s":3566.05,"kind":"window","text":"B: copies #393: p50 125.1µs, p99 247.1µs, max 654.3µs","label":"B: copies","window":393,"p50":125.101,"p99":247.1,"max":654.3}
+{"t":1794763427850,"s":3576.325,"kind":"window","text":"B: copies #394: p50 127.8µs, p99 266.1µs, max 286.7µs","label":"B: copies","window":394,"p50":127.8,"p99":266.099,"max":286.701}
+{"t":1794763438119,"s":3586.594,"kind":"window","text":"B: copies #395: p50 120.6µs, p99 306.4µs, max 421.3µs","label":"B: copies","window":395,"p50":120.599,"p99":306.4,"max":421.3}
+{"t":1794763447387,"s":3595.862,"kind":"window","text":"B: copies #396: p50 126.0µs, p99 262.8µs, max 328.2µs","label":"B: copies","window":396,"p50":126.001,"p99":262.801,"max":328.2}
+{"t":1794763457719,"s":3606.194,"kind":"window","text":"B: copies #397: p50 120.4µs, p99 317.5µs, max 816.2µs","label":"B: copies","window":397,"p50":120.4,"p99":317.499,"max":816.2}
+{"t":1794763467993,"s":3616.468,"kind":"window","text":"B: copies #398: p50 130.2µs, p99 423.6µs, max 495.6µs","label":"B: copies","window":398,"p50":130.2,"p99":423.601,"max":495.6}
+{"t":1794763478277,"s":3626.752,"kind":"window","text":"B: copies #399: p50 128.7µs, p99 262.7µs, max 413.6µs","label":"B: copies","window":399,"p50":128.701,"p99":262.699,"max":413.6}
+{"t":1794763487519,"s":3635.994,"kind":"window","text":"B: copies #400: p50 129.4µs, p99 301.9µs, max 434.4µs","label":"B: copies","window":400,"p50":129.4,"p99":301.899,"max":434.4}
+{"t":1794763497816,"s":3646.291,"kind":"window","text":"B: copies #401: p50 127.9µs, p99 274.3µs, max 435.2µs","label":"B: copies","window":401,"p50":127.899,"p99":274.3,"max":435.2}
+{"t":1794763508089,"s":3656.564,"kind":"window","text":"B: copies #402: p50 141.6µs, p99 291.8µs, max 452.6µs","label":"B: copies","window":402,"p50":141.6,"p99":291.8,"max":452.6}
+{"t":1794763518339,"s":3666.814,"kind":"window","text":"B: copies #403: p50 126.1µs, p99 239.2µs, max 461.3µs","label":"B: copies","window":403,"p50":126.1,"p99":239.2,"max":461.3}
+{"t":1794763528663,"s":3677.138,"kind":"window","text":"B: copies #404: p50 127.8µs, p99 262.4µs, max 505.0µs","label":"B: copies","window":404,"p50":127.8,"p99":262.4,"max":505}
+{"t":1794763537963,"s":3686.438,"kind":"window","text":"B: copies #405: p50 107.2µs, p99 228.2µs, max 240.5µs","label":"B: copies","window":405,"p50":107.2,"p99":228.2,"max":240.5}
+{"t":1794763548298,"s":3696.773,"kind":"window","text":"B: copies #406: p50 111.5µs, p99 312.6µs, max 472.3µs","label":"B: copies","window":406,"p50":111.5,"p99":312.6,"max":472.3}
+{"t":1794763558568,"s":3707.043,"kind":"window","text":"B: copies #407: p50 120.5µs, p99 306.0µs, max 578.5µs","label":"B: copies","window":407,"p50":120.5,"p99":306,"max":578.5}
+{"t":1794763568820,"s":3717.295,"kind":"window","text":"B: copies #408: p50 128.8µs, p99 289.8µs, max 944.2µs","label":"B: copies","window":408,"p50":128.8,"p99":289.8,"max":944.2}
+{"t":1794763578105,"s":3726.58,"kind":"window","text":"B: copies #409: p50 122.9µs, p99 227.3µs, max 430.6µs","label":"B: copies","window":409,"p50":122.9,"p99":227.3,"max":430.6}
+{"t":1794763588310,"s":3736.785,"kind":"window","text":"B: copies #410: p50 134.8µs, p99 319.7µs, max 491.4µs","label":"B: copies","window":410,"p50":134.8,"p99":319.7,"max":491.4}
+{"t":1794763598521,"s":3746.996,"kind":"window","text":"B: copies #411: p50 124.1µs, p99 274.5µs, max 376.9µs","label":"B: copies","window":411,"p50":124.1,"p99":274.5,"max":376.9}
+{"t":1794763608823,"s":3757.298,"kind":"window","text":"B: copies #412: p50 132.2µs, p99 246.3µs, max 492.7µs","label":"B: copies","window":412,"p50":132.2,"p99":246.3,"max":492.7}
+{"t":1794763619097,"s":3767.572,"kind":"window","text":"B: copies #413: p50 120.0µs, p99 243.5µs, max 301.6µs","label":"B: copies","window":413,"p50":120,"p99":243.5,"max":301.6}
+{"t":1794763628402,"s":3776.877,"kind":"window","text":"B: copies #414: p50 124.8µs, p99 323.1µs, max 1561.7µs","label":"B: copies","window":414,"p50":124.8,"p99":323.1,"max":1561.7}
+{"t":1794763638738,"s":3787.213,"kind":"window","text":"B: copies #415: p50 126.1µs, p99 378.6µs, max 490.6µs","label":"B: copies","window":415,"p50":126.1,"p99":378.6,"max":490.6}
+{"t":1794763649061,"s":3797.536,"kind":"window","text":"B: copies #416: p50 129.8µs, p99 293.4µs, max 653.8µs","label":"B: copies","window":416,"p50":129.8,"p99":293.4,"max":653.8}
+{"t":1794763658328,"s":3806.803,"kind":"window","text":"B: copies #417: p50 122.6µs, p99 349.6µs, max 659.5µs","label":"B: copies","window":417,"p50":122.6,"p99":349.6,"max":659.5}
+{"t":1794763663470,"s":3811.945,"kind":"label","text":"B: copies, all lights written"}
+{"t":1794763668653,"s":3817.128,"kind":"window","text":"B: copies, all lights written #418: p50 122.4µs, p99 259.0µs, max 426.1µs","label":"B: copies, all lights written","window":418,"p50":122.4,"p99":259,"max":426.1}
+{"t":1794763678873,"s":3827.348,"kind":"window","text":"B: copies, all lights written #419: p50 129.6µs, p99 337.6µs, max 459.5µs","label":"B: copies, all lights written","window":419,"p50":129.6,"p99":337.6,"max":459.5}
+{"t":1794763689095,"s":3837.57,"kind":"window","text":"B: copies, all lights written #420: p50 136.1µs, p99 270.8µs, max 353.8µs","label":"B: copies, all lights written","window":420,"p50":136.1,"p99":270.8,"max":353.8}
+{"t":1794763699389,"s":3847.864,"kind":"window","text":"B: copies, all lights written #421: p50 131.6µs, p99 315.9µs, max 413.4µs","label":"B: copies, all lights written","window":421,"p50":131.6,"p99":315.9,"max":413.4}
+{"t":1794763709613,"s":3858.088,"kind":"window","text":"B: copies, all lights written #422: p50 132.6µs, p99 389.9µs, max 586.7µs","label":"B: copies, all lights written","window":422,"p50":132.6,"p99":389.9,"max":586.7}
+{"t":1794763719783,"s":3868.258,"kind":"window","text":"B: copies, all lights written #423: p50 131.6µs, p99 255.9µs, max 278.0µs","label":"B: copies, all lights written","window":423,"p50":131.6,"p99":255.9,"max":278}
+{"t":1794763729968,"s":3878.443,"kind":"window","text":"B: copies, all lights written #424: p50 135.5µs, p99 395.5µs, max 719.7µs","label":"B: copies, all lights written","window":424,"p50":135.5,"p99":395.5,"max":719.7}
+{"t":1794763740223,"s":3888.698,"kind":"window","text":"B: copies, all lights written #425: p50 123.0µs, p99 287.5µs, max 390.3µs","label":"B: copies, all lights written","window":425,"p50":123,"p99":287.5,"max":390.3}
+{"t":1794763749448,"s":3897.923,"kind":"window","text":"B: copies, all lights written #426: p50 137.2µs, p99 300.7µs, max 517.7µs","label":"B: copies, all lights written","window":426,"p50":137.2,"p99":300.7,"max":517.7}
+{"t":1794763759658,"s":3908.133,"kind":"window","text":"B: copies, all lights written #427: p50 121.8µs, p99 278.6µs, max 649.3µs","label":"B: copies, all lights written","window":427,"p50":121.8,"p99":278.6,"max":649.3}
+{"t":1794763769959,"s":3918.434,"kind":"window","text":"B: copies, all lights written #428: p50 124.9µs, p99 291.4µs, max 1291.3µs","label":"B: copies, all lights written","window":428,"p50":124.9,"p99":291.4,"max":1291.3}
+{"t":1794763780240,"s":3928.715,"kind":"window","text":"B: copies, all lights written #429: p50 112.7µs, p99 329.6µs, max 471.6µs","label":"B: copies, all lights written","window":429,"p50":112.7,"p99":329.6,"max":471.6}
+{"t":1794763790494,"s":3938.969,"kind":"window","text":"B: copies, all lights written #430: p50 116.7µs, p99 243.8µs, max 282.7µs","label":"B: copies, all lights written","window":430,"p50":116.7,"p99":243.8,"max":282.7}
+{"t":1794763800714,"s":3949.189,"kind":"window","text":"B: copies, all lights written #431: p50 120.9µs, p99 490.3µs, max 890.3µs","label":"B: copies, all lights written","window":431,"p50":120.9,"p99":490.3,"max":890.3}
+{"t":1794763810991,"s":3959.466,"kind":"window","text":"B: copies, all lights written #432: p50 122.9µs, p99 261.5µs, max 457.5µs","label":"B: copies, all lights written","window":432,"p50":122.9,"p99":261.5,"max":457.5}
+{"t":1794763820269,"s":3968.744,"kind":"window","text":"B: copies, all lights written #433: p50 125.1µs, p99 273.8µs, max 378.4µs","label":"B: copies, all lights written","window":433,"p50":125.1,"p99":273.8,"max":378.4}
+{"t":1794763830596,"s":3979.071,"kind":"window","text":"B: copies, all lights written #434: p50 124.6µs, p99 338.1µs, max 707.0µs","label":"B: copies, all lights written","window":434,"p50":124.6,"p99":338.1,"max":707}
+{"t":1794763840820,"s":3989.295,"kind":"window","text":"B: copies, all lights written #435: p50 127.3µs, p99 367.0µs, max 697.2µs","label":"B: copies, all lights written","window":435,"p50":127.3,"p99":367,"max":697.2}
+{"t":1794763852225,"s":4000.7,"kind":"window","text":"B: copies, all lights written #436: p50 147.8µs, p99 337.9µs, max 412.1µs","label":"B: copies, all lights written","window":436,"p50":147.8,"p99":337.9,"max":412.1}
+{"t":1794763862480,"s":4010.955,"kind":"window","text":"B: copies, all lights written #437: p50 133.5µs, p99 424.0µs, max 680.6µs","label":"B: copies, all lights written","window":437,"p50":133.5,"p99":424,"max":680.6}
+{"t":1794763872808,"s":4021.283,"kind":"window","text":"B: copies, all lights written #438: p50 129.8µs, p99 248.6µs, max 436.1µs","label":"B: copies, all lights written","window":438,"p50":129.8,"p99":248.6,"max":436.1}
+{"t":1794763883011,"s":4031.486,"kind":"window","text":"B: copies, all lights written #439: p50 127.1µs, p99 287.6µs, max 384.5µs","label":"B: copies, all lights written","window":439,"p50":127.1,"p99":287.6,"max":384.5}
+{"t":1794763892275,"s":4040.75,"kind":"window","text":"B: copies, all lights written #440: p50 124.9µs, p99 231.0µs, max 471.3µs","label":"B: copies, all lights written","window":440,"p50":124.9,"p99":231,"max":471.3}
+{"t":1794763903550,"s":4052.025,"kind":"window","text":"B: copies, all lights written #441: p50 130.8µs, p99 245.8µs, max 297.9µs","label":"B: copies, all lights written","window":441,"p50":130.8,"p99":245.8,"max":297.9}
+{"t":1794763913755,"s":4062.23,"kind":"window","text":"B: copies, all lights written #442: p50 128.0µs, p99 342.6µs, max 464.1µs","label":"B: copies, all lights written","window":442,"p50":128,"p99":342.6,"max":464.1}
+{"t":1794763923939,"s":4072.414,"kind":"window","text":"B: copies, all lights written #443: p50 140.5µs, p99 287.5µs, max 402.3µs","label":"B: copies, all lights written","window":443,"p50":140.5,"p99":287.5,"max":402.3}
+{"t":1794763934113,"s":4082.588,"kind":"window","text":"B: copies, all lights written #444: p50 138.4µs, p99 267.8µs, max 396.1µs","label":"B: copies, all lights written","window":444,"p50":138.4,"p99":267.8,"max":396.1}
+{"t":1794763943331,"s":4091.806,"kind":"label","text":"B: copies, flaps 60 written"}
+{"t":1794763945408,"s":4093.883,"kind":"window","text":"B: copies, flaps 60 written #445: p50 146.0µs, p99 556.5µs, max 765.2µs","label":"B: copies, flaps 60 written","window":445,"p50":146,"p99":556.5,"max":765.2}
+{"t":1794763954678,"s":4103.153,"kind":"window","text":"B: copies, flaps 60 written #446: p50 155.8µs, p99 608.9µs, max 1856.0µs","label":"B: copies, flaps 60 written","window":446,"p50":155.8,"p99":608.9,"max":1856}
+{"t":1794763964922,"s":4113.397,"kind":"window","text":"B: copies, flaps 60 written #447: p50 146.1µs, p99 363.3µs, max 445.4µs","label":"B: copies, flaps 60 written","window":447,"p50":146.1,"p99":363.3,"max":445.4}
+{"t":1794763975213,"s":4123.688,"kind":"window","text":"B: copies, flaps 60 written #448: p50 137.2µs, p99 285.1µs, max 452.3µs","label":"B: copies, flaps 60 written","window":448,"p50":137.2,"p99":285.1,"max":452.3}
+{"t":1794763985491,"s":4133.966,"kind":"window","text":"B: copies, flaps 60 written #449: p50 138.9µs, p99 288.0µs, max 481.5µs","label":"B: copies, flaps 60 written","window":449,"p50":138.9,"p99":288,"max":481.5}
+{"t":1794763995788,"s":4144.263,"kind":"window","text":"B: copies, flaps 60 written #450: p50 127.4µs, p99 324.5µs, max 378.7µs","label":"B: copies, flaps 60 written","window":450,"p50":127.4,"p99":324.5,"max":378.7}
+{"t":1794764005054,"s":4153.529,"kind":"window","text":"B: copies, flaps 60 written #451: p50 120.3µs, p99 248.6µs, max 611.1µs","label":"B: copies, flaps 60 written","window":451,"p50":120.3,"p99":248.6,"max":611.1}
+{"t":1794764015295,"s":4163.77,"kind":"window","text":"B: copies, flaps 60 written #452: p50 107.8µs, p99 174.9µs, max 239.1µs","label":"B: copies, flaps 60 written","window":452,"p50":107.8,"p99":174.9,"max":239.1}
+{"t":1794764025544,"s":4174.019,"kind":"window","text":"B: copies, flaps 60 written #453: p50 121.4µs, p99 401.9µs, max 667.5µs","label":"B: copies, flaps 60 written","window":453,"p50":121.4,"p99":401.9,"max":667.5}
+{"t":1794764035829,"s":4184.304,"kind":"window","text":"B: copies, flaps 60 written #454: p50 124.2µs, p99 271.2µs, max 595.5µs","label":"B: copies, flaps 60 written","window":454,"p50":124.2,"p99":271.2,"max":595.5}
+{"t":1794764046101,"s":4194.576,"kind":"window","text":"B: copies, flaps 60 written #455: p50 130.1µs, p99 416.5µs, max 467.3µs","label":"B: copies, flaps 60 written","window":455,"p50":130.1,"p99":416.5,"max":467.3}
+{"t":1794764056337,"s":4204.812,"kind":"window","text":"B: copies, flaps 60 written #456: p50 129.4µs, p99 312.9µs, max 452.3µs","label":"B: copies, flaps 60 written","window":456,"p50":129.4,"p99":312.9,"max":452.3}
+{"t":1794764065581,"s":4214.056,"kind":"window","text":"B: copies, flaps 60 written #457: p50 128.3µs, p99 382.5µs, max 727.4µs","label":"B: copies, flaps 60 written","window":457,"p50":128.3,"p99":382.5,"max":727.4}
+{"t":1794764075902,"s":4224.377,"kind":"window","text":"B: copies, flaps 60 written #458: p50 132.1µs, p99 352.1µs, max 672.3µs","label":"B: copies, flaps 60 written","window":458,"p50":132.1,"p99":352.1,"max":672.3}
+{"t":1794764086207,"s":4234.682,"kind":"window","text":"B: copies, flaps 60 written #459: p50 136.7µs, p99 254.6µs, max 554.9µs","label":"B: copies, flaps 60 written","window":459,"p50":136.7,"p99":254.6,"max":554.9}
+{"t":1794764096474,"s":4244.949,"kind":"window","text":"B: copies, flaps 60 written #460: p50 149.9µs, p99 397.2µs, max 852.5µs","label":"B: copies, flaps 60 written","window":460,"p50":149.9,"p99":397.2,"max":852.5}
+{"t":1794764106765,"s":4255.24,"kind":"window","text":"B: copies, flaps 60 written #461: p50 4.8µs, p99 242.9µs, max 288.2µs","label":"B: copies, flaps 60 written","window":461,"p50":4.8,"p99":242.9,"max":288.2}
+{"t":1794764117030,"s":4265.505,"kind":"window","text":"B: copies, flaps 60 written #462: p50 3.7µs, p99 100.2µs, max 579.6µs","label":"B: copies, flaps 60 written","window":462,"p50":3.7,"p99":100.2,"max":579.6}
+{"t":1794764126306,"s":4274.781,"kind":"label","text":"B2: clean copies"}
+{"t":1794764126331,"s":4274.806,"kind":"window","text":"B2: clean copies #463: p50 29.7µs, p99 158.5µs, max 293.1µs","label":"B2: clean copies","window":463,"p50":29.7,"p99":158.5,"max":293.1}
+{"t":1794764136554,"s":4285.029,"kind":"window","text":"B2: clean copies #464: p50 87.8µs, p99 205.6µs, max 560.1µs","label":"B2: clean copies","window":464,"p50":87.8,"p99":205.6,"max":560.1}
+{"t":1794764146749,"s":4295.224,"kind":"window","text":"B2: clean copies #465: p50 119.9µs, p99 204.2µs, max 255.7µs","label":"B2: clean copies","window":465,"p50":119.9,"p99":204.2,"max":255.7}
+{"t":1794764156994,"s":4305.469,"kind":"window","text":"B2: clean copies #466: p50 120.0µs, p99 367.9µs, max 441.6µs","label":"B2: clean copies","window":466,"p50":120,"p99":367.9,"max":441.6}
+{"t":1794764167273,"s":4315.748,"kind":"window","text":"B2: clean copies #467: p50 124.3µs, p99 270.7µs, max 506.3µs","label":"B2: clean copies","window":467,"p50":124.3,"p99":270.7,"max":506.3}
+{"t":1794764177495,"s":4325.97,"kind":"window","text":"B2: clean copies #468: p50 131.2µs, p99 332.4µs, max 497.9µs","label":"B2: clean copies","window":468,"p50":131.2,"p99":332.4,"max":497.9}
+{"t":1794764187771,"s":4336.246,"kind":"window","text":"B2: clean copies #469: p50 147.7µs, p99 391.3µs, max 557.5µs","label":"B2: clean copies","window":469,"p50":147.7,"p99":391.3,"max":557.5}
+{"t":1794764197979,"s":4346.454,"kind":"window","text":"B2: clean copies #470: p50 135.4µs, p99 253.6µs, max 434.6µs","label":"B2: clean copies","window":470,"p50":135.4,"p99":253.6,"max":434.6}
+{"t":1794764207217,"s":4355.692,"kind":"window","text":"B2: clean copies #471: p50 128.7µs, p99 235.9µs, max 399.0µs","label":"B2: clean copies","window":471,"p50":128.7,"p99":235.9,"max":399}
+{"t":1794764217487,"s":4365.962,"kind":"window","text":"B2: clean copies #472: p50 122.6µs, p99 279.2µs, max 421.8µs","label":"B2: clean copies","window":472,"p50":122.6,"p99":279.2,"max":421.8}
+{"t":1794764227758,"s":4376.233,"kind":"window","text":"B2: clean copies #473: p50 124.2µs, p99 274.5µs, max 505.1µs","label":"B2: clean copies","window":473,"p50":124.2,"p99":274.5,"max":505.1}
+{"t":1794764238014,"s":4386.489,"kind":"window","text":"B2: clean copies #474: p50 123.4µs, p99 313.1µs, max 427.9µs","label":"B2: clean copies","window":474,"p50":123.4,"p99":313.1,"max":427.9}
+{"t":1794764248243,"s":4396.718,"kind":"window","text":"B2: clean copies #475: p50 134.3µs, p99 381.5µs, max 506.7µs","label":"B2: clean copies","window":475,"p50":134.3,"p99":381.5,"max":506.7}
+{"t":1794764257480,"s":4405.955,"kind":"window","text":"B2: clean copies #476: p50 128.9µs, p99 317.8µs, max 338.6µs","label":"B2: clean copies","window":476,"p50":128.9,"p99":317.8,"max":338.6}
+{"t":1794764267792,"s":4416.267,"kind":"window","text":"B2: clean copies #477: p50 126.8µs, p99 316.0µs, max 610.8µs","label":"B2: clean copies","window":477,"p50":126.8,"p99":316,"max":610.8}
+{"t":1794764278099,"s":4426.574,"kind":"window","text":"B2: clean copies #478: p50 126.1µs, p99 261.0µs, max 461.6µs","label":"B2: clean copies","window":478,"p50":126.1,"p99":261,"max":461.6}
+{"t":1794764288413,"s":4436.888,"kind":"window","text":"B2: clean copies #479: p50 128.2µs, p99 336.0µs, max 724.8µs","label":"B2: clean copies","window":479,"p50":128.2,"p99":336,"max":724.8}
+{"t":1794764298755,"s":4447.23,"kind":"window","text":"B2: clean copies #480: p50 128.9µs, p99 723.7µs, max 1496.9µs","label":"B2: clean copies","window":480,"p50":128.9,"p99":723.7,"max":1496.9}
+{"t":1794764309019,"s":4457.494,"kind":"window","text":"B2: clean copies #481: p50 139.2µs, p99 414.2µs, max 2734.4µs","label":"B2: clean copies","window":481,"p50":139.2,"p99":414.2,"max":2734.4}
+{"t":1794764319280,"s":4467.755,"kind":"window","text":"B2: clean copies #482: p50 141.7µs, p99 351.1µs, max 1084.3µs","label":"B2: clean copies","window":482,"p50":141.7,"p99":351.1,"max":1084.3}
+{"t":1794764329543,"s":4478.018,"kind":"window","text":"B2: clean copies #483: p50 129.7µs, p99 247.9µs, max 296.1µs","label":"B2: clean copies","window":483,"p50":129.7,"p99":247.9,"max":296.1}
+{"t":1794764339853,"s":4488.328,"kind":"window","text":"B2: clean copies #484: p50 3.8µs, p99 15.3µs, max 29.9µs","label":"B2: clean copies","window":484,"p50":3.8,"p99":15.3,"max":29.9}
+{"t":1794764350145,"s":4498.62,"kind":"window","text":"B2: clean copies #485: p50 22.9µs, p99 65.8µs, max 126.1µs","label":"B2: clean copies","window":485,"p50":22.9,"p99":65.8,"max":126.1}
+{"t":1794764351148,"s":4499.623,"kind":"label","text":"B3: smooth replay"}
+{"t":1794764360427,"s":4508.902,"kind":"window","text":"B3: smooth replay #486: p50 98.0µs, p99 235.8µs, max 578.7µs","label":"B3: smooth replay","window":486,"p50":98,"p99":235.8,"max":578.7}
+{"t":1794764369699,"s":4518.174,"kind":"window","text":"B3: smooth replay #487: p50 107.3µs, p99 266.0µs, max 401.0µs","label":"B3: smooth replay","window":487,"p50":107.3,"p99":266,"max":401}
+{"t":1794764379937,"s":4528.412,"kind":"window","text":"B3: smooth replay #488: p50 107.9µs, p99 185.0µs, max 242.5µs","label":"B3: smooth replay","window":488,"p50":107.9,"p99":185,"max":242.5}
+{"t":1794764390201,"s":4538.676,"kind":"window","text":"B3: smooth replay #489: p50 106.1µs, p99 210.1µs, max 275.8µs","label":"B3: smooth replay","window":489,"p50":106.1,"p99":210.1,"max":275.8}
+{"t":1794764400498,"s":4548.973,"kind":"window","text":"B3: smooth replay #490: p50 106.8µs, p99 209.8µs, max 228.3µs","label":"B3: smooth replay","window":490,"p50":106.8,"p99":209.8,"max":228.3}
+{"t":1794764409737,"s":4558.212,"kind":"window","text":"B3: smooth replay #491: p50 113.3µs, p99 192.7µs, max 297.7µs","label":"B3: smooth replay","window":491,"p50":113.3,"p99":192.7,"max":297.7}
+{"t":1794764420002,"s":4568.477,"kind":"window","text":"B3: smooth replay #492: p50 107.4µs, p99 178.5µs, max 269.4µs","label":"B3: smooth replay","window":492,"p50":107.4,"p99":178.5,"max":269.4}
+{"t":1794764430235,"s":4578.71,"kind":"window","text":"B3: smooth replay #493: p50 110.7µs, p99 202.5µs, max 357.5µs","label":"B3: smooth replay","window":493,"p50":110.7,"p99":202.5,"max":357.5}
+{"t":1794764439545,"s":4588.02,"kind":"window","text":"B3: smooth replay #494: p50 111.4µs, p99 356.4µs, max 558.9µs","label":"B3: smooth replay","window":494,"p50":111.4,"p99":356.4,"max":558.9}
+{"t":1794764449793,"s":4598.268,"kind":"window","text":"B3: smooth replay #495: p50 127.0µs, p99 300.6µs, max 348.3µs","label":"B3: smooth replay","window":495,"p50":127,"p99":300.6,"max":348.3}
+{"t":1794764460134,"s":4608.609,"kind":"window","text":"B3: smooth replay #496: p50 119.9µs, p99 273.6µs, max 429.9µs","label":"B3: smooth replay","window":496,"p50":119.9,"p99":273.6,"max":429.9}
+{"t":1794764470430,"s":4618.905,"kind":"window","text":"B3: smooth replay #497: p50 113.6µs, p99 192.6µs, max 443.2µs","label":"B3: smooth replay","window":497,"p50":113.6,"p99":192.6,"max":443.2}
+{"t":1794764480695,"s":4629.17,"kind":"window","text":"B3: smooth replay #498: p50 116.7µs, p99 242.7µs, max 318.9µs","label":"B3: smooth replay","window":498,"p50":116.7,"p99":242.7,"max":318.9}
+{"t":1794764490857,"s":4639.332,"kind":"window","text":"B3: smooth replay #499: p50 128.2µs, p99 402.2µs, max 595.1µs","label":"B3: smooth replay","window":499,"p50":128.2,"p99":402.2,"max":595.1}
+{"t":1794764501105,"s":4649.58,"kind":"window","text":"B3: smooth replay #500: p50 128.3µs, p99 338.5µs, max 768.0µs","label":"B3: smooth replay","window":500,"p50":128.3,"p99":338.5,"max":768}
+{"t":1794764510351,"s":4658.826,"kind":"window","text":"B3: smooth replay #501: p50 125.1µs, p99 314.3µs, max 370.8µs","label":"B3: smooth replay","window":501,"p50":125.1,"p99":314.3,"max":370.8}
+{"t":1794764520575,"s":4669.05,"kind":"window","text":"B3: smooth replay #502: p50 137.4µs, p99 321.3µs, max 857.0µs","label":"B3: smooth replay","window":502,"p50":137.4,"p99":321.3,"max":857}
+{"t":1794764530875,"s":4679.35,"kind":"window","text":"B3: smooth replay #503: p50 134.2µs, p99 310.1µs, max 418.4µs","label":"B3: smooth replay","window":503,"p50":134.2,"p99":310.1,"max":418.4}
+{"t":1794764541169,"s":4689.644,"kind":"window","text":"B3: smooth replay #504: p50 130.7µs, p99 294.7µs, max 447.2µs","label":"B3: smooth replay","window":504,"p50":130.7,"p99":294.7,"max":447.2}
+{"t":1794764551440,"s":4699.915,"kind":"window","text":"B3: smooth replay #505: p50 130.2µs, p99 290.2µs, max 580.1µs","label":"B3: smooth replay","window":505,"p50":130.2,"p99":290.2,"max":580.1}
+{"t":1794764560701,"s":4709.176,"kind":"window","text":"B3: smooth replay #506: p50 128.8µs, p99 378.8µs, max 531.3µs","label":"B3: smooth replay","window":506,"p50":128.8,"p99":378.8,"max":531.3}
+{"t":1794764570897,"s":4719.372,"kind":"window","text":"B3: smooth replay #507: p50 127.1µs, p99 330.4µs, max 492.8µs","label":"B3: smooth replay","window":507,"p50":127.1,"p99":330.4,"max":492.8}
+{"t":1794764581197,"s":4729.672,"kind":"window","text":"B3: smooth replay #508: p50 114.3µs, p99 246.5µs, max 279.8µs","label":"B3: smooth replay","window":508,"p50":114.3,"p99":246.5,"max":279.8}
+{"t":1794764591489,"s":4739.964,"kind":"window","text":"B3: smooth replay #509: p50 117.0µs, p99 365.4µs, max 1348.4µs","label":"B3: smooth replay","window":509,"p50":117,"p99":365.4,"max":1348.4}
+{"t":1794764601762,"s":4750.237,"kind":"window","text":"B3: smooth replay #510: p50 108.8µs, p99 270.4µs, max 364.0µs","label":"B3: smooth replay","window":510,"p50":108.8,"p99":270.4,"max":364}
+{"t":1794764612048,"s":4760.523,"kind":"window","text":"B3: smooth replay #511: p50 120.0µs, p99 295.9µs, max 346.9µs","label":"B3: smooth replay","window":511,"p50":120,"p99":295.9,"max":346.9}
+{"t":1794764621237,"s":4769.712,"kind":"window","text":"B3: smooth replay #512: p50 116.6µs, p99 286.0µs, max 637.4µs","label":"B3: smooth replay","window":512,"p50":116.6,"p99":286,"max":637.4}
+{"t":1794764631515,"s":4779.99,"kind":"window","text":"B3: smooth replay #513: p50 118.0µs, p99 249.2µs, max 329.3µs","label":"B3: smooth replay","window":513,"p50":118,"p99":249.2,"max":329.3}
+{"t":1794764641870,"s":4790.345,"kind":"window","text":"B3: smooth replay #514: p50 118.7µs, p99 476.6µs, max 552.8µs","label":"B3: smooth replay","window":514,"p50":118.7,"p99":476.6,"max":552.8}
+{"t":1794764652157,"s":4800.632,"kind":"window","text":"B3: smooth replay #515: p50 129.6µs, p99 261.2µs, max 460.9µs","label":"B3: smooth replay","window":515,"p50":129.6,"p99":261.2,"max":460.9}
+{"t":1794764662429,"s":4810.904,"kind":"window","text":"B3: smooth replay #516: p50 129.9µs, p99 300.1µs, max 371.9µs","label":"B3: smooth replay","window":516,"p50":129.9,"p99":300.1,"max":371.9}
+{"t":1794764671711,"s":4820.186,"kind":"window","text":"B3: smooth replay #517: p50 131.3µs, p99 345.9µs, max 374.4µs","label":"B3: smooth replay","window":517,"p50":131.3,"p99":345.9,"max":374.4}
+{"t":1794764682013,"s":4830.488,"kind":"window","text":"B3: smooth replay #518: p50 118.8µs, p99 296.9µs, max 499.5µs","label":"B3: smooth replay","window":518,"p50":118.8,"p99":296.9,"max":499.5}
+{"t":1794764692279,"s":4840.754,"kind":"window","text":"B3: smooth replay #519: p50 120.7µs, p99 260.8µs, max 339.1µs","label":"B3: smooth replay","window":519,"p50":120.7,"p99":260.8,"max":339.1}
+{"t":1794764702592,"s":4851.067,"kind":"window","text":"B3: smooth replay #520: p50 122.0µs, p99 287.1µs, max 657.7µs","label":"B3: smooth replay","window":520,"p50":122,"p99":287.1,"max":657.7}
+{"t":1794764711795,"s":4860.27,"kind":"window","text":"B3: smooth replay #521: p50 119.5µs, p99 264.2µs, max 444.8µs","label":"B3: smooth replay","window":521,"p50":119.5,"p99":264.2,"max":444.8}
+{"t":1794764722066,"s":4870.541,"kind":"window","text":"B3: smooth replay #522: p50 120.5µs, p99 311.5µs, max 704.9µs","label":"B3: smooth replay","window":522,"p50":120.5,"p99":311.5,"max":704.9}
+{"t":1794764732312,"s":4880.787,"kind":"window","text":"B3: smooth replay #523: p50 115.6µs, p99 266.0µs, max 324.3µs","label":"B3: smooth replay","window":523,"p50":115.6,"p99":266,"max":324.3}
+{"t":1794764742647,"s":4891.122,"kind":"window","text":"B3: smooth replay #524: p50 114.6µs, p99 188.2µs, max 292.8µs","label":"B3: smooth replay","window":524,"p50":114.6,"p99":188.2,"max":292.8}
+{"t":1794764751916,"s":4900.391,"kind":"window","text":"B3: smooth replay #525: p50 116.9µs, p99 283.7µs, max 618.4µs","label":"B3: smooth replay","window":525,"p50":116.9,"p99":283.7,"max":618.4}
+{"t":1794764762247,"s":4910.722,"kind":"window","text":"B3: smooth replay #526: p50 118.7µs, p99 210.6µs, max 498.1µs","label":"B3: smooth replay","window":526,"p50":118.7,"p99":210.6,"max":498.1}
+{"t":1794764772540,"s":4921.015,"kind":"window","text":"B3: smooth replay #527: p50 119.8µs, p99 234.3µs, max 621.6µs","label":"B3: smooth replay","window":527,"p50":119.8,"p99":234.3,"max":621.6}
+{"t":1794764782874,"s":4931.349,"kind":"window","text":"B3: smooth replay #528: p50 127.3µs, p99 264.1µs, max 598.9µs","label":"B3: smooth replay","window":528,"p50":127.3,"p99":264.1,"max":598.9}
+{"t":1794764792119,"s":4940.594,"kind":"window","text":"B3: smooth replay #529: p50 120.9µs, p99 284.6µs, max 361.3µs","label":"B3: smooth replay","window":529,"p50":120.9,"p99":284.6,"max":361.3}
+{"t":1794764802385,"s":4950.86,"kind":"window","text":"B3: smooth replay #530: p50 109.6µs, p99 187.9µs, max 279.5µs","label":"B3: smooth replay","window":530,"p50":109.6,"p99":187.9,"max":279.5}
+{"t":1794764812723,"s":4961.198,"kind":"window","text":"B3: smooth replay #531: p50 116.2µs, p99 198.3µs, max 244.8µs","label":"B3: smooth replay","window":531,"p50":116.2,"p99":198.3,"max":244.8}
+{"t":1794764822992,"s":4971.467,"kind":"window","text":"B3: smooth replay #532: p50 113.7µs, p99 243.8µs, max 367.1µs","label":"B3: smooth replay","window":532,"p50":113.7,"p99":243.8,"max":367.1}
+{"t":1794764833345,"s":4981.82,"kind":"window","text":"B3: smooth replay #533: p50 120.1µs, p99 376.9µs, max 747.1µs","label":"B3: smooth replay","window":533,"p50":120.1,"p99":376.9,"max":747.1}
+{"t":1794764838469,"s":4986.944,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794764847032,"s":4995.507,"kind":"window","text":"B3: smooth replay #534: p50 120.6µs, p99 290.9µs, max 445.1µs","label":"B3: smooth replay","window":534,"p50":120.6,"p99":290.9,"max":445.1}
+{"t":1794764858520,"s":5006.995,"kind":"window","text":"B3: smooth replay #535: p50 126.1µs, p99 346.3µs, max 531.7µs","label":"B3: smooth replay","window":535,"p50":126.1,"p99":346.3,"max":531.7}
+{"t":1794764870758,"s":5019.233,"kind":"window","text":"B3: smooth replay #536: p50 128.0µs, p99 347.2µs, max 458.6µs","label":"B3: smooth replay","window":536,"p50":128,"p99":347.2,"max":458.6}
+{"t":1794764881957,"s":5030.432,"kind":"window","text":"B3: smooth replay #537: p50 124.1µs, p99 350.9µs, max 764.0µs","label":"B3: smooth replay","window":537,"p50":124.1,"p99":350.9,"max":764}
+{"t":1794764892277,"s":5040.752,"kind":"window","text":"B3: smooth replay #538: p50 128.9µs, p99 260.3µs, max 387.3µs","label":"B3: smooth replay","window":538,"p50":128.9,"p99":260.3,"max":387.3}
+{"t":1794764902660,"s":5051.135,"kind":"window","text":"B3: smooth replay #539: p50 126.7µs, p99 262.4µs, max 918.3µs","label":"B3: smooth replay","window":539,"p50":126.7,"p99":262.4,"max":918.3}
+{"t":1794764914958,"s":5063.433,"kind":"label","text":"B3: stand-ins"}
+{"t":1794764914963,"s":5063.438,"kind":"window","text":"B3: stand-ins #540: p50 136.0µs, p99 449.7µs, max 679.9µs","label":"B3: stand-ins","window":540,"p50":136,"p99":449.7,"max":679.9}
+{"t":1794764926245,"s":5074.72,"kind":"window","text":"B3: stand-ins #541: p50 122.7µs, p99 199.9µs, max 315.6µs","label":"B3: stand-ins","window":541,"p50":122.7,"p99":199.9,"max":315.6}
+{"t":1794764937524,"s":5085.999,"kind":"window","text":"B3: stand-ins #542: p50 131.2µs, p99 358.6µs, max 708.2µs","label":"B3: stand-ins","window":542,"p50":131.2,"p99":358.6,"max":708.2}
+{"t":1794764950079,"s":5098.554,"kind":"window","text":"B3: stand-ins #543: p50 129.8µs, p99 233.4µs, max 350.2µs","label":"B3: stand-ins","window":543,"p50":129.8,"p99":233.4,"max":350.2}
+{"t":1794764960264,"s":5108.739,"kind":"window","text":"B3: stand-ins #544: p50 132.1µs, p99 304.3µs, max 434.3µs","label":"B3: stand-ins","window":544,"p50":132.1,"p99":304.3,"max":434.3}
+{"t":1794764971550,"s":5120.025,"kind":"window","text":"B3: stand-ins #545: p50 134.0µs, p99 321.6µs, max 390.8µs","label":"B3: stand-ins","window":545,"p50":134,"p99":321.6,"max":390.8}
+{"t":1794764981809,"s":5130.284,"kind":"window","text":"B3: stand-ins #546: p50 124.6µs, p99 291.7µs, max 544.2µs","label":"B3: stand-ins","window":546,"p50":124.6,"p99":291.7,"max":544.2}
+{"t":1794764993122,"s":5141.597,"kind":"window","text":"B3: stand-ins #547: p50 129.7µs, p99 341.0µs, max 471.4µs","label":"B3: stand-ins","window":547,"p50":129.7,"p99":341,"max":471.4}
+{"t":1794765003354,"s":5151.829,"kind":"window","text":"B3: stand-ins #548: p50 127.1µs, p99 230.3µs, max 414.0µs","label":"B3: stand-ins","window":548,"p50":127.1,"p99":230.3,"max":414}
+{"t":1794765013621,"s":5162.096,"kind":"window","text":"B3: stand-ins #549: p50 136.9µs, p99 313.0µs, max 428.5µs","label":"B3: stand-ins","window":549,"p50":136.9,"p99":313,"max":428.5}
+{"t":1794765023899,"s":5172.374,"kind":"window","text":"B3: stand-ins #550: p50 126.8µs, p99 264.8µs, max 575.6µs","label":"B3: stand-ins","window":550,"p50":126.8,"p99":264.8,"max":575.6}
+{"t":1794765034100,"s":5182.575,"kind":"window","text":"B3: stand-ins #551: p50 130.5µs, p99 258.1µs, max 365.4µs","label":"B3: stand-ins","window":551,"p50":130.5,"p99":258.1,"max":365.4}
+{"t":1794765044440,"s":5192.915,"kind":"window","text":"B3: stand-ins #552: p50 129.5µs, p99 219.9µs, max 901.5µs","label":"B3: stand-ins","window":552,"p50":129.5,"p99":219.9,"max":901.5}
+{"t":1794765054738,"s":5203.213,"kind":"window","text":"B3: stand-ins #553: p50 133.4µs, p99 364.8µs, max 422.4µs","label":"B3: stand-ins","window":553,"p50":133.4,"p99":364.8,"max":422.4}
+{"t":1794765064961,"s":5213.436,"kind":"window","text":"B3: stand-ins #554: p50 126.1µs, p99 223.7µs, max 274.6µs","label":"B3: stand-ins","window":554,"p50":126.1,"p99":223.7,"max":274.6}
+{"t":1794765075235,"s":5223.71,"kind":"window","text":"B3: stand-ins #555: p50 127.3µs, p99 284.2µs, max 391.1µs","label":"B3: stand-ins","window":555,"p50":127.3,"p99":284.2,"max":391.1}
+{"t":1794765084480,"s":5232.955,"kind":"window","text":"B3: stand-ins #556: p50 121.1µs, p99 241.9µs, max 412.8µs","label":"B3: stand-ins","window":556,"p50":121.1,"p99":241.9,"max":412.8}
+{"t":1794765095704,"s":5244.179,"kind":"window","text":"B3: stand-ins #557: p50 126.1µs, p99 334.8µs, max 734.1µs","label":"B3: stand-ins","window":557,"p50":126.1,"p99":334.8,"max":734.1}
+{"t":1794765097589,"s":5246.064,"kind":"report","text":"\nA: sim pilot hosts, sim AI and BeyondATC: 108 windows, median p50 39.3µs, median p99 165.2µs, worst p99 736.5µs, max 1553.6µs\nA: on foot: 9 windows, median p50 41.5µs, median p99 168.1µs, worst p99 412.5µs, max 1272.9µs\nA: pushback: 86 windows, median p50 37.2µs, median p99 153.9µs, worst p99 411.6µs, max 1619.6µs\nA2: BeyondATC alone: 121 windows, median p50 40.2µs, median p99 169.5µs, worst p99 342.5µs, max 13200.3µs\nB: none, before copies: 2 windows, median p50 37.5µs, median p99 305.0µs, worst p99 305.0µs, max 521.2µs\nB: copies: 38 windows, median p50 125.5µs, median p99 291.8µs, worst p99 423.6µs, max 1561.7µs\nB: copies, all lights written: 27 windows, median p50 128.0µs, median p99 287.6µs, worst p99 490.3µs, max 1291.3µs\nB: copies, flaps 60 written: 18 windows, median p50 130.1µs, median p99 324.5µs, worst p99 608.9µs, max 1856.0µs\nB2: clean copies: 23 windows, median p50 126.8µs, median p99 279.2µs, worst p99 723.7µs, max 2734.4µs\nB3: smooth replay: 54 windows, median p50 119.9µs, median p99 283.7µs, worst p99 476.6µs, max 1348.4µs\nB3: stand-ins: 18 windows, median p50 129.7µs, median p99 291.7µs, worst p99 449.7µs, max 901.5µs","lines":["A: sim pilot hosts, sim AI and BeyondATC: 108 windows, median p50 39.3µs, median p99 165.2µs, worst p99 736.5µs, max 1553.6µs","A: on foot: 9 windows, median p50 41.5µs, median p99 168.1µs, worst p99 412.5µs, max 1272.9µs","A: pushback: 86 windows, median p50 37.2µs, median p99 153.9µs, worst p99 411.6µs, max 1619.6µs","A2: BeyondATC alone: 121 windows, median p50 40.2µs, median p99 169.5µs, worst p99 342.5µs, max 13200.3µs","B: none, before copies: 2 windows, median p50 37.5µs, median p99 305.0µs, worst p99 305.0µs, max 521.2µs","B: copies: 38 windows, median p50 125.5µs, median p99 291.8µs, worst p99 423.6µs, max 1561.7µs","B: copies, all lights written: 27 windows, median p50 128.0µs, median p99 287.6µs, worst p99 490.3µs, max 1291.3µs","B: copies, flaps 60 written: 18 windows, median p50 130.1µs, median p99 324.5µs, worst p99 608.9µs, max 1856.0µs","B2: clean copies: 23 windows, median p50 126.8µs, median p99 279.2µs, worst p99 723.7µs, max 2734.4µs","B3: smooth replay: 54 windows, median p50 119.9µs, median p99 283.7µs, worst p99 476.6µs, max 1348.4µs","B3: stand-ins: 18 windows, median p50 129.7µs, median p99 291.7µs, worst p99 449.7µs, max 901.5µs"]}

@@ -5,4 +5,4 @@ import type { Delivery } from "./Delivery.ts";
  * What the network's test unit does. It stands in for a feature with a channel of each
  * delivery, whose probes carry their send stamp so the receiver measures how late each came.
  */
-export type NetAct = { "act": "send", delivery: Delivery, count: number, every_ms: number, bytes: number, } | { "act": "report" };
+export type NetAct = { "act": "send", delivery: Delivery, count: number, every_ms: number, bytes: number, } | { "act": "report" } | { "act": "hold", channel: number, ms: number, };

@@ -1,0 +1,15 @@
+node tools/bench.ts traffic, run on 2026-11-15 at 12:24 on the development machine, before the gate's fix: the scenario's second case.
+The original taxied north at 20 kt, then its velocity was set to 0, and the copy was read 2.5s and 4s later.
+
+# Subtest: a taxiing copy trails its original by 1s and stops where it stopped, and a receiving pilot who leaves the flight or loads one has every copy removed and shown again once back
+not ok 2 - a taxiing copy trails its original by 1s and stops where it stopped, and a receiving pilot who leaves the flight or loads one has every copy removed and shown again once back
+  ---
+  duration_ms: 20536.0623
+  type: 'test'
+  failureType: 'testCodeFailure'
+  error: 'it stopped 3.31m from where its original did'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='

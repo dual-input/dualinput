@@ -23,6 +23,7 @@ pub fn list() -> Vec<Kind> {
         flight_model_routines::Lead,
         flight_model_routines::Follow,
         avatars_routines::Figure,
+        traffic_routines::Traffic,
         state_sync_routines::NamedEvents
     ]
 }

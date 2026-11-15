@@ -5,10 +5,10 @@
 // has a second form for the card's fold: one row of every pilot's head, badged ready or out, and this pilot's Ready.
 
 import { BadgedHead, CountdownRing, crewInPreflight, CrewHeads, EmptyHead, Head, HEAD_CUE, inPreflight, ReadyButton, useCountdown, useCrew } from "@dualinput/crew"
-import { Badge, Button, CardContent, Confirm, cx, ScrollWindow, Separator, toast, useRoot } from "@dualinput/ui"
+import { Badge, Button, CardContent, Confirm, cx, ScrollWindow, Separator, toast, Tooltip, useRoot } from "@dualinput/ui"
 import { Copy, LogOut } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import type { HTMLAttributes } from "react"
+import type { ComponentType, HTMLAttributes } from "react"
 
 import type { MemberLink } from "../../../../engines/messages/ts/net/MemberLink.ts"
 import type { NetSlice } from "../../../../engines/messages/ts/net/NetSlice.ts"
@@ -48,7 +48,27 @@ function linkWords(link: MemberLink | undefined): string | undefined {
 /** The code as a pilot reads it out, in two groups. */
 const spaced = (code: string) => `${code.slice(0, 3)}-${code.slice(3)}`
 
-function CrewRow({ member, you, flying, link, pop, alive, slumped, end }: { member: SliceMember; you: boolean; flying: boolean; link: MemberLink | undefined; pop?: number; alive: boolean; slumped: boolean; end?: React.ReactNode }) {
+/** A feature's role, as a crew row's chip shows its holder: its tab's icon, and what it says. */
+export type RoleChip = { label: string; says: string; icon: ComponentType<{ className?: string }> }
+
+/**
+ * A role's chip: its tab's icon alone, since a row already holds a name of up to 20 characters, Pilot flying, and
+ * the link, and a tooltip says what it means (record/areas/interface/decisions.md, "Traffic and ATC audio are shared
+ * apart, each by a switch of its own").
+ */
+function HostChip({ chip }: { chip: RoleChip }) {
+  return (
+    <Tooltip content={chip.says}>
+      <span className="mr-2 inline-flex">
+        <Badge variant="outline" aria-label={chip.says} className="px-1.5 text-muted-foreground">
+          <chip.icon className="size-3" />
+        </Badge>
+      </span>
+    </Tooltip>
+  )
+}
+
+function CrewRow({ member, you, flying, link, pop, alive, slumped, end, hosts }: { member: SliceMember; you: boolean; flying: boolean; link: MemberLink | undefined; pop?: number; alive: boolean; slumped: boolean; end?: React.ReactNode; hosts: RoleChip[] }) {
   // A row's pop is fixed when the row first shows.
   const [popAfter] = useState(pop)
   const under = you ? undefined : whereabouts(member, link)
@@ -71,6 +91,9 @@ function CrewRow({ member, you, flying, link, pop, alive, slumped, end }: { memb
               {chip}
             </Badge>
           )}
+          {hosts.map((host) => (
+            <HostChip key={host.label} chip={host} />
+          ))}
         </span>
         {under && <span className={cx("text-xs", under.trouble ? "text-warning" : "text-muted-foreground")}>{under.shows}</span>}
       </div>
@@ -93,7 +116,7 @@ function MyReady({ ready, why, left, onToggle }: { ready: boolean; why: string |
   )
 }
 
-export function SessionSide({ session, started, turnedIn, folded, onEase }: { session: SessionSlice; started: boolean; turnedIn: boolean; folded: boolean; onEase: () => void }) {
+export function SessionSide({ session, started, turnedIn, folded, onEase, roles }: { session: SessionSlice; started: boolean; turnedIn: boolean; folded: boolean; onEase: () => void; roles: RoleChip[] }) {
   const { link } = useShell()
   const net = useCoreSlice<NetSlice>("network")
   const crew = useCrew()
@@ -187,6 +210,7 @@ export function SessionSide({ session, started, turnedIn, folded, onEase }: { se
                     alive={preflight && !started && !out(member)}
                     slumped={preflight && !started && out(member)}
                     end={endOf(member)}
+                    hosts={roles.filter((role) => session.roles.some((r) => r.label === role.label && r.holder === member.pilot))}
                   />
                 ))}
                 {others.length === 0 && (

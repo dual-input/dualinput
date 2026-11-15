@@ -4,6 +4,95 @@ What our reads and probes found about carrying one pilot's AI traffic and ATC au
 Our FS Copilot fork built both, and its record, `record/traffic-atc/` in the FS Copilot fork, holds the measurements made before this area existed: smooth copies from freezing each object and writing it every frame, a 2Hz poll, a gate that sends about 20% of samples, and ATC audio about 130ms from capture to speaker.
 The probes are in [experiments/areas/traffic-atc](../../../experiments/areas/traffic-atc), and their raw output is in [experiments/areas/traffic-atc/results](../../../experiments/areas/traffic-atc/results).
 
+## 2026-11-15: Writing only what changed, `Traffic` took about 60µs a frame with 105 copies, the copies kept their velocities, and the B505 created as the helicopter's stand-in
+
+**Asked:** the checks the first session left for a rebuild: `Traffic`'s time once each copy writes only the values that changed and two alike samples skip the interpolation, whether a frozen copy keeps written velocities between frames, the B505 as the helicopter's stand-in, and the Traffic tab once the kit's rooms measure only on a shown page.
+
+**Expected:** `Traffic` near its 0.1ms, moving copies still reading their velocities, and the B505 creating.
+
+**Found:** on MSFS 2024 at KSFO, the same setup as the entry below, with FS Copilot's KSFO capture replayed smoothly:
+
+- Our module's update took a median 98µs to 113µs at p50 with about 105 copies, 2 to 4 of them moving, against 36µs to 48µs with none in the same run, so `Traffic` took about 60µs at p50, down from about 85µs; at p99 the windows with and without copies overlapped, 120µs to 390µs against 165µs to 425µs, too spread to give `Traffic`'s share.
+- Every moving copy read a body velocity, written only when it changed, so a frozen copy keeps written velocities between frames.
+- The helicopter's made-up title threw, and its stand-in, `Asobo PassiveAircraft B505`, created; the airliner's created as the CJ4, and the Traffic tab counted both as missing or shown incorrectly, with the dot on its icon.
+- The Traffic tab's rules no longer ran over its packs card, and its plane showed in the tab bar and the header, where in the first session the tab bar showed none; what hid it then is unknown.
+- Copies scored 0.15 to 0.17 on FS Copilot's jitter measure, at 30.3 fps to 31.0 fps.
+
+**Changed:** nothing more; `Traffic`'s remaining 60µs, which isn't the writes, is unexplained.
+
+**Affects:** the plan's stage 18, whose `Traffic` budget this leaves open.
+
+**Evidence:** [the sessions' results](../../../experiments/areas/traffic-atc/results/p03-sim-session-2026-11-15.txt), its second session's section.
+
+## 2026-11-15: In the sim, copies drew at 0.16 on FS Copilot's jitter measure, written lights and flaps took on them, and AI aircraft's light switches showed what the sim drew where no flap variable did
+
+**Asked:** stage 18's cases in the sim ([cases for the bench](01-traffic-and-atc.md#cases-for-the-bench), "In the sim", and the note of 2026-11-15's four checks), and its budgets there: the sim's frame on a receiving machine, `Traffic`'s time, and ATC from the app to the crew.
+
+**Expected:** copies as smooth as FS Copilot's 0.17, the five light switches and four flap surfaces following what the sim draws, and `Traffic` under 0.1ms at p99.
+
+**Found:** on MSFS 2024 at KSFO in the Black Square Baron 58P, on one PC, with the real core hosting and a bench core as the second pilot ([the session's results](../../../experiments/areas/traffic-atc/results/p03-sim-session-2026-11-15.txt)):
+
+- With the real core as traffic host over the sim's AI traffic and BeyondATC, every poll was whole, 13ms to 45ms each, carrying 144 to 277 objects at 20 to 26 bytes a second each, which is 2.6KB/s to 7.1KB/s; the second pilot held 147, then 247 copies.
+- The parked 58P read `IS USER SIM` 1 throughout while its pilot walked around it, so the poll never carries it.
+- The sim's own tugs, `ASO_Pushback_White` and `ASO_Pushback_Blue`, became copies; GSX's, about 60 titled `FSDT_Pushback_03_ASOBO_…` and `FSDT_Tug_M1A_…` within 1km, didn't, the allowlist leaving them out. `K:TOGGLE_PUSHBACK` on the 58P brought no tug, so whether the poll finds the tug of the pilot's own pushback stays open; GSX's pushback of it brought `FSDT_Tug_660_UA` and two others.
+- On BeyondATC's aircraft, the five light switches showed what the sim drew and the `LIGHT … ON` variables didn't: 68 parked aircraft read all five `ON` while their pilot saw them dark but for their logo lights, and the switches read mostly off; on aircraft holding short and lining up, the switches read taxi, beacon, and nav, then strobes and landing lights at the runway, as the pilot saw.
+- No flap variable showed the flaps BeyondATC's FSLTL 737s drew: on two, lined up and rolling with their flaps visibly out, the four surfaces, their angles and indexes, and the handle's index and percent all read 0; on aircraft whose flaps showed up, the surfaces read 0 and the handle 0 or 1.
+- Copies took what traffic wrote, with one write each: every light switched on showed on every copy, parked ones too, and read back; flaps written at 60% read back 60 on 97 of 101 parked copies and every mover; a copy whose taxi light switched kept its nav and beacon on throughout. Every copy read its three freezes on, every moving copy a body velocity, and the copies showed on the 58P's traffic display.
+- Copies of FS Copilot's KSFO capture, which the second pilot replayed as its stand-in's AI traffic, scored a median 0.16 and p90 0.25 over 149 movers on FS Copilot's jitter measure, against BeyondATC's own traffic's median 0.21 and p90 0.38 in the same sim; the sim held a median 30.9 fps with about 105 copies, against 30.4 with none.
+  Replayed at the capture's 2Hz with the stand-in moving each aircraft on its velocities, copies eased back at each stop and hitched now and then, both the replay's: the stand-in carried each aircraft past its next state, and two 2Hz clocks beat; moved between its states every 100ms, the stand-in gave neither.
+- With about 105 copies, 3 or 4 moving, our module's update took a median 120µs to 130µs at p50 and 280µs to 325µs at p99, against 37µs to 40µs and 150µs to 170µs with none, so `Traffic` cost about 85µs at p50 and about 120µs at p99, over its 0.1ms with 25 movers. Natively the same mix takes 6.0µs at p50, and 4.8µs once two alike samples skip the interpolation, so most of the 85µs is likely the 12 values each mover writes each frame (unverified).
+- For a title the sim lacked, the airliner's create threw and its stand-in, the CJ4, created; the helicopter's stand-in, `Asobo PassiveAircraft Bell 407`, threw too, being none of MSFS 2024's 16 passive helicopters, among them `Asobo PassiveAircraft B505`. None of the capture's 140 titles threw.
+- The real core captured BeyondATC, and the second pilot played every transmission whole on the same speakers: 106 to 679 frames each, none late or concealed, at the least depth, 60ms; the pilot heard the copy as an echo come and go with its volume.
+- The real core, a debug build, held 47.9 MB private and 83.9 MB working set with about 105 copies.
+- The sim crashed once, before anything was shared and about a minute after BeyondATC's first aircraft, our module stopping 22s before its connections were lost; nothing in our core's log ties it to us, and it didn't recur.
+
+**Changed:** the helicopter's stand-in is `Asobo PassiveAircraft B505`, which the next session in the sim checks; the playout returns two alike samples as they are; and stage 18's in-sim cases stand as passed but for `Traffic`'s budget, the helicopter's stand-in, the tug of the pilot's own pushback, multiplayer's pilots in the count, and SayIntentions' capture.
+
+**Affects:** [01-traffic-and-atc](01-traffic-and-atc.md)'s dress, its stand-ins, and its known limits, through a note.
+
+**Evidence:** [the session's results](../../../experiments/areas/traffic-atc/results/p03-sim-session-2026-11-15.txt), from [p03-sim-session](../../../experiments/areas/traffic-atc/p03-sim-session); [the sim's helicopter titles](../../../experiments/areas/traffic-atc/results/p03-titles-2026-11-15-17-48-57.ndjson).
+
+## 2026-11-15: Stage 18's bench passed traffic's and ATC audio's cases, a poll's 851 answers each within 1ms, and ATC audio took 6.8KB/s through a relay
+
+**Asked:** stage 18's [cases for the bench](01-traffic-and-atc.md#cases-for-the-bench) and its [budgets](01-traffic-and-atc.md#budgets) there.
+
+**Expected:** each case to pass, and each budget to hold.
+
+**Found:**
+
+- Every case passed on the bench's cores at the end, a quiet PC's runs counting for the timings: a state that comes before its identity waited for it, through the bench's new hold on a channel; a copy that stopped held where its original did, once the gate's fix was in (entry below); and a traffic host carried 500 objects at most, its receiving pilot leaving the flight and coming back within the kernel's 1,000 calls an input.
+- A poll's answers, 130 aircraft and a helicopter and 20 tugs and 700 GSX signs, each took under 1ms; the one input of either core's run over it was the profile's load as the aircraft entered the flight, at 1.2ms to 1.5ms, which every scenario has.
+- The traffic host's states took 1,818 bytes a second for 151 objects, in postcard, against about 2.5KB/s for 120 aircraft.
+- ATC audio took 136 bytes a frame through the relay, 6.8KB/s while ATC talks, with the link's idle traffic taken off: 80 bytes of speech, as 32 kbps averages, and about 56 of each frame's number and stamp and the link's framing. The user accepted about 7KB/s on 2026-11-15, over bundling two frames to a packet, which saves about 1.3KB/s for 20ms more delay.
+- A joiner created 150 copies 6ms to 7ms after entering the flight, its identities already held, against 5s; a pilot already in the flight created 150 copies 323ms to 432ms after its link came up, against 500ms.
+
+**Changed:** [the plan's stage 18](../build/plan.md#18-traffic-and-atc-audio) takes about 7KB/s through a relay as ATC audio's budget.
+
+**Affects:** [01-traffic-and-atc](01-traffic-and-atc.md)'s budgets, through a note.
+
+**Evidence:** `node tools/bench.ts traffic atc-audio` on 2026-11-15, and `tools/bench/scenarios/traffic.ts` and `atc-audio.ts`.
+
+## 2026-11-15: A copy whose original stopped was carried past the stop and held there, since the stop's repeats came at its own time
+
+**Asked:** whether a taxiing copy on the bench stops where its original stopped, as [the cases for the bench](01-traffic-and-atc.md#cases-for-the-bench) say: "its stop goes out on three polls, and the receiving machine draws it stopped once".
+
+**Expected:** the copy to stop within 1m of where its original stopped, 1s after it.
+
+**Found:**
+
+- On stage 18's bench, a stand-in AI aircraft taxiing north at 20 kt had its velocity set to 0, and its copy stopped 3.31m past where it stopped, and held there ([the bench's output](results/2026-11-15-bench-stop-carried-past.txt)).
+- The gate sent the stop again on the next two polls at the stop's own time, as FS Copilot's did, so the receiving machine dropped both repeats as no newer (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficGate.cs`, `Decide`).
+- The stop stayed the copy's newest sample, and past the newest the playout carries a copy along the line through its last two samples for up to 500ms at 2Hz, as FS Copilot's interpolator does (read in `FsCopilot/Simulation/TrafficInterpolator.cs`, `TryRender`).
+  So the copy went on past the stop by up to the length of its last step, and only the next heartbeat, 5s on, would have brought it back.
+- FS Copilot's gate says the repeats are there because a lost stop leaves the receiver carrying the copy past it, which the carry does to a stop that arrived as well.
+  An AI aircraft that slows over its last steps has a short last step, which may be why FS Copilot's testers didn't report it (unverified).
+
+**Changed:** `object-mirror`'s gate sends each repeat of the stop at its own poll's time, so the copy's last segment stands still at the stop, and a copy whose stop was lost reaches it a poll late rather than passing it.
+
+**Affects:** [01-traffic-and-atc](01-traffic-and-atc.md)'s gate and its playout, through a note.
+
+**Evidence:** [the bench's output](results/2026-11-15-bench-stop-carried-past.txt), from `tools/bench/scenarios/traffic.ts`.
+
 ## 2026-11-15: FS Copilot's host read all five lights on for every parked AI aircraft, so its copies lit up at the gate
 
 **Asked:** why an FS Copilot 1.3 tester flying SayIntentions' traffic saw every parked copy with its landing lights on, while the copies in flight looked right and both pilots had the same FSLTL package (reported by the tester, relayed by the user on 2026-11-15), and whether [stage 18's design](01-traffic-and-atc.md) carries the same fault.

@@ -15,6 +15,8 @@ use crate::Aircraft;
 const EQUATOR_M: f64 = 6_378_137.0;
 const FLATTENING: f64 = 1.0 / 298.257_223_563;
 const FT: f64 = 0.3048;
+/// A foot a second in knots, of 1,852m an hour.
+const FT_PER_S_IN_KNOTS: f64 = FT * 3_600.0 / 1_852.0;
 
 /// Moves `aircraft` on by `seconds`. Its table holds the pose in degrees and feet, the body
 /// velocities in feet per second, x right, y up, and z forward, and the rotation velocities
@@ -37,10 +39,12 @@ pub(crate) fn fly(aircraft: &mut Aircraft, seconds: f64) {
     let [right, up, forward] =
         ["X", "Y", "Z"].map(|a| aircraft.number(&format!("VELOCITY BODY {a}")));
     let [north, east, down] = to_ned(heading, pitch, bank, [forward, right, -up]);
-    // The sim gives the velocity over the ground too, which `Follow` reads as it starts.
+    // The sim gives the velocity over the ground too, which `Follow` reads as it starts, and
+    // its speed, which the traffic host reads in knots.
     aircraft.set_number("VELOCITY WORLD X", east);
     aircraft.set_number("VELOCITY WORLD Y", -down);
     aircraft.set_number("VELOCITY WORLD Z", north);
+    aircraft.set_number("GROUND VELOCITY", north.hypot(east) * FT_PER_S_IN_KNOTS);
 
     if aircraft.number("IS LATITUDE LONGITUDE FREEZE ON") == 0.0 && (north != 0.0 || east != 0.0) {
         let latitude = aircraft.number("PLANE LATITUDE");

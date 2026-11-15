@@ -17,6 +17,7 @@ import { useCoreSlice, useShell } from "../part.ts"
 import type { Part } from "../part.ts"
 import { HomeRest } from "./home-rest.tsx"
 import { SessionSide } from "./session-side.tsx"
+import type { RoleChip } from "./session-side.tsx"
 import { StartSide } from "./start-side.tsx"
 import type { Action, Status } from "./start-side.tsx"
 import { useCardFold } from "./use-card-fold.ts"
@@ -31,6 +32,13 @@ const pinned: CSSProperties = { position: "-webkit-sticky" as CSSProperties["pos
 /** How much the rooms easing inside a box have still to grow, so the box can set the height it will have rather than the one it has mid-ease. */
 function stillEasing(box: HTMLElement): number {
   return Array.from(box.querySelectorAll<HTMLElement>("[data-ease-to]")).reduce((sum, room) => sum + Number(room.dataset.easeTo) - room.offsetHeight, 0)
+}
+
+/** Each part's role, with its tab's icon, for its holder's chip in the crew list. */
+function roleChips(parts: Part[]): RoleChip[] {
+  const chips: RoleChip[] = []
+  for (const part of parts) if (part.role && part.tab) chips.push({ ...part.role, icon: part.tab.icon })
+  return chips
 }
 
 export function SessionTab({ parts }: { parts: Part[] }) {
@@ -197,7 +205,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
                     style={{ opacity: turning === "out" ? 0 : 1, transition: `opacity ${TURN.out}ms ease-out` }}
                   >
                     {side === "session" && session ? (
-                      <SessionSide session={session} started={started} turnedIn={turnedIn.current} folded={fold.folded} onEase={() => remeasure((n) => n + 1)} />
+                      <SessionSide session={session} started={started} turnedIn={turnedIn.current} folded={fold.folded} onEase={() => remeasure((n) => n + 1)} roles={roleChips(parts)} />
                     ) : (
                       <StartSide
                         aircraft={aircraft}

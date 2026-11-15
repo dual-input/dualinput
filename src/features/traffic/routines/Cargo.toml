@@ -1,0 +1,16 @@
+[package]
+name = "traffic-routines"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+messages = { path = "../../../engines/messages" }
+object-mirror = { path = "../../../engines/object-mirror" }
+routine-host = { path = "../../../platform/routine-host" }
+
+[dev-dependencies]
+bytemuck = "1.25.2"
+
+[lints]
+workspace = true

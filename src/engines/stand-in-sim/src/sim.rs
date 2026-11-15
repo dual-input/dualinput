@@ -12,7 +12,7 @@ use sim_client::{Connection, Op, SimCall, Tag, Up, Value};
 use simconnect_types::{
     SIMCONNECT_COMM_BUS_BROADCAST_TO_JS, SIMCONNECT_DATA_REQUEST_FLAG_CHANGED,
     SIMCONNECT_DATATYPE_STRING256, SIMCONNECT_EXCEPTION_CREATE_OBJECT_FAILED,
-    SIMCONNECT_EXCEPTION_NAME_UNRECOGNIZED, SIMCONNECT_PERIOD_ONCE, SIMCONNECT_SIMOBJECT_TYPE_USER,
+    SIMCONNECT_EXCEPTION_NAME_UNRECOGNIZED, SIMCONNECT_PERIOD_ONCE,
 };
 use windows_sys::Win32::Foundation::{E_FAIL, FILETIME, S_OK, WAIT_OBJECT_0, WAIT_TIMEOUT};
 use windows_sys::Win32::System::Threading::{
@@ -93,6 +93,8 @@ pub(crate) struct Sim {
     calls: Vec<Called>,
     /// The rules a scenario scripted for the aircraft.
     rules: Vec<Rule>,
+    /// How many more by-type requests have their last answer held back.
+    hold_polls: u32,
 }
 
 enum Due {
@@ -206,6 +208,7 @@ impl Sim {
             opened: Vec::new(),
             calls: Vec::new(),
             rules: Vec::new(),
+            hold_polls: 0,
         }
     }
 
@@ -370,6 +373,23 @@ impl Sim {
             Act::Lack { title } => {
                 self.lacking.insert(title);
             }
+            Act::Ai(objects) => {
+                for ai in objects {
+                    let vars = self.world.set_ai(ai.id, ai.kind);
+                    for (name, value) in ai.numbers {
+                        vars.set_number(bare(&name), value);
+                    }
+                    for (name, value) in ai.texts {
+                        vars.set_text(bare(&name), &value);
+                    }
+                }
+            }
+            Act::AiGone { ids } => {
+                for id in ids {
+                    self.world.remove_ai(id);
+                }
+            }
+            Act::HoldPolls { count } => self.hold_polls = count,
             Act::FrameBurst { count } => {
                 for _ in 0..count {
                     self.frame_events();
@@ -548,15 +568,32 @@ impl Sim {
                 kind,
                 ..
             } => {
-                // The stand-in has no positions to measure a radius by, so every object it
-                // holds is near.
-                let objects = if kind == SIMCONNECT_SIMOBJECT_TYPE_USER {
-                    vec![0]
-                } else {
-                    self.world.objects()
-                };
-                for object in objects {
-                    if let Some(data) = self.data(connection, request, definition, object, false) {
+                let mut objects = self.world.of_kind(kind);
+                let out_of = objects.len() as u32;
+                if self.hold_polls > 0 {
+                    self.hold_polls -= 1;
+                    objects.pop();
+                }
+                // A poll that finds nothing answers once, with a count of 0.
+                if out_of == 0 {
+                    let none = Data {
+                        request,
+                        object: 0,
+                        definition,
+                        flags: 0,
+                        count: 0,
+                        entry: 0,
+                        out_of: 0,
+                        bytes: Vec::new(),
+                    };
+                    self.send(connection, &Message::ObjectData(none));
+                }
+                for (entry, object) in (1..).zip(objects) {
+                    if let Some(mut data) =
+                        self.data(connection, request, definition, object, false)
+                    {
+                        data.entry = entry;
+                        data.out_of = out_of;
                         self.send(connection, &Message::ObjectData(data));
                     }
                 }
@@ -620,18 +657,17 @@ impl Sim {
                 }
             }
             Op::AICreateSimulatedObject { title, request, .. } => {
-                if self.lacking.contains(&title) {
-                    let message = Message::Exception {
-                        exception: SIMCONNECT_EXCEPTION_CREATE_OBJECT_FAILED as u32,
-                        send_id: 0,
-                        index: 1,
-                    };
-                    self.send_tagged(connection, &message, tag);
-                } else {
-                    let object = self.world.create(&title, connection);
-                    self.send(connection, &Message::Assigned { request, object });
-                }
+                self.create(connection, tag, &title, None, request);
             }
+            Op::AICreateNonAtcAircraft {
+                title,
+                tail,
+                request,
+                ..
+            } => self.create(connection, tag, &title, Some(&tail), request),
+            // The sim's AI moves no object the stand-in holds but its own traffic, so a release
+            // leaves the object as it is.
+            Op::AIReleaseControl { .. } => {}
             Op::AIRemoveObject { object, .. } => self.world.remove(object, connection),
             Op::CameraGet { referential } => {
                 let camera = self.cameras.get(&referential).copied().unwrap_or(Camera {
@@ -640,6 +676,30 @@ impl Sim {
                 });
                 self.send(connection, &Message::Camera(camera));
             }
+        }
+    }
+
+    /// Creates an object of the SimObject `title`, an aircraft with its tail when `tail` names
+    /// one, and hands up its ID under `request`, or an exception tagged with the call for a
+    /// title the scenario said the sim lacks.
+    fn create(
+        &mut self,
+        connection: Connection,
+        tag: Tag,
+        title: &str,
+        tail: Option<&str>,
+        request: u32,
+    ) {
+        if self.lacking.contains(title) {
+            let message = Message::Exception {
+                exception: SIMCONNECT_EXCEPTION_CREATE_OBJECT_FAILED as u32,
+                send_id: 0,
+                index: 1,
+            };
+            self.send_tagged(connection, &message, tag);
+        } else {
+            let object = self.world.create(title, tail, connection);
+            self.send(connection, &Message::Assigned { request, object });
         }
     }
 
@@ -667,6 +727,9 @@ impl Sim {
                 let n = text.len().min(255);
                 field[..n].copy_from_slice(&text.as_bytes()[..n]);
                 bytes.extend_from_slice(&field);
+            } else if d.name == "IS USER SIM" {
+                // The pilot's own aircraft reads 1, as the sim's does, and every other object 0.
+                bytes.extend_from_slice(&f64::from(u8::from(object == 0)).to_le_bytes());
             } else {
                 bytes.extend_from_slice(&vars.number(&d.name).to_le_bytes());
             }
@@ -677,6 +740,8 @@ impl Sim {
             definition,
             flags: if tagged { 2 } else { 0 },
             count: if tagged { datums.len() as u32 } else { 1 },
+            entry: 1,
+            out_of: 1,
             bytes,
         })
     }
@@ -695,7 +760,9 @@ impl Sim {
         if let Some(last) = self.last_frame.replace(now)
             && self.paused == 0
         {
-            motion::fly(&mut self.world.aircraft, (now - last).as_secs_f64());
+            let seconds = (now - last).as_secs_f64();
+            motion::fly(&mut self.world.aircraft, seconds);
+            self.world.fly_ai(seconds);
         }
         if !self.module_stopped {
             let clock = self.clock();
@@ -805,6 +872,8 @@ impl Sim {
                 definition: 0,
                 flags: 0,
                 count: 1,
+                entry: 1,
+                out_of: 1,
                 bytes: bytes.to_vec(),
             };
             self.send(connection, &Message::ClientData(data));

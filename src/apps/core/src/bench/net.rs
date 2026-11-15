@@ -147,6 +147,7 @@ impl BenchNet {
                 cx.out(Heard(format!("net report {report}")));
                 me.got.clear();
             }
+            NetAct::Hold { channel, ms } => network::hold(cx, channel, u64::from(ms)),
         }
     }
 

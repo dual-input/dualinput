@@ -2,7 +2,7 @@
 //! up, and what turns a unit's call into SimConnect's calls
 //! (record/areas/core/03-sim-seam-and-wasm-module.md, "The sim client").
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use simconnect_types::{
     SIMCONNECT_CLIENT_DATA_PERIOD_ON_SET, SIMCONNECT_DATA_REQUEST_FLAG_CHANGED,
@@ -17,6 +17,25 @@ use crate::{InitPosition, Op};
 
 /// A string variable's value takes this many bytes, `STRING256`'s.
 const TEXT: usize = 256;
+
+/// How many polls a connection keeps waiting for their last answer. A poll whose answers
+/// never all came, as when the sim drops some, would otherwise stay for the connection's life,
+/// so the oldest past this many is forgotten, and an answer that comes for it after is dropped.
+/// Traffic polls three kinds of object twice a second, and drops a poll still out after 2s, so
+/// it has 12 out at most; `POLL` and `POLL_WITHIN` in src/features/traffic/core/src/host.rs set
+/// those, so change them together.
+const OPEN_POLLS: usize = 32;
+
+/// How a request reads.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Reads {
+    /// Every sim frame in which a value changed.
+    Changes,
+    /// Once, and it's over with its answer.
+    Once,
+    /// Once on each object of a kind, over with its last object's answer.
+    Poll,
+}
 
 /// The value of `var` in `bytes` at `at`, which moves past it.
 fn value_at(var: &Var, bytes: &[u8], at: &mut usize) -> Option<Value> {
@@ -82,6 +101,13 @@ pub struct Watch {
     pub object: u32,
 }
 
+impl Watch {
+    /// The same definition on `object`, which a write through it writes.
+    pub fn on(self, object: u32) -> Watch {
+        Watch { object, ..self }
+    }
+}
+
 /// A client data area on a connection, and the definition that covers it whole.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Area {
@@ -95,8 +121,10 @@ pub struct Client<K> {
     next: Next,
     setup: Vec<(K, Op)>,
     definitions: BTreeMap<u32, Vec<Var>>,
-    /// Each request a watch made, by its ID: its definition, and whether it reads once.
-    requests: BTreeMap<u32, (u32, bool)>,
+    /// Each request a watch or a poll made, by its ID: its definition, and how it reads.
+    requests: BTreeMap<u32, (u32, Reads)>,
+    /// The polls whose last answer hasn't come, oldest first.
+    polls: VecDeque<u32>,
     /// The definition each set of variables read once has, which every later read of the
     /// same set reuses.
     once: BTreeMap<Vec<Var>, u32>,
@@ -183,6 +211,7 @@ impl<K: Clone> Default for Client<K> {
             setup: Vec::new(),
             definitions: BTreeMap::new(),
             requests: BTreeMap::new(),
+            polls: VecDeque::new(),
             once: BTreeMap::new(),
             events: BTreeMap::new(),
             listening: None,
@@ -234,8 +263,11 @@ impl<K: Clone> Client<K> {
             Period::Once => op,
             Period::OnChange => self.set_up(by, op),
         });
-        self.requests
-            .insert(request, (definition, period == Period::Once));
+        let reads = match period {
+            Period::Once => Reads::Once,
+            Period::OnChange => Reads::Changes,
+        };
+        self.requests.insert(request, (definition, reads));
         (
             Watch {
                 request,
@@ -246,10 +278,11 @@ impl<K: Clone> Client<K> {
         )
     }
 
-    /// A definition of `var` on the pilot's aircraft for writing alone, which reads nothing, as
-    /// a write function's target that no entry watches.
-    pub fn define(&mut self, by: &K, var: &Var) -> (Watch, Vec<Op>) {
-        let (definition, ops) = self.definition(by, std::slice::from_ref(var), false);
+    /// A definition of `vars` for writing alone, which reads nothing: on the pilot's aircraft,
+    /// as a write function's target that no entry watches, or through `Watch::on` on an object
+    /// the connection created, as traffic dresses each copy through one definition.
+    pub fn define(&mut self, by: &K, vars: &[Var]) -> (Watch, Vec<Op>) {
+        let (definition, ops) = self.definition(by, vars, false);
         let watch = Watch {
             request: 0,
             definition,
@@ -262,10 +295,13 @@ impl<K: Clone> Client<K> {
     /// aircraft, such as every object within 50m, which lists the C152's seat objects
     /// `SEAT_C152_Pilot` and `SEAT_C152_Pax` (measured on MSFS 2024, 2026-10-02,
     /// record/areas/avatars/log.md, "Seat objects place the other pilot in the cockpit"). The
-    /// sim answers once for each object, each answer naming its object, so the request stays
-    /// until the connection goes. Returns the request its answers carry, and the calls that
-    /// make it.
-    pub fn read_by_type(&mut self, by: &K, kind: i32, radius: u32, vars: &[Var]) -> (u32, Vec<Op>) {
+    /// sim answers once for each object, each answer naming its object and its number among
+    /// them, and carries no mark of its poll but the request, so each poll takes a request of
+    /// its own, and an answer that comes after the next poll still names its own (read in the FS
+    /// Copilot fork, `FsCopilot/Simulation/TrafficDefinitions.cs`, `TrafficReq`). A poll is
+    /// forgotten at its last answer, or once `OPEN_POLLS` newer ones wait. Returns the request
+    /// its answers carry, and the calls that make it.
+    pub fn poll(&mut self, by: &K, kind: i32, radius: u32, vars: &[Var]) -> (u32, Vec<Op>) {
         let (definition, mut ops) = self.definition(by, vars, true);
         let request = take(&mut self.next.request);
         ops.push(Op::RequestDataOnSimObjectType {
@@ -274,8 +310,21 @@ impl<K: Clone> Client<K> {
             radius,
             kind,
         });
-        self.requests.insert(request, (definition, false));
+        self.requests.insert(request, (definition, Reads::Poll));
+        self.polls.push_back(request);
+        while self.polls.len() > OPEN_POLLS {
+            if let Some(old) = self.polls.pop_front() {
+                self.requests.remove(&old);
+            }
+        }
         (request, ops)
+    }
+
+    /// Whether `request` is a poll still waiting for its last answer.
+    pub fn polling(&self, request: u32) -> bool {
+        self.requests
+            .get(&request)
+            .is_some_and(|(_, reads)| *reads == Reads::Poll)
     }
 
     /// The data definition that names `vars`, tagged, and the calls that make it. A read
@@ -309,19 +358,25 @@ impl<K: Clone> Client<K> {
         (definition, ops)
     }
 
-    /// The values a watch's answer carries, each with its place in the watch's variables, or
-    /// `None` for data no watch of this connection asked for. A watch that read once is
-    /// forgotten with its answer.
+    /// The values a watch's or a poll's answer carries, each with its place in the
+    /// variables, or `None` for data no watch or poll of this connection asked for. A watch
+    /// that read once is forgotten with its answer, and a poll with its last, and a poll's
+    /// answer that found no object carries no values.
     pub fn values(&mut self, data: &Data) -> Option<Vec<(usize, Value)>> {
-        let &(definition, once) = self.requests.get(&data.request)?;
-        if once {
+        let &(definition, reads) = self.requests.get(&data.request)?;
+        let last_of_poll = reads == Reads::Poll && data.entry >= data.out_of;
+        if reads == Reads::Once || last_of_poll {
             self.requests.remove(&data.request);
+            self.polls.retain(|&r| r != data.request);
+        }
+        if reads == Reads::Poll && data.out_of == 0 {
+            return Some(Vec::new());
         }
         let vars = self.definitions.get(&definition)?;
         let mut at = 0;
         // `SimConnect_RequestDataOnSimObjectType` takes no flags, so its answers hold every
-        // variable in the definition's order with no tags, and reading the first bytes of a
-        // title as a tag lost the whole answer.
+        // variable in the definition's order with no tags, and a tagged read would take a
+        // title's first bytes for a tag and lose the whole answer.
         if data.flags & SIMCONNECT_DATA_REQUEST_FLAG_TAGGED == 0 {
             return vars
                 .iter()
@@ -529,6 +584,32 @@ impl<K: Clone> Client<K> {
         (request, op)
     }
 
+    /// Creates an aircraft or a helicopter of the SimObject `title`, with the tail `tail`, which
+    /// no ATC flies. Returns the request its object ID comes back under.
+    pub fn create_aircraft(
+        &mut self,
+        title: &str,
+        livery: &str,
+        tail: &str,
+        at: InitPosition,
+    ) -> (u32, Op) {
+        let request = take(&mut self.next.request);
+        let op = Op::AICreateNonAtcAircraft {
+            title: title.into(),
+            livery: livery.into(),
+            tail: tail.into(),
+            at,
+            request,
+        };
+        (request, op)
+    }
+
+    /// Takes an object the connection created away from the sim's AI.
+    pub fn release(&mut self, object: u32) -> Op {
+        let request = take(&mut self.next.request);
+        Op::AIReleaseControl { object, request }
+    }
+
     /// Removes an object the connection created.
     pub fn remove(&mut self, object: u32) -> Op {
         let request = take(&mut self.next.request);
@@ -719,6 +800,8 @@ mod tests {
             definition: watch.definition,
             flags: 2,
             count: 2,
+            entry: 1,
+            out_of: 1,
             bytes,
         };
         assert_eq!(
@@ -744,11 +827,11 @@ mod tests {
     }
 
     #[test]
-    fn a_read_by_type_hears_each_object_and_shares_a_read_onces_definition() {
+    fn a_poll_hears_each_object_shares_a_read_onces_definition_and_ends_at_its_last() {
         let mut client = Client::<()>::default();
         let vars = [Var::text("A:TITLE")];
         let (watch, _) = client.watch(&(), &vars, Period::Once);
-        let (request, ops) = client.read_by_type(&(), 1, 50, &vars);
+        let (request, ops) = client.poll(&(), 1, 50, &vars);
         assert_eq!(
             ops,
             [Op::RequestDataOnSimObjectType {
@@ -758,7 +841,7 @@ mod tests {
                 kind: 1,
             }]
         );
-        for object in [0x10, 0x11] {
+        for (entry, object) in [(1, 0x10), (2, 0x11)] {
             let mut bytes = vec![0; TEXT];
             bytes[..4].copy_from_slice(b"SEAT");
             let data = Data {
@@ -767,14 +850,49 @@ mod tests {
                 definition: watch.definition,
                 flags: 0,
                 count: 1,
+                entry,
+                out_of: 2,
                 bytes,
             };
+            assert!(
+                client.polling(request),
+                "the poll waits for its last answer"
+            );
             assert_eq!(
                 client.values(&data),
                 Some(vec![(0, Value::Text("SEAT".into()))]),
                 "object {object:#x}"
             );
         }
+        assert!(!client.polling(request), "and is forgotten with it");
+    }
+
+    #[test]
+    fn a_poll_that_finds_nothing_ends_and_the_oldest_of_too_many_waiting_go() {
+        let mut client = Client::<()>::default();
+        let vars = [Var::number("A:IS USER SIM", "bool")];
+        let (empty, _) = client.poll(&(), 1, 50, &vars);
+        let data = |request| Data {
+            request,
+            object: 0,
+            definition: 0,
+            flags: 0,
+            count: 1,
+            entry: 0,
+            out_of: 0,
+            bytes: Vec::new(),
+        };
+        assert_eq!(client.values(&data(empty)), Some(Vec::new()));
+        assert!(!client.polling(empty));
+        let first = client.poll(&(), 1, 50, &vars).0;
+        for _ in 0..OPEN_POLLS {
+            client.poll(&(), 1, 50, &vars);
+        }
+        assert!(
+            !client.polling(first),
+            "the oldest of too many waiting is forgotten"
+        );
+        assert_eq!(client.values(&data(first)), None);
     }
 
     #[test]
@@ -784,7 +902,7 @@ mod tests {
             Var::text("A:TITLE"),
             Var::number("A:PLANE LATITUDE", "degrees"),
         ];
-        let (request, _) = client.read_by_type(&(), 1, 50, &vars);
+        let (request, _) = client.poll(&(), 1, 50, &vars);
         let definition = client.requests[&request].0;
         let mut bytes = vec![0; TEXT];
         bytes[..4].copy_from_slice(b"SEAT");
@@ -795,6 +913,8 @@ mod tests {
             definition,
             flags: 0,
             count: 2,
+            entry: 1,
+            out_of: 1,
             bytes,
         };
         assert_eq!(

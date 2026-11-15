@@ -230,6 +230,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "atc-audio"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "core-helper-service",
+ "kernel",
+ "messages",
+ "network",
+ "serde_json",
+ "session",
+ "tracing",
+]
+
+[[package]]
 name = "atomic-polyfill"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1032,6 +1046,7 @@ dependencies = [
 name = "dualinput-core"
 version = "0.1.0"
 dependencies = [
+ "atc-audio",
  "avatars",
  "bytemuck",
  "cc",
@@ -1070,6 +1085,7 @@ dependencies = [
  "tokio-websockets",
  "tracing",
  "tracing-subscriber",
+ "traffic",
  "transport",
  "windows-sys 0.61.2",
  "zstd",
@@ -3034,6 +3050,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "object-mirror"
+version = "0.1.0"
+
+[[package]]
 name = "ogg"
 version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3680,6 +3700,7 @@ dependencies = [
  "messages",
  "routine-host",
  "state-sync-routines",
+ "traffic-routines",
 ]
 
 [[package]]
@@ -4890,6 +4911,34 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-log",
+]
+
+[[package]]
+name = "traffic"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "kernel",
+ "messages",
+ "network",
+ "object-mirror",
+ "postcard",
+ "profile-loader",
+ "serde_json",
+ "session",
+ "sim-service",
+ "simconnect-types",
+ "tracing",
+]
+
+[[package]]
+name = "traffic-routines"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "messages",
+ "object-mirror",
+ "routine-host",
 ]
 
 [[package]]

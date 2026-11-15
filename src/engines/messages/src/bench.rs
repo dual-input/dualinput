@@ -206,6 +206,10 @@ pub enum StandInHelperLine {
         mouse: bool,
         captures: Vec<u16>,
         streams: Vec<u16>,
+        /// Each capture's programs, in the order the helper looks for them.
+        programs: Vec<(u16, Vec<String>)>,
+        /// Each stream's gain.
+        gains: Vec<(u16, f32)>,
         sounds: bool,
         lists: bool,
     },
@@ -311,8 +315,37 @@ pub enum StandInAct {
     /// Sends a `FromCore::Track` line with the aircraft's variables `names` after each frame
     /// from now on, or stops with no names.
     Track { names: Vec<String> },
+    /// Puts each of the sim's own AI objects in the sim, or sets more of its variables, as an
+    /// ATC app's traffic, each moving by its velocities from then on.
+    Ai { objects: Vec<AiObject> },
+    /// Takes the AI objects `ids` out of the sim.
+    AiGone { ids: Vec<u32> },
+    /// Holds back the last answer of each of the next `count` by-type requests, so none is
+    /// whole.
+    HoldPolls { count: u32 },
     /// Answers with a `FromCore::StandIn` line.
     Report,
+}
+
+/// One of the sim's own AI objects, by an ID the scenario gives it, with its variables, such as
+/// `A:PLANE LATITUDE` and `A:TITLE`.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "bench/")]
+pub struct AiObject {
+    pub id: u32,
+    pub kind: AiKind,
+    pub numbers: Vec<(String, f64)>,
+    pub texts: Vec<(String, String)>,
+}
+
+/// Which `SIMCONNECT_SIMOBJECT_TYPE` an AI object is, which a poll of that kind finds.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum AiKind {
+    Aircraft,
+    Helicopter,
+    Ground,
 }
 
 /// What sets off a rule of the stand-in's aircraft.
@@ -544,6 +577,10 @@ pub enum NetAct {
     /// Tells the bench what came on each channel since the last report, and its clock offset
     /// from each member, as a `net report` line.
     Report,
+    /// Holds every message that comes on the channel numbered `channel` for `ms`, then
+    /// delivers them in their order, as loss on a direct path can hold one channel behind
+    /// another.
+    Hold { channel: u16, ms: u32 },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]

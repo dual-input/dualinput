@@ -1,0 +1,10 @@
+[package]
+name = "object-mirror"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+
+[lints]
+workspace = true

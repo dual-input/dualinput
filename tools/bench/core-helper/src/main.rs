@@ -102,6 +102,12 @@ fn heard(message: ToHelper) -> StandInHelperLine {
             mouse: w.mouse,
             captures: w.captures.iter().map(|(n, _)| *n).collect(),
             streams: w.streams.iter().map(|(n, _)| *n).collect(),
+            programs: w
+                .captures
+                .iter()
+                .map(|(n, c)| (*n, c.programs.clone()))
+                .collect(),
+            gains: w.streams.iter().map(|(n, b)| (*n, b.gain)).collect(),
             sounds: w.sounds,
             lists: w.lists,
         },

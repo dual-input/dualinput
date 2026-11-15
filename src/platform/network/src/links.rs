@@ -36,7 +36,12 @@ pub(crate) enum TimerFor {
     Heard(messages::net::PilotId),
     Dial(messages::net::PilotId),
     Out(messages::net::PilotId),
-    Frames { conn: u64, channel: u16 },
+    Frames {
+        conn: u64,
+        channel: u16,
+    },
+    /// The end of a hold on a channel, which `hold` set.
+    Release(u16),
 }
 
 /// The length of the whole frame `bytes` starts with, if it holds one.
@@ -143,6 +148,11 @@ impl Network {
             TimerFor::Dial(pilot) => me.dial(pilot, cx),
             TimerFor::Heard(pilot) => me.heard_check(pilot, cx),
             TimerFor::Frames { conn, channel } => me.frames(conn, channel, cx),
+            TimerFor::Release(channel) => {
+                for (from, bytes) in me.held.remove(&channel).unwrap_or_default() {
+                    me.deliver(from, channel, bytes, cx);
+                }
+            }
             TimerFor::Out(pilot) => {
                 if let Some(mut link) = me.links.remove(&pilot) {
                     tracing::info!(
@@ -410,7 +420,17 @@ impl Network {
         self.deliver(from, channel, bytes, cx);
     }
 
-    fn deliver(&self, from: Sender, channel: u16, bytes: Vec<u8>, cx: &Cx) {
+    /// `hold`, as the network: holds the channel until a timer releases it.
+    pub(crate) fn hold_for(me: &mut Network, (channel, ms): (u16, u64), cx: &mut Cx) {
+        me.held.entry(channel).or_default();
+        me.timer(cx, Duration::from_millis(ms), TimerFor::Release(channel));
+    }
+
+    fn deliver(&mut self, from: Sender, channel: u16, bytes: Vec<u8>, cx: &Cx) {
+        if let Some(held) = self.held.get_mut(&channel) {
+            held.push((from, bytes));
+            return;
+        }
         match self.channels.get(&channel) {
             Some(registered) => cx.call_handler(&registered.handler, Received { from, bytes }),
             // Such as a plugin's channel, which exists only where that plugin runs.

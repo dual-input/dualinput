@@ -21,6 +21,7 @@ stand-in = [
 ]
 
 [dependencies]
+atc-audio = { path = "../../features/atc-audio/core" }
 avatars = { path = "../../features/avatars/core" }
 bytemuck = { version = "1.25.2", optional = true }
 clients = { path = "../../platform/clients" }
@@ -58,6 +59,7 @@ serde = { version = "1.0.229", features = ["derive"], optional = true }
 serde_json = "1.0.145"
 sha2 = "0.10.9"
 take-control = { path = "../../features/take-control/core" }
+traffic = { path = "../../features/traffic/core" }
 # The core runs its sockets on tokio (decision 027), and its jobs on tokio's blocking pool.
 tokio = { version = "1.53.3", features = ["io-util", "macros", "net", "process", "rt-multi-thread", "sync", "time"] }
 # The clients' WebSocket server. iroh, which the network brings into the core, already builds

@@ -223,6 +223,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   The Traffic tab's "Share my traffic" writes the traffic host's key, and the ATC audio tab's "Share my ATC" writes the ATC host's, each by itself, so a pilot can share either without the other, and a crew that wants one host for both turns both on.
   Each role keeps the rest of its row in [the table of roles](../session/01-roles-and-members.md#the-table-of-roles): any pilot takes it at any time by turning their own switch on, which turns the old holder's off, and only leaving the session releases it.
   On the session page, each host's crew row carries a chip with the icon of the tab whose role they hold, a plane for traffic and a headset for ATC.
+  Each switch sends the session crate's `session.share` with its own role's key, which claims that key alone or releases it, and no request claims several together (user, 2026-11-15).
   This changes [03-v1-scope](../product/03-v1-scope.md#hearing-atc)'s rule that the traffic host is also the ATC host, [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host), the code map's [traffic and ATC switch](../architecture/02-code-map.md#the-traffic-and-atc-switch), and the architecture's tentative decision that [one request claims both](../architecture/decisions.md#traffic-and-atc-audio-each-hold-a-role-and-one-request-claims-both), and [decision 044](../../decisions/044-table-of-roles.md), which gives the two one role that can split, once step 8's decisions are numbered.
   Settled by the user on 2026-10-31.
 - **Because:**
@@ -235,7 +236,6 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - FS Copilot's build gave traffic and ATC audio a host each (FS Copilot fork, `record/traffic-atc/docs/03-implementation-plan.md`, "Decisions locked with the user (2026-09-06)", row 1).
 - **Leaves out:**
   - A crew whose ATC and traffic come from two pilots may hear ATC talk about aircraft it doesn't see, since an ATC app works with the traffic in its own pilot's sim (unverified, and likely to differ by app); the crew settles that on voice, as it settles a tussle over a switch ([decision 044](../../decisions/044-table-of-roles.md)).
-  - Whether the platform keeps its request that claims several keys together, which only the combined switch sent ([02-code-map](../architecture/02-code-map.md#the-traffic-and-atc-switch)): the user's to decide.
 
 ## The Traffic and ATC audio tabs hold their sharing, settings, and warnings, flagged by a dot on the tab's icon
 

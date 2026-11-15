@@ -39,7 +39,7 @@ differences: Array<Difference>,
  */
 ready: Array<string> | null, 
 /**
- * Why "Share my traffic and ATC" can't be turned on now, empty when it can.
+ * Why a sharing card's switch can't be turned on now, empty when it can.
  */
 share: Array<string> | null, 
 /**

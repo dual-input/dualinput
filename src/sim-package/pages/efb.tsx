@@ -7,9 +7,11 @@ import { createRoot } from "react-dom/client"
 import { simEnv } from "../../engines/page-client/src/sim-env.ts"
 import { VERSION } from "../../engines/messages/ts/stamp.ts"
 import { CoreLink } from "../../engines/page-client/src/core-link.ts"
+import { atcAudio } from "../../features/atc-audio/efb/part.tsx"
 import { avatars } from "../../features/avatars/efb/part.tsx"
 import { stateSync } from "../../features/state-sync/efb/part.tsx"
 import takeControl from "../../features/take-control/efb/index.tsx"
+import { traffic } from "../../features/traffic/efb/part.tsx"
 import { DesktopLink } from "../../platform/efb-shell/src/desktop-link.ts"
 import { Frame } from "../../platform/efb-shell/src/frame.tsx"
 import type { Part } from "../../platform/efb-shell/src/part.ts"
@@ -21,7 +23,7 @@ import { viewLeft, viewShown } from "../../platform/efb-shell/src/view.ts"
 const INTERNAL_NAME = "DualInput"
 
 /** Each feature's part, one line each, in the order their tabs show. */
-const PARTS: Part[] = [takeControl, avatars, stateSync]
+const PARTS: Part[] = [takeControl, traffic, atcAudio, avatars, stateSync]
 
 const SIM = simWindow(INTERNAL_NAME)
 

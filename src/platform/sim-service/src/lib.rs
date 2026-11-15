@@ -20,7 +20,10 @@ mod connections;
 mod module;
 mod seam;
 
-pub use aircraft::{AircraftChanged, PackageFound, USER_CFG, aircraft_awareness, find_package};
+pub use aircraft::{
+    AircraftChanged, PackageFound, USER_CFG, aircraft_awareness, find_package, package_roots,
+    package_version, packages_folder, user_cfgs,
+};
 pub use announce::announce;
 pub use calls::{ModuleCalls, Sim, SimCx, SimUnit};
 pub use connections::profile_unloaded;
@@ -61,6 +64,16 @@ pub enum SimEvent {
     Values {
         watch: Handle,
         values: Vec<(usize, Value)>,
+    },
+    /// One object a `poll` found, with its values, each with its place in the poll's
+    /// variables, and its number among the poll's objects, from 1 to `out_of`. A poll that
+    /// found nothing answers once, with `out_of` 0 and no values.
+    Polled {
+        call: Handle,
+        object: u32,
+        values: Vec<(usize, Value)>,
+        entry: u32,
+        out_of: u32,
     },
     /// The sim refused a call after it returned. `call` is the call's handle when the edge
     /// still held its packet ID, and `index` the argument at fault, such as a watch's

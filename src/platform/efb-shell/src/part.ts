@@ -7,7 +7,7 @@ import type { ComponentType } from "react"
 
 import type { JsonValue } from "../../../engines/messages/ts/serde_json/JsonValue.ts"
 import type { CoreLink } from "../../../engines/page-client/src/core-link.ts"
-import { useSlice } from "../../../engines/page-client/src/core-link.ts"
+import { useCoreState, useSlice } from "../../../engines/page-client/src/core-link.ts"
 import type { DesktopLink } from "./desktop-link.ts"
 
 /** What a part reaches of the core: slices, commands, and the `unit` messages it trades with its own unit. */
@@ -40,6 +40,8 @@ export type Part = {
   settings?: ComponentType
   /** An icon after the phase's name in the header while the feature is shared, as a `PhaseIcon`, so it shows on every page. */
   phaseIcon?: ComponentType
+  /** The role the feature declares, by its label in the session's slice, whose holder's crew row carries a chip of the tab's icon, which says `says`. */
+  role?: { label: string; says: string }
 }
 
 export function definePart(part: Part): Part {
@@ -101,4 +103,9 @@ export function useShell(): Shell {
 /** A slice of client state, typed by the message crate's type its unit registered, or undefined until the core has sent it. */
 export function useCoreSlice<T>(name: string): T | undefined {
   return useSlice<T>(useShell().link, name)
+}
+
+/** Whether the core is there to answer, as a part waits for before it sends a command a tab's opening asks for. */
+export function useCoreConnected(): boolean {
+  return useCoreState(useShell().link) === "connected"
 }

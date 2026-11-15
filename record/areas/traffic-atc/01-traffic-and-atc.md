@@ -23,6 +23,25 @@ Decides:     What the traffic host polls, how often, and which objects it carrie
 > Each surface goes out as a byte of percent, which makes a batch about 23 states rather than 25 (arithmetic).
 > Stage 18's session in the sim adds four checks to the [in-sim cases](#cases-for-the-bench), on AI aircraft parked at a busy gate and then on AI aircraft taxiing: that the five switches and four surfaces follow what the sim draws, read beside the five `LIGHT … ON` variables; that a copy takes a written surface; that one write of the dress holds on a released copy; and that each light's write takes on a copy of an FSLTL aircraft.
 
+> **Note**
+> On the bench, a copy whose original stopped was carried past the stop and held there, since the receiving machine dropped the stop's repeats as no newer and the playout carries a copy past its newest sample ([log](log.md#2026-11-15-a-copy-whose-original-stopped-was-carried-past-the-stop-and-held-there-since-the-stops-repeats-came-at-its-own-time)).
+> So [the gate](#the-gate) sends each repeat of the stop at its own poll's time, which [the playout](#traffic-each-frame) takes as a newer sample at the stop.
+
+> **Note**
+> Stage 18's build takes each object's kind from the poll that found it, aircraft, helicopter, or ground, so [polling](#polling)'s read of an identity holds no `CATEGORY`.
+
+> **Note**
+> The traffic host carries 500 objects at most, the first it finds, counting those whose identity it's still reading, and logs once that it reached them (user, 2026-11-15).
+> A receiving pilot who enters or leaves the flight queues a call for each copy in one input, which the kernel stops past 1,000, and a busy hub's traffic is about 165 objects, p10's 145 aircraft and 20 tugs at EGLL ([log](log.md)).
+> [Which objects the host carries](#which-objects-the-host-carries) skips every object past those.
+
+> **Note**
+> Stage 18's session in the sim found the five light switches showing what the sim draws on BeyondATC's AI aircraft, and no flap variable showing the flaps its FSLTL 737s drew out, so a copy of such an aircraft shows its flaps up ([log](log.md#2026-11-15-in-the-sim-copies-drew-at-016-on-fs-copilots-jitter-measure-written-lights-and-flaps-took-on-them-and-ai-aircrafts-light-switches-showed-what-the-sim-drew-where-no-flap-variable-did)), a [known limit](#known-limits) until something we can read carries them.
+> A copy takes a written light or surface, and keeps it, from one write.
+> MSFS 2024 has no `Asobo PassiveAircraft Bell 407`, so [creating a copy](#creating-a-copy)'s helicopter stand-in is `Asobo PassiveAircraft B505`.
+> GSX's tugs stay off [the allowlist](#which-objects-the-host-carries), with GSX's other vehicles, until ground operations sync (user, 2026-11-15): at KSFO about 60 stood within 1km, most parked at gates, which a receiving pilot who runs GSX would see twice, and the sim's own `ASO_Pushback_` tugs are the ones that push AI aircraft back.
+> ATC audio between machines takes about 7KB/s through a relay, the speech's 4KB/s and each 20ms frame's number, stamp, and framing (user, 2026-11-15; [log](log.md#2026-11-15-stage-18s-bench-passed-traffics-and-atc-audios-cases-a-polls-851-answers-each-within-1ms-and-atc-audio-took-68kbs-through-a-relay)).
+
 On the traffic host, traffic polls the sim's AI aircraft and helicopters within the radius setting, and the ground objects within 1km whose titles it allows, twice a second.
 It sends each object's identity once, and its state when it changes or every 5s.
 Every other machine creates a frozen copy of each object, and traffic's routine `Traffic` in our WASM module draws each copy every frame, 1s behind the traffic host's reads.

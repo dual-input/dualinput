@@ -268,14 +268,8 @@ impl SimService {
         if finding != Finding::Installed {
             self.aware.searches.retain(|s| s.finding != finding);
         }
-        let cfgs = cx
-            .read::<Clients>()
-            .setting_as::<String>(USER_CFG)
-            .unwrap_or_else(|| USER_CFGS.to_string());
-        let reads = cfgs
-            .split(';')
-            .map(str::trim)
-            .filter(|p| !p.is_empty())
+        let reads = user_cfgs(cx.read::<Clients>())
+            .into_iter()
             .map(|path| cx.job(Job::read(path), SimService::user_cfg_read))
             .collect();
         self.aware.searches.push(Search {
@@ -322,7 +316,7 @@ impl SimService {
         let roots = search
             .folders
             .iter()
-            .flat_map(|folder| ROOTS.map(|(name, depth, _)| (format!(r"{folder}\{name}"), depth)))
+            .flat_map(|folder| package_roots(folder))
             .collect();
         let holding = format!(r"SimObjects\Airplanes\{}", search.aircraft.folder());
         search.find = Some(cx.job(Job::find(roots, holding), SimService::package_found));
@@ -390,13 +384,7 @@ impl SimService {
         let Some((_, package, location)) = search.manifest.take() else {
             return;
         };
-        let version = result.ok().and_then(|bytes| {
-            serde_json::from_slice::<serde_json::Value>(&bytes)
-                .ok()?
-                .get("package_version")?
-                .as_str()
-                .map(str::to_string)
-        });
+        let version = result.ok().and_then(|bytes| package_version(&bytes));
         me.searched(finding, Some((package, location, version)), cx);
     }
 
@@ -499,12 +487,43 @@ const ROOTS: [(&str, u8, Location); 4] = [
     ("Official2020", 2, Location::Official),
 ];
 
+/// The folders under the packages folder `folder` that hold packages, each with how deep a
+/// package sits under it, for a `Job::find` of what a package holds, as traffic's job lists the
+/// traffic packs.
+pub fn package_roots(folder: &str) -> Vec<(String, u8)> {
+    ROOTS
+        .map(|(name, depth, _)| (format!(r"{folder}\{name}"), depth))
+        .to_vec()
+}
+
+/// A package's version, from its `manifest.json`.
+pub fn package_version(manifest: &[u8]) -> Option<String> {
+    serde_json::from_slice::<serde_json::Value>(manifest)
+        .ok()?
+        .get("package_version")?
+        .as_str()
+        .map(str::to_string)
+}
+
+/// The sim's `UserCfg.opt` files, each of which names a packages folder: the development
+/// setting's, or Steam's and the Microsoft Store's.
+pub fn user_cfgs(clients: &Clients) -> Vec<String> {
+    clients
+        .setting_as::<String>(USER_CFG)
+        .unwrap_or_else(|| USER_CFGS.to_string())
+        .split(';')
+        .map(str::trim)
+        .filter(|p| !p.is_empty())
+        .map(str::to_string)
+        .collect()
+}
+
 /// The folder `UserCfg.opt`'s `InstalledPackagesPath` line names, matched by its name and a
 /// space, so a longer name such as `InstalledPackagesPathNextBoot` doesn't match.
 /// `packagesFolders` in tools/lib/install.ts, `packages_folder` in src/apps/desktop/src/places.rs,
 /// and `packages_folders` in tools/profile-author's cockpit.rs read the line the same way, so change
 /// all four together.
-fn packages_folder(cfg: &str) -> Option<String> {
+pub fn packages_folder(cfg: &str) -> Option<String> {
     let line = cfg
         .lines()
         .find_map(|l| l.trim_start().strip_prefix("InstalledPackagesPath "))?;

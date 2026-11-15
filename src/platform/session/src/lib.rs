@@ -85,8 +85,8 @@ impl Moment for ControlPassed {}
 impl Moment for PreflightEnded {}
 
 /// A request to write session keys, which every feature makes through `cx.ask`, so a guard
-/// on any one key refuses the whole request, as "Share my traffic and ATC" claims two keys at
-/// once (record/areas/architecture/02-code-map.md, "Guards").
+/// on any one key refuses the whole request (record/areas/architecture/02-code-map.md,
+/// "Guards").
 pub struct WriteKeys {
     /// Each key by its number, and its value in postcard, or `None` to clear it.
     pub writes: Vec<(u16, Option<Vec<u8>>)>,
@@ -335,8 +335,8 @@ pub trait SessionUnit {
     /// A session key the unit owns, which it writes through `WriteKeys`.
     fn session_key<T>(&mut self, key: Key<T>) -> &mut Self;
 
-    /// A role's key, with its label in the feature's words, which "Share my traffic and ATC"
-    /// claims with every other role's.
+    /// A role's key, with its label in the feature's words, which its sharing card's switch
+    /// claims through `session.share`.
     fn role_key(&mut self, key: Key<Option<PilotId>>, label: &'static str) -> &mut Self;
 
     /// An item of the match check, which compares every member's value with `compare`, and

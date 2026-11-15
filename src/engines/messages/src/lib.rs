@@ -23,6 +23,7 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 include!(concat!(env!("OUT_DIR"), "/hash.rs"));
 
+pub mod atc_audio;
 pub mod avatars;
 pub mod backend;
 pub mod bench;
@@ -41,6 +42,7 @@ pub mod sim;
 pub mod state_sync;
 pub mod sync;
 pub mod take_control;
+pub mod traffic;
 
 /// Bytes as lowercase hex, two digits a byte, the form pilot and endpoint IDs take in the
 /// messages, the backend's requests, and the session file.

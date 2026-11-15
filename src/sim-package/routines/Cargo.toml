@@ -11,6 +11,7 @@ publish = false
 avatars-routines = { path = "../../features/avatars/routines" }
 flight-model-routines = { path = "../../features/flight-model/routines" }
 state-sync-routines = { path = "../../features/state-sync/routines" }
+traffic-routines = { path = "../../features/traffic/routines" }
 routine-host = { path = "../../platform/routine-host" }
 
 [dev-dependencies]

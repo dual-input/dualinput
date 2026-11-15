@@ -1,9 +1,13 @@
 use std::collections::BTreeMap;
 
 use sim_client::Connection;
-use simconnect_types::SIMCONNECT_OBJECT_ID_USER_AVATAR;
+use simconnect_types::{
+    SIMCONNECT_OBJECT_ID_USER_AVATAR, SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT,
+    SIMCONNECT_SIMOBJECT_TYPE_ALL, SIMCONNECT_SIMOBJECT_TYPE_GROUND,
+    SIMCONNECT_SIMOBJECT_TYPE_USER,
+};
 
-use crate::Aircraft;
+use crate::{Aircraft, motion};
 
 /// The first ID the stand-in gives an object a connection creates. Which IDs the sim gives
 /// is unverified, so the stand-in starts well clear of the pilot's aircraft, 0.
@@ -21,6 +25,9 @@ pub struct World {
     pub avatar: Aircraft,
     objects: BTreeMap<u32, Object>,
     next_object: u32,
+    /// The sim's own AI objects, which no connection created, such as an ATC app's traffic, by
+    /// the IDs a scenario gave them, each with its `SIMCONNECT_SIMOBJECT_TYPE`.
+    ai: BTreeMap<u32, (i32, Aircraft)>,
     /// Each ID the Vars API has handed out since the last reset: for an object's own
     /// variable, its object, and the variable's name. IDs count on across a reset, so one
     /// from before names nothing.
@@ -57,6 +64,10 @@ pub(crate) struct Input {
 struct Object {
     title: String,
     connection: Connection,
+    /// Its `SIMCONNECT_SIMOBJECT_TYPE`: an aircraft for an aircraft's create, and a ground
+    /// object for a simulated object's, as avatars' figure is, which a poll of ground objects
+    /// then finds, as the traffic host's must skip.
+    kind: i32,
     vars: Aircraft,
 }
 
@@ -76,7 +87,11 @@ impl World {
         match id {
             0 => Some(&self.aircraft),
             SIMCONNECT_OBJECT_ID_USER_AVATAR => Some(&self.avatar),
-            _ => self.objects.get(&id).map(|o| &o.vars),
+            _ => self
+                .objects
+                .get(&id)
+                .map(|o| &o.vars)
+                .or_else(|| self.ai.get(&id).map(|(_, vars)| vars)),
         }
     }
 
@@ -84,7 +99,28 @@ impl World {
         match id {
             0 => Some(&mut self.aircraft),
             SIMCONNECT_OBJECT_ID_USER_AVATAR => Some(&mut self.avatar),
-            _ => self.objects.get_mut(&id).map(|o| &mut o.vars),
+            _ => match self.objects.get_mut(&id) {
+                Some(o) => Some(&mut o.vars),
+                None => self.ai.get_mut(&id).map(|(_, vars)| vars),
+            },
+        }
+    }
+
+    /// Puts the AI object `id` of `kind` in the sim, or sets more of its variables.
+    pub(crate) fn set_ai(&mut self, id: u32, kind: i32) -> &mut Aircraft {
+        let (k, vars) = self.ai.entry(id).or_insert((kind, Aircraft::default()));
+        *k = kind;
+        vars
+    }
+
+    pub(crate) fn remove_ai(&mut self, id: u32) {
+        self.ai.remove(&id);
+    }
+
+    /// Moves every AI object on by `seconds`, by its velocities, as the sim's AI moves its own.
+    pub(crate) fn fly_ai(&mut self, seconds: f64) {
+        for (_, vars) in self.ai.values_mut() {
+            motion::fly(vars, seconds);
         }
     }
 
@@ -138,28 +174,56 @@ impl World {
         self.reset = true;
     }
 
-    /// Every object's ID: the pilot's aircraft, the avatar, and the objects connections
-    /// created.
-    pub(crate) fn objects(&self) -> Vec<u32> {
-        [0, SIMCONNECT_OBJECT_ID_USER_AVATAR]
-            .into_iter()
-            .chain(self.objects.keys().copied())
-            .collect()
+    /// The ID of every object of `kind`, a `SIMCONNECT_SIMOBJECT_TYPE`, as a by-type request
+    /// finds them: the pilot's aircraft among the aircraft, as the sim's poll of aircraft finds
+    /// it, the AI objects, and the objects connections created. The stand-in has no positions
+    /// to measure a radius by, so every object it holds is near.
+    pub(crate) fn of_kind(&self, kind: i32) -> Vec<u32> {
+        let any = kind == SIMCONNECT_SIMOBJECT_TYPE_ALL;
+        let user = (kind == SIMCONNECT_SIMOBJECT_TYPE_USER
+            || kind == SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT
+            || any)
+            .then_some(0);
+        let created = self
+            .objects
+            .iter()
+            .filter(|(_, o)| any || o.kind == kind)
+            .map(|(&id, _)| id);
+        let ai = self
+            .ai
+            .iter()
+            .filter(|(_, (k, _))| any || *k == kind)
+            .map(|(&id, _)| id);
+        user.into_iter().chain(created).chain(ai).collect()
     }
 
     /// Creates an object of the SimObject `title`, which its `A:TITLE` reads, as the C152's
     /// seat object's reads `SEAT_C152_Pilot` (measured on MSFS 2024, 2026-10-02,
-    /// record/areas/avatars/log.md, "Seat objects place the other pilot in the cockpit").
-    pub(crate) fn create(&mut self, title: &str, connection: Connection) -> u32 {
+    /// record/areas/avatars/log.md, "Seat objects place the other pilot in the cockpit"), and an
+    /// aircraft's `A:ATC ID` its tail.
+    pub(crate) fn create(
+        &mut self,
+        title: &str,
+        tail: Option<&str>,
+        connection: Connection,
+    ) -> u32 {
         let id = FIRST_OBJECT + self.next_object;
         self.next_object += 1;
         let mut vars = Aircraft::default();
         vars.set_text("TITLE", title);
+        let kind = match tail {
+            Some(tail) => {
+                vars.set_text("ATC ID", tail);
+                SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT
+            }
+            None => SIMCONNECT_SIMOBJECT_TYPE_GROUND,
+        };
         self.objects.insert(
             id,
             Object {
                 title: title.to_string(),
                 connection,
+                kind,
                 vars,
             },
         );

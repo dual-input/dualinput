@@ -66,21 +66,38 @@ export function part(stage: Stage, changes: boolean, at = 0, rise = true, early 
   return { opacity: 1, transform: "none", transition: `opacity ${MOMENT.in}ms ease-out ${delay}ms, transform ${MOMENT.in}ms ease-out ${delay}ms` }
 }
 
+/** How often an open room measures its content again, in milliseconds, as a scroll box does. */
+const MEASURE_EVERY = 250
+
 /**
  * A part that comes and goes: its room opens to its content's height, or shuts, in the moment's second
  * step, and holds what it had while it shuts. Coherent GT has no ResizeObserver, so the content is
- * measured after every render, and an open room follows its content's height. It cuts off what overflows
- * it only while it's shut or moving, so a card at rest in it keeps its outline and shadow.
+ * measured after every render, and again a few times a second, since it can change size with no render
+ * here, as a font loads, or as the tab of a page that rendered while hidden opens. A room on a hidden page
+ * measures nothing, since its content reads 0 there: the EFB app keeps every tab's page mounted, and one
+ * that took 0 left its content spilling over the page below it once its tab opened. An open room follows its
+ * content's height. It cuts off what overflows it only while it's shut or moving, so a card at rest in it
+ * keeps its outline and shadow.
  */
 export function Room({ open, pad = "", style, children }: { open: boolean; pad?: string; style?: CSSProperties; children?: ReactNode }) {
   const last = useRef(children)
   if (open) last.current = children
   const inner = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState<number>()
-  useLayoutEffect(() => {
-    const measured = inner.current?.offsetHeight ?? 0
-    if (measured !== height) setHeight(measured)
-  })
+  const measure = () => {
+    const box = inner.current
+    // A block in a shown page is as wide as what holds it, so a width of 0 says the page is hidden.
+    if (!box || box.offsetWidth === 0) return
+    const measured = box.offsetHeight
+    setHeight((was) => (was === measured ? was : measured))
+  }
+  useLayoutEffect(measure)
+  useEffect(() => {
+    const timer = window.setInterval(measure, MEASURE_EVERY)
+    return () => window.clearInterval(timer)
+    // The timer reads only refs and sets state through its updater.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [moving, setMoving] = useState(false)
   const was = useRef(open)
   useEffect(() => {

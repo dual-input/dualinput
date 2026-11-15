@@ -1,0 +1,29 @@
+{"t":1794758849997,"s":0.039,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1794758850023,"s":0.065,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1794758850024,"s":0.066,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1794758850024,"s":0.066,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794758850024,"s":0.066,"kind":"window","text":"start #88: p50 36.7µs, p99 179.4µs, max 417.9µs","label":"start","window":88,"p50":36.7,"p99":179.4,"max":417.9}
+{"t":1794758853128,"s":3.17,"kind":"window","text":"start #89: p50 40.7µs, p99 195.9µs, max 219.3µs","label":"start","window":89,"p50":40.7,"p99":195.9,"max":219.3}
+{"t":1794758858521,"s":8.563,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1794758863444,"s":13.486,"kind":"window","text":"start #90: p50 38.8µs, p99 167.0µs, max 390.1µs","label":"start","window":90,"p50":38.8,"p99":167,"max":390.1}
+{"t":1794758873709,"s":23.751,"kind":"window","text":"start #91: p50 36.3µs, p99 177.3µs, max 327.7µs","label":"start","window":91,"p50":36.3,"p99":177.3,"max":327.7}
+{"t":1794758877168,"s":27.21,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1794758877219,"s":27.261,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794758883391,"s":33.433,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794758884069,"s":34.111,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794758885283,"s":35.325,"kind":"window","text":"start #92: p50 41.3µs, p99 134.7µs, max 336.3µs","label":"start","window":92,"p50":41.3,"p99":134.7,"max":336.3}
+{"t":1794758889299,"s":39.341,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1794758893489,"s":43.531,"kind":"label","text":"A: sim pilot hosts, sim AI and BeyondATC"}
+{"t":1794758895542,"s":45.584,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #93: p50 39.6µs, p99 164.5µs, max 345.7µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":93,"p50":39.6,"p99":164.5,"max":345.7}
+{"t":1794758905822,"s":55.864,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #94: p50 36.6µs, p99 186.2µs, max 318.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":94,"p50":36.6,"p99":186.2,"max":318.4}
+{"t":1794758916083,"s":66.125,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #95: p50 37.2µs, p99 143.9µs, max 318.6µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":95,"p50":37.2,"p99":143.9,"max":318.6}
+{"t":1794758926416,"s":76.458,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #96: p50 34.7µs, p99 200.1µs, max 380.3µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":96,"p50":34.7,"p99":200.1,"max":380.3}
+{"t":1794758936689,"s":86.731,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #97: p50 34.5µs, p99 278.4µs, max 592.2µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":97,"p50":34.5,"p99":278.4,"max":592.2}
+{"t":1794758945921,"s":95.963,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #98: p50 34.3µs, p99 181.9µs, max 264.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":98,"p50":34.3,"p99":181.9,"max":264}
+{"t":1794758957269,"s":107.311,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #99: p50 36.9µs, p99 188.7µs, max 1650.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":99,"p50":36.9,"p99":188.7,"max":1650.4}
+{"t":1794758969952,"s":119.994,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #100: p50 37.1µs, p99 90.6µs, max 195.4µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":100,"p50":37.1,"p99":90.6,"max":195.4}
+{"t":1794758982367,"s":132.409,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #101: p50 34.8µs, p99 193.8µs, max 204.0µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":101,"p50":34.8,"p99":193.8,"max":204}
+{"t":1794758992865,"s":142.907,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #102: p50 36.6µs, p99 165.2µs, max 947.1µs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":102,"p50":36.6,"p99":165.2,"max":947.1}
+{"t":1794758993345,"s":143.387,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1794758998639,"s":148.681,"kind":"window","text":"A: sim pilot hosts, sim AI and BeyondATC #0: p50 NaNµs, p99 NaNµs, max NaNµs","label":"A: sim pilot hosts, sim AI and BeyondATC","window":0,"p50":null,"p99":null,"max":null}
+{"t":1794759017980,"s":168.022,"kind":"lost","text":"the SimConnect connection closed"}

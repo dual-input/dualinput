@@ -31,6 +31,9 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > **Note**
 > In [features](#features), take-control has no desktop part, and uses the network too ([control log](../control/log.md#2026-11-04-stage-20s-take-control-passes-its-cases-on-the-bench-and-a-press-reaches-the-cue-about-80ms-later-past-the-50ms-budget)).
 
+> **Note**
+> In [the traffic and ATC switch](#the-traffic-and-atc-switch), the platform offers no request that claims several keys together: each switch's `session.share` claims or releases its own role's key alone (user, 2026-11-15).
+
 Dual Input's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
 A feature reads the platform's state, reaches other features only through moments the platform raises, and reaches the world only through outputs, and a feature that can block a request registers a guard rather than having the platform check on it.

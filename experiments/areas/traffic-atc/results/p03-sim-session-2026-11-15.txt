@@ -1,0 +1,101 @@
+p03: stage 18's session in the sim, on MSFS 2024 at KSFO in the Black Square Baron 58P, 2026-11-15, on our development
+machine. The real core (target/debug) hosted the session and flew; a bench core in the 58P on a stand-in sim played the
+second pilot (experiments/areas/traffic-atc/p03-sim-session/second-pilot.ts). Our package was installed with
+experiments/areas/avatars/p29-sim-session/update-timer.patch applied, so p29's update-times.mjs timed the module's update.
+reads.mjs read the sim's aircraft within 3km and ground objects within 1km every 10s, and scored up to 30 movers on FS
+Copilot's jitter measure. Times below are the PC's local time.
+
+Phases, as the probes labeled their windows:
+  A   the sim pilot hosts traffic and ATC, with the sim's AI traffic, multiplayer, and BeyondATC on
+  A2  the sim pilot hosts, with BeyondATC alone
+  B   the second pilot hosts FS Copilot's KSFO capture (record/traffic-atc/recordings/traffic-2026-09-06-15-58-19.ndjson
+      in the FS Copilot fork), so the real sim shows copies; B wrote nav alone, then every light, then flaps at 60
+  B2  the same, the stand-in holding each object at the capture's 2Hz states, lights and flaps from each state's phase
+  B3  the same, the stand-in moving each object between its states every 100ms
+
+reads.mjs's report (jitter: mean frame-to-frame change in displacement over mean displacement, 0 constant):
+  A: sim pilot hosts, sim AI and BeyondATC: 110 windows, median 131 aircraft, 919 mover scores, jitter median 0.09, worst 1.77; fps median 30.8
+  A: on foot: 10 windows, median 207 aircraft, 190 mover scores, jitter median 0.14, worst 0.31; fps median 27.1
+  A: pushback: 97 windows, median 209 aircraft, 971 mover scores, jitter median 0.18, worst 1.86; fps median 27.4
+  A2: BeyondATC alone: 124 windows, median 100 aircraft, 486 mover scores, jitter median 0.21, worst 2.01; fps median 30.6
+  B: none, before copies: 3 windows, median 1 aircraft, 0 mover scores; fps median 29.8
+  B: copies: 37 windows, median 106 aircraft, 91 mover scores, jitter median 0.17, worst 0.34; fps median 30.9
+  B: copies, all lights written: 28 windows, median 106 aircraft, 85 mover scores, jitter median 0.16, worst 0.29; fps median 30.6
+  B: copies, flaps 60 written: 19 windows, median 106 aircraft, 47 mover scores, jitter median 0.17, worst 0.31; fps median 30.9
+  B2: clean copies: 22 windows, median 106 aircraft, 50 mover scores, jitter median 0.18, worst 0.26; fps median 30.8
+  B3: smooth replay: 56 windows, median 106 aircraft, 149 mover scores, jitter median 0.16, p90 0.25, worst 0.43; fps median 30.9
+  A2's p90 was 0.38; B3's movers were 3 or 4 at a time.
+
+update-times.mjs's report (our module's whole update, each window 300 frames):
+  A: sim pilot hosts, sim AI and BeyondATC: 108 windows, median p50 39.3µs, median p99 165.2µs, worst p99 736.5µs
+  A2: BeyondATC alone: 121 windows, median p50 40.2µs, median p99 169.5µs, worst p99 342.5µs
+  B: copies: 38 windows, median p50 125.5µs, median p99 291.8µs, worst p99 423.6µs
+  B3: smooth replay: 54 windows, median p50 119.9µs, median p99 283.7µs, worst p99 476.6µs
+  With about 105 copies, 3 or 4 of them moving, the update took about 85µs more at p50 and about 120µs more at p99.
+
+The traffic host's stats line, every 30s, in phase A (real core's log):
+  objects=146 polls=59 dropped=0 poll_ms=21 read=19226 refused=0 sent=2211 bytes_per_s=3041
+  objects=144..152, polls=60, dropped=0, poll_ms=13..45, refused=0..1, bytes_per_s=2621..3314
+  objects=247..277 once BeyondATC filled KSFO: dropped=0, poll_ms=17..26, refused=0..2, bytes_per_s=4057..7118
+  The second pilot's stand-in held 147 copies, then 247.
+
+Lights and flaps, the probe's reads beside what the pilot saw (S/L/T/B/N: strobe, landing, taxi, beacon, nav):
+  A2, 68 of BeyondATC's parked aircraft, frozen: every LIGHT ... ON read 1; switches mostly 0 (nav 22, beacon 8, taxi 5).
+    Seen: parked aircraft dark apart from their logo lights.
+  A2, 8 moving: ON read all five; switches taxi 6, beacon 8, nav 8, strobe 2, landing 2.
+  FSLTL_FAIB_B738_UAL-United_NC [UAL1896], lined up, frozen: switches 11111; every flap variable 0 (handle index and
+    percent, the four surfaces' percent, angle, and index, the effective handle index). Seen: flaps out.
+  FSLTL_E170_SKW_Alaska [SKW3455], holding short: switches 00111, ON 11111, surfaces 0, handle index 1.
+    Seen: nav, beacon, and a light in front on; strobes off; flaps up.
+  FSLTL_FAIB_B739_UAL-United_SSWNC [UAL702], holding short: switches 00111, ON 11111, surfaces 0, handle index 1.
+    Seen: taxi, beacon, and nav on; flaps up. Lining up at 18 kt: every flap variable 0. Seen: flaps out.
+    Rolling at 106 kt: every flap variable 0.
+  FSLTL_FAIB_B739_UAL-United_SSWNC [UAL2498], entering 28L: switches 00111, then 11111. Seen: strobes on at the runway.
+  FSLTL_FAIB_B739_UAL-United_SSWNC [UAL1768], after landing: switches 11011, then 00011 as it stopped.
+
+Writes onto copies (phase B):
+  lights 31 on every copy: switches read strobe, landing, beacon, and nav on 102 of 102 parked copies, taxi on 98.
+    Seen: every copy lit, parked ones too.
+  lights 16, flaps 60 on every copy: the four surfaces read 60 on 97 of 101 parked copies and 4 of 4 movers, the handle 0.
+    Not seen: whether the flaps showed out.
+  A light that changed left the copy's other lights on: a copy crossing a runway switched its taxi light off and on with
+    nav and beacon staying on. Seen.
+  Every copy read its three freezes on; every moving copy read a body velocity. Copies showed on the Baron's TCAS. Seen.
+
+Stand-ins (lack, the second pilot's made-up titles beside the capture's gate):
+  the sim refused a copy's title, so traffic creates its stand-in title="P03 Absent Airliner"
+  the sim refused a copy's title, so traffic creates its stand-in title="P03 Absent Helicopter"
+  the sim refused a copy, so it's missing title="P03 Absent Helicopter"
+  No title of the capture's 140 objects was refused. The sim's 16 passive helicopters, from titles.mjs: Asobo
+  PassiveAircraft B204, B205, B212, B214, B222, B230, B412, B427, B429, B429 WLG, B430, B505, Helicopter, R22, R44, R66;
+  no Bell 407 (p03-titles-2026-11-15-17-48-57.ndjson).
+
+Ground objects within 1km in phase A: the sim's tugs ASO_Pushback_White (7 to 9) and ASO_Pushback_Blue (1), which the
+second pilot showed as copies; GSX's FSDT_Pushback_03_ASOBO_* and FSDT_Tug_M1A_* (about 60), which it didn't; the
+sim's ASO_Baggage_Cart01/02 and Aso_Baggage_Loader. K:TOGGLE_PUSHBACK on the 58P brought no tug; GSX's pushback of the
+58P brought FSDT_Tug_660_UA, FSDT_Tug_Endurance_UA, and FSDT_Pushback_M1A_UA.
+
+IS USER SIM: the 58P read 1 in all 8 windows while its pilot walked around it.
+
+ATC audio: the real core captured BeyondATC; the second pilot's playback stream, on the same speakers, ended each
+transmission with played=106 to 679, concealed=0, late=0, depth_ms=60. The pilot heard the copy as an echo come and go
+as its volume went between 0 and 100 every 4s.
+
+Memory: the real core, a debug build, held 47.9 MB private and 83.9 MB working set with about 105 copies.
+
+The sim crashed once, at 17:10:17, before anything was shared, about a minute after BeyondATC's first aircraft: the
+real core logged "our WASM module stopped with a routine live" 22s and 11s before its connections were lost, and the
+module's update timer restarted at 17:09:58.
+
+Second session, 19:27 to 19:52, after a rebuild: Traffic writes only each copy's changed values, two alike samples skip
+the interpolation, and the helicopter's stand-in is Asobo PassiveAircraft B505. Same setup, the capture replayed smoothly.
+update-times.mjs, our module's whole update, each window 300 frames:
+  C: copies, write only changes: p50 98.4 to 105.6µs, p99 181.1 to 366.7µs (about 105 copies, 2 to 4 moving)
+  C: none: p50 35.8 to 47.7µs, p99 120.8 to 390.8µs
+  C: copies again: p50 89.2 to 112.8µs, p99 164.9 to 425.8µs
+reads.mjs: every moving copy read a body velocity; movers scored 0.15 to 0.17; 30.3 to 31.0 fps.
+lack: the sim refused a copy's title, so traffic creates its stand-in title="P03 Absent Airliner"
+      the sim refused a copy's title, so traffic creates its stand-in title="P03 Absent Helicopter"
+      (no "missing" line; the probe listed Asobo PassiveAircraft B505 among the stand-ins)
+The Traffic tab, seen: the rules clear of the packs card; "2 aircraft from Second pilot are missing or shown
+incorrectly"; the plane in the tab bar, with its dot, and in the header.

@@ -185,6 +185,19 @@ unsafe extern "system" {
         at: SIMCONNECT_DATA_INITPOSITION,
         request: SIMCONNECT_DATA_REQUEST_ID,
     ) -> HRESULT;
+    fn SimConnect_AICreateNonATCAircraft_EX1(
+        handle: HANDLE,
+        title: *const c_char,
+        livery: *const c_char,
+        tail: *const c_char,
+        at: SIMCONNECT_DATA_INITPOSITION,
+        request: SIMCONNECT_DATA_REQUEST_ID,
+    ) -> HRESULT;
+    fn SimConnect_AIReleaseControl(
+        handle: HANDLE,
+        object: SIMCONNECT_OBJECT_ID,
+        request: SIMCONNECT_DATA_REQUEST_ID,
+    ) -> HRESULT;
     fn SimConnect_AIRemoveObject(
         handle: HANDLE,
         object: SIMCONNECT_OBJECT_ID,
@@ -360,29 +373,54 @@ pub(crate) unsafe fn make(handle: HANDLE, op: Op) -> HRESULT {
             } => {
                 let title = c_string(&title);
                 let livery = c_string(&livery);
-                let at = SIMCONNECT_DATA_INITPOSITION {
-                    Latitude: at.latitude,
-                    Longitude: at.longitude,
-                    Altitude: at.altitude,
-                    Pitch: at.pitch,
-                    Bank: at.bank,
-                    Heading: at.heading,
-                    OnGround: DWORD::from(at.on_ground),
-                    Airspeed: at.airspeed,
-                };
                 SimConnect_AICreateSimulatedObject_EX1(
                     handle,
                     title.as_ptr(),
                     livery.as_ptr(),
-                    at,
+                    init_position(at),
                     request,
                 )
+            }
+            Op::AICreateNonAtcAircraft {
+                title,
+                livery,
+                tail,
+                at,
+                request,
+            } => {
+                let title = c_string(&title);
+                let livery = c_string(&livery);
+                let tail = c_string(&tail);
+                SimConnect_AICreateNonATCAircraft_EX1(
+                    handle,
+                    title.as_ptr(),
+                    livery.as_ptr(),
+                    tail.as_ptr(),
+                    init_position(at),
+                    request,
+                )
+            }
+            Op::AIReleaseControl { object, request } => {
+                SimConnect_AIReleaseControl(handle, object, request)
             }
             Op::AIRemoveObject { object, request } => {
                 SimConnect_AIRemoveObject(handle, object, request)
             }
             Op::CameraGet { referential } => SimConnect_CameraGet(handle, referential),
         }
+    }
+}
+
+fn init_position(at: sim_client::InitPosition) -> SIMCONNECT_DATA_INITPOSITION {
+    SIMCONNECT_DATA_INITPOSITION {
+        Latitude: at.latitude,
+        Longitude: at.longitude,
+        Altitude: at.altitude,
+        Pitch: at.pitch,
+        Bank: at.bank,
+        Heading: at.heading,
+        OnGround: DWORD::from(at.on_ground),
+        Airspeed: at.airspeed,
     }
 }
 

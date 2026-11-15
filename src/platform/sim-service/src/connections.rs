@@ -84,6 +84,8 @@ pub(crate) struct Holder {
     /// Each routine whose reports the unit reads, by the request they come under: the
     /// routine's name, and the handle of the unit's latest `reports` call for it.
     pub(crate) reports: BTreeMap<u32, (&'static str, Handle)>,
+    /// Each poll's handle by its request, until its last answer.
+    pub(crate) polls: BTreeMap<u32, Handle>,
     /// The tag of the unit's next call, from the unit's own count, and each recent call's
     /// origin by its tag.
     next_tag: u64,
@@ -107,6 +109,7 @@ impl Holder {
             input_reads: BTreeMap::new(),
             inputs: BTreeMap::new(),
             reports: BTreeMap::new(),
+            polls: BTreeMap::new(),
             next_tag: 0,
             tags: BTreeMap::new(),
         }

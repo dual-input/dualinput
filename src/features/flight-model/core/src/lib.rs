@@ -15,28 +15,24 @@
 //! stays in the flight (record/areas/profiles/02-units.md, "The pin"). Register it after
 //! every crate of the platform.
 
-mod offset;
-
 use std::time::Duration;
 
 use kernel::{Cx, Handle, Registry, TimerId};
 use messages::flight_model::slots::{FollowSlot, LeadSlot};
 use messages::flight_model::{self as wire, PERIOD, Sample};
 use messages::net::PilotId;
-use network::{NetUnit, Network, Sender, To};
+use network::{NetUnit, Network, Sender, Slewed, To};
 
 use session::{ControlPassed, FlightChanged, Session, SessionEnded};
 use sim_service::{SimAwareness, SimChanged, SimCx, SimEvent, SimUnit};
 
-use crate::offset::Applied;
-
-/// How far behind the samples `Follow` draws the aircraft, in µs, the delay of FS Copilot's
+/// How far behind the samples `Follow` draws the aircraft, in Âµs, the delay of FS Copilot's
 /// module (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.h`, `k_delay_sec`).
 /// Each feed carries it, so a later delay that follows the path changes only this crate.
 pub const DELAY: u64 = 400_000;
 
 /// How long the flying sim's pause goes with no report before this core sends the last
-/// sample again, in µs. Whether our module's update runs in a pause is unmeasured, and when
+/// sample again, in Âµs. Whether our module's update runs in a pause is unmeasured, and when
 /// it does, `Lead` keeps reporting and nothing is sent again.
 const QUIET: u64 = 100_000;
 
@@ -75,7 +71,7 @@ struct Following {
     /// The newest stamp taken, on the PF's counter.
     newest: u64,
     /// The PF's clock offset as this core applies it, once the network has given one.
-    offset: Option<Applied>,
+    offset: Slewed,
 }
 
 impl Following {
@@ -95,7 +91,7 @@ impl Following {
         if from != self.pf || sample.at <= self.newest {
             return None;
         }
-        let offset = offset::apply(&mut self.offset, estimate?, now);
+        let offset = self.offset.apply(estimate?, now);
         self.newest = sample.at;
         // The stamp moves from the PF's counter onto this core's, the one `Follow` draws on.
         Some(FollowSlot {
@@ -183,7 +179,7 @@ impl FlightModel {
                 self.running = Running::Follow(Following {
                     pf,
                     newest: 0,
-                    offset: None,
+                    offset: Slewed::default(),
                 });
             }
         }
@@ -296,7 +292,7 @@ mod tests {
         Following {
             pf: PF,
             newest: 0,
-            offset: None,
+            offset: Slewed::default(),
         }
     }
 

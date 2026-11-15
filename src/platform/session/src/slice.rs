@@ -1,6 +1,7 @@
-//! What the apps see of the session: its slice, and "Share my traffic and ATC", the switch
-//! that claims every role's key at once (record/areas/interface/01-apps.md, "Slices and
-//! commands"; record/areas/architecture/02-code-map.md, "The traffic and ATC switch").
+//! What the apps see of the session: its slice, and each sharing card's switch, which claims
+//! its role's key (record/areas/interface/01-apps.md, "Slices and commands";
+//! record/areas/interface/decisions.md, "Traffic and ATC audio are shared apart, each by a
+//! switch of its own").
 
 use kernel::{Cx, Verdict, View};
 use messages::net::PilotId;
@@ -86,8 +87,10 @@ fn holder(me: &Session, key: u16) -> Option<PilotId> {
         .flatten()
 }
 
-/// The switch as this pilot would turn it on now: every role's key naming this pilot, which
-/// the kernel keeps a verdict on, so the switch says why not before it's touched.
+/// The sharing cards' switches as this pilot would turn them on now: every role's key naming
+/// this pilot, which the kernel keeps a verdict on, so a switch says why not before it's
+/// touched. A guard refuses a role's key whether the request writes it alone or with others, so
+/// one verdict serves every switch.
 pub(crate) fn build_share(me: &Session, _: &View) -> Option<WriteKeys> {
     let mine = me.me()?;
     let writes: Vec<(u16, Option<Vec<u8>>)> = me
@@ -99,26 +102,27 @@ pub(crate) fn build_share(me: &Session, _: &View) -> Option<WriteKeys> {
     (!writes.is_empty()).then_some(WriteKeys { writes })
 }
 
-/// `session.share`: on claims every role's key for this pilot, from whoever holds it, and off
-/// releases each this pilot holds.
+/// `session.share`: on claims the role's key for this pilot, from whoever holds it, and off
+/// releases it if this pilot holds it.
 pub(crate) fn share(me: &mut Session, args: Share, cx: &mut Cx) -> Result<(), String> {
     let Some(mine) = me.me() else {
         return Err("There's no session".into());
     };
-    let request = if args.on {
+    if !me.declared.get(&args.key).is_some_and(|d| d.names_member) {
+        return Err(format!("No feature has a role with the key {}", args.key));
+    }
+    let value = if args.on {
         if let Some(Verdict::Denied(reasons)) = cx.verdict::<WriteKeys>() {
             return Err(reasons.join(". "));
         }
-        build_share(me, &cx.view()).ok_or("No feature has a role to share")?
+        Some(crate::encode(&Some(mine)))
+    } else if holder(me, args.key) == Some(mine) {
+        None
     } else {
-        let writes = me
-            .declared
-            .iter()
-            .filter(|(key, d)| d.names_member && holder(me, **key) == Some(mine))
-            .map(|(&key, _)| (key, None))
-            .collect();
-        WriteKeys { writes }
+        return Ok(());
     };
-    cx.ask(request);
+    cx.ask(WriteKeys {
+        writes: vec![(args.key, value)],
+    });
     Ok(())
 }

@@ -22,6 +22,8 @@ const UNITS: &[fn(&mut Registry)] = &[
     take_control::register,
     avatars::register,
     flight_model::register,
+    traffic::register,
+    atc_audio::register,
 ];
 
 fn main() -> ExitCode {

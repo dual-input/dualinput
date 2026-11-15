@@ -1,0 +1,203 @@
+diff --git a/src/platform/routine-host/src/lib.rs b/src/platform/routine-host/src/lib.rs
+index 778524d..6793648 100644
+--- a/src/platform/routine-host/src/lib.rs
++++ b/src/platform/routine-host/src/lib.rs
+@@ -290,6 +290,10 @@ pub struct Host {
+     /// The frame's reports, which the module's edge takes with `reports` and writes into
+     /// each routine's report slot.
+     reports: Vec<(RoutineId, Vec<u8>)>,
++    /// p04: the module's clock in ns, and the last frame's time in `Traffic`'s frame, in every
++    /// other routine's, and in carrying out their wants.
++    pub clock_ns: Option<fn() -> u64>,
++    pub parts: [u64; 3],
+ }
+ 
+ impl Host {
+@@ -317,6 +321,8 @@ impl Host {
+             writes: Vec::new(),
+             keys: Vec::new(),
+             fires: Vec::new(),
++            clock_ns: None,
++            parts: [0; 3],
+             reports: Vec::new(),
+         }
+     }
+@@ -414,15 +420,25 @@ impl Host {
+             reports: &mut self.reports,
+             running: (messages::module::HOLD, 0),
+         };
++        let ns = self.clock_ns.unwrap_or(|| 0);
++        let mut parts = [0u64; 3];
+         for slot in &mut self.slots {
+             if slot.running.is_some() && clock.saturating_sub(slot.written) > UNFED {
+                 slot.running = None;
+             }
+             if let Some(running) = &mut slot.running {
+                 want.running = (slot.kind.id, slot.kind.report);
++                let started = ns();
+                 running.frame(&frame, &mut want);
++                let took = ns().saturating_sub(started);
++                if slot.kind.id == messages::traffic::TRAFFIC {
++                    parts[0] += took;
++                } else {
++                    parts[1] += took;
++                }
+             }
+         }
++        let wants_started = ns();
+         let freeze = want.freeze;
+         for w in &self.writes {
+             if let (Some(space), Some(ids)) =
+@@ -441,6 +457,8 @@ impl Host {
+             }
+         }
+         self.freeze.carry_out(freeze, sim);
++        parts[2] = ns().saturating_sub(wants_started);
++        self.parts = parts;
+         self.status(clock)
+     }
+ 
+diff --git a/src/sim-package/wasm-module/src/lib.rs b/src/sim-package/wasm-module/src/lib.rs
+index 0ff0c49..8c1ed2e 100644
+--- a/src/sim-package/wasm-module/src/lib.rs
++++ b/src/sim-package/wasm-module/src/lib.rs
+@@ -50,9 +50,12 @@ impl Module {
+     }
+ 
+     /// One frame: the core's writes go to the routine host before its frame, so each routine
+-    /// runs on every feed that arrived since the last frame.
+-    fn frame(&mut self) {
++    /// runs on every feed that arrived since the last frame. Returns p04's time taking them,
++    /// in ns.
++    fn frame(&mut self) -> u64 {
++        let started = clock_ns();
+         let clock = self.take_writes();
++        let took = clock_ns().saturating_sub(started);
+         let status = self.host.frame(clock, &mut self.aircraft);
+         for (routine, report) in self.host.reports() {
+             self.connection.write_report(routine, &report);
+@@ -60,6 +63,7 @@ impl Module {
+         if let Some(status) = status {
+             self.connection.write_status(&status);
+         }
++        took
+     }
+ }
+ 
+@@ -89,7 +93,8 @@ pub extern "C" fn module_init() {
+     // "Left open"). So a second call stops the first's module, as `module_deinit` would,
+     // rather than leave its connection open.
+     module_deinit();
+-    let host = Host::new(routines::list(), messages::SLOTS_HASH, messages::VERSION);
++    let mut host = Host::new(routines::list(), messages::SLOTS_HASH, messages::VERSION);
++    host.clock_ns = Some(clock_ns);
+     // Without a connection the module runs nothing and writes no status, so the core reports
+     // it as missing.
+     let Some(connection) = Connection::open(&host.slots(), &host.report_slots()) else {
+@@ -110,11 +115,105 @@ pub extern "C" fn module_init() {
+ #[unsafe(no_mangle)]
+ #[allow(non_snake_case)]
+ pub extern "C" fn Update_StandAlone(_: f32) {
++    let started = clock_ns();
++    let mut take = 0;
++    let mut parts = [0; 3];
+     with_module(|module| {
+         if let Some(module) = module {
+-            module.frame();
++            take = module.frame();
++            parts = module.host.parts;
+         }
+     });
++    let whole = clock_ns().saturating_sub(started);
++    let [traffic, others, wants] = parts;
++    TIMER.with(|timer| {
++        if let Ok(mut timer) = timer.try_borrow_mut() {
++            timer.add([whole, take, traffic, others, wants]);
++        }
++    });
++}
++
++/// p04: how long each part of the module's update took, over a window of frames, as `L:`
++/// variables experiments/areas/traffic-atc/p04-traffic-time/parts.mjs reads, in ns:
++/// DUALINPUT_P04_<PART>_P50 and _P99 for each of `PARTS`, and DUALINPUT_P04_WINDOW, which
++/// counts windows. The sim's WASM Debug window reads 0ms for a standalone module
++/// (record/areas/core/log.md, 2026-10-21), so this is the one way we have to time it.
++const PARTS: [&str; 5] = ["WHOLE", "TAKE", "TRAFFIC", "OTHERS", "WRITES"];
++
++struct Timer {
++    took: [Vec<u64>; 5],
++    ids: Option<(Vec<routine_host::Ids>, routine_host::Ids)>,
++    windows: u64,
++}
++
++impl Timer {
++    const FRAMES: usize = 300;
++
++    fn add(&mut self, parts: [u64; 5]) {
++        for (list, took) in self.took.iter_mut().zip(parts) {
++            list.push(took);
++        }
++        if self.took.first().map_or(0, Vec::len) < Self::FRAMES {
++            return;
++        }
++        if self.ids.is_none() {
++            let id = |name: String| {
++                vars::look_up(
++                    0,
++                    &routine_host::Named {
++                        space: routine_host::Space::L,
++                        name,
++                        unit: "number".to_string(),
++                    },
++                )
++            };
++            let parts: Option<Vec<_>> = PARTS
++                .iter()
++                .flat_map(|p| [format!("DUALINPUT_P04_{p}_P50"), format!("DUALINPUT_P04_{p}_P99")])
++                .map(id)
++                .collect();
++            if let (Some(parts), Some(window)) = (parts, id("DUALINPUT_P04_WINDOW".to_string())) {
++                self.ids = Some((parts, window));
++            }
++        }
++        self.windows += 1;
++        let mut values = Vec::new();
++        for list in &mut self.took {
++            list.sort_unstable();
++            let at = |share: usize| {
++                list.get(share * (Self::FRAMES - 1) / 100)
++                    .copied()
++                    .unwrap_or(0) as f64
++            };
++            values.push(at(50));
++            values.push(at(99));
++            list.clear();
++        }
++        if let Some((parts, window)) = &self.ids {
++            for (ids, value) in parts.iter().zip(values) {
++                vars::set(0, routine_host::Space::L, *ids, value);
++            }
++            vars::set(0, routine_host::Space::L, *window, self.windows as f64);
++        }
++    }
++}
++
++thread_local! {
++    static TIMER: RefCell<Timer> = const {
++        RefCell::new(Timer {
++            took: [Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new()],
++            ids: None,
++            windows: 0,
++        })
++    };
++}
++
++fn clock_ns() -> u64 {
++    const MONOTONIC: u32 = 1;
++    let mut ns = 0;
++    // SAFETY: the sim writes the time into `ns`, which outlives the call.
++    unsafe { clock_time_get(MONOTONIC, 1, &mut ns) };
++    ns
+ }
+ 
+ /// The sim calls this as it unloads the module.

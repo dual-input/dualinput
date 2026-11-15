@@ -765,6 +765,20 @@ The stage closes on the whole bench, as [working a stage](#working-a-stage) has 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the `take-control` scenario among them; on the bench, a press on one core's stand-in helper passes control, and both machines play the cue and show who has control; and the [control log](../control/log.md) has an entry for the cases and the budget.
 Done on 2026-11-04.
 
+## 14b State sync's writes that read another value
+
+Designs first: why 14 of state sync's writes in the first flight with friends read another value 1.5s later, 11 of them on the following machine, the elevator trim and the autopilot modes among them ([sync log](../sync/log.md#2026-11-12-in-the-first-flight-with-friends-14-of-state-syncs-writes-read-another-value-15s-later-11-on-the-following-machine-the-elevator-trim-and-autopilot-modes-among-them)), and whether they're why the aircraft drifted, mainly sideways, after a handover with the autopilot engaged, which the [flight-model log](../flight-model/log.md#2026-11-12-two-pilots-on-two-pcs-flew-one-58p-smoothly-through-13-handovers-over-a-relayed-link-and-after-a-handover-with-the-autopilot-engaged-the-aircraft-drifted) leaves to this work (user, 2026-11-12).
+Then which unit fixes it, since the sync log's leads sit in the following sim's own autopilot, the 58P profile's entries, and the sync engine's `CHECK`, one read 1.5s after a write, which flags a value that lands later.
+The fix comes from a session in the sim that makes both happen again.
+Builds: that fix, in the units its design names.
+Needs: 14 and 16, since `Follow` flies the following machine, where 11 of the 14 were.
+
+## 16b A following pilot's camera
+
+Designs first: why a following pilot's core reads its camera 1m to 3m behind the pilot's seat in flight, so the crew sees that pilot as a head in the cabin, and the click's ray, cast from that camera, may put their hand in the wrong place too, and how avatars or flight-model sync fixes both, from the read in the sim the log names as what would settle it ([avatars log](../avatars/log.md#2026-11-12-on-a-following-machine-in-flight-the-camera-reads-1m-to-3m-behind-the-pilots-seat-so-the-crew-sees-that-pilot-as-a-head-in-the-cabin)).
+Builds: that fix, in the units its design names.
+Needs: 16 and 17.
+
 ## 20b The sounds
 
 Designs first: the style of Dual Input's sounds, which the user picks by ear from a page of a few contrasting styles, each playing the same two cues, with a licensed pack or a sound designer as the way out if none is good enough (user, 2026-11-04).

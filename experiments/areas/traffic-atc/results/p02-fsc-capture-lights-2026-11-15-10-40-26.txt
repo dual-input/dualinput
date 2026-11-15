@@ -1,0 +1,49 @@
+traffic-2026-09-06-15-03-11.ndjson
+     1  AIRCRAFT moving l=29 e=-
+     7  AIRCRAFT moving l=31 e=-
+   101  AIRCRAFT parked l=31 e=-
+traffic-2026-09-06-15-24-05.ndjson
+     1  AIRCRAFT moving l=29 e=1
+     1  AIRCRAFT moving l=31 e=0
+     1  AIRCRAFT moving l=31 e=15
+    15  AIRCRAFT moving l=31 e=3
+   101  AIRCRAFT parked l=31 e=0
+     2  AIRCRAFT parked l=31 e=3
+traffic-2026-09-06-15-25-00.ndjson
+     1  AIRCRAFT moving l=29 e=1
+     1  AIRCRAFT moving l=31 e=0
+     1  AIRCRAFT moving l=31 e=15
+    15  AIRCRAFT moving l=31 e=3
+   102  AIRCRAFT parked l=31 e=0
+     1  AIRCRAFT parked l=31 e=3
+    10  GROUND parked l=0 e=0
+     1  GROUND parked l=0 e=15
+traffic-2026-09-06-15-52-24.ndjson
+     2  AIRCRAFT moving l=31 e=0
+    10  AIRCRAFT moving l=31 e=3
+   103  AIRCRAFT parked l=31 e=0
+     1  AIRCRAFT parked l=31 e=3
+    14  GROUND parked l=0 e=0
+     1  GROUND parked l=0 e=15
+traffic-2026-09-06-15-58-19-gated.ndjson
+     1  AIRCRAFT moving l=29 e=1
+     1  AIRCRAFT moving l=31 e=0
+    18  AIRCRAFT moving l=31 e=3
+   100  AIRCRAFT parked l=31 e=0
+     2  AIRCRAFT parked l=31 e=3
+    16  GROUND parked l=0 e=0
+     2  GROUND parked l=0 e=15
+traffic-2026-09-06-15-58-19.ndjson
+     1  AIRCRAFT moving l=29 e=1
+     1  AIRCRAFT moving l=31 e=0
+    18  AIRCRAFT moving l=31 e=3
+   100  AIRCRAFT parked l=31 e=0
+     2  AIRCRAFT parked l=31 e=3
+    16  GROUND parked l=0 e=0
+     2  GROUND parked l=0 e=15
+traffic-2026-09-06-16-47-06.ndjson
+     9  AIRCRAFT moving l=31 e=3
+    64  AIRCRAFT parked l=31 e=0
+traffic-2026-09-06-16-52-35.ndjson
+    12  AIRCRAFT moving l=31 e=3
+    64  AIRCRAFT parked l=31 e=0

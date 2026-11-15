@@ -4,6 +4,28 @@ What our reads and probes found about carrying one pilot's AI traffic and ATC au
 Our FS Copilot fork built both, and its record, `record/traffic-atc/` in the FS Copilot fork, holds the measurements made before this area existed: smooth copies from freezing each object and writing it every frame, a 2Hz poll, a gate that sends about 20% of samples, and ATC audio about 130ms from capture to speaker.
 The probes are in [experiments/areas/traffic-atc](../../../experiments/areas/traffic-atc), and their raw output is in [experiments/areas/traffic-atc/results](../../../experiments/areas/traffic-atc/results).
 
+## 2026-11-15: FS Copilot's host read all five lights on for every parked AI aircraft, so its copies lit up at the gate
+
+**Asked:** why an FS Copilot 1.3 tester flying SayIntentions' traffic saw every parked copy with its landing lights on, while the copies in flight looked right and both pilots had the same FSLTL package (reported by the tester, relayed by the user on 2026-11-15), and whether [stage 18's design](01-traffic-and-atc.md) carries the same fault.
+
+**Expected:** the host to read a parked aircraft's lights as off, and the fault to be in what the receiver writes.
+
+**Found:**
+
+- FS Copilot's host reads `LIGHT STROBE ON`, `LIGHT LANDING ON`, `LIGHT TAXI ON`, `LIGHT BEACON ON`, and `LIGHT NAV ON`, and its receiver writes `LIGHT STROBE`, `LIGHT LANDING`, `LIGHT TAXI`, `LIGHT BEACON`, and `LIGHT NAV`, the switches, once after the create and again on each change (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficDefinitions.cs`, `ObjectState` and `Appearance`, and `TrafficReceiver.cs`, `Dress`).
+- In FS Copilot's seven traffic captures from 2026-09-06, and a gated copy of one, every parked AI aircraft, one whose last ground speed was under 1kt, read all five `ON` variables as 1: 64 to 104 aircraft a capture, and in the six captures that recorded engines, at most two of them a capture with an engine running ([p02's output](../../../experiments/areas/traffic-atc/results/p02-fsc-capture-lights-2026-11-15-10-40-26.txt)).
+  The moving aircraft read all five on too, except one aircraft in each of four captures with its landing light off, and the ground objects read none.
+- FS Copilot never checked the lights it wrote: its log says only that the sim accepted them, while it read the engines back after writing them (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 0 capture read; TrafficInject built and smoke-tested — Q01, Q08 settled" and "2026-09-06 · First visual replay; engines, pushback, ground vehicles").
+
+**Changed:** the report implies the host's sim drew its parked aircraft dark (unverified), which would mean a parked AI aircraft's `ON` variables don't follow what the sim draws, while the receiver writes what they read into each copy's switches.
+[Polling](01-traffic-and-atc.md#polling) reads FS Copilot's state, so it would light every parked copy the same way.
+Stage 18's session in the sim reads the switches beside the `ON` variables on parked and moving AI aircraft at a busy gate, compares both with what the sim draws, and fixes the poll's light variables by the result.
+The same reads compare `FLAPS HANDLE INDEX` with the flap surfaces, `TRAILING EDGE FLAPS LEFT PERCENT` and the others, since nothing measured says an AI aircraft's handle follows its surfaces.
+
+**Affects:** [01-traffic-and-atc](01-traffic-and-atc.md)'s polling and its dress, through a note.
+
+**Evidence:** [p02's output](../../../experiments/areas/traffic-atc/results/p02-fsc-capture-lights-2026-11-15-10-40-26.txt), from [p02-fsc-capture-lights.mjs](../../../experiments/areas/traffic-atc/p02-fsc-capture-lights.mjs).
+
 ## 2026-10-17: FS Copilot's code holds the traffic and ATC mechanisms 6.14 carries over, p10's ground objects at EGLL were GSX's gate signs and the sim's pushback tugs, and SayIntentions' program is SayIntentionsAI
 
 **Asked:** for node 6.14's [design](01-traffic-and-atc.md), how FS Copilot's traffic and ATC code works beyond what its record says, what the SDK documents about AI objects, what our own probes measured of them, and which ground objects a traffic host's poll finds at a busy airport.

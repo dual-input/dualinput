@@ -143,13 +143,13 @@ impl Routine for Traffic {
         let Some(names) = self.names else {
             return;
         };
-        // Each write crosses into the sim, which made the writes most of `Traffic`'s time in
-        // the sim: about 85µs a frame for 4 moving copies' 48 writes, where the same frames took
-        // 4.8µs natively (record/areas/traffic-atc/log.md, 2026-11-15). A frozen copy holds its
-        // pose, so each frame writes only the values that changed: a copy on the ground mostly
-        // moves and turns, and its velocities change at the samples alone. A parked copy's pose
-        // doesn't change, so it costs no writes at all. Whether a frozen copy keeps written
-        // velocities between frames, which its animations and sounds read, is unmeasured.
+        // Each write crosses into the sim, so a frame writes only the values that changed. A
+        // frozen copy holds its pose and its written velocities, which its animations and sounds
+        // read: a copy on the ground mostly moves and turns, its velocities change at the samples
+        // alone, and a parked copy costs no writes at all. In the sim, with about 105 copies, 4
+        // of them moving, `Traffic` took about 85µs a frame writing every value and about 60µs
+        // writing only what changed, where the same frames took under 5µs natively
+        // (record/areas/traffic-atc/log.md, 2026-11-15).
         let written = &mut self.written;
         self.playout
             .each(frame.now.saturating_sub(DELAY), |object, drawn| {

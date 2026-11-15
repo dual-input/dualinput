@@ -4,6 +4,24 @@ What our reads and probes found about carrying one pilot's AI traffic and ATC au
 Our FS Copilot fork built both, and its record, `record/traffic-atc/` in the FS Copilot fork, holds the measurements made before this area existed: smooth copies from freezing each object and writing it every frame, a 2Hz poll, a gate that sends about 20% of samples, and ATC audio about 130ms from capture to speaker.
 The probes are in [experiments/areas/traffic-atc](../../../experiments/areas/traffic-atc), and their raw output is in [experiments/areas/traffic-atc/results](../../../experiments/areas/traffic-atc/results).
 
+## 2026-11-16: The whole bench passed 175 of 176 cases on stage 18's committed tree, the desktop app's idle CPU over its 0.2% as on every run the day before
+
+**Asked:** whether the whole bench passes on the tree committed for stage 18, with its late changes in: `Traffic` writing only what changed, the playout's alike samples, the B505 stand-in, and the kit's rooms measuring only on a shown page.
+
+**Expected:** every case to pass.
+
+**Found:** on our development machine, with other programs taking about 12% of its CPU:
+
+- 175 of 176 cases passed in 51 minutes, every `traffic` and `atc-audio` case among them.
+- ATC audio took 7,082 bytes a second while ATC talks, 141.6 bytes a frame through the relay, against about 7KB/s.
+- The one failure: the desktop app, with no window and the sim closed, used 0.260% of one CPU core over 60s against 0.2%, and held 4.06 MB. It read 0.24% to 0.29% on every run of 2026-11-15, where stage 15 read 0.14% to 0.15% ([install log](../install/log.md#2026-11-11-the-bench-read-the-desktop-apps-cpu-in-whole-156ms-clock-ticks-read-from-cycles-the-app-uses-014-to-015-of-a-core)); stage 18 changes nothing the desktop app runs, and why it reads higher is unknown.
+
+**Changed:** nothing.
+
+**Affects:** the plan's stage 18, whose bench this is, and the desktop app's CPU budget, stage 15's.
+
+**Evidence:** `node tools/bench.ts` on 2026-11-16.
+
 ## 2026-11-15: Writing only what changed, `Traffic` took about 60µs a frame with 105 copies, the copies kept their velocities, and the B505 created as the helicopter's stand-in
 
 **Asked:** the checks the first session left for a rebuild: `Traffic`'s time once each copy writes only the values that changed and two alike samples skip the interpolation, whether a frozen copy keeps written velocities between frames, the B505 as the helicopter's stand-in, and the Traffic tab once the kit's rooms measure only on a shown page.

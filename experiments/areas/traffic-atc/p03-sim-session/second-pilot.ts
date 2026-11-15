@@ -14,6 +14,8 @@
  * Each line appended to the commands file is one command:
  *
  *   host             takes Share my traffic, and plays the capture as the stand-in's AI traffic, over and over
+ *   movers <n>       takes Share my traffic, and keeps n airliners taxiing circles near the capture's gate, every one
+ *                    moving every frame, beside the capture if it plays; `movers 0` takes them away
  *   lights <mask>    every played aircraft's light switches from then: strobe 1, landing 2, taxi 4, beacon 8, nav 16,
  *                    or `auto` for its phase's, which is what the play starts with
  *   flaps <percent>  every played aircraft's four flap surfaces from then, or `auto` for its phase's
@@ -182,6 +184,51 @@ async function share(label: string, on: boolean): Promise<void> {
 let lights: number | null = null
 let flaps: number | null = null
 let playing: { started: number; next: Map<number, number>; shown: Set<number> } | null = null
+let sharing = false
+
+/**
+ * The movers: `Traffic`'s budget counts 25 copies moving every frame, where the capture holds 3 or 4 moving at a time.
+ * Mover i taxis a circle of 50m at 8 m/s, about 15.5 kt, a phase apart from the others, in a grid of five a row 150m
+ * apart around the capture's gate, with the title and dress of the capture's first airliner.
+ */
+let movers = 0
+const MOVER = 0x7e00_0000
+const MOVER_TEXTS = [...objects.values()].find((o) => o.kind === "aircraft" && o.texts.length > 0)?.texts ?? []
+const MOVERS_FROM = performance.now()
+
+function moverState(i: number): Record<string, number> {
+  const [radius, speed] = [50, 8]
+  const theta = i * 2.4 + (speed / radius) * ((performance.now() - MOVERS_FROM) / 1_000)
+  const lat = 37.6225 - Math.floor(i / 5) * 0.00135
+  const lon = -122.382 + (i % 5) * 0.0017
+  return {
+    lat: lat + (radius * Math.sin(theta)) / 111_000,
+    lon: lon + (radius * Math.cos(theta)) / (111_000 * Math.cos((lat * Math.PI) / 180)),
+    // A circle run anticlockwise heads 90° left of the bearing from its center.
+    h: ((((-theta * 180) / Math.PI) % 360) + 360) % 360,
+    alt: 28.8,
+    vbz: speed * 3.281,
+    gs: speed * 1.944,
+    g: 1,
+    gear: 1,
+    ne: 2,
+    e: 3,
+  }
+}
+
+/** How many movers the stand-in has been handed, so each one's identity goes with its first act alone, as the play's do. */
+let moversShown = 0
+
+function moverActs(): AiObject[] {
+  const acts = Array.from({ length: movers }, (_, i) => ({
+    id: MOVER + i,
+    kind: "aircraft" as const,
+    numbers: numbers(moverState(i)),
+    texts: i < moversShown ? [] : MOVER_TEXTS.map(([k, v]): [string, string] => [k, k === "A:ATC ID" ? `N${100 + i}MV` : v]),
+  }))
+  moversShown = movers
+  return acts
+}
 
 /** The switches a crew sets for the state's phase: nav always, beacon with an engine running, taxi lights while taxiing, strobes and landing lights from the takeoff roll on. */
 function phaseLights(s: Record<string, number>): number {
@@ -239,6 +286,8 @@ const towards = (a: number, b: number, f: number): number => {
  * copy paused, then caught up. A parked object goes out only as it passes a state.
  */
 function step(): void {
+  const moving = moverActs()
+  for (let i = 0; i < moving.length; i += 100) second.act({ act: "ai", objects: moving.slice(i, i + 100) })
   if (!playing) return
   const at = performance.now() - playing.started
   if (at > length) {
@@ -332,8 +381,18 @@ async function command(line: string): Promise<boolean> {
   const [a] = rest.map(Number)
   say(`> ${line.trim()}`)
   if (word === "host") {
-    await share(TRAFFIC, true)
+    if (!sharing) await share(TRAFFIC, true)
+    sharing = true
     playing = { started: performance.now(), next: new Map(), shown: new Set() }
+  } else if (word === "movers") {
+    if (!sharing) await share(TRAFFIC, true)
+    sharing = true
+    const was = movers
+    movers = Math.max(0, Math.min(100, a ?? 25))
+    const gone = Array.from({ length: Math.max(0, was - movers) }, (_, i) => MOVER + movers + i)
+    if (gone.length) second.act({ act: "ai-gone", ids: gone })
+    moversShown = Math.min(moversShown, movers)
+    say(`${movers} movers`)
   } else if (word === "lights") {
     lights = rest[0] === "auto" ? null : (a ?? 16)
     dressAgain()
@@ -344,8 +403,12 @@ async function command(line: string): Promise<boolean> {
   else if (word === "volume") await slices.ok("clients.set-setting", { key: "atc-audio.volume", value: a ?? 100 })
   else if (word === "stop") {
     await share(TRAFFIC, false)
-    if (playing) second.act({ act: "ai-gone", ids: [...playing.shown, 0x7f00_0001, 0x7f00_0002] })
+    sharing = false
+    const shown = playing ? [...playing.shown] : []
+    second.act({ act: "ai-gone", ids: [...shown, ...Array.from({ length: movers }, (_, i) => MOVER + i), 0x7f00_0001, 0x7f00_0002] })
     playing = null
+    movers = 0
+    moversShown = 0
   } else if (word === "report") await report()
   else if (word === "quit") return false
   else if (word) say(`no command ${word}`)

@@ -107,3 +107,17 @@ ok 7 - Check now goes through checking to up to date, ...
 not ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
   the app held 4.30 MB and used 0.268% of one CPU core over 60s, as at 74b6fc2, 0.273% earlier this session, both with
   the walk for the sim that 2026-11-16's idle-CPU work replaced
+
+=== node tools/bench.ts desktop-app, with the fix rebased onto a611e4c and its EnumProcesses walk, after a game closed
+ok 1 - the sim's start starts a core within 3s, ...   # the core started 1831ms after the sim's process appeared
+ok 2 - a core that crashes while the sim runs ...     # the core started again 2025ms after the crash
+ok 3 - a sim that starts again as the core exits for the last one gets a core
+ok 4 - a unit's panic in a session crashes the core, ...
+ok 5 - a second start hands its request to the running app and exits
+ok 6 - our package goes into Community ...
+ok 7 - Check now goes through checking to up to date, ...
+ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
+  the app held 3.50 MB and used 0.069% of one CPU core over 60s
+# tests 8, pass 8, fail 0
+The crash run's log holds no "found the core" line; the package and update runs hold one each, a new app finding a
+running core.

@@ -24,6 +24,7 @@ Time lost in one of the parts between the bench's kill and the line it waits for
   At stage 15's close the case read 2,052ms to 2,443ms ([results](results/2026-11-11-desktop-app-bench.txt)), and those runs' logs are gone, so whether they looped is unverified.
 - With `Held::open` checking that the process still runs, the case read 2,025ms to 2,054ms in 10 runs and never looped, where the app at `74b6fc2`, alternating with it, read 2,038ms to 2,668ms and looped in 8 of 10.
   It looped whether it ran first or second in its pair, so the order the entry below saw came from the loop's spread.
+- With the walk the entry below changed, the whole `desktop-app` scenario passed 8 of 8, the crash case at 2,025ms with no loop.
 
 **What changed.**
 `Held::open` waits 0ms on the process it opens, and gives none for one that has exited, as the stand-in sim's search for the sim's process does.

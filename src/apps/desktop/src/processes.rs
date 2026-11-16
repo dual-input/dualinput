@@ -178,10 +178,13 @@ impl Held {
             return None;
         }
         let handle = Object(handle);
-        // A core that just crashed has to read as gone, or the jobs find it again through the port file, wait on it, and hear
-        // its exit at once, over and over, and its restart waits until the loop ends. A process that has exited still opens,
-        // with the same ID and creation time, while anything holds it open, and something held a killed core's for up to
-        // 1.2s on the bench. (measured, record/areas/install/log.md, "2026-11-16: A crashed core came back up to 1.2s late")
+        // A core that just crashed has to read as gone. The port file, where a running core names its process, outlives a
+        // crash, so otherwise the jobs find the dead core through it, wait on it, hear its exit at once, and loop, and its
+        // restart waits until the loop ends. A process that has exited still opens, with the same ID and creation time,
+        // while anything holds it open, and something held a killed core's process for up to 1.2s on the bench. (measured,
+        // record/areas/install/log.md, "2026-11-16: A crashed core came back up to 1.2s late, because the desktop app took
+        // the dead core for a running one while something held its process open, and with that fixed it comes back in
+        // 2.03s to 2.06s")
         // SAFETY: the handle stays open through the call, and a 0ms wait only reads whether the process has exited.
         if unsafe { WaitForSingleObject(handle.0, 0) } != WAIT_TIMEOUT {
             return None;
@@ -283,6 +286,13 @@ mod tests {
             .expect("cmd should start");
         // `child` keeps its handle to the process after the wait, so the ID still opens.
         assert!(child.wait().is_ok());
+        // SAFETY: OpenProcess takes access rights, an inherit flag, and an ID.
+        let opened = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, child.id()) };
+        assert!(
+            !opened.is_null(),
+            "the exited child should still open by its ID"
+        );
+        drop(Object(opened));
         assert!(Held::open(child.id()).is_none());
     }
 }

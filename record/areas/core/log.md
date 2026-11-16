@@ -3,6 +3,26 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-11-16: Capturing BeyondATC with a binding and the mouse on, the helper took 1.44% of a core, and opus-rs at 5% loss stayed understandable
+
+**Asked:** the helper's CPU budget with take-control's binding on, as in every session, which [stage 18](../build/plan.md#18-traffic-and-atc-audio) took over from stage 20, and the other cases of `node tools/sim/core-helper.ts sim`.
+
+**Expected:** the helper under 1% of one core while it captures ATC.
+
+**Found:** on MSFS 2024 at KSFO in the Black Square Baron 58P, with the release helper, a binding on, and the mouse on ([the run's report](results/2026-11-16-stage-18-helper-session.txt)):
+
+- Capturing BeyondATC, 3,118 frames crossed the gate, none of 6 bytes or fewer, and the helper took 1.44% of one core on average over 6 readings of 10s, 1.52% at most, against 1%.
+  At stage 20, a tone took 0.49% alone and 1.08% with a binding and the mouse on ([control log](../control/log.md#2026-11-04-stage-20s-take-control-passes-its-cases-on-the-bench-and-a-press-reaches-the-cue-about-80ms-later-past-the-50ms-budget)).
+- With 5% of frames lost, the user heard a fault a pilot would notice in BeyondATC's speech through opus-rs, and found it understandable throughout.
+- A bound key crossed with the sim's main window and with a popped-out display in front, and not with another program in front, and a click in the main window crossed with its place, −0.341, 0.214.
+- A click in a popped-out display crossed its two left releases alone, each at 0, 0, as the rule of [04-core-helper](04-core-helper.md)'s note of 2026-11-05 has every left release cross; the run's check, older than that rule, expected nothing, and failed.
+
+**Changed:** the helper's CPU budget is under 2% of one core, and ATC through opus-rs with 5% of frames lost passes while a pilot can understand it, so libopus doesn't take its place (user, 2026-11-16). `tools/sim/core-helper.ts` lets a popped-out display's release cross and asks whether any of the 5% speech is impossible to understand.
+
+**Affects:** [04-core-helper](04-core-helper.md)'s budgets and its Opus, through a note.
+
+**Evidence:** [the run's report](results/2026-11-16-stage-18-helper-session.txt), from `node tools/sim/core-helper.ts sim`.
+
 ## 2026-11-10: Beside the A350, the loop's queue keeps its budget, and the sim's share of the CPU puts about 640 inputs over a handler's 1ms
 
 **Asked:** does the loop under load keep its budgets once state sync's write functions run in it, on a quiet PC and beside MSFS flying the A350, as [stage 14](../build/plan.md#14-state-sync) asks?

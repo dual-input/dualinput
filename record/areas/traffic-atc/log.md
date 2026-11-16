@@ -4,6 +4,33 @@ What our reads and probes found about carrying one pilot's AI traffic and ATC au
 Our FS Copilot fork built both, and its record, `record/traffic-atc/` in the FS Copilot fork, holds the measurements made before this area existed: smooth copies from freezing each object and writing it every frame, a 2Hz poll, a gate that sends about 20% of samples, and ATC audio about 130ms from capture to speaker.
 The probes are in [experiments/areas/traffic-atc](../../../experiments/areas/traffic-atc), and their raw output is in [experiments/areas/traffic-atc/results](../../../experiments/areas/traffic-atc/results).
 
+## 2026-11-16: Traffic held its budget with 25 moving copies, and the cost the day before came from 19 moving aircraft and 30 the stand-in turned
+
+**Asked:** `Traffic`'s time in the sim with 25 copies moving, the case its budget names, and where the 60µs it took the day before went, with p04's patch timing each part of our module's update over windows of 300 frames: taking the core's slot writes, `Traffic`'s frame, the other routines' frames, and carrying out their writes.
+
+**Expected:** `Traffic` under 0.1ms with 25 moving copies, and parked copies writing nothing.
+
+**Found:** on MSFS 2024 at KSFO in the Black Square Baron 58P, with multiplayer and the sim's AI traffic off, the real core receiving and the second pilot of p03's harness sharing its stand-in's AI traffic; each line gives the medians of the windows' p50 and p99:
+
+| Copies | Windows | `Traffic`'s frame | Its writes | Our module's whole update |
+| --- | --- | --- | --- | --- |
+| None | 13 | 0 | 0.3µs, 0.7µs | 33.4µs, 82.1µs |
+| 25 taxiing circles, each moving every frame | 12 | 5.6µs, 8.4µs | 16.4µs, 24.8µs | 55.5µs, 101.2µs |
+| FS Copilot's KSFO capture, as the day before | 15 | 21.6µs, 30.8µs | 28.2µs, 47.7µs | 84.6µs, 136.9µs |
+| The capture, its parked aircraft held whole | 12 | 22.6µs, 29.6µs | 19.6µs, 30.1µs | 68.6µs, 106.3µs |
+| Both, the parked aircraft held whole | 11 | 28.7µs, 40.3µs | 37.2µs, 59.2µs | 100.4µs, 174.0µs |
+
+- With 25 moving copies, `Traffic`'s frame and its writes together took about 22µs at p50, and at most 33µs at p99, the sum of the two.
+- The capture holds a median 136 objects in any 5s, 19 of them moving and 14 of those airborne; 2026-11-15's entries counted 3 or 4 moving, which were the movers reads.mjs scored within 3km.
+- The stand-in moves an AI object's altitude and attitude by its velocities unless their freezes are on, and the harness froze only latitude and longitude, so it turned the 30 of the capture's 124 parked aircraft that hold a small rotation or vertical velocity while still, and their copies were written every frame; with all three freezes on, the writes took 19.6µs, from 28.2µs.
+- In `Traffic`'s frame, a parked copy took about 0.15µs a frame and a moving one 0.22µs, and each value written took about 0.22µs more, where a parked copy wrote nothing. At the traffic host's 500 objects, 50 of them moving with 4 values each, that comes to about 120µs at p50 (unverified).
+
+**Changed:** the harness holds each played aircraft with all three freezes on. `Traffic`'s budget holds, and the 60µs of 2026-11-15's entry was the capture's 19 movers and the 30 aircraft the stand-in turned.
+
+**Affects:** the plan's stage 18.
+
+**Evidence:** [p04's windows](../../../experiments/areas/traffic-atc/results/p04-traffic-parts-2026-11-16-18-34-27.ndjson), from [p04-traffic-time](../../../experiments/areas/traffic-atc/p04-traffic-time).
+
 ## 2026-11-16: The whole bench passed 175 of 176 cases on stage 18's committed tree, the desktop app's idle CPU over its 0.2% as on every run the day before
 
 **Asked:** whether the whole bench passes on the tree committed for stage 18, with its late changes in: `Traffic` writing only what changed, the playout's alike samples, the B505 stand-in, and the kit's rooms measuring only on a shown page.

@@ -10,6 +10,9 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > Stage 20's build changes [Raw Input](#raw-input): the next press skips a modifier and any key pressed with one held, as [the Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version) asks, and while it's on, a press crosses only as the next press, so pressing the key already bound doesn't also take control ([control log](../control/log.md#2026-11-04-stage-20s-take-control-passes-its-cases-on-the-bench-and-a-press-reaches-the-cue-about-80ms-later-past-the-50ms-budget)).
 
 > **Note**
+> Since 2026-11-16, the helper's CPU budget in [budgets](#budgets) is under 2% of one core, since capturing BeyondATC with a binding and the mouse on took 1.44%, and ATC through opus-rs with 5% of frames lost passes while a pilot can understand it, a fault they'd hear allowed, so libopus doesn't take its place ([core log](log.md#2026-11-16-capturing-beyondatc-with-a-binding-and-the-mouse-on-the-helper-took-144-of-a-core-and-opus-rs-at-5-loss-stayed-understandable)).
+
+> **Note**
 > Since 2026-11-05, a left release crosses whatever is in front, and a press or a wheel notch with the cursor off the sim's main window's area doesn't cross, though one on another window lying over that area still does, since a click that takes the focus away left a figure's hand out until the next click ([avatars log](../avatars/log.md#2026-11-05-a-click-that-took-the-focus-from-the-sim-left-a-figures-hand-out-and-the-rest-of-the-session-passed)).
 
 The core helper runs only what features want of it.

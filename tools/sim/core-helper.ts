@@ -551,8 +551,10 @@ async function sim(s: Session): Promise<void> {
       outcome = await step(guide, () => guide.clicks() > clicked, 2 * 60_000)
       if (outcome === "done") {
         await sleep(400)
-        const crossed = since(core, from, "mouse")
-        verdict(popOutInFront(tools) && crossed.length === 0, "a click in a popped-out display crosses nothing", crossed.join("; "))
+        // A left release crosses whatever is in front, so the hand a press brought out never stays out
+        // (record/areas/core/04-core-helper.md, its note of 2026-11-05).
+        const crossed = since(core, from, "mouse").filter((line) => !line.startsWith("mouse LeftUp"))
+        verdict(popOutInFront(tools) && crossed.length === 0, "a click in a popped-out display crosses nothing but its release", crossed.join("; "))
         const presses = await keyCrosses()
         verdict(presses === 2, "a bound key crosses with a popped-out display in front", `${presses} presses and releases`)
       } else missed(outcome, "a click in a popped-out display")
@@ -632,6 +634,8 @@ async function sim(s: Session): Promise<void> {
     spawn("cmd", ["/c", "start", "", wav], { stdio: "ignore", detached: true }).unref()
     await ask(say, `Listening to ATC with ${loss}% of frames lost, ${path.relative(ROOT, wav)}, which opens now. Press Enter when you've heard enough.`)
   }
-  const fault = await ask(say, "Does the 5% one have a fault a pilot would notice, beyond a word clipped here and there? Type y or n, then Enter.")
-  check(fault === "n", "ATC speech through opus-rs with 5% of frames lost has no fault a pilot would notice", fault === "y" ? "it does, so libopus goes in its place" : "")
+  // A fault a pilot would hear passes, as long as they can understand every call (user, 2026-11-16,
+  // record/areas/core/log.md).
+  const lost = await ask(say, "Is any of the 5% one impossible to understand, as a pilot listening for their call? Type y or n, then Enter.")
+  check(lost === "n", "ATC speech through opus-rs with 5% of frames lost stays understandable", lost === "y" ? "it doesn't, so libopus goes in its place" : "")
 }

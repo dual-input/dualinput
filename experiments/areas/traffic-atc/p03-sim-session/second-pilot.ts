@@ -250,7 +250,11 @@ function numbers(s: Record<string, number>): [string, number][] {
   return [
     // The stand-in moves an AI object along its velocities between writes, which carried a stopping aircraft past its
     // stop until the next of the capture's 2Hz states pulled it back, so it holds each object where the capture puts it.
+    // With its position alone frozen, the stand-in turned 30 of the capture's parked aircraft by the small rotation
+    // velocities they hold while still, and each of their copies was drawn and written every frame.
     ["A:IS LATITUDE LONGITUDE FREEZE ON", 1],
+    ["A:IS ALTITUDE FREEZE ON", 1],
+    ["A:IS ATTITUDE FREEZE ON", 1],
     ["A:PLANE LATITUDE", s.lat!],
     ["A:PLANE LONGITUDE", s.lon!],
     ["A:PLANE ALTITUDE", s.alt!],

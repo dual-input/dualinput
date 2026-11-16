@@ -1,0 +1,26 @@
+a bench core started in target\bench\runs\2026-11-16_18-56-50-core-helper-sim, with the real helper
+Which ATC app will you use? Type b for BeyondATC, i for SayIntentionsAI, both, or n for neither, then Enter.
+
+In the sim, a voice says each step, a high beep is a pass and a low one a fail, and Page Up skips a step:
+  1. Load into a flight, and click into the sim's window.
+  2. Pop out a display, by holding right Alt and clicking a screen, and click inside the pop-out; then click it once more when the voice asks.
+  3. Click once in the sim's main window, on the sky or anything that does nothing.
+  4. Switch to another program, such as this terminal.
+  5. Get BeyondATC talking for about a minute, such as by asking for the ATIS.
+Then come back here to listen to the ATC recordings.
+
+Press Enter, then go to the sim.
+ok: a bound key crosses with the sim's main window in front: 2 presses and releases
+FAILED: a click in a popped-out display crosses nothing: mouse LeftUp 0.000 0.000; mouse LeftUp 0.000 0.000
+ok: a bound key crosses with a popped-out display in front: 2 presses and releases
+ok: a click in the sim's main window crosses with its place: mouse LeftDown -0.341 0.214
+ok: a bound key with another program in front crosses nothing: 0 presses and releases
+ok: the helper captures BeyondATC's speech: 3118 frames crossed the gate
+budget: capturing BeyondATC, the helper took 1.44% of one CPU core on average over 6 readings of 10s, 1.52% at most, against 1%
+ATC through opus-rs, as the helper encoded it, with 0% of frames lost: frames 3118 small 0 level -22.6 decode 22
+ATC through opus-rs, as the helper encoded it, with 5% of frames lost: frames 3118 small 0 level -23.9 decode 22
+Listening to ATC with 0% of frames lost, target\bench\runs\2026-11-16_18-56-50-core-helper-sim\atc-0-loss.wav, which opens now. Press Enter when you've heard enough.
+Listening to ATC with 5% of frames lost, target\bench\runs\2026-11-16_18-56-50-core-helper-sim\atc-5-loss.wav, which opens now. Press Enter when you've heard enough.
+Does the 5% one have a fault a pilot would notice, beyond a word clipped here and there? Type y or n, then Enter.
+FAILED: ATC speech through opus-rs with 5% of frames lost has no fault a pilot would notice: it does, so libopus goes in its place
+the core's recordings replayed to every checkpoint; 2 FAILED

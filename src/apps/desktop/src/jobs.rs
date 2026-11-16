@@ -20,7 +20,7 @@ use tokio::sync::{mpsc, watch};
 use tokio::time::{Interval, MissedTickBehavior};
 use velopack::VelopackAsset;
 
-use crate::processes::{self, Held, SimWalk};
+use crate::processes::{self, Held};
 use crate::screens::Shared;
 use crate::usage::Line;
 use crate::{log, places, start_with_windows};
@@ -29,8 +29,9 @@ use updates::{Found, Updates};
 
 pub use firewall::{FIX_FLAG, fix_and_exit};
 
-/// How often the app walks the processes for the sim while it holds none. `SimWalk`'s walk took 0.8ms of CPU, so a walk
-/// every 2s costs about 0.04% of one core (measured on our development machine, 2026-11-16, record/areas/install/log.md).
+/// How often the app walks the processes for the sim while it holds none. `processes::sim_id`'s walk took 0.8ms of CPU, so
+/// a walk every 2s costs about 0.04% of one core (measured on our development machine, 2026-11-16,
+/// record/areas/install/log.md).
 const WALK_EVERY: Duration = Duration::from_secs(2);
 /// How often it checks for an update, beside its start and each time the sim closes.
 const CHECK_EVERY: Duration = Duration::from_secs(3 * 60 * 60);
@@ -111,7 +112,6 @@ struct Jobs {
     start_sim: Option<PathBuf>,
     /// When the sim was asked to close so it could start again.
     restart_closed_at: Option<Instant>,
-    walk: SimWalk,
     package_due: bool,
     writing_package: bool,
     core_missing_said: bool,
@@ -154,7 +154,6 @@ pub fn start(
         install: None,
         start_sim: start.start_sim,
         restart_closed_at: None,
-        walk: SimWalk::default(),
         package_due: installed,
         writing_package: false,
         core_missing_said: false,
@@ -525,7 +524,7 @@ impl Jobs {
     }
 
     fn find_sim(&mut self) {
-        let Some(id) = self.walk.find() else {
+        let Some(id) = processes::sim_id() else {
             return;
         };
         let Some(held) = Held::open(id) else {

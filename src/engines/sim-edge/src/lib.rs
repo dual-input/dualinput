@@ -45,7 +45,7 @@ use crate::stats::{Stats, Woke};
 /// Application log gave the sim's process on the Steam edition, and a pilot's crash report
 /// on a forum gave it on the Microsoft Store's
 /// (record/areas/core/03-sim-seam-and-wasm-module.md, "The sim's process"). `SIM` in
-/// src/apps/desktop/src/usage.rs names the same one, so change both together.
+/// src/apps/desktop/src/processes.rs names the same one, so change both together.
 const SIM: &str = "FlightSimulator2024.exe";
 
 /// The longest the edge waits before reading its connections again, while one is open, so

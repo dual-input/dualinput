@@ -11,9 +11,9 @@ use windows_sys::Win32::System::Diagnostics::ToolHelp::{
 };
 use windows_sys::Win32::System::ProcessStatus::EnumProcesses;
 use windows_sys::Win32::System::Threading::{
-    GetExitCodeProcess, GetProcessTimes, INFINITE, OpenProcess, PROCESS_NAME_NATIVE,
-    PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_SYNCHRONIZE,
-    QueryFullProcessImageNameW, WaitForSingleObject,
+    GetExitCodeProcess, GetProcessTimes, INFINITE, OpenProcess, PROCESS_NAME_FORMAT,
+    PROCESS_NAME_NATIVE, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION,
+    PROCESS_SYNCHRONIZE, QueryFullProcessImageNameW, WaitForSingleObject,
 };
 
 /// The sim's program. `SIM` in src/engines/sim-edge/src/lib.rs names the same one, so change both together.
@@ -69,53 +69,47 @@ pub fn running() -> Vec<Running> {
     all
 }
 
-/// The walk for the sim's process every 2s, which has to fit the app's 0.2% of one CPU core. `NtQuerySystemInformation`'s
-/// process list names each process, and holds a record for each of its threads too, so it costs more with every thread the PC
-/// runs: a walk took 4.0ms of CPU at 348 processes and 7,146 threads, so 30 walks a minute took the whole 0.2% by themselves,
-/// and Toolhelp's snapshot cost more. So the walk takes the process IDs alone, from `EnumProcesses`, and opens each process
-/// for its program's name, which took 0.8ms (measured on our development machine, record/areas/install/log.md, 2026-11-16).
-#[derive(Default)]
-pub struct SimWalk {
-    /// How many IDs the longest list held.
-    listed: usize,
+/// The sim's process, if one runs, matched by its program's name without regard to case, as the core's edge matches it.
+///
+/// The jobs walk for it every `WALK_EVERY` in jobs.rs, which has to fit the app's 0.2% of one CPU core.
+/// `NtQuerySystemInformation`'s process list names each process, and holds a record for each of its threads too, so it costs
+/// more with every thread the PC runs: a walk took 4.0ms of CPU at 348 processes and 7,146 threads, which at one walk every
+/// `WALK_EVERY` took the whole 0.2%, and Toolhelp's snapshot cost more. So the walk takes the process IDs alone, from
+/// `EnumProcesses`, and opens each process for its program's name (measured on our development machine,
+/// record/areas/install/log.md, 2026-11-16).
+pub fn sim_id() -> Option<u32> {
+    find_named(SIM)
 }
 
-impl SimWalk {
-    /// The sim's process, if one runs, matched by its program's name without regard to case, as the core's edge matches it.
-    pub fn find(&mut self) -> Option<u32> {
-        self.find_named(SIM)
-    }
+fn find_named(program: &str) -> Option<u32> {
+    let wanted: Vec<u16> = program.encode_utf16().collect();
+    ids().into_iter().find(|&id| runs(id, &wanted))
+}
 
-    fn find_named(&mut self, program: &str) -> Option<u32> {
-        let wanted: Vec<u16> = program.encode_utf16().collect();
-        self.ids().into_iter().find(|&id| runs(id, &wanted))
-    }
-
-    /// Every running process's ID. `EnumProcesses` fills what fits and says how many bytes it wrote, so a full list may have
-    /// left some out, and the walk asks again with room for twice as many.
-    fn ids(&mut self) -> Vec<u32> {
-        let mut room = (self.listed + 256).max(1024);
-        loop {
-            let mut ids = vec![0u32; room];
-            let size = u32::try_from(room * 4).unwrap_or(u32::MAX);
-            let mut written = 0;
-            // SAFETY: the list is `size` bytes long, and the call writes at most that many.
-            if unsafe { EnumProcesses(ids.as_mut_ptr(), size, &mut written) } == 0 {
-                return Vec::new();
-            }
-            let listed = written as usize / 4;
-            if listed < room {
-                ids.truncate(listed);
-                self.listed = self.listed.max(listed);
-                return ids;
-            }
-            room *= 2;
+/// Every running process's ID. `EnumProcesses` fills what fits and says how many bytes it wrote, so a full list may have left
+/// some out, and the walk asks again with room for twice as many.
+fn ids() -> Vec<u32> {
+    let mut room = 1024;
+    loop {
+        let mut ids = vec![0u32; room];
+        let size = u32::try_from(room * 4).unwrap_or(u32::MAX);
+        let mut written = 0;
+        // SAFETY: the list is `size` bytes long, and the call writes at most that many.
+        if unsafe { EnumProcesses(ids.as_mut_ptr(), size, &mut written) } == 0 {
+            return Vec::new();
         }
+        let listed = written as usize / 4;
+        if listed < room {
+            ids.truncate(listed);
+            return ids;
+        }
+        room *= 2;
     }
 }
 
 /// Whether the process `id` runs the program named `wanted`, matched by its image's file name without regard to case. A
-/// process this user can't open, such as a protected one, gives no name, and the pilot's sim isn't one of those.
+/// process this user can't open, such as a service's or another account's, gives no name. `Held::open` and the core's edge
+/// open the sim with this right too, so a sim this walk can't name is one neither could hold.
 fn runs(id: u32, wanted: &[u16]) -> bool {
     // SAFETY: OpenProcess takes access rights, an inherit flag, and an ID.
     let handle = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, id) };
@@ -124,26 +118,21 @@ fn runs(id: u32, wanted: &[u16]) -> bool {
     }
     let handle = Object(handle);
     let mut path = [0u16; 1024];
-    let mut length = path.len() as u32;
-    // SAFETY: the handle stays open through the call, and `length` is the buffer's length, which the call writes back. The
-    // native form skips turning the device path into a drive letter, which the name doesn't need.
-    let read = unsafe {
-        QueryFullProcessImageNameW(
-            handle.0,
-            PROCESS_NAME_NATIVE,
-            path.as_mut_ptr(),
-            &mut length,
-        )
-    };
-    if read == 0 {
-        return false;
-    }
-    let path = &path[..length as usize];
-    let file = path
-        .rsplit(|&unit| unit == u16::from(b'\\'))
-        .next()
-        .unwrap_or(path);
-    same_name(file, wanted)
+    // The native form skips turning the device path into a drive letter, which the name doesn't need.
+    image_path(handle.0, PROCESS_NAME_NATIVE, &mut path).is_some_and(|path| {
+        path.rsplit(|&unit| unit == u16::from(b'\\'))
+            .next()
+            .is_some_and(|file| same_name(file, wanted))
+    })
+}
+
+/// The path of the program the process `handle` runs, in `form`, written into `path`. A path longer than `path` gives none.
+fn image_path(handle: HANDLE, form: PROCESS_NAME_FORMAT, path: &mut [u16]) -> Option<&[u16]> {
+    let mut length = u32::try_from(path.len()).unwrap_or(u32::MAX);
+    // SAFETY: the caller keeps the handle open through the call, and `length` is no more than the buffer's length, which the
+    // call writes back.
+    let read = unsafe { QueryFullProcessImageNameW(handle, form, path.as_mut_ptr(), &mut length) };
+    (read != 0).then(|| &path[..length as usize])
 }
 
 /// Whether two names in UTF-16 are equal without regard to the case of their ASCII letters.
@@ -160,7 +149,7 @@ fn same_name(a: &[u16], b: &[u16]) -> bool {
 
 /// Whether the sim runs, from one walk.
 pub fn sim_runs() -> bool {
-    SimWalk::default().find().is_some()
+    sim_id().is_some()
 }
 
 /// A process held open, so its ID can't pass to another while the app waits on it.
@@ -211,17 +200,8 @@ impl Held {
     /// The program the process runs, by its whole path.
     pub fn program(&self) -> Option<PathBuf> {
         let mut path = [0u16; 1024];
-        let mut length = path.len() as u32;
-        // SAFETY: the handle stays open through the call, and `length` is the buffer's length, which the call writes back.
-        let read = unsafe {
-            QueryFullProcessImageNameW(
-                self.handle.0,
-                PROCESS_NAME_WIN32,
-                path.as_mut_ptr(),
-                &mut length,
-            )
-        };
-        (read != 0).then(|| PathBuf::from(String::from_utf16_lossy(&path[..length as usize])))
+        image_path(self.handle.0, PROCESS_NAME_WIN32, &mut path)
+            .map(|path| PathBuf::from(String::from_utf16_lossy(path)))
     }
 
     /// Waits until the process exits, and gives its exit code. It blocks the thread, so it runs on one of its own.
@@ -266,10 +246,7 @@ mod tests {
             .expect("a program has a name")
             .to_string_lossy()
             .to_uppercase();
-        assert_eq!(
-            SimWalk::default().find_named(&name),
-            Some(std::process::id())
-        );
+        assert_eq!(find_named(&name), Some(std::process::id()));
     }
 
     #[test]

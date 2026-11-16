@@ -1,5 +1,50 @@
 # Installing and updating: log
 
+## 2026-11-16: The desktop app's walk for the sim cost 4.0ms at 7,146 threads, and through `EnumProcesses` it costs 0.8ms, so the app uses 0.06% to 0.07% of a core
+
+**Asked.**
+Why the desktop app, with no window and the sim closed, read 0.24% to 0.29% of one CPU core on every bench run of 2026-11-15, and 0.260% on 2026-11-16 ([traffic and ATC log](../traffic-atc/log.md#2026-11-16-the-whole-bench-passed-175-of-176-cases-on-stage-18s-committed-tree-the-desktop-apps-idle-cpu-over-its-02-as-on-every-run-the-day-before)), where it read 0.14% to 0.15% at stage 15's close ([entry below](#2026-11-11-the-bench-read-the-desktop-apps-cpu-in-whole-156ms-clock-ticks-read-from-cycles-the-app-uses-014-to-015-of-a-core)).
+
+**Expected.**
+A change in what the app runs, or in the PC around it.
+
+**Found** (measured on our development machine, 2026-11-16, Windows 11 Pro 10.0.26200, AMD Ryzen 7 7800X3D, no sim or game running, CPU read from cycles throughout, [the measurements](results/2026-11-16-desktop-app-walk.txt)):
+
+- Nothing the app runs changed since stage 15's close.
+  No commit after `7859de2` touches `src/apps/desktop`, the `messages` crate it builds on gained types alone, `rust-toolchain.toml` pins rustc 1.95.0, and Windows' cumulative update KB5132061 took effect at the reboot of 2026-11-16, after 2026-11-15's readings.
+- The scenario alone read 0.243% of a core, and its budget case alone 0.232% twice.
+  Of the app's 119.06ms of CPU over 55s, 118.6ms ran on three of tokio's worker threads, which run the jobs and the minute's sample, and 0.11ms on the main thread.
+- A copy of the app that timed each of its parts from its own thread's cycles spent 133ms to 140ms of CPU a minute, and 120ms to 127ms of that in its 30 walks for the sim, 4.0ms to 4.2ms a walk.
+  The rest was the minute's sample at 5.1ms to 6.7ms, the ticks after each event at 3.5ms to 4.0ms, the reads of the `Run` value at 0.7ms to 0.8ms, and 2.1ms to 2.7ms outside every part.
+- The walk's cost is the kernel's.
+  Lone walks 2s apart, timed from PowerShell, took 4.0ms each whether the list went into a fresh zeroed buffer, as the app's does, a fresh unzeroed one, or one kept from walk to walk, the last two with no page faults.
+  The same walk took 1.5ms in a tight loop, where stage 15 timed 1.02ms in a tight loop at 288 processes ([entry of 2026-11-10](#2026-11-10-the-desktop-app-starts-the-core-18s-after-the-sim-and-20s-to-24s-after-a-crash-and-holds-its-02-of-a-core-only-with-a-walk-cheaper-than-toolhelps)).
+- `NtQuerySystemInformation`'s process list holds a record for every thread, and it ran to 807 KB for 348 processes and 7,146 threads, 5,523 of them in the pilot's own session, the most in Explorer, a browser, NVIDIA's overlay, Claude, and Discord.
+  How many threads the PC ran at stage 15's close went unrecorded, so how much of the rise more threads explain is unknown; the PC ran 60 more processes than stage 15's 288.
+- Walks that list no threads cost less, lone and 2s apart, from PowerShell:
+
+| Walk | CPU a walk | Processes named |
+| --- | --- | --- |
+| `NtQuerySystemInformation` with `SystemProcessInformation`, the app's | 4.0ms | 348 |
+| `EnumProcesses` alone, which gives IDs and no names | 0.09ms | none |
+| `EnumProcesses`, then `OpenProcess` and `QueryFullProcessImageNameW` for each ID | 0.80ms | 208 |
+| `EnumProcesses`, then `NtQuerySystemInformation` with `SystemProcessIdInformation` for each ID | 0.29ms | 350 |
+| `NtGetNextProcess`, reading each process's image name | 0.59ms | 231 |
+
+- Opening each process names only those the pilot's account may open for `PROCESS_QUERY_LIMITED_INFORMATION`, the right the app already holds the sim with.
+  We took it over the query by ID, which costs 0.5ms less a walk, because Microsoft documents no `SystemProcessIdInformation` and windows-sys 0.61.2 carries no type for it.
+- With that walk, the timed copy's walks took 0.75ms to 0.89ms each, and the app 35ms to 43ms of CPU a minute, the minute's sample, at 6.7ms to 9.6ms, its largest part after the walks.
+  The scenario then passed 8 of 8 twice, the app at 0.062% and 0.073% of a core, and 3.34 MB and 3.38 MB.
+- A crashed core's restart, a path with no walk since the app holds the sim, read 2,038ms to 2,909ms in 10 runs of the app before the change and 2,040ms to 3,212ms in 10 after, the two alternating.
+  One run, of the changed app, went over the 3s budget, and whichever app ran second in each pair read slower by its median, so the change doesn't set the restart's time, and what does is unknown.
+
+**What changed.**
+The app walks for the sim with `EnumProcesses`, opening each process for its program's name, and keeps Toolhelp for its figures' once-a-minute walk, which needs each process's parent.
+The budget stays at 0.2% of a core.
+
+**Docs affected.**
+[01-installing-and-updating](01-installing-and-updating.md), in its note on the walk.
+
 ## 2026-11-12: In a session an update downloads and waits, then installs as the sim closes, the tray's Quit reads as a leave, and a session raised no firewall prompt from Windows
 
 **Asked.**

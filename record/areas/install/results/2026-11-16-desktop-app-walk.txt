@@ -1,0 +1,117 @@
+The desktop app's CPU with no window and the sim closed, and its walk for the sim's process, 2026-11-16, our development
+machine (Windows 11 Pro 10.0.26200, build 26200.9974, AMD Ryzen 7 7800X3D, base clock 4,200 MHz, power plan High
+performance), with no sim or game running. CPU is read from cycles over the base clock throughout, as the bench reads it.
+
+=== The PC
+348 processes and 7,146 threads at the first walk timing; 349 to 364 processes and 7,034 to 7,382 threads across the day's runs.
+By session: session 1, the pilot's, 213 processes and 5,523 threads; session 0, 135 processes and 1,626 threads.
+Threads by process, the most: System 440 (session 0), explorer 246, Dia 228, Dia 149, NVIDIA Overlay 141, claude 140,
+Discord 139, logioptionsplus_agent 134.
+Windows Update: KB5132061 (2026-11 security update, 26200.9974) began installing 2026-11-15 09:30 and finished at the
+reboot of 2026-11-16 10:10.
+
+=== Before the fix: node tools/bench.ts desktop-app
+# the core started 2155ms after the sim's process appeared
+# the core started again 2050ms after the crash
+not ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
+# the app held 4.10 MB and used 0.243% of one CPU core over 60s
+# tests 8
+# pass 7
+# fail 1
+
+=== Before the fix: the budget case alone, with the app's threads' cycles read over 55s of its 60s window
+Thread           Name             Ms
+6064             tokio-rt-worker  87.44
+2332             tokio-rt-worker  26.51
+32396            tokio-rt-worker   4.64
+27820            (new, unnamed)    0.17
+15972            main              0.11
+33304            (new, unnamed)    0.04
+(15 other threads, 0)
+process 119.06ms over 55s = 0.216% of a core; threads listed 118.91ms; gone threads 3
+not ok 1 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
+# the app held 4.10 MB and used 0.232% of one CPU core over 60s
+(A first run of the same read 0.232% too, at 4.00 MB.)
+
+=== Before the fix: a copy of the app timing each part from its thread's cycles, one line a minute, run 5 minutes
+The first minute holds the start's work: the firewall read, the update check, and the package write.
+TIMING process 195.384ms, parts 137.789ms, rest 57.595ms; walk 31x 127.892ms; tick 48x 3.988ms; read-windows 13x 0.766ms; check 1x 0.028ms; event 3x 0.029ms; sample 1x 5.086ms; named 48x 2.727ms; session 48x 1.172ms;
+TIMING process 136.687ms, parts 134.473ms, rest 2.214ms; walk 30x 124.784ms; tick 42x 3.739ms; read-windows 12x 0.725ms; check 0x 0.000ms; event 0x 0.000ms; sample 1x 5.224ms; named 42x 2.619ms; session 42x 1.065ms;
+TIMING process 137.070ms, parts 134.822ms, rest 2.248ms; walk 30x 124.856ms; tick 42x 3.529ms; read-windows 12x 0.735ms; check 0x 0.000ms; event 0x 0.000ms; sample 1x 5.703ms; named 42x 2.398ms; session 42x 1.074ms;
+TIMING process 140.122ms, parts 138.027ms, rest 2.095ms; walk 30x 126.843ms; tick 42x 3.641ms; read-windows 12x 0.813ms; check 0x 0.000ms; event 0x 0.000ms; sample 1x 6.730ms; named 42x 2.523ms; session 42x 1.063ms;
+TIMING process 132.672ms, parts 129.992ms, rest 2.680ms; walk 30x 119.743ms; tick 42x 3.483ms; read-windows 12x 0.725ms; check 0x 0.000ms; event 0x 0.000ms; sample 1x 6.040ms; named 42x 2.312ms; session 42x 1.115ms;
+Parts: walk is find_sim; tick is the tick after every event, holding named (core::named, the port file's read) and session
+(places::session_held); read-windows is the Run value's read every 5s; sample is the figures' sample a minute, with its
+Toolhelp walk; rest is the process's cycles outside the parts.
+
+=== The walk timed outside the app, from PowerShell's .NET, as SimWalk made it
+In a tight loop of 300 walks each:
+348 processes, 7146 threads, list 806,944 bytes
+a walk into a fresh buffer: 1.517ms of CPU; into a kept one: 1.346ms; Toolhelp: 3.475ms (300 walks each)
+
+Lone walks 2s apart, 15 of each kind:
+fresh, zeroed (the app): median 4.071ms, min 1.567ms, max 4.200ms, page faults a walk 17
+fresh, not zeroed: median 4.063ms, min 3.037ms, max 4.456ms, page faults a walk 0
+kept: median 3.971ms, min 3.104ms, max 4.310ms, page faults a walk 0
+list 807,456 bytes
+
+=== Walks that list no threads, lone and 2s apart, 15 of each kind, from PowerShell's .NET
+NtGetNextProcess and each image name: median 0.586ms, min 0.522ms, max 0.711ms; 231 processes opened, 15 named powershell.exe
+  the same in a tight loop: 0.466ms
+EnumProcesses: median 0.092ms, min 0.041ms, max 0.115ms; 353 IDs
+processes 353, threads 7348
+
+EnumProcesses, then for each ID:
+Open (OpenProcess with PROCESS_QUERY_LIMITED_INFORMATION, QueryFullProcessImageNameW in its native form): median 0.799ms, min 0.704ms, max 1.057ms; 208 named, 15 powershell.exe
+ById (NtQuerySystemInformation with SystemProcessIdInformation, 88): median 0.291ms, min 0.186ms, max 0.373ms; 350 named, 15 powershell.exe
+processes 353, threads 7382
+
+=== After the fix (EnumProcesses, then OpenProcess and QueryFullProcessImageNameW for each): the timed copy, run 5 minutes
+TIMING process 92.462ms, parts 33.987ms, rest 58.475ms; walk 31x 22.515ms; tick 48x 3.863ms; read-windows 13x 0.749ms; check 1x 0.028ms; event 3x 0.024ms; sample 1x 6.807ms; named 48x 2.596ms; session 48x 1.183ms;
+TIMING process 35.375ms, parts 33.184ms, rest 2.191ms; walk 30x 22.460ms; tick 42x 3.302ms; read-windows 12x 0.719ms; check 0x 0.000ms; event 0x 0.000ms; sample 1x 6.704ms; named 42x 2.182ms; session 42x 1.067ms;
+TIMING process 43.084ms, parts 40.487ms, rest 2.597ms; walk 30x 26.831ms; tick 42x 4.033ms; read-windows 12x 0.719ms; check 0x 0.000ms; event 0x 0.000ms; sample 1x 8.903ms; named 42x 2.586ms; session 42x 1.381ms;
+TIMING process 40.953ms, parts 38.524ms, rest 2.430ms; walk 30x 24.435ms; tick 42x 3.782ms; read-windows 12x 0.748ms; check 0x 0.000ms; event 0x 0.000ms; sample 1x 9.558ms; named 42x 2.542ms; session 42x 1.178ms;
+TIMING process 38.272ms, parts 35.663ms, rest 2.609ms; walk 30x 23.981ms; tick 42x 3.793ms; read-windows 12x 0.704ms; check 0x 0.000ms; event 0x 0.000ms; sample 1x 7.185ms; named 42x 2.562ms; session 42x 1.178ms;
+processes 349, threads 7034
+
+=== After the fix: node tools/bench.ts desktop-app, twice
+--- run 1
+# the core started 2274ms after the sim's process appeared
+# the core started again 2594ms after the crash
+ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
+# the app held 3.34 MB and used 0.062% of one CPU core over 60s
+# tests 8
+# pass 8
+# fail 0
+--- run 2
+# the core started 2225ms after the sim's process appeared
+# the core started again 2800ms after the crash
+ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
+# the app held 3.38 MB and used 0.073% of one CPU core over 60s
+# tests 8
+# pass 8
+# fail 0
+
+=== The crash case alone, alternating the app before the fix (the timed copy) and after it, 5 rounds each way
+Before first:
+round 1, before : # the core started again 2132ms after the crash
+round 1, after : # the core started again 2907ms after the crash
+round 2, before : # the core started again 2663ms after the crash
+round 2, after : # the core started again 2224ms after the crash
+round 3, before : # the core started again 2038ms after the crash
+round 3, after : # the core started again 2333ms after the crash
+round 4, before : # the core started again 2040ms after the crash
+round 4, after : # the core started again 2323ms after the crash
+round 5, before : # the core started again 2078ms after the crash
+round 5, after : # the core started again 2367ms after the crash
+After first:
+round 1, after : # the core started again 2040ms after the crash
+round 1, before : # the core started again 2444ms after the crash
+round 2, after : # the core started again 2588ms after the crash
+round 2, before : # the core started again 2195ms after the crash
+round 3, after : not ok 1 - a core that crashes while the sim runs comes back within 3s as a bench core, and one that exits with 0 stays down until the sim starts again | # the core started again 3212ms after the crash
+round 3, before : # the core started again 2909ms after the crash
+round 4, after : # the core started again 2105ms after the crash
+round 4, before : # the core started again 2076ms after the crash
+round 5, after : # the core started again 2045ms after the crash
+round 5, before : # the core started again 2663ms after the crash

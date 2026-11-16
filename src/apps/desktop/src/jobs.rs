@@ -29,8 +29,8 @@ use updates::{Found, Updates};
 
 pub use firewall::{FIX_FLAG, fix_and_exit};
 
-/// How often the app walks the processes for the sim while it holds none. `SimWalk`'s walk took 1.0ms of CPU, so a walk
-/// every 2s costs about 0.05% of one core (measured on our development machine, 2026-11-10, record/areas/install/log.md).
+/// How often the app walks the processes for the sim while it holds none. `SimWalk`'s walk took 0.8ms of CPU, so a walk
+/// every 2s costs about 0.04% of one core (measured on our development machine, 2026-11-16, record/areas/install/log.md).
 const WALK_EVERY: Duration = Duration::from_secs(2);
 /// How often it checks for an update, beside its start and each time the sim closes.
 const CHECK_EVERY: Duration = Duration::from_secs(3 * 60 * 60);

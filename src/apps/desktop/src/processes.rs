@@ -4,7 +4,7 @@
 use std::path::PathBuf;
 
 use windows_sys::Win32::Foundation::{
-    CloseHandle, FILETIME, HANDLE, INVALID_HANDLE_VALUE, WAIT_OBJECT_0,
+    CloseHandle, FILETIME, HANDLE, INVALID_HANDLE_VALUE, WAIT_OBJECT_0, WAIT_TIMEOUT,
 };
 use windows_sys::Win32::System::Diagnostics::ToolHelp::{
     CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
@@ -162,8 +162,8 @@ pub struct Held {
 }
 
 impl Held {
-    /// Opens the process `id` to wait on, which a program with no administrator could do to another of the pilot's
-    /// processes (measured on our development machine, 2026-10-18, record/areas/install/results/
+    /// Opens the process `id` to wait on, while it runs, which a program with no administrator could do to another of the
+    /// pilot's processes (measured on our development machine, 2026-10-18, record/areas/install/results/
     /// 2026-10-18-windows-and-msfs-facts.txt).
     pub fn open(id: u32) -> Option<Self> {
         // SAFETY: OpenProcess takes access rights, an inherit flag, and an ID.
@@ -178,6 +178,14 @@ impl Held {
             return None;
         }
         let handle = Object(handle);
+        // A core that just crashed has to read as gone, or the jobs find it again through the port file, wait on it, and hear
+        // its exit at once, over and over, and its restart waits until the loop ends. A process that has exited still opens,
+        // with the same ID and creation time, while anything holds it open, and something held a killed core's for up to
+        // 1.2s on the bench. (measured, record/areas/install/log.md, "2026-11-16: A crashed core came back up to 1.2s late")
+        // SAFETY: the handle stays open through the call, and a 0ms wait only reads whether the process has exited.
+        if unsafe { WaitForSingleObject(handle.0, 0) } != WAIT_TIMEOUT {
+            return None;
+        }
         let created = created(handle.0)?;
         Some(Self {
             handle,
@@ -251,8 +259,9 @@ mod tests {
 
     #[test]
     fn a_held_process_gives_its_exit_code() {
+        // The ping keeps cmd running for about 1s, so it still runs when the test opens it.
         let child = std::process::Command::new("cmd")
-            .args(["/c", "exit 7"])
+            .args(["/c", "ping -n 2 127.0.0.1 >nul & exit 7"])
             .spawn()
             .expect("cmd should start");
         let held = Held::open(child.id()).expect("the child should open");
@@ -264,5 +273,16 @@ mod tests {
         assert_eq!(held.wait(), Some(7));
         let mut child = child;
         assert!(child.wait().is_ok_and(|status| status.code() == Some(7)));
+    }
+
+    #[test]
+    fn a_process_that_has_exited_doesnt_open_while_another_holds_it() {
+        let mut child = std::process::Command::new("cmd")
+            .args(["/c", "exit 0"])
+            .spawn()
+            .expect("cmd should start");
+        // `child` keeps its handle to the process after the wait, so the ID still opens.
+        assert!(child.wait().is_ok());
+        assert!(Held::open(child.id()).is_none());
     }
 }

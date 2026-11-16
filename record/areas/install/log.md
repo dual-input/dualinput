@@ -1,5 +1,37 @@
 # Installing and updating: log
 
+## 2026-11-16: A crashed core came back up to 1.2s late, because the desktop app took the dead core for a running one while something held its process open, and with that fixed it comes back in 2.03s to 2.06s
+
+**Asked.**
+Why the bench's case of a crashed core read 2,038ms to 3,212ms over 20 runs earlier on 2026-11-16, once over its 3s budget ([budgets](01-installing-and-updating.md#budgets)), when the app waits a fixed 2s after a crash, and why the app that ran second in each pair read slower ([entry below](#2026-11-16-the-desktop-apps-walk-for-the-sim-cost-40ms-at-7146-threads-and-through-enumprocesses-it-costs-08ms-so-the-app-uses-006-to-007-of-a-core)).
+
+**Expected.**
+Time lost in one of the parts between the bench's kill and the line it waits for: the core's exit reaching the app, the 2s timer, the spawn, the log's write, or the bench's read of the log every 25ms.
+
+**Found** (measured on our development machine, 2026-11-16, Windows 11 Pro 10.0.26200, no sim or game running, the case run alone, [the runs](results/2026-11-16-desktop-app-crash-restart.txt)):
+
+- None of those parts took the time.
+  In each slow run the app's log repeats the pair `the core exited with 0x1` and `found the core <N> running`, for the core the bench killed, and the restart came 0.09ms later for each pass: the runs with no pass read 2,038ms to 2,045ms, and the run with 12,811 passes read 3,212ms.
+- After the core exits, the jobs read the port file, which a crashed core leaves behind, and `Held::open` opened the process it names, whose ID and creation time matched.
+  Windows keeps a process that has exited, and lets it be opened by its ID, while anything holds it open.
+  So the jobs held the dead core again, which cleared the 2s wait, their wait on it returned at once, and its exit set a new 2s wait.
+  The app holds no handle between closing one and opening the next, so something else held the process for as long as the loop ran, and the restart came 2s after the last pass.
+- What held it is unknown.
+  A copy of ping, started without a window as the app starts the core and killed from PowerShell, stayed held after its exit in 4 of 10 runs, for 224ms to 257ms, by programs we can't open without administrator.
+  A driver's reference holds a process open too, and no handle listing shows one.
+- Each pass logs two lines, so one crash wrote up to 1.2 MB into the app's log, which starts over past 1 MB only at the app's next start.
+- Stage 18's whole bench on 2026-11-15 looped in 4 of its 5 crash runs, up to 6,780 passes.
+  At stage 15's close the case read 2,052ms to 2,443ms ([results](results/2026-11-11-desktop-app-bench.txt)), and those runs' logs are gone, so whether they looped is unverified.
+- With `Held::open` checking that the process still runs, the case read 2,025ms to 2,054ms in 10 runs and never looped, where the app at `74b6fc2`, alternating with it, read 2,038ms to 2,668ms and looped in 8 of 10.
+  It looped whether it ran first or second in its pair, so the order the entry below saw came from the loop's spread.
+
+**What changed.**
+`Held::open` waits 0ms on the process it opens, and gives none for one that has exited, as the stand-in sim's search for the sim's process does.
+The 3s budget stays.
+
+**Docs affected.**
+None, since [the sim and the core](01-installing-and-updating.md#the-sim-and-the-core) already has the app start a core when the port file names "none that runs".
+
 ## 2026-11-16: The desktop app's walk for the sim cost 4.0ms at 7,146 threads, and through `EnumProcesses` it costs 0.8ms, so the app uses 0.06% to 0.07% of a core
 
 **Asked.**

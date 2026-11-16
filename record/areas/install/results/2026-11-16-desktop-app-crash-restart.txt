@@ -1,0 +1,109 @@
+The desktop app's restart of a crashed core, on the bench's desktop-app scenario, case "a core that crashes while the sim
+runs comes back within 3s ...", run alone with
+  node --test --test-force-exit --test-name-pattern "crashes while the sim runs" tools/bench/scenarios/desktop-app.ts
+Our development machine, Windows 11 Pro 10.0.26200, AMD Ryzen 7 7800X3D, no sim or game running, 2026-11-16.
+"loop" is how many times the app's log says "found the core <N> running" in the run: each follows a line "the core exited
+with 0x1" for the same core.
+
+=== The 20 runs of 2026-11-16's idle-CPU work, two app builds alternating, with each run's loop counted from its folder
+run folder                               app      case read   loop
+2026-11-16_19-51-19-desktop-app-crash    before   2132ms        912
+2026-11-16_19-51-31-desktop-app-crash    after    2907ms       9402
+2026-11-16_19-51-44-desktop-app-crash    before   2663ms       7660
+2026-11-16_19-51-57-desktop-app-crash    after    2224ms       2065
+2026-11-16_19-52-09-desktop-app-crash    before   2038ms          0
+2026-11-16_19-52-20-desktop-app-crash    after    2333ms       3174
+2026-11-16_19-52-32-desktop-app-crash    before   2040ms         42
+2026-11-16_19-52-43-desktop-app-crash    after    2323ms       3118
+2026-11-16_19-52-55-desktop-app-crash    before   2078ms        492
+2026-11-16_19-53-06-desktop-app-crash    after    2367ms       3582
+2026-11-16_19-53-46-desktop-app-crash    after    2040ms          0
+2026-11-16_19-53-59-desktop-app-crash    before   2444ms       4849
+2026-11-16_19-54-11-desktop-app-crash    after    2588ms       6056
+2026-11-16_19-54-24-desktop-app-crash    before   2195ms       1953
+2026-11-16_19-54-36-desktop-app-crash    after    3212ms      12811   (failed, over 3s)
+2026-11-16_19-54-41-desktop-app-crash    before   2909ms      10670
+2026-11-16_19-54-54-desktop-app-crash    after    2105ms        583
+2026-11-16_19-55-04-desktop-app-crash    before   2076ms        485
+2026-11-16_19-55-17-desktop-app-crash    after    2045ms          0
+2026-11-16_19-55-28-desktop-app-crash    before   2663ms       6711
+"before" and "after" are that work's two builds, which differ only in the walk for the sim, a path the app doesn't take
+while it holds the sim. The case's readings are from that work's results, 2026-11-16-desktop-app-walk.txt, its last
+section, matched to the folders in order.
+
+The excess over 2,040ms against the loop: 0.0915ms a pass, from the 12,811-pass run's 1,172ms, which predicts the
+9,402-pass run at 2,900ms (read 2,907ms), the 6,711-pass at 2,654ms (2,663ms), and the 4,849-pass at 2,484ms (2,444ms).
+The app's console output in each folder, desktop-<ms>-output.txt, ran to 1,206,003 bytes in the 12,811-pass run, from
+2,665 bytes in a run with none.
+
+Stage 18's whole-bench runs of 2026-11-15, in its worktree's target\bench\runs, looped too:
+2026-11-15_12-56-21-desktop-app-crash      333
+2026-11-15_13-37-54-desktop-app-crash        0
+2026-11-15_14-59-11-desktop-app-crash     3805
+2026-11-15_15-18-50-desktop-app-crash     6780
+2026-11-15_22-50-34-desktop-app-crash     4755
+
+=== Who holds a killed process open, from PowerShell with no administrator
+A script started a program as the app starts the core, with CREATE_NO_WINDOW, held one handle to it, killed it with
+TerminateProcess after 1.5s or 2.5s, and read the process object's handle count through NtQueryObject until only its own
+handle was left. It named other holders by duplicating each Process handle the system's handle table lists, from every
+program it could open, and comparing objects; the table gave no object addresses to a caller without administrator.
+"handles" counts the script's own handle too.
+
+A copy of ping, 10 runs, while a cargo build ran beside it:
+  alive: handles 6, others: conhost x1 and 148 to 151 programs with Process handles the script couldn't open
+  6 runs: handles 1 at the exit
+  4 runs: handles 2 or 3 at the exit, back to 1 at 224ms, 235ms, 226ms, and 257ms after it; the holders weren't among the
+          programs the script could open
+The bench core on a fresh data folder, 6 runs, as the build finished:
+  alive: handles 6, others: conhost x1 and 148 to 184 programs with Process handles the script couldn't open
+  6 runs: handles 1 at the exit
+Windows also keeps a process that has exited while a driver holds a reference to it, which no handle listing shows, so
+naming what held the bench's dead cores open is left undone.
+
+=== This session's runs: the app at 74b6fc2 ("before") and the same with Held::open's 0ms wait ("after"), alternating
+Before first:
+round 1, before : 2045 ms, 77 'found the core' lines, ok, 2026-11-16_20-26-14-desktop-app-crash
+round 1, after : 2052 ms, 0 'found the core' lines, ok, 2026-11-16_20-26-26-desktop-app-crash
+round 2, before : 2087 ms, 357 'found the core' lines, ok, 2026-11-16_20-26-37-desktop-app-crash
+round 2, after : 2039 ms, 0 'found the core' lines, ok, 2026-11-16_20-26-50-desktop-app-crash
+round 3, before : 2284 ms, 2214 'found the core' lines, ok, 2026-11-16_20-27-01-desktop-app-crash
+round 3, after : 2036 ms, 0 'found the core' lines, ok, 2026-11-16_20-27-14-desktop-app-crash
+round 4, before : 2041 ms, 0 'found the core' lines, ok, 2026-11-16_20-27-24-desktop-app-crash
+round 4, after : 2054 ms, 0 'found the core' lines, ok, 2026-11-16_20-27-37-desktop-app-crash
+round 5, before : 2668 ms, 6447 'found the core' lines, ok, 2026-11-16_20-27-48-desktop-app-crash
+round 5, after : 2052 ms, 0 'found the core' lines, ok, 2026-11-16_20-28-01-desktop-app-crash
+After first:
+round 1, after : 2025 ms, 0 'found the core' lines, ok, 2026-11-16_20-28-11-desktop-app-crash
+round 1, before : 2195 ms, 1497 'found the core' lines, ok, 2026-11-16_20-28-24-desktop-app-crash
+round 2, after : 2035 ms, 0 'found the core' lines, ok, 2026-11-16_20-28-37-desktop-app-crash
+round 2, before : 2038 ms, 0 'found the core' lines, ok, 2026-11-16_20-28-47-desktop-app-crash
+round 3, after : 2046 ms, 0 'found the core' lines, ok, 2026-11-16_20-28-58-desktop-app-crash
+round 3, before : 2411 ms, 3827 'found the core' lines, ok, 2026-11-16_20-29-09-desktop-app-crash
+round 4, after : 2031 ms, 0 'found the core' lines, ok, 2026-11-16_20-29-21-desktop-app-crash
+round 4, before : 2527 ms, 4800 'found the core' lines, ok, 2026-11-16_20-29-32-desktop-app-crash
+round 5, after : 2045 ms, 0 'found the core' lines, ok, 2026-11-16_20-29-45-desktop-app-crash
+round 5, before : 2441 ms, 4064 'found the core' lines, ok, 2026-11-16_20-29-55-desktop-app-crash
+
+before: 2,038ms to 2,668ms, looping in 8 of 10 runs, 77 to 6,447 passes
+after:  2,025ms to 2,054ms, no loop in 10 of 10
+
+Six more runs of "after", each with the script above following the app's first core from its log line through the
+bench's kill: 2,061ms, 2,031ms, 2,054ms, 2,056ms, 2,046ms, 2,052ms. With the alive scan running as the bench killed the
+core, each read its handle count only after the exit, at 1, the script's own.
+
+=== node tools/bench.ts desktop-app, with "after"
+ok 1 - the sim's start starts a core within 3s, ...   # the core started 2455ms after the sim's process appeared
+ok 2 - a core that crashes while the sim runs ...     # the core started again 2042ms after the crash
+ok 3 - a sim that starts again as the core exits for the last one gets a core
+not ok 4 - a unit's panic in a session crashes the core, ...
+  the replay of <run>\pilot\recordings\2026-11-16_20-37-20\inputs.zst should panic as its run did:
+  replayed 54 inputs, and its 1 checkpoint matched
+  The run's log.txt: "the recording stopped, since its drive has under 1 GB free free_mb=304", then
+  "panic at input 74". C: had filled with this session's builds; with 3.5 GB free, case 4 alone passed twice.
+ok 5 - a second start hands its request to the running app and exits
+ok 6 - our package goes into Community ...
+ok 7 - Check now goes through checking to up to date, ...
+not ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
+  the app held 4.30 MB and used 0.268% of one CPU core over 60s, as at 74b6fc2, 0.273% earlier this session, both with
+  the walk for the sim that 2026-11-16's idle-CPU work replaced

@@ -26,8 +26,8 @@ Decides:     That the desktop app does the watcher's jobs from a tray icon; what
 > The welcome no longer has a screen for a sim that has never run, which [left to the apps' stage](#left-to-the-apps-stage) names.
 
 > **Note**
-> Stage 15 found that a `CreateToolhelp32Snapshot` walk every 2s takes about 0.15% of one CPU core by itself, most of the app's 0.2% ([log](log.md#2026-11-10-the-desktop-app-starts-the-core-18s-after-the-sim-and-20s-to-24s-after-a-crash-and-holds-its-02-of-a-core-only-with-a-walk-cheaper-than-toolhelps)).
-> `NtQuerySystemInformation`'s process list holds a record for every thread, so it costs more with every thread the PC runs, and took 4.0ms of CPU a walk at 7,146 threads.
+> Stage 15 found that a `CreateToolhelp32Snapshot` walk every 2s takes about 0.15% of one CPU core by itself, most of the app's 0.2%, and moved the walk for the sim to `NtQuerySystemInformation` ([log](log.md#2026-11-10-the-desktop-app-starts-the-core-18s-after-the-sim-and-20s-to-24s-after-a-crash-and-holds-its-02-of-a-core-only-with-a-walk-cheaper-than-toolhelps)).
+> That call's process list holds a record for every thread, so it costs more with every thread the PC runs: it took 4.0ms of CPU a walk at 7,146 threads, which at 30 walks a minute is 0.2% of a core by itself.
 > So where [the sim and the core](#the-sim-and-the-core) has the app walk with Toolhelp, it takes the process IDs from `EnumProcesses` and opens each process for its program's name, at 0.8ms a walk, and keeps Toolhelp for its figures' once-a-minute walk ([log](log.md#2026-11-16-the-desktop-apps-walk-for-the-sim-cost-40ms-at-7146-threads-and-through-enumprocesses-it-costs-08ms-so-the-app-uses-006-to-007-of-a-core)).
 
 Dual Input has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.

@@ -71,9 +71,9 @@ pub fn running() -> Vec<Running> {
 
 /// The walk for the sim's process every 2s, which has to fit the app's 0.2% of one CPU core. `NtQuerySystemInformation`'s
 /// process list names each process, and holds a record for each of its threads too, so it costs more with every thread the PC
-/// runs: a walk took 4.0ms of CPU at 348 processes and 7,146 threads, 30 times a minute, and Toolhelp's snapshot cost more.
-/// So the walk takes the process IDs alone, from `EnumProcesses`, and opens each process for its program's name, which took
-/// 0.8ms (measured on our development machine, 2026-11-16, record/areas/install/log.md).
+/// runs: a walk took 4.0ms of CPU at 348 processes and 7,146 threads, so 30 walks a minute took the whole 0.2% by themselves,
+/// and Toolhelp's snapshot cost more. So the walk takes the process IDs alone, from `EnumProcesses`, and opens each process
+/// for its program's name, which took 0.8ms (measured on our development machine, record/areas/install/log.md, 2026-11-16).
 #[derive(Default)]
 pub struct SimWalk {
     /// How many IDs the longest list held.

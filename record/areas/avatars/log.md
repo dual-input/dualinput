@@ -13,6 +13,36 @@ The 58P's and the Comanche's models are glTF with no compression, in vertex layo
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-11-18: The 58P's gear follows `GEAR ANIMATION POSITION` through the sim's own templates, which `aircraft-model` doesn't read
+
+**Asked:** why does `aircraft-model` leave the 58P's nose gear stowed, as [the entry below](#2026-11-17-with-the-camera-read-in-our-module-a-pilot-following-in-flight-keeps-their-seat-and-their-click-lands-on-the-switch) found, and what would posing the gear where the sim draws it take?
+
+**Expected:** that the sim's templates drive the gear, as [p22](#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away) found.
+
+**Found:** read in bksq-aircraft-baronpro 0.1.1 and the MSFS 2024 SDK 1.8.1, with the 58P's exterior posed offline by `experiments/areas/avatars/lib/animate.mjs`.
+
+- **The 58P keys its gear with the sim's own templates.**
+  `BaronProfessional_Base_EXT.xml` keys `Gear_C`, `Gear_L`, and `Gear_R` with `ASOBO_GEAR_Center_Template`, `ASOBO_GEAR_Left_Template`, and `ASOBO_GEAR_Right_Template`, and the nose wheel's steering with `ASOBO_GEAR_Steering_Template`, and each use gives only `ANIM_NAME`.
+  `aircraft-model` takes an animation from a use of one of the sim's templates only when the use gives `ANIM_CODE` (`leaf` in `src/engines/aircraft-model/src/behavior.rs`), so these give it nothing.
+- **The templates read the sim's gear variables.**
+  In the SDK's `ModelBehaviorDefs\Asobo\Exterior.xml`, the gear templates animate from `A:GEAR ANIMATION POSITION:<ID>`, in percent over an `ANIM_LENGTH` of 100, through `ASOBO_GT_Anim_Sim`, and the steering template from `(A:GEAR STEER ANGLE:0, degrees) dnor` over 360.
+- **The 58P's gear animations run 200 frames:** 0 to 100 extend the gear, and 100 to 200 compress the strut.
+  The file's rest pose holds the main gear at frame 100, extended, and the nose gear at frame 0, stowed.
+- **Posed at a `GEAR ANIMATION POSITION` of 50, the nose tire's lowest point sits 1.145m below the model's origin, and at 75, 1.041m.**
+  The replay found the ground 1.07m below the origin beside the nose, so the sim draws the parked struts about three quarters of the way (inferred).
+- The Bonanza Pro keys its gear with the same templates, and A2A's Comanche copies them into a template of its own that hands `GEAR ANIMATION POSITION` to `ASOBO_GT_Anim_Sim` (read in their behavior XML, 2026-11-18).
+
+Unverified: whether `A:GEAR ANIMATION POSITION:<ID>` carries the strut's compression, about 50 in the air and about 75 parked, or reads 100 once extended.
+Posing from it puts the nose wheel within about 10cm of where the sim draws it either way, inside the tire's 0.36m.
+
+**Changed:** nothing in the code.
+Posing the gear takes two rules in `aircraft-model`'s walk of the templates: one for a use that gives `ANIM_SIMVAR`, and a table for the sim's gear and steering templates.
+The user deferred it, since the gear isn't a control, and a click there brings no hand rather than a wrong one (user, 2026-11-18).
+
+**Affects:** [01-avatars](01-avatars.md#known-limits), through a known limit.
+
+**Evidence:** the files named above; the offline posing's scripts weren't kept.
+
 ## 2026-11-17: With the camera read in our module, a pilot following in flight keeps their seat and their click lands on the switch
 
 **Asked:** stage 16b's session in the sim, with the platform's `Camera` reading the camera in our module: does a pilot whose 58P follows a bench core's aircraft in flight keep their seat, and does their click put their hand on the switch, at about 85 m/s and 130 m/s, in active pause, with ChasePlane off, and after they take control in flight?
@@ -49,10 +79,10 @@ The 58P's profile locates no switch, so the script judged each click against the
 **Changed:**
 
 - The user accepted our module's update as measured, against the 91µs to 335µs at p99 they accepted for stage 16 (user, 2026-11-17).
-- Posing the exterior's gear from the sim's gear position is a follow-up task, outside stage 16b (user, 2026-11-17).
+- The exterior's gear stays as its file stores it, a known limit of [01-avatars](01-avatars.md#known-limits), and posing it from the sim is deferred ([the entry above](#2026-11-18-the-58ps-gear-follows-gear-animation-position-through-the-sims-own-templates-which-aircraft-model-doesnt-read); user, 2026-11-18).
 - `tools/sim/camera.ts` asks for the left main wheel on foot, and with ChasePlane off, for the knob in view before the head holds still.
 
-**Affects:** [stage 16b](../build/plan.md#16b-a-following-pilots-camera), whose session this is.
+**Affects:** [stage 16b](../build/plan.md#16b-a-following-pilots-camera), whose session this is, and [01-avatars](01-avatars.md#known-limits), through a known limit.
 
 **Evidence:** the script's reports, [the first run](results/2026-11-17-stage-16b-session-first-run.txt) and [the on-foot retry](results/2026-11-17-stage-16b-session-on-foot-retry.txt), and [the replays' casts on foot](results/2026-11-17-stage-16b-session-on-foot-replay.txt).
 

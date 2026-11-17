@@ -819,6 +819,7 @@ Tests:
 - In this stage's session in the sim, our module's update timed again with `experiments/areas/avatars/p29-sim-session/update-timer.patch`, since `Camera` adds a read of the camera and a report to every frame, and put to the user against the 91µs to 335µs at p99 they accepted for stage 16, since budgets are theirs ([flight-model log](../flight-model/log.md#2026-11-11-seated-on-the-pose-follow-says-it-writes-a-figure-keeps-its-seat-on-the-following-machine-and-the-58p-banks-and-pitches-with-the-aircraft-it-follows)).
 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the fix's tests and the `avatars` scenario among them; in this stage's session in the sim, a pilot whose 58P follows the bench core's aircraft in flight, and then flies it, keeps their seat, and their click puts their hand on the switch they clicked; and the [avatars log](../avatars/log.md) has an entry for the fix and the session.
+Done on 2026-11-18.
 
 ## 20b The sounds
 

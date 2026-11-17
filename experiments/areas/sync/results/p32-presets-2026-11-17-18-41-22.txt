@@ -1,0 +1,65 @@
+p32 on 2026-11-17T18:40:19.000Z, in Black Square Baron 58P Professional N515MR
+
+=== INSTRUMENT_Heading_Bug_Set
+landed: INSTRUMENT_Heading_Bug_Set 90 from a panel: reads 90 after 267ms
+landed: INSTRUMENT_Heading_Bug_Set 180 from a panel: reads 180 after 267ms
+landed: INSTRUMENT_Heading_Bug_Set 135 from our module: reads 135 after 799ms
+MISSED: INSTRUMENT_Heading_Bug_Set 270 from our module: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 315 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 45 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 225 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 180 from our module: reads 135 after 1.5s
+
+=== INSTRUMENT_Altimeter_1_Set
+landed: INSTRUMENT_Altimeter_1_Set 1029 from a panel: reads 1029 after 266ms
+landed: INSTRUMENT_Altimeter_1_Set 1045 from a panel: reads 1045 after 269ms
+landed: INSTRUMENT_Altimeter_1_Set 1061 from our module: reads 1061 after 797ms
+MISSED: INSTRUMENT_Altimeter_1_Set 1077 from our module: reads 1061 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 1093 from a panel: reads 1061 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 1109 from a panel: reads 1061 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 1125 from a panel: reads 1061 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 1141 from our module: reads 1061 after 1.5s
+
+=== PASSENGER_Cabin_Heat_2_Set
+landed: PASSENGER_Cabin_Heat_2_Set 0.25 from a panel: reads 0.25 after 267ms
+landed: PASSENGER_Cabin_Heat_2_Set 0.75 from a panel: reads 0.75 after 265ms
+landed: PASSENGER_Cabin_Heat_2_Set 0.5 from our module: reads 0.5 after 800ms
+MISSED: PASSENGER_Cabin_Heat_2_Set 1 from our module: reads 0.5 after 1.5s
+MISSED: PASSENGER_Cabin_Heat_2_Set 0 from a panel: reads 0.5 after 1.5s
+MISSED: PASSENGER_Cabin_Heat_2_Set 0.4 from a panel: reads 0.5 after 1.5s
+MISSED: PASSENGER_Cabin_Heat_2_Set 0.6 from a panel: reads 0.5 after 1.5s
+MISSED: PASSENGER_Cabin_Heat_2_Set 0.8 from our module: reads 0.5 after 1.5s
+
+=== LANDING_GEAR_ParkingBrake_Set
+MISSED: LANDING_GEAR_ParkingBrake_Set 1 from a panel: reads 0 after 1.5s
+landed: LANDING_GEAR_ParkingBrake_Set 0 from a panel: reads 0 after 260ms
+MISSED: LANDING_GEAR_ParkingBrake_Set 1 from our module: reads 0 after 1.5s
+landed: LANDING_GEAR_ParkingBrake_Set 0 from our module: reads 0 after 775ms
+MISSED: LANDING_GEAR_ParkingBrake_Set 1 from a panel: reads 0 after 1.5s
+landed: LANDING_GEAR_ParkingBrake_Set 0 from a panel: reads 0 after 235ms
+MISSED: LANDING_GEAR_ParkingBrake_Set 1 from a panel: reads 0 after 1.5s
+landed: LANDING_GEAR_ParkingBrake_Set 0 from our module: reads 0 after 773ms
+
+=== INSTRUMENT_Heading_Bug_Set from a panel, 20 more times
+landed: INSTRUMENT_Heading_Bug_Set 135 from a panel: reads 135 after 267ms
+MISSED: INSTRUMENT_Heading_Bug_Set 90 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 45 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 0 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 315 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 270 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 225 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 180 from a panel: reads 135 after 1.5s
+landed: INSTRUMENT_Heading_Bug_Set 135 from a panel: reads 135 after 266ms
+MISSED: INSTRUMENT_Heading_Bug_Set 90 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 45 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 0 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 315 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 270 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 225 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 180 from a panel: reads 135 after 1.5s
+landed: INSTRUMENT_Heading_Bug_Set 135 from a panel: reads 135 after 258ms
+MISSED: INSTRUMENT_Heading_Bug_Set 90 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 45 from a panel: reads 135 after 1.5s
+MISSED: INSTRUMENT_Heading_Bug_Set 0 from a panel: reads 135 after 1.5s
+
+3 of 20 landed

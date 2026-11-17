@@ -1,0 +1,12 @@
+﻿{"title":"Black Square Baron 58P Professional N515MR","onGround":1,"bug":0,"battery":1}
+landed: K:HEADING_BUG_SET 100: reads 100.000 after 133ms
+landed: K:HEADING_BUG_SET 200: reads 200.000 after 134ms
+landed: K:HEADING_BUG_SET 135: reads 135.000 after 134ms
+landed: B:INSTRUMENT_Heading_Bug_Set 180: reads 180.000 after 134ms
+landed: B:INSTRUMENT_Heading_Bug_Set 270: reads 270.000 after 132ms
+landed: B:INSTRUMENT_Heading_Bug_Set 45: reads 45.000 after 133ms
+landed: K:HEADING_BUG_SET 300: reads 300.000 after 132ms
+landed: K:HEADING_BUG_SET 90: reads 90.000 after 136ms
+B:INSTRUMENT_Heading_Bug_Inc: 90.000 to 91.011
+K:HEADING_BUG_INC: 91.011 to 92.011
+landed: B:INSTRUMENT_Heading_Bug_Set 225: reads 225.000 after 133ms

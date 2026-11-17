@@ -790,8 +790,27 @@ Done on 2026-11-04.
 Designs first: why 14 of state sync's writes in the first flight with friends read another value 1.5s later, 11 of them on the following machine, the elevator trim and the autopilot modes among them ([sync log](../sync/log.md#2026-11-12-in-the-first-flight-with-friends-14-of-state-syncs-writes-read-another-value-15s-later-11-on-the-following-machine-the-elevator-trim-and-autopilot-modes-among-them)), and whether they're why the aircraft drifted, mainly sideways, after a handover with the autopilot engaged, which the [flight-model log](../flight-model/log.md#2026-11-12-two-pilots-on-two-pcs-flew-one-58p-smoothly-through-13-handovers-over-a-relayed-link-and-after-a-handover-with-the-autopilot-engaged-the-aircraft-drifted) leaves to this work (user, 2026-11-12).
 Then which unit fixes it, since the sync log's leads sit in the following sim's own autopilot, the 58P profile's entries, and the sync engine's `CHECK`, one read 1.5s after a write, which flags a value that lands later.
 The fix comes from a session in the sim that makes both happen again.
-Builds: that fix, in the units its design names.
+The replays and two sessions in the sim found it: the host's heading bug jammed at its first value, since `fsVarsBVarCall` with a value jams an input event for the rest of the flight, and a following machine's autopilot ran its trim to full nose-down ([sync log](../sync/log.md#2026-11-17-fsvarsbvarcall-with-a-value-jams-the-input-event-for-the-rest-of-the-flight-and-calculator-code-from-our-module-doesnt)).
+Two coupled toggles that undo each other, and a following machine's autopilot sending its own vertical speed target, stay known limits, the first for [stage 14c](#14c-two-coupled-writes-in-one-input) (user, 2026-11-17).
+
+Builds:
+
+- our WASM module's presets, each called as calculator code, `value (>B:name)`, in place of `fsVarsBVarCall` and the IDs it kept ([sync log](../sync/log.md#2026-11-17-fsvarsbvarcall-with-a-value-jams-the-input-event-for-the-rest-of-the-flight-and-calculator-code-from-our-module-doesnt))
+- in `sync-engine`: a flag for each write that never lands, which state sync logs, its notification still once for each load; a PF-owned entry's write on a following machine, live and in catch-up, left unchecked; and, as control passes to a machine, each PF-owned entry written once at the old PF's last value
+- in state sync, the engine's call as control passes
+- in the Baron 58P profile, the heading bug written rounded to its preset's 1/16,384ths of a turn, and notes on the two known limits
+
 Needs: 14 and 16, since `Follow` flies the following machine, where 11 of the 14 were.
+
+Tests:
+
+- As the sync engine's own tests: each write that never lands is flagged, not only the first; a PF-owned entry that a following machine's own systems move is never flagged, live or in catch-up; and a machine that takes control writes what the PF owns at the old PF's last values, while one that goes on following writes nothing.
+- On the bench, in the `state-sync` scenario: a following machine never flags what the PF owns, and writes it at the old PF's last value as it takes control.
+- In this stage's session in the sim, in the 58P with a bench core as the second pilot: the heading bug, an altimeter, and a cabin handle take every value the second pilot sets through their `_Set` presets; and after a handover with the autopilot in heading mode, the 58P flies straight on, its trim at the second pilot's.
+
+The stage's code acts only in a session with a profile loaded, so it closes on the scenarios that hold a session in a flight, the 18 stage 16 closed on.
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the `state-sync` scenario's new case among them; in this stage's session in the sim, the 58P's `_Set` presets take every value the second pilot sets, and after a handover in heading mode it flies straight on; and the [sync log](../sync/log.md) has an entry for the session.
 
 ## 16b A following pilot's camera
 

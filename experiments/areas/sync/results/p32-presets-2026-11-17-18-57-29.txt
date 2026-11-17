@@ -1,0 +1,53 @@
+p32, second run on 2026-11-17T18:56:45.580Z, in Black Square Baron 58P Professional N515MR
+
+=== INSTRUMENT_Heading_Bug_Set
+landed: INSTRUMENT_Heading_Bug_Set 90 from our module's calculator code: reads 90 after 931ms
+landed: INSTRUMENT_Heading_Bug_Set 180 from our module's calculator code: reads 180 after 934ms
+landed: INSTRUMENT_Heading_Bug_Set 135 from our module's calculator code: reads 135 after 932ms
+landed: INSTRUMENT_Heading_Bug_Set 270 from our module's calculator code: reads 270 after 936ms
+landed: INSTRUMENT_Heading_Bug_Set 315 from our module's calculator code: reads 315 after 932ms
+landed: INSTRUMENT_Heading_Bug_Set 45 from our module's calculator code: reads 45 after 933ms
+landed: INSTRUMENT_Heading_Bug_Set 225 from our module's calculator code: reads 225 after 934ms
+landed: INSTRUMENT_Heading_Bug_Set 180 from our module's calculator code: reads 180 after 931ms
+8 of 8 landed
+
+=== PASSENGER_Cabin_Heat_3_Set
+landed: PASSENGER_Cabin_Heat_3_Set 0.25 from our module's calculator code: reads 0.25 after 934ms
+landed: PASSENGER_Cabin_Heat_3_Set 0.75 from our module's calculator code: reads 0.75 after 932ms
+landed: PASSENGER_Cabin_Heat_3_Set 0.5 from a panel: reads 0.5 after 268ms
+landed: PASSENGER_Cabin_Heat_3_Set 1 from a panel: reads 1 after 266ms
+landed: PASSENGER_Cabin_Heat_3_Set 0 from our module's calculator code: reads 0 after 933ms
+landed: PASSENGER_Cabin_Heat_3_Set 0.4 from a panel: reads 0.4 after 268ms
+landed: PASSENGER_Cabin_Heat_3_Set 0.6 from our module's calculator code: reads 0.6 after 933ms
+landed: PASSENGER_Cabin_Heat_3_Set 0.8 from a panel: reads 0.8 after 267ms
+8 of 8 landed
+
+=== INSTRUMENT_Altimeter_1_Set
+landed: INSTRUMENT_Altimeter_1_Set 1029 from a panel: reads 1029 after 267ms
+landed: INSTRUMENT_Altimeter_1_Set 981 from a panel: reads 981 after 266ms
+landed: INSTRUMENT_Altimeter_1_Set 1061 from a panel: reads 1061 after 267ms
+landed: INSTRUMENT_Altimeter_1_Set 949 from a panel: reads 949 after 267ms
+MISSED: INSTRUMENT_Altimeter_1_Set 1093 from a panel: reads 1084 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 917 from a panel: reads 948 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 1125 from a panel: reads 1084 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 885 from a panel: reads 948 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 1157 from a panel: reads 1084 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 853 from a panel: reads 948 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 1189 from a panel: reads 1084 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 821 from a panel: reads 948 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 1221 from a panel: reads 1084 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 789 from a panel: reads 948 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 1253 from a panel: reads 1084 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 757 from a panel: reads 948 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 1285 from a panel: reads 1084 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 725 from a panel: reads 948 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 1317 from a panel: reads 1084 after 1.5s
+MISSED: INSTRUMENT_Altimeter_1_Set 693 from a panel: reads 948 after 1.5s
+4 of 20 landed
+
+=== INSTRUMENT_Altimeter_2_Set
+landed: INSTRUMENT_Altimeter_2_Set 1029 from our module's fsVarsBVarCall: reads 1029 after 934ms
+MISSED: INSTRUMENT_Altimeter_2_Set 1045 from our module's calculator code: reads 1029 after 1.5s
+MISSED: INSTRUMENT_Altimeter_2_Set 1061 from our module's calculator code: reads 1029 after 1.5s
+MISSED: INSTRUMENT_Altimeter_2_Set 1077 from a panel: reads 1029 after 1.5s
+1 of 4 landed

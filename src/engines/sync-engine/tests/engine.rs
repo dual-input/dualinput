@@ -729,6 +729,92 @@ fn a_pilot_flying_entry_moved_on_a_following_machine_is_put_back_and_never_flagg
 }
 
 #[test]
+fn each_write_that_never_lands_is_flagged_not_only_the_first() {
+    let bug = l("HEADING_BUG");
+    let p = profile(
+        vec![state("heading_bug", bug.clone(), Write::Name(bug.clone()))],
+        vec![],
+    );
+    let mut pm = Machine::new(PM, &p);
+    pm.read(&bug, 0.0);
+    pm.arrive("heading_bug", 90.0, stamp(PF, 1, &[]));
+    pm.wait(2 * SECOND);
+    pm.arrive("heading_bug", 180.0, stamp(PF, 2, &[]));
+    pm.wait(2 * SECOND);
+    assert_eq!(pm.flags(), 2, "each miss gets its log line: {:?}", pm.out);
+}
+
+#[test]
+fn a_pilot_flying_entry_its_own_systems_move_on_a_following_machine_is_never_flagged() {
+    let trim = l("ELEVATOR_TRIM");
+    let mut trims = state("elevator_trim", trim.clone(), Write::Name(trim.clone()));
+    trims.owner = Owner::PilotFlying;
+    let p = profile(vec![trims], vec![]);
+    let mut pm = Machine::new(PM, &p);
+    pm.read(&trim, 0.0);
+    pm.arrive("elevator_trim", -5.0, stamp(PF, 1, &[]));
+    assert_eq!(pm.acts(), vec![set(&trim, -5.0)]);
+    // Its autopilot trims the frozen aircraft faster than putting it back brings it home.
+    for f in 0..120 {
+        pm.read(&trim, -6.0 - f64::from(f) * 0.1);
+        pm.frame();
+    }
+    pm.wait(2 * SECOND);
+    assert_eq!(pm.flags(), 0, "{:?}", pm.out);
+
+    // Nor in a catch-up.
+    let mut late = Machine::new(PM, &p);
+    late.read(&trim, 0.0);
+    late.catching_up = true;
+    let out = late.engine.take(
+        &CatchUpState {
+            entries: vec![entry("elevator_trim", -5.0)],
+        },
+        late.cx(),
+    );
+    late.out.extend(out);
+    late.read(&trim, -7.0);
+    late.wait(2 * SECOND);
+    assert_eq!(late.flags(), 0, "{:?}", late.out);
+}
+
+#[test]
+fn a_machine_that_takes_control_writes_what_the_pf_owns_at_the_old_pfs_last_values() {
+    let trim = l("ELEVATOR_TRIM");
+    let beacon = l("BEACON");
+    let mut entry = state("elevator_trim", trim.clone(), Write::Name(trim.clone()));
+    entry.owner = Owner::PilotFlying;
+    let p = profile(
+        vec![
+            entry,
+            state("beacon", beacon.clone(), Write::Name(beacon.clone())),
+        ],
+        vec![],
+    );
+    let mut pm = Machine::new(PM, &p);
+    pm.read(&trim, 0.0);
+    pm.read(&beacon, 0.0);
+    pm.arrive("elevator_trim", -5.0, stamp(PF, 1, &[]));
+    pm.read(&trim, -5.0);
+    // Its own autopilot runs the trim away while it follows.
+    pm.read(&trim, -30.0);
+    pm.take();
+
+    let out = pm.engine.control_passed(pm.cx());
+    assert!(
+        out.is_empty(),
+        "a machine that goes on following writes nothing: {out:?}"
+    );
+    pm.pf = PM;
+    let out = pm.engine.control_passed(pm.cx());
+    assert_eq!(
+        out,
+        vec![Out::Act(set(&trim, -5.0))],
+        "only what the PF owns, and only where it differs"
+    );
+}
+
+#[test]
 fn an_event_entry_doesnt_send_back_what_its_write_fires_and_stops_when_it_comes_too_late() {
     let h = Name::H {
         name: "SOME_KEY_PRESSED".into(),

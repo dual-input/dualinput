@@ -7,6 +7,10 @@ Decides:     What comes back after a link, a core, a sim, or a PC goes down; how
 ```
 
 > **Note**
+> In [putting back](#putting-back) and [a change of control](#a-change-of-control), putting back doesn't hold a PF-owned entry that a following machine's own systems move, as its autopilot ran the 58P's trim to full nose-down, so as control passes to a machine it writes each PF-owned entry at the old PF's last value, and a following machine doesn't check those entries' writes ([05-units](05-units.md)' note; [sync log](log.md#2026-11-17-fsvarsbvarcall-with-a-value-jams-the-input-event-for-the-rest-of-the-flight-and-calculator-code-from-our-module-doesnt); user, 2026-11-17).
+> A known limit: the trim wheel on a following machine can drift from the PF's while it follows.
+
+> **Note**
 > Stage 11b's tentative decision on [the banner's content](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) drops the crash's ask for a bug report, from the crew and the pilot alike, until the apps' design confirms it (user, 2026-11-01): the crew's card says the pilot's sim crashed and that they're still in the session, and the pilot sees the service reconnecting, then catching up.
 
 What comes back depends on what went down.

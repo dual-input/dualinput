@@ -363,11 +363,19 @@ state:
         if (value == state.ap_altitude_hold) return
         write(value ? K('AP_ALT_HOLD') : K('AP_PITCH_LEVELER_ON'))
       }
+  # A known limit: when altitude hold and vertical speed mode change together, this toggle can
+  # read vertical speed mode before altitude hold's event turns it off, and turn it back on
+  # (measured on MSFS 2024, 2026-11-16, record/areas/sync/log.md), which stage 14c of
+  # record/areas/build/plan.md takes up.
   ap_vs_hold:
     name: Autopilot vertical speed mode
     watch: A('AUTOPILOT VERTICAL HOLD', 'Bool')
     write:
       toggle: K('AP_PANEL_VS_HOLD', 1)
+  # A known limit for this and the armed vertical speed below: as vertical speed mode engages,
+  # a following machine's autopilot sets its own target from its own climb rate, which goes to
+  # the crew as its pilot's change (measured on MSFS 2024, 2026-11-16,
+  # record/areas/sync/log.md).
   ap_vertical_speed:
     name: Autopilot vertical speed
     watch: A('AUTOPILOT VERTICAL HOLD VAR:1', 'Feet per minute')
@@ -413,10 +421,18 @@ state:
       }
 
   # ═══ INSTRUMENTS
+  # The knob's preset turns degrees into 1/16,384ths of a turn, so a written 1° reads back as
+  # 1.0107°, and a reading that matches no write counts as this pilot's own turn and goes back to
+  # the crew. Rounding the value the same way first makes the reading match the write (read in
+  # MSFS 2024 SDK 1.8.1, ModelBehaviorDefs/Asobo/Common/Subtemplates/Instrument_Subtemplates.xml;
+  # measured on MSFS 2024, 2026-11-16, record/areas/sync/log.md).
   heading_bug:
     name: Heading bug
     watch: A('AUTOPILOT HEADING LOCK DIR:1', 'Degrees')
-    write: B('INSTRUMENT_Heading_Bug_Set')
+    write: |
+      (value) => {
+        write(B('INSTRUMENT_Heading_Bug_Set'), Math.round(Number(value) * 16384 / 360) * 360 / 16384)
+      }
   hsi_course:
     name: HSI course
     watch: A('NAV OBS:1', 'Degrees')

@@ -1,0 +1,101 @@
+Start the sim, load a flight in the Baron 58P on the ground at a stand, engines running, and press Ready to fly.
+The session is starting. Keep your hands off the controls until the script says the aircraft is yours.
+the sim is flying bksq-aircraft-baronpropress; hosting the session
+waiting up to 75s for your aircraft to settle
+
+=== On the ground, with the 58P flying
+--- route 0, as built
+landed: route 0, INSTRUMENT_Heading_Bug_Set 45: reads 45 after 135ms; our module made 1 call, the last through route 0, preset ID 608, error 0
+MISSED: route 0, INSTRUMENT_Heading_Bug_Set 90: reads 45 after 2.5s; our module made 1 call, the last through route 0, preset ID 608, error 0
+MISSED: route 0, INSTRUMENT_Heading_Bug_Set 135: reads 45 after 2.5s; our module made 1 call, the last through route 0, preset ID 608, error 0
+MISSED: route 0, INSTRUMENT_Heading_Bug_Set 180: reads 45 after 2.5s; our module made 1 call, the last through route 0, preset ID 608, error 0
+MISSED: route 0, INSTRUMENT_Heading_Bug_Set 225: reads 45 after 2.5s; our module made 1 call, the last through route 0, preset ID 608, error 0
+--- route 1, a fresh ID each call
+MISSED: route 1, INSTRUMENT_Heading_Bug_Set 270: reads 45 after 2.5s; our module made 1 call, the last through route 1, preset ID 608, error 0
+MISSED: route 1, INSTRUMENT_Heading_Bug_Set 315: reads 45 after 2.5s; our module made 1 call, the last through route 1, preset ID 608, error 0
+MISSED: route 1, INSTRUMENT_Heading_Bug_Set 225: reads 45 after 2.5s; our module made 1 call, the last through route 1, preset ID 608, error 0
+MISSED: route 1, INSTRUMENT_Heading_Bug_Set 180: reads 45 after 2.5s; our module made 1 call, the last through route 1, preset ID 608, error 0
+MISSED: route 1, INSTRUMENT_Heading_Bug_Set 135: reads 45 after 2.5s; our module made 1 call, the last through route 1, preset ID 608, error 0
+--- route 2, calculator code
+MISSED: route 2, INSTRUMENT_Heading_Bug_Set 90: reads 45 after 2.5s; our module made 1 call, the last through route 2, preset ID 608, error -1
+MISSED: route 2, INSTRUMENT_Heading_Bug_Set 270: reads 45 after 2.5s; our module made 1 call, the last through route 2, preset ID 608, error -1
+MISSED: route 2, INSTRUMENT_Heading_Bug_Set 180: reads 45 after 2.5s; our module made 1 call, the last through route 2, preset ID 608, error -1
+MISSED: route 2, INSTRUMENT_Heading_Bug_Set 315: reads 45 after 2.5s; our module made 1 call, the last through route 2, preset ID 608, error -1
+MISSED: route 2, INSTRUMENT_Heading_Bug_Set 225: reads 45 after 2.5s; our module made 1 call, the last through route 2, preset ID 608, error -1
+
+=== In the air
+the 58P stands at 126.7° magnetic, magnetic variation 2.6°; the second pilot flies 225° magnetic at 3400 ft
+--- route 0, as built
+The second pilot takes control and flies at 3000 feet. Your aircraft will rise and fly on its own.
+the following 58P's autopilot: master 1, heading mode 1, altitude hold 1
+the following 58P's elevator trim over 10s: -33.34% to -21.92%, with the second pilot's at 0.00%
+--- route 0, as built
+MISSED: route 0, LANDING_GEAR_Gear_Set 0: reads 1 after 2.5s; our module made 0 calls, the last through route 2, preset ID 608, error -1
+landed: route 0, LANDING_GEAR_ParkingBrake_Set 1: reads 1 after 133ms; our module made 1 call, the last through route 0, preset ID 592, error 0
+landed: route 0, LANDING_GEAR_Gear_Set 1: reads 1 after 134ms; our module made 0 calls, the last through route 0, preset ID 592, error 0
+landed: route 0, LANDING_GEAR_ParkingBrake_Set 0: reads 0 after 134ms; our module made 0 calls, the last through route 0, preset ID 592, error 0
+landed: route 0, LANDING_GEAR_Gear_Set 0: reads 0 after 132ms; our module made 1 call, the last through route 0, preset ID 604, error 0
+landed: route 0, LANDING_GEAR_ParkingBrake_Set 1: reads 1 after 133ms; our module made 1 call, the last through route 0, preset ID 592, error 0
+landed: route 0, LANDING_GEAR_Gear_Set 1: reads 1 after 134ms; our module made 0 calls, the last through route 0, preset ID 592, error 0
+landed: route 0, LANDING_GEAR_ParkingBrake_Set 0: reads 0 after 133ms; our module made 0 calls, the last through route 0, preset ID 592, error 0
+--- route 1, a fresh ID each call
+landed: route 1, LANDING_GEAR_Gear_Set 0: reads 0 after 134ms; our module made 1 call, the last through route 1, preset ID 604, error 0
+landed: route 1, LANDING_GEAR_ParkingBrake_Set 1: reads 1 after 134ms; our module made 1 call, the last through route 1, preset ID 592, error 0
+landed: route 1, LANDING_GEAR_Gear_Set 1: reads 1 after 135ms; our module made 0 calls, the last through route 1, preset ID 592, error 0
+landed: route 1, LANDING_GEAR_ParkingBrake_Set 0: reads 0 after 132ms; our module made 0 calls, the last through route 1, preset ID 592, error 0
+landed: route 1, LANDING_GEAR_Gear_Set 0: reads 0 after 133ms; our module made 1 call, the last through route 1, preset ID 604, error 0
+landed: route 1, LANDING_GEAR_ParkingBrake_Set 1: reads 1 after 133ms; our module made 1 call, the last through route 1, preset ID 592, error 0
+landed: route 1, LANDING_GEAR_Gear_Set 1: reads 1 after 132ms; our module made 0 calls, the last through route 1, preset ID 592, error 0
+landed: route 1, LANDING_GEAR_ParkingBrake_Set 0: reads 0 after 135ms; our module made 0 calls, the last through route 1, preset ID 592, error 0
+--- route 2, calculator code
+landed: route 2, LANDING_GEAR_Gear_Set 0: reads 0 after 132ms; our module made 1 call, the last through route 2, preset ID 592, error -1
+MISSED: route 2, LANDING_GEAR_ParkingBrake_Set 1: reads 0 after 2.5s; our module made 1 call, the last through route 2, preset ID 592, error -1
+landed: route 2, LANDING_GEAR_Gear_Set 1: reads 1 after 134ms; our module made 0 calls, the last through route 2, preset ID 592, error -1
+landed: route 2, LANDING_GEAR_ParkingBrake_Set 0: reads 0 after 136ms; our module made 0 calls, the last through route 2, preset ID 592, error -1
+MISSED: route 2, LANDING_GEAR_Gear_Set 0: reads 1 after 2.5s; our module made 1 call, the last through route 2, preset ID 592, error -1
+landed: route 2, LANDING_GEAR_ParkingBrake_Set 1: reads 1 after 134ms; our module made 1 call, the last through route 2, preset ID 592, error -1
+landed: route 2, LANDING_GEAR_Gear_Set 1: reads 1 after 133ms; our module made 0 calls, the last through route 2, preset ID 592, error -1
+landed: route 2, LANDING_GEAR_ParkingBrake_Set 0: reads 0 after 125ms; our module made 0 calls, the last through route 2, preset ID 592, error -1
+--- route 0, as built
+route 0: the second pilot's bug reads 225°, the 58P's 45.0°
+You take control for 15 seconds. Keep your hands off the controls.
+PASSED: with route 0: in the 15s after the 58P took control in heading mode it turned up to 16.0° from 225°, banked up to 40.8°, and went down 1993 ft, so the drift happened again
+--- route 2, calculator code
+FAILED: route 2: the 58P's bug followed the second pilot's to 225°: it reads 45.00°
+You take control for 15 seconds again. Keep your hands off the controls.
+FAILED: with route 2: in the 15s after the 58P took control in heading mode it turned up to 5.2° from 225°, banked up to 3.6°, and went down 3133 ft, so it flew straight on
+
+=== The autopilot's modes
+after vertical speed mode reached the following 58P, the second pilot's vertical speed target read 500 fpm, where it set 500
+PASSED: altitude hold back with vertical speed mode off, in one change, leaves the following 58P in altitude hold 1, vertical speed mode 0
+You take control for half a minute while the script presses the autopilot's buttons. Keep your hands off the controls.
+the 58P's modes before: ALT 1, VS 0, HDG 1, NAV 0, APR 0, BC 0
+vertical speed mode by toggle (K:AP_PANEL_VS_HOLD): ALT 0, VS 1, HDG 1, NAV 0, APR 0, BC 0; vertical speed target 0 to 0 fpm
+altitude hold and the vertical speed toggle together, as state sync sent them (K:AP_ALT_HOLD + K:AP_PANEL_VS_HOLD): ALT 1, VS 0, HDG 1, NAV 0, APR 0, BC 0; vertical speed target 0 to 0 fpm
+vertical speed mode on (K:AP_VS_ON): ALT 0, VS 1, HDG 1, NAV 0, APR 0, BC 0; vertical speed target 0 to 0 fpm
+altitude hold on and vertical speed mode off together (K:AP_ALT_HOLD_ON + K:AP_VS_OFF): ALT 0, VS 0, HDG 1, NAV 0, APR 0, BC 0; vertical speed target 0 to 800 fpm
+altitude hold off (K:AP_ALT_HOLD_OFF): ALT 0, VS 0, HDG 1, NAV 0, APR 0, BC 0; vertical speed target 800 to 800 fpm
+altitude hold on (K:AP_ALT_HOLD_ON): ALT 1, VS 0, HDG 1, NAV 0, APR 0, BC 0; vertical speed target 800 to 800 fpm
+heading mode off (K:AP_HDG_HOLD_OFF): ALT 1, VS 0, HDG 0, NAV 0, APR 0, BC 0; vertical speed target 800 to 800 fpm
+heading mode on (K:AP_HDG_HOLD_ON): ALT 1, VS 0, HDG 1, NAV 0, APR 0, BC 0; vertical speed target 800 to 800 fpm
+nav mode on (K:AP_NAV1_HOLD_ON): ALT 1, VS 0, HDG 1, NAV 1, APR 0, BC 0; vertical speed target 800 to 800 fpm
+nav mode off (K:AP_NAV1_HOLD_OFF): ALT 1, VS 0, HDG 1, NAV 0, APR 0, BC 0; vertical speed target 800 to 800 fpm
+approach mode on (K:AP_APR_HOLD_ON): ALT 1, VS 0, HDG 1, NAV 0, APR 1, BC 0; vertical speed target 800 to 800 fpm
+approach mode off (K:AP_APR_HOLD_OFF): ALT 1, VS 0, HDG 1, NAV 0, APR 0, BC 0; vertical speed target 800 to 800 fpm
+back course on (K:AP_BC_HOLD_ON): ALT 1, VS 0, HDG 1, NAV 0, APR 1, BC 1; vertical speed target 800 to 800 fpm
+back course off (K:AP_BC_HOLD_OFF): ALT 1, VS 0, HDG 1, NAV 0, APR 0, BC 0; vertical speed target 800 to 800 fpm
+heading mode on, altitude hold on (K:AP_HDG_HOLD_ON + K:AP_ALT_HOLD_ON): ALT 1, VS 0, HDG 1, NAV 0, APR 0, BC 0; vertical speed target 800 to 800 fpm
+
+=== Each route's preset writes
+route 0, INSTRUMENT_Heading_Bug_Set: 1 landed, 4 didn't
+route 0, LANDING_GEAR_Gear_Set: 3 landed, 1 didn't
+route 0, LANDING_GEAR_ParkingBrake_Set: 4 landed, 0 didn't
+route 1, INSTRUMENT_Heading_Bug_Set: 0 landed, 5 didn't
+route 1, LANDING_GEAR_Gear_Set: 4 landed, 0 didn't
+route 1, LANDING_GEAR_ParkingBrake_Set: 4 landed, 0 didn't
+route 2, INSTRUMENT_Heading_Bug_Set: 0 landed, 5 didn't
+route 2, LANDING_GEAR_Gear_Set: 3 landed, 1 didn't
+route 2, LANDING_GEAR_ParkingBrake_Set: 3 landed, 1 didn't
+That's every case. The aircraft is yours. Whoever runs the script stops it with q in its terminal, which replays the core's recording.
+the real core's last loop stats: 31683899033µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=12603 busy_percent=0.64 wait_p50_us=9 wait_p99_us=303 wait_p999_us=1151 wait_max_us=2435 over_1ms=1 slowest_us=1116 slowest_seq=71834 slowest_stamp=31658941151
+the core's replay: replayed 87498 inputs, and all 469 checkpoints matched, up to the last flush of a cut recording

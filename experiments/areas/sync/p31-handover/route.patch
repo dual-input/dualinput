@@ -1,0 +1,67 @@
+diff --git a/src/sim-package/wasm-module/src/aircraft.rs b/src/sim-package/wasm-module/src/aircraft.rs
+index 42f5a3c..5192956 100644
+--- a/src/sim-package/wasm-module/src/aircraft.rs
++++ b/src/sim-package/wasm-module/src/aircraft.rs
+@@ -42,6 +42,19 @@ unsafe extern "C" fn on_vars_status(
+     }
+ }
+ 
++/// Runs p31's calculator code and gives its number, 0 when it gives none.
++fn p31_number(code: &str) -> f64 {
++    let Ok(code) = CString::new(code) else {
++        return 0.0;
++    };
++    let mut value = 0.0;
++    // SAFETY: the sim reads the code, which outlives the call, and writes one number.
++    unsafe {
++        execute_calculator_code(code.as_ptr(), &mut value, ptr::null_mut(), ptr::null_mut())
++    };
++    value
++}
++
+ /// Starts hearing the sim's removes and resets of its variables.
+ pub(crate) fn listen() {
+     // SAFETY: the handler reads nothing through its pointer, which is null. `true` is the
+@@ -153,6 +166,32 @@ impl Sim for Aircraft {
+     /// with no value, has run in the sim, so whether a `_Set` takes its value as one double is
+     /// unverified (record/areas/sync/log.md, 2026-11-10).
+     fn call_preset(&mut self, name: &str, value: Option<f64>) {
++        // p31's three routes (experiments/areas/sync/p31-handover/route.patch, never committed):
++        // 0 as built, 1 a fresh ID for each call, 2 calculator code. Each call adds one to
++        // L:DUALINPUT_P31_CALLS and leaves its route, ID, and error in the L:DUALINPUT_P31_ ones.
++        let route = p31_number("(L:DUALINPUT_P31_ROUTE, number)");
++        if route == 2.0 {
++            let code = match value {
++                Some(v) => format!("{v} (>B:{name})"),
++                None => format!("(>B:{name})"),
++            };
++            if let Ok(code) = CString::new(code) {
++                // SAFETY: as in `fire_h`.
++                unsafe {
++                    execute_calculator_code(
++                        code.as_ptr(),
++                        ptr::null_mut(),
++                        ptr::null_mut(),
++                        ptr::null_mut(),
++                    )
++                };
++            }
++            p31_number("(L:DUALINPUT_P31_CALLS, number) 1 + (>L:DUALINPUT_P31_CALLS, number) 2 (>L:DUALINPUT_P31_LAST_ROUTE, number) -1 (>L:DUALINPUT_P31_ERROR, number)");
++            return;
++        }
++        if route == 1.0 {
++            self.presets.remove(name);
++        }
+         let id = match self.presets.get(name) {
+             Some(&id) => id,
+             None => {
+@@ -184,7 +223,8 @@ impl Sim for Aircraft {
+             },
+         };
+         // SAFETY: the sim reads at most the one value, which outlives the call.
+-        unsafe { fsVarsBVarCall(id, params, FS_OBJECT_ID_USER_AIRCRAFT) };
++        let error = unsafe { fsVarsBVarCall(id, params, FS_OBJECT_ID_USER_AIRCRAFT) };
++        p31_number(&format!("(L:DUALINPUT_P31_CALLS, number) 1 + (>L:DUALINPUT_P31_CALLS, number) {route} (>L:DUALINPUT_P31_LAST_ROUTE, number) {id} (>L:DUALINPUT_P31_ID, number) {error} (>L:DUALINPUT_P31_ERROR, number)"));
+     }
+ 
+     /// Sends the event with its value as an integer, the type SimConnect sends an event's

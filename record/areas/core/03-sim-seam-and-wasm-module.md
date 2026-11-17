@@ -22,7 +22,8 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > In [wants and the sim's APIs](#wants-and-the-sims-apis), a routine reads an `E:` variable through `fsVarsGetEVarId` and `fsVarsEVarGet`, and an event's value goes as the Events API's unsigned integer, a negative one as its two's complement ([flight-model log](../flight-model/log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump)).
 
 > **Note**
-> `set_input` isn't built: every write to an input event goes through our WASM module, as `fsVarsBVarCall` on a preset's name, beside the `H:` events ([sync log](../sync/log.md#2026-11-09-writes-to-input-events-go-through-our-wasm-module-since-simconnects-list-has-none-of-their-presets); user, 2026-11-09).
+> `set_input` isn't built: every write to an input event goes through our WASM module, beside the `H:` events ([sync log](../sync/log.md#2026-11-09-writes-to-input-events-go-through-our-wasm-module-since-simconnects-list-has-none-of-their-presets); user, 2026-11-09).
+> The module calls each preset as calculator code, `value (>B:name)`, or `(>B:name)` for one that takes no value, not through `fsVarsBVarCall`, which with a value took the first and then jammed the input event for the rest of the flight, the pilot's own knob included ([sync log](../sync/log.md#2026-11-17-fsvarsbvarcall-with-a-value-jams-the-input-event-for-the-rest-of-the-flight-and-calculator-code-from-our-module-doesnt); user, 2026-11-17).
 
 > **Note**
 > For [home's aircraft line](../interface/decisions.md#home-names-the-loaded-aircraft-and-offers-host-and-join-in-any-aircraft), sim awareness gains `selected`, the aircraft of the last `AircraftLoaded` in any stage, and the slice `sim` gains `where` and names that aircraft (2026-11-01).

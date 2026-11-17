@@ -46,6 +46,11 @@ state:
     owner: pilot_flying
     watch: L('THROTTLE')
     write: L('THROTTLE')
+  trim:
+    name: Trim
+    owner: pilot_flying
+    watch: L('TRIM')
+    write: K('SET_TRIM')
   lamp:
     name: Lamp
     watch: L('LAMP')
@@ -191,6 +196,16 @@ async function keysSent(p: Pilot, name: string): Promise<number> {
   return calls.filter((c) => c.function === "TransmitClientEvent" && c.unit === mapped.unit && c.arguments.includes(`event: ${id},`)).length
 }
 
+/** How many times `p` sent the client event `name` with `data` as its value. */
+async function keysSentWith(p: Pilot, name: string, data: number): Promise<number> {
+  const calls = (await p.core.report()).calls
+  const mapped = calls.find((c) => c.function === "MapClientEventToSimEvent" && c.arguments.includes(`"${name}"`))
+  if (!mapped) return 0
+  const id = /event: (\d+)/.exec(mapped.arguments)![1]
+  const value = new RegExp(`data: ${data}\\b`)
+  return calls.filter((c) => c.function === "TransmitClientEvent" && c.unit === mapped.unit && c.arguments.includes(`event: ${id},`) && value.test(c.arguments)).length
+}
+
 function setVariable(p: Pilot, name: string, value: number): void {
   p.core.act({ act: "set", numbers: [[name, value]], texts: [] })
 }
@@ -226,6 +241,19 @@ test("a switch flipped on one core's aircraft moves on the other's, and nothing 
   assert.equal(sent(pm, "throttle"), 0, "a lever of the PF's sends nothing from the PM")
   setVariable(pf, "L:THROTTLE", 0.75)
   await settles("the PM's throttle, from the PF", () => variable(pm, "L:THROTTLE"), 0.75)
+})
+
+test("a following machine never flags what the PF owns, and writes it at the old PF's last value as it takes control", { timeout: 120_000 }, async (t) => {
+  const { pf, pm } = await crew(t, "take-over")
+  // The stand-in takes no K:SET_TRIM, so the PM's trim stays where its own systems hold it, as a
+  // following 58P's autopilot held its trim against every write in the sim.
+  setVariable(pf, "L:TRIM", 5)
+  await settles("the PM's write of the PF's trim", () => keysSentWith(pm, "SET_TRIM", 5), 1)
+  await sleep(2_000)
+  assert.doesNotMatch(pm.core.log(), /a write never landed entry="trim"/, "the PM's own systems moving the PF's trim isn't flagged")
+  cockpit(pm, { act: "take-control" })
+  await until(pm, (s) => s.pf === s.me, "the PM flies")
+  await settles("the new PF's write of the old PF's trim", () => keysSentWith(pm, "SET_TRIM", 5), 2)
 })
 
 test("an input event is read once and then by its subscription, and written through its preset", { timeout: 120_000 }, async (t) => {

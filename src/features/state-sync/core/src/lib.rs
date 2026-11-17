@@ -32,7 +32,7 @@ use messages::sync::{CatchUpState, Stamp, Value};
 use profile_engine::{Name, Resolved};
 use profile_loader::{ProfileLoaded, ProfileUnloaded, Profiles};
 use sandbox::Sandbox;
-use session::{Ready, Session};
+use session::{ControlPassed, Ready, Session};
 use sim_service::{SimAwareness, SimChanged, SimCx, SimEvent, SimUnit};
 use sync_engine::{Applied, Arrived, Ctx, Engine, Load, Ready as Settling, Seen};
 
@@ -98,6 +98,7 @@ pub fn register(r: &mut Registry) {
         .on::<ProfileUnloaded>(StateSync::unload)
         .on::<SimChanged>(StateSync::sim_changed)
         .on::<CockpitSent>(StateSync::sent)
+        .on::<ControlPassed>(StateSync::control_passed)
         .guard::<Ready>(StateSync::settled)
         .on_sim(StateSync::on_sim)
         .panel_module(H_EVENTS, panels::h_events_rule, panels::any_h_event)
@@ -255,6 +256,15 @@ impl StateSync {
             return;
         };
         let out = live.heard_from_sim(event, ctx);
+        live.carry_out(out, cx);
+    }
+
+    /// Control passed: a machine that now flies writes what the PF owns at the old PF's values.
+    fn control_passed(me: &mut StateSync, _: &ControlPassed, cx: &mut Cx) {
+        let (Some(live), Some(ctx)) = (me.live.as_mut(), engine_ctx(cx)) else {
+            return;
+        };
+        let out = live.engine.control_passed(ctx);
         live.carry_out(out, cx);
     }
 

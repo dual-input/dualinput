@@ -1,0 +1,287 @@
+﻿Stage 14b's replays of stage 16's first flight with friends, 2026-11-16.
+Both recordings replayed with every checkpoint matching (host: 821,299 inputs, 2,832 checkpoints; joiner: 446,841 inputs, 2,662 checkpoints),
+on a development build of the release 0.1.0's code (commit 7859de2 with stage 16's tree, a424f21, over it) with log lines added in state sync
+(each reading, arrival, catch-up entry, and action, at info under the target s14b) and in flight-model sync (the flying aircraft's sample, about once a second).
+Times are each core's own counter in seconds; the host's 16049.424 is the joiner's 53843.814, control generation 12.
+The host is pilot-b, who hosted, on the other PC; the joiner is pilot-a, on our development machine. Session names are left out.
+
+== Every write state sync made from another machine's change or a catch-up, and whether a reading equal to it (as f32) came within 1.5s, later, never, or before the next write superseded it
+== host
+entry                      writes following in1.5s late superseded never
+elevator_trim                2908      2908    353    0       2546     9
+heading_bug                    40        31      0    0         37     3
+gear                            3         2      1    0          0     2
+ap_vs_hold                      7         7      5    1          0     1
+ap_altitude_hold               10         9      8    1          0     1
+kas_arm                         3         3      2    0          0     1
+kas_armed_vs                   18        18     14    0          3     1
+ap_nav_mode                     1         1      0    0          0     1
+map_light_2                     2         0      2    0          0     0
+hsi_course                      8         0      7    0          1     0
+ignition_1                     13         6     13    0          0     0
+ignition_2                      7         5      7    0          0     0
+parking_brake                  12         0     12    0          0     0
+battery                         3         1      3    0          0     0
+alternator_1                    1         1      1    0          0     0
+alternator_2                    1         1      1    0          0     0
+mixture_1                       8         8      8    0          0     0
+mixture_2                       6         6      6    0          0     0
+throttle_1                    374       374    374    0          0     0
+throttle_2                    533       533    533    0          0     0
+fuel_pump_2                     6         6      6    0          0     0
+fuel_pump_1                     4         4      4    0          0     0
+avionics_master                 1         1      1    0          0     0
+com1_active                     1         1      1    0          0     0
+com2_standby                    1         1      1    0          0     0
+com2_active                     1         1      1    0          0     0
+ap_altitude                    30        29     30    0          0     0
+kas_vs_adjust                   8         8      8    0          0     0
+flight_director                 6         6      6    0          0     0
+ap_vertical_speed               9         8      9    0          0     0
+flaps                           1         1      1    0          0     0
+propeller_1                    18        18     18    0          0     0
+propeller_2                    14        14     14    0          0     0
+ap_master                       4         4      4    0          0     0
+global_failure_rate           227       227    227    0          0     0
+ap_heading_mode                 1         1      1    0          0     0
+aileron_trim                   96        96     96    0          0     0
+
+== joiner
+entry                      writes following in1.5s late superseded never
+parking_brake                  15        15     13    1          0     1
+cowl_flap_1                     3         1      2    0          0     1
+cowl_flap_2                     3         1      2    0          0     1
+kas_armed_vs                    7         0      4    0          2     1
+elevator_trim                 638       638      1    0        636     1
+ap_vertical_speed               2         0      1    0          0     1
+yoke_chrono_1                   1         1      1    0          0     0
+cabin_temp_unit                 2         1      2    0          0     0
+cabin_heat_handle               1         1      1    0          0     0
+cabin_altitude_goal             1         1      1    0          0     0
+global_failure_rate            66         1     63    0          3     0
+radar_mode                      1         1      1    0          0     0
+map_light_1                     2         2      2    0          0     0
+heading_bug                     3         3      3    0          0     0
+control_lock                    3         3      3    0          0     0
+alternator_1                    2         2      2    0          0     0
+alternator_2                    2         2      2    0          0     0
+storm_window                    6         0      6    0          0     0
+flight_director                 3         0      3    0          0     0
+flaps                           3         0      3    0          0     0
+prop_sync                       1         0      1    0          0     0
+ap_altitude_hold                5         2      5    0          0     0
+ap_vs_hold                      4         2      4    0          0     0
+radar_tilt                      1         0      1    0          0     0
+
+== Each write that didn't land within 1.5s, but for the elevator trim's (host first, then joiner)
+time        entry                      how     machine    wanted        from          read at 1.5s   landed after
+-- host
+15046.492    heading_bug                arrived flying     358.01074218  1.0107421875  1.0107421875   never
+15084.192    heading_bug                arrived flying     356.01074218  1.0107421875  1.0107421875   never
+15457.667    kas_arm                    arrived following  0             1             1              never
+15471.516    kas_armed_vs               arrived following  1200          1500          1000           never
+15532.037    gear                       arrived following  1             0             0              never
+15661.799    gear                       arrived following  1             0             0              never
+16063.901    ap_nav_mode                arrived following  1             0             0              never
+16071.619    heading_bug                arrived following  252.01074218  1.0107421875  1.0107421875   never
+16089.939    ap_vs_hold                 arrived following  0             1             1              never
+16089.939    ap_altitude_hold           arrived following  1             0             0              never
+16097.768    ap_vs_hold                 arrived following  0             1             1              157.01s
+16097.768    ap_altitude_hold           arrived following  1             0             0              157.01s
+-- joiner
+52780.638    cowl_flap_1                catch   following  16384         0             0              never
+52780.638    cowl_flap_2                catch   following  16384         0             0              never
+52925.559    parking_brake              arrived following  1             0             0              never
+52928.111    parking_brake              arrived following  1             0             0              3.96s
+53884.368    ap_vertical_speed          arrived flying     100           0             0              never
+53892.554    kas_armed_vs               arrived flying     400           600           200            never
+
+== The host's heading bug: every reading, and each write state sync made, through the flight
+14825.082 #18975 read entry="heading_bug" value=Number(0.0) flying=true
+15045.622 #76875 arrived entry="heading_bug" value=Number(1.0) applied=Done flying=true
+15045.622 #76875 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(1.0) })
+15045.663 #76889 read entry="heading_bug" value=Number(1.0107421875) flying=true
+15045.689 #76899 arrived entry="heading_bug" value=Number(2.0) applied=Skipped flying=true
+15045.756 #76919 arrived entry="heading_bug" value=Number(3.0) applied=Skipped flying=true
+15046.090 #77014 arrived entry="heading_bug" value=Number(0.0107421875) applied=Done flying=true
+15046.090 #77014 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(0.0107421875) })
+15046.157 #77039 arrived entry="heading_bug" value=Number(357.0107421875) applied=Done flying=true
+15046.157 #77039 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(357.0107421875) })
+15046.224 #77058 arrived entry="heading_bug" value=Number(356.0107421875) applied=Done flying=true
+15046.224 #77058 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(356.0107421875) })
+15046.424 #77121 arrived entry="heading_bug" value=Number(357.0107421875) applied=Done flying=true
+15046.424 #77121 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(357.0107421875) })
+15046.491 #77140 arrived entry="heading_bug" value=Number(358.0107421875) applied=Done flying=true
+15046.491 #77140 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(358.0107421875) })
+15047.124 #77329 state_sync::carry: a write never landed entry="heading_bug" wanted=Number(1.0) reading=Some(Number(1.0107421875)) retries=0
+15083.556 #87759 arrived entry="heading_bug" value=Number(1.0107421875) applied=Done flying=true
+15084.056 #87888 arrived entry="heading_bug" value=Number(0.0107421875) applied=Done flying=true
+15084.056 #87888 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(0.0107421875) })
+15084.122 #87908 arrived entry="heading_bug" value=Number(357.0107421875) applied=Done flying=true
+15084.122 #87908 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(357.0107421875) })
+15084.192 #87928 arrived entry="heading_bug" value=Number(356.0107421875) applied=Done flying=true
+15084.192 #87928 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(356.0107421875) })
+16066.701 #452808 arrived entry="heading_bug" value=Number(3.0107421875) applied=Done flying=false
+16066.701 #452808 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(3.0107421875) })
+16066.768 #452844 arrived entry="heading_bug" value=Number(6.0107421875) applied=Done flying=false
+16066.768 #452844 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(6.0107421875) })
+16066.835 #452877 arrived entry="heading_bug" value=Number(10.0107421875) applied=Done flying=false
+16066.835 #452877 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(10.0107421875) })
+16066.903 #452909 arrived entry="heading_bug" value=Number(12.0107421875) applied=Done flying=false
+16066.903 #452909 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(12.0107421875) })
+16067.235 #453062 arrived entry="heading_bug" value=Number(10.0107421875) applied=Done flying=false
+16067.235 #453062 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(10.0107421875) })
+16067.307 #453099 arrived entry="heading_bug" value=Number(8.0107421875) applied=Done flying=false
+16067.307 #453099 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(8.0107421875) })
+16067.373 #453132 arrived entry="heading_bug" value=Number(1.0107421875) applied=Done flying=false
+16067.441 #453165 arrived entry="heading_bug" value=Number(358.0107421875) applied=Done flying=false
+16067.441 #453165 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(358.0107421875) })
+16067.707 #453283 arrived entry="heading_bug" value=Number(351.0107421875) applied=Done flying=false
+16067.707 #453283 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(351.0107421875) })
+16067.775 #453316 arrived entry="heading_bug" value=Number(350.0107421875) applied=Done flying=false
+16067.775 #453316 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(350.0107421875) })
+16067.976 #453405 arrived entry="heading_bug" value=Number(342.0107421875) applied=Done flying=false
+16067.976 #453405 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(342.0107421875) })
+16068.042 #453433 arrived entry="heading_bug" value=Number(341.0107421875) applied=Done flying=false
+16068.042 #453433 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(341.0107421875) })
+16068.208 #453507 arrived entry="heading_bug" value=Number(337.0107421875) applied=Done flying=false
+16068.208 #453507 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(337.0107421875) })
+16068.275 #453537 arrived entry="heading_bug" value=Number(333.0107421875) applied=Done flying=false
+16068.275 #453537 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(333.0107421875) })
+16068.476 #453631 arrived entry="heading_bug" value=Number(325.0107421875) applied=Done flying=false
+16068.476 #453631 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(325.0107421875) })
+16068.543 #453663 arrived entry="heading_bug" value=Number(324.0107421875) applied=Done flying=false
+16068.543 #453663 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(324.0107421875) })
+16068.744 #453756 arrived entry="heading_bug" value=Number(317.0107421875) applied=Done flying=false
+16068.744 #453756 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(317.0107421875) })
+16069.544 #454163 arrived entry="heading_bug" value=Number(312.0107421875) applied=Done flying=false
+16069.544 #454163 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(312.0107421875) })
+16069.611 #454200 arrived entry="heading_bug" value=Number(308.0107421875) applied=Done flying=false
+16069.611 #454200 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(308.0107421875) })
+16069.879 #454347 arrived entry="heading_bug" value=Number(301.0107421875) applied=Done flying=false
+16069.879 #454347 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(301.0107421875) })
+16070.146 #454468 arrived entry="heading_bug" value=Number(300.0107421875) applied=Done flying=false
+16070.146 #454468 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(300.0107421875) })
+16070.214 #454486 arrived entry="heading_bug" value=Number(292.0107421875) applied=Done flying=false
+16070.214 #454486 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(292.0107421875) })
+16070.481 #454613 arrived entry="heading_bug" value=Number(285.0107421875) applied=Done flying=false
+16070.481 #454613 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(285.0107421875) })
+16070.549 #454641 arrived entry="heading_bug" value=Number(283.0107421875) applied=Done flying=false
+16070.549 #454641 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(283.0107421875) })
+16070.749 #454741 arrived entry="heading_bug" value=Number(276.0107421875) applied=Done flying=false
+16070.749 #454741 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(276.0107421875) })
+16070.816 #454775 arrived entry="heading_bug" value=Number(273.0107421875) applied=Done flying=false
+16070.816 #454775 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(273.0107421875) })
+16071.017 #454879 arrived entry="heading_bug" value=Number(268.0107421875) applied=Done flying=false
+16071.017 #454879 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(268.0107421875) })
+16071.083 #454921 arrived entry="heading_bug" value=Number(265.0107421875) applied=Done flying=false
+16071.083 #454921 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(265.0107421875) })
+16071.284 #455039 arrived entry="heading_bug" value=Number(261.0107421875) applied=Done flying=false
+16071.284 #455039 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(261.0107421875) })
+16071.351 #455078 arrived entry="heading_bug" value=Number(256.0107421875) applied=Done flying=false
+16071.351 #455078 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(256.0107421875) })
+16071.552 #455152 arrived entry="heading_bug" value=Number(253.0107421875) applied=Done flying=false
+16071.552 #455152 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(253.0107421875) })
+16071.618 #455165 arrived entry="heading_bug" value=Number(252.0107421875) applied=Done flying=false
+16071.618 #455165 out out=Act(Set { name: B { name: "INSTRUMENT_Heading_Bug_Set" }, value: Number(252.0107421875) })
+16144.131 #496267 catch-up entry entry="heading_bug" value=Number(1.0107421875)
+
+== The joiner, flying, before control generation 13, and the host, flying, after it: the flying aircraft once a second, and the autopilot's entries
+53905.0 lead hdg=253.0 bank=-0.1 pitch=-1.2 alt=3040 vs=0fpm surf=[67, 16, 55]
+53906.0 lead hdg=252.9 bank=-0.2 pitch=-1.2 alt=3043 vs=167fpm surf=[55, 16, 53]
+53907.0 lead hdg=253.0 bank=-0.2 pitch=-1.2 alt=3045 vs=157fpm surf=[36, 16, 53]
+53908.0 lead hdg=253.0 bank=-0.0 pitch=-1.1 alt=3048 vs=147fpm surf=[48, 16, 51]
+53908.2 read entry="ap_vertical_speed" value=Number(0.0) flying=true
+53908.4 read entry="kas_armed_vs" reading=Number(0.0) flying=true
+53909.0 lead hdg=253.0 bank=-0.0 pitch=-1.4 alt=3050 vs=167fpm surf=[80, 16, 50]
+53910.0 lead hdg=253.0 bank=-0.0 pitch=-1.0 alt=3053 vs=150fpm surf=[100, 16, 47]
+53911.0 lead hdg=253.0 bank=-0.1 pitch=-1.0 alt=3055 vs=97fpm surf=[113, 16, 48]
+53912.0 lead hdg=253.0 bank=-0.2 pitch=-1.1 alt=3057 vs=101fpm surf=[86, 16, 48]
+53913.0 lead hdg=253.0 bank=-0.2 pitch=-1.1 alt=3058 vs=107fpm surf=[73, 16, 48]
+53914.0 lead hdg=253.1 bank=-0.1 pitch=-1.0 alt=3060 vs=103fpm surf=[26, 16, 48]
+53915.0 lead hdg=253.1 bank=0.1 pitch=-1.0 alt=3062 vs=97fpm surf=[28, 16, 48]
+53916.0 lead hdg=253.1 bank=0.2 pitch=-1.0 alt=3063 vs=91fpm surf=[117, 16, 48]
+53917.0 lead hdg=253.1 bank=0.1 pitch=-1.0 alt=3065 vs=82fpm surf=[77, 16, 48]
+53918.0 lead hdg=253.1 bank=0.1 pitch=-1.0 alt=3066 vs=77fpm surf=[89, 16, 48]
+53919.0 lead hdg=253.1 bank=0.0 pitch=-0.9 alt=3067 vs=69fpm surf=[119, 16, 48]
+53920.0 lead hdg=253.1 bank=-0.2 pitch=-0.9 alt=3068 vs=67fpm surf=[110, 16, 48]
+53921.0 lead hdg=253.1 bank=-0.2 pitch=-0.9 alt=3069 vs=69fpm surf=[85, 16, 48]
+53922.0 lead hdg=253.1 bank=-0.2 pitch=-0.9 alt=3071 vs=69fpm surf=[44, 16, 49]
+53923.0 lead hdg=253.2 bank=-0.2 pitch=-0.9 alt=3072 vs=75fpm surf=[0, 0, 48]
+53924.0 lead hdg=253.2 bank=-0.1 pitch=-0.8 alt=3073 vs=54fpm surf=[-34, 28, 46]
+53925.0 lead hdg=253.2 bank=0.1 pitch=-0.8 alt=3074 vs=54fpm surf=[-2, 30, 47]
+53926.0 lead hdg=253.2 bank=0.1 pitch=-0.8 alt=3075 vs=58fpm surf=[27, 30, 47]
+53927.0 lead hdg=253.1 bank=-0.0 pitch=-0.8 alt=3076 vs=59fpm surf=[40, 28, 47]
+53927.4 session::control: control passed generation=13 pf="bd785a342891437a87b838de477aa271"
+16132.8 session::control: this core passed control generation=13 pf="bd785a342891437a87b838de477aa271"
+16133.0 lead hdg=253.2 bank=-4.5 pitch=-0.6 alt=3076 vs=0fpm surf=[14935, 28, 47]
+16133.5 lead hdg=254.0 bank=-23.8 pitch=0.6 alt=3075 vs=-82fpm surf=[6668, 28, 47]
+16134.0 lead hdg=255.5 bank=-34.4 pitch=0.6 alt=3072 vs=-386fpm surf=[-1499, 28, 47]
+16134.5 lead hdg=257.6 bank=-34.3 pitch=0.5 alt=3067 vs=-537fpm surf=[2425, 28, 47]
+16135.0 lead hdg=259.7 bank=-38.0 pitch=0.2 alt=3063 vs=-571fpm surf=[2156, 28, 47]
+16135.5 lead hdg=262.2 bank=-41.0 pitch=0.0 alt=3058 vs=-570fpm surf=[638, 28, 47]
+16136.0 lead hdg=265.3 bank=-42.5 pitch=0.0 alt=3053 vs=-535fpm surf=[1187, 28, 47]
+16136.5 lead hdg=268.1 bank=-44.5 pitch=-0.2 alt=3049 vs=-511fpm surf=[966, 28, 47]
+16137.0 lead hdg=271.2 bank=-46.0 pitch=-0.4 alt=3045 vs=-465fpm surf=[642, 28, 47]
+16137.5 lead hdg=274.6 bank=-47.2 pitch=-0.5 alt=3042 vs=-421fpm surf=[637, 28, 47]
+16138.0 lead hdg=277.9 bank=-48.3 pitch=-0.7 alt=3039 vs=-378fpm surf=[632, 28, 47]
+16138.5 lead hdg=281.4 bank=-49.5 pitch=-0.9 alt=3036 vs=-344fpm surf=[613, 28, 47]
+16139.0 lead hdg=285.1 bank=-50.6 pitch=-1.0 alt=3033 vs=-299fpm surf=[559, 28, 47]
+16139.5 lead hdg=288.8 bank=-51.7 pitch=-1.1 alt=3031 vs=-269fpm surf=[464, 28, 47]
+16140.0 lead hdg=292.7 bank=-52.6 pitch=-1.2 alt=3029 vs=-239fpm surf=[393, 28, 47]
+16140.5 lead hdg=296.6 bank=-53.4 pitch=-1.3 alt=3027 vs=-221fpm surf=[358, 28, 47]
+16141.0 lead hdg=300.8 bank=-52.0 pitch=-1.3 alt=3026 vs=-196fpm surf=[2719, 28, 47]
+16141.5 lead hdg=305.0 bank=-40.5 pitch=-1.1 alt=3025 vs=-129fpm surf=[10938, 28, 47]
+16142.0 lead hdg=306.9 bank=-31.6 pitch=-2.2 alt=3025 vs=60fpm surf=[15234, 28, 47]
+16142.5 lead hdg=307.5 bank=-25.0 pitch=-2.6 alt=3028 vs=307fpm surf=[15780, 28, 47]
+16143.0 lead hdg=308.8 bank=-17.6 pitch=-1.9 alt=3031 vs=419fpm surf=[15969, 28, 47]
+16143.5 lead hdg=309.6 bank=-9.1 pitch=-1.3 alt=3034 vs=344fpm surf=[16069, 28, 47]
+16143.9 session::control: control passed generation=14 pf="11bc00e2cfec4bd7a25bbd3ca66c6efa"
+
+== The host, following, from 16087 to 16099: altitude hold and vertical speed mode arrive together, and the host's own vertical speed target goes out
+16088.790 #464485 s14b: arrived entry="kas_armed_vs" value=Number(200.0) applied=Stepping flying=false
+16088.790 #464485 s14b: out out=Act(Fire { name: H { name: "kas297b_100_INC" } })
+16088.898 #464549 s14b: read entry="kas_armed_vs" reading=Number(200.0) flying=false
+16089.070 #464642 s14b: arrived entry="kas_armed_vs" value=Number(300.0) applied=Done flying=false
+16089.070 #464642 s14b: out out=Act(Fire { name: H { name: "kas297b_100_INC" } })
+16089.153 #464691 s14b: read entry="kas_armed_vs" reading=Number(300.0) flying=false
+16089.671 #464965 s14b: arrived entry="ap_altitude_hold" value=Number(0.0) applied=Done flying=false
+16089.671 #464965 s14b: out out=Act(Key { name: K { name: "AP_PITCH_LEVELER_ON", values: [] }, values: [] })
+16089.671 #464965 s14b: arrived entry="ap_vs_hold" value=Number(1.0) applied=Done flying=false
+16089.671 #464965 s14b: out out=Act(Key { name: K { name: "AP_PANEL_VS_HOLD", values: [Number(1.0)] }, values: [1.0] })
+16089.711 #464983 s14b: read entry="ap_altitude_hold" value=Number(0.0) flying=false
+16089.711 #464984 s14b: read entry="ap_vs_hold" value=Number(1.0) flying=false
+16089.711 #464985 s14b: read entry="ap_vertical_speed" value=Number(100.0) flying=false
+16089.711 #464985 s14b: out out=Send(Change { entry: "ap_vertical_speed", value: Some(Number(100.0)), kind: Shared })
+16089.916 #465096 s14b: read entry="kas_armed_vs" reading=Number(100.0) flying=false
+16089.916 #465096 s14b: out out=Send(Change { entry: "kas_armed_vs", value: Some(Number(100.0)), kind: Shared })
+16089.939 #465109 s14b: arrived entry="ap_altitude_hold" value=Number(1.0) applied=Done flying=false
+16089.939 #465109 s14b: out out=Act(Key { name: K { name: "AP_ALT_HOLD", values: [] }, values: [] })
+16089.939 #465109 s14b: arrived entry="ap_vs_hold" value=Number(0.0) applied=Done flying=false
+16089.939 #465109 s14b: out out=Act(Key { name: K { name: "AP_PANEL_VS_HOLD", values: [Number(1.0)] }, values: [1.0] })
+16090.192 #465255 s14b: arrived entry="kas_armed_vs" value=Number(0.0) applied=Done flying=false
+16091.446 #465970 s14b: out out=Flag(Flag { entry: "ap_altitude_hold", name: "Autopilot altitude hold", what: NeverLanded { wanted: Number(1.0), reading: Some(Number(0.0)) } })
+16091.446 #465970 state_sync::carry: a write never landed entry="ap_altitude_hold" wanted=Number(1.0) reading=Some(Number(0.0)) retries=0
+16091.446 #465970 s14b: out out=Flag(Flag { entry: "ap_vs_hold", name: "Autopilot vertical speed mode", what: NeverLanded { wanted: Number(0.0), reading: Some(Number(1.0)) } })
+16091.446 #465970 state_sync::carry: a write never landed entry="ap_vs_hold" wanted=Number(0.0) reading=Some(Number(1.0)) retries=0
+16091.446 #465970 clients: a notification was raised id="state-sync.couldnt-sync" level=Warning text="Couldn't sync Autopilot altitude hold"
+16091.446 #465970 clients: a notification was raised id="state-sync.couldnt-sync" level=Warning text="Couldn't sync 2 controls"
+16094.477 #467630 s14b: arrived entry="kas_armed_vs" value=Number(200.0) applied=Done flying=false
+16094.748 #467780 s14b: arrived entry="kas_armed_vs" value=Number(500.0) applied=Done flying=false
+16095.015 #467927 s14b: arrived entry="kas_armed_vs" value=Number(600.0) applied=Done flying=false
+16095.629 #468262 s14b: arrived entry="ap_altitude_hold" value=Number(0.0) applied=Done flying=false
+16095.629 #468262 s14b: arrived entry="ap_vs_hold" value=Number(1.0) applied=Done flying=false
+16095.899 #468415 s14b: arrived entry="ap_vertical_speed" value=Number(600.0) applied=Done flying=false
+16095.899 #468415 s14b: out out=Act(Key { name: K { name: "AP_VS_VAR_SET_ENGLISH", values: [] }, values: [600.0] })
+16095.914 #468425 s14b: read entry="ap_vertical_speed" value=Number(600.0) flying=false
+16096.098 #468527 s14b: read entry="kas_armed_vs" reading=Number(600.0) flying=false
+16097.768 #469436 s14b: arrived entry="ap_altitude_hold" value=Number(1.0) applied=Done flying=false
+16097.768 #469436 s14b: out out=Act(Key { name: K { name: "AP_ALT_HOLD", values: [] }, values: [] })
+16097.768 #469436 s14b: arrived entry="ap_vs_hold" value=Number(0.0) applied=Done flying=false
+16097.768 #469436 s14b: out out=Act(Key { name: K { name: "AP_PANEL_VS_HOLD", values: [Number(1.0)] }, values: [1.0] })
+16097.806 #469455 s14b: read entry="ap_vertical_speed" value=Number(400.0) flying=false
+16097.806 #469455 s14b: out out=Send(Change { entry: "ap_vertical_speed", value: Some(Number(400.0)), kind: Shared })
+16097.897 #469507 s14b: read entry="kas_armed_vs" reading=Number(400.0) flying=false
+16097.897 #469507 s14b: out out=Send(Change { entry: "kas_armed_vs", value: Some(Number(400.0)), kind: Shared })
+16098.492 #469830 s14b: arrived entry="kas_armed_vs" value=Number(300.0) applied=Done flying=false
+16098.763 #469973 s14b: arrived entry="kas_armed_vs" value=Number(200.0) applied=Done flying=false

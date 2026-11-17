@@ -197,7 +197,7 @@ pub enum ChangeKind {
     Fired,
 }
 
-/// A write that never landed, or a value too large to send, once per entry for each load.
+/// A write that never landed, or a value too large to send, each time.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Flag {
     pub entry: String,
@@ -401,6 +401,13 @@ impl Engine {
         self.check(cx, &mut out);
         self.settle(cx.at);
         self.catch_up_progress(&mut out);
+        out
+    }
+
+    /// Control passed, and `cx` holds the new control value.
+    pub fn control_passed(&mut self, cx: Ctx) -> Vec<Out> {
+        let mut out = Vec::new();
+        self.took_control(cx, &mut out);
         out
     }
 

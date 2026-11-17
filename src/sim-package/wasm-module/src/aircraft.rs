@@ -2,7 +2,6 @@
 //! the sim's Vars and Events APIs (record/areas/core/03-sim-seam-and-wasm-module.md, "Wants
 //! and the sim's APIs").
 
-use std::collections::BTreeMap;
 use std::ffi::{CString, c_void};
 use std::ptr;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -14,14 +13,13 @@ use crate::vars;
 
 use crate::bindings::{
     FS_OBJECT_ID_USER_AIRCRAFT, FS_VAR_ERROR_NONE, FS_VAR_UPDATE_OP_REMOVE, FS_VAR_UPDATE_OP_RESET,
-    FsAVarId, FsBVarId, FsCameraData, FsEventId, FsObjectId, FsUnitId, FsVarParamArray,
-    FsVarParamTypeDouble, FsVarParamTypeInteger, FsVarParamVariant,
-    FsVarParamVariant__bindgen_ty_1, FsVarTypeFlags, FsVarUpdateOp, KEY_AXIS_AILERONS_SET,
-    KEY_AXIS_ELEVATOR_SET, KEY_AXIS_LEFT_BRAKE_SET, KEY_AXIS_RIGHT_BRAKE_SET, KEY_AXIS_RUDDER_SET,
-    KEY_FREEZE_ALTITUDE_SET, KEY_FREEZE_ATTITUDE_SET, KEY_FREEZE_LATITUDE_LONGITUDE_SET,
-    execute_calculator_code, fsCameraGet, fsEventsTriggerKeyEvent, fsVarsAVarGet, fsVarsBVarCall,
-    fsVarsGetAVarId, fsVarsGetBVarId, fsVarsGetUnitId, fsVarsRegisterVarsStatusUpdateHandler,
-    fsVarsUnregisterVarsStatusUpdateHandler,
+    FsAVarId, FsCameraData, FsEventId, FsObjectId, FsUnitId, FsVarParamArray,
+    FsVarParamTypeInteger, FsVarParamVariant, FsVarParamVariant__bindgen_ty_1, FsVarTypeFlags,
+    FsVarUpdateOp, KEY_AXIS_AILERONS_SET, KEY_AXIS_ELEVATOR_SET, KEY_AXIS_LEFT_BRAKE_SET,
+    KEY_AXIS_RIGHT_BRAKE_SET, KEY_AXIS_RUDDER_SET, KEY_FREEZE_ALTITUDE_SET,
+    KEY_FREEZE_ATTITUDE_SET, KEY_FREEZE_LATITUDE_LONGITUDE_SET, execute_calculator_code,
+    fsCameraGet, fsEventsTriggerKeyEvent, fsVarsAVarGet, fsVarsGetAVarId, fsVarsGetUnitId,
+    fsVarsRegisterVarsStatusUpdateHandler, fsVarsUnregisterVarsStatusUpdateHandler,
 };
 
 /// Set when the sim removes or resets variables, which fsc-editor's module heard on an
@@ -98,8 +96,32 @@ impl FreezeIds {
 #[derive(Default)]
 pub(crate) struct Aircraft {
     ids: Option<FreezeIds>,
-    /// Each preset's ID, by its name, which a reset of the sim's variables drops.
-    presets: BTreeMap<String, FsBVarId>,
+}
+
+/// Whether `name` can go into calculator code as an event's name. A name that could close the
+/// code's parenthesis or add a word to it is no event's, so it fires nothing.
+fn plain(name: &str) -> bool {
+    !name.is_empty()
+        && name
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.' | ':'))
+}
+
+/// Runs calculator code that gives no result.
+fn calculate(code: &str) {
+    let Ok(code) = CString::new(code) else {
+        return;
+    };
+    // SAFETY: the sim reads the code, which outlives the call, and writes no result, since
+    // each result's pointer is null.
+    unsafe {
+        execute_calculator_code(
+            code.as_ptr(),
+            ptr::null_mut(),
+            ptr::null_mut(),
+            ptr::null_mut(),
+        )
+    };
 }
 
 impl Aircraft {
@@ -118,7 +140,6 @@ impl Sim for Aircraft {
         let reset = FORGET.swap(false, Ordering::Relaxed);
         if reset {
             self.ids = None;
-            self.presets.clear();
         }
         reset
     }
@@ -126,66 +147,29 @@ impl Sim for Aircraft {
     /// Fires the `H:` event as calculator code, `(>H:name)`, since the Events API's
     /// `fsEventsHEventCall` returned `FS_EVENTS_ERROR_FAIL` and reached no cockpit panel, while
     /// calculator code reached every one (measured on MSFS 2024, 2026-11-10,
-    /// record/areas/sync/log.md). A name that could close the code's parenthesis or add a word
-    /// to it is no `H:` event's, so it fires nothing.
+    /// record/areas/sync/log.md).
     fn fire_h(&mut self, name: &str) {
-        let plain = |c: char| c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.' | ':');
-        if name.is_empty() || !name.chars().all(plain) {
-            return;
+        if plain(name) {
+            calculate(&format!("(>H:{name})"));
         }
-        let Ok(code) = CString::new(format!("(>H:{name})")) else {
-            return;
-        };
-        // SAFETY: the sim reads the code, which outlives the call, and writes no result, since
-        // each result's pointer is null.
-        unsafe {
-            execute_calculator_code(
-                code.as_ptr(),
-                ptr::null_mut(),
-                ptr::null_mut(),
-                ptr::null_mut(),
-            )
-        };
     }
 
-    /// Calls a preset by the name it has, such as `ELECTRICAL_Battery_1_Toggle`, which
-    /// `fsVarsGetBVarId` takes with `callable` true. An ID the sim refuses isn't kept, so the
-    /// next call asks again, and the 1.5s check flags a write it swallows. Only `_Toggle`,
-    /// with no value, has run in the sim, so whether a `_Set` takes its value as one double is
-    /// unverified (record/areas/sync/log.md, 2026-11-10).
+    /// Calls a preset as calculator code, with its value first when it takes one, as in
+    /// `90 (>B:INSTRUMENT_Heading_Bug_Set)`. Called through the Vars API's `fsVarsBVarCall`
+    /// with a value, a preset took that value and then jammed: no later call, and not the
+    /// pilot's own knob, moved its control until the flight loaded again, while calculator
+    /// code took every value (measured on MSFS 2024, 2026-11-17, record/areas/sync/log.md). A
+    /// value calculator code can't spell, such as NaN, calls nothing, and the 1.5s check flags
+    /// the write.
     fn call_preset(&mut self, name: &str, value: Option<f64>) {
-        let id = match self.presets.get(name) {
-            Some(&id) => id,
-            None => {
-                let Ok(text) = CString::new(name) else {
-                    return;
-                };
-                // SAFETY: the sim reads the name, which outlives the call.
-                let id =
-                    unsafe { fsVarsGetBVarId(text.as_ptr(), true, FS_OBJECT_ID_USER_AIRCRAFT) };
-                if id < 0 {
-                    return;
-                }
-                self.presets.insert(name.to_string(), id);
-                id
-            }
-        };
-        let mut param = FsVarParamVariant {
-            type_: FsVarParamTypeDouble,
-            __bindgen_anon_1: FsVarParamVariant__bindgen_ty_1 {
-                doubleValue: value.unwrap_or(0.0),
-            },
-        };
-        let params = FsVarParamArray {
-            size: u32::from(value.is_some()),
-            array: if value.is_some() {
-                &mut param
-            } else {
-                ptr::null_mut()
-            },
-        };
-        // SAFETY: the sim reads at most the one value, which outlives the call.
-        unsafe { fsVarsBVarCall(id, params, FS_OBJECT_ID_USER_AIRCRAFT) };
+        if !plain(name) {
+            return;
+        }
+        match value {
+            None => calculate(&format!("(>B:{name})")),
+            Some(value) if value.is_finite() => calculate(&format!("{value} (>B:{name})")),
+            Some(_) => {}
+        }
     }
 
     /// Sends the event with its value as an integer, the type SimConnect sends an event's

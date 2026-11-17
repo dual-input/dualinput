@@ -35,7 +35,6 @@ pub(crate) struct StateSlot {
     sending: Option<Value>,
     last_sent: Option<Value>,
     pub(crate) stopped: bool,
-    flagged: bool,
     driven: Driven,
     /// A counting entry's `count` variable, as last read.
     count_at: Option<f64>,
@@ -76,6 +75,22 @@ const CATCH_UP: How = How {
     answers: false,
     catch_up: true,
 };
+
+impl How {
+    /// How `how` goes for `owner`'s entry on this machine. A following machine's own systems
+    /// move what the PF owns, as its autopilot trims an aircraft `Follow` holds frozen, and
+    /// putting it back can't win against them, so checking the write there only flags the
+    /// trim in every flight on autopilot (measured on MSFS 2024, 2026-11-17,
+    /// record/areas/sync/log.md). The PF's machine writes those entries' last values as it
+    /// takes control, which is when they count.
+    fn for_owner(self, owner: Owner, cx: Ctx) -> How {
+        let following = owner == Owner::PilotFlying && !cx.flying();
+        How {
+            checked: self.checked && !following,
+            ..self
+        }
+    }
+}
 
 impl StateSlot {
     fn counted(&self) -> Option<&profile_engine::Count> {
@@ -163,7 +178,6 @@ impl Engine {
             sending: None,
             last_sent: None,
             stopped: false,
-            flagged: false,
             driven: Driven::default(),
             count_at: None,
             compare: Vec::new(),
@@ -462,7 +476,38 @@ impl Engine {
         }
         slot.stamp = Some(stamp);
         slot.held = Some(value.clone());
-        self.write(i, value, ARRIVAL, cx, out)
+        let how = ARRIVAL.for_owner(slot.entry.owner, cx);
+        self.write(i, value, how, cx, out)
+    }
+
+    /// Control passed to this machine: each PF-owned entry its cockpit doesn't hold at the old
+    /// PF's last value is written to it once. While this machine followed, its own systems
+    /// could move those entries away, as its autopilot ran the 58P's trim to full nose-down,
+    /// and an aircraft let go with that trim dived 2,000 ft in 15s (measured on MSFS 2024,
+    /// 2026-11-17, record/areas/sync/log.md).
+    pub(crate) fn took_control(&mut self, cx: Ctx, out: &mut Vec<Out>) {
+        if !cx.flying() {
+            return;
+        }
+        for i in 0..self.state.len() {
+            let Some(slot) = self.state.get(i) else {
+                continue;
+            };
+            if slot.entry.owner != Owner::PilotFlying
+                || slot.stopped
+                || slot.watch_only()
+                || slot.counted().is_some()
+            {
+                continue;
+            }
+            let (Some(held), Some(reading)) = (&slot.held, &slot.reading) else {
+                continue;
+            };
+            if !held.same(reading) {
+                let held = held.clone();
+                self.write(i, held, PUT_BACK, cx, out);
+            }
+        }
     }
 
     /// Writes `wanted` into the entry through its `write`, as the engine chooses.
@@ -663,14 +708,12 @@ impl Engine {
         }
     }
 
-    /// Flags an entry, once for each load.
+    /// Flags an entry each time, so the log has a line for every write that never lands, and
+    /// state sync tells its pilot once for each load.
     pub(crate) fn flag(&mut self, i: usize, what: Flagged, out: &mut Vec<Out>) {
-        let Some(slot) = self.state.get_mut(i) else {
+        let Some(slot) = self.state.get(i) else {
             return;
         };
-        if std::mem::replace(&mut slot.flagged, true) {
-            return;
-        }
         out.push(Out::Flag(Flag {
             entry: slot.entry.key.clone(),
             name: slot.entry.name.clone(),
@@ -802,7 +845,8 @@ impl Engine {
             if slot.reading.as_ref().is_some_and(|r| r.same(&e.value)) {
                 continue;
             }
-            self.write(i, e.value.clone(), CATCH_UP, cx, &mut out);
+            let how = CATCH_UP.for_owner(slot.entry.owner, cx);
+            self.write(i, e.value.clone(), how, cx, &mut out);
             let outstanding = self.runs.contains_key(&Slot::State(i))
                 || self.state.get(i).is_some_and(|s| s.waiting.is_some());
             if outstanding && let Some(c) = self.catch_up.as_mut() {

@@ -22,6 +22,15 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 > Every write to an input event goes through our WASM module, not `set_input`, and the routine `HEvents` below also calls input event presets, under the name `NamedEvents` and the slot `DUALINPUT_ROUTINE_NAMED_EVENTS` ([sync log](log.md#2026-11-09-writes-to-input-events-go-through-our-wasm-module-since-simconnects-list-has-none-of-their-presets); user, 2026-11-09).
 
 > **Note**
+> From the first flight with friends ([sync log](log.md#2026-11-17-fsvarsbvarcall-with-a-value-jams-the-input-event-for-the-rest-of-the-flight-and-calculator-code-from-our-module-doesnt); user, 2026-11-17):
+>
+> - In [reaching the sim](#reaching-the-sim), `HEvents` calls each input event's preset as calculator code, as it fires `H:` events, since `fsVarsBVarCall` with a value jammed the input event for the rest of the flight.
+> - In [checking a write](#checking-a-write), the engine flags each write that never lands, not once for each load, so the run's log has a line for each, and state sync's notification still shows once for each entry and load.
+> - A PF-owned entry's write on a following machine, live or in catch-up, goes unchecked, since that machine's own systems move it, as its autopilot trims the aircraft `Follow` freezes.
+> - As control passes to a machine, the engine writes each PF-owned entry its cockpit doesn't hold at the old PF's last value, once, through `control_passed`, which state sync calls on `ControlPassed`.
+> - Two known limits: a following machine's autopilot can send its own target as the PF's vertical speed mode reaches it, which goes out as its pilot's change; and two toggles of coupled controls that arrive together can undo each other, since a toggle decides from the last reading, which [stage 14c](../build/plan.md#14c-two-coupled-writes-in-one-input) takes up.
+
+> **Note**
 > Each `panel_module` call below takes a third argument, a function that says whether the loaded profile names anything the module serves, and `clients` raises its trouble over a panel that never connects only when one says yes ([the apps' note](../interface/01-apps.md); user, 2026-11-01).
 > `h-events` says yes when the loaded variant's `watches` holds an `H:` event, and `instrument-reads` when they hold an `instrument()`.
 

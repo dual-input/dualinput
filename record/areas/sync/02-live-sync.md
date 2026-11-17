@@ -10,6 +10,9 @@ Decides:     What crosses the wire, the order changes apply in, how a conflict r
 > Stage 11b's tentative decision on [the banner's content](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) changes [checking that a write landed](#checking-that-a-write-landed)'s notification until the apps' design confirms it (user, 2026-11-01): it names the control with no article, to fit any profile's name, as "Couldn't sync Beacon", and drops the line asking for a bug report.
 > The log's line stays, and [the EFB app has no button that marks the moment](../interface/decisions.md#mark-the-moment-leaves-the-efb-app), though `recording.mark` stays in the core.
 
+> **Note**
+> In [checking that a write landed](#checking-that-a-write-landed), the log gets a line for each write that never lands, and the notification still shows once per entry per flight, since one line per entry hid 39 heading-bug writes that never landed behind a first that looked like rounding ([sync log](log.md#2026-11-16-the-drift-after-a-handover-was-the-hosts-heading-bug-which-no-write-moved-after-its-first-and-every-_set-preset-that-missed-took-the-value-of-its-first-call); user, 2026-11-17).
+
 A state entry crosses the wire as its new value, and each receiving machine moves its cockpit to that value through the entry's write, then reads it back to check.
 Events and pointer presses cross as what happened.
 All three travel in one stream, in an order every machine agrees on, so a page key always lands before a press on the page it opened.

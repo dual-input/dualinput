@@ -28,7 +28,9 @@ pub(crate) fn run(me: &mut Session, cx: &mut Cx) -> bool {
         return false;
     }
     let awareness = cx.read::<SimAwareness>();
-    let here = crate::members::flying(awareness.stage)
+    let here = awareness
+        .stage
+        .in_a_flight()
         .then(|| awareness.aircraft.clone())
         .flatten();
     match here {

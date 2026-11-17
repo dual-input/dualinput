@@ -6,6 +6,9 @@ Depends on:  ../core/02-clients-and-panel-bridge.md, ../architecture/02-code-map
 Decides:     How a feature's part plugs into the EFB app and comes out; what a part may use; the slices and commands the apps need that no unit had; how any client changes a setting and quits; when and how the banner is opened and closed; how a click on a notification reaches the EFB app; what trouble in each component raises; and what the apps learn when the core goes (node 6.16).
 ```
 
+> **Note**
+> Since stage 21, a part also shows on the session card's crew rows, as Go to's Join ends the pilot flying's row, a row taking the first part's answer, and `profiles.pick` loads an aircraft at the world map through the menu script (user, 2026-11-17; [session log](../session/log.md#2026-11-17-in-the-sim-join-set-the-world-map-and-started-the-flight-within-09s-and-active-pause-followed-from-our-efb-apps-code-in-264ms-once-the-menu-script-parsed)).
+
 A feature shows itself in the EFB app through one part, which the app lists in one line, so deleting a feature deletes its folder and that line, and the platform's shells never name a feature.
 The apps reach the core only through slices of state, commands, and a part's `unit` messages, and any client sends any command, a setting's change among them.
 In each flight of a session, the EFB app's code opens the banner, calling the toolbar again until the banner's page connects, and the page shows and hides its own content while the panel stays open.

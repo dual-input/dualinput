@@ -252,10 +252,7 @@ impl SimService {
     /// Starts the search for the loaded aircraft's package: first each `UserCfg.opt`.
     fn look(&mut self, cx: &Cx) {
         let awareness = cx.read::<SimAwareness>();
-        let flying = matches!(
-            awareness.stage,
-            messages::sim::Stage::ReadyToFly | messages::sim::Stage::Flying
-        );
+        let flying = awareness.stage.in_a_flight();
         let Some(aircraft) = awareness.aircraft.clone().filter(|_| flying) else {
             return;
         };

@@ -14,4 +14,9 @@ loaded: LoadedProfile | null,
 /**
  * Each published profile this core's level takes, in the aircraft picker.
  */
-supported: Array<SupportedAircraft>, };
+supported: Array<SupportedAircraft>, 
+/**
+ * How many of the picker's picks the world map couldn't carry out, which the picker counts
+ * up from as it asks, so it says when its pick failed.
+ */
+pick_failed: number, };

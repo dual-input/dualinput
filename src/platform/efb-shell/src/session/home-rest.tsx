@@ -91,7 +91,7 @@ export function HomeRest({ page, signals, aircraft, onFigureGone }: { page: RefO
         </div>
       ) : null}
       {farewell && <Farewell onGone={() => setFarewell(false)} />}
-      <AircraftPicker open={picking} onOpenChange={setPicking} aircraft={profiles?.supported ?? []} canLoad={sim?.where === "world-map"} inFlight={sim?.where === "flight"} loaded={sim?.aircraft ?? null} onPick={onPick} />
+      <AircraftPicker open={picking} onOpenChange={setPicking} aircraft={profiles?.supported ?? []} canLoad={sim?.where === "world-map"} inFlight={sim?.where === "flight"} loaded={sim?.aircraft ?? null} onPick={onPick} failed={profiles?.pick_failed ?? 0} />
     </div>
   )
 }

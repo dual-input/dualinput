@@ -47,10 +47,12 @@ export type AircraftPickerProps = {
   loaded: { maker: string | null; model: string | null } | null
   /** Asks the core to load it, which refuses or takes the ask. */
   onPick: (aircraft: PickableAircraft) => Promise<void>
+  /** How many picks the world map couldn't carry out, which counts up when one the core took fails. */
+  failed: number
 }
 
-export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, inFlight, loaded, onPick }: AircraftPickerProps) {
-  const [choice, setChoice] = useState<{ aircraft: PickableAircraft; loaded: boolean } | null>(null)
+export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, inFlight, loaded, onPick, failed }: AircraftPickerProps) {
+  const [choice, setChoice] = useState<{ aircraft: PickableAircraft; loaded: boolean; failed: number } | null>(null)
   const scroller = useScroller()
   const timer = useRef(0)
   useEffect(() => () => window.clearTimeout(timer.current), [])
@@ -59,12 +61,19 @@ export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, inFlight
   }, [open])
   const choose = (picked: PickableAircraft) => {
     if (choice) return
-    setChoice({ aircraft: picked, loaded: false })
+    setChoice({ aircraft: picked, loaded: false, failed })
     onPick(picked).catch(() => {
       setChoice(null)
       toast("Dual Input couldn't load that aircraft")
     })
   }
+  // The core took the pick, and the world map couldn't carry it out.
+  const missed = !!choice && !choice.loaded && failed > choice.failed
+  useEffect(() => {
+    if (!missed) return
+    setChoice(null)
+    toast("Dual Input couldn't load that aircraft")
+  }, [missed])
   const landed = !!choice && !choice.loaded && loaded?.maker === choice.aircraft.maker && loaded.model === choice.aircraft.model
   useEffect(() => {
     if (!landed) return

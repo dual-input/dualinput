@@ -22,6 +22,13 @@ pub enum Stage {
     Flying,
 }
 
+impl Stage {
+    /// Whether the sim is in a flight: at Ready to fly or flying.
+    pub fn in_a_flight(self) -> bool {
+        matches!(self, Stage::ReadyToFly | Stage::Flying)
+    }
+}
+
 /// The menu's page, as the menu script last reported it.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[serde(rename_all = "kebab-case")]
@@ -161,6 +168,80 @@ pub struct MenuReport {
 /// The unit the menu script's report goes to, and its ask comes from.
 /// src/sim-package/pages/menu.ts names it too, so change both together.
 pub const MENU_UNIT: &str = "sim-service";
+
+/// What the menu script sends the sim service: a report of its master page, or the answer to
+/// a world map request.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(untagged)]
+#[ts(export, export_to = "sim/")]
+pub enum FromMenuScript {
+    Answer(WorldMapAnswer),
+    Page(MenuReport),
+}
+
+/// A world map request, which the sim service sends the menu script as a `unit` message, with
+/// the number of the call its answer names (record/areas/session/02-units.md, "The menu
+/// script").
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "sim/")]
+pub struct WorldMapCall {
+    pub call: u64,
+    pub request: WorldMapRequest,
+}
+
+/// The menu script's answer to one request.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "sim/")]
+pub struct WorldMapAnswer {
+    pub call: u64,
+    pub outcome: WorldMapOutcome,
+}
+
+/// What the menu script does at Free flight's world map. It decides nothing beyond which list
+/// entry matches a request.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(tag = "do", rename_all = "kebab-case")]
+#[ts(export, export_to = "sim/")]
+pub enum WorldMapRequest {
+    /// Searches for the airport, and selects the result whose `ICAO` matches.
+    DepartureAirport { icao: String },
+    /// Selects the stand whose list name is `name` and `number` followed by ` --` or nothing,
+    /// as "PARKING 140 -- RAMP CARGO" is for `GateName=PARKING; GateNumber=140`.
+    DepartureStand { name: String, number: u32 },
+    /// Selects the first runway the departure lists.
+    DepartureRunway,
+    /// Answers whether the aircraft list has the aircraft whose `SimObjects\Airplanes\` folder
+    /// is `folder`, preferring the variation titled `title`, without selecting it.
+    FindAircraft {
+        folder: String,
+        title: Option<String>,
+    },
+    /// Selects that aircraft.
+    Aircraft {
+        folder: String,
+        title: Option<String>,
+    },
+    /// Selects the pilot flying's livery for the selected aircraft: the one named `name`, their
+    /// `A:LIVERY NAME`, or with none, the one whose name ends `title`, their `A:TITLE`.
+    Livery { name: Option<String>, title: String },
+    /// Starts the flight.
+    LaunchFlight,
+    /// Presses Ready to fly.
+    ReadyToFly,
+}
+
+/// How a request went.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(tag = "as", rename_all = "kebab-case")]
+#[ts(export, export_to = "sim/")]
+pub enum WorldMapOutcome {
+    Done,
+    /// No list entry matches, such as a stand the airport doesn't have.
+    NoMatch,
+    Failed {
+        why: String,
+    },
+}
 
 /// The sim service's slice of client state, `sim`.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]

@@ -182,7 +182,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   So loading a pilot's flight for them, which [03-v1-scope](../product/03-v1-scope.md#preflight) leaves out of v1, is in v1 from the world map, and Go to from any other page stays [an idea](../product/ideas.md#the-pfs-spot-on-the-world-map).
   Join is disabled, and says why, while the PF has loaded no flight, while the PF's flight names no departure airport, while the joiner lacks the PF's aircraft, while the joiner is in a flight in another aircraft, which it says to end (user, 2026-11-01), and while Dual Input has no copy of BlurPage.
   Its words name the PF and never use he or she, since Dual Input doesn't know a pilot's pronouns (user, 2026-10-29).
-  A step that fails says which one ([Go to](../session/02-units.md#go-to)).
+  A step that fails says which one ([Go to](../session/02-units.md#go-to)), in a toast that waits until the EFB shows our app, so a pilot who presses Join and closes the EFB still sees it; Set up only says nothing when the pilot flying's flight names no stand, since the world map's own spot needs no word; and Join stays hidden while this pilot's own flight loads (user, 2026-11-17).
   When the world map lists no stand matching the PF's, the airport stays selected with no stand ([the menu script](../session/02-units.md#the-menu-script)), and Join now goes on to the aircraft, the livery, and the flight's start, since Dual Input moves the joiner's aircraft to the PF at the same airport.
   Settled by the user on 2026-10-29.
 - **Because:**

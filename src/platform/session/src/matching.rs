@@ -22,24 +22,34 @@ pub struct Found {
     pub note: Option<String>,
 }
 
-type CompareBytes = Box<dyn Fn(&[(String, &[u8])]) -> Option<Found>>;
+/// An item's comparison: each member's name and value, and which of them is this pilot's, so the
+/// words can say `yours`, or `None` when this pilot isn't among them, as while out of the flight.
+pub type Compare<T> = fn(&[(String, T)], Option<usize>) -> Option<Found>;
 
-/// An item's comparison, over each member's name and value in postcard.
+type CompareBytes = Box<dyn Fn(&[(String, &[u8], bool)]) -> Option<Found>>;
+
+/// An item's comparison, over each member's name and value in postcard, and whether it's this
+/// pilot's.
 pub(crate) struct Item {
     compare: CompareBytes,
 }
 
 impl Item {
-    pub(crate) fn new<T: DeserializeOwned + 'static>(
-        compare: fn(&[(String, T)]) -> Option<Found>,
-    ) -> Item {
+    pub(crate) fn new<T: DeserializeOwned + 'static>(compare: Compare<T>) -> Item {
         Item {
             compare: Box::new(move |values| {
-                let read: Vec<(String, T)> = values
+                let read: Vec<(String, T, bool)> = values
                     .iter()
-                    .filter_map(|(name, bytes)| Some((name.clone(), crate::decode(bytes)?)))
+                    .filter_map(|(name, bytes, mine)| {
+                        Some((name.clone(), crate::decode(bytes)?, *mine))
+                    })
                     .collect();
-                compare(&read)
+                let mine = read.iter().position(|(_, _, mine)| *mine);
+                let read: Vec<(String, T)> = read
+                    .into_iter()
+                    .map(|(name, value, _)| (name, value))
+                    .collect();
+                compare(&read, mine)
             }),
         }
     }
@@ -126,18 +136,21 @@ pub(crate) fn differences(me: &Session) -> Vec<Difference> {
         .into_iter()
         .filter(|m| me.in_flight(m))
         .collect();
-    let values: Vec<(String, MatchValues)> = flying
+    let values: Vec<(String, MatchValues, bool)> = flying
         .iter()
-        .filter_map(|m| Some((me.name_of(m), me.member_key(wire::MATCH, m)?)))
+        .filter_map(|m| {
+            let mine = me.me() == Some(*m);
+            Some((me.name_of(m), me.member_key(wire::MATCH, m)?, mine))
+        })
         .collect();
     me.items
         .iter()
         .filter_map(|(&number, item)| {
-            let of_item: Vec<(String, &[u8])> = values
+            let of_item: Vec<(String, &[u8], bool)> = values
                 .iter()
-                .filter_map(|(name, v)| {
+                .filter_map(|(name, v, mine)| {
                     let (_, bytes) = v.items.iter().find(|(n, _)| *n == number)?;
-                    Some((name.clone(), bytes.as_slice()))
+                    Some((name.clone(), bytes.as_slice(), *mine))
                 })
                 .collect();
             if of_item.len() < 2 {
@@ -158,47 +171,58 @@ pub(crate) fn differences(me: &Session) -> Vec<Difference> {
 fn listed<T>(values: &[(String, T)], text: impl Fn(&T) -> String) -> String {
     values
         .iter()
-        .map(|(name, v)| format!("{name}: {}", text(v)))
+        .map(|(name, v)| format!("{name} {}", text(v)))
         .collect::<Vec<_>>()
         .join(", ")
 }
 
 fn place(installed: &Installed) -> String {
-    let location = match installed.location {
+    match installed.location {
         Location::Community => "in Community",
         Location::Community2024 => "in Community2024",
-        Location::Official => "from the Marketplace, installed",
+        Location::Official => "from the Marketplace",
         Location::Streamed => "streamed",
-    };
-    match &installed.package {
-        Some(package) => format!("{package}, {location}"),
-        None => location.to_string(),
     }
+    .to_string()
 }
 
 /// The aircraft's package and where it's installed, compared for equality, as a warning: two
 /// stores can ship one version with different files
-/// (record/areas/product/03-v1-scope.md, "Preflight match check").
-pub(crate) fn compare_package(values: &[(String, Installed)]) -> Option<Found> {
+/// (record/areas/product/03-v1-scope.md, "Preflight match check"). The words name where each
+/// copy is, and not its package, whose folder's name tells a pilot little (user, 2026-11-17).
+pub(crate) fn compare_package(values: &[(String, Installed)], _: Option<usize>) -> Option<Found> {
     let first = values.first()?;
-    let same = values
+    // A streamed copy against an installed one is the version's warning to give, so the crew sees
+    // one line for it, not two (user, 2026-11-17).
+    let streamed = |v: &Installed| v.location == Location::Streamed;
+    if values.iter().any(|(_, v)| streamed(v)) && values.iter().any(|(_, v)| !streamed(v)) {
+        return None;
+    }
+    if values.iter().any(|(_, v)| v.location != first.1.location) {
+        return Some(Found {
+            level: Severity::Warning,
+            words: format!(
+                "Aircraft copies come from different places: {}",
+                listed(values, place)
+            ),
+            note: Some("The same version can differ between stores".into()),
+        });
+    }
+    values
         .iter()
-        .all(|(_, v)| v.package == first.1.package && v.location == first.1.location);
-    (!same).then(|| Found {
-        level: Severity::Warning,
-        words: format!(
-            "Your copies of the aircraft come from different places. {}",
-            listed(values, place)
-        ),
-        note: Some("The same version can differ between stores".into()),
-    })
+        .any(|(_, v)| v.package != first.1.package)
+        .then(|| Found {
+            level: Severity::Warning,
+            words: "Aircraft copies come from different packages".into(),
+            note: None,
+        })
 }
 
 /// The aircraft's version, where both copies have one, as an error. A streamed copy keeps no
 /// version on disk, so a streamed copy against an installed one is a warning that this core
 /// can't compare them, and two streamed copies show nothing (record/areas/aircraft/log.md,
 /// 2026-10-16).
-pub(crate) fn compare_version(values: &[(String, Installed)]) -> Option<Found> {
+pub(crate) fn compare_version(values: &[(String, Installed)], _: Option<usize>) -> Option<Found> {
     let streamed = values
         .iter()
         .filter(|(_, v)| v.location == Location::Streamed)
@@ -210,7 +234,7 @@ pub(crate) fn compare_version(values: &[(String, Installed)]) -> Option<Found> {
         return Some(Found {
             level: Severity::Warning,
             words: format!(
-                "A streamed copy of the aircraft keeps no version Dual Input can read. {}",
+                "A streamed copy of the aircraft keeps no version Dual Input can read: {}",
                 listed(values, |v| v
                     .version
                     .clone()
@@ -225,7 +249,7 @@ pub(crate) fn compare_version(values: &[(String, Installed)]) -> Option<Found> {
     differs.then(|| Found {
         level: Severity::Error,
         words: format!(
-            "Your aircraft's versions differ. {}",
+            "Aircraft versions differ: {}",
             listed(values, |v| v.version.clone().unwrap_or_default())
         ),
         note: None,
@@ -233,13 +257,16 @@ pub(crate) fn compare_version(values: &[(String, Installed)]) -> Option<Found> {
 }
 
 /// The livery, `A:LIVERY NAME`, compared for equality, as a warning.
-pub(crate) fn compare_livery(values: &[(String, Option<String>)]) -> Option<Found> {
+pub(crate) fn compare_livery(
+    values: &[(String, Option<String>)],
+    _: Option<usize>,
+) -> Option<Found> {
     let first = &values.first()?.1;
     let same = values.iter().all(|(_, v)| v == first);
     (!same).then(|| Found {
         level: Severity::Warning,
         words: format!(
-            "Your liveries differ. {}",
+            "Liveries differ: {}",
             listed(values, |v| v.clone().unwrap_or_else(|| "none".into()))
         ),
         note: None,
@@ -264,10 +291,13 @@ mod tests {
 
     #[test]
     fn a_streamed_copy_against_an_installed_one_is_a_warning() {
-        let found = compare_version(&crew(
-            copy(Location::Community, Some("0.1.1")),
-            copy(Location::Streamed, None),
-        ))
+        let found = compare_version(
+            &crew(
+                copy(Location::Community, Some("0.1.1")),
+                copy(Location::Streamed, None),
+            ),
+            None,
+        )
         .unwrap();
         assert_eq!(found.level, Severity::Warning);
         assert!(found.words.contains("keeps no version"), "{}", found.words);
@@ -278,26 +308,42 @@ mod tests {
     }
 
     #[test]
+    fn a_streamed_copy_against_an_installed_one_is_one_warning_not_two() {
+        let crew = crew(
+            copy(Location::Community, Some("0.1.1")),
+            copy(Location::Streamed, None),
+        );
+        assert!(compare_version(&crew, None).is_some());
+        assert_eq!(compare_package(&crew, None), None);
+    }
+
+    #[test]
     fn two_streamed_copies_show_nothing() {
         assert_eq!(
-            compare_version(&crew(
-                copy(Location::Streamed, None),
-                copy(Location::Streamed, None)
-            )),
+            compare_version(
+                &crew(
+                    copy(Location::Streamed, None),
+                    copy(Location::Streamed, None)
+                ),
+                None
+            ),
             None
         );
     }
 
     #[test]
     fn two_installed_versions_that_differ_are_an_error() {
-        let found = compare_version(&crew(
-            copy(Location::Community, Some("1.0.8")),
-            copy(Location::Official, Some("1.0.9")),
-        ))
+        let found = compare_version(
+            &crew(
+                copy(Location::Community, Some("1.0.8")),
+                copy(Location::Official, Some("1.0.9")),
+            ),
+            None,
+        )
         .unwrap();
         assert_eq!(found.level, Severity::Error);
         assert!(
-            found.words.contains("James: 1.0.8, Adam: 1.0.9"),
+            found.words == "Aircraft versions differ: James 1.0.8, Adam 1.0.9",
             "{}",
             found.words
         );
@@ -309,17 +355,37 @@ mod tests {
             copy(Location::Community, Some("1.0.8")),
             copy(Location::Official, Some("1.0.8")),
         );
-        assert_eq!(compare_version(&crew), None);
-        assert_eq!(compare_package(&crew).unwrap().level, Severity::Warning);
+        assert_eq!(compare_version(&crew, None), None);
+        let found = compare_package(&crew, None).unwrap();
+        assert_eq!(found.level, Severity::Warning);
+        assert_eq!(
+            found.words,
+            "Aircraft copies come from different places: James in Community, Adam from the Marketplace"
+        );
+    }
+
+    #[test]
+    fn two_packages_in_one_place_say_so_without_naming_them() {
+        let mut other = copy(Location::Community, Some("1.0.8"));
+        other.package = Some("another-baron".into());
+        let found = compare_package(&crew(copy(Location::Community, Some("1.0.8")), other), None);
+        assert_eq!(
+            found.unwrap().words,
+            "Aircraft copies come from different packages"
+        );
     }
 
     #[test]
     fn liveries_that_differ_are_a_warning() {
-        let found = compare_livery(&[
-            ("James".into(), Some("N515MR".into())),
-            ("Adam".into(), Some("N58P".into())),
-        ])
+        let found = compare_livery(
+            &[
+                ("James".into(), Some("N515MR".into())),
+                ("Adam".into(), Some("N58P".into())),
+            ],
+            None,
+        )
         .unwrap();
         assert_eq!(found.level, Severity::Warning);
+        assert_eq!(found.words, "Liveries differ: James N515MR, Adam N58P");
     }
 }

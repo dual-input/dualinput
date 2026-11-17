@@ -159,8 +159,8 @@ test("a member offline whose cache lacks the pin shows the error, loads nothing,
   await crew(a, b)
   await load(a.core, BARON)
   await load(b.core, BARON)
-  const s = await until(a, (s) => bundleDifference(s)?.words.startsWith("Couldn't get the session's profile") === true, "Adam's error")
-  assert.equal(bundleDifference(s)?.words, "Couldn't get the session's profile: Adam")
+  const s = await until(a, (s) => bundleDifference(s) !== undefined, "Adam's error")
+  assert.equal(bundleDifference(s)?.words, "Adam couldn't download this aircraft's profile")
   assert.deepEqual(loads(b.core), [])
 
   net.profiles.setCut(false)
@@ -185,7 +185,7 @@ test("the pilot flying pins a local bundle: a member with the same file loads it
   await logged(a.core, new RegExp(`the pilot flying pinned the session's profile hash="${hash}" local=true`))
   for (const p of [a, b]) await logged(p.core, loadedLine(hash))
   const s = await until(a, (s) => bundleDifference(s) !== undefined, "Rosa's error")
-  assert.equal(bundleDifference(s)?.words, "Couldn't get the session's profile: Rosa")
+  assert.equal(bundleDifference(s)?.words, "Rosa doesn't have your unpublished profile for this aircraft")
   assert.ok(!net.profiles.requests.some((r) => r.path.includes(hash)), "no core fetched the local bundle")
 })
 
@@ -357,7 +357,7 @@ test("the apps see where the pilot is, the aircraft the sim last loaded by name,
   const installed = (s: ProfilesSlice | undefined) => s?.supported.every((p) => p.installed) === true && s.supported.length > 0
 
   await watching.until(() => installed(profiles()), "the Baron's profile, installed")
-  assert.deepEqual(profiles(), { loaded: null, supported: [{ maker: "Black Square", model: "Baron 58P", maturity: "Experimental", installed: true }] })
+  assert.deepEqual(profiles(), { loaded: null, supported: [{ maker: "Black Square", model: "Baron 58P", maturity: "Experimental", installed: true }], pick_failed: 0 })
   assert.equal(sim()?.where, "main-menu")
   assert.equal(sim()?.aircraft, null)
 
@@ -380,7 +380,19 @@ test("the apps see where the pilot is, the aircraft the sim last loaded by name,
   await watching.until(() => sim()?.where === "flight", "the flight")
   await named({ path: BARON.path, maker: "Black Square", model: "Baron 58P", tail: "N58BS" })
 
-  assert.match((await watching.command("profiles.pick", { maker: "Black Square", model: "Baron 58P" })) ?? "", /can't load an aircraft yet/)
+  // In a flight the picker loads nothing; at the world map the menu script selects the Baron's
+  // folder, and a pick the world map can't carry out counts as failed.
+  const pick = () => watching.command("profiles.pick", { maker: "Black Square", model: "Baron 58P" })
+  assert.match((await pick()) ?? "", /only at the world map/)
+  await toMenu(a.core)
+  await watching.until(() => sim()?.where === "world-map", "back at the world map")
+  menu.aircraft = [BARON]
+  assert.equal(await pick(), null)
+  await menu.until(() => menu.requests.some((r) => r.do === "aircraft" && r.folder === BARON.path), "the menu script asked for the Baron")
+  assert.equal(profiles()?.pick_failed, 0)
+  menu.aircraft = []
+  assert.equal(await pick(), null)
+  await watching.until(() => profiles()?.pick_failed === 1, "the failed pick counted")
 })
 
 test("a profile's aircraft no package on disk holds shows as not installed, and an aircraft with no package has no name", { timeout: 60_000 }, async (t) => {

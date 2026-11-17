@@ -1,0 +1,19 @@
+// The tests run on Node's test runner, so they see Node's types. The words they test take the kit's toast's type,
+// whose module the kit's index brings in with its components, so the check reads JSX.
+{
+  "compilerOptions": {
+    "target": "es2024",
+    "lib": ["es2024", "dom"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "types": ["node"]
+  },
+  "include": ["*.ts"]
+}

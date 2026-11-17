@@ -9,6 +9,8 @@ import { VERSION } from "../../engines/messages/ts/stamp.ts"
 import { CoreLink } from "../../engines/page-client/src/core-link.ts"
 import { atcAudio } from "../../features/atc-audio/efb/part.tsx"
 import { avatars } from "../../features/avatars/efb/part.tsx"
+import goTo from "../../features/go-to/efb/index.tsx"
+import rateAndPause from "../../features/rate-and-pause/efb/index.ts"
 import { stateSync } from "../../features/state-sync/efb/part.tsx"
 import takeControl from "../../features/take-control/efb/index.tsx"
 import { traffic } from "../../features/traffic/efb/part.tsx"
@@ -23,7 +25,7 @@ import { viewLeft, viewShown } from "../../platform/efb-shell/src/view.ts"
 const INTERNAL_NAME = "DualInput"
 
 /** Each feature's part, one line each, in the order their tabs show. */
-const PARTS: Part[] = [takeControl, traffic, atcAudio, avatars, stateSync]
+const PARTS: Part[] = [takeControl, traffic, atcAudio, avatars, stateSync, rateAndPause, goTo]
 
 const SIM = simWindow(INTERNAL_NAME)
 

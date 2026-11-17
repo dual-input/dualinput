@@ -30,12 +30,14 @@ core-helper-service = { path = "../../platform/core-helper-service" }
 flight-model = { path = "../../features/flight-model/core" }
 # Each socket's task reads and writes its WebSocket through StreamExt and SinkExt.
 futures-util = { version = "0.3.34", default-features = false, features = ["sink"] }
+go-to = { path = "../../features/go-to/core" }
 kernel = { path = "../../platform/kernel" }
 messages = { path = "../../engines/messages" }
 network = { path = "../../platform/network" }
 pointer-sync = { path = "../../features/pointer-sync/core" }
 profile-engine = { path = "../../engines/profile-engine", optional = true }
 profile-loader = { path = "../../platform/profile-loader" }
+rate-and-pause = { path = "../../features/rate-and-pause/core" }
 recording = { path = "../../platform/recording" }
 recording-format = { path = "../../engines/recording-format" }
 # The edge's fetches, through the reqwest and rustls iroh already builds, with ring, iroh's

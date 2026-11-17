@@ -6,7 +6,7 @@
 import { inPreflight } from "@dualinput/crew"
 import { Card, cx, fadeMask, NO_SCROLLBAR, showPress } from "@dualinput/ui"
 import { ChevronDown, Hand } from "lucide-react"
-import { createElement, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { createElement, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import type { CSSProperties } from "react"
 
 import type { ProfilesSlice } from "../../../../engines/messages/ts/profiles/ProfilesSlice.ts"
@@ -43,6 +43,7 @@ function roleChips(parts: Part[]): RoleChip[] {
 
 export function SessionTab({ parts }: { parts: Part[] }) {
   const { link, tab } = useShell()
+  const crewRows = useMemo(() => parts.map((part) => part.useCrewRow).filter((useRow): useRow is NonNullable<Part["useCrewRow"]> => !!useRow), [parts])
   const session = useCoreSlice<SessionSlice>("session")
   const sim = useCoreSlice<SimSlice>("sim")
   const profiles = useCoreSlice<ProfilesSlice>("profiles")
@@ -205,7 +206,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
                     style={{ opacity: turning === "out" ? 0 : 1, transition: `opacity ${TURN.out}ms ease-out` }}
                   >
                     {side === "session" && session ? (
-                      <SessionSide session={session} started={started} turnedIn={turnedIn.current} folded={fold.folded} onEase={() => remeasure((n) => n + 1)} roles={roleChips(parts)} />
+                      <SessionSide session={session} started={started} turnedIn={turnedIn.current} folded={fold.folded} onEase={() => remeasure((n) => n + 1)} roles={roleChips(parts)} crewRows={crewRows} />
                     ) : (
                       <StartSide
                         aircraft={aircraft}

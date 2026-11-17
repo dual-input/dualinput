@@ -17,12 +17,13 @@ mod local;
 use std::collections::{BTreeMap, BTreeSet};
 
 use clients::{Clients, ClientsUnit, SettingChanged, SettingDef};
-use kernel::{Cx, JobId, Moment, Registry, Started, View};
+use kernel::{Cx, Handle, JobId, Moment, Registry, Started, View};
 use messages::clients::SettingKind;
 use messages::profiles::{
     self as wire, BUNDLE, Bundle, LoadedProfile, PIN, Pick, Pin, ProfilesSlice, SupportedAircraft,
 };
 use messages::session::{Phase, Severity};
+use messages::sim::{MenuPage, Stage, WorldMapOutcome, WorldMapRequest};
 use messages::{hex, unhex};
 use profile_engine::{Index, IndexBundle, Maturity, Profile, Resolved};
 use serde_json::json;
@@ -30,7 +31,7 @@ use session::{
     ControlPassed, FlightChanged, Found, KeyChanged, Session, SessionEnded, SessionStarted,
     SessionUnit, WriteKeys, clear_match, set_match,
 };
-use sim_service::{PackageFound, SimAwareness};
+use sim_service::{PackageFound, SimAwareness, SimCx, SimEvent, SimService, SimUnit};
 
 /// The development setting that names the profiles' site, which the bench points at its own.
 pub const SITE: &str = "profiles.site";
@@ -90,6 +91,10 @@ pub struct Profiles {
     /// Whether a package on disk holds each folder a published profile covers, by the folder in
     /// lowercase, as far as the sim service has answered.
     installed: BTreeMap<String, bool>,
+    /// The aircraft picker's ask of the world map, on its way.
+    picking: Option<Handle>,
+    /// How many picks the world map couldn't carry out.
+    pick_failed: u32,
 }
 
 impl Profiles {
@@ -116,6 +121,7 @@ pub fn register(r: &mut Registry) {
         .on::<SettingChanged>(Profiles::setting_changed)
         .on::<PackageFound>(Profiles::package_found)
         .command(wire::command::PICK, Profiles::pick)
+        .on_sim(Profiles::on_sim)
         .client_state(wire::SLICE, Profiles::slice)
         .session_key(PIN)
         .match_item(BUNDLE, compare);
@@ -182,12 +188,64 @@ impl Profiles {
         me.installed.insert(found.folder.clone(), found.installed);
     }
 
-    /// `profiles.pick`, from the aircraft picker.
-    // TODO: load the aircraft once the menu script makes the world map's requests,
-    // `game/aircraft/aircraftList` and `game/aircraft/configurator/setAircraftForConfigurator`.
-    fn pick(_: &mut Profiles, pick: Pick, _: &mut Cx) -> Result<(), String> {
-        tracing::info!(pick.maker, pick.model, "the aircraft picker can't load yet");
-        Err("Dual Input can't load an aircraft yet".into())
+    /// `profiles.pick`, from the aircraft picker: has the menu script select the aircraft on the
+    /// world map, as Join selects the pilot flying's, by a folder its profile covers, one a package
+    /// on disk holds where the sim service has found one (record/areas/interface/decisions.md, "The
+    /// aircraft picker loads an aircraft through the world map's store, and only at the world
+    /// map"). The picker sees the pick land in the sim's loaded aircraft, and fail in `pick_failed`.
+    fn pick(me: &mut Profiles, pick: Pick, cx: &mut Cx) -> Result<(), String> {
+        let sim = cx.read::<SimAwareness>();
+        if sim.stage != Stage::Menu
+            || sim.page != MenuPage::WorldMap
+            || !cx.read::<SimService>().menu_script()
+        {
+            return Err("The aircraft picker loads an aircraft only at the world map".into());
+        }
+        let folders: Vec<String> = me
+            .published()
+            .find(|b| b.shown.maker == pick.maker && b.shown.name == pick.model)
+            .map(|b| b.variants.iter().map(|v| folder(v)).collect())
+            .unwrap_or_default();
+        let Some(chosen) = folders
+            .iter()
+            .find(|f| me.installed.get(*f) == Some(&true))
+            .or(folders.first())
+            .cloned()
+        else {
+            return Err(format!(
+                "No published profile is {} {}",
+                pick.maker, pick.model
+            ));
+        };
+        tracing::info!(
+            pick.maker,
+            pick.model,
+            folder = chosen,
+            "the aircraft picker loads an aircraft"
+        );
+        let request = WorldMapRequest::Aircraft {
+            folder: chosen,
+            title: None,
+        };
+        me.picking = Some(cx.sim().world_map(request));
+        Ok(())
+    }
+
+    /// The world map's answer to the picker's ask.
+    fn on_sim(me: &mut Profiles, event: SimEvent, _: &mut Cx) {
+        let (call, done) = match event {
+            SimEvent::WorldMap { call, outcome } => (call, outcome == WorldMapOutcome::Done),
+            SimEvent::Failed { call } => (call, false),
+            _ => return,
+        };
+        if me.picking != Some(call) {
+            return;
+        }
+        me.picking = None;
+        if !done {
+            tracing::info!("the world map couldn't load the aircraft the picker asked for");
+            me.pick_failed += 1;
+        }
     }
 
     /// The slice `profiles`.
@@ -211,6 +269,7 @@ impl Profiles {
                         .any(|v| me.installed.get(&folder(v)) == Some(&true)),
                 })
                 .collect(),
+            pick_failed: me.pick_failed,
         }
     }
 
@@ -500,15 +559,10 @@ impl Profiles {
 
 /// The match check's comparison: a member with no profile, or without the session's, is an
 /// error, even when every member shows it, since state sync, pointer sync, and avatars find
-/// nothing to load (record/areas/session/02-units.md, "The match check").
-fn compare(values: &[(String, Bundle)]) -> Option<Found> {
-    let names = |want: fn(&Bundle) -> bool| {
-        values
-            .iter()
-            .filter(|(_, v)| want(v))
-            .map(|(n, _)| n.as_str())
-            .collect::<Vec<_>>()
-    };
+/// nothing to load (record/areas/session/02-units.md, "The match check"). The words are the
+/// frames' (`HEADS_UP` in experiments/areas/interface/bench/src/frames/home.tsx), from the side of
+/// the pilot reading them, `mine` (user, 2026-11-17).
+fn compare(values: &[(String, Bundle)], mine: Option<usize>) -> Option<Found> {
     if values.iter().any(|(_, v)| *v == Bundle::NoProfile) {
         return Some(Found {
             level: Severity::Error,
@@ -516,14 +570,43 @@ fn compare(values: &[(String, Bundle)]) -> Option<Found> {
             note: Some("The cockpits won't sync".into()),
         });
     }
-    let unavailable = names(|v| *v == Bundle::Unavailable);
-    if !unavailable.is_empty() {
+    // The pinned bundle is local, unpublished, when the pilot flying's own folder holds it.
+    let unpublished = values
+        .iter()
+        .position(|(_, v)| matches!(v, Bundle::Loaded(pin) if pin.local));
+    if mine.is_some_and(|i| values[i].1 == Bundle::Unavailable) {
+        let words = match unpublished {
+            Some(holder) => format!(
+                "{}'s profile for this aircraft is unpublished, so you don't have it",
+                values[holder].0
+            ),
+            None => "Your PC couldn't download this aircraft's profile".into(),
+        };
         return Some(Found {
             level: Severity::Error,
-            words: format!(
-                "Couldn't get the session's profile: {}",
-                unavailable.join(", ")
-            ),
+            words,
+            note: Some("Your switches, knobs, and displays won't sync".into()),
+        });
+    }
+    let missing: Vec<&str> = values
+        .iter()
+        .enumerate()
+        .filter(|(i, (_, v))| Some(*i) != mine && *v == Bundle::Unavailable)
+        .map(|(_, (name, _))| name.as_str())
+        .collect();
+    if let [one] = missing.as_slice() {
+        return Some(Found {
+            level: Severity::Error,
+            words: lacks(one, "doesn't", unpublished, mine, values),
+            note: Some(format!("{one}'s switches, knobs, and displays won't sync")),
+        });
+    }
+    if !missing.is_empty() {
+        let (last, rest) = missing.split_last()?;
+        let who = format!("{} and {last}", rest.join(", "));
+        return Some(Found {
+            level: Severity::Error,
+            words: lacks(&who, "don't", unpublished, mine, values),
             note: Some("Their switches, knobs, and displays won't sync".into()),
         });
     }
@@ -539,6 +622,27 @@ fn compare(values: &[(String, Bundle)]) -> Option<Found> {
         words: "The pilots loaded different profiles".into(),
         note: None,
     })
+}
+
+/// What the members `who` lack: a published bundle they couldn't download, or the unpublished one
+/// the member at `unpublished` pinned, this pilot's own or another's.
+fn lacks(
+    who: &str,
+    do_not: &str,
+    unpublished: Option<usize>,
+    mine: Option<usize>,
+    values: &[(String, Bundle)],
+) -> String {
+    match unpublished {
+        Some(holder) if Some(holder) == mine => {
+            format!("{who} {do_not} have your unpublished profile for this aircraft")
+        }
+        Some(holder) => format!(
+            "{who} {do_not} have {}'s unpublished profile for this aircraft",
+            values[holder].0
+        ),
+        None => format!("{who} couldn't download this aircraft's profile"),
+    }
 }
 
 /// The folder a variant is in, a preset's first part, in lowercase.
@@ -599,10 +703,13 @@ mod tests {
 
     #[test]
     fn no_profile_is_an_error_even_when_every_member_shows_it() {
-        let found = compare(&[
-            ("A".into(), Bundle::NoProfile),
-            ("B".into(), Bundle::NoProfile),
-        ]);
+        let found = compare(
+            &[
+                ("A".into(), Bundle::NoProfile),
+                ("B".into(), Bundle::NoProfile),
+            ],
+            Some(0),
+        );
         assert_eq!(
             found.map(|f| f.words).as_deref(),
             Some("No profile for this aircraft")
@@ -612,19 +719,48 @@ mod tests {
     #[test]
     fn the_same_bundle_everywhere_shows_nothing() {
         assert_eq!(
-            compare(&[
-                ("A".into(), Bundle::Loaded(pin(1))),
-                ("B".into(), Bundle::Loaded(pin(1)))
-            ]),
+            compare(
+                &[
+                    ("A".into(), Bundle::Loaded(pin(1))),
+                    ("B".into(), Bundle::Loaded(pin(1)))
+                ],
+                Some(0)
+            ),
             None
         );
-        let found = compare(&[
+        let values = [
             ("A".into(), Bundle::Loaded(pin(1))),
             ("B".into(), Bundle::Unavailable),
-        ]);
+        ];
+        let words = |mine| compare(&values, mine).map(|f| f.words);
         assert_eq!(
-            found.map(|f| f.words).as_deref(),
-            Some("Couldn't get the session's profile: B")
+            words(Some(0)).as_deref(),
+            Some("B couldn't download this aircraft's profile")
+        );
+        assert_eq!(
+            words(Some(1)).as_deref(),
+            Some("Your PC couldn't download this aircraft's profile")
+        );
+    }
+
+    #[test]
+    fn an_unpublished_bundle_names_whose_it_is_from_each_side() {
+        let local = Pin {
+            hash: [1; 32],
+            local: true,
+        };
+        let values = [
+            ("James".into(), Bundle::Loaded(local)),
+            ("Adam".into(), Bundle::Unavailable),
+        ];
+        let words = |mine| compare(&values, mine).map(|f| f.words);
+        assert_eq!(
+            words(Some(0)).as_deref(),
+            Some("Adam doesn't have your unpublished profile for this aircraft")
+        );
+        assert_eq!(
+            words(Some(1)).as_deref(),
+            Some("James's profile for this aircraft is unpublished, so you don't have it")
         );
     }
 }

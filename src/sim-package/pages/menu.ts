@@ -4,13 +4,17 @@
 // main menu and `MasterPage_InGame` in a flight, which tells a core that found the sim already
 // running where the pilot is (record/areas/session/02-units.md, "The menu script";
 // record/areas/core/03-sim-seam-and-wasm-module.md, "Leaving Starting"). From then on it reports
-// each change, which is how the aircraft picker knows it's at the world map.
+// each change, which is how the aircraft picker and Join know the pilot is at the world map. It
+// also makes the world map's requests the sim service hands it, which Join sends (world-map.ts).
 //
 // It touches no input, so it has nothing to fail open from.
 
 import type { MenuPage } from "../../engines/messages/ts/sim/MenuPage.ts"
+import type { WorldMapAnswer } from "../../engines/messages/ts/sim/WorldMapAnswer.ts"
+import type { WorldMapCall } from "../../engines/messages/ts/sim/WorldMapCall.ts"
 import { PageClient } from "../../engines/page-client/src/page-client.ts"
 import { simEnv } from "../../engines/page-client/src/sim-env.ts"
+import { run } from "./world-map.ts"
 
 /** The component its `hello` names. `component::MENU_SCRIPT` in src/engines/messages/src/clients.rs names it too. */
 const COMPONENT = "menu-script"
@@ -18,8 +22,8 @@ const COMPONENT = "menu-script"
 /** The unit its report goes to, which asks for it. `MENU_UNIT` in src/engines/messages/src/sim.rs names it too. */
 const UNIT = "sim-service"
 
-/** How often it looks for a change of page, in milliseconds. */
-const WATCH_MS = 1000
+/** How often it looks for a change of page, in milliseconds (record/areas/session/02-units.md, "The menu script"). */
+const WATCH_MS = 500
 
 /**
  * The master page on screen. The pause menu puts `MasterPage_Pause` over a flight's
@@ -39,7 +43,16 @@ try {
   const client = new PageClient({ component: COMPONENT }, simEnv())
   // Null until the sim service has asked, and it asks each time the socket joins.
   let reported: MenuPage | null = null
-  client.onUnit(UNIT, () => {
+  client.onUnit(UNIT, (body) => {
+    const asked = body as Partial<WorldMapCall> | null
+    if (asked && typeof asked.call === "number" && asked.request) {
+      const call = asked.call
+      void run(asked.request).then((outcome) => {
+        const answer: WorldMapAnswer = { call, outcome }
+        client.sendUnit(UNIT, answer)
+      })
+      return
+    }
     reported = masterPage()
     client.sendUnit(UNIT, { master: reported })
   })

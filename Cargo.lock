@@ -1055,12 +1055,14 @@ dependencies = [
  "core-helper-service",
  "flight-model",
  "futures-util",
+ "go-to",
  "kernel",
  "messages",
  "network",
  "pointer-sync",
  "profile-engine",
  "profile-loader",
+ "rate-and-pause",
  "recording",
  "recording-format",
  "reqwest",
@@ -1519,6 +1521,18 @@ dependencies = [
  "futures-core",
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "go-to"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "kernel",
+ "messages",
+ "session",
+ "sim-service",
+ "tracing",
 ]
 
 [[package]]
@@ -3518,6 +3532,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "caa0f4137e1c0a72f4c651489402276c8e8e1cf081f3b0ba156d2cbeef09e86a"
 dependencies = [
  "rand_core",
+]
+
+[[package]]
+name = "rate-and-pause"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "kernel",
+ "messages",
+ "session",
+ "sim-service",
+ "tracing",
 ]
 
 [[package]]

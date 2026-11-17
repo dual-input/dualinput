@@ -3,9 +3,11 @@
 // (record/areas/interface/01-apps.md, "A feature's parts").
 
 import { createContext, useContext } from "react"
-import type { ComponentType } from "react"
+import type { ComponentType, ReactNode } from "react"
 
 import type { JsonValue } from "../../../engines/messages/ts/serde_json/JsonValue.ts"
+import type { SessionSlice } from "../../../engines/messages/ts/session/SessionSlice.ts"
+import type { SliceMember } from "../../../engines/messages/ts/session/SliceMember.ts"
 import type { CoreLink } from "../../../engines/page-client/src/core-link.ts"
 import { useCoreState, useSlice } from "../../../engines/page-client/src/core-link.ts"
 import type { DesktopLink } from "./desktop-link.ts"
@@ -42,7 +44,16 @@ export type Part = {
   phaseIcon?: ComponentType
   /** The role the feature declares, by its label in the session's slice, whose holder's crew row carries a chip of the tab's icon, which says `says`. */
   role?: { label: string; says: string }
+  /**
+   * What the part shows on the session card's crew rows, as Go to's Join on the pilot flying's row: a hook, which
+   * the card calls once each time it draws, answering for each row. A row shows the first part's answer, in the
+   * parts' order, since a row has room for one.
+   */
+  useCrewRow?: () => (member: SliceMember, session: SessionSlice) => CrewRowView | undefined
 }
+
+/** A part's words under a pilot's name, in place of where they are, unless their link is lost or their sim crashed, and what ends their row, unless preflight's Ready does. */
+export type CrewRowView = { under?: string; end?: ReactNode }
 
 export function definePart(part: Part): Part {
   return part

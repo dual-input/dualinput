@@ -1,0 +1,22 @@
+node tools/bench.ts rate-and-pause go-to, on 2026-11-17, stage 21's tree after its code review's fixes: the test runner's lines, with the build's output left out.
+
+TAP version 13
+# budget: Set up only took 62ms from the command to its last answer, on a fake menu script that answers at once; Go to's 5s is measured in the sim
+# Subtest: Join from the world map: Set up only at the pilot flying's stand, and Join now on a runway through Ready to fly
+ok 1 - Join from the world map: Set up only at the pilot flying's stand, and Join now on a runway through Ready to fly
+# Subtest: Join says why it's unavailable, keeps the airport when the stand is missing, and says which step failed
+ok 2 - Join says why it's unavailable, keeps the airport when the stand is missing, and says which step failed
+# budget: the following machine's active pause asked of its part 21ms after the pilot flying's press, the key's way between the cores included, against 500ms from the key arriving
+# Subtest: active pause and the simulation rate follow every pilot, the flag the part brings back writes no key, and the pause menu and time of day show
+ok 3 - active pause and the simulation rate follow every pilot, the flag the part brings back writes no key, and the pause menu and time of day show
+# Subtest: active pause set while the EFB app reconnects reaches the sim once the app is back
+ok 4 - active pause set while the EFB app reconnects reaches the sim once the app is back
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 58937.5659

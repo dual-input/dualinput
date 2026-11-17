@@ -3,16 +3,23 @@
 // own page-client over the core's real WebSocket, sending the sim's Origin, so the core
 // can't tell a fake page from a real one (record/areas/build/02-testing.md, "The sim's pages").
 
+import type { Played } from "../../src/engines/messages/ts/bench/Played.ts"
 import type { EfbAppOrder } from "../../src/engines/messages/ts/clients/EfbAppOrder.ts"
 import type { FromClient } from "../../src/engines/messages/ts/clients/FromClient.ts"
 import type { Notification } from "../../src/engines/messages/ts/clients/Notification.ts"
 import type { NotificationClicked } from "../../src/engines/messages/ts/clients/NotificationClicked.ts"
 import type { ToClient } from "../../src/engines/messages/ts/clients/ToClient.ts"
 import type { JsonValue } from "../../src/engines/messages/ts/serde_json/JsonValue.ts"
+import type { SetPause } from "../../src/engines/messages/ts/rate-and-pause/SetPause.ts"
 import type { MenuPage } from "../../src/engines/messages/ts/sim/MenuPage.ts"
+import type { WorldMapAnswer } from "../../src/engines/messages/ts/sim/WorldMapAnswer.ts"
+import type { WorldMapCall } from "../../src/engines/messages/ts/sim/WorldMapCall.ts"
+import type { WorldMapOutcome } from "../../src/engines/messages/ts/sim/WorldMapOutcome.ts"
+import type { WorldMapRequest } from "../../src/engines/messages/ts/sim/WorldMapRequest.ts"
 import { HASH, VERSION } from "../../src/engines/messages/ts/stamp.ts"
 import { type Env, PageClient, type Socket } from "../../src/engines/page-client/src/page-client.ts"
 import type { Core } from "./cores.ts"
+import { type Aircraft, RTC_END, RTC_START } from "./flights.ts"
 
 /** What every page in the sim sends as its Origin, which the core takes (decision 013). */
 export const SIM_ORIGIN = "coui://html_ui"
@@ -128,14 +135,80 @@ export class FakePage {
 /**
  * The menu script, as the bench fakes it: a page that joins as `menu-script` and answers the
  * sim service's ask with the master page the scenario gives, `main` for the main menu's and
- * `in-game` for a flight's (record/areas/session/02-units.md, "The menu script").
+ * `in-game` for a flight's, and each world map request as `answer` says, by default as done
+ * (record/areas/session/02-units.md, "The menu script"). Its aircraft list holds `aircraft`, and
+ * the flight it starts loads the one selected, as the sim's load signals it on the core's stand-in.
  */
-export function fakeMenuScript(core: Core, master: MenuPage): FakePage {
-  const page = new FakePage(core, { component: "menu-script" })
-  page.client.onUnit("sim-service", () => {
-    page.client.sendUnit("sim-service", { master })
-  })
-  return page
+export class FakeMenuScript extends FakePage {
+  /** Each world map request, oldest first. */
+  readonly requests: WorldMapRequest[] = []
+  /** Answers each request; a scenario replaces it to make a step fail or find no match. */
+  answer: (request: WorldMapRequest) => WorldMapOutcome | undefined = () => undefined
+  /** How long each kind of request's answer waits after the world map has acted, in ms, as the launch's answer can come after the load it started. */
+  late: Partial<Record<WorldMapRequest["do"], number>> = {}
+  /** The aircraft list, which a scenario changes as a pilot installs or removes an aircraft. */
+  aircraft: Aircraft[]
+  private readonly core: Core
+  private master: MenuPage
+  private selected: Aircraft | undefined
+
+  constructor(core: Core, master: MenuPage, aircraft: Aircraft[] = []) {
+    super(core, { component: "menu-script" })
+    this.core = core
+    this.master = master
+    this.aircraft = aircraft
+    this.client.onUnit("sim-service", (body) => {
+      const asked = body as Partial<WorldMapCall>
+      if (typeof asked.call !== "number" || !asked.request) {
+        this.client.sendUnit("sim-service", { master: this.master })
+        return
+      }
+      this.requests.push(asked.request)
+      const outcome = this.answer(asked.request) ?? this.carryOut(asked.request)
+      const answer: WorldMapAnswer = { call: asked.call, outcome }
+      const late = this.late[asked.request.do] ?? 0
+      if (late > 0) setTimeout(() => this.client.sendUnit("sim-service", answer), late)
+      else this.client.sendUnit("sim-service", answer)
+    })
+  }
+
+  /** Reports another master page, as the script reports a change of page. */
+  show(master: MenuPage): void {
+    this.master = master
+    this.client.sendUnit("sim-service", { master })
+  }
+
+  /** What the world map does with a request no scenario answers itself. */
+  private carryOut(request: WorldMapRequest): WorldMapOutcome {
+    const listed = (folder: string) => this.aircraft.find((a) => a.path.split("/")[0]!.toLowerCase() === folder.toLowerCase())
+    switch (request.do) {
+      case "find-aircraft":
+        return listed(request.folder) ? { as: "done" } : { as: "no-match" }
+      case "aircraft":
+        this.selected = listed(request.folder)
+        return this.selected ? { as: "done" } : { as: "no-match" }
+      case "launch-flight": {
+        // The load as the sim sends it, up to the Ready to fly screen.
+        const cfg = (this.selected ?? this.aircraft[0])?.cfg ?? ""
+        const signals: Played[] = [
+          { after_ms: 20, signal: { signal: "flight-loaded", path: "x.FLT" } },
+          { after_ms: 20, signal: { signal: "aircraft-loaded", path: cfg } },
+          { after_ms: 20, signal: { signal: "flow", event: RTC_START } },
+        ]
+        this.core.act({ act: "play", signals })
+        return { as: "done" }
+      }
+      case "ready-to-fly":
+        this.core.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "flow", event: RTC_END } }] })
+        return { as: "done" }
+      default:
+        return { as: "done" }
+    }
+  }
+}
+
+export function fakeMenuScript(core: Core, master: MenuPage): FakeMenuScript {
+  return new FakeMenuScript(core, master)
 }
 
 /**
@@ -157,6 +230,24 @@ export class FakeEfbApp extends FakePage {
   /** Whether a banner page's socket is open, as the core last said. */
   bannerOpen(): boolean {
     return this.slice("banner") === true
+  }
+
+  /** Each active pause rate and pause's part was asked for, oldest first. */
+  readonly pauses: boolean[] = []
+  /** How long the toolbar's call takes to bring its flag back, in ms. */
+  toolbarLateMs = 0
+
+  /**
+   * Makes rate and pause's part's toolbar call, as the EFB app's part does, by playing
+   * `Pause_EX1` with active pause's flag, 4, on `core`'s stand-in, which the sim sends when the
+   * call turns it on or off (record/areas/session/02-units.md, "Rate and pause").
+   */
+  makesToolbarCall(core: Core): void {
+    this.client.onUnit("rate-and-pause", (body) => {
+      const { on } = body as SetPause
+      this.pauses.push(on)
+      core.act({ act: "play", signals: [{ after_ms: this.toolbarLateMs, signal: { signal: "pause", flags: on ? 4 : 0 } }] })
+    })
   }
 }
 

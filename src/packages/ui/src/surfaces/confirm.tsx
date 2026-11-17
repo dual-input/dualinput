@@ -32,6 +32,8 @@ export type ConfirmProps = {
   disabled?: boolean
   /** The action's own button, which by default looks like the button that asks. */
   goVariant?: ButtonVariant
+  /** Classes for the action's own button, as Join now takes the sim's flight-button yellow. */
+  goClassName?: string
   align?: Align
   className?: string
   /** Holds it open, as the kit's page does. */
@@ -45,7 +47,7 @@ export type ConfirmProps = {
  * below where there's no room, pointing at it, lined up as the button lines up in what holds it
  * (record/areas/interface/decisions.md, "A dangerous action asks in the kit's popover, with no Cancel").
  */
-export function Confirm({ children, question, go, onConfirm, also, variant = "default", size, disabled, goVariant, align = "center", className, open: openFromOutside }: ConfirmProps) {
+export function Confirm({ children, question, go, onConfirm, also, variant = "default", size, disabled, goVariant, goClassName, align = "center", className, open: openFromOutside }: ConfirmProps) {
   const [openHere, setOpenHere] = useState(false)
   const open = openFromOutside ?? openHere
   return (
@@ -74,6 +76,7 @@ export function Confirm({ children, question, go, onConfirm, also, variant = "de
           <Button
             size="sm"
             variant={goVariant ?? (variant === "destructive" ? "danger" : variant)}
+            className={goClassName}
             onClick={() => {
               setOpenHere(false)
               onConfirm()

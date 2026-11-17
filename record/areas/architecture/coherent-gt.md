@@ -21,6 +21,10 @@ A file with syntax the engine rejects doesn't parse, and none of it runs.
 
 The `s` and `d` regex flags parse, and the regex throws "Invalid regular expression: invalid flags" when its line runs, so a file using one runs until it gets there.
 
+`await` right after a unary operator doesn't parse in a condition: mainUi rejected `if (!await request(x))` with "SyntaxError: Unexpected identifier 'request'. Expected ')' to end an 'if' condition." (measured on MSFS 2024, 2026-11-17, [session log][await]).
+esbuild 0.28.2 writes `!(await x)` that way, dropping the parentheses, so our code puts each awaited value into a const before an operator reads it.
+Node parses the line, so `node --check` and the Coherent GT check passed the file.
+
 TypeScript 7.0.2 and esbuild 0.28.2 at `es2017` lowered the syntax from the right column that our test module used, and neither makes the regex features work ([architecture log][p09]):
 
 - TypeScript leaves each regex as written, and its type check flags named groups and the `s` flag, but not lookbehind.
@@ -105,5 +109,6 @@ A sim update can change any of this, so re-run [p09](../../../experiments/areas/
 [p13]: log.md#2026-10-25-coherent-gt-drops-layer-oklch-color-mix-and-every-gap-but-grid-gap-so-tailwind-4s-output-cant-style-a-page-there
 [p09]: log.md#2026-10-09-coherent-gt-parses-all-of-es2017-and-object-rest-but-no-other-syntax-from-es2018-on-has-no-built-in-from-es2018-on-of-its-own-but-weakref-and-runs-typescript-compiled-to-es2017-by-tsc-and-by-esbuild
 [research]: log.md#2026-10-09-coherent-gts-makers-last-placed-its-engine-near-safari-101-the-msfs-avionics-framework-and-flybywire-compile-to-es2017-nobody-maintains-a-rule-set-for-the-engine-and-working-title-ships-its-own-pinned-copy-of-the-framework
+[await]: ../session/log.md#2026-11-17-in-the-sim-join-set-the-world-map-and-started-the-flight-within-09s-and-active-pause-followed-from-our-efb-apps-code-in-264ms-once-the-menu-script-parsed
 [canvas]: ../interface/log.md#2026-11-01-coherent-gts-canvas-takes-no-pixels-so-a-figure-drawn-by-rays-cant-reach-the-screen-at-any-size-above-a-heads-while-the-fold-its-pin-and-its-masks-all-work
 [second-session]: ../interface/log.md#2026-11-02-a-second-session-in-the-sim-confirms-bootmode-2-restart-and-a-load-from-the-world-map-and-finds-a-large-l-value-reads-0-and-a-canvas-repaints-only-when-its-element-changes

@@ -3,10 +3,8 @@
 //! signal for the sim awareness engine (record/areas/core/03-sim-seam-and-wasm-module.md,
 //! "What the platform's connection holds").
 
-use clients::{ClientJoined, Sender, To};
 use kernel::{Cx, Job, JobId};
-use messages::clients::component;
-use messages::sim::{MENU_UNIT, MenuPage, MenuReport};
+use messages::sim::MenuPage;
 use sim_awareness::{Departure, Flow, Process, Signal, SimAwareness};
 use simconnect_types::SIMCONNECT_GROUP_PRIORITY_HIGHEST_MASKABLE;
 
@@ -128,7 +126,15 @@ impl SimService {
     fn flight_file(_: &mut SimService, _: JobId, read: Result<Vec<u8>, String>, cx: &mut Cx) {
         match read {
             Ok(bytes) => match Departure::from_flight_file(&String::from_utf8_lossy(&bytes)) {
-                Some(departure) => Step::signal(cx, Step::Departure(departure)),
+                Some(departure) => {
+                    tracing::info!(
+                        airport = departure.airport,
+                        stand_name = departure.stand_name,
+                        stand_number = departure.stand_number,
+                        "the loaded flight file names its departure"
+                    );
+                    Step::signal(cx, Step::Departure(departure));
+                }
                 None => tracing::info!("the loaded flight file has no [Departure] section"),
             },
             Err(error) => tracing::warn!(%error, "the loaded flight file couldn't be read"),
@@ -139,42 +145,14 @@ impl SimService {
     /// its title read once to log beside the aircraft's path, since the path, not the title,
     /// names the preset (record/areas/core/03-sim-seam-and-wasm-module.md, "The aircraft").
     pub(crate) fn sim_changed(me: &mut SimService, changed: &SimChanged, cx: &mut Cx) {
-        let in_flight = |stage| {
-            matches!(
-                stage,
-                messages::sim::Stage::ReadyToFly | messages::sim::Stage::Flying
-            )
-        };
         let awareness = cx.read::<SimAwareness>();
         if awareness.selected != changed.before.selected {
             me.name_aircraft(cx);
         }
-        if in_flight(awareness.stage) && !in_flight(changed.before.stage) {
+        if awareness.stage.in_a_flight() && !changed.before.stage.in_a_flight() {
             me.aircraft_loaded(cx);
         }
         me.check_stall(cx);
-    }
-}
-
-impl SimService {
-    /// The menu script's socket joined: the service asks it for its master page, which ends
-    /// Starting for a core that found the sim already running, since no SimConnect signal
-    /// tells the main menu from a flight then (record/areas/core/03-sim-seam-and-wasm-module.md,
-    /// "Leaving Starting").
-    pub(crate) fn client_joined(_: &mut SimService, joined: &ClientJoined, cx: &mut Cx) {
-        if joined.component == component::MENU_SCRIPT {
-            clients::send(
-                cx,
-                To::Component(component::MENU_SCRIPT.into()),
-                MENU_UNIT,
-                &serde_json::json!({}),
-            );
-        }
-    }
-
-    pub(crate) fn menu_report(_: &mut SimService, _: Sender, report: MenuReport, cx: &mut Cx) {
-        tracing::info!(master = ?report.master, "the menu script reported its master page");
-        Step::signal(cx, Step::Page(report.master));
     }
 }
 

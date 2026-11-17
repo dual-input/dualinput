@@ -47,6 +47,9 @@ pub struct ProfilesSlice {
     pub loaded: Option<LoadedProfile>,
     /// Each published profile this core's level takes, in the aircraft picker.
     pub supported: Vec<SupportedAircraft>,
+    /// How many of the picker's picks the world map couldn't carry out, which the picker counts
+    /// up from as it asks, so it says when its pick failed.
+    pub pick_failed: u32,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]

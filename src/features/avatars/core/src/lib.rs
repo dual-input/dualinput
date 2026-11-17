@@ -169,7 +169,7 @@ pub fn register(r: &mut Registry) {
 /// The match check's comparison, at the `info` level, since nothing went wrong. It names no
 /// one, since a crew of ten on a Marketplace aircraft would fill the line, and nobody can act
 /// on the names (record/areas/avatars/01-avatars.md's note of 2026-11-04).
-fn compare(values: &[(String, ModelRead)]) -> Option<session::Found> {
+fn compare(values: &[(String, ModelRead)], _: Option<usize>) -> Option<session::Found> {
     let unreadable = values
         .iter()
         .filter(|(_, v)| *v == ModelRead::Unreadable)
@@ -475,21 +475,27 @@ mod tests {
     #[test]
     fn the_match_item_says_figures_or_some_figures_as_an_info() {
         let read = |name: &str, v| (name.to_string(), v);
-        assert_eq!(compare(&[read("James", ModelRead::Read)]), None);
-        let found = compare(&[
-            read("James", ModelRead::Unreadable),
-            read("Mira", ModelRead::Read),
-        ])
+        assert_eq!(compare(&[read("James", ModelRead::Read)], None), None);
+        let found = compare(
+            &[
+                read("James", ModelRead::Unreadable),
+                read("Mira", ModelRead::Read),
+            ],
+            None,
+        )
         .unwrap();
         assert_eq!(found.level, messages::session::Severity::Info);
         assert_eq!(
             found.words,
             "Some figures won't be able to interact with the cockpit"
         );
-        let both = compare(&[
-            read("James", ModelRead::Unreadable),
-            read("Mira", ModelRead::Unreadable),
-        ])
+        let both = compare(
+            &[
+                read("James", ModelRead::Unreadable),
+                read("Mira", ModelRead::Unreadable),
+            ],
+            None,
+        )
         .unwrap();
         assert_eq!(
             both.words,

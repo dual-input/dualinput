@@ -61,7 +61,7 @@ const SUPPORTED: ProfilesSlice["supported"] = [
   { maker: "iniBuilds", model: "A380", maturity: "Experimental", installed: false },
   { maker: "iniBuilds", model: "L-1011 TriStar", maturity: "Experimental", installed: false },
 ]
-const NO_PROFILE: ProfilesSlice = { loaded: null, supported: SUPPORTED }
+const NO_PROFILE: ProfilesSlice = { loaded: null, supported: SUPPORTED, pick_failed: 0 }
 const atWorldMap: SimSlice = { stage: "menu", page: "world-map", where: "world-map", aircraft: BARON, pause: 0, ended: null, module: "running" }
 const fenix: SimSlice = { ...atWorldMap, aircraft: FENIX }
 const CORE: CoreSlice = { version: VERSION, hash: "", username: null }
@@ -89,7 +89,7 @@ const OUTPUTS = {
 }
 
 const reach = { internet: true, servers: "reachable" as const }
-const healthy = { network: { members: [], ...reach }, sim: atWorldMap, profiles: { loaded: { maturity: "Stable" }, supported: SUPPORTED }, session: noSession, settings: settings(true, true) }
+const healthy = { network: { members: [], ...reach }, sim: atWorldMap, profiles: { loaded: { maturity: "Stable" }, supported: SUPPORTED, pick_failed: 0 }, session: noSession, settings: settings(true, true) }
 
 /**
  * Take-control's slice and its stream's, by name alone, since no shell names a feature: live once this pilot is in the

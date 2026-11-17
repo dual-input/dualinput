@@ -17,6 +17,7 @@ mod announce;
 mod awareness;
 mod calls;
 mod connections;
+mod menu;
 mod module;
 mod seam;
 
@@ -108,6 +109,11 @@ pub enum SimEvent {
     Report { call: Handle, bytes: Vec<u8> },
     /// The unit's connection was lost, and what it set up or created in the sim with it.
     Lost,
+    /// The menu script's answer to a `world_map` call.
+    WorldMap {
+        call: Handle,
+        outcome: messages::sim::WorldMapOutcome,
+    },
 }
 
 /// The sim service's state.
@@ -129,6 +135,7 @@ pub struct SimService {
     module: ModuleWatch,
     announcing: announce::Announcing,
     aware: aircraft::Awareness,
+    menu: menu::Menu,
 }
 
 impl SimService {
@@ -151,7 +158,8 @@ pub fn register(r: &mut Registry) {
     me.on::<Started>(SimService::started)
         .on::<SimChanged>(SimService::sim_changed)
         .on::<clients::ClientJoined>(SimService::client_joined)
-        .client_messages(messages::sim::MENU_UNIT, SimService::menu_report)
+        .on::<clients::ClientLeft>(SimService::client_left)
+        .client_messages(messages::sim::MENU_UNIT, SimService::menu_said)
         .client_state(messages::sim::SLICE, SimService::slice);
     aircraft::setting(&mut me);
     me.source::<Seam>(SimService::seam);

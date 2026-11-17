@@ -241,6 +241,16 @@ impl Sim<'_, '_> {
         handle
     }
 
+    /// Hands the menu script a world map request, as a `unit` message to the newest menu
+    /// script's socket. Its answer arrives as `SimEvent::WorldMap` with this handle, or
+    /// `SimEvent::Failed` once no menu script can answer it: at once when none is connected, or
+    /// when the one it went to closes first.
+    pub fn world_map(&self, request: messages::sim::WorldMapRequest) -> Handle {
+        let (handle, origin) = self.origin();
+        self.cx.call(SimService::world_map_for, (origin, request));
+        handle
+    }
+
     /// A new handle, and the call's origin with it.
     fn origin(&self) -> (Handle, Origin) {
         let handle = self.cx.handle();

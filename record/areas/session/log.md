@@ -2,6 +2,77 @@
 
 What we found building and testing the session, newest entry first.
 
+## 2026-11-17: In the sim, Join set the world map and started the flight within 0.9s, and active pause followed from our EFB app's code in 264ms, once the menu script parsed
+
+**Asked:** stage 21's cases in the sim ([plan](../build/plan.md#21-rate-and-pause-and-go-to)): does our EFB app's code turn active pause on and off, which runway does Join's request pick, which entries of the world map's lists are the pilot flying's, does a gate with a letter match its flight file, does the menu script see Free flight's world map, and does Join now reach the flight within Go to's 5s?
+
+**Expected:** each as the bench had it, with the matches the menu script makes unverified.
+
+**Found:** on MSFS 2024, with `node tools/sim/go-to.ts`: a bench core played James, the pilot flying, in a Baron 58P at KSEA's PARKING 140, and the release core built from this tree played Adam, the user's sim:
+
+- **The first two runs never left the start:** the menu script loaded into mainUi but never joined the core, and mainUi's console said "SyntaxError: Unexpected identifier 'request'. Expected ')' to end an 'if' condition.".
+  Coherent GT rejects `if (!await request(…))`, which esbuild wrote from our `!(await request(…))`, and the error took out the whole script.
+  [Coherent GT's limits](../architecture/coherent-gt.md) gain it, and the menu script puts each awaited value into a const first.
+- **The menu script** reported Free flight's world map, so `FreeFlightPage` is an element it finds.
+- **The aircraft list** held 138 entries, 1 in the Baron's folder, named in its thumbnail's path as for p08's A380: `aircraftId` 10, `displayName` "Black Square Baron 58P Professional", and `variation` "N513LW", the livery then selected, not the `A:TITLE`.
+  So the Baron's entry came from its folder alone, and the preference for a variation equal to `A:TITLE` serves aircraft with an entry per preset, as the A380's.
+- **The liveries** each have a `title`, such as "N515MR", and an `id`, such as "18070071185185781799:1", which `saveVariationId` takes.
+  The Baron read no `A:LIVERY NAME`, and its `A:TITLE`, "Black Square Baron 58P Professional N515MR", ends with its livery's title.
+- **Set up only** took 0.7s from its command to PARKING 140 selected, then the aircraft and the livery, 1.2s in all.
+- **Join now,** with James's engines running, selected a runway by its `ID` 0.45s after its command, then started the flight, and pressed Ready to fly 0.4s after the load reached it; Adam's Baron stood with both engines running, in James's flight.
+  The script's own figure, 8.9s, counted from Set up only's start, which its fix leaves out.
+  Adam's aircraft then went to the sea, since flight-model sync moved it to James's, and the stand-in's aircraft sits at 0° latitude and 0° longitude.
+- **Active pause:** James's press on and off each reached Adam's sim through our EFB app's `TOOLBAR_SET_ACTIVE_PAUSE`, with the EFB closed, in 264ms and 263ms from the press, under the 500ms [budget](02-units.md#budgets); Adam's own press on and off each wrote the key.
+- **A gate with a letter:** the list named it "GATE N 17 -- GATE MEDIUM", and the flight file `GateName=GATE_N` and `GateNumber=17`.
+- **The replay** of Adam's core matched all 144 checkpoints.
+
+**Changed:**
+
+- The menu script reads a flight file's underscore as a space, so GATE_N 17 takes "GATE N 17".
+- With no `A:LIVERY NAME`, Join selects the livery whose title ends the pilot flying's `A:TITLE`.
+
+The water was the bench core's, which a session with two sims doesn't have; Join from the world map in two real sims is still unrun.
+
+**Evidence:** the run's report and Adam's core's log, read from `target/sim/runs/2026-11-17_17-15-56-go-to/` and quoted here, since the run's folder sits outside the tree.
+
+**Affects:** [02-units](02-units.md)'s Go to and the menu script, [Join](../interface/decisions.md#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up), and [Coherent GT's limits](../architecture/coherent-gt.md).
+
+## 2026-11-17: Stage 21's rate and pause and Go to pass their bench cases, and a following machine's part was asked to pause 21ms after the press
+
+**Asked:** do [stage 21](../build/plan.md#21-rate-and-pause-and-go-to)'s rate and pause and Go to hold their [cases for the bench](02-units.md#cases-for-the-bench), and the apps' case of an EFB app that reconnects?
+
+**Expected:** yes, with the EFB app's part and the menu script faked: the fake EFB app plays `Pause_EX1` on its core's stand-in when the part is asked to pause, as the toolbar's call would, and the fake menu script answers each world map request and plays a flight's load when asked to start it.
+
+**Found:** on the bench, with two cores in a session in the Baron 58P, James's as the pilot flying and Adam's following, `node tools/bench.ts rate-and-pause go-to` passed its 4 tests, 2 for each scenario, which cover the first five items below, and the menu script's own test passed (`results/2026-11-17-stage-21-bench.txt`):
+
+- **Active pause:** one press of James's reached Adam's part 21ms later, counted from the press, so the key's way between the cores is in it.
+  The 500ms [budget](02-units.md#budgets) runs to the pause being applied, and the bench stops when the part is asked, so the part's `TOOLBAR_SET_ACTIVE_PAUSE` call and the flag it brings back wait for the sim.
+  The flag Adam's part brought back wrote no key, both pressing at once ended on one value, and James pressing it three times within a round trip left both sims on his last.
+  With Adam's part bringing its flag back 300ms late, James's on and off left Adam's sim off, a case the code review found the first version got wrong, by asking Adam's part only for the first.
+- **The simulation rate:** Adam's own change stepped back to James's, and James's change reached Adam.
+- **The EFB app reconnecting:** a pause the key took while Adam's EFB app was gone reached Adam's sim once a new app joined.
+- **The pause menu and the time of day:** "James has paused" held on Adam's banner while James's sim had `Pause_EX1`'s flag 8, and sims 20 minutes apart showed a warning.
+- **Join:** Set up only sent the airport, PARKING 140, the aircraft, and the livery; with James's engines running, Join now sent a runway and started the flight, then pressed Ready to fly once the load reached it, and Adam entered the flight.
+  A stand the list lacks kept the airport and said so, a failed airport search stopped Join there and said so, and Join gave each of its five reasons while unavailable.
+- **The menu script's own test:** `departure_stand` for PARKING 14 at an airport with PARKING 140 takes PARKING 14.
+
+Building it found one thing the design left out, and a read that narrows one it left open:
+
+- **A departure from the last flight:** sim awareness kept a flight's `[Departure]` through the next load, so a flight file without one would have sent a joiner to the last flight's airport, and sim awareness drops it at each `FlightLoaded`.
+- **By the code, the runway's request takes the runway's `ID`,** as the stand's does, since the world map's list hands each entry's `ID` to `SetDepartureRunwayIndex` (read in fs-base-ui 0.1.10, `html_ui/Global/pkg/base.bundle.js`, `FreeflightPlanCombobox._updateDropdown`), and the case in the sim settles it.
+
+**Changed:** stage 21's code, its plan lines, and these choices, which the design left open:
+
+- Join asks the world map's aircraft list for the pilot flying's aircraft as the joiner reaches the world map, through a `find_aircraft` request, so it can say "Install the Baron 58P to fly with James" before it's pressed.
+- The menu script matches the pilot flying's aircraft by the `SimObjects\Airplanes\` folder in an entry's thumbnail's path, and prefers the entry whose variation is their `A:TITLE`, as the A380's entry named its folder there and had its title as its variation (`experiments/areas/interface/results/p08-world-map-aircraft-2026-10-05-19-31-33.ndjson`).
+  It matches a livery when any of the entry's text fields equals their `A:LIVERY NAME`.
+- A part in the EFB app shows on a crew row, a place [a feature's parts](../interface/01-apps.md#a-features-parts) doesn't list, since Join ends the pilot flying's row.
+- The menu script reports the page every 500ms outside a session too, since stage 11b's aircraft picker reads it at home.
+
+What no bench can answer waits for the stage's session in the sim, `node tools/sim/go-to.ts`, whose cases [stage 21](../build/plan.md#21-rate-and-pause-and-go-to) lists.
+
+**Affects:** [02-units](02-units.md)'s rate and pause, Go to, and the menu script, the sim seam's [`world_map`](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), and the apps' [parts](../interface/01-apps.md#a-features-parts).
+
 ## 2026-11-04: A member's entry is rewritten on a change, so a new name or color reaches the crew at once, and the color moves to the session
 
 **Asked:** could a new name reach the crew in its session rather than the next, and could the apps' heads wear the color a pilot picked, which they computed from the pilot's ID (user, 2026-11-04)?

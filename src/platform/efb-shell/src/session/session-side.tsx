@@ -15,6 +15,7 @@ import type { NetSlice } from "../../../../engines/messages/ts/net/NetSlice.ts"
 import type { SessionSlice } from "../../../../engines/messages/ts/session/SessionSlice.ts"
 import type { SliceMember } from "../../../../engines/messages/ts/session/SliceMember.ts"
 import { useCoreSlice, useShell } from "../part.ts"
+import type { CrewRowView, Part } from "../part.ts"
 
 import { CrewDifferences } from "./differences.tsx"
 
@@ -68,10 +69,12 @@ function HostChip({ chip }: { chip: RoleChip }) {
   )
 }
 
-function CrewRow({ member, you, flying, link, pop, alive, slumped, end, hosts }: { member: SliceMember; you: boolean; flying: boolean; link: MemberLink | undefined; pop?: number; alive: boolean; slumped: boolean; end?: React.ReactNode; hosts: RoleChip[] }) {
+function CrewRow({ member, you, flying, link, pop, alive, slumped, end, hosts, said }: { member: SliceMember; you: boolean; flying: boolean; link: MemberLink | undefined; pop?: number; alive: boolean; slumped: boolean; end?: React.ReactNode; hosts: RoleChip[]; said?: string }) {
   // A row's pop is fixed when the row first shows.
   const [popAfter] = useState(pop)
-  const under = you ? undefined : whereabouts(member, link)
+  const where = you ? undefined : whereabouts(member, link)
+  // A lost link and a crashed sim outrank what a part says of where the pilot is.
+  const under = where && said !== undefined && !where.trouble ? { shows: said } : where
   const chip = you ? undefined : linkWords(link)
   return (
     <li className="flex items-center">
@@ -116,8 +119,17 @@ function MyReady({ ready, why, left, onToggle }: { ready: boolean; why: string |
   )
 }
 
-export function SessionSide({ session, started, turnedIn, folded, onEase, roles }: { session: SessionSlice; started: boolean; turnedIn: boolean; folded: boolean; onEase: () => void; roles: RoleChip[] }) {
+export function SessionSide({ session, started, turnedIn, folded, onEase, roles, crewRows }: { session: SessionSlice; started: boolean; turnedIn: boolean; folded: boolean; onEase: () => void; roles: RoleChip[]; crewRows: NonNullable<Part["useCrewRow"]>[] }) {
   const { link } = useShell()
+  // Each part's hook, called in the parts' order every draw, as the hooks' rules require.
+  const rowViews = crewRows.map((useRow) => useRow())
+  const viewOf = (member: SliceMember): CrewRowView => {
+    for (const view of rowViews) {
+      const said = view(member, session)
+      if (said) return said
+    }
+    return {}
+  }
   const net = useCoreSlice<NetSlice>("network")
   const crew = useCrew()
   const { scale } = useRoot()
@@ -209,7 +221,8 @@ export function SessionSide({ session, started, turnedIn, folded, onEase, roles 
                     pop={turnedIn ? 0 : POP.first + at * POP.stagger}
                     alive={preflight && !started && !out(member)}
                     slumped={preflight && !started && out(member)}
-                    end={endOf(member)}
+                    end={endOf(member) ?? viewOf(member).end}
+                    said={viewOf(member).under}
                     hosts={roles.filter((role) => session.roles.some((r) => r.label === role.label && r.holder === member.pilot))}
                   />
                 ))}

@@ -14,12 +14,16 @@ export const BARON = { cfg: String.raw`SimObjects\Airplanes\bksq-aircraft-baronp
 export const PA24 = { cfg: String.raw`SimObjects\Airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.cfg`, path: "pa24-250/presets/a2a/pa24-250" }
 export type Aircraft = typeof BARON
 
-/** Loads a flight in `aircraft`, on the ground unless `airborne`, through to Flying. */
-export async function load(core: Core, aircraft: Aircraft, { airborne = false, title = "Baron 58P", livery = "N515MR" } = {}): Promise<void> {
+/**
+ * Loads a flight in `aircraft`, on the ground unless `airborne`, through to Flying. `flight` names
+ * the flight file the sim service reads its departure from, which a file that doesn't exist leaves
+ * without one.
+ */
+export async function load(core: Core, aircraft: Aircraft, { airborne = false, title = "Baron 58P", livery = "N515MR", flight = "x.FLT" } = {}): Promise<void> {
   const after = core.heard().length
   core.act({ act: "set", numbers: [["A:SIM ON GROUND", airborne ? 0 : 1]], texts: [["A:TITLE", title], ["A:LIVERY NAME", livery]] })
   const signals: Played[] = [
-    { after_ms: 0, signal: { signal: "flight-loaded", path: "x.FLT" } },
+    { after_ms: 0, signal: { signal: "flight-loaded", path: flight } },
     { after_ms: 20, signal: { signal: "aircraft-loaded", path: aircraft.cfg } },
     { after_ms: 20, signal: { signal: "flow", event: RTC_START } },
     { after_ms: 20, signal: { signal: "flow", event: RTC_END } },

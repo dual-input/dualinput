@@ -379,6 +379,19 @@ fn an_exit_with_no_quit_message_is_a_crash_with_its_code() {
 }
 
 #[test]
+fn a_new_load_forgets_the_last_flights_departure() {
+    let mut sim = flying(PA24);
+    let departure = Departure {
+        airport: "EGBB".into(),
+        stand_name: "GATE".into(),
+        stand_number: 58,
+    };
+    sim.step(Signal::Departure(departure));
+    sim.step(Signal::FlightLoaded);
+    assert_eq!(sim.departure, None);
+}
+
+#[test]
 fn a_new_process_after_a_close_or_a_crash_starts_a_new_run() {
     let close = vec![Signal::Quit, Signal::Process(Process::Exited { code: 0 })];
     let crash = vec![Signal::Process(Process::Exited { code: 0xC000_0005 })];

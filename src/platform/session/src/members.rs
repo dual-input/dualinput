@@ -14,11 +14,6 @@ use sim_service::{SimAwareness, SimService};
 use crate::{FlightChanged, MemberGone, MemberJoined, Other, Session, control, joining};
 use messages::hex;
 
-/// Whether a member's sim is in a flight: at Ready to fly or Flying.
-pub(crate) fn flying(stage: Stage) -> bool {
-    matches!(stage, Stage::ReadyToFly | Stage::Flying)
-}
-
 /// A member's link came up: it's a member from its first, and every `LinkUp` gets this
 /// core's keys whole, since a key changed after this core's first message went out, but
 /// before the other side's passed here, went to no member

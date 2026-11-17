@@ -20,6 +20,8 @@ const UNITS: &[fn(&mut Registry)] = &[
     pointer_sync::register,
     state_sync::register,
     take_control::register,
+    rate_and_pause::register,
+    go_to::register,
     avatars::register,
     flight_model::register,
     traffic::register,

@@ -20,7 +20,7 @@ mod preflight;
 mod slice;
 mod store;
 
-pub use matching::{Found, clear_match, set_match};
+pub use matching::{Compare, Found, clear_match, set_match};
 pub use messages::session::{Control, Key, MatchItem, Phase, Preflight, Writer};
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -308,7 +308,7 @@ impl Session {
         let Some(status) = self.member_key(wire::STATUS, member) else {
             return false;
         };
-        members::flying(status.stage)
+        status.stage.in_a_flight()
             && status
                 .aircraft
                 .is_some_and(|a| a.path.eq_ignore_ascii_case(&aircraft.path))
@@ -344,7 +344,7 @@ pub trait SessionUnit {
     fn match_item<T: DeserializeOwned + 'static>(
         &mut self,
         item: MatchItem<T>,
-        compare: fn(&[(String, T)]) -> Option<Found>,
+        compare: Compare<T>,
     ) -> &mut Self;
 }
 
@@ -368,7 +368,7 @@ impl<S: 'static> SessionUnit for Unit<'_, S> {
     fn match_item<T: DeserializeOwned + 'static>(
         &mut self,
         item: MatchItem<T>,
-        compare: fn(&[(String, T)]) -> Option<Found>,
+        compare: Compare<T>,
     ) -> &mut Self {
         let session = self.registry().state_mut::<Session>();
         assert!(

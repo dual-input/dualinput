@@ -1,0 +1,16 @@
+[package]
+name = "go-to"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+clients = { path = "../../../platform/clients" }
+kernel = { path = "../../../platform/kernel" }
+messages = { path = "../../../engines/messages" }
+session = { path = "../../../platform/session" }
+sim-service = { path = "../../../platform/sim-service" }
+tracing = "0.1.44"
+
+[lints]
+workspace = true

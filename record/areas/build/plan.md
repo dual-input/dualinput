@@ -811,10 +811,38 @@ Done on 2026-11-15.
 
 ## 21 Rate and pause, and Go to
 
-Builds: the rate and pause feature with its part in the EFB app, and Go to with its part in the EFB app ([the session's units](../session/02-units.md)).
-From stage 4, it also builds the sim service's `world_map`, and the menu script's requests that carry it out ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [the menu script](../session/02-units.md#the-menu-script)), with the menu script's report of the menu's page, read every 500ms in a session, which only Go to reads.
+Builds:
+
+- the message crate's `rate_and_pause` module: `PAUSE`, an `Anyone` key, `RATE`, a `PilotFlying` key, the `unit` message to the EFB app's part, and the time of day's match item; and its `go_to` module: `SPOT`, a `PilotFlying` key, its slice, and its command ([session keys](../session/02-units.md#session-keys), [slices and commands](../interface/01-apps.md#slices-and-commands))
+- `src/features/rate-and-pause/core`: active pause, written when this sim's flag, `Pause_EX1` 4, changes to differ from the key, and applied through the EFB app's part whenever the flag differs from the key, again when the EFB app joins; the simulation rate, written on the flying machine and stepped on a following one by `K:SIM_RATE_INCR` or `K:SIM_RATE_DECR`, one step at a time; both only while this pilot is in the flight; the PF in the pause menu, `Pause_EX1` 8, as a held notification in the frames' words, "James has paused"; and the time of day's item, `E:ZULU TIME` and the zulu date, a warning past 10 minutes ([rate and pause](../session/02-units.md#rate-and-pause), [the match check](../session/02-units.md#the-match-check), [the banner](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on))
+- `src/features/rate-and-pause/efb`: the part with no screen, which calls `TOOLBAR_SET_ACTIVE_PAUSE` on each `unit` message ([a feature's parts](../interface/01-apps.md#a-features-parts))
+- `src/features/go-to/core`: the PF's spot, their `[Departure]` airport and stand and whether an engine runs; why Join is unavailable; and Join, which runs the world map's requests one at a time and says which step failed ([Go to](../session/02-units.md#go-to), [Join](../interface/decisions.md#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up))
+- `src/features/go-to/efb`: Join at the end of the PF's crew row with where the PF is under their name, its question with Set up only and Join now, its toasts, and its reasons while disabled, rebuilt from `JoinPf` in `experiments/areas/interface/bench/src/frames/home.tsx`; and for it, a place for parts on a crew row in the EFB shell, and the frames' icon for a warning and an error on the kit's toast
+- the menu script's requests: the departure airport, stand, and runway, the PF's aircraft found or selected, their livery, the flight's start, and Ready to fly pressed ([the menu script](../session/02-units.md#the-menu-script)), and on the bench a fake menu script that answers them
+- the aircraft picker's load, `profiles.pick`, through the menu script's aircraft request at the world map, which [stage 11b](#11b-the-apps) left refusing (user, 2026-11-17)
+- the match check's comparisons told which value is the reader's, with the profile's and the time of day's items in the frames' words from the reader's side, and the version's, the place's, and the livery's shortened (user, 2026-11-17)
+
+From stage 4, it also builds the sim service's `world_map`, a `unit` message to the newest menu script's socket answered with the call's handle, and failed at once with no menu script connected ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls)), with the menu script's report of the menu's page, read every 500ms.
+The page's report runs outside a session too, since stage 11b's aircraft picker reads it at home.
+
 Needs: 9 and 11b.
-Tests, from stage 11a, on the bench: rate and pause's `unit` message sent while the EFB app reconnects, and whether active pause catches up ([the apps' cases](../interface/01-apps.md#cases-for-the-bench)).
+
+Tests:
+
+- From [the session's cases](../session/02-units.md#cases-for-the-bench), on the bench, with two cores, a fake EFB app whose part plays the toolbar's call on its stand-in, and a fake menu script on each:
+  - The EFB app's part sets active pause on the stand-in's toolbar call, and the flag that comes back writes no key.
+  - Two pilots press active pause at once: both machines keep one value; a pilot who presses it twice within one round trip ends with every machine on one value; and a following pilot's change of the rate is stepped back.
+  - From stage 11a: rate and pause's `unit` message sent while the EFB app reconnects, and active pause catching up once it's back ([the apps' cases](../interface/01-apps.md#cases-for-the-bench)).
+  - Beyond the cases: the PF in the pause menu shows "James has paused" on the other's banner until they leave it, and two times of day 20 minutes apart show a warning.
+  - Join from the world map: with the PF at a stand, engines off, Set up only sets the airport, the stand, the aircraft, and the livery; with the PF's engines running, Join now sets a runway, starts the flight, and presses Ready to fly; a stand the list lacks keeps the airport alone and says so; a step that fails says which; and Join is unavailable, with its reason, before the PF loads a flight, with no departure, without the PF's aircraft, in a flight in another aircraft, and with no menu script.
+- As the menu script's own tests: `departure_stand` for PARKING 14 at an airport that has PARKING 140 selects PARKING 14.
+- [The session's budgets](../session/02-units.md#budgets): a following machine's active pause applied within 500ms of the key arriving, on the bench up to the part being asked, and in the sim from the part's call to the flag; and Go to's, from the press to the stand or runway selected within 5s, in the sim.
+
+In the sim, in one session ([cases in the sim](../session/02-units.md#cases-for-the-bench)): our EFB app's code calls `TOOLBAR_SET_ACTIVE_PAUSE` with the EFB closed, and active pause turns on and off, with the time from the call to the flag; `departure_runway` selects a runway by its `ID`, as the world map's own list does (read in fs-base-ui 0.1.10, `html_ui/Global/pkg/base.bundle.js`, `FreeflightPlanCombobox._updateDropdown`), and the Baron 58P's engines run at Ready to fly after it; `departure_stand` against a gate whose list name has a letter; which entry of the aircraft list and of the liveries is the PF's; that the menu script sees `FreeFlightPage`; and Join now from the world map to the PF's flight, with Go to's budget.
+The stage changes nothing every scenario runs on, so it closes on the scenarios it adds or changes: `rate-and-pause`, `go-to`, and those with a fake menu script, `session`, `profiles`, and `flight-model`.
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the `rate-and-pause` and `go-to` scenarios among them; on the bench, active pause set on one core's fake EFB app reaches the other's, and Join from the world map runs every request to Ready to fly; in the sim, active pause follows from our EFB app's code, and Join now puts a joiner in the PF's flight; and the [session log](../session/log.md) has an entry for the cases and budgets.
+Done on 2026-11-17: on the bench, `rate-and-pause` and `go-to` passed 4 of 4, a following machine's part asked to pause 21ms after the press ([session log](../session/log.md#2026-11-17-stage-21s-rate-and-pause-and-go-to-pass-their-bench-cases-and-a-following-machines-part-was-asked-to-pause-21ms-after-the-press)); in the sim, our EFB app's code set active pause on and off within 264ms of the press, and Join now selected a runway 0.45s after its command and started the flight within 0.9s, once the menu script parsed ([session log](../session/log.md#2026-11-17-in-the-sim-join-set-the-world-map-and-started-the-flight-within-09s-and-active-pause-followed-from-our-efb-apps-code-in-264ms-once-the-menu-script-parsed)).
 
 ## 22 GitHub
 

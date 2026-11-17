@@ -203,6 +203,10 @@ impl SimAwareness {
                 self.selected = self.held.state.clone();
             }
             Signal::FlightLoaded => {
+                // The new flight's file is read after this signal, and one with no
+                // `[Departure]` section names no departure, so the last flight's goes now, and
+                // Go to never sends a joiner to it.
+                self.departure = None;
                 if matches!(self.stage, Stage::Starting | Stage::Menu | Stage::Flying) {
                     self.stage = Stage::Loading;
                 }

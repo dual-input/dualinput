@@ -29,8 +29,8 @@ export function memoryText(bytes: number): string {
 /**
  * A share of the PC's cores, so a pilot never reads the app as stuck: to one decimal as Task Manager shows it, or below 0.1% to
  * its first digit that isn't 0, as 0.004%. Idle, the app uses about 0.065% of one core, so 0.004% of a 16-thread PC's, which one
- * decimal would show as 0.0% (record/areas/install/log.md, 2026-11-16). `cpu_text` in src/apps/desktop/src/usage.rs formats the
- * tray menu's line the same way, so change both together.
+ * decimal would show as 0.0% (record/areas/install/log.md, "2026-11-16: The desktop app's walk for the sim cost 4.0ms").
+ * `cpu_text` in src/apps/desktop/src/usage.rs formats the tray menu's line the same way, so change both together.
  */
 export function cpuText(percent: number): string {
   if (percent <= 0) return "0%"

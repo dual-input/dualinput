@@ -14,14 +14,14 @@ use std::sync::Mutex;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
-use windows_sys::Win32::Foundation::FILETIME;
 use windows_sys::Win32::System::ProcessStatus::{
     GetProcessMemoryInfo, PROCESS_MEMORY_COUNTERS, PROCESS_MEMORY_COUNTERS_EX,
     PROCESS_MEMORY_COUNTERS_EX2,
 };
 use windows_sys::Win32::System::Threading::{
-    GetCurrentProcessId, GetProcessTimes, OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION,
+    GetCurrentProcessId, OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION,
 };
+use windows_sys::Win32::System::WindowsProgramming::QueryProcessCycleTime;
 
 use crate::processes::{Object, Running, running};
 
@@ -178,7 +178,7 @@ fn ours(all: &[Running], me: u32) -> Vec<u32> {
     found
 }
 
-/// A process's private working set in bytes, and the CPU time it has used, in 100ns. A process gone since the snapshot has neither.
+/// A process's private working set in bytes, and the cycles it has used. A process gone since the snapshot has neither.
 fn figures_of(id: u32) -> Option<(u64, u64)> {
     // SAFETY: OpenProcess takes access rights, an inherit flag, and an ID.
     let handle = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, id) };
@@ -186,14 +186,11 @@ fn figures_of(id: u32) -> Option<(u64, u64)> {
         return None;
     }
     let handle = Object(handle);
-    let mut times = [FILETIME::default(); 4];
-    let [created, exited, kernel, user] = &mut times;
-    // SAFETY: the handle stays open through the call, which writes the four times.
-    if unsafe { GetProcessTimes(handle.0, created, exited, kernel, user) } == 0 {
+    let mut cycles = 0;
+    // SAFETY: the handle stays open through the call, which writes one u64.
+    if unsafe { QueryProcessCycleTime(handle.0, &mut cycles) } == 0 {
         return None;
     }
-    let time = |t: &FILETIME| u64::from(t.dwHighDateTime) << 32 | u64::from(t.dwLowDateTime);
-    let cpu = time(&times[2]) + time(&times[3]);
     // SAFETY: an all-zero struct of integers is valid.
     let mut memory: PROCESS_MEMORY_COUNTERS_EX2 = unsafe { std::mem::zeroed() };
     // A Windows that predates the longer struct may refuse its size or leave its last field at the zero it was given, and
@@ -221,7 +218,7 @@ fn figures_of(id: u32) -> Option<(u64, u64)> {
         0 => memory.PrivateUsage,
         set => set,
     };
-    Some((private as u64, cpu))
+    Some((private as u64, cycles))
 }
 
 /// Takes samples, each one's CPU figure counting from the sample before.
@@ -230,6 +227,8 @@ pub struct Sampler {
     cores: f64,
     seen: HashMap<u32, u64>,
     taken: Instant,
+    /// The time-stamp counter at the last sample, which the next one's cycles are measured against.
+    counted: u64,
     /// What updates downloaded since the last sample.
     downloaded: u64,
 }
@@ -244,6 +243,7 @@ impl Sampler {
             cores: std::thread::available_parallelism().map_or(1.0, |n| n.get() as f64),
             seen,
             taken: Instant::now(),
+            counted: counter(),
             downloaded: 0,
         }
     }
@@ -255,9 +255,10 @@ impl Sampler {
 
     /// A sample that the next one counts from.
     pub fn take(&mut self, at: u64) -> Sample {
-        let (sample, seen) = self.read(at);
+        let (sample, seen, counted) = self.read(at);
         self.seen = seen;
         self.taken = Instant::now();
+        self.counted = counted;
         self.downloaded = 0;
         sample
     }
@@ -267,16 +268,29 @@ impl Sampler {
         self.read(at).0
     }
 
-    fn read(&self, at: u64) -> (Sample, HashMap<u32, u64>) {
+    fn read(&self, at: u64) -> (Sample, HashMap<u32, u64>, u64) {
         let (memory, now) = read_ours(self.me);
+        let counted = counter();
         let sample = Sample {
             at,
             memory,
-            cpu: cpu_share(&self.seen, &now, self.taken.elapsed(), self.cores),
+            cpu: cpu_share(
+                &self.seen,
+                &now,
+                self.taken.elapsed(),
+                counted.wrapping_sub(self.counted),
+                self.cores,
+            ),
             network: self.downloaded,
         };
-        (sample, now)
+        (sample, now, counted)
     }
+}
+
+/// The time-stamp counter, which ticks at the rate Windows counts a process's cycles in.
+fn counter() -> u64 {
+    // SAFETY: reading the time-stamp counter has no effects.
+    unsafe { std::arch::x86_64::_rdtsc() }
 }
 
 fn read_ours(me: u32) -> (u64, HashMap<u32, u64>) {
@@ -291,16 +305,32 @@ fn read_ours(me: u32) -> (u64, HashMap<u32, u64>) {
     (memory, times)
 }
 
-/// The share of the PC's cores these processes used since `seen`. A process that started since counts all its time, so a
-/// window's first seconds show. A moment too short to read comes out as if it were 1s long, since a tray menu's first figure
-/// otherwise divides by next to nothing.
-fn cpu_share(seen: &HashMap<u32, u64>, now: &HashMap<u32, u64>, over: Duration, cores: f64) -> f32 {
+/// The share of the PC's cores these processes used since `seen`, so an idle minute reads as the little it took rather than as
+/// a 0% one minute and a jump the next. Windows adds a process's time a whole 15.6ms clock tick at a time, to whichever thread
+/// runs as the tick fires, so three runs of the same quiet minute of this app read 0.130% to 0.234% of a core from its times,
+/// where the cycles Windows counts for it read 0.139% and 0.154%, and a 3,000ms spin as 2,995.1ms at the processor's base clock
+/// (record/areas/install/log.md, "2026-11-11: The bench read the desktop app's CPU in whole 15.6ms clock ticks"). So these are
+/// the cycles each process used against the time-stamp counter's over the same moment, which ticks at that base clock. A
+/// process that started since counts all its cycles, so a window's first seconds show. A moment too short to read counts as if
+/// it were 1s long, since a tray menu's first figure otherwise divides by next to nothing.
+fn cpu_share(
+    seen: &HashMap<u32, u64>,
+    now: &HashMap<u32, u64>,
+    over: Duration,
+    counted: u64,
+    cores: f64,
+) -> f32 {
     let used: u64 = now
         .iter()
-        .map(|(id, time)| time.saturating_sub(seen.get(id).copied().unwrap_or(0)))
+        .map(|(id, cycles)| cycles.saturating_sub(seen.get(id).copied().unwrap_or(0)))
         .sum();
-    let over = over.as_secs_f64().max(1.0) * 10_000_000.0;
-    (used as f64 / over / cores * 100.0).min(100.0) as f32
+    let seconds = over.as_secs_f64();
+    if counted == 0 || seconds <= 0.0 {
+        return 0.0;
+    }
+    // The counter's cycles over 1s or the moment, whichever is longer, at the rate it counted them over the moment.
+    let whole = counted as f64 * (1.0 / seconds).max(1.0);
+    (used as f64 / whole / cores * 100.0).min(100.0) as f32
 }
 
 /// The tray menu's line, in the units Task Manager shows.
@@ -314,8 +344,9 @@ pub fn tray_line(sample: &Sample) -> String {
 
 /// A share of the PC's cores, so a pilot never reads the app as stuck: to one decimal as Task Manager shows it, or below 0.1%
 /// to its first digit that isn't 0, as 0.004%. Idle, the app uses about 0.065% of one core, so 0.004% of a 16-thread PC's,
-/// which one decimal would show as 0.0% (record/areas/install/log.md, 2026-11-16). `cpuText` in
-/// src/platform/desktop-shell/src/usage.ts formats the window's figures the same way, so change both together.
+/// which one decimal would show as 0.0% (record/areas/install/log.md, "2026-11-16: The desktop app's walk for the sim cost
+/// 4.0ms"). `cpuText` in src/platform/desktop-shell/src/usage.ts formats the window's figures the same way, so change both
+/// together.
 fn cpu_text(percent: f32) -> String {
     let percent = f64::from(percent);
     if percent <= 0.0 {
@@ -442,13 +473,27 @@ mod tests {
     }
 
     #[test]
-    fn the_cpu_share_counts_since_the_last_sample_and_a_new_process_whole() {
-        let seen = HashMap::from([(1, 100_000_000)]);
-        let now = HashMap::from([(1, 110_000_000), (2, 10_000_000)]);
-        // 2s of CPU over 10s on one core is 20%, and on four cores 5%.
-        assert_eq!(cpu_share(&seen, &now, Duration::from_secs(10), 1.0), 20.0);
-        assert_eq!(cpu_share(&seen, &now, Duration::from_secs(10), 4.0), 5.0);
-        assert_eq!(cpu_share(&seen, &now, Duration::from_millis(1), 1.0), 100.0);
+    fn the_cpu_share_counts_cycles_since_the_last_sample_and_a_new_process_whole() {
+        let seen = HashMap::from([(1, 100_000)]);
+        let now = HashMap::from([(1, 101_000), (2, 1_000)]);
+        // With the counter at 1,000 cycles a second, 2,000 cycles over 10s on one core is 20%, and on four cores 5%.
+        let ten_seconds = Duration::from_secs(10);
+        assert_eq!(cpu_share(&seen, &now, ten_seconds, 10_000, 1.0), 20.0);
+        assert_eq!(cpu_share(&seen, &now, ten_seconds, 10_000, 4.0), 5.0);
+        assert_eq!(
+            cpu_share(&seen, &now, Duration::from_millis(1), 1, 1.0),
+            100.0
+        );
+    }
+
+    #[test]
+    fn a_moment_too_short_to_read_counts_as_1s() {
+        let seen = HashMap::from([(1, 0)]);
+        let now = HashMap::from([(1, 500)]);
+        // 500 cycles in 100ms of a counter at 1,000 a second read against a whole second's 1,000, not the moment's 100.
+        let moment = Duration::from_millis(100);
+        assert_eq!(cpu_share(&seen, &now, moment, 100, 1.0), 50.0);
+        assert_eq!(cpu_share(&seen, &now, Duration::ZERO, 0, 1.0), 0.0);
     }
 
     #[test]

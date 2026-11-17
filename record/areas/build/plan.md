@@ -844,6 +844,15 @@ The stage changes nothing every scenario runs on, so it closes on the scenarios 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the `rate-and-pause` and `go-to` scenarios among them; on the bench, active pause set on one core's fake EFB app reaches the other's, and Join from the world map runs every request to Ready to fly; in the sim, active pause follows from our EFB app's code, and Join now puts a joiner in the PF's flight; and the [session log](../session/log.md) has an entry for the cases and budgets.
 Done on 2026-11-17: on the bench, `rate-and-pause` and `go-to` passed 4 of 4, a following machine's part asked to pause 21ms after the press ([session log](../session/log.md#2026-11-17-stage-21s-rate-and-pause-and-go-to-pass-their-bench-cases-and-a-following-machines-part-was-asked-to-pause-21ms-after-the-press)); in the sim, our EFB app's code set active pause on and off within 264ms of the press, and Join now selected a runway 0.45s after its command and started the flight within 0.9s, once the menu script parsed ([session log](../session/log.md#2026-11-17-in-the-sim-join-set-the-world-map-and-started-the-flight-within-09s-and-active-pause-followed-from-our-efb-apps-code-in-264ms-once-the-menu-script-parsed)).
 
+## 14c Two coupled writes in one input
+
+Designs first: how state sync writes two coupled controls that arrive in one input, since a profile's write decides in the core from a reading a frame or more old, so one write can undo the other, as the 58P's altitude hold and vertical speed mode did twice in the first flight with friends, which [stage 14b](#14b-state-syncs-writes-that-read-another-value) found and left as a known limit (user, 2026-11-17).
+It starts from the sync log's entries of 2026-11-16 and 2026-11-17, and the idea weighed there, in which profiles stay in JavaScript and our WASM module runs a toggle as calculator code guarded by the entry's own variable.
+Before that design, it measures how the sim orders and applies the events of one frame, through SimConnect and through our module.
+Builds: that fix, in the units its design names.
+Needs: 14b.
+Tests: a bench case, with the stand-in's rules, in which two coupled controls arrive in one input and one write undoes the other.
+
 ## 22 GitHub
 
 Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)): CI's workflows for each pull request and each merge to `main` ([CI](../architecture/02-code-map.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green)), the release workflow with the check before a release ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)), the profiles' workflow and their Pages site ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)), `tools/replay.ts`, which fetches the core a recording's release shipped ([running a replay](../core/01-loop-and-edge.md#running-a-replay)), and the repositories of ours beside this one, the Coherent GT check's and the one that holds the relays' tokens ([the build](01-the-build.md)).

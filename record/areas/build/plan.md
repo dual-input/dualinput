@@ -853,6 +853,16 @@ Builds: that fix, in the units its design names.
 Needs: 14b.
 Tests: a bench case, with the stand-in's rules, in which two coupled controls arrive in one input and one write undoes the other.
 
+## 16c Trim and bank after a handover
+
+Designs first: what moves the 58P's elevator trim and bank in the frames after flight-model sync's `Follow` lets it go at a handover, and which unit fixes it, which [stage 14b](#14b-state-syncs-writes-that-read-another-value) found and left as a known limit (user, 2026-11-18).
+In 14b's two runs in the sim, the trim dropped from -8% to between -62% and -77% and came back within about 7 frames, and a left bank of 16° to 24° began in the same frame, though state sync's write of the old PF's trim, -5%, went out at that moment; in the run whose autopilot held the second pilot's altitude, the 58P turned 15.6° and lost 128 ft in 15s.
+The lead, unverified, is the following machine's own autopilot, wound up while it trims an aircraft `Follow` holds still, so the fix may sit in how `Follow` holds or lets go, in the trim in flight-model sync's sample, or in that autopilot.
+It starts from the sync log's entry of 2026-11-18, and `tools/sim/handover.ts` reproduces it; whether it happens behind a PF whose aircraft moves, rather than the bench's stand-in, whose pose stays fixed, is unknown.
+Builds: that fix, in the units its design names.
+Needs: 14b and 16.
+Exit: after a handover with the autopilot in heading and altitude hold, the 58P flies straight on, with its trim at the old PF's.
+
 ## 22 GitHub
 
 Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)): CI's workflows for each pull request and each merge to `main` ([CI](../architecture/02-code-map.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green)), the release workflow with the check before a release ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)), the profiles' workflow and their Pages site ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)), `tools/replay.ts`, which fetches the core a recording's release shipped ([running a replay](../core/01-loop-and-edge.md#running-a-replay)), and the repositories of ours beside this one, the Coherent GT check's and the one that holds the relays' tokens ([the build](01-the-build.md)).

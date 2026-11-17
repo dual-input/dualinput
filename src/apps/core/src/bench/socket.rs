@@ -180,7 +180,8 @@ impl Bench {
             StandInAct::Lack { title } => Act::Lack { title },
             StandInAct::FrameBurst { count } => Act::FrameBurst { count },
             StandInAct::ResetVars => Act::ResetVars,
-            StandInAct::LateReport { delay_ms } => Act::LateReport {
+            StandInAct::LateReport { routine, delay_ms } => Act::LateReport {
+                slot: format!("{}{routine}", stand_in_sim::REPORT_PREFIX),
                 delay: Duration::from_millis(delay_ms),
             },
             StandInAct::Track { names } => Act::Track { names },

@@ -1,0 +1,73 @@
+The camera as each core read it in the first flight with friends, 2026-11-11, from a replay of each pilot's recording on
+2026-11-17, against the speed Follow drew the aircraft at and the frame rate of the sim's last Frame event.
+The replay was a development build of the release 0.1.0's tree with two temporary log lines: avatars' camera_read logged
+every read, with the frame rate the last Frame event carried, and flight-model's core logged every sample it fed Follow
+and every report Lead gave. Both replays matched every checkpoint: pilot-b's 2,832 over 821,299 inputs, recorded on an
+AMD Ryzen 9 9950X and replayed on an AMD Ryzen 7 7800X3D, and pilot-a's 2,662 over 446,841 inputs.
+
+How it reads:
+- Reads kept: the SIMOBJECT referential, within 6m of the reference point along z and 1.5m across, not on foot.
+- The seat's eye is the median of this pilot's own reads while they flew, in the seat.
+- dx, dy, dz are a read's offset from that eye, x left, y up, z forward, in meters.
+- vx, vy, vz are the body velocity Follow drew at the read, from the samples' A:VELOCITY BODY X, Y, and Z 400ms before
+  the read, in m/s, and fps is the Frame event's frame rate before the read.
+- "-dz/vz" is how many ms of the aircraft's travel the shift is worth, against 1000/fps, a frame's time.
+- "left along z" is dz after adding back vz/fps, what a correction from outside the sim would leave.
+- pilot-b hosted, on the AMD Ryzen 9 9950X; pilot-a joined, on our development machine, whose sim held 30 fps.
+=== pilot-b, who hosted
+camera reads: 122113; SIMOBJECT in the cabin: 111962; follow samples 27851, lead reports 14186
+seat's eye while flying: x 0.253 y 0.899 z -0.143 over 28608 reads
+following reads with a drawn velocity: 83332
+in flight (vz over 20 m/s): 66311 reads
+  -dz/vz: p10 11.1ms, p50 13.1ms, p90 22.0ms
+  1/fps:  p10 11.6ms, p50 13.5ms, p90 22.3ms
+  (-dz/vz) / (1/fps): p10 0.85, p50 0.98, p90 1.10
+  correlation of -dz/vz with 1/fps, read by read: 0.914
+  correlation of -dz with vz: 0.489; with vz/fps: 0.940
+  fit: -dz = 0.936 * vz/fps + 0.052m
+  residual: p10 -0.17m p50 -0.00m p90 0.17m
+  vertical fit: dy = -0.947 * vy/fps + -0.041m; corr -0.945
+  lateral fit: dx = 0.991 * vx/fps + -0.489m; corr 0.982
+  left along z after adding vz/fps back: p1 -0.34m, p10 -0.13m, p50 0.03m, p90 0.21m, p99 0.47m
+  by speed along the body (m/s): reads, -dz p50, vz/fps p50, fps p50
+    20-50:    460  0.64m  0.67m  51.9
+    50-70:   2708  1.01m  1.04m  62.9
+    70-80:   5750  0.97m  1.02m  74.9
+    80-90:  11936  1.07m  1.11m  76.1
+    90-100:  38207  1.24m  1.27m  74.6
+    100-200:   7250  1.57m  1.60m  68.0
+  by fps: reads, (-dz/vz) p50 in ms, 1000/fps
+    25-30:    159  32.2ms  34.3ms
+    30-35:   2342  29.4ms  30.1ms
+    35-45:   4182  25.4ms  25.6ms
+    45-60:   3126  17.3ms  18.3ms
+    60-200:  56490  12.8ms  13.2ms
+taxiing (vz 1 to 20 m/s): 5619 reads, -dz/vz p50 20.0ms, 1/fps p50 23.8ms, -dz p50 0.15m
+still while following: 10972 reads, dz p50 0.027m, p10 -0.001 p90 0.027
+flying at over 20 m/s: 19500 reads, dz p50 0.026m, p1 -0.004m, p99 0.081m
+
+=== pilot-a, who joined
+camera reads: 54031; SIMOBJECT in the cabin: 52128; follow samples 8132, lead reports 27878
+seat's eye while flying: x 0.249 y 0.852 z -0.145 over 41482 reads
+following reads with a drawn velocity: 10374
+in flight (vz over 20 m/s): 3653 reads
+  -dz/vz: p10 24.6ms, p50 33.2ms, p90 35.3ms
+  1/fps:  p10 33.3ms, p50 33.3ms, p90 33.3ms
+  (-dz/vz) / (1/fps): p10 0.74, p50 0.99, p90 1.06
+  correlation of -dz/vz with 1/fps, read by read: 0.020
+  correlation of -dz with vz: 0.334; with vz/fps: 0.334
+  fit: -dz = 0.730 * vz/fps + 0.643m
+  residual: p10 -0.62m p50 0.09m p90 0.29m
+  vertical fit: dy = -0.935 * vy/fps + -0.001m; corr -0.949
+  lateral fit: dx = 1.103 * vx/fps + 0.021m; corr 0.880
+  left along z after adding vz/fps back: p1 -0.37m, p10 -0.16m, p50 0.02m, p90 0.73m, p99 1.02m
+  by speed along the body (m/s): reads, -dz p50, vz/fps p50, fps p50
+    70-80:    951  2.60m  2.62m  30.0
+    80-90:   2293  2.81m  2.85m  30.0
+    90-100:    376  3.09m  3.15m  30.0
+    100-200:     33  3.16m  3.35m  30.0
+  by fps: reads, (-dz/vz) p50 in ms, 1000/fps
+    25-30:     29  33.6ms  33.3ms
+    30-35:   3624  33.1ms  33.3ms
+still while following: 6721 reads, dz p50 0.026m, p10 0.017 p90 0.027
+flying at over 20 m/s: 29919 reads, dz p50 0.000m, p1 -0.029m, p99 0.013m

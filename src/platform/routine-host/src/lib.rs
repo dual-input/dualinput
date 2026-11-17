@@ -21,18 +21,20 @@
     clippy::indexing_slicing
 )]
 
+mod camera;
 mod freeze;
 mod hold;
 mod key;
 mod vars;
 
+pub use camera::Camera;
 pub use freeze::Flag;
 pub use hold::Hold;
 pub use key::Key;
 pub use vars::{AVATAR, Ids, Named, Space, USER, VarRef};
 
 use bytemuck::Pod;
-use messages::module::slots::SlotHeader;
+use messages::module::slots::{CameraRead, SlotHeader};
 use messages::module::{ModuleStatus, RoutineId};
 
 use crate::freeze::Freeze;
@@ -63,6 +65,9 @@ pub trait Sim {
     fn call_preset(&mut self, name: &str, value: Option<f64>);
     /// Sends the pilot's aircraft the event `key` with `value`, as its hardware would.
     fn key(&mut self, key: Key, value: i32);
+    /// The camera now, in `referential`, `REFERENTIAL_SIMOBJECT` or `REFERENTIAL_WORLD` of the
+    /// message crate's `module`, or `None` when the sim gives none, as it may through a load.
+    fn camera(&mut self, referential: u32) -> Option<CameraRead>;
 }
 
 /// An `H:` event or a preset a routine asked for, carried out once every routine's frame has
@@ -174,6 +179,15 @@ impl Wants<'_> {
         let space = self.vars.space(var)?;
         let ids = self.vars.ids(var, object, self.sim)?;
         self.sim.get(object, space, ids)
+    }
+
+    /// The camera in `referential`, read now, as every read is, so before any routine's
+    /// writes go out. On a following machine, one whose aircraft `Follow` moves along the
+    /// pilot flying's path, that's the only moment the camera and the aircraft agree: the sim places the camera from the pose before `Follow`'s write, so a
+    /// read after it lands one frame of the aircraft's travel behind the pilot's eye
+    /// (measured on MSFS 2024, 2026-11-17, record/areas/avatars/log.md).
+    pub fn camera(&mut self, referential: u32) -> Option<CameraRead> {
+        self.sim.camera(referential)
     }
 
     /// Writes `value` into `var` on `object`, once every routine's frame has run. The sim

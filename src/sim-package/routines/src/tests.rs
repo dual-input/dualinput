@@ -72,6 +72,10 @@ impl Sim for World {
     fn fire_h(&mut self, _: &str) {}
     fn call_preset(&mut self, _: &str, _: Option<f64>) {}
     fn key(&mut self, _: Key, _: i32) {}
+
+    fn camera(&mut self, _: u32) -> Option<messages::module::slots::CameraRead> {
+        None
+    }
 }
 
 impl World {

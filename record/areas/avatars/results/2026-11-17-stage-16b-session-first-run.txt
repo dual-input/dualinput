@@ -1,0 +1,42 @@
+Start the sim, load a flight in the Baron 58P on the ground at a stand, engines running, and press Ready to fly.
+The session is starting. Sit in the left seat in the cockpit view, and keep your hands off until a step asks for them.
+
+=== At the stand
+the pilot's eye, as the second pilot's core is fed it: [0.249, 0.848, -0.148]
+Pick a small knob or button you can click on its center without changing anything that matters, such as a panel light knob. Click its center once now, and the same spot each time I ask.
+the click at the stand put the hand at [0.313, 0.339, 0.571]
+our module's update with Lead, Figure, and Camera, on the stand: 52µs at p50, 219µs at p99, 250µs at most, over its last 300 frames
+
+=== On foot
+Get out of the aircraft on foot and walk up to a main wheel. Press Page Up when you're there.
+Click the tire once now.
+FAILED: on foot, the pilot's figure stands on the ground and a click brings a hand: "on-foot", no hand
+Go back to the left seat in the cockpit view. Press Page Up when you're seated.
+
+=== Following in flight
+The second pilot has control. Your aircraft climbs straight up 3,000 feet, then flies level. Keep your hands off.
+PASSED: following at 85 m/s, the pilot keeps their seat, their eye at most 1.7cm from the stand's, over 73 feeds
+Click your knob's center once now, at 85 meters a second.
+PASSED: following at 85 m/s, the click's hand landed 1.3cm from the stand's, at [0.313, 0.352, 0.571]
+PASSED: following at 130 m/s, the pilot keeps their seat, their eye at most 3.0cm from the stand's, over 71 feeds
+Click your knob's center once now, at 130 meters a second.
+PASSED: following at 130 m/s, the click's hand landed 3.3cm from the stand's, at [0.336, 0.363, 0.570]
+our module's update with Follow, Figure, and Camera, in flight: 65µs at p50, 293µs at p99, 519µs at most, over its last 300 frames
+
+=== Active pause, and ChasePlane off
+Turn active pause on. Press Page Up when it's on.
+Click your knob's center once now, in active pause.
+PASSED: in active pause, the click's hand landed 1.3cm from the stand's, at [0.313, 0.348, 0.580]
+Turn active pause off. Press Page Up when it's off.
+If ChasePlane runs, turn it off in its own settings, then keep your head and the mouse still. Press Page Up when that's done, or Page Down if ChasePlane isn't running.
+Click your knob's center once now, with your head still.
+PASSED: with ChasePlane off and the head still, the click's hand landed 3.3cm from the stand's, at [0.336, 0.361, 0.562]
+
+=== Flying
+You take control in flight. Engage the autopilot with heading and altitude hold, and keep about 160 knots.
+Press Page Up once the autopilot holds heading and altitude.
+PASSED: flying, the pilot keeps their seat, their eye at most 0.8cm from the stand's, over 78 feeds
+Click your knob's center once now, while you fly.
+PASSED: flying, the click's hand landed 2.8cm from the stand's, at [0.323, 0.365, 0.573]
+our module's update with Lead, Figure, and Camera, in flight: 58µs at p50, 335µs at p99, 348µs at most, over its last 300 frames
+That's every case. The script stops the cores now, so fly on as you like, or quit.

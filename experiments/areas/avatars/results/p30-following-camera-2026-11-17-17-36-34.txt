@@ -1,0 +1,192 @@
+Start the sim, load a flight in the Baron 58P on the ground at a stand, and press Ready to fly.
+The session is starting. Sit in the left seat in the cockpit view, keep your hands off the mouse and the controls, and keep the sim in front until the long low beep.
+the camera's status: acquired by another client, such as ChasePlane
+phase 1: following, still, on the stand
+phase 2: climbing straight up at 91 m/s for 10s
+phase 3: level, still, 3,000 ft up
+phase 4: level at 40 m/s
+phase 5: level at 85 m/s
+phase 6: level at 130 m/s
+phase 7: turning right at 85 m/s, banked 25 degrees
+phase 8: climbing at 85 m/s, nose up 8 degrees
+phase 9: level at 85 m/s
+ChasePlane drives the camera. Turn it off in its own settings, and press Page Up when it's off, or Page Down to skip this part.
+ChasePlane: turned off
+Keep your hands off again.
+phase 10: level at 85 m/s, ChasePlane off
+You can turn ChasePlane back on after the long low beep.
+That's all: your aircraft is back on its stand and yours. The script stops the cores and writes its report.
+copied 3.9 MB of the module's lines to experiments\areas\avatars\results\p30-following-camera-2026-11-17-17-36-34-module.csv
+
+p30, p30-following-camera-2026-11-17-17-36-34.ndjson
+The camera's status at the start: acquired by another client, such as ChasePlane.
+
+From outside the sim, as the core reads it: 5675 SIMOBJECT answers, 5867 poses, and 5676 Frame events.
+SimConnect_CameraGet's referentials, and WORLD turned into the aircraft's frame through a pose read beside it:
+  Each line: the median offset along z, forward positive, its p10 and p90, and the median distance from the phase-1 point.
+  Phase 1, following, still, on the stand: one frame's travel 0.00m
+    SIMOBJECT                z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 183 reads
+    EYEPOINT                 z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 184 reads
+    SIMOBJECT_DATUM          z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 184 reads
+    WORLD, last pose         z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 183 reads
+    WORLD, pose before       z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 183 reads
+    WORLD, next pose         z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 183 reads
+  Phase 2, climbing straight up at 91 m/s: one frame's travel 2.98m
+    SIMOBJECT                z 0.02m (p10 0.02, p90 0.03), 2.98m away, over 304 reads
+    EYEPOINT                 z 0.02m (p10 0.02, p90 0.03), 2.98m away, over 304 reads
+    SIMOBJECT_DATUM          z 0.02m (p10 0.02, p90 0.03), 2.98m away, over 304 reads
+    WORLD, last pose         z 0.02m (p10 0.02, p90 0.03), 0.06m away, over 304 reads
+    WORLD, pose before       z 0.02m (p10 0.02, p90 0.03), 3.09m away, over 304 reads
+    WORLD, next pose         z 0.02m (p10 0.02, p90 0.03), 2.98m away, over 304 reads
+  Phase 3, level, still, 3,000 ft up: one frame's travel 0.01m
+    SIMOBJECT                z 0.00m (p10 -0.01, p90 0.02), 0.01m away, over 154 reads
+    EYEPOINT                 z 0.00m (p10 -0.01, p90 0.02), 0.01m away, over 154 reads
+    SIMOBJECT_DATUM          z 0.00m (p10 -0.01, p90 0.02), 0.01m away, over 154 reads
+    WORLD, last pose         z 0.00m (p10 -0.01, p90 0.02), 0.01m away, over 154 reads
+    WORLD, pose before       z 0.00m (p10 -0.01, p90 0.02), 0.01m away, over 154 reads
+    WORLD, next pose         z 0.00m (p10 -0.01, p90 0.02), 0.01m away, over 154 reads
+  Phase 4, level at 40 m/s: one frame's travel 1.33m
+    SIMOBJECT                z -1.33m (p10 -1.38, p90 -1.28), 1.33m away, over 364 reads
+    EYEPOINT                 z -1.33m (p10 -1.38, p90 -1.28), 1.33m away, over 364 reads
+    SIMOBJECT_DATUM          z -1.33m (p10 -1.38, p90 -1.28), 1.33m away, over 364 reads
+    WORLD, last pose         z 0.00m (p10 -0.00, p90 0.01), 0.01m away, over 364 reads
+    WORLD, pose before       z 1.33m (p10 1.27, p90 1.38), 1.33m away, over 364 reads
+    WORLD, next pose         z -1.33m (p10 -1.38, p90 -1.27), 1.33m away, over 364 reads
+  Phase 5, level at 85 m/s: one frame's travel 2.83m
+    SIMOBJECT                z -2.82m (p10 -2.93, p90 -2.71), 2.82m away, over 364 reads
+    EYEPOINT                 z -2.82m (p10 -2.93, p90 -2.71), 2.82m away, over 364 reads
+    SIMOBJECT_DATUM          z -2.82m (p10 -2.93, p90 -2.71), 2.82m away, over 364 reads
+    WORLD, last pose         z 0.01m (p10 0.01, p90 0.01), 0.01m away, over 364 reads
+    WORLD, pose before       z 2.84m (p10 2.70, p90 2.95), 2.84m away, over 364 reads
+    WORLD, next pose         z -2.82m (p10 -2.93, p90 -2.71), 2.82m away, over 364 reads
+  Phase 6, level at 130 m/s: one frame's travel 4.33m
+    SIMOBJECT                z -4.31m (p10 -4.45, p90 -4.13), 4.31m away, over 362 reads
+    EYEPOINT                 z -4.31m (p10 -4.45, p90 -4.13), 4.31m away, over 362 reads
+    SIMOBJECT_DATUM          z -4.31m (p10 -4.45, p90 -4.13), 4.31m away, over 362 reads
+    WORLD, last pose         z 0.02m (p10 0.02, p90 0.03), 0.02m away, over 362 reads
+    WORLD, pose before       z 4.35m (p10 4.12, p90 4.50), 4.35m away, over 362 reads
+    WORLD, next pose         z -4.31m (p10 -4.45, p90 -4.13), 4.31m away, over 362 reads
+  Phase 7, turning right at 85 m/s, banked 25 degrees: one frame's travel 2.83m
+    SIMOBJECT                z -2.79m (p10 -2.98, p90 -2.63), 2.79m away, over 575 reads
+    EYEPOINT                 z -2.79m (p10 -2.98, p90 -2.63), 2.79m away, over 574 reads
+    SIMOBJECT_DATUM          z -2.79m (p10 -2.98, p90 -2.63), 2.79m away, over 574 reads
+    WORLD, last pose         z 0.02m (p10 -0.06, p90 0.14), 0.14m away, over 575 reads
+    WORLD, pose before       z 2.89m (p10 2.68, p90 3.06), 2.89m away, over 575 reads
+    WORLD, next pose         z -2.79m (p10 -2.98, p90 -2.63), 2.79m away, over 575 reads
+  Phase 8, climbing at 85 m/s, nose up 8 degrees: one frame's travel 2.83m
+    SIMOBJECT                z -2.69m (p10 -2.80, p90 -2.59), 2.69m away, over 365 reads
+    EYEPOINT                 z -2.69m (p10 -2.80, p90 -2.59), 2.69m away, over 365 reads
+    SIMOBJECT_DATUM          z -2.69m (p10 -2.80, p90 -2.59), 2.69m away, over 365 reads
+    WORLD, last pose         z 0.14m (p10 0.12, p90 0.15), 0.14m away, over 365 reads
+    WORLD, pose before       z 2.97m (p10 2.84, p90 3.08), 2.97m away, over 365 reads
+    WORLD, next pose         z -2.69m (p10 -2.80, p90 -2.59), 2.69m away, over 365 reads
+  Phase 9, level at 85 m/s: one frame's travel 2.83m
+    SIMOBJECT                z -2.70m (p10 -2.81, p90 -2.58), 2.70m away, over 303 reads
+    EYEPOINT                 z -2.70m (p10 -2.81, p90 -2.58), 2.70m away, over 304 reads
+    SIMOBJECT_DATUM          z -2.70m (p10 -2.81, p90 -2.58), 2.70m away, over 304 reads
+    WORLD, last pose         z 0.14m (p10 0.14, p90 0.14), 0.14m away, over 303 reads
+    WORLD, pose before       z 2.97m (p10 2.84, p90 3.09), 2.97m away, over 303 reads
+    WORLD, next pose         z -2.70m (p10 -2.81, p90 -2.58), 2.70m away, over 303 reads
+  Phase 10, level at 85 m/s, ChasePlane off: one frame's travel 2.83m
+    SIMOBJECT                z -3.04m (p10 -3.19, p90 -2.91), 3.04m away, over 453 reads
+    EYEPOINT                 z -3.04m (p10 -3.19, p90 -2.91), 3.04m away, over 453 reads
+    SIMOBJECT_DATUM          z -3.04m (p10 -3.19, p90 -2.91), 3.04m away, over 453 reads
+    WORLD, last pose         z -0.21m (p10 -0.21, p90 -0.21), 0.22m away, over 453 reads
+    WORLD, pose before       z 2.62m (p10 2.49, p90 2.77), 2.62m away, over 453 reads
+    WORLD, next pose         z -3.04m (p10 -3.19, p90 -2.91), 3.04m away, over 453 reads
+
+Inside our module, 3429 frames, 33.321999999999996 ms each at the median.
+Between the pose read before the routine host's frame and the one after it, the aircraft moved 2.83m at the median in phase 5, so a read after Follow's write gives the pose it wrote.
+fsCameraGet in each referential, before and after the routine host's frame, and WORLD through the pose before or after:
+  Each line: the median offset along z, forward positive, its p10 and p90, and the median distance from the phase-1 point.
+  Phase 1, following, still, on the stand: one frame's travel 0.00m
+    SIMOBJECT before         z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 184 reads
+    SIMOBJECT after          z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 184 reads
+    EYEPOINT before          z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 184 reads
+    EYEPOINT after           z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 184 reads
+    DATUM before             z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 184 reads
+    DATUM after              z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 184 reads
+    WORLD bef., pose bef.    z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 184 reads
+    WORLD bef., pose aft.    z 0.00m (p10 -0.00, p90 0.00), 0.00m away, over 184 reads
+  Phase 2, climbing straight up at 91 m/s: one frame's travel 3.04m
+    SIMOBJECT before         z 0.02m (p10 0.02, p90 0.03), 0.06m away, over 304 reads
+    SIMOBJECT after          z 0.02m (p10 0.02, p90 0.03), 2.99m away, over 304 reads
+    EYEPOINT before          z 0.02m (p10 0.02, p90 0.03), 0.06m away, over 304 reads
+    EYEPOINT after           z 0.02m (p10 0.02, p90 0.03), 2.99m away, over 304 reads
+    DATUM before             z 0.02m (p10 0.02, p90 0.03), 0.06m away, over 304 reads
+    DATUM after              z 0.02m (p10 0.02, p90 0.03), 2.99m away, over 304 reads
+    WORLD bef., pose bef.    z 0.02m (p10 0.02, p90 0.03), 0.06m away, over 304 reads
+    WORLD bef., pose aft.    z 0.02m (p10 0.02, p90 0.03), 2.99m away, over 304 reads
+  Phase 3, level, still, 3,000 ft up: one frame's travel 0.00m
+    SIMOBJECT before         z 0.00m (p10 -0.01, p90 0.01), 0.01m away, over 154 reads
+    SIMOBJECT after          z 0.00m (p10 -0.01, p90 0.01), 0.01m away, over 154 reads
+    EYEPOINT before          z 0.00m (p10 -0.01, p90 0.01), 0.01m away, over 154 reads
+    EYEPOINT after           z 0.00m (p10 -0.01, p90 0.01), 0.01m away, over 154 reads
+    DATUM before             z 0.00m (p10 -0.01, p90 0.01), 0.01m away, over 154 reads
+    DATUM after              z 0.00m (p10 -0.01, p90 0.01), 0.01m away, over 154 reads
+    WORLD bef., pose bef.    z 0.00m (p10 -0.01, p90 0.01), 0.01m away, over 154 reads
+    WORLD bef., pose aft.    z 0.00m (p10 -0.01, p90 0.01), 0.01m away, over 154 reads
+  Phase 4, level at 40 m/s: one frame's travel 1.33m
+    SIMOBJECT before         z 0.00m (p10 -0.00, p90 0.01), 0.01m away, over 364 reads
+    SIMOBJECT after          z -1.33m (p10 -1.38, p90 -1.28), 1.33m away, over 364 reads
+    EYEPOINT before          z 0.00m (p10 -0.00, p90 0.01), 0.01m away, over 364 reads
+    EYEPOINT after           z -1.33m (p10 -1.38, p90 -1.28), 1.33m away, over 364 reads
+    DATUM before             z 0.00m (p10 -0.00, p90 0.01), 0.01m away, over 364 reads
+    DATUM after              z -1.33m (p10 -1.38, p90 -1.28), 1.33m away, over 364 reads
+    WORLD bef., pose bef.    z 0.00m (p10 -0.00, p90 0.01), 0.01m away, over 364 reads
+    WORLD bef., pose aft.    z -1.33m (p10 -1.38, p90 -1.28), 1.33m away, over 364 reads
+  Phase 5, level at 85 m/s: one frame's travel 2.83m
+    SIMOBJECT before         z 0.01m (p10 0.01, p90 0.01), 0.01m away, over 364 reads
+    SIMOBJECT after          z -2.82m (p10 -2.93, p90 -2.72), 2.82m away, over 364 reads
+    EYEPOINT before          z 0.01m (p10 0.01, p90 0.01), 0.01m away, over 364 reads
+    EYEPOINT after           z -2.82m (p10 -2.93, p90 -2.72), 2.82m away, over 364 reads
+    DATUM before             z 0.01m (p10 0.01, p90 0.01), 0.01m away, over 364 reads
+    DATUM after              z -2.82m (p10 -2.93, p90 -2.72), 2.82m away, over 364 reads
+    WORLD bef., pose bef.    z 0.01m (p10 0.01, p90 0.01), 0.01m away, over 364 reads
+    WORLD bef., pose aft.    z -2.82m (p10 -2.93, p90 -2.72), 2.82m away, over 364 reads
+  Phase 6, level at 130 m/s: one frame's travel 4.33m
+    SIMOBJECT before         z 0.02m (p10 0.02, p90 0.03), 0.02m away, over 362 reads
+    SIMOBJECT after          z -4.31m (p10 -4.45, p90 -4.14), 4.31m away, over 362 reads
+    EYEPOINT before          z 0.02m (p10 0.02, p90 0.03), 0.02m away, over 362 reads
+    EYEPOINT after           z -4.31m (p10 -4.45, p90 -4.14), 4.31m away, over 362 reads
+    DATUM before             z 0.02m (p10 0.02, p90 0.03), 0.02m away, over 362 reads
+    DATUM after              z -4.31m (p10 -4.45, p90 -4.14), 4.31m away, over 362 reads
+    WORLD bef., pose bef.    z 0.02m (p10 0.02, p90 0.03), 0.02m away, over 362 reads
+    WORLD bef., pose aft.    z -4.31m (p10 -4.45, p90 -4.14), 4.31m away, over 362 reads
+  Phase 7, turning right at 85 m/s, banked 25 degrees: one frame's travel 2.83m
+    SIMOBJECT before         z 0.02m (p10 -0.06, p90 0.14), 0.14m away, over 574 reads
+    SIMOBJECT after          z -2.78m (p10 -2.97, p90 -2.62), 2.79m away, over 574 reads
+    EYEPOINT before          z 0.02m (p10 -0.06, p90 0.14), 0.14m away, over 574 reads
+    EYEPOINT after           z -2.78m (p10 -2.97, p90 -2.62), 2.79m away, over 574 reads
+    DATUM before             z 0.02m (p10 -0.06, p90 0.14), 0.14m away, over 574 reads
+    DATUM after              z -2.78m (p10 -2.97, p90 -2.62), 2.79m away, over 574 reads
+    WORLD bef., pose bef.    z 0.02m (p10 -0.06, p90 0.14), 0.14m away, over 574 reads
+    WORLD bef., pose aft.    z -2.78m (p10 -2.97, p90 -2.62), 2.79m away, over 574 reads
+  Phase 8, climbing at 85 m/s, nose up 8 degrees: one frame's travel 2.83m
+    SIMOBJECT before         z 0.14m (p10 0.12, p90 0.15), 0.14m away, over 365 reads
+    SIMOBJECT after          z -2.70m (p10 -2.80, p90 -2.59), 2.70m away, over 365 reads
+    EYEPOINT before          z 0.14m (p10 0.12, p90 0.15), 0.14m away, over 365 reads
+    EYEPOINT after           z -2.70m (p10 -2.80, p90 -2.59), 2.70m away, over 365 reads
+    DATUM before             z 0.14m (p10 0.12, p90 0.15), 0.14m away, over 365 reads
+    DATUM after              z -2.70m (p10 -2.80, p90 -2.59), 2.70m away, over 365 reads
+    WORLD bef., pose bef.    z 0.14m (p10 0.12, p90 0.15), 0.14m away, over 365 reads
+    WORLD bef., pose aft.    z -2.69m (p10 -2.80, p90 -2.59), 2.69m away, over 365 reads
+  Phase 9, level at 85 m/s: one frame's travel 2.83m
+    SIMOBJECT before         z 0.14m (p10 0.14, p90 0.14), 0.14m away, over 304 reads
+    SIMOBJECT after          z -2.70m (p10 -2.81, p90 -2.58), 2.70m away, over 304 reads
+    EYEPOINT before          z 0.14m (p10 0.14, p90 0.14), 0.14m away, over 304 reads
+    EYEPOINT after           z -2.70m (p10 -2.81, p90 -2.58), 2.70m away, over 304 reads
+    DATUM before             z 0.14m (p10 0.14, p90 0.14), 0.14m away, over 304 reads
+    DATUM after              z -2.70m (p10 -2.81, p90 -2.58), 2.70m away, over 304 reads
+    WORLD bef., pose bef.    z 0.14m (p10 0.14, p90 0.14), 0.14m away, over 304 reads
+    WORLD bef., pose aft.    z -2.70m (p10 -2.81, p90 -2.58), 2.70m away, over 304 reads
+  Phase 10, level at 85 m/s, ChasePlane off: one frame's travel 2.83m
+    SIMOBJECT before         z -0.21m (p10 -0.21, p90 -0.21), 0.22m away, over 454 reads
+    SIMOBJECT after          z -3.04m (p10 -3.19, p90 -2.91), 3.04m away, over 454 reads
+    EYEPOINT before          z -0.21m (p10 -0.21, p90 -0.21), 0.22m away, over 454 reads
+    EYEPOINT after           z -3.04m (p10 -3.19, p90 -2.91), 3.04m away, over 454 reads
+    DATUM before             z -0.21m (p10 -0.21, p90 -0.21), 0.22m away, over 454 reads
+    DATUM after              z -3.04m (p10 -3.19, p90 -2.91), 3.04m away, over 454 reads
+    WORLD bef., pose bef.    z -0.21m (p10 -0.21, p90 -0.21), 0.22m away, over 454 reads
+    WORLD bef., pose aft.    z -3.04m (p10 -3.19, p90 -2.91), 3.04m away, over 454 reads
+

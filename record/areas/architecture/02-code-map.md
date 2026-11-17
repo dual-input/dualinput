@@ -11,6 +11,11 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > In [budgets for work in the sim](#budgets-for-work-in-the-sim), with `Lead` or `Follow` running, our module's update took 91µs to 335µs at p99 against 0.1ms, which the user accepted for stage 16 ([flight-model log](../flight-model/log.md#2026-11-11-seated-on-the-pose-follow-says-it-writes-a-figure-keeps-its-seat-on-the-following-machine-and-the-58p-banks-and-pitches-with-the-aircraft-it-follows)).
 
 > **Note**
+> In [what a routine can ask for](#what-a-routine-can-ask-for), a routine can also read the camera in a referential, which the routine host reads during the routine's frame, as it reads named variables, so before any routine's writes go out, and which leaves nothing to undo.
+> On a following machine, a read of the camera after `Follow`'s write lands one frame of the aircraft's travel behind the pilot's eye, and one before lands at the eye (measured on MSFS 2024, 2026-11-17, [avatars log](../avatars/log.md#2026-11-17-inside-our-module-before-the-routines-write-a-following-machines-camera-reads-at-the-eye-in-every-referential)).
+> The platform's own routine `Camera` asks for it, which lives in the routine host as `Hold` does, since reading the camera is the sim seam's work, and which the sim service feeds on the platform's connection while any feature subscribes to the camera ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md)'s note), so the module's list gains `routine_host::Camera`, and [names the sim shares](#names-the-sim-shares) gains `DUALINPUT_ROUTINE_CAMERA` and `DUALINPUT_REPORT_CAMERA` (user, 2026-11-17).
+
+> **Note**
 > In [a connection for each feature](#a-connection-for-each-feature-for-each-load), a group on one connection kept hearing an event while a group on another was cleared, so the rule against clearing a group while another hears that event holds for each connection alone ([architecture log](log.md#2026-11-09-a-group-on-one-simconnect-connection-keeps-hearing-an-event-while-a-group-on-another-is-cleared)).
 
 > **Note**

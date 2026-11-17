@@ -121,7 +121,7 @@ impl Probe {
                 "created object {object} for create {:?}",
                 me.creates.iter().position(|h| *h == call)
             ),
-            SimEvent::Camera { camera, .. } => format!("camera {}", camera.referential),
+            SimEvent::Camera { simobject, .. } => format!("camera at {:?}", simobject.position),
             SimEvent::Frame { .. } => "frame".to_string(),
             SimEvent::Heard { data, .. } => format!("heard an event with {}", data[0]),
             SimEvent::Input { value, first, .. } => format!("input {value:?} first={first}"),

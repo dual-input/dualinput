@@ -82,6 +82,11 @@ impl ModuleWatch {
         self.feeds.values().any(|f| f.live)
     }
 
+    /// Whether `unit` feeds `routine` now.
+    pub(crate) fn fed(&self, unit: UnitId, routine: RoutineId) -> bool {
+        self.feeds.get(&(unit, routine)).is_some_and(|f| f.live)
+    }
+
     /// Every routine a feature has fed, the platform's own left out.
     pub(crate) fn routines_of_features(&self, platform: UnitId) -> Vec<(UnitId, RoutineId)> {
         self.feeds
@@ -103,11 +108,16 @@ impl ModuleWatch {
 
     /// The sim's process ended, and its module with it, so every routine ends, and the next
     /// run of the sim starts none its feature hasn't fed it, and reads Missing until its
-    /// module writes.
-    pub(crate) fn sim_exited(&mut self) {
-        for feed in self.feeds.values_mut() {
+    /// module writes. A feature's slots go with its connection, but the platform's connection
+    /// keeps its setup for the next run, which maps the platform's own slots, `Hold`'s and
+    /// `Camera`'s, again as it opens, so they keep their areas rather than map the same name
+    /// a second time on that connection.
+    pub(crate) fn sim_exited(&mut self, platform: UnitId) {
+        for ((unit, _), feed) in &mut self.feeds {
             feed.live = false;
-            feed.area = None;
+            if *unit != platform {
+                feed.area = None;
+            }
         }
         self.status = Status::Missing;
         self.counter = None;

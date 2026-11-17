@@ -1,13 +1,16 @@
 use std::collections::BTreeMap;
 
 use sim_client::Connection;
+use sim_client::message::Camera;
 use simconnect_types::{
-    SIMCONNECT_OBJECT_ID_USER_AVATAR, SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT,
-    SIMCONNECT_SIMOBJECT_TYPE_ALL, SIMCONNECT_SIMOBJECT_TYPE_GROUND,
-    SIMCONNECT_SIMOBJECT_TYPE_USER,
+    SIMCONNECT_OBJECT_ID_USER_AVATAR, SIMCONNECT_POSITION_REFERENTIAL_SIMOBJECT,
+    SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT, SIMCONNECT_SIMOBJECT_TYPE_ALL,
+    SIMCONNECT_SIMOBJECT_TYPE_GROUND, SIMCONNECT_SIMOBJECT_TYPE_USER,
 };
 
 use crate::{Aircraft, motion};
+
+const REFERENTIAL_SIMOBJECT: u32 = SIMCONNECT_POSITION_REFERENTIAL_SIMOBJECT as u32;
 
 /// The first ID the stand-in gives an object a connection creates. Which IDs the sim gives
 /// is unverified, so the stand-in starts well clear of the pilot's aircraft, 0.
@@ -39,6 +42,11 @@ pub struct World {
     /// The `H:` events the module fired and the presets it called since the stand-in last
     /// looked, in order.
     fired: Vec<Fired>,
+    /// Where the camera is in each referential a scenario put it.
+    cameras: BTreeMap<u32, Camera>,
+    /// Where the `SIMOBJECT` camera stood in the world as the module's frame began, which
+    /// `camera` reads it from, as the sim does.
+    camera_placed: Option<[f64; 3]>,
 }
 
 /// An event the module made in the sim.
@@ -81,6 +89,44 @@ pub struct Made {
 }
 
 impl World {
+    /// Puts the camera where `camera` says, in its referential.
+    pub(crate) fn set_camera(&mut self, camera: Camera) {
+        self.cameras.insert(camera.referential, camera);
+        self.place_camera();
+    }
+
+    /// Places the `SIMOBJECT` camera in the world from where the aircraft stands now, which
+    /// the stand-in does as the module's frame begins, after it moved the aircraft. The sim
+    /// does the same: on a following machine, its camera stayed where the pose before
+    /// `Follow`'s write put it, so a read after the write landed one frame of the aircraft's
+    /// travel behind the eye, and a read during a routine's frame at it (measured on MSFS 2024,
+    /// 2026-11-17, record/areas/avatars/log.md).
+    pub(crate) fn place_camera(&mut self) {
+        self.camera_placed = self
+            .cameras
+            .get(&REFERENTIAL_SIMOBJECT)
+            .map(|c| motion::to_world(&self.aircraft, c.position));
+    }
+
+    /// The camera now, in `referential`: the `SIMOBJECT` camera from where it was placed, in
+    /// the aircraft's frame as the aircraft stands now, and any other as a scenario put it,
+    /// or at 0 in a referential no scenario set.
+    pub fn camera(&self, referential: u32) -> Camera {
+        let Some(&set) = self.cameras.get(&referential) else {
+            return Camera {
+                referential,
+                ..Camera::default()
+            };
+        };
+        match self.camera_placed {
+            Some(placed) if referential == REFERENTIAL_SIMOBJECT => Camera {
+                position: motion::to_frame(&self.aircraft, placed),
+                ..set
+            },
+            _ => set,
+        }
+    }
+
     /// The variables of the object `id`: the pilot's aircraft at 0, the avatar on foot at
     /// `SIMCONNECT_OBJECT_ID_USER_AVATAR`, or an object a connection created.
     pub fn vars(&self, id: u32) -> Option<&Aircraft> {

@@ -1,0 +1,15 @@
+Start the sim, load a flight in the Baron 58P on the ground at a stand, engines running, and press Ready to fly.
+The session is starting. Sit in the left seat in the cockpit view, and keep your hands off until a step asks for them.
+
+=== At the stand
+the pilot's eye, as the second pilot's core is fed it: [0.250, 0.848, -0.147]
+Pick a small knob or button you can click on its center without changing anything that matters, such as a panel light knob. Click its center once now, and the same spot each time I ask.
+the click at the stand put the hand at [0.369, 0.648, 0.559]
+our module's update with Lead, Figure, and Camera, on the stand: 52µs at p50, 131µs at p99, 169µs at most, over its last 300 frames
+
+=== On foot
+Get out of the aircraft on foot and walk up to the left main wheel, under the left wing. Press Page Up when you're there.
+Click the left main wheel's tire once now.
+PASSED: on foot, the pilot's figure stands on the ground and a click brings a hand: "on-foot", [-0.342, -0.097, 2.248]
+Go back to the left seat in the cockpit view. Press Page Up when you're seated.
+That's the on-foot retry. The script stops the cores now.

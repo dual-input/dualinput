@@ -1,6 +1,7 @@
-//! What avatars hears from the sim: a `Frame` event each frame, which reads the camera, and
-//! the watches on the avatar on foot, the aircraft's pose, and the variables the model's
-//! code reads (record/areas/avatars/01-avatars.md, "A seat" and "The ray").
+//! What avatars hears from the sim: the camera each frame, a `Frame` event each frame, which
+//! moves the hands on, and the watches on the avatar on foot, the aircraft's pose, and the
+//! variables the model's code reads (record/areas/avatars/01-avatars.md, "A seat" and "The
+//! ray").
 
 use kernel::{Cx, Handle};
 use messages::avatars::Body;
@@ -45,7 +46,8 @@ fn avatar_vars() -> [Var; 5] {
 #[derive(Default)]
 pub(crate) struct SimState {
     frames: Option<Handle>,
-    camera_call: Option<Handle>,
+    cameras: Option<Handle>,
+    /// The camera as it last came, in the referential the pilot's place calls for.
     pub(crate) camera: Option<Camera>,
     is_avatar: Option<Handle>,
     /// Whether the pilot is on foot, which `E:IS AVATAR` on the pilot's object tells, since it
@@ -57,9 +59,11 @@ pub(crate) struct SimState {
     pub(crate) aircraft: Option<AircraftPose>,
 }
 
-/// At the profile's load: the frames, the avatar, and a first read of the aircraft's pose.
+/// At the profile's load: the camera, the frames, the avatar, and a first read of the
+/// aircraft's pose.
 pub(crate) fn start(me: &mut Avatars, cx: &Cx) {
     let sim = cx.sim();
+    me.sim.cameras = Some(sim.cameras());
     me.sim.frames = Some(sim.frames());
     me.sim.is_avatar = Some(sim.watch(&[Var::number("E:IS AVATAR", "bool")], Period::OnChange));
     me.sim.avatar_watch = Some(sim.watch_on(
@@ -73,8 +77,12 @@ pub(crate) fn start(me: &mut Avatars, cx: &Cx) {
 pub(crate) fn on_sim(me: &mut Avatars, event: SimEvent, cx: &mut Cx) {
     match event {
         SimEvent::Frame { call, .. } if Some(call) == me.sim.frames => frame(me, cx),
-        SimEvent::Camera { call, camera } if Some(call) == me.sim.camera_call => {
-            me.sim.camera_call = None;
+        SimEvent::Camera {
+            call,
+            simobject,
+            world,
+        } if Some(call) == me.sim.cameras => {
+            let camera = if me.sim.on_foot { world } else { simobject };
             camera_read(me, camera, cx);
         }
         SimEvent::Values { watch, values } => values_read(me, watch, &values, cx),
@@ -91,8 +99,7 @@ pub(crate) fn on_sim(me: &mut Avatars, event: SimEvent, cx: &mut Cx) {
         SimEvent::Failed { call } => forget_call(me, call),
         SimEvent::Lost => {
             // The figures went with the connection, and the calls it was answering; the next
-            // connection makes the frames and watches again.
-            me.sim.camera_call = None;
+            // connection makes the camera, the frames, and the watches again.
             me.sim.aircraft_read = None;
             crew::lost(me);
         }
@@ -101,25 +108,23 @@ pub(crate) fn on_sim(me: &mut Avatars, event: SimEvent, cx: &mut Cx) {
 }
 
 fn forget_call(me: &mut Avatars, call: Handle) {
-    if me.sim.camera_call == Some(call) {
-        me.sim.camera_call = None;
-    }
     if me.sim.aircraft_read == Some(call) {
         me.sim.aircraft_read = None;
     }
 }
 
-/// Each frame: the camera, read once, and the aircraft's pose while the pilot is on foot or
-/// a figure waits for its first place.
+/// Each frame: the hands' time and this pilot's pose move on, whether or not a camera came
+/// this frame, since whether SimConnect sends a report our module set to the same bytes, as
+/// when the camera holds still, and whether the sim runs our module in active pause are both
+/// unmeasured; and the aircraft's pose is read while the pilot is on foot or a figure waits
+/// for its first place.
 fn frame(me: &mut Avatars, cx: &mut Cx) {
-    let sim = cx.sim();
-    if me.sim.camera_call.is_none() {
-        let referential = if me.sim.on_foot { WORLD } else { SIMOBJECT };
-        me.sim.camera_call = Some(sim.camera(referential));
-    }
     if (me.sim.on_foot || crew::waiting(me)) && me.sim.aircraft_read.is_none() {
-        me.sim.aircraft_read = Some(sim.watch(&pose_vars(), Period::Once));
+        me.sim.aircraft_read = Some(cx.sim().watch(&pose_vars(), Period::Once));
     }
+    let rules = me.rules(cx);
+    me.hands.tick(&rules, cx.now());
+    crew::own_pose(me, cx);
 }
 
 fn values_read(me: &mut Avatars, watch: Handle, values: &[(usize, Value)], cx: &mut Cx) {
@@ -174,8 +179,7 @@ fn values_read(me: &mut Avatars, watch: Handle, values: &[(usize, Value)], cx: &
     }
 }
 
-/// The camera, read for this frame: the body it puts this pilot's figure in, the hands' time,
-/// and the pose.
+/// The camera, as it came this frame: the body it puts this pilot's figure in.
 fn camera_read(me: &mut Avatars, camera: Camera, cx: &mut Cx) {
     me.sim.camera = Some(camera);
     if me.sim.on_foot {
@@ -195,9 +199,6 @@ fn camera_read(me: &mut Avatars, camera: Camera, cx: &mut Cx) {
     } else if camera.referential == SIMOBJECT {
         in_the_aircraft(me, &camera, cx);
     }
-    let rules = me.rules(cx);
-    me.hands.tick(&rules, cx.now());
-    crew::own_pose(me, cx);
 }
 
 /// In the aircraft: the seat the camera takes or holds, a head in no seat, or in an outside

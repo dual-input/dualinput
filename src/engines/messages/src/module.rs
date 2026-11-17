@@ -44,6 +44,18 @@ pub const HOLD: RoutineId = RoutineId {
     freezes: true,
 };
 
+/// The platform's routine that reads the camera each frame while a feature subscribes to it.
+pub const CAMERA: RoutineId = RoutineId {
+    name: "CAMERA",
+    freezes: false,
+};
+
+/// The camera's referentials `Camera` reads, which `SimConnect.h` numbers in
+/// `SIMCONNECT_POSITION_REFERENTIAL` and `MSFS_Camera.h` in `FsPositionReferential` alike
+/// (read in MSFS 2024 SDK 1.8.1): the aircraft's frame, and the world's.
+pub const REFERENTIAL_SIMOBJECT: u32 = 1;
+pub const REFERENTIAL_WORLD: u32 = 2;
+
 /// What the module writes into its status slot once a second. Its layout never changes,
 /// so a core reads the status of a module from any build, and can say which build it is.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Pod, Zeroable)]

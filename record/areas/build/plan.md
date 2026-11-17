@@ -796,8 +796,29 @@ Needs: 14 and 16, since `Follow` flies the following machine, where 11 of the 14
 ## 16b A following pilot's camera
 
 Designs first: why a following pilot's core reads its camera 1m to 3m behind the pilot's seat in flight, so the crew sees that pilot as a head in the cabin, and the click's ray, cast from that camera, may put their hand in the wrong place too, and how avatars or flight-model sync fixes both, from the read in the sim the log names as what would settle it ([avatars log](../avatars/log.md#2026-11-12-on-a-following-machine-in-flight-the-camera-reads-1m-to-3m-behind-the-pilots-seat-so-the-crew-sees-that-pilot-as-a-head-in-the-cabin)).
-Builds: that fix, in the units its design names.
+The design settled on 2026-11-17: the platform reads the camera through its own routine, `Camera`, in our WASM module, behind the sim service's subscription `cameras`, which avatars takes, and the routine host reads it for `Camera` during that routine's frame, before any routine's writes go out ([avatars log](../avatars/log.md#2026-11-17-inside-our-module-before-the-routines-write-a-following-machines-camera-reads-at-the-eye-in-every-referential); user, 2026-11-17), as the notes at the top of [01-avatars](../avatars/01-avatars.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [the code map](../architecture/02-code-map.md), and [testing](02-testing.md) have it.
+
+Builds:
+
+- the message crate's `module` module: the platform's routine `CAMERA`, its slot, which holds nothing, and its report, the camera in `SIMOBJECT`'s referential and in `WORLD`'s, each as `SimConnect_CameraGet` gives it
+- `routine-host`: the want to read the camera in a referential, carried out during the routine's frame, which gives nothing when the sim gives no camera; and the platform's routine `Camera`, which reads the camera in both referentials each frame and reports them, and reports nothing in a frame the sim gives no camera
+- our WASM module's edge for the want, through `fsCameraGet`, and `routine_host::Camera` in the module's list of routines in `src/sim-package/routines`
+- the stand-in's answer to the want, from a camera placed in the world from where its aircraft stood as the module's frame began, after the stand-in moved it, and its answer to `CameraGet` from the same place
+- `sim-service`: `cameras` in place of `camera`, feeding `Camera` on the platform's connection while any unit's subscription is open, ending it when the last closes, and handing each subscriber the camera from `Camera`'s report on its own connection
+- `avatars`: `cameras` taken at `ProfileLoaded`; the camera taken from its newest arrival, in the referential the pilot's place calls for, where it was taken from `SimConnect_CameraGet`'s answer; and the hands' time and this pilot's pose still moved on each `Frame` event, since a camera may not come every frame
+
 Needs: 16 and 17.
+
+Tests:
+
+- As the routine host's own tests: a routine's read of the camera sees none of that frame's writes, and `Camera`'s report carries the camera in both referentials each frame, and nothing in a frame with no camera.
+- On the bench, in the `avatars` scenario: a pilot following in flight at 40 m/s and 85 m/s keeps their seat, and the other core's `Figure` is fed their figure seated, with its eye within 5cm of the seat's eye, since a camera a frame behind can still fall within the seat's 0.8m; and `Camera`'s slot is written while a profile is loaded, and no more once it unloads, since the sim service has no tests of its own and the bench reaches it.
+- In this stage's session in the sim, in the 58P, with a bench core as the pilot flying, whose stand-in aircraft the 58P follows ([in the sim](02-testing.md#in-the-sim)): following at about 85 m/s and 130 m/s, the pilot keeps their seat, the bench core's `Figure` is fed their figure seated, and a click on a cockpit switch is cast from their eye and puts their hand on that switch; then the same after the pilot takes control in flight and flies at about 85 m/s, since the module's read has been measured only on a following machine.
+- In the same session: a click on the aircraft's exterior on foot puts the hand where it was clicked, since `Camera` reports only when the sim gives both referentials, and its `SIMOBJECT` read on foot is unmeasured.
+- In the same session: a click in active pause, and a click with ChasePlane off and the head held still, each puts the hand on the switch, since whether our module runs in active pause and whether SimConnect sends a report that didn't change are both unmeasured, and a gap either leaves is a known limit of [01-avatars](../avatars/01-avatars.md#known-limits).
+- In this stage's session in the sim, our module's update timed again with `experiments/areas/avatars/p29-sim-session/update-timer.patch`, since `Camera` adds a read of the camera and a report to every frame, and put to the user against the 91µs to 335µs at p99 they accepted for stage 16, since budgets are theirs ([flight-model log](../flight-model/log.md#2026-11-11-seated-on-the-pose-follow-says-it-writes-a-figure-keeps-its-seat-on-the-following-machine-and-the-58p-banks-and-pitches-with-the-aircraft-it-follows)).
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the fix's tests and the `avatars` scenario among them; in this stage's session in the sim, a pilot whose 58P follows the bench core's aircraft in flight, and then flies it, keeps their seat, and their click puts their hand on the switch they clicked; and the [avatars log](../avatars/log.md) has an entry for the fix and the session.
 
 ## 20b The sounds
 

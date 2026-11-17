@@ -71,6 +71,10 @@ impl Sim for World {
     fn call_preset(&mut self, _: &str, _: Option<f64>) {}
 
     fn key(&mut self, _: routine_host::Key, _: i32) {}
+
+    fn camera(&mut self, _: u32) -> Option<messages::module::slots::CameraRead> {
+        None
+    }
 }
 
 impl World {

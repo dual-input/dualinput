@@ -63,6 +63,10 @@ impl Sim for World {
     fn key(&mut self, key: Key, value: i32) {
         self.keys.push((key, value));
     }
+
+    fn camera(&mut self, _: u32) -> Option<messages::module::slots::CameraRead> {
+        None
+    }
 }
 
 impl World {

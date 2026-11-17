@@ -691,3 +691,53 @@ test("a following machine's yoke moved through Follow's events keeps the pilot f
   }
   assert.equal(yoke, "60", "the following machine's yoke moved by the axis event")
 })
+
+test("a pilot following in flight keeps their seat, their figure's eye at the seat's on the other machine, since the platform reads the camera before Follow moves the aircraft", { timeout: 120_000 }, async (t) => {
+  const { a, b } = await flight(t, "following-camera")
+  await untilBoth(a, ({ own, other }) => seatOf(own) === "pilot" && seatOf(other) === "copilot", "both seated")
+  await pastPreflight(a, b)
+  for (const speed of [40, 85]) {
+    a.core.act({ act: "set", numbers: [["A:VELOCITY BODY Z", speed / 0.3048]], texts: [] })
+    // Follow draws 400ms behind and eases a step over 3s, so the following aircraft flies at the speed well within 4s.
+    await sleep(4_000)
+    const moved = await groundSpeed(b)
+    assert.ok(moved > speed * 0.8, `the following aircraft flies at ${moved.toFixed(1)} m/s, against ${speed} m/s`)
+    // A camera a frame behind, 0.94m at 85 m/s in the stand-in's 11ms frames, can still sit in the seat's 0.8m, so the eye is what tells.
+    const since = Math.max(0, a.core.fed().length - 1)
+    await sleep(2_000)
+    for (const fed of a.core.fed().slice(since)) {
+      const other = both(fed)?.other
+      assert.ok(other && seatOf(other) === "copilot", `at ${speed} m/s the following pilot is seated on the other machine: ${JSON.stringify(other?.body)}`)
+      assert.ok(other.body.body === "seated" && close(other.body.eye, SEATS.copilot.eye, 0.05), `at ${speed} m/s the following pilot's eye stays at the seat's: ${JSON.stringify(other.body)}`)
+    }
+  }
+})
+
+test("the platform's Camera runs while a profile is loaded, and stops once it unloads", { timeout: 90_000 }, async (t) => {
+  const { b } = await flight(t, "camera-routine")
+  const first = await b.core.routineWrites("CAMERA")
+  await sleep(1_000)
+  const running = await b.core.routineWrites("CAMERA")
+  assert.ok(first > 0 && running - first >= 4, `Camera's slot is written every 200ms while the profile is loaded: ${first}, then ${running} a second later`)
+  await toMenu(b.core)
+  await sleep(1_500)
+  const ended = await b.core.routineWrites("CAMERA")
+  await sleep(1_000)
+  assert.equal(await b.core.routineWrites("CAMERA"), ended, "no more writes once the profile unloaded and its end mark went out")
+})
+
+/** The speed of `p`'s stand-in aircraft over the ground across one second, in m/s, from its latitude and longitude. */
+async function groundSpeed(p: Pilot): Promise<number> {
+  const where = async (): Promise<[number, number]> => {
+    const variables = new Map((await p.core.report()).variables)
+    return [Number(variables.get("PLANE LATITUDE")), Number(variables.get("PLANE LONGITUDE"))]
+  }
+  const [lat0, lon0] = await where()
+  const started = Date.now()
+  await sleep(1_000)
+  const [lat1, lon1] = await where()
+  const seconds = (Date.now() - started) / 1_000
+  const north = (lat1 - lat0) * 111_195
+  const east = (lon1 - lon0) * 111_195 * Math.cos((lat0 * Math.PI) / 180)
+  return Math.hypot(north, east) / seconds
+}

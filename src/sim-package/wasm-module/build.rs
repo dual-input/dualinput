@@ -72,6 +72,7 @@ fn main() {
         .allowlist_function("SimConnect_.*")
         .allowlist_function("fsVars.*")
         .allowlist_function("fsEvents.*")
+        .allowlist_function("fsCameraGet")
         .allowlist_type("SIMCONNECT_.*")
         .allowlist_var("SIMCONNECT_.*")
         .allowlist_var("FS_OBJECT_ID_USER_AIRCRAFT")

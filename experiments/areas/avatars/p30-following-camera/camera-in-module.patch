@@ -1,0 +1,193 @@
+diff --git a/src/sim-package/wasm-module/build.rs b/src/sim-package/wasm-module/build.rs
+index 0e5eed7..61b8e7f 100644
+--- a/src/sim-package/wasm-module/build.rs
++++ b/src/sim-package/wasm-module/build.rs
+@@ -72,6 +72,7 @@ fn main() {
+         .allowlist_function("SimConnect_.*")
+         .allowlist_function("fsVars.*")
+         .allowlist_function("fsEvents.*")
++        .allowlist_function("fsCameraGet")
+         .allowlist_type("SIMCONNECT_.*")
+         .allowlist_var("SIMCONNECT_.*")
+         .allowlist_var("FS_OBJECT_ID_USER_AIRCRAFT")
+diff --git a/src/sim-package/wasm-module/src/lib.rs b/src/sim-package/wasm-module/src/lib.rs
+index 0ff0c49..cc9e7a3 100644
+--- a/src/sim-package/wasm-module/src/lib.rs
++++ b/src/sim-package/wasm-module/src/lib.rs
+@@ -21,6 +21,7 @@
+ mod aircraft;
+ mod bindings;
+ mod connection;
++mod p30;
+ mod vars;
+ 
+ use std::cell::RefCell;
+@@ -35,6 +36,7 @@ struct Module {
+     connection: Connection,
+     host: Host,
+     aircraft: Aircraft,
++    p30: p30::P30,
+ }
+ 
+ impl Module {
+@@ -53,7 +55,16 @@ impl Module {
+     /// runs on every feed that arrived since the last frame.
+     fn frame(&mut self) {
+         let clock = self.take_writes();
++        let phase = self.p30.phase();
++        let before = (phase > 0.0).then(|| self.p30.read());
+         let status = self.host.frame(clock, &mut self.aircraft);
++        match before {
++            Some(before) => {
++                let after = self.p30.read();
++                self.p30.add(clock, phase, &before, &after);
++            }
++            None => self.p30.flush(),
++        }
+         for (routine, report) in self.host.reports() {
+             self.connection.write_report(routine, &report);
+         }
+@@ -100,6 +111,7 @@ pub extern "C" fn module_init() {
+         connection,
+         host,
+         aircraft: Aircraft::default(),
++        p30: p30::P30::default(),
+     };
+     module.take_writes();
+     with_module(|slot| *slot = Some(module));
+diff --git a/src/sim-package/wasm-module/wrapper.h b/src/sim-package/wasm-module/wrapper.h
+index e335963..032b85c 100644
+--- a/src/sim-package/wasm-module/wrapper.h
++++ b/src/sim-package/wasm-module/wrapper.h
+@@ -6,3 +6,4 @@
+ #include <SimConnect.h>
+ #include <MSFS/MSFS_Vars.h>
+ #include <MSFS/MSFS_Events.h>
++#include <MSFS/MSFS_Camera.h>
+diff --git a/src/sim-package/wasm-module/src/p30.rs b/src/sim-package/wasm-module/src/p30.rs
+new file mode 100644
+index 0000000..e890fcc
+--- /dev/null
++++ b/src/sim-package/wasm-module/src/p30.rs
+@@ -0,0 +1,121 @@
++//! p30, for experiments/areas/avatars/p30-following-camera: the camera and the aircraft's pose,
++//! read inside the frame on both sides of the routine host's frame, which carries out
++//! `Follow`'s writes. While `L:DUALINPUT_P30_PHASE` is above 0, each frame adds a line to
++//! `\work\p30-camera.csv`, written out every 60 frames and when the phase goes back to 0. The
++//! probe applies this as a patch for its run, and takes it out again.
++
++use std::fmt::Write as _;
++use std::fs::OpenOptions;
++use std::io::Write as _;
++
++use routine_host::{Ids, Named, Space};
++
++use crate::bindings::{FsCameraData, fsCameraGet};
++use crate::vars;
++
++const FILE: &str = "\\work\\p30-camera.csv";
++
++/// The aircraft's pose and its freeze, on the user's aircraft.
++const POSE: [(&str, &str); 7] = [
++    ("PLANE LATITUDE", "degrees"),
++    ("PLANE LONGITUDE", "degrees"),
++    ("PLANE ALTITUDE", "feet"),
++    ("PLANE HEADING DEGREES TRUE", "degrees"),
++    ("PLANE PITCH DEGREES", "degrees"),
++    ("PLANE BANK DEGREES", "degrees"),
++    ("IS LATITUDE LONGITUDE FREEZE ON", "bool"),
++];
++
++/// fsCameraGet's referentials: SIMOBJECT, WORLD, EYEPOINT, and SIMOBJECT_DATUM.
++const REFERENTIALS: [i32; 4] = [1, 2, 3, 4];
++
++#[derive(Default)]
++pub(crate) struct P30 {
++    looked_up: bool,
++    phase: Option<Ids>,
++    pose: Vec<Option<Ids>>,
++    lines: String,
++    count: u32,
++}
++
++fn named(space: Space, name: &str, unit: &str) -> Named {
++    Named {
++        space,
++        name: name.to_string(),
++        unit: unit.to_string(),
++    }
++}
++
++impl P30 {
++    /// The phase the probe set, or 0.
++    pub(crate) fn phase(&mut self) -> f64 {
++        if !self.looked_up {
++            self.looked_up = true;
++            self.phase = vars::look_up(0, &named(Space::L, "DUALINPUT_P30_PHASE", "number"));
++            self.pose = POSE
++                .iter()
++                .map(|(name, unit)| vars::look_up(0, &named(Space::A, name, unit)))
++                .collect();
++        }
++        self.phase
++            .and_then(|ids| vars::get(0, Space::L, ids))
++            .unwrap_or(0.0)
++    }
++
++    /// The camera in each referential, its position and rotation, then the pose, each value
++    /// after a comma, and an empty value for one the sim didn't give.
++    pub(crate) fn read(&self) -> String {
++        let mut out = String::new();
++        for referential in REFERENTIALS {
++            // SAFETY: FsCameraData holds numbers alone, which zeros fill.
++            let mut data: FsCameraData = unsafe { std::mem::zeroed() };
++            // SAFETY: the sim writes into `data`, which outlives the call.
++            let ok = unsafe { fsCameraGet(referential, &mut data) };
++            if ok {
++                // The struct is packed, so each value is copied out before it's formatted.
++                let values: [f64; 6] = [
++                    data.position.x,
++                    data.position.y,
++                    data.position.z,
++                    data.pbh.p,
++                    data.pbh.b,
++                    data.pbh.h,
++                ];
++                for value in values {
++                    let _ = write!(out, ",{value}");
++                }
++            } else {
++                out.push_str(",,,,,,");
++            }
++        }
++        for ids in &self.pose {
++            match ids.and_then(|ids| vars::get(0, Space::A, ids)) {
++                Some(value) => {
++                    let _ = write!(out, ",{value}");
++                }
++                None => out.push(','),
++            }
++        }
++        out
++    }
++
++    pub(crate) fn add(&mut self, clock: u64, phase: f64, before: &str, after: &str) {
++        let _ = writeln!(self.lines, "{clock},{phase}{before}{after}");
++        self.count += 1;
++        if self.count >= 60 {
++            self.flush();
++        }
++    }
++
++    /// Appends the lines held to the file, and drops them whether or not it opened.
++    pub(crate) fn flush(&mut self) {
++        self.count = 0;
++        if self.lines.is_empty() {
++            return;
++        }
++        if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(FILE) {
++            let _ = file.write_all(self.lines.as_bytes());
++        }
++        self.lines.clear();
++    }
++}

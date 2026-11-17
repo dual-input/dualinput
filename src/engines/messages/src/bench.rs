@@ -280,10 +280,10 @@ pub enum StandInAct {
     },
     /// Sets the variables of the pilot's avatar on foot, such as `A:PLANE LATITUDE`.
     SetAvatar { numbers: Vec<(String, f64)> },
-    /// Puts the camera where `CameraGet` in `referential` finds it: 1 for `SIMOBJECT`, in
-    /// meters from the aircraft's reference point, x left, y up, z forward, and 2 for
-    /// `WORLD`, latitude and longitude in degrees and altitude in meters; its angles in
-    /// degrees, and its field of view, the view's height, in radians.
+    /// Puts the camera where `CameraGet` and the module's read in `referential` find it: 1 for
+    /// `SIMOBJECT`, in meters from the aircraft's reference point, x left, y up, z forward,
+    /// and 2 for `WORLD`, latitude and longitude in degrees and altitude in meters; its angles
+    /// in degrees, and its field of view, the view's height, in radians.
     Camera {
         referential: u32,
         position: [f64; 3],
@@ -310,8 +310,9 @@ pub enum StandInAct {
         after_ms: u64,
         then: RuleThen,
     },
-    /// Hands up our module's next report this long after the module made it.
-    LateReport { delay_ms: u64 },
+    /// Hands up the next report of the routine `routine`, such as `LEAD`, this long after our
+    /// module made it.
+    LateReport { routine: String, delay_ms: u64 },
     /// Sends a `FromCore::Track` line with the aircraft's variables `names` after each frame
     /// from now on, or stops with no names.
     Track { names: Vec<String> },

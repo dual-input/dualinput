@@ -70,6 +70,9 @@ struct Aircraft {
     lookups: u32,
     /// Each `H:` event and preset made, in order.
     fired: Vec<String>,
+    /// Whether the sim gives a camera, which it holds at the aircraft's `PLANE LATITUDE`,
+    /// along x, so a test sees which pose a read of it saw.
+    camera: bool,
 }
 
 impl Aircraft {
@@ -131,6 +134,111 @@ impl Sim for Aircraft {
     fn key(&mut self, key: Key, value: i32) {
         self.fired.push(format!("K {} {value}", key.name()));
     }
+
+    fn camera(&mut self, referential: u32) -> Option<CameraRead> {
+        let latitude = self.values.get(&(USER, "PLANE LATITUDE".to_string()));
+        self.camera.then(|| CameraRead {
+            position: [latitude.copied().unwrap_or(0.0), 0.0, 0.0],
+            referential,
+            ..CameraRead::default()
+        })
+    }
+}
+
+/// Moves the aircraft one degree of latitude a frame, as `Follow` writes the pose.
+#[derive(Default)]
+struct Mover {
+    frames: u32,
+}
+
+const MOVER: RoutineId = RoutineId {
+    name: "MOVER",
+    freezes: false,
+};
+
+impl Routine for Mover {
+    const ID: RoutineId = MOVER;
+    type Slot = NoteSlot;
+    type Report = ();
+
+    fn on_slot(&mut self, _: &NoteSlot) {}
+
+    fn frame(&mut self, _: &Frame, want: &mut Wants) {
+        self.frames += 1;
+        if let Some(latitude) = want.var("A:PLANE LATITUDE", "degrees") {
+            want.write(USER, latitude, f64::from(self.frames));
+        }
+    }
+}
+
+/// `Camera`'s slot written with no struct after its header, since `CameraSlot` holds nothing.
+fn camera_feed() -> Vec<u8> {
+    bytemuck::bytes_of(&SlotHeader {
+        feeds: 1,
+        end: 0,
+        slots_hash: HASH,
+        counter: 0,
+    })
+    .to_vec()
+}
+
+fn camera_reports(host: &mut Host) -> Vec<messages::module::slots::CameraReport> {
+    host.reports()
+        .filter(|(id, _)| *id == messages::module::CAMERA)
+        .map(|(_, bytes)| bytemuck::pod_read_unaligned(&bytes))
+        .collect()
+}
+
+#[test]
+fn a_camera_read_sees_none_of_the_frames_writes() {
+    let mut host = Host::new(routines![Mover, Camera], HASH, "");
+    let mut sim = Aircraft {
+        camera: true,
+        ..Aircraft::default()
+    };
+    host.written(MOVER, &write(1, 0, HASH, 0, 1), 0);
+    host.written(messages::module::CAMERA, &camera_feed(), 0);
+    let mut seen = Vec::new();
+    for at in 0..3 {
+        host.frame(at, &mut sim);
+        seen.extend(
+            camera_reports(&mut host)
+                .iter()
+                .map(|r| r.simobject.position[0]),
+        );
+    }
+    // `Mover` runs first and writes each frame's latitude, and the camera still reads the
+    // latitude the frame began with.
+    assert_eq!(seen, [0.0, 1.0, 2.0]);
+}
+
+#[test]
+fn camera_reports_both_referentials_each_frame_and_nothing_in_a_frame_with_no_camera() {
+    let mut host = Host::new(routines![Camera], HASH, "");
+    let mut sim = Aircraft {
+        camera: true,
+        ..Aircraft::default()
+    };
+    host.written(messages::module::CAMERA, &camera_feed(), 0);
+    host.frame(0, &mut sim);
+    let reports = camera_reports(&mut host);
+    assert_eq!(reports.len(), 1);
+    assert_eq!(
+        (
+            reports[0].simobject.referential,
+            reports[0].world.referential
+        ),
+        (
+            messages::module::REFERENTIAL_SIMOBJECT,
+            messages::module::REFERENTIAL_WORLD
+        )
+    );
+    sim.camera = false;
+    host.frame(1, &mut sim);
+    assert!(
+        camera_reports(&mut host).is_empty(),
+        "a frame with no camera reports nothing"
+    );
 }
 
 /// Asks for an `H:` event and a preset, in that order, once each feed.

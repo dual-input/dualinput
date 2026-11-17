@@ -10,6 +10,14 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > In [wants and the sim's APIs](#wants-and-the-sims-apis), an `H:` event goes as calculator code, `(>H:<name>)`, through `execute_calculator_code`, since `fsEventsHEventCall` returned `FS_EVENTS_ERROR_FAIL` and reached no panel, while calculator code reached every one ([sync log](../sync/log.md#2026-11-10-the-sdks-h-event-call-fails-on-msfs-2024-so-our-module-fires-h-events-as-calculator-code-which-reached-every-panel); user, 2026-11-10).
 
 > **Note**
+> In [what a feature calls](#what-a-feature-calls), `cameras` takes the place of `camera`: a subscription that lasts as long as the unit's connection, as `frames` does, which hands the unit the camera each frame, in `SIMOBJECT`'s referential and in `WORLD`'s, as `SimEvent::Camera` (user, 2026-11-17).
+> The sim service reads it in our WASM module, through the platform's own routine `Camera`, which it feeds on the platform's connection while any unit's subscription is open and ends when the last one's connection closes, and each subscriber reads `Camera`'s report on its own connection.
+> On a following machine, `SimConnect_CameraGet` read the camera one frame of the aircraft's travel behind the pilot's eye, and a read in the module before the routines' writes read it at the eye ([avatars log](../avatars/log.md#2026-11-17-inside-our-module-before-the-routines-write-a-following-machines-camera-reads-at-the-eye-in-every-referential)).
+> In [wants and the sim's APIs](#wants-and-the-sims-apis), reading the camera is a want, which `fsCameraGet` carries in the referential the routine names; it gives the same position and angles as `SimConnect_CameraGet`, with the yaw in `FsCameraData`'s `pbh.b` and the roll in its `pbh.h` (measured on MSFS 2024, 2026-11-17, [avatars log](../avatars/log.md#2026-11-17-inside-our-module-before-the-routines-write-a-following-machines-camera-reads-at-the-eye-in-every-referential)).
+> Whether its `fov` is the view's height in radians, as `SimConnect_CameraGet`'s is, is unverified, and stage 16b's click in the sim settles it, since the click's ray reads it.
+> `sim-client` keeps `CameraGet` for `tools/profile-author`, which reads the camera with no session running, so no routine moves its aircraft.
+
+> **Note**
 > In [what a feature calls](#what-a-feature-calls), `cx.module().reports` takes the report's type, and a second call for the same routine moves its reports to the new handle, so a feature calls it each time it starts the routine.
 > In [wants and the sim's APIs](#wants-and-the-sims-apis), a routine reads an `E:` variable through `fsVarsGetEVarId` and `fsVarsEVarGet`, and an event's value goes as the Events API's unsigned integer, a negative one as its two's complement ([flight-model log](../flight-model/log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump)).
 

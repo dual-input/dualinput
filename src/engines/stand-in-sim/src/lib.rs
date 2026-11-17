@@ -46,8 +46,8 @@ pub trait Module: Send {
     fn frame(&mut self, clock: u64, world: &mut World) -> Vec<(String, Vec<u8>)>;
 }
 
-/// What the name of each report's client data area starts with, by which `Act::LateReport`
-/// tells a report from the module's status. `RoutineId::report_slot` in
+/// What the name of each report's client data area starts with, by which the bench names the
+/// slot an `Act::LateReport` delays. `RoutineId::report_slot` in
 /// src/engines/messages/src/module.rs makes those names, so change both together.
 pub const REPORT_PREFIX: &str = "DUALINPUT_REPORT_";
 
@@ -103,8 +103,9 @@ pub enum Act {
     /// Sets the variables of the pilot's avatar on foot, such as `PLANE LATITUDE` and
     /// `IS CROUCH`, which a watch on `SIMCONNECT_OBJECT_ID_USER_AVATAR` reads.
     SetAvatar { numbers: Vec<(String, f64)> },
-    /// Puts the camera where `Camera` says, in its referential, which `CameraGet` in that
-    /// referential answers with.
+    /// Puts the camera where `Camera` says, in its referential, which `CameraGet` and the
+    /// module's read in that referential answer with, a `SIMOBJECT` camera from its place in
+    /// the world as the module's frame began.
     Camera(Camera),
     /// Lacks the SimObject titled `title`, so a create naming it fails with an exception
     /// tagged with the call. Which exception the sim sends is unverified, so the stand-in
@@ -129,11 +130,13 @@ pub enum Act {
     SendEvent { name: String, data: u32 },
     /// Scripts the aircraft's own behavior from now on, as a scenario's system needs it.
     Rule(Rule),
-    /// Hands up the module's next report this long after the module made it, as a variable
-    /// requested through SimConnect once came 193ms after the slot from its frame (measured on
-    /// MSFS 2024, 2026-10-09, record/areas/architecture/log.md). The reports after it come on
-    /// time, so the late one arrives behind newer ones.
-    LateReport { delay: Duration },
+    /// Hands up the next report written into the report slot named `slot`, such as
+    /// `DUALINPUT_REPORT_LEAD`, this long after the module made it, as a variable requested
+    /// through SimConnect once came 193ms after the slot from its frame (measured on MSFS 2024,
+    /// 2026-10-09, record/areas/architecture/log.md). The reports after it come on time, so the
+    /// late one arrives behind newer ones. It names its slot, since the platform's `Camera`
+    /// reports every frame beside the routine a scenario means.
+    LateReport { slot: String, delay: Duration },
     /// Hands the sim's pages the aircraft's variables `names`, as numbers, once each frame
     /// from now on, after the module's frame, or stops with no names. A scenario follows the
     /// aircraft's path by them, frame by frame.

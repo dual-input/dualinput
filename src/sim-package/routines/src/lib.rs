@@ -20,6 +20,7 @@ mod tests;
 pub fn list() -> Vec<Kind> {
     routines![
         routine_host::Hold,
+        routine_host::Camera,
         flight_model_routines::Lead,
         flight_model_routines::Follow,
         avatars_routines::Figure,

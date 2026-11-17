@@ -42,6 +42,8 @@ impl SimService {
             me.close(unit, cx);
             me.module.closed(unit);
         }
+        // Each subscriber's connection closed, and its camera subscription with it.
+        me.run_camera(cx);
     }
 }
 
@@ -70,8 +72,9 @@ pub(crate) struct Holder {
     pub(crate) creates: BTreeMap<u32, Handle>,
     /// The objects the connection created and hasn't removed.
     pub(crate) objects: BTreeSet<u32>,
-    /// The camera calls waiting for their answers, oldest first.
-    pub(crate) cameras: VecDeque<Handle>,
+    /// The unit's camera subscription: the request `Camera`'s reports come under on this
+    /// connection, and the handle of the unit's latest `cameras` call.
+    pub(crate) camera: Option<(u32, Handle)>,
     /// Each `frames` call's handle by the client event its `Frame` messages carry, which
     /// the next connection subscribes again with the rest of the setup.
     pub(crate) frames: BTreeMap<u32, Handle>,
@@ -103,7 +106,7 @@ impl Holder {
             watches: BTreeMap::new(),
             creates: BTreeMap::new(),
             objects: BTreeSet::new(),
-            cameras: VecDeque::new(),
+            camera: None,
             frames: BTreeMap::new(),
             listens: BTreeMap::new(),
             input_reads: BTreeMap::new(),
@@ -269,7 +272,6 @@ impl SimService {
         // The objects went with the connection, and the answers it was waiting for with them.
         holder.creates.clear();
         holder.objects.clear();
-        holder.cameras.clear();
         for (origin, _) in conn.pending {
             if let Some(call) = origin.handle {
                 self.tell(origin.unit, SimEvent::Failed { call }, cx);

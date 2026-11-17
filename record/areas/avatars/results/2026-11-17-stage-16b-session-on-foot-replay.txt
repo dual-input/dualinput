@@ -1,0 +1,88 @@
+Stage 16b's session in the sim, 2026-11-17: the clicks on foot, from replays of the core's recordings.
+
+Each recording was replayed by a dev build of the session's tree with temporary log lines in
+src/features/avatars/core/src/mouse.rs, which never reached the tree: each click's cast on foot,
+the figure and the camera at it, and casts of our own into the posed exterior model of the
+Black Square Baron 58P. Every replay matched all of its recording's checkpoints.
+Positions are in the aircraft's frame, in meters: x to the left, y up, z forward, from the
+model's origin. A hit is (point, distance, node name), or None for a ray that met nothing
+within 20m.
+
+=== First run (2026-11-17_22-31-48): replayed 91951 inputs, all 560 checkpoints matched
+
+The pilot, crouched by the nose, clicked around the nose wheel.
+The figure, the camera (WORLD: latitude, longitude, altitude in meters; pitch, heading, roll
+in degrees), and the aircraft (latitude, longitude, altitude in feet, heading) at the first
+click:
+
+  body=Some(OnFoot { at: [-0.62578243, -1.0661927, 2.874462], heading: 233.89133, crouch: true })
+  camera position=[-0.445259641621425, -90.27212648872298, 39.02374989166856] pbh=(46.426365, 17.74018, 0.010524091)
+  aircraft=(-0.4452364058116568, -90.27213774065646, 128.01364782447678, 143.8488477411981)
+
+The camera sits 1.0m above the crouching figure's feet, beside the nose, and its altitude,
+39.02m, is the aircraft's 128.01 ft.
+
+The clicks' rays, the first with two checks from the same origin: toward the model's origin, and straight down.
+
+  origin=[-0.5043195, -0.06972367, 2.8126252] direction=[-0.0428225, -0.797909, -0.6012549] hit=None
+  check: toward the origin hit=(node 393, [-0.3721959, -0.051457196, 2.0757627], 0.7488368); down hit=None
+  origin=[-0.50409955, -0.06969708, 2.8126757] direction=[0.47322154, -0.7211528, -0.5059646] hit=None
+  origin=[-0.701682, -0.0640778, 2.3928282] direction=[0.64945275, -0.7349137, -0.19522542] hit=None
+  origin=[-0.64934164, -0.06676837, 2.5755112] direction=[0.6510403, -0.6899518, -0.31640652] hit=None
+  origin=[-0.87733305, -0.063787624, 2.3708696] direction=[0.71968234, -0.6494486, -0.2455074] hit=None
+  origin=[-0.87743515, -0.06386652, 2.3708568] direction=[0.78018075, -0.5857163, -0.21966879] hit=None
+
+The lowest surfaces under the aircraft: rays cast straight up from 1.6m below the model's
+origin, every 0.1m from x=-4m to 4m and z=-6m to 6m, the 18 lowest of 2,481 hits.
+
+  y=-1.1826 x=1.5  z=-0.4 TireStill_L
+  y=-1.1825 x=-1.5 z=-0.4 TireStill_R
+  y=-1.1744 x=1.5  z=-0.3 TireStill_L
+  y=-1.1743 x=-1.5 z=-0.3 TireStill_R
+  y=-1.1439 x=1.5  z=-0.5 TireStill_L
+  y=-1.1439 x=-1.5 z=-0.5 TireStill_R
+  y=-1.1125 x=-1.5 z=-0.2 TireStill_R
+  y=-1.1124 x=1.5  z=-0.2 TireStill_L
+  y=-1.0700 x=-1.4 z=-0.4 TireStill_R
+  y=-1.0700 x=1.4  z=-0.4 TireStill_L
+  y=-1.0605 x=-1.6 z=-0.5 GearStrutBottom_R
+  y=-1.0604 x=1.6  z=-0.5 GearStrutBottom_L
+  y=-1.0532 x=1.4  z=-0.3 TireStill_L
+  y=-1.0531 x=-1.4 z=-0.3 TireStill_R
+  y=-0.9888 x=-1.5 z=-0.6 TireStill_R
+  y=-0.9879 x=1.5  z=-0.6 TireStill_L
+  y=-0.9031 x=1.6  z=-0.4 GearStrutBottom_L
+  y=-0.9031 x=-1.6 z=-0.4 GearStrutBottom_R
+  ...the next is y=-0.5566, a cylinder at x=0.8, z=-1.8
+
+Along the centerline under the nose, the first surface a ray straight up meets:
+
+  z=1.0 y=0.6614  UtilityDoorFuselage
+  z=1.1 y=-0.3613 NoseGearDoor_L.003
+  z=1.5 y=-0.3450 NoseGearDoor_L.003
+  z=2.0 y=-0.2919 NoseGearDoor_L.003
+  z=2.1 y=-0.2725 NoseGearDoor_L.003
+  z=2.2 y=-0.2430 BaronNose
+  z=2.5 y=-0.1639 BaronNose
+  z=2.8 y=-0.0507 BaronNose.006
+
+So the posed exterior has both main tires on the ground, the ground being 1.07m below the
+model's origin where the figure stood, and the nose gear's doors shut 0.3m up, with no nose
+wheel below them.
+
+=== On-foot retry (2026-11-17_22-54-03): replayed 15314 inputs, all 85 checkpoints matched
+
+The pilot stayed crouched by the nose, and clicked the nose's skin, then around the nose wheel.
+
+  body=Some(OnFoot { at: [-0.63262594, -1.0654807, 2.8579202], heading: 237.95242, crouch: true })
+
+The click on the nose's skin, a held press whose casts follow the cursor (first three of 23):
+
+  origin=[-0.5234397, -0.0683189, 2.780997] direction=[0.36292166, -0.011178961, -0.9317526] hit=([-0.3120467, -0.074830376, 2.2382739], 0.5824756, BaronNose.006)
+  origin=[-0.52383137, -0.06847466, 2.7809863] direction=[0.36295184, -0.011070762, -0.9317421] hit=([-0.31217837, -0.074930504, 2.237647], 0.5831435, BaronNose.006)
+  origin=[-0.52400076, -0.06851896, 2.7809856] direction=[0.36289427, -0.011597174, -0.93175817] hit=([-0.31212988, -0.07528981, 2.2369914], 0.5838364, BaronNose.006)
+
+The second pilot's core was fed the hand at [-0.342, -0.097, 2.248], on the nose.
+The clicks around the nose wheel each met nothing, as in the first run, for example:
+
+  origin=[-0.5145169, -0.0690164, 2.791829] direction=[0.41289395, -0.68100584, -0.60477227] hit=None

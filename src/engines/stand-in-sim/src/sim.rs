@@ -7,7 +7,7 @@ use std::panic::AssertUnwindSafe;
 use std::sync::mpsc;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use sim_client::message::{Camera, Data, InputEvent, Message};
+use sim_client::message::{Data, InputEvent, Message};
 use sim_client::{Connection, Op, SimCall, Tag, Up, Value};
 use simconnect_types::{
     SIMCONNECT_COMM_BUS_BROADCAST_TO_JS, SIMCONNECT_DATA_REQUEST_FLAG_CHANGED,
@@ -22,8 +22,8 @@ use windows_sys::Win32::System::Threading::{
 
 use crate::world::{Fired, Input};
 use crate::{
-    Act, Called, Message as ToThread, Module, Object, Page, REPORT_PREFIX, Report, Rule, Signal,
-    Then, When, World, motion,
+    Act, Called, Message as ToThread, Module, Object, Page, Report, Rule, Signal, Then, When,
+    World, motion,
 };
 
 /// What the sim's open message names, as MSFS 2024's did on three sim releases: SunRise
@@ -66,8 +66,6 @@ pub(crate) struct Sim {
     /// Each unit's last connection that's gone, for `Act::Stale`.
     gone: BTreeMap<u32, Connection>,
     world: World,
-    /// Where the camera is in each referential a scenario put it.
-    cameras: BTreeMap<u32, Camera>,
     /// The SimObject titles a create fails on.
     lacking: BTreeSet<String>,
     /// The last `AircraftLoaded` path, which the `AircraftLoaded` state answers with.
@@ -83,8 +81,9 @@ pub(crate) struct Sim {
     /// The flags of the last `Pause_EX1` a scenario played, 0 when nothing pauses the sim. A
     /// paused aircraft stays where it is.
     paused: u32,
-    /// How late the module's next report goes up, when a scenario asked for a late one.
-    late_report: Option<Duration>,
+    /// Which report slot's next report goes up late, and how late, when a scenario asked for
+    /// a late one.
+    late_report: Option<(String, Duration)>,
     /// The aircraft's variables a scenario follows frame by frame.
     track: Vec<String>,
     /// What's due later, such as a held-back open message or a played signal, in order.
@@ -192,7 +191,6 @@ impl Sim {
             conns: BTreeMap::new(),
             gone: BTreeMap::new(),
             world: World::default(),
-            cameras: BTreeMap::new(),
             lacking: BTreeSet::new(),
             aircraft_path: String::new(),
             rejected: BTreeSet::new(),
@@ -345,7 +343,7 @@ impl Sim {
                 // doesn't jump on by the whole stop when they start again.
                 self.last_frame = None;
             }
-            Act::LateReport { delay } => self.late_report = Some(delay),
+            Act::LateReport { slot, delay } => self.late_report = Some((slot, delay)),
             Act::Track { names } => {
                 self.track = names.iter().map(|n| bare(n).to_string()).collect();
             }
@@ -367,9 +365,7 @@ impl Sim {
                     self.world.avatar.set_number(bare(&name), value);
                 }
             }
-            Act::Camera(camera) => {
-                self.cameras.insert(camera.referential, camera);
-            }
+            Act::Camera(camera) => self.world.set_camera(camera),
             Act::Lack { title } => {
                 self.lacking.insert(title);
             }
@@ -670,10 +666,7 @@ impl Sim {
             Op::AIReleaseControl { .. } => {}
             Op::AIRemoveObject { object, .. } => self.world.remove(object, connection),
             Op::CameraGet { referential } => {
-                let camera = self.cameras.get(&referential).copied().unwrap_or(Camera {
-                    referential,
-                    ..Camera::default()
-                });
+                let camera = self.world.camera(referential);
                 self.send(connection, &Message::Camera(camera));
             }
         }
@@ -764,6 +757,7 @@ impl Sim {
             motion::fly(&mut self.world.aircraft, seconds);
             self.world.fly_ai(seconds);
         }
+        self.world.place_camera();
         if !self.module_stopped {
             let clock = self.clock();
             let (module, world) = (&mut self.module, &mut self.world);
@@ -772,7 +766,12 @@ impl Sim {
             match std::panic::catch_unwind(AssertUnwindSafe(|| module.frame(clock, world))) {
                 Ok(writes) => {
                     for (slot, bytes) in writes {
-                        match self.late_report.filter(|_| slot.starts_with(REPORT_PREFIX)) {
+                        let late = self
+                            .late_report
+                            .as_ref()
+                            .filter(|(wanted, _)| *wanted == slot)
+                            .map(|&(_, delay)| delay);
+                        match late {
                             Some(delay) => {
                                 self.late_report = None;
                                 self.schedule(Instant::now() + delay, Due::Area(slot, bytes));

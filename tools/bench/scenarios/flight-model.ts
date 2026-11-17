@@ -240,7 +240,7 @@ test("one core's aircraft moves on the other's 400ms behind it, with its yoke an
 test("a report 193ms late leaves the following aircraft's path where it was, and a pilot flying in the pause menu has it hold, whether or not the module updates", { timeout: 120_000 }, async (t) => {
   const { a, b } = await flying(t, "flight-model-late-and-pause")
   mark(a, b)
-  a.core.act({ act: "late-report", delay_ms: 193 })
+  a.core.act({ act: "late-report", routine: "LEAD", delay_ms: 193 })
   await sleep(2_000)
   const late = behind(path(a), path(b), path(a)[0]!.t + 0.5)
   assert.ok(Math.max(...late) < 4, `a late report moved the following aircraft ${Math.max(...late).toFixed(2)}m off the path`)

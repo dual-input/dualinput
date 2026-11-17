@@ -380,10 +380,20 @@ export class Core {
 
   /** How many times the core's flight-model sync has written `Follow`'s slot, feeds and the sim service's rewrites together, or 0 before its first. */
   async followWrites(): Promise<number> {
+    return this.routineWrites("FOLLOW")
+  }
+
+  /**
+   * How many times the core has written the slot of the routine `name`, such as `CAMERA`, feeds and the sim service's
+   * rewrites together, or 0 before its first: the writes into the area the connection mapped the slot's name to.
+   */
+  async routineWrites(name: string): Promise<number> {
     const { calls } = await this.report()
-    const mapped = calls.find((c) => c.function === "MapClientDataNameToId" && c.arguments.includes("DUALINPUT_ROUTINE_FOLLOW"))
-    if (!mapped) return 0
-    return calls.filter((c) => c.unit === mapped.unit && c.open === mapped.open && c.function === "SetClientData").length
+    const mapped = calls.find((c) => c.function === "MapClientDataNameToId" && c.arguments.includes(`DUALINPUT_ROUTINE_${name}`))
+    const area = mapped?.arguments.match(/area: (\d+)/)?.[1]
+    if (!mapped || area === undefined) return 0
+    const into = new RegExp(`area: ${area}\\b`)
+    return calls.filter((c) => c.unit === mapped.unit && c.open === mapped.open && c.function === "SetClientData" && into.test(c.arguments)).length
   }
 
   /** Ends the core at once, as a crash would, if it's still running, and waits until it has. */

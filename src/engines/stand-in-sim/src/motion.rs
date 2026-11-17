@@ -103,6 +103,61 @@ fn to_ned(heading: f64, pitch: f64, bank: f64, [f, r, d]: [f64; 3]) -> [f64; 3] 
     ]
 }
 
+/// A vector along north, east, and down, turned back onto the body's forward, right, and
+/// down axes: `to_ned` the other way.
+fn from_ned(heading: f64, pitch: f64, bank: f64, [n, e, d]: [f64; 3]) -> [f64; 3] {
+    let column = |v: [f64; 3]| to_ned(heading, pitch, bank, v);
+    let [f, r, dn] = [
+        column([1.0, 0.0, 0.0]),
+        column([0.0, 1.0, 0.0]),
+        column([0.0, 0.0, 1.0]),
+    ];
+    let dot = |a: [f64; 3]| a[0] * n + a[1] * e + a[2] * d;
+    [dot(f), dot(r), dot(dn)]
+}
+
+/// The point `local` in `aircraft`'s frame, in meters, x left, y up, and z forward, placed in
+/// the world: latitude and longitude in degrees, and altitude in feet.
+pub(crate) fn to_world(aircraft: &Aircraft, [x, y, z]: [f64; 3]) -> [f64; 3] {
+    let (latitude, longitude, altitude) = (
+        aircraft.number("PLANE LATITUDE"),
+        aircraft.number("PLANE LONGITUDE"),
+        aircraft.number("PLANE ALTITUDE"),
+    );
+    let [north, east, down] = to_ned(
+        aircraft.number("PLANE HEADING DEGREES TRUE"),
+        aircraft.number("PLANE PITCH DEGREES"),
+        aircraft.number("PLANE BANK DEGREES"),
+        [z, -x, -y],
+    );
+    let (meridian, normal) = radii(latitude);
+    [
+        latitude + (north / meridian).to_degrees(),
+        longitude + (east / (normal * latitude.to_radians().cos())).to_degrees(),
+        altitude - down / FT,
+    ]
+}
+
+/// A place in the world, as `to_world` gives one, in `aircraft`'s frame as it stands now.
+pub(crate) fn to_frame(aircraft: &Aircraft, [lat, lon, alt_ft]: [f64; 3]) -> [f64; 3] {
+    let (latitude, longitude, altitude) = (
+        aircraft.number("PLANE LATITUDE"),
+        aircraft.number("PLANE LONGITUDE"),
+        aircraft.number("PLANE ALTITUDE"),
+    );
+    let (meridian, normal) = radii(latitude);
+    let north = (lat - latitude).to_radians() * meridian;
+    let east = (lon - longitude).to_radians() * normal * latitude.to_radians().cos();
+    let down = -(alt_ft - altitude) * FT;
+    let [forward, right, down] = from_ned(
+        aircraft.number("PLANE HEADING DEGREES TRUE"),
+        aircraft.number("PLANE PITCH DEGREES"),
+        aircraft.number("PLANE BANK DEGREES"),
+        [north, east, down],
+    );
+    [-right, -down, forward]
+}
+
 /// WGS 84's meridian and normal radii at `latitude`, in meters.
 fn radii(latitude: f64) -> (f64, f64) {
     let e2 = FLATTENING * (2.0 - FLATTENING);
@@ -125,6 +180,25 @@ mod tests {
         a.set_number("VELOCITY BODY Z", 253.2);
         a.set_number("VELOCITY BODY Y", 10.0);
         a
+    }
+
+    #[test]
+    fn a_point_placed_in_the_world_comes_back_to_the_frame_it_left() {
+        let mut a = flying_east();
+        a.set_number("PLANE PITCH DEGREES", -8.0);
+        a.set_number("PLANE BANK DEGREES", 25.0);
+        let eye = [0.25, 0.9, -0.14];
+        let back = to_frame(&a, to_world(&a, eye));
+        for k in 0..3 {
+            assert!((back[k] - eye[k]).abs() < 1e-6, "{back:?}");
+        }
+        // Flying east, a point 10m ahead is 10m east of the aircraft.
+        a.set_number("PLANE PITCH DEGREES", 0.0);
+        a.set_number("PLANE BANK DEGREES", 0.0);
+        let ahead = to_world(&a, [0.0, 0.0, 10.0]);
+        let (_, normal) = radii(47.0);
+        let east_m = (ahead[1] - 8.0).to_radians() * normal * 47f64.to_radians().cos();
+        assert!((east_m - 10.0).abs() < 1e-6, "{east_m}");
     }
 
     #[test]

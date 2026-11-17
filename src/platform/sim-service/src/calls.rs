@@ -6,7 +6,8 @@
 
 use bytemuck::Pod;
 use kernel::{Cx, Handle, Unit, UnitId};
-use messages::module::RoutineId;
+use messages::module::slots::{CameraRead, CameraReport, CameraSlot};
+use messages::module::{CAMERA, RoutineId};
 use sim_client::message::{Camera, Data};
 use sim_client::{InitPosition, Period, Value, Var};
 use simconnect_types::SIMCONNECT_OBJECT_ID_USER;
@@ -224,12 +225,18 @@ impl Sim<'_, '_> {
         handle
     }
 
-    /// Reads the camera once, in `referential`, such as
-    /// `SIMCONNECT_POSITION_REFERENTIAL_SIMOBJECT`. It arrives as `SimEvent::Camera` with this
+    /// Subscribes to the camera, which arrives each frame as `SimEvent::Camera` with this
+    /// handle, in `SIMOBJECT`'s referential and in `WORLD`'s. The subscription lasts as long
+    /// as the unit's connection, as `frames` does, and a second call only moves it to the new
     /// handle.
-    pub fn camera(&self, referential: u32) -> Handle {
+    ///
+    /// The platform reads the camera in our WASM module, through its routine `Camera`, rather
+    /// than through `SimConnect_CameraGet`, which on a following machine read it one frame of
+    /// the aircraft's travel behind the pilot's eye (measured on MSFS 2024, 2026-11-17,
+    /// record/areas/avatars/log.md).
+    pub fn cameras(&self) -> Handle {
         let (handle, origin) = self.origin();
-        self.cx.call(SimService::camera_for, (origin, referential));
+        self.cx.call(SimService::cameras_for, origin);
         handle
     }
 
@@ -332,15 +339,57 @@ impl SimService {
     }
 
     /// A routine's report, which the module wrote into its report slot: the unit's latest
-    /// `reports` call for the routine hears it.
+    /// `reports` call for the routine hears it, and `Camera`'s reaches the unit's `cameras`
+    /// call as the camera.
     pub(crate) fn report_read(&self, unit: UnitId, request: u32, bytes: Vec<u8>, cx: &Cx) {
-        if let Some(&(_, call)) = self
-            .holders
-            .get(&unit.place())
-            .and_then(|h| h.reports.get(&request))
-        {
+        let Some(holder) = self.holders.get(&unit.place()) else {
+            return;
+        };
+        if let Some((_, call)) = holder.camera.filter(|(r, _)| *r == request) {
+            let Some(bytes) = bytes.get(..size_of::<CameraReport>()) else {
+                tracing::warn!("Camera's report held too few bytes");
+                return;
+            };
+            let report: CameraReport = bytemuck::pod_read_unaligned(bytes);
+            let (simobject, world) = (camera(&report.simobject), camera(&report.world));
+            self.tell(
+                unit,
+                SimEvent::Camera {
+                    call,
+                    simobject,
+                    world,
+                },
+                cx,
+            );
+        } else if let Some(&(_, call)) = holder.reports.get(&request) {
             self.tell(unit, SimEvent::Report { call, bytes }, cx);
         }
+    }
+
+    /// Maps `Camera`'s report slot on the unit's connection and asks for it each time the
+    /// module sets it, then runs `Camera` if no other unit's subscription does, or, when the
+    /// connection reads it already, hands the camera to the new call.
+    fn cameras_for(me: &mut SimService, origin: Origin, cx: &mut Cx) {
+        let Some(call) = origin.handle else {
+            return;
+        };
+        if me.client(origin, cx).is_none() {
+            return;
+        }
+        let Some(holder) = me.holders.get_mut(&origin.unit.place()) else {
+            return;
+        };
+        if let Some((request, _)) = holder.camera {
+            holder.camera = Some((request, call));
+            return;
+        }
+        let size = size_of::<CameraReport>() as u32;
+        let (area, mut ops) = holder.client.area(&origin, &CAMERA.report_slot(), size);
+        let (request, op) = holder.client.read_area(&origin, area);
+        ops.push(op);
+        holder.camera = Some((request, call));
+        me.make(origin, ops, cx);
+        me.run_camera(cx);
     }
 
     fn watch_for(
@@ -641,18 +690,6 @@ impl SimService {
         me.make(origin, vec![op], cx);
     }
 
-    fn camera_for(me: &mut SimService, (origin, referential): (Origin, u32), cx: &mut Cx) {
-        if me.client(origin, cx).is_none() {
-            return;
-        }
-        if let (Some(holder), Some(handle)) =
-            (me.holders.get_mut(&origin.unit.place()), origin.handle)
-        {
-            holder.cameras.push_back(handle);
-        }
-        me.make(origin, vec![sim_client::Op::CameraGet { referential }], cx);
-    }
-
     fn frames_for(me: &mut SimService, origin: Origin, cx: &mut Cx) {
         let Some(client) = me.client(origin, cx) else {
             return;
@@ -679,20 +716,6 @@ impl SimService {
         self.tell(unit, SimEvent::Created { call, object }, cx);
     }
 
-    /// The camera's answer, which names no request, so it goes to the unit's oldest camera
-    /// call still waiting. A call the sim refused leaves the queue with its exception, so the
-    /// answers that follow still find their calls.
-    pub(crate) fn camera_read(&mut self, unit: UnitId, camera: Camera, cx: &Cx) {
-        let Some(call) = self
-            .holders
-            .get_mut(&unit.place())
-            .and_then(|h| h.cameras.pop_front())
-        else {
-            return;
-        };
-        self.tell(unit, SimEvent::Camera { call, camera }, cx);
-    }
-
     pub(crate) fn frame(&mut self, unit: UnitId, event: u32, rate: f32, speed: f32, cx: &Cx) {
         let Some(&call) = self
             .holders
@@ -702,6 +725,25 @@ impl SimService {
             return;
         };
         self.tell(unit, SimEvent::Frame { call, rate, speed }, cx);
+    }
+
+    /// Runs the platform's `Camera` while any unit's subscription is open, and ends it once
+    /// none is, as a profile's unload closes the last subscriber's connection.
+    pub(crate) fn run_camera(&mut self, cx: &mut Cx) {
+        let platform = self.me();
+        let wanted = self
+            .holders
+            .values()
+            .any(|h| h.unit != platform && h.camera.is_some());
+        if wanted == self.module.fed(platform, CAMERA) {
+            return;
+        }
+        if wanted {
+            let body = bytemuck::bytes_of(&CameraSlot {}).to_vec();
+            SimService::feed(self, (platform, CAMERA, body), cx);
+        } else {
+            SimService::end(self, (platform, CAMERA), cx);
+        }
     }
 
     /// A watch's values: the platform's own once-reads, or a unit's watch, routed by the
@@ -747,5 +789,18 @@ impl SimService {
             holder.watches.remove(&watch);
         }
         self.tell(unit, SimEvent::Values { watch, values }, cx);
+    }
+}
+
+/// The camera as `Camera`'s report carries it, in the type `SimConnect_CameraGet`'s answer
+/// comes in, which features read.
+fn camera(read: &CameraRead) -> Camera {
+    Camera {
+        position: read.position,
+        referential: read.referential,
+        pitch: read.pitch,
+        yaw: read.yaw,
+        roll: read.roll,
+        fov: read.fov,
     }
 }

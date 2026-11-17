@@ -7,19 +7,20 @@ use std::ffi::{CString, c_void};
 use std::ptr;
 use std::sync::atomic::{AtomicBool, Ordering};
 
+use messages::module::slots::CameraRead;
 use routine_host::{Flag, Ids, Key, Named, Sim, Space};
 
 use crate::vars;
 
 use crate::bindings::{
     FS_OBJECT_ID_USER_AIRCRAFT, FS_VAR_ERROR_NONE, FS_VAR_UPDATE_OP_REMOVE, FS_VAR_UPDATE_OP_RESET,
-    FsAVarId, FsBVarId, FsEventId, FsObjectId, FsUnitId, FsVarParamArray, FsVarParamTypeDouble,
-    FsVarParamTypeInteger, FsVarParamVariant, FsVarParamVariant__bindgen_ty_1, FsVarTypeFlags,
-    FsVarUpdateOp, KEY_AXIS_AILERONS_SET, KEY_AXIS_ELEVATOR_SET, KEY_AXIS_LEFT_BRAKE_SET,
-    KEY_AXIS_RIGHT_BRAKE_SET, KEY_AXIS_RUDDER_SET, KEY_FREEZE_ALTITUDE_SET,
-    KEY_FREEZE_ATTITUDE_SET, KEY_FREEZE_LATITUDE_LONGITUDE_SET, execute_calculator_code,
-    fsEventsTriggerKeyEvent, fsVarsAVarGet, fsVarsBVarCall, fsVarsGetAVarId, fsVarsGetBVarId,
-    fsVarsGetUnitId, fsVarsRegisterVarsStatusUpdateHandler,
+    FsAVarId, FsBVarId, FsCameraData, FsEventId, FsObjectId, FsUnitId, FsVarParamArray,
+    FsVarParamTypeDouble, FsVarParamTypeInteger, FsVarParamVariant,
+    FsVarParamVariant__bindgen_ty_1, FsVarTypeFlags, FsVarUpdateOp, KEY_AXIS_AILERONS_SET,
+    KEY_AXIS_ELEVATOR_SET, KEY_AXIS_LEFT_BRAKE_SET, KEY_AXIS_RIGHT_BRAKE_SET, KEY_AXIS_RUDDER_SET,
+    KEY_FREEZE_ALTITUDE_SET, KEY_FREEZE_ATTITUDE_SET, KEY_FREEZE_LATITUDE_LONGITUDE_SET,
+    execute_calculator_code, fsCameraGet, fsEventsTriggerKeyEvent, fsVarsAVarGet, fsVarsBVarCall,
+    fsVarsGetAVarId, fsVarsGetBVarId, fsVarsGetUnitId, fsVarsRegisterVarsStatusUpdateHandler,
     fsVarsUnregisterVarsStatusUpdateHandler,
 };
 
@@ -210,6 +211,32 @@ impl Sim for Aircraft {
         };
         // SAFETY: the sim reads the one value, which outlives the call.
         unsafe { fsEventsTriggerKeyEvent(event as FsEventId, params) };
+    }
+
+    /// The camera through the Camera API, whose `FsCameraData` carries the same angles as
+    /// `SimConnect_CameraGet`'s answer: the pitch in `pbh.p`, the yaw in `pbh.b`, and the roll
+    /// in `pbh.h` (measured on MSFS 2024, 2026-11-17, record/areas/avatars/log.md). Its `fov`
+    /// passes through as `SimConnect_CameraGet`'s view's height in radians, which is
+    /// unverified for this API.
+    fn camera(&mut self, referential: u32) -> Option<CameraRead> {
+        let referential_id = i32::try_from(referential).ok()?;
+        // SAFETY: FsCameraData holds numbers alone, which zeros fill.
+        let mut data: FsCameraData = unsafe { std::mem::zeroed() };
+        // SAFETY: the sim writes into `data`, which outlives the call.
+        if !unsafe { fsCameraGet(referential_id, &mut data) } {
+            return None;
+        }
+        // The struct is packed, so each value is copied out before it's used.
+        let (x, y, z) = (data.position.x, data.position.y, data.position.z);
+        let (pitch, yaw, roll) = (data.pbh.p, data.pbh.b, data.pbh.h);
+        Some(CameraRead {
+            position: [x, y, z],
+            fov: data.fov,
+            pitch: pitch as f32,
+            yaw: yaw as f32,
+            roll: roll as f32,
+            referential,
+        })
     }
 
     fn look_up(&mut self, object: u32, named: &Named) -> Option<Ids> {

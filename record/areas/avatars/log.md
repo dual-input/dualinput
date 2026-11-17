@@ -13,6 +13,115 @@ The 58P's and the Comanche's models are glTF with no compression, in vertex layo
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-11-17: With the camera read in our module, a pilot following in flight keeps their seat and their click lands on the switch
+
+**Asked:** stage 16b's session in the sim, with the platform's `Camera` reading the camera in our module: does a pilot whose 58P follows a bench core's aircraft in flight keep their seat, and does their click put their hand on the switch, at about 85 m/s and 130 m/s, in active pause, with ChasePlane off, and after they take control in flight?
+Does a click on the exterior on foot bring a hand, since `Camera` reports only when the sim gives both referentials?
+And what does our module's update cost with `Camera` added?
+
+**Expected:** every case to pass, since [p30](#2026-11-17-inside-our-module-before-the-routines-write-a-following-machines-camera-reads-at-the-eye-in-every-referential) read the camera at the eye inside the module before the routine host's frame.
+
+**Found:** with `tools/sim/camera.ts`, on MSFS 2024 SunRise 12.2.282174.999, 2026-11-17, in the Black Square Baron 58P at a stand, with a bench core as the pilot flying.
+The 58P's profile locates no switch, so the script judged each click against the pilot's own click on the same knob at the stand.
+
+- **Following at 85 m/s**, the pilot kept their seat, their eye at most 1.7cm from the stand's over 73 feeds, and the click's hand landed 1.3cm from the stand's.
+- **At 130 m/s**, the eye stayed within 3.0cm over 71 feeds, and the hand landed 3.3cm off.
+- **In active pause**, the hand landed 1.3cm off.
+- **With ChasePlane off**, the hand landed 3.3cm off.
+  The pilot moved the camera to bring the knob into view after turning ChasePlane off, then clicked, so the click followed a camera that had just moved.
+- **Flying**, after the pilot took control in flight and engaged the autopilot at about 160 knots, the eye stayed within 0.8cm over 78 feeds, and the hand landed 2.8cm off.
+- **On foot**, the figure stood on the ground, and clicks around the nose wheel brought no hand.
+  A replay of the recording, by a build that logged each click's cast, showed each click cast from the camera's `WORLD` reading, 1.0m above the crouching figure's feet, beside the nose.
+  So `Camera` reports on foot, and `fsCameraGet` gives `SIMOBJECT` there too.
+  A ray from that spot toward the aircraft's center met the nose's skin 0.75m away.
+  Rays cast up from the ground under the aircraft met both main tires, 1.5m either side of the center, and under the nose a gear door 0.3m up: our posed exterior has the nose gear stowed, so a ray through where the sim draws the nose wheel meets nothing.
+  That's the gap [p22 found](#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away): the sim's templates drive the gear, and `aircraft-model` leaves it as the file stores it.
+  In a second run, a click on the nose's skin on foot brought a hand on the nose, where its ray met it.
+- **Our module's update**, over the 300 frames before each reading, against the stage 16 figures in [the flight-model log](../flight-model/log.md#2026-11-11-seated-on-the-pose-follow-says-it-writes-a-figure-keeps-its-seat-on-the-following-machine-and-the-58p-banks-and-pitches-with-the-aircraft-it-follows): 91µs to 180µs at p99 with `Lead`, and 207µs to 335µs with `Follow`.
+
+  | Routines running | p50 | p99 | Most |
+  | --- | --- | --- | --- |
+  | `Lead`, `Figure`, and `Camera`, on the stand | 52µs | 219µs | 250µs |
+  | The same, in the second run | 52µs | 131µs | 169µs |
+  | `Follow`, `Figure`, and `Camera`, in flight | 65µs | 293µs | 519µs |
+  | `Lead`, `Figure`, and `Camera`, in flight | 58µs | 335µs | 348µs |
+
+**Changed:**
+
+- The user accepted our module's update as measured, against the 91µs to 335µs at p99 they accepted for stage 16 (user, 2026-11-17).
+- Posing the exterior's gear from the sim's gear position is a follow-up task, outside stage 16b (user, 2026-11-17).
+- `tools/sim/camera.ts` asks for the left main wheel on foot, and with ChasePlane off, for the knob in view before the head holds still.
+
+**Affects:** [stage 16b](../build/plan.md#16b-a-following-pilots-camera), whose session this is.
+
+**Evidence:** the script's reports, [the first run](results/2026-11-17-stage-16b-session-first-run.txt) and [the on-foot retry](results/2026-11-17-stage-16b-session-on-foot-retry.txt), and [the replays' casts on foot](results/2026-11-17-stage-16b-session-on-foot-replay.txt).
+
+## 2026-11-17: Inside our module, before the routines write, a following machine's camera reads at the eye in every referential
+
+**Asked:** on a following 58P in flight, which reading of the camera stays at the pilot's eye after `Follow`'s write: `SimConnect_CameraGet` from outside the sim, as the core reads it, in each of its four referentials, or `fsCameraGet` inside our module, before or after the routine host's frame?
+
+**Expected:** a reading inside the module before the routine host's frame, if the sim places the camera from the pose before `Follow`'s write, as [the entry below](#2026-11-17-on-a-following-machine-the-camera-reads-one-frame-of-the-aircrafts-motion-behind-the-seat-on-every-axis) inferred.
+
+**Found:** with [p30](../../../experiments/areas/avatars/p30-following-camera/run.ts), on MSFS 2024 SunRise 12.2.282174.999, 2026-11-17, in the Black Square Baron 58P at a stand.
+A bench core flew as the pilot flying, and its stand-in aircraft climbed 3,000 ft straight up, then flew straight at 40 m/s, 85 m/s, and 130 m/s, turned, and climbed, while the 58P followed it.
+The sim ran at 30 fps, and ChasePlane 26.39.1 drove the camera in every phase but the last.
+Each cell is how far the reading sat from the pilot's eye, along the aircraft, at the median:
+
+| Reading | At 40 m/s | At 85 m/s | At 130 m/s |
+| --- | --- | --- | --- |
+| One frame of the aircraft's travel, for comparison | 1.33m | 2.83m | 4.33m |
+| `SIMOBJECT`, `EYEPOINT`, or `SIMOBJECT_DATUM`, from outside the sim | 1.33m behind | 2.82m behind | 4.31m behind |
+| `WORLD` from outside the sim, through the pose read at period `SIM_FRAME` that arrived just before it | 0.00m | 0.01m | 0.02m |
+| Any of the four inside our module, before the routine host's frame | 0.00m | 0.01m | 0.02m |
+| Any of the four inside our module, after the routine host's frame | 1.33m behind | 2.82m behind | 4.31m behind |
+
+- **The pose the module read after the routine host's frame was the one `Follow` wrote**, 2.83m ahead of the pose before it, at 85 m/s, and the camera then sat where the pose before had put it.
+  So the sim places the camera from the pose before `Follow`'s write, and a reading turned into the aircraft's frame after the write lands one frame of travel behind.
+- **Climbing straight up at 91 m/s**, the shifted readings sat 2.98m below the eye, and the module's reads before the routine host's frame sat within 6cm.
+- **`WORLD` through the pose read beside it** stayed within 2cm at p99 at each speed in straight flight, over 1,090 reads, and one read of 304 in the climb straight up was 0.74m off.
+  It lands right only because SimConnect sent that frame's pose before the camera's answer, an order no document promises.
+- **In the turn**, the readings that didn't shift spread up to 0.43m, inside the module and from outside alike, so the camera itself moved, and ChasePlane, which drove it, moves the camera in a bank (unverified: no turn ran with ChasePlane off).
+  In the last phase, level at 85 m/s with ChasePlane off, those readings held within 1mm of each other, 0.21m behind where they sat on the stand with ChasePlane on.
+- **`fsCameraGet` gives what `SimConnect_CameraGet` gives:** on the stand, the same place within 1mm, with the yaw in its second angle and the roll in its third.
+
+**Changed:** the design, which [stage 16b](../build/plan.md#16b-a-following-pilots-camera) builds: the platform reads the camera through a routine of its own in our module, `Camera`, behind a subscription of the sim service's, `cameras`, and avatars subscribes in place of its call to `camera` each frame (user, 2026-11-17).
+The routine host reads it during `Camera`'s frame, before it carries out any routine's writes, so it reads what p30 read before the routine host's frame.
+`WORLD` through a pose read from outside the sim also gave the eye, and the user chose the module's read, since it leans on no order of SimConnect's messages, and the platform's, since reading the camera is the sim seam's work, which any feature may need.
+
+**Affects:** [01-avatars](01-avatars.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [the code map](../architecture/02-code-map.md), and [testing](../build/02-testing.md), each through a note at its top.
+
+**Evidence:** [p30's report](../../../experiments/areas/avatars/results/p30-following-camera-2026-11-17-17-36-34.txt), with every reading from outside the sim in [its `.ndjson`](../../../experiments/areas/avatars/results/p30-following-camera-2026-11-17-17-36-34.ndjson) and every frame inside our module in [its `-module.csv`](../../../experiments/areas/avatars/results/p30-following-camera-2026-11-17-17-36-34-module.csv).
+
+## 2026-11-17: On a following machine the camera reads one frame of the aircraft's motion behind the seat, on every axis
+
+**Asked:** is the shift [the entry below](#2026-11-12-on-a-following-machine-in-flight-the-camera-reads-1m-to-3m-behind-the-pilots-seat-so-the-crew-sees-that-pilot-as-a-head-in-the-cabin) found one frame of the aircraft's travel, as it guessed with no frame rate logged, and does it run along the aircraft's motion on every axis?
+
+**Expected:** one frame, from that entry's arithmetic.
+
+**Found:** from replays of both pilots' recordings of the first flight with friends, made on MSFS 2024 SunRise 12.2.282174.999 on 2026-11-11 and replayed on 2026-11-17 by a build of the release's tree that logged every camera read, with the frame rate of the sim's `Frame` event before it, and every sample `Follow` was fed.
+Both replays matched every checkpoint.
+The velocity `Follow` drew at a read is the samples' body velocity 400ms before it.
+
+- **A read sits behind the seat's eye by the body velocity `Follow` drew times one frame's time, on each axis.**
+  On the host's PC, over 66,311 reads in flight, the shift along the aircraft was 0.98 of that frame's travel at the median, 0.85 at p10, and 1.10 at p90.
+  The shifts up and sideways each followed the velocity on their own axis over one frame, at 0.95 and 0.99 of it.
+- **It follows each frame's time, not a fixed delay.**
+  The host's sim ran at 25 fps to 76 fps, and the shift divided by the velocity followed the frame's time: 29.4ms at 30 fps to 35 fps, 17.3ms at 45 fps to 60 fps, and 12.8ms over 60 fps, against frames of 30.1ms, 18.3ms, and 13.2ms.
+  Read by read, the two correlate at 0.91.
+  So the faster the sim runs, the smaller the shift: 1.0m to 1.6m at the host's 68 fps to 76 fps, and 2.6m to 3.1m at the joiner's 30 fps, from 70 m/s to 100 m/s.
+- **Nothing shifts while the pilot flies, or while a following aircraft stands still:** within 3cm of the seat's eye at the median on both PCs, and within 8cm at p99 flying over 20 m/s.
+- **A correction from outside the sim leaves decimeters.**
+  Adding back the drawn velocity times the `Frame` event's frame time leaves a read from 0.13m behind to 0.21m ahead of the eye at p10 and p90 on the host's PC, and from 0.16m behind to 0.73m ahead on the joiner's, whose sim reported 30 fps at every read, so its frame rate told nothing of each frame's time.
+
+The mechanism this fits, unverified: the sim places the camera from the pose before `Follow`'s write, and `SimConnect_CameraGet` turns that place into the aircraft's frame through the pose after it, while the pilot's own view draws both from one pose.
+
+**Changed:** nothing in the code.
+[p30](../../../experiments/areas/avatars/p30-following-camera/run.ts) reads the camera on a following 58P in flight in each of `SimConnect_CameraGet`'s four referentials from outside the sim, and through `fsCameraGet` from inside our module on both sides of the routine host's frame, to find a reading the write doesn't shift.
+
+**Affects:** [01-avatars](01-avatars.md), whose note on the shift had it fit one frame, unverified.
+
+**Evidence:** [results/2026-11-17-camera-shift-against-speed-and-frame-rate.txt](results/2026-11-17-camera-shift-against-speed-and-frame-rate.txt).
+
 ## 2026-11-12: On a following machine in flight the camera reads 1m to 3m behind the pilot's seat, so the crew sees that pilot as a head in the cabin
 
 **Asked:** in [stage 16](../build/plan.md#16-flight-model-sync)'s first flight with friends, the pilot flying saw the other pilot, whose camera was in a pilot's seat, as a head and a hand floating in the rear of the cabin.

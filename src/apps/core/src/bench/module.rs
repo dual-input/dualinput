@@ -8,7 +8,7 @@ use messages::avatars::slots::{
     BODY_HEAD, BODY_ON_FOOT, FigureSlot, FigureState, HAND_GRIP, HAND_POINT, HAND_THUMB,
 };
 use messages::bench::{FedBody, FedFigure, FedHand, FromCore};
-use messages::module::slots::SlotHeader;
+use messages::module::slots::{CameraRead, SlotHeader};
 use messages::module::{RoutineId, STATUS};
 use routine_host::{Flag, Frame, Host, Ids, Key, Named, Routine, Sim, Space, Wants};
 use stand_in_sim::{Aircraft, Module, World};
@@ -275,5 +275,17 @@ impl Sim for Plane<'_> {
 
     fn key(&mut self, key: Key, value: i32) {
         self.0.key(key.name(), value);
+    }
+
+    fn camera(&mut self, referential: u32) -> Option<CameraRead> {
+        let camera = self.0.camera(referential);
+        Some(CameraRead {
+            position: camera.position,
+            fov: camera.fov,
+            pitch: camera.pitch,
+            yaw: camera.yaw,
+            roll: camera.roll,
+            referential,
+        })
     }
 }

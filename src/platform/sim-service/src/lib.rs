@@ -90,8 +90,14 @@ pub enum SimEvent {
     /// The object a `create_ai` made, by the ID a `watch_on`, a `key_on`, a `remove`, and a
     /// routine's write name it by.
     Created { call: Handle, object: u32 },
-    /// The camera, as a `camera` call read it.
-    Camera { call: Handle, camera: Camera },
+    /// The camera this frame, which a `cameras` call subscribed to, in `SIMOBJECT`'s
+    /// referential and in `WORLD`'s, read in our WASM module before any routine moved the
+    /// aircraft.
+    Camera {
+        call: Handle,
+        simobject: Camera,
+        world: Camera,
+    },
     /// The sim drew a frame, which a `frames` call subscribed to: its frame rate in frames
     /// a second, and the sim's rate, 1 at normal speed.
     Frame { call: Handle, rate: f32, speed: f32 },

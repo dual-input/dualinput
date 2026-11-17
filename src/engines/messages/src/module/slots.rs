@@ -27,3 +27,40 @@ pub struct SlotHeader {
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Pod, Zeroable)]
 #[repr(C)]
 pub struct HoldSlot {}
+
+/// `Camera`'s slot, which carries nothing: the routine reads the camera in both referentials
+/// while it runs.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Pod, Zeroable)]
+#[repr(C)]
+pub struct CameraSlot {}
+
+/// The camera in one referential, as `SimConnect_CameraGet` and `fsCameraGet` give it
+/// (record/areas/core/03-sim-seam-and-wasm-module.md, the note on the camera).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Pod, Zeroable)]
+#[repr(C)]
+pub struct CameraRead {
+    /// In meters from the aircraft's reference point, x left, y up, and z forward, in
+    /// `SIMOBJECT`'s referential; latitude and longitude in degrees and altitude in meters
+    /// in `WORLD`'s.
+    pub position: [f64; 3],
+    /// The view's height, in radians, as `SimConnect_CameraGet` gives it. Whether
+    /// `fsCameraGet`'s is the same is unverified, and a click in the sim, whose ray reads it,
+    /// settles it.
+    pub fov: f64,
+    /// In degrees, as the sim's three angles carry them: the pitch, then the yaw, then the
+    /// roll.
+    pub pitch: f32,
+    pub yaw: f32,
+    pub roll: f32,
+    /// The referential, `SIMCONNECT_POSITION_REFERENTIAL_SIMOBJECT` or `_WORLD`.
+    pub referential: u32,
+}
+
+/// `Camera`'s report each frame: the camera in both referentials, read during the routine's
+/// frame, before any routine's writes go out.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Pod, Zeroable)]
+#[repr(C)]
+pub struct CameraReport {
+    pub simobject: CameraRead,
+    pub world: CameraRead,
+}

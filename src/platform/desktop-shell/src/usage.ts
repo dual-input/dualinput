@@ -26,8 +26,19 @@ export function memoryText(bytes: number): string {
   return bytes > 0 && megabytes < 1 ? "<1 MB" : `${Math.round(megabytes)} MB`
 }
 
+/**
+ * A share of the PC's cores, so a pilot never reads the app as stuck: to one decimal as Task Manager shows it, or below 0.1% to
+ * its first digit that isn't 0, as 0.004%. Idle, the app uses about 0.065% of one core, so 0.004% of a 16-thread PC's, which one
+ * decimal would show as 0.0% (record/areas/install/log.md, 2026-11-16). `cpu_text` in src/apps/desktop/src/usage.rs formats the
+ * tray menu's line the same way, so change both together.
+ */
 export function cpuText(percent: number): string {
-  return percent > 0 && percent < 0.1 ? "<0.1%" : `${percent.toFixed(1)}%`
+  if (percent <= 0) return "0%"
+  if (percent >= 0.1) return `${percent.toFixed(1)}%`
+  let decimals = Math.ceil(-Math.log10(percent))
+  // Rounding can carry into the next digit, as 0.0096 does to 0.010, which one fewer decimal writes as 0.01.
+  if (Math.round(percent * 10 ** decimals) >= 10) decimals -= 1
+  return `${percent.toFixed(decimals)}%`
 }
 
 export function networkText(bytes: number): string {

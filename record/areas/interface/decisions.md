@@ -340,10 +340,11 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
     They count the window's own WebView2 processes while it's open, so the line ends in a spike for as long as the pilot looks at it.
     The memory figure matched the Windows counter behind Task Manager's Memory column to within 0.4 MB, in one comparison on a debug build (measured on our development machine, 2026-11-04, [log](log.md#2026-11-04-the-desktop-windows-memory-figure-matches-windows-to-within-04-mb-the-app-and-its-webview2-read-about-95-mb-to-114-mb-with-the-window-open-and-a-window-can-follow-its-content-frame-by-frame)).
     The memory is the private working set, Task Manager's Memory column.
+    The CPU is a share of all the PC's cores, as Task Manager's CPU column has it, to one decimal from 0.1% up and below that to its first digit that isn't 0, such as 0.004%, here and in the tray menu's usage line, since one decimal showed an idle app as 0.0%, which a pilot can read as stuck (user, 2026-11-17).
     The app takes a sample a minute into `%APPDATA%\DualInput\app\usage.jsonl`, and holds none of them in memory.
   - Turning Start with Windows off shows a warning under the switch, here and under [the EFB app's](#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version).
 
-  Settled by the user on 2026-10-25, 2026-10-31, 2026-11-01, 2026-11-03, 2026-11-04, and 2026-11-10.
+  Settled by the user on 2026-10-25, 2026-10-31, 2026-11-01, 2026-11-03, 2026-11-04, 2026-11-10, and 2026-11-17.
 - **Because:**
   - A pilot works in the EFB app, so the welcome ends by pointing there, after saying why Windows asks about the firewall and why a tray app runs at all (user, 2026-11-10).
   - A screen for a sim that has never run would almost never show, and is easy to forget to keep working, so the welcome's one line about restarting the sim covers that case and a pilot who installed with the sim running (user, 2026-11-10).

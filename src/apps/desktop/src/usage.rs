@@ -306,10 +306,30 @@ fn cpu_share(seen: &HashMap<u32, u64>, now: &HashMap<u32, u64>, over: Duration, 
 /// The tray menu's line, in the units Task Manager shows.
 pub fn tray_line(sample: &Sample) -> String {
     format!(
-        "Using {} MB RAM, {:.1}% CPU",
+        "Using {} MB RAM, {} CPU",
         (sample.memory as f64 / 1_048_576.0).round(),
-        sample.cpu
+        cpu_text(sample.cpu)
     )
+}
+
+/// A share of the PC's cores, so a pilot never reads the app as stuck: to one decimal as Task Manager shows it, or below 0.1%
+/// to its first digit that isn't 0, as 0.004%. Idle, the app uses about 0.065% of one core, so 0.004% of a 16-thread PC's,
+/// which one decimal would show as 0.0% (record/areas/install/log.md, 2026-11-16). `cpuText` in
+/// src/platform/desktop-shell/src/usage.ts formats the window's figures the same way, so change both together.
+fn cpu_text(percent: f32) -> String {
+    let percent = f64::from(percent);
+    if percent <= 0.0 {
+        return "0%".into();
+    }
+    if percent >= 0.1 {
+        return format!("{percent:.1}%");
+    }
+    let mut decimals = (-percent.log10()).ceil() as usize;
+    // Rounding can carry into the next digit, as 0.0096 does to 0.010, which one fewer decimal writes as 0.01.
+    if (percent * 10f64.powi(decimals as i32)).round() >= 10.0 {
+        decimals -= 1;
+    }
+    format!("{percent:.decimals$}%")
 }
 
 #[cfg(test)]
@@ -440,5 +460,16 @@ mod tests {
             network: 0,
         });
         assert_eq!(line, "Using 4 MB RAM, 0.1% CPU");
+    }
+
+    #[test]
+    fn a_small_cpu_share_reads_to_its_first_digit_rather_than_as_nothing() {
+        assert_eq!(cpu_text(12.34), "12.3%");
+        assert_eq!(cpu_text(0.0049), "0.005%");
+        assert_eq!(cpu_text(0.0033), "0.003%");
+        assert_eq!(cpu_text(0.05), "0.05%");
+        assert_eq!(cpu_text(0.0096), "0.01%");
+        assert_eq!(cpu_text(0.097), "0.1%");
+        assert_eq!(cpu_text(0.0), "0%");
     }
 }

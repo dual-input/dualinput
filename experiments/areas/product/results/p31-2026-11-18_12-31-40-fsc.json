@@ -1,0 +1,361 @@
+{
+  "probe": "p31",
+  "mode": "fsc",
+  "label": "FS Copilot",
+  "dry": false,
+  "commit": "189d4a4",
+  "fsc": {
+    "commit": "172e480",
+    "hash": "6EA94F97A0C613C8",
+    "synced": "2026-11-18T01:17:26.9820255Z"
+  },
+  "simVersion": "1,9,24,0",
+  "loaded": [
+    "pressed Start",
+    "pressed Free flight",
+    "set SEGS, the runway 14 , the 58P, and the livery N515MR, and pressed Fly",
+    "pressed Ready to fly",
+    "in the flight",
+    "the local time reads 12:01 after setting 12:00",
+    "the camera is in the cockpit"
+  ],
+  "measured": {
+    "started": "2026-11-18T12:35:21.003Z",
+    "seconds": 300,
+    "frames": {
+      "error": "PresentMon wrote no CSV, and exited with 1: "
+    },
+    "processes": [
+      {
+        "role": "the sim",
+        "pid": 1800,
+        "name": "FlightSimulator2024.exe",
+        "cpuPercent": 353.9916351258316,
+        "workingSetMeanMB": 9505.37964527027,
+        "workingSetMaxMB": 9567.23828125,
+        "privateMeanMB": 20239.262510557433,
+        "privateMaxMB": 21097.78515625,
+        "exited": false
+      },
+      {
+        "role": "harness: this script",
+        "pid": 14768,
+        "name": "node.exe",
+        "cpuPercent": 0.02549710702741591,
+        "workingSetMeanMB": 75.36935177364865,
+        "workingSetMaxMB": 75.3828125,
+        "privateMeanMB": 79.33123944256756,
+        "privateMaxMB": 79.35546875,
+        "exited": false
+      },
+      {
+        "role": "harness: powershell.exe",
+        "pid": 3008,
+        "name": "powershell.exe",
+        "cpuPercent": 1.9683766625165084,
+        "workingSetMeanMB": 121.27734375,
+        "workingSetMaxMB": 121.37890625,
+        "privateMeanMB": 97.9932960304054,
+        "privateMaxMB": 98.05859375,
+        "exited": false
+      },
+      {
+        "role": "harness: powershell.exe",
+        "pid": 24280,
+        "name": "powershell.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 82.78462837837837,
+        "workingSetMaxMB": 82.8046875,
+        "privateMeanMB": 58.64207664695946,
+        "privateMaxMB": 58.6796875,
+        "exited": false
+      },
+      {
+        "role": "harness: powershell.exe",
+        "pid": 10460,
+        "name": "powershell.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 70.60494087837837,
+        "workingSetMaxMB": 70.625,
+        "privateMeanMB": 49.82567039695946,
+        "privateMaxMB": 49.86328125,
+        "exited": false
+      },
+      {
+        "role": "network: FS Copilot's relay",
+        "pid": 27544,
+        "name": "p2p_serv.exe",
+        "cpuPercent": 1.3513466724530432,
+        "workingSetMeanMB": 56.11668602195946,
+        "workingSetMaxMB": 58.875,
+        "privateMeanMB": 23.683752111486488,
+        "privateMaxMB": 26.84375,
+        "exited": false
+      },
+      {
+        "role": "pilot: FS Copilot",
+        "pid": 27272,
+        "name": "FsCopilot.exe",
+        "cpuPercent": 11.687873861367454,
+        "workingSetMeanMB": 365.5674619932432,
+        "workingSetMaxMB": 369.46484375,
+        "privateMeanMB": 329.1095333614865,
+        "privateMaxMB": 333.01171875,
+        "exited": false
+      },
+      {
+        "role": "second pilot: a second FS Copilot, kept off the sim",
+        "pid": 16428,
+        "name": "FsCopilot.exe",
+        "cpuPercent": 13.304390446905623,
+        "workingSetMeanMB": 333.5606524493243,
+        "workingSetMaxMB": 334.89453125,
+        "privateMeanMB": 296.91736169763516,
+        "privateMaxMB": 298.4140625,
+        "exited": false
+      },
+      {
+        "role": "harness: its powershell.exe",
+        "pid": 5364,
+        "name": "powershell.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 86.08963260135135,
+        "workingSetMaxMB": 86.109375,
+        "privateMeanMB": 67.76623205236487,
+        "privateMaxMB": 67.80078125,
+        "exited": false
+      },
+      {
+        "role": "harness: its WindowsTerminal.exe",
+        "pid": 12868,
+        "name": "WindowsTerminal.exe",
+        "cpuPercent": 0.02039768562193273,
+        "workingSetMeanMB": 106.66971072635135,
+        "workingSetMaxMB": 106.984375,
+        "privateMeanMB": 75.26908255912163,
+        "privateMaxMB": 75.37109375,
+        "exited": false
+      }
+    ],
+    "network": {
+      "4": {
+        "sent": 138801,
+        "received": 10655
+      },
+      "1800": {
+        "sent": 205500,
+        "received": 36308087
+      },
+      "2500": {
+        "sent": 26334,
+        "received": 7369
+      },
+      "3064": {
+        "sent": 998,
+        "received": 54024
+      },
+      "5380": {
+        "sent": 618,
+        "received": 1038
+      },
+      "5432": {
+        "sent": 19265,
+        "received": 12300
+      },
+      "5500": {
+        "sent": 23341,
+        "received": 15792
+      },
+      "7140": {
+        "sent": 1371,
+        "received": 1249
+      },
+      "8536": {
+        "sent": 504,
+        "received": 5704
+      },
+      "9960": {
+        "sent": 1650917270,
+        "received": 204197
+      },
+      "10452": {
+        "sent": 0,
+        "received": 8827
+      },
+      "15488": {
+        "sent": 102939,
+        "received": 26370
+      },
+      "16428": {
+        "sent": 136259,
+        "received": 937518
+      },
+      "16908": {
+        "sent": 1360,
+        "received": 0
+      },
+      "18392": {
+        "sent": 24446,
+        "received": 29195
+      },
+      "20500": {
+        "sent": 35259657,
+        "received": 30
+      },
+      "21144": {
+        "sent": 656,
+        "received": 677
+      },
+      "21416": {
+        "sent": 1360,
+        "received": 52316
+      },
+      "22780": {
+        "sent": 9020277,
+        "received": 11420291
+      },
+      "25872": {
+        "sent": 909,
+        "received": 18838
+      },
+      "25900": {
+        "sent": 679887,
+        "received": 128816
+      },
+      "26284": {
+        "sent": 65453,
+        "received": 291458
+      },
+      "26684": {
+        "sent": 18609,
+        "received": 4590
+      },
+      "26772": {
+        "sent": 1599,
+        "received": 101
+      },
+      "27272": {
+        "sent": 936033,
+        "received": 136718
+      },
+      "27484": {
+        "sent": 1192,
+        "received": 101
+      },
+      "27544": {
+        "sent": 1074236,
+        "received": 1072292
+      },
+      "35104": {
+        "sent": 5028856,
+        "received": 6254387
+      },
+      "35692": {
+        "sent": 6394283,
+        "received": 4961490
+      },
+      "36060": {
+        "sent": 658,
+        "received": 16926
+      },
+      "36072": {
+        "sent": 1273,
+        "received": 101
+      },
+      "36360": {
+        "sent": 2222,
+        "received": 101
+      },
+      "36380": {
+        "sent": 975,
+        "received": 101
+      },
+      "36404": {
+        "sent": 2836,
+        "received": 101
+      },
+      "36484": {
+        "sent": 1224,
+        "received": 101
+      },
+      "36516": {
+        "sent": 4844,
+        "received": 101
+      },
+      "36628": {
+        "sent": 2673,
+        "received": 101
+      }
+    },
+    "focus": 1,
+    "busiest": [
+      {
+        "pid": 1800,
+        "name": "FlightSimulator2024",
+        "cpuPercent": 353.9916351258316
+      },
+      {
+        "pid": 5432,
+        "name": "MsMpEng",
+        "cpuPercent": 28.49556681384002
+      },
+      {
+        "pid": 35104,
+        "name": "gtn_simulator",
+        "cpuPercent": 28.29668937902618
+      },
+      {
+        "pid": 35692,
+        "name": "gtn_simulator",
+        "cpuPercent": 27.123822455765044
+      },
+      {
+        "pid": 4,
+        "name": "System",
+        "cpuPercent": 21.85612014390092
+      },
+      {
+        "pid": 16428,
+        "name": "FsCopilot",
+        "cpuPercent": 13.304390446905623
+      },
+      {
+        "pid": 8,
+        "name": "dwm",
+        "cpuPercent": 11.998938567101927
+      },
+      {
+        "pid": 27272,
+        "name": "FsCopilot",
+        "cpuPercent": 11.687873861367454
+      },
+      {
+        "pid": 3128,
+        "name": "platform_runtime_IS5LEYETRACKER5_service",
+        "cpuPercent": 7.261576081408052
+      },
+      {
+        "pid": 9960,
+        "name": "sunshine",
+        "cpuPercent": 7.103494017838073
+      },
+      {
+        "pid": 20500,
+        "name": "FlowShare",
+        "cpuPercent": 4.273315137794906
+      },
+      {
+        "pid": 25872,
+        "name": "plates",
+        "cpuPercent": 2.5752078097690068
+      }
+    ],
+    "pcCpuPercent": 34.122459620952874,
+    "logicalCores": 16
+  },
+  "notes": [
+    "the second FS Copilot's log says its SimConnect reached the sim, so it wrote into the pilot's aircraft and the run measures two apps on one sim",
+    "in the 10s before the window, processes outside the run used MsMpEng 33%, gtn_simulator 30%, gtn_simulator 27%, System 13% of one core",
+    "the second FS Copilot's SimConnect reached the sim during the window"
+  ]
+}

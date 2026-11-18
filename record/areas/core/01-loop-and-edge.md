@@ -7,6 +7,13 @@ Decides:     The core's threads; how the queue stamps and orders inputs, and wha
 ```
 
 > **Note**
+> Stage 2b gives the run's log a thread of its own, the log's writer, fed by std's `mpsc::sync_channel`, since Windows held a core's early writes to its log for up to 49ms on the loop's thread ([core log](log.md#2026-11-18-windows-held-a-cores-early-writes-to-its-log-for-up-to-49ms-on-the-loops-thread-so-the-log-gets-a-writer-of-its-own); user, 2026-11-18).
+> The thread that logs a line sends it, and the log's writer writes the lines in the order they were sent.
+> At most 1,024 lines wait for the log's writer, and a thread that logs one more waits for room: a replay at a raised level, whose loop logs faster than the writer writes, waits as it did before, and a live run's loop, which logs a few lines in 49ms, waits only in a storm of lines.
+> The 16 MB cap of [logging](#logging) counts the bytes sent.
+> The panic hook sends its line past the cap and waits at most 500ms for the log's writer to write it, then at most 500ms for the recording's writer, so up to 1s in all, and a run or a replay waits for the log's writer to write every line before it returns.
+
+> **Note**
 > Stage 11b's tentative decision that [Dual Input's one full window is its EFB app](../interface/decisions.md#dual-inputs-one-full-window-is-its-efb-app) takes out the EFB app's button that brought the desktop app forward, so the core's edge no longer starts the desktop app's program, as [starting and stopping](#starting-and-stopping) has it (user, 2026-10-25).
 
 The core runs every unit on one thread, the loop, which takes one input at a time from one queue.

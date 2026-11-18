@@ -49,24 +49,21 @@ pub fn open(
     });
     log::install();
     panic::install();
-    let scope = Scope::enter(context.clone());
-    Ok((context, scope))
+    enter(context.clone());
+    Ok((context.clone(), Scope(context)))
 }
 
 /// Makes the calling thread one of the run's until this is dropped, for the thread that
-/// calls `run` or `replay`, which outlives the run.
-pub struct Scope;
-
-impl Scope {
-    pub fn enter(context: Arc<Context>) -> Scope {
-        enter(context);
-        Scope
-    }
-}
+/// calls `run` or `replay`, which outlives the run. Dropping it ends the run's log, once its
+/// writer has written every line, so a run's last lines are in the file before `run` or
+/// `replay` returns, whatever path it returns by. Only `open` makes one, since dropping
+/// another would end the log while the run goes on.
+pub struct Scope(Arc<Context>);
 
 impl Drop for Scope {
     fn drop(&mut self) {
         let _ = CONTEXT.try_with(|c| c.borrow_mut().take());
+        self.0.log.finish();
     }
 }
 

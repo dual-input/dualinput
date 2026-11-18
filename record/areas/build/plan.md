@@ -907,6 +907,17 @@ Builds: that fix, in the units its design names.
 Needs: 14b and 16.
 Exit: after a handover with the autopilot in heading and altitude hold, the 58P flies straight on, with its trim at the old PF's.
 
+## 2b The core's log off the loop's thread
+
+Designs first: a thread of the log's own that writes the run's log, since Windows held a core's early writes to its new `log.txt` for up to 49ms on the loop's thread, which failed the bench's 1ms for a handler in `flight-model`'s and `cockpit`'s first tests ([core log](../core/log.md#2026-11-18-windows-held-a-cores-early-writes-to-its-log-for-up-to-49ms-on-the-loops-thread-so-the-log-gets-a-writer-of-its-own); user, 2026-11-18).
+Builds: that writer, in `src/apps/core`'s log, as [01-loop-and-edge](../core/01-loop-and-edge.md)'s note of stage 2b has it, and the bench's `Core.logged` in `tools/bench/cores.ts`, which waits for a line of a running core's log, since a line can reach the file after the bench sees what its handler did.
+Needs: 2.
+Tests: as the log's own tests, a line sent while each write takes 50ms returns at once, a flush waits for every line sent before it, and the cap and the home folder's path hold as before.
+The stage changes the core's edge, so it closes on the whole bench.
+
+Exit: on our development machine, `node tools/check.ts` and the whole `node tools/bench.ts` pass, the log's tests among them.
+Done on 2026-11-18: the whole bench passed 182 of 182, and after the code review's fixes the seven scenarios they touched passed 60 of 60; the stall itself didn't come in these runs, so they show the loop can't wait on a held write, not that the stall is gone ([core log](../core/log.md#2026-11-18-windows-held-a-cores-early-writes-to-its-log-for-up-to-49ms-on-the-loops-thread-so-the-log-gets-a-writer-of-its-own)).
+
 ## 22 GitHub
 
 Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)): CI's workflows for each pull request and each merge to `main` ([CI](../architecture/02-code-map.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green)), the release workflow with the check before a release ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)), the profiles' workflow and their Pages site ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)), `tools/replay.ts`, which fetches the core a recording's release shipped ([running a replay](../core/01-loop-and-edge.md#running-a-replay)), and the repositories of ours beside this one, the Coherent GT check's and the one that holds the relays' tokens ([the build](01-the-build.md)).

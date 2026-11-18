@@ -163,7 +163,8 @@ test("a joiner in another aircraft is a member out of the flight, and enters it 
   await toMenu(b)
   await load(b, BARON)
   s = await until(b, (s) => me(s)?.in_flight === true, "the joiner in the flight")
-  assert.match(b.core.log(), /preflight ended, and the session's keys take this much/, "the late joiner raised PreflightEnded")
+  // The late joiner raised PreflightEnded.
+  await b.core.logged(/preflight ended, and the session's keys take this much/)
   assert.doesNotMatch(b.core.log(), /this core holds the aircraft for preflight on=true/, "a late joiner skips preflight's hold")
   // Its aircraft is frozen all the same, since flight-model sync's Follow draws it behind the pilot flying's.
   await untilFrozen(b, true)
@@ -239,7 +240,7 @@ test("both pilots ready: the countdown ends preflight on both, each held until t
   await until(b, (s) => s.preflight.phase === "ended", "preflight's end on the other core")
   await untilFrozen(a, false)
   // The other pilot's hold ends too, and flight-model sync's Follow keeps their aircraft frozen, drawn behind the pilot flying's.
-  assert.match(b.core.log(), /this core holds the aircraft for preflight on=false/, "the other pilot's hold ended")
+  await b.core.logged(/this core holds the aircraft for preflight on=false/)
   assert.ok(await frozen(b), "the following aircraft stays frozen")
   // Both cores read one PC's counter, so their stamps compare.
   const ended = "preflight ended, and the session's keys take this much"
@@ -310,7 +311,8 @@ test("going without a pilot whose sim kept running ends preflight, and that pilo
   await a.app.ok("session.go-without", { member: named(slice(a), "Adam")!.pilot })
   await until(a, (s) => s.preflight.phase === "ended", "preflight's end without the cut pilot", 8_000)
   await until(b, (s) => s.preflight.phase === "ended", "the cut pilot seeing preflight's end", 40_000)
-  assert.match(b.core.log(), /preflight ended, and the session's keys take this much/, "the pilot gone without raised PreflightEnded on return")
+  // The pilot gone without raised PreflightEnded on return.
+  await b.core.logged(/preflight ended, and the session's keys take this much/)
 })
 
 test("a pilot flying who leaves the flight after preflight passes control, and the session ends once nobody is in the flight", { timeout: 90_000 }, async (t) => {

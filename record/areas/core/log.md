@@ -3,6 +3,34 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-11-18: Windows held a core's early writes to its log for up to 49ms on the loop's thread, so the log gets a writer of its own
+
+**Asked:** why the bench's `flight-model` scenario failed its first test in every run on `main` from 2026-11-16 to 2026-11-17, each time on the [1ms for a handler](../architecture/02-code-map.md#budgets), with the first core's slowest input #7 at 22,910µs to 44,331µs.
+
+**Expected:** a cost in input #7's handler, the sim service's answer to its read of `UserCfg.opt` at the core's start, which logs one line and raises `PackageFound`.
+
+**Found:** the handler does the same work in every run, and only the first core of a scenario file's first test went over 1ms on it, in five runs: `flight-model` run alone after the build, three times after `avatars`, and `cockpit` after `avatars`, in `cockpit-held` ([results](results/2026-11-18-log-write-stalls.txt)).
+In a later test of the same bench, `profiles-unchanged`, the first core's slowest input was #7, at 307µs.
+A diagnostic build, an uncommitted patch that logged each input over 1ms with the loop thread's CPU time from `QueryThreadCycleTime` and its time writing the log, ran two `flight-model` benches of ours and stage 14b's `cockpit` bench on 2026-11-18.
+The two `flight-model` benches had no stall.
+The `cockpit` bench had three stalls, each spent almost all in writing to `log.txt`, two of them in the second core of a later test, where the bench doesn't check the budget:
+
+| Test | Core | Input | Took | On the CPU | Writing the log |
+| --- | --- | --- | --- | --- | --- |
+| `cockpit-held` | James, the file's first | #7 | 41,455µs | 126µs | 41,409µs |
+| `cockpit-late-joiner` | Adam | #13 | 2,676µs | 43µs | 2,652µs |
+| `cockpit-pass-during-catch-up` | Adam | #13 | 49,409µs | 45µs | 49,385µs |
+
+The log's lock waited 0µs in each, so Windows held the write itself, and each came within a core's first 13 inputs, while its `log.txt` was new.
+What in Windows held it is unknown; a scan of the new file by antivirus fits, unverified.
+`Log::line` in `src/apps/core/src/log.rs` wrote each line on the thread that logged it, so the same write could hold a pilot's loop as each core starts.
+
+**Changed:** [stage 2b](../build/plan.md#2b-the-cores-log-off-the-loops-thread) gives the run's log a writer thread of its own, which [01-loop-and-edge](01-loop-and-edge.md) takes in a note (user, 2026-11-18).
+
+**Affects:** [01-loop-and-edge](01-loop-and-edge.md)'s threads and its logging.
+
+**Evidence:** [the runs' lines](results/2026-11-18-log-write-stalls.txt).
+
 ## 2026-11-16: Capturing BeyondATC with a binding and the mouse on, the helper took 1.44% of a core, and opus-rs at 5% loss stayed understandable
 
 **Asked:** the helper's CPU budget with take-control's binding on, as in every session, which [stage 18](../build/plan.md#18-traffic-and-atc-audio) took over from stage 20, and the other cases of `node tools/sim/core-helper.ts sim`.

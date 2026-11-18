@@ -1,5 +1,20 @@
 # The build: log
 
+## 2026-11-18: The one input over 1ms the bench allows each core was a job's result, on the CPU, not a pause
+
+**Asked:** what took the one input over 1ms that [building what it runs](02-testing.md#building-what-it-runs) allows each core, which that section puts down to a pause of the loop's thread.
+
+**Expected:** a pause, with the loop's thread off the CPU.
+
+**Found:** a diagnostic build, which logged each input over 1ms with the loop thread's CPU time and each handler over 300µs with its unit, ran two benches of `flight-model` and one of `cockpit` on 2026-11-18 ([results](../core/results/2026-11-18-log-write-stalls.txt)).
+In every core, that input was a job's result, source 2, once a core, at 1,109µs to 1,618µs, with the loop's thread on the CPU throughout.
+In the two `flight-model` benches, where the build named the unit, the handler was state sync's; in `cockpit`, which runs a test unit in state sync's place, the build didn't name it.
+It's the handler that runs once a scenario and takes 1ms to 2ms, the gap that section names.
+
+**Changed:** nothing; the allowance passes it, as that section says.
+
+**Affects:** [building what it runs](02-testing.md#building-what-it-runs), whose pauses are still inferred.
+
 ## 2026-11-04: A plain `cargo build` writes the desktop program's Windows version resource from its crate
 
 **Asked:** what lands in `dualinput-desktop.exe`'s Windows version resource, which [the build](01-the-build.md#each-components-version-and-hash) had reach it through `tauri build --config`, unverified, because tauri-build read only `tauri.conf.json`'s version and the crate inherited its own.

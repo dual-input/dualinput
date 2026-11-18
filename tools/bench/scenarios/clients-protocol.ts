@@ -20,7 +20,7 @@ test("a fake page that heard the stand-in's announcement connects, and the core 
   const page = new FakePage(core, { component: "efb-app" })
   t.after(() => page.close())
   await page.until(() => page.client.connected, "the page connecting")
-  assert.match(core.log(), /a client joined.*component="efb-app"|component="efb-app".*a client joined/)
+  await core.logged(/a client joined.*component="efb-app"|component="efb-app".*a client joined/)
   await assert.rejects(page.client.command("nobody.knows", null), /unknown/)
   // The case from the loop's design: a command's handler reads the clients crate's settings
   // while the clients crate dispatches it, here a setting changed from the page's socket.
@@ -60,10 +60,9 @@ test("a client of another version is logged with both versions and still served,
   old.send(JSON.stringify({ t: "command", id: 1, name: "nobody.knows", args: null }))
   await old.until(() => old.received.some((m) => m.t === "answer"), "the command's answer")
   assert.deepEqual(old.received.find((m) => m.t === "answer"), { t: "answer", id: 1, error: "unknown" })
-  const log = core.log()
-  assert.match(log, /a client's version differs from the core's/)
-  assert.match(log, /client_version="0\.0\.1"/)
-  assert.match(log, /a client's message didn't read, so it was dropped/)
+  await core.logged(/a client's version differs from the core's/)
+  await core.logged(/client_version="0\.0\.1"/)
+  await core.logged(/a client's message didn't read, so it was dropped/)
 })
 
 test("a settings file keeps a key no unit registered through the core's write of it", { timeout: 30_000 }, async (t) => {

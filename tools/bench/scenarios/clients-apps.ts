@@ -42,5 +42,5 @@ test("a notification clicked outside its action reaches the EFB app as the order
   await efb.until(() => efb.orders.length > 0, "the EFB app's order")
   assert.deepEqual(efb.orders, [{ t: "open-efb", landing: "session", id: "bench-clients.look" }])
   assert.deepEqual(banner.messages("unit"), [], "only the EFB app gets the order")
-  assert.match(core.log(), /a notification was clicked outside its action, so the EFB app opens the EFB onto our app/)
+  await core.logged(/a notification was clicked outside its action, so the EFB app opens the EFB onto our app/)
 })

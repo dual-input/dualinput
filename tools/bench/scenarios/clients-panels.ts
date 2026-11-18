@@ -116,7 +116,7 @@ test("a panel module's messages reach its feature and come back, and a reloaded 
   t.after(() => reloaded.close())
   await reloaded.until(() => reloaded.messages("load").length === 1, "the reloaded panel's load")
   await first.until(() => first.client.state === "closed", "the core closing the old socket")
-  assert.match(core.log(), /a cockpit panel's new socket replaced its old one/)
+  await core.logged(/a cockpit panel's new socket replaced its old one/)
 })
 
 test("a slice 20 panels watch reaches each under 30 messages a second, though it changes 100 times a second, and each round takes under 1ms on the loop", { timeout: 60_000 }, async (t) => {

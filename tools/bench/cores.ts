@@ -363,6 +363,21 @@ export class Core {
     }
   }
 
+  /**
+   * Waits until a line of the core's log matches `wanted`, and returns it. A handler sends its
+   * line to the log's writer, which writes it on its own thread, so the line can reach the
+   * file after the bench has seen what the handler did, by as long as Windows holds the write:
+   * up to 49ms (record/areas/core/log.md, 2026-11-18).
+   */
+  async logged(wanted: string | RegExp, { ms = 5_000 } = {}): Promise<string> {
+    const match = (line: string) => (typeof wanted === "string" ? line.includes(wanted) : wanted.test(line))
+    for (const started = Date.now(); ; await sleep(20)) {
+      const found = this.log().split("\n").find(match)
+      if (found !== undefined) return found
+      if (Date.now() - started > ms) throw new Error(`the core's log never said ${wanted} within ${ms}ms`)
+    }
+  }
+
   /** What the stand-in was called for, and what its aircraft holds. */
   async report(): Promise<StandInReport> {
     const before = this.lines.read.length

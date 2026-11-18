@@ -1,0 +1,44 @@
+# Log-write stalls on the loop's thread, 2026-11-16 to 2026-11-18
+
+# 1b. For comparison, a later test's first core in the same bench as the 2026-11-17_23-42 run, as read out of its log.txt on 2026-11-18.
+2026-11-17_23-47-16-profiles-unchanged James | window="run" seconds=0.2 inputs=14 busy_percent=0.55 wait_p50_us=8 wait_p99_us=2606 wait_p999_us=2606 wait_max_us=2606 over_1ms=0 slowest_us=307 slowest_seq=7 slowest_stamp=52245978824
+
+# 1. The loop's stats for the whole run, from James's core, the first core, in each bench run whose first test failed the bench's 1ms for a handler.
+#    The run folders were deleted with their worktrees, so these are the fields as read out of each log.txt on 2026-11-18.
+2026-11-16_23-28-01-flight-model | over_1ms=2 slowest_us=22910 slowest_seq=7
+2026-11-17_19-04-00-flight-model | over_1ms=2 slowest_us=44186 slowest_seq=7
+2026-11-17_19-42-17-flight-model | over_1ms=2 slowest_us=44331 slowest_seq=7
+2026-11-17_23-42-17-flight-model | window="run" seconds=23.6 inputs=6497 busy_percent=0.57 wait_p50_us=10 wait_p99_us=479 wait_p999_us=575 wait_max_us=24655 over_1ms=2 slowest_us=32916 slowest_seq=7 slowest_stamp=51947081960
+2026-11-18_00-01-03-cockpit-held | window="run" seconds=10.3 inputs=2404 busy_percent=0.67 wait_p50_us=10 wait_p99_us=495 wait_p999_us=1855 wait_max_us=18132 over_1ms=2 slowest_us=26772 slowest_seq=7 slowest_stamp=53073745486
+
+# 2. Stage 14b's cockpit bench on a diagnostic build, an uncommitted patch, on 2026-11-18: every input over 1ms, by run and core.
+#    cpu_us is the loop thread's CPU time from QueryThreadCycleTime, in cycles / 4,200; log_write_us is the time spent writing lines to log.txt during the input.
+2026-11-18_01-11-25-cockpit-held Adam | #194  WARN dualinput_core::run: DIAG slow input seq=194 source=2 took_us=1179 cpu_us=1169 faults=388 log_lock_us=0 log_write_us=15 lines=3
+2026-11-18_01-11-25-cockpit-held James | #7  WARN dualinput_core::run: DIAG slow input seq=7 source=2 took_us=41455 cpu_us=126 faults=72 log_lock_us=0 log_write_us=41409 lines=2
+2026-11-18_01-11-25-cockpit-held James | #256  WARN dualinput_core::run: DIAG slow input seq=256 source=2 took_us=1594 cpu_us=1596 faults=414 log_lock_us=0 log_write_us=14 lines=3
+2026-11-18_01-11-41-cockpit-cut Adam | #153  WARN dualinput_core::run: DIAG slow input seq=153 source=2 took_us=1342 cpu_us=1343 faults=412 log_lock_us=0 log_write_us=16 lines=3
+2026-11-18_01-11-41-cockpit-cut James | #217  WARN dualinput_core::run: DIAG slow input seq=217 source=2 took_us=1520 cpu_us=1522 faults=395 log_lock_us=0 log_write_us=20 lines=3
+2026-11-18_01-13-16-cockpit-takeover Adam | #157  WARN dualinput_core::run: DIAG slow input seq=157 source=2 took_us=1403 cpu_us=1405 faults=444 log_lock_us=0 log_write_us=17 lines=3
+2026-11-18_01-13-16-cockpit-takeover James | #223  WARN dualinput_core::run: DIAG slow input seq=223 source=2 took_us=1559 cpu_us=1558 faults=474 log_lock_us=0 log_write_us=16 lines=3
+2026-11-18_01-13-59-cockpit-late-joiner Adam | #13  WARN dualinput_core::run: DIAG slow input seq=13 source=3 took_us=2676 cpu_us=43 faults=2 log_lock_us=0 log_write_us=2652 lines=2
+2026-11-18_01-13-59-cockpit-late-joiner Adam | #133  WARN dualinput_core::run: DIAG slow input seq=133 source=2 took_us=1119 cpu_us=1120 faults=196 log_lock_us=0 log_write_us=14 lines=3
+2026-11-18_01-13-59-cockpit-late-joiner James | #125  WARN dualinput_core::run: DIAG slow input seq=125 source=2 took_us=1550 cpu_us=1535 faults=585 log_lock_us=0 log_write_us=18 lines=3
+2026-11-18_01-14-29-cockpit-pass-during-catch-up Adam | #13  WARN dualinput_core::run: DIAG slow input seq=13 source=3 took_us=49409 cpu_us=45 faults=4 log_lock_us=0 log_write_us=49385 lines=2
+2026-11-18_01-14-29-cockpit-pass-during-catch-up Adam | #154  WARN dualinput_core::run: DIAG slow input seq=154 source=2 took_us=1269 cpu_us=1271 faults=391 log_lock_us=0 log_write_us=15 lines=3
+2026-11-18_01-14-29-cockpit-pass-during-catch-up Eve | #137  WARN dualinput_core::run: DIAG slow input seq=137 source=2 took_us=1109 cpu_us=1110 faults=198 log_lock_us=0 log_write_us=17 lines=3
+2026-11-18_01-14-29-cockpit-pass-during-catch-up James | #219  WARN dualinput_core::run: DIAG slow input seq=219 source=2 took_us=1605 cpu_us=1601 faults=408 log_lock_us=0 log_write_us=18 lines=3
+2026-11-18_01-14-45-cockpit-leave-during-replay Adam | #191  WARN dualinput_core::run: DIAG slow input seq=191 source=2 took_us=1239 cpu_us=1241 faults=409 log_lock_us=0 log_write_us=14 lines=3
+2026-11-18_01-14-45-cockpit-leave-during-replay James | #256  WARN dualinput_core::run: DIAG slow input seq=256 source=2 took_us=1345 cpu_us=1347 faults=400 log_lock_us=0 log_write_us=17 lines=3
+2026-11-18_01-15-20-cockpit-no-profile Adam | #155  WARN dualinput_core::run: DIAG slow input seq=155 source=2 took_us=1374 cpu_us=1369 faults=407 log_lock_us=0 log_write_us=15 lines=3
+2026-11-18_01-15-20-cockpit-no-profile James | #220  WARN dualinput_core::run: DIAG slow input seq=220 source=2 took_us=1618 cpu_us=1620 faults=378 log_lock_us=0 log_write_us=20 lines=3
+
+# 3. Two flight-model benches on the same diagnostic build on 2026-11-18, alone and after avatars: every input over 1ms, and every handler over 300us with its unit.
+2026-11-18_00-40-24-flight-model Adam | #260 [state-sync]  WARN kernel::run: DIAG slow handler us=878
+2026-11-18_00-40-24-flight-model Adam | #260  WARN dualinput_core::run: DIAG slow input seq=260 source=2 took_us=1278 cpu_us=1276 faults=338 log_lock_us=0 log_write_us=21 lines=3
+2026-11-18_00-40-24-flight-model Adam | #5802 [clients]  WARN kernel::run: DIAG slow handler us=325
+2026-11-18_00-40-24-flight-model James | #207 [state-sync]  WARN kernel::run: DIAG slow handler us=1204
+2026-11-18_00-40-24-flight-model James | #207  WARN dualinput_core::run: DIAG slow input seq=207 source=2 took_us=1586 cpu_us=1588 faults=331 log_lock_us=0 log_write_us=18 lines=3
+2026-11-18_00-48-08-flight-model Adam | #262 [state-sync]  WARN kernel::run: DIAG slow handler us=1036
+2026-11-18_00-48-08-flight-model Adam | #262  WARN dualinput_core::run: DIAG slow input seq=262 source=2 took_us=1502 cpu_us=1503 faults=387 log_lock_us=0 log_write_us=19 lines=3
+2026-11-18_00-48-08-flight-model James | #207 [state-sync]  WARN kernel::run: DIAG slow handler us=843
+2026-11-18_00-48-08-flight-model James | #207  WARN dualinput_core::run: DIAG slow input seq=207 source=2 took_us=1230 cpu_us=1232 faults=416 log_lock_us=0 log_write_us=16 lines=3

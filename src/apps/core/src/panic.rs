@@ -10,7 +10,8 @@ use std::time::Duration;
 use crate::clock;
 use crate::run_context;
 
-/// How long the hook waits for the writer to put the recording's last frame on disk.
+/// How long the hook waits for the log's writer to write the panic's line, and then for the
+/// recording's writer to put the recording's last frame on disk.
 const FLUSH: Duration = Duration::from_millis(500);
 
 /// Installs the one panic hook of the process, ahead of the one already there, which still
@@ -31,8 +32,9 @@ pub fn install() {
 }
 
 /// Logs the panic with the input being handled and the unit that was running, and waits for
-/// the writer to put everything it was sent on disk, that input included, since the loop
-/// records each input before handling it. Returns whether the process should abort.
+/// the log's writer to write it and for the recording's writer to put everything it was sent
+/// on disk, that input included, since the loop records each input before handling it.
+/// Returns whether the process should abort.
 fn record(info: &PanicHookInfo) -> bool {
     let unit = kernel::running_unit().unwrap_or("none");
     let at = run_context::current().map_or("no input".to_string(), |input| {
@@ -43,6 +45,7 @@ fn record(info: &PanicHookInfo) -> bool {
             "{}µs ERROR panic at {at}, in unit {unit}: {info}\n",
             clock::now()
         ));
+        c.log.flush(FLUSH);
         if let Some(writer) = c.writer.get() {
             writer.flush(FLUSH);
         }

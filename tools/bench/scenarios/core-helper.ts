@@ -51,7 +51,7 @@ test("the helper runs only while a want is on, gets the sound and then the wants
   core.helper({ act: "binding", on: false })
   await helper.until(() => helper.latest!.closed !== undefined, "its exit")
   assert.equal(helper.latest!.lines.at(-1)?.line, "closed", "the core closed its standard input")
-  assert.match(core.log(), /nothing is wanted of the core helper, so it stops/)
+  await core.logged(/nothing is wanted of the core helper, so it stops/)
 })
 
 test("a press reaches the feature, and a helper killed while a want is on runs again within 3s with the binding sent as before", { timeout: 60_000 }, async (t) => {
@@ -72,7 +72,7 @@ test("a press reaches the feature, and a helper killed while a want is on runs a
   const again = performance.now() - killed
   console.log(`budget: the helper ran again with every want sent ${again.toFixed(0)}ms after it was killed, against 3,000ms`)
   assert.ok(again < 3_000, `the helper ran again ${again.toFixed(0)}ms after it was killed`)
-  assert.match(core.log(), /the core helper exited while something was wanted of it/)
+  await core.logged(/the core helper exited while something was wanted of it/)
 })
 
 test("the core killed, the helper exits within 1s", { timeout: 60_000 }, async (t) => {
@@ -110,7 +110,7 @@ test("a helper of another build is logged, killed, and started again, and the tr
   const shown = performance.now() - first
   assert.ok(shown > 4_500 && shown < 7_000, `the trouble notification showed ${shown.toFixed(0)}ms after the helper went down`)
   assert.ok(helper.runs.length >= 2, "the core started it again")
-  assert.match(core.log(), /a core helper of another build said hello, so the core killed it/)
+  await core.logged(/a core helper of another build said hello, so the core killed it/)
 
   helper.helloAs = {}
   await efb.until(() => !ids().includes("core-helper.down"), "the notification clearing at a matching hello", 10_000)

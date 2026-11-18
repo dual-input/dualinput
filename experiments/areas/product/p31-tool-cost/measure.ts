@@ -268,8 +268,9 @@ export function frameStats(csv: string, exe: string | null = SIM_EXE): FrameStat
   if (!column) return { error: `PresentMon's CSV has none of the frame-time columns this script knows: ${header.join(", ")}` }
   const at = header.indexOf(column)
   const app = header.findIndex((c) => c === "Application" || c === "ProcessName")
-  // PresentMon 1.x names the time column TimeInSeconds, and 2.x CPUStartTime, both in seconds from the capture's start unless a flag says otherwise.
-  const time = header.findIndex((c) => c === "TimeInSeconds" || c === "CPUStartTime")
+  // PresentMon 1.x names the time column TimeInSeconds, 2.0 CPUStartTime, both in seconds from the capture's start, and 2.6 TimeInMs, in ms.
+  const time = header.findIndex((c) => c === "TimeInSeconds" || c === "CPUStartTime" || c === "TimeInMs")
+  const timeScale = header[time] === "TimeInMs" ? 1 / 1000 : 1
   const otherColumns = ["MsBetweenDisplayChange", "MsUntilDisplayed", "MsInPresentAPI", "MsRenderPresentLatency", "MsGPUBusy", "MsCPUBusy"].filter((c) => header.includes(c))
   const rows = lines.slice(1).map((l) => l.split(",")).filter((r) => exe === null || app < 0 || r[app]?.toLowerCase() === exe.toLowerCase())
   const values = rows.map((r) => Number(r[at])).filter((v) => Number.isFinite(v) && v > 0)
@@ -277,7 +278,7 @@ export function frameStats(csv: string, exe: string | null = SIM_EXE): FrameStat
   const sorted = [...values].sort((a, b) => a - b)
   const minuteP50: number[] = []
   if (time >= 0) {
-    const times = rows.map((r) => Number(r[time]))
+    const times = rows.map((r) => Number(r[time]) * timeScale)
     const first = times[0]!
     for (let m = 0; ; m++) {
       const inMinute = rows.filter((_, i) => times[i]! - first >= m * 60 && times[i]! - first < (m + 1) * 60).map((r) => Number(r[at])).filter((v) => v > 0)

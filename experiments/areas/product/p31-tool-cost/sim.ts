@@ -18,11 +18,59 @@ import { setTimeout as sleep } from "node:timers/promises"
 
 import { simRunning } from "../../../../tools/lib/install.ts"
 import { evaluate, listPages, type Page } from "../../../../tools/sim/inspector.ts"
-import { processes, SIM_EXE } from "./measure.ts"
+import { processes, SIM_EXE, tree } from "./measure.ts"
 
 const STEAM_URL = "steam://rungameid/2537590"
-/** What the sim starts and leaves running after it quits, which then makes Steam refuse to start it again (our notes of 2026-11-05). */
-const LEFTOVERS = ["FenixBootstrapper", "TDSGTNXiFlightSimEXE", "TDSROARService", "roar", "gtn_simulator"]
+/**
+ * What the sim starts and leaves running after it quits, which then makes Steam refuse to start it
+ * again (our notes of 2026-11-05). FlowShare, which the sim starts about 80s into its boot on this
+ * PC, outlived each sim of the schedule of 2026-11-18 by up to a minute.
+ */
+const LEFTOVERS = ["FenixBootstrapper", "TDSGTNXiFlightSimEXE", "TDSROARService", "roar", "gtn_simulator", "FlowShare"]
+
+/** Each process the sim started while it ran, and each those started, by ID, with its name, so they can be ended once it quits. */
+const simStarted = new Map<number, string>()
+/** The last sim the run started, whose children name it as their parent after it quits. */
+let lastSim: number | undefined
+
+/** Notes what `root` started and what those started, as they stand. */
+export function noteTree(root: number): void {
+  for (const p of tree(processes(), root)) if (p.pid !== root) simStarted.set(p.pid, p.name)
+}
+
+/** Notes the running sim's whole tree. */
+export function noteSimTree(): void {
+  const pid = simPid()
+  if (pid === undefined) return
+  lastSim = pid
+  noteTree(pid)
+}
+
+/**
+ * Ends what the sims the run started left running after they quit, and returns what it ended. Steam
+ * counts the game as running while any process of it lives, and refuses a launch until then: in the
+ * schedule of 2026-11-18 it answered a launch sent seconds after the sim had quit with
+ * `WaitingPrevProcess`, then `AppError_16`, while FlowShare still ran (Steam's logs\console_log.txt,
+ * and the run's list of busy processes, which named FlowShare by its process ID). So this ends every
+ * process the sim was seen to start and whatever those started, whatever still names the last sim
+ * as its parent, and the leftovers we know by name.
+ */
+export function endLeftovers(): string[] {
+  if (simRunning()) return []
+  const all = processes()
+  const doomed = new Map<number, string>()
+  const end = (pid: number) => {
+    for (const p of tree(all, pid)) doomed.set(p.pid, p.name)
+  }
+  // A process that has the ID and name it had while the sim ran is the same process, since Windows reuses an ID only after the process ends.
+  for (const [pid, name] of simStarted) if (all.some((p) => p.pid === pid && p.name === name)) end(pid)
+  if (lastSim !== undefined && !all.some((p) => p.pid === lastSim)) for (const p of all) if (p.parent === lastSim) end(p.pid)
+  for (const p of all) if (LEFTOVERS.some((name) => p.name.toLowerCase() === `${name.toLowerCase()}.exe`)) end(p.pid)
+  doomed.delete(process.pid)
+  for (const pid of doomed.keys()) spawnSync("taskkill", ["/PID", String(pid), "/T", "/F"], { stdio: "ignore" })
+  simStarted.clear()
+  return [...doomed].map(([pid, name]) => `${name} (${pid})`)
+}
 
 /** The flight every run loads: the user's last flight's airport and runway, in the 58P and its livery N515MR. */
 export const FLIGHT = { icao: "SEGS", runway: "14", folder: "bksq-aircraft-baronpropress", livery: "N515MR" }
@@ -50,11 +98,6 @@ export function simPid(): number | undefined {
   return processes().find((p) => p.name.toLowerCase() === SIM_EXE.toLowerCase())?.pid
 }
 
-export function killLeftovers(): void {
-  if (simRunning()) return
-  powershell(`Get-Process -Name ${LEFTOVERS.join(",")} -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue`)
-}
-
 /** Waits for `get` to give a value, every second, and throws `SimDown` if the sim's process `pid` ends first, or `ms` passes. */
 async function until<T>(pid: number | undefined, get: () => T | undefined | null | Promise<T | undefined | null>, ms: number, what: string): Promise<T> {
   const started = Date.now()
@@ -78,32 +121,40 @@ function alive(pid: number): boolean {
 
 /** Starts the sim through Steam, once more if Steam ignored the first launch, and returns its process ID. */
 export async function launchSim(say: Say): Promise<number> {
-  killLeftovers()
+  const ended = endLeftovers()
+  if (ended.length) say(`ended what an earlier sim left running: ${ended.join(", ")}`)
   for (let attempt = 0; attempt < 2; attempt++) {
     spawnSync("cmd", ["/c", "start", "", STEAM_URL], { stdio: "ignore" })
     say(attempt === 0 ? "started the sim through Steam" : "no sim process after 60s, so the run asked Steam again")
     // Steam can ignore a launch sent seconds after the sim last quit (our notes of 2026-10-04).
     const pid = await until(undefined, () => simPid(), 60_000, "a process").catch(() => undefined)
-    if (pid) return pid
+    if (pid) {
+      lastSim = pid
+      return pid
+    }
   }
   throw new SimDown("Steam started no sim in two tries")
 }
 
 /**
- * Closes the sim as its window's close button does, and kills it after 3 minutes, since with nobody
- * at the PC a sim that won't quit holds every run after it.
+ * Closes the sim as its window's close button does, kills it after 3 minutes, since with nobody at
+ * the PC a sim that won't quit holds every run after it, then ends whatever it left running.
  */
 export async function closeSim(say: Say): Promise<void> {
-  if (!simRunning()) return killLeftovers()
-  powershell("Get-Process FlightSimulator2024 -ErrorAction SilentlyContinue | ForEach-Object { [void]$_.CloseMainWindow() }")
-  for (const started = Date.now(); simRunning() && Date.now() - started < 180_000; ) await sleep(2_000)
+  noteSimTree()
   if (simRunning()) {
-    say("the sim hadn't quit 3 minutes after its close, so the run ended it")
-    spawnSync("taskkill", ["/IM", SIM_EXE, "/F"], { stdio: "ignore" })
-    for (const started = Date.now(); simRunning() && Date.now() - started < 30_000; ) await sleep(1_000)
+    powershell("Get-Process FlightSimulator2024 -ErrorAction SilentlyContinue | ForEach-Object { [void]$_.CloseMainWindow() }")
+    for (const started = Date.now(); simRunning() && Date.now() - started < 180_000; ) await sleep(2_000)
+    if (simRunning()) {
+      say("the sim hadn't quit 3 minutes after its close, so the run ended it")
+      spawnSync("taskkill", ["/IM", SIM_EXE, "/F"], { stdio: "ignore" })
+      for (const started = Date.now(); simRunning() && Date.now() - started < 30_000; ) await sleep(1_000)
+    }
   }
-  killLeftovers()
-  say("the sim has quit")
+  // A process the sim started can take a moment to start its own shutdown, so the run gives them 5s before ending them.
+  await sleep(5_000)
+  const ended = endLeftovers()
+  say(ended.length ? `the sim has quit, and the run ended what it left running: ${ended.join(", ")}` : "the sim has quit, and left nothing running")
 }
 
 /**
@@ -284,14 +335,26 @@ const MENU_JS = `(function () {
 
 type Screen = { start: boolean; home: boolean; map: boolean; ready: boolean; inGame: boolean }
 
+/**
+ * What the run last saw of the menu through the inspector, which a wait that runs out reports: in
+ * the schedule of 2026-11-18 the sim reached its menu 134s after it started, by the core's log, and
+ * the run saw no page it knew for 480s, and nothing said why.
+ */
+let menuSeen = "nothing"
+
 /** mainUi, once the inspector lists it and it takes our code. */
 async function mainUi(): Promise<Page | undefined> {
-  const page = (await listPages()).find((p) => /mainui\.html/i.test(p.url))
-  if (!page) return undefined
+  const pages = await listPages()
+  const page = pages.find((p) => /mainui\.html/i.test(p.url))
+  if (!page) {
+    menuSeen = pages.length ? `the inspector listed ${pages.length} pages, none of them mainUi: ${pages.slice(0, 8).map((p) => p.url.split("/").pop()).join(", ")}` : "nothing answered on the inspector's port"
+    return undefined
+  }
   try {
     await evaluate<string>(page, MENU_JS)
     return page
-  } catch {
+  } catch (error) {
+    menuSeen = `mainUi refused the run's menu code: ${(error as Error).message}`
     return undefined
   }
 }
@@ -299,7 +362,10 @@ async function mainUi(): Promise<Page | undefined> {
 async function menu<T>(expression: string): Promise<T | undefined> {
   const page = await mainUi()
   if (!page) return undefined
-  return evaluate<T>(page, `(function () { var m = window.DUALINPUT_P31_MENU; return ${expression}; })()`).catch(() => undefined)
+  return evaluate<T>(page, `(function () { var m = window.DUALINPUT_P31_MENU; return ${expression}; })()`).catch((error: Error) => {
+    menuSeen = `mainUi didn't answer ${expression}: ${error.message}`
+    return undefined
+  })
 }
 
 const screen = () => menu<Screen>("m.screen()")
@@ -319,10 +385,14 @@ export async function loadFlight(pid: number, say: Say): Promise<string[]> {
     said.push(line)
     say(line)
   }
+  menuSeen = "nothing"
   await until(pid, async () => {
     const now = await screen()
+    if (now && !Object.values(now).some(Boolean)) menuSeen = `mainUi answered with no page the run knows up: ${JSON.stringify(now)}`
     return now && Object.values(now).some(Boolean) ? now : undefined
-  }, 8 * 60_000, "its first screen")
+  }, 8 * 60_000, "its first screen").catch((error: Error) => {
+    throw error instanceof SimDown && !/quit/.test(error.message) ? new SimDown(`${error.message}; the last the run saw: ${menuSeen}`) : error
+  })
   // Each page gets its action at most every few seconds, since a press takes a moment to change the page.
   const last = new Map<string, number>()
   const due = (action: string, every: number) => {

@@ -144,7 +144,7 @@ async function session(options: Options, body: (guide: Voice) => Promise<void>):
     await body(guide)
   } finally {
     guide.close()
-    if (quit.length) console.log("Your installed Dual Input stays quit; it starts again at your next login, or from the Start menu, and puts its own package back in Community as it starts.")
+    if (!options.dry) console.log("If your installed Dual Input was running, the runs quit it; it starts again at your next login, or from the Start menu, and puts its own package back in Community as it starts.")
   }
 }
 
@@ -178,7 +178,12 @@ async function all(modes: Mode[], repeats: number, options: Options): Promise<vo
       }
     })
   } finally {
-    if (!options.dry || process.env.DUALINPUT_P31_PACKAGES) for (const line of restore()) console.log(line)
+    // A restore that can't move a package back says why, and leaves the report to be written all the same.
+    try {
+      if (!options.dry || process.env.DUALINPUT_P31_PACKAGES) for (const line of restore()) console.log(line)
+    } catch (error) {
+      console.log(`Community isn't back as it was: ${(error as Error).message}`)
+    }
     restoreFscProfile()
   }
   if (options.dry) return console.log("dry: no report, since a dry run's numbers measure no sim")
@@ -312,6 +317,8 @@ async function runOne(mode: Mode, options: Options, guide: Voice): Promise<Resul
   }
   const notes: string[] = []
   say(`p31, the run with ${label}, ${new Date().toString()}`)
+  // Windows starts the installed app at login, 42s after Steam on 2026-11-18, which was 20s after that schedule had looked for it, so every run looks again.
+  if (!dry) for (const quit of quitInstalledDualInput()) say(`quit your installed Dual Input's ${quit}`)
   if (!dry || process.env.DUALINPUT_P31_PACKAGES) for (const line of mount(MOUNTS[mode])) say(line)
   else say("dry: Community stays as it is")
 
@@ -650,6 +657,8 @@ async function startDualInput(folder: string, say: Say, notes: string[], dry: bo
 
     const data = path.join(folder, "core")
     fs.mkdirSync(data, { recursive: true })
+    // Each try of a run starts its core on the same folder, and the port file an earlier try's core wrote would send the run to a port nothing listens on.
+    fs.rmSync(path.join(data, "port.json"), { force: true })
     fs.writeFileSync(path.join(data, "settings.json"), JSON.stringify({ ...settings, "session.name": "Pilot" }, null, 2))
     const out = fs.openSync(`${data}-output.txt`, "w")
     real = spawn(RELEASE_CORE, ["--data", data], { stdio: ["ignore", out, out] })

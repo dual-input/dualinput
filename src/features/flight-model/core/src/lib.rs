@@ -26,13 +26,13 @@ use network::{NetUnit, Network, Sender, Slewed, To};
 use session::{ControlPassed, FlightChanged, Session, SessionEnded};
 use sim_service::{SimAwareness, SimChanged, SimCx, SimEvent, SimUnit};
 
-/// How far behind the samples `Follow` draws the aircraft, in Âµs, the delay of FS Copilot's
+/// How far behind the samples `Follow` draws the aircraft, in µs, the delay of FS Copilot's
 /// module (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.h`, `k_delay_sec`).
 /// Each feed carries it, so a later delay that follows the path changes only this crate.
 pub const DELAY: u64 = 400_000;
 
 /// How long the flying sim's pause goes with no report before this core sends the last
-/// sample again, in Âµs. Whether our module's update runs in a pause is unmeasured, and when
+/// sample again, in µs. Whether our module's update runs in a pause is unmeasured, and when
 /// it does, `Lead` keeps reporting and nothing is sent again.
 const QUIET: u64 = 100_000;
 

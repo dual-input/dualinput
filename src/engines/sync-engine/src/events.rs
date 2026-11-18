@@ -295,7 +295,7 @@ impl Engine {
                 step: None,
             }],
             Write::Function(_) => match self.script.run(Slot::Event(i), value.as_ref()) {
-                Ok(written) => self.chains_of(written),
+                Ok(ran) => self.chains_of(ran.written),
                 Err(RunFailed::Limit(failed)) => {
                     self.stop(Slot::Event(i), Why::Limit(failed.to_string()), out);
                     return Applied::Skipped;

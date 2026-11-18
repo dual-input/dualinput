@@ -303,6 +303,11 @@ state:
     name: Parking brake
     watch: A('BRAKE PARKING POSITION', 'Bool')
     write: B('LANDING_GEAR_ParkingBrake_Set')
+  # A known limit: as a following 58P takes control, its own trim falls, to -77% in one run,
+  # within a second of the write that puts it at the old PF's, and the aircraft banks, likely from
+  # its own autopilot (unverified; measured on MSFS 2024, 2026-11-18, record/areas/sync/log.md,
+  # "In stage 14b's session the 58P took every preset value and its heading bug followed, and as it
+  # took control its own trim fell and it banked, after our trim write went out").
   elevator_trim:
     name: Elevator trim
     watch: A('ELEVATOR TRIM PCT', 'Percent')
@@ -365,17 +370,17 @@ state:
       }
   # A known limit: when altitude hold and vertical speed mode change together, this toggle can
   # read vertical speed mode before altitude hold's event turns it off, and turn it back on
-  # (measured on MSFS 2024, 2026-11-16, record/areas/sync/log.md), which stage 14c of
-  # record/areas/build/plan.md takes up.
+  # (measured on MSFS 2024, 2026-11-16, record/areas/sync/log.md), until a toggle's last check
+  # is made in the sim as it runs.
   ap_vs_hold:
     name: Autopilot vertical speed mode
     watch: A('AUTOPILOT VERTICAL HOLD', 'Bool')
     write:
       toggle: K('AP_PANEL_VS_HOLD', 1)
   # A known limit for this and the armed vertical speed below: as vertical speed mode engages,
-  # a following machine's autopilot sets its own target from its own climb rate, which goes to
-  # the crew as its pilot's change (measured on MSFS 2024, 2026-11-16,
-  # record/areas/sync/log.md).
+  # a following machine's autopilot sets its own target, likely from its own climb rate
+  # (unverified), which goes to the crew as its pilot's change (measured on MSFS 2024,
+  # 2026-11-16, record/areas/sync/log.md).
   ap_vertical_speed:
     name: Autopilot vertical speed
     watch: A('AUTOPILOT VERTICAL HOLD VAR:1', 'Feet per minute')
@@ -421,17 +426,22 @@ state:
       }
 
   # ═══ INSTRUMENTS
-  # The knob's preset turns degrees into 1/16,384ths of a turn, so a written 1° reads back as
-  # 1.0107°, and a reading that matches no write counts as this pilot's own turn and goes back to
-  # the crew. Rounding the value the same way first makes the reading match the write (read in
-  # MSFS 2024 SDK 1.8.1, ModelBehaviorDefs/Asobo/Common/Subtemplates/Instrument_Subtemplates.xml;
-  # measured on MSFS 2024, 2026-11-16, record/areas/sync/log.md).
+  # A reading that matches no write counts as this pilot's own turn and goes back to the crew, and
+  # the knob's preset turns degrees into 1/16,384ths of a turn, so a written 1° reads back as
+  # 1.0107°. So the function returns the value the bug will read, which the sync engine waits for
+  # in place of the one it gave. It rounds to the nearest step, which 1° fits, though rounding up
+  # fits it too (unverified; measured on MSFS 2024, 2026-11-16, record/areas/sync/log.md, "The
+  # drift after a handover was the host's heading bug, which no write moved after its first, and
+  # every `_Set` preset that missed took the value of its first call").
   heading_bug:
     name: Heading bug
     watch: A('AUTOPILOT HEADING LOCK DIR:1', 'Degrees')
     write: |
       (value) => {
-        write(B('INSTRUMENT_Heading_Bug_Set'), Math.round(Number(value) * 16384 / 360) * 360 / 16384)
+        write(B('INSTRUMENT_Heading_Bug_Set'), value)
+        const turn = 16384
+        const degrees = ((value % 360) + 360) % 360
+        return (Math.round(degrees * turn / 360) % turn) * 360 / turn
       }
   hsi_course:
     name: HSI course

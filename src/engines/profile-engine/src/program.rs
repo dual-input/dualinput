@@ -95,11 +95,19 @@ pub(crate) fn program(
                 let e = &p.events[script.entry];
                 (&e.key, &e.only, "(value?: number) => void".to_string())
             } else {
+                // A state entry's function may return the value its entry will read once the
+                // write lands, which the sync engine waits for in place of the one it gave. One
+                // written `(value) => write(...)` returns write()'s chain, which the engine takes
+                // as no value, and without `Chain` here TypeScript refuses that form. An
+                // `instrument()` value's type is unknown, so its function returns a number or a
+                // text, the only values the engine takes.
                 let e = &p.state[script.entry];
+                let t = value_type(&e.watch);
+                let reads = if t == "unknown" { "number | string" } else { t };
                 (
                     &e.key,
                     &e.only,
-                    format!("(value: {}) => void", value_type(&e.watch)),
+                    format!("(value: {t}) => {reads} | Chain | void"),
                 )
             };
             if !applies(only) {

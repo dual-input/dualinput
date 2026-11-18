@@ -10,8 +10,11 @@ Decides:     The profile's two blocks, the fields of an entry, the writer API, a
 > In [the writer API](#the-writer-api), state sync's routine fires `H:` events as calculator code, `(>H:<name>)`, in our own module, where no profile's code runs, since `fsEventsHEventCall` reached no panel; authors still write no calculator code ([sync log](log.md#2026-11-10-the-sdks-h-event-call-fails-on-msfs-2024-so-our-module-fires-h-events-as-calculator-code-which-reached-every-panel); user, 2026-11-10).
 
 > **Note**
-> In [ignoring a consequence](#ignoring-a-consequence), a consequence that's a readable state entry can still go out when each machine computes its own: as the PF's vertical speed mode reached a following 58P, its autopilot set its own target from its own climb rate, and sent it as its pilot's change ([sync log](log.md#2026-11-16-the-drift-after-a-handover-was-the-hosts-heading-bug-which-no-write-moved-after-its-first-and-every-_set-preset-that-missed-took-the-value-of-its-first-call)).
+> In [ignoring a consequence](#ignoring-a-consequence), a consequence that's a readable state entry can still go out when each machine computes its own: as the PF's vertical speed mode reached a following 58P, its autopilot set its own target, likely from its own climb rate (unverified), and that machine sent the target as its pilot's change ([sync log](log.md#2026-11-16-the-drift-after-a-handover-was-the-hosts-heading-bug-which-no-write-moved-after-its-first-and-every-_set-preset-that-missed-took-the-value-of-its-first-call)).
 > v1 leaves it a known limit (user, 2026-11-17).
+
+> **Note**
+> In [the writer API](#the-writer-api), a state entry's write function may return the value its entry will read once the write lands, which the sync engine waits for, since an aircraft can round what it's given, as the 58P's heading bug read a written 1° back as 1.0107° ([profiles' format note](../profiles/01-format-and-delivery.md); user, 2026-11-17).
 
 > **Note**
 > Stage 11b's tentative decision that [the profile format gains a name, a maturity, and an entry's description](../interface/decisions.md#the-profile-format-gains-a-name-a-maturity-and-an-entrys-description) adds an optional `description` to a state entry, which the checklist shows under its name, until the apps' design confirms it (user, 2026-10-30).

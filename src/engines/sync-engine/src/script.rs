@@ -1,7 +1,7 @@
 //! The profile's write functions in its sandbox: the names, `write()`, and `state` the context
 //! defines for them, compiling each at load, and running one for a value, which hands back the
-//! actions it wrote, in call order (record/areas/profiles/01-format-and-delivery.md, "Write
-//! functions").
+//! actions it wrote, in call order, and the value it returned, if any
+//! (record/areas/profiles/01-format-and-delivery.md, "Write functions").
 //!
 //! A run's actions come back whole once the function returns, so the engine sees every action
 //! before any goes out, and a function that throws or reaches a limit writes nothing.
@@ -50,6 +50,14 @@ pub(crate) struct Written {
     pub(crate) value: Option<Value>,
     pub(crate) times: u64,
     pub(crate) every: Option<Pace>,
+}
+
+/// What a run wrote, and the value it returned, which a state entry's function returns as the
+/// value its entry will read once the write lands, where the sim rounds what it's given.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct Ran {
+    pub(crate) written: Vec<Written>,
+    pub(crate) reads: Option<Value>,
 }
 
 /// Why a run wrote nothing.
@@ -115,18 +123,18 @@ impl Script {
         }
     }
 
-    /// Runs the function for `slot` with `value`, and hands back what it wrote.
+    /// Runs the function for `slot` with `value`, and hands back what it wrote and returned.
     pub(crate) fn run(
         &mut self,
         slot: crate::Slot,
         value: Option<&Value>,
-    ) -> Result<Vec<Written>, RunFailed> {
+    ) -> Result<Ran, RunFailed> {
         let (Some(function), Some(take)) = (self.functions.get(&slot), self.take.as_ref()) else {
             return Err(RunFailed::Wrong("the entry has no write function".into()));
         };
         // A run that fails leaves `state` to be set again before the next.
         let changed = &self.changed;
-        let raw = self
+        let (raw, returned) = self
             .sandbox
             .call(|ctx| {
                 let take = take.clone().restore(ctx)?;
@@ -140,26 +148,48 @@ impl Script {
                     }
                 }
                 let f = function.clone().restore(ctx)?;
-                match value {
-                    Some(v) => f.call::<_, ()>((to_js(ctx, v)?,))?,
-                    None => f.call::<_, ()>(())?,
-                }
+                let returned: JsValue = match value {
+                    Some(v) => f.call((to_js(ctx, v)?,))?,
+                    None => f.call(())?,
+                };
+                // An event has no reading, so what its function returns goes unused, and the
+                // builder types it to return anything. A state entry's function written
+                // `(value) => write(...)` returns write()'s chain, which says nothing about the
+                // reading, and the builder lets it return no other object.
+                let state_entry = matches!(slot, crate::Slot::State(_));
+                let returned = if !state_entry || returned.is_object() {
+                    None
+                } else {
+                    raw_value(&returned)?
+                };
                 let taken: Array = take.call(())?;
                 let mut raw = Vec::new();
                 for action in taken.iter::<Object>() {
                     raw.push(read_raw(&action?)?);
                 }
-                Ok(raw)
+                Ok((raw, returned))
             })
             .map_err(|failed| match failed {
                 Failed::Threw(e) => RunFailed::Wrong(e),
                 limit => RunFailed::Limit(limit),
             })?;
         self.changed.clear();
-        raw.into_iter()
+        let reads = match returned {
+            None => None,
+            Some(RawValue::Number(n)) if n.is_finite() => Some(Value::Number(n)),
+            Some(RawValue::Text(t)) => Some(Value::Text(t)),
+            Some(_) => {
+                return Err(RunFailed::Wrong(
+                    "a write function returns the value its entry will read, a number or a text, or nothing".into(),
+                ));
+            }
+        };
+        let written = raw
+            .into_iter()
             .map(|r| written(r, value))
             .collect::<Result<_, _>>()
-            .map_err(RunFailed::Wrong)
+            .map_err(RunFailed::Wrong)?;
+        Ok(Ran { written, reads })
     }
 }
 
@@ -200,8 +230,20 @@ fn read_raw<'js>(action: &Object<'js>) -> sandbox::rquickjs::Result<Raw> {
         Some(t) => t.get::<_, Option<Vec<Option<f64>>>>("values")?,
         None => None,
     };
-    let value: JsValue = action.get("value")?;
-    let value = if value.is_undefined() {
+    Ok(Raw {
+        kind: field("kind")?,
+        name: field("name")?,
+        unit: field("unit")?,
+        values,
+        value: raw_value(&action.get("value")?)?,
+        times: action.get::<_, Option<f64>>("times")?.unwrap_or(f64::NAN),
+        every: action.get::<_, Option<String>>("every")?,
+    })
+}
+
+/// A value as a run gave it, `None` for `undefined`, before it's checked.
+fn raw_value(value: &JsValue) -> sandbox::rquickjs::Result<Option<RawValue>> {
+    Ok(if value.is_undefined() {
         None
     } else if let Some(n) = value.as_number() {
         Some(RawValue::Number(n))
@@ -209,15 +251,6 @@ fn read_raw<'js>(action: &Object<'js>) -> sandbox::rquickjs::Result<Raw> {
         Some(RawValue::Text(s.to_string()?))
     } else {
         Some(RawValue::Other)
-    };
-    Ok(Raw {
-        kind: field("kind")?,
-        name: field("name")?,
-        unit: field("unit")?,
-        values,
-        value,
-        times: action.get::<_, Option<f64>>("times")?.unwrap_or(f64::NAN),
-        every: action.get::<_, Option<String>>("every")?,
     })
 }
 

@@ -551,7 +551,7 @@ fn each_variants_file_declares_only_its_own_entries() {
     assert!(
         p.files[1]
             .text
-            .contains("const write_fuel_pump: (value: number) => void = (")
+            .contains("const write_fuel_pump: (value: number) => number | Chain | void = (")
     );
 }
 

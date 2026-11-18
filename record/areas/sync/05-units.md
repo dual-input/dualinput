@@ -25,9 +25,10 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 > From the first flight with friends ([sync log](log.md#2026-11-17-fsvarsbvarcall-with-a-value-jams-the-input-event-for-the-rest-of-the-flight-and-calculator-code-from-our-module-doesnt); user, 2026-11-17):
 >
 > - In [reaching the sim](#reaching-the-sim), `HEvents` calls each input event's preset as calculator code, as it fires `H:` events, since `fsVarsBVarCall` with a value jammed the input event for the rest of the flight.
-> - In [checking a write](#checking-a-write), the engine flags each write that never lands, not once for each load, so the run's log has a line for each, and state sync's notification still shows once for each entry and load.
+> - In [checking a write](#checking-a-write), the engine flags every write that never lands, where it flagged only an entry's first in each load, so the run's log has a line for each, and state sync's notification still shows once for each entry and load.
+> - A write function that returns a value puts that value pending in place of the one it was given, so a reading the aircraft rounded is still the write's echo ([profiles' format note](../profiles/01-format-and-delivery.md)).
 > - A PF-owned entry's write on a following machine, live or in catch-up, goes unchecked, since that machine's own systems move it, as its autopilot trims the aircraft `Follow` freezes.
-> - As control passes to a machine, the engine writes each PF-owned entry its cockpit doesn't hold at the old PF's last value, once, through `control_passed`, which state sync calls on `ControlPassed`.
+> - As control passes to a machine, the engine writes each PF-owned entry whose reading differs from the old PF's last value, once, at that value, through `control_passed`, which state sync calls on `ControlPassed`.
 > - Two known limits: a following machine's autopilot can send its own target as the PF's vertical speed mode reaches it, which goes out as its pilot's change; and two toggles of coupled controls that arrive together can undo each other, since a toggle decides from the last reading, which [stage 14c](../build/plan.md#14c-two-coupled-writes-in-one-input) takes up.
 
 > **Note**

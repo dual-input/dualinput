@@ -16,6 +16,10 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 > Stage 11b's tentative decision that [the profile format gains a name, a maturity, and an entry's description](../interface/decisions.md#the-profile-format-gains-a-name-a-maturity-and-an-entrys-description) adds `name` and `maturity` to [a profile's top-level keys](#a-profile) at level 1, and an optional `description` to a state entry, until the apps' design confirms it (user, 2026-10-26 and 2026-10-30).
 > A profile also needs `maker`, and `name` holds the model alone, since the aircraft picker's tiles show the two apart (2026-11-01), which the decision doesn't say yet.
 
+> **Note**
+> In [write functions](#write-functions), a state entry's function may return the value its entry will read once the write lands, a number or a text of the entry's type, and the sync engine waits for that reading in place of the value it gave the function; an event entry's function still returns nothing.
+> The Baron 58P's heading-bug preset turns degrees into 1/16,384ths of a turn, so a written 1° read back as 1.0107°, which matched no write and went back to the crew as the pilot's own turn ([sync log](../sync/log.md#2026-11-16-the-drift-after-a-handover-was-the-hosts-heading-bug-which-no-write-moved-after-its-first-and-every-_set-preset-that-missed-took-the-value-of-its-first-call); user, 2026-11-17).
+
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Dual Input defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
 Profiles live as flat files in `profiles/` in Dual Input's own public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules in it, under its hash.

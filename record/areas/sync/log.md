@@ -4,6 +4,34 @@ What our experiments and the build's stages found about keeping cockpits in sync
 The probes are in [experiments/areas/sync](../../../experiments/areas/sync), and their raw output is in its `results/` folder.
 Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on our development machine with Flow Pro 26.33.5, ChasePlane 2026.39.1.16, and GSX Pro 4.0.19 installed, with the frame rate capped near 30 fps unless the entry says otherwise.
 
+## 2026-11-18: In stage 14b's session the 58P took every preset value and its heading bug followed, and as it took control its own trim fell and it banked, after our trim write went out
+
+**Asked:** in [stage 14b's session](../../../tools/sim/handover.ts), with [the fix below](#2026-11-17-fsvarsbvarcall-with-a-value-jams-the-input-event-for-the-rest-of-the-flight-and-calculator-code-from-our-module-doesnt) in, does the Baron 58P take every value a second pilot sets through its `_Set` presets with no flag, and after a handover in heading mode does it fly straight on with its trim at the second pilot's?
+
+**Expected:** both, since the presets go as calculator code, the heading bug's function returns what the 58P reads, and the machine taking control writes the trim at the old PF's last value.
+
+**Found:** on MSFS 2024 on our development machine, 2026-11-18, in bksq-aircraft-baronpro 0.1.1, in two runs, with the real core flying the 58P and a bench core on a stand-in as the second pilot ([results](results/2026-11-18-stage-14b-session-in-the-sim.txt)).
+
+- **The presets took every value, and nothing was flagged**, in each run: the heading bug 6 of 6, `INSTRUMENT_Altimeter_1_Set` 4 of 4, and the cabin heat handle 5 of 5, each read back within 302ms.
+- **The heading-bug preset rounds to the nearest 1/16,384th of a turn**: 100° read back as 99.997559° and 253° as 252.993164°, where rounding up gives 100.019531° and 253.015137°, so the profile's function returns what the 58P reads.
+- **The 58P's heading bug followed the second pilot's to 225°**, so it took control with its bug on the course it flew, which the jammed bug of [the first flight with friends](#2026-11-16-the-drift-after-a-handover-was-the-hosts-heading-bug-which-no-write-moved-after-its-first-and-every-_set-preset-that-missed-took-the-value-of-its-first-call) didn't.
+- **As the 58P took control, its own trim fell and it banked left.**
+  From the frame flight-model sync's `Follow` let it go, its elevator trim fell 6.67% each panel frame, about 15 frames a second, from -8.33% to -77.21% in the first run and -61.78% in the second, then rose again at about that rate, for 4 frames to -55.34% in the first and 6 frames to -27.75% in the second.
+  A left bank started in the same frame and reached 16.0° in the first run and 23.8° in the second, in which the 58P turned up to 15.6° and lost 128 ft in 15s.
+- **State sync's write at the handover went out**: run 2's recording, replayed with a log line where the write goes, shows the real core writing the trim at the second pilot's -5% as control reached it, with the 58P reading -6.67%.
+  The `state-sync` bench case of that write passes too, on a stand-in sim, which has no autopilot to move the trim.
+- While following, the 58P's trim read -11.67% to -8.33% in both runs against the second pilot's -5%, as its autopilot trimmed the aircraft `Follow` froze and state sync put it back.
+- **The first run's dive of 829 ft came from the script**: it engaged the second pilot's altitude hold in the same change as the jump to 3,100 ft, and the 58P's autopilot held 300 ft after the run, likely the altitude the 58P had reached on the way up as the mode engaged (unverified).
+  The second run engaged it 3s after the 58P reached 3,100 ft, and the 58P's autopilot held 3,100 ft.
+- Both recordings replayed with every checkpoint matching, 223 and 101.
+
+So the trim and bank move after the handover write, from something in the 58P, likely its autopilot, wound up while it couldn't move the aircraft `Follow` froze (unverified).
+
+**Changed:** the trim and bank as a following 58P takes control are a known limit of stage 14b and the work of [stage 16c](../build/plan.md#16c-trim-and-bank-after-a-handover), so 14b's exit drops "flies straight on" (user, 2026-11-18).
+The session's script engages the second pilot's autopilot once the 58P has reached its altitude.
+
+**Affects:** [stage 14b](../build/plan.md#14b-state-syncs-writes-that-read-another-value) and [stage 16c](../build/plan.md#16c-trim-and-bank-after-a-handover).
+
 ## 2026-11-17: `fsVarsBVarCall` with a value jams the input event for the rest of the flight, and calculator code from our module doesn't
 
 **Asked:** after [p31's session](#2026-11-17-a-preset-called-with-a-value-from-our-wasm-module-took-only-its-first-value-and-from-a-panel-it-took-every-one), does a panel's call land after our module has called the same preset, and does our module's calculator code, the way FS Copilot's module calls presets, land each value when nothing has called the preset through `fsVarsBVarCall` first?
@@ -12,11 +40,13 @@ Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on 
 
 **Found:** on MSFS 2024 on our development machine, 2026-11-17, in bksq-aircraft-baronpro 0.1.1 parked at a stand, with no core running, through presets.patch, which has our module call a preset when an `L:` variable tells it to ([p32-presets](../../../experiments/areas/sync/p32-presets/check.ts); [first run](../../../experiments/areas/sync/results/p32-presets-2026-11-17-18-41-22.txt), [second run](../../../experiments/areas/sync/results/p32-presets-2026-11-17-18-57-29.txt)).
 
-- **`fsVarsBVarCall` with a value lands once and then jams the input event for the rest of the flight**, for every caller: on `INSTRUMENT_Heading_Bug_Set`, `INSTRUMENT_Altimeter_1_Set`, and `PASSENGER_Cabin_Heat_2_Set` two panel calls each landed before it, on `INSTRUMENT_Altimeter_2_Set` it was the first call, its own call landed each time, and none of the 3 to 23 calls after it moved the control, from our module, from a panel, or as our module's calculator code.
+- **`fsVarsBVarCall` with a value lands once and then jams the input event for the rest of the flight**, for every caller.
+  Its own call landed on all four presets: on `INSTRUMENT_Heading_Bug_Set`, `INSTRUMENT_Altimeter_1_Set`, and `PASSENGER_Cabin_Heat_2_Set` after two panel calls had landed, and on `INSTRUMENT_Altimeter_2_Set` as the first call.
+  None of the calls after it moved the control, whether from our module, from a panel, or as our module's calculator code: 25 on the heading bug, 5 each on the altimeter and the cabin handle, and 3 on `INSTRUMENT_Altimeter_2_Set`.
   The pilot saw the heading bug's knob stuck in the cockpit too, and loading the flight again cleared it.
-  So p31's calculator code failed only because its route 0 had jammed the preset first.
-- **Calculator code from our module took every value**: `INSTRUMENT_Heading_Bug_Set` 8 of 8, and `PASSENGER_Cabin_Heat_3_Set` 8 of 8 with a panel's calls between them, each within the script's 930ms round trip.
-- **A panel's calls took every value with no `fsVarsBVarCall` before them**: `INSTRUMENT_Altimeter_1_Set` took 20 of 20, the 16 beyond its range at its limits, 948 and 1084.
+  So the entry below was wrong that a preset called with a value from a WASM module takes only its first value through either API: p31's route 0 called `fsVarsBVarCall` first and jammed the input event, and its fresh IDs and calculator code came after.
+- **Calculator code from our module took every value** in the second run, after loading the flight again had cleared the jam: `INSTRUMENT_Heading_Bug_Set` 8 of 8, and `PASSENGER_Cabin_Heat_3_Set` 8 of 8 with a panel's calls between them, each read back 931ms to 936ms after the call, the script's round trip.
+- **A panel's calls took every value with no `fsVarsBVarCall` before them**: `INSTRUMENT_Altimeter_1_Set` took all 4 values in its range, and each of the 16 beyond it read back at the nearer limit, 948 or 1084, which match 28 and 32 inHg in hPa, and which the probe printed as `MISSED` ("4 of 20 landed").
 - `LANDING_GEAR_ParkingBrake_Set` 1 never landed from either route, so something held the brake released; that preset reads nothing here.
 - FS Copilot's profile for the 58P Press writes the heading bug, both altimeters, the gear, and the cabin handles through these presets as calculator code from its module (read in the FS Copilot profiles, `definitions/bksq-aircraft-baronpropress.yaml`), and the user never saw them jam in FS Copilot.
 
@@ -27,10 +57,9 @@ Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on 
 3. The autopilot's vertical speed target and the KAS 297B's armed vertical speed stay shared, a known limit.
 4. Two coupled toggles undoing each other goes to [stage 14c](../build/plan.md#14c-two-coupled-writes-in-one-input), since a write decides in the core from the last reading where FS Copilot's calculator code decides in the sim, and that wants experiments first.
 5. The engine flags each write that never lands, and the notification stays once per entry for each load.
+6. A state entry's write function may return the value its entry will read once the write lands, which the engine waits for in place of the value it gave, so the 58P's heading bug returns its value rounded to the nearest 1/16,384th of a turn (unverified against rounding up, which a written 1° fits too).
 
-The 58P profile's heading bug writes its value rounded to 1/16,384ths of a turn, so the reading matches the write.
-
-**Affects:** [stage 14b](../build/plan.md#14b-state-syncs-writes-that-read-another-value), [05-units](05-units.md), [04-order-and-recovery](04-order-and-recovery.md), [02-live-sync](02-live-sync.md), [01-profile-entries](01-profile-entries.md), and [the sim seam](../core/03-sim-seam-and-wasm-module.md), each with a note at its top.
+**Affects:** [stage 14b](../build/plan.md#14b-state-syncs-writes-that-read-another-value), [05-units](05-units.md), [04-order-and-recovery](04-order-and-recovery.md), [02-live-sync](02-live-sync.md), [01-profile-entries](01-profile-entries.md), [the sim seam](../core/03-sim-seam-and-wasm-module.md), and [the profile format](../profiles/01-format-and-delivery.md), each with a note at its top.
 
 ## 2026-11-17: A preset called with a value from our WASM module took only its first value, and from a panel it took every one
 
@@ -45,9 +74,9 @@ The 58P profile's heading bug writes its value rounded to 1/16,384ths of a turn,
 - **From a cockpit panel, in the flight loaded again with no call from our module, the same preset took every value**, 180°, 270°, 45°, and 225°, each within 133ms, and `K:HEADING_BUG_SET` took 100°, 200°, 135°, 300°, and 90°.
 - So the module's ID isn't the cause: a preset called with a value from a WASM module takes only its first value, through either API, and why is unknown (unverified whether that holds for each sim run, each flight, or each preset).
 - **The gear handle and the parking brake read nothing either way**: the pilot's hardware, whose controls the sim had bound by itself, put each back between writes, so each preset was only ever called with one value.
-- **The drift happened again**: with route 0, the 58P took control in heading mode with its bug at 45° while it flew 225°, and in 15s it turned 16° and banked up to 41°.
-  Neither handover's flight says more, since in each the 58P went down 2,000 ft to 3,000 ft in 15s.
-- **The following 58P's autopilot ran its elevator trim to full nose-down** while it followed, which the pilot watched, from -21.9% to -33.3% over one 10s window; the stand-in's trim never changed, so no arrival pulled it back, and putting the trim back didn't hold it.
+- **The drift happened again**: with route 0, the 58P took control in heading mode with its bug at 45° while it flew 225° magnetic, and in 15s it turned 16° and banked up to 41°.
+  Neither handover's flight says more, since the 58P lost 1,993 ft in the first and 3,133 ft in the second, each in 15s.
+- **The following 58P's autopilot ran its elevator trim to full nose-down** while it followed, which the pilot watched, reading between -33.3% and -21.9% over one 10s window; the stand-in's trim never changed, so no arrival pulled it back, and putting the trim back didn't hold it.
   That trim is the likeliest cause of the dives after each handover (unverified).
 - **The vertical modes didn't undo each other this time**: altitude hold back with vertical speed mode off, in one change, left the following 58P in altitude hold, and the second pilot's vertical speed target stayed at the 500 fpm it set.
 - **The KFC 150 takes each of its on and off events**: `K:AP_ALT_HOLD_ON` and `_OFF`, `K:AP_VS_ON` and `_OFF`, `K:AP_HDG_HOLD_ON` and `_OFF`, `K:AP_NAV1_HOLD_ON` and `_OFF`, `K:AP_APR_HOLD_ON` and `_OFF`, and `K:AP_BC_HOLD_ON` and `_OFF`, each within 1s.
@@ -102,7 +131,8 @@ The host is the pilot who hosted, on the other PC, and the joiner is the pilot o
 - **The cowl flaps' catch-up writes at preflight's end** missed on the joiner, and their two later writes landed; why is unknown.
 
 So none of the three leads holds the drift's cause, which is how the presets took their values.
-Of the other misses, the profile's toggles hold the modes', the following sim's autopilot holds the targets it sent and the trim's, and the check's 1.5s holds none, though flagging once for each load hid the heading bug's.
+Of the other misses, the profile's toggles caused the modes' misses, and the following sim's autopilot caused the trim's and sent its own targets.
+The check's 1.5s caused none, though flagging once for each load hid the heading bug's misses.
 
 **Changed:** nothing yet.
 A session in the sim, `experiments/areas/sync/p31-handover/session.ts`, calls each preset through three routes, our module's kept ID, an ID looked up for each call, and calculator code, makes the drift happen again, and tries the KFC 150's own on and off events for each mode.

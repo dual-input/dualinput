@@ -43,7 +43,11 @@ pub(crate) struct Run {
     due: Due,
     /// Whether each step's value goes pending, which a put-back's and a shadow's don't.
     pub(crate) checked: bool,
-    /// It puts back a value this machine may not send.
+    /// Whether a pending value still unread at its check is flagged, which a following
+    /// machine's write of a PF-owned entry's isn't.
+    pub(crate) flags: bool,
+    /// Its values don't go pending, as a put-back's don't, so this machine's readings while it
+    /// runs start no put-back of their own.
     pub(crate) put_back: bool,
     /// An arrival waits on its last step, as `Applied::Stepping`.
     pub(crate) answers: bool,
@@ -60,6 +64,7 @@ impl Run {
             chains: chains.into(),
             due: Due::Now,
             checked: true,
+            flags: true,
             put_back: false,
             answers: false,
             catch_up: false,
@@ -238,12 +243,13 @@ impl Engine {
                 Due::Now
             };
             let checked = run.checked;
+            let flags = run.flags;
             let tokens = run.tokens;
             if let (Some(by), Some(count)) = (step, run.count.as_mut()) {
                 count.at = moved(*count, by);
                 let value = Value::Number(count.at);
                 if checked && let Slot::State(i) = slot {
-                    self.pend(i, value, None);
+                    self.pend(i, value, None, flags);
                 }
             }
             if tokens {

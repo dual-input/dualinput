@@ -158,9 +158,10 @@ impl Sim for Aircraft {
     /// `90 (>B:INSTRUMENT_Heading_Bug_Set)`. Called through the Vars API's `fsVarsBVarCall`
     /// with a value, a preset took that value and then jammed: no later call, and not the
     /// pilot's own knob, moved its control until the flight loaded again, while calculator
-    /// code took every value (measured on MSFS 2024, 2026-11-17, record/areas/sync/log.md). A
-    /// value calculator code can't spell, such as NaN, calls nothing, and the 1.5s check flags
-    /// the write.
+    /// code took every value (measured on MSFS 2024, 2026-11-17, record/areas/sync/log.md,
+    /// "`fsVarsBVarCall` with a value jams the input event for the rest of the flight, and
+    /// calculator code from our module doesn't"). A value calculator code can't spell, such as
+    /// NaN, calls nothing.
     fn call_preset(&mut self, name: &str, value: Option<f64>) {
         if !plain(name) {
             return;

@@ -197,7 +197,8 @@ pub enum ChangeKind {
     Fired,
 }
 
-/// A write that never landed, or a value too large to send, each time.
+/// A write that never landed, or a value too large to send, each time, so a text over the
+/// limit that keeps changing is flagged at each change.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Flag {
     pub entry: String,

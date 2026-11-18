@@ -7,7 +7,8 @@ Decides:     What comes back after a link, a core, a sim, or a PC goes down; how
 ```
 
 > **Note**
-> In [putting back](#putting-back) and [a change of control](#a-change-of-control), putting back doesn't hold a PF-owned entry that a following machine's own systems move, as its autopilot ran the 58P's trim to full nose-down, so as control passes to a machine it writes each PF-owned entry at the old PF's last value, and a following machine doesn't check those entries' writes ([05-units](05-units.md)' note; [sync log](log.md#2026-11-17-fsvarsbvarcall-with-a-value-jams-the-input-event-for-the-rest-of-the-flight-and-calculator-code-from-our-module-doesnt); user, 2026-11-17).
+> In [putting back](#putting-back) and [a change of control](#a-change-of-control), putting back can't hold a PF-owned entry that a following machine's own systems move: the following 58P's autopilot ran its trim to full nose-down while the machine put it back.
+> So a following machine doesn't check its writes to PF-owned entries, and as control passes to a machine, its sync engine writes each PF-owned entry that reads other than the old PF's last value at that value ([05-units' note on the first flight with friends](05-units.md); [sync log](log.md#2026-11-17-fsvarsbvarcall-with-a-value-jams-the-input-event-for-the-rest-of-the-flight-and-calculator-code-from-our-module-doesnt); user, 2026-11-17).
 > A known limit: the trim wheel on a following machine can drift from the PF's while it follows.
 
 > **Note**

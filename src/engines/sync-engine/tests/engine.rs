@@ -471,6 +471,66 @@ fn a_value_read_back_within_f32_isnt_flagged() {
 }
 
 #[test]
+fn a_reading_that_matches_what_a_write_function_returned_is_its_echo() {
+    let bug = l("BUG");
+    // The 58P's heading-bug preset rounds to 1/16,384ths of a turn, so 1° reads back as 46 of
+    // them.
+    let rounded = 46.0 * 360.0 / 16384.0;
+    let heading = |function: &str| {
+        profile(
+            vec![state(
+                "heading_bug",
+                bug.clone(),
+                Write::Function(function.into()),
+            )],
+            vec![],
+        )
+    };
+    let returns = heading(
+        r#"(value) => {
+      write(B('INSTRUMENT_Heading_Bug_Set'), value)
+      return Math.round(value * 16384 / 360) * 360 / 16384
+    }"#,
+    );
+    let mut pm = Machine::new(PM, &returns);
+    pm.read(&bug, 0.0);
+    pm.arrive("heading_bug", 1.0, stamp(PF, 1, &[]));
+    pm.frame();
+    pm.read(&bug, rounded);
+    pm.wait(2 * SECOND);
+    assert!(pm.sends().is_empty(), "{:?}", pm.out);
+    assert_eq!(pm.flags(), 0);
+
+    // A catch-up's 1° finds the bug already on 46 steps, so the sim reports no change, and the
+    // write waits for none.
+    pm.catching_up = true;
+    let out = pm.engine.take(
+        &CatchUpState {
+            entries: vec![entry("heading_bug", 1.0)],
+        },
+        pm.cx(),
+    );
+    pm.out.extend(out);
+    pm.wait(2 * SECOND);
+    assert_eq!(pm.flags(), 0, "{:?}", pm.out);
+    assert!(pm.sends().is_empty());
+
+    // Without a value returned, the rounded reading is this pilot's own turn. A function written
+    // `(value) => write(...)` returns write()'s chain, which still writes and counts as no value.
+    let silent = heading("(value) => write(B('INSTRUMENT_Heading_Bug_Set'), value)");
+    let mut pm = Machine::new(PM, &silent);
+    pm.read(&bug, 0.0);
+    pm.arrive("heading_bug", 1.0, stamp(PF, 1, &[]));
+    pm.frame();
+    let preset = Name::B {
+        name: "INSTRUMENT_Heading_Bug_Set".into(),
+    };
+    assert_eq!(pm.acts(), vec![set(&preset, 1.0)]);
+    pm.read(&bug, rounded);
+    assert_eq!(pm.sends().len(), 1);
+}
+
+#[test]
 fn two_pilots_changing_one_entry_at_once_end_on_one_value() {
     let bat = l("BAT");
     let p = profile(
@@ -753,7 +813,12 @@ fn a_pilot_flying_entry_its_own_systems_move_on_a_following_machine_is_never_fla
     let mut pm = Machine::new(PM, &p);
     pm.read(&trim, 0.0);
     pm.arrive("elevator_trim", -5.0, stamp(PF, 1, &[]));
-    assert_eq!(pm.acts(), vec![set(&trim, -5.0)]);
+    pm.arrive("elevator_trim", -6.0, stamp(PF, 2, &[]));
+    assert_eq!(pm.acts(), vec![set(&trim, -5.0), set(&trim, -6.0)]);
+    // Its writes still go pending, so a reading that lags behind them is their echo.
+    pm.read(&trim, -5.0);
+    pm.read(&trim, -6.0);
+    assert!(pm.acts().is_empty(), "a lagging echo starts no put-back");
     // Its autopilot trims the frozen aircraft faster than putting it back brings it home.
     for f in 0..120 {
         pm.read(&trim, -6.0 - f64::from(f) * 0.1);
@@ -857,6 +922,22 @@ fn an_event_entry_doesnt_send_back_what_its_write_fires_and_stops_when_it_comes_
         }
     }
     assert!(stopped, "{:?}", pm.out);
+}
+
+#[test]
+fn what_an_event_entrys_function_returns_goes_unused() {
+    let h = Name::H {
+        name: "SOME_KEY_PRESSED".into(),
+    };
+    // The builder types an event's function to return anything, as `false` here.
+    let function = "(value) => { write(H('SOME_KEY_PRESSED')); return false }";
+    let p = profile(
+        vec![],
+        vec![event("key", h.clone(), Write::Function(function.into()))],
+    );
+    let mut pm = Machine::new(PM, &p);
+    pm.arrive_fired("key", None);
+    assert_eq!(pm.acts(), vec![Action::Fire { name: h }]);
 }
 
 #[test]

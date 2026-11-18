@@ -1,0 +1,143 @@
+Stage 14b's session in the sim, MSFS 2024, 2026-11-18, bksq-aircraft-baronpro 0.1.1, tools/sim/handover.ts: the real core flew the Baron 58P, and a bench core on a stand-in played the second pilot.
+
+=== Run 1 (00:01 local), report.txt
+Start the sim, load a flight in the Baron 58P on the ground at a stand, engines running, and press Ready to fly.
+The session is starting. Keep your hands off the controls until the script says the aircraft is yours.
+waiting up to 75s for your aircraft to settle
+
+=== The presets, with the 58P flying
+landed: heading bug 45: the 58P reads 45 after 130ms, rounded to the nearest 1/16,384th of a turn
+landed: heading bug 100: the 58P reads 99.997559 after 132ms, rounded to the nearest 1/16,384th of a turn
+landed: heading bug 253: the 58P reads 252.993164 after 298ms, rounded to the nearest 1/16,384th of a turn
+landed: heading bug 90: the 58P reads 90 after 133ms, rounded to the nearest 1/16,384th of a turn
+landed: heading bug 315.5: the 58P reads 315.505371 after 299ms, rounded to the nearest 1/16,384th of a turn
+landed: heading bug 180: the 58P reads 180 after 299ms, rounded to the nearest 1/16,384th of a turn
+PASSED: the 58P's heading bug took 6 of 6 values through its _Set preset
+landed: altimeter 1 1000: the 58P reads 1000.000008 after 134ms
+landed: altimeter 1 1020: the 58P reads 1019.999994 after 299ms
+landed: altimeter 1 990: the 58P reads 989.999983 after 132ms
+landed: altimeter 1 1013: the 58P reads 1012.999983 after 302ms
+PASSED: the 58P's altimeter 1 took 4 of 4 values through its _Set preset
+landed: cabin heat handle 0.25: the 58P reads 0.25 after 130ms
+landed: cabin heat handle 0.75: the 58P reads 0.75 after 299ms
+landed: cabin heat handle 0.5: the 58P reads 0.5 after 300ms
+landed: cabin heat handle 1: the 58P reads 1 after 299ms
+landed: cabin heat handle 0: the 58P reads 0 after 300ms
+PASSED: the 58P's cabin heat handle took 5 of 5 values through its _Set preset
+the real core's lines for writes that never landed: none
+PASSED: the heading bug read back each value its function returned, so none was flagged
+
+=== In the air
+the 58P stands at 141.3° magnetic; the second pilot flies 225° magnetic at 3100 ft
+The second pilot takes control and flies at 3000 feet. Your aircraft will rise and fly on its own.
+while it followed for 20s, the 58P's elevator trim read -11.67% to -8.33%, where the second pilot's reads -5%
+PASSED: the 58P's heading bug followed the second pilot's to 225°: it reads 225.00°
+You take control for 15 seconds. Keep your hands off the controls.
+FAILED: as it took control, the 58P's trim went to the second pilot's -5%: it read -55.00% 300ms after
+FAILED: after it took control in heading mode, the 58P turned up to 5.6° from 225°, banked up to 16.0°, and went down 829 ft in 15s
+That's every case. The aircraft is yours. Whoever runs the script stops it with q in its terminal, which replays the core's recording.
+the real core's last loop stats: 49709286080µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=9389 busy_percent=0.58 wait_p50_us=9 wait_p99_us=271 wait_p999_us=703 wait_max_us=897 over_1ms=2 slowest_us=4566 slowest_seq=4223 slowest_stamp=49667738180
+the core's replay: replayed 23482 inputs, and all 223 checkpoints matched, up to the last flush of a cut recording
+
+=== Run 2 (00:10 local), report.txt, after the script engaged the second pilot's autopilot once the 58P reached its altitude
+Start the sim, load a flight in the Baron 58P on the ground at a stand, engines running, and press Ready to fly.
+The session is starting. Keep your hands off the controls until the script says the aircraft is yours.
+waiting up to 75s for your aircraft to settle
+
+=== The presets, with the 58P flying
+landed: heading bug 45: the 58P reads 45 after 292ms, rounded to the nearest 1/16,384th of a turn
+landed: heading bug 100: the 58P reads 99.997559 after 133ms, rounded to the nearest 1/16,384th of a turn
+landed: heading bug 253: the 58P reads 252.993164 after 135ms, rounded to the nearest 1/16,384th of a turn
+landed: heading bug 90: the 58P reads 90 after 297ms, rounded to the nearest 1/16,384th of a turn
+landed: heading bug 315.5: the 58P reads 315.505371 after 300ms, rounded to the nearest 1/16,384th of a turn
+landed: heading bug 180: the 58P reads 180 after 132ms, rounded to the nearest 1/16,384th of a turn
+PASSED: the 58P's heading bug took 6 of 6 values through its _Set preset
+landed: altimeter 1 1000: the 58P reads 1000.000008 after 300ms
+landed: altimeter 1 1020: the 58P reads 1019.999994 after 299ms
+landed: altimeter 1 990: the 58P reads 990 after 133ms
+landed: altimeter 1 1013: the 58P reads 1012.999983 after 132ms
+PASSED: the 58P's altimeter 1 took 4 of 4 values through its _Set preset
+landed: cabin heat handle 0.25: the 58P reads 0.25 after 301ms
+landed: cabin heat handle 0.75: the 58P reads 0.75 after 297ms
+landed: cabin heat handle 0.5: the 58P reads 0.5 after 299ms
+landed: cabin heat handle 1: the 58P reads 1 after 133ms
+landed: cabin heat handle 0: the 58P reads 0 after 298ms
+PASSED: the 58P's cabin heat handle took 5 of 5 values through its _Set preset
+the real core's lines for writes that never landed: none
+PASSED: the heading bug read back each value its function returned, so none was flagged
+
+=== In the air
+the 58P stands at 141.3° magnetic; the second pilot flies 225° magnetic at 3100 ft
+The second pilot takes control and flies at 3000 feet. Your aircraft will rise and fly on its own.
+while it followed for 20s, the 58P's elevator trim read -11.67% to -8.33%, where the second pilot's reads -5%
+PASSED: the 58P's heading bug followed the second pilot's to 225°: it reads 225.00°
+PASSED: the 58P's autopilot holds 3100 ft (altitude hold 1), where the second pilot's holds 3100 ft
+You take control for 15 seconds. Keep your hands off the controls.
+FAILED: as it took control, the 58P's trim went to the second pilot's -5%: it read -55.00% 300ms after
+FAILED: after it took control in heading mode, the 58P turned up to 15.6° from 225°, banked up to 23.8°, and went down 128 ft in 15s
+That's every case. The aircraft is yours. Whoever runs the script stops it with q in its terminal, which replays the core's recording.
+the real core's last loop stats: 50119261446µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=9229 busy_percent=0.65 wait_p50_us=10 wait_p99_us=383 wait_p999_us=1919 wait_max_us=18756 over_1ms=4 slowest_us=24447 slowest_seq=13 slowest_stamp=50059276222
+the core's replay: replayed 19336 inputs, and all 101 checkpoints matched, up to the last flush of a cut recording
+
+=== Each run's frames around the handover, read from the cockpit panel's DUALINPUT_CHECK_HANDOVER after the run (target/sim/read-handover-frames.ts, not kept): frame, then the 58P's magnetic heading in degrees, bank in degrees, altitude in feet MSL, and elevator trim in percent. The panel's frames came about 15 a second: 226 frames over the 15s. The record starts just before the core asks for control, and Follow lets the 58P go at frame 1 or 2. Each run shows every frame until the trim has come back from its lowest point, then a selection.
+
+--- Run 1 (autopilot engaged in the same change as the jump to 3,100 ft)
+0	hdg 225.0	bank 0.0	alt 3100	trim -8.33
+1	hdg 225.0	bank 0.0	alt 3100	trim -8.33
+2	hdg 224.8	bank -0.4	alt 3100	trim -15.00
+3	hdg 224.5	bank -1.1	alt 3100	trim -21.67
+4	hdg 224.1	bank -2.0	alt 3100	trim -28.33
+5	hdg 223.5	bank -3.0	alt 3099	trim -35.00
+6	hdg 223.0	bank -4.0	alt 3099	trim -41.67
+7	hdg 222.4	bank -4.9	alt 3099	trim -48.33
+8	hdg 221.8	bank -5.7	alt 3099	trim -55.00
+9	hdg 221.2	bank -6.3	alt 3099	trim -61.67
+10	hdg 220.7	bank -6.7	alt 3098	trim -68.33
+11	hdg 220.3	bank -7.0	alt 3098	trim -75.00
+12	hdg 219.9	bank -7.2	alt 3098	trim -77.21
+13	hdg 219.7	bank -7.2	alt 3098	trim -70.54
+14	hdg 219.5	bank -7.1	alt 3097	trim -63.87
+15	hdg 219.4	bank -7.0	alt 3097	trim -58.21
+16	hdg 219.5	bank -6.9	alt 3096	trim -55.34
+20	hdg 220.1	bank -7.5	alt 3091	trim -53.99
+25	hdg 221.5	bank -10.0	alt 3082	trim -56.93
+30	hdg 222.0	bank -12.5	alt 3070	trim -54.50
+39	hdg 221.0	bank -13.9	alt 3043	trim -50.21
+43	hdg 220.6	bank -14.0	alt 3028	trim -34.31
+60	hdg 222.9	bank -16.0	alt 2953	trim -24.53
+90	hdg 225.8	bank -12.3	alt 2808	trim -23.14
+120	hdg 227.7	bank -5.2	alt 2665	trim -26.15
+150	hdg 227.9	bank 1.9	alt 2534	trim -28.32
+180	hdg 227.4	bank 1.9	alt 2422	trim -31.16
+210	hdg 226.8	bank -0.9	alt 2322	trim -39.92
+
+After run 1, the 58P read: A:AUTOPILOT ALTITUDE LOCK 1, A:AUTOPILOT ALTITUDE LOCK VAR 300 ft, A:AUTOPILOT MASTER 0, A:PLANE ALTITUDE 27.52 ft.
+
+--- Run 2 (autopilot engaged 3s after the 58P reached 3,100 ft)
+0	hdg 225.0	bank 0.0	alt 3100	trim -8.33
+1	hdg 224.9	bank -0.2	alt 3100	trim -11.67
+2	hdg 224.6	bank -1.2	alt 3100	trim -18.33
+3	hdg 224.0	bank -2.6	alt 3100	trim -25.00
+4	hdg 223.4	bank -4.2	alt 3099	trim -31.67
+5	hdg 222.6	bank -6.0	alt 3099	trim -38.33
+6	hdg 221.7	bank -7.8	alt 3099	trim -45.00
+7	hdg 220.9	bank -9.5	alt 3099	trim -51.67
+8	hdg 220.1	bank -11.2	alt 3098	trim -58.33
+9	hdg 219.3	bank -12.6	alt 3098	trim -61.78
+10	hdg 218.7	bank -13.9	alt 3098	trim -55.11
+11	hdg 218.2	bank -15.0	alt 3098	trim -48.53
+12	hdg 217.9	bank -15.8	alt 3097	trim -42.65
+13	hdg 217.7	bank -16.4	alt 3097	trim -37.19
+14	hdg 217.6	bank -16.8	alt 3096	trim -32.07
+15	hdg 217.7	bank -16.9	alt 3096	trim -27.75
+20	hdg 219.8	bank -16.0	alt 3091	trim -25.50
+30	hdg 222.8	bank -21.2	alt 3076	trim -16.39
+39	hdg 222.9	bank -22.3	alt 3061	trim -10.48
+60	hdg 229.5	bank -23.8	alt 3026	trim -6.35
+90	hdg 234.6	bank -19.1	alt 2982	trim -6.73
+120	hdg 238.5	bank -12.7	alt 2956	trim -8.62
+143	hdg 240.2	bank -7.6	alt 2951	trim -9.80
+
+=== Run 2's recording replayed on a debug build of the same tree with one more log line in the sync engine's took_control (removed after), which matched all 101 checkpoints
+50141689014µs #14552 [session]  INFO session::control: this core passed control generation=3 pf="ad19743102ce48219e93f6f7ff752d64"
+50141689014µs #14552 [state-sync]  INFO sync_engine::state: s14b took control, writes entry="elevator_trim" held=Number(-5.0) reading=Number(-6.6657643765211105)

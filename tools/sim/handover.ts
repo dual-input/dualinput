@@ -138,8 +138,9 @@ async function run(program: string): Promise<void> {
 /**
  * With the 58P flying, the second pilot sets three controls the 58P takes through `_Set` presets
  * with a value, several values each, and each must land within 2.5s. The heading bug's values
- * include some that aren't whole 1/16,384ths of a turn, which the profile rounds, so the 58P's
- * reading matches its write, and the real core flags none of them.
+ * include some that aren't whole 1/16,384ths of a turn, the preset's steps: the profile's function
+ * returns each rounded to the nearest step, the reading the real core then waits for, so it flags
+ * none of them. 100° and 253° tell rounding to the nearest step from rounding up.
  */
 async function presets(c: Session): Promise<void> {
   c.say("\n=== The presets, with the 58P flying")
@@ -161,7 +162,8 @@ async function presets(c: Session): Promise<void> {
       }
       const ok = Math.abs(unit === "degrees" ? angle(read - value) : read - value) <= within
       if (ok) landed++
-      c.say(`${ok ? "landed" : "MISSED"}: ${what} ${value}: the 58P reads ${Number(read.toFixed(4))}${ok ? ` after ${Date.now() - started}ms` : " after 2.5s"}`)
+      const how = unit === "degrees" && ok ? `, ${rounding(read, value)}` : ""
+      c.say(`${ok ? "landed" : "MISSED"}: ${what} ${value}: the 58P reads ${Number(read.toFixed(6))}${ok ? ` after ${Date.now() - started}ms${how}` : " after 2.5s"}`)
     }
     c.result(landed === values.length, `the 58P's ${what} took ${landed} of ${values.length} values through its _Set preset`)
   }
@@ -170,7 +172,16 @@ async function presets(c: Session): Promise<void> {
     .split(/\r?\n/)
     .filter((l) => l.includes("a write never landed"))
   c.say(`the real core's lines for writes that never landed: ${flagged.length === 0 ? "none" : `\n  ${flagged.join("\n  ")}`}`)
-  c.result(!flagged.some((l) => l.includes('entry="heading_bug"')), "the heading bug's rounded writes read back as written, so none was flagged")
+  c.result(!flagged.some((l) => l.includes('entry="heading_bug"')), "the heading bug read back each value its function returned, so none was flagged")
+}
+
+/** Which way the heading-bug preset rounded `value` to the `read` the 58P gave. */
+function rounding(read: number, value: number): string {
+  const step = 360 / 16384
+  const at = (steps: number) => Math.abs(angle(read - steps * step)) < 1e-6
+  if (at(Math.round(value / step))) return "rounded to the nearest 1/16,384th of a turn"
+  if (at(Math.ceil(value / step))) return "rounded up to a 1/16,384th of a turn"
+  return "rounded neither to the nearest 1/16,384th of a turn nor up"
 }
 
 /**
@@ -212,6 +223,21 @@ async function inTheAir(c: Session): Promise<void> {
       ["A:FLAPS HANDLE PERCENT", 0],
       ["A:GEAR HANDLE POSITION", 0],
       ["A:ELEVATOR TRIM PCT", -5],
+    ],
+    texts: [],
+  })
+  // The second pilot engages the autopilot once the 58P has come up to its altitude, as a crew
+  // engages altitude hold at the altitude both aircraft fly. Engaged in the same change as the
+  // jump to 3,000 ft, the 58P's autopilot held 300 ft, likely the altitude it had reached on the
+  // way up as the mode engaged (unverified), and the 58P dived for it after taking control.
+  for (const started = Date.now(); Math.abs((await readSim("A:PLANE ALTITUDE", "feet")) - target) > 50; ) {
+    if (Date.now() - started > 15_000) throw new Failed("the 58P didn't come up to the second pilot's altitude within 15s")
+    await sleep(250)
+  }
+  await sleep(3_000)
+  second.act({
+    act: "set",
+    numbers: [
       ["A:AUTOPILOT MASTER", 1],
       ["A:AUTOPILOT FLIGHT DIRECTOR ACTIVE", 1],
       ["A:AUTOPILOT HEADING LOCK", 1],
@@ -228,6 +254,9 @@ async function inTheAir(c: Session): Promise<void> {
   say(`while it followed for 20s, the 58P's elevator trim read ${Math.min(...trims).toFixed(2)}% to ${Math.max(...trims).toFixed(2)}%, where the second pilot's reads -5%`)
   const bug = await readSim("A:AUTOPILOT HEADING LOCK DIR:1", "degrees")
   result(Math.abs(angle(bug - course)) < 0.05, `the 58P's heading bug followed the second pilot's to ${course}°: it reads ${bug.toFixed(2)}°`)
+  const held = await readSim("A:AUTOPILOT ALTITUDE LOCK VAR", "feet")
+  const holding = await readSim("A:AUTOPILOT ALTITUDE LOCK", "bool")
+  result(holding === 1 && Math.abs(held - target) < 100, `the 58P's autopilot holds ${held.toFixed(0)} ft (altitude hold ${holding}), where the second pilot's holds ${target} ft`)
 
   say("You take control for 15 seconds. Keep your hands off the controls.", true)
   await record(15)

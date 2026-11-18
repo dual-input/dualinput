@@ -48,6 +48,8 @@ pub(crate) struct Pending {
     pub(crate) value: Value,
     /// When it's flagged, or `None` while its write's run still sends.
     pub(crate) due: Option<u64>,
+    /// Whether it's flagged when it's due, or only dropped.
+    pub(crate) flags: bool,
 }
 
 /// How a write goes.
@@ -55,6 +57,8 @@ pub(crate) struct Pending {
 pub(crate) struct How {
     /// Its values go pending and are checked, which a put-back's aren't.
     checked: bool,
+    /// Whether a value still pending at its check is flagged; it's dropped either way.
+    flags: bool,
     /// An arrival waits on it.
     answers: bool,
     catch_up: bool,
@@ -62,31 +66,36 @@ pub(crate) struct How {
 
 const ARRIVAL: How = How {
     checked: true,
+    flags: true,
     answers: true,
     catch_up: false,
 };
 const PUT_BACK: How = How {
     checked: false,
+    flags: false,
     answers: false,
     catch_up: false,
 };
 const CATCH_UP: How = How {
     checked: true,
+    flags: true,
     answers: false,
     catch_up: true,
 };
 
 impl How {
-    /// How `how` goes for `owner`'s entry on this machine. A following machine's own systems
-    /// move what the PF owns, as its autopilot trims an aircraft `Follow` holds frozen, and
-    /// putting it back can't win against them, so checking the write there only flags the
-    /// trim in every flight on autopilot (measured on MSFS 2024, 2026-11-17,
-    /// record/areas/sync/log.md). The PF's machine writes those entries' last values as it
-    /// takes control, which is when they count.
+    /// How `how` goes for `owner`'s entry on this machine. On a following machine, flight-model
+    /// sync's routine `Follow` freezes the aircraft and writes its pose, and the aircraft's
+    /// own systems still move what the PF owns, as its autopilot trims, faster than putting it
+    /// back brings it home, so a flag there would only report the trim in every flight on
+    /// autopilot (measured on MSFS 2024, 2026-11-17, record/areas/sync/log.md, "A preset called
+    /// with a value from our WASM module took only its first value, and from a panel it took
+    /// every one"). Its values still go pending, so the echo of the write is still its own.
+    /// The PF's machine writes those entries' last values as it takes control, when they count.
     fn for_owner(self, owner: Owner, cx: Ctx) -> How {
         let following = owner == Owner::PilotFlying && !cx.flying();
         How {
-            checked: self.checked && !following,
+            flags: self.flags && !following,
             ..self
         }
     }
@@ -480,11 +489,16 @@ impl Engine {
         self.write(i, value, how, cx, out)
     }
 
-    /// Control passed to this machine: each PF-owned entry its cockpit doesn't hold at the old
-    /// PF's last value is written to it once. While this machine followed, its own systems
-    /// could move those entries away, as its autopilot ran the 58P's trim to full nose-down,
-    /// and an aircraft let go with that trim dived 2,000 ft in 15s (measured on MSFS 2024,
-    /// 2026-11-17, record/areas/sync/log.md).
+    /// Control passed to this machine: each PF-owned entry whose reading differs from the old
+    /// PF's last value is written to that value once, so the machine takes control with the
+    /// controls the old PF flew. While this machine followed, its own systems could move those
+    /// entries away, as its autopilot ran the 58P's trim to full nose-down. The write doesn't
+    /// hold a 58P's trim, which still fell to -77% within a second of the write as the aircraft
+    /// was let go, likely from its own autopilot (unverified; measured on MSFS 2024, 2026-11-18,
+    /// record/areas/sync/log.md, "In stage 14b's session the 58P took every preset value and its
+    /// heading bug followed, and as it took control its own trim fell and it banked, after our
+    /// trim write went out"). A toggle is left out, since a write of it still on its way would
+    /// flip it back, and nothing but a pilot moves a switch.
     pub(crate) fn took_control(&mut self, cx: Ctx, out: &mut Vec<Out>) {
         if !cx.flying() {
             return;
@@ -496,7 +510,7 @@ impl Engine {
             if slot.entry.owner != Owner::PilotFlying
                 || slot.stopped
                 || slot.watch_only()
-                || slot.counted().is_some()
+                || matches!(slot.entry.write, Write::Toggle(_))
             {
                 continue;
             }
@@ -587,11 +601,26 @@ impl Engine {
                 run
             }
             Write::Function(_) => match self.script.run(slot_id, Some(&wanted)) {
-                Ok(written) => {
-                    if checked {
-                        self.pend(i, wanted.clone(), None);
+                Ok(ran) => {
+                    // Without the value a function returns, a reading the sim rounded matches
+                    // no write and goes back to the crew as this pilot's change: the 58P's
+                    // heading-bug preset turns degrees into 1/16,384ths of a turn, so a written
+                    // 1° read back as 1.0107° (measured on MSFS 2024, 2026-11-16,
+                    // record/areas/sync/log.md, "The drift after a handover was the host's
+                    // heading bug, which no write moved after its first, and every `_Set` preset
+                    // that missed took the value of its first call").
+                    let reads = ran.reads.unwrap_or_else(|| wanted.clone());
+                    // A cockpit that already reads that value reports no change for the check
+                    // to match, as a catch-up's 252° finds 252.0044° already on the bug.
+                    let there = self
+                        .state
+                        .get(i)
+                        .and_then(|s| s.reading.as_ref())
+                        .is_some_and(|r| r.same(&reads));
+                    if checked && !there {
+                        self.pend(i, reads, None, how.flags);
                     }
-                    Run::new(self.chains_of(written))
+                    Run::new(self.chains_of(ran.written))
                 }
                 Err(RunFailed::Limit(failed)) => {
                     tracing::info!(entry = self.state.get(i).map(|s| s.entry.key.as_str()), %failed, "a write function reached a limit, so its entry stops on this machine");
@@ -605,7 +634,7 @@ impl Engine {
                         "a write function failed, so its write made nothing"
                     );
                     if checked {
-                        self.pend(i, wanted, Some(cx.at + CHECK));
+                        self.pend(i, wanted, Some(cx.at + CHECK), how.flags);
                     }
                     return Applied::Done;
                 }
@@ -619,9 +648,10 @@ impl Engine {
         // A name's or a toggle's value goes pending as it's written; a stepping write's goes
         // step by step, and a function's went pending whatever the run wrote.
         if checked && !function && run.count.is_none() {
-            self.pend(i, wanted, None);
+            self.pend(i, wanted, None, how.flags);
         }
         run.checked = checked;
+        run.flags = how.flags;
         run.put_back = !how.checked;
         // A counting entry hears its own write's events, which its tokens use up.
         run.tokens = counted.is_some();
@@ -636,9 +666,9 @@ impl Engine {
         }
     }
 
-    pub(crate) fn pend(&mut self, i: usize, value: Value, due: Option<u64>) {
+    pub(crate) fn pend(&mut self, i: usize, value: Value, due: Option<u64>, flags: bool) {
         if let Some(slot) = self.state.get_mut(i) {
-            slot.pending.push(Pending { value, due });
+            slot.pending.push(Pending { value, due, flags });
         }
     }
 
@@ -651,7 +681,7 @@ impl Engine {
             let late: Vec<Value> = slot
                 .pending
                 .iter()
-                .filter(|p| p.due.is_some_and(|d| cx.at >= d))
+                .filter(|p| p.flags && p.due.is_some_and(|d| cx.at >= d))
                 .map(|p| p.value.clone())
                 .collect();
             slot.pending.retain(|p| p.due.is_none_or(|d| cx.at < d));

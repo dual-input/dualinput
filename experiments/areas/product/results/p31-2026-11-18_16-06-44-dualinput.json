@@ -1,0 +1,15 @@
+{
+  "probe": "p31",
+  "mode": "dualinput",
+  "label": "Dual Input",
+  "dry": false,
+  "commit": "fde69ff",
+  "fsc": null,
+  "simVersion": "1,9,24,0",
+  "loaded": [],
+  "notes": [
+    "try 1: the sim never reached its first screen in 480s",
+    "try 2: the core's WebSocket on 51538 didn't open",
+    "try 3: the core's WebSocket on 61101 didn't open"
+  ]
+}

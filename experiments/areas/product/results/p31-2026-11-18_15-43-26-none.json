@@ -1,0 +1,306 @@
+{
+  "probe": "p31",
+  "mode": "none",
+  "label": "no tool",
+  "dry": false,
+  "commit": "fde69ff",
+  "fsc": {
+    "commit": "172e480",
+    "hash": "6EA94F97A0C613C8",
+    "synced": "2026-11-18T01:17:26.9820255Z"
+  },
+  "simVersion": "1,9,24,0",
+  "loaded": [
+    "pressed Start",
+    "pressed Free flight",
+    "set SEGS, the runway 14 , the 58P, and the livery N515MR, and pressed Fly",
+    "pressed Ready to fly",
+    "in the flight",
+    "the local time reads 12:01 after setting 12:00",
+    "the camera is in the cockpit"
+  ],
+  "measured": {
+    "started": "2026-11-18T15:47:32.963Z",
+    "seconds": 300,
+    "frames": {
+      "frames": 17998,
+      "fps": 60.00111723827162,
+      "p50": 16.5929,
+      "p95": 16.8382,
+      "p99": 16.9149,
+      "max": 17.2353,
+      "over50ms": 0,
+      "minuteP50": [],
+      "others": {
+        "MsBetweenDisplayChange": 16.6677,
+        "MsUntilDisplayed": 6.4508,
+        "MsInPresentAPI": 0.1832,
+        "MsRenderPresentLatency": 0.2712,
+        "MsGPUBusy": 13.0412,
+        "MsCPUBusy": 16.4315
+      },
+      "column": "MsBetweenPresents"
+    },
+    "processes": [
+      {
+        "role": "the sim",
+        "pid": 16864,
+        "name": "FlightSimulator2024.exe",
+        "cpuPercent": 339.3597964474155,
+        "workingSetMeanMB": 9622.948379823825,
+        "workingSetMaxMB": 9715.125,
+        "privateMeanMB": 20079.47027055369,
+        "privateMaxMB": 20591.99609375,
+        "exited": false
+      },
+      {
+        "role": "harness: this script",
+        "pid": 25608,
+        "name": "node.exe",
+        "cpuPercent": 0.01019649649802943,
+        "workingSetMeanMB": 69.51725041946308,
+        "workingSetMaxMB": 69.5703125,
+        "privateMeanMB": 43.363202600671144,
+        "privateMaxMB": 43.40625,
+        "exited": false
+      },
+      {
+        "role": "harness: powershell.exe",
+        "pid": 26052,
+        "name": "powershell.exe",
+        "cpuPercent": 1.6722254256768265,
+        "workingSetMeanMB": 120.56889681208054,
+        "workingSetMaxMB": 120.7265625,
+        "privateMeanMB": 97.67814072986577,
+        "privateMaxMB": 97.7578125,
+        "exited": false
+      },
+      {
+        "role": "harness: powershell.exe",
+        "pid": 26060,
+        "name": "powershell.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 83.11527369966443,
+        "workingSetMaxMB": 83.1875,
+        "privateMeanMB": 58.92258284395973,
+        "privateMaxMB": 58.94921875,
+        "exited": false
+      },
+      {
+        "role": "harness: powershell.exe",
+        "pid": 17340,
+        "name": "powershell.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 69.6402317533557,
+        "workingSetMaxMB": 69.7265625,
+        "privateMeanMB": 49.06527894295302,
+        "privateMaxMB": 49.11328125,
+        "exited": false
+      },
+      {
+        "role": "harness: its powershell.exe",
+        "pid": 18984,
+        "name": "powershell.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 81.7621119966443,
+        "workingSetMaxMB": 81.8125,
+        "privateMeanMB": 64.38656145134229,
+        "privateMaxMB": 64.41796875,
+        "exited": false
+      },
+      {
+        "role": "harness: its WindowsTerminal.exe",
+        "pid": 16856,
+        "name": "WindowsTerminal.exe",
+        "cpuPercent": 0.01019649649802943,
+        "workingSetMeanMB": 106.44573196308725,
+        "workingSetMaxMB": 106.76171875,
+        "privateMeanMB": 74.18537646812081,
+        "privateMaxMB": 74.3203125,
+        "exited": false
+      }
+    ],
+    "network": {
+      "4": {
+        "sent": 150,
+        "received": 150
+      },
+      "2796": {
+        "sent": 9744,
+        "received": 18392
+      },
+      "3368": {
+        "sent": 18609,
+        "received": 4590
+      },
+      "5264": {
+        "sent": 505,
+        "received": 855
+      },
+      "5396": {
+        "sent": 1231,
+        "received": 1334
+      },
+      "5456": {
+        "sent": 18967,
+        "received": 12300
+      },
+      "5856": {
+        "sent": 11359,
+        "received": 1178874
+      },
+      "6372": {
+        "sent": 1527,
+        "received": 1324
+      },
+      "7080": {
+        "sent": 4010,
+        "received": 13049
+      },
+      "8656": {
+        "sent": 542,
+        "received": 5699
+      },
+      "9420": {
+        "sent": 1360,
+        "received": 971
+      },
+      "10132": {
+        "sent": 0,
+        "received": 4952
+      },
+      "13120": {
+        "sent": 1180298,
+        "received": 1077797
+      },
+      "13356": {
+        "sent": 2040,
+        "received": 0
+      },
+      "13568": {
+        "sent": 2864,
+        "received": 9688
+      },
+      "13848": {
+        "sent": 0,
+        "received": 39
+      },
+      "14320": {
+        "sent": 34854828,
+        "received": 30
+      },
+      "14912": {
+        "sent": 22646,
+        "received": 27178
+      },
+      "16864": {
+        "sent": 196450,
+        "received": 35765556
+      },
+      "17252": {
+        "sent": 65453,
+        "received": 291458
+      },
+      "18220": {
+        "sent": 10828,
+        "received": 6931
+      },
+      "20448": {
+        "sent": 4682,
+        "received": 5343
+      },
+      "20680": {
+        "sent": 775,
+        "received": 594
+      },
+      "21760": {
+        "sent": 53723,
+        "received": 3351201
+      },
+      "22268": {
+        "sent": 361842,
+        "received": 670825
+      },
+      "22572": {
+        "sent": 49086,
+        "received": 152712
+      },
+      "23216": {
+        "sent": 79974,
+        "received": 176617
+      },
+      "26204": {
+        "sent": 26324,
+        "received": 7354
+      }
+    },
+    "focus": 1,
+    "busiest": [
+      {
+        "pid": 16864,
+        "name": "FlightSimulator2024",
+        "cpuPercent": 339.3597964474155
+      },
+      {
+        "pid": 13120,
+        "name": "gtn_simulator",
+        "cpuPercent": 30.3498718263846
+      },
+      {
+        "pid": 5456,
+        "name": "MsMpEng",
+        "cpuPercent": 15.141797299573703
+      },
+      {
+        "pid": 884,
+        "name": "dwm",
+        "cpuPercent": 9.350187288692988
+      },
+      {
+        "pid": 3136,
+        "name": "platform_runtime_IS5LEYETRACKER5_service",
+        "cpuPercent": 6.765375426442527
+      },
+      {
+        "pid": 4,
+        "name": "System",
+        "cpuPercent": 4.216251301935169
+      },
+      {
+        "pid": 14320,
+        "name": "FlowShare",
+        "cpuPercent": 4.18566181244108
+      },
+      {
+        "pid": 3368,
+        "name": "CP MSFS Bridge",
+        "cpuPercent": 2.069888789099974
+      },
+      {
+        "pid": 26052,
+        "name": "powershell",
+        "cpuPercent": 1.6722254256768265
+      },
+      {
+        "pid": 25520,
+        "name": "Couatl64_MSFS2024",
+        "cpuPercent": 1.6569306809297821
+      },
+      {
+        "pid": 12152,
+        "name": "FenixBootstrapper",
+        "cpuPercent": 1.6008499501906204
+      },
+      {
+        "pid": 23216,
+        "name": "mongod",
+        "cpuPercent": 1.4326077579731349
+      }
+    ],
+    "pcCpuPercent": 27.18290374219977,
+    "logicalCores": 16
+  },
+  "notes": [
+    "in the 10s before the window, processes outside the run used gtn_simulator 29%, MsMpEng 16% of one core"
+  ]
+}

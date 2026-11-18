@@ -17,8 +17,12 @@ export type Result = {
   /** How the flight was loaded, step by step, by the run's own menu code or by the pilot. */
   loaded: string[]
   measured?: Measured
-  /** Each core's bytes through the bench relay in the window, by its process ID, in the Dual Input run. */
-  relayBytes?: Record<string, { bytes: number; busiestSecond: number }>
+  /**
+   * Each core's bytes through the bench relay, by its process ID, in the Dual Input run, over
+   * `seconds` from the window's start. The first schedule's counts carry no `seconds`, and span
+   * the 10s before the window, the window, and the minutes after it that its network trace took to read.
+   */
+  relayBytes?: Record<string, { bytes: number; busiestSecond: number; seconds?: number }>
   notes: string[]
 }
 
@@ -36,7 +40,7 @@ export function summary(r: Result): string[] {
     )
   }
   if ("error" in m.network) lines.push(`network: ${m.network.error}`)
-  for (const [pid, through] of Object.entries(r.relayBytes ?? {})) lines.push(`  through the bench relay, process ${pid} sent ${kbs(through.bytes, m.seconds)}`)
+  for (const [pid, through] of Object.entries(r.relayBytes ?? {})) lines.push(`  through the bench relay, process ${pid} sent ${through.seconds ? kbs(through.bytes, through.seconds) : `${(through.bytes / 1024).toFixed(0)} KB over more than the window`}`)
   return [...lines, ...r.notes.map((n) => `note: ${n}`)]
 }
 

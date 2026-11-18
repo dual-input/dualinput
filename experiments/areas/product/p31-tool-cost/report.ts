@@ -1,18 +1,23 @@
 /*
- * p31's report: the runs of the last 12 hours side by side, from the JSON each run wrote, with what
- * each tool syncs and what kept the comparison from being even. It reads only the results folder,
- * so it can be written again at any time.
+ * p31's report: the last schedule's runs side by side, from the JSON each run wrote, with what each
+ * tool syncs and what kept the comparison from being even. It reads only the results folder, so it
+ * can be written again at any time.
  */
 
 import fs from "node:fs"
 import path from "node:path"
 
-import { BUSY_PERCENT, type ProcessResult } from "./measure.ts"
+import type { ProcessResult } from "./measure.ts"
 import { RESULTS } from "./places.ts"
 import { compareProfiles } from "./profiles.ts"
 import { kbs, MODES, summary, type Result } from "./result.ts"
 
-const WITHIN_MS = 12 * 60 * 60_000
+/**
+ * The last schedule is the newest run and each run before it that started within this of the run
+ * after it. A schedule starts a run about every 13 minutes, and a run that fails all three tries
+ * takes about 40, so an hour's gap only falls between schedules.
+ */
+const GAP_MS = 60 * 60_000
 const GROUPS = [
   ["pilot: ", "The pilot's tool, what a pilot's PC runs"],
   ["second pilot: ", "The second pilot, on this PC only for the test"],
@@ -29,8 +34,10 @@ export function report(): string {
     .filter((f) => !f.result.dry)
     .sort((a, b) => a.at - b.at)
   if (!files.some((f) => f.result.measured)) throw new Error(`there are no measured runs in ${RESULTS} to report`)
-  const last = files.at(-1)!.at
-  const recent = files.filter((f) => last - f.at < WITHIN_MS)
+  let start = files.length - 1
+  while (start > 0 && files[start]!.at - files[start - 1]!.at < GAP_MS) start--
+  const recent = files.slice(start)
+  if (!recent.some((f) => f.result.measured)) throw new Error(`the last schedule's runs in ${RESULTS} measured nothing`)
   const runs = recent.filter((f) => f.result.measured).map((f) => f.result)
   const failed = recent.filter((f) => !f.result.measured).map((f) => f.result)
   const seen = new Map<string, number>()
@@ -121,7 +128,8 @@ export function report(): string {
     if (r.relayBytes) {
       for (const [pid, through] of Object.entries(r.relayBytes)) {
         const who = m.processes.find((p) => p.pid === Number(pid))?.role ?? `process ${pid}`
-        out.push(`Through the bench relay, ${who} sent ${kbs(through.bytes, m.seconds)}, ${(through.busiestSecond / 1024).toFixed(1)} KB in its busiest second`)
+        const rate = through.seconds ? kbs(through.bytes, through.seconds) : `${(through.bytes / 1024).toFixed(0)} KB over more than the window`
+        out.push(`Through the bench relay, ${who} sent ${rate}, ${(through.busiestSecond / 1024).toFixed(1)} KB in its busiest second`)
       }
     }
     const ours = new Set(m.processes.map((p) => p.pid))
@@ -152,7 +160,8 @@ export function report(): string {
   out.push(
     "- The flight sat on runway 14 as the world map starts a runway departure, so the runs measure a connected session at rest: each tool still streams the aircraft at its full rate, but a flight, or a crew working switches, has each tool send more changes. Each run's printout below says how its flight was loaded and what the time and camera read after.",
     "- The weather was whatever the world map last had, since nothing we know sets it from outside the sim; the runs in turn spread its changes across the tools rather than onto one.",
-    "- Each second pilot runs on this PC only for the test: a second FS Copilot, whose SimConnect.cfg sends it to a closed port so it never reaches the sim, and FS Copilot's relay, against a bench core on a stand-in sim, the bench relay, and the local backend under wrangler. Their CPU comes out of the same PC as the sim's, so the report lists them apart from the pilot's tool. fsc-exerciser couldn't be FS Copilot's second pilot: the fork's main refused its join for a schema that lacks the traffic and ATC packets.",
+    "- Each second pilot runs on this PC only for the test: a second FS Copilot, whose SimConnect.cfg sends it to a port the run holds without answering, so it never reaches the sim, and FS Copilot's relay, against a bench core on a stand-in sim, the bench relay, and the local backend under wrangler. Their CPU comes out of the same PC as the sim's, so the report lists them apart from the pilot's tool. fsc-exerciser couldn't be FS Copilot's second pilot: the fork's main refused its join for a schema that lacks the traffic and ATC packets.",
+    "- Dual Input's cores reach the bench relay over TCP, and FS Copilot's apps reach their relay over UDP. The network trace's counts of FS Copilot's three processes add up: its relay's bytes in and out match what the two apps sent and received. Each Dual Input run prints both the trace's count of each core's bytes and the bench relay's own count of them, which should agree; where they don't, the side-by-side figure, from the trace, is in doubt.",
     "- Both tools' links crossed a local relay: Dual Input's through the bench relay, by the bench's relays-only setting, and FS Copilot's through its own relay, by its `--no-direct` switch. Between two PCs, each links directly when it can, and its relay costs that PC nothing.",
     "- Neither tool's traffic or ATC sharing was switched on, and each starts with it off until a pilot claims it (read in FS Copilot fork, src/FsCopilot/Simulation/ShareSwitch.cs, and record/areas/architecture/02-code-map.md, \"The traffic and ATC switch\").",
     "- Dual Input's desktop app didn't run; the pilot's core ran alone, as tools/sim/camera.ts runs it. The app, as a tray icon with its window closed, holds about 4 MB and uses 0.14% to 0.26% of one core (measured on our development machine, record/areas/install/log.md, 2026-11-11, and record/areas/traffic-atc/log.md). FS Copilot's one process is its window and its logic together, and its window stayed open.",
@@ -172,17 +181,16 @@ export function report(): string {
 
 /**
  * What disturbed a run, by what it measured: the sim behind another window for over 5% of the
- * samples, since MSFS 2024 draws fewer frames without the focus, or a process outside the run busy
- * in the window, or no frames at all.
+ * samples, since MSFS 2024 draws fewer frames without the focus, or no frames at all. Processes
+ * outside the run are listed with each run but leave it in: every run of the first schedule had
+ * the 58P's two GTN simulators at about 28% of a core each, Defender at 14% to 28%, and Windows'
+ * System and dwm at 10% to 22%, so a rule that left out busy runs left out every run.
  */
 function disturbed(r: Result): string[] {
   const m = r.measured!
   const why: string[] = []
   if ("error" in m.frames) why.push("no frames")
   if (m.focus < 0.95) why.push(`the sim in front ${(m.focus * 100).toFixed(0)}% of the window`)
-  const ours = new Set(m.processes.map((p) => p.pid))
-  const busy = m.busiest.filter((b) => !ours.has(b.pid) && b.name !== "Idle" && b.cpuPercent >= BUSY_PERCENT)
-  if (busy.length) why.push(busy.map((b) => `${b.name} at ${b.cpuPercent.toFixed(0)}%`).join(", "))
   return why
 }
 

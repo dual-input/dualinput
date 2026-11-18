@@ -10,7 +10,9 @@ With the default 2 rounds the six runs take about 75 minutes, from p10's 164s fr
 ## Before you start
 
 - Close the sim.
-- Close anything that would load the PC or move the camera: ChasePlane, BeyondATC, SayIntentions, GSX, a torrent client, any game, and any Claude session working on this PC.
+- Close anything that would load the PC or move the camera: ChasePlane, BeyondATC, SayIntentions, GSX, a torrent client, any game, any Claude session working on this PC, and a Moonlight stream from Sunshine, which encodes every frame the sim draws.
+- If `target\p31\PresentMon-2.6.0-x64.exe` isn't in your checkout, download it from [PresentMon's 2.6.0 release](https://github.com/GameTechDev/PresentMon/releases/tag/v2.6.0) into that folder.
+  The PresentMon in NVIDIA's FrameView SDK records nothing outside FrameView.
 - Keep Steam running, started as usual from the Start menu.
 - Open Terminal as administrator: Win+X, then Terminal (Admin).
   PresentMon and the network trace each start an ETW session, which Windows allows only an elevated terminal.
@@ -49,6 +51,7 @@ With the default 2 rounds the six runs take about 75 minutes, from p10's 164s fr
    node experiments/areas/product/p31-tool-cost/run.ts all
    ```
 
+   It first has PresentMon time frames for 3s, and stops at once if it can't, so wait for `PresentMon timed frames in a 3s check` before you leave.
    `--repeats 3` runs a third round, about 40 minutes more.
    You're done when it prints `Every run is done` and the report's path, in `experiments/areas/product/results/`.
    By then it has moved `dualinput` and `fscopilot-bridge` back into Community, as they were.

@@ -22,7 +22,7 @@ export function sibling(name: string): string {
 export const HERE = path.dirname(fileURLToPath(import.meta.url))
 /** What a reader keeps: each run's numbers and the report, committed. */
 export const RESULTS = path.join(HERE, "..", "results")
-/** What only this PC needs: PresentMon's CSVs, the network traces, the cores' folders, and FS Copilot's copy. */
+/** What only this PC needs: PresentMon and its CSVs, the network traces, and FS Copilot's working folders. */
 export const WORK = path.join(ROOT, "target", "p31")
 
 /** The FS Copilot fork's checkout, on its one main branch, which p31 only builds and reads. */
@@ -41,7 +41,7 @@ export const FSC_APP = path.join(EXERCISER, "fsc", "FsCopilot.exe")
 export const FSC_RELAY_EXE = path.join(EXERCISER, "relay", "p2p_serv.exe")
 /** The pilot's FS Copilot's working folder, where it writes its log. */
 export const FSC_PILOT_FOLDER = path.join(WORK, "fsc-pilot")
-/** The second pilot's, which also holds a SimConnect.cfg that names a port nothing listens on, so that app never reaches the sim. */
+/** The second pilot's, which also holds the SimConnect.cfg that run.ts's holdOffSim writes, so that app never reaches the sim. */
 export const FSC_SECOND_FOLDER = path.join(WORK, "fsc-second")
 
 /** The bench's builds, which `prepare` makes as tools/bench.ts does. */

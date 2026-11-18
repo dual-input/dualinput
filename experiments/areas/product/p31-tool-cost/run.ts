@@ -49,7 +49,7 @@ import { Failed, main, run } from "../../../../tools/lib/run.ts"
 import { desktop, type Desktop } from "../../../../tools/sim/desktop.ts"
 import { Guide } from "../../../../tools/sim/guide.ts"
 import { DUAL_INPUT, FS_COPILOT, mount, restore, where, type Package } from "./community.ts"
-import { elevated, measure, othersBusy, PRESENTMON, processes, SIM_EXE, tree, type Measured, type Tracked } from "./measure.ts"
+import { elevated, measure, othersBusy, PRESENTMON, PRESENTMON_URL, presentMonWorks, processes, SIM_EXE, tree, type Measured, type Tracked } from "./measure.ts"
 import {
   BENCH_OUT,
   BENCH_PROFILES,
@@ -104,7 +104,7 @@ main(async () => {
     return all(modes, Number(flag(rest, "--repeats") ?? 2), options)
   }
   if (command && command in MODES) {
-    await session(options, (guide) => runOne(command as Mode, options, guide))
+    await session(options, async (guide) => void (await runOne(command as Mode, options, guide)))
     return
   }
   throw new Failed("usage: node experiments/areas/product/p31-tool-cost/run.ts check | prepare | all [--repeats <n>] [--seconds <n>] [--modes ...] [--dry] | none | fsc | dualinput [--seconds <n>] [--dry] | finish | restore | profiles")
@@ -128,7 +128,10 @@ async function session(options: Options, body: (guide: Voice) => Promise<void>):
     if (simRunning()) throw new Failed("the sim is running; close it, so the run can switch Community and start it")
     // Steam started from this elevated terminal would start the sim elevated too, which no pilot runs.
     if (!powershell("Get-Process steam -ErrorAction SilentlyContinue").trim()) throw new Failed("Steam isn't running; start it from the Start menu, then run this again")
-    if (!fs.existsSync(PRESENTMON)) throw new Failed(`PresentMon isn't at ${PRESENTMON}`)
+    if (!fs.existsSync(PRESENTMON)) throw new Failed(`PresentMon isn't at ${PRESENTMON}; download ${PRESENTMON_URL} there`)
+    const frames = presentMonWorks(path.join(WORK, "runs"))
+    if (frames) throw new Failed(frames)
+    console.log("PresentMon timed frames in a 3s check")
     if (!fs.existsSync(PACKAGE)) throw new Failed(`there's no package of this tree's in ${PACKAGE}; run prepare`)
     quit = quitInstalledDualInput()
     if (quit.length) console.log(`quit your installed Dual Input for the benchmark: ${quit.join(", ")}`)
@@ -168,7 +171,9 @@ async function all(modes: Mode[], repeats: number, options: Options): Promise<vo
         for (const mode of modes) {
           console.log(`\n=== round ${round} of ${repeats}: ${MODES[mode]}, ${Math.round((Date.now() - started) / 60_000)} min in`)
           // A run that stops before its tries, such as on a package missing from Community, leaves the rest of the schedule to run.
-          await runOne(mode, options, guide).catch((error: Error) => console.log(`the run with ${MODES[mode]} stopped: ${error.message}`))
+          const result = await runOne(mode, options, guide).catch((error: Error) => void console.log(`the run with ${MODES[mode]} stopped: ${error.message}`))
+          // Frame times are what the schedule is for, so a window that measured none ends it rather than measuring the rest without them.
+          if (!options.dry && result?.measured && "error" in result.measured.frames) throw new Failed(`stopped the schedule, since the run with ${MODES[mode]} measured no frames: ${result.measured.frames.error}`)
         }
       }
     })
@@ -218,7 +223,7 @@ function exists(file: string): string {
 async function check(): Promise<void> {
   const lines = [
     `terminal opened as administrator: ${elevated() ? "ok" : "NO, so PresentMon and the network trace won't start; open Terminal (Admin)"}`,
-    `PresentMon, ${PRESENTMON}: ${exists(PRESENTMON)}`,
+    `PresentMon, ${PRESENTMON}: ${fs.existsSync(PRESENTMON) ? "ok" : `MISSING; download ${PRESENTMON_URL} there`}`,
     `the sim: ${simRunning() ? "RUNNING; close it before a run" : "closed"}`,
     `your installed Dual Input: ${processes().some((p) => p.path?.toLowerCase().startsWith(`${path.join(process.env.LOCALAPPDATA ?? "", "DualInput").toLowerCase()}\\`)) ? "running; the run quits it at its start" : "not running"}`,
     `Steam: ${powershell("if (Get-Process steam -ErrorAction SilentlyContinue) { 'running' } else { 'NOT RUNNING; start it, unelevated, from the Start menu' }").trim()}`,
@@ -230,7 +235,6 @@ async function check(): Promise<void> {
     `FS Copilot as fsc-exerciser synced it, ${FSC_APP}: ${exists(FSC_APP)}, commit ${fscBuild()?.commit ?? "unrecorded"}, where the fork's main is at ${git(FSC_SOURCE)}`,
     `its relay, ${FSC_RELAY_EXE}: ${exists(FSC_RELAY_EXE)}`,
     `the user's FS Copilot profile of the 58P: ${exists(path.join(FSC_DEFINITIONS, FSC_PROFILE_NAME))}`,
-    `the second FS Copilot's SimConnect.cfg, which keeps it off the sim: ${exists(path.join(FSC_SECOND_FOLDER, "SimConnect.cfg"))}`,
     `free on C:: ${(Number(powershell("(Get-PSDrive C).Free").trim()) / 2 ** 30).toFixed(1)} GB`,
   ]
   for (const line of lines) console.log(line)
@@ -284,13 +288,6 @@ async function prepare(): Promise<void> {
     run("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(EXERCISER, "sync-and-rebuild.ps1"), "-Fsc", FSC_SOURCE, "-Configuration", "Release"])
     console.log(`built FS Copilot ${head} and synced fsc-exerciser to it, ${elapsed()}`)
   }
-  fs.mkdirSync(FSC_PILOT_FOLDER, { recursive: true })
-  fs.mkdirSync(FSC_SECOND_FOLDER, { recursive: true })
-  // SimConnect reads SimConnect.cfg from the app's working folder: on our development machine on
-  // 2026-11-18, an app started in a folder whose file named a port this script listened on tried
-  // that port 94 times in 15s. Port 1 refuses every connection on a PC that runs no TCPMUX, so
-  // each try fails at once and the second app never reaches the sim.
-  fs.writeFileSync(path.join(FSC_SECOND_FOLDER, "SimConnect.cfg"), "[SimConnect]\r\nProtocol=IPv4\r\nAddress=127.0.0.1\r\nPort=1\r\n")
   console.log(`FS Copilot ${fscBuild()?.commit} is ready to run from fsc-exerciser's copy, ${elapsed()}`)
 }
 
@@ -300,7 +297,7 @@ async function prepare(): Promise<void> {
  * the try, stops the tool, and closes the sim, and the third try asks aloud for the flight. The run's
  * JSON holds the numbers, or every try's error when none got through.
  */
-async function runOne(mode: Mode, options: Options, guide: Voice): Promise<void> {
+async function runOne(mode: Mode, options: Options, guide: Voice): Promise<Result> {
   const { seconds, dry } = options
   const label = MODES[mode]
   const name = `${stamp()}-${mode}`
@@ -353,12 +350,12 @@ async function runOne(mode: Mode, options: Options, guide: Voice): Promise<void>
       say(`settling ${SETTLE_MS / 1000}s, then measuring for ${seconds}s`)
       await sleep(SETTLE_MS)
       if (!dry && !alive(sim)) throw new SimDown("the sim quit while the flight settled")
-      await started.before?.()
       const tracked = started.roles(processes())
       const busy = await othersBusy(new Set([sim, ...tracked.map((t) => t.pid)]))
       if (busy.length) notes.push(`in the 10s before the window, processes outside the run used ${busy.map((b) => `${b.name} ${b.cpuPercent.toFixed(0)}%`).join(", ")} of one core`)
       if (!dry && !focusSim()) notes.push("the sim wasn't in front as the window started, and the run couldn't bring it there")
       say(`measuring: ${tracked.map((t) => `${t.role} (${t.pid})`).join(", ")}`)
+      await started.before?.()
       const window = await measure(folder, sim, tracked, seconds)
       if (!dry && !alive(sim)) throw new SimDown("the sim quit during the window")
       extra = (await started.after?.()) ?? {}
@@ -384,6 +381,7 @@ async function runOne(mode: Mode, options: Options, guide: Voice): Promise<void>
   for (const line of summary(result)) say(line)
   fs.writeFileSync(path.join(folder, "run.txt"), `${text.join("\n")}\n`)
   say(`The numbers are in ${path.relative(ROOT, json)}, and PresentMon's CSV and the network trace in ${path.relative(ROOT, folder)}.`)
+  return result
 }
 
 function alive(pid: number): boolean {
@@ -428,7 +426,7 @@ function harness(all: ReturnType<typeof processes>, me: number, role: (p: { pid:
  * on this PC.
  */
 async function startFsc(folder: string, say: Say, notes: string[]): Promise<Started> {
-  for (const file of [FSC_APP, FSC_RELAY_EXE, path.join(FSC_SECOND_FOLDER, "SimConnect.cfg")]) if (!fs.existsSync(file)) throw new Failed(`there's no ${file}; run prepare`)
+  for (const file of [FSC_APP, FSC_RELAY_EXE]) if (!fs.existsSync(file)) throw new Failed(`there's no ${file}; run prepare`)
   if (powershell("Get-NetUDPEndpoint -LocalPort 3600 -ErrorAction SilentlyContinue").trim()) throw new Failed("something already holds UDP port 3600, FS Copilot's relay port; close any FS Copilot, exerciser, or relay left running")
   if (powershell("Get-NetTCPConnection -LocalPort 9020 -State Listen -ErrorAction SilentlyContinue").trim()) throw new Failed("something already listens on port 9020, where FS Copilot's panels look first; close any FS Copilot left running")
   // FS Copilot loads profiles from its program's folder, so the user's 58P profile goes into the
@@ -437,6 +435,7 @@ async function startFsc(folder: string, say: Say, notes: string[]): Promise<Star
   const children: ChildProcess[] = []
   const relayOut = fs.createWriteStream(path.join(folder, "fsc-relay.txt"))
   const benchPort = await freePort()
+  const offSim = await holdOffSim()
   let pilot: ChildProcess | undefined
   const stop = async () => {
     await bench(benchPort, { c: "quit" }).catch(() => {})
@@ -445,6 +444,7 @@ async function startFsc(folder: string, say: Say, notes: string[]): Promise<Star
     await sleep(5_000)
     for (const p of children) if (p.exitCode === null) p.kill()
     relayOut.end()
+    offSim.close()
     restoreFscProfile()
   }
   let relaySaid = ""
@@ -514,6 +514,36 @@ async function startFsc(folder: string, say: Say, notes: string[]): Promise<Star
       return {}
     },
     stop,
+  }
+}
+
+/**
+ * Keeps the second FS Copilot off the sim, so the sim serves one FS Copilot, as a pilot's does.
+ * SimConnect reads SimConnect.cfg from the app's working folder, and falls back to the sim's
+ * default pipe when the port it names refuses, but not when the port accepts and never answers:
+ * with the sim closed, an app whose file named a refusing port reached a stand-in for that pipe 8
+ * times in 25s, and one whose file named a silent listener reached it 0 times and the listener 8
+ * (measured on our development machine, 2026-11-18, after a file naming port 1 let the second app
+ * into the sim in both of the first schedule's FS Copilot runs). So this listens on a port of its
+ * own, holds each connection without a word, and writes that port into the second app's file.
+ */
+async function holdOffSim(): Promise<{ close: () => void }> {
+  const held: net.Socket[] = []
+  const server = net.createServer((socket) => {
+    held.push(socket)
+    socket.on("error", () => {})
+    socket.resume()
+  })
+  await new Promise<void>((resolve, reject) => server.once("error", reject).listen(0, "127.0.0.1", resolve))
+  const { port } = server.address() as net.AddressInfo
+  fs.mkdirSync(FSC_PILOT_FOLDER, { recursive: true })
+  fs.mkdirSync(FSC_SECOND_FOLDER, { recursive: true })
+  fs.writeFileSync(path.join(FSC_SECOND_FOLDER, "SimConnect.cfg"), `[SimConnect]\r\nProtocol=IPv4\r\nAddress=127.0.0.1\r\nPort=${port}\r\n`)
+  return {
+    close: () => {
+      for (const socket of held) socket.destroy()
+      server.close()
+    },
   }
 }
 
@@ -632,6 +662,7 @@ async function startDualInput(folder: string, say: Say, notes: string[], dry: bo
   const [secondCore, realCore] = [second, real]
   say(`started the pilot's core (${realCore.pid}) and the second pilot's bench core (${secondCore.process.pid})`)
   let relayBefore: Record<string, [number, number]> = {}
+  let relayFrom = Date.now()
 
   return {
     roles: (all) =>
@@ -641,7 +672,8 @@ async function startDualInput(folder: string, say: Say, notes: string[], dry: bo
         if (p.pid === secondCore.process.pid) return "second pilot: the bench core"
         if (p.parent === secondCore.process.pid) return `second pilot: the bench core's ${p.name}`
         if (/^bench-relay/i.test(p.name)) return "network: the bench relay"
-        if (/^(workerd|node)/i.test(p.name) && p.pid !== process.pid) return `network: the local backend's ${p.name}`
+        // Wrangler serves the local backend through workerd, and rebuilds its code with esbuild.
+        if (/^(workerd|node|esbuild)/i.test(p.name) && p.pid !== process.pid) return `network: the local backend's ${p.name}`
         if (p.pid === stub.pid) return "second pilot: its stand-in sim's process"
         return undefined
       }),
@@ -671,11 +703,15 @@ async function startDualInput(folder: string, say: Say, notes: string[], dry: bo
     },
     before: async () => {
       relayBefore = await net.relays[0]!.rates().catch(() => ({}))
+      relayFrom = Date.now()
     },
+    // The relay's counts span the window and the reading of its network trace after it, which
+    // took minutes, so each carries the seconds it spans.
     after: async () => {
       const relayAfter = await net.relays[0]!.rates().catch(() => ({}) as Record<string, [number, number]>)
+      const seconds = (Date.now() - relayFrom) / 1000
       const relayBytes: NonNullable<Result["relayBytes"]> = {}
-      for (const [pid, [bytes, busiest]] of Object.entries(relayAfter)) relayBytes[pid] = { bytes: bytes - (relayBefore[pid]?.[0] ?? 0), busiestSecond: busiest }
+      for (const [pid, [bytes, busiest]] of Object.entries(relayAfter)) relayBytes[pid] = { bytes: bytes - (relayBefore[pid]?.[0] ?? 0), busiestSecond: busiest, seconds }
       return { relayBytes }
     },
     stop,

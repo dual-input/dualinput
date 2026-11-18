@@ -11,12 +11,19 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process"
 import fs from "node:fs"
 import os from "node:os"
+import path from "node:path"
 import { createInterface } from "node:readline"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import { Failed } from "../../../../tools/lib/run.ts"
+import { WORK } from "./places.ts"
 
-export const PRESENTMON = String.raw`C:\Program Files\NVIDIA Corporation\FrameViewSDK\bin\PresentMon_x64.exe`
+// The PresentMon that NVIDIA's FrameView SDK installs exits 1 without a word on every capture, live
+// or from a trace file, elevated or not, so it runs only inside FrameView (measured on our
+// development machine, 2026-11-18, where all six runs of the first schedule got no frames).
+// Intel's own release runs on its own and says what's wrong when it can't.
+export const PRESENTMON = path.join(WORK, "PresentMon-2.6.0-x64.exe")
+export const PRESENTMON_URL = "https://github.com/GameTechDev/PresentMon/releases/download/v2.6.0/PresentMon-2.6.0-x64.exe"
 export const SIM_EXE = "FlightSimulator2024.exe"
 const FRAMES_SESSION = "DualInputP31Frames"
 const NETWORK_SESSION = "DualInputP31Net"
@@ -127,6 +134,23 @@ export type Measured = {
 }
 
 /**
+ * Has PresentMon time every process's frames for 3s, as a window would, and says why it got none,
+ * or null when it got some. A schedule calls it before its first run, while someone is still at the
+ * terminal, so a PresentMon that can't capture stops the schedule in seconds rather than after it.
+ * The terminal the schedule runs in redraws its cursor, so some process presents in any 3s.
+ */
+export function presentMonWorks(folder: string): string | null {
+  fs.mkdirSync(folder, { recursive: true })
+  const csv = path.join(folder, "presentmon-check.csv")
+  fs.rmSync(csv, { force: true })
+  const ran = spawnSync(PRESENTMON, ["--output_file", csv, "--timed", "3", "--terminate_after_timed", "--no_console_stats", "--session_name", FRAMES_SESSION, "--stop_existing_session"], { encoding: "utf8", timeout: 30_000 })
+  const said = `${ran.stdout ?? ""}${ran.stderr ?? ""}`.trim().slice(0, 400)
+  if (!fs.existsSync(csv)) return `PresentMon wrote no CSV in a 3s check, and exited with ${ran.status}: ${said}`
+  const stats = frameStats(csv, null)
+  return "error" in stats ? `PresentMon's 3s check: ${stats.error}` : null
+}
+
+/**
  * Measures one window of `seconds`, with the sim as `sim` and the tool's processes as `tracked`,
  * and writes PresentMon's CSV and the network trace into `folder`.
  */
@@ -228,8 +252,8 @@ while ((Get-Date) -lt $until) {
   return rows
 }
 
-/** Frame times of the sim from PresentMon's CSV, by the column `MsBetweenPresents`, which PresentMon 1.x and 2.x both write. */
-export function frameStats(csv: string): FrameStats | { error: string } {
+/** Frame times of `exe`, or of every process when it's null, from PresentMon's CSV, by the first frame-time column this PresentMon wrote. */
+export function frameStats(csv: string, exe: string | null = SIM_EXE): FrameStats | { error: string } {
   const lines = fs.readFileSync(csv, "utf8").split(/\r?\n/).filter(Boolean)
   if (lines.length < 2) return { error: "PresentMon's CSV holds no frames; the sim may have had no swap chain while it ran" }
   const header = lines[0]!.split(",")
@@ -240,9 +264,9 @@ export function frameStats(csv: string): FrameStats | { error: string } {
   // PresentMon 1.x names the time column TimeInSeconds, and 2.x CPUStartTime, both in seconds from the capture's start unless a flag says otherwise.
   const time = header.findIndex((c) => c === "TimeInSeconds" || c === "CPUStartTime")
   const otherColumns = ["MsBetweenDisplayChange", "MsUntilDisplayed", "MsInPresentAPI", "MsRenderPresentLatency", "MsGPUBusy", "MsCPUBusy"].filter((c) => header.includes(c))
-  const rows = lines.slice(1).map((l) => l.split(",")).filter((r) => app < 0 || r[app]?.toLowerCase() === SIM_EXE.toLowerCase())
+  const rows = lines.slice(1).map((l) => l.split(",")).filter((r) => exe === null || app < 0 || r[app]?.toLowerCase() === exe.toLowerCase())
   const values = rows.map((r) => Number(r[at])).filter((v) => Number.isFinite(v) && v > 0)
-  if (values.length < 2) return { error: "PresentMon's CSV holds no frame times for the sim" }
+  if (values.length < 2) return { error: `PresentMon's CSV holds no frame times for ${exe ?? "any process"}` }
   const sorted = [...values].sort((a, b) => a - b)
   const minuteP50: number[] = []
   if (time >= 0) {

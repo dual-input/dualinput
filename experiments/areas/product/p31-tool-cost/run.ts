@@ -41,8 +41,9 @@ import { StandInHelper } from "../../../../tools/bench/helper.ts"
 import { app, BenchNetwork, join } from "../../../../tools/bench/network.ts"
 import { level } from "../../../../tools/bench/profiles.ts"
 import { buildPrograms } from "../../../../tools/lib/cargo.ts"
-import { refuseWhileSimRuns, simRunning, userCfgs } from "../../../../tools/lib/install.ts"
+import { install, refuseWhileSimRuns, simRunning, userCfgs } from "../../../../tools/lib/install.ts"
 import { writeMessageTypes } from "../../../../tools/lib/messages.ts"
+import { PACKAGE } from "../../../../tools/lib/package.ts"
 import { ROOT } from "../../../../tools/lib/repo.ts"
 import { Failed, main, run } from "../../../../tools/lib/run.ts"
 import { desktop, type Desktop } from "../../../../tools/sim/desktop.ts"
@@ -121,19 +122,41 @@ function finish(): void {
  * which a dry run keeps silent, since it runs with no one at the sim, at any hour.
  */
 async function session(options: Options, body: (guide: Voice) => Promise<void>): Promise<void> {
+  let quit: string[] = []
   if (!options.dry) {
     if (!elevated()) throw new Failed("this terminal isn't elevated, so PresentMon and the network trace can't start; open Terminal (Admin) and run this again")
     if (simRunning()) throw new Failed("the sim is running; close it, so the run can switch Community and start it")
     // Steam started from this elevated terminal would start the sim elevated too, which no pilot runs.
     if (!powershell("Get-Process steam -ErrorAction SilentlyContinue").trim()) throw new Failed("Steam isn't running; start it from the Start menu, then run this again")
     if (!fs.existsSync(PRESENTMON)) throw new Failed(`PresentMon isn't at ${PRESENTMON}`)
+    if (!fs.existsSync(PACKAGE)) throw new Failed(`there's no package of this tree's in ${PACKAGE}; run prepare`)
+    quit = quitInstalledDualInput()
+    if (quit.length) console.log(`quit your installed Dual Input for the benchmark: ${quit.join(", ")}`)
+    // A package an earlier run left aside comes back first, so the copy below replaces it rather than sitting beside it.
+    for (const line of restore()) console.log(line)
+    for (const copy of install(PACKAGE, userCfgs())) console.log(`installed this tree's package in ${copy}`)
   }
   const guide = options.dry ? silent : await Guide.start()
   try {
     await body(guide)
   } finally {
     guide.close()
+    if (quit.length) console.log("Your installed Dual Input stays quit; it starts again at your next login, or from the Start menu, and puts its own package back in Community as it starts.")
   }
+}
+
+/**
+ * Ends the installed Dual Input's tray app and its core, which would otherwise spoil every run: the
+ * app writes its own package into Community after each sim close whenever ours is aside, or of
+ * another version, as this tree's 0.1.0 is beside a 0.1.1 release (read in
+ * src/apps/desktop/src/jobs.rs, `SimExited` and `write_package`), and it starts its own core with
+ * every sim, beside the run's.
+ */
+function quitInstalledDualInput(): string[] {
+  const home = path.join(process.env.LOCALAPPDATA ?? "", "DualInput").toLowerCase()
+  const installed = processes().filter((p) => p.path?.toLowerCase().startsWith(`${home}\\`))
+  for (const p of installed) spawnSync("taskkill", ["/PID", String(p.pid), "/T", "/F"], { stdio: "ignore" })
+  return installed.map((p) => `${p.name} (${p.pid})`)
 }
 
 /** Every mode in turn, `repeats` times, then Community back as it started and the report. */
@@ -197,6 +220,7 @@ async function check(): Promise<void> {
     `terminal opened as administrator: ${elevated() ? "ok" : "NO, so PresentMon and the network trace won't start; open Terminal (Admin)"}`,
     `PresentMon, ${PRESENTMON}: ${exists(PRESENTMON)}`,
     `the sim: ${simRunning() ? "RUNNING; close it before a run" : "closed"}`,
+    `your installed Dual Input: ${processes().some((p) => p.path?.toLowerCase().startsWith(`${path.join(process.env.LOCALAPPDATA ?? "", "DualInput").toLowerCase()}\\`)) ? "running; the run quits it at its start" : "not running"}`,
     `Steam: ${powershell("if (Get-Process steam -ErrorAction SilentlyContinue) { 'running' } else { 'NOT RUNNING; start it, unelevated, from the Start menu' }").trim()}`,
     ...where().map((w) => `Community, ${w.community}: ${Object.entries(w.packages).map(([n, p]) => `${n} ${p}`).join(", ")}`),
     `the pilot's release core, ${path.relative(ROOT, RELEASE_CORE)}: ${exists(RELEASE_CORE)}`,

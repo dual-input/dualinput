@@ -25,16 +25,24 @@ export const RESULTS = path.join(HERE, "..", "results")
 /** What only this PC needs: PresentMon's CSVs, the network traces, the cores' folders, and FS Copilot's copy. */
 export const WORK = path.join(ROOT, "target", "p31")
 
-export const EXERCISER = sibling("fsc-exerciser")
-export const EXERCISER_EXE = path.join(EXERCISER, "src", "bin", "Debug", "net9.0", "win-x64", "FsCopilot.Exerciser.exe")
-/** The exerciser's Serilog file, which it opens in its working folder, its checkout's root when run.cmd starts it. */
-export const EXERCISER_LOG = path.join(EXERCISER, "exerciser-log")
-export const FSC_RELAY_EXE = path.join(EXERCISER, "relay", "p2p_serv.exe")
-/** The FS Copilot build the exerciser compiled against, which its sync copied in from the fork. */
-export const FSC_SYNCED = path.join(EXERCISER, "fsc")
-/** p31's own copy of that build, with the user's 58P profile in its Definitions, and no Community folder, so it deploys nothing into the sim's. */
-export const FSC_COPY = path.join(WORK, "fsc")
+/** The FS Copilot fork's checkout, on its one main branch, which p31 only builds and reads. */
 export const FSC_SOURCE = path.join(sibling("fsc"), "src")
+export const FSC_PROJECT = path.join(FSC_SOURCE, "FsCopilot", "FsCopilot.csproj")
+
+/**
+ * FS Copilot and its relay as fsc-exerciser's sync copies them from the fork's Release build, with
+ * no Community folder, so the app deploys nothing into the sim's. p31 runs both from there, since
+ * Windows' firewall has a rule for each of those paths: a program at a new path that opens a UDP
+ * socket raises the firewall's prompt, which takes the focus from the sim (seen on our development
+ * machine, 2026-11-18).
+ */
+export const EXERCISER = sibling("fsc-exerciser")
+export const FSC_APP = path.join(EXERCISER, "fsc", "FsCopilot.exe")
+export const FSC_RELAY_EXE = path.join(EXERCISER, "relay", "p2p_serv.exe")
+/** The pilot's FS Copilot's working folder, where it writes its log. */
+export const FSC_PILOT_FOLDER = path.join(WORK, "fsc-pilot")
+/** The second pilot's, which also holds a SimConnect.cfg that names a port nothing listens on, so that app never reaches the sim. */
+export const FSC_SECOND_FOLDER = path.join(WORK, "fsc-second")
 
 /** The bench's builds, which `prepare` makes as tools/bench.ts does. */
 export const BENCH_OUT = path.join(ROOT, "target", "bench", "release-with-checks")

@@ -37,9 +37,10 @@ While it measures, keep your hands off the mouse and keyboard: a beep starts the
    node experiments/areas/product/p31-tool-cost/run.ts prepare
    ```
 
-   It installs main's package into Community, builds the pilot's core with the release profile and the bench's second pilot, and copies FS Copilot with your 58P profile into `target\p31\fsc`.
+   It installs main's package into Community, and builds the pilot's core with the release profile and the bench's second pilot.
+   If fsc-exerciser holds an older FS Copilot than the fork's main, it builds FS Copilot and syncs the exerciser to it.
    In a checkout that has never built, this compiles everything from nothing, so start it and come back.
-   You're done when it prints `copied FS Copilot into target\p31\fsc`.
+   You're done when it prints `FS Copilot ... is ready to run from fsc-exerciser's copy`.
 
 4. Run with no tool.
 
@@ -59,7 +60,8 @@ While it measures, keep your hands off the mouse and keyboard: a beep starts the
    node experiments/areas/product/p31-tool-cost/run.ts fsc
    ```
 
-   FS Copilot and fsc-exerciser open their windows first, and the exerciser joins FS Copilot's session on a local relay.
+   Two FS Copilot windows open first: yours, and a second pilot's, which joins your session through a local relay and never connects to the sim.
+   Both start from fsc-exerciser's copy of FS Copilot, a path Windows Firewall already allows, so no firewall prompt comes.
    Then the same flight as step 4, and the same hands-off window.
 
 6. Run with Dual Input.
@@ -90,6 +92,7 @@ While it measures, keep your hands off the mouse and keyboard: a beep starts the
 
 ## If a run stops partway
 
+- Ctrl+C stops the run and its tool, and leaves the sim open.
 - If the sim is still running, quit it.
 - Run the same step again.
   Each run sets Community as it needs, so nothing has to be undone first.

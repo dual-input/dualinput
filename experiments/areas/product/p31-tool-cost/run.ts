@@ -27,6 +27,7 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process"
 import crypto from "node:crypto"
 import fs from "node:fs"
+import net from "node:net"
 import path from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
@@ -50,12 +51,12 @@ import {
   BENCH_OUT,
   BENCH_PROFILES,
   EXERCISER,
-  EXERCISER_EXE,
-  EXERCISER_LOG,
-  FSC_COPY,
+  FSC_APP,
+  FSC_PILOT_FOLDER,
+  FSC_PROJECT,
   FSC_RELAY_EXE,
+  FSC_SECOND_FOLDER,
   FSC_SOURCE,
-  FSC_SYNCED,
   RELEASE_CORE,
   RESULTS,
   WORK,
@@ -94,6 +95,7 @@ main(async () => {
   if (command === "profiles") return void compareProfiles().forEach((l) => console.log(`${l}\n`))
   if (command === "finish") {
     for (const line of restore()) console.log(line)
+    restoreFscProfile()
     console.log(`The report is in ${path.relative(ROOT, report())}.`)
     return
   }
@@ -141,11 +143,10 @@ async function check(): Promise<void> {
     `its core helper: ${exists(path.join(path.dirname(RELEASE_CORE), "dualinput-core-helper.exe"))}`,
     `the bench core, ${path.relative(ROOT, BENCH_OUT)}: ${exists(path.join(BENCH_OUT, "dualinput-core.exe"))}`,
     `the bench's profiles: ${exists(BENCH_PROFILES)}`,
-    `fsc-exerciser, ${EXERCISER_EXE}: ${exists(EXERCISER_EXE)}`,
-    `the FS Copilot build it synced, which the run uses: ${JSON.stringify(fscBuild())}; the fork's main is at ${git(FSC_SOURCE)}`,
+    `FS Copilot as fsc-exerciser synced it, ${FSC_APP}: ${exists(FSC_APP)}, commit ${fscBuild()?.commit ?? "unrecorded"}, where the fork's main is at ${git(FSC_SOURCE)}`,
     `its relay, ${FSC_RELAY_EXE}: ${exists(FSC_RELAY_EXE)}`,
-    `p31's copy of FS Copilot, ${path.relative(ROOT, FSC_COPY)}: ${exists(path.join(FSC_COPY, "FsCopilot.exe"))}`,
-    `the user's FS Copilot profile of the 58P in it: ${sameFile(path.join(FSC_DEFINITIONS, FSC_PROFILE_NAME), path.join(FSC_COPY, "Definitions", FSC_PROFILE_NAME)) ? "ok" : "MISSING or out of date; run prepare"}`,
+    `the user's FS Copilot profile of the 58P: ${exists(path.join(FSC_DEFINITIONS, FSC_PROFILE_NAME))}`,
+    `the second FS Copilot's SimConnect.cfg, which keeps it off the sim: ${exists(path.join(FSC_SECOND_FOLDER, "SimConnect.cfg"))}`,
     `free on C:: ${(Number(powershell("(Get-PSDrive C).Free").trim()) / 2 ** 30).toFixed(1)} GB`,
   ]
   for (const line of lines) console.log(line)
@@ -166,14 +167,12 @@ function cpu(): Map<number, { name: string; ms: number }> {
   return times
 }
 
-function sameFile(a: string, b: string): boolean {
-  return fs.existsSync(a) && fs.existsSync(b) && fs.readFileSync(a).equals(fs.readFileSync(b))
-}
-
 /**
  * Builds what the runs need from this tree: our package into Community, the pilot's core with the
  * release profile, and the bench's core, stand-in helper, relay, and profiles as tools/bench.ts
- * builds them; then copies the FS Copilot build fsc-exerciser synced, with the user's 58P profile.
+ * builds them; then FS Copilot and fsc-exerciser, if the exerciser holds another commit than the
+ * fork's main; then copies the FS Copilot build the exerciser synced, with the user's 58P profile.
+ * Only build output changes in the fork's and the exerciser's checkouts.
  */
 async function prepare(): Promise<void> {
   refuseWhileSimRuns()
@@ -190,25 +189,23 @@ async function prepare(): Promise<void> {
   fs.rmSync(BENCH_PROFILES, { recursive: true, force: true })
   run(built["dualinput-profile-builder"], ["publish", "--released", String(level()), "--profiles", "profiles", "--pages", BENCH_PROFILES])
   console.log(`built the bench, ${elapsed()}`)
-  copyFsc()
-  console.log(`copied FS Copilot into ${path.relative(ROOT, FSC_COPY)}, ${elapsed()}`)
-}
-
-/**
- * Copies the FS Copilot build the exerciser compiled against, since a peer of another build is
- * refused for a schema that hashes each packet type's assembly-qualified name, and puts the user's
- * 58P profile in its Definitions. The copy leaves out the Community folder, which the app would
- * otherwise deploy into the sim's at its start (read in FS Copilot fork, src/FsCopilot/Installer.cs,
- * DeployBridge), and the settings and logs the exerciser's copy wrote while it ran.
- */
-function copyFsc(): void {
-  if (!fs.existsSync(path.join(FSC_SYNCED, "FsCopilot.exe"))) {
-    throw new Failed(`fsc-exerciser holds no synced FS Copilot in ${FSC_SYNCED}; run its sync-and-rebuild.ps1 -Fsc ${FSC_SOURCE} -Configuration Release`)
+  // fsc-exerciser's sync copies the fork's Release build to the same paths each time, so the
+  // firewall's rules for them still hold. It refuses a build older than any source file, so
+  // FS Copilot builds first.
+  const head = git(FSC_SOURCE)
+  if (fscBuild()?.commit !== head) {
+    run("dotnet", ["build", FSC_PROJECT, "-c", "Release", "--nologo", "-v", "q", "-nodeReuse:false"])
+    run("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(EXERCISER, "sync-and-rebuild.ps1"), "-Fsc", FSC_SOURCE, "-Configuration", "Release"])
+    console.log(`built FS Copilot ${head} and synced fsc-exerciser to it, ${elapsed()}`)
   }
-  fs.mkdirSync(FSC_COPY, { recursive: true })
-  const left = /^(Community|settings\.json.*|log|log\..*)$/i
-  fs.cpSync(FSC_SYNCED, FSC_COPY, { recursive: true, force: true, filter: (src) => !left.test(path.relative(FSC_SYNCED, src)) })
-  fs.copyFileSync(path.join(FSC_DEFINITIONS, FSC_PROFILE_NAME), path.join(FSC_COPY, "Definitions", FSC_PROFILE_NAME))
+  fs.mkdirSync(FSC_PILOT_FOLDER, { recursive: true })
+  fs.mkdirSync(FSC_SECOND_FOLDER, { recursive: true })
+  // SimConnect reads SimConnect.cfg from the app's working folder: on our development machine on
+  // 2026-11-18, an app started in a folder whose file named a port this script listened on tried
+  // that port 94 times in 15s. Port 1 refuses every connection on a PC that runs no TCPMUX, so
+  // each try fails at once and the second app never reaches the sim.
+  fs.writeFileSync(path.join(FSC_SECOND_FOLDER, "SimConnect.cfg"), "[SimConnect]\r\nProtocol=IPv4\r\nAddress=127.0.0.1\r\nPort=1\r\n")
+  console.log(`FS Copilot ${fscBuild()?.commit} is ready to run from fsc-exerciser's copy, ${elapsed()}`)
 }
 
 async function runOne(mode: Mode, seconds: number, dry: boolean): Promise<void> {
@@ -238,6 +235,8 @@ async function runOne(mode: Mode, seconds: number, dry: boolean): Promise<void> 
   else say("dry: Community stays as it is")
 
   const started = await start(mode, folder, say, notes, dry)
+  // Ctrl+C stops the tool as a run's end does, so no FS Copilot or core is left running; the sim stays open.
+  process.once("SIGINT", () => void started.stop().finally(() => process.exit(130)))
   let stand: ChildProcess | undefined
   let measured: Measured | undefined
   let extra: Pick<Result, "relayBytes"> = {}
@@ -297,17 +296,33 @@ function harness(all: ReturnType<typeof processes>, me: number, role: (p: { pid:
   return tree(all, me).map((p) => ({ role: role(p) ?? (p.pid === me ? "harness: this script" : `harness: ${p.name}`), pid: p.pid, name: p.name }))
 }
 
+/**
+ * FS Copilot as its own one-PC bench runs it: the pilot's app, and a second app that joins the
+ * pilot's session through the control channel `--bench` opens (read in FS Copilot fork,
+ * src/FsCopilot/Connection/BenchControl.cs). fsc-exerciser can't be the second pilot: FS Copilot's
+ * main registers traffic and ATC packets the exerciser doesn't, and refused its join for
+ * SCHEMA_MISMATCH on our development machine on 2026-11-18. Both apps link through the fork's relay
+ * on this PC.
+ */
 async function startFsc(folder: string, say: Say, notes: string[]): Promise<Started> {
-  if (!fs.existsSync(path.join(FSC_COPY, "FsCopilot.exe"))) throw new Failed(`there's no copy of FS Copilot in ${FSC_COPY}; run prepare`)
-  if (!fs.existsSync(EXERCISER_EXE)) throw new Failed(`fsc-exerciser isn't built at ${EXERCISER_EXE}; run its sync-and-rebuild.ps1`)
-  if (powershell("Get-NetUDPEndpoint -LocalPort 3600 -ErrorAction SilentlyContinue").trim()) throw new Failed("something already holds UDP port 3600, FS Copilot's relay port; close any exerciser or relay left running")
+  for (const file of [FSC_APP, FSC_RELAY_EXE, path.join(FSC_SECOND_FOLDER, "SimConnect.cfg")]) if (!fs.existsSync(file)) throw new Failed(`there's no ${file}; run prepare`)
+  if (powershell("Get-NetUDPEndpoint -LocalPort 3600 -ErrorAction SilentlyContinue").trim()) throw new Failed("something already holds UDP port 3600, FS Copilot's relay port; close any FS Copilot, exerciser, or relay left running")
+  if (powershell("Get-NetTCPConnection -LocalPort 9020 -State Listen -ErrorAction SilentlyContinue").trim()) throw new Failed("something already listens on port 9020, where FS Copilot's panels look first; close any FS Copilot left running")
+  // FS Copilot loads profiles from its program's folder, so the user's 58P profile goes into the
+  // copy's Definitions for the run, and the fork's own comes back at its end, or at `finish`.
+  fs.copyFileSync(path.join(FSC_DEFINITIONS, FSC_PROFILE_NAME), path.join(path.dirname(FSC_APP), "Definitions", FSC_PROFILE_NAME))
   const children: ChildProcess[] = []
   const relayOut = fs.createWriteStream(path.join(folder, "fsc-relay.txt"))
+  const benchPort = await freePort()
+  let pilot: ChildProcess | undefined
   const stop = async () => {
-    for (const p of children) closeWindow(p.pid)
+    await bench(benchPort, { c: "quit" }).catch(() => {})
+    // The pilot's own close path says goodbye to its peer, as its window's close button does.
+    closeWindow(pilot?.pid)
     await sleep(5_000)
     for (const p of children) if (p.exitCode === null) p.kill()
     relayOut.end()
+    restoreFscProfile()
   }
   let relaySaid = ""
   // As fsc-exerciser's Local.StartRelay starts it, with its HTTP side on a port nothing else takes.
@@ -319,111 +334,128 @@ async function startFsc(folder: string, say: Say, notes: string[]): Promise<Star
       relayOut.write(d)
     })
   }
-  // The exerciser makes a code the same way, and FS Copilot takes it as its peer ID.
-  const code = `EX${crypto.randomBytes(3).toString("hex").toUpperCase()}`
-  let fsc: ChildProcess
-  let exerciser: ChildProcess
+  // FS Copilot's codes are 8 characters, and the bench's join refuses any other length.
+  const code = `PI${crypto.randomBytes(3).toString("hex").toUpperCase()}`
+  // Each app writes its log into its working folder, read from where this run started.
+  const since = (file: string) => {
+    const from = fs.existsSync(file) ? fs.statSync(file).size : 0
+    return () => (fs.existsSync(file) ? fs.readFileSync(file, "utf8").slice(from) : "")
+  }
+  const pilotLog = since(path.join(FSC_PILOT_FOLDER, "log"))
+  const secondLog = since(path.join(FSC_SECOND_FOLDER, "log"))
+  let second: ChildProcess
   try {
     await until(() => (relaySaid.includes("UDP port: 3600") ? true : undefined), 30_000, "FS Copilot's relay to listen on UDP 3600")
     // `--no-direct` sends every link through the relay, as the bench's relays-only setting does Dual Input's, so both tools' traffic takes the same path (read in FS Copilot fork, src/FsCopilot/Program.cs).
-    fsc = spawn(path.join(FSC_COPY, "FsCopilot.exe"), ["--relay", "localhost", "--peer-id", code, "--no-direct"], { cwd: FSC_COPY, stdio: "ignore" })
-    children.push(fsc)
-    say(`started FS Copilot as ${code} on the local relay`)
-    await sleep(8_000)
-    exerciser = await joinExerciser(code, say, children)
+    pilot = spawn(FSC_APP, ["--relay", "localhost", "--peer-id", code, "--no-direct"], { cwd: FSC_PILOT_FOLDER, stdio: "ignore" })
+    children.push(pilot)
+    // The sim's panels look for FS Copilot on ports 9020 to 9024 in turn, so the pilot's app takes 9020 before the second starts.
+    await until(() => (/\[PanelServer\] Listening on 127\.0\.0\.1:9020/.test(pilotLog()) ? true : undefined), 60_000, "the pilot's FS Copilot to listen on port 9020")
+    const secondId = `SE${crypto.randomBytes(3).toString("hex").toUpperCase()}`
+    second = spawn(FSC_APP, ["--relay", "localhost", "--peer-id", secondId, "--no-direct", "--bench", String(benchPort)], { cwd: FSC_SECOND_FOLDER, stdio: "ignore" })
+    children.push(second)
+    say(`started the pilot's FS Copilot as ${code}, and a second FS Copilot as ${secondId}, on the local relay`)
+    // A join sent before both apps reach the relay fails, and a failed join leaves the joiner master (read in FS Copilot fork, src/FsCopilot/ViewModels/MainViewModel.cs, JoinCommand).
+    await until(() => (relaySaid.includes(`CONNECT pid=${code}`) && relaySaid.includes(`CONNECT pid=${secondId}`) ? true : undefined), 60_000, "both FS Copilots to reach the relay")
+    await joinSecond(benchPort, code, say)
   } catch (error) {
     await stop()
     throw error
   }
+  const [pilotApp, secondApp] = [pilot, second]
+  const secondReachedSim = () => /\[SimConnect\] (Consumer|Producer) connected/.test(secondLog())
 
   return {
     roles: (all) =>
       harness(all, process.pid, (p) => {
-        if (p.pid === fsc.pid) return "pilot: FS Copilot"
-        if (tree(all, fsc.pid!).some((q) => q.pid === p.pid)) return `pilot: FS Copilot's ${p.name}`
-        if (p.pid === exerciser.pid) return "second pilot: fsc-exerciser"
-        if (tree(all, exerciser.pid!).some((q) => q.pid === p.pid)) return `second pilot: fsc-exerciser's ${p.name}`
+        if (p.pid === pilotApp.pid) return "pilot: FS Copilot"
+        if (tree(all, pilotApp.pid!).some((q) => q.pid === p.pid)) return `pilot: FS Copilot's ${p.name}`
+        if (p.pid === secondApp.pid) return "second pilot: a second FS Copilot, kept off the sim"
+        if (tree(all, secondApp.pid!).some((q) => q.pid === p.pid)) return `second pilot: its ${p.name}`
         if (p.pid === relay.pid) return "network: FS Copilot's relay"
         return undefined
       }),
     ready: async () => {
-      let state = await fscState(30_000)
-      if (state?.sync !== "live") {
-        notes.push(`FS Copilot's session read ${JSON.stringify(state)} after the flight loaded, so the exerciser joined again`)
-        closeWindow(exerciser.pid)
-        await sleep(3_000)
-        if (exerciser.exitCode === null) exerciser.kill()
-        exerciser = await joinExerciser(code, say, children)
-        state = await fscState(30_000)
+      let peers = await bench(benchPort, { c: "peers" }).catch(() => null)
+      if (!peers?.connected || peers.master) {
+        notes.push(`the second FS Copilot read ${JSON.stringify(peers)} after the flight loaded, so it joined again`)
+        await joinSecond(benchPort, code, say).catch((error: Error) => notes.push(error.message))
+        peers = await bench(benchPort, { c: "peers" }).catch(() => null)
       }
-      if (state?.sync !== "live" || state.role !== "master") notes.push(`FS Copilot's session read ${JSON.stringify(state)}, not live with FS Copilot as master, so its numbers may not be a session's`)
-      return [`FS Copilot says its session is ${state?.sync ?? "unknown"}, as ${state?.role || "no role"}`]
+      if (!peers?.connected || peers.master) notes.push(`the second FS Copilot read ${JSON.stringify(peers)}, not linked and following, so the pilot's FS Copilot may not have been sending as a master to a follower`)
+      if (secondReachedSim()) notes.push("the second FS Copilot's log says its SimConnect reached the sim, so it wrote into the pilot's aircraft and the run measures two apps on one sim")
+      return [`the second FS Copilot is ${peers?.connected ? "linked" : "NOT linked"}, ${peers?.master ? "as master" : "following"}, with peers ${JSON.stringify(peers?.peers ?? [])}`]
+    },
+    after: async () => {
+      if (secondReachedSim()) notes.push("the second FS Copilot's SimConnect reached the sim during the window")
+      return {}
     },
     stop,
   }
 }
 
-/** Starts fsc-exerciser joining `code`, from its checkout's root as run.cmd does, and waits for its log to say the join went, three tries at most. */
-async function joinExerciser(code: string, say: Say, children: ChildProcess[]): Promise<ChildProcess> {
-  for (let attempt = 1; ; attempt++) {
-    const from = fs.existsSync(EXERCISER_LOG) ? fs.statSync(EXERCISER_LOG).size : 0
-    const exerciser = spawn(EXERCISER_EXE, ["--relay", "localhost", "--join", code], { cwd: EXERCISER, stdio: "ignore" })
-    children.push(exerciser)
-    const joined = await until(
-      () => {
-        if (!fs.existsSync(EXERCISER_LOG)) return undefined
-        const fd = fs.openSync(EXERCISER_LOG, "r")
-        const size = fs.fstatSync(fd).size
-        const buffer = Buffer.alloc(Math.max(0, size - from))
-        fs.readSync(fd, buffer, 0, buffer.length, from)
-        fs.closeSync(fd)
-        return /join: (\S+)/.exec(buffer.toString("utf8"))?.[1]
-      },
-      45_000,
-      "fsc-exerciser to say how its join went",
-    ).catch(() => "no answer")
-    say(`fsc-exerciser's join of ${code}, try ${attempt}: ${joined}`)
-    if (joined === "Success") return exerciser
-    closeWindow(exerciser.pid)
-    await sleep(3_000)
-    if (exerciser.exitCode === null) exerciser.kill()
-    if (attempt === 3) throw new Failed(`fsc-exerciser couldn't join FS Copilot in three tries; its log is ${EXERCISER_LOG}`)
+/** Puts the fork's own 58P profile back into fsc-exerciser's copy, as its sync left it, from the source its build copies. */
+function restoreFscProfile(): void {
+  const own = path.join(FSC_SOURCE, "Definitions", FSC_PROFILE_NAME)
+  if (fs.existsSync(own) && fs.existsSync(FSC_APP)) fs.copyFileSync(own, path.join(path.dirname(FSC_APP), "Definitions", FSC_PROFILE_NAME))
+}
+
+type Peers = { ok: boolean; connected?: boolean; master?: boolean; peers?: unknown[]; error?: string }
+
+/** Has the second app join `code` through its bench channel, as pressing Join does, until it's linked and following, three tries at most. */
+async function joinSecond(port: number, code: string, say: Say): Promise<void> {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    // The bench channel opens once the app's window and services are up, a few seconds after its start.
+    await until(() => bench(port, { c: "join", code }).catch(() => undefined), 60_000, "the second FS Copilot's bench channel").catch(() => null)
+    // The app reads its link from its peer list, which settles a moment after the join returns,
+    // and a leave on a link still settling came back as a master on our development machine, 2026-11-18.
+    let peers: Peers | null = null
+    for (const started = Date.now(); Date.now() - started < 15_000 && !peers?.connected; await sleep(500)) peers = await bench(port, { c: "peers" }).catch(() => null)
+    say(`the second FS Copilot's join of ${code}, try ${attempt}: ${JSON.stringify(peers)}`)
+    if (peers?.connected && !peers.master) return
+    await bench(port, { c: "leave" }).catch(() => null)
+    await sleep(5_000)
   }
+  throw new Failed(`the second FS Copilot couldn't join ${code} as a follower in three tries; its log is ${path.join(FSC_SECOND_FOLDER, "log")}`)
+}
+
+let benchId = 0
+
+/** Sends one request on FS Copilot's bench channel, a JSON line over loopback TCP, and returns its reply line. */
+function bench(port: number, request: Record<string, unknown>): Promise<Peers> {
+  return new Promise((resolve, reject) => {
+    const socket = net.connect(port, "127.0.0.1", () => socket.write(`${JSON.stringify({ id: ++benchId, ...request })}\n`))
+    let text = ""
+    const timer = setTimeout(() => {
+      socket.destroy()
+      reject(new Error(`FS Copilot's bench channel didn't answer ${JSON.stringify(request)}`))
+    }, 60_000)
+    socket.on("data", (d: Buffer) => {
+      text += d.toString("utf8")
+      const end = text.indexOf("\n")
+      if (end < 0) return
+      clearTimeout(timer)
+      socket.end()
+      resolve(JSON.parse(text.slice(0, end)) as Peers)
+    })
+    socket.on("error", (error) => {
+      clearTimeout(timer)
+      reject(error)
+    })
+  })
+}
+
+function freePort(): Promise<number> {
+  return new Promise((resolve) => {
+    const server = net.createServer().listen(0, "127.0.0.1", () => {
+      const { port } = server.address() as net.AddressInfo
+      server.close(() => resolve(port))
+    })
+  })
 }
 
 function closeWindow(pid: number | undefined): void {
   if (pid) powershell(`try { [void](Get-Process -Id ${pid} -ErrorAction Stop).CloseMainWindow() } catch { }`)
-}
-
-/** What FS Copilot tells a watcher of its panel channel about its session, as fsc-exerciser's Session.WatchLoop reads it: its sync state and role. */
-async function fscState(ms: number): Promise<{ sync: string; role: string } | null> {
-  const started = Date.now()
-  while (Date.now() - started < ms) {
-    for (const port of [9020, 9021, 9022, 9023, 9024]) {
-      const state = await new Promise<{ sync: string; role: string } | null>((resolve) => {
-        const ws = new WebSocket(`ws://127.0.0.1:${port}/`)
-        const timer = setTimeout(() => {
-          ws.close()
-          resolve(null)
-        }, 3_000)
-        ws.onopen = () => ws.send(JSON.stringify({ t: "watch" }))
-        ws.onerror = () => {
-          clearTimeout(timer)
-          resolve(null)
-        }
-        ws.onmessage = (event) => {
-          const message = JSON.parse(String(event.data)) as { t?: string; sync?: string; role?: string }
-          if (message.t !== "state") return
-          clearTimeout(timer)
-          ws.close()
-          resolve({ sync: message.sync ?? "", role: message.role ?? "" })
-        }
-      })
-      if (state) return state
-    }
-    await sleep(1_000)
-  }
-  return null
 }
 
 /**
@@ -585,7 +617,7 @@ function git(folder: string): string {
   return spawnSync("git", ["-C", folder, "rev-parse", "--short", "HEAD"], { encoding: "utf8" }).stdout.trim()
 }
 
-/** Which FS Copilot build the run used: the fork's commit the exerciser synced, as its sync recorded it, without the checkout's path, which names this PC's user. */
+/** Which FS Copilot build the run used: the fork's commit fsc-exerciser synced, as its sync recorded it, without the checkout's path, which names this PC's user. */
 function fscBuild(): { commit: string; hash: string; synced: string } | null {
   const recorded = path.join(EXERCISER, "fsc-exerciser.json")
   if (!fs.existsSync(recorded)) return null

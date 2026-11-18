@@ -117,7 +117,8 @@ export function report(): string {
     const m = r.measured!
     if (m.focus < 0.95) out.push(`- ${names[i]}: the sim had the focus in only ${(m.focus * 100).toFixed(0)}% of samples, and MSFS 2024 draws fewer frames without it.`)
     const pilot = m.processes.filter((p) => p.role.startsWith("pilot: "))
-    if (pilot.length && !("error" in m.network) && pilot.every((p) => !m.network[p.pid]?.sent)) {
+    const net = m.network
+    if (pilot.length && !("error" in net) && pilot.every((p) => !net[p.pid]?.sent)) {
       out.push(`- ${names[i]}: the network trace saw no byte sent by the pilot's tool, so the kernel's events may miss loopback, and its network numbers say nothing.`)
     }
     for (const n of r.notes) out.push(`- ${names[i]}: ${n}`)
@@ -125,7 +126,7 @@ export function report(): string {
   for (const mode of Object.keys(MODES)) if (!runs.some((r) => r.mode === mode)) out.push(`- No run with ${MODES[mode as keyof typeof MODES]} is in the last 12 hours.`)
   out.push(
     "- The flight sat on the runway with its engines running, so the runs measure a connected session at rest: each tool still streams the aircraft at its full rate, but a flight, or a crew working switches, has each tool send more changes.",
-    "- Each second pilot is a different program, on this PC only for the test: fsc-exerciser, a window and a peer, and FS Copilot's relay, against a bench core on a stand-in sim, the bench relay, and the local backend under wrangler. Their CPU comes out of the same PC as the sim's, so the report lists them apart from the pilot's tool.",
+    "- Each second pilot runs on this PC only for the test: a second FS Copilot, whose SimConnect.cfg sends it to a closed port so it never reaches the sim, and FS Copilot's relay, against a bench core on a stand-in sim, the bench relay, and the local backend under wrangler. Their CPU comes out of the same PC as the sim's, so the report lists them apart from the pilot's tool. fsc-exerciser couldn't be FS Copilot's second pilot: the fork's main refused its join for a schema that lacks the traffic and ATC packets.",
     "- Both tools' links crossed a local relay: Dual Input's through the bench relay, by the bench's relays-only setting, and FS Copilot's through its own relay, by its `--no-direct` switch. Between two PCs, each links directly when it can, and its relay costs that PC nothing.",
     "- Neither tool's traffic or ATC sharing was switched on, and each starts with it off until a pilot claims it (read in FS Copilot fork, src/FsCopilot/Simulation/ShareSwitch.cs, and record/areas/architecture/02-code-map.md, \"The traffic and ATC switch\").",
     "- Dual Input's desktop app didn't run; the pilot's core ran alone, as tools/sim/camera.ts runs it. The app, as a tray icon with its window closed, holds about 4 MB and uses 0.14% to 0.26% of one core (measured on our development machine, record/areas/install/log.md, 2026-11-11, and record/areas/traffic-atc/log.md). FS Copilot's one process is its window and its logic together, and its window stayed open.",

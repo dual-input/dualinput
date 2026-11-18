@@ -260,6 +260,8 @@ function cpu(): Map<number, { name: string; ms: number }> {
  */
 async function prepare(): Promise<void> {
   refuseWhileSimRuns()
+  // A run stopped partway leaves packages aside, and the install below would put a second copy beside them.
+  for (const line of restore()) console.log(line)
   const started = Date.now()
   const elapsed = () => `${Math.round((Date.now() - started) / 60_000)} min in`
   run(process.execPath, [path.join("tools", "build.ts"), "install"])

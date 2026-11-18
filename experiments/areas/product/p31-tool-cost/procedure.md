@@ -10,7 +10,9 @@ With the default 2 rounds the six runs take about 75 minutes, from p10's 164s fr
 ## Before you start
 
 - Close the sim.
-- Close anything that would load the PC or move the camera: ChasePlane, BeyondATC, SayIntentions, GSX, a torrent client, any game, any Claude session working on this PC, and a Moonlight stream from Sunshine, which encodes every frame the sim draws.
+- Close anything whose load changes from minute to minute: a torrent client, any game, and any Claude session working on this PC.
+- Leave running what you always fly with, such as ChasePlane or GSX, and keep everything as it is until the schedule ends, a Moonlight stream from Sunshine included.
+  The comparison holds a steady load evenly across the tools, but a program started, closed, or connected partway lands on some tools' runs and not others.
 - If `target\p31\PresentMon-2.6.0-x64.exe` isn't in your checkout, download it from [PresentMon's 2.6.0 release](https://github.com/GameTechDev/PresentMon/releases/tag/v2.6.0) into that folder.
   The PresentMon in NVIDIA's FrameView SDK records nothing outside FrameView.
 - Keep Steam running, started as usual from the Start menu.

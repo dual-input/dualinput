@@ -169,7 +169,14 @@ export async function measure(folder: string, sim: number, tracked: Tracked[], s
   let presentmonSaid = ""
   presentmon.stdout!.on("data", (d: Buffer) => (presentmonSaid += d.toString()))
   presentmon.stderr!.on("data", (d: Buffer) => (presentmonSaid += d.toString()))
-  const presentmonEnded = new Promise<number | null>((resolve) => presentmon.on("exit", resolve))
+  // A PresentMon that can't start, such as one missing from a dry run's tree, leaves a window with no frames rather than ending the run before its tool stops.
+  const presentmonEnded = new Promise<number | null>((resolve) => {
+    presentmon.on("exit", resolve)
+    presentmon.on("error", (error) => {
+      presentmonSaid += error.message
+      resolve(null)
+    })
+  })
 
   const t0 = performance.now()
   const before = cpuTimes()

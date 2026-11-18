@@ -1,27 +1,29 @@
 /*
  * p31: what Dual Input and FS Copilot each cost one PC, in the sim's frame times and in the CPU,
- * memory, and network bytes of each tool's processes. The runs share one flight, the Black Square
- * Baron 58P on runway 14 at Seymour, SEGS, engines running and parking brake set, each measured
- * for 5 minutes with nobody touching anything:
+ * memory, and network bytes of each tool's processes. Every run flies the same flight, the Black
+ * Square Baron 58P on runway 14 at Seymour, SEGS, at noon, and measures it for 5 minutes with
+ * nobody touching anything, in one of three modes:
  *
  *   none        neither tool's package in Community, and no tool running
- *   fsc         FS Copilot, with fsc-exerciser as the second pilot on this PC
- *   dualinput   Dual Input, with a bench core as the second pilot on this PC
+ *   fsc         FS Copilot, with a second FS Copilot, kept off the sim, as the second pilot
+ *   dualinput   Dual Input, with a bench core as the second pilot
  *
  * Run it in a terminal opened as administrator, since PresentMon and the network trace each start
  * an ETW session. procedure.md beside this file gives the steps.
  *
  *   node experiments/areas/product/p31-tool-cost/run.ts check
  *   node experiments/areas/product/p31-tool-cost/run.ts prepare
+ *   node experiments/areas/product/p31-tool-cost/run.ts all [--repeats <n>] [--seconds <n>] [--modes none,fsc,dualinput] [--dry]
  *   node experiments/areas/product/p31-tool-cost/run.ts none | fsc | dualinput [--seconds <n>] [--dry]
- *   node experiments/areas/product/p31-tool-cost/run.ts finish
- *   node experiments/areas/product/p31-tool-cost/run.ts restore | profiles
+ *   node experiments/areas/product/p31-tool-cost/run.ts finish | restore | profiles
  *
- * A run switches Community, starts the tool, starts the sim through Steam, asks aloud for the
- * flight, waits for the sim to have the focus, settles 30s, measures, then stops the tool and closes
- * the sim, so the next run starts with the sim closed. `--dry` runs with a stand-in process for the
- * sim and leaves Community alone unless DUALINPUT_P31_PACKAGES names a copy of a packages folder.
- * `finish` moves every package back and writes the report from the runs of the last 12 hours.
+ * `all` runs the modes in turn, repeated, so drift over the hours spreads across every tool, then
+ * moves every package back and writes the report. Each run switches Community, starts its tool,
+ * starts the sim through Steam, loads the flight through the menu (sim.ts), brings the sim to the
+ * front, settles 30s, measures, stops the tool, and closes the sim. A crash or a hang starts the run
+ * over from a closed sim, and its third try asks aloud for the flight instead. `--dry` runs with a
+ * stand-in process for the sim and leaves Community alone unless DUALINPUT_P31_PACKAGES names a
+ * copy of a packages folder.
  */
 
 import { spawn, spawnSync, type ChildProcess } from "node:child_process"
@@ -46,7 +48,7 @@ import { Failed, main, run } from "../../../../tools/lib/run.ts"
 import { desktop, type Desktop } from "../../../../tools/sim/desktop.ts"
 import { Guide } from "../../../../tools/sim/guide.ts"
 import { DUAL_INPUT, FS_COPILOT, mount, restore, where, type Package } from "./community.ts"
-import { elevated, measure, PRESENTMON, processes, SIM_EXE, tree, type Measured, type Tracked } from "./measure.ts"
+import { elevated, measure, othersBusy, PRESENTMON, processes, SIM_EXE, tree, type Measured, type Tracked } from "./measure.ts"
 import {
   BENCH_OUT,
   BENCH_PROFILES,
@@ -64,44 +66,102 @@ import {
 import { compareProfiles, FSC_DEFINITIONS, FSC_PROFILE_NAME } from "./profiles.ts"
 import { report } from "./report.ts"
 import { MODES, summary, type Mode, type Result } from "./result.ts"
+import { closeSim, focusSim, launchSim, loadFlight, SimDown } from "./sim.ts"
 
 const MOUNTS: Record<Mode, Package[]> = { none: [], fsc: [FS_COPILOT], dualinput: [DUAL_INPUT] }
 
 const SETTLE_MS = 30_000
-const STEAM_URL = "steam://rungameid/2537590"
+/** How many times a run starts over from a closed sim before it gives up, the last of them asking aloud for the flight. */
+const ATTEMPTS = 3
 const BARON = /baronpro/i
-/** What the sim starts and leaves running after it quits, which then makes Steam refuse to start it again. */
-const LEFTOVERS = ["FenixBootstrapper", "TDSGTNXiFlightSimEXE", "TDSROARService", "roar", "gtn_simulator"]
 /** The copilot's eye in the 58P's profile, where the second pilot's camera sits, as tools/sim/camera.ts has it. */
 const COPILOT_EYE: [number, number, number] = [-0.282, 0.855, -0.144]
 
-const FLIGHT =
-  "Load a free flight in the Black Square Baron 58P, at Seymour, S E G S, on runway 14, with the weather preset Clear Skies and the time at noon. " +
-  "Press Ready to fly. Start the engines if they aren't running, set the parking brake, and stay in the cockpit view. Then press Page Up."
+const ASK_FOR_FLIGHT =
+  "The run couldn't load the flight on its own. Load a free flight in the Black Square Baron 58P, at Seymour, S E G S, on runway 14, at noon. " +
+  "Press Ready to fly, stay in the cockpit view, and press Page Up."
 
 type Say = (line: string, aloud?: boolean) => void
 type Voice = Pick<Guide, "say" | "tick" | "pass" | "skipped" | "close">
 const silent: Voice = { say: () => {}, tick: () => {}, pass: () => {}, skipped: () => false, close: () => {} }
 /** What a tool's run started, and how to end it. */
 type Started = { roles: (all: ReturnType<typeof processes>) => Tracked[]; ready: () => Promise<string[]>; before?: () => Promise<void>; after?: () => Promise<Pick<Result, "relayBytes">>; stop: () => Promise<void> }
+type Options = { seconds: number; dry: boolean }
 
 main(async () => {
   const [command, ...rest] = process.argv.slice(2)
-  const seconds = Number(flag(rest, "--seconds") ?? 300)
-  const dry = rest.includes("--dry")
+  const options: Options = { seconds: Number(flag(rest, "--seconds") ?? 300), dry: rest.includes("--dry") }
   if (command === "check") return check()
   if (command === "prepare") return prepare()
   if (command === "restore") return void restore().forEach((l) => console.log(l))
   if (command === "profiles") return void compareProfiles().forEach((l) => console.log(`${l}\n`))
-  if (command === "finish") {
-    for (const line of restore()) console.log(line)
-    restoreFscProfile()
-    console.log(`The report is in ${path.relative(ROOT, report())}.`)
+  if (command === "finish") return finish()
+  if (command === "all") {
+    const modes = (flag(rest, "--modes") ?? "none,fsc,dualinput").split(",") as Mode[]
+    const unknown = modes.filter((m) => !(m in MODES))
+    if (unknown.length) throw new Failed(`no mode named ${unknown.join(", ")}; the modes are ${Object.keys(MODES).join(", ")}`)
+    return all(modes, Number(flag(rest, "--repeats") ?? 2), options)
+  }
+  if (command && command in MODES) {
+    await session(options, (guide) => runOne(command as Mode, options, guide))
     return
   }
-  if (command && command in MODES) return runOne(command as Mode, seconds, dry)
-  throw new Failed("usage: node experiments/areas/product/p31-tool-cost/run.ts check | prepare | none | fsc | dualinput [--seconds <n>] [--dry] | finish | restore | profiles")
+  throw new Failed("usage: node experiments/areas/product/p31-tool-cost/run.ts check | prepare | all [--repeats <n>] [--seconds <n>] [--modes ...] [--dry] | none | fsc | dualinput [--seconds <n>] [--dry] | finish | restore | profiles")
 })
+
+function finish(): void {
+  for (const line of restore()) console.log(line)
+  restoreFscProfile()
+  console.log(`The report is in ${path.relative(ROOT, report())}.`)
+}
+
+/**
+ * Checks what every run needs before the first starts, so a missing build or an unelevated
+ * terminal stops the schedule at once, not an hour in, then runs `body` with the guide's voice,
+ * which a dry run keeps silent, since it runs with no one at the sim, at any hour.
+ */
+async function session(options: Options, body: (guide: Voice) => Promise<void>): Promise<void> {
+  if (!options.dry) {
+    if (!elevated()) throw new Failed("this terminal isn't elevated, so PresentMon and the network trace can't start; open Terminal (Admin) and run this again")
+    if (simRunning()) throw new Failed("the sim is running; close it, so the run can switch Community and start it")
+    // Steam started from this elevated terminal would start the sim elevated too, which no pilot runs.
+    if (!powershell("Get-Process steam -ErrorAction SilentlyContinue").trim()) throw new Failed("Steam isn't running; start it from the Start menu, then run this again")
+    if (!fs.existsSync(PRESENTMON)) throw new Failed(`PresentMon isn't at ${PRESENTMON}`)
+  }
+  const guide = options.dry ? silent : await Guide.start()
+  try {
+    await body(guide)
+  } finally {
+    guide.close()
+  }
+}
+
+/** Every mode in turn, `repeats` times, then Community back as it started and the report. */
+async function all(modes: Mode[], repeats: number, options: Options): Promise<void> {
+  const started = Date.now()
+  try {
+    await session(options, async (guide) => {
+      for (let round = 1; round <= repeats; round++) {
+        for (const mode of modes) {
+          console.log(`\n=== round ${round} of ${repeats}: ${MODES[mode]}, ${Math.round((Date.now() - started) / 60_000)} min in`)
+          // A run that stops before its tries, such as on a package missing from Community, leaves the rest of the schedule to run.
+          await runOne(mode, options, guide).catch((error: Error) => console.log(`the run with ${MODES[mode]} stopped: ${error.message}`))
+        }
+      }
+    })
+  } finally {
+    if (!options.dry || process.env.DUALINPUT_P31_PACKAGES) for (const line of restore()) console.log(line)
+    restoreFscProfile()
+  }
+  if (options.dry) return console.log("dry: no report, since a dry run's numbers measure no sim")
+  let written: string
+  try {
+    written = path.relative(ROOT, report())
+  } catch (error) {
+    written = `not written: ${(error as Error).message}`
+  }
+  console.log(`\nEvery run is done, ${Math.round((Date.now() - started) / 60_000)} min after the first started. The report is in ${written}.`)
+}
 
 function flag(args: string[], name: string): string | undefined {
   const i = args.indexOf(name)
@@ -208,79 +268,105 @@ async function prepare(): Promise<void> {
   console.log(`FS Copilot ${fscBuild()?.commit} is ready to run from fsc-exerciser's copy, ${elapsed()}`)
 }
 
-async function runOne(mode: Mode, seconds: number, dry: boolean): Promise<void> {
+/**
+ * One run of `mode`: Community switched, then up to three tries, each with the tool started first,
+ * as a pilot would have it running, then the sim from closed. A crash, a hang, or a failed step ends
+ * the try, stops the tool, and closes the sim, and the third try asks aloud for the flight. The run's
+ * JSON holds the numbers, or every try's error when none got through.
+ */
+async function runOne(mode: Mode, options: Options, guide: Voice): Promise<void> {
+  const { seconds, dry } = options
   const label = MODES[mode]
   const name = `${stamp()}-${mode}`
   const folder = path.join(WORK, "runs", name)
   fs.mkdirSync(folder, { recursive: true })
   fs.mkdirSync(RESULTS, { recursive: true })
   const text: string[] = []
-  // A dry run speaks and beeps nothing, since it runs with no one at the sim, at any hour.
-  const guide = dry ? silent : await Guide.start()
   const say: Say = (line, aloud = false) => {
     console.log(line)
     text.push(line)
     if (aloud) guide.say(line)
   }
   const notes: string[] = []
-
-  if (!dry && !elevated()) throw new Failed("this terminal isn't elevated, so PresentMon and the network trace can't start; open Terminal (Admin) and run this again")
-  if (!dry && simRunning()) throw new Failed("the sim is running; close it, so this run can switch Community and start it")
-  // Steam started from this elevated terminal would start the sim elevated too, which no pilot runs.
-  if (!dry && !powershell("Get-Process steam -ErrorAction SilentlyContinue").trim()) throw new Failed("Steam isn't running; start it from the Start menu, then run this again")
-  if (!fs.existsSync(PRESENTMON)) notes.push(`PresentMon isn't at ${PRESENTMON}, so this run has no frame times`)
-
   say(`p31, the run with ${label}, ${new Date().toString()}`)
   if (!dry || process.env.DUALINPUT_P31_PACKAGES) for (const line of mount(MOUNTS[mode])) say(line)
   else say("dry: Community stays as it is")
 
-  const started = await start(mode, folder, say, notes, dry)
-  // Ctrl+C stops the tool as a run's end does, so no FS Copilot or core is left running; the sim stays open.
-  process.once("SIGINT", () => void started.stop().finally(() => process.exit(130)))
-  let stand: ChildProcess | undefined
   let measured: Measured | undefined
   let extra: Pick<Result, "relayBytes"> = {}
   let version: string | null = null
-  try {
-    let sim: number
-    if (dry) {
-      stand = spawn("ping", ["-n", "86400", "127.0.0.1"], { stdio: "ignore" })
-      sim = stand.pid!
-      say("dry: a ping stands in for the sim")
-    } else {
-      sim = await launchSim(say)
-      version = simVersion()
-      say(FLIGHT, true)
-      await pageUp(guide, 45 * 60_000)
+  let loaded: string[] = []
+  const failures: string[] = []
+  for (let attempt = 1; attempt <= ATTEMPTS && !measured; attempt++) {
+    let started: Started | undefined
+    let stand: ChildProcess | undefined
+    // Ctrl+C stops the tool and closes the sim as a try's end does, so no FS Copilot or core is left running.
+    const interrupted = () => {
+      void (started?.stop() ?? Promise.resolve()).finally(() => process.exit(130))
     }
-    for (const line of await started.ready()) say(line)
-    if (!dry) await focused(sim, say)
-    const minutes = Math.ceil((SETTLE_MS + seconds * 1000) / 60_000)
-    say(`Hands off now, for about ${minutes} minute${minutes === 1 ? "" : "s"}, until the high beep.`, true)
-    guide.tick()
-    await sleep(SETTLE_MS)
-    await started.before?.()
-    const tracked = started.roles(processes())
-    say(`measuring for ${seconds}s: ${tracked.map((t) => `${t.role} (${t.pid})`).join(", ")}`)
-    measured = await measure(folder, sim, tracked, seconds)
-    extra = (await started.after?.()) ?? {}
-    guide.pass()
-    say("Measured. You can move again; the run stops the tool and closes the sim now.", true)
-  } finally {
-    await started.stop().catch((error: Error) => say(`stopping the tool: ${error.message}`))
-    stand?.kill()
-    if (!dry) await closeSim(say).catch((error: Error) => say(error.message, true))
+    process.once("SIGINT", interrupted)
+    try {
+      started = await start(mode, folder, say, notes, dry)
+      let sim: number
+      if (dry) {
+        stand = spawn("ping", ["-n", "86400", "127.0.0.1"], { stdio: "ignore" })
+        sim = stand.pid!
+        say("dry: a ping stands in for the sim")
+      } else {
+        sim = await launchSim(say)
+        version = simVersion()
+        if (attempt === ATTEMPTS) {
+          say(ASK_FOR_FLIGHT, true)
+          // With nobody at the PC this only costs the wait, so it's short.
+          await pageUp(guide, 10 * 60_000)
+          loaded = [`the pilot loaded the flight, after the run's own load failed ${ATTEMPTS - 1} times`]
+        } else loaded = await loadFlight(sim, say)
+      }
+      for (const line of await started.ready()) say(line)
+      if (!dry && !focusSim()) notes.push("the run couldn't bring the sim to the front before its window")
+      say(`settling ${SETTLE_MS / 1000}s, then measuring for ${seconds}s`)
+      await sleep(SETTLE_MS)
+      if (!dry && !alive(sim)) throw new SimDown("the sim quit while the flight settled")
+      await started.before?.()
+      const tracked = started.roles(processes())
+      const busy = await othersBusy(new Set([sim, ...tracked.map((t) => t.pid)]))
+      if (busy.length) notes.push(`in the 10s before the window, processes outside the run used ${busy.map((b) => `${b.name} ${b.cpuPercent.toFixed(0)}%`).join(", ")} of one core`)
+      if (!dry && !focusSim()) notes.push("the sim wasn't in front as the window started, and the run couldn't bring it there")
+      say(`measuring: ${tracked.map((t) => `${t.role} (${t.pid})`).join(", ")}`)
+      const window = await measure(folder, sim, tracked, seconds)
+      if (!dry && !alive(sim)) throw new SimDown("the sim quit during the window")
+      extra = (await started.after?.()) ?? {}
+      measured = window
+      guide.pass()
+    } catch (error) {
+      const why = error instanceof Error ? error.message : String(error)
+      failures.push(`try ${attempt}: ${why}`)
+      say(`try ${attempt} of ${ATTEMPTS} stopped: ${why}`)
+    } finally {
+      process.removeListener("SIGINT", interrupted)
+      await started?.stop().catch((error: Error) => say(`stopping the tool: ${error.message}`))
+      stand?.kill()
+      if (!dry) await closeSim(say).catch((error: Error) => say(error.message))
+    }
   }
+  if (failures.length) notes.push(...failures.map((f) => (measured ? `${f}, so the run started over` : f)))
 
-  const result: Result = { probe: "p31", mode, label, dry, commit: git(ROOT), fsc: mode === "dualinput" ? null : fscBuild(), simVersion: version, measured, ...extra, notes }
+  const result: Result = { probe: "p31", mode, label, dry, commit: git(ROOT), fsc: mode === "dualinput" ? null : fscBuild(), simVersion: version, loaded, measured, ...extra, notes }
   // A dry run's numbers measure no sim, so they stay in target/ with its raw output.
   const json = dry ? path.join(folder, "result.json") : path.join(RESULTS, `p31-${name}.json`)
   fs.writeFileSync(json, `${JSON.stringify(result, null, 2)}\n`)
   for (const line of summary(result)) say(line)
   fs.writeFileSync(path.join(folder, "run.txt"), `${text.join("\n")}\n`)
   say(`The numbers are in ${path.relative(ROOT, json)}, and PresentMon's CSV and the network trace in ${path.relative(ROOT, folder)}.`)
-  guide.close()
-  process.exit(0)
+}
+
+function alive(pid: number): boolean {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch {
+    return false
+  }
 }
 
 /** The run's tool, started before the sim is, as a pilot would have it running. */
@@ -291,9 +377,20 @@ async function start(mode: Mode, folder: string, say: Say, notes: string[], dry:
   return { roles: (all) => harness(all, me, () => undefined), ready: async () => [], stop: async () => {} }
 }
 
-/** The harness's own processes, which every run has: this script, the guide's three PowerShells, and whatever `role` names first. */
+/**
+ * The harness's own processes, which every run has: this script, the guide's three PowerShells, and
+ * whatever `role` names first; and the shell and terminal that run the script, up to three levels
+ * above it, since they draw its output and would otherwise read as a stranger busy beside the sim.
+ */
 function harness(all: ReturnType<typeof processes>, me: number, role: (p: { pid: number; parent: number; name: string }) => string | undefined): Tracked[] {
-  return tree(all, me).map((p) => ({ role: role(p) ?? (p.pid === me ? "harness: this script" : `harness: ${p.name}`), pid: p.pid, name: p.name }))
+  const above: Tracked[] = []
+  for (let p = all.find((x) => x.pid === me); p && above.length < 3; ) {
+    const parent = all.find((x) => x.pid === p!.parent)
+    if (!parent || /^(explorer|svchost|services|wininit)\.exe$/i.test(parent.name)) break
+    above.push({ role: `harness: its ${parent.name}`, pid: parent.pid, name: parent.name })
+    p = parent
+  }
+  return [...tree(all, me).map((p) => ({ role: role(p) ?? (p.pid === me ? "harness: this script" : `harness: ${p.name}`), pid: p.pid, name: p.name })), ...above]
 }
 
 /**
@@ -559,58 +656,11 @@ async function startDualInput(folder: string, say: Say, notes: string[], dry: bo
   }
 }
 
+/** Waits for Page Up, the pilot's word that the flight is loaded. */
 async function pageUp(guide: Voice, ms: number): Promise<void> {
   guide.skipped()
   for (const started = Date.now(); Date.now() - started < ms; await sleep(100)) if (guide.skipped()) return
-  throw new Failed("no Page Up came; the run stops")
-}
-
-/** Waits until the sim's window has the focus, since MSFS 2024 draws fewer frames without it, asking aloud each minute it doesn't. */
-async function focused(sim: number, say: Say): Promise<void> {
-  const front = () => Number(powershell(`Add-Type 'using System; using System.Runtime.InteropServices; public static class P31F { [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow(); [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint p); }'; $p = 0; [void][P31F]::GetWindowThreadProcessId([P31F]::GetForegroundWindow(), [ref]$p); $p`).trim())
-  for (let asked = 0; front() !== sim; ) {
-    if (Date.now() - asked > 60_000) {
-      say("Click once on the sim's window, so it has the focus.", true)
-      asked = Date.now()
-    }
-    await sleep(1_000)
-  }
-}
-
-/** Starts the sim through Steam, after ending what a sim before it left behind, and returns its process ID. */
-async function launchSim(say: Say): Promise<number> {
-  killLeftovers()
-  for (let attempt = 0; attempt < 2; attempt++) {
-    spawnSync("cmd", ["/c", "start", "", STEAM_URL], { stdio: "ignore" })
-    say(attempt === 0 ? "Starting the sim through Steam." : "The sim didn't start, so the run asks Steam again.", true)
-    // Steam can ignore a launch sent seconds after the sim last quit (the memory of 2026-10-04 in our notes), so it gets a second.
-    const pid = await until(() => simPid(), 60_000, "the sim's process").catch(() => undefined)
-    if (pid) return pid
-  }
-  say("Start the sim from Steam yourself; the run waits for it.", true)
-  return until(() => simPid(), 10 * 60_000, "the sim's process")
-}
-
-function simPid(): number | undefined {
-  return processes().find((p) => p.name.toLowerCase() === SIM_EXE.toLowerCase())?.pid
-}
-
-/** Closes the sim as its window's close button does, and waits up to 2 min for it to quit, then asks the pilot. */
-async function closeSim(say: Say): Promise<void> {
-  if (!simRunning()) return
-  powershell("Get-Process FlightSimulator2024 -ErrorAction SilentlyContinue | ForEach-Object { [void]$_.CloseMainWindow() }")
-  const gone = await until(() => (simRunning() ? undefined : true), 120_000, "the sim to quit").catch(() => false)
-  if (!gone) {
-    say("The sim hasn't quit in two minutes. Quit it from its main menu.", true)
-    await until(() => (simRunning() ? undefined : true), 10 * 60_000, "the sim to quit")
-  }
-  killLeftovers()
-  say("The sim has quit.")
-}
-
-function killLeftovers(): void {
-  if (simRunning()) return
-  powershell(`Get-Process -Name ${LEFTOVERS.join(",")} -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue`)
+  throw new SimDown(`no Page Up came in ${ms / 60_000} minutes`)
 }
 
 function git(folder: string): string {

@@ -1,15 +1,16 @@
 # p31 procedure: what each tool costs one PC
 
-This runs p31 on the sim's PC: three runs of the same flight, one with no tool, one with FS Copilot, and one with Dual Input, then a report of the sim's frame times and each tool's CPU, memory, and network side by side.
-The builds take a while the first time and need no one; the runs need you at the sim for about 40 minutes.
+This runs p31 on the sim's PC with nobody at it: runs with no tool, with FS Copilot, and with Dual Input, in turn and repeated, then a report of the sim's frame times and each tool's CPU, memory, and network side by side.
+You start two commands and come back to the report.
 
-Each run starts the sim through Steam, asks aloud for the flight, measures for 5 minutes, then closes the sim itself.
-While it measures, keep your hands off the mouse and keyboard: a beep starts the 5.5 minutes, and a high beep ends them.
+Each run starts the sim through Steam, loads the Black Square Baron 58P on runway 14 at Seymour, SEGS, sets the time to noon, measures for 5 minutes, and closes the sim.
+A crash or a hang starts the run over; on its third try a voice asks for the flight by hand, and waits 10 minutes.
+With the default 2 rounds the six runs take about 75 minutes, from p10's 164s from Steam to Ready to fly plus each 5-minute window, and longer for each crash.
 
 ## Before you start
 
 - Close the sim.
-- Close anything that would move the camera or load the PC: ChasePlane, BeyondATC, SayIntentions, GSX, a torrent client, and any game.
+- Close anything that would load the PC or move the camera: ChasePlane, BeyondATC, SayIntentions, GSX, a torrent client, any game, and any Claude session working on this PC.
 - Keep Steam running, started as usual from the Start menu.
 - Open Terminal as administrator: Win+X, then Terminal (Admin).
   PresentMon and the network trace each start an ETW session, which Windows allows only an elevated terminal.
@@ -29,7 +30,7 @@ While it measures, keep your hands off the mouse and keyboard: a beep starts the
    ```
 
    You'll see a line per thing a run needs, each `ok` or `MISSING`, then the busiest processes over 5s.
-   If something other than the sim or a tool is busy, close it.
+   If something other than the terminal is busy, close it.
 
 3. Build what the runs need, with the sim closed.
 
@@ -39,62 +40,33 @@ While it measures, keep your hands off the mouse and keyboard: a beep starts the
 
    It installs main's package into Community, and builds the pilot's core with the release profile and the bench's second pilot.
    If fsc-exerciser holds an older FS Copilot than the fork's main, it builds FS Copilot and syncs the exerciser to it.
-   In a checkout that has never built, this compiles everything from nothing, so start it and come back.
+   In a checkout that has never built, this compiles everything from nothing.
    You're done when it prints `FS Copilot ... is ready to run from fsc-exerciser's copy`.
 
-4. Run with no tool.
+4. Start every run, and leave the PC.
 
    ```powershell
-   node experiments/areas/product/p31-tool-cost/run.ts none
+   node experiments/areas/product/p31-tool-cost/run.ts all
    ```
 
-   The sim starts, and a voice asks for the flight: the Black Square Baron 58P at Seymour, SEGS, on runway 14, weather preset Clear Skies, time at noon.
-   Press Ready to fly, start the engines if they aren't running, set the parking brake, stay in the cockpit view, and press Page Up.
-   If the voice asks, click once on the sim's window.
-   Then keep your hands off until the high beep, after which the sim closes.
-   You're done when the terminal prints where the numbers are.
+   `--repeats 3` runs a third round, about 40 minutes more.
+   You're done when it prints `Every run is done` and the report's path, in `experiments/areas/product/results/`.
+   By then it has moved `dualinput` and `fscopilot-bridge` back into Community, as they were.
 
-5. Run with FS Copilot.
+## What you'll see
 
-   ```powershell
-   node experiments/areas/product/p31-tool-cost/run.ts fsc
-   ```
-
-   Two FS Copilot windows open first: yours, and a second pilot's, which joins your session through a local relay and never connects to the sim.
-   Both start from fsc-exerciser's copy of FS Copilot, a path Windows Firewall already allows, so no firewall prompt comes.
-   Then the same flight as step 4, and the same hands-off window.
-
-6. Run with Dual Input.
-
-   ```powershell
-   node experiments/areas/product/p31-tool-cost/run.ts dualinput
-   ```
-
-   The pilot's core and a bench core as the second pilot start first, with no windows.
-   After you press Page Up, the run hosts a session, the second pilot joins and takes the copilot's seat, and preflight ends, which takes up to 2 minutes.
-   Then the same hands-off window.
-
-7. If you have 15 minutes left, run with no tool again.
-
-   ```powershell
-   node experiments/areas/product/p31-tool-cost/run.ts none
-   ```
-
-   A second run with no tool shows how far the PC drifted across the runs, so the report can tell a tool's cost from drift.
-
-8. Put Community back and write the report.
-
-   ```powershell
-   node experiments/areas/product/p31-tool-cost/run.ts finish
-   ```
-
-   It moves `dualinput` and `fscopilot-bridge` back into Community, and prints the report it wrote to `experiments/areas/product/results/`.
+- FS Copilot's runs open two FS Copilot windows before the sim starts: yours, and a second pilot's, which joins your session through a local relay and never connects to the sim.
+  Both start from fsc-exerciser's copy of FS Copilot, a path Windows Firewall already allows, so no firewall prompt comes.
+- Dual Input's runs start the pilot's core and a bench core as the second pilot, with no windows, then host a session once the flight is loaded.
+- The sim goes from its first screen to the flight on its own: the run's code presses through the menu as a pilot would.
 
 ## If a run stops partway
 
-- Ctrl+C stops the run and its tool, and leaves the sim open.
-- If the sim is still running, quit it.
-- Run the same step again.
-  Each run sets Community as it needs, so nothing has to be undone first.
-- If you stop for the day, run step 8, which puts both packages back.
-  Until then they may sit in `dualinput-p31-aside`, beside your Community folder, and nothing deletes them.
+- Ctrl+C stops the run and its tool, and leaves the sim open; quit it yourself.
+- To finish what's measured so far, run the step below, which moves both packages back and writes the report from the runs of the last 12 hours.
+
+  ```powershell
+  node experiments/areas/product/p31-tool-cost/run.ts finish
+  ```
+
+- Until then the packages may sit in `dualinput-p31-aside`, beside your Community folder, and nothing deletes them.

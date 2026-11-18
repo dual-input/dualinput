@@ -65,6 +65,23 @@ function cpuTimes(): Map<number, { name: string; ms: number }> {
   return times
 }
 
+/** A process outside the run's that used this share of one core or more counts as busy, enough to take time from the sim. */
+export const BUSY_PERCENT = 10
+
+/** The processes outside `ours` that used `BUSY_PERCENT` of one core or more over `ms`, busiest first. */
+export async function othersBusy(ours: Set<number>, ms = 10_000): Promise<{ pid: number; name: string; cpuPercent: number }[]> {
+  const before = cpuTimes()
+  const t0 = performance.now()
+  await sleep(ms)
+  const after = cpuTimes()
+  const wall = performance.now() - t0
+  return [...after]
+    .filter(([pid, { name }]) => !ours.has(pid) && name !== "Idle")
+    .map(([pid, { name, ms: used }]) => ({ pid, name, cpuPercent: ((used - (before.get(pid)?.ms ?? used)) / wall) * 100 }))
+    .filter((p) => p.cpuPercent >= BUSY_PERCENT)
+    .sort((a, b) => b.cpuPercent - a.cpuPercent)
+}
+
 export type Tracked = { role: string; pid: number; name: string }
 
 export type ProcessResult = Tracked & {

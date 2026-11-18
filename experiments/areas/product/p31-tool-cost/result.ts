@@ -14,6 +14,8 @@ export type Result = {
   /** The FS Copilot build fsc-exerciser synced, which the FS Copilot run copies. */
   fsc: { commit: string; hash: string; synced: string } | null
   simVersion: string | null
+  /** How the flight was loaded, step by step, by the run's own menu code or by the pilot. */
+  loaded: string[]
   measured?: Measured
   /** Each core's bytes through the bench relay in the window, by its process ID, in the Dual Input run. */
   relayBytes?: Record<string, { bytes: number; busiestSecond: number }>
@@ -22,8 +24,8 @@ export type Result = {
 
 export function summary(r: Result): string[] {
   const m = r.measured
-  if (!m) return [`${r.label}: no measurement`]
-  const lines: string[] = []
+  if (!m) return [`${r.label}: no measurement`, ...r.notes.map((n) => `note: ${n}`)]
+  const lines: string[] = r.loaded.map((l) => `loaded: ${l}`)
   const f = m.frames
   lines.push("error" in f ? `frames: ${f.error}` : `frames: ${f.frames}, ${f.fps.toFixed(1)} fps; frame time ${f.p50.toFixed(2)}ms median, ${f.p95.toFixed(2)}ms p95, ${f.p99.toFixed(2)}ms p99, ${f.max.toFixed(1)}ms worst; ${f.over50ms} over 50ms`)
   lines.push(`the sim had the focus in ${(m.focus * 100).toFixed(0)}% of samples; the whole PC's CPU was ${m.pcCpuPercent.toFixed(1)}% of its ${m.logicalCores} logical cores`)

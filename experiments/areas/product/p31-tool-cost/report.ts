@@ -79,6 +79,14 @@ export function report(): string {
     out.push(row([MODES[mode], `${mine.length} of ${ran}`, f(m.fps, 1), f(m.p50), f(m.p95), f(m.p99), f(m.over50ms, 0), f(m.cpuBusy), f(m.simCpu, 1), f(m.simMemory, 0), mode === "none" ? "" : f(m.pilotCpu), mode === "none" ? "" : f(m.pilotMemory, 0), mode === "none" ? "" : f(m.sent), mode === "none" ? "" : f(m.received)]))
   }
   const base = byMode.get("none")
+  // The figures' line compares two Dual Input modes, so a schedule of only those two still gets it.
+  const [drawn, bare] = [byMode.get("dualinput"), byMode.get("dualinput-no-figures")]
+  let figuresLine: string | undefined
+  if (drawn?.p50 != null && bare?.p50 != null) {
+    const busy = drawn.cpuBusy !== null && bare.cpuBusy !== null ? `, CPU busy ${signed(drawn.cpuBusy - bare.cpuBusy)}ms per frame` : ""
+    figuresLine = `- Dual Input's figures, its run against its run with no figures: frame median ${signed(drawn.p50 - bare.p50)}ms, p99 ${signed(drawn.p99! - bare.p99!)}ms, ${signed(drawn.fps! - bare.fps!)} fps${busy}`
+  }
+  if (base?.p50 == null && figuresLine) out.push("", "By the same medians:", figuresLine)
   if (base?.p50 != null) {
     out.push("")
     out.push("Against no tool, by the same medians:")
@@ -88,11 +96,7 @@ export function report(): string {
       const busy = m.cpuBusy !== null && base.cpuBusy !== null ? `; CPU busy ${signed(m.cpuBusy - base.cpuBusy)}ms per frame` : ""
       out.push(`- ${MODES[mode]}: frame median ${signed(m.p50 - base.p50)}ms, p99 ${signed(m.p99! - base.p99!)}ms, ${signed(m.fps! - base.fps!)} fps${busy}; the sim's own CPU ${signed(m.simCpu! - base.simCpu!)} points of one core`)
     }
-    const [drawn, bare] = [byMode.get("dualinput"), byMode.get("dualinput-no-figures")]
-    if (drawn?.p50 != null && bare?.p50 != null) {
-      const busy = drawn.cpuBusy !== null && bare.cpuBusy !== null ? `, CPU busy ${signed(drawn.cpuBusy - bare.cpuBusy)}ms per frame` : ""
-      out.push(`- Dual Input's figures, its run against its run with no figures: frame median ${signed(drawn.p50 - bare.p50)}ms, p99 ${signed(drawn.p99! - bare.p99!)}ms, ${signed(drawn.fps! - bare.fps!)} fps${busy}`)
-    }
+    if (figuresLine) out.push(figuresLine)
     const nones = kept.filter((r) => r.mode === "none").map(figures)
     if (nones.length > 1) {
       const spread = (k: "p50" | "p99" | "cpuBusy") => {
@@ -168,8 +172,8 @@ export function report(): string {
     for (const n of r.notes) out.push(`- ${names[i]}: ${n}`)
   }
   for (const r of failed) out.push(`- A run with ${r.label} measured nothing: ${r.notes.join("; ")}.`)
-  // The run with no figures is one a schedule asks for by name, so only its absence from a schedule that had it says anything.
-  const expected = new Set<string>(["none", "fsc", "dualinput", ...recent.map((f) => f.result.mode)])
+  // A schedule runs the modes its --modes names, so only a mode it tried and never measured says anything.
+  const expected = new Set<string>(recent.map((f) => f.result.mode))
   for (const mode of expected) if (!runs.some((r) => r.mode === mode)) out.push(`- No measured run with ${MODES[mode as keyof typeof MODES]} is in the last schedule.`)
   out.push(
     "- The flight sat on runway 14 as the world map starts a runway departure, so the runs measure a connected session at rest: each tool still streams the aircraft at its full rate, but a flight, or a crew working switches, has each tool send more changes. Each run's printout below says how its flight was loaded and what the time and camera read after.",

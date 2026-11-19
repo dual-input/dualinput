@@ -53,7 +53,7 @@ With the default 2 rounds the six runs take about 75 minutes, from p10's 164s fr
    node experiments/areas/product/p31-tool-cost/run.ts all
    ```
 
-   It first has PresentMon time frames for 3s, and stops at once if it can't, so wait for `PresentMon timed frames in a 3s check` before you leave.
+   It first has PresentMon time frames for 3s, and stops at once if it can't, so wait for `PresentMon traced frames in a 3s check` before you leave.
    `--repeats 3` runs a third round, about 40 minutes more.
    You're done when it prints `Every run is done` and the report's path, in `experiments/areas/product/results/`.
    By then it has moved `dualinput` and `fscopilot-bridge` back into Community, as they were.

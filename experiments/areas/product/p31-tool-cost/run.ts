@@ -131,7 +131,7 @@ async function session(options: Options, body: (guide: Voice) => Promise<void>):
     if (!fs.existsSync(PRESENTMON)) throw new Failed(`PresentMon isn't at ${PRESENTMON}; download ${PRESENTMON_URL} there`)
     const frames = presentMonWorks(path.join(WORK, "runs"))
     if (frames) throw new Failed(frames)
-    console.log("PresentMon timed frames in a 3s check")
+    console.log("PresentMon traced frames in a 3s check")
     if (!fs.existsSync(PACKAGE)) throw new Failed(`there's no package of this tree's in ${PACKAGE}; run prepare`)
     quit = quitInstalledDualInput()
     if (quit.length) console.log(`quit your installed Dual Input for the benchmark: ${quit.join(", ")}`)

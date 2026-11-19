@@ -134,10 +134,12 @@ export type Measured = {
 }
 
 /**
- * Has PresentMon time every process's frames for 3s, as a window would, and says why it got none,
- * or null when it got some. A schedule calls it before its first run, while someone is still at the
- * terminal, so a PresentMon that can't capture stops the schedule in seconds rather than after it.
- * The terminal the schedule runs in redraws its cursor, so some process presents in any 3s.
+ * Has PresentMon trace every process's frames for 3s, as a window would, and says why it couldn't,
+ * or null when it could. A schedule calls it before its first run, while someone is still at the
+ * terminal, so a PresentMon that can't trace stops the schedule in seconds rather than after it.
+ * PresentMon exits 0 once its trace has run, and anything else when it can't start one: 1 for
+ * FrameView's copy, 6 for Intel's unelevated. It writes its CSV only once a process presents, and
+ * an idle desktop presented nothing in 3s on 2026-11-19, so a missing CSV fails nothing.
  */
 export function presentMonWorks(folder: string): string | null {
   fs.mkdirSync(folder, { recursive: true })
@@ -145,7 +147,8 @@ export function presentMonWorks(folder: string): string | null {
   fs.rmSync(csv, { force: true })
   const ran = spawnSync(PRESENTMON, ["--output_file", csv, "--timed", "3", "--terminate_after_timed", "--no_console_stats", "--session_name", FRAMES_SESSION, "--stop_existing_session"], { encoding: "utf8", timeout: 30_000 })
   const said = `${ran.stdout ?? ""}${ran.stderr ?? ""}`.trim().slice(0, 400)
-  if (!fs.existsSync(csv)) return `PresentMon wrote no CSV in a 3s check, and exited with ${ran.status}: ${said}`
+  if (ran.status !== 0) return `PresentMon couldn't trace frames in a 3s check, and exited with ${ran.status}: ${said || ran.error?.message || "nothing said"}`
+  if (!fs.existsSync(csv)) return null
   const stats = frameStats(csv, null)
   return "error" in stats ? `PresentMon's 3s check: ${stats.error}` : null
 }

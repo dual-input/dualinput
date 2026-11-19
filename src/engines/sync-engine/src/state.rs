@@ -493,11 +493,11 @@ impl Engine {
     /// PF's last value is written to that value once, so the machine takes control with the
     /// controls the old PF flew. While this machine followed, its own systems could move those
     /// entries away, as its autopilot ran the 58P's trim to full nose-down. The write doesn't
-    /// hold a 58P's trim, which still fell to -77% within a second of the write as the aircraft
-    /// was let go, likely from its own autopilot (unverified; measured on MSFS 2024, 2026-11-18,
-    /// record/areas/sync/log.md, "In stage 14b's session the 58P took every preset value and its
-    /// heading bug followed, and as it took control its own trim fell and it banked, after our
-    /// trim write went out"). A toggle is left out, since a write of it still on its way would
+    /// hold a 58P's trim with its autopilot engaged: the autopilot, wound up while the aircraft
+    /// was frozen, runs the trim away within a second of the write (measured on MSFS 2024,
+    /// 2026-11-19, record/areas/flight-model/log.md, "After a handover the 58P's own autopilot
+    /// rolls the aircraft and runs its trim, wound up while `Follow` held it frozen, which v1
+    /// keeps as a known limit"). A toggle is left out, since a write of it still on its way would
     /// flip it back, and nothing but a pilot moves a switch.
     pub(crate) fn took_control(&mut self, cx: Ctx, out: &mut Vec<Out>) {
         if !cx.flying() {

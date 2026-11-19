@@ -303,11 +303,12 @@ state:
     name: Parking brake
     watch: A('BRAKE PARKING POSITION', 'Bool')
     write: B('LANDING_GEAR_ParkingBrake_Set')
-  # A known limit: as a following 58P takes control, its own trim falls, to -77% in one run,
-  # within a second of the write that puts it at the old PF's, and the aircraft banks, likely from
-  # its own autopilot (unverified; measured on MSFS 2024, 2026-11-18, record/areas/sync/log.md,
-  # "In stage 14b's session the 58P took every preset value and its heading bug followed, and as it
-  # took control its own trim fell and it banked, after our trim write went out").
+  # A known limit: as a following 58P takes control with its autopilot engaged, the autopilot,
+  # wound up while the aircraft was frozen, runs this trim away within a second of the write that
+  # puts it at the old PF's, to -55% in one run, and rolls the aircraft, until it settles within
+  # about 9s (measured on MSFS 2024, 2026-11-19, record/areas/flight-model/log.md, "After a
+  # handover the 58P's own autopilot rolls the aircraft and runs its trim, wound up while `Follow`
+  # held it frozen, which v1 keeps as a known limit").
   elevator_trim:
     name: Elevator trim
     watch: A('ELEVATOR TRIM PCT', 'Percent')

@@ -27,6 +27,12 @@ Decides:     Who reads the flying aircraft, and how often; what a sample carries
 > Nothing in v1 unloads a profile mid-flight, since the pin changes only from none once preflight has ended ([the pin](../profiles/02-units.md#the-pin)), so v1 builds nothing for it (user, 2026-11-11).
 > The IDE's reload of a profile mid-session is the first thing that can, and its design adds the fix: a feature that follows the session says so as it registers, and the sim service ends its routines and closes its connection at the session's end, not at a profile's unload ([flight-model log](log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump)).
 
+> **Note**
+> A known limit, measured on the 58P: a following machine's own autopilot, when engaged, keeps flying the aircraft `Follow` holds frozen and winds up, and once `Follow` lets the aircraft go at a handover, it rolls the aircraft and runs its trim for several seconds.
+> The 58P's KFC 150 is the sim's own autopilot and flies pitch through the trim, which within 0.5s ran to +38.7% in one run and -55.1% in the other, while the bank reached 7.2° and 7.9° within about 2.5s, and the autopilot settled the aircraft within about 9s (measured on MSFS 2024, 2026-11-19, [flight-model log](log.md#2026-11-19-after-a-handover-the-58ps-own-autopilot-rolls-the-aircraft-and-runs-its-trim-wound-up-while-follow-held-it-frozen-which-v1-keeps-as-a-known-limit)).
+> Other aircraft are unmeasured.
+> v1 builds nothing for it (user, 2026-11-19).
+
 On the flying machine, the PF's, a routine in our WASM module, `Lead`, reads the aircraft's pose, velocities, control surfaces, and toe brakes about 20 times a second, each read stamped with its frame's time, and the core sends each read to the crew as a sample.
 On each following machine, any other pilot's, `Follow` draws the aircraft 400ms behind those samples, along straight lines between them, carries it on through a gap of up to 2s, and eases it back over 3s.
 Our module keeps an estimate of the core's counter, from a stamp the core puts in every slot it writes, so every routine runs on the core's timeline and the core never estimates the module's clock.

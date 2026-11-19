@@ -901,11 +901,14 @@ Tests: a bench case, with the stand-in's rules, in which two coupled controls ar
 
 Designs first: what moves the 58P's elevator trim and bank in the frames after flight-model sync's `Follow` lets it go at a handover, and which unit fixes it, which [stage 14b](#14b-state-syncs-writes-that-read-another-value) found and left as a known limit (user, 2026-11-18).
 In 14b's two runs in the sim, the trim dropped from -8% to between -62% and -77% and came back within about 7 frames, and a left bank of 16° to 24° began in the same frame, though state sync's write of the old PF's trim, -5%, went out at that moment; in the run whose autopilot held the second pilot's altitude, the 58P turned 15.6° and lost 128 ft in 15s.
-The lead, unverified, is the following machine's own autopilot, wound up while it trims an aircraft `Follow` holds still, so the fix may sit in how `Follow` holds or lets go, in the trim in flight-model sync's sample, or in that autopilot.
-It starts from the sync log's entry of 2026-11-18, and `tools/sim/handover.ts` reproduces it; whether it happens behind a PF whose aircraft moves, rather than the bench's stand-in, whose pose stays fixed, is unknown.
-Builds: that fix, in the units its design names.
+It started from the sync log's entry of 2026-11-18, and `tools/sim/handover.ts` reproduced it.
+Two runs of p40 in the sim found the cause: the 58P's KFC 150, the sim's own autopilot, winds up while `Follow` holds the aircraft frozen, and once it's let go, rolls it and runs its trim until it settles, within about 9s; the first flight with friends shows the same behind a PF whose aircraft moves ([flight-model log](../flight-model/log.md#2026-11-19-after-a-handover-the-58ps-own-autopilot-rolls-the-aircraft-and-runs-its-trim-wound-up-while-follow-held-it-frozen-which-v1-keeps-as-a-known-limit)).
+The user kept it as a known limit of flight-model sync, since the likely fix, which p40 never got to try, turns the autopilot off and on again at every handover (user, 2026-11-19).
+Builds: nothing.
 Needs: 14b and 16.
-Exit: after a handover with the autopilot in heading and altitude hold, the 58P flies straight on, with its trim at the old PF's.
+Tests: none, since it changes no code.
+Exit: the [flight-model log](../flight-model/log.md) has an entry for the cause, and [01-flight-model-sync](../flight-model/01-flight-model-sync.md) a note on the known limit.
+Done on 2026-11-19.
 
 ## 2b The core's log off the loop's thread
 

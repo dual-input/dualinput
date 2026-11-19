@@ -2,11 +2,14 @@
  * p31: what Dual Input and FS Copilot each cost one PC, in the sim's frame times and in the CPU,
  * memory, and network bytes of each tool's processes. Every run flies the same flight, the Black
  * Square Baron 58P on runway 14 at Seymour, SEGS, at noon, and measures it for 5 minutes with
- * nobody touching anything, in one of three modes:
+ * nobody touching anything, in one of four modes:
  *
- *   none        neither tool's package in Community, and no tool running
- *   fsc         FS Copilot, with a second FS Copilot, kept off the sim, as the second pilot
- *   dualinput   Dual Input, with a bench core as the second pilot
+ *   none                   neither tool's package in Community, and no tool running
+ *   fsc                    FS Copilot, with a second FS Copilot, kept off the sim, as the second pilot
+ *   dualinput              Dual Input, with a bench core as the second pilot
+ *   dualinput-no-figures   Dual Input as above, from a core built with no-figures.patch, which
+ *                          creates no figure in the sim, so the two Dual Input runs tell what
+ *                          the figures cost the sim's frames
  *
  * Run it in a terminal opened as administrator, since PresentMon and the network trace each start
  * an ETW session. procedure.md beside this file gives the steps.
@@ -17,8 +20,8 @@
  *   node experiments/areas/product/p31-tool-cost/run.ts none | fsc | dualinput [--seconds <n>] [--dry]
  *   node experiments/areas/product/p31-tool-cost/run.ts finish | restore | profiles
  *
- * `all` runs the modes in turn, repeated, so drift over the hours spreads across every tool, then
- * moves every package back and writes the report. Each run switches Community, starts its tool,
+ * `all` runs the modes in turn, every second round in reverse, so a steady drift over the hours
+ * falls on every mode alike, then moves every package back and writes the report. Each run switches Community, starts its tool,
  * starts the sim through Steam, loads the flight through the menu (sim.ts), brings the sim to the
  * front, settles 30s, measures, stops the tool, and closes the sim. A crash or a hang starts the run
  * over from a closed sim, and its third try asks aloud for the flight instead. `--dry` runs with a
@@ -60,6 +63,7 @@ import {
   FSC_RELAY_EXE,
   FSC_SECOND_FOLDER,
   FSC_SOURCE,
+  NO_FIGURES_CORE,
   RELEASE_CORE,
   RESULTS,
   WORK,
@@ -69,7 +73,7 @@ import { report } from "./report.ts"
 import { MODES, summary, type Mode, type Result } from "./result.ts"
 import { closeSim, focusSim, launchSim, loadFlight, SimDown } from "./sim.ts"
 
-const MOUNTS: Record<Mode, Package[]> = { none: [], fsc: [FS_COPILOT], dualinput: [DUAL_INPUT] }
+const MOUNTS: Record<Mode, Package[]> = { none: [], fsc: [FS_COPILOT], dualinput: [DUAL_INPUT], "dualinput-no-figures": [DUAL_INPUT] }
 
 const SETTLE_MS = 30_000
 /** How many times a run starts over from a closed sim before it gives up, the last of them asking aloud for the flight. */
@@ -101,13 +105,14 @@ main(async () => {
     const modes = (flag(rest, "--modes") ?? "none,fsc,dualinput").split(",") as Mode[]
     const unknown = modes.filter((m) => !(m in MODES))
     if (unknown.length) throw new Failed(`no mode named ${unknown.join(", ")}; the modes are ${Object.keys(MODES).join(", ")}`)
+    if (modes.includes("dualinput-no-figures") && !fs.existsSync(NO_FIGURES_CORE)) throw new Failed(`there's no ${NO_FIGURES_CORE}; build it as procedure.md says`)
     return all(modes, Number(flag(rest, "--repeats") ?? 2), options)
   }
   if (command && command in MODES) {
     await session(options, async (guide) => void (await runOne(command as Mode, options, guide)))
     return
   }
-  throw new Failed("usage: node experiments/areas/product/p31-tool-cost/run.ts check | prepare | all [--repeats <n>] [--seconds <n>] [--modes ...] [--dry] | none | fsc | dualinput [--seconds <n>] [--dry] | finish | restore | profiles")
+  throw new Failed("usage: node experiments/areas/product/p31-tool-cost/run.ts check | prepare | all [--repeats <n>] [--seconds <n>] [--modes ...] [--dry] | none | fsc | dualinput | dualinput-no-figures [--seconds <n>] [--dry] | finish | restore | profiles")
 })
 
 function finish(): void {
@@ -162,13 +167,18 @@ function quitInstalledDualInput(): string[] {
   return installed.map((p) => `${p.name} (${p.pid})`)
 }
 
-/** Every mode in turn, `repeats` times, then Community back as it started and the report. */
+/**
+ * Every mode in turn, `repeats` times, then Community back as it started and the report. Every
+ * second round runs in reverse, so each mode's runs sit at the same mean place in the schedule,
+ * and a steady drift raises every mode's median alike. In 2026-11-19's schedule, which ran
+ * none, FS Copilot, Dual Input twice in that order, each round's frame times rose in that order.
+ */
 async function all(modes: Mode[], repeats: number, options: Options): Promise<void> {
   const started = Date.now()
   try {
     await session(options, async (guide) => {
       for (let round = 1; round <= repeats; round++) {
-        for (const mode of modes) {
+        for (const mode of round % 2 ? modes : [...modes].reverse()) {
           console.log(`\n=== round ${round} of ${repeats}: ${MODES[mode]}, ${Math.round((Date.now() - started) / 60_000)} min in`)
           // A run that stops before its tries, such as on a package missing from Community, leaves the rest of the schedule to run.
           const result = await runOne(mode, options, guide).catch((error: Error) => void console.log(`the run with ${MODES[mode]} stopped: ${error.message}`))
@@ -235,6 +245,7 @@ async function check(): Promise<void> {
     ...where().map((w) => `Community, ${w.community}: ${Object.entries(w.packages).map(([n, p]) => `${n} ${p}`).join(", ")}`),
     `the pilot's release core, ${path.relative(ROOT, RELEASE_CORE)}: ${exists(RELEASE_CORE)}`,
     `its core helper: ${exists(path.join(path.dirname(RELEASE_CORE), "dualinput-core-helper.exe"))}`,
+    `the core with no figures, for --modes ...,dualinput-no-figures, ${path.relative(ROOT, NO_FIGURES_CORE)}: ${exists(NO_FIGURES_CORE)}, and its core helper: ${exists(path.join(path.dirname(NO_FIGURES_CORE), "dualinput-core-helper.exe"))}`,
     `the bench core, ${path.relative(ROOT, BENCH_OUT)}: ${exists(path.join(BENCH_OUT, "dualinput-core.exe"))}`,
     `the bench's profiles: ${exists(BENCH_PROFILES)}`,
     `FS Copilot as fsc-exerciser synced it, ${FSC_APP}: ${exists(FSC_APP)}, commit ${fscBuild()?.commit ?? "unrecorded"}, where the fork's main is at ${git(FSC_SOURCE)}`,
@@ -381,7 +392,7 @@ async function runOne(mode: Mode, options: Options, guide: Voice): Promise<Resul
   }
   if (failures.length) notes.push(...failures.map((f) => (measured ? `${f}, so the run started over` : f)))
 
-  const result: Result = { probe: "p31", mode, label, dry, commit: git(ROOT), fsc: mode === "dualinput" ? null : fscBuild(), simVersion: version, loaded, measured, ...extra, notes }
+  const result: Result = { probe: "p31", mode, label, dry, commit: git(ROOT), fsc: mode.startsWith("dualinput") ? null : fscBuild(), simVersion: version, loaded, measured, ...extra, notes }
   // A dry run's numbers measure no sim, so they stay in target/ with its raw output.
   const json = dry ? path.join(folder, "result.json") : path.join(RESULTS, `p31-${name}.json`)
   fs.writeFileSync(json, `${JSON.stringify(result, null, 2)}\n`)
@@ -403,7 +414,8 @@ function alive(pid: number): boolean {
 /** The run's tool, started before the sim is, as a pilot would have it running. */
 async function start(mode: Mode, folder: string, say: Say, notes: string[], dry: boolean): Promise<Started> {
   if (mode === "fsc") return startFsc(folder, say, notes)
-  if (mode === "dualinput") return startDualInput(folder, say, notes, dry)
+  if (mode === "dualinput") return startDualInput(RELEASE_CORE, folder, say, notes, dry)
+  if (mode === "dualinput-no-figures") return startDualInput(NO_FIGURES_CORE, folder, say, notes, dry)
   const me = process.pid
   return { roles: (all) => harness(all, me, () => undefined), ready: async () => [], stop: async () => {} }
 }
@@ -619,12 +631,13 @@ function closeWindow(pid: number | undefined): void {
 }
 
 /**
- * Dual Input as tools/sim/camera.ts runs it: the pilot's release core on a data folder of the
- * run's, against the bench's local relay, backend, and profiles' site, and a bench core as the
- * second pilot, seated in the copilot's seat on a stand-in sim, so the pilot's sim draws its figure.
+ * Dual Input as tools/sim/camera.ts runs it: the pilot's `core`, built with the release profile, on
+ * a data folder of the run's, against the bench's local relay, backend, and profiles' site, and a
+ * bench core as the second pilot, seated in the copilot's seat on a stand-in sim, so the pilot's sim
+ * draws its figure, unless `core` is the one built to draw none.
  */
-async function startDualInput(folder: string, say: Say, notes: string[], dry: boolean): Promise<Started> {
-  for (const file of [RELEASE_CORE, path.join(BENCH_OUT, "dualinput-core.exe"), BENCH_PROFILES]) if (!fs.existsSync(file)) throw new Failed(`there's no ${file}; run prepare`)
+async function startDualInput(core: string, folder: string, say: Say, notes: string[], dry: boolean): Promise<Started> {
+  for (const file of [core, path.join(BENCH_OUT, "dualinput-core.exe"), BENCH_PROFILES]) if (!fs.existsSync(file)) throw new Failed(`there's no ${file}; run prepare`)
   process.env.DUALINPUT_BENCH_CORE = path.join(BENCH_OUT, "dualinput-core.exe")
   process.env.DUALINPUT_BENCH_STAND_IN_HELPER = path.join(BENCH_OUT, "stand-in-core-helper.exe")
   process.env.DUALINPUT_BENCH_RELAY = path.join(BENCH_OUT, "bench-relay.exe")
@@ -661,7 +674,7 @@ async function startDualInput(folder: string, say: Say, notes: string[], dry: bo
     fs.rmSync(path.join(data, "port.json"), { force: true })
     fs.writeFileSync(path.join(data, "settings.json"), JSON.stringify({ ...settings, "session.name": "Pilot" }, null, 2))
     const out = fs.openSync(`${data}-output.txt`, "w")
-    real = spawn(RELEASE_CORE, ["--data", data], { stdio: ["ignore", out, out] })
+    real = spawn(core, ["--data", data], { stdio: ["ignore", out, out] })
     await until(() => (fs.existsSync(path.join(data, "port.json")) ? true : undefined), 30_000, "the pilot's core to write its port file")
     pilot = await desktop(data, ["session", "sim"])
   } catch (error) {

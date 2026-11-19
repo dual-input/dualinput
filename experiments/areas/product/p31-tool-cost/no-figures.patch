@@ -1,0 +1,22 @@
+diff --git a/src/features/avatars/core/src/crew.rs b/src/features/avatars/core/src/crew.rs
+index 4c6bde4..8702f60 100644
+--- a/src/features/avatars/core/src/crew.rs
++++ b/src/features/avatars/core/src/crew.rs
+@@ -254,7 +254,7 @@ pub(crate) fn own_pose(me: &mut Avatars, cx: &mut Cx) {
+ 
+ /// Whether a figure waits for its object, so the aircraft's pose is read for its first place.
+ pub(crate) fn waiting(me: &Avatars) -> bool {
+-    !me.crew.refused
++    false
+         && me
+             .crew
+             .figures
+@@ -264,7 +264,7 @@ pub(crate) fn waiting(me: &Avatars) -> bool {
+ 
+ /// Creates each figure that waits, at the aircraft's place, once that's read.
+ pub(crate) fn create_waiting(me: &mut Avatars, cx: &mut Cx) {
+-    let Some(a) = me.sim.aircraft.filter(|_| !me.crew.refused) else {
++    let Some(a) = me.sim.aircraft.filter(|_| false) else {
+         return;
+     };
+     let at = InitPosition {

@@ -49,3 +49,9 @@ export const BENCH_OUT = path.join(ROOT, "target", "bench", "release-with-checks
 export const BENCH_PROFILES = path.join(ROOT, "target", "bench", "profiles")
 /** The pilot's core, built with the release profile a pilot's runs, and its core helper beside it. */
 export const RELEASE_CORE = path.join(ROOT, "target", "release", "dualinput-core.exe")
+/**
+ * The same core built with no-figures.patch beside run.ts, which creates no figure in the sim, and
+ * its core helper beside it, for the run that measures what the figures cost the sim's frames.
+ * procedure.md says how to build it.
+ */
+export const NO_FIGURES_CORE = path.join(WORK, "no-figures", "dualinput-core.exe")

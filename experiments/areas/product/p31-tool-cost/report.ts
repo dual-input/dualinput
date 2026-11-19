@@ -26,10 +26,10 @@ const GROUPS = [
 ] as const
 
 export function report(): string {
-  // A run's file is named for when it started, as p31-2026-11-18_09-54-00-fsc.json, in UTC.
+  // A run's file is named for when it started, in UTC, and its mode, as p31-2026-11-18_09-54-00-fsc.json or p31-2026-11-20_09-54-00-dualinput-no-figures.json.
   const files = fs
     .readdirSync(RESULTS)
-    .filter((f) => /^p31-\d{4}-\d\d-\d\d_\d\d-\d\d-\d\d-\w+\.json$/.test(f))
+    .filter((f) => /^p31-\d{4}-\d\d-\d\d_\d\d-\d\d-\d\d-[\w-]+\.json$/.test(f))
     .map((f) => ({ at: Date.parse(`${f.slice(4, 14)}T${f.slice(15, 23).replaceAll("-", ":")}Z`), result: JSON.parse(fs.readFileSync(path.join(RESULTS, f), "utf8")) as Result }))
     .filter((f) => !f.result.dry)
     .sort((a, b) => a.at - b.at)
@@ -53,7 +53,7 @@ export function report(): string {
   out.push("")
   out.push(
     `Each run started MSFS 2024 ${first.simVersion ?? "(version unread)"} fresh with one tool's package in Community, or neither, loaded the Black Square Baron 58P on runway 14 at Seymour, SEGS, set the time to noon, and measured ${first.measured!.seconds}s after a 30s settle, with nobody at the PC. ` +
-      `The modes ran in turn, repeated, so drift over the hours falls on every tool alike, and the tools are compared by their medians across the runs nothing disturbed. ` +
+      `The modes ran in turn, every second round in reverse, so a steady drift over the hours falls on every mode alike, and the modes are compared by their medians across the runs nothing disturbed. ` +
       `PresentMon timed every frame the sim presented, a sampler read each process's memory every 2s and its CPU time at the start and end, and the kernel's network events counted each process's bytes. ` +
       `Dual Input ran from commit ${first.commit}; FS Copilot from the fork's build that fsc-exerciser synced, ${fscLine(runs.find((r) => r.fsc)?.fsc)}.`,
   )
@@ -82,11 +82,16 @@ export function report(): string {
   if (base?.p50 != null) {
     out.push("")
     out.push("Against no tool, by the same medians:")
-    for (const mode of ["fsc", "dualinput"] as const) {
+    for (const mode of Object.keys(MODES) as (keyof typeof MODES)[]) {
       const m = byMode.get(mode)
-      if (m?.p50 == null) continue
+      if (mode === "none" || m?.p50 == null) continue
       const busy = m.cpuBusy !== null && base.cpuBusy !== null ? `; CPU busy ${signed(m.cpuBusy - base.cpuBusy)}ms per frame` : ""
       out.push(`- ${MODES[mode]}: frame median ${signed(m.p50 - base.p50)}ms, p99 ${signed(m.p99! - base.p99!)}ms, ${signed(m.fps! - base.fps!)} fps${busy}; the sim's own CPU ${signed(m.simCpu! - base.simCpu!)} points of one core`)
+    }
+    const [drawn, bare] = [byMode.get("dualinput"), byMode.get("dualinput-no-figures")]
+    if (drawn?.p50 != null && bare?.p50 != null) {
+      const busy = drawn.cpuBusy !== null && bare.cpuBusy !== null ? `, CPU busy ${signed(drawn.cpuBusy - bare.cpuBusy)}ms per frame` : ""
+      out.push(`- Dual Input's figures, its run against its run with no figures: frame median ${signed(drawn.p50 - bare.p50)}ms, p99 ${signed(drawn.p99! - bare.p99!)}ms, ${signed(drawn.fps! - bare.fps!)} fps${busy}`)
     }
     const nones = kept.filter((r) => r.mode === "none").map(figures)
     if (nones.length > 1) {
@@ -163,7 +168,9 @@ export function report(): string {
     for (const n of r.notes) out.push(`- ${names[i]}: ${n}`)
   }
   for (const r of failed) out.push(`- A run with ${r.label} measured nothing: ${r.notes.join("; ")}.`)
-  for (const mode of Object.keys(MODES)) if (!runs.some((r) => r.mode === mode)) out.push(`- No measured run with ${MODES[mode as keyof typeof MODES]} is in the last 12 hours.`)
+  // The run with no figures is one a schedule asks for by name, so only its absence from a schedule that had it says anything.
+  const expected = new Set<string>(["none", "fsc", "dualinput", ...recent.map((f) => f.result.mode)])
+  for (const mode of expected) if (!runs.some((r) => r.mode === mode)) out.push(`- No measured run with ${MODES[mode as keyof typeof MODES]} is in the last schedule.`)
   out.push(
     "- The flight sat on runway 14 as the world map starts a runway departure, so the runs measure a connected session at rest: each tool still streams the aircraft at its full rate, but a flight, or a crew working switches, has each tool send more changes. Each run's printout below says how its flight was loaded and what the time and camera read after.",
     "- The weather was whatever the world map last had, since nothing we know sets it from outside the sim; the runs in turn spread its changes across the tools rather than onto one.",
@@ -172,7 +179,10 @@ export function report(): string {
     "- Both tools' links crossed a local relay: Dual Input's through the bench relay, by the bench's relays-only setting, and FS Copilot's through its own relay, by its `--no-direct` switch. Between two PCs, each links directly when it can, and its relay costs that PC nothing.",
     "- Neither tool's traffic or ATC sharing was switched on, and each starts with it off until a pilot claims it (read in FS Copilot fork, src/FsCopilot/Simulation/ShareSwitch.cs, and record/areas/architecture/02-code-map.md, \"The traffic and ATC switch\").",
     "- Dual Input's desktop app didn't run; the pilot's core ran alone, as tools/sim/camera.ts runs it. The app, as a tray icon with its window closed, holds about 4 MB and uses 0.14% to 0.26% of one core (measured on our development machine, record/areas/install/log.md, 2026-11-11, and record/areas/traffic-atc/log.md). FS Copilot's one process is its window and its logic together, and its window stayed open.",
-    "- Dual Input draws the second pilot's figure in the copilot's seat, and FS Copilot draws no one, so the sim's frame times in the Dual Input run carry that figure.",
+    "- Dual Input draws each pilot's figure in the pilot's sim, the second pilot's in the copilot's seat, and FS Copilot draws no one, so the sim's frame times in the Dual Input runs carry those figures.",
+    ...(runs.some((r) => r.mode === "dualinput-no-figures")
+      ? ["- The runs with Dual Input, no figures, ran a core built with no-figures.patch beside run.ts, which creates no figure in the sim and changes nothing else: the core still works out the pilot's figure and sends its pose to the second pilot, and the second pilot still sends its own."]
+      : []),
     "- The two profiles watch different lists, as the section above shows, and FS Copilot's includes modules for the PMS50 GTN, which this PC has installed.",
     "- Each run started the sim fresh, so the scenery and shader caches warm over the first runs; the modes' turns spread that over every tool, and the table of runs gives the order.",
   )

@@ -6,6 +6,7 @@ You start two commands and come back to the report.
 Each run starts the sim through Steam, loads the Black Square Baron 58P on runway 14 at Seymour, SEGS, sets the time to noon, measures for 5 minutes, and closes the sim.
 A crash or a hang starts the run over; on its third try a voice asks for the flight by hand, and waits 10 minutes.
 With the default 2 rounds the six runs take about 75 minutes, from p10's 164s from Steam to Ready to fly plus each 5-minute window, and longer for each crash.
+A fourth mode, Dual Input with no figures, adds two runs, about 25 minutes, and needs a core of its own, which [Building the core with no figures](#building-the-core-with-no-figures) makes.
 
 ## Before you start
 
@@ -55,8 +56,46 @@ With the default 2 rounds the six runs take about 75 minutes, from p10's 164s fr
 
    It first has PresentMon time frames for 3s, and stops at once if it can't, so wait for `PresentMon traced frames in a 3s check` before you leave.
    `--repeats 3` runs a third round, about 40 minutes more.
+   `--modes none,fsc,dualinput,dualinput-no-figures` adds the runs with no figures.
    You're done when it prints `Every run is done` and the report's path, in `experiments/areas/product/results/`.
    By then it has moved `dualinput` and `fscopilot-bridge` back into Community, as they were.
+
+## Building the core with no figures
+
+The runs with no figures use the pilot's core built with `no-figures.patch` beside run.ts, which creates no figure in the sim and changes nothing else.
+The patch never goes into a commit, so the core is built in a worktree and copied into the checkout that runs the schedule.
+
+1. In a worktree at the same commit as your main checkout, apply the patch.
+
+   ```powershell
+   git apply experiments/areas/product/p31-tool-cost/no-figures.patch
+   ```
+
+   `git diff --stat` shows one file, `src/features/avatars/core/src/crew.rs`, with 2 lines changed.
+
+2. Build the core and its core helper into a target folder of their own, so the release core `prepare` built stays as it was.
+
+   ```powershell
+   cargo build --release -p dualinput-core -p dualinput-core-helper --target-dir target\p31-no-figures
+   ```
+
+3. Copy both programs into the main checkout's `target\p31\no-figures\`.
+
+   ```powershell
+   New-Item -ItemType Directory -Force $env:USERPROFILE\dev\crosscheck\target\p31\no-figures
+   ```
+
+   ```powershell
+   Copy-Item target\p31-no-figures\release\dualinput-core.exe, target\p31-no-figures\release\dualinput-core-helper.exe -Destination $env:USERPROFILE\dev\crosscheck\target\p31\no-figures\
+   ```
+
+   `run.ts check` in the main checkout then says `ok` for the core with no figures.
+
+4. Take the patch back out of the worktree.
+
+   ```powershell
+   git apply -R experiments/areas/product/p31-tool-cost/no-figures.patch
+   ```
 
 ## What you'll see
 

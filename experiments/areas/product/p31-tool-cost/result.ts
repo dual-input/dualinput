@@ -2,7 +2,7 @@
 
 import type { Measured } from "./measure.ts"
 
-export const MODES = { none: "no tool", fsc: "FS Copilot", dualinput: "Dual Input" } as const
+export const MODES = { none: "no tool", fsc: "FS Copilot", dualinput: "Dual Input", "dualinput-no-figures": "Dual Input, no figures" } as const
 export type Mode = keyof typeof MODES
 
 export type Result = {

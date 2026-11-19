@@ -5,8 +5,8 @@ You start two commands and come back to the report.
 
 Each run starts the sim through Steam, loads the Black Square Baron 58P on runway 14 at Seymour, SEGS, sets the time to noon, measures for 5 minutes, and closes the sim.
 A crash or a hang starts the run over; on its third try a voice asks for the flight by hand, and waits 10 minutes.
-With the default 2 rounds the six runs take about 75 minutes, from p10's 164s from Steam to Ready to fly plus each 5-minute window, and longer for each crash.
-A fourth mode, Dual Input with no figures, adds two runs, about 25 minutes, and needs a core of its own, which [Building the core with no figures](#building-the-core-with-no-figures) makes.
+A run took about 15 minutes on 2026-11-19, retries at the menu included, so the default 2 rounds of three modes take about 90 minutes, and longer for each crash.
+A fourth mode, Dual Input with no figures, adds a run to each round, and needs a core of its own, which [Building the core with no figures](#building-the-core-with-no-figures) makes.
 
 ## Before you start
 
@@ -55,7 +55,8 @@ A fourth mode, Dual Input with no figures, adds two runs, about 25 minutes, and 
    ```
 
    It first has PresentMon time frames for 3s, and stops at once if it can't, so wait for `PresentMon traced frames in a 3s check` before you leave.
-   `--repeats 3` runs a third round, about 40 minutes more.
+   `--repeats 4` runs two more rounds.
+   Keep the rounds even, because every second round runs in reverse, and only a pair of rounds puts each mode at the same mean place in the schedule.
    `--modes none,fsc,dualinput,dualinput-no-figures` adds the runs with no figures.
    You're done when it prints `Every run is done` and the report's path, in `experiments/areas/product/results/`.
    By then it has moved `dualinput` and `fscopilot-bridge` back into Community, as they were.

@@ -64,6 +64,7 @@ import {
   FSC_SECOND_FOLDER,
   FSC_SOURCE,
   NO_FIGURES_CORE,
+  NO_FIGURES_FILES,
   RELEASE_CORE,
   RESULTS,
   WORK,
@@ -105,7 +106,8 @@ main(async () => {
     const modes = (flag(rest, "--modes") ?? "none,fsc,dualinput").split(",") as Mode[]
     const unknown = modes.filter((m) => !(m in MODES))
     if (unknown.length) throw new Failed(`no mode named ${unknown.join(", ")}; the modes are ${Object.keys(MODES).join(", ")}`)
-    if (modes.includes("dualinput-no-figures") && !fs.existsSync(NO_FIGURES_CORE)) throw new Failed(`there's no ${NO_FIGURES_CORE}; build it as procedure.md says`)
+    const missing = NO_FIGURES_FILES.filter((file) => !fs.existsSync(file))
+    if (modes.includes("dualinput-no-figures") && missing.length) throw new Failed(`there's no ${missing.join(" or ")}; build the core with no figures as procedure.md says`)
     return all(modes, Number(flag(rest, "--repeats") ?? 2), options)
   }
   if (command && command in MODES) {
@@ -245,7 +247,7 @@ async function check(): Promise<void> {
     ...where().map((w) => `Community, ${w.community}: ${Object.entries(w.packages).map(([n, p]) => `${n} ${p}`).join(", ")}`),
     `the pilot's release core, ${path.relative(ROOT, RELEASE_CORE)}: ${exists(RELEASE_CORE)}`,
     `its core helper: ${exists(path.join(path.dirname(RELEASE_CORE), "dualinput-core-helper.exe"))}`,
-    `the core with no figures, for --modes ...,dualinput-no-figures, ${path.relative(ROOT, NO_FIGURES_CORE)}: ${exists(NO_FIGURES_CORE)}, and its core helper: ${exists(path.join(path.dirname(NO_FIGURES_CORE), "dualinput-core-helper.exe"))}`,
+    `the core with no figures, for --modes ...,dualinput-no-figures, in ${path.relative(ROOT, path.dirname(NO_FIGURES_CORE))}: ${NO_FIGURES_FILES.map((file) => `${path.basename(file)} ${exists(file)}`).join(", ")}`,
     `the bench core, ${path.relative(ROOT, BENCH_OUT)}: ${exists(path.join(BENCH_OUT, "dualinput-core.exe"))}`,
     `the bench's profiles: ${exists(BENCH_PROFILES)}`,
     `FS Copilot as fsc-exerciser synced it, ${FSC_APP}: ${exists(FSC_APP)}, commit ${fscBuild()?.commit ?? "unrecorded"}, where the fork's main is at ${git(FSC_SOURCE)}`,

@@ -50,8 +50,13 @@ export const BENCH_PROFILES = path.join(ROOT, "target", "bench", "profiles")
 /** The pilot's core, built with the release profile a pilot's runs, and its core helper beside it. */
 export const RELEASE_CORE = path.join(ROOT, "target", "release", "dualinput-core.exe")
 /**
- * The same core built with no-figures.patch beside run.ts, which creates no figure in the sim, and
- * its core helper beside it, for the run that measures what the figures cost the sim's frames.
+ * The same core built with no-figures.patch beside run.ts, which creates no figure in the sim, for
+ * the run that measures what the figures cost the sim's frames.
  * procedure.md says how to build it.
  */
 export const NO_FIGURES_CORE = path.join(WORK, "no-figures", "dualinput-core.exe")
+/**
+ * What the core with no figures needs beside it: Windows ends a core that has no SimConnect.dll
+ * beside it before it prints anything, so its run only times out waiting for the port file.
+ */
+export const NO_FIGURES_FILES = ["dualinput-core.exe", "dualinput-core-helper.exe", "SimConnect.dll"].map((file) => path.join(path.dirname(NO_FIGURES_CORE), file))

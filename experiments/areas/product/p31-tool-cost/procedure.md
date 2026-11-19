@@ -79,17 +79,18 @@ The patch never goes into a commit, so the core is built in a worktree and copie
    cargo build --release -p dualinput-core -p dualinput-core-helper --target-dir target\p31-no-figures
    ```
 
-3. Copy both programs into the main checkout's `target\p31\no-figures\`.
+3. Copy both programs and `SimConnect.dll` into the main checkout's `target\p31\no-figures\`.
+   Without the DLL beside it, Windows ends the core before it prints anything.
 
    ```powershell
    New-Item -ItemType Directory -Force $env:USERPROFILE\dev\crosscheck\target\p31\no-figures
    ```
 
    ```powershell
-   Copy-Item target\p31-no-figures\release\dualinput-core.exe, target\p31-no-figures\release\dualinput-core-helper.exe -Destination $env:USERPROFILE\dev\crosscheck\target\p31\no-figures\
+   Copy-Item target\p31-no-figures\release\dualinput-core.exe, target\p31-no-figures\release\dualinput-core-helper.exe, target\p31-no-figures\release\SimConnect.dll -Destination $env:USERPROFILE\dev\crosscheck\target\p31\no-figures\
    ```
 
-   `run.ts check` in the main checkout then says `ok` for the core with no figures.
+   `run.ts check` in the main checkout then says `ok` for all three files of the core with no figures.
 
 4. Take the patch back out of the worktree.
 

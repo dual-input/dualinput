@@ -31,7 +31,7 @@ export function summary(r: Result): string[] {
   if (!m) return [`${r.label}: no measurement`, ...r.notes.map((n) => `note: ${n}`)]
   const lines: string[] = r.loaded.map((l) => `loaded: ${l}`)
   const f = m.frames
-  lines.push("error" in f ? `frames: ${f.error}` : `frames: ${f.frames}, ${f.fps.toFixed(1)} fps; frame time ${f.p50.toFixed(2)}ms median, ${f.p95.toFixed(2)}ms p95, ${f.p99.toFixed(2)}ms p99, ${f.max.toFixed(1)}ms worst; ${f.over50ms} over 50ms${f.others.MsCPUBusy !== undefined && f.others.MsGPUBusy !== undefined ? `; ${f.others.MsCPUBusy.toFixed(2)}ms CPU busy and ${f.others.MsGPUBusy.toFixed(2)}ms GPU busy per frame` : ""}`)
+  lines.push("error" in f ? `frames: ${f.error}` : `frames: ${f.frames}, ${f.fps.toFixed(1)} fps; frame time ${f.p50.toFixed(2)}ms median, ${f.p95.toFixed(2)}ms p95, ${f.p99.toFixed(2)}ms p99, ${f.max.toFixed(1)}ms worst; ${f.over50ms} over 50ms${f.others.MsCPUBusy !== undefined ? `; ${f.others.MsCPUBusy.toFixed(2)}ms CPU busy per frame` : ""}`)
   lines.push(`the sim had the focus in ${(m.focus * 100).toFixed(0)}% of samples; the whole PC's CPU was ${m.pcCpuPercent.toFixed(1)}% of its ${m.logicalCores} logical cores`)
   for (const p of m.processes) {
     const net = "error" in m.network ? undefined : m.network[p.pid]

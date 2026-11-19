@@ -64,10 +64,10 @@ export function report(): string {
   out.push("")
   out.push(
     `Each figure is the median, across a mode's runs that nothing disturbed, of that run's own figure. Frame times are in ms; CPU is a percentage of one logical core; memory is the mean working set in MB; network is KB/s. ` +
-      `CPU busy and GPU busy are each frame's median time of work, in ms, which PresentMon measures apart from the wait: a sim held at a frame-rate cap draws every frame in the same time whatever a tool costs, and the cost shows in these instead.`,
+      `CPU busy is the median time, in ms, the sim's CPU worked on each frame, which PresentMon measures apart from its wait: a sim held at a frame-rate cap draws every frame in the same time whatever a tool costs, and the cost shows there instead.`,
   )
   out.push("")
-  out.push(row(["mode", "runs kept", "fps", "frame median", "p95", "p99", "over 50ms", "CPU busy per frame", "GPU busy per frame", "the sim's CPU", "the sim's memory", "the pilot's tool's CPU", "its memory", "it sent", "it received"], true))
+  out.push(row(["mode", "runs kept", "fps", "frame median", "p95", "p99", "over 50ms", "CPU busy per frame", "the sim's CPU", "the sim's memory", "the pilot's tool's CPU", "its memory", "it sent", "it received"], true))
   const byMode = new Map<string, Figures>()
   for (const mode of Object.keys(MODES) as (keyof typeof MODES)[]) {
     const mine = kept.filter((r) => r.mode === mode).map(figures)
@@ -76,7 +76,7 @@ export function report(): string {
     const m = medianFigures(mine)
     byMode.set(mode, m)
     const f = (v: number | null, digits = 2) => (v === null ? "" : v.toFixed(digits))
-    out.push(row([MODES[mode], `${mine.length} of ${ran}`, f(m.fps, 1), f(m.p50), f(m.p95), f(m.p99), f(m.over50ms, 0), f(m.cpuBusy), f(m.gpuBusy), f(m.simCpu, 1), f(m.simMemory, 0), mode === "none" ? "" : f(m.pilotCpu), mode === "none" ? "" : f(m.pilotMemory, 0), mode === "none" ? "" : f(m.sent), mode === "none" ? "" : f(m.received)]))
+    out.push(row([MODES[mode], `${mine.length} of ${ran}`, f(m.fps, 1), f(m.p50), f(m.p95), f(m.p99), f(m.over50ms, 0), f(m.cpuBusy), f(m.simCpu, 1), f(m.simMemory, 0), mode === "none" ? "" : f(m.pilotCpu), mode === "none" ? "" : f(m.pilotMemory, 0), mode === "none" ? "" : f(m.sent), mode === "none" ? "" : f(m.received)]))
   }
   const base = byMode.get("none")
   if (base?.p50 != null) {
@@ -85,30 +85,30 @@ export function report(): string {
     for (const mode of ["fsc", "dualinput"] as const) {
       const m = byMode.get(mode)
       if (m?.p50 == null) continue
-      const busy = m.cpuBusy !== null && base.cpuBusy !== null && m.gpuBusy !== null && base.gpuBusy !== null ? `; CPU busy ${signed(m.cpuBusy - base.cpuBusy)}ms and GPU busy ${signed(m.gpuBusy - base.gpuBusy)}ms per frame` : ""
+      const busy = m.cpuBusy !== null && base.cpuBusy !== null ? `; CPU busy ${signed(m.cpuBusy - base.cpuBusy)}ms per frame` : ""
       out.push(`- ${MODES[mode]}: frame median ${signed(m.p50 - base.p50)}ms, p99 ${signed(m.p99! - base.p99!)}ms, ${signed(m.fps! - base.fps!)} fps${busy}; the sim's own CPU ${signed(m.simCpu! - base.simCpu!)} points of one core`)
     }
     const nones = kept.filter((r) => r.mode === "none").map(figures)
     if (nones.length > 1) {
-      const spread = (k: "p50" | "p99" | "cpuBusy" | "gpuBusy") => {
+      const spread = (k: "p50" | "p99" | "cpuBusy") => {
         const values = nones.map((n) => n[k]).filter((v): v is number => v !== null)
         return values.length ? (Math.max(...values) - Math.min(...values)).toFixed(2) : "?"
       }
-      out.push(`- The runs with no tool differ from each other by ${spread("p50")}ms at the frame median, ${spread("p99")}ms at p99, ${spread("cpuBusy")}ms in CPU busy, and ${spread("gpuBusy")}ms in GPU busy, so a difference smaller than that is the PC's drift, not a tool's cost.`)
+      out.push(`- The runs with no tool differ from each other by ${spread("p50")}ms at the frame median, ${spread("p99")}ms at p99, and ${spread("cpuBusy")}ms in CPU busy, so a difference smaller than that is the PC's drift, not a tool's cost.`)
     } else out.push("- With fewer than two runs with no tool kept, the report can't say how far the PC drifts between runs.")
   }
   out.push("")
 
   out.push("## Each run")
   out.push("")
-  out.push(row(["run", "started", "frames", "fps", "median", "p95", "p99", "worst", "over 50ms", "CPU busy", "GPU busy", "median of each minute", "focus", "disturbed by"], true))
+  out.push(row(["run", "started", "frames", "fps", "median", "p95", "p99", "worst", "over 50ms", "CPU busy", "median of each minute", "focus", "disturbed by"], true))
   runs.forEach((r, i) => {
     const f = r.measured!.frames
     const focus = `${(r.measured!.focus * 100).toFixed(0)}%`
     const why = disturbed(r).join("; ")
     const at = `${r.measured!.started.slice(11, 16)} UTC`
-    if ("error" in f) out.push(row([names[i]!, at, f.error, "", "", "", "", "", "", "", "", "", focus, why]))
-    else out.push(row([names[i]!, at, String(f.frames), f.fps.toFixed(1), f.p50.toFixed(2), f.p95.toFixed(2), f.p99.toFixed(2), f.max.toFixed(1), String(f.over50ms), f.others.MsCPUBusy?.toFixed(2) ?? "", f.others.MsGPUBusy?.toFixed(2) ?? "", f.minuteP50.map((v) => v.toFixed(2)).join(" "), focus, why]))
+    if ("error" in f) out.push(row([names[i]!, at, f.error, "", "", "", "", "", "", "", "", focus, why]))
+    else out.push(row([names[i]!, at, String(f.frames), f.fps.toFixed(1), f.p50.toFixed(2), f.p95.toFixed(2), f.p99.toFixed(2), f.max.toFixed(1), String(f.over50ms), f.others.MsCPUBusy?.toFixed(2) ?? "", f.minuteP50.map((v) => v.toFixed(2)).join(" "), focus, why]))
   })
   out.push("")
 
@@ -201,7 +201,7 @@ function disturbed(r: Result): string[] {
   return why
 }
 
-type Figures = { fps: number | null; p50: number | null; p95: number | null; p99: number | null; over50ms: number | null; cpuBusy: number | null; gpuBusy: number | null; simCpu: number | null; simMemory: number | null; pilotCpu: number | null; pilotMemory: number | null; sent: number | null; received: number | null }
+type Figures = { fps: number | null; p50: number | null; p95: number | null; p99: number | null; over50ms: number | null; cpuBusy: number | null; simCpu: number | null; simMemory: number | null; pilotCpu: number | null; pilotMemory: number | null; sent: number | null; received: number | null }
 
 /** One run's figures for the side-by-side table: the sim's frames and its own process, and the pilot's tool's processes together. */
 function figures(r: Result): Figures {
@@ -218,7 +218,6 @@ function figures(r: Result): Figures {
     p99: f?.p99 ?? null,
     over50ms: f?.over50ms ?? null,
     cpuBusy: f?.others.MsCPUBusy ?? null,
-    gpuBusy: f?.others.MsGPUBusy ?? null,
     simCpu: sim?.cpuPercent ?? null,
     simMemory: sim?.workingSetMeanMB ?? null,
     pilotCpu: sum(pilot.map((p) => p.cpuPercent)),
@@ -230,7 +229,7 @@ function figures(r: Result): Figures {
 
 function medianFigures(list: Figures[]): Figures {
   const pick = (k: keyof Figures) => median(list.map((f) => f[k]).filter((v): v is number => v !== null))
-  return { fps: pick("fps"), p50: pick("p50"), p95: pick("p95"), p99: pick("p99"), over50ms: pick("over50ms"), cpuBusy: pick("cpuBusy"), gpuBusy: pick("gpuBusy"), simCpu: pick("simCpu"), simMemory: pick("simMemory"), pilotCpu: pick("pilotCpu"), pilotMemory: pick("pilotMemory"), sent: pick("sent"), received: pick("received") }
+  return { fps: pick("fps"), p50: pick("p50"), p95: pick("p95"), p99: pick("p99"), over50ms: pick("over50ms"), cpuBusy: pick("cpuBusy"), simCpu: pick("simCpu"), simMemory: pick("simMemory"), pilotCpu: pick("pilotCpu"), pilotMemory: pick("pilotMemory"), sent: pick("sent"), received: pick("received") }
 }
 
 function median(values: number[]): number | null {

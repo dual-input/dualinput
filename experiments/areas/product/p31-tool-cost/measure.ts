@@ -26,6 +26,14 @@ export const PRESENTMON = path.join(WORK, "PresentMon-2.6.0-x64.exe")
 export const PRESENTMON_URL = "https://github.com/GameTechDev/PresentMon/releases/download/v2.6.0/PresentMon-2.6.0-x64.exe"
 export const SIM_EXE = "FlightSimulator2024.exe"
 const FRAMES_SESSION = "DualInputP31Frames"
+/**
+ * PresentMon writes a frame only once it has seen that frame reach the display, and on our
+ * development machine on 2026-11-19 it saw none reach it, from the sim or any other program, so
+ * every capture came back empty. With display tracking off it recorded the sim's frames, and display
+ * tracking can't go off while GPU tracking is on, so both go, with input tracking, which p31 doesn't
+ * read. That leaves each frame's time and CPU busy, and no GPU busy.
+ */
+const PRESENTMON_TRACKING = ["--no_track_display", "--no_track_gpu", "--no_track_input"]
 const NETWORK_SESSION = "DualInputP31Net"
 /** How often the sampler reads the tracked processes and the window in front, in ms. */
 const SAMPLE_EVERY_MS = 2_000
@@ -145,7 +153,7 @@ export function presentMonWorks(folder: string): string | null {
   fs.mkdirSync(folder, { recursive: true })
   const csv = path.join(folder, "presentmon-check.csv")
   fs.rmSync(csv, { force: true })
-  const ran = spawnSync(PRESENTMON, ["--output_file", csv, "--timed", "3", "--terminate_after_timed", "--no_console_stats", "--session_name", FRAMES_SESSION, "--stop_existing_session"], { encoding: "utf8", timeout: 30_000 })
+  const ran = spawnSync(PRESENTMON, [...PRESENTMON_TRACKING, "--output_file", csv, "--timed", "3", "--terminate_after_timed", "--no_console_stats", "--session_name", FRAMES_SESSION, "--stop_existing_session"], { encoding: "utf8", timeout: 30_000 })
   const said = `${ran.stdout ?? ""}${ran.stderr ?? ""}`.trim().slice(0, 400)
   if (ran.status !== 0) return `PresentMon couldn't trace frames in a 3s check, and exited with ${ran.status}: ${said || ran.error?.message || "nothing said"}`
   if (!fs.existsSync(csv)) return null
@@ -168,7 +176,7 @@ export async function measure(folder: string, sim: number, tracked: Tracked[], s
   const traced = spawnSync("logman", ["start", NETWORK_SESSION, "-p", "Microsoft-Windows-Kernel-Network", "0x30", "0x4", "-o", etl, "-ets"], { encoding: "utf8" })
   const networkError = traced.status === 0 ? null : `logman didn't start the network trace: ${(traced.stdout + traced.stderr).trim()}`
 
-  const presentmon = spawn(PRESENTMON, ["--process_name", SIM_EXE, "--output_file", csv, "--timed", String(seconds), "--terminate_after_timed", "--no_console_stats", "--session_name", FRAMES_SESSION, "--stop_existing_session"], { stdio: ["ignore", "pipe", "pipe"] })
+  const presentmon = spawn(PRESENTMON, [...PRESENTMON_TRACKING, "--process_name", SIM_EXE, "--output_file", csv, "--timed", String(seconds), "--terminate_after_timed", "--no_console_stats", "--session_name", FRAMES_SESSION, "--stop_existing_session"], { stdio: ["ignore", "pipe", "pipe"] })
   let presentmonSaid = ""
   presentmon.stdout!.on("data", (d: Buffer) => (presentmonSaid += d.toString()))
   presentmon.stderr!.on("data", (d: Buffer) => (presentmonSaid += d.toString()))
@@ -264,7 +272,8 @@ while ((Get-Date) -lt $until) {
 
 /** Frame times of `exe`, or of every process when it's null, from PresentMon's CSV, by the first frame-time column this PresentMon wrote. */
 export function frameStats(csv: string, exe: string | null = SIM_EXE): FrameStats | { error: string } {
-  const lines = fs.readFileSync(csv, "utf8").split(/\r?\n/).filter(Boolean)
+  // PresentMon 2.6 starts its CSV with a byte-order mark, which would hide the first column's name.
+  const lines = fs.readFileSync(csv, "utf8").replace(/^﻿/, "").split(/\r?\n/).filter(Boolean)
   if (lines.length < 2) return { error: "PresentMon's CSV holds no frames; the sim may have had no swap chain while it ran" }
   const header = lines[0]!.split(",")
   const column = ["MsBetweenPresents", "FrameTime", "MsBetweenAppStart"].find((c) => header.includes(c))

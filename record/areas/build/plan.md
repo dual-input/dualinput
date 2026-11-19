@@ -893,9 +893,25 @@ Done on 2026-11-17: on the bench, `rate-and-pause` and `go-to` passed 4 of 4, a 
 Designs first: how state sync writes two coupled controls that arrive in one input, since a profile's write decides in the core from a reading a frame or more old, so one write can undo the other, as the 58P's altitude hold and vertical speed mode did twice in the first flight with friends, which [stage 14b](#14b-state-syncs-writes-that-read-another-value) found and left as a known limit (user, 2026-11-17).
 It starts from the sync log's entries of 2026-11-16 and 2026-11-17, and the idea weighed there, in which profiles stay in JavaScript and our WASM module runs a toggle as calculator code guarded by the entry's own variable.
 Before that design, it measures how the sim orders and applies the events of one frame, through SimConnect and through our module.
-Builds: that fix, in the units its design names.
+p33 found that no route shows the 58P autopilot's response to an event in the frame it's sent, so a toggle guarded in the sim reads the old mode too.
+Instead, the sync engine holds a toggle, a stepping write, or a write function while another entry has a value pending, as [05-units](../sync/05-units.md)' note of stage 14c has it ([sync log](../sync/log.md#2026-11-19-no-route-showed-an-autopilot-events-effect-in-the-frame-it-was-sent-so-a-guard-in-the-sim-reads-the-old-mode-and-the-events-of-one-frame-apply-in-the-order-sent); user, 2026-11-19).
+
+Builds:
+
+- in `sync-engine`: an arrival's or a catch-up's `toggle`, stepping write, or write function held while another entry has a value pending, other than a following machine's write of what the PF owns, each later write of an arrival or a catch-up held behind it, in order, and each made from the readings, at the value its entry holds then, a frame after that value reads back or is dropped; a held arrival answered as `Stepping`; and a reading that brings the value a held write wants taken as no change of this machine's
+- in the Baron 58P profile, the note on `ap_vs_hold`'s known limit dropped
+
 Needs: 14b.
-Tests: a bench case, with the stand-in's rules, in which two coupled controls arrive in one input and one write undoes the other.
+
+Tests:
+
+- As the sync engine's own tests: a toggle that arrives with another entry's write decides once that write reads back, finds its mode already off, and sends nothing back; a held toggle goes once the write before it is flagged, and flips when its mode still reads on; a following machine's write of what the PF owns holds no toggle, and a value's write never waits for another entry's pending write; catch-up holds a toggle behind the write before it, and the writes after it in order; a held write makes the value its entry holds as it goes, this pilot's own change included; and a write function behind the battery in catch-up's burst waits for the battery, then writes.
+- On the bench, in the `state-sync` scenario, with the stand-in's rules for the 58P's two vertical modes: altitude hold and vertical speed mode changed in one frame leave the other machine in altitude hold, and nothing comes back.
+
+The stage's code acts only in a session with a profile loaded, so it closes on the scenarios that hold a session in a flight: the 18 stage 16 closed on, and `go-to` and `rate-and-pause`, which stage 21 added after them.
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the `state-sync` scenario's new case among them, which fails with the hold taken out; and the [sync log](../sync/log.md) has an entry for p33 and the fix.
+Done on 2026-11-19: `node tools/check.ts` passed, and the `state-sync` scenario passed 12 of 12 after the code review's fixes, its new case failing with the hold taken out ([sync log](../sync/log.md#2026-11-19-no-route-showed-an-autopilot-events-effect-in-the-frame-it-was-sent-so-a-guard-in-the-sim-reads-the-old-mode-and-the-events-of-one-frame-apply-in-the-order-sent)); the other 19 scenarios of the close wait for the next bench that runs them, since a game held the PC (user, 2026-11-19).
 
 ## 16c Trim and bank after a handover
 

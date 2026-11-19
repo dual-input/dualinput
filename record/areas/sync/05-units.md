@@ -32,6 +32,19 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 > - Two known limits: a following machine's autopilot can send its own target as the PF's vertical speed mode reaches it, which goes out as its pilot's change; and two toggles of coupled controls that arrive together can undo each other, since a toggle decides from the last reading, which [stage 14c](../build/plan.md#14c-two-coupled-writes-in-one-input) takes up.
 
 > **Note**
+> From stage 14c, because no route showed the 58P's autopilot taking an event in the frame it was sent, and a toggle guarded in the sim read the old mode too ([sync log](log.md#2026-11-19-no-route-showed-an-autopilot-events-effect-in-the-frame-it-was-sent-so-a-guard-in-the-sim-reads-the-old-mode-and-the-events-of-one-frame-apply-in-the-order-sent); user, 2026-11-19):
+>
+> - In [writing](#writing), an arrival's or a catch-up's `toggle`, stepping write, or write function, the three forms that decide from the cockpit's readings, waits while another entry has a value pending.
+>   Each later write of an arrival or a catch-up waits behind it, in order.
+>   It goes at the second `frame` call after the pending value reads back or its check drops it, and decides from the readings then, since state sync watches each variable on a request of its own, and where the sim's `Frame` event falls among one frame's requests is unmeasured.
+>   It writes the value its entry holds as it goes, so a newer arrival, a catch-up taken again, or this pilot's own change in the meantime is what it writes.
+>   A following machine's pending write of what the PF owns makes no other write wait, since that machine's own autopilot can move the value before it reads back, as it moves the trim.
+>   A put-back goes at once, and an event entry's write isn't held, though the stream applies none behind a held arrival.
+> - The stream applies nothing after a held arrival until the engine's `Stepped` says it went, as it waits on a stepping write's last step.
+> - In [its own echo](#its-own-echo), a reading that brings the value a held write wants is no change of this machine's, as vertical speed mode turned off by altitude hold's event.
+> - So the two-toggle known limit above no longer holds, and in [the cases for the bench](#cases-for-the-bench), a write function that checks for power in catch-up's burst behind the battery waits for the battery's write to read back and then writes, where it wrote nothing and was flagged.
+
+> **Note**
 > Each `panel_module` call below takes a third argument, a function that says whether the loaded profile names anything the module serves, and `clients` raises its trouble over a panel that never connects only when one says yes ([the apps' note](../interface/01-apps.md); user, 2026-11-01).
 > `h-events` says yes when the loaded variant's `watches` holds an `H:` event, and `instrument-reads` when they hold an `instrument()`.
 

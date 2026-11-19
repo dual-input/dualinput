@@ -4,6 +4,45 @@ What our experiments and the build's stages found about keeping cockpits in sync
 The probes are in [experiments/areas/sync](../../../experiments/areas/sync), and their raw output is in its `results/` folder.
 Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on our development machine with Flow Pro 26.33.5, ChasePlane 2026.39.1.16, and GSX Pro 4.0.19 installed, with the frame rate capped near 30 fps unless the entry says otherwise.
 
+## 2026-11-19: No route showed an autopilot event's effect in the frame it was sent, so a guard in the sim reads the old mode, and the events of one frame apply in the order sent
+
+**Asked:** for [stage 14c](../build/plan.md#14c-two-coupled-writes-in-one-input), how soon can the sim read the effect of a `K:` event, sent through SimConnect as the core sends it, through our WASM module's calculator code or its Events API, or from a cockpit panel?
+Does the race of [the first flight with friends](#2026-11-16-the-drift-after-a-handover-was-the-hosts-heading-bug-which-no-write-moved-after-its-first-and-every-_set-preset-that-missed-took-the-value-of-its-first-call) happen again, `K:AP_ALT_HOLD` then `K:AP_PANEL_VS_HOLD` from vertical speed mode?
+Does `K:AP_PANEL_VS_HOLD` guarded by its own variable in calculator code, as FS Copilot's 58P profile guards it, leave altitude hold on?
+In which order does each route apply two events sent together?
+
+**Expected:** no source either way; the guard was the idea stage 14b left for this stage, and it works only if the sim applies the first event before the guard reads.
+
+**Found:** on MSFS 2024 on our development machine, 2026-11-19, in bksq-aircraft-baronpro 0.1.1 at a stand with its engines running, at about 70 fps, through p33, which has our module run calculator code and key events a frame at a time ([p33-frame-order](../../../experiments/areas/sync/p33-frame-order/probe.mjs), [results](../../../experiments/areas/sync/results/p33-frame-order-2026-11-19-19-17-58.txt)).
+The KFC 150 took vertical speed mode and altitude hold on the ground with the autopilot off.
+The pilot flipped the compass's slave switch once or twice during the run, which drives the heading indicator, not the vertical modes.
+
+- **No route showed `K:AP_ALT_HOLD`'s effect in the frame it was sent:**
+
+  | Route | First reading of altitude hold on and vertical speed mode off |
+  | --- | --- |
+  | Our module's calculator code | 2 or 3 of our module's frames later, 31ms to 41ms, and not in the same code or in a second call in the same frame |
+  | Our module's Events API | 2 frames later, 27ms to 30ms |
+  | SimConnect | in SimConnect's 2nd frame after the send, 27ms to 29ms, and in our module's 1st, 12ms to 14ms |
+  | A cockpit panel | in its 2nd animation frame, 41ms to 42ms |
+- **A guard in calculator code read vertical speed mode as still on**, 15 of 15, whether it ran in the same code as `K:AP_ALT_HOLD`, in a second call in the same frame, in our module's next frame, after the Events API's key, or after SimConnect's send.
+  So it fired the toggle each time, and each run ended with both modes off.
+- **The race left both modes off**, 15 of 15, through SimConnect back to back, our module's calculator code in one call and in two, its Events API, and a panel.
+  In the flight it left vertical speed mode on, which fits the two events landing in different frames, the second after the first had turned vertical speed mode off (unverified).
+- **Two events sent together applied in the order sent**, 2 of 2 through each of SimConnect, our module's calculator code, and a panel: `K:AP_ALT_HOLD_ON` then `K:AP_VS_OFF` left both modes off, and `K:AP_VS_OFF` then `K:AP_ALT_HOLD_ON` left altitude hold on.
+  `K:AP_VS_OFF` alone turned altitude hold off, 2 of 2, so the KFC 150's own on and off events undo each other too, depending on their order.
+- `K:AP_PITCH_LEVELER_ON` then `K:AP_PANEL_VS_HOLD`, as state sync sends a press of VS from altitude hold, left vertical speed mode on, 2 of 2, as wanted.
+- Other events showed sooner: `K:HEADING_BUG_SET` and `B:INSTRUMENT_Heading_Bug_Set` from calculator code read back in our module's next frame, and `(B:LIGHTING_TAXI_1)` read the taxi light's new position in the same code as its toggle preset, while `A:LIGHT TAXI` followed a frame later.
+- p31's single run of the race from a panel left altitude hold on ([that entry](#2026-11-17-a-preset-called-with-a-value-from-our-wasm-module-took-only-its-first-value-and-from-a-panel-it-took-every-one)), against both off in each of these 3; p31 sent `K:AP_PANEL_VS_HOLD` with 0 rather than 1, in the air with the autopilot on, and which of those made the difference is unknown.
+
+So a toggle guarded in the sim decides from the same old reading as a toggle the core decides, unless something holds it until the event before it shows its effect.
+
+**Changed:** the sync engine holds a write that decides from the cockpit's readings, a `toggle`, a stepping write, or a write function, while another entry has a value pending, and makes it from the readings once that value reads back (user, 2026-11-19).
+The user picked that over our module holding a guarded event 3 frames, which would have sent every `K:` write through our module and still left `instrument()` entries and write functions that read `state` unguarded.
+On the bench, the `state-sync` scenario's case of the two modes, with the stand-in's rules for them, failed with the hold taken out, the other machine's altitude hold ending off, and passed with it, 12 of 12 ([results](results/2026-11-19-stage-14c-bench.txt)).
+
+**Affects:** [stage 14c](../build/plan.md#14c-two-coupled-writes-in-one-input) and [05-units](05-units.md), with a note at its top.
+
 ## 2026-11-18: In stage 14b's session the 58P took every preset value and its heading bug followed, and as it took control its own trim fell and it banked, after our trim write went out
 
 **Asked:** in [stage 14b's session](../../../tools/sim/handover.ts), with [the fix below](#2026-11-17-fsvarsbvarcall-with-a-value-jams-the-input-event-for-the-rest-of-the-flight-and-calculator-code-from-our-module-doesnt) in, does the Baron 58P take every value a second pilot sets through its `_Set` presets with no flag, and after a handover in heading mode does it fly straight on with its trim at the second pilot's?

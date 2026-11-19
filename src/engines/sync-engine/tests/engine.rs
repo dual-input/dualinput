@@ -394,7 +394,8 @@ fn a_toggle_over_a_lamp_that_lights_late_flips_once_and_is_flagged() {
 }
 
 #[test]
-fn a_write_function_that_writes_nothing_is_flagged_live_and_in_catch_up() {
+fn a_write_function_that_writes_nothing_is_flagged_and_one_behind_the_battery_in_catch_up_waits_for_it()
+ {
     let battery = l("BATTERY");
     let xpdr = l("XPDR");
     let function = r#"(value) => {
@@ -435,13 +436,221 @@ fn a_write_function_that_writes_nothing_is_flagged_live_and_in_catch_up() {
         late.cx(),
     );
     late.out.extend(out);
-    assert_eq!(late.acts(), vec![set(&battery, 1.0)]);
-    late.read(&battery, 1.0);
-    late.wait(2 * SECOND);
     assert_eq!(
-        late.flags(),
-        1,
-        "the transponder's write made nothing behind the battery"
+        late.acts(),
+        vec![set(&battery, 1.0)],
+        "the transponder's function waits for the battery's write to read back"
+    );
+    late.read(&battery, 1.0);
+    late.frame();
+    late.frame();
+    assert_eq!(
+        late.acts(),
+        vec![Action::Key {
+            name: k("SET_XPDR_MODE"),
+            values: vec![2.0]
+        }],
+        "behind the battery, the function finds it on"
+    );
+    late.read(&xpdr, 2.0);
+    late.wait(2 * SECOND);
+    assert_eq!(late.flags(), 0);
+}
+
+/// A 58P's two vertical modes: altitude hold's function, which sends one of two events, and
+/// vertical speed mode's toggle.
+fn vertical_modes() -> (Name, Name, Resolved) {
+    let alt = l("ALT_HOLD");
+    let vs = l("VS_HOLD");
+    let function = r#"(value) => {
+      if (value == state.alt) return
+      write(value ? K('AP_ALT_HOLD') : K('AP_PITCH_LEVELER_ON'))
+    }"#;
+    let p = profile(
+        vec![
+            state("alt", alt.clone(), Write::Function(function.into())),
+            state("vs", vs.clone(), Write::Toggle(k("AP_PANEL_VS_HOLD"))),
+        ],
+        vec![],
+    );
+    (alt, vs, p)
+}
+
+fn key(name: &str) -> Action {
+    Action::Key {
+        name: k(name),
+        values: Vec::new(),
+    }
+}
+
+#[test]
+fn a_toggle_that_arrives_with_another_entrys_write_decides_once_that_write_reads_back() {
+    let (alt, vs, p) = vertical_modes();
+    let mut pm = Machine::new(PM, &p);
+    pm.read(&alt, 0.0);
+    pm.read(&vs, 1.0);
+    // The PF pressed ALT in vertical speed mode: altitude hold on and vertical speed mode off.
+    assert_eq!(pm.arrive("alt", 1.0, stamp(PF, 1, &[])), Applied::Done);
+    assert_eq!(pm.arrive("vs", 0.0, stamp(PF, 2, &[])), Applied::Stepping);
+    assert_eq!(pm.acts(), vec![key("AP_ALT_HOLD")]);
+    pm.frame();
+    pm.frame();
+    assert!(
+        pm.acts().is_empty(),
+        "the toggle waits while altitude hold's write is pending"
+    );
+    // The autopilot turns vertical speed mode off with altitude hold, and both read back in one
+    // frame.
+    pm.read(&alt, 1.0);
+    pm.frame();
+    assert!(
+        !pm.out.contains(&Out::Stepped("vs".into())),
+        "the toggle waits a frame more, for the rest of that frame's readings"
+    );
+    pm.read(&vs, 0.0);
+    pm.frame();
+    assert!(
+        pm.acts().is_empty(),
+        "the toggle finds vertical speed mode already off"
+    );
+    assert!(pm.out.contains(&Out::Stepped("vs".into())));
+    pm.wait(2 * SECOND);
+    assert!(
+        pm.sends().is_empty(),
+        "the mode altitude hold turned off isn't this pilot's change: {:?}",
+        pm.out
+    );
+    assert_eq!(pm.flags(), 0);
+}
+
+#[test]
+fn a_held_toggle_goes_once_the_write_before_it_is_flagged_and_flips_when_it_must() {
+    let (alt, vs, p) = vertical_modes();
+    let mut pm = Machine::new(PM, &p);
+    pm.read(&alt, 0.0);
+    pm.read(&vs, 1.0);
+    pm.arrive("alt", 1.0, stamp(PF, 1, &[]));
+    assert_eq!(pm.arrive("vs", 0.0, stamp(PF, 2, &[])), Applied::Stepping);
+    assert_eq!(pm.acts(), vec![key("AP_ALT_HOLD")]);
+    // Altitude hold never reads back, as on an aircraft that ignores the event.
+    pm.wait(SECOND);
+    assert!(pm.acts().is_empty());
+    pm.wait(SECOND);
+    assert_eq!(pm.flags(), 1, "altitude hold's write never landed");
+    assert_eq!(
+        pm.acts(),
+        vec![key("AP_PANEL_VS_HOLD")],
+        "the toggle decides once the write before it is dropped, and the mode still reads on"
+    );
+}
+
+#[test]
+fn a_following_machines_write_of_what_the_pf_owns_holds_no_toggle_and_a_value_write_never_waits() {
+    let (alt, vs, mut p) = vertical_modes();
+    let trim = l("TRIM");
+    let beacon = l("BEACON");
+    let mut trim_entry = state("trim", trim.clone(), Write::Name(k("SET_TRIM")));
+    trim_entry.owner = Owner::PilotFlying;
+    p.state.push(trim_entry);
+    p.state
+        .push(state("beacon", beacon.clone(), Write::Name(beacon.clone())));
+    let mut pm = Machine::new(PM, &p);
+    for name in [&alt, &trim, &beacon] {
+        pm.read(name, 0.0);
+    }
+    pm.read(&vs, 1.0);
+    // The PM's own autopilot holds its trim where it wants it, so the write never reads back.
+    pm.arrive("trim", 5.0, stamp(PF, 1, &[]));
+    assert_eq!(pm.arrive("vs", 0.0, stamp(PF, 2, &[])), Applied::Done);
+    assert_eq!(pm.arrive("beacon", 1.0, stamp(PF, 3, &[])), Applied::Done);
+    assert_eq!(
+        pm.acts(),
+        vec![
+            Action::Key {
+                name: k("SET_TRIM"),
+                values: vec![5.0]
+            },
+            key("AP_PANEL_VS_HOLD"),
+            set(&beacon, 1.0)
+        ],
+        "the toggle doesn't wait on the trim, and the beacon's value doesn't wait on the toggle"
+    );
+}
+
+#[test]
+fn catch_up_holds_a_toggle_behind_the_write_before_it_and_what_follows_in_order() {
+    let (alt, vs, mut p) = vertical_modes();
+    let beacon = l("BEACON");
+    p.state
+        .push(state("beacon", beacon.clone(), Write::Name(beacon.clone())));
+    let mut late = Machine::new(PM, &p);
+    late.read(&alt, 0.0);
+    late.read(&vs, 1.0);
+    late.read(&beacon, 0.0);
+    late.catching_up = true;
+    let out = late.engine.take(
+        &CatchUpState {
+            entries: vec![entry("alt", 1.0), entry("vs", 0.0), entry("beacon", 1.0)],
+        },
+        late.cx(),
+    );
+    late.out.extend(out);
+    assert_eq!(
+        late.acts(),
+        vec![key("AP_ALT_HOLD")],
+        "the toggle waits, and the beacon behind it"
+    );
+    assert!(!late.out.contains(&Out::CatchUpMade));
+    late.read(&alt, 1.0);
+    late.read(&vs, 0.0);
+    late.frame();
+    late.frame();
+    assert_eq!(late.acts(), vec![set(&beacon, 1.0)]);
+    assert!(late.out.contains(&Out::CatchUpMade));
+}
+
+#[test]
+fn a_held_write_makes_the_value_its_entry_holds_as_it_goes_this_pilots_own_change_included() {
+    let beacon = l("BEACON");
+    let selected = l("SELECTED_ALTITUDE");
+    let function = r#"(value) => {
+      write(K('SET_ALTITUDE'), value)
+    }"#;
+    let p = profile(
+        vec![
+            state("beacon", beacon.clone(), Write::Name(beacon.clone())),
+            state(
+                "selected",
+                selected.clone(),
+                Write::Function(function.into()),
+            ),
+        ],
+        vec![],
+    );
+    let mut pm = Machine::new(PM, &p);
+    pm.read(&beacon, 0.0);
+    pm.read(&selected, 7_000.0);
+    pm.arrive("beacon", 1.0, stamp(PF, 1, &[]));
+    assert_eq!(
+        pm.arrive("selected", 9_000.0, stamp(PF, 2, &[])),
+        Applied::Stepping
+    );
+    // This pilot turns the selector while the other's 9,000 ft is held, which goes out.
+    pm.read(&selected, 8_000.0);
+    assert_eq!(pm.sends().len(), 1);
+    pm.read(&beacon, 1.0);
+    pm.frame();
+    pm.frame();
+    assert_eq!(
+        pm.acts(),
+        vec![
+            set(&beacon, 1.0),
+            Action::Key {
+                name: k("SET_ALTITUDE"),
+                values: vec![8_000.0]
+            }
+        ],
+        "the held write makes this pilot's 8,000 ft, not the 9,000 ft it was held with"
     );
 }
 

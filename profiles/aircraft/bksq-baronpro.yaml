@@ -369,10 +369,6 @@ state:
         if (value == state.ap_altitude_hold) return
         write(value ? K('AP_ALT_HOLD') : K('AP_PITCH_LEVELER_ON'))
       }
-  # A known limit: when altitude hold and vertical speed mode change together, this toggle can
-  # read vertical speed mode before altitude hold's event turns it off, and turn it back on
-  # (measured on MSFS 2024, 2026-11-16, record/areas/sync/log.md), until a toggle's last check
-  # is made in the sim as it runs.
   ap_vs_hold:
     name: Autopilot vertical speed mode
     watch: A('AUTOPILOT VERTICAL HOLD', 'Bool')

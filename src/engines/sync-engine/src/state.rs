@@ -43,6 +43,17 @@ pub(crate) struct StateSlot {
     refused: bool,
 }
 
+/// An arrival's or a catch-up's write to the entry `i`, held behind other entries' pending
+/// writes, in the order it came. It writes the value the entry holds when it goes, which a
+/// newer arrival, a catch-up taken again, or this pilot's own change may have moved since.
+#[derive(Debug)]
+pub(crate) struct Held {
+    i: usize,
+    how: How,
+    /// Nothing pending held it back at the last frame, so it goes at the next.
+    ready: bool,
+}
+
 #[derive(Clone, Debug)]
 pub(crate) struct Pending {
     pub(crate) value: Value,
@@ -246,7 +257,7 @@ impl Engine {
                     ..how
                 };
                 self.write(i, wanted, how, cx, out);
-                if how.catch_up && !self.runs.contains_key(&Slot::State(i)) {
+                if how.catch_up && !self.outstanding(i) {
                     self.made(i);
                 }
             }
@@ -262,6 +273,13 @@ impl Engine {
         // value pending before it; one that equals none is this machine's own change.
         if let Some(p) = slot.pending.iter().position(|p| p.value.same(&value)) {
             slot.pending.drain(..=p);
+            return;
+        }
+        // A reading that brings the value a held write will write came from the write before
+        // it, as altitude hold's event turns vertical speed mode off, so it's no change of this
+        // machine's either, and the held write finds it there.
+        let brings = slot.held.as_ref().is_some_and(|h| h.same(&value));
+        if brings && self.is_held(i) {
             return;
         }
         self.own_change(i, value, cx, out);
@@ -524,8 +542,130 @@ impl Engine {
         }
     }
 
-    /// Writes `wanted` into the entry through its `write`, as the engine chooses.
+    /// Writes `wanted` into the entry through its `write`, or holds it for `release`. A toggle, a
+    /// stepping write, or a write function decides from the cockpit's readings, and another
+    /// entry's write can change them a few frames later: on a 58P in vertical speed mode,
+    /// altitude hold's `K:AP_ALT_HOLD` turns vertical speed mode off, and a vertical speed toggle
+    /// that arrives with it, still reading the mode on, toggles it again and leaves the wrong
+    /// mode. No route showed the autopilot taking an event in the frame it was sent, so a check
+    /// made in the sim as the toggle goes reads the old mode too. So such a write waits while
+    /// another entry has a value pending, and each write of an arrival or a catch-up after it
+    /// waits behind it, in order. A put-back goes at once, since it restores this machine's own
+    /// control (measured on MSFS 2024, 2026-11-19, record/areas/sync/log.md, "No route showed an
+    /// autopilot event's effect in the frame it was sent, so a guard in the sim reads the old
+    /// mode, and the events of one frame apply in the order sent").
     fn write(&mut self, i: usize, wanted: Value, how: How, cx: Ctx, out: &mut Vec<Out>) -> Applied {
+        let waits = how.checked
+            && self.state.get(i).is_some_and(|s| s.reading.is_some())
+            && (!self.held.is_empty() || (self.decides(i) && self.pending_besides(i)));
+        if !waits {
+            return self.write_now(i, wanted, how, cx, out);
+        }
+        // A newer value for an entry already held keeps its place, as the stream hands it over
+        // in place of the held arrival, and the held write takes the newer value as it goes.
+        match self.held.iter_mut().find(|h| h.i == i) {
+            Some(held) => {
+                held.how = How {
+                    answers: held.how.answers || how.answers,
+                    catch_up: held.how.catch_up || how.catch_up,
+                    ..how
+                };
+            }
+            None => self.held.push_back(Held {
+                i,
+                how,
+                ready: false,
+            }),
+        }
+        if how.answers {
+            Applied::Stepping
+        } else {
+            Applied::Done
+        }
+    }
+
+    /// Whether the entry's write decides from the cockpit's readings, rather than setting a value.
+    fn decides(&self, i: usize) -> bool {
+        self.state.get(i).is_some_and(|s| {
+            matches!(
+                s.entry.write,
+                Write::Toggle(_) | Write::Steps(_) | Write::Function(_)
+            )
+        })
+    }
+
+    /// Whether another entry has a value pending that its check would flag. A following
+    /// machine's write of what the PF owns doesn't flag, as `How::for_owner` sets it, since that
+    /// machine's own autopilot moves the trim faster than it reads back, so it could hold every
+    /// switch for a check's length; so it holds nothing here either.
+    fn pending_besides(&self, i: usize) -> bool {
+        self.state
+            .iter()
+            .enumerate()
+            .any(|(j, s)| j != i && s.pending.iter().any(|p| p.flags))
+    }
+
+    /// Makes the held writes whose turn has come, in order, once a frame. A write that decides
+    /// from the readings goes a frame after nothing held it back, so the readings of the frame
+    /// its blocker read back in have all arrived: state sync watches each variable on a request
+    /// of its own, and where the sim's `Frame` event falls among one frame's requests is
+    /// unmeasured, while the autopilot's two modes changed in one frame (measured on MSFS 2024,
+    /// 2026-11-19, record/areas/sync/log.md, "No route showed an autopilot event's effect in the
+    /// frame it was sent, so a guard in the sim reads the old mode, and the events of one frame
+    /// apply in the order sent").
+    pub(crate) fn release(&mut self, cx: Ctx, out: &mut Vec<Out>) {
+        while let Some(&Held { i, ready, .. }) = self.held.front() {
+            if self.decides(i) {
+                let blocked = self.pending_besides(i);
+                if blocked || !ready {
+                    if let Some(front) = self.held.front_mut() {
+                        front.ready = !blocked;
+                    }
+                    return;
+                }
+            }
+            let Some(Held { how, .. }) = self.held.pop_front() else {
+                return;
+            };
+            let wanted = self.state.get(i).and_then(|s| s.held.clone());
+            let applied = match wanted {
+                Some(wanted) => self.write_now(i, wanted, how, cx, out),
+                None => Applied::Done,
+            };
+            if how.answers
+                && applied != Applied::Stepping
+                && let Some(s) = self.state.get(i)
+            {
+                out.push(Out::Stepped(s.entry.key.clone()));
+            }
+            if how.catch_up && !self.outstanding(i) {
+                self.made(i);
+            }
+        }
+    }
+
+    /// Whether a write of the entry is held.
+    pub(crate) fn is_held(&self, i: usize) -> bool {
+        self.held.iter().any(|h| h.i == i)
+    }
+
+    /// Whether the entry's write is still to be made: it runs, waits for the entry's first
+    /// reading, or is held. Catch-up counts it made once it isn't.
+    pub(crate) fn outstanding(&self, i: usize) -> bool {
+        self.runs.contains_key(&Slot::State(i))
+            || self.state.get(i).is_some_and(|s| s.waiting.is_some())
+            || self.is_held(i)
+    }
+
+    /// Writes `wanted` into the entry through its `write`, as the engine chooses.
+    fn write_now(
+        &mut self,
+        i: usize,
+        wanted: Value,
+        how: How,
+        cx: Ctx,
+        out: &mut Vec<Out>,
+    ) -> Applied {
         let Some(slot) = self.state.get_mut(i) else {
             return Applied::Skipped;
         };
@@ -753,8 +893,13 @@ impl Engine {
 
     /// Stops an entry syncing on this machine for the rest of the load.
     pub(crate) fn stop(&mut self, slot: Slot, why: Why, out: &mut Vec<Out>) {
-        // An arrival waiting on the run's last step counts as applied, so the stream moves on.
-        let answered = self.runs.remove(&slot).is_some_and(|r| r.answers);
+        // An arrival waiting on the run's last step, or on a held write, counts as applied, so
+        // the stream moves on.
+        let mut answered = self.runs.remove(&slot).is_some_and(|r| r.answers);
+        if let Slot::State(i) = slot {
+            answered |= self.held.iter().any(|h| h.i == i && h.how.answers);
+            self.held.retain(|h| h.i != i);
+        }
         let (key, name) = match slot {
             Slot::State(i) => {
                 let Some(s) = self.state.get_mut(i) else {
@@ -877,9 +1022,9 @@ impl Engine {
             }
             let how = CATCH_UP.for_owner(slot.entry.owner, cx);
             self.write(i, e.value.clone(), how, cx, &mut out);
-            let outstanding = self.runs.contains_key(&Slot::State(i))
-                || self.state.get(i).is_some_and(|s| s.waiting.is_some());
-            if outstanding && let Some(c) = self.catch_up.as_mut() {
+            if self.outstanding(i)
+                && let Some(c) = self.catch_up.as_mut()
+            {
                 c.outstanding.insert(i);
             }
         }

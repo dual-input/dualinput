@@ -1,0 +1,104 @@
+the aircraft is Black Square Baron 58P Professional N515MR
+before: autopilot 0, flight director 0, ALT 0 VS 0, heading bug 0, on the ground 1
+our module answered p33's first script in 30ms
+vertical speed mode engages here: ALT 0 VS 1
+
+=== How soon each route reads an event's effect, K:AP_ALT_HOLD from vertical speed mode
+visible, our module's calculator code: from ALT 0 VS 1 ends ALT 1 VS 0; frame 0 +0.0ms ALT 0 VS 1, frame 0 +0.0ms ALT 0 VS 1, frame 1 +12.8ms ALT 0 VS 1, frame 2 +26.8ms ALT 0 VS 1, frame 3 +40.7ms ALT 1 VS 0
+visible, our module's calculator code: from ALT 0 VS 1 ends ALT 1 VS 0; frame 0 +0.0ms ALT 0 VS 1, frame 0 +0.0ms ALT 0 VS 1, frame 1 +15.6ms ALT 0 VS 1, frame 2 +30.7ms ALT 1 VS 0, frame 3 +46.7ms ALT 1 VS 0
+visible, our module's Events API: from ALT 0 VS 1 ends ALT 1 VS 0; frame 0 +0.0ms ALT 0 VS 0, frame 0 +0.0ms ALT 0 VS 1, frame 1 +14.3ms ALT 0 VS 1, frame 2 +29.9ms ALT 1 VS 0, frame 3 +43.6ms ALT 1 VS 0
+visible, our module's Events API: from ALT 0 VS 1 ends ALT 1 VS 0; frame 0 +0.0ms ALT 0 VS 0, frame 0 +0.0ms ALT 0 VS 1, frame 1 +13.1ms ALT 0 VS 1, frame 2 +26.8ms ALT 1 VS 0, frame 3 +41.6ms ALT 1 VS 0
+visible, SimConnect, its own frames: from ALT 0 VS 1 ends ALT 1 VS 0; 15ms ALT 0 VS 1, 29ms ALT 1 VS 0, 44ms ALT 1 VS 0, 56ms ALT 1 VS 0, 69ms ALT 1 VS 0, 84ms ALT 1 VS 0, 97ms ALT 1 VS 0, 111ms ALT 1 VS 0, 124ms ALT 1 VS 0, 137ms ALT 1 VS 0
+visible, SimConnect, its own frames: from ALT 0 VS 1 ends ALT 1 VS 0; 14ms ALT 0 VS 1, 27ms ALT 1 VS 0, 41ms ALT 1 VS 0, 54ms ALT 1 VS 0, 67ms ALT 1 VS 0, 81ms ALT 1 VS 0, 94ms ALT 1 VS 0, 108ms ALT 1 VS 0, 122ms ALT 1 VS 0, 135ms ALT 1 VS 0
+visible, SimConnect, then our module's frames: from ALT 0 VS 1 ends ALT 1 VS 0; frame 0 +0.0ms ALT 0 VS 1, frame 1 +12.3ms ALT 1 VS 0, frame 2 +26.2ms ALT 1 VS 0, frame 3 +38.6ms ALT 1 VS 0, frame 4 +51.4ms ALT 1 VS 0
+visible, SimConnect, then our module's frames: from ALT 0 VS 1 ends ALT 1 VS 0; frame 0 +0.0ms ALT 0 VS 1, frame 1 +13.8ms ALT 1 VS 0, frame 2 +26.5ms ALT 1 VS 0, frame 3 +40.1ms ALT 1 VS 0, frame 4 +54.5ms ALT 1 VS 0
+visible, a panel: from ALT 0 VS 1 ends ALT 1 VS 0; same call ALT 0 VS 1, frame 1 +14ms ALT 0 VS 1, frame 2 +41ms ALT 10 VS 0, frame 3 +87ms ALT 10 VS 0, frame 4 +114ms ALT 10 VS 0, frame 5 +141ms ALT 10 VS 0
+visible, a panel: from ALT 0 VS 1 ends ALT 1 VS 0; same call ALT 0 VS 1, frame 1 +16ms ALT 0 VS 1, frame 2 +42ms ALT 10 VS 0, frame 3 +83ms ALT 10 VS 0, frame 4 +111ms ALT 10 VS 0, frame 5 +138ms ALT 10 VS 0
+
+=== Other events read in the same calculator code
+K:HEADING_BUG_SET 123: frame 0 +0.0ms 0, frame 1 +15.9ms 123, frame 2 +32.7ms 123
+B:INSTRUMENT_Heading_Bug_Set 231: frame 0 +0.0ms 123, frame 1 +14.4ms 230.9985, frame 2 +28.0ms 230.9985
+B:LIGHTING_TAXI_1 read in calculator code: 0, and as (A:LIGHT TAXI, Bool): 0
+B:LIGHTING_TAXI_1_Toggle, then (B:LIGHTING_TAXI_1) and (A:LIGHT TAXI, Bool): frame 0 +0.0ms 1, frame 0 +0.0ms 0, frame 1 +15.0ms 1, frame 1 +15.0ms 1, frame 2 +28.9ms 1, frame 2 +28.9ms 1
+the taxi light back: 0
+
+=== The race: K:AP_ALT_HOLD then K:AP_PANEL_VS_HOLD 1 from vertical speed mode, unguarded, as state sync sent them
+race, SimConnect back to back: from ALT 0 VS 1 ends ALT 0 VS 0
+race, SimConnect back to back: from ALT 0 VS 1 ends ALT 0 VS 0
+race, SimConnect back to back: from ALT 0 VS 1 ends ALT 0 VS 0
+race, our module's calculator code, one call: from ALT 0 VS 1 ends ALT 0 VS 0
+race, our module's calculator code, one call: from ALT 0 VS 1 ends ALT 0 VS 0
+race, our module's calculator code, one call: from ALT 0 VS 1 ends ALT 0 VS 0
+race, our module's calculator code, two calls in one frame: from ALT 0 VS 1 ends ALT 0 VS 0
+race, our module's calculator code, two calls in one frame: from ALT 0 VS 1 ends ALT 0 VS 0
+race, our module's calculator code, two calls in one frame: from ALT 0 VS 1 ends ALT 0 VS 0
+race, our module's Events API, one frame: from ALT 0 VS 1 ends ALT 0 VS 0
+race, our module's Events API, one frame: from ALT 0 VS 1 ends ALT 0 VS 0
+race, our module's Events API, one frame: from ALT 0 VS 1 ends ALT 0 VS 0
+race, a panel, one call: from ALT 0 VS 1 ends ALT 0 VS 0
+race, a panel, one call: from ALT 0 VS 1 ends ALT 0 VS 0
+race, a panel, one call: from ALT 0 VS 1 ends ALT 0 VS 0
+
+=== The toggle guarded by its own variable in calculator code, after K:AP_ALT_HOLD; the guard's reading is the last value
+guarded, our module's calculator code, one call: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+guarded, our module's calculator code, one call: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+guarded, our module's calculator code, one call: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+guarded, our module's calculator code, two calls in one frame: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+guarded, our module's calculator code, two calls in one frame: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+guarded, our module's calculator code, two calls in one frame: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+guarded, our module's calculator code, the next frame: from ALT 0 VS 1 ends ALT 0 VS 0; frame 1 +13.1ms the guard read VS 1
+guarded, our module's calculator code, the next frame: from ALT 0 VS 1 ends ALT 0 VS 0; frame 1 +14.7ms the guard read VS 1
+guarded, our module's calculator code, the next frame: from ALT 0 VS 1 ends ALT 0 VS 0; frame 1 +15.1ms the guard read VS 1
+guarded, our module's Events API, then calculator code in one frame: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+guarded, our module's Events API, then calculator code in one frame: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+guarded, our module's Events API, then calculator code in one frame: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+guarded, SimConnect, then our module's calculator code: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+guarded, SimConnect, then our module's calculator code: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+guarded, SimConnect, then our module's calculator code: from ALT 0 VS 1 ends ALT 0 VS 0; frame 0 +0.0ms the guard read VS 1
+
+=== The order of two on and off events sent together, from vertical speed mode
+order, K:AP_ALT_HOLD_ON then K:AP_VS_OFF, SimConnect: from ALT 0 VS 1 ends ALT 0 VS 0
+order, K:AP_ALT_HOLD_ON then K:AP_VS_OFF, SimConnect: from ALT 0 VS 1 ends ALT 0 VS 0
+order, K:AP_ALT_HOLD_ON then K:AP_VS_OFF, our module's calculator code, one call: from ALT 0 VS 1 ends ALT 0 VS 0
+order, K:AP_ALT_HOLD_ON then K:AP_VS_OFF, our module's calculator code, one call: from ALT 0 VS 1 ends ALT 0 VS 0
+order, K:AP_ALT_HOLD_ON then K:AP_VS_OFF, a panel: from ALT 0 VS 1 ends ALT 0 VS 0
+order, K:AP_ALT_HOLD_ON then K:AP_VS_OFF, a panel: from ALT 0 VS 1 ends ALT 0 VS 0
+order, K:AP_VS_OFF then K:AP_ALT_HOLD_ON, SimConnect: from ALT 0 VS 1 ends ALT 1 VS 0
+order, K:AP_VS_OFF then K:AP_ALT_HOLD_ON, SimConnect: from ALT 0 VS 1 ends ALT 1 VS 0
+order, K:AP_VS_OFF then K:AP_ALT_HOLD_ON, our module's calculator code, one call: from ALT 0 VS 1 ends ALT 1 VS 0
+order, K:AP_VS_OFF then K:AP_ALT_HOLD_ON, our module's calculator code, one call: from ALT 0 VS 1 ends ALT 1 VS 0
+order, K:AP_VS_OFF then K:AP_ALT_HOLD_ON, a panel: from ALT 0 VS 1 ends ALT 1 VS 0
+order, K:AP_VS_OFF then K:AP_ALT_HOLD_ON, a panel: from ALT 0 VS 1 ends ALT 1 VS 0
+K:AP_VS_OFF alone from altitude hold, our module: from ALT 1 VS 0 ends ALT 0 VS 0
+K:AP_VS_OFF alone from altitude hold, our module: from ALT 1 VS 0 ends ALT 0 VS 0
+
+=== The other way: K:AP_PITCH_LEVELER_ON then K:AP_PANEL_VS_HOLD 1 from altitude hold, as state sync sends a press of VS
+VS pressed, SimConnect back to back: from ALT 1 VS 0 ends ALT 0 VS 1
+VS pressed, SimConnect back to back: from ALT 1 VS 0 ends ALT 0 VS 1
+
+=== Each trial's ends, by our module's reading
+visible, our module's calculator code: ALT 1 VS 0 2 of 2
+visible, our module's Events API: ALT 1 VS 0 2 of 2
+visible, SimConnect, its own frames: ALT 1 VS 0 2 of 2
+visible, SimConnect, then our module's frames: ALT 1 VS 0 2 of 2
+visible, a panel: ALT 1 VS 0 2 of 2
+race, SimConnect back to back: ALT 0 VS 0 3 of 3
+race, our module's calculator code, one call: ALT 0 VS 0 3 of 3
+race, our module's calculator code, two calls in one frame: ALT 0 VS 0 3 of 3
+race, our module's Events API, one frame: ALT 0 VS 0 3 of 3
+race, a panel, one call: ALT 0 VS 0 3 of 3
+guarded, our module's calculator code, one call: ALT 0 VS 0 3 of 3
+guarded, our module's calculator code, two calls in one frame: ALT 0 VS 0 3 of 3
+guarded, our module's calculator code, the next frame: ALT 0 VS 0 3 of 3
+guarded, our module's Events API, then calculator code in one frame: ALT 0 VS 0 3 of 3
+guarded, SimConnect, then our module's calculator code: ALT 0 VS 0 3 of 3
+order, K:AP_ALT_HOLD_ON then K:AP_VS_OFF, SimConnect: ALT 0 VS 0 2 of 2
+order, K:AP_ALT_HOLD_ON then K:AP_VS_OFF, our module's calculator code, one call: ALT 0 VS 0 2 of 2
+order, K:AP_ALT_HOLD_ON then K:AP_VS_OFF, a panel: ALT 0 VS 0 2 of 2
+order, K:AP_VS_OFF then K:AP_ALT_HOLD_ON, SimConnect: ALT 1 VS 0 2 of 2
+order, K:AP_VS_OFF then K:AP_ALT_HOLD_ON, our module's calculator code, one call: ALT 1 VS 0 2 of 2
+order, K:AP_VS_OFF then K:AP_ALT_HOLD_ON, a panel: ALT 1 VS 0 2 of 2
+K:AP_VS_OFF alone from altitude hold, our module: ALT 0 VS 0 2 of 2
+VS pressed, SimConnect back to back: ALT 0 VS 1 2 of 2
+
+the autopilot is back as it was: ALT 0 VS 0; that's every case

@@ -1,0 +1,41 @@
+Stage 14c, the state-sync scenario on the bench, on our development machine, 2026-11-19.
+
+With the hold taken out of the sync engine (write's check forced to write at once):
+
+ok 1 - a switch flipped on one core's aircraft moves on the other's, and nothing comes back
+ok 2 - a following machine never flags what the PF owns, and writes it at the old PF's last value as it takes control
+ok 3 - an input event is read once and then by its subscription, and written through its preset
+ok 4 - a K: event is heard through listen, and our own send of it uses up its token
+ok 5 - an H: event is heard in one panel and fired through our module, and its own firing isn't sent back
+ok 6 - an instrument() value is read in its panel and written through an H: event
+ok 7 - a pulse set and cleared within one frame never fires its event entry
+ok 8 - a press on a display that sets a variable the profile also syncs, the variable first, ends on one value
+not ok 9 - altitude hold and vertical speed mode changed in one frame leave the other machine in altitude hold, and nothing comes back
+ok 10 - a toggle over a lamp the stand-in lights 2s late flips once, and shows one notification
+ok 11 - Ready is denied until 30s after Ready to fly, and allowed then
+ok 12 - a late joiner catches up onto the aircraft, the battery before the APU master, and its queued copies drop
+# pass 11
+# fail 1
+
+The failing case's error:
+  error: "the PM's altitude hold: wanted 1, had 0"
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'fail'
+
+With the hold, after the code review's fixes:
+
+ok 1 - a switch flipped on one core's aircraft moves on the other's, and nothing comes back
+ok 2 - a following machine never flags what the PF owns, and writes it at the old PF's last value as it takes control
+ok 3 - an input event is read once and then by its subscription, and written through its preset
+ok 4 - a K: event is heard through listen, and our own send of it uses up its token
+ok 5 - an H: event is heard in one panel and fired through our module, and its own firing isn't sent back
+ok 6 - an instrument() value is read in its panel and written through an H: event
+ok 7 - a pulse set and cleared within one frame never fires its event entry
+ok 8 - a press on a display that sets a variable the profile also syncs, the variable first, ends on one value
+ok 9 - altitude hold and vertical speed mode changed in one frame leave the other machine in altitude hold, and nothing comes back
+ok 10 - a toggle over a lamp the stand-in lights 2s late flips once, and shows one notification
+ok 11 - Ready is denied until 30s after Ready to fly, and allowed then
+ok 12 - a late joiner catches up onto the aircraft, the battery before the APU master, and its queued copies drop
+# pass 12
+# fail 0

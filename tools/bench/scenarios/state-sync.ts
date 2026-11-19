@@ -63,6 +63,19 @@ state:
     name: ADF BFO
     watch: instrument('KR87A', 'bfoMode')
     write: {toggle: H('adf_bfo')}
+  alt_hold:
+    name: Altitude hold
+    watch: L('ALT_HOLD')
+    write: |
+      (value) => {
+        if (value == state.alt_hold) return
+        write(value ? K('AP_ALT_HOLD') : K('AP_PITCH_LEVELER_ON'))
+      }
+  vs_hold:
+    name: Vertical speed mode
+    watch: L('VS_HOLD')
+    write:
+      toggle: K('AP_PANEL_VS_HOLD', 1)
 events:
   ap_master:
     name: Autopilot master
@@ -331,6 +344,35 @@ test("a press on a display that sets a variable the profile also syncs, the vari
   await sleep(500)
   assert.equal(sent(pm, "beacon"), 0, "a click that lands on the written value sends nothing")
   assert.equal(await variable(pf, "L:BEACON"), 1)
+})
+
+test("altitude hold and vertical speed mode changed in one frame leave the other machine in altitude hold, and nothing comes back", { timeout: 120_000 }, async (t) => {
+  const { pf, pm } = await crew(t, "coupled")
+  // The PM's autopilot as the 58P's KFC 150 has it: altitude hold's event turns vertical speed
+  // mode off, and vertical speed mode's turns altitude hold off, each in the order sent
+  // (record/areas/sync/log.md, "No route showed an autopilot event's effect in the frame it was
+  // sent, so a guard in the sim reads the old mode, and the events of one frame apply in the
+  // order sent").
+  const rule = (event: string, then: { then: "flip"; name: string } | { then: "set"; name: string; value: number }) =>
+    pm.core.act({ act: "rule", when: { when: "sent", name: event }, after_ms: 0, then })
+  rule("AP_ALT_HOLD", { then: "flip", name: "L:ALT_HOLD" })
+  rule("AP_ALT_HOLD", { then: "set", name: "L:VS_HOLD", value: 0 })
+  rule("AP_PANEL_VS_HOLD", { then: "flip", name: "L:VS_HOLD" })
+  rule("AP_PANEL_VS_HOLD", { then: "set", name: "L:ALT_HOLD", value: 0 })
+  rule("AP_PITCH_LEVELER_ON", { then: "set", name: "L:ALT_HOLD", value: 0 })
+  setVariable(pf, "L:VS_HOLD", 1)
+  await settles("the PM's vertical speed mode", () => variable(pm, "L:VS_HOLD"), 1)
+  await sleep(500)
+  // The PF presses ALT: its autopilot turns altitude hold on and vertical speed mode off in one
+  // frame, and both changes reach the PM together.
+  pf.core.act({ act: "set", numbers: [["L:ALT_HOLD", 1], ["L:VS_HOLD", 0]], texts: [] })
+  await settles("the PM's altitude hold", () => variable(pm, "L:ALT_HOLD"), 1)
+  await sleep(2_000)
+  assert.equal(await variable(pm, "L:VS_HOLD"), 0, "the PM's vertical speed mode stays off")
+  assert.equal(await variable(pm, "L:ALT_HOLD"), 1, "the PM's altitude hold stays on")
+  assert.equal(await keysSent(pm, "AP_PANEL_VS_HOLD"), 1, "the PM toggled vertical speed mode once, to engage it")
+  assert.equal(sent(pm, "vs_hold") + sent(pm, "alt_hold"), 0, "the modes the PM's own autopilot changed don't go back")
+  assert.doesNotMatch(pm.core.log(), /a write never landed/, "every write landed")
 })
 
 test("a toggle over a lamp the stand-in lights 2s late flips once, and shows one notification", { timeout: 120_000 }, async (t) => {

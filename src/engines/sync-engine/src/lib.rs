@@ -13,7 +13,7 @@ mod runs;
 mod script;
 mod state;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 
 pub use messages::cockpit::{Origin, VectorClock};
 pub use messages::session::Control;
@@ -24,7 +24,7 @@ pub use sandbox::Sandbox;
 use crate::events::EventSlot;
 use crate::runs::Run;
 use crate::script::Script;
-use crate::state::StateSlot;
+use crate::state::{Held, StateSlot};
 
 /// A value still pending this long after its write, or after a stepping write's last step, is
 /// flagged. A profile watches the switch it writes, which shows a write within a few frames, as
@@ -135,7 +135,8 @@ pub enum Arrived {
 pub enum Applied {
     Done,
     Skipped,
-    /// Its write takes frames, and `Out::Stepped` says when its last step went.
+    /// Its write takes frames, or waits behind another entry's, and `Out::Stepped` says when
+    /// its last step went.
     Stepping,
 }
 
@@ -160,8 +161,8 @@ pub enum Out {
         name: String,
         why: Why,
     },
-    /// The entry's stepping write sent its last step, so the arrival that started it counts as
-    /// applied.
+    /// The entry's stepping write sent its last step, or its held write went, so the arrival
+    /// that started it counts as applied.
     Stepped(String),
     /// Every catch-up write is made, a stepping write's last step included.
     CatchUpMade,
@@ -270,6 +271,8 @@ pub struct Engine {
     pub(crate) pace: Pace,
     /// The write in progress for each entry that has one.
     pub(crate) runs: BTreeMap<Slot, Run>,
+    /// Writes held behind other entries' pending writes, in the order they came.
+    pub(crate) held: VecDeque<Held>,
     pub(crate) tokens: Vec<events::Token>,
     pub(crate) ignores: Vec<events::Token>,
     pub(crate) reports: Vec<events::Report>,
@@ -296,6 +299,7 @@ impl Engine {
             roles: Vec::new(),
             pace: profile.pace.unwrap_or(Pace::Frames(1)),
             runs: BTreeMap::new(),
+            held: VecDeque::new(),
             tokens: Vec::new(),
             ignores: Vec::new(),
             reports: Vec::new(),
@@ -400,6 +404,7 @@ impl Engine {
         self.reports
             .retain(|r| cx.at.saturating_sub(r.at) <= events::DOUBLE_FIRE_MOST);
         self.check(cx, &mut out);
+        self.release(cx, &mut out);
         self.settle(cx.at);
         self.catch_up_progress(&mut out);
         out

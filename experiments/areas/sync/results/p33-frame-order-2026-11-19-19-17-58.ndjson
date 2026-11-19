@@ -1,0 +1,4 @@
+{"t":1795115878301,"s":0.035,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1795115878313,"s":0.047,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1795115878314,"s":0.048,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1795115878314,"s":0.048,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}

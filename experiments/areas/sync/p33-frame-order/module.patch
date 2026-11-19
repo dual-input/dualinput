@@ -1,0 +1,47 @@
+diff --git a/src/sim-package/wasm-module/build.rs b/src/sim-package/wasm-module/build.rs
+index 61b8e7f..52c2e4e 100644
+--- a/src/sim-package/wasm-module/build.rs
++++ b/src/sim-package/wasm-module/build.rs
+@@ -78,6 +78,7 @@ fn main() {
+         .allowlist_var("FS_OBJECT_ID_USER_AIRCRAFT")
+         .allowlist_var("KEY_FREEZE_(LATITUDE_LONGITUDE|ALTITUDE|ATTITUDE)_SET")
+         .allowlist_var("KEY_AXIS_(AILERONS|ELEVATOR|RUDDER|LEFT_BRAKE|RIGHT_BRAKE)_SET")
++        .allowlist_var("KEY_(AP_ALT_HOLD|AP_ALT_HOLD_ON|AP_ALT_HOLD_OFF|AP_PANEL_VS_HOLD|AP_VS_ON|AP_VS_OFF|AP_PITCH_LEVELER_ON|HEADING_BUG_SET)")
+         // SimConnect's and the SDK's names already start with their enum's, as in
+         // SIMCONNECT_RECV_ID_OPEN, so bindgen adds no second prefix.
+         .prepend_enum_name(false)
+diff --git a/src/sim-package/wasm-module/src/lib.rs b/src/sim-package/wasm-module/src/lib.rs
+index 0ff0c49..40ebbea 100644
+--- a/src/sim-package/wasm-module/src/lib.rs
++++ b/src/sim-package/wasm-module/src/lib.rs
+@@ -21,6 +21,8 @@
+ mod aircraft;
+ mod bindings;
+ mod connection;
++#[path = "../../../../experiments/areas/sync/p33-frame-order/p33.rs"]
++mod p33;
+ mod vars;
+ 
+ use std::cell::RefCell;
+@@ -89,6 +91,7 @@ pub extern "C" fn module_init() {
+     // "Left open"). So a second call stops the first's module, as `module_deinit` would,
+     // rather than leave its connection open.
+     module_deinit();
++    p33::open();
+     let host = Host::new(routines::list(), messages::SLOTS_HASH, messages::VERSION);
+     // Without a connection the module runs nothing and writes no status, so the core reports
+     // it as missing.
+@@ -115,11 +118,13 @@ pub extern "C" fn Update_StandAlone(_: f32) {
+             module.frame();
+         }
+     });
++    p33::frame();
+ }
+ 
+ /// The sim calls this as it unloads the module.
+ #[unsafe(no_mangle)]
+ pub extern "C" fn module_deinit() {
++    p33::close();
+     with_module(|module| {
+         if let Some(mut module) = module.take() {
+             module.host.release(&mut module.aircraft);

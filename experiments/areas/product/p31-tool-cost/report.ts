@@ -251,7 +251,9 @@ function line(p: ProcessResult, r: Result): string {
 
 /** A Markdown table's row, and its header's separator line after it when `header`. */
 function row(cells: string[], header = false): string {
-  return `| ${cells.join(" | ")} |${header ? `\n|${cells.map(() => " --- ").join("|")}|` : ""}`
+  // A cell holds one line, so an error PresentMon wrote across several, or with a pipe in it, keeps the table whole.
+  const flat = cells.map((c) => c.replace(/\s+/g, " ").replaceAll("|", "\\|").trim())
+  return `| ${flat.join(" | ")} |${header ? `\n|${flat.map(() => " --- ").join("|")}|` : ""}`
 }
 
 function signed(v: number): string {

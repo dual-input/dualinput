@@ -1,0 +1,3 @@
+p31 pages: the sim's frame rate over 30s, Fri Nov 20 2026 17:12:39 GMT+0100 (Central European Standard Time)
+
+72.95 fps from 2189 frames' data, 13.71ms a frame; the Frame event's mean 72.18 fps over 2158; longest gap 42.0ms

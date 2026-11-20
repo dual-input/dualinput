@@ -1,0 +1,72 @@
+p31 pages: each document's animation-frame and timer callbacks over 20s, Fri Nov 20 2026 17:07:10 GMT+0100 (Central European Standard Time)
+
+ 19  VCockpit94 - bksq_wradar1                coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       49.26ms of callbacks a second: 29.9 frame callbacks a second, 49.26ms; 0.0 timers a second, 0.00ms; longest 6.60ms
+ 36  //42 Flow                                coui://html_UI/ingamePanels/P42Flow/P42Flow.html
+       44.03ms of callbacks a second: 358.7 frame callbacks a second, 44.03ms; 0.0 timers a second, 0.00ms; longest 4.20ms
+ 17  VCockpit96 - EDM760_1                    coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       7.67ms of callbacks a second: 29.9 frame callbacks a second, 7.67ms; 0.0 timers a second, 0.00ms; longest 0.60ms
+ 20  VCockpit93 - KNS81_1                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       5.44ms of callbacks a second: 29.9 frame callbacks a second, 5.44ms; 0.0 timers a second, 0.00ms; longest 1.00ms
+ 14  VCockpit99 - BlackSquareTablet           coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       2.86ms of callbacks a second: 29.9 frame callbacks a second, 2.86ms; 0.0 timers a second, 0.00ms; longest 7.10ms
+ 22  VCockpit91 - AS330                       coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       1.97ms of callbacks a second: 29.9 frame callbacks a second, 1.97ms; 0.0 timers a second, 0.00ms; longest 0.40ms
+ 24  VCockpit89 - KX155B_2                    coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       1.75ms of callbacks a second: 29.9 frame callbacks a second, 1.75ms; 0.0 timers a second, 0.00ms; longest 0.40ms
+ 18  VCockpit95 - KAS297B_1                   coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       1.69ms of callbacks a second: 29.9 frame callbacks a second, 1.69ms; 0.0 timers a second, 0.00ms; longest 0.60ms
+ 32  VCockpit81 - GTN750_INT                  coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_GTN750_1
+       1.65ms of callbacks a second: 59.8 frame callbacks a second, 1.65ms; 0.0 timers a second, 0.00ms; longest 2.60ms
+ 31  VCockpit82 - GTN650_INT_2                coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_GTN650_2
+       1.53ms of callbacks a second: 59.8 frame callbacks a second, 1.53ms; 0.0 timers a second, 0.00ms; longest 2.30ms
+ 15  VCockpit98 - WTT2                        coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_WTT
+       1.49ms of callbacks a second: 59.8 frame callbacks a second, 1.49ms; 0.0 timers a second, 0.00ms; longest 0.30ms
+ 16  VCockpit97 - WTT1                        coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_WTT
+       1.47ms of callbacks a second: 59.8 frame callbacks a second, 1.47ms; 0.0 timers a second, 0.00ms; longest 2.20ms
+ 21  VCockpit92 - KDI572R                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       1.24ms of callbacks a second: 29.9 frame callbacks a second, 1.24ms; 0.0 timers a second, 0.00ms; longest 7.00ms
+ 23  VCockpit90 - KR87A                       coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       1.21ms of callbacks a second: 29.9 frame callbacks a second, 1.21ms; 0.0 timers a second, 0.00ms; longest 0.30ms
+ 35  //42 CP Overlay (Reqd.)                  coui://html_UI/ingamePanels/P42ChasePlane/P42ChasePlane_overlay.html
+       1.13ms of callbacks a second: 119.7 frame callbacks a second, 1.13ms; 0.0 timers a second, 0.00ms; longest 1.50ms
+ 25  VCockpit88 - KX155B_1                    coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       0.94ms of callbacks a second: 29.9 frame callbacks a second, 0.94ms; 0.0 timers a second, 0.00ms; longest 0.40ms
+ 13  VCockpit100 - WeatherSquare4000_int      coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       0.67ms of callbacks a second: 29.9 frame callbacks a second, 0.67ms; 0.0 timers a second, 0.00ms; longest 0.30ms
+ 28  VCockpit85 - GNS_DISABLED                coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_AS530_1&guid=88&instrumentId=AS530&instrumentIdx=1&primary=true
+       0.67ms of callbacks a second: 59.8 frame callbacks a second, 0.67ms; 0.0 timers a second, 0.00ms; longest 1.20ms
+ 27  VCockpit86 - GNS_DISABLED                coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_AS430_1&guid=89&instrumentId=AS430&instrumentIdx=1&primary=false
+       0.51ms of callbacks a second: 59.8 frame callbacks a second, 0.51ms; 0.0 timers a second, 0.00ms; longest 0.70ms
+  9  Toolbar                                  coui://html_UI/Global/Panel.html
+       0.50ms of callbacks a second: 59.8 frame callbacks a second, 0.43ms; 1.9 timers a second, 0.07ms; longest 0.50ms
+ 30  VCockpit83 - WasmInstrument              coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       0.48ms of callbacks a second: 29.9 frame callbacks a second, 0.48ms; 0.0 timers a second, 0.00ms; longest 0.30ms
+ 29  VCockpit84 - WasmInstrument              coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       0.47ms of callbacks a second: 29.9 frame callbacks a second, 0.47ms; 0.0 timers a second, 0.00ms; longest 0.30ms
+ 26  VCockpit87 - KLN90B                      coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       0.42ms of callbacks a second: 29.9 frame callbacks a second, 0.42ms; 0.0 timers a second, 0.00ms; longest 0.40ms
+  6  VLivery01 - BksqBaronLiveryRegistration  coui://html_UI/Pages/VLivery/Core/VLivery.html
+       0.00ms of callbacks a second: 0.5 frame callbacks a second, 0.00ms; 0.0 timers a second, 0.00ms; longest 0.10ms
+  7  Electronic Flight Bag                    coui://html_ui/efb_ui/efb_os/efb_ui.html
+       0.00ms of callbacks a second: 0.2 frame callbacks a second, 0.00ms; 0.0 timers a second, 0.00ms; longest 0.10ms
+  0  atlas                                    coui://html_UI/Global/atlas.html
+       0.00ms of callbacks a second: 0.0 frame callbacks a second, 0.00ms; 0.0 timers a second, 0.00ms; longest 0.00ms
+  1  Shared Variables                         coui://html_UI/Global/sharedVariables.html
+       0.00ms of callbacks a second: 0.0 frame callbacks a second, 0.00ms; 0.0 timers a second, 0.00ms; longest 0.00ms
+  2  mainUi                                   coui://html_UI/Global/mainUI.html
+       0.00ms of callbacks a second: 0.0 frame callbacks a second, 0.00ms; 0.0 timers a second, 0.00ms; longest 0.00ms
+  3  notifications                            coui://html_UI/Global/notifications.html?type=POPUP|MESSAGE|OBJECTIVE|ACTION_STEP|SUBTITLES|STACKABLE&theme=SYSTEM|LOBBY
+       0.00ms of callbacks a second: 0.0 frame callbacks a second, 0.00ms; 0.0 timers a second, 0.00ms; longest 0.00ms
+  5  transition                               coui://html_UI/Global/transition.html
+       0.00ms of callbacks a second: 0.0 frame callbacks a second, 0.00ms; 0.0 timers a second, 0.00ms; longest 0.00ms
+  8  Mission Steps                            coui://html_UI/Global/Panel.html
+       0.00ms of callbacks a second: 0.0 frame callbacks a second, 0.00ms; 0.0 timers a second, 0.00ms; longest 0.00ms
+ 10  notifications                            coui://html_UI/Global/notifications.html?type=MESSAGE|STACKABLE|OVERLAY&theme=TIPS|GAMEPLAY|INFO|SCORE
+       0.00ms of callbacks a second: 0.0 frame callbacks a second, 0.00ms; 0.0 timers a second, 0.00ms; longest 0.00ms
+ 33  VLogic                                   coui://html_UI/Pages/VCockpit/Core/VCockpitLogic.html
+       0.00ms of callbacks a second: 0.0 frame callbacks a second, 0.00ms; 0.0 timers a second, 0.00ms; longest 0.00ms
+ 37  Dual Input                               coui://html_UI/InGamePanels/DualInput/banner.html
+       0.00ms of callbacks a second: 0.0 frame callbacks a second, 0.00ms; 0.0 timers a second, 0.00ms; longest 0.00ms
+
+every document together: 129.06ms of callbacks a second

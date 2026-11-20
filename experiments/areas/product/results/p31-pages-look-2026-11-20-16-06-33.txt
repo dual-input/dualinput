@@ -1,0 +1,86 @@
+p31 pages: what each of the sim's documents holds of ours, Fri Nov 20 2026 17:06:27 GMT+0100 (Central European Standard Time)
+
+  0  atlas                                    coui://html_UI/Global/atlas.html
+       ours: none; 3 scripts; visible; body 3440x1440; 46 elements; canvases 0 shown of 0
+  1  Shared Variables                         coui://html_UI/Global/sharedVariables.html
+       ours: none; 1 scripts; visible; body 0x0; 8 elements; canvases 0 shown of 0
+  2  mainUi                                   coui://html_UI/Global/mainUI.html
+       ours: DualInput/menu.js; 5 scripts; visible; body 3440x1440; 61 elements; canvases 0 shown of 0
+  3  notifications                            coui://html_UI/Global/notifications.html?type=POPUP|MESSAGE|OBJECTIVE|ACTION_STEP|SUBTITLES|STACKABLE&theme=SYSTEM|LOBBY
+       ours: none; 1 scripts; visible; body 3440x1440; 607 elements; canvases 0 shown of 0
+  5  transition                               coui://html_UI/Global/transition.html
+       ours: none; 1 scripts; visible; body 3440x1440; 38 elements; canvases 0 shown of 0
+  6  VLivery01 - BksqBaronLiveryRegistration  coui://html_UI/Pages/VLivery/Core/VLivery.html
+       ours: none; 9 scripts; visible; body 3072x3072; 27 elements; canvases 0 shown of 0
+       text: N515MRN515MR
+  7  Electronic Flight Bag                    coui://html_ui/efb_ui/efb_os/efb_ui.html
+       ours: efb_ui/efb_apps/dualinput/dualinput.js?t=1795190727569; 29 scripts; visible; body 782x0; 461 elements; canvases 0 shown of 0
+       text: 0 June 21, Sunday 2026 18:01 Settings Flight Planner GSX Aircraft CIVA INS Dual Input Ground Services IniJetways Navigraph Charts Pilot book SayIntentions.AI 
+  8  Mission Steps                            coui://html_UI/Global/Panel.html
+       ours: none; 1 scripts; visible; body 519x82; 229 elements; canvases 0 shown of 0
+       text: Mission Steps 
+  9  Toolbar                                  coui://html_UI/Global/Panel.html
+       ours: none; 59 scripts; visible; body 1224x216; 847 elements; canvases 0 shown of 0
+ 10  notifications                            coui://html_UI/Global/notifications.html?type=MESSAGE|STACKABLE|OVERLAY&theme=TIPS|GAMEPLAY|INFO|SCORE
+       ours: none; 1 scripts; visible; body 3440x1440; 153 elements; canvases 0 shown of 0
+ 13  VCockpit100 - WeatherSquare4000_int      coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js, DualInput/modules/h-events.js; 17 scripts; visible; body 512x374; 35 elements; canvases 0 shown of 0
+       text: Black Square's WeatherSquare 4000 package not found. You should not be seeing this message.
+ 14  VCockpit99 - BlackSquareTablet           coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js, DualInput/modules/pointer-sync.js; 20 scripts; visible; body 700x1024; 5129 elements; canvases 0 shown of 0
+       text: Options Payload L Eng R Eng Elec Cabin Failures Avionics Selection Primary KX 155B KLN 90B GNS 530 GTN 750 Secondary KX 155B GNS 430 GTN 650 PMS50 GTN TDS GTNxi
+ 15  VCockpit98 - WTT2                        coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_WTT
+       ours: DualInput/bridge.js; 29 scripts; visible; body 100x100; 52 elements; canvases 0 shown of 0
+ 16  VCockpit97 - WTT1                        coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_WTT
+       ours: DualInput/bridge.js; 29 scripts; visible; body 100x100; 60 elements; canvases 0 shown of 0
+       text: Engine KEY2 Map Opt KEY4 KEY5 KEY6 KEY7 KEY8 KEY9 Detail Charts Checklist 
+ 17  VCockpit96 - EDM760_1                    coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js; 17 scripts; visible; body 455x525; 80 elements; canvases 0 shown of 0
+       text: L R P°F1 2 3 4 5 6 T1 2 3 4 5 6 T FUEL LOW 11.5 GAL
+ 18  VCockpit95 - KAS297B_1                   coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js, DualInput/modules/instrument-reads.js; 17 scripts; visible; body 350x216; 44 elements; canvases 0 shown of 0
+       text: FT 0
+ 19  VCockpit94 - bksq_wradar1                coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js, DualInput/modules/instrument-reads.js; 143 scripts; visible; body 512x374; 380 elements; canvases 1 shown of 2
+       text: ACTIVE FAILURES 8 ACTIVE FAILURESRESET ALL FAILURES > 60 n m STAB-OFF WX D 3.0 15 30 45 60
+ 20  VCockpit93 - KNS81_1                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js; 17 scripts; visible; body 1024x94; 48 elements; canvases 0 shown of 0
+       text: RNVWPT>FRQ< RAD DST 1 113.00 285.0 5.0
+ 21  VCockpit92 - KDI572R                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js; 16 scripts; visible; body 256x52; 45 elements; canvases 0 shown of 0
+ 22  VCockpit91 - AS330                       coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js; 16 scripts; visible; body 440x100; 81 elements; canvases 0 shown of 0
+       text: ALT R 7 0 0 0 PRESSURE ALTFL 002
+ 23  VCockpit90 - KR87A                       coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js, DualInput/modules/instrument-reads.js; 17 scripts; visible; body 500x70; 44 elements; canvases 0 shown of 0
+       text: ADF 890 FRQ 1400 
+ 24  VCockpit89 - KX155B_2                    coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js; 16 scripts; visible; body 800x110; 42 elements; canvases 0 shown of 0
+       text: 124.85 124.85 110.50 113.90
+ 25  VCockpit88 - KX155B_1                    coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js; 16 scripts; visible; body 800x110; 42 elements; canvases 0 shown of 0
+ 26  VCockpit87 - KLN90B                      coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js; 17 scripts; visible; body 860x388; 33 elements; canvases 0 shown of 0
+       text: KLN 90B package not found. Get it from https://github.com/falcon71/kln90b
+ 27  VCockpit86 - GNS_DISABLED                coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_AS430_1&guid=89&instrumentId=AS430&instrumentIdx=1&primary=false
+       ours: DualInput/bridge.js; 25 scripts; visible; body 350x190; 38 elements; canvases 0 shown of 0
+ 28  VCockpit85 - GNS_DISABLED                coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_AS530_1&guid=88&instrumentId=AS530&instrumentIdx=1&primary=true
+       ours: DualInput/bridge.js; 25 scripts; visible; body 320x234; 38 elements; canvases 0 shown of 0
+ 29  VCockpit84 - WasmInstrument              coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js; 18 scripts; visible; body 650x287; 33 elements; canvases 0 shown of 0
+ 30  VCockpit83 - WasmInstrument              coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+       ours: DualInput/bridge.js; 18 scripts; visible; body 650x768; 33 elements; canvases 0 shown of 0
+ 31  VCockpit82 - GTN650_INT_2                coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_GTN650_2
+       ours: DualInput/bridge.js; 182 scripts; visible; body 650x287; 3672 elements; canvases 0 shown of 5
+       text:  Com Vol Psh Sq But2 MSG But1 COM 888.888 STBY 888.888 XPDR 1200 ON Enter Left Right 
+ 32  VCockpit81 - GTN750_INT                  coui://html_ui/Pages/VCockpit/Core/VCockpit.html?id=L%3AXMLVAR_GPS_DISABLED_GTN750_1
+       ours: DualInput/bridge.js; 182 scripts; visible; body 650x768; 3754 elements; canvases 0 shown of 5
+ 33  VLogic                                   coui://html_UI/Pages/VCockpit/Core/VCockpitLogic.html
+       ours: none; 9 scripts; visible; body 0x0; 16 elements; canvases 0 shown of 0
+ 35  //42 CP Overlay (Reqd.)                  coui://html_UI/ingamePanels/P42ChasePlane/P42ChasePlane_overlay.html
+       ours: none; 31 scripts; visible; body 3440x1440; 138 elements; canvases 0 shown of 0
+ 36  //42 Flow                                coui://html_UI/ingamePanels/P42Flow/P42Flow.html
+       ours: none; 45 scripts; visible; body 3440x1440; 366 elements; canvases 0 shown of 0
+       text:  Static Wheel S1 For all aircraft Search 
+ 37  Dual Input                               coui://html_UI/InGamePanels/DualInput/banner.html
+       ours: InGamePanels/DualInput/banner.js; 12 scripts; visible; body 480x520; 33 elements; canvases 0 shown of 0

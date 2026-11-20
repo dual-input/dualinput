@@ -451,8 +451,9 @@ impl CoreHelper {
             error,
             "the core helper couldn't carry out a want"
         );
-        // A pilot knows a binding by what it does and its key by its name, and the helper's own
-        // words stay in the log, as a pilot can do nothing with them.
+        // A pilot knows a binding by what it does and its key by its name, so a bound key's
+        // warning names the key and leaves the helper's own words to the log. Any other want's
+        // warning carries the helper's words as its detail.
         let bound = match want {
             WantId::Binding(n) => self.bindings.iter().find(|b| b.number == n).and_then(|b| {
                 cx.read::<Clients>()

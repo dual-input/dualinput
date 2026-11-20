@@ -43,7 +43,7 @@ pub const NAMED_EVENTS: RoutineId = RoutineId {
 pub enum NamedEvent {
     /// An `H:` event, its name with no `H:`, as an instrument receives it: the L-1011's engineer
     /// panel answers `onInteractionEvent("FUEL")` for `H:FUEL` (read in inibuilds-aircraft-l1011
-    /// 1.0.8, record/areas/aircraft/inibuilds-l1011/study.md).
+    /// 1.0.8, html_ui/Pages/VCockpit/Instruments/L1011_COCKPIT/ENGINEER_PANEL/L1011_ENGINEER_PANEL.js).
     H(String),
     /// An input event's preset, its name with no `B:`, with the value `_Set` takes.
     Preset { name: String, value: Option<f64> },

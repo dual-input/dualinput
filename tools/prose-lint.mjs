@@ -26,9 +26,8 @@ const CODE_FILE = /\.(?:[cm]?[jt]sx?|cpp|cc|h|hpp|rs|json)$/i
 const HASH_FILE = /\.toml$/i
 const SKIPPED = /(?:^|\/)node_modules\/|^\.claude\/worktrees\//
 // A comment that tells the code's history goes stale, and git keeps the history anyway, so
-// writing.md's Code comments rules it out. The pattern comes from Afterfund's prose-lint
-// (AfterfundTech/afterfund, .claude/hooks/prose-lint.mjs), without its bare "now" and "used to".
-// In our probes' comments, the five such hits we checked meant the moment the code runs, a purpose
+// writing.md's Code comments rules it out. The pattern leaves out a bare "now" and "used to": in
+// our probes' comments, the five such hits we checked meant the moment the code runs, a purpose
 // ("used to tell"), or a variable named NOW.
 const HISTORY = /(?<![.\w])(?:previously|no longer|used to be|for now|we changed|was changed)(?![\w(])/gi
 
@@ -150,7 +149,7 @@ function scan(text) {
 // with comments, such as a tsconfig. It skips strings, so a `//` inside one isn't read as a
 // comment. Three things fool it: a regex literal, whose `//` can read as a comment; a Rust
 // lifetime such as `'a`, which reads as an unclosed quote and hides the rest of its line; and a
-// Rust string that spans lines, whose later lines read as code. Taken from Afterfund's prose-lint.
+// Rust string that spans lines, whose later lines read as code.
 function scanComments(text) {
   const out = []
   let state = 'code'

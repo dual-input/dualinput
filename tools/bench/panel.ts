@@ -16,7 +16,7 @@ import { asDocument, asElement, type FakeElement, FakeDocument, type Heard } fro
 import type { Core } from "./cores.ts"
 import { FakePage } from "./pages.ts"
 
-/** The Baron 58P's tablet (read in bksq-aircraft-baronpro 0.1.1, record/areas/aircraft/black-square-baron-pro/study.md). */
+/** The Baron 58P's tablet, as `displays` in profiles/aircraft/bksq-baronpro.yaml names it, so change both together. */
 export const TABLET = "BlackSquareTablet"
 
 const WIDTH = 800

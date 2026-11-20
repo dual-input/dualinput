@@ -497,7 +497,8 @@ async function a350(c: Flight): Promise<void> {
 /**
  * The flight engineer's script acts only on `H:FUEL`, so the switch's variable moving says our
  * `L:` write landed, and the pump's own switch moving says our module's `H:FUEL` reached the
- * aircraft (read in inibuilds-aircraft-l1011 1.0.8, record/areas/aircraft/inibuilds-l1011/study.md).
+ * aircraft (read in inibuilds-aircraft-l1011 1.0.8,
+ * html_ui/Pages/VCockpit/Instruments/L1011_COCKPIT/ENGINEER_PANEL/L1011_ENGINEER_PANEL.js).
  */
 async function l1011(c: Flight): Promise<void> {
   const want = (await readSim("L:SWITCH_FUEL_PUMP_1_1")) === 1 ? 0 : 1

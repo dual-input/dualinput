@@ -1,6 +1,7 @@
 # The L-1011's fuel pump, for state sync's cases in the sim (record/areas/sync/05-units.md): its
 # click flips the switch and fires `H:FUEL`, and the flight engineer's script acts only on the
-# event (read in inibuilds-aircraft-l1011 1.0.8, record/areas/aircraft/inibuilds-l1011/study.md).
+# event (read in inibuilds-aircraft-l1011 1.0.8,
+# html_ui/Pages/VCockpit/Instruments/L1011_COCKPIT/ENGINEER_PANEL/L1011_ENGINEER_PANEL.js).
 maker: iniBuilds
 name: L-1011 session check
 maturity: experimental

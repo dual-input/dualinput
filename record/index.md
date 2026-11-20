@@ -41,6 +41,7 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/product/02-users.md](areas/product/02-users.md): the kinds of pilots Dual Input is designed for, and the problems each runs into.
 - [areas/product/03-v1-scope.md](areas/product/03-v1-scope.md): what each v1 feature does, where v1 stops, and the rules for its behavior.
 - [areas/product/04-room-for-later.md](areas/product/04-room-for-later.md): what each feature after v1 needs from what v1 builds, and what v1 builds so it slots in without rework.
+- [areas/product/log.md](areas/product/log.md): what we found about Dual Input as a whole, such as what it costs the PC that runs the sim against FS Copilot.
 - [decisions/001-changing-other-developers-packages.md](decisions/001-changing-other-developers-packages.md): Dual Input's own features never change another developer's package, and an aircraft's plugin may, on the pilot's machine.
 - [decisions/002-core-starts-with-every-sim-run.md](decisions/002-core-starts-with-every-sim-run.md): The core starts with every sim run.
 - [decisions/003-watcher-keeps-blurpage-copy-current.md](decisions/003-watcher-keeps-blurpage-copy-current.md): The watcher keeps the BlurPage copy current.

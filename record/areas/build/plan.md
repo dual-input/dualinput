@@ -938,6 +938,33 @@ The stage changes the core's edge, so it closes on the whole bench.
 Exit: on our development machine, `node tools/check.ts` and the whole `node tools/bench.ts` pass, the log's tests among them.
 Done on 2026-11-18: the whole bench passed 182 of 182, and after the code review's fixes the seven scenarios they touched passed 60 of 60; the stall itself didn't come in these runs, so they show the loop can't wait on a held write, not that the stall is gone ([core log](../core/log.md#2026-11-18-windows-held-a-cores-early-writes-to-its-log-for-up-to-49ms-on-the-loops-thread-so-the-log-gets-a-writer-of-its-own)).
 
+## 21b Code comments
+
+Designs first: one pass over every comment in the tree as it stands, since nothing has read them the way the `doc-reviewer` reads a document: prose-lint checks words and history only, and each stage's code review weighed comments as one of eight things (user, 2026-11-20).
+Each chunk below goes to an agent of its own, and no two chunks share a file.
+Each agent fixes, most costly first: a comment its code no longer matches, plan or status left in a comment, a workaround for sim behavior with no source cited, and anything else writing.md's [Code comments](../../../.claude/rules/writing.md#code-comments) rules out, skipping matters of taste.
+A bug a comment exposes goes to the user rather than into this stage's diff, so the stage changes only comments.
+A generated file's comments are fixed at their source: the message crate's TypeScript types come from its Rust, `levels/1/declarations.d.ts` from the profile builder, and `javascript.d.ts` from `tools/javascript-types.ts`.
+The stage changes no behavior, so it runs no bench, and its close runs no code review, since the chunks' review is one (user, 2026-11-20).
+
+Builds: the comments' fixes, chunk by chunk, each with its comment lines as of 2026-11-20:
+
+1. the sim side of `src/engines/`: `sync-engine`, `aircraft-model`, `stand-in-sim`, `sim-client`, `sim-edge`, `sim-awareness`, `simconnect-types`, `object-mirror`, `ray-cast`, `msfs-gltf`, and `msfs-rpn`, 2,131 lines
+2. `tools/`, outside `tools/bench/`, 1,995 lines
+3. `src/features/`, 1,811 lines
+4. `src/platform/`'s `sim-service`, `session`, `network`, `kernel`, `routine-host`, and `recording`, 1,714 lines
+5. `src/apps/desktop`, `src/platform/efb-shell`, `src/platform/desktop-shell`, and `src/packages/`, 1,677 lines
+6. the message crate's Rust, in `src/engines/messages`, 1,383 lines
+7. the rest of `src/engines/`, with `src/sim-package/`, `src/backend/`, and `src/relays/`, 1,275 lines
+8. `tools/bench/`, 1,248 lines
+9. `src/apps/core` and `src/apps/core-helper`, 1,144 lines
+10. the rest of `src/platform/`, 993 lines
+
+Needs: every stage before 22.
+Tests: none, since it changes no behavior.
+
+Exit: on our development machine, `node tools/check.ts` passes, and every chunk has been read and fixed.
+
 ## 22 GitHub
 
 Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)): CI's workflows for each pull request and each merge to `main` ([CI](../architecture/02-code-map.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green)), the release workflow with the check before a release ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)), the profiles' workflow and their Pages site ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)), `tools/replay.ts`, which fetches the core a recording's release shipped ([running a replay](../core/01-loop-and-edge.md#running-a-replay)), and the repositories of ours beside this one, the Coherent GT check's and the one that holds the relays' tokens ([the build](01-the-build.md)).

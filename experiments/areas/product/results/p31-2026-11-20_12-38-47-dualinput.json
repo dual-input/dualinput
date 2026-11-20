@@ -1,0 +1,459 @@
+{
+  "probe": "p31",
+  "mode": "dualinput",
+  "label": "Dual Input",
+  "dry": false,
+  "commit": "933d7b9",
+  "fsc": null,
+  "simVersion": "1,9,24,0",
+  "loaded": [
+    "pressed Start",
+    "pressed Free flight",
+    "set SEGS, the runway 14 , the 58P, and the livery N515MR, and pressed Fly",
+    "pressed Ready to fly",
+    "in the flight",
+    "the local time reads 12:00 after setting 12:00",
+    "the camera is in the cockpit"
+  ],
+  "measured": {
+    "started": "2026-11-20T12:42:40.317Z",
+    "seconds": 300,
+    "frames": {
+      "frames": 21759,
+      "fps": 72.53274077049866,
+      "p50": 13.7026,
+      "p95": 14.9718,
+      "p99": 15.9214,
+      "max": 74.59960000000001,
+      "over50ms": 1,
+      "minuteP50": [
+        13.5844,
+        13.6993,
+        13.7475,
+        13.7288,
+        13.7427
+      ],
+      "others": {
+        "MsInPresentAPI": 0.2362,
+        "MsCPUBusy": 13.4588
+      },
+      "column": "MsBetweenPresents"
+    },
+    "processes": [
+      {
+        "role": "the sim",
+        "pid": 16836,
+        "name": "FlightSimulator2024.exe",
+        "cpuPercent": 565.2825435442753,
+        "workingSetMeanMB": 9278.894022902397,
+        "workingSetMaxMB": 9334.765625,
+        "privateMeanMB": 18818.274454195205,
+        "privateMaxMB": 19417.97265625,
+        "exited": false
+      },
+      {
+        "role": "harness: this script",
+        "pid": 13952,
+        "name": "node.exe",
+        "cpuPercent": 0.3103248329077864,
+        "workingSetMeanMB": 81.41427654109589,
+        "workingSetMaxMB": 81.4296875,
+        "privateMeanMB": 85.0234375,
+        "privateMaxMB": 85.0234375,
+        "exited": false
+      },
+      {
+        "role": "harness: powershell.exe",
+        "pid": 28868,
+        "name": "powershell.exe",
+        "cpuPercent": 1.7533353059289931,
+        "workingSetMeanMB": 121.47854238013699,
+        "workingSetMaxMB": 121.49609375,
+        "privateMeanMB": 104.04130993150685,
+        "privateMaxMB": 104.07421875,
+        "exited": false
+      },
+      {
+        "role": "harness: powershell.exe",
+        "pid": 24752,
+        "name": "powershell.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 81.13479238013699,
+        "workingSetMaxMB": 81.15234375,
+        "privateMeanMB": 61.934128852739725,
+        "privateMaxMB": 61.96484375,
+        "exited": false
+      },
+      {
+        "role": "harness: powershell.exe",
+        "pid": 30736,
+        "name": "powershell.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 67.41213613013699,
+        "workingSetMaxMB": 67.4296875,
+        "privateMeanMB": 52.08818493150685,
+        "privateMaxMB": 52.12109375,
+        "exited": false
+      },
+      {
+        "role": "network: the bench relay",
+        "pid": 29560,
+        "name": "bench-relay.exe",
+        "cpuPercent": 2.1308971859668,
+        "workingSetMeanMB": 11.072238869863014,
+        "workingSetMaxMB": 11.17578125,
+        "privateMeanMB": 36.94162029109589,
+        "privateMaxMB": 37.0078125,
+        "exited": false
+      },
+      {
+        "role": "network: the local backend's node.exe",
+        "pid": 21932,
+        "name": "node.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 45.93881100171233,
+        "workingSetMaxMB": 45.98046875,
+        "privateMeanMB": 16.147741866438356,
+        "privateMaxMB": 16.19140625,
+        "exited": false
+      },
+      {
+        "role": "second pilot: its stand-in sim's process",
+        "pid": 28604,
+        "name": "PING.EXE",
+        "cpuPercent": 0.03620456383924175,
+        "workingSetMeanMB": 5.549497003424658,
+        "workingSetMaxMB": 5.5703125,
+        "privateMeanMB": 1.1397153253424657,
+        "privateMaxMB": 1.140625,
+        "exited": false
+      },
+      {
+        "role": "second pilot: the bench core",
+        "pid": 29148,
+        "name": "dualinput-core.exe",
+        "cpuPercent": 4.742797862940669,
+        "workingSetMeanMB": 102.51185252568493,
+        "workingSetMaxMB": 130.76953125,
+        "privateMeanMB": 81.40678510273973,
+        "privateMaxMB": 110.5078125,
+        "exited": false
+      },
+      {
+        "role": "pilot: Dual Input's core",
+        "pid": 3240,
+        "name": "dualinput-core.exe",
+        "cpuPercent": 3.6514888672149532,
+        "workingSetMeanMB": 63.195981378424655,
+        "workingSetMaxMB": 63.5078125,
+        "privateMeanMB": 43.177841395547944,
+        "privateMaxMB": 43.45703125,
+        "exited": false
+      },
+      {
+        "role": "network: the local backend's node.exe",
+        "pid": 16832,
+        "name": "node.exe",
+        "cpuPercent": 0.11378577206618837,
+        "workingSetMeanMB": 156.32210509417808,
+        "workingSetMaxMB": 156.58984375,
+        "privateMeanMB": 156.74673587328766,
+        "privateMaxMB": 158.046875,
+        "exited": false
+      },
+      {
+        "role": "second pilot: the bench core's stand-in-core-helper.exe",
+        "pid": 30008,
+        "name": "stand-in-core-helper.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 4.607662671232877,
+        "workingSetMaxMB": 4.69921875,
+        "privateMeanMB": 0.750267551369863,
+        "privateMaxMB": 0.80078125,
+        "exited": false
+      },
+      {
+        "role": "pilot: the core's dualinput-core-helper.exe",
+        "pid": 24768,
+        "name": "dualinput-core-helper.exe",
+        "cpuPercent": 0.06206496658155729,
+        "workingSetMeanMB": 11.836231806506849,
+        "workingSetMaxMB": 11.9765625,
+        "privateMeanMB": 2.395681720890411,
+        "privateMaxMB": 2.453125,
+        "exited": false
+      },
+      {
+        "role": "network: the local backend's esbuild.exe",
+        "pid": 28476,
+        "name": "esbuild.exe",
+        "cpuPercent": 3.1032483290778643,
+        "workingSetMeanMB": 20.064506635273972,
+        "workingSetMaxMB": 20.71875,
+        "privateMeanMB": 56.50864190924658,
+        "privateMaxMB": 57.1328125,
+        "exited": false
+      },
+      {
+        "role": "network: the local backend's workerd.exe",
+        "pid": 27920,
+        "name": "workerd.exe",
+        "cpuPercent": 0.031032483290778644,
+        "workingSetMeanMB": 60.28371147260274,
+        "workingSetMaxMB": 61.12109375,
+        "privateMeanMB": 54.070339255136986,
+        "privateMaxMB": 55.5546875,
+        "exited": false
+      },
+      {
+        "role": "network: the local backend's workerd.exe",
+        "pid": 20516,
+        "name": "workerd.exe",
+        "cpuPercent": 0.0051720805484631064,
+        "workingSetMeanMB": 91.84417808219177,
+        "workingSetMaxMB": 92.046875,
+        "privateMeanMB": 91.64867829623287,
+        "privateMaxMB": 91.7890625,
+        "exited": false
+      },
+      {
+        "role": "harness: conhost.exe",
+        "pid": 22360,
+        "name": "conhost.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 7.474876926369863,
+        "workingSetMaxMB": 7.5234375,
+        "privateMeanMB": 1.186242508561644,
+        "privateMaxMB": 1.23828125,
+        "exited": false
+      },
+      {
+        "role": "harness: conhost.exe",
+        "pid": 8628,
+        "name": "conhost.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 7.473565924657534,
+        "workingSetMaxMB": 7.51953125,
+        "privateMeanMB": 1.178430008561644,
+        "privateMaxMB": 1.23046875,
+        "exited": false
+      },
+      {
+        "role": "harness: its powershell.exe",
+        "pid": 29540,
+        "name": "powershell.exe",
+        "cpuPercent": 0,
+        "workingSetMeanMB": 78.86745505136986,
+        "workingSetMaxMB": 78.88671875,
+        "privateMeanMB": 61.64988227739726,
+        "privateMaxMB": 61.68359375,
+        "exited": false
+      },
+      {
+        "role": "harness: its WindowsTerminal.exe",
+        "pid": 7632,
+        "name": "WindowsTerminal.exe",
+        "cpuPercent": 0.031032483290778644,
+        "workingSetMeanMB": 107.64934717465754,
+        "workingSetMaxMB": 107.921875,
+        "privateMeanMB": 75.53569135273973,
+        "privateMaxMB": 75.79296875,
+        "exited": false
+      }
+    ],
+    "network": {
+      "3100": {
+        "sent": 717,
+        "received": 10002
+      },
+      "3240": {
+        "sent": 1950366,
+        "received": 671725
+      },
+      "3268": {
+        "sent": 1360,
+        "received": 8554
+      },
+      "5304": {
+        "sent": 515,
+        "received": 865
+      },
+      "5516": {
+        "sent": 19073,
+        "received": 8442
+      },
+      "8092": {
+        "sent": 1367,
+        "received": 1409
+      },
+      "8520": {
+        "sent": 542,
+        "received": 5734
+      },
+      "9528": {
+        "sent": 13480,
+        "received": 11892
+      },
+      "10564": {
+        "sent": 0,
+        "received": 3871
+      },
+      "11656": {
+        "sent": 2040,
+        "received": 0
+      },
+      "12976": {
+        "sent": 20326,
+        "received": 24158
+      },
+      "13952": {
+        "sent": 5719,
+        "received": 3532702
+      },
+      "16832": {
+        "sent": 5460,
+        "received": 24593
+      },
+      "16836": {
+        "sent": 216091,
+        "received": 34831597
+      },
+      "18196": {
+        "sent": 33830500,
+        "received": 30
+      },
+      "19236": {
+        "sent": 11211,
+        "received": 1156952
+      },
+      "19540": {
+        "sent": 48056,
+        "received": 18001
+      },
+      "20340": {
+        "sent": 716,
+        "received": 993
+      },
+      "20516": {
+        "sent": 2790,
+        "received": 3510
+      },
+      "21844": {
+        "sent": 18387,
+        "received": 4545
+      },
+      "21952": {
+        "sent": 11643,
+        "received": 10097
+      },
+      "24808": {
+        "sent": 26338,
+        "received": 7364
+      },
+      "26388": {
+        "sent": 75184,
+        "received": 27387
+      },
+      "27436": {
+        "sent": 64380,
+        "received": 286680
+      },
+      "27920": {
+        "sent": 29303,
+        "received": 8790
+      },
+      "29148": {
+        "sent": 4209083,
+        "received": 1805747
+      },
+      "29560": {
+        "sent": 7434675,
+        "received": 7526319
+      },
+      "31724": {
+        "sent": 1158376,
+        "received": 1097646
+      }
+    },
+    "focus": 1,
+    "busiest": [
+      {
+        "pid": 16836,
+        "name": "FlightSimulator2024",
+        "cpuPercent": 565.2825435442753
+      },
+      {
+        "pid": 31724,
+        "name": "gtn_simulator",
+        "cpuPercent": 40.64738103037156
+      },
+      {
+        "pid": 5516,
+        "name": "MsMpEng",
+        "cpuPercent": 15.428316276065448
+      },
+      {
+        "pid": 1192,
+        "name": "dwm",
+        "cpuPercent": 8.642546596481852
+      },
+      {
+        "pid": 3164,
+        "name": "platform_runtime_IS5LEYETRACKER5_service",
+        "cpuPercent": 7.830529950373144
+      },
+      {
+        "pid": 4,
+        "name": "System",
+        "cpuPercent": 7.60813048678923
+      },
+      {
+        "pid": 29148,
+        "name": "dualinput-core",
+        "cpuPercent": 4.742797862940669
+      },
+      {
+        "pid": 18196,
+        "name": "FlowShare",
+        "cpuPercent": 4.246278130288211
+      },
+      {
+        "pid": 3240,
+        "name": "dualinput-core",
+        "cpuPercent": 3.6514888672149532
+      },
+      {
+        "pid": 28476,
+        "name": "esbuild",
+        "cpuPercent": 3.1032483290778643
+      },
+      {
+        "pid": 21844,
+        "name": "CP MSFS Bridge",
+        "cpuPercent": 2.21365047474221
+      },
+      {
+        "pid": 29560,
+        "name": "bench-relay",
+        "cpuPercent": 2.1308971859668
+      }
+    ],
+    "pcCpuPercent": 42.8513338540854,
+    "logicalCores": 16
+  },
+  "relayBytes": {
+    "3240": {
+      "bytes": 4389545,
+      "busiestSecond": 28727,
+      "seconds": 493.709
+    },
+    "29148": {
+      "bytes": 2910896,
+      "busiestSecond": 26664,
+      "seconds": 493.709
+    }
+  },
+  "notes": [
+    "in the 10s before the window, processes outside the run used gtn_simulator 35%, MsMpEng 16% of one core"
+  ]
+}

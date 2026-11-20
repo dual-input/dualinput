@@ -59,8 +59,10 @@ fn main() {
             .unwrap_or_else(|| panic!("the figure's spec should give a number at {at}"));
         writeln!(out, "pub(crate) const {name}: f32 = {value:?};").expect("a String takes writes");
     }
-    // A whole number here, so `Figure` turns no float into an integer, which the sim's module
-    // check refuses unless the compiler happens to fold it.
+    // A whole number here, so `Figure` turns no float into an integer, which cargo-msfs's check
+    // of the module refuses unless the compiler happens to fold it
+    // (record/areas/flight-model/log.md, "On the bench a following aircraft keeps to the flying
+    // one's path 400ms behind, and samples that arrive together after a gap made `Follow` jump").
     let segments = spec
         .pointer("/knee/segments")
         .and_then(serde_json::Value::as_u64)

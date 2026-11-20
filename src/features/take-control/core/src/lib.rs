@@ -74,8 +74,9 @@ pub fn register(r: &mut Registry) {
         SettingDef {
             label: "Whether that key or button takes a hold rather than a press",
             kind: SettingKind::Bool,
-            // A hold keeps a brushed button from taking control. src/features/take-control/efb/
-            // binding.tsx draws this until the settings arrive, so change both together.
+            // A hold keeps a brushed button from taking control.
+            // src/features/take-control/efb/binding.tsx draws this until the settings arrive, so
+            // change both together.
             default: json!(true),
             part_only: true,
             development: false,

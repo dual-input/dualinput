@@ -3,7 +3,8 @@
 //! its manifest's `package_version` (record/areas/traffic-atc/01-traffic-and-atc.md, "Traffic
 //! packs"). It reads folder names and manifests alone, where finding the package of each of the
 //! host's titles would read every `aircraft.cfg` and `livery.cfg`: 2,690 files in our
-//! development machine's Community folder, 2,551 of them in `fsltl-traffic-base`.
+//! development machine's Community folder, 2,551 of them in `fsltl-traffic-base` (read on
+//! 2026-10-17).
 
 use clients::Clients;
 use kernel::{Cx, Job, JobId};
@@ -11,8 +12,8 @@ use messages::traffic::Pack;
 
 use crate::Traffic;
 
-/// The known traffic packs, each a folder's name or the start of one. Each pack the build
-/// confirms joins the list.
+/// The known traffic packs, each a folder's name or the start of one. When another pack's
+/// folder name is confirmed, add it here.
 const KNOWN: [&str; 1] = ["fsltl-traffic-base"];
 
 /// A listing under way: the reads of `UserCfg.opt` still out and the packages folders found,

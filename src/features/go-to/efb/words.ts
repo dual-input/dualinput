@@ -15,7 +15,7 @@ export function standName(stand: Stand): string {
   return `${name} ${stand.number}`
 }
 
-/** Where the pilot flying is, under their name, while this pilot is out of the flight; 	itle is their aircraft's `A:TITLE`. */
+/** Where the pilot flying is, under their name, while this pilot is out of the flight; `title` is their aircraft's `A:TITLE`. */
 export function whereWords(spot: Spot | null, title: string): string {
   if (!spot) return "Hasn't loaded a flight yet"
   if (!spot.airport) return `In the ${title}`

@@ -18,8 +18,8 @@ use crate::{Avatars, ray};
 /// foot outside, the click ray lands within 1cm on the exterior").
 const MOST: f32 = 20.0;
 /// A right press counts as a click when it came up within 300ms, with the cursor under 5px
-/// and the mouse under 20 counts from where it went down, as p20, p25, and p27 judged it
-/// (same log, "A quick, still right press is a click").
+/// and the mouse under 20 counts from where it went down, as our probes p20, p25, and p27
+/// judged it (same log, "A quick, still right press is a click").
 const RIGHT_WITHIN: u64 = 300_000;
 const RIGHT_PIXELS: f32 = 5.0;
 const RIGHT_COUNTS: u32 = 20;

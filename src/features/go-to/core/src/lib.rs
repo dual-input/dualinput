@@ -120,7 +120,9 @@ impl GoTo {
                 .aircraft_facts()
                 .and_then(|facts| facts.livery.clone())
                 // The Baron 58P read no `A:LIVERY NAME`, and its livery is in its title
-                // (measured on MSFS 2024, 2026-11-17, record/areas/session/log.md).
+                // (measured on MSFS 2024, 2026-11-17, record/areas/session/log.md, "In the sim,
+                // Join set the world map and started the flight within 0.9s, and active pause
+                // followed from our EFB app's code in 264ms, once the menu script parsed").
                 .filter(|livery| !livery.is_empty()),
         }
     }
@@ -260,7 +262,8 @@ impl GoTo {
             return JoinState::Running;
         }
         let unavailable = |why| JoinState::Unavailable { why };
-        // The EFB opens at the world map and in a flight, so anywhere else no one sees Join.
+        // The EFB opens at the world map and in a flight, so anywhere else no one sees Join
+        // (record/areas/interface/decisions.md, "Dual Input's one full window is its EFB app").
         let in_a_flight = sim.stage.in_a_flight();
         if !in_a_flight && sim.stage != Stage::Menu {
             return JoinState::Hidden;

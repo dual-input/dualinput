@@ -421,7 +421,7 @@ fn a_joiner_whose_pf_is_50km_away_is_written_at_once_and_one_10m_away_eases_over
         "once a sample is 400ms old: {clock}"
     );
 
-    // At the PF's stand, 10m east of where the PF's aircraft stands.
+    // At the pilot flying's stand, 10m east of where the pilot flying's aircraft stands.
     let stand = Snapshot {
         velocity: [0.0; 3],
         ..flying(0)
@@ -445,8 +445,8 @@ fn a_joiner_whose_pf_is_50km_away_is_written_at_once_and_one_10m_away_eases_over
 
 #[test]
 fn at_a_handover_the_ex_pfs_aircraft_flies_on_eases_back_and_never_stops_or_jumps() {
-    // The ex-PF's aircraft has flown itself to where the flying aircraft is at 5s, while
-    // the new PF's, which followed it, is 400ms behind.
+    // The former pilot flying's aircraft has flown itself to where the flying aircraft is at
+    // 5s, while the new pilot flying's, which followed it, is 400ms behind.
     let behind = |t: u64| flying(t - DELAY);
     let mut f = Following::new();
     f.world.place(&flying(5_000_000), [SPEED, 0.0, 0.0]);

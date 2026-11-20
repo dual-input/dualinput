@@ -68,18 +68,18 @@ enum Running {
 /// What a following core keeps since `Follow` started.
 struct Following {
     pf: PilotId,
-    /// The newest stamp taken, on the PF's counter.
+    /// The newest stamp taken, on the pilot flying's counter.
     newest: u64,
-    /// The PF's clock offset as this core applies it, once the network has given one.
+    /// The pilot flying's clock offset as this core applies it, once the network has given one.
     offset: Slewed,
 }
 
 impl Following {
     /// What to feed `Follow` for `sample`, which came from `from` at `now`, with the
     /// network's estimate of that sender's clock offset, or `None` to drop it: from a sender
-    /// who isn't the PF this core follows, which covers a new PF's samples until the
-    /// session's control key arrives; with a stamp no later than the newest taken; or before
-    /// the network has an offset for its sender, which lasts until the link's first
+    /// who isn't the pilot flying this core follows, which covers a new pilot flying's samples
+    /// until the session's control key arrives; with a stamp no later than the newest taken; or
+    /// before the network has an offset for its sender, which lasts until the link's first
     /// heartbeat.
     fn take(
         &mut self,
@@ -93,7 +93,8 @@ impl Following {
         }
         let offset = self.offset.apply(estimate?, now);
         self.newest = sample.at;
-        // The stamp moves from the PF's counter onto this core's, the one `Follow` draws on.
+        // The stamp moves from the pilot flying's counter onto this core's, the one `Follow`
+        // draws on.
         Some(FollowSlot {
             delay: DELAY,
             has_sample: 1,
@@ -126,8 +127,8 @@ pub fn register(r: &mut Registry) {
 
 impl FlightModel {
     /// Ends the routine this core runs and starts the one the session calls for, when the two
-    /// differ. A change of PF on a machine that goes on following differs too, so `Follow`
-    /// starts new, with a new buffer for the new PF's samples.
+    /// differ. A change of pilot flying on a machine that goes on following differs too, so
+    /// `Follow` starts new, with a new buffer for the new pilot flying's samples.
     fn settle(&mut self, cx: &mut Cx) {
         let session = cx.read::<Session>();
         let wanted = match (session.me(), session.pf()) {
@@ -303,14 +304,16 @@ mod tests {
         }
     }
 
-    /// Flight-model sync's case: a sample from a sender who isn't the PF, from a new PF
-    /// before the key, with an old stamp, or before the link's first offset is dropped.
+    /// Flight-model sync's case: a sample from a sender who isn't the pilot flying, from a new
+    /// pilot flying before the key, with an old stamp, or before the link's first offset is
+    /// dropped.
     #[test]
     fn a_sample_is_dropped_from_another_sender_with_an_old_stamp_or_before_an_offset() {
         let mut f = following();
-        // Before the link's first heartbeat, the network has no offset for the PF.
+        // Before the link's first heartbeat, the network has no offset for the pilot flying.
         assert_eq!(f.take(PF, &sample(1_000_000), None, 500), None);
-        // A new PF's samples, until the control key makes it the PF this core follows.
+        // A new pilot flying's samples, until the control key makes it the one this core
+        // follows.
         assert_eq!(f.take([2; 16], &sample(1_000_000), Some(0), 500), None);
         assert!(f.take(PF, &sample(1_000_000), Some(0), 500).is_some());
         assert_eq!(f.take(PF, &sample(1_000_000), Some(0), 600), None);
@@ -321,7 +324,7 @@ mod tests {
     #[test]
     fn a_samples_stamp_moves_onto_this_cores_counter_with_the_delay() {
         let mut f = following();
-        // The PF's counter runs 2s ahead of this core's.
+        // The pilot flying's counter runs 2s ahead of this core's.
         let slot = f.take(PF, &sample(10_000_000), Some(2_000_000), 0).unwrap();
         assert_eq!((slot.delay, slot.has_sample), (DELAY, 1));
         assert_eq!(slot.sample.at, 8_000_000);

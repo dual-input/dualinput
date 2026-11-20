@@ -1,9 +1,10 @@
 // Join, at the end of the pilot flying's crew row for a pilot out of the flight, with where the pilot flying is under
 // their name, rebuilt from `JoinPf` in experiments/areas/interface/bench/src/frames/home.tsx
 // (record/areas/interface/decisions.md, "Join takes a joiner from the world map into the PF's flight, or only sets it
-// up"). A press asks first, in the kit's confirm popover, since Join now starts a flight: the question names the pilot
-// flying, and the two answers say how far to go. While the menu script works, Join shows a spinner. Where Join can't go,
-// it's disabled, and a tooltip says why; a disabled button takes no pointer events, so the tooltip hangs on a wrapper.
+// up"). A press asks first, in the kit's confirm popover, since one of its two answers, Join now, starts a flight: the
+// question names the pilot flying, and the answers say how far to go. While the menu script works, Join shows a
+// spinner. Where Join can't go, it's disabled, and a tooltip says why; a disabled button takes no pointer events, so
+// the tooltip hangs on a wrapper.
 
 import { Button, Confirm, Spinner, toast, Tooltip } from "@dualinput/ui"
 import type { ToastLevel } from "@dualinput/ui"

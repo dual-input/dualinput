@@ -1,7 +1,7 @@
 // The figure's model, built from its spec, figure.json: spheres and sticks whose joints are
 // glTF animations, each driven by one `Z:` variable of the figure's own object, which
 // `Figure` writes (record/areas/avatars/01-avatars.md, "Names"). It imports nothing, so
-// generate.ts writes it for the sim and tools/figure-viewer builds the same model in a
+// tools/figure.ts writes it for the sim and tools/figure-viewer builds the same model in a
 // browser.
 //
 // It follows the probes' figure, which posed in the sim and changed color there (measured on
@@ -11,10 +11,13 @@
 //   - A stick that stretches telescopes: a pair of fixed pieces of length s, one forward from
 //     its base and one back from the node at its end, covers any length from s to 2s, and
 //     visibility rules on the length show only the pair that fits. A scale animation along
-//     the stick drew the sticks at their full length, and a skinned stick killed
-//     fspackagetool (read in experiments/areas/avatars/figure/model.mjs).
+//     the stick drew the sticks at their full length, and the sim went down as it built a
+//     skinned stick (measured on MSFS 2024, 2026-10-03, record/areas/avatars/log.md, "The sim
+//     doesn't play a scale animation that stretches a stick along its length" and "A skinned
+//     stick took the sim down in an in-sim build").
 //   - Each stick size is a mesh of its own, since fspackagetool rewrote one unit stick shared
-//     by nodes with uneven scales (same file).
+//     by nodes with uneven scales (same log, "fspackagetool rewrote a mesh that nodes shared
+//     under different uneven scales").
 //   - Every animated node carries one animated path, and a node that needs a second motion has
 //     a child carry it.
 //
@@ -45,11 +48,11 @@ const ROT_STEP = 30
 const STRETCH_MIN = 0.01
 const THINNER = 0.99
 
-/** The SimObject's title, which avatars creates its figures by. */
+/** The SimObject's title, which avatars creates its figures by. `TITLE` in src/features/avatars/core/src/crew.rs names it too, so change both together. */
 export const TITLE = "DUALINPUT_FIGURE_PILOT"
 export const variable = (name: string) => `DUALINPUT_FIGURE_${name}`
 
-/** What `Z:DUALINPUT_FIGURE_SHOWS` holds, as messages::avatars::slots's `SHOWS_*`. */
+/** What `Z:DUALINPUT_FIGURE_SHOWS` holds, as messages::avatars::slots's `SHOWS_*` has it, so change both together. */
 export const SHOWS = { body: 1, head: 2, hands: 4, faded: 8 }
 
 type Kind = "move" | "turn" | "stretch"

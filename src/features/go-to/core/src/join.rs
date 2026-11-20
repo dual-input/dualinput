@@ -13,9 +13,10 @@ use sim_service::{SimAwareness, SimCx, SimService};
 use crate::{GoTo, Wanted};
 
 /// How long the flight's load has to begin once the world map started it. The sim loaded within
-/// 0.7s in p08 and p10 (record/areas/interface/log.md, 2026-10-05 and 2026-10-06), and with no
-/// departure it showed an error dialog and loaded nothing, which would otherwise leave Join
-/// running for good.
+/// 0.7s in our probes p08 and p10, and with no departure it showed an error dialog and loaded
+/// nothing, which would otherwise leave Join running for good (measured on MSFS 2024, 2026-10-05
+/// and 2026-10-06, record/areas/interface/log.md, "Code in the menu's document sets the world
+/// map's departure" and "Our copy of BlurPage brings our script into the menu").
 const LOAD_BEGINS: Duration = Duration::from_secs(10);
 
 /// One Join, from its press until its last step answers.
@@ -111,7 +112,9 @@ fn next(me: &mut GoTo, cx: &Cx) {
         Step::Launch => {
             // The load's signals and the launch's answer come by separate paths, SimConnect and the
             // menu script's socket, so Join follows the load from the launch on, whichever comes
-            // first: in p10, `FlightLoaded` came 200ms after `launchFlight`.
+            // first: in p10, `FlightLoaded` came 200ms after `launchFlight`
+            // (record/areas/interface/log.md, "Our copy of BlurPage brings our script into the
+            // menu").
             run.launched = Some(Some(cx.timer(LOAD_BEGINS, load_late)));
             WorldMapRequest::LaunchFlight
         }

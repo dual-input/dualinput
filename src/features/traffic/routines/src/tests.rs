@@ -167,7 +167,7 @@ fn a_copy_is_drawn_1s_behind_turning_the_short_way_and_a_removed_one_is_forgotte
     m.frame(DELAY + 6_000_000);
     assert_eq!(m.world.writes, writes, "a parked copy costs no writes");
 
-    // Removed, it's no longer drawn, even when a later feed's sample would have moved it.
+    // Removed, it isn't drawn, even when a later feed's sample would have moved it.
     m.feed(
         7_000_000,
         &[Entry {
@@ -246,9 +246,10 @@ fn moving_copies_frame_time() {
     );
 }
 
-/// Stage 18's session in the sim's mix, natively: 4 copies moving, and 101 parked, each fed a
-/// heartbeat every 5s, which in the sim added about 85µs to our module's update at p50
-/// (record/areas/traffic-atc/log.md, 2026-11-15):
+/// The mix of traffic's first session in the sim, natively: 4 copies moving, and 101 parked,
+/// each fed a heartbeat every 5s, which in the sim added about 85µs to our module's update at
+/// p50 while every value was written each frame (record/areas/traffic-atc/log.md, "In the sim,
+/// copies drew at 0.16 on FS Copilot's jitter measure"):
 ///   cargo test -p traffic-routines --release -- --ignored --nocapture parked_copies
 #[test]
 #[ignore = "a timing, measured by hand in a release build"]

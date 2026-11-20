@@ -3,10 +3,10 @@
 //! made without a click").
 //!
 //! The pilot's machine decides every target, the overlap of two hands on a yoke included,
-//! so `Figure` only eases each hand to the target it's given. Every time below is a starting
-//! value, p27's, to be tuned in the 58P in the sim (record/areas/avatars/decisions.md, "The hands
-//! follow a pilot's habits"). Times are in µs on the core's counter, from the input each change
-//! came in, so a replay moves the hands the same way.
+//! so `Figure` only eases each hand to the target it's given. Every time below is p27's, the
+//! probe whose times our test pilot tuned in the A350 (record/areas/avatars/decisions.md, "The
+//! hands follow a pilot's habits"). Times are in µs on the core's counter, from the input each
+//! change came in, so a replay moves the hands the same way.
 
 use messages::avatars::{Hand, Side};
 
@@ -23,7 +23,8 @@ const HOVER: u64 = 500_000;
 /// How far off the spot a hand hovers, along the surface's normal, in meters.
 const HOVER_OFF: f32 = 0.015;
 /// How long a hand takes to come home, the length of `Figure`'s curve back, and how long
-/// past its arrival the hand that stood in on the yoke keeps its grip.
+/// past its arrival the hand that stood in on the yoke keeps its grip. `HOME_S` in
+/// src/features/avatars/routines/src/ease.rs is the curve's length, so change both together.
 const HOME: u64 = 300_000;
 const OVERLAP: u64 = 300_000;
 /// A located change waits this long before its hand reaches, and a second entry's change
@@ -51,7 +52,7 @@ pub(crate) struct Rules {
 }
 
 impl Rules {
-    /// The hand that holds the yoke at rest, the PF's alone.
+    /// The hand that holds the yoke at rest, the pilot flying's alone.
     fn holder(&self) -> Option<usize> {
         let _ = self.yoke.filter(|_| self.pf)?;
         Some(if self.left_seat { 0 } else { 1 })
@@ -120,7 +121,7 @@ impl Hands {
         }
     }
 
-    /// The hand on the yoke now, while the PF's figure holds one.
+    /// The hand on the yoke now, while the pilot flying's figure holds one.
     fn yoke_hand(&self, rules: &Rules) -> Option<usize> {
         let holder = rules.holder()?;
         match &self.out {
@@ -308,8 +309,8 @@ mod tests {
         point([0.4, 0.6, 1.9], [0.0, 0.0, -1.0])
     }
 
-    /// 01-avatars' case: a left tap on the left side of the panel by the PF in the left
-    /// seat: the left hand reaches, the right takes the yoke at once, and 650ms after the
+    /// 01-avatars' case: a left tap on the left side of the panel by the pilot flying in the
+    /// left seat: the left hand reaches, the right takes the yoke at once, and 650ms after the
     /// release the left takes the yoke and the right lets go 0.3s after it arrives.
     #[test]
     fn a_left_tap_by_the_pf_in_the_left_seat_swaps_the_yoke_and_back() {

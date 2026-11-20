@@ -265,10 +265,13 @@ impl Own {
 
 /// Sends the five axis events. Each surface goes negated, since on the 58P each surface
 /// variable read its axis event's value negated, so a surface sent back negated repeats the
-/// PF's input, and the following aircraft moves its own yoke and pedals from it (measured on
-/// MSFS 2024, 2026-10-01, experiments/areas/flight-controls/results/p01-mask-2026-10-01-20-28-54.txt).
-/// Each brake goes less 16,384, which is unverified
-/// (record/areas/flight-model/01-flight-model-sync.md, "Drawing").
+/// pilot flying's input, and the following aircraft moves its own yoke and pedals from it
+/// (measured on MSFS 2024, 2026-10-01,
+/// experiments/areas/flight-controls/results/p01-mask-2026-10-01-20-28-54.txt). Each brake goes
+/// less 16,384, which the 58P reads on a curve, so its toe brakes read less than the pilot
+/// flying's in mid-travel, a known limit (measured on MSFS 2024, 2026-11-11,
+/// record/areas/flight-model/log.md, "In the sim the 58P follows a stand-in's path within
+/// centimeters").
 fn send_controls(s: &Snapshot, want: &mut Wants) {
     let [aileron, elevator, rudder] = s.surfaces.map(|v| -i32::from(v));
     let [left, right] = s.brakes.map(|v| i32::from(v) - 16_384);

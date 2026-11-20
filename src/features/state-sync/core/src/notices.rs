@@ -1,5 +1,5 @@
 //! The notification for a control that couldn't sync: one card once per entry for each load, and
-//! several in a row as one, whose words stage 11b settled
+//! several in a row as one, worded as the banner's decision has it
 //! (record/areas/interface/decisions.md, "The banner carries what a pilot must see without the
 //! EFB").
 
@@ -62,7 +62,8 @@ impl Notices {
 }
 
 /// Whose cockpit this pilot's may differ from: the sender of the change that couldn't be
-/// written, or the PF's for a pilot with no sender, such as one whose entry stopped on its own.
+/// written, or the pilot flying's for a pilot with no sender, such as one whose entry stopped on
+/// its own.
 fn whose(from: Option<PilotId>, cx: &Cx) -> String {
     let session = cx.read::<Session>();
     let them = from.or(session.pf()).filter(|p| Some(*p) != session.me());

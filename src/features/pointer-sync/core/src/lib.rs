@@ -128,9 +128,9 @@ impl PointerSync {
         }
         // Any catch-up but preflight's end's skips gestures, since its displays may show other
         // pages than the ones a gesture was made on. Preflight's end's skips none, since
-        // neither cockpit's displays were touched in preflight, so the PF's first presses play
-        // once its writes are made (record/areas/pointer-sync/01-pointer-sync.md, "Playing a
-        // gesture").
+        // neither cockpit's displays were touched in preflight, so the pilot flying's first
+        // presses play once its writes are made
+        // (record/areas/pointer-sync/01-pointer-sync.md, "Playing a gesture").
         if cx.read::<CockpitStream>().catching_up() == Some(false) {
             return Answer::Skipped;
         }
@@ -210,11 +210,11 @@ impl PointerSync {
         }
     }
 
-    /// The visible lock's slice. On a machine other than the PF's, every synced display locks
-    /// while this core has no link up to the PF, naming taking control as the way out, and
-    /// while a replay or a catch-up runs here, since its pilot's presses would otherwise reach
-    /// the crew's displays while their gestures play nowhere. Preflight locks nothing, since
-    /// the stream sends no gesture then.
+    /// The visible lock's slice. On a machine other than the pilot flying's, every synced
+    /// display locks while this core has no link up to the pilot flying, naming taking control
+    /// as the way out, and while a replay or a catch-up runs here, since its pilot's presses
+    /// would otherwise reach the crew's displays while their gestures play nowhere. Preflight
+    /// locks nothing, since the stream sends no gesture then.
     fn lock(_: &PointerSync, view: &View) -> Lock {
         let session = view.read::<Session>();
         let (Some(me), Some(pf)) = (session.me(), session.pf()) else {

@@ -25,8 +25,9 @@ const EVERY: u64 = 33_000;
 const AT_LEAST: u64 = 1_000_000;
 
 /// The figure's SimObject (record/areas/avatars/01-avatars.md, "Names"). tools/profile-author's
-/// seats.rs creates the figure by the same `TITLE` and freezes it by the same `FREEZES`, so
-/// change both together.
+/// seats.rs creates the figure by the same `TITLE` and freezes it by the same `FREEZES`, and
+/// src/features/avatars/figure/model.ts builds the SimObject under that `TITLE`, so change them
+/// together.
 const TITLE: &str = "DUALINPUT_FIGURE_PILOT";
 
 /// The sim's freeze events, which hold each figure where `Figure` writes it.
@@ -71,8 +72,8 @@ impl Crew {
         {
             return;
         }
-        // Two pilots took one seat within a trip: the PF keeps it, or else the lower pilot
-        // ID, and the other gives it up at once.
+        // Two pilots took one seat within a trip: the pilot flying keeps it, or else the lower
+        // pilot ID, and the other gives it up at once.
         if let (Body::Seated { seat, .. }, Some(Body::Seated { seat: mine, .. }), Some(me_id)) =
             (&pose.body, &me.body, session.me())
             && seat == mine
@@ -201,8 +202,8 @@ fn shows(own: bool, body: &Body, settings: &Settings) -> u32 {
     }
 }
 
-/// A figure at rest on this machine: the PF's holds the yoke in front of its seat with the
-/// hand on its outboard side, and every other figure rests both hands.
+/// A figure at rest on this machine: the pilot flying's holds the yoke in front of its seat with
+/// the hand on its outboard side, and every other figure rests both hands.
 fn rest_hands(seat: Option<&seats::Place>, pf: bool, yokes: &[aircraft_model::Yoke]) -> [Hand; 2] {
     let Some(seat) = seat.filter(|_| pf) else {
         return [Hand::Rest; 2];
@@ -284,8 +285,8 @@ pub(crate) fn create_waiting(me: &mut Avatars, cx: &mut Cx) {
     }
 }
 
-/// A figure's object came: frozen where it is, so only `Figure`'s writes move it, as p25 to
-/// p27 froze theirs (read in experiments/areas/avatars/p25-figure-hands.mjs).
+/// A figure's object came: frozen where it is, so only `Figure`'s writes move it, as our probes
+/// p25 to p27 froze theirs (read in experiments/areas/avatars/p25-figure-hands.mjs).
 pub(crate) fn created(me: &mut Avatars, call: Handle, object: u32, cx: &mut Cx) {
     let Some(figure) = me
         .crew

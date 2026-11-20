@@ -30,8 +30,11 @@ const ACTIVE: u32 = 4;
 const MENU: u32 = 8;
 
 /// How long an ask of the EFB app's part counts as on its way, in µs. An ask whose call changed
-/// nothing would otherwise keep the pilot's own press to that value from reaching the crew. How
-/// soon the call's flag comes back is unmeasured, and stage 21's session in the sim times it.
+/// nothing would otherwise keep the pilot's own press to that value from reaching the crew. In
+/// the sim, another pilot's press set this sim's flag through the call within 264ms (measured on
+/// MSFS 2024, 2026-11-17, record/areas/session/log.md, "In the sim, Join set the world map and
+/// started the flight within 0.9s, and active pause followed from our EFB app's code in 264ms,
+/// once the menu script parsed").
 const ASK_LIVES: u64 = 2_000_000;
 
 /// The notification while the pilot flying is in the pause menu.
@@ -134,8 +137,7 @@ impl RateAndPause {
 
     /// Asks the EFB app's part to set active pause to the key, when the flag this sim will have
     /// once every ask on its way has come back differs. An ask whose call changed nothing leaves
-    /// the flag off the key until the key next changes, a known limit until the session in the
-    /// sim shows whether the call can fail.
+    /// the flag off the key until the key next changes, a known limit.
     fn apply(&mut self, cx: &Cx) {
         let session = cx.read::<Session>();
         let Some(wanted) = session.key(PAUSE).filter(|_| in_flight(session)) else {
@@ -194,8 +196,8 @@ impl RateAndPause {
 
     /// The pilot flying writes their rate into the key, and a following machine steps its own
     /// toward the key's, one step at a time, each once the last shows in `E:SIMULATION RATE`,
-    /// which also steps back a following pilot's own change (record/areas/sync/
-    /// 04-order-and-recovery.md, "Putting back").
+    /// which also steps back a following pilot's own change
+    /// (record/areas/sync/04-order-and-recovery.md, "Putting back").
     fn follow(&mut self, cx: &Cx) {
         let session = cx.read::<Session>();
         let Some(rate) = self.rate.filter(|_| in_flight(session)) else {

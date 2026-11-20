@@ -64,7 +64,8 @@ const PLACE_DEG: f64 = 0.05;
 /// 2026-10-17).
 const REACH_ON_FOOT: f32 = 3.0;
 const POINT_AT: f32 = 0.6;
-/// How fast a figure on foot follows its avatar, the rate of a critically damped spring.
+/// How fast a figure on foot follows its avatar, the rate of a spring damped just enough not to
+/// overshoot.
 const FOLLOW: f32 = 20.0;
 
 #[derive(Default)]

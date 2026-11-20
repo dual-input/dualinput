@@ -32,7 +32,8 @@ pub(crate) const UPKEEP: Duration = Duration::from_secs(1);
 /// fork, `FsCopilot/Simulation/TrafficFallbacks.cs`). Its helicopter, `Asobo PassiveAircraft
 /// Bell 407`, isn't among MSFS 2024's passive helicopters, which refused it, so the helicopter's
 /// is the Bell 505, the nearest that is (measured on MSFS 2024, 2026-11-15,
-/// record/areas/traffic-atc/log.md).
+/// record/areas/traffic-atc/log.md, "In the sim, copies drew at 0.16 on FS Copilot's jitter
+/// measure" and "Writing only what changed").
 const STAND_IN_AIRCRAFT: &str = "Asobo PassiveAircraft Citation CJ4";
 const STAND_IN_HELICOPTER: &str = "Asobo PassiveAircraft B505";
 

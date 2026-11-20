@@ -149,7 +149,8 @@ impl Routine for Traffic {
         // alone, and a parked copy costs no writes at all. In the sim, with about 105 copies, 4
         // of them moving, `Traffic` took about 85µs a frame writing every value and about 60µs
         // writing only what changed, where the same frames took under 5µs natively
-        // (record/areas/traffic-atc/log.md, 2026-11-15).
+        // (measured on MSFS 2024, 2026-11-15, record/areas/traffic-atc/log.md, "In the sim,
+        // copies drew at 0.16 on FS Copilot's jitter measure" and "Writing only what changed").
         let written = &mut self.written;
         self.playout
             .each(frame.now.saturating_sub(DELAY), |object, drawn| {

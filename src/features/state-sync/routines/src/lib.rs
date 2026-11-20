@@ -2,7 +2,8 @@
 //! code in the sim can, `H:` events and input events' presets, since the SDK documents no
 //! SimConnect route to an `H:` event, and `SimConnect_SetInputEvent` takes only the names
 //! `SimConnect_EnumerateInputEvents` lists, which holds no presets
-//! (record/areas/sync/log.md, 2026-11-09).
+//! (record/areas/sync/log.md, "Writes to input events go through our WASM module, since
+//! SimConnect's list has none of their presets").
 //!
 //! The routine host carries them out once every routine's frame has run, in the order they were
 //! fed, so a write function's `H:` and `B:` actions keep their call order.

@@ -21,8 +21,8 @@ pub(crate) struct Pose {
 }
 
 impl Pose {
-    /// This pose led by `k` frames of the change from `last`, as p16 and p25 held a figure in
-    /// a moving aircraft with a lead of 1 (measured on MSFS 2024, 2026-10-03,
+    /// This pose led by `k` frames of the change from `last`, as our probes p16 and p25 held a
+    /// figure in a moving aircraft with a lead of 1 (measured on MSFS 2024, 2026-10-03,
     /// record/areas/avatars/log.md, "Over three minutes of flying, leads of 0.75 and 1 frame
     /// both hold the figure").
     pub(crate) fn led(&self, last: &Pose, k: f64) -> Pose {

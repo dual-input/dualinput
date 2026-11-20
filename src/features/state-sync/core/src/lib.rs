@@ -138,8 +138,9 @@ fn engine_ctx(cx: &Cx) -> Option<Ctx> {
     })
 }
 
-/// The PF's checklist: each counting entry's name and starting value, since a shadow is right
-/// only if the PF's aircraft starts there (record/areas/sync/01-profile-entries.md).
+/// The pilot flying's checklist: each counting entry's name and starting value, since a shadow
+/// is right only if the pilot flying's aircraft starts there
+/// (record/areas/sync/01-profile-entries.md).
 fn checklist(profile: &Resolved) -> Vec<ChecklistRow> {
     profile
         .state
@@ -259,7 +260,8 @@ impl StateSync {
         live.carry_out(out, cx);
     }
 
-    /// Control passed: a machine that now flies writes what the PF owns at the old PF's values.
+    /// Control passed: a machine that now flies writes what the pilot flying owns at the former
+    /// pilot flying's values.
     fn control_passed(me: &mut StateSync, _: &ControlPassed, cx: &mut Cx) {
         let (Some(live), Some(ctx)) = (me.live.as_mut(), engine_ctx(cx)) else {
             return;
@@ -435,7 +437,8 @@ fn answer(applied: Applied) -> Answer {
 }
 
 /// What state sync reads a variable as: its name as SimConnect takes it, and its unit, `Number`
-/// for an `L:` one that gives none, as [names] has it.
+/// for an `L:` one that gives none, as the profile format has it
+/// (record/areas/profiles/01-format-and-delivery.md, "Names").
 fn variable(name: &Name) -> Option<(String, String)> {
     match name {
         Name::L { name, unit } => Some((

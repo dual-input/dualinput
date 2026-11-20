@@ -48,14 +48,15 @@ const GROUND_RADIUS: u32 = 1_000;
 /// `ASO_Pushback_White` and `ASO_Pushback_Blue` at EGLL and KSFO, which push AI aircraft back.
 /// GSX's signs, its tugs, about 60 within 1km at KSFO, most parked at gates, and the sim's other
 /// vehicles stay on the machine that runs them, since a receiving pilot who runs GSX would see
-/// GSX's twice (record/areas/traffic-atc/log.md, 2026-10-17 and 2026-11-15).
+/// GSX's twice (record/areas/traffic-atc/log.md, 2026-10-17, and 2026-11-15, "In the sim, copies
+/// drew at 0.16 on FS Copilot's jitter measure").
 const GROUND_ALLOWED: [&str; 1] = ["ASO_Pushback_"];
 
 /// How many objects the host carries at most, the first it finds, counting those whose
 /// identity it's still reading. Leaving or entering the flight queues a call for each copy in
 /// one input, which the kernel stops past 1,000, and a busy hub's traffic is about 165 objects:
-/// p10's 145 aircraft and 20 tugs at EGLL (user, 2026-11-15; record/areas/traffic-atc/log.md,
-/// 2026-10-17).
+/// our probe p10's 145 aircraft and 20 tugs at EGLL (user, 2026-11-15;
+/// record/areas/traffic-atc/log.md, 2026-10-17).
 const MOST_CARRIED: usize = 500;
 
 /// What starts the title of every SimObject of ours, such as avatars' figure,

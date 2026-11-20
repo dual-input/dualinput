@@ -90,8 +90,8 @@ pub(crate) fn inside_seats(seats: &[Place], camera: V3) -> bool {
     })
 }
 
-/// Of two pilots whose poses name one seat, whether this one keeps it: the PF does, or else
-/// the lower pilot ID.
+/// Of two pilots whose poses name one seat, whether this one keeps it: the pilot flying does,
+/// or else the lower pilot ID.
 pub(crate) fn keeps_against(me: [u8; 16], other: [u8; 16], pf: Option<[u8; 16]>) -> bool {
     match pf {
         Some(pf) if pf == me => true,

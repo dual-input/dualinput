@@ -1,8 +1,10 @@
 // Rate and pause's part in the EFB app: code with no screen of its own, which turns active pause on
 // and off with the call the sim's toolbar makes, `TOOLBAR_SET_ACTIVE_PAUSE`, the one way we found,
 // since no SimConnect event we tried does it (record/areas/session/02-units.md, "Rate and pause").
-// The call worked from the EFB's document through the inspector with the EFB closed; that our app's
-// own code can make it is unverified, and a session in the sim settles it.
+// Our app's own code makes it with the EFB closed: another pilot's press reached this sim's active
+// pause within 264ms (measured on MSFS 2024, 2026-11-17, record/areas/session/log.md, "In the sim,
+// Join set the world map and started the flight within 0.9s, and active pause followed from our EFB
+// app's code in 264ms, once the menu script parsed").
 
 import type { SetPause } from "../../../engines/messages/ts/rate-and-pause/SetPause.ts"
 import { definePart } from "../../../platform/efb-shell/src/part.ts"

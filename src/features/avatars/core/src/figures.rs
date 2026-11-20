@@ -18,7 +18,7 @@ pub(crate) enum Look {
     /// Slumped and gray: its member out of the flight, or its link lost while this PC
     /// reaches the internet.
     Slumped,
-    /// At rest in its own colors, the PF's holding its yoke: this PC reaches no one.
+    /// At rest in its own colors, the pilot flying's holding its yoke: this PC reaches no one.
     Resting,
     /// Gray without slumping: this pilot's own figure while this PC reaches no one.
     Gray,
@@ -34,7 +34,7 @@ pub(crate) struct Drawn<'a> {
     pub(crate) color: u8,
     pub(crate) shows: u32,
     pub(crate) look: Look,
-    /// For `Look::Resting`: the hands at rest, the PF's holding its yoke.
+    /// For `Look::Resting`: the hands at rest, the pilot flying's holding its yoke.
     pub(crate) rest: [Hand; 2],
 }
 

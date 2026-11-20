@@ -23,7 +23,7 @@ const MINE_WALKAROUND = "avatars.mine-walkaround"
 const CREW_INSIDE = "avatars.crew-inside"
 const CREW_WALKAROUND = "avatars.crew-walkaround"
 
-/** The color a pilot who never picked one starts from, which setup starts from too, in src/platform/efb-shell/src/setup/setup-flow.tsx. */
+/** The color a pilot who never picked one starts from, which setup starts from too, in src/platform/efb-shell/src/setup/setup-flow.tsx, so change both together. */
 const FIRST_COLOR = "orange"
 
 /** How long after the last key a new name goes out, in milliseconds, since the crew sees it as it's written, and shouldn't watch it spelled. */

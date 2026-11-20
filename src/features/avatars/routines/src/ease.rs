@@ -3,17 +3,20 @@
 //!
 //! A hand goes out on a spring damped just enough not to overshoot, 95% of the way in 0.15s,
 //! and back to rest or to a grip along a curve that sags 6cm toward its shoulder and eases out
-//! by 1 − (1 − t)³ over 0.3s, as p27 drove them (measured on MSFS 2024, 2026-10-04,
+//! by 1 − (1 − t)³ over 0.3s, as our probe p27 drove them (measured on MSFS 2024, 2026-10-04,
 //! record/areas/avatars/log.md, "In the A350, the pilot cut the hand's time on the spot"); the
-//! head closes 1 − e^(−dt/0.12s) of what's left each frame, as p25's did (read in
+//! head closes 1 − e^(−dt/0.12s) of what's left each frame, as the probe p25's did (read in
 //! experiments/areas/avatars/p25-figure-hands.mjs, `EASE_S`).
 //! A part within what shows of its target, at rest, snaps to it, so it stops changing and
 //! `Figure` stops writing it.
 
 use crate::solve::{L3, add, length, scale, sub};
 
-/// A critically damped spring's rate: (1 + ωt)e^(−ωt) is 5% at t = 0.15s for ω = 31.6.
+/// The spring's rate, damped just enough not to overshoot: (1 + ωt)e^(−ωt) is 5% at t = 0.15s
+/// for ω = 31.6.
 const SPRING: f32 = 31.6;
+/// How long the curve home takes, in seconds. `HOME` in src/features/avatars/core/src/hands.rs
+/// holds the same length, so change both together.
 const HOME_S: f32 = 0.3;
 const SAG: f32 = 0.06;
 const HEAD_S: f32 = 0.12;

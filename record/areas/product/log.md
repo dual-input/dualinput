@@ -3,6 +3,29 @@
 What we found about Dual Input as a whole, such as what it costs the PC that runs the sim, newest entry first.
 The probes are in [experiments/areas/product](../../../experiments/areas/product), and their raw output is in its `results/` folder.
 
+## 2026-11-20: The figures' 0.34ms is about what the product's figure was measured to cost, and the schedule's entry below compared it with the probes' lighter one
+
+**Asked:** why Dual Input's two figures cost the sim's frame five to seven times what [the schedule's entry below](#2026-11-20-dual-input-added-085ms-to-the-sims-frame-and-fs-copilot-030ms-and-dual-inputs-figures-about-034ms-of-its-085ms) expected.
+
+**Expected:** something in the figure or in our module that the probes' figure didn't have.
+
+**Found:** from the record and the code, with no new run.
+
+- That entry expected 0.05ms to 0.07ms from p28's figure, which [the avatars log](../avatars/log.md#2026-11-05-a-click-that-took-the-focus-from-the-sim-left-a-figures-hand-out-and-the-rest-of-the-session-passed) lists as the budget beside the product's own figure.
+  The product's figure, measured on MSFS 2024 on 2026-11-05 in that entry, cost 64µs each in view and still at its closest level of detail, and 105µs with every joint moving, against p28's 16µs to 21µs and 26µs to 37µs.
+  The same entry timed our module's frame at 86µs at the median with two figures seated, against 3µs before the session, in Developer Mode, which may inflate it.
+- The product's figure is rounder by the user's choice, since the pilots sit an arm's length apart: its closest level draws 47,104 triangles as posed, at 46 draw calls ([avatars log](../avatars/log.md#2026-11-05-the-figures-closest-level-of-detail-draws-47104-triangles-since-the-pilots-sit-an-arms-length-apart)).
+  Its compiled `DUALINPUT_FIGURE_PILOT_LOD00.gltf` places 35 meshes on 146 nodes (read in src/features/avatars/figure/compiled/model/).
+- The core with no figures creates no figure, so it feeds `Figure` an empty slot (read in src/features/avatars/core/src/crew.rs, `feed`), and its runs leave out both the drawing and `Figure`'s work on each figure.
+- So two figures should cost 0.13ms drawn still or 0.21ms moving, plus `Figure`'s share of the module's 86µs, which no run has split out: 0.13ms to about 0.3ms (arithmetic).
+  p31 measured 0.34ms, with rounds from -0.09ms to 0.59ms.
+
+**Changed:** nothing.
+The schedule's entry below was wrong that the figures cost five to seven times what we'd measured: they cost about what the user accepted for two figures on 2026-11-05, 0.13ms to 0.21ms drawn and about 0.14ms in the module (user, 2026-11-05).
+Its open question about the figures, and its effect on [04-room-for-later](04-room-for-later.md#people-beyond-the-crew), whose lighter crowd figures p28's numbers fit, no longer stand.
+
+**Affects:** the schedule's entry below.
+
 ## 2026-11-20: Our EFB app and banner cost the sim's frame nothing we could measure, nor did the bench's own watcher
 
 **Asked:** whether our pages in the sim, the EFB app and the banner, make the part of Dual Input's frame cost [the entry below](#2026-11-20-dual-input-added-085ms-to-the-sims-frame-and-fs-copilot-030ms-and-dual-inputs-figures-about-034ms-of-its-085ms) left open beyond its figures, and whether the bench's own processes do.

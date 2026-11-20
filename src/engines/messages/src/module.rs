@@ -1,6 +1,6 @@
 //! What the core and our WASM module trade through the sim's client data areas, the slots:
-//! each routine's slot, which the core writes and the module reads, and the module's status
-//! slot, which the module writes and the core reads
+//! each routine's slot, which the core writes and the module reads, and each routine's report
+//! slot and the module's status slot, which the module writes and the core reads
 //! (record/areas/core/03-sim-seam-and-wasm-module.md, "Its slots").
 //!
 //! The module reads a slot in place, as the bytes of a `#[repr(C)]` struct, so the slots'
@@ -32,7 +32,8 @@ impl RoutineId {
     }
 
     /// The client data area the module writes the routine's reports into, which only the
-    /// module can write.
+    /// module can write. `REPORT_PREFIX` in src/engines/stand-in-sim/src/lib.rs names the
+    /// same prefix, so change both together.
     pub fn report_slot(self) -> String {
         format!("DUALINPUT_REPORT_{}", self.name)
     }

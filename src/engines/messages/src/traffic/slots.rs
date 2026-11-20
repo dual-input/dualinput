@@ -37,7 +37,7 @@ pub struct Entry {
     pub removed: u32,
     /// When the traffic host read it, in µs on this core's counter.
     pub at: u64,
-    /// `A:PLANE LATITUDE` and `A:PLANE LONGITUDE` in degrees, and `A:PLANE ALTITUDE` in feet.
+    /// `A:PLANE LATITUDE` and `A:PLANE LONGITUDE` in degrees, and `A:PLANE ALTITUDE` in feet MSL.
     pub lat: f64,
     pub lon: f64,
     pub alt: f64,

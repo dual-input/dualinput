@@ -6,6 +6,7 @@ import type { ChecklistRow } from "./ChecklistRow.ts";
  */
 export type StateSyncSlice = { 
 /**
- * The PF's checklist, which is empty for any other pilot and once preflight has ended.
+ * The pilot flying's checklist, which is empty for any other pilot and once preflight has
+ * ended.
  */
 checklist: Array<ChecklistRow>, };

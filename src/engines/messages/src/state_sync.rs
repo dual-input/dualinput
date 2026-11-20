@@ -174,7 +174,8 @@ pub struct InstrumentPath {
     pub path: String,
 }
 
-/// One row of the PF's preflight checklist: a counted control and the value it starts at.
+/// One row of the pilot flying's preflight checklist: a counted control and the value it starts
+/// at.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "state-sync/")]
 pub struct ChecklistRow {
@@ -188,7 +189,8 @@ pub struct ChecklistRow {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "state-sync/")]
 pub struct StateSyncSlice {
-    /// The PF's checklist, which is empty for any other pilot and once preflight has ended.
+    /// The pilot flying's checklist, which is empty for any other pilot and once preflight has
+    /// ended.
     pub checklist: Vec<ChecklistRow>,
 }
 

@@ -19,7 +19,8 @@ pub enum Value {
 impl Value {
     /// Whether two values are the same as the sim reads them: numbers within `f32`'s precision,
     /// since a value written as 165 read back as 165.000002 on an AI object's `A:` variable
-    /// (measured on MSFS 2024, 2026-10-02, record/areas/avatars/log.md).
+    /// (measured on MSFS 2024, 2026-10-02, record/areas/avatars/log.md, "2026-10-02: Writing a
+    /// GSX person's animation frame makes it walk, and a seated one moves on its own").
     pub fn same(&self, other: &Value) -> bool {
         match (self, other) {
             (Value::Number(a), Value::Number(b)) => (*a as f32) == (*b as f32),

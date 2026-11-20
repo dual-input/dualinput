@@ -10,9 +10,10 @@ use crate::module::RoutineId;
 use crate::net::{Channel, Delivery, OneOff, Wait};
 
 /// The flying machine's samples, as one-off packets of which only the newest waits to go,
-/// handed over after the heartbeat's and before avatars' poses
+/// handed over after the heartbeat's and before ATC audio's
 /// (record/areas/network/01-between-machines.md, "Channels" and "Sending"). A sample carries
-/// nothing of control: its sender is its PF, since only the flying machine sends them.
+/// nothing of control: its sender is its pilot flying, since only the flying machine sends
+/// them.
 pub const SAMPLES: Channel<Sample> = Channel::new(6, Delivery::Newest, 220);
 
 /// How long `Lead` leaves between two reports, in µs, so samples come 20 a second, which puts

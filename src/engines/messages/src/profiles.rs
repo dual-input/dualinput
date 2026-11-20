@@ -65,7 +65,7 @@ pub struct SupportedAircraft {
     pub model: String,
     pub maturity: Maturity,
     /// Whether a package on disk holds it. A streamed copy keeps no folder on disk, so one reads
-    /// as not installed until the world map's own list can say.
+    /// as not installed.
     pub installed: bool,
 }
 

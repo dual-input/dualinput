@@ -3,6 +3,7 @@ import type { Point } from "./Point.ts";
 
 /**
  * One message of a gesture. Its point is `point` rather than `at`, since the Coherent GT check
- * reads any `.at` in our code in the sim as `Array.prototype.at`, which the engine lacks.
+ * reads any `.at` in our code in the sim as `Array.prototype.at`, which the engine lacks
+ * (record/areas/architecture/coherent-gt.md, "Built-ins").
  */
 export type Gesture = { "down": { button: number, point: Point, } } | { "move": { point: Point, } } | "held" | { "up": { point: Point, click: boolean, } };

@@ -139,7 +139,7 @@ pub enum HelperAct {
 }
 
 /// What the bench tells the stand-in core helper over the line the stand-in opens to it
-/// (record/areas/build/02-testing.md's note of 2026-10-22).
+/// (record/areas/build/02-testing.md, "The stand-in core helper").
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
 #[serde(tag = "act", rename_all = "kebab-case")]
 #[ts(export, export_to = "bench/")]

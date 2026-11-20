@@ -4,6 +4,6 @@ import type { Maturity } from "./Maturity.ts";
 export type SupportedAircraft = { maker: string, model: string, maturity: Maturity, 
 /**
  * Whether a package on disk holds it. A streamed copy keeps no folder on disk, so one reads
- * as not installed until the world map's own list can say.
+ * as not installed.
  */
 installed: boolean, };

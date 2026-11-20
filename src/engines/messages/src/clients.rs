@@ -45,15 +45,20 @@ pub const PORT_FILE: &str = "port.json";
 /// The components, as each names itself in its `hello`.
 pub mod component {
     /// A cockpit panel's bridge, which our `VCockpit.js` loads into every cockpit panel.
+    /// `COMPONENT` in src/platform/panel-bridge/src/start.ts names it too, so change both
+    /// together.
     pub const PANEL_BRIDGE: &str = "panel-bridge";
     /// The menu script, which our copy of BlurPage brings into the sim's menu.
     /// src/sim-package/pages/menu.ts names it too, so change both together.
     pub const MENU_SCRIPT: &str = "menu-script";
     /// The desktop app's Rust side.
     pub const DESKTOP: &str = "desktop";
-    /// Our app in the sim's EFB.
+    /// Our app in the sim's EFB. `CoreLink`'s constructor in
+    /// src/engines/page-client/src/core-link.ts names it too, so change both together.
     pub const EFB_APP: &str = "efb-app";
     /// The banner's page, in the panel the EFB app's code opens in each flight of a session.
+    /// `CoreLink`'s constructor in src/engines/page-client/src/core-link.ts names it too, so
+    /// change both together.
     pub const BANNER: &str = "banner";
 }
 
@@ -281,8 +286,9 @@ pub const BANNER: &str = "banner";
 pub const NOTIFICATION_CLICKED: &str = "clients.notification-clicked";
 
 /// The command that opens our Discord, in the pilot's Discord app if they have it and otherwise
-/// in their browser, from any client. It takes no arguments, and the link is the core's to hold, since any add-on's page in the sim can send a
-/// command, and a core that opened what it was told would open anything for any of them.
+/// in their browser, from any client. It takes no arguments, and the link is the core's to
+/// hold, since any add-on's page in the sim can send a command, and a core that opened what it
+/// was told would open anything for any of them.
 pub const OPEN_DISCORD: &str = "clients.open-discord";
 
 /// Where `OPEN_DISCORD` goes in a browser, which for a pilot not signed in there is a form to
@@ -290,7 +296,8 @@ pub const OPEN_DISCORD: &str = "clients.open-discord";
 pub const DISCORD_INVITE: &str = "https://discord.gg/Z8MqaSFczT";
 
 /// Where `OPEN_DISCORD` goes in the Discord app. Discord documents no form for this, so a later
-/// app may not take it (measured on Discord 1.0.9266, 2026-11-02, record/areas/interface/log.md).
+/// app may not take it (measured on Discord 1.0.9266, 2026-11-02, record/areas/interface/log.md,
+/// "2026-11-02: A `discord:` link opens an invite in the Discord app, from closed").
 pub const DISCORD_APP_INVITE: &str = "discord:///invite/Z8MqaSFczT";
 
 /// The arguments of `NOTIFICATION_CLICKED`. A click carries its card's landing, rather than the
@@ -333,6 +340,9 @@ pub struct CoreSlice {
     /// started with setup not yet done.
     pub username: Option<String>,
 }
+
+// `SETUP_DONE` and `GUIDE_DONE` in src/platform/efb-shell/src/settings/setting.ts name the
+// same two settings, so change both together.
 
 /// The setting that says first-time setup is done, so it shows once.
 pub const SETUP_DONE: &str = "app.setup-done";

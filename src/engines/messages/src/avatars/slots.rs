@@ -12,6 +12,8 @@ use bytemuck::{Pod, Zeroable};
 pub const FIGURES: usize = 8;
 
 /// The frames a yoke's stage holds across its animation, as `aircraft-model` samples them.
+/// `SAMPLES` in src/engines/aircraft-model/src/yokes.rs holds the same count, so change both
+/// together.
 pub const SAMPLES: usize = 21;
 
 /// What `Figure` is fed: each yoke, then each figure, the first `count` in use.
@@ -39,6 +41,8 @@ pub struct YokeSlot {
     /// Where the left hand's and the right hand's centers go, in the frame of the last
     /// stage's node.
     pub grips: [[f32; 3]; 2],
+    /// `MOST_STAGES` in src/engines/aircraft-model/src/yokes.rs holds the same count, so
+    /// change both together.
     pub stages: [StageSlot; 2],
 }
 
@@ -85,6 +89,10 @@ pub struct FigureState {
     pub facing: f32,
     pub pose: PoseSlot,
 }
+
+// The bits of `FigureState::shows`, which `Figure` writes into `Z:DUALINPUT_FIGURE_SHOWS`.
+// `SHOWS` in src/features/avatars/figure/model.ts holds the same bits, so change both
+// together.
 
 /// Every part shows.
 pub const SHOWS_ALL: u32 = SHOWS_BODY | SHOWS_HEAD | SHOWS_HANDS;

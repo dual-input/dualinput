@@ -24,7 +24,8 @@ pub const NAME: &str = "pointer-sync";
 pub const GESTURE: CockpitKind<Gesture> = CockpitKind::new(10);
 
 /// One message of a gesture. Its point is `point` rather than `at`, since the Coherent GT check
-/// reads any `.at` in our code in the sim as `Array.prototype.at`, which the engine lacks.
+/// reads any `.at` in our code in the sim as `Array.prototype.at`, which the engine lacks
+/// (record/areas/architecture/coherent-gt.md, "Built-ins").
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize, TS)]
 #[serde(rename_all = "kebab-case")]
 #[ts(export, export_to = "pointer-sync/")]
@@ -92,7 +93,7 @@ pub struct Play {
 pub enum Lock {
     #[default]
     None,
-    /// This machine isn't the PF's, and has no link up to the PF.
+    /// This machine isn't the pilot flying's, and has no link up to the pilot flying.
     NoLink,
     /// A replay or a catch-up runs here.
     CatchingUp,

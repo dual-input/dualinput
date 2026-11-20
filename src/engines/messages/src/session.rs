@@ -138,8 +138,8 @@ pub const MATCH: Key<MatchValues> = Key::new(4, Writer::Member);
 /// The session's aircraft and preflight's phase, which the pilot flying's core writes.
 pub const PREFLIGHT: Key<Preflight> = Key::new(5, Writer::PilotFlying);
 
-/// A member's entry: its display name, kind, and endpoint ID. Its pilot ID is the stamp's
-/// writer.
+/// A member's entry: its display name, color, kind, and endpoint ID. Its pilot ID is the
+/// stamp's writer.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MemberEntry {
     pub name: String,
@@ -463,7 +463,9 @@ pub struct Share {
     pub on: bool,
 }
 
-/// The display name setting, the name the crew sees, which Host and Join need.
+/// The display name setting, the name the crew sees, which Host and Join need. `NAME` in
+/// src/platform/efb-shell/src/settings/setting.ts names the same setting, so change both
+/// together.
 pub const NAME: &str = "session.name";
 
 /// The color setting, the color of the pilot's figure and head: `AUTOMATIC`, or a name in

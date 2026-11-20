@@ -23,8 +23,8 @@ pub const HOST: Key<Option<PilotId>> = Key::role(7, Writer::Anyone);
 pub const IDENTITIES: Channel<Identified> = Channel::new(7, Delivery::Stream, 200);
 
 /// Each poll's states, in batches, as one-off packets of which only the newest of each place
-/// waits to go, handed over after every other one-off channel's
-/// (record/areas/network/01-between-machines.md, "Sending").
+/// waits to go, handed over after every other one-off channel's but the cockpit stream's
+/// clocks (record/areas/network/01-between-machines.md, "Sending").
 pub const STATES: Channel<Batch> = Channel::new(8, Delivery::Newest, 100);
 
 /// The routine that draws every copy each frame, 1s behind the traffic host's reads.
@@ -124,7 +124,8 @@ pub struct State {
 /// The light switches a state carries, in the order of its bits, lowest first, the variables
 /// the traffic host reads and a copy is written, rather than `LIGHT … ON`, which read on for
 /// every parked AI aircraft in FS Copilot's captures (record/areas/traffic-atc/log.md,
-/// 2026-11-15).
+/// "2026-11-15: FS Copilot's host read all five lights on for every parked AI aircraft, so
+/// its copies lit up at the gate").
 pub const LIGHTS: [&str; 5] = [
     "A:LIGHT STROBE",
     "A:LIGHT LANDING",

@@ -43,7 +43,8 @@ fn numbers(makers: &[&str]) -> BTreeMap<u16, String> {
             for (at, _) in text.match_indices(maker) {
                 let rest = text[at + maker.len()..].trim_start();
                 let digits: String = rest.chars().take_while(char::is_ascii_digit).collect();
-                // The constructor's own `const fn` takes no literal.
+                // A constructor with no number after it, such as one a doc comment mentions,
+                // makes no key or item.
                 let Ok(number) = digits.parse::<u16>() else {
                     continue;
                 };

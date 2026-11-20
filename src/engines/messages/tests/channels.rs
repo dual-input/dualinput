@@ -23,7 +23,8 @@ fn no_two_channels_share_a_number() {
         for (at, _) in text.match_indices("Channel::new(") {
             let rest = text[at + "Channel::new(".len()..].trim_start();
             let digits: String = rest.chars().take_while(char::is_ascii_digit).collect();
-            // `Channel::new(number, ...)` in the type's own `const fn` takes no literal.
+            // A `Channel::new(` with no number after it, such as one a doc comment mentions,
+            // makes no channel.
             let Ok(number) = digits.parse::<u16>() else {
                 continue;
             };

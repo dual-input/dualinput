@@ -1,5 +1,6 @@
 //! What the recording crate shows the apps of the runs the core keeps, and the commands it
-//! takes (record/areas/recording/01-recording-and-bug-reports.md, the note of 2026-10-23).
+//! takes (record/areas/recording/01-recording-and-bug-reports.md, "What each PC keeps", and
+//! the note at its top).
 
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;

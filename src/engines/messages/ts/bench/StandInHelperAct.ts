@@ -6,6 +6,6 @@ import type { WantId } from "../core_helper/WantId.ts";
 
 /**
  * What the bench tells the stand-in core helper over the line the stand-in opens to it
- * (record/areas/build/02-testing.md's note of 2026-10-22).
+ * (record/areas/build/02-testing.md, "The stand-in core helper").
  */
 export type StandInHelperAct = { "act": "hello", version: string | null, hash: string | null, } | { "act": "press", binding: number, down: boolean, } | { "act": "next-press", input: Input, name: string, } | { "act": "click", x: number, y: number, } | { "act": "mouse", kind: MouseKind, x: number, y: number, } | { "act": "moves", per_second: number, for_ms: number, } | { "act": "frame", capture: number, bytes: number, } | { "act": "capturing", capture: number, program: string | null, } | { "act": "failed", want: WantId, error: string, } | { "act": "lists", outputs: Array<DeviceInfo>, programs: Array<string>, } | { "act": "in-use", output: DeviceInfo | null, } | { "act": "exit", code: number, };

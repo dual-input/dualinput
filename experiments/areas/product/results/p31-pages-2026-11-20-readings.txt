@@ -1,0 +1,22 @@
+p31 pages, 2026-11-20, 17:04 to 17:16 local: what each frame-rate reading measured
+
+One Dual Input session from `run.ts hold`, Dual Input at fb26041 (package, release core, and bench rebuilt by
+`run.ts prepare`), the Black Square Baron 58P on runway 14 at Seymour, SEGS, at noon, uncapped, no frame
+generation, 3440x1440, the sim in front, nobody at the PC. Each reading is `pages.mjs fps 30`: 30s of
+SimConnect's per-frame data, in the file named.
+
+file (UTC)                               state                                         fps     ms a frame
+p31-pages-fps-2026-11-20-16-07-10.txt    the session as it flew, before the meter      74.06   13.50
+p31-pages-fps-2026-11-20-16-08-56.txt    the banner's panel closed                     73.77   13.56
+p31-pages-fps-2026-11-20-16-09-41.txt    the banner's panel open, as the session has   73.57   13.59
+p31-pages-fps-2026-11-20-16-10-27.txt    the banner's panel closed                     73.52   13.60
+p31-pages-fps-2026-11-20-16-11-12.txt    the banner's panel open                       73.23   13.65
+p31-pages-fps-2026-11-20-16-12-39.txt    the bench backend's esbuild paused            72.95   13.71
+p31-pages-fps-2026-11-20-16-13-12.txt    esbuild running                               72.22   13.85
+p31-pages-fps-2026-11-20-16-13-45.txt    esbuild paused                                71.21   14.04
+p31-pages-fps-2026-11-20-16-14-19.txt    esbuild running                               72.01   13.89
+
+The banner's panel was closed and opened from the EFB's document with
+`Coherent.call('TOOLBAR_BUTTON_TOGGLE', 'PANEL_DUALINPUT_BANNER', open)`, as the EFB app does, and the
+inspector's page list lost and regained "Dual Input" each time. esbuild (the local backend's watcher, under
+wrangler) was paused with NtSuspendProcess and resumed with NtResumeProcess, 3s before each reading.

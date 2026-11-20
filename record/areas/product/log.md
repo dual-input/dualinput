@@ -3,6 +3,34 @@
 What we found about Dual Input as a whole, such as what it costs the PC that runs the sim, newest entry first.
 The probes are in [experiments/areas/product](../../../experiments/areas/product), and their raw output is in its `results/` folder.
 
+## 2026-11-20: Our EFB app and banner cost the sim's frame nothing we could measure, nor did the bench's own watcher
+
+**Asked:** whether our pages in the sim, the EFB app and the banner, make the part of Dual Input's frame cost [the entry below](#2026-11-20-dual-input-added-085ms-to-the-sims-frame-and-fs-copilot-030ms-and-dual-inputs-figures-about-034ms-of-its-085ms) left open beyond its figures, and whether the bench's own processes do.
+
+**Expected:** the pages, since FS Copilot draws nothing in the sim, and the crew's heads on our pages draw up to 30 times a second while one moves (read in src/packages/crew/src/heads/live.ts, `LIVE`).
+
+**Found:** on MSFS 2024 1.9.24.0, on our development machine, in one Dual Input session flying as the schedule's did, from [p31-tool-cost](../../../experiments/areas/product/p31-tool-cost/pages.mjs)'s `hold` and `pages.mjs`.
+The package and cores were rebuilt at fb26041 first, since the bench's tools there refused the bench core built at 933d7b9.
+
+- Our menu script ran in the sim's `mainUi`, our panel bridge in all 20 of the 58P's cockpit panels, our EFB app in the EFB's document, and the banner in its own panel ([look](../../../experiments/areas/product/results/p31-pages-look-2026-11-20-16-06-33.txt)).
+- The EFB was closed, its document 782 by 0 pixels, and our app had no canvas in it, so no head was drawing.
+- The banner's panel stayed open through the session, 480 by 520 pixels, with nothing on it.
+- Over 20s, every document's animation-frame and timer callbacks together took 129ms a second: the weather radar's panel 49ms, the Flow add-on's 44ms, and each other gauge 7.7ms or less ([meter](../../../experiments/areas/product/results/p31-pages-meter-2026-11-20-16-07-42.txt)).
+  Our banner ran none, the EFB's document 0.2 a second at 0.00ms, and `mainUi` none.
+  The meter counts only callbacks scheduled after it starts, so the instrument reads' 250ms timer, the menu script's 500ms one, and work a socket's message starts went uncounted.
+- With the banner's panel closed and opened in turn, the frame took 13.56ms and 13.60ms closed, and 13.59ms and 13.65ms open ([readings](../../../experiments/areas/product/results/p31-pages-2026-11-20-readings.txt)).
+  The frame rose about 0.03ms from each reading to the next, which accounts for the 0.04ms between the two.
+- With the local backend's esbuild paused and running in turn, about 3% of one core in the schedule's runs, the frame took 13.71ms and 14.04ms paused, and 13.85ms and 13.89ms running.
+- The frame rose from 13.50ms to 13.89ms over the session's 8 minutes of readings, and two 30s readings a minute apart differed by up to 0.19ms, so these readings can't resolve less than about 0.2ms.
+
+**Changed:** nothing.
+What's left of Dual Input's cost beyond its figures is its panel bridge in every cockpit panel, our module's work each frame, and the core's SimConnect traffic, none of which a session can switch off and on.
+A schedule with each left out, from an uncommitted patch, would settle which.
+
+**Affects:** the open question in the entry below.
+
+**Evidence:** [the readings](../../../experiments/areas/product/results/p31-pages-2026-11-20-readings.txt), [the look](../../../experiments/areas/product/results/p31-pages-look-2026-11-20-16-06-33.txt), and [the meter](../../../experiments/areas/product/results/p31-pages-meter-2026-11-20-16-07-42.txt).
+
 ## 2026-11-20: Dual Input added 0.85ms to the sim's frame and FS Copilot 0.30ms, and Dual Input's figures about 0.34ms of its 0.85ms
 
 **Asked:** what each shared-cockpit tool costs the PC that runs the sim, in the sim's frame time, the tool's own CPU and memory, and its network bytes, with Dual Input and FS Copilot in the same aircraft, and how much of Dual Input's cost its figures make.

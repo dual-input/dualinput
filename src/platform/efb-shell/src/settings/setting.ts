@@ -10,7 +10,7 @@ export const SETUP_DONE = "app.setup-done"
 export const GUIDE_DONE = "app.guide-done"
 export const NAME = "session.name"
 export const FIGURE_COLOR = "session.color"
-/** `OUTPUT` in src/platform/core-helper-service/src/lib.rs names the same setting. */
+/** `OUTPUT` in src/platform/core-helper-service/src/lib.rs names the same setting, so change both together. */
 export const OUTPUT = "core-helper.output"
 
 /** A setting's value, or undefined until the core has sent the slice. */

@@ -284,6 +284,7 @@ pub const BANNER: &str = "banner";
 
 /// The command for a click on a notification outside its action, from any client, with
 /// `NotificationClicked` as its arguments. It sends the EFB app `EfbAppOrder::OpenEfb`.
+/// `CLICKED` in src/platform/banner/src/banner.tsx names it too, so change both together.
 pub const NOTIFICATION_CLICKED: &str = "clients.notification-clicked";
 
 /// The command that opens our Discord, in the pilot's Discord app if they have it and otherwise

@@ -34,18 +34,19 @@ use crate::settings::Settings;
 
 /// How often each side sends something, at least: the core sends every client `alive` this
 /// often whatever else it sends, and each client does the same (decision 010;
-/// record/areas/core/02-clients-and-panel-bridge.md's note of 2026-10-22).
+/// record/areas/core/02-clients-and-panel-bridge.md, "The protocol").
 const ALIVE: Duration = Duration::from_secs(2);
 
 /// A socket the core hasn't heard from in this long, in µs, is closed, since a page's socket
 /// stays open after the page is gone (record/areas/architecture/01-spine.md, "The sim's pages").
 const QUIET: u64 = 8_000_000;
 
-/// How long a one-time notification stays in the slice, in µs: past its card's 6s, so a page that
-/// reconnects within a moment still shows it, and not much longer, so a page that opens later,
-/// as the banner's does at the next flight, doesn't show old news
-/// (record/areas/interface/decisions.md, "The banner is a box of opaque cards at the screen's top
-/// right"). The 2s tick checks, so it can stay up to 2s longer.
+/// How long a one-time notification stays in the slice, in µs: past its card's 6s, `ONCE_MS` in
+/// src/platform/banner/src/note.ts, so a page that reconnects within a moment still shows it, and
+/// not much longer, so a page that opens later, as the banner's does at the next flight, doesn't
+/// show old news (record/areas/interface/decisions.md, "The banner is a box of opaque cards at the
+/// screen's top right"). The 2s tick checks, so it can stay up to 2s longer. When `ONCE_MS`
+/// grows, this grows with it.
 const ONCE_STAYS: u64 = 10_000_000;
 
 /// How often the clients crate builds the slices some client shows, and sends each client

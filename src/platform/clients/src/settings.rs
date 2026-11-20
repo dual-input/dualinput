@@ -12,6 +12,8 @@ use crate::hooks::SettingDef;
 use crate::{Clients, SettingChanged};
 
 /// The settings' file in the core's data folder, whose bytes come with the core's first input.
+/// `SETTINGS_FILE` in src/apps/desktop/src/places.rs names the same file, so change both
+/// together.
 pub(crate) const FILE: &str = "settings.json";
 
 #[derive(Default)]

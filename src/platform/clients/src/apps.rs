@@ -1,6 +1,6 @@
-//! What the clients crate holds for the apps alone: the banner's slice, and the command for a
-//! click on a notification outside its action (record/areas/interface/01-apps.md, "Slices and
-//! commands").
+//! What the clients crate holds for the apps alone: the banner's slice, the command for a click
+//! on a notification outside its action, and the command that opens our Discord
+//! (record/areas/interface/01-apps.md, "Slices and commands").
 
 use kernel::{Cx, Job, JobId};
 use messages::clients::{

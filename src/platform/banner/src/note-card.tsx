@@ -1,8 +1,9 @@
-// One notification's card. The sim blurs whatever lies behind a panel's painted pixels, and we know no way to turn it
-// off, so a card is opaque, with its edge an inset ring and no shadow, since a translucent pixel would show the blur.
-// A click anywhere on it opens the EFB app where the notification is explained or acted on; its × or a drag toward
-// the screen's edge dismisses it (record/areas/interface/decisions.md, "The banner is a box of opaque cards at the
-// screen's top right").
+// One notification's card. A click anywhere on it opens the EFB app where the notification is explained or acted on;
+// its × or a drag toward the screen's edge dismisses it. The sim blurs whatever lies behind a panel's painted pixels,
+// and we know no way to turn it off, so a card is opaque, with its edge an inset ring and no shadow, since a
+// translucent pixel would show the blur (measured on MSFS 2024, 2026-10-04, record/areas/interface/log.md, "An
+// in-game panel of ours takes clicks, and opens from code in the toolbar's and the EFB's pages, but not in a cockpit
+// page").
 
 import { EmptyHead, Head } from "@dualinput/crew"
 import { Button, cx, mouseIn, part, Room, showPressOn, Spinner, useMoment, useRoot } from "@dualinput/ui"

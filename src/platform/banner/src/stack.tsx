@@ -31,7 +31,7 @@ function Row({ fresh, leaving, away, onGone, children }: { fresh: boolean; leavi
   const [stage, setStage] = useState<RowStage>(fresh ? "enter" : "rest")
   const gone = useRef(onGone)
   gone.current = onGone
-  // Coherent GT has no ResizeObserver, so the row measures itself after every render.
+  // Coherent GT has no ResizeObserver, so the row measures itself after every render (record/areas/architecture/coherent-gt.md).
   useLayoutEffect(() => {
     const measured = inner.current?.offsetHeight ?? 0
     if (measured !== height) setHeight(measured)

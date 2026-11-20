@@ -16,7 +16,7 @@ import type { Landing, Note } from "./note.ts"
 import { PreflightCard } from "./preflight-card.tsx"
 import { BOX, Stack } from "./stack.tsx"
 
-/** The command a click sends, and the name a click on the summary goes by, since the summary is no notification. `NOTIFICATION_CLICKED` in src/engines/messages/src/clients.rs names the command too. */
+/** The command a click sends, and the name a click on the summary goes by, since the summary is no notification. `NOTIFICATION_CLICKED` in src/engines/messages/src/clients.rs names the command too, so change both together. */
 const CLICKED = "clients.notification-clicked"
 const SUMMARY_CLICK = "banner.preflight-summary"
 /** What the page raises for a click while no core can carry it, which the EFB app watches while its own link is down. `OPEN_EFB_VARIABLE` in src/platform/efb-shell/src/landing.ts names the same one, so change both together. */
@@ -28,7 +28,11 @@ const SAME_SHAPE = 0.01
 /** How often the page reads whether the EFB app is on screen, in milliseconds. */
 const LOOK_AT_EFB_EVERY = 250
 
-/** The panel takes its size from the screen's height, so its pixels do too: the box always covers the same share of the screen. */
+/**
+ * The panel takes its size from the screen's height, so its pixels do too: the box always covers the same share of the screen (measured on MSFS 2024, 2026-10-04,
+ * record/areas/interface/log.md, "An in-game panel's size is a percent of the screen's height, capped at 150% of it, so ours can't span a wide screen, though Parallel 42's
+ * panels do").
+ */
 function useBoxScale(host: HTMLElement): number {
   const [scale, setScale] = useState(1)
   useEffect(() => {
@@ -43,12 +47,16 @@ function useBoxScale(host: HTMLElement): number {
 }
 
 /**
- * The sim sizes a panel as it opens, then stretches it with the window, which moves our box in from the screen's corner, or cuts it off (measured on MSFS 2024, 2026-11-02,
- * record/areas/interface/log.md). So once a change of the window settles, a panel whose shape differs from the one it opened with asks for a new opening.
+ * The sim sizes a panel as it opens, then stretches it with the window, which moves our box in from the screen's corner, and a smaller window would cut it off
+ * (unverified). So once a change of the window settles, a panel whose shape differs from the one it opened with asks for a new opening (measured on MSFS 2024,
+ * 2026-11-02, record/areas/interface/log.md, "The sim sizes a panel only as it opens, the toolbar's open call changes nothing on an open panel, and a load's old page
+ * closes after a short load has ended").
  */
 function useAskToReopen(host: HTMLElement, ask: () => void): void {
   useEffect(() => {
-    // The panel measures nothing at times, as it may with another window in front of the sim, which says nothing of its shape.
+    // The panel measures nothing at times, as it may with another window in front of the sim, which says nothing of its shape
+    // (measured in the EFB's document on MSFS 2024, 2026-11-01, record/areas/interface/log.md, "React 19 runs in the EFB's own
+    // document and takes a pilot's real click, wheel, and typing, and on a card-sized change it stays within 0.1ms of FSComponent").
     const shape = () => (host.offsetHeight > 0 ? host.offsetWidth / host.offsetHeight : 0)
     let opened = shape()
     let later = 0

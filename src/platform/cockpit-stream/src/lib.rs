@@ -39,9 +39,8 @@ use crate::order::{Inbox, Next, Skipped};
 
 /// How often each member sends its clock.
 const CLOCK_EVERY: Duration = Duration::from_secs(1);
-/// A held value goes out at most this often, 20 times a second, a starting value v1's
-/// recordings tune, so a change undone within 50ms never goes out
-/// (record/areas/sync/04-order-and-recovery.md, "The cockpit stream").
+/// A held value goes out at most this often, 20 times a second, so a change undone within 50ms
+/// never goes out (record/areas/sync/04-order-and-recovery.md, "The cockpit stream").
 const HOLD_FOR: Duration = Duration::from_millis(50);
 /// Each message the stream applies queues two calls, its handler's and its answer's, and the
 /// kernel panics past 1,000 queued in one input, which a replay's messages, up to about 540 in

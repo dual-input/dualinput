@@ -155,8 +155,11 @@ export class Locks {
    * The element at a point, looking past every lock, so a gesture played under one reaches the
    * display. Each lock ignores hit-testing only for this one synchronous call, so no real press
    * gets through in between (read in the FS Copilot fork, FsCopilot.Bridge/PackageSources/
-   * HTML_UI/FsCopilot/overlay.js, `hitTest`). That Coherent GT applies the style before
-   * `elementFromPoint` runs is unverified, and a case in the sim settles it.
+   * HTML_UI/FsCopilot/overlay.js, `hitTest`). Coherent GT applies the style before
+   * `elementFromPoint` runs, since another pilot's drag played its moves and its up under an
+   * unseen lock on the A220's ND (measured on MSFS 2024, 2026-11-09,
+   * record/areas/pointer-sync/log.md, "Pointer sync's cases in the sim pass on the A220's ND and
+   * the Baron's tablet, once the second pilot's display carries the A220's livery").
    */
   hitTest(x: number, y: number): Element | null {
     const shown = this.overlays.filter((o) => o.el !== null)

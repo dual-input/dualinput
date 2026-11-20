@@ -17,7 +17,7 @@ export type Note = Omit<Notification, "landing"> & {
   list?: string[]
 }
 
-/** How long a one-time card stays, in milliseconds, paused under the pointer. */
+/** How long a one-time card stays, in milliseconds, paused under the pointer. When this grows, `ONCE_STAYS` in src/platform/clients/src/lib.rs, which keeps the notification in the slice past this time, grows with it. */
 export const ONCE_MS = 6000
 
 /** Held cards keep their places by this order, when they don't all fit. */

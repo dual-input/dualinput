@@ -117,8 +117,10 @@ impl Clients {
             // A page's socket stays open after the page reloads, so a panel's new socket
             // naming the panel another socket holds replaces it. Its name, not its
             // instruments' keys, tells, since two of the Black Square Baron's panels each hold
-            // an instrument keyed `GNS_DISABLED` (record/areas/core/
-            // 02-clients-and-panel-bridge.md's note of 2026-10-22).
+            // an instrument keyed `GNS_DISABLED` (measured on MSFS 2024, 2026-10-22,
+            // record/areas/core/log.md, "Stage 5's bridge loads in all 20 of the Baron's
+            // panels, joins the core on a session's announcement, and leaves the cockpit whole
+            // when bridge.js is missing or throws, but two panels shared an instrument key").
             let old: Vec<u64> = self
                 .sockets
                 .iter()

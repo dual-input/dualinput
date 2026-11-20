@@ -28,14 +28,15 @@ use serde_json::{Value, json};
 use crate::hooks::{Binding, CaptureReg, Owned, SoundReg, StreamReg};
 
 /// The setting that holds the output device the pilot picked, or `null` for Windows'
-/// default.
+/// default. `OUTPUT` in src/platform/efb-shell/src/settings/setting.ts names the same setting,
+/// so change both together.
 pub const OUTPUT: &str = "core-helper.output";
 
 /// The development setting that names the program the core starts as its helper, which is
 /// `dualinput-core-helper.exe` beside the core when it's empty. The bench names its stand-in
 /// core helper here (record/areas/build/02-testing.md, "The stand-in core helper").
-/// `PROGRAM` in src/apps/core/src/edges/core_helper.rs and this setting's label below name the
-/// same file, so change all three together.
+/// `PROGRAM` in src/apps/core/src/edges/core_helper.rs, `PipeOut::Start`'s comment in edge.rs,
+/// and this setting's label below name the same file, so change all four together.
 pub const PROGRAM: &str = "core-helper.program";
 
 /// The service's state.

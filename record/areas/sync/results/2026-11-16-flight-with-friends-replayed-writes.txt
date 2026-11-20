@@ -1,6 +1,6 @@
 ﻿Stage 14b's replays of stage 16's first flight with friends, 2026-11-16.
 Both recordings replayed with every checkpoint matching (host: 821,299 inputs, 2,832 checkpoints; joiner: 446,841 inputs, 2,662 checkpoints),
-on a development build of the release 0.1.0's code (commit 7859de2 with stage 16's tree, a424f21, over it) with log lines added in state sync
+on a development build of the release 0.1.0's code (commit 6fa2382 with stage 16's tree, 549f72f, over it) with log lines added in state sync
 (each reading, arrival, catch-up entry, and action, at info under the target s14b) and in flight-model sync (the flying aircraft's sample, about once a second).
 Times are each core's own counter in seconds; the host's 16049.424 is the joiner's 53843.814, control generation 12.
 The host is pilot-b, who hosted, on the other PC; the joiner is pilot-a, on our development machine. Session names are left out.

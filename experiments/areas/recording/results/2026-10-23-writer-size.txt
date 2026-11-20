@@ -1,4 +1,4 @@
-writer-size, 2026-10-23, on the development machine, release build, on commit bf43be3
+writer-size, 2026-10-23, on the development machine, release build, on commit e38a4ff
 cargo run --release -- ../../../../tools/bench/fixtures/flight-58p-egll-600s.bin.zst
 
 312702 records, 47.5 MB, over 600.0s of the capture's clock

@@ -31,7 +31,7 @@ The size budgets, from the stream's and the engine's own tests:
 budget: a change took 95 bytes, so a 30-minute cut at 20 a second keeps 3420000 bytes, against 4,194,304
 budget: a catch-up's answer for 500 entries took 44638 bytes, against 65,536
 
-The rerun on 2026-10-25, with no game on the PC, the processor at 7% to 9% before it, and the bench at normal priority, from c763560 and 037e92e.
+The rerun on 2026-10-25, with no game on the PC, the processor at 7% to 9% before it, and the bench at normal priority, from 4934917 and ef4d508.
 `node tools/bench.ts cockpit session profiles`, its budget and result lines:
 # budget: James's run, with a lever changed 60 times a second: the slowest input took 268µs, 0 over 1ms, against 1,000µs for a handler with one pause under 2ms allowed
 # budget: Adam's run, with a lever changed 60 times a second: the slowest input took 133µs, 0 over 1ms, against 1,000µs for a handler with one pause under 2ms allowed

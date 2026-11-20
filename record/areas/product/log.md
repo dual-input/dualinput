@@ -33,7 +33,7 @@ Its open question about the figures, and its effect on [04-room-for-later](04-ro
 **Expected:** the pages, since FS Copilot draws nothing in the sim, and the crew's heads on our pages draw up to 30 times a second while one moves (read in src/packages/crew/src/heads/live.ts, `LIVE`).
 
 **Found:** on MSFS 2024 1.9.24.0, on our development machine, in one Dual Input session flying as the schedule's did, from [p31-tool-cost](../../../experiments/areas/product/p31-tool-cost/pages.mjs)'s `hold` and `pages.mjs`.
-The package and cores were rebuilt at fb26041 first, since the bench's tools there refused the bench core built at 933d7b9.
+The package and cores were rebuilt at 913f6ef first, since the bench's tools there refused the bench core built at fa505c5.
 
 - Our menu script ran in the sim's `mainUi`, our panel bridge in all 20 of the 58P's cockpit panels, our EFB app in the EFB's document, and the banner in its own panel ([look](../../../experiments/areas/product/results/p31-pages-look-2026-11-20-16-06-33.txt)).
 - The EFB was closed, its document 782 by 0 pixels, and our app had no canvas in it, so no head was drawing.
@@ -64,7 +64,7 @@ The two figures, the pilot's own and the second pilot's in the right seat, to co
 **Found:** on MSFS 2024 1.9.24.0, on our development machine, 2026-11-20, with the `p31-tool-cost` harness ([procedure](../../../experiments/areas/product/p31-tool-cost/procedure.md), [report](../../../experiments/areas/product/results/p31-2026-11-20_13-12-29-report.md)).
 Each run started the sim fresh with one tool's package in Community, or neither, loaded the Black Square Baron 58P on runway 14 at Seymour, SEGS, at noon, and after 30s timed every frame for 300s with nobody at the PC, with no frame-rate cap, frame generation off, at 3440x1440.
 PresentMon 2.6.0 timed the frames with its display, GPU, and input tracking off: with display tracking on it wrote none of the sim's frames (2026-11-19), and the PresentMon in NVIDIA's FrameView SDK records nothing outside FrameView (2026-11-18).
-Each tool linked to a second pilot on the same PC through a local relay: FS Copilot 172e480 to a second FS Copilot kept off the sim, and Dual Input's release core at 933d7b9 to a bench core on a stand-in sim.
+Each tool linked to a second pilot on the same PC through a local relay: FS Copilot 172e480 to a second FS Copilot kept off the sim, and Dual Input's release core at fa505c5 to a bench core on a stand-in sim.
 The fourth mode ran Dual Input's core built with `no-figures.patch`, which creates no figure in the sim and still sends the pilot's pose.
 Four rounds ran the four modes, every second round in reverse, so a steady drift over the 4 hours falls on every mode alike.
 All 16 runs measured, with the sim in focus throughout.

@@ -1,6 +1,6 @@
 p31 pages, 2026-11-20, 17:04 to 17:16 local: what each frame-rate reading measured
 
-One Dual Input session from `run.ts hold`, Dual Input at fb26041 (package, release core, and bench rebuilt by
+One Dual Input session from `run.ts hold`, Dual Input at 913f6ef (package, release core, and bench rebuilt by
 `run.ts prepare`), the Black Square Baron 58P on runway 14 at Seymour, SEGS, at noon, uncapped, no frame
 generation, 3440x1440, the sim in front, nobody at the PC. Each reading is `pages.mjs fps 30`: 30s of
 SimConnect's per-frame data, in the file named.

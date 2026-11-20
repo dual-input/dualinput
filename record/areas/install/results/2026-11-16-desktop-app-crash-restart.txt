@@ -61,7 +61,7 @@ The bench core on a fresh data folder, 6 runs, as the build finished:
 Windows also keeps a process that has exited while a driver holds a reference to it, which no handle listing shows, so
 naming what held the bench's dead cores open is left undone.
 
-=== This session's runs: the app at 74b6fc2 ("before") and the same with Held::open's 0ms wait ("after"), alternating
+=== This session's runs: the app at 6a13709 ("before") and the same with Held::open's 0ms wait ("after"), alternating
 Before first:
 round 1, before : 2045 ms, 77 'found the core' lines, ok, 2026-11-16_20-26-14-desktop-app-crash
 round 1, after : 2052 ms, 0 'found the core' lines, ok, 2026-11-16_20-26-26-desktop-app-crash
@@ -105,10 +105,10 @@ ok 5 - a second start hands its request to the running app and exits
 ok 6 - our package goes into Community ...
 ok 7 - Check now goes through checking to up to date, ...
 not ok 8 - the app with no window and the sim closed takes under 5 MB and 0.2% of one CPU core
-  the app held 4.30 MB and used 0.268% of one CPU core over 60s, as at 74b6fc2, 0.273% earlier this session, both with
+  the app held 4.30 MB and used 0.268% of one CPU core over 60s, as at 6a13709, 0.273% earlier this session, both with
   the walk for the sim that 2026-11-16's idle-CPU work replaced
 
-=== node tools/bench.ts desktop-app, with the fix rebased onto a611e4c and its EnumProcesses walk, after a game closed
+=== node tools/bench.ts desktop-app, with the fix rebased onto 569e164 and its EnumProcesses walk, after a game closed
 ok 1 - the sim's start starts a core within 3s, ...   # the core started 1831ms after the sim's process appeared
 ok 2 - a core that crashes while the sim runs ...     # the core started again 2025ms after the crash
 ok 3 - a sim that starts again as the core exits for the last one gets a core

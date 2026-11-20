@@ -18,7 +18,7 @@ replay	17.2s for 2636127 inputs, 17.2s an hour	budget 360s an hour	within
 recording	126.2 MB
 
 The core's log, its start, the playback, and the loop's stats:
-30827954155µs  INFO dualinput_core::run: the core started commit="2d63ea80bd3fca87db104f5c7e6e039fb028914b" uncommitted=Some("7d85dd92596f0ae301bff18b17ffdda70d4e075c21ece151e72623886659ae91") profile="release" messages="a48d170bd1323f6dc7b0d264100e0072118449aa4abd304f33dc035999ccd606"
+30827954155µs  INFO dualinput_core::run: the core started commit="9b611979b94d066086874cfdf16e7fa6addc2c56" uncommitted=Some("7d85dd92596f0ae301bff18b17ffdda70d4e075c21ece151e72623886659ae91") profile="release" messages="a48d170bd1323f6dc7b0d264100e0072118449aa4abd304f33dc035999ccd606"
 30828018013µs  INFO dualinput_core::bench::load: the playback started records=312702 plays=6
 30887958534µs #36956  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36957 busy_percent=0.34 wait_p50_us=12 wait_p99_us=57 wait_p999_us=115 wait_max_us=2172 over_1ms=0 slowest_us=301 slowest_seq=29874 slowest_stamp=30876413578
 30947958978µs #74026  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37070 busy_percent=0.48 wait_p50_us=12 wait_p99_us=75 wait_p999_us=191 wait_max_us=100082 over_1ms=1 slowest_us=100003 slowest_seq=36972 slowest_stamp=30888018421
@@ -100,7 +100,7 @@ stamps rise	439359 of 439359 inputs recorded in order		within
 recording	21.1 MB
 
 The core's log, its start, the playback, and the loop's stats:
-34557893153µs  INFO dualinput_core::run: the core started commit="2d63ea80bd3fca87db104f5c7e6e039fb028914b" uncommitted=Some("49d87f4dfdaacc44d9b6c6c89970572bdbe41e3a8d3558bdb849f0fca632b7a2") profile="release" messages="d3fd9e37736590ef1e58706190384e8d6539c5ec1360f85e14f3228f5c7215e4"
+34557893153µs  INFO dualinput_core::run: the core started commit="9b611979b94d066086874cfdf16e7fa6addc2c56" uncommitted=Some("49d87f4dfdaacc44d9b6c6c89970572bdbe41e3a8d3558bdb849f0fca632b7a2") profile="release" messages="d3fd9e37736590ef1e58706190384e8d6539c5ec1360f85e14f3228f5c7215e4"
 34557965789µs  INFO dualinput_core::bench::playback: the playback started records=312702 plays=1
 34617898715µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36955 busy_percent=0.48 wait_p50_us=13 wait_p99_us=103 wait_p999_us=151 wait_max_us=2092 over_1ms=0 slowest_us=237 slowest_seq=12765 slowest_stamp=34578549128
 34677906095µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37071 busy_percent=0.63 wait_p50_us=14 wait_p99_us=99 wait_p999_us=255 wait_max_us=100084 over_1ms=1 slowest_us=100003 slowest_seq=36972 slowest_stamp=34617966325

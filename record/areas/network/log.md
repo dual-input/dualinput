@@ -8,7 +8,7 @@ What we found about connecting the crew's machines, directly or through our rela
 
 **Expected:** on a direct path QUIC sees each loss, unlike through a relay, where [p06] found the slots change nothing; so its congestion window shrinks, one-off packets queue in QUIC up to its 1 MiB default, and the packets behind them run late, which the slots bound.
 
-**Found:** on 2026-10-23, `tools/bench/droplet` at 57a0d1b ran between our two droplets, `dualinput-relay-fra` in fra1 and `dualinput-relay-nyc` in nyc3, each 1 vCPU and 512 MB on Ubuntu 24.04 ([results](results/2026-10-23-droplet-run/report.txt)).
+**Found:** on 2026-10-23, `tools/bench/droplet` at 16091ce ran between our two droplets, `dualinput-relay-fra` in fra1 and `dualinput-relay-nyc` in nyc3, each 1 vCPU and 512 MB on Ubuntu 24.04 ([results](results/2026-10-23-droplet-run/report.txt)).
 The dialer sent [p06]'s busy mix for 60s from a network namespace on the Frankfurt droplet, whose link lost packets each way at the run's rate through `tc netem`, to a listener on the same droplet with 11ms added each way, a 23ms round trip, or on the New York droplet, 83ms to 93ms away, about 85ms.
 Each case ran on the transport as it ships, and on a copy with [the patch](results/2026-10-23-droplet-run/without-slots.patch) that hands every one-off packet to QUIC as it comes, with QUIC's default queue, as p06's variant (a) did.
 Every connection went direct 68ms to 362ms after it opened, and in one run 1,008ms and 1,422ms after at its two ends, before its mix started, and stayed direct to its end.

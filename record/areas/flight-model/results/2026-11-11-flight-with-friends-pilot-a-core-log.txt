@@ -1,4 +1,4 @@
-51892504586µs  INFO dualinput_core::run: the core started commit="7859de22eb5cc21739523d2efcf43df73917a623" uncommitted=Some("deb2e369306bc66a1ddf70675b7f64725f86656aff5730729fbd98122303c293") profile="release" messages="b4a1b2556f5104a1321900218b8a7146d1aa9ad069b125c56b69f5192740b1b1"
+51892504586µs  INFO dualinput_core::run: the core started commit="6fa238291117951c7144355c1f6cf3682355125b" uncommitted=Some("deb2e369306bc66a1ddf70675b7f64725f86656aff5730729fbd98122303c293") profile="release" messages="b4a1b2556f5104a1321900218b8a7146d1aa9ad069b125c56b69f5192740b1b1"
 51892507462µs  INFO dualinput_core::edges::sockets: the clients' WebSocket server listens on 127.0.0.1 port=57430
 51892506794µs #1 [clients]  INFO clients::sockets: the core's WebSocket server listens on 127.0.0.1 port=57430
 51892514431µs #5 [sim-service]  INFO sim_service::seam: the sim's process was found process=37252 created=134389091265070230

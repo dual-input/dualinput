@@ -7,7 +7,7 @@
 //! Each record of the capture becomes an input whose source is its kind and whose bytes are
 //! its SimConnect message, with a checkpoint each second, as the core records them.
 //!
-//! On commit bf43be3, the writer ended a frame each second rather than flushing, and this
+//! On commit e38a4ff, the writer ended a frame each second rather than flushing, and this
 //! probe compared that with one frame and with a re-encoding flushed each second; its output
 //! then is results/2026-10-23-writer-size.txt.
 

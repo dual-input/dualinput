@@ -816,7 +816,7 @@ After a crash, the sim has to be closed in full before fspackagetool runs.
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
 
-**Evidence:** the skinned model, `experiments/areas/avatars/figure/model.mjs` at commit d96c749, and the package folder's file times, read when it happened; no run file.
+**Evidence:** the skinned model, `experiments/areas/avatars/figure/model.mjs` at commit f5205b3, and the package folder's file times, read when it happened; no run file.
 
 ## 2026-10-03: The sim doesn't play a scale animation that stretches a stick along its length
 

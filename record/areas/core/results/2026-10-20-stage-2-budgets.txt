@@ -1,6 +1,6 @@
 Stage 2's budgets, measured on our development machine on 2026-10-20.
 CPU: AMD Ryzen 7 7800X3D 8-Core Processor. Windows: 10.0.26200.0. rustc 1.95.0.
-The tree was commit 4eea371 with stage 2's changes uncommitted.
+The tree was commit e1a9e9b with stage 2's changes uncommitted.
 
 Timers and memory, a release build of apps/core's hand-run tests:
 
@@ -13,6 +13,6 @@ test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; fini
 Exiting, the log.txt of a debug build's run in
 records_a_run_exits_within_a_second_and_replays_to_every_checkpoint, from node tools/check.ts:
 
-17807971080µs  INFO dualinput_core::run: the core started commit="4eea371c4bb09cd125c16324c562ec7be865844b" uncommitted=Some("7358febf5b823194862bf55a7438528e37b0740ce16cf0ad6c5094dd90998e8b") profile="debug"
+17807971080µs  INFO dualinput_core::run: the core started commit="e1a9e9b85fd54b55a924ff713be42f8e80c97e5c" uncommitted=Some("7358febf5b823194862bf55a7438528e37b0740ce16cf0ad6c5094dd90998e8b") profile="debug"
 17810579273µs  INFO dualinput_core::run: the core is exiting seq=76
 17810608348µs  INFO dualinput_core::run: the core exited exit_took_ms=29

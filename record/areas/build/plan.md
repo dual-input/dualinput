@@ -912,7 +912,7 @@ The stage's code acts only in a session with a profile loaded, so it closes on t
 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the `state-sync` scenario's new case among them, which fails with the hold taken out; and the [sync log](../sync/log.md) has an entry for p33 and the fix.
 Done on 2026-11-19: `node tools/check.ts` passed, and the `state-sync` scenario passed 12 of 12 after the code review's fixes, its new case failing with the hold taken out ([sync log](../sync/log.md#2026-11-19-no-route-showed-an-autopilot-events-effect-in-the-frame-it-was-sent-so-a-guard-in-the-sim-reads-the-old-mode-and-the-events-of-one-frame-apply-in-the-order-sent)); the other 19 scenarios of the close wait for the next bench that runs them, since a game held the PC (user, 2026-11-19).
-On 2026-11-20 the whole bench passed 184 of 184 on main at 14ce25c, those 19 among them, and `node tools/check.ts` passed there too.
+On 2026-11-20 the whole bench passed 184 of 184 on main at 48c0d1d, those 19 among them, and `node tools/check.ts` passed there too.
 
 ## 16c Trim and bank after a handover
 

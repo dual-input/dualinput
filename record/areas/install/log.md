@@ -22,7 +22,7 @@ Time lost in one of the parts between the bench's kill and the line it waits for
 - Each pass logs two lines, so one crash wrote up to 1.2 MB into the app's log, which starts over past 1 MB only at the app's next start.
 - Stage 18's whole bench on 2026-11-15 looped in 4 of its 5 crash runs, up to 6,780 passes.
   At stage 15's close the case read 2,052ms to 2,443ms ([results](results/2026-11-11-desktop-app-bench.txt)), and those runs' logs are gone, so whether they looped is unverified.
-- With `Held::open` checking that the process still runs, the case read 2,025ms to 2,054ms in 10 runs and never looped, where the app at `74b6fc2`, alternating with it, read 2,038ms to 2,668ms and looped in 8 of 10.
+- With `Held::open` checking that the process still runs, the case read 2,025ms to 2,054ms in 10 runs and never looped, where the app at `6a13709`, alternating with it, read 2,038ms to 2,668ms and looped in 8 of 10.
   It looped whether it ran first or second in its pair, so the order the entry below saw came from the loop's spread.
 - With the walk the entry below changed, the whole `desktop-app` scenario passed 8 of 8, the crash case at 2,025ms with no loop.
 
@@ -44,7 +44,7 @@ A change in what the app runs, or in the PC around it.
 **Found** (measured on our development machine, 2026-11-16, Windows 11 Pro 10.0.26200, AMD Ryzen 7 7800X3D, no sim or game running, CPU read from cycles throughout, [the measurements](results/2026-11-16-desktop-app-walk.txt)):
 
 - Nothing the app runs changed since stage 15's close.
-  No commit after `7859de2` touches `src/apps/desktop`, the `messages` crate it builds on gained types alone, `rust-toolchain.toml` pins rustc 1.95.0, and Windows' cumulative update KB5132061 took effect at the reboot of 2026-11-16, after 2026-11-15's readings.
+  No commit after `6fa2382` touches `src/apps/desktop`, the `messages` crate it builds on gained types alone, `rust-toolchain.toml` pins rustc 1.95.0, and Windows' cumulative update KB5132061 took effect at the reboot of 2026-11-16, after 2026-11-15's readings.
 - The scenario alone read 0.243% of a core, and its budget case alone 0.232% twice.
   Of the app's 119.06ms of CPU over 55s, 118.6ms ran on three of tokio's worker threads, which run the jobs and the minute's sample, and 0.11ms on the main thread.
 - A copy of the app that timed each of its parts from its own thread's cycles spent 133ms to 140ms of CPU in each minute after the first, which held the start's work, and 120ms to 127ms of that in its 30 walks for the sim, 4.0ms to 4.2ms a walk.

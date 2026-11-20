@@ -964,7 +964,7 @@ Needs: every stage before 22.
 Tests: none, since it changes no behavior.
 
 Exit: on our development machine, `node tools/check.ts` passes, and every chunk has been read and fixed.
-Done on 2026-11-20: every chunk was read and fixed, changing comments in 254 files, with the message crate's TypeScript types written again from its new doc comments, and `node tools/check.ts` passed; the two bugs the comments exposed, in `tools/sim/desk`'s usage message and the EFB app's dev loop, went to the user rather than into the diff.
+Done on 2026-11-20: every chunk was read and fixed, changing comments in 254 files, with the message crate's TypeScript types written again from its new doc comments, and `node tools/check.ts` passed; the two bugs the comments exposed, in `tools/sim/desk`'s usage message and the EFB app's dev loop, went to the user rather than into the diff, and were fixed in commits of their own that day at the user's word.
 
 ## 22 GitHub
 

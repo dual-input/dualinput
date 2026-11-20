@@ -44,8 +44,9 @@ pub struct Traffic {
 /// Registers traffic.
 pub fn register(r: &mut Registry) {
     r.unit::<Traffic>("traffic")
-        // The Traffic tab, src/features/traffic/efb/part.tsx, finds the role by this label, so
-        // change both together.
+        // The Traffic tab, src/features/traffic/efb/part.tsx, finds the role by this label, and
+        // the dev loop's stand-in core, src/platform/efb-shell/dev/stand-in.ts, holds it too, so
+        // change all three together.
         .role_key(HOST, "Share my traffic")
         .channel(messages_traffic::IDENTITIES, Traffic::on_identity)
         .channel(messages_traffic::STATES, Traffic::on_states)

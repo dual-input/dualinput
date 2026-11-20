@@ -22,9 +22,10 @@ pub const CHANNEL: Channel<Cockpit> = Channel::new(3, Delivery::Stream, 240);
 /// Each member's clock, once a second, which tells every other member what it applied, so they
 /// stop keeping it. The heartbeat can't carry it, since the network sits below the cockpit
 /// stream (record/areas/network/02-units.md, "The heartbeat and clock offsets"). It goes after
-/// every other one-off channel: a late clock only keeps the messages a replay would resend a
-/// moment longer, and a receiver drops a copy, while every other one-off channel carries
-/// something a pilot sees or hears (record/areas/network/01-between-machines.md, "Sending").
+/// every other one-off channel, since a late clock only keeps the stream's sent messages in
+/// memory a moment longer, while every other one-off channel keeps the link up or carries
+/// something a pilot sees or hears (record/areas/network/01-between-machines.md, the note at its
+/// top).
 pub const CLOCKS: Channel<Clock> = Channel::new(4, Delivery::Newest, 10);
 
 /// A sender of cockpit messages: a pilot, under one restart count of their core, so a core that

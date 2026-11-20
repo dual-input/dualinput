@@ -44,8 +44,8 @@ pub struct CameraRead {
     /// in `WORLD`'s.
     pub position: [f64; 3],
     /// The view's height, in radians, as `SimConnect_CameraGet` gives it. Whether
-    /// `fsCameraGet`'s is the same is unverified, and a click on a target whose place is known,
-    /// whose ray reads it, settles it.
+    /// `fsCameraGet`'s is the same is unverified. The ray through a click reads it, so a click
+    /// on a target whose place is known settles it.
     pub fov: f64,
     /// In degrees, as the sim's three angles carry them: the pitch, then the yaw, then the
     /// roll.

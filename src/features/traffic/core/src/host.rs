@@ -56,8 +56,8 @@ const GROUND_ALLOWED: [&str; 1] = ["ASO_Pushback_"];
 /// identity it's still reading. Leaving or entering the flight queues a call for each copy in
 /// one input, which the kernel stops past 1,000, and a busy hub's traffic is under 180 objects:
 /// at EGLL our probe p10 counted 142 to 153 aircraft, and 23 of the sim's pushback tugs came
-/// within 1km of the pilot's aircraft (user, 2026-11-15; record/areas/architecture/log.md,
-/// 2026-10-16, and record/areas/traffic-atc/log.md, 2026-10-17).
+/// within 1km of the pilot's aircraft (user, 2026-11-15;
+/// record/areas/traffic-atc/01-traffic-and-atc.md, the note at its top).
 const MOST_CARRIED: usize = 500;
 
 /// What starts the title of every SimObject of ours, such as avatars' figure,

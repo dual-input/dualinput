@@ -45,9 +45,9 @@ const DIFFERENCES: Difference[] = [
 ]
 
 /**
- * The roles traffic's and ATC audio's parts find by their labels, by name alone, since no shell names a feature, held by
- * whoever a scene says. `LABEL` in src/features/traffic/efb/part.tsx and in src/features/atc-audio/efb/part.tsx names
- * the same label as each feature's core does, so change all three together.
+ * Traffic's and ATC audio's role keys, which their parts find by label. A scene says who holds each. `LABEL` in
+ * src/features/traffic/efb/part.tsx and in src/features/atc-audio/efb/part.tsx names the same label as each feature's
+ * core does, so change all three together.
  */
 const SHARE_TRAFFIC = "Share my traffic"
 const SHARE_ATC = "Share my ATC"
@@ -105,7 +105,7 @@ const reach = { internet: true, servers: "reachable" as const }
 const healthy = { network: { members: [], ...reach }, sim: atWorldMap, profiles: { loaded: { maturity: "Stable" }, supported: SUPPORTED, pick_failed: 0 }, session: noSession, settings: settings(true, true) }
 
 /**
- * Take-control's slice and its stream's, by name alone, since no shell names a feature: live once this pilot is in the
+ * Take control's slice and its stream's, by name alone, since no shell names a feature: live once this pilot is in the
  * flight, with this pilot not flying unless a scene says so.
  */
 const TAKE_CONTROL = "take-control"
@@ -128,6 +128,9 @@ const AT_KSEA = { airport: "KSEA", stand: { name: "PARKING", number: 140 }, engi
 type Joining = { spot: unknown; join: { as: string }; said: { n: number } | null }
 /** James flying from a stand, with this pilot at the menu, out of the flight, where Join shows on James's row. */
 const jamesAway = held({ pf: JAMES, members: [me(atMenu), james(inFlight)], preflight: ended, ready: null })
+/** This pilot in a flight of their own, in the A320, where Join can't run until they end it, as Go to's core says. */
+const inA320: Status = { ...inFlight, aircraft: { path: FENIX.path }, title: "A320" }
+const jamesElsewhere = held({ pf: JAMES, members: [me(inA320), james(inFlight)], preflight: ended, ready: null })
 /** A key the stand-in binds at the next press, as the helper names it. */
 const F9 = { input: { key: { scan: 67, extended: false } }, name: "F9" }
 const boundTo = (name: string) => ({ settings: [...settings(true, true), { ...setting(INPUT, false), kind: { type: "input" as const }, value: { ...F9, name }, default: null }] })
@@ -191,7 +194,7 @@ export const SCENES: Record<string, Slices> = {
   "ATC: you share": { ...netUp, session: flying(ME, { atc: ME }), [ATC]: { capturing: "BeyondATC" } },
   "ATC: James shares": { ...netUp, session: flying(JAMES, { atc: JAMES }) },
   "Join: James at a stand": { ...netUp, session: jamesAway, [GO_TO]: { ...noJoin, spot: AT_KSEA, join: { as: "ready" } } },
-  "Join: another aircraft": { ...netUp, session: jamesAway, [GO_TO]: { ...noJoin, spot: AT_KSEA, join: { as: "unavailable", why: "other-aircraft" } } },
+  "Join: another aircraft": { ...netUp, sim: { ...fenix, stage: "ready-to-fly", where: "flight" }, session: jamesElsewhere, [GO_TO]: { ...noJoin, spot: AT_KSEA, join: { as: "unavailable", why: "other-aircraft" } } },
   "Header: offline": { network: { members: [], internet: false, servers: null } },
   "Header: several things": { network: { members: [], internet: true, servers: "unreachable" }, [DESKTOP]: { ...LOCAL, firewall: "blocks", update: { state: "ready", next: "1.0.3" } } },
   "Header: our own parts": {
@@ -298,7 +301,7 @@ export class StandInCore extends StandInBase {
     this.setSession({ roles: this.session().roles.map((role) => (role.key === key ? { ...role, holder: on ? ME : null } : role)) })
   }
 
-  /** Join runs for a moment, then says it set the flight up; Join now also puts this pilot in the flight, which hides Join. */
+  /** Join runs for a moment, then says it set the flight up; the "Join now" answer also puts this pilot in the flight, which hides Join. */
   private join(now: boolean): void {
     const goTo = this.slices[GO_TO] as Joining
     if (goTo.join.as !== "ready" || !goTo.spot) return

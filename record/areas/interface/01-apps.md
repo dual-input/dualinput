@@ -8,6 +8,7 @@ Decides:     How a feature's part plugs into the EFB app and comes out; what a p
 
 > **Note**
 > Since stage 21, a part also shows on the session card's crew rows, as Go to's Join ends the pilot flying's row, a row taking the first part's answer, and `profiles.pick` loads an aircraft at the world map through the menu script (user, 2026-11-17; [session log](../session/log.md#2026-11-17-in-the-sim-join-set-the-world-map-and-started-the-flight-within-09s-and-active-pause-followed-from-our-efb-apps-code-in-264ms-once-the-menu-script-parsed)).
+> The list is `PARTS` in `src/sim-package/pages/parts.ts`, which the app's entry, `efb.tsx`, and its dev loop, `efb-dev.tsx`, both import, since the dev loop's own list had fallen four parts behind the app's (user, 2026-11-20).
 
 A feature shows itself in the EFB app through one part, which the app lists in one line, so deleting a feature deletes its folder and that line, and the platform's shells never name a feature.
 The apps reach the core only through slices of state, commands, and a part's `unit` messages, and any client sends any command, a setting's change among them.

@@ -69,7 +69,8 @@ enum Role {
 pub fn register(r: &mut Registry) {
     r.unit::<AtcAudio>("atc-audio")
         // The ATC audio tab, src/features/atc-audio/efb/part.tsx, finds the role by this label,
-        // so change both together.
+        // and the dev loop's stand-in core, src/platform/efb-shell/dev/stand-in.ts, holds it too,
+        // so change all three together.
         .role_key(HOST, "Share my ATC")
         .channel(wire::FRAMES, AtcAudio::on_frame)
         .capture(ATC, AtcAudio::captured)

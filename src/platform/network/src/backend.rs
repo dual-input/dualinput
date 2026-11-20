@@ -50,6 +50,8 @@ pub(crate) fn default_relays() -> Vec<Relay> {
 }
 
 const ANSWER_WITHIN: Duration = Duration::from_secs(10);
+/// How often a member renews its entry. The backend lists only members renewed within its
+/// `LAPSE_MS` in src/backend/src/index.ts, three of these, so change both together.
 pub(crate) const RENEW_EVERY: Duration = Duration::from_secs(10 * 60);
 /// A core back from a restart dials the crew in its session file, and looks the code up
 /// only when none of them has answered by then.

@@ -10,6 +10,7 @@ description = "Measures a profile's seats and its controls' locations in the sim
 # aircraft-model for the cast, the message crate for `Figure`'s slot, and profile-engine to
 # check each edit. saphyr is the YAML reader profile-engine pins, which gives each key's line
 # and column, so the tool edits a profile's text in place and keeps its comments.
+# src/engines/profile-engine/Cargo.toml pins the same saphyr, so change both together.
 # windows-sys reads the cursor, the keys, and the clock, and beeps, at the version sim-edge
 # takes.
 [dependencies]

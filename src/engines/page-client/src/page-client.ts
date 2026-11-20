@@ -14,7 +14,7 @@ import type { ToClient } from "../../messages/ts/clients/ToClient.ts"
 import type { JsonValue } from "../../messages/ts/serde_json/JsonValue.ts"
 import { HASH, VERSION } from "../../messages/ts/stamp.ts"
 
-/** The CommBus event the core announces its port on. `ANNOUNCE` in src/engines/messages/src/clients.rs names it too. */
+/** The CommBus event the core announces its port on. `ANNOUNCE` in src/engines/messages/src/clients.rs names it too, so change both together. */
 export const ANNOUNCE = "DUALINPUT_CORE_ANNOUNCE"
 
 /** Each side sends something at least this often (decision 010). */

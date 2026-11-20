@@ -13,7 +13,8 @@ use sim_service::{Period, SimAwareness, SimCx, SimEvent, Value, Var};
 
 use crate::{PreflightEnded, Ready, Session};
 
-/// From every counted member ready to the flight starting.
+/// From every counted member ready to the flight starting. `COUNTDOWN` in
+/// src/packages/crew/src/ready.tsx draws the same length, so change both together.
 const COUNTDOWN: Duration = Duration::from_secs(3);
 
 /// The pilot flying's duties, while preflight hasn't ended: the session's aircraft, the
@@ -357,6 +358,8 @@ pub(crate) fn go_without(me: &mut Session, args: GoWithout, cx: &mut Cx) -> Resu
         .as_ref()
         .and_then(|h| h.others.get(&member))
         .is_some_and(|o| o.link == wire::Link::Up);
+    // `out` in src/packages/crew/src/in-preflight.ts shows the same members as gone, so change
+    // both together.
     let dropped_out = !link_up || !me.in_flight(&member);
     if !dropped_out {
         return Err("That member hasn't dropped out".into());

@@ -296,7 +296,8 @@ pub enum StandInAct {
     Lack { title: String },
     /// Hands up `count` `Frame` events at once on each connection subscribed to them.
     FrameBurst { count: u32 },
-    /// Resets the sim's variables, as an aircraft change does.
+    /// Resets the sim's variables, as an aircraft change does
+    /// (record/areas/core/03-sim-seam-and-wasm-module.md, "Wants and the sim's APIs").
     ResetVars,
     /// Sets the aircraft's input events, each with its value, which the sim lists.
     Inputs { events: Vec<(String, f64)> },

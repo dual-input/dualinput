@@ -23,7 +23,8 @@ use crate::connections::Origin;
 
 /// The development setting that names the sim's `UserCfg.opt` files, separated by `;`, which
 /// the bench points at a packages folder of its own. A path may start with `%APPDATA%` or
-/// `%LOCALAPPDATA%`, which the core's edge fills in.
+/// `%LOCALAPPDATA%`, which the core's edge fills in. `USER_CFG` in src/apps/desktop/src/places.rs
+/// names the same key, so change both together.
 pub const USER_CFG: &str = "sim.user-cfg";
 
 /// Steam's `UserCfg.opt`, then the Microsoft Store's

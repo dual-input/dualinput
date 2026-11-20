@@ -26,7 +26,8 @@ pub struct RoutineId {
 }
 
 impl RoutineId {
-    /// The client data area the core writes the routine's feeds into.
+    /// The client data area the core writes the routine's feeds into. `routineWrites` in
+    /// tools/bench/cores.ts builds the same name, so change both together.
     pub fn slot(self) -> String {
         format!("DUALINPUT_ROUTINE_{}", self.name)
     }

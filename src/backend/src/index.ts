@@ -31,7 +31,7 @@ const LEAVE = "/v1/members/leave"
 const ENDPOINT_HEADER = "DualInput-Endpoint"
 const SIGNATURE_HEADER = "DualInput-Signature"
 
-/** A lookup lists only members renewed within this, and every member renews each 10 minutes. */
+/** A lookup lists only members renewed within this, and every member renews each 10 minutes, at `RENEW_EVERY` in src/platform/network/src/backend.rs, so change both together. */
 const LAPSE_MS = 30 * 60 * 1000
 /** An address that got this many codes wrong this hour is refused until the next. */
 const WRONG_CODES = 20

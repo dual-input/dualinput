@@ -16,7 +16,8 @@ use windows_sys::Win32::System::Threading::{
     PROCESS_SYNCHRONIZE, QueryFullProcessImageNameW, WaitForSingleObject,
 };
 
-/// The sim's program. `SIM` in src/engines/sim-edge/src/lib.rs names the same one, so change both together.
+/// The sim's program. `SIM` in src/engines/sim-edge/src/lib.rs and in tools/bench/desktop.ts names the same one, so change
+/// all three together.
 const SIM: &str = "FlightSimulator2024.exe";
 
 /// A process as the snapshot lists it.

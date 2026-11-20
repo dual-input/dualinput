@@ -120,7 +120,8 @@ pub enum Act {
     /// FS Copilot fork, `FsCopilot/Connection/SimTraffic.cs`).
     FrameBurst { count: u32 },
     /// Resets the sim's variables, as an aircraft change does: the module hears the reset,
-    /// and every ID the Vars API gave it names nothing.
+    /// and every ID the Vars API gave it names nothing
+    /// (record/areas/core/03-sim-seam-and-wasm-module.md, "Wants and the sim's APIs").
     ResetVars,
     /// Sets the aircraft's input events, each with its value, the ones
     /// `SimConnect_EnumerateInputEvents` lists. It reports nothing, as a load reports nothing.

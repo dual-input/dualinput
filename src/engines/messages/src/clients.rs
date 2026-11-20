@@ -11,7 +11,8 @@ use serde_json::Value;
 use ts_rs::TS;
 
 /// The CommBus event the core announces its port on, to every page in the sim
-/// (record/areas/architecture/02-code-map.md, "Names the sim shares").
+/// (record/areas/architecture/02-code-map.md, "Names the sim shares"). `ANNOUNCE` in
+/// src/engines/page-client/src/page-client.ts names it too, so change both together.
 pub const ANNOUNCE: &str = "DUALINPUT_CORE_ANNOUNCE";
 
 /// The body of the core's announcement, such as `{"port":51234,"session":false}`.

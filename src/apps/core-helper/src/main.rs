@@ -7,7 +7,8 @@
 //! and each thread sends its `FromHelper`s to the writer. Its standard input closing tells
 //! it the core is gone, so it exits, after a core that crashed too.
 
-// A Windows program with no console, as p08's helper was, so starting it opens no window.
+// A Windows program with no console, as our probe p08's helper was, so starting it opens no
+// window.
 #![windows_subsystem = "windows"]
 
 mod audio;

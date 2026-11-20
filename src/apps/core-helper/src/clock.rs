@@ -1,7 +1,8 @@
 //! The one timeline every process on the PC reads, Windows' performance counter, in µs, so
 //! the core can compare the helper's stamps with its own (record/areas/architecture/01-spine.md,
-//! "Times"). `clock::now` in src/apps/core and the bench's stand-in core helper's `now` read it
-//! the same way, so change all three together.
+//! "Times"). `clock::now` in src/apps/core, the bench's stand-in core helper's `now` in
+//! tools/bench/core-helper/src/main.rs, and tools/profile-author's `screen::now` read it the
+//! same way, so change all four together.
 
 use std::sync::OnceLock;
 

@@ -70,7 +70,7 @@ tokio = { version = "1.53.3", features = ["io-util", "macros", "net", "process",
 tokio-websockets = { version = "0.13.3", default-features = false, features = ["server", "sha1_smol"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", default-features = false, features = ["fmt", "std", "registry"] }
-# The loop under load reads its capture of a flight, which p10 compressed with zstd.
+# The loop under load reads its capture of a flight, which our probe p10 compressed with zstd.
 zstd = { version = "0.14.3", default-features = false, optional = true }
 
 [dependencies.windows-sys]

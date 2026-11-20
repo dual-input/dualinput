@@ -10,7 +10,8 @@ use kernel::{Entry, Fetch, Fetched, Gathered, JOBS, JobId, Method, StartJob, Wor
 use crate::queue::Queue;
 
 /// A fetch with no answer by then is the job's error, so a job never waits on a server that
-/// stopped answering. The network keeps its own 10s for the backend's answer.
+/// stopped answering. The network keeps a shorter limit of its own for the backend's answer,
+/// `ANSWER_WITHIN` in src/platform/network/src/backend.rs.
 const FETCH_WITHIN: Duration = Duration::from_secs(30);
 
 /// A gather whose `follow` still names new files after this many rounds of reads is the
@@ -194,7 +195,6 @@ fn find(folder: &Path, depth: u8, holding: &Path, found: &mut Vec<String>) {
     }
 }
 
-/// The clipboard's text, read and written through Windows' clipboard functions.
 /// Which program Windows runs for a link's scheme. The entry can outlive an uninstalled program,
 /// so it counts only while the file it names is there.
 mod link_program {
@@ -254,6 +254,7 @@ mod link_program {
     }
 }
 
+/// The clipboard's text, read and written through Windows' clipboard functions.
 mod clipboard {
     use std::time::Duration;
 
@@ -444,7 +445,7 @@ fn resolve(data: &Path, path: &str) -> PathBuf {
 
 /// Writes a file beside `path` and renames it over `path`, so a crash in the middle leaves
 /// the old file whole. The rename replaces `path` if it exists. The file beside it is named
-/// for the job, as `settings.json.3-12.new`, since the pool runs up to 4 jobs at once, and two
+/// for the job, as `settings.json.3-12.new`, since the pool runs several jobs at once, and two
 /// writes of one path sharing one file beside it could rename a mix of both into place.
 fn replace(path: &Path, bytes: &[u8], id: JobId) -> std::io::Result<()> {
     if let Some(parent) = path.parent() {

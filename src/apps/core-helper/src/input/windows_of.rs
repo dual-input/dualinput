@@ -1,8 +1,9 @@
 //! The sim's windows, found by class and title rather than by its process, so the helper
-//! needs nothing from the core to find them (record/areas/core/04-core-helper.md's note of
-//! 2026-10-18). The sim's main window and each popped-out display is a top-level window of
-//! class `AceApp`, and the main window's title starts `Microsoft Flight Simulator 2024`
-//! (measured on MSFS 2024 1.8.16.0, record/learn/foundations/06-03-display-kinds-input-and-pop-outs.md).
+//! needs nothing from the core to find them (record/areas/core/04-core-helper.md, "Raw
+//! Input"). The sim's main window and each popped-out display is a top-level window of class
+//! `AceApp`, and the main window's title starts `Microsoft Flight Simulator 2024` (measured on
+//! MSFS 2024 1.8.16.0, record/learn/foundations/06-03-display-kinds-input-and-pop-outs.md,
+//! "Pop-out windows").
 
 use windows::Win32::Foundation::{HWND, LPARAM, POINT, RECT};
 use windows::Win32::Graphics::Gdi::ScreenToClient;

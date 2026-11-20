@@ -9,8 +9,9 @@ use windows_sys::Win32::System::Performance::{QueryPerformanceCounter, QueryPerf
 /// since at the 10 MHz Windows fixes the counter at under a hypervisor, ticks times
 /// 1,000,000 passes a signed 64-bit integer, which the counter is, after about 10.7 days of
 /// the PC running. The core helper stamps its inputs the same way, in src/apps/core-helper's
-/// `clock::now`, as do the bench's stand-in's `now` and tools/profile-author's `screen::now`,
-/// so change all four together.
+/// `clock::now`, as do the bench's stand-in core helper's `now`, in
+/// tools/bench/core-helper/src/main.rs, and tools/profile-author's `screen::now`, so change
+/// all four together.
 pub fn now() -> u64 {
     let mut ticks = 0;
     // SAFETY: QueryPerformanceCounter writes one i64 to the pointer it's given.

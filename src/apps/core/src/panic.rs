@@ -41,6 +41,8 @@ fn record(info: &PanicHookInfo) -> bool {
         format!("input {}", input.seq)
     });
     run_context::with(|c| {
+        // `replayPanic` in tools/bench/cores.ts and tools/bench/scenarios/desktop-app.ts find a
+        // crashed run by "panic at input <n>" in its log, so change all three together.
         c.log.always(&format!(
             "{}µs ERROR panic at {at}, in unit {unit}: {info}\n",
             clock::now()

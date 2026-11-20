@@ -54,7 +54,7 @@ mod tests {
 
     /// The bench's sound, which its test unit registers, so a core on the real helper
     /// plays something we know: 2s of 440Hz and 554Hz, each for half a second, at −20dBFS RMS.
-    /// It stays short, since the core sends every sound in each Hello, and a desk run plays
+    /// It stays short, since the core sends every sound after each Hello, and a desk run plays
     /// it again and again while a person changes Windows' default output device.
     const TONE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../core/src/bench/tone.opus");
 
@@ -111,7 +111,7 @@ mod tests {
     /// -- --ignored writes_take_controls_cues`, when they should change.
     ///
     /// Control passing is a soft two-note chime rising a fifth, which reads as news, not an alarm,
-    /// over an engine. A refusal is two dull notes falling, an octave and a half lower with odd
+    /// over an engine. A refusal is two dull notes falling, more than an octave lower with odd
     /// overtones, so a pilot in VR tells the two apart without looking.
     #[test]
     #[ignore = "it writes src/features/take-control/core/src/sounds, which is committed"]

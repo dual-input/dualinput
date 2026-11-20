@@ -24,8 +24,11 @@ pub const INPUT: &str = "bench.input";
 
 /// 2s of 440Hz and 554Hz, each for half a second, at −20dBFS RMS, as Ogg Opus at 48 kHz, which
 /// `writes_the_bench_tone` in src/apps/core-helper wrote, and writes again when it should change.
-/// It stays short: the core sends every sound in each of the helper's `Hello`s, and a debug
-/// build took 1.95ms to hash a 10s version, 48 KB, past a handler's 1ms.
+/// It stays short: the core sends every sound after each of the helper's `Hello`s, and a debug
+/// build took 1.95ms to hash a 10s version, 48 KB, past a handler's 1ms (measured on our
+/// development machine, 2026-10-22, record/areas/core/log.md, "Stage 6's helper passes on
+/// nothing it wasn't asked for and comes back 2s after a kill, but capturing a continuous tone
+/// takes 1.4% of a core against 1%").
 const TONE: &[u8] = include_bytes!("tone.opus");
 
 #[derive(Default)]
@@ -78,7 +81,7 @@ impl BenchHelper {
             HelperAct::Mouse { on } => core_helper_service::mouse(cx, on),
             HelperAct::Capture { programs } => {
                 // ATC audio's starting values: 32 kbps, and FS Copilot's gate and hangover
-                // (record/areas/core/04-core-helper.md's note of 2026-10-23).
+                // (record/areas/core/04-core-helper.md, "Capturing a program").
                 let capture = programs.map(|programs| Capture {
                     programs,
                     bitrate: 32_000,

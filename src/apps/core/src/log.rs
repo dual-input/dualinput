@@ -8,7 +8,8 @@
 //! The thread that logs a line, the loop included, never waits on the disk: it sends the
 //! line, and a thread of the log's own writes it to the file. Windows held a core's early
 //! writes to its new `log.txt` for up to 49ms, on the loop's thread
-//! (record/areas/core/log.md, 2026-11-18).
+//! (record/areas/core/log.md, "2026-11-18: Windows held a core's early writes to its log for up
+//! to 49ms on the loop's thread, so the log gets a writer of its own").
 
 use std::fmt;
 use std::io::Write;

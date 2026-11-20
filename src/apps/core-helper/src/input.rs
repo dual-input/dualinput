@@ -1,8 +1,8 @@
 //! The input thread: a hidden window that receives Raw Input in sink mode, which gets a copy
-//! of input whatever window is in front and sits in no program's input path, as p08's helper
-//! registered keyboards, joysticks, and gamepads (record/areas/core/04-core-helper.md, "Raw
-//! Input"). Only what a want asks for crosses to the core, so no recording or bug report
-//! holds what the pilot typed into another program.
+//! of input whatever window is in front and sits in no program's input path, as our probe
+//! p08's helper registered keyboards, joysticks, and gamepads
+//! (record/areas/core/04-core-helper.md, "Raw Input"). Only what a want asks for crosses to
+//! the core, so no recording or bug report holds what the pilot typed into another program.
 
 mod buttons;
 mod keys;

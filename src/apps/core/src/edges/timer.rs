@@ -89,8 +89,10 @@ impl Timers {
 }
 
 /// tokio's sleep woke up to 16.9ms late, and a high-resolution waitable timer at most
-/// 1.46ms (measured on our development machine, 2026-10-15, record/areas/core/log.md), so
-/// this thread waits on one for the nearest deadline, or on `wake` when a message comes.
+/// 1.46ms (measured on our development machine, 2026-10-15, record/areas/core/log.md, "A
+/// high-resolution waitable timer wakes within 1.5ms where tokio's wake up to 17ms late, and
+/// the core's math changes with the C runtime's FMA3 switch and with its version"), so this
+/// thread waits on one for the nearest deadline, or on `wake` when a message comes.
 fn run(queue: &Queue, from: &mpsc::Receiver<Message>, wake: &Object) {
     // SAFETY: a timer with no name and no security attributes.
     let timer = Object(unsafe {

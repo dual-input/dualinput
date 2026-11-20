@@ -88,7 +88,7 @@ impl MouseState {
 /// not at its release, so a left release always crosses, or the hand its press brought would
 /// stay until the next click. A press off the window's area is such a click on another monitor
 /// (measured on MSFS 2024, 2026-11-05, record/areas/avatars/log.md, "A click that took the
-/// focus from the sim left a figure's hand out").
+/// focus from the sim left a figure's hand out, and the rest of the session passed").
 pub fn crosses(kind: &MouseKind, place: Option<(f32, f32)>) -> bool {
     match kind {
         MouseKind::LeftUp => true,

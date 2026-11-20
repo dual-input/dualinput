@@ -42,9 +42,9 @@ fn exits(child: &mut Child, within: Duration) -> Option<i32> {
     panic!("the helper didn't exit within {within:?}");
 }
 
-/// The helper is a program with no console, as p08's was, and p08 piped only its standard
-/// output, so this also settles that such a program reads a piped standard input
-/// (record/areas/core/04-core-helper.md, "Left open").
+/// The helper is a program with no console, as our probe p08's was, and p08 piped only its
+/// standard output, so this also checks that such a program reads a piped standard input
+/// (record/areas/core/04-core-helper.md, "The helper's life").
 #[test]
 fn it_says_hello_first_and_exits_within_1s_of_its_standard_input_closing() {
     let mut child = start();

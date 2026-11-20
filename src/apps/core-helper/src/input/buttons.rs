@@ -1,6 +1,8 @@
 //! Each flight-hardware device's buttons that are down, so only a change crosses, since four
 //! devices nobody touched sent 1,447 reports in 4s (measured on our development machine,
-//! 2026-10-08, record/areas/architecture/log.md).
+//! 2026-10-08, record/areas/architecture/log.md, "A Rust program captures one process's audio,
+//! plays on a device it looks up by name, and receives keyboard and HID input through Raw
+//! Input in sink mode, and builds with Visual Studio's linker").
 
 use std::collections::{BTreeMap, BTreeSet};
 

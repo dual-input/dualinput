@@ -22,8 +22,8 @@ use crate::sinks::Sinks;
 const STOP_WAIT: Duration = Duration::from_secs(1);
 
 /// The helper's program, beside the core's own, which `tools/build.ts` lays out together.
-/// `PROGRAM`'s comment in src/platform/core-helper-service/src/lib.rs names the same file, so
-/// change both together.
+/// `PROGRAM`'s comment and its setting's label in src/platform/core-helper-service/src/lib.rs
+/// name the same file, so change all three together.
 const PROGRAM: &str = "dualinput-core-helper.exe";
 
 /// The run the service last started, from its start until its process exits.

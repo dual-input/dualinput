@@ -5,12 +5,15 @@
 //! The rates and costs are p10's, the probe that first ran this load on a loop of its own:
 //! a flight's capture at the pace it was captured, made-up inputs at a session's rates, 100
 //! write functions on each flight-model input, and a write function stopped at its limit
-//! once a minute (record/areas/architecture/log.md, 2026-10-16).
+//! once a minute (record/areas/architecture/log.md, "2026-10-16: A flying machine that hosts
+//! traffic at EGLL takes in 285 MB of inputs an hour, 45 MB with zstd, mostly traffic, and one
+//! loop carries them at 0.5% of a core and replays them exactly").
 //!
 //! The engine gets what state sync gives it: a frame before each flight-model input, and each
 //! write back as the sim's reading of it. Without both, every write's value stayed pending, and
 //! a run grew slower each minute, to 12,273 inputs over 1ms (measured on our development
-//! machine, 2026-11-09, record/areas/sync/log.md).
+//! machine, 2026-11-09, record/areas/sync/log.md, "Stage 14's session in the sim passed in four
+//! aircraft, and no aircraft took an H: event our module fired").
 
 use std::collections::BTreeMap;
 use std::time::{Duration, Instant};

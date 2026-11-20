@@ -34,9 +34,11 @@ impl Encoder {
         encoder.use_cbr = false;
         // Complexity sets how hard the encoder works for quality at its bitrate, not how much
         // it sends, and any decoder plays what any complexity makes. opus-rs's default, 9,
-        // took 193µs a frame, about 1% of a core at 50 frames a second, the capture's whole
-        // budget, and 5 took 119µs at the same 105 bytes a frame (measured on our development
-        // machine, 2026-10-22, record/areas/core/log.md; user, 2026-10-22).
+        // took 193µs a frame, about 1% of a core at 50 frames a second, and 5 took 119µs at
+        // the same 105 bytes a frame (measured on our development machine, 2026-10-22,
+        // record/areas/core/log.md, "Stage 6's helper passes on nothing it wasn't asked for and
+        // comes back 2s after a kill, but capturing a continuous tone takes 1.4% of a core
+        // against 1%"; user, 2026-10-22).
         encoder.complexity = 5;
         Ok(Encoder(encoder))
     }

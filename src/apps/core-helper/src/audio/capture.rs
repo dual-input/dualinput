@@ -112,9 +112,12 @@ fn take(
     stop: &AtomicBool,
 ) -> Result<(), String> {
     // Whether WASAPI converts a process-loopback stream to another format is unverified, so
-    // the capture asks for the format p02's did, 48 kHz stereo float, which got its program
-    // at the level it played (measured on our development machine, 2026-10-08,
-    // record/areas/architecture/log.md), and the thread mixes it to mono.
+    // the capture asks for the format our probe p02's did, 48 kHz stereo float, which got its
+    // program at the level it played, and the thread mixes it to mono (measured on our
+    // development machine, 2026-10-08, record/areas/architecture/log.md, "A Rust program
+    // captures one process's audio, plays on a device it looks up by name, and receives
+    // keyboard and HID input through Raw Input in sink mode, and builds with Visual Studio's
+    // linker").
     let format = WaveFormat::new(32, 32, &SampleType::Float, opus::RATE as usize, 2, None);
     let mut client =
         AudioClient::new_application_loopback_client(process, true).map_err(|e| e.to_string())?;

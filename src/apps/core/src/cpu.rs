@@ -9,7 +9,9 @@ unsafe extern "C" {
 
 /// Rust's `f64` functions and QuickJS-ng's `Math` call the C runtime, whose results changed
 /// with its FMA3 switch (measured on our development machine, 2026-10-15,
-/// record/areas/core/log.md). So the core turns FMA3 off before it starts any thread, in a
+/// record/areas/core/log.md, "A high-resolution waitable timer wakes within 1.5ms where
+/// tokio's wake up to 17ms late, and the core's math changes with the C runtime's FMA3 switch
+/// and with its version"). So the core turns FMA3 off before it starts any thread, in a
 /// run and in a replay alike, and links the C runtime statically, so its version doesn't
 /// follow the pilot's Windows.
 pub fn fma3_off() {

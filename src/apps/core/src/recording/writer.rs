@@ -20,7 +20,8 @@ const FLUSH: Duration = Duration::from_secs(1);
 
 /// Filling the pilot's system drive mid-flight would stall more than Dual Input, so the
 /// recording stops once its drive has less than this free (record/areas/recording/log.md,
-/// 2026-10-23).
+/// "2026-10-23: One zstd frame flushed each second keeps a busy flight's recording at 42.6 MB
+/// an hour, where a frame ended each second takes 66.7 MB").
 const FLOOR: u64 = 1_000_000_000;
 
 enum Message {

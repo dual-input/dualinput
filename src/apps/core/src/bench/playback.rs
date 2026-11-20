@@ -1,6 +1,6 @@
 //! The playback that feeds the load unit, on a thread of its own as an edge's: a flight's
-//! capture at the pace it was captured, and a session's other inputs beside it at p10's
-//! rates (record/areas/build/02-testing.md, "The loop under load").
+//! capture at the pace it was captured, and a session's other inputs beside it at the rates of
+//! our probe p10 (record/areas/build/02-testing.md, "The loop under load").
 
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;

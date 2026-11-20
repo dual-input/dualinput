@@ -247,7 +247,8 @@ impl Sim for Plane<'_> {
     }
 
     fn set(&mut self, object: u32, space: Space, ids: Ids, value: f64) {
-        // The sim gives no write for an `E:` variable.
+        // The Vars API has no write for an `E:` variable, so our module writes none, as `set`
+        // in src/sim-package/wasm-module/src/vars.rs skips it.
         if space == Space::E {
             return;
         }

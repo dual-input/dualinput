@@ -385,7 +385,7 @@ In the sim:
 - Killing the sim: which of a failed call, the quit message, and the process's exit reaches the edge first, and how soon.
 - A second flight load in one run of the sim: the module's own connection and its slots carry on, and `Follow` starts new at its first feed.
 - `fsVarsAVarSet` holds the pilot's own aircraft's pose, and `fsEventsTriggerKeyEvent` freezes and unfreezes it.
-- A Marketplace aircraft's path names its folder and preset, and each of the L-1011's four presets gives a path of its own ([L-1011 study](../aircraft/inibuilds-l1011/study.md), sim question 13).
+- A Marketplace aircraft's path names its folder and preset, and each of the L-1011's four presets gives a path of its own (read in inibuilds-aircraft-l1011 1.0.8, `presets/inibuilds/`).
 - A connection's event, not the 2ms timeout, wakes the edge within the code map's 1ms budget ([the sim seam's budgets](../architecture/02-code-map.md#the-sim-seams-budgets)).
 - The Microsoft Store edition's process is `FlightSimulator2024.exe`.
 

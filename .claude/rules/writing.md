@@ -32,7 +32,7 @@ The kind decides who reads it and what shape it takes.
 | Outline            | `record/learn/<course>/outline.md`                                       | know what a course covers, in what order and depth, and which parts have a chapter     |
 | Chapter            | `record/learn/<course>/NN-<slug>.md`                                     | understand one part of a course well enough to use it                                  |
 | Agent instructions | `CLAUDE.md` and `.claude/`, including rules such as this file            | act correctly without asking                                                           |
-| Study              | `record/areas/aircraft/<aircraft>/study.md`                              | know how one aircraft is built, where its state lives, and what changes it             |
+| Study              | `<aircraft>/study.md`, in a private repository                           | know how one aircraft is built, where its state lives, and what changes it             |
 | Ideas              | `record/areas/product/ideas.md`                                          | know what Dual Input might do, how promising each idea looked, and what we left out    |
 
 A document that's two kinds at once serves neither reader.
@@ -86,6 +86,8 @@ The reasoning lives in a design doc, and the reference links to it.
 ### Studies
 
 A study describes one aircraft at the package versions its header names, and [the study template](../skills/study-aircraft/template.md) gives its sections.
+Studies stay out of this repository, because they cite decompiled code and decrypted files, so nothing here links to one.
+A claim taken from a study cites the plain file or measurement behind it, as [Evidence](#evidence) says.
 When the aircraft updates, study it again and edit the study in place, because git keeps the version before.
 When a sim session answers one of its sim questions, the finding goes in the area's log, and the study's claim cites that entry as measured.
 
@@ -210,8 +212,9 @@ So every MSFS-specific claim, and any other claim a reader could ask "says who?"
 - **Documented:** a vendor or project says so.
   Link the page.
   Before a design leans on a documented claim, we measure it.
-- **Read:** we read it in the sim's or an aircraft's files, decompiled or not.
-  Name the package, its version, the file, and for decompiled code the function: `(read in fnx-aircraft-320 2.4.0.4720, FenixDisplayModule.wasm, ECAM_Lower_gauge_callback)`.
+- **Read:** we read it in the sim's or an aircraft's files.
+  Name the package, its version, and the file's path in the package: `(read in a2a-aircraft-pa24 2.1.3, SimObjects\Airplanes\pa24-250\common\model\PA24_250_INTERIOR.xml)`.
+  The public record cites plain files (XML, JavaScript, and cfg files, and a module's import or export table) and measurements, and a finding from decompiled code or a decrypted file stays in its private study.
   Code says what would happen, not that the sim runs that path, so a claim that turns on which path runs stays unverified until measured.
 - **Unverified:** an inference, a forum post, or a guess.
   Mark it unverified, and if anything depends on it, say what would settle it.

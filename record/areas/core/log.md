@@ -231,7 +231,7 @@ And stage 2's other half of the timer budget, with the sim running and the PC bu
   Developer Mode's WASM Debug window read 0ms for every update, for our module and for p08's alike, so it doesn't time a standalone module's update.
 - **The stages:** each load went Loading, Ready to fly, then Flying, with its aircraft.
   The Black Square Baron 58P's path is `SimObjects\Airplanes\bksq-aircraft-baronpropress\aircraft.CFG`, which p04 read from the sim too, a folder with no presets, so its aircraft is `bksq-aircraft-baronpropress`.
-  Each of the iniBuilds L-1011's four presets gave a path of its own, such as `inibuilds-l1011/presets/inibuilds/l1011-500-stair`, and `A:TITLE` gave each preset's own title, such as `L1011-500 Cabin w/ Lounge`, which answers the [L-1011 study](../aircraft/inibuilds-l1011/study.md)'s sim question 13.
+  Each of the iniBuilds L-1011's four presets gave a path of its own, such as `inibuilds-l1011/presets/inibuilds/l1011-500-stair`, and `A:TITLE` gave each preset's own title, such as `L1011-500 Cabin w/ Lounge`.
 - **Leaving a flight:** the pause menu's End flight sent `Pause_EX1` 8, `FLIGHT_END` 2.9s later, then the main menu's `hangar.flt` loading 8s after that, and no `BACK_TO_MAIN_MENU` (p05).
   So the core read Flying through the main menu until the next `FlightLoaded`, where [stages](03-sim-seam-and-wasm-module.md#stages) enters Menu only on `BACK_TO_MAIN_MENU` or the menu script's page.
   The [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel) saw `BACK_TO_MAIN_MENU` with `FLIGHT_END` after the prompt to leave a flight, which this run didn't use.

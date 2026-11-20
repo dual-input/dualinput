@@ -33,7 +33,6 @@ A profile, the file that tells Dual Input what to sync on one aircraft, names wh
   The Synaptic A220 puts its whole cockpit's state there, the A2A PA-24 doesn't use it, and the iniBuilds A350 uses it only between its modules, its electronic flight bag (EFB), and its printer (measured on MSFS 2024, 2026-09-28, and read in the aircraft's files, 2026-09-30, [CommBus log](../commbus/log.md)).
   Some aircraft hand over their full state on request, which a pilot joining mid-flight needs.
   Sending `A22X.Resync` made each of the A220's 29 change-sending channels send a full snapshot, 1,674 fields in about 100ms (measured on MSFS 2024, 2026-09-28, [CommBus log](../commbus/log.md#2026-09-28-a22xresync-returns-the-a220s-full-state-and-one-listener-hears-every-channel)).
-
 - **Open questions:** our CommBus work covers reading.
   Whether a message carried to the other machine changes that aircraft's state, rather than only what its displays draw, is the next question.
 
@@ -92,7 +91,7 @@ The traffic one pilot's sim shows appears in the other's, on the same principles
 
 Pushback, jetways, the fuel truck, and GSX show on both machines, so both pilots see the pushback they asked for.
 
-- **Tech:** the sim's own services start from key events, such as `K:TOGGLE_JETWAY` and `K:TOGGLE_PUSHBACK`, and GSX is a separate addon with its own `L:FSDT_GSX_*` variables; the iniBuilds A350 uses both (read in inibuilds-aircraft-a350 1.2.6, [A350 study](../aircraft/inibuilds-a350/study.md)).
+- **Tech:** the sim's own services start from key events, such as `K:TOGGLE_JETWAY` and `K:TOGGLE_PUSHBACK`, and GSX is a separate addon with its own `L:FSDT_GSX_*` variables; the iniBuilds A350 uses both (read in inibuilds-aircraft-a350 1.2.6, `ini-efb-a350.js`).
   Showing the tug on the other machine is a [traffic sync](#traffic-sync) problem.
   The sim's own services are the same on every aircraft, so they belong in Dual Input's own code, while GSX is one product, so it comes through a [plugin](#plugins).
   Until ground operations sync is built, [traffic sync](03-v1-scope.md#traffic-sync) sets who flies a pushback.
@@ -134,7 +133,7 @@ It replaces loading the host's flight on every machine with `SimConnect_FlightLo
 Before a session starts, Dual Input compares each pilot's aircraft package and version, warns when the liveries differ, and says how to fix what doesn't match.
 The check leaves out Dual Input's own version, which the connection checks, and fuel and payload, which sync throughout the flight.
 
-- **Tech:** each package's version is in its `manifest.json`, which our aircraft studies already read.
+- **Tech:** each package's version is in its `manifest.json`, which our probe p16 read for every installed package ([aircraft log](../aircraft/log.md#2026-10-16-a-streamed-package-keeps-no-version-on-disk-while-every-installed-one-with-a-manifest-has-its-package_version)).
   On livery N324DU the A220's DisplayUnits panel identifies itself as `DisplayUnits|config=N324DU`, while FS Copilot's profile matches only `DisplayUnits|config=Default`, so by our reading, not yet flown, that display syncs on no other livery, which is why the check compares liveries (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-17 — The A220's DisplayUnits key carries the livery, and the profile names only Default").
 
 ### What doesn't sync
@@ -270,7 +269,7 @@ The profile author places each seat in the sim itself, from the [Dual Input IDE]
    If arrows in the sim can't be done, the IDE offers its own controls, with the figure previewed in the sim.
 
 - **Tech:** MSFS 2024 aircraft can ship seat parts with their own navigation graphs.
-  The A220 has `A220_Seat_Pilot` and `A220_Seat_Copilot` (read in synaptic-aircraft-a220 1.0.10, [files](../aircraft/synaptic-a220/files.md)), and the Phenom 300E has a passenger seat, `fsreborn_phenom300e_seat_pax` (read in fsreborn-aircraft-phenom300e 1.0.24, [files](../aircraft/fsreborn-phenom-300e/files.md)).
+  The A220 has `A220_Seat_Pilot` and `A220_Seat_Copilot` (read in synaptic-aircraft-a220 1.0.10, `SimObjects/AirplaneParts/A220_Seat_Pilot/sim.cfg` and `A220_Seat_Copilot/sim.cfg`), and the Phenom 300E has a passenger seat, `fsreborn_phenom300e_seat_pax` (read in fsreborn-aircraft-phenom300e 1.0.24, `minimal.fsarchive`, `simobjects/airplaneparts/fsreborn_phenom300e_seat_pax/navigation_graph/navigation_graph_seat_pax.cfg`).
   The C152's seats show up in SimConnect as objects, `SEAT_C152_Pilot` and `SEAT_C152_Pax`, whose positions a SimConnect client reads, and the seated pilot's avatar sits exactly on `SEAT_C152_Pilot` (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
   The A2A Comanche's show up the same way, as `SEAT_DEFAULT_Pilot` and `SEAT_DEFAULT_Copilot`, and sit about 1cm from where its model puts the nodes `PILOT_1` and `PILOT_2`, shifted the same way for both seats (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-the-cockpit-models-own-space-lines-up-with-simconnects-within-8mm-but-the-models-input-event-ids-arent-the-names-the-sim-lists)).
   Whether the A220's and Phenom's seat parts show up the same way, with positions Dual Input can use, is unverified.
@@ -435,7 +434,7 @@ The analogy stops at testing: DefinitelyTyped's CI checks every change, and fsc-
 
 ## Ideas left out
 
-- **Save and resume together:** few addons save and restore their own state, such as PMDG's panel states and the iniBuilds A350's autosaves (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md), and inibuilds-aircraft-a350 1.2.6, [A350 study](../aircraft/inibuilds-a350/study.md)), and driving those from outside is unexplored.
+- **Save and resume together:** few addons save and restore their own state, such as PMDG's panel states and the iniBuilds A350's autosaves (read in pmdg-aircraft-77w 2.4.143, `Config\PanelState\*.sav`, and documented in inibuilds-aircraft-a350 1.2.6, `Resources/Airbus A350 Manual 1.5.pdf`, the OIS's AUTOSAVE page), and driving those from outside is unexplored.
 - **Basic sync for aircraft without a profile:** we judge that a starter profile generated from an aircraft's input events would give little that's usable on most aircraft (unverified: nobody has tried it).
 - **An activity feed for pilots:** one control can fire several events, as the PA-24's radio volume knob fired four input events in one turn ([03-03](../../learn/foundations/03-03-reading-and-writing.md#enumerating-vs-observing)), and a pilot can't read a feed of them.
   It belongs in the Dual Input IDE.

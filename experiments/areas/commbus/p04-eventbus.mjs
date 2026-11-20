@@ -3,7 +3,8 @@
  * the MSFS Avionics Framework share their EventBus topics under, and can it
  * publish there? The plan's step 6 probe on the EventBus bridge
  * (record/areas/product/plan.md; record/areas/product/ideas.md, "EventBus
- * bridge"), and the Phenom 300E study's sim question 11.
+ * bridge"), which also shows whether a G3000 page change or setting on the
+ * Phenom 300E crosses to its other displays through wt.eb.evt.
  *
  *   node experiments/areas/commbus/p04-eventbus.mjs [--page <title or id>]
  *

@@ -25,7 +25,7 @@ Our FS Copilot fork added a second way, which sends where the click was, as frac
 | React on DOM | Elements a framework creates and reorders | None in our records | Names shift when siblings reorder [3] | Not tested |
 | React on SVG | One HTML `div`, with SVG below it | The A220's DisplayUnits [2] | Every click names the `div` [3] | Works [2] |
 | Canvas | One `<canvas>` | The A220's MKP, FCP, and ISI, suspected [3] | Nothing to name [3] | Not tested |
-| WASM gauge | A live image of the gauge | Every A350 display but the EFB, the cabin's flight attendant panel, and the printer [6] [24], and the A380's DU [21] | On the A350, presses whatever the receiving pilot's cursor is over [7] | Works on the A380, not on the A350 [7] [21] |
+| WASM gauge | A live image of the gauge | Every A350 display but the EFB, the cabin's flight attendant panel, and the printer [6] [23], and the A380's DU [21] | On the A350, presses whatever the receiving pilot's cursor is over [7] | Works on the A380, not on the A350 [7] [21] |
 
 The A220's DisplayUnits is one document, 7410x1110, with five display units side by side, and only its mount `div` and five empty wrapper `div`s are HTML: everything drawn is SVG [2].
 The A350's MFD, seen through the debugger, holds a live image and no element per control [6] [8]:
@@ -78,7 +78,7 @@ Because the document does its own hit-testing, a position is enough.
 A synthetic `mousedown`, `mouseup`, and `click` at the coordinates of a real click, (3229,191), landed on an SVG `rect` and opened the FPLN/PERF dropdown [2].
 
 A WASM gauge's shell, the sim's `WasmSimCanvas.js`, forwards nine DOM mouse events, each through a `Coherent.call` such as `WASM_MOUSE_DOWN` with the event's coordinates [8].
-A module can place a press at either of two positions: the event's own coordinates, which the shell's calls carry [8], or the sim's cursor position on the gauge, which the sim passes every frame in the `mx` and `my` of `sGaugeDrawData` [23].
+A module can place a press at either of two positions: the event's own coordinates, which the shell's calls carry [8], or the sim's cursor position on the gauge, which the sim passes every frame in the `mx` and `my` of `sGaugeDrawData` [22].
 
 The A380's DU presses at the event's coordinates.
 A probe dispatched a press to a marked target on it from panel code, with the real cursor held somewhere else, alone and in an enter wrapper: a `mouseover` on the display and a `mouseenter` on its `<wasm-sim-canvas>` before the press, and a `mouseleave` after it [21].
@@ -99,9 +99,6 @@ WASM_MOUSE_OVER(232,111,77,0)  WASM_MOUSE_ENTER(232)  WASM_MOUSE_MOVE(232,111,77
 WASM_MOUSE_DOWN(232,111,77,0)  WASM_MOUSE_UP(232,111,77,0)  WASM_CLICK(232,111,77,0)
 WASM_MOUSE_LEAVE(232)
 ```
-
-
-
 
 The A350's MFD pressed under the real cursor, whatever the event said, on 2026-08-30 [7] [13]:
 
@@ -176,9 +173,8 @@ Whether popping out reloads the document, which would put the display back in it
 19. Measured on MSFS 2024 1.8.16.0, 2026-09-17: FS Copilot fork, `record/exerciser/docs/log.md`, "2026-09-17 — A pop-out capture maps to rect fractions by contain-fit, within 6.5 px", with the numbers in `record/exerciser/results/p02-popout-mapping-2026-09-17.txt`.
 20. Documented: fsc-exerciser at 2e4783a, `README.md`, "Limitations", and `src/MainWindow.axaml.cs`, `FirePopOut`.
 21. Measured on MSFS 2024, 2026-09-23: FS Copilot fork at 34b621d, branch `ahead-record`, `record/wasm-pointer/docs/log.md`, "2026-09-23 — The A380 presses where we say once the display is told the mouse entered it; the A350 does not", with each trial's calls in `record/wasm-pointer/results/p01-wasm-away-2026-09-23.ndjson`.
-
-23. Documented, read from the SDK: MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_GaugeContext.h`, `struct sGaugeDrawData`.
-24. Documented in our record, read from the installed package `inibuilds-aircraft-a350` 1.2.6 on 2026-09-29: [inibuilds-a350 study](../../areas/aircraft/inibuilds-a350/study.md), "Displays", from the `panel.cfg` files of the cockpit and of the two flight attendant panel attachments.
+22. Documented, read from the SDK: MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_GaugeContext.h`, `struct sGaugeDrawData`.
+23. Documented, read from the installed package `inibuilds-aircraft-a350` 1.2.6 on 2026-09-29: the `panel.cfg` files of the cockpit, `SimObjects\Airplanes\A350\attachments\inibuilds\Function_Interior_A350\panel\panel.cfg`, and of the two flight attendant panel attachments, `Part_Interior_A350_FAP` and `Part_Interior_A350_FAP_Lite`.
 
 ## Unverified claims
 

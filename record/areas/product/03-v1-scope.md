@@ -280,29 +280,29 @@ It finds state a profile can't reach, exports it as values the profile watches, 
 **In v1:**
 
 - No plugins, the 58P's included: plugins come with the first pick that needs code, designed afresh then (user, 2026-10-17; [plugins and the sandbox](../plugins/01-plugins.md)).
-- Some of the 58P's radio settings live only in its gauges' JavaScript: the ADF's modes and timers, the KAS 297B's armed vertical speed, and the radar's range and modes (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)).
+- Some of the 58P's radio settings live only in its gauges' JavaScript: the ADF's modes and timers, the KAS 297B's armed vertical speed, and the radar's range and modes (read in bksq-aircraft-baronpro 0.1.1, `KR87A.js`, `KAS297B.js`, and `bksq_wradar1.js`).
   The 58P's profile reads them through a name, `instrument()`, and writes them through the gauges' own `H:` events (user, 2026-10-17).
   The radar's range syncs only if a data field of Asobo's map holds it (user, 2026-10-18; [plugins and the sandbox](../plugins/01-plugins.md)).
-- The KX 155B mirrors its knob-pulled state to `L:COM_1_KNOB_PULLED` and never reads it back (same study), so a profile can watch it, and setting it needs no write method: a `toggle` on the knob's `H:` event sets it.
+- The KX 155B mirrors its knob-pulled state to `L:COM_1_KNOB_PULLED` and never reads it back (read in `KX155B.js`), so a profile can watch it, and setting it needs no write method: a `toggle` on the knob's `H:` event sets it.
   The other radios' knob-pulled states are variables their code reads back.
-- The tablet's 15 saved settings need no plugin, because each mirrors an `L:` variable the profile syncs directly, such as `L:var_FrontArmrest` (same study).
+- The tablet's 15 saved settings need no plugin, because each mirrors an `L:` variable the profile syncs directly, such as `L:var_FrontArmrest` (read in `BlackSquareTablet.js`, `aircraftConfigSave`).
 - A late joiner's ADF elapsed timer starts at 0, and the tablet rolls each machine's own failures unless the crew sets its failure rate to 0, which the profile syncs ([no plugins in v1](../plugins/01-plugins.md#no-plugins-in-v1)).
 
 **Not in v1:**
 
 - Plugins for add-ons, such as one for GSX, which comes with [ground operations sync](ideas.md#ground-operations-sync), a Soon pick.
 - Changing an aircraft's files: how a plugin does it waits until one needs it.
-- The KNS-81's 10 waypoints, which the gauge keeps in its JavaScript, saves to the sim's DataStorage every 60s while it has power, and reads back only when it loads (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)).
-  A plugin could sync them: its write method would write the PF's waypoints to the gauge's keys with the sim's `SetStoredData` (documented, as the Baron study cites it; not run, the study's sim question 11), then reload the gauge's panel document, which our FS Copilot fork did from the sim's inspector (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-17 — A peer's press drove the real A220 ND, opted in by identifier alone"), though a reload through our own panel code is untried.
+- The KNS-81's 10 waypoints, which the gauge keeps in its JavaScript, saves to the sim's DataStorage every 60s while it has power, and reads back only when it loads (read in bksq-aircraft-baronpro 0.1.1, `KNS81.js`, `radioConfigSave` and `radioConfigLoad`).
+  A plugin could sync them: its write method would write the PF's waypoints to the gauge's keys with the sim's `SetStoredData` (read in the sim's `dataStorage.js`, FS Copilot profiles, `sim-sources/vcockpit12-efba220-1/html_UI_JS_dataStorage.js`; not run), then reload the gauge's panel document, which our FS Copilot fork did from the sim's inspector (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-17 — A peer's press drove the real A220 ND, opted in by identifier alone"), though a reload through our own panel code is untried.
   Or it would call the gauge's own `radioConfigLoad`, the waypoint load, which also tunes NAV 3 to waypoint 1 and writes that frequency into the waypoint on display (read in bksq-aircraft-baronpro 0.1.1, `KNS81.js`, `radioConfigLoad` and `setStandbyFrequency`; [the Baron's gauge state](../plugins/results/2026-10-17-baron-gauge-state.txt)), and nobody has tried that either.
-  The KNS-81 sits alone in its panel document, `VCockpit13`, so a reload costs only its own JavaScript state: the displayed and used waypoint, the navigation mode, and the data entry mode, of which the study found the waypoint number and the data entry mode mirrored to `L:` variables (same study).
+  The KNS-81 sits alone in its panel document, `VCockpit13`, so a reload costs only its own JavaScript state: the displayed and used waypoint, the navigation mode, and the data entry mode, of which the gauge mirrors the waypoint number and the data entry mode to `L:` variables (read in `KNS81.js`).
 
 **Rules:**
 
 - Plugins' design, after v1, starts from these rules and isn't bound by them (user, 2026-10-17; [no plugins in v1](../plugins/01-plugins.md#no-plugins-in-v1)).
 - Code that serves one aircraft or add-on lives in a plugin, never in Dual Input's own code, so dropping support for an aircraft means removing its plugin and its profile.
 - Each aircraft has one plugin, which runs alongside any add-on's plugin, and plugins share no library, which comes when two plugins need the same code ([01-format-and-delivery](../profiles/01-format-and-delivery.md#deferred)).
-  Black Square's Baron Pro and Bonanza Pro each ship a tablet file named `BlackSquareTablet.js`, of 4,830 and 5,383 lines (read in bksq-aircraft-baronpro 0.1.1 and bksq-aircraft-bonanzapro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md), [Bonanza study](../aircraft/black-square-bonanza-pro/study.md)), and how much code the two share is unverified.
+  Black Square's Baron Pro and Bonanza Pro each ship a tablet file named `BlackSquareTablet.js`, of 4,830 and 5,383 lines (read in bksq-aircraft-baronpro 0.1.1 and bksq-aircraft-bonanzapro 0.1.1), and how much code the two share is unverified.
 - A plugin runs while a variant its profile covers is loaded, and is published inside its profile's file, so pilots never install a plugin or pick one to run, and profiles and plugins reach pilots apart from Dual Input's releases ([architecture's tentative decisions](../architecture/decisions.md#plugin-code-runs-only-in-the-core), [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md)).
 - A plugin's code runs only in Dual Input's core, the program that owns the session ([EFB app](#efb-app)), and reaches the panels and the WASM module through our own code's APIs (same decisions).
   It reaches only the sim and the aircraft, through Dual Input's APIs, and never the pilot's files (same decisions).
@@ -471,7 +471,7 @@ During [preflight](#preflight), and when a late joiner is in a flight, Dual Inpu
 **In v1:**
 
 - The differences show beside each Ready button, as a list of warnings and errors in the EFB app and as counts on the [notification banner](#notification-banner)'s summary, and how they look is for a later design.
-- The comparison covers the aircraft's package, where it's installed, its manifest's version, and the livery ([the match check](../session/02-units.md#the-match-check)), since two pilots can run the iniBuilds L-1011's "1.0.8" from different stores with different files (read in inibuilds-aircraft-l1011 1.0.8, [L-1011 study](../aircraft/inibuilds-l1011/study.md)).
+- The comparison covers the aircraft's package, where it's installed, its manifest's version, and the livery ([the match check](../session/02-units.md#the-match-check)), since two pilots can run the iniBuilds L-1011's "1.0.8" from different stores with different files (read in inibuilds-aircraft-l1011 1.0.8, `common/flt/runway.flt`, against the same file in its streamed copy's unencrypted `minimal.fsarchive`).
   A streamed copy, which keeps no version on disk, shows against an installed one as a warning that asks both pilots to compare versions themselves.
 - Each pilot's profile for the aircraft is compared by a hash the core computes, since a profile carries no version of its own, so a profile someone edited by hand shows as an error, and a copy not yet published shows as "unpublished" ([01-format-and-delivery](../profiles/01-format-and-delivery.md#the-aircraft-and-its-variants)).
 - Each sim's time of day is compared at preflight and at a late join, and a difference shows as a warning (user, 2026-10-12; [04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
@@ -479,7 +479,7 @@ During [preflight](#preflight), and when a late joiner is in a flight, Dual Inpu
 **Not in v1:**
 
 - Stopping a pilot from flying over a difference other than the aircraft itself.
-- Detecting which licensed add-on an aircraft uses, such as the Baron choosing its GPS unit by the TDS license (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), which pilots sort out themselves.
+- Detecting which licensed add-on an aircraft uses, such as the Baron choosing its GPS unit by the TDS license (documented in bksq-aircraft-baronpro 0.1.1, `Manual\BKSQ_BaronProfessionalManual.pdf`, "TDS GTNxi 750 Integration"), which pilots sort out themselves.
 
 **Rules:**
 

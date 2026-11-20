@@ -66,7 +66,7 @@ seats:
     eye: [0.643, -0.054]
 ```
 
-The 58P's mixture lever drags `L:BKSQ_MixtureLeverPosition_1`, and the aircraft's behavior code writes the stock mixture from it, and its weather radar's gauge fires `H:bksq_wradar1_radarAlertToggle` (read in bksq-aircraft-baronpro 0.1.1, `bksq_wradar1.js`, [Baron study](../aircraft/black-square-baron-pro/study.md)).
+The 58P's mixture lever drags `L:BKSQ_MixtureLeverPosition_1`, and the aircraft's behavior code writes the stock mixture from it, and its weather radar's gauge fires `H:bksq_wradar1_radarAlertToggle` (read in bksq-aircraft-baronpro 0.1.1, `model.base\BaronProfessional_Base_INT.xml` and `bksq_wradar1.js`).
 
 | Top-level key | What it holds |
 | --- | --- |
@@ -105,7 +105,7 @@ A name says what something in the sim is, and never acts.
   For an event that takes the written value later in its list, `value` marks the place: `K('SOME_EVENT', 3, value)`, for a hypothetical event, sends 3, then the value.
   Where each event takes its value is documented for only 662 of the SDK's 1,524 `K:` events (counted by fsc-editor, same document, "Confidence tiers").
 - `none` names nothing, and `write: none` marks a watch-only entry ([state entries](#state-entries)).
-- An aircraft's client data, such as the PMDG 777's `ELEC_Battery_Sw_ON` (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)), has no name call: what its bytes mean comes from a layout only that aircraft has, so a plugin would read it and export what the profile needs, and plugins wait for plugins' design ([plugins](#plugins)).
+- An aircraft's client data, such as the PMDG 777's `ELEC_Battery_Sw_ON` (documented in pmdg-aircraft-77w 2.4.143's SDK header, `PMDG_777X_SDK.h`), has no name call: what its bytes mean comes from a layout only that aircraft has, so a plugin would read it and export what the profile needs, and plugins wait for plugins' design ([plugins](#plugins)).
 
 Names are quoted because they're JavaScript strings, and the same JavaScript runs everywhere a profile has script.
 
@@ -155,7 +155,7 @@ fuel_pump_1_1:
     }
 ```
 
-The L-1011's fuel pump click flips `L:SWITCH_FUEL_PUMP_1_1` and fires `H:FUEL`, and its flight engineer's script acts only on `H:FUEL` (read in inibuilds-aircraft-l1011 1.0.8, [L-1011 study](../aircraft/inibuilds-l1011/study.md); unverified in the sim).
+The L-1011's fuel pump click flips `L:SWITCH_FUEL_PUMP_1_1` and fires `H:FUEL` (read in inibuilds-aircraft-l1011 1.0.8, `L1011_COCKPIT.behavior.xml`), and its flight engineer's script acts only on `H:FUEL` (measured on MSFS 2024, 2026-11-09 and 2026-11-10, [sync log](../sync/log.md#2026-11-09-stage-14s-session-in-the-sim-passed-in-four-aircraft-and-no-aircraft-took-an-h-event-our-module-fired), and [sync log](../sync/log.md#2026-11-10-the-sdks-h-event-call-fails-on-msfs-2024-so-our-module-fires-h-events-as-calculator-code-which-reached-every-panel)).
 
 - A write function takes the value to write, and returns nothing.
   `state`, the state object, is a global, and so are the names and `write()`, so nothing else is passed in.
@@ -201,7 +201,7 @@ An aircraft that drops them gets a field naming the call for the whole aircraft 
   A pushback still belongs to the PF; what changes is what happens to another pilot's change, put back in v1 and forwarded to the PF as a request then ([04-room-for-later](../product/04-room-for-later.md#profiles)).
 - An entry's key is lowercase snake_case starting with a letter, so a function reads it as `state.battery_1`, and it's unique across the profile and its modules, in both blocks.
 - `only` lets one profile cover variants that differ.
-  On the base Baron, the mixture lever drags `A:GENERAL ENG MIXTURE LEVER POSITION`, and on the 58TC and 58P it drags `L:BKSQ_MixtureLeverPosition_n` (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), so two entries with different keys and `only` lists cover the mixture.
+  On the base Baron, the mixture lever drags `A:GENERAL ENG MIXTURE LEVER POSITION`, and on the 58TC and 58P it drags `L:BKSQ_MixtureLeverPosition_n` (read in bksq-aircraft-baronpro 0.1.1, `model.base\BaronProfessional_Base_INT.xml`), so two entries with different keys and `only` lists cover the mixture.
 - After the entry fires, Dual Input ignores the next occurrence of each name in `ignore` on that machine, if it comes within 1s, as [01-profile-entries](../sync/01-profile-entries.md#ignoring-a-consequence) describes.
 - `location` is `[x, y, z]` in meters from the aircraft's reference point, in the frame SimConnect's camera reports, with x to the left, y up, and z forward (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-includes-a-tobii-head-trackers-rotation-and-its-position-is-in-meters)).
   Where a variant's cockpit puts a control elsewhere, `location` is a map from variant ID to a point, and a variant missing from the map gets no location.
@@ -228,7 +228,7 @@ fcu_heading:
     dec: K('SOME_AC_HDG_DEC')
 ```
 
-- A counting `watch` takes any of: `inc` and `dec`, each moving the shadow a `step`, which defaults to 1; `set`, an event whose value becomes the shadow; and `count`, a variable whose change is added, for a counter such as the Fenix's `L:E_FCU_HEADING`, which adds 1 for every detent of the heading knob (read in fnx-aircraft-320 2.4.0.4720, [Fenix study](../aircraft/fenix-a320-family/study.md)).
+- A counting `watch` takes any of: `inc` and `dec`, each moving the shadow a `step`, which defaults to 1; `set`, an event whose value becomes the shadow; and `count`, a variable whose change is added, for a counter such as the Fenix's `L:E_FCU_HEADING`, which adds 1 for every detent of the heading knob (read in fnx-aircraft-320 2.4.0.4720, `ModelBehaviorDefs\fnx32x\Templates\Interactions.xml`).
 - It requires `wrap` and `range`, because the count has to stop, or go round, where the aircraft's does: a shadow that kept counting past the top of a speed the aircraft holds at its top would stay wrong, and every following machine would take its value.
 - The entry's stepping write steps by the count's `wrap` and `range`, since the shadow is where the write both starts and ends, and a stepping write on a counted entry that gives its own fails the load.
 - `default` goes on the PF's preflight checklist under the entry's `name`, because the shadow is right only if the PF's aircraft starts there, and the shadow goes back to it whenever the aircraft reloads ([01-profile-entries](../sync/01-profile-entries.md#keeping-a-shadow-value)).
@@ -254,7 +254,7 @@ events:
     ignore: K('TOGGLE_FLIGHT_DIRECTOR')
 ```
 
-The Bonanza's autopilot click fires `K:AP_MASTER`, and `K:TOGGLE_FLIGHT_DIRECTOR` too when the director is off (read in bksq-aircraft-bonanzapro 0.1.1, [Bonanza study](../aircraft/black-square-bonanza-pro/study.md)), which is what the `ignore` above is for.
+The Bonanza's autopilot click fires `K:AP_MASTER`, and `K:TOGGLE_FLIGHT_DIRECTOR` too when the director is off (read in bksq-aircraft-bonanzapro 0.1.1, `model.base\BonanzaProfessional_Base_INT.XML`), which is what the `ignore` above is for.
 The IDE fills `write` with the watched name.
 
 ## Checking a write
@@ -300,14 +300,14 @@ aircraft:
     a35k: [A350/presets/inibuilds/A350-1000_Default_Cabin, A350/presets/inibuilds/A350-1000_No_Cabin]
 ```
 
-- The iniBuilds A350's -900 and -1000 are presets of the folder `A350`, and the Fenix's A319, A320, and A321 are presets of `FNX_32X`, whose study says both pilots must fly the same preset (read in inibuilds-aircraft-a350 1.2.6 and fnx-aircraft-320 2.4.0.4720, [A350 study](../aircraft/inibuilds-a350/study.md#identity), [Fenix study](../aircraft/fenix-a320-family/study.md#identity)).
+- The iniBuilds A350's -900 and -1000 are presets of the folder `A350`, and the Fenix's A319, A320, and A321 are presets of `FNX_32X`, where both pilots must fly the same preset (read in inibuilds-aircraft-a350 1.2.6 and fnx-aircraft-320 2.4.0.4720, each preset's `config\aircraft.cfg`).
 - The core matches a loaded aircraft by its folder and its preset, from the path the sim reports when it loads, and compares them ignoring case, since one load reported a relative, mixed-case path and then an absolute, lowercase one ([02-02](../../learn/foundations/02-02-aircraft.md#how-an-aircraft-is-identified)).
-  FS Copilot keeps only the folder, the path's segment after `SimObjects\Airplanes\` (read in the FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs`, `PushAircraft`), though the PA-24's path named its preset too: `pa24-250\presets\a2a\pa24-250\config\aircraft.CFG` (measured on MSFS 2024, 2026-08-18, fsc-editor, [A2A PA-24 study](../aircraft/a2a-pa24-comanche/study.md)).
-  The PA-24 has one preset, so whether the path names the loaded preset on an aircraft with several, and whether `A:TITLE` gives the preset's own title, is the [L-1011 study](../aircraft/inibuilds-l1011/study.md)'s sim question 13; the profile names the preset either way.
+  FS Copilot keeps only the folder, the path's segment after `SimObjects\Airplanes\` (read in the FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs`, `PushAircraft`), though the PA-24's path named its preset too: `pa24-250\presets\a2a\pa24-250\config\aircraft.CFG` (measured on MSFS 2024, 2026-08-18, fsc-editor, `docs/sim-vars/build/v1-log.md`, "Stage 0 complete. Aircraft key confirmed; two findings about layout.").
+  The PA-24 has one preset, while each of the L-1011's four presets gave a path of its own, and `A:TITLE` gave each preset's own title (measured on MSFS 2024, 2026-10-21, [core log](../core/log.md#2026-10-21-stage-4s-core-follows-the-sim-through-three-boots-and-five-loads-and-replays-all-of-it-but-ending-a-flight-sends-no-back_to_main_menu-and-a-failed-open-blocks-for-45s)); the profile names the preset either way.
   The core reads which preset loaded from the path `AircraftLoaded` reports, lowercased and cut below `simobjects/airplanes/`, and logs `A:TITLE` beside it ([the aircraft](../core/03-sim-seam-and-wasm-module.md#the-aircraft)).
 - Two pilots fly together only in the same folder and preset: another aircraft, a different variant included, keeps a pilot out of the flight, while different versions and liveries stop nothing ([03-v1-scope](../product/03-v1-scope.md); user, 2026-10-12).
 - The core finds the package that holds the folder from the same path, for the aircraft's version and the [preflight match check](../product/03-v1-scope.md#preflight-match-check), so a profile names no package.
-  One package can hold several aircraft: `bksq-aircraft-baronpro` 0.1.1 holds all three Barons ([Baron study](../aircraft/black-square-baron-pro/study.md#identity)).
+  One package can hold several aircraft: `bksq-aircraft-baronpro` 0.1.1 holds all three Barons (read in its `layout.json`).
 - A profile lists no aircraft versions, because authors would leave the list empty or wrong too often for its warning to mean anything, and the match check still compares the two pilots' aircraft versions with each other.
   The sim service reads an aircraft's version from its package's `manifest.json` ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts)), and the match check shows a streamed copy, which keeps none on disk, as a warning when compared with an installed one ([the match check](../session/02-units.md#the-match-check)).
 - `pace` sets the pace for the whole aircraft ([pace](#pace)).

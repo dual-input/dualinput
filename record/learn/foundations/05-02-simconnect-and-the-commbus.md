@@ -42,7 +42,7 @@ module           reads "start" in its dispatch callback; writes a hello with the
 The third is which sim the module is built for.
 The SDK says a module is detected as an MSFS 2024 module only if it's linked with `MSFS_WasmVersions.a`, and that without it, features such as SimConnect "behave as if they were from a MSFS 2020 module" [7].
 The platform toolset links it without being asked ([05-03](05-03-toolchain-versioning-and-debugging.md#toolchain-sdk-platform-toolset-fspackagetool-the-project-editor)).
-A Rust module built without it was compiled into `WASM\MSFS2024` and ran [21], and what the sim does differently for such a module is unmeasured.
+A Rust module built without it was compiled into `WASM\MSFS2024` and ran [20], and what the sim does differently for such a module is unmeasured.
 
 A module has all of SimConnect, alongside the Vars API.
 FS Copilot's module reads four freeze and state variables and `L:FSC_CONTROL` through a data definition at `SIMCONNECT_PERIOD_SIM_FRAME` with the `CHANGED` flag, and writes position through calculator code [2].
@@ -54,8 +54,8 @@ The module is there before the app and stays after it, so the app has to find ou
 **Traps.**
 
 - Both our modules return from `module_init` without a word when `SimConnect_Open` fails, so a module that couldn't connect looks, from the app, like no module at all [2] [3].
-- Inside a module, `HANDLE` is 64 bits wide though pointers are 32 [20].
-  A Rust binding that declared it as a pointer got `S_OK` from `SimConnect_Open` and a handle that fit in 32 bits, then `E_FAIL`, −2147467259, from the first call after it, and the module's data areas never appeared; declared as a 64-bit integer, `SimConnect_Open` and the eight setup calls after it returned `S_OK` [21].
+- Inside a module, `HANDLE` is 64 bits wide though pointers are 32 [19].
+  A Rust binding that declared it as a pointer got `S_OK` from `SimConnect_Open` and a handle that fit in 32 bits, then `E_FAIL`, −2147467259, from the first call after it, and the module's data areas never appeared; declared as a 64-bit integer, `SimConnect_Open` and the eight setup calls after it returned `S_OK` [20].
   C++ takes the width from the SDK's header, so a binding written by hand has to follow the header for every type, because a wrong width compiles and loads.
 - Some SimConnect structures changed size in MSFS 2024: the `ident` member of `SIMCONNECT_ICAO` and the structures built on it grew to 8 [1] [7].
   The SDK warns about code that copies them into short fixed buffers.
@@ -91,12 +91,12 @@ The SDK recommends JSON for the string, and says "All calls are asynchronous" [9
 None of the three APIs has a call that reads an earlier message [9] [10] [11], so a listener that registers late has missed what came before.
 
 A SimConnect client and the sim's pages reach each other over it, in both directions.
-On 2026-10-08 a probe that was a SimConnect client called `SimConnect_CallCommBusEvent` for JavaScript every 500ms, and subscribed with `SimConnect_SubscribeToCommBusEvent` to a name each page called [18] [19].
+On 2026-10-08 a probe that was a SimConnect client called `SimConnect_CallCommBusEvent` for JavaScript every 500ms, and subscribed with `SimConnect_SubscribeToCommBusEvent` to a name each page called [17] [18].
 In the main menu, 13 of the 14 pages heard the calls and reached the subscription.
-In a flight in the A2A PA-24, 30 of the 31 pages heard them, all 16 of its cockpit panels among them, and 29 reached the subscription [19].
-A page's call back is `COMM_BUS_SIMCONNECT_CALLBACK` with an event name and a text, made on its listener where it has one and on `engine` where it has none [18] [19].
+In a flight in the A2A PA-24, 30 of the 31 pages heard them, all 16 of its cockpit panels among them, and 29 reached the subscription [18].
+A page's call back is `COMM_BUS_SIMCONNECT_CALLBACK` with an event name and a text, made on its listener where it has one and on `engine` where it has none [17] [18].
 
-What a page has decides how it listens, and a page without `Coherent` hears the calls through the sim's own view-listener mechanism, not through the CommBus API [18]:
+What a page has decides how it listens, and a page without `Coherent` hears the calls through the sim's own view-listener mechanism, not through the CommBus API [17]:
 
 | Page has | It listens through | Pages |
 | --- | --- | --- |
@@ -114,14 +114,14 @@ engine.on("EVENT_FROM_VIEW_LISTENER", function (listener, name) {
 engine.trigger("ADD_VIEW_LISTENER", "JS_LISTENER_COMM_BUS", window.location.pathname);
 ```
 
-A call arrives on that route as an `EVENT_FROM_VIEW_LISTENER` for `JS_LISTENER_COMM_BUS`, never as an event of its own name, so a page that listens for the name alone hears nothing [18].
-The sim's own page code takes events this way (read in fs-base-ui 0.1.10, `html_ui/Global/lib.js`, `ViewListenerMgr`) [18].
+A call arrives on that route as an `EVENT_FROM_VIEW_LISTENER` for `JS_LISTENER_COMM_BUS`, never as an event of its own name, so a page that listens for the name alone hears nothing [17].
+The sim's own page code takes events this way (read in fs-base-ui 0.1.10, `html_ui/Global/lib.js`, `ViewListenerMgr`) [17].
 
-Two pages broke the pattern [19]:
+Two pages broke the pattern [18]:
 
 - A page named `transition` heard no call, and the sim rejected its call back: "COMM_BUS_SIMCONNECT_CALLBACK not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result."
 - The toolbar's page in a flight heard 13 calls, but its listener still hadn't reported ready about 7s after it registered, and the one call it made 1.5s in never reached the probe or settled.
-  In an earlier run its listener reported ready and its call arrived [18].
+  In an earlier run its listener reported ready and its call arrived [17].
 
 FS Copilot uses the CommBus between its panel hook and its module, to carry clicks on a display and `H:` events.
 The module relays them to and from the app through two client data areas of 512 bytes [2] [12]:
@@ -145,13 +145,13 @@ Our FS Copilot fork moved forwarded clicks off this path, to a WebSocket from ea
 
 Aircraft use the CommBus too.
 The Synaptic A220's systems module publishes its state as JSON on more than 30 named channels, such as `A22X.L PFD Data`, for its JavaScript displays to draw [15].
-The panels get the selected altimeter setting on the CommBus, as `qnh_hpa` on `A22X.L ADS Data` and `qnh.value` on `A22X.L CTP Data` [17].
+The panels get the selected altimeter setting on the CommBus, as `qnh_hpa` on `A22X.L ADS Data` and `qnh.value` on `A22X.L CTP Data` [16].
 Whether `A:KOHLSMAN SETTING MB` follows it is unverified ([07](07-aircraft-specific-systems.md#why-study-level-aircraft-diverge)).
 
 **What it changes for Dual Input.**
 Some aircraft keep state only on the CommBus, and a Dual Input module could register for the same names to read it, but it receives only calls whose sender set the WASM flag.
 The A220's module sets only the JavaScript flag, `FsCommBusBroadcast_JS`, so a module can't read the A220's channels, and Dual Input has to read them from panel JavaScript (unverified).
-A SimConnect client can call into all but one of the pages we use, and a page's call back can be lost before its listener reports ready, as the toolbar's was [19].
+A SimConnect client can call into all but one of the pages we use, and a page's call back can be lost before its listener reports ready, as the toolbar's was [18].
 
 **Traps.**
 
@@ -159,10 +159,10 @@ A SimConnect client can call into all but one of the pages we use, and a page's 
   We trust the header, which spells the flags `FsCommBusBroadcast_JS` and so on.
 - A module doesn't hear its own calls unless it adds `FsCommBusBroadcast_WasmSelfCall` [11].
 - FS Copilot's module drops a message from JavaScript longer than 512 bytes, and logs nothing [2].
-- The route into a page without `Coherent` is the sim's own page code, not a call of the JavaScript Communication API [10] [18], so a sim update could change it.
+- The route into a page without `Coherent` is the sim's own page code, not a call of the JavaScript Communication API [10] [17], so a sim update could change it.
 - A SimConnect client receives only calls whose sender set `FsCommBusBroadcast_SimConnect` [11].
   Our A220 notes say SimConnect can't see its CommBus traffic [15], and no client has subscribed to one of its channels (unverified).
-  The SDK's claim that SimConnect clients and JavaScript exchange CommBus events holds for the events our probe sent [18] [19].
+  The SDK's claim that SimConnect clients and JavaScript exchange CommBus events holds for the events our probe sent [17] [18].
 
 ## Sources
 
@@ -181,12 +181,11 @@ A SimConnect client can call into all but one of the pages we use, and a page's 
 13. Documented in our record: FS Copilot fork, `record/pointer-forwarding/docs/04-transport.md`, sections "What exists" and "Bypassing it".
 14. Documented in our record: FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, "4.1 Transport: WebSocket sidecar, not the CommBus".
 15. Documented in our record, read from the aircraft's files: fsc-editor, `docs/aircraft/synaptic-a220.md`, sections "Architecture — the thing to remember", "THE ALTIMETER PROBLEM", and "CommBus channels".
-
-17. Measured on MSFS 2024, 2026-09-28: [CommBus log](../../areas/commbus/log.md#2026-09-28-the-a220-sends-changes-not-snapshots-and-keeps-its-altimeter-setting-on-the-ads-and-ctp-channels), "The A220 sends changes, not snapshots, and keeps its altimeter setting on the ADS and CTP channels".
-18. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one), "Every page we use reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:` variable, and a flight load resets one", with the output in `experiments/areas/interface/results/p13-sim-links-2026-10-08-13-54-50.txt` and `p14-commbus-pages-2026-10-08-14-05-05.txt`.
-19. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel), "A page's WebSocket stays open after the page is gone, and the CommBus reaches every page we use in the menu and every cockpit panel", with the output in `experiments/areas/interface/results/p15-links-coverage-2026-10-08-14-54-27.txt`.
-20. Documented, read from the SDK: MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_WindowsTypes.h`, `typedef unsigned long long HANDLE`.
-21. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [architecture log](../../areas/architecture/log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide), "A standalone module built from Rust with cargo-msfs, and packaged by our own script, runs on MSFS 2024 and trades data slots with a SimConnect client, once its SimConnect handle is 64 bits wide", with the output in `experiments/areas/architecture/results/p03-rust-module-2026-10-08-17-54-02.txt` for the failing call, `-17-59-24.txt` for the handle that fit in 32 bits, and `-18-04-12.txt` for the 64-bit run.
+16. Measured on MSFS 2024, 2026-09-28: [CommBus log](../../areas/commbus/log.md#2026-09-28-the-a220-sends-changes-not-snapshots-and-keeps-its-altimeter-setting-on-the-ads-and-ctp-channels), "The A220 sends changes, not snapshots, and keeps its altimeter setting on the ADS and CTP channels".
+17. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one), "Every page we use reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:` variable, and a flight load resets one", with the output in `experiments/areas/interface/results/p13-sim-links-2026-10-08-13-54-50.txt` and `p14-commbus-pages-2026-10-08-14-05-05.txt`.
+18. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel), "A page's WebSocket stays open after the page is gone, and the CommBus reaches every page we use in the menu and every cockpit panel", with the output in `experiments/areas/interface/results/p15-links-coverage-2026-10-08-14-54-27.txt`.
+19. Documented, read from the SDK: MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_WindowsTypes.h`, `typedef unsigned long long HANDLE`.
+20. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [architecture log](../../areas/architecture/log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide), "A standalone module built from Rust with cargo-msfs, and packaged by our own script, runs on MSFS 2024 and trades data slots with a SimConnect client, once its SimConnect handle is 64 bits wide", with the output in `experiments/areas/architecture/results/p03-rust-module-2026-10-08-17-54-02.txt` for the failing call, `-17-59-24.txt` for the handle that fit in 32 bits, and `-18-04-12.txt` for the 64-bit run.
 
 ## Unverified claims
 

@@ -26,9 +26,9 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
 - `.claude/skills/resume/` picks up work on one area of `record/areas/` from its plan, its log, or both (`/resume <area>`).
 - `.claude/skills/learn/` writes one chapter of the learning material (`/learn <course> <part>`), running the `chapter-writer` agent, then the `fact-checker` on full-depth sections.
 - `.claude/skills/stage-map/` makes a build stage's map, the page the user reads before the stage's diff (`/stage-map <stage>`).
-- `.claude/skills/study-aircraft/` studies one aircraft from every file of it we can open (`/study-aircraft <aircraft>`).
+- `.claude/skills/study-aircraft/` studies one aircraft from every file of it we can open (`/study-aircraft <aircraft> <studies folder>`), into the studies folder the user names, never this repository, because a study cites decompiled code.
   Start a background subagent per aircraft and have it invoke the skill, because a study fills a whole context.
-  When it reports, commit its folder and mark it in `record/areas/aircraft/plan.md`.
+  When it reports, commit the aircraft's folder in the studies folder's repository, and mark the aircraft done in the studies folder's `plan.md`.
 
 ## Targets
 
@@ -110,12 +110,11 @@ A build stage's close runs it without asking, alongside the bench, as [working a
 Experiments get none.
 
 **Commit at any checkpoint without asking.**
-Until the repository goes public, commits are only checkpoints.
-On the day it goes public, we squash the history into one commit.
+Commits are checkpoints, and the next rule's check, run before each one, is what keeps them safe in a history that stays public.
 
 **Nothing personal in the tree.**
-The squash removes old commits, not the files in the last one, so everything in the tree on that day goes public.
-No file in the tree may carry a username, a home folder path, a machine name, or an email address.
+Removing a file later doesn't take it back, because an old commit still holds it.
+No file in the tree, and no commit message, may carry a username, a home folder path, a machine name, or an email address.
 Before committing, run this in Git Bash.
 No output means it found none of your account name, machine name, or email address:
 

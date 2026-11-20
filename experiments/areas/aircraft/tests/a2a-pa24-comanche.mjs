@@ -1,20 +1,31 @@
 /*
- * The A2A PA-24's sim questions, from record/areas/aircraft/a2a-pa24-comanche/study.md,
- * Sim questions. The shape is in run.mjs's header.
+ * The harness's tests on the A2A PA-24, numbered as in questions.tsv. The shape
+ * is in run.mjs's header.
  */
 
-import { readFileSync } from "node:fs"
+import { readFileSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 
-import { REPO } from "../lib/out.mjs"
+import { findPackage } from "../lib/flights.mjs"
 
-// The input events the package declares, by ID (read in a2a-aircraft-pa24
-// 2.1.3, common/model/Inputs, Templates, and attachments, by script).
+function* xmlFiles(dir) {
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, e.name)
+    if (e.isDirectory()) yield* xmlFiles(path)
+    else if (/\.xml$/i.test(e.name)) yield path
+  }
+}
+
+// The input events the package declares, by ID: every <InputEvent ID> in the
+// aircraft's model XML, 223 at a2a-aircraft-pa24 2.1.3, read from the installed package.
 function declaredInputEvents() {
-  const file = join(REPO, "record", "areas", "aircraft", "a2a-pa24-comanche", "inventory", "input-events.tsv")
-  return readFileSync(file, "utf8").split(/\r?\n/)
-    .filter((l) => l && !l.startsWith("#") && !l.startsWith("file\t"))
-    .map((l) => { const [file, id, presets, kind] = l.split("\t"); return { file, id, presets, kind } })
+  const root = findPackage("a2a-aircraft-pa24")
+  if (!root) throw new Error("a2a-aircraft-pa24 isn't installed")
+  const ids = new Set()
+  for (const file of xmlFiles(join(root, "SimObjects", "Airplanes", "pa24-250"))) {
+    for (const m of readFileSync(file, "utf8").matchAll(/<InputEvent\b[^>]*\bID="([^"]+)"/g)) ids.add(m[1])
+  }
+  return [...ids].map((id) => ({ id }))
 }
 
 // The runtime name adds the template's IE_NAME, such as SWITCH_BATTERY_MASTER_2STATES
@@ -110,7 +121,6 @@ export default {
       async run(ctx) {
         // Sent without the harness's tag, because the question is about events
         // without a parameter.
-
         //
         // A subscription at the highest priority hears every event. One at
         // 10,000,001, just below SimConnect's HIGHEST_MASKABLE, hears what no
@@ -120,7 +130,8 @@ export default {
         // masks it in between (measured on MSFS 2024, 2026-10-01; unverified
         // which client). The control is an event no group masked on the PA-24
         // (measured on MSFS 2024, 2026-10-01, experiments/areas/aircraft/results/
-        // run-a2a-pa24-comanche-2026-10-01-18-20-15.txt), sent with the frequency it already has.
+        // run-a2a-pa24-comanche-2026-10-01-18-20-15.txt), sent with the frequency
+        // it already has.
         const control = await ctx.readOne("COM STANDBY FREQUENCY:1", "Hz")
         const cases = [
           { event: "K:COM_STBY_RADIO_SET_HZ", values: [control], stock: ["COM STANDBY FREQUENCY:1", "Hz"], l: null, control: true, restore: () => {} },

@@ -54,7 +54,7 @@ const RESCAN_MS = 5_000
 // 6 changes after any candidate moment.
 const KEEP_TIMES = 30
 
-// One aircraft for each way of loading its state that our studies found, and
+// One aircraft for each way of loading its state we found in the aircraft's files, and
 // the last load repeats the first with Flow Pro's auto-click off, so any
 // difference the click makes shows on the same aircraft (agreed with the user,
 // 2026-10-05). The Bonanza, Aerostar, L-1011, A380, and Phenom 300E share a
@@ -101,12 +101,11 @@ const STOCK_WRITES = [
   },
 ]
 
-// One control of the aircraft's own, where its study names a variable that's
+// One control of the aircraft's own, where its files name a variable that's
 // safe to flip and put back.
 const AIRCRAFT_WRITES = {
   // The tablet saves the front armrest from this variable (read in
-  // bksq-aircraft-baronpro 0.1.1, record/areas/aircraft/black-square-baron-pro/
-  // inventory/datastorage-keys.txt).
+  // bksq-aircraft-baronpro 0.1.1, BlackSquareTablet.js, aircraftConfigSave).
   "black-square-baron-pro": [{
     label: "L:var_FrontArmrest by data definition",
     read: ["L:var_FrontArmrest", "number"],

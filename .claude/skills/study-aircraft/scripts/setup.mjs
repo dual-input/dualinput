@@ -7,7 +7,7 @@
  * Each tool is pinned in tools.json, with its download's SHA-256, so a changed or
  * tampered download is refused. When you bump a version there, bump its hash in the same
  * edit. bin/ is gitignored, so the downloaded binaries never enter the repository, which
- * goes public.
+ * is public.
  */
 
 import { createHash } from "node:crypto"

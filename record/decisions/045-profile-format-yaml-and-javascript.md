@@ -13,7 +13,7 @@ Our earlier work shows what a format can cost:
 
 - FS Copilot's format guessed a setter's kind from its characters and fell back silently, emptied a whole profile on one unknown key, and ran a repeated name as two subscriptions (fsc-editor, `docs/fscopilot-behavior.md` and `docs/sim-vars/18-language-core.md`).
 - 15,933 of the 26,533 entries in FS Copilot's profiles, 60%, write through the calculator code the format generates (measured across those profiles, fsc-editor, `docs/sim-vars/build/v1-log.md`, 2026-08-25, "A setter is a script, and most entries do not have one"), and the engine can't pace, order, or recognize as its own a write hidden in calculator code ([01-profile-entries](../areas/sync/01-profile-entries.md#the-writer-api)).
-- The Fenix's A319, A320, and A321 are presets of one folder, `FNX_32X`, and both pilots must fly the same preset (read in fnx-aircraft-320 2.4.0.4720, [Fenix study](../areas/aircraft/fenix-a320-family/study.md#identity)), while FS Copilot keeps only the folder from the path the sim reports (read in the FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs`, `PushAircraft`).
+- The Fenix's A319, A320, and A321 are presets of one folder, `FNX_32X`, and both pilots must fly the same preset (read in fnx-aircraft-320 2.4.0.4720, each preset's `config\aircraft.cfg`), while FS Copilot keeps only the folder from the path the sim reports (read in the FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs`, `PushAircraft`).
 
 ## Options
 

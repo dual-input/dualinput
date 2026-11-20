@@ -53,7 +53,7 @@ The problems below are ones we expect.
 
 - **Who:** a crew, and sometimes passengers.
   The crew is usually two pilots, or three with a flight engineer.
-  The iniBuilds L-1011 has a flight engineer's panel, though its manual says it's designed for single-pilot operations (read in inibuilds-aircraft-l1011 1.0.8, [L-1011 study](../aircraft/inibuilds-l1011/study.md)).
+  The iniBuilds L-1011 has a flight engineer's panel, though its manual says it's designed for single-pilot operations (documented in inibuilds-aircraft-l1011 1.0.8, `Resources/Documentation/Tristar manual 1.2.pdf`).
   Older airliners carried more: the L-1049 Super Constellation flew with five, adding a navigator and a radio operator ([L-1049](https://en.wikipedia.org/wiki/Lockheed_L-1049_Super_Constellation) on Wikipedia).
   The B-36 bomber's reconnaissance version flew with 22, each working a station on the aircraft ([B-36](https://en.wikipedia.org/wiki/Convair_B-36_Peacemaker) on Wikipedia).
   So a crew has two limits:

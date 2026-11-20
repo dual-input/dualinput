@@ -105,13 +105,12 @@ A `Z:` variable, also written `L:1:`, is the same idea scoped to one object, suc
 **How it works.**
 The SDK says an undefined `L:` is created and set to 0 the first time code references it, and doesn't persist between runs [15].
 A flight load resets one.
-On 2026-10-08 a SimConnect client wrote `L:CROSSCHECK_P13_PORT` as 61203 in the main menu and read 61203 back, and after a flight loaded, the same read returned 0; a write in the flight held for the rest of the run [29].
+On 2026-10-08 a SimConnect client wrote `L:CROSSCHECK_P13_PORT` as 61203 in the main menu and read 61203 back, and after a flight loaded, the same read returned 0; a write in the flight held for the rest of the run [28].
 The PA-24's battery switch writes `L:Battery1Switch` ([02-02](02-02-aircraft.md#model-behaviors)), and fsc-editor wrote the same variable from outside through calculator code, `1 (>L:Battery1Switch)` [18].
 
 One table serves the whole sim.
 With the PA-24 loaded, a WASM module listed 5,364 `L:` names [16].
 FS Copilot's PA-24 profile names 279 `L:` variables, about 5% of that count [16].
-
 Other installed add-ons, such as a GTN 750 and GSX, and the sim registered the rest [16].
 Switching to a Black Square Baron removed none of the 6,149 names and added 3 [19].
 The table grew from 5,341 to 6,125 names over a few minutes with no aircraft change, as instruments and add-ons registered theirs [20].
@@ -170,10 +169,9 @@ A value written before a flight loads doesn't survive the load, so anything Dual
 24. Documented in our record: fsc-editor, `docs/sim-vars/18-language-core.md`, the `ref-unresolved` item under "Evidence-backed rules", which lists the profiles.
 25. Measured on MSFS 2024, 2026-08-27: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-27 — One parser, one descriptor table; eight private opinions deleted".
 26. Documented, read from the SDK: MSFS 2024 SDK 1.7.3, `ModelBehaviorDefs/Asobo/NAVCOM/NavComSystem.xml`, from the MSFS 2020 template set, where `AUDIO_Knob_Selector#SUFFIX_ID#` appears only as an animation and node name; `ModelBehaviorDefs/Asobo_EX1`, the 2024 set, doesn't contain the name.
-27. Measured on MSFS 2024, 2026-09-28: [CommBus log](../../areas/commbus/log.md#2026-09-28-the-a220-sends-changes-not-snapshots-and-keeps-its-altimeter-setting-on-the-ads-and-ctp-channels), "The A220 sends changes, not snapshots, and keeps its altimeter setting on the ADS and CTP channels".
-
     The MSFS 2024 SDK's [Model Behaviors](https://docs.flightsimulator.com/msfs2024/html/5_Content_Configuration/Models/ModelBehaviors/Model_Behaviors.htm) page says the `Asobo` folder holds the core files for MSFS 2020, and not to mix it with `Asobo_EX1`.
-29. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one), "Every page we use reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:` variable, and a flight load resets one", with the output in `experiments/areas/interface/results/p13-sim-links-2026-10-08-13-39-22.txt`, in the A2A PA-24 parked.
+27. Measured on MSFS 2024, 2026-09-28: [CommBus log](../../areas/commbus/log.md#2026-09-28-the-a220-sends-changes-not-snapshots-and-keeps-its-altimeter-setting-on-the-ads-and-ctp-channels), "The A220 sends changes, not snapshots, and keeps its altimeter setting on the ADS and CTP channels".
+28. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one), "Every page we use reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:` variable, and a flight load resets one", with the output in `experiments/areas/interface/results/p13-sim-links-2026-10-08-13-39-22.txt`, in the A2A PA-24 parked.
 
 ## Unverified claims
 
@@ -188,5 +186,5 @@ A value written before a flight loads doesn't survive the load, so anything Dual
   The measured conversion came through the WASM API and calculator code [21] [22], and FS Copilot reads `L:` through SimConnect in `number`.
   Reading `L:Eng1_FuelQuantityCC` on the PA-24 through a SimConnect data definition in `number` and in `gallons` would settle it.
 - **Whether a flight load resets every `L:`, or only one that no aircraft code registers.**
-  We watched one variable, `L:CROSSCHECK_P13_PORT`, which only our probe used [29].
+  We watched one variable, `L:CROSSCHECK_P13_PORT`, which only our probe used [28].
   Writing a variable the PA-24 registers in one flight, loading a second flight, and reading it would settle it.

@@ -12,7 +12,7 @@ A PF-owned entry, an engine lever or the trim, is one only the flying machine se
 Two problems meet here:
 
 - **An entry the aircraft drives.** An entry for something the aircraft changes or fires on its own, such as a timer, a blinking light, or an `H:` event a gauge fires on a timer, is a profile's mistake, and it would send a change or a firing at every tick and fill every replay ([04-order-and-recovery](../areas/sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself)).
-  Input events can report on their own: 21 of the A220's input events reported four times a second on an untouched aircraft (measured on MSFS 2024, 2026-09-04, fsc-editor, as the [A220 study](../areas/aircraft/synaptic-a220/study.md) cites).
+  Input events can report on their own: 21 of the A220's input events reported four times a second on an untouched aircraft (measured on MSFS 2024, 2026-09-04, fsc-editor, `docs/sim-vars/build/v1-log.md`, "The `B:` subscription is a change feed; the entry below was wrong").
 - **A change a machine may not send.** A following machine's sim reports changes the machine may not send, such as the PM's throttle hardware moving a PF-owned lever ([04-order-and-recovery](../areas/sync/04-order-and-recovery.md#putting-back)).
   Catch-up already moved a catching-up pilot's changes back ([03-catch-up](../areas/sync/03-catch-up.md#while-catch-up-runs)), and v1's scope already put back another pilot's change to the simulation rate ([time, date, sim rate, and pause](../areas/product/03-v1-scope.md#time-date-sim-rate-and-pause)).
 

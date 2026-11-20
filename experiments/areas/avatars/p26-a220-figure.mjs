@@ -28,8 +28,10 @@
  * Y forms (synaptic-aircraft-a220 1.0.10). Everything else stays as the files
  * store it, so a click's ray can meet a part where the file has it rather
  * than where the sim has moved it, or one the sim hides. Nothing writes the R
- * pair (record/areas/aircraft/synaptic-a220/study.md), so the first officer's
- * stick stays centered.
+ * pair (measured on MSFS 2024, 2026-10-04, record/areas/avatars/log.md, "In the
+ * A220's right seat, the figure's right hand held the first officer's
+ * sidestick, and nothing moved that stick"), so the first officer's stick stays
+ * centered.
  *
  * The seat: the A220 has no PILOT_ node, so the seat point sits under the
  * copilot's eye from cameras.cfg as the Baron's PILOT_1 sits under its

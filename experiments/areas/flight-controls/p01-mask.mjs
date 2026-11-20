@@ -5,7 +5,6 @@
  * An aircraft that runs its own flight controls, such as A2A's Accu-Sim
  * aircraft, the Synaptic A220, the iniBuilds A350, or the PMDG 777, may mask
  * the pilot's axis events through SimConnect itself (unverified; the masked
-
  * phase shows it). A forum thread says masking
  * "never has worked properly in MSFS" (record/learn/foundations/04-02-events.md).
  * Nobody in our records has measured it.
@@ -16,8 +15,8 @@
  * a minute for pitch and 30s for the others. --controls mixture runs only the
  * mixture, which the Black Square Baron takes through its own input events,
  * BKSQ_TurbochargedMixtureController_1 and _2, bound to every MIXTURE* key
- * event (record/areas/aircraft/black-square-baron-pro/study.md); soft takeover
- * needs masking to hold those back too. The probe steps
+ * event (read in bksq-aircraft-baronpro 0.1.1, BaronProfessional_Templates.xml);
+ * soft takeover needs masking to hold those back too. The probe steps
  * through the phases by itself, 5s each, with a short beep at each:
  *
  *   free     Nothing masked: which K: events and input events the control
@@ -40,8 +39,8 @@
  * With --reload, the masks then go in before you reload the aircraft, to see
  * whether the order of registration decides a tie at 10,000,000.
  *
- * With --masks-first <study folder>, start with another aircraft loaded, such
- * as the stock Cessna 152. The probe installs the masks, loads the study
+ * With --masks-first <aircraft>, start with another aircraft loaded, such
+ * as the stock Cessna 152. The probe installs the masks, loads that
  * aircraft's parked flight through SimConnect, and asks for one window of yoke
  * and throttle together: masked, then cleared. It answers the same question as
  * --reload without loading the same aircraft twice in a row, which crashed the
@@ -67,12 +66,12 @@
  * travel. Events near ±4,000 mean they carry the raw axis; events near 0, or
  * none, mean they carry the value after MSFS's dead zone.
  *
- *   node experiments/areas/flight-controls/p01-mask.mjs [--aircraft <study folder>] [--controls pitch,throttle,mixture] [--reload] [--legacy]
- *   node experiments/areas/flight-controls/p01-mask.mjs --masks-first <study folder>
+ *   node experiments/areas/flight-controls/p01-mask.mjs [--aircraft <aircraft>] [--controls pitch,throttle,mixture] [--reload] [--legacy]
+ *   node experiments/areas/flight-controls/p01-mask.mjs --masks-first <aircraft>
  *   node experiments/areas/flight-controls/p01-mask.mjs --deadzone
  *
- * <study folder> is a folder under record/areas/aircraft/, such as
- * a2a-pa24-comanche. Without it the probe matches the loaded aircraft's TITLE,
+ * <aircraft> is a key of AIRCRAFT in experiments/areas/aircraft/lib/aircraft.mjs,
+ * such as a2a-pa24-comanche. Without it the probe matches the loaded aircraft's TITLE,
  * and with no match it watches the stock variables alone.
  *
  * Output: one line per phase on the console, every event in
@@ -137,7 +136,6 @@ const CANDIDATES = [
 
 // Events an aircraft's own module may send to move the sim's surfaces and
 // levers, such as K:ELEVATOR_SET (unverified for any one aircraft), and the normally aspirated Baron's
-
 // K:MIXTURE1_SET, which its mixture input event sends from the pilot's input
 // (read in BaronProfessional_Templates.xml). Masking one would cut the
 // module's output, so the probe listens for them and never masks them.
@@ -183,14 +181,14 @@ const LOCAL = {
   "pmdg-777-300er": { pitch: ["L:yokes_Fore_Aft"] },
   "fenix-a320-family": { pitch: ["L:N_FC_SIDESTICK_CAPT_PITCH"] },
   // On the 58TC and 58P the lever is L:BKSQ_MixtureLeverPosition_1, and the
-  // XML writes the stock variable from it at 2 Hz (record/areas/aircraft/
-  // black-square-baron-pro/study.md, Throttles, propellers, and mixture).
+  // XML writes the stock variable from it at 2 Hz (read in bksq-aircraft-baronpro
+  // 0.1.1, model.base\BaronProfessional_Base_INT.xml).
   "black-square-baron-pro": { mixture: ["L:BKSQ_MixtureLeverPosition_1"] },
 }
 
 // Black Square's control lock clamps the elevator and ailerons to ±1% while
-// it's in (record/areas/aircraft/black-square-baron-pro/study.md, Flight
-// controls and autoflight).
+// it's in (read in bksq-aircraft-baronpro 0.1.1,
+// model.base\BaronProfessional_Base_INT.xml, the YOKES component).
 const CONTROL_LOCKS = {
   "black-square-baron-pro": "L:bksq_controlLocks",
   "black-square-bonanza-pro": "L:bksq_controlLocks",

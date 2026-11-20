@@ -664,7 +664,7 @@ The same holds for turning the `WORLD` camera into the aircraft's frame, which t
 **Changed:** p27 kept these rules in the A350 and tuned the timing ([entry above](#2026-10-04-in-the-a350-the-pilot-cut-the-hands-time-on-the-spot-to-150ms-and-its-hover-to-500ms-at-15cm-and-sent-it-back-in-03s-on-a-curve-that-eases-out)).
 In the A220, a hand on the first officer's stick stays still whatever is flown, since nothing moves that stick.
 
-**Affects:** [the avatars' tentative decisions](decisions.md), whose hand rules leave sidesticks out, and [the A220 study](../aircraft/synaptic-a220/study.md), whose claim that nothing writes the `R` pair this run measured.
+**Affects:** [the avatars' tentative decisions](decisions.md), whose hand rules leave sidesticks out.
 
 **Evidence:** [p26's run](../../../experiments/areas/avatars/results/p26-a220-figure-2026-10-04-15-02-35.txt), and its record, `p26-a220-figure-2026-10-04-15-02-35.ndjson`, whose system events show the pause and the flights that followed.
 
@@ -698,8 +698,8 @@ Then the same for the other aircraft installed on our development machine.
   | Aircraft | Grip nodes | Grip size | Side to side | Fore and aft | What drives the animations |
   | --- | --- | --- | --- | --- | --- |
   | Synaptic A220 | `CPT_STICK_HANDLE`, `FO_STICK_HANDLE` | 10 × 19 × 11cm | 4.2cm each way | 6.3cm and 5.3cm | `L:A22X L Sidestick X` and `Y`, as `(L:A22X L Sidestick X, Percent) neg 2 / 50 +` in `Sidestick.xml` |
-  | Fenix A320 | `Misc_Sidestick_Pitch_Captain_3`, `Misc_Sidestick_Pitch_FO_3` | 10 × 15 × 16cm | 3.9cm each way | 3.9cm each way | `L:N_FC_SIDESTICK_CAPT_PITCH` and `_BANK`, -1000 to 1000 ([Fenix study](../aircraft/fenix-a320-family/study.md)), through Fenix's `FNX32X_Interact_Sidestick_Template` |
-  | iniBuilds A350 | `CPT_JOY_HANDLE`, `FO_JOY_HANDLE` | 8 × 14 × 14cm | 8.8cm and 5.3cm | 7.2cm each way | compiled code in the behavior file's `<Strings>` table ([A350 study](../aircraft/inibuilds-a350/study.md)) |
+  | Fenix A320 | `Misc_Sidestick_Pitch_Captain_3`, `Misc_Sidestick_Pitch_FO_3` | 10 × 15 × 16cm | 3.9cm each way | 3.9cm each way | `L:N_FC_SIDESTICK_CAPT_PITCH` and `_BANK`, -1000 to 1000 (read in fnx-aircraft-320 2.4.0.4720, `ModelBehaviorDefs\fnx32x\Templates\Interactions.xml`), through Fenix's `FNX32X_Interact_Sidestick_Template` |
+  | iniBuilds A350 | `CPT_JOY_HANDLE`, `FO_JOY_HANDLE` | 8 × 14 × 14cm | 8.8cm and 5.3cm | 7.2cm each way | compiled code in the behavior file's `<Strings>` table (read in inibuilds-aircraft-a350 1.2.6, `A350_Interior.behavior.xml`) |
 
   The A220's code centers its stick at the middle frame.
   We haven't read the Fenix's or the A350's code, so their middle frame may not be the stick's center, which the A350's uneven 8.8cm and 5.3cm suggest (unverified).

@@ -8,7 +8,7 @@
  *   node experiments/areas/aircraft/run.mjs all --dry-run
  *   node experiments/areas/aircraft/run.mjs --restore-pending [<aircraft>]    with the sim closed
  *
- * <aircraft> is a folder name under record/areas/aircraft/, such as
+ * <aircraft> is a key of AIRCRAFT in lib/aircraft.mjs, such as
  * a2a-pa24-comanche. Without --state it loads parked, then runway.
  *
  * For one aircraft it:
@@ -47,7 +47,7 @@
  *     aircraft: "<aircraft>",
  *     tests: [
  *       {
- *         question: 11,              the question's number in the study's Sim questions
+ *         question: 11,              the question's number in questions.tsv
  *         title: "...",              the question, short
  *         state: "runway",           "parked", "runway", or "any": the load it runs at
  *         frameSensitive: false,     true when the answer depends on the frame rate

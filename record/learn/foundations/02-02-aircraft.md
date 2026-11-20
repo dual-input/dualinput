@@ -176,8 +176,8 @@ One click can surface as an input event, an `H:` event, an `L:` write, or nothin
 21. Documented in our record: fsc-editor, `docs/sim-vars/02-namespaces.md`, sections "But coverage varies enormously" and "Pure-XML interactions".
 22. Measured on MSFS 2024, 2026-08-18: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-18 — Every input event fires twice".
 23. Documented in our record: fsc-editor, `docs/aircraft/synaptic-a220.md`, section "Input events (`B:`)".
-24. Documented in our record, read from the installed package `inibuilds-aircraft-a380` 1.0.0 on 2026-09-29: [inibuilds-a380 study](../../areas/aircraft/inibuilds-a380/study.md), the "Readable" line of its header and "What the encryption hides", and its [file list](../../areas/aircraft/inibuilds-a380/files.md), from each archive's header and index.
-25. Documented in our record, read from the installed package `a2a-aircraft-pa24` 2.1.3 on 2026-09-29: [a2a-pa24-comanche study](../../areas/aircraft/a2a-pa24-comanche/study.md), "State" and "Prior records", with every declared input event in its [input-events.tsv](../../areas/aircraft/a2a-pa24-comanche/inventory/input-events.tsv).
+24. Documented, read from the installed package `inibuilds-aircraft-a380` 1.0.0 on 2026-09-29: the package's file listing, and the header of each `.fsarchive` file, where `html_ui\html_ui.fsarchive` and `minimal.fsarchive` say `notEncrypted` and list their files, stored uncompressed, and the other five have an unreadable index; `minimal.fsarchive` holds the `panel.cfg` files that name the WASM module.
+25. Documented, read from the installed package `a2a-aircraft-pa24` 2.1.3 on 2026-09-29: the `<InputEvent>` elements of every XML file under `SimObjects\Airplanes\pa24-250\`, among them `common\model\Inputs\A2A_External_Inputs.xml`.
 
 ## Unverified claims
 

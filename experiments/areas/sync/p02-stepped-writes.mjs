@@ -1,8 +1,9 @@
 /*
  * How the A220, the A350, and the Fenix take stepped writes: the plan's step 6
- * probe on pacing (record/areas/product/plan.md), which asks the A220 study's
- * sim question 5, the A350 study's question 3, and the Fenix study's questions
- * 1 and 2.
+ * probe on pacing (record/areas/product/plan.md). It shows whether another
+ * client can set the A220's autopilot targets, whether the A350 merges pulses
+ * written together, whether the Fenix's systems program takes an outside write
+ * of a switch variable like a click, and how it reads a counter that jumps.
  *
  *   node experiments/areas/sync/p02-stepped-writes.mjs [--only synaptic-a220]
  *   node experiments/areas/sync/p02-stepped-writes.mjs --only fenix-a320-family --from-step 6
@@ -40,7 +41,7 @@ const BASELINE_MS = 2000
 const AIRCRAFT_STEPS = [
   {
     id: "synaptic-a220",
-    // Sim question 5 in record/areas/aircraft/synaptic-a220/study.md.
+    // Whether another client can set the autopilot targets.
     prompt: "Load the Synaptic A220 with power on and the autopilot's control panel lit.",
     commbus: "FCP",
     stock: [["AUTOPILOT HEADING LOCK DIR", "degrees"], ["AUTOPILOT AIRSPEED HOLD VAR", "knots"], ["AUTOPILOT VERTICAL HOLD VAR", "feet/minute"]],
@@ -54,7 +55,7 @@ const AIRCRAFT_STEPS = [
   },
   {
     id: "inibuilds-a350",
-    // Sim question 3 in record/areas/aircraft/inibuilds-a350/study.md.
+    // Whether pulses written together merge.
     prompt: "Load the iniBuilds A350 with power on and the captain's barometer showing.",
     stock: [["KOHLSMAN SETTING MB:1", "millibars"]],
     steps: [
@@ -65,7 +66,7 @@ const AIRCRAFT_STEPS = [
   },
   {
     id: "fenix-a320-family",
-    // Sim question 1 in record/areas/aircraft/fenix-a320-family/study.md.
+    // Whether the systems program takes an outside write of a switch variable like a click.
     prompt: "Load the Fenix A320 cold and dark at a gate, with the Fenix programs running.",
     stock: [["AUTOPILOT HEADING LOCK DIR", "degrees"], ["ELECTRICAL MASTER BATTERY:1", "bool"]],
     steps: [
@@ -74,7 +75,8 @@ const AIRCRAFT_STEPS = [
       { label: "L:S_MIP_CLOCK_CHR + 3 at once", run: (c) => c.addL("L:S_MIP_CLOCK_CHR", 3) },
       { label: "L:S_MIP_CLOCK_CHR + 1", run: (c) => c.addL("L:S_MIP_CLOCK_CHR", 1) },
       { label: "L:S_MIP_CLOCK_CHR + 2 at once", run: (c) => c.addL("L:S_MIP_CLOCK_CHR", 2) },
-      // Sim question 2: the FCU needs power, which the pilot sets up.
+      // How the program reads an encoder or push-pull counter that jumps: the
+      // FCU needs power, which the pilot sets up.
       // The first run's heading steps fell inside the FCU's power-up, when its
       // AP lights and dashed displays flipped 9 times in 3s (results/p02-
       // stepped-writes-2026-10-05-19-37-47.txt), so the pilot waits it out.

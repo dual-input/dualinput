@@ -44,7 +44,7 @@ v1 has these whatever is picked, because they're the product rather than ideas:
 - the connection between machines
 - profiles, starting with the 58P's, written without the Dual Input IDE, which is a Soon pick
 
-v1's aircraft is the pressurized 58P variant of the [Black Square Baron Pro](../aircraft/black-square-baron-pro/study.md).
+v1's aircraft is the pressurized 58P variant of the Black Square Baron Pro.
 
 The picks, picked on 2026-10-02:
 
@@ -150,7 +150,7 @@ Exit: each risk below has a log entry that answers it, or is deferred with a rea
 - Whether a fast local recognizer hears the [voice phrases](03-v1-scope.md#voice-phrases) accurately with our accents, stays quiet inside longer sentences such as "you have control of the radios", and works while Discord uses the same microphone; an audio probe in `experiments/` answers it, with no sim.
   Deferred to the build: speech recognition is proven, so we research it, build our best version of what v1 needs, then test it with our voices and calibrate (user, 2026-10-06).
   Moved to Soon with the voice phrases on 2026-10-17, and the [control log](../control/log.md#2026-10-17-research-puts-silero-vad-and-sherpa-onnx-ahead-for-recognizing-the-voice-phrases-on-the-pilots-pc-and-the-voice-phrases-move-to-soon) holds the research that probe starts from.
-- Whether masking holds back the Baron's mixture levers, which the Baron takes through its own input events, such as `BKSQ_TurbochargedMixtureController_1` (read in its [study](../aircraft/black-square-baron-pro/study.md)); soft takeover depends on it.
+- Whether masking holds back the Baron's mixture levers, which the Baron takes through its own input events, such as `BKSQ_TurbochargedMixtureController_1` (read in bksq-aircraft-baronpro 0.1.1, `model.base\BaronProfessional_Templates.xml`); soft takeover depends on it.
   Answered on 2026-10-06: masking holds back a lever bound in MSFS and not one SPAD.neXt drives, so soft takeover needs another way for those pilots ([flight-controls log](../flight-controls/log.md#2026-10-06-masking-holds-back-a-mixture-lever-bound-in-msfs-and-not-one-spadnext-drives-because-spadnext-sets-the-input-event-itself)).
 - Whether a click on a notification on the [notification banner](03-v1-scope.md#notification-banner) opens Dual Input's EFB app when the app is on neither the EFB's dock nor the first page of its app list, and whether the app's own code runs while the EFB is closed.
   The probe fills the EFB with far more apps than its dock and the first page of its app list hold.
@@ -161,9 +161,9 @@ Exit: each risk below has a log entry that answers it, or is deferred with a rea
 - Whether anything outside the sim can set the world map's departure, which decides whether [the PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map) is in v1.
   Answered on 2026-10-05 through the sim's inspector: [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight).
   Whether a package of ours can put that code there was answered on 2026-10-06, through a copy of the sim's BlurPage component, in a run from a closed sim to Ready to fly: [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly).
-- How fast an aircraft takes stepped writes, which checks the default pace in [01-profile-entries](../sync/01-profile-entries.md#what-a-profile-says-once-per-aircraft): send the Synaptic A220's `K:HEADING_BUG_INC` 10 times in one frame, then once per frame, and count the degrees the bug moves (its study's sim question 5); write `L:INI_BARO1_INC_COMMAND` twice before one update of the iniBuilds A350, then once per update (its sim question 3); and add 10 to the Fenix's `L:E_FCU_HEADING` at once (its sim questions 1 and 2).
+- How fast an aircraft takes stepped writes, which checks the default pace in [01-profile-entries](../sync/01-profile-entries.md#what-a-profile-says-once-per-aircraft): send the Synaptic A220's `K:HEADING_BUG_INC` 10 times in one frame, then once per frame, and count the degrees the bug moves; write `L:INI_BARO1_INC_COMMAND` twice before one update of the iniBuilds A350, then once per update; and add 10 to the Fenix's `L:E_FCU_HEADING` at once.
   Answered on 2026-10-05: [sync log](../sync/log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents), and for the A350's heading, [sync log](../sync/log.md#2026-10-05-the-a350s-stock-heading-is-an-output-of-its-module-and-its-dial-takes-a-value-written-straight-into-it).
-- When an aircraft loaded cold stops restoring its own controls, which checks [catch-up's settle rule](../sync/03-catch-up.md#settling-after-a-load): load each studied aircraft and log every variable it changes, every 250ms for 3 minutes; the Baron's sim question 2 is part of it.
+- When an aircraft loaded cold stops restoring its own controls, which checks [catch-up's settle rule](../sync/03-catch-up.md#settling-after-a-load): load each studied aircraft and log every variable it changes, every 250ms for 3 minutes.
   Answered on 2026-10-05, from every change for 2 minutes after Ready to fly: [sync log](../sync/log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads).
 - Whether the input event double-fire stays inside [live sync's duplicate filter](../sync/02-live-sync.md#keeping-a-change-from-applying-twice) at low frame rates (the PA-24 session's wasn't recorded), and whether a held key bound to a momentary input event repeats inside that window.
   Answered on 2026-10-05 for the PA-24: [sync log](../sync/log.md#2026-10-05-the-pa-24s-double-fire-comes-one-frame-apart-at-31-and-21-fps-and-a-held-key-doesnt-repeat).

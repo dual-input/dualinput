@@ -8,7 +8,7 @@ The entries of 2026-09-28 were measured on MSFS 2024 that day, with FS Copilot's
 
 ## 2026-10-06: Our own code hears `wt.eb.evt` from the EFB's document, and the G3000 acts on a package it sends
 
-**Asked:** can our own code listen on `wt.eb.evt`, the key Working Title avionics share their synced EventBus topics under, which is [the plan](../product/plan.md)'s step 6 question for the [EventBus bridge](../product/ideas.md#eventbus-bridge) and the Phenom 300E study's sim question 11?
+**Asked:** can our own code listen on `wt.eb.evt`, the key Working Title avionics share their synced EventBus topics under, which is [the plan](../product/plan.md)'s step 6 question for the [EventBus bridge](../product/ideas.md#eventbus-bridge)?
 And can it publish there, as another bus?
 
 **Expected:** a listener of our own, registered with `RegisterGenericDataListener`, would hear the package each bus sends once a frame, `{ busId, packagedId, data: [{ topic, data, isCached }] }`, because the framework's buses hear each other that way and skip only their own `busId` (read in synaptic-aircraft-a220 1.0.10, `DisplayUnits/instrument.js`, the EventBus's generic data sync).
@@ -33,7 +33,7 @@ And can it publish there, as another bus?
 A bridge's listener belongs in a document that holds none of the avionics' buses, such as the EFB app's, where it hears all of them and its packages reach all of them; one inside an instrument's document misses that instrument's bus.
 Settings carry a `syncTime`, and whether a bus drops a setting older than its own is untested, so a bridge stamps the time it sends.
 
-**Affects:** the idea [EventBus bridge](../product/ideas.md#eventbus-bridge); [04-room-for-later](../product/04-room-for-later.md#channels), on which way the bridge publishes, and its [code inside the sim](../product/04-room-for-later.md#code-inside-the-sim), on where the listener runs; and the Phenom study's sim question 11.
+**Affects:** the idea [EventBus bridge](../product/ideas.md#eventbus-bridge); [04-room-for-later](../product/04-room-for-later.md#channels), on which way the bridge publishes, and its [code inside the sim](../product/04-room-for-later.md#code-inside-the-sim), on where the listener runs.
 
 **Evidence:** `results/p04-eventbus-2026-10-06-18-24-26` and `-18-28-36`, each `.txt`, `.ndjson`, and a folder of screenshots.
 
@@ -44,18 +44,15 @@ Settings carry a `syncTime`, and whether a bus drops a setting older than its ow
 **Expected:** yes, since the modules import the variable API and no CommBus call.
 
 **Found:** it holds for most of the cockpit and misses one place, by the model and panel XML of `a2a-aircraft-pa24` 2.1.3.
-
-- The radio stack's frequencies, the OBS, the transponder code, the altimeter setting, the avionics master, and the fuel pump switch are stock `A:` variables.
-  The avionics master's switch sends `K:TOGGLE_AVIONICS_MASTER` and draws itself from `A:AVIONICS MASTER SWITCH:1`, and the altimeter knob sends `K:KOHLSMAN_INC` and `K:KOHLSMAN_DEC` and draws from `A:KOHLSMAN SETTING MB` (read in a2a-aircraft-pa24 2.1.3, `common\model\PA24_250_INTERIOR.xml`).
-
-
+The radio stack's frequencies, the OBS, the transponder code, the altimeter setting, the avionics master, and the fuel pump switch are stock `A:` variables.
+The avionics master's switch sends `K:TOGGLE_AVIONICS_MASTER` and draws itself from `A:AVIONICS MASTER SWITCH:1`, and the altimeter knob sends `K:KOHLSMAN_INC` and `K:KOHLSMAN_DEC` and draws from `A:KOHLSMAN SETTING MB` (read in a2a-aircraft-pa24 2.1.3, `common\model\PA24_250_INTERIOR.xml`).
 
 **Changed:** the entry's finding stands: the PA-24 doesn't use the CommBus.
 Reading its state takes these stock `A:` variables as well as its `L:` variables.
 
 **Affects:** the PA-24 entry below, whose text stays as it was.
 
-**Evidence:** the [PA-24 study](../aircraft/a2a-pa24-comanche/study.md#state), sections "State" and "Hidden state".
+**Evidence:** in `a2a-aircraft-pa24` 2.1.3, `common\model\PA24_250_INTERIOR.xml` for the OBS, the altimeter, the avionics master, and the fuel pump; `common\model\a2a_avionics.xml` and `common\panel\A2A_PA24\code_pa24_r.xml` for the radio frequencies; and `common\panel\A2A_PA24\code_pa24_m.xml` for the transponder code.
 
 ## 2026-09-30: Two claims of the A350 entry don't hold against the aircraft's files
 
@@ -68,8 +65,6 @@ Reading its state takes these stock `A:` variables as well as its `L:` variables
 - "15 of its 18 panels are `WasmInstrument` gauges" is wrong: 14 panels hold 15 `WasmInstrument` gauges.
   The results file lists 14 `WasmInstrument` panels, one of them with two gauges, and the package's `panel.cfg` puts the systems gauge and Navigraph's `navigation_data_interface` on one panel.
   The other four panels are the two EFBs and two flight attendant panels (FAPs).
-
-
 - The module doesn't draw every display, and the EFB isn't the only JavaScript on the CommBus.
   The FAP and the printer are JavaScript too, and the printer's page listens for `PRINTCALLBACK` (read in `A350_Printer.js`).
   The probe missed the printer because it listed only `VCockpit` panels, and the printer is a `VPainting` page.
@@ -78,10 +73,9 @@ Of the names the entry found among the module's strings, the EFB's JavaScript se
 
 **Changed:** the entry's conclusion stands: the module keeps the cockpit's state to itself, and the JavaScript on the CommBus is the EFBs' and the printer's.
 
-
 **Affects:** the A350 entry below, whose text stays as it was, and [06-03](../../learn/foundations/06-03-display-kinds-input-and-pop-outs.md#display-kinds-html-react-on-dom-react-on-svg-canvas-wasm-gauges), whose table put every A350 display but the EFB in the WASM gauge kind and is corrected in place.
 
-**Evidence:** [a350-check-2026-09-28.txt](../../../experiments/areas/commbus/results/a350-check-2026-09-28.txt) for the panels, and the [A350 study](../aircraft/inibuilds-a350/study.md#prior-records), whose [commbus.tsv](../aircraft/inibuilds-a350/inventory/commbus.tsv) lists each CommBus name with its listener and sender.
+**Evidence:** [a350-check-2026-09-28.txt](../../../experiments/areas/commbus/results/a350-check-2026-09-28.txt) for the panels; and in `inibuilds-aircraft-a350` 1.2.6, `attachments/inibuilds/Function_Interior_A350/panel/panel.cfg` and the FAPs' `panel.cfg` files, `html_ui/Pages/VLivery/Liveries/iniA350_Printer/A350_Printer.js`, and `html_ui/Pages/VCockpit/Instruments/ini-efb-a350/ini-efb-a350.js`.
 
 ## 2026-09-28: The A350's CommBus carries EFB traffic, and its cockpit state stays inside one module
 

@@ -5,7 +5,7 @@ Documentation people write for other people lives in `docs/` instead.
 
 - [learn/foundations/outline.md](learn/foundations/outline.md): the foundations course, the concepts we need to build Dual Input, in the order we'll learn them, with the depth each one gets.
 - [areas/commbus/log.md](areas/commbus/log.md): what our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, on the Synaptic A220, the A2A PA-24, and the iniBuilds A350, and listening and publishing on the avionics framework's `wt.eb.evt`.
-- [areas/aircraft/plan.md](areas/aircraft/plan.md): how the aircraft we fly are built, studied from their files, then checked in the sim.
+- [areas/aircraft/log.md](areas/aircraft/log.md): what the sim showed about the aircraft we fly: loading flights through SimConnect, their seat objects, moving the pilot's camera to another seat, and where a package keeps its version.
 - [areas/flight-controls/log.md](areas/flight-controls/log.md): what our experiments found about keeping a pilot's own flight controls out of the sim by masking key events.
 - [areas/environment/log.md](areas/environment/log.md): what our experiments found about the sim's pause, simulation rate, and time of day, and setting them from SimConnect.
 - [areas/flight-model/log.md](areas/flight-model/log.md): what our experiments found about a following machine setting a frozen aircraft from the flying machine's values, on the Black Square Baron 58P.

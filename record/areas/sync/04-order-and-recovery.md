@@ -155,7 +155,7 @@ A PF whose core crashes loses control, and their aircraft then follows the new P
 ## Entries the aircraft drives itself
 
 An entry for something the aircraft changes or fires on its own, such as a timer, a blinking light, or an `H:` event a gauge fires on a timer, is a profile's mistake, since an entry carries a cause ([02-live-sync](02-live-sync.md#values-not-events)), and it would send a change or a firing at every tick and fill every replay.
-Input events can report on their own: 21 of the A220's reported four times a second on an untouched aircraft (measured on MSFS 2024, 2026-09-04, fsc-editor, as the [A220 study](../aircraft/synaptic-a220/study.md) cites).
+Input events can report on their own: 21 of the A220's reported four times a second on an untouched aircraft (measured on MSFS 2024, 2026-09-04, fsc-editor, `docs/sim-vars/build/v1-log.md`, "The `B:` subscription is a change feed; the entry below was wrong").
 The IDE shows every entry live while the profile is written, where an author can see one change on its own ([01-profile-entries](01-profile-entries.md#what-the-ide-does-with-a-profile)), and Dual Input catches a shared entry the author missed by a sign no pilot makes: every machine's own aircraft keeps changing it.
 
 - A machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Dual Input's write, and it also received another machine's change to it or firing of it, a replayed one included.

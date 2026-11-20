@@ -197,7 +197,7 @@ For each variable, Dual Input needs a wire type that keeps every value the recei
 30. Documented, read from source: FS Copilot fork, `ahead` branch at 9d4e864, `FsCopilot/Connection/SimConnectExtensions.cs`, `InferDataType`.
 31. Documented in our record: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — Stage 2b: the module streams. Transport built, untested against the sim.", which describes the module's design; the entry itself says it hadn't yet run against the sim.
 32. Documented: MSFS 2024 SDK, [SimConnect_ExecuteAction](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/General/SimConnect_ExecuteAction.htm).
-33. Documented in our record, read from the installed package `a2a-aircraft-pa24` 2.1.3 on 2026-09-29: [a2a-pa24-comanche study](../../areas/aircraft/a2a-pa24-comanche/study.md), "State", with every declared input event in its [input-events.tsv](../../areas/aircraft/a2a-pa24-comanche/inventory/input-events.tsv).
+33. Documented, read from the installed package `a2a-aircraft-pa24` 2.1.3 on 2026-09-29: the `<InputEvent>` elements of every XML file under `SimObjects\Airplanes\pa24-250\`.
 
 ## Unverified claims
 

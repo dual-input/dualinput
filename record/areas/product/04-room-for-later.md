@@ -198,7 +198,7 @@ The network carries those figures too, so the avatar channel sends only what mov
 
 In v1 the desktop app and the EFB app show Dual Input's state and send it commands, and decide nothing ([EFB app](03-v1-scope.md#efb-app)).
 A cockpit panel can hold a WebSocket to a program on the same PC (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 - Q08 yes: a cockpit document can hold a WebSocket to loopback"), with the sim's developer mode off (FS Copilot fork, `record/pointer-forwarding/docs/06-open-questions.md`, Q08).
-The Fenix's MSFS 2024 tablet app shows its web app from `http://localhost:8083` (read in fnx-aircraft-320 2.4.0.4720, [Fenix study](../aircraft/fenix-a320-family/study.md)), which is a second route.
+The Fenix's MSFS 2024 tablet app shows its web app from `http://localhost:8083` (read in fnx-aircraft-320 2.4.0.4720, `html_ui\efb_ui\efb_apps\fenixsim-efb-app\FenixSimEfbApp.js`), which is a second route.
 Both routes work from the documents the other clients would live in (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves)).
 Code run in the EFB's document, standing in for an EFB app, held a WebSocket to a program on the same PC, got answers to HTTP requests, and loaded a page the program served in a hidden iframe, whose own WebSocket connected back.
 Code in the toolbar's document and in Flow Pro's and ChasePlane's in-game panels did the same.

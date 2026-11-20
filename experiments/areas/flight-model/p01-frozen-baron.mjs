@@ -7,7 +7,7 @@
  * frame, as our FS Copilot fork does (read in the FS Copilot fork,
  * FsCopilot.Bridge.Wasm/wasm_module.cpp, apply_control and interpolate). Two
  * things about the Baron could break that (read in bksq-aircraft-baronpro
- * 0.1.1, record/areas/aircraft/black-square-baron-pro/study.md, sim question 6):
+ * 0.1.1, model.base\BaronProfessional_Base_EXT.xml):
  *
  *   - Its logic reads A:SIM ON GROUND, and nobody knows what a frozen aircraft
  *     written above or below the ground reports there.

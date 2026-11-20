@@ -28,7 +28,7 @@ The PF's machine writes 1 through the entry's write, whatever the aircraft needs
 
 So how the PM changed the beacon doesn't matter: a click, a key binding, and a home cockpit switch all change the same value, and only the value travels.
 An entry writes the cause, the variable the aircraft computes the control from, not a readout the aircraft displays, because the aircraft can rebuild the readout from the cause.
-On the Baron 58TC and 58P, the behavior XML rewrites `A:GENERAL ENG MIXTURE LEVER POSITION:n` from `L:BKSQ_MixtureLeverPosition_n` at 2 Hz (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), so an entry that wrote the stock variable would see its write undone within half a second if the XML runs as read (unverified, the Baron study's sim question 5), and the mixture entry reads and writes the `L:` variable instead.
+On the Baron 58TC and 58P, the behavior XML rewrites `A:GENERAL ENG MIXTURE LEVER POSITION:n` from `L:BKSQ_MixtureLeverPosition_n` at 2 Hz (read in bksq-aircraft-baronpro 0.1.1, `model.base\BaronProfessional_Base_INT.xml`), so an entry that wrote the stock variable would see its write undone within half a second if the XML runs as read (unverified, and a write to the stock mixture on a running 58P, read back for 2s, would settle it), and the mixture entry reads and writes the `L:` variable instead.
 
 A watch-only entry, one whose `write` is `none`, crosses the wire too, and the receiving machine compares it with its own value instead of writing it ([01-profile-entries](01-profile-entries.md#writing-a-value)).
 In v1 a mismatch goes in the run's log at info ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)), and the rest of the pre-sync checklist, a Soon pick, acts on it ([04-room-for-later](../product/04-room-for-later.md#profiles)).
@@ -117,7 +117,7 @@ With one attempt, nothing repeats a write function's actions ([what the open que
 Two cases get past the check:
 
 - A shadow value has nothing to read back ([01-profile-entries](01-profile-entries.md#keeping-a-shadow-value)).
-- A write that sets the readout but not the cause reads back correctly while the system stays wrong, such as an L-1011 fuel pump switch written without the `H:FUEL` its flight engineer's script listens for (unverified in the sim, the L-1011 study's sim question 1).
+- A write that sets the readout but not the cause reads back correctly while the system stays wrong, such as an L-1011 fuel pump switch written without the `H:FUEL` its flight engineer's script listens for (measured on MSFS 2024, 2026-11-09, [sync log](log.md#2026-11-09-stage-14s-session-in-the-sim-passed-in-four-aircraft-and-no-aircraft-took-an-h-event-our-module-fired)).
   The IDE's two-instance write test catches it ([01-profile-entries](01-profile-entries.md#what-the-ide-does-with-a-profile)).
 
 ## Keeping a change from applying twice

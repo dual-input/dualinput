@@ -2,7 +2,7 @@
 
 ```text
 Purpose:     Why v1 builds no plugins, how a profile reads state that lives in a gauge's JavaScript instead, and the rules the sandbox runs a profile's scripts under.
-Depends on:  ../profiles/01-format-and-delivery.md, ../profiles/02-units.md, ../sync/05-units.md, ../core/02-clients-and-panel-bridge.md, ../core/01-loop-and-edge.md, ../architecture/02-code-map.md, ../aircraft/black-square-baron-pro/study.md
+Depends on:  ../profiles/01-format-and-delivery.md, ../profiles/02-units.md, ../sync/05-units.md, ../core/02-clients-and-panel-bridge.md, ../core/01-loop-and-edge.md, ../architecture/02-code-map.md
 Decides:     That plugins come after v1; the `instrument()` name, what its path may reach, and the values it reads; how state sync reads it and writes a gauge's state through its H: events; the Baron 58P's entries for its gauges' state; and the sandbox's rules against randomness a replay can't repeat (node 6.15).
 ```
 

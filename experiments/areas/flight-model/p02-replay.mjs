@@ -14,7 +14,7 @@
  *     them, linear and rotational;
  *   - whether the Baron's own engine model, which integrates L:BKSQ_* values
  *     from the stock engine's outputs on each machine (read in
- *     bksq-aircraft-baronpro 0.1.1, record/areas/aircraft/black-square-baron-pro/study.md),
+ *     bksq-aircraft-baronpro 0.1.1, model.base\BaronProfessional_Base_INT.xml),
  *     then tracks the flight it follows or drifts away.
  *
  * Two runs, on one machine:
@@ -71,8 +71,8 @@ const POSE = [
 const BODY = [["VELOCITY BODY X", "feet per second"], ["VELOCITY BODY Y", "feet per second"], ["VELOCITY BODY Z", "feet per second"]]
 const ROTATION = [["ROTATION VELOCITY BODY X", "radians per second"], ["ROTATION VELOCITY BODY Y", "radians per second"], ["ROTATION VELOCITY BODY Z", "radians per second"]]
 // On the 58P the mixture lever drags L:BKSQ_MixtureLeverPosition_n and the
-// XML writes the stock mixture from it at 2 Hz (read in the Baron study,
-// "Throttles, propellers, and mixture"), so the L: variable is the one to write.
+// XML writes the stock mixture from it at 2 Hz (read in bksq-aircraft-baronpro
+// 0.1.1, model.base\BaronProfessional_Base_INT.xml), so the L: variable is the one to write.
 const LEVERS = [
   ["GENERAL ENG THROTTLE LEVER POSITION:1", "percent"], ["GENERAL ENG THROTTLE LEVER POSITION:2", "percent"],
   ["GENERAL ENG PROPELLER LEVER POSITION:1", "percent"], ["GENERAL ENG PROPELLER LEVER POSITION:2", "percent"],

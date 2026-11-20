@@ -1,9 +1,9 @@
 /*
- * The 11 aircraft the harness runs, one entry each, keyed by the folder name of
- * the aircraft's study under record/areas/aircraft/.
+ * The 11 aircraft the harness runs, one entry each, keyed by an ID such as
+ * a2a-pa24-comanche.
  *
  * Each entry's title and livery are what its flight files load, copied from the
- * package on disk, as each study's Identity section says where to look. Where
+ * package's aircraft.cfg and livery.cfg files on disk. Where
  * the package's aircraft.cfg is encrypted, the title is the one the sim lists
  * for the package in a live session (SimConnect_EnumerateSimObjectsAndLiveries).
  *
@@ -47,7 +47,9 @@ export const userSimObject = (folder) => join(simDir(), "SimObjects", "Airplanes
 
 // A2A's Accu-Sim sets L:DATLoaded or L:DatNotFound once it's ready: the tablet
 // shows an error while neither is set (read in a2a-aircraft-pa24 2.1.3,
-// A2ATabletAppComanche250.js, NotificationsDataPublisher), and L:DATLoaded went to 1 about 7s after each load (measured on MSFS 2024, 2026-10-01, experiments/areas/aircraft/results/run-a2a-pa24-comanche-2026-10-01-18-20-15.txt).
+// A2ATabletAppComanche250.js, NotificationsDataPublisher), and L:DATLoaded went
+// to 1 about 7s after each load (measured on MSFS 2024, 2026-10-01,
+// experiments/areas/aircraft/results/run-a2a-pa24-comanche-2026-10-01-18-20-15.txt).
 const A2A_READY = {
   label: "L:DATLoaded or L:DatNotFound at 1",
   vars: ["L:DATLoaded", "L:DatNotFound"],
@@ -55,7 +57,7 @@ const A2A_READY = {
 }
 
 // Black Square's XML sets L:var_startupComplete about 3 to 4s after load
-// (record/areas/aircraft/black-square-baron-pro/study.md, Persistence).
+// (read in bksq-aircraft-baronpro 0.1.1, model.base\BaronProfessional_Base_INT.xml).
 const BKSQ_READY = {
   label: "L:var_startupComplete at 1",
   vars: ["L:var_startupComplete"],
@@ -150,17 +152,17 @@ export const AIRCRAFT = {
     identityL: ["L:Panel_state", "L:FNX_FLT_LOADED"],
     radios: {},
     // The Fenix's own phase files set L:Panel_state 1 (read in fnx-aircraft-320
-    // 2.4.0.4720, SimObjects\Airplanes\FNX_32X\common\flt\*.flt), and Fenix:Ready may wait on it (unverified),
-    // so its flight files carry the phase file's [LocalVars.0] in case the sim
-    // doesn't apply the phase file itself.
+    // 2.4.0.4720, SimObjects\Airplanes\FNX_32X\common\flt\*.flt), and Fenix:Ready
+    // may wait on it (unverified), so its flight files carry the phase file's
+    // [LocalVars.0] in case the sim doesn't apply the phase file itself.
     phaseLocalVars: { pkg: "fnx-aircraft-320", dir: ["SimObjects", "Airplanes", "FNX_32X", "common", "flt"] },
   },
 
   "fsreborn-phenom-300e": {
     name: "FSReborn Phenom 300E",
-    // The package's aircraft.cfg files are encrypted
-    // (record/areas/aircraft/fsreborn-phenom-300e/study.md, Identity), so the
-    // title is the sim's: it listed 8 Phenom 300E titles, among them this one,
+    // The package's aircraft.cfg files are in its encrypted archives (read in
+    // fsreborn-aircraft-phenom300e 1.0.24: neither readable .fsarchive lists
+    // one), so the title is the sim's: it listed 8 Phenom 300E titles, among them this one,
     // the Pro flight model the manual's figures are for (measured on MSFS 2024,
     // 2026-10-01, SimConnect_EnumerateSimObjectsAndLiveries, in
     // experiments/areas/aircraft/results/run-a2a-pa24-comanche-2026-10-01-17-59-48.ndjson).
@@ -198,9 +200,9 @@ export const AIRCRAFT = {
 
   "inibuilds-a380": {
     name: "iniBuilds A380, Rolls-Royce",
-    // The package's aircraft.cfg files are encrypted
-    // (record/areas/aircraft/inibuilds-a380/study.md, Identity), so the title
-    // is the sim's: it listed A380-800 RR Cabin, RR Basic, EA Cabin, and EA
+    // The package's aircraft.cfg files are in its encrypted archives (read in
+    // inibuilds-aircraft-a380 1.0.0: neither readable .fsarchive lists one), so
+    // the title is the sim's: it listed A380-800 RR Cabin, RR Basic, EA Cabin, and EA
     // Basic (measured on MSFS 2024, 2026-10-01, in
     // experiments/areas/aircraft/results/run-a2a-pa24-comanche-2026-10-01-17-59-48.ndjson).
     // The livery is a Rolls-Royce one.
@@ -230,7 +232,7 @@ export const AIRCRAFT = {
     ready: [],
     identityL: [],
     // L1011_RADIO.js mirrors the stock COM frequencies into these every 1,000ms
-    // (read in the deobfuscated copies, not in the study; unverified).
+    // (read in the deobfuscated copies; unverified).
     radios: {
       comActive: ["L:COM_RADIO_SET_HZ"],
       comStandby: ["L:COM_STBY_RADIO_SET_HZ"],

@@ -86,9 +86,10 @@ const CAMERA_STATES = [
 
 // Each aircraft's own marks of a finished load. The PA-24 sets L:DATLoaded or
 // L:DatNotFound once it's ready, and its tablet shows an error while neither is
-// set (read in a2a-aircraft-pa24 2.1.3, A2ATabletAppComanche250.js, NotificationsDataPublisher). The Fenix
-// sets switch variables when its systems program applies the panel state
-// (record/areas/aircraft/fenix-a320-family/study.md).
+// set (read in a2a-aircraft-pa24 2.1.3, A2ATabletAppComanche250.js,
+// NotificationsDataPublisher). The Fenix sets switch variables when its systems
+// program applies the panel state (read in the program's own log,
+// %PROGRAMDATA%\Fenix\FenixSim A320\logs\log-System.txt, "Quickstart:Writing").
 const SETTLE_L = [
   { match: /PA-24/i, names: ["L:DATLoaded", "L:DatNotFound", "L:FlightPhase", "L:Battery1Switch"] },
   { match: /^Fenix/i, names: ["L:Panel_state", "L:FNX_FLT_LOADED", "L:S_OH_ELEC_BAT1", "L:I_OH_ELEC_BAT1_L", "L:S_MIP_PARKING_BRAKE"] },

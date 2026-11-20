@@ -24,8 +24,8 @@
  *   3. a hidden 1x1 iframe of the served page, whose own script opens a
  *      WebSocket back and sends a line, which is the Fenix tablet app's route:
  *      it shows its web app from http://localhost:8083 (read in
- *      fnx-aircraft-320 2.4.0.4720, record/areas/aircraft/fenix-a320-family/
- *      study.md).
+ *      fnx-aircraft-320 2.4.0.4720, html_ui\efb_ui\efb_apps\fenixsim-efb-app\
+ *      FenixSimEfbApp.js).
  * It reads back what each document saw, puts the server's log beside it, and
  * removes the iframe and closes the sockets. Nothing it adds sits in the
  * pilot's input path.

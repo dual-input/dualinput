@@ -8,8 +8,7 @@ aircraft:
 
 # The tablet, the one display of the package's own that takes presses on its screen; its
 # radios and engine monitor take knobs and buttons, and the GTNs are other packages' (read in
-# bksq-aircraft-baronpro 0.1.1, record/areas/aircraft/black-square-baron-pro/study.md,
-# "Displays").
+# bksq-aircraft-baronpro 0.1.1, panel.*\PANEL.CFG and the gauges' JavaScript).
 displays: BlackSquareTablet
 seats:
   copilot:
@@ -51,7 +50,8 @@ state:
   # ── Breakers
   # Only the seven breakers that export a variable are synced: the others read through
   # A:CIRCUIT CONNECTION ON:n, which needs A:BUS LOOKUP INDEX set first (read in
-  # bksq-aircraft-baronpro 0.1.1, BaronProfessional_Templates.xml; the study's sim question 8).
+  # bksq-aircraft-baronpro 0.1.1, BaronProfessional_Templates.xml; whether SimConnect reads one
+  # right without the index set is unmeasured).
   breaker_gear_relay:
     name: Landing gear relay breaker
     watch: L('var_Breaker_LandingGearRelay_readonly')

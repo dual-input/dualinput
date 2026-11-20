@@ -1,7 +1,7 @@
 ---
 name: study-aircraft
-description: Studies how one MSFS 2024 aircraft is built, from every file of it we can open, decompiled WASM and JavaScript included, and writes the study to record/areas/aircraft/<aircraft>/. Use when the user asks to study or research an aircraft, for example "/study-aircraft synaptic-a220", or "/study-aircraft synaptic-a220 the EFB" to take one part deeper. A study fills a whole context, so start a background subagent per aircraft and have it invoke this skill, rather than running it in your own session.
-argument-hint: <aircraft> [focus]
+description: Studies how one MSFS 2024 aircraft is built, from every file of it we can open, and writes the study to the studies folder it's given. Use when the user asks to study or research an aircraft, for example "/study-aircraft <vendor>-<aircraft> <studies folder>", or "/study-aircraft <vendor>-<aircraft> <studies folder> the EFB" to take one part deeper. A study fills a whole context, so start a background subagent per aircraft and have it invoke this skill, rather than running it in your own session.
+argument-hint: <aircraft> <studies folder> [focus]
 ---
 
 # Study one aircraft
@@ -9,14 +9,15 @@ argument-hint: <aircraft> [focus]
 You study one aircraft: how it's built, where its state lives, and what changes that state.
 Dual Input will later decide how two pilots share its cockpit, and no question is fixed yet, so your judgment decides what matters.
 
-The aircraft is `$0`, the name of its folder in `record/areas/aircraft/`.
+The aircraft is `$0`, the name of its folder in the studies folder, `$1`, which holds one folder per aircraft.
 An aircraft studied before has that folder already.
-For a new one, the name is `<vendor>-<aircraft>` in kebab-case, such as `pmdg-777-300er`.
-Any words after the name in `$ARGUMENTS` are a focus: the part of the aircraft to take deeper.
+For a new one, the name is `<vendor>-<aircraft>` in kebab-case.
+Any words after the studies folder in `$ARGUMENTS` are a focus: the part of the aircraft to take deeper.
+If `$1` is missing or isn't a folder, stop and ask for it, because a study never goes in Dual Input's repository.
 
 You write to two folders:
 
-- `record/areas/aircraft/$0/` holds `study.md`, `files.md`, and `inventory/`, and goes public.
+- `$1/$0/` holds `study.md`, `files.md`, and `inventory/`, and stays private, because it cites decompiled code, so nothing in Dual Input's repository links to it.
   Identifiers and short strings from the vendor's files can go there, and the vendor's code can't.
 - `experiments/sim-sources/aircraft/$0/<version>/` is gitignored, and holds the vendor's files as decoded text, and your `notes.md`, which may quote them.
   `<version>` is the main package's `package_version`.
@@ -54,7 +55,7 @@ You write to two folders:
    Each row gets a status as you go: read, skimmed, skipped with the reason, or unreadable with the reason.
    A rerun resumes from this file, so keep it current.
 3. For a file the script left alone that you need, use what you have: read a PDF with the Read tool, or its text with `pdftotext`.
-   Check each `.fsarchive` header: a Marketplace package can mark some archives `notEncrypted`, storing their files uncompressed and listed in the header's index, as two of the iniBuilds A380's seven were (its study's Code architecture section says how to read them).
+   Check each `.fsarchive` header: a Marketplace package can mark some archives `notEncrypted`, storing their files uncompressed and listed in the header's index, and the studies in `$1` that read one say how in their Code architecture section.
    Leave an encrypted archive shut, because a way to open it would open every product on the Marketplace.
    If it needs a tool we don't have, such as a .NET decompiler, mark it unreadable, name the tool, and report it.
    Don't install anything.
@@ -66,8 +67,7 @@ Then search its `.strings.txt` and `.dcmp` for the names you're following, and r
 A name in a module's strings says the module knows it, not what the module does with it, and the direction is what Dual Input needs.
 So find the module's wrappers around the imports that register names with the sim, such as `SimConnect_AddToDataDefinition`, `SimConnect_MapClientEventToSimEvent`, and `SimConnect_AddClientEventToNotificationGroup`, and resolve every call site.
 Record each variable as read or written, by which data definition `SimConnect_RequestDataOnSimObject` and `SimConnect_SetDataOnSimObject` use, and each event as listened for, listened for and masked, or only sent.
-A module copies each name from its data segment into a buffer just before the call, but builds a name of 8 bytes or fewer from an integer constant, which a strings search misses, so decode the constants stored into the buffer too.
-
+A module copies each name from its data segment into a buffer just before the call, but can build a name of 8 bytes or fewer, such as `PAUSE_ON`, from an integer constant, which a strings search misses, so decode the constants stored into the buffer too.
 
 ## Read
 
@@ -101,7 +101,7 @@ Write what you find to `notes.md` as you read, because a long read outlasts your
 5. Last, find the aircraft's license, in its packages, its installer, or on the vendor's site.
    If it restricts reverse engineering, decompiling, or publishing what we found, add a License section at the end of the study that names the clause and links to it.
 
-Don't commit, and don't edit `record/areas/aircraft/plan.md`.
+Don't commit, and don't edit `$1/plan.md`.
 Several studies can run at once in separate subagents, and they'd collide on git's lock and on the plan's table, so the session that started the study does both after you report.
 
 ## Report
@@ -112,6 +112,6 @@ Return:
 - the number of sim questions
 - each file in `files.md` not read or skimmed, with the reason
 - the license finding
-- the folder to commit, `record/areas/aircraft/$0/`
+- the folder to commit, `$1/$0/`
 
 Don't paste the study.

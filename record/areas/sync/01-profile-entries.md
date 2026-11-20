@@ -59,7 +59,7 @@ fcu_heading:
 ```
 
 A variable here is an `L:` or `A:` variable, or an input event's `B:` value.
-An aircraft's own client data, such as the PMDG 777's battery switch `ELEC_Battery_Sw_ON` (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)), isn't watched by name: the aircraft's plugin reads it.
+An aircraft's own client data, such as the PMDG 777's battery switch `ELEC_Battery_Sw_ON` (documented in pmdg-aircraft-77w 2.4.143's SDK header, `PMDG_777X_SDK.h`), isn't watched by name: the aircraft's plugin reads it.
 `watch` can also name a value the aircraft's [plugin](../product/03-v1-scope.md#plugins) exports, as `plugin.state.<name>`, which the plugin finds where no variable shows it, such as in a gauge's JavaScript.
 `write` can name one of the write methods the plugin registers, as `plugin.write.<name>(…)` ([the writer API](#the-writer-api)).
 
@@ -81,7 +81,7 @@ speed:
 
 A counting `watch` takes `inc` and `dec`, as here, `set`, or `count`, and requires `wrap`; `wrap` and `range` appear only in a map that steps or counts.
 `count` adds a variable's change, which covers counters whose value means nothing on its own.
-The Fenix's `L:E_FCU_HEADING` adds 1 for every detent of the heading knob (read in fnx-aircraft-320 2.4.0.4720, [Fenix study](../aircraft/fenix-a320-family/study.md)).
+The Fenix's `L:E_FCU_HEADING` adds 1 for every detent of the heading knob (read in fnx-aircraft-320 2.4.0.4720, `ModelBehaviorDefs\fnx32x\Templates\Interactions.xml`).
 The Fenix's systems program, `FenixSystem.exe`, which runs outside the sim, acts on the change: a jump of 10 in the counter moved the FCU heading 10 degrees (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
 So writing the PF's counter value on a following machine would move that machine's heading by the gap between the two counters.
 Where the heading itself can be read, the entry watches the heading and writes the counter, adding the whole difference in one write.
@@ -114,11 +114,11 @@ The rest of the pre-sync checklist, a Soon pick, uses watch-only entries to tick
 
 `toggle` is common enough to be built in.
 About 20 entries in FS Copilot's Synaptic A220 profile compare before they flip (unverified, FS Copilot profiles, `definitions/synaptic_a220.yaml`).
-The A350's `B:AIRLINER_ELEC_BAT_1_Set` flips the battery whatever value it's given (read in inibuilds-aircraft-a350 1.2.6, [A350 study](../aircraft/inibuilds-a350/study.md); unverified in the sim).
+The A350's `B:AIRLINER_ELEC_BAT_1_Set` flips the battery whatever value it's given (read in inibuilds-aircraft-a350 1.2.6, `A350_Interior.behavior.xml`; unverified in the sim).
 On the Baron 58P, a bare `B:ELECTRICAL_Battery_1` write left the battery unchanged while `B:ELECTRICAL_Battery_1_Toggle` flipped it, with no other form tried (measured on MSFS 2024, 2026-08-29, fsc-editor, `docs/sim-vars/build/v1-log.md`, "The arity probes: bare K: pops one and broadcasts; bare B: writes are per-preset dead air").
 
 A control whose system listens for a second name takes a write function that writes both.
-The L-1011's fuel pump click flips `L:SWITCH_FUEL_PUMP_1_1` and fires `H:FUEL`, and its flight engineer's script acts only on `H:FUEL` (read in inibuilds-aircraft-l1011 1.0.8, [L-1011 study](../aircraft/inibuilds-l1011/study.md); unverified in the sim):
+The L-1011's fuel pump click flips `L:SWITCH_FUEL_PUMP_1_1` and fires `H:FUEL` (read in inibuilds-aircraft-l1011 1.0.8, `L1011_COCKPIT.behavior.xml`), and its flight engineer's script acts only on `H:FUEL` (measured on MSFS 2024, 2026-11-09 and 2026-11-10, [sync log](log.md#2026-11-09-stage-14s-session-in-the-sim-passed-in-four-aircraft-and-no-aircraft-took-an-h-event-our-module-fired), and [sync log](log.md#2026-11-10-the-sdks-h-event-call-fails-on-msfs-2024-so-our-module-fires-h-events-as-calculator-code-which-reached-every-panel)):
 
 ```yaml
 fuel_pump_1_1:
@@ -154,7 +154,7 @@ The PF's entries are the categories [the take-control key](../product/03-v1-scop
 ### Ignoring a consequence
 
 One click can fire several names, and syncing each would apply the action twice.
-The Bonanza's autopilot master click fires `K:AP_MASTER`, and `K:TOGGLE_FLIGHT_DIRECTOR` too when the director is off, while a block running at 2 Hz that watches `A:AUTOPILOT MASTER` turns the director on once the autopilot engages (read in bksq-aircraft-bonanzapro 0.1.1, [Bonanza study](../aircraft/black-square-bonanza-pro/study.md)).
+The Bonanza's autopilot master click fires `K:AP_MASTER`, and `K:TOGGLE_FLIGHT_DIRECTOR` too when the director is off, while a block running at 2 Hz that watches `A:AUTOPILOT MASTER` turns the director on once the autopilot engages (read in bksq-aircraft-bonanzapro 0.1.1, `model.base\BonanzaProfessional_Base_INT.XML`).
 Forwarding both events would let the receiving machine's own block turn the director on between them, and the forwarded toggle would then turn it off again.
 `ignore` names what the entry's action also fires, in a state entry or an event entry alike:
 
@@ -189,12 +189,12 @@ events:
 - `watch` takes a `K:`, `H:`, `B:`, or `L:` name.
   A watched `L:` variable is a pulse: each rise from 0 counts as one occurrence.
   Some aircraft use a variable that way instead of an event: the A350's cockpit sets command variables such as `L:INI_MASTER_WARNING_COMMAND` to 1 (read in inibuilds-aircraft-a350 1.2.6, `A350_Interior.behavior.xml`), and its module acts on the 1 and clears it (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a350s-stock-heading-is-an-output-of-its-module-and-its-dial-takes-a-value-written-straight-into-it)).
-  Whether a reader outside the aircraft ever sees the 1 is unverified (the A350 study's sim question 2).
+  Whether a reader outside the aircraft ever sees a 1 the cockpit sets is unverified, and a client reading a knob's command variable every frame while the knob turns would settle it.
 - `write` is required here as on a state entry, and says what the other machines run: the watched name, which replays it, or another form from [writing a value](#writing-a-value).
 - `ignore` works as it does for a state entry.
 
 Controls whose meaning is their sequence belong here, not under `state:`.
-The A380's refuel selector starts refueling only after AUTO, OFF, AUTO (documented: iniBuilds A380 manual 1.2, p. 28, as the [A380 study](../aircraft/inibuilds-a380/study.md) cites it; not measured), and catch-up, which writes each state entry once at its final value, would write only the final AUTO.
+The A380's refuel selector starts refueling only after AUTO, OFF, AUTO (documented: iniBuilds, `iniBuilds A380 Manual 1.2.pdf`, p. 28, attached to [Aircraft Manual - A380 Airliner](https://forum.inibuilds.com/topic/40789-aircraft-manual-a380-airliner/); not measured), and catch-up, which writes each state entry once at its final value, would write only the final AUTO.
 
 Dual Input catches a pulse by reading the variable once per frame, so a pulse the aircraft sets and clears within one frame is missed.
 Two kinds of pulse could be caught every time (unverified): one written by panel JavaScript, which code Dual Input injects into that panel could see, and one set by an input event, whose subscription reports changes.
@@ -233,7 +233,6 @@ Some facts belong to the aircraft, not to one control, such as its pace: how fas
 
 The engine sends one step per frame unless the profile's header sets a slower pace for the whole aircraft, written as `2 frames` or `40ms`, and an entry can set its own on its `inc` and `dec`.
 An aircraft can read a command once per update of its own code, which can be every frame or slower.
-
 The A350 takes at most one command every 2 frames: two baro commands in one frame moved the baro 1 hPa, and ten sent once a frame moved it 5 hPa (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
 So the A350's profile paces its commands at 2 frames or more.
 Its heading knob also accelerates: ten up commands, one every 2 frames, moved the dial 30 degrees, so a heading syncs as one write to `L:INI_HEADING_DIAL`, which holds a written value, rather than as steps (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a350s-stock-heading-is-an-output-of-its-module-and-its-dial-takes-a-value-written-straight-into-it)).
@@ -245,8 +244,8 @@ A profile names no transport, since the engine picks the call by how many values
 For the yoke's masked axis events, the PMDG 777's module drops one sent with SimConnect's `_EX1` call and acts on the same event sent with the legacy call (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-the-pmdg-777-takes-a-value-sent-back-with-the-legacy-transmit-call)), and its other events are untested.
 
 Settings for following machines wait until a profile needs them: values Dual Input would set on every following machine while the session runs, so only one machine runs something each machine would otherwise run for itself.
-The Baron's tablet assesses failures every 10s, from failure times each machine draws for itself with `Math.random()` (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), so a following machine's failure rate would go to 0, and the PF's failures would reach the others as events.
-That a rate of 0 stops them, and that `H:` events mirror every failure, are unverified (the Baron study's sim questions 3 and 7).
+The Baron's tablet assesses failures every 10s, from failure times each machine draws for itself with `Math.random()` (read in bksq-aircraft-baronpro 0.1.1, `BlackSquareTablet.js`, `failureAssessment` and `calculateNewFailureTime`), so a following machine's failure rate would go to 0, and the PF's failures would reach the others as events.
+That a rate of 0 stops them, and that `H:` events mirror every failure, are unverified, and a run at a rate of 0 with one failure replayed as its `H:` event would settle both.
 
 A profile gives no signal for when the aircraft has finished loading, because only an author who understands Dual Input's catch-up would fill it in ([03-catch-up](03-catch-up.md#settling-after-a-load)).
 
@@ -255,7 +254,7 @@ A profile gives no signal for when the aircraft has finished loading, because on
 - It shows the state object live, entry by entry, and lists the watch-only entries.
 - It warns about an entry with both a readable `watch` and a `default`, an `ignore` naming a readable state entry, and, under `state:`, a pulsing `L:` variable or a control with no readable value whose only event is a toggle, which belong under `events:`.
 - It tests an entry's write across two instances, with a stand-in for the second pilot like fsc-exerciser, which as of 2026-10-04 exercises only pointer sync: click the control on one, apply the entry's write on the other, and compare everything that changed on each.
-  A write that sets only `L:SWITCH_FUEL_PUMP_1_1` passes Dual Input's own read-back, and this comparison would catch that the pump's stock switch, `A:FUELSYSTEM PUMP SWITCH:1`, moved on one side only (unverified in the sim, the L-1011 study's sim question 1).
+  A write that sets only `L:SWITCH_FUEL_PUMP_1_1` passes Dual Input's own read-back, and this comparison would catch that the pump's stock switch, `A:FUELSYSTEM PUMP SWITCH:1`, moved on one side only (measured on MSFS 2024, 2026-11-09, [sync log](log.md#2026-11-09-stage-14s-session-in-the-sim-passed-in-four-aircraft-and-no-aircraft-took-an-h-event-our-module-fired)).
 
 The IDE doesn't build entries by itself from what a click fires.
 fsc-editor tried that with its Activity view.
@@ -265,8 +264,8 @@ The Activity view's ranking put the beacon's own variable first in one capture a
 ## Known limits
 
 - State in display or FMS code has no entry.
-  The A220's display formats live in its DisplayUnits' Redux store (read in synaptic-aircraft-a220 1.0.10, [A220 study](../aircraft/synaptic-a220/study.md)), and pointer sync carries presses on those displays while both show the same page.
+  The A220's display formats live in its DisplayUnits' Redux store (read in synaptic-aircraft-a220 1.0.10, `a22x\DisplayUnits\instrument.js`), and pointer sync carries presses on those displays while both show the same page.
   An aircraft's [plugin](../product/03-v1-scope.md#plugins) is the path to that state, as an [aircraft adapter](../product/ideas.md#aircraft-adapters).
 - Values each aircraft computes from the same inputs, such as a managed speed, aren't synced, on the assumption that both machines run the same configuration and compute the same value.
-- A press whose action depends on how long it's held fits neither block, and the PA-24's JPI step button might be one (unverified, the [PA-24 study](../aircraft/a2a-pa24-comanche/study.md)'s sim question 9).
-- A rate knob fits no write form, because what it changes depends on how long it's held off center, not on a count of steps: the PMDG 777's baro knob `L:CABaroKnob` recenters after 0.5s (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)), and reaching a value would need a loop that drives it and reads back until the machines agree.
+- A press whose action depends on how long it's held fits neither block, and the PA-24's JPI step button might be one (unverified, and pressing it for 0.2s and then for 3s while watching the JPI's page would settle it).
+- A rate knob fits no write form, because what it changes depends on how long it's held off center, not on a count of steps: the PMDG 777's baro knob `L:CABaroKnob` recenters after 0.5s (read in pmdg-aircraft-77w 2.4.143, `77W_Cockpit_Behavior.xml`), and reaching a value would need a loop that drives it and reads back until the machines agree.

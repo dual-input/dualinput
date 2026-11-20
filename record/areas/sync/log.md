@@ -437,13 +437,13 @@ Was that because the A350 loaded with its own battery switches off, or does it h
 **Changed:** p01's reading was wrong: the heading went back because the module writes its dial over the stock heading, powered, not because the A350 was dark.
 On the A350 the heading syncs as one write to `L:INI_HEADING_DIAL`, and `A:AUTOPILOT HEADING LOCK DIR` is a value to read, never to write.
 
-**Affects:** [pacing in 01-profile-entries](01-profile-entries.md#what-a-profile-says-once-per-aircraft), and the A350 study's claims about its autopilot.
+**Affects:** [pacing in 01-profile-entries](01-profile-entries.md#what-a-profile-says-once-per-aircraft).
 
 **Evidence:** `results/p04-a350-heading-2026-10-05-20-00-21`, `-20-01-18`, and `-20-04-47`, each `.txt` and `.ndjson`.
 
 ## 2026-10-05: The A220's FCP ignores stock autopilot events, the A350 takes a command at most every 2 frames, and the Fenix reads a counter's jump as that many detents
 
-**Asked:** how fast do the A220, the A350, and the Fenix take stepped writes ([the plan](../product/plan.md)'s step 6), which is the A220 study's sim question 5, the A350's question 3, and the Fenix's questions 1 and 2?
+**Asked:** how fast do the A220, the A350, and the Fenix take stepped writes ([the plan](../product/plan.md)'s step 6)?
 
 **Expected:** only the heading event reaches the A220's module and the A350 counts two commands before one update as one (both unverified), and how the Fenix reads a counter that jumps couldn't be told.
 
@@ -471,7 +471,7 @@ The A220's autopilot targets don't sync through stock events at all, and need th
 The Fenix's encoder counters can be written as one jump of the full difference.
 Whether a +1 on the Fenix's push-pull counter pulls the knob, or does nothing on the ground, is open.
 
-**Affects:** [pacing in 01-profile-entries](01-profile-entries.md#what-a-profile-says-once-per-aircraft) and its note on the Fenix's counter, and the A220, A350, and Fenix studies' sim questions 1, 2, 3, and 5.
+**Affects:** [pacing in 01-profile-entries](01-profile-entries.md#what-a-profile-says-once-per-aircraft) and its note on the Fenix's counter.
 
 **Evidence:** `results/p02-stepped-writes-2026-10-05-19-37-47` and, for the Fenix's heading, `-19-50-45`, each `.txt` and `.ndjson`; the A220's CommBus watch is `experiments/areas/commbus/results/p02-commbus-watch-2026-10-05-19-37-55.ndjson`.
 
@@ -550,7 +550,7 @@ It explains why some loads in the settle runs ran twice.
 **Asked:** when does an aircraft loaded from the menu stop restoring its own controls, and does [catch-up's settle rule](03-catch-up.md#settling-after-a-load) call it right?
 The rule counts from "load", so which moment is that?
 
-**Expected:** the Baron's code finishes restoring its settings about 25s after load (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md), sim question 2), and a restore might pause longer than 15s, as `L:` names appearing did (03-catch-up).
+**Expected:** the Baron's code finishes restoring its settings about 25s after load (read in bksq-aircraft-baronpro 0.1.1, `model.base\BaronProfessional_Base_INT.xml` and `BlackSquareTablet.js`), and a restore might pause longer than 15s, as `L:` names appearing did (03-catch-up).
 
 **Found:** the pilot loaded each aircraft parked from Free flight's world map; the probe recorded every `L:` variable through fsc-editor-link's stream and 27 stock values every frame, through 2 minutes of hands off after Ready to fly:
 
@@ -580,6 +580,6 @@ The rule counts from "load", so which moment is that?
 The switches were done within 15s of Ready on every aircraft, so a rule with a lower floor would cut the wait, which is a design question.
 The only real state after the verdict was the Fenix's ground power and doors flipping back.
 
-**Affects:** [03-catch-up](03-catch-up.md#settling-after-a-load), and the Baron study's sim question 2.
+**Affects:** [03-catch-up](03-catch-up.md#settling-after-a-load).
 
 **Evidence:** `results/p01-guided-load-2026-10-05-16-54-34`, `-17-29-24`, and `-17-50-58`, each `.txt` and `.ndjson`, and the re-timed `results/p01-markers-2026-10-05-16-54-34.txt` and `-17-29-24.txt`; the first run's Fenix recording began 22.1s after its Fly, so its numbers come from the third run.

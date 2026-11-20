@@ -141,7 +141,7 @@ type Preflight = { settled: boolean; ready?: boolean; differences: Difference[];
 // names only the crewmate's, which is the one this pilot can't see in their own sim. The words are drafts, and the
 // versions, stores, times, and dates are examples. A livery can set the aircraft's
 // equipment and units, as a Fenix A320 livery's `fnx_*` keys set its baro unit, ADIRS type, and
-// standby instrument (record/areas/aircraft/fenix-a320-family/study.md).
+// standby instrument (read in fnx-aircraft-320-liveries 3.0, the liveries' livery.cfg files).
 const SWITCHES_THERE = "James's switches, knobs, and displays won't sync"
 const SWITCHES_HERE = "Your switches, knobs, and displays won't sync"
 const HEADS_UP = {

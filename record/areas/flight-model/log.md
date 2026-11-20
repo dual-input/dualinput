@@ -30,7 +30,7 @@ The real core flew the 58P, a bench core on a stand-in played the second pilot, 
   As the joiner took control in vertical speed mode, its trim ran from -7% to -44% in the last 2s of following and to -91% within 0.5s after, and as the host took control once, from -38% to -52%.
   At a third the trim held at -13%, and at the fourth it was already at -100% as the joiner took control, since that release didn't put the trim back while following.
   These are state sync's readings in [stage 14b's replays](../sync/log.md#2026-11-16-the-drift-after-a-handover-was-the-hosts-heading-bug-which-no-write-moved-after-its-first-and-every-_set-preset-that-missed-took-the-value-of-its-first-call) of the two recordings, with a log line for each reading.
-- The 58P's KFC 150 is the sim's own autopilot ([study](../aircraft/black-square-baron-pro/study.md)), and it flies pitch through the trim: the 58P's `systems.cfg` sets `pitch_use_trim = 1`, `pitch_pid_reset_mode=2`, and `roll_pid_reset_mode=2` (read in bksq-aircraft-baronpro 0.1.1, `SimObjects/Airplanes/bksq-aircraft-baronpropress/systems.cfg`).
+- The 58P's KFC 150 is the sim's own autopilot (read in its `model.base\BaronProfessional_Base_INT.xml`), and it flies pitch through the trim: the 58P's `systems.cfg` sets `pitch_use_trim = 1`, `pitch_pid_reset_mode=2`, and `roll_pid_reset_mode=2` (read in bksq-aircraft-baronpro 0.1.1, `SimObjects/Airplanes/bksq-aircraft-baronpropress/systems.cfg`).
   The SDK documents that the sim resets a PID only when it hasn't run for 10 frames, under mode 2 to the aircraft's state, so one that runs keeps what it has built up ([systems.cfg](https://docs.flightsimulator.com/msfs2024/retail/content-configuration/cfg-files/systems.cfg/)); no key event resets one ([autopilot events](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/key-events/aircraft-autopilot-and-flight-assistance-events/)).
 - FS Copilot follows the same way: its module freezes the aircraft and writes its pose and velocities each frame (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`), and its 58P profile syncs the KFC 150 and the trim (read in the FS Copilot profiles, `definitions/bksq-aircraft-baronpropress.yaml`), so its following autopilot would wind up the same way (unverified).
 - **The off-engage, reset, and on-again cases tested nothing, in both runs.**
@@ -331,7 +331,7 @@ Whether writing every velocity each frame keeps them all pinned is unmeasured.
 ## 2026-10-03: The Baron's ground contact follows the written altitude, and its own physics writes don't hold against ours
 
 **Asked:** on a frozen Baron, what does `A:SIM ON GROUND` report when we write the aircraft above or below the ground, and do the Baron's own physics writes fight a follower's?
-The Baron sets `A:VELOCITY BODY X` and `Z` to 0 at 60 Hz while `L:bksq_WheelChocks` is set, and writes `A:PLANE BANK DEGREES` at 15 Hz during an engine start (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md), sim question 6).
+The Baron sets `A:VELOCITY BODY X` and `Z` to 0 at 60 Hz while `L:bksq_WheelChocks` is set, and writes `A:PLANE BANK DEGREES` at 15 Hz during an engine start (read in bksq-aircraft-baronpro 0.1.1, `model.base\BaronProfessional_Base_EXT.xml`).
 
 **Expected:** no prediction.
 
@@ -351,6 +351,6 @@ The Baron sets `A:VELOCITY BODY X` and `Z` to 0 at 60 Hz while `L:bksq_WheelChoc
 The chocks don't stop a follower, but the Baron took its own chocks away once the written aircraft moved: the follower's aircraft changed its own state in reply to written motion, and state sync would see that change as if a pilot had made it.
 The engine-start shake doesn't change a follower's written attitude, and the follower's pilot still sees it.
 
-**Affects:** flight-model sync and state sync in [03-v1-scope](../product/03-v1-scope.md); the Baron study's sim question 6.
+**Affects:** flight-model sync and state sync in [03-v1-scope](../product/03-v1-scope.md).
 
 **Evidence:** [the first run](../../../experiments/areas/flight-model/results/p01-frozen-baron-2026-10-03-09-18-08.txt) for the ground and chocks, and [the engine-start run](../../../experiments/areas/flight-model/results/p01-frozen-baron-2026-10-03-09-26-18.txt), with each frame in the `.ndjson` beside each.

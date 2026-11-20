@@ -360,7 +360,7 @@ pub struct HEventsSlot { pub count: u16, pub names: [u8; 8000] }   // `count` na
 ```
 
 - Each feed is one batch of names, in call order, and a batch longer than the slot goes in several feeds.
-- A name goes without its `H:`, as an instrument receives it: the L-1011's engineer panel answers `onInteractionEvent("FUEL")` for `H:FUEL` (read in inibuilds-aircraft-l1011 1.0.8, [L-1011 study](../aircraft/inibuilds-l1011/study.md)).
+- A name goes without its `H:`, as an instrument receives it: the Baron's KR87A answers `adf_SetRst` for `H:adf_SetRst` (read in bksq-aircraft-baronpro 0.1.1, `KR87A.js`, `onInteractionEvent`).
 - The routine asks the routine host, in its frame, to fire each name, and the routine host registers each name once with `fsEventsRegisterHEvent` and fires it with `fsEventsHEventCall` and no parameters, after every routine's frame has run.
   This adds a want to the code map's [what a routine can ask for](../architecture/02-code-map.md#what-a-routine-can-ask-for), with nothing to undo, as the code map foresaw for an `H:` event.
 - The SDK documents that after `fsEventsHEventCall`, "in all JavaScript VCockpit, the callback `OnInteractionEvent` will be called" ([fsEventsHEventCall](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/wasm/event-api/fseventsheventcall/index.md)), and its header says "HVar are events distributed to js vcockpits" (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_Events.h`).

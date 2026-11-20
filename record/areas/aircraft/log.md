@@ -3,6 +3,21 @@
 What the sim found about aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-11-20: The Phenom 300E's readable archive holds seat parts for its pilot, its copilot, and its passengers
+
+**Asked:** does [the 2026-10-03 entry](#2026-10-03-two-partly-encrypted-aircraft-list-seat-objects-the-phenom-300e-for-its-pilots-and-passengers-and-the-a380-for-its-pilots)'s claim hold, that the Phenom's readable files show only a passenger seat part, so SimConnect showed more than the files did?
+
+**Expected:** no, since SimConnect listed a pilot's and a copilot's seat as well.
+
+**Found:** it doesn't hold.
+The index of `minimal.fsarchive`, the readable archive of fsreborn-aircraft-phenom300e 1.0.40, lists three seat parts under `simobjects\airplaneparts\`, each with a navigation graph: `fsreborn_phenom300e_seat_pilot`, `fsreborn_phenom300e_seat_copilot`, and `fsreborn_phenom300e_seat_pax` (read in its `minimal.fsarchive`, the archive's index).
+The entry read version 1.0.24, which isn't installed any more.
+
+**Changed:** the 10 seat objects SimConnect listed belong to the three parts the package's readable files hold, so SimConnect showed no seat the files lacked.
+The entry's finding that a figure can sit in a seat of a partly encrypted aircraft stands.
+
+**Affects:** the 2026-10-03 entry below, whose text stays as it was.
+
 ## 2026-10-16: A streamed package keeps no version on disk, while every installed one with a manifest has its `package_version`
 
 **Asked:** the preflight match check compares two pilots' aircraft versions ([preflight match check](../product/03-v1-scope.md#preflight-match-check)), and a package's version is `package_version` in its `manifest.json` ([07](../../learn/foundations/07-aircraft-specific-systems.md)); 03-v1-scope says a streamed Marketplace copy has no `manifest.json` in its folder, with no source.

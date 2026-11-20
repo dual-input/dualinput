@@ -19,6 +19,11 @@
  *   node experiments/areas/product/p31-tool-cost/run.ts all [--repeats <n>] [--seconds <n>] [--modes none,fsc,dualinput] [--dry]
  *   node experiments/areas/product/p31-tool-cost/run.ts none | fsc | dualinput [--seconds <n>] [--dry]
  *   node experiments/areas/product/p31-tool-cost/run.ts finish | restore | profiles
+ *   node experiments/areas/product/p31-tool-cost/run.ts hold
+ *
+ * `hold` flies a Dual Input run's session and holds it until a file named `stop` appears in
+ * target/p31/hold/, measuring nothing, so pages.mjs can look inside the sim while it flies. It needs
+ * no elevated terminal.
  *
  * `all` runs the modes in turn, every second round in reverse, so a steady drift over the hours
  * falls on every mode alike, then moves every package back and writes the report. Each run switches Community, starts its tool,
@@ -102,6 +107,7 @@ main(async () => {
   if (command === "restore") return void restore().forEach((l) => console.log(l))
   if (command === "profiles") return void compareProfiles().forEach((l) => console.log(`${l}\n`))
   if (command === "finish") return finish()
+  if (command === "hold") return hold()
   if (command === "all") {
     const modes = (flag(rest, "--modes") ?? "none,fsc,dualinput").split(",") as Mode[]
     const unknown = modes.filter((m) => !(m in MODES))
@@ -206,6 +212,43 @@ async function all(modes: Mode[], repeats: number, options: Options): Promise<vo
     written = `not written: ${(error as Error).message}`
   }
   console.log(`\nEvery run is done, ${Math.round((Date.now() - started) / 60_000)} min after the first started. The report is in ${written}.`)
+}
+
+/**
+ * A Dual Input run's session, from the release core and the package in Community, loaded and
+ * flying as `all` flies one, then held until `stop` appears in target/p31/hold/, or for an hour.
+ * `ready.json` there says when it flies. A failed step stops the tool, closes the sim, and puts
+ * Community back, as a run's try does.
+ */
+async function hold(): Promise<void> {
+  if (simRunning()) throw new Failed("the sim is running; close it, so the run can switch Community and start it")
+  const folder = path.join(WORK, "hold")
+  const [stopFile, readyFile] = [path.join(folder, "stop"), path.join(folder, "ready.json")]
+  const runFolder = path.join(folder, stamp())
+  fs.mkdirSync(runFolder, { recursive: true })
+  // Both are this command's own signals, which a held session before this one left.
+  for (const file of [stopFile, readyFile]) fs.rmSync(file, { force: true })
+  const say: Say = (line) => console.log(line)
+  for (const quit of quitInstalledDualInput()) say(`quit your installed Dual Input's ${quit}`)
+  for (const line of restore()) say(line)
+  for (const line of mount(MOUNTS.dualinput)) say(line)
+  const notes: string[] = []
+  let started: Started | undefined
+  try {
+    started = await start("dualinput", runFolder, say, notes, false)
+    const sim = await launchSim(say)
+    for (const line of await loadFlight(sim, say)) say(line)
+    for (const line of await started.ready()) say(line)
+    say(focusSim() ? "the sim is in front" : "the run couldn't bring the sim to the front")
+    for (const note of notes) say(`note: ${note}`)
+    fs.writeFileSync(readyFile, `${JSON.stringify({ sim, flying: new Date().toISOString() })}\n`)
+    say(`holding the session until ${stopFile} appears, an hour at most`)
+    for (const end = Date.now() + 60 * 60_000; !fs.existsSync(stopFile) && Date.now() < end; ) await sleep(1_000)
+  } finally {
+    await started?.stop().catch((error: Error) => say(`stopping the tool: ${error.message}`))
+    await closeSim(say).catch((error: Error) => say(error.message))
+    for (const line of restore()) say(line)
+  }
 }
 
 function flag(args: string[], name: string): string | undefined {

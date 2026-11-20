@@ -61,8 +61,8 @@ pub(crate) const PACKET: usize = 1_162;
 const ONE_OFF_QUEUE: usize = 3 * PACKET;
 
 /// The 750ms the core's edges get to finish once the core exits, which `GRACE` in
-/// src/apps/core/src/run.rs gives them, so change both together
-/// (record/areas/core/01-loop-and-edge.md, "Exiting").
+/// src/apps/core/src/run.rs gives them, as does `GRACE` in tools/bench/droplet/src/main.rs, so
+/// change all three together (record/areas/core/01-loop-and-edge.md, "Exiting").
 const CLOSE_WITHIN: Duration = Duration::from_millis(750);
 
 const STATS_EVERY: Duration = Duration::from_secs(1);

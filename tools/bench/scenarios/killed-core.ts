@@ -33,8 +33,9 @@ test("a killed core's recording replays to its last flush, losing at most its la
   assert.ok(recording, "the core should have recorded its run")
   assert.equal(others.length, 0)
   const replayed = run.replay(recording, "debug")
-  // The test unit logs each line's number as it handles one, and the lines reach the loop
-  // in the order they were sent, so the recording holds lines 1 to the highest it logged.
+  // The test unit, in src/apps/core/src/bench/lines.rs, logs each line's number as it handles
+  // one, and the lines reach the loop in the order they were sent, so the recording holds lines
+  // 1 to the highest it logged. When you change that log line, change this pattern with it.
   const counted = [...fs.readFileSync(replayed.log, "utf8").matchAll(/a line from the bench reached the loop n=(\d+)/g)].map((m) => Number(m[1]))
   const reached = counted.length
   assert.deepEqual(counted, Array.from({ length: reached }, (_, i) => i + 1), "the lines should reach the loop in order")

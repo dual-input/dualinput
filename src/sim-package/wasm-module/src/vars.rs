@@ -58,7 +58,8 @@ pub(crate) fn get(object: u32, space: Space, ids: Ids) -> Option<f64> {
 }
 
 /// Writes `value` into the variable. The Vars API has no write for an `E:` variable, so a
-/// write to one does nothing.
+/// write to one does nothing (read in the MSFS 2024 SDK 1.8.1, `WASM/include/MSFS/MSFS_Vars.h`,
+/// which declares `fsVarsEVarGet` and no setter).
 pub(crate) fn set(object: u32, space: Space, ids: Ids, value: f64) {
     let target = object as FsObjectId;
     // SAFETY: the sim reads no parameter, since `NONE` holds none.

@@ -41,7 +41,8 @@ const USAGE: &str = "usage: bench-droplet listen <folder> <public IPv4> <secs>
 const RELAY_PORT: u16 = 3340;
 
 /// The 750ms the core's edges get to finish once it exits, as `GRACE` in
-/// src/apps/core/src/run.rs gives them, so change both together.
+/// src/apps/core/src/run.rs gives them, as does `CLOSE_WITHIN` in
+/// src/engines/transport/src/lib.rs, so change all three together.
 const GRACE: Duration = Duration::from_millis(750);
 
 /// Every unit, in the core's order, with the test unit last.

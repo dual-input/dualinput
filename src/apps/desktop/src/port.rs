@@ -7,10 +7,11 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{mpsc, watch};
 use tokio_websockets::{CloseCode, Limits, Message, ServerBuilder};
 
-/// What every page we use sent as its `Origin` (measured on MSFS 2024, 2026-10-08, record/areas/interface/log.md). Only the
-/// EFB app has any reason to reach this port, and any web page in a browser on this PC can open a socket to 127.0.0.1, so
-/// one that says nothing is closed too, where the core takes that from the desktop app. `SIM_ORIGIN` in
-/// src/apps/core/src/edges/sockets.rs names the same one.
+/// What every page we use sent as its `Origin` (measured on MSFS 2024, 2026-10-08, record/areas/interface/log.md, "Every
+/// page we use reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:` variable, and a
+/// flight load resets one"). Only the EFB app has any reason to reach this port, and any web page in a browser on this PC
+/// can open a socket to 127.0.0.1, so one that says nothing is closed too, where the core takes that from the desktop
+/// app. `SIM_ORIGIN` in src/apps/core/src/edges/sockets.rs names the same one, so change both together.
 const SIM_ORIGIN: &str = "coui://html_ui";
 
 /// The largest message a socket takes, far past the few words any of them is.

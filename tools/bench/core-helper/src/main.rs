@@ -221,7 +221,8 @@ fn tell(bench: Option<&Shared<TcpStream>>, line: &StandInHelperLine) {
 }
 
 /// Now, in µs on the performance counter, as the real helper stamps. `clock::now` in
-/// src/apps/core and in src/apps/core-helper read it the same way, so change all three together.
+/// src/apps/core and in src/apps/core-helper, and tools/profile-author's `screen::now`, read it
+/// the same way, so change all four together.
 fn now() -> u64 {
     let (mut ticks, mut frequency) = (0, 0);
     // SAFETY: each call writes one i64 to the pointer it's given.

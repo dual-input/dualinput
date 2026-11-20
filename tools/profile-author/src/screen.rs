@@ -175,7 +175,9 @@ pub fn beep(high: bool) {
 }
 
 /// Now, in µs on the PC's performance counter, the clock `Figure`'s slot header carries, as the
-/// core's `clock::now` in src/apps/core/src/clock.rs reads it, so change both together.
+/// core's `clock::now` in src/apps/core/src/clock.rs reads it. That, `clock::now` in
+/// src/apps/core-helper, and the stand-in core helper's `now` in
+/// tools/bench/core-helper/src/main.rs read it the same way, so change all four together.
 pub fn now() -> u64 {
     let (mut ticks, mut frequency) = (0, 0);
     // SAFETY: each call writes one i64 to the pointer it's given.

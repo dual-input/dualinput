@@ -54,9 +54,10 @@ const GROUND_ALLOWED: [&str; 1] = ["ASO_Pushback_"];
 
 /// How many objects the host carries at most, the first it finds, counting those whose
 /// identity it's still reading. Leaving or entering the flight queues a call for each copy in
-/// one input, which the kernel stops past 1,000, and a busy hub's traffic is about 165 objects:
-/// our probe p10's 145 aircraft and 20 tugs at EGLL (user, 2026-11-15;
-/// record/areas/traffic-atc/log.md, 2026-10-17).
+/// one input, which the kernel stops past 1,000, and a busy hub's traffic is under 180 objects:
+/// at EGLL our probe p10 counted 142 to 153 aircraft, and 23 of the sim's pushback tugs came
+/// within 1km of the pilot's aircraft (user, 2026-11-15; record/areas/architecture/log.md,
+/// 2026-10-16, and record/areas/traffic-atc/log.md, 2026-10-17).
 const MOST_CARRIED: usize = 500;
 
 /// What starts the title of every SimObject of ours, such as avatars' figure,

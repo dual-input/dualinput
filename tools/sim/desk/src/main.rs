@@ -73,7 +73,7 @@ fn main() {
         ["devices"] => devices(),
         ["usage", process, ms] => usage(process, ms),
         ["frames", input, output, loss] => frames(input, output, loss),
-        _ => Err("usage: desk window <class> <title> | front | key <scan> <ms> | usage <process> <ms> | frames <in> <out.wav> <loss percent>".into()),
+        _ => Err("usage: desk window <class> <title> | front | key <scan> <ms> | devices | usage <process> <ms> | frames <in> <out.wav> <loss percent>".into()),
     };
     if let Err(error) = result {
         eprintln!("{error}");

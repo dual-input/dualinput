@@ -17,6 +17,7 @@ import type { JsonValue } from "../../../engines/messages/ts/serde_json/JsonValu
 import type { SliceMember } from "../../../engines/messages/ts/session/SliceMember.ts"
 import type { Status } from "../../../engines/messages/ts/session/Status.ts"
 import type { DesktopState } from "../../../engines/messages/ts/desktop/DesktopState.ts"
+import type { Role } from "../../../engines/messages/ts/session/Role.ts"
 import type { ToDesktop } from "../../../engines/messages/ts/desktop/ToDesktop.ts"
 import { VERSION } from "../../../engines/messages/ts/stamp.ts"
 import type { Socket } from "../../../engines/page-client/src/page-client.ts"
@@ -43,8 +44,20 @@ const DIFFERENCES: Difference[] = [
   { item: 3, level: "warning", words: "James's sim is 4 hours ahead of yours" },
 ]
 
+/**
+ * The roles traffic's and ATC audio's parts find by their labels, by name alone, since no shell names a feature, held by
+ * whoever a scene says. `LABEL` in src/features/traffic/efb/part.tsx and in src/features/atc-audio/efb/part.tsx names
+ * the same label as each feature's core does, so change all three together.
+ */
+const SHARE_TRAFFIC = "Share my traffic"
+const SHARE_ATC = "Share my ATC"
+const roles = (holders: { traffic?: string; atc?: string } = {}): Role[] => [
+  { key: 1, label: SHARE_TRAFFIC, holder: holders.traffic ?? null },
+  { key: 2, label: SHARE_ATC, holder: holders.atc ?? null },
+]
+
 const noSession: SessionSlice = { held: false, code: null, me: ME, pf: null, members: [], preflight: { aircraft: null, phase: "no-aircraft" }, differences: [], ready: null, share: null, roles: [], attempt: null, refused: null }
-const held = (rest: Partial<SessionSlice>): SessionSlice => ({ ...noSession, held: true, code: CODE, pf: ME, ready: [], share: [], ...rest })
+const held = (rest: Partial<SessionSlice>): SessionSlice => ({ ...noSession, held: true, code: CODE, pf: ME, ready: [], share: [], roles: roles(), ...rest })
 const running = { aircraft: inFlight.aircraft, phase: "running" as const }
 
 const BARON: NamedAircraft = { path: "baron58p/presets/blacksquare/baron58p", maker: "Black Square", model: "Baron 58P", tail: "N58BS" }
@@ -84,7 +97,7 @@ const OUTPUTS = {
     { id: "realtek", name: "Speakers (Realtek(R) Audio)" },
     { id: "lg", name: "LG HDR 4K (NVIDIA High Definition Audio)" },
   ],
-  programs: [],
+  programs: ["Discord", "BeyondATC", "FlightSimulator2024"],
   in_use: { id: "usb", name: "Headset (USB Audio)" },
 }
 
@@ -99,7 +112,22 @@ const TAKE_CONTROL = "take-control"
 const STREAM = "cockpit-stream"
 const INPUT = "take-control.input"
 const control = (rest: Record<string, unknown>) => ({ live: true, mine: false, denied: [], warning: null, waiting: false, next_press: null, ...rest })
-const flying = (pf: string): SessionSlice => held({ pf, members: [me(inFlight), james(inFlight)], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, differences: DIFFERENCES, ready: null })
+const ended = { aircraft: inFlight.aircraft, phase: "ended" as const }
+const flying = (pf: string, holders: { traffic?: string; atc?: string } = {}): SessionSlice =>
+  held({ pf, members: [me(inFlight), james(inFlight)], preflight: ended, differences: DIFFERENCES, ready: null, roles: roles(holders) })
+
+/** Traffic's, ATC audio's, and Go to's slices, by name alone and untyped, as take control's above. */
+const TRAFFIC = "traffic"
+const ATC = "atc-audio"
+const GO_TO = "go-to"
+const noTraffic = { missing: 0, others: 0, packs: null }
+const PACKS = [{ name: "fsltl-traffic-base", version: "1.0.0" }]
+const noJoin = { spot: null, join: { as: "hidden" }, said: null }
+const AT_KSEA = { airport: "KSEA", stand: { name: "PARKING", number: 140 }, engines: false, livery: "N515MR" }
+/** What the stand-in reads of Go to's slice when Join is pressed. */
+type Joining = { spot: unknown; join: { as: string }; said: { n: number } | null }
+/** James flying from a stand, with this pilot at the menu, out of the flight, where Join shows on James's row. */
+const jamesAway = held({ pf: JAMES, members: [me(atMenu), james(inFlight)], preflight: ended, ready: null })
 /** A key the stand-in binds at the next press, as the helper names it. */
 const F9 = { input: { key: { scan: 67, extended: false } }, name: "F9" }
 const boundTo = (name: string) => ({ settings: [...settings(true, true), { ...setting(INPUT, false), kind: { type: "input" as const }, value: { ...F9, name }, default: null }] })
@@ -158,6 +186,12 @@ export const SCENES: Record<string, Slices> = {
   "James flying, catching up": { ...netUp, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ denied: ["You're catching up with James."] }), [STREAM]: { catching_up: true, from_preflight_end: false, replaying: false } },
   "James flying, another guard refuses": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({ denied: ["Only the instructor can take control"] }) },
   "James's link lost": { network: { members: [{ pilot: JAMES, up: false, path: null, round_trip_ms: null }], ...reach }, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ warning: "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect." }) },
+  "Traffic: James shares, some missing": { ...netUp, session: flying(JAMES, { traffic: JAMES }), [TRAFFIC]: { ...noTraffic, missing: 3, others: 12 } },
+  "Traffic: you share": { ...netUp, session: flying(ME, { traffic: ME }) },
+  "ATC: you share": { ...netUp, session: flying(ME, { atc: ME }), [ATC]: { capturing: "BeyondATC" } },
+  "ATC: James shares": { ...netUp, session: flying(JAMES, { atc: JAMES }) },
+  "Join: James at a stand": { ...netUp, session: jamesAway, [GO_TO]: { ...noJoin, spot: AT_KSEA, join: { as: "ready" } } },
+  "Join: another aircraft": { ...netUp, session: jamesAway, [GO_TO]: { ...noJoin, spot: AT_KSEA, join: { as: "unavailable", why: "other-aircraft" } } },
   "Header: offline": { network: { members: [], internet: false, servers: null } },
   "Header: several things": { network: { members: [], internet: true, servers: "unreachable" }, [DESKTOP]: { ...LOCAL, firewall: "blocks", update: { state: "ready", next: "1.0.3" } } },
   "Header: our own parts": {
@@ -219,7 +253,7 @@ export class StandInCore extends StandInBase {
     this.local = DESKTOP in scene ? (scene[DESKTOP] as DesktopState | null) : LOCAL
     this.tellDesktop()
     this.set({ settings: settings(true, true) })
-    window.setTimeout(() => this.set({ ...healthy, [TAKE_CONTROL]: control({ live: false }), [STREAM]: { catching_up: false, from_preflight_end: false, replaying: false }, recording: { runs: RUNS, stopped: null }, "core-helper": { ...OUTPUTS, outputs: [] }, notifications: [], core: CORE, avatars: { note: null }, ...scene }), 0)
+    window.setTimeout(() => this.set({ ...healthy, [TAKE_CONTROL]: control({ live: false }), [STREAM]: { catching_up: false, from_preflight_end: false, replaying: false }, recording: { runs: RUNS, stopped: null }, "core-helper": { ...OUTPUTS, outputs: [] }, notifications: [], core: CORE, avatars: { note: null }, [TRAFFIC]: noTraffic, [ATC]: { capturing: null }, [GO_TO]: noJoin, ...scene }), 0)
   }
 
   private setControl(changes: Record<string, unknown>): void {
@@ -254,6 +288,28 @@ export class StandInCore extends StandInBase {
     else if (name === "clients.set-setting") this.setSetting(String(fields.key), fields.value as JsonValue)
     else if (name === "take-control.request") this.takeControl()
     else if (name === "take-control.bind") this.bind(!!fields.on)
+    else if (name === "session.share") this.share(Number(fields.key), !!fields.on)
+    else if (name === "traffic.list-packs") this.set({ [TRAFFIC]: { ...(this.slices[TRAFFIC] as Record<string, unknown>), packs: PACKS } })
+    else if (name === "go-to.join") this.join(!!fields.now)
+  }
+
+  /** A switch claims its role or lets it go, at once, as the core's does with no other member to ask. */
+  private share(key: number, on: boolean): void {
+    this.setSession({ roles: this.session().roles.map((role) => (role.key === key ? { ...role, holder: on ? ME : null } : role)) })
+  }
+
+  /** Join runs for a moment, then says it set the flight up; Join now also puts this pilot in the flight, which hides Join. */
+  private join(now: boolean): void {
+    const goTo = this.slices[GO_TO] as Joining
+    if (goTo.join.as !== "ready" || !goTo.spot) return
+    const spot = goTo.spot
+    this.set({ [GO_TO]: { ...goTo, join: { as: "running" } } })
+    window.clearTimeout(this.answer)
+    this.answer = window.setTimeout(() => {
+      const said = { n: (goTo.said?.n ?? 0) + 1, now, spot, aircraft: inFlight.title ?? "", outcome: { as: "set-up", no_stand: false } }
+      this.set({ [GO_TO]: { ...goTo, join: now ? { as: "hidden" } : { as: "ready" }, said } })
+      if (now) this.setSession({ members: this.session().members.map((one) => (one.pilot === ME ? { ...one, status: inFlight, in_flight: true } : one)) })
+    }, AFTER.answer)
   }
 
   private setSetting(key: string, value: JsonValue): void {

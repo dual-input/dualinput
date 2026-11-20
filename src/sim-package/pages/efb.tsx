@@ -7,25 +7,15 @@ import { createRoot } from "react-dom/client"
 import { simEnv } from "../../engines/page-client/src/sim-env.ts"
 import { VERSION } from "../../engines/messages/ts/stamp.ts"
 import { CoreLink } from "../../engines/page-client/src/core-link.ts"
-import { atcAudio } from "../../features/atc-audio/efb/part.tsx"
-import { avatars } from "../../features/avatars/efb/part.tsx"
-import goTo from "../../features/go-to/efb/index.tsx"
-import rateAndPause from "../../features/rate-and-pause/efb/index.ts"
-import { stateSync } from "../../features/state-sync/efb/part.tsx"
-import takeControl from "../../features/take-control/efb/index.tsx"
-import { traffic } from "../../features/traffic/efb/part.tsx"
 import { DesktopLink } from "../../platform/efb-shell/src/desktop-link.ts"
 import { Frame } from "../../platform/efb-shell/src/frame.tsx"
-import type { Part } from "../../platform/efb-shell/src/part.ts"
 import { registerEfbApp } from "../../platform/efb-shell/src/register.ts"
 import { simWindow } from "../../platform/efb-shell/src/sim-window.ts"
 import { viewLeft, viewShown } from "../../platform/efb-shell/src/view.ts"
+import { PARTS } from "./parts.ts"
 
 /** `EFB_APP` in tools/lib/pages.ts names the same folder, so change both together. */
 const INTERNAL_NAME = "DualInput"
-
-/** Each feature's part, one line each, in the order their tabs show. */
-const PARTS: Part[] = [takeControl, traffic, atcAudio, avatars, stateSync, rateAndPause, goTo]
 
 const SIM = simWindow(INTERNAL_NAME)
 

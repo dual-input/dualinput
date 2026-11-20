@@ -15,7 +15,7 @@ import { definePart, useCoreConnected, useCoreSlice, useShell } from "../../../p
 import { HowItWorks, RoleCard, useRole } from "../../../platform/efb-shell/src/roles/role-card.tsx"
 import type { CheckLine } from "../../../platform/efb-shell/src/roles/role-card.tsx"
 
-/** The role's label, which `register` in src/features/traffic/core/src/lib.rs gives it, so change both together. */
+/** The role's label, which `register` in src/features/traffic/core/src/lib.rs gives it, and the dev loop's stand-in core, src/platform/efb-shell/dev/stand-in.ts, holds too, so change all three together. */
 const LABEL = "Share my traffic"
 /** The part's name, its unit's, which is its tab's too. */
 const NAME = "traffic"

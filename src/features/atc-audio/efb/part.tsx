@@ -18,7 +18,7 @@ import { HowItWorks, RoleCard, useRole } from "../../../platform/efb-shell/src/r
 import type { RoleNow } from "../../../platform/efb-shell/src/roles/role-card.tsx"
 import { useSetting, writeSetting } from "../../../platform/efb-shell/src/settings/setting.ts"
 
-/** The role's label, which `register` in src/features/atc-audio/core/src/lib.rs gives it, so change both together. */
+/** The role's label, which `register` in src/features/atc-audio/core/src/lib.rs gives it, and the dev loop's stand-in core, src/platform/efb-shell/dev/stand-in.ts, holds too, so change all three together. */
 const LABEL = "Share my ATC"
 /** The part's name, its unit's, which is its tab's too. */
 const NAME = "atc-audio"

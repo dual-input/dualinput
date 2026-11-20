@@ -8,7 +8,7 @@ import { mountSample } from "./sample.tsx"
 
 const SIZES = { Small: [447, 632], Medium: [537, 759], Large: [621, 879] } as const
 
-/** Runs the app with `parts`, which src/sim-package/pages/efb-dev.tsx lists, since no shell names a feature. */
+/** Runs the app with `parts`, which src/sim-package/pages/parts.ts lists, since no shell names a feature. */
 export function mountDev(parts: Part[]): void {
   const page = document.getElementById("page") as HTMLElement
   page.style.cssText = "display:flex;padding:16px;align-items:flex-start"

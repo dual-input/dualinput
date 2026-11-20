@@ -23,15 +23,15 @@ import { buildPrograms } from "./lib/cargo.ts"
 import { ROOT } from "./lib/repo.ts"
 import { Failed, main, output, run } from "./lib/run.ts"
 
+/** A path from the root that isn't code, as `changes` above gives them. */
+const NOT_CODE = /^(profiles|record|docs|experiments|\.claude)\/|\.md$/
+
 main(() => {
   const [step, ...args] = process.argv.slice(2)
   if (step === "changes" && args.length === 0) return changes()
   if (step === "publish-profiles" && args.length === 1) return publishProfiles(path.resolve(args[0]!))
   throw new Failed("usage: node tools/ci.ts changes | node tools/ci.ts publish-profiles <pages>")
 })
-
-/** A path from the root that isn't code, as `changes` above gives them. */
-const NOT_CODE = /^(profiles|record|docs|experiments|\.claude)\/|\.md$/
 
 function changes(): void {
   let code = true

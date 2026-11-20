@@ -237,7 +237,7 @@ async function hold(): Promise<void> {
   try {
     started = await start("dualinput", runFolder, say, notes, false)
     const sim = await launchSim(say)
-    for (const line of await loadFlight(sim, say)) say(line)
+    await loadFlight(sim, say)
     for (const line of await started.ready()) say(line)
     say(focusSim() ? "the sim is in front" : "the run couldn't bring the sim to the front")
     for (const note of notes) say(`note: ${note}`)

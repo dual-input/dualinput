@@ -3,8 +3,8 @@
 //! keeps changes, and a 10ms step taken at once would move a drawn aircraft 0.8m at 150 kt. So
 //! the applied offset moves toward the estimate by at most 5ms a second, which slows or speeds
 //! what's drawn by at most 0.5% (record/areas/flight-model/01-flight-model-sync.md, "Taking a
-//! sample"). Flight-model sync draws the PF's aircraft by it, and traffic the traffic host's
-//! copies.
+//! sample"). Flight-model sync draws the pilot flying's aircraft by it, and traffic the
+//! traffic host's copies.
 
 /// The offset in use, the sender's counter less this core's in µs, and when it was last moved,
 /// or nothing before the first.

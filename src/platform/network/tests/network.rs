@@ -319,7 +319,6 @@ impl Core {
         self.handle(self.acts, postcard::to_stdvec(&act).unwrap());
     }
 
-    /// The fetch jobs started since the last call, as each one's method, URL, and job.
     /// Each request to the backend that started since the last call.
     fn fetches(&mut self) -> Vec<(String, StartJob)> {
         self.started(Method::Post)

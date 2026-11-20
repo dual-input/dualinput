@@ -84,8 +84,10 @@ pub enum SimEvent {
         exception: u32,
         index: u32,
     },
-    /// A call the service couldn't make, because the sim is closed or the unit's connection
-    /// didn't open.
+    /// A call the service couldn't carry out: the sim is closed, the unit's connection went
+    /// before the call did, or what the call needs isn't there, such as the watch a write
+    /// names, the input event an `input` call names, or a menu script to answer a world map
+    /// request.
     Failed { call: Handle },
     /// The object a `create_ai` made, by the ID a `watch_on`, a `key_on`, a `remove`, and a
     /// routine's write name it by.

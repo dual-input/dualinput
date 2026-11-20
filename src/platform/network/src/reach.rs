@@ -93,7 +93,9 @@ impl Network {
         };
         let urls = std::iter::once((Server::Backend, format!("{}/", backend_url(cx)))).chain(
             relays.iter().map(|relay| {
-                // `/ping` answers with no token (record/areas/network/log.md).
+                // `/ping` answers with no token (read in iroh-relay 1.3.0,
+                // record/areas/network/log.md, "2026-10-16: iroh-relay 1.3.0 builds and runs on
+                // Windows, and in dev mode answers on IPv6 loopback only").
                 let url = format!("{}/ping", relay.url.trim_end_matches('/'));
                 (Server::Relay, url)
             }),

@@ -26,10 +26,10 @@ use crate::connections::Origin;
 /// `%LOCALAPPDATA%`, which the core's edge fills in.
 pub const USER_CFG: &str = "sim.user-cfg";
 
-/// Steam's `UserCfg.opt`, then the Microsoft Store's (record/areas/install/
-/// 01-installing-and-updating.md, "The packages folders"). `userCfgs` in tools/lib/install.ts,
-/// `USER_CFGS` in src/apps/desktop/src/places.rs, and `USER_CFGS` in tools/profile-author's
-/// cockpit.rs name the same files, so change all four together.
+/// Steam's `UserCfg.opt`, then the Microsoft Store's
+/// (record/areas/install/01-installing-and-updating.md, "The packages folders"). `userCfgs` in
+/// tools/lib/install.ts, `USER_CFGS` in src/apps/desktop/src/places.rs, and `USER_CFGS` in
+/// tools/profile-author's cockpit.rs name the same files, so change all four together.
 const USER_CFGS: &str = r"%APPDATA%\Microsoft Flight Simulator 2024\UserCfg.opt;%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\UserCfg.opt";
 
 /// The facts changed, the search's result included.
@@ -46,8 +46,8 @@ pub struct PackageFound {
 
 impl Moment for PackageFound {}
 
-/// Turns aircraft awareness on as a session starts, and off as it ends, since every v1 reader
-/// of the facts is in a session.
+/// Turns aircraft awareness on as a session starts, and off as it ends, since every reader of
+/// the facts is in a session.
 pub fn aircraft_awareness(cx: &Cx, on: bool) {
     cx.call(SimService::set_awareness, on);
 }
@@ -421,7 +421,9 @@ impl SimService {
 
     /// The search ended: a package's folder, where it's installed, and its version, or none,
     /// which counts as streamed, since a streamed package keeps no aircraft folder on disk
-    /// (record/areas/aircraft/log.md, 2026-10-16).
+    /// (measured, 2026-10-16, record/areas/aircraft/log.md, "2026-10-16: A streamed package
+    /// keeps no version on disk, while every installed one with a manifest has its
+    /// `package_version`").
     fn searched(
         &mut self,
         (finding, aircraft): (Finding, Aircraft),
@@ -474,9 +476,10 @@ impl SimService {
 /// package in `Community2024` over `Community`, and either over an Official one (documented,
 /// [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)).
 /// The Official folders hold a folder for each store, such as `Steam`, with the packages
-/// inside it (record/areas/aircraft/log.md, 2026-10-16). `ROOTS` in tools/profile-author's
-/// cockpit.rs holds the same folders, which its `package` searches the same way, so change
-/// both together.
+/// inside it (measured, 2026-10-16, record/areas/aircraft/log.md, "2026-10-16: A streamed
+/// package keeps no version on disk, while every installed one with a manifest has its
+/// `package_version`"). `ROOTS` in tools/profile-author's cockpit.rs holds the same folders,
+/// which its `package` searches the same way, so change both together.
 const ROOTS: [(&str, u8, Location); 4] = [
     ("Community2024", 1, Location::Community2024),
     ("Community", 1, Location::Community),

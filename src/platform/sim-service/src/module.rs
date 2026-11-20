@@ -2,8 +2,9 @@
 //! every 200ms until a feature feeds another or ends the routine, and the module's status. A
 //! module that stopped can't lift the freeze its routine holds, so the core lifts it when the
 //! routine ends, as the pilot takes control or leaves, rather than the moment the module
-//! stops, which would hand the pilot a flying aircraft unasked
-//! (record/areas/architecture/log.md, 2026-10-23).
+//! stops, which would hand the pilot a flying aircraft unasked (user, 2026-10-23,
+//! record/areas/architecture/log.md, "2026-10-23: A review against the simplicity rule cut
+//! eight guards, and kept every designed feature it questioned").
 
 use std::collections::BTreeMap;
 use std::time::Duration;
@@ -281,8 +282,9 @@ impl SimService {
 
     /// Turns off all three freezes through the platform's connection, as a client outside the
     /// sim released a frozen Baron (measured on MSFS 2024, 2026-10-03,
-    /// record/areas/flight-model/log.md). The events go out in the same input as the
-    /// routine's end, with no read of the flags first, so a quit's exit, which takes no
+    /// record/areas/flight-model/log.md, "2026-10-03: Freezing holds the pose but not the
+    /// velocities, so a follower has to write them all"). The events go out in the same input
+    /// as the routine's end, with no read of the flags first, so a quit's exit, which takes no
     /// input after it, still carries them out.
     fn unfreeze(&mut self, cx: &Cx) {
         let origin = Origin {

@@ -17,9 +17,9 @@ use crate::{
 };
 
 pub(crate) const HEARTBEAT_EVERY: Duration = Duration::from_secs(1);
-/// Starting values, which v1's recordings tune: 5s sits above the 2s a dead direct path
-/// takes to give way to the relay (record/areas/network/01-between-machines.md, "The link
-/// between two cores").
+/// A starting value, to tune once recordings hold real outages: 5s sits above the 2s a dead
+/// direct path takes to give way to the relay (record/areas/network/01-between-machines.md,
+/// "The link between two cores").
 const LOST_AFTER: Duration = Duration::from_secs(5);
 /// Every dial still running when a link returns connects, so a core runs one at a time and
 /// starts a new one every 2s in place of the last.

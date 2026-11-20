@@ -152,7 +152,9 @@ pub(crate) struct Backend {
     /// its session file. A `SigningKey` holds its public half, so a signed request costs one
     /// curve multiplication, the signature's, where working the public half out again for the
     /// entry and the header would make three, a third of a joiner's first `LinkUp` on an
-    /// unoptimized build (record/areas/session/log.md, 2026-10-23).
+    /// unoptimized build (measured, 2026-10-23, record/areas/session/log.md, "2026-10-23: An
+    /// unoptimized bench build sat close enough to a handler's 1ms for a pause of the PC's to
+    /// cross it, so the bench builds optimized").
     pub(crate) key: Option<SigningKey>,
     pub(crate) me: Option<Me>,
     /// Whether the backend lists this core's entry: a host's is listed with its code, and

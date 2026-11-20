@@ -2,8 +2,8 @@
 //! `recordings\` with the run's recording and log, which a pilot sends us by hand when we ask
 //! for a bug's. When the core starts, it deletes the oldest runs while all of them together
 //! pass 1 GB; it lists the runs for the EFB app's Settings tab; and it takes the commands that
-//! mark the moment and delete a run (record/areas/recording/01-recording-and-bug-reports.md, the note
-//! of 2026-10-23).
+//! mark the moment, delete a run, and open a run's folder
+//! (record/areas/recording/01-recording-and-bug-reports.md, "What each PC keeps").
 //!
 //! The core's edge creates the run's folder before the loop starts, named by its start in
 //! UTC, so of the folders named as runs, the newest is the run in progress. A PC whose clock
@@ -26,7 +26,9 @@ use serde_json::Value;
 const RECORDINGS: &str = "recordings";
 
 /// All runs together stay within this, which holds about 17 hours of a busy session's
-/// recording at its budget of 60 MB an hour (record/areas/recording/log.md, 2026-10-23).
+/// recording at its budget of 60 MB an hour (record/areas/recording/log.md, "2026-10-23: One
+/// zstd frame flushed each second keeps a busy flight's recording at 42.6 MB an hour, where a
+/// frame ended each second takes 66.7 MB").
 const KEEP: u64 = 1_000_000_000;
 
 /// How often the slice's size of the run in progress is read again. A run grows about 1 MB a

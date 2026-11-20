@@ -56,7 +56,8 @@ pub struct LinkUp {
     pub again: bool,
 }
 
-/// 5s with nothing on the member's connection.
+/// The member's link lost its connection: 5s with nothing on it, or a close with any code but
+/// Leave's or the quit code.
 pub struct LinkLost {
     pub member: PilotId,
 }

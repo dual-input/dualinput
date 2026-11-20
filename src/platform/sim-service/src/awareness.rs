@@ -77,8 +77,10 @@ impl SimService {
         if first {
             // The masking group, which takes its priority as the sim starts, so a later
             // feature that masks sits ahead of an aircraft's own module, held open by
-            // K:SIM_RATE_INCR, which it listens to and doesn't mask
-            // (record/areas/architecture/01-spine.md, "The core").
+            // K:SIM_RATE_INCR, which it listens to and doesn't mask (measured on MSFS 2024,
+            // 2026-10-07, record/areas/flight-controls/log.md, "2026-10-07: A group that takes
+            // its priority as the sim starts, held open by an event it only listens to, masks
+            // ahead of Accu-Sim once it adds the axis").
             let (_, group) = client.group(
                 &me,
                 SIMCONNECT_GROUP_PRIORITY_HIGHEST_MASKABLE,

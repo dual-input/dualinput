@@ -114,7 +114,9 @@ pub struct Frame {
 /// The pilot's aircraft's pose, as the sim's variables give it: `A:PLANE LATITUDE` and
 /// `A:PLANE LONGITUDE` in radians, `A:PLANE ALTITUDE` in feet MSL, and `A:PLANE PITCH DEGREES`,
 /// `A:PLANE BANK DEGREES`, and `A:PLANE HEADING DEGREES TRUE` in radians, pitch and bank
-/// negative for nose up and right wing down.
+/// negative for nose up and right wing down (measured on MSFS 2024, 2026-10-03,
+/// record/areas/avatars/log.md, "2026-10-03: Nose up and right wing down are negative, and
+/// turned by full attitude a WASM-written figure holds its seat").
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Pose {
     pub latitude: f64,
@@ -183,9 +185,11 @@ impl Wants<'_> {
 
     /// The camera in `referential`, read now, as every read is, so before any routine's
     /// writes go out. On a following machine, one whose aircraft `Follow` moves along the
-    /// pilot flying's path, that's the only moment the camera and the aircraft agree: the sim places the camera from the pose before `Follow`'s write, so a
-    /// read after it lands one frame of the aircraft's travel behind the pilot's eye
-    /// (measured on MSFS 2024, 2026-11-17, record/areas/avatars/log.md).
+    /// pilot flying's path, that's the only moment the camera and the aircraft agree: the sim
+    /// places the camera from the pose before `Follow`'s write, so a read after it lands one
+    /// frame of the aircraft's travel behind the pilot's eye (measured on MSFS 2024,
+    /// 2026-11-17, record/areas/avatars/log.md, "2026-11-17: Inside our module, before the
+    /// routines write, a following machine's camera reads at the eye in every referential").
     pub fn camera(&mut self, referential: u32) -> Option<CameraRead> {
         self.sim.camera(referential)
     }

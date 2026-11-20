@@ -167,7 +167,7 @@ pub(crate) fn differences(me: &Session) -> Vec<Difference> {
         .collect()
 }
 
-/// Each member's name and its text for a value, as "James: 1.0.8, Adam: 1.0.9".
+/// Each member's name and its text for a value, as "James 1.0.8, Adam 1.0.9".
 fn listed<T>(values: &[(String, T)], text: impl Fn(&T) -> String) -> String {
     values
         .iter()
@@ -220,8 +220,9 @@ pub(crate) fn compare_package(values: &[(String, Installed)], _: Option<usize>) 
 
 /// The aircraft's version, where both copies have one, as an error. A streamed copy keeps no
 /// version on disk, so a streamed copy against an installed one is a warning that this core
-/// can't compare them, and two streamed copies show nothing (record/areas/aircraft/log.md,
-/// 2026-10-16).
+/// can't compare them, and two streamed copies show nothing (measured, 2026-10-16,
+/// record/areas/aircraft/log.md, "2026-10-16: A streamed package keeps no version on disk,
+/// while every installed one with a manifest has its `package_version`").
 pub(crate) fn compare_version(values: &[(String, Installed)], _: Option<usize>) -> Option<Found> {
     let streamed = values
         .iter()

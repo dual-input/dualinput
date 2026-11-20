@@ -76,8 +76,12 @@ impl SimService {
         let unit = holder.unit;
         if result != S_OK {
             // SimConnect_Open returned E_FAIL until the sim took connections, 109s into its
-            // boot (measured on MSFS 2024, 2026-10-09, record/areas/architecture/log.md), so
-            // the platform tries again at its next tick, and a feature at its next call.
+            // boot, so the platform tries again at its next tick, and a feature at its next
+            // call (measured on MSFS 2024, 2026-10-09, record/areas/architecture/log.md,
+            // "2026-10-09: In a flight, a Rust client on SimConnect.dll masks, creates AI
+            // objects with liveries, sets input events, reads the camera, and follows the load;
+            // the Rust module echoes; Raw Input gets a person's key and button; and the module's
+            // clock counts the counter's ticks from near the sim's start").
             tracing::debug!(?connection, result, "a connection didn't open");
             self.gone(unit, cx);
             return;

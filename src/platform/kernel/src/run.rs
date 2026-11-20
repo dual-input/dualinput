@@ -19,9 +19,9 @@ use crate::edge::{
 use crate::registry::{Handler, Registered, Registry, Request, UnitId, downcast_mut};
 use crate::{Moment, Started};
 
-/// More moments and calls than this for one input is a cycle, such as two units raising
-/// moments that each handle by raising the other's, and a cycle is a bug, so the kernel
-/// panics rather than run forever.
+/// More moments, calls, and requests than this for one input is a cycle, such as two units
+/// raising moments that each handle by raising the other's, and a cycle is a bug, so the
+/// kernel panics rather than run forever.
 const MOST_PENDING: u32 = 1_000;
 
 thread_local! {

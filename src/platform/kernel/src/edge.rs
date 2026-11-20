@@ -114,9 +114,8 @@ pub struct StartJob {
     pub job: Job,
 }
 
-/// Work the edge does for a unit, off the loop: reading, writing, listing, or deleting files,
-/// or fetching over HTTPS, then optionally an engine's work on what it got, as the profile loader parses and
-/// checks a bundle.
+/// Work the edge does for a unit off the loop, of the kinds `Work` lists, then optionally an
+/// engine's work on what it got, as the profile loader parses and checks a bundle.
 #[derive(Clone, Debug, Serialize)]
 pub struct Job {
     pub work: Work,

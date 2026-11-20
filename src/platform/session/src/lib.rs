@@ -717,7 +717,8 @@ impl Session {
         }
         members::write_status(self, cx);
         // A pass of control or a preflight write changes who is in the flight, and a change
-        // of who is in the flight can call for either, so this runs until nothing changes.
+        // of who is in the flight can call for either, so this runs until nothing changes, up
+        // to 8 times.
         for _ in 0..8 {
             let changed = members::flight_changes(self, cx) | preflight::run(self, cx);
             if !changed {

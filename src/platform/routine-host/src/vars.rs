@@ -2,7 +2,7 @@
 //! frame has run, on the pilot's aircraft or on an object by its ID
 //! (record/areas/architecture/02-code-map.md, "What a routine can ask for").
 //!
-//! `Figure` writes up to 34 variables on each figure every frame, so a lookup by name for
+//! `Figure` writes up to 35 variables on each figure every frame, so a lookup by name for
 //! each would cost a frame what it costs to compare every name. So a routine names a variable
 //! once, through `Wants::var`, and keeps the `VarRef` it gets, its place in the host's table.
 //! The sim's Vars API takes IDs, which the host looks up once for each place and keeps until

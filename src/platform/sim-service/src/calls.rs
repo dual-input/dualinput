@@ -233,7 +233,8 @@ impl Sim<'_, '_> {
     /// The platform reads the camera in our WASM module, through its routine `Camera`, rather
     /// than through `SimConnect_CameraGet`, which on a following machine read it one frame of
     /// the aircraft's travel behind the pilot's eye (measured on MSFS 2024, 2026-11-17,
-    /// record/areas/avatars/log.md).
+    /// record/areas/avatars/log.md, "2026-11-17: Inside our module, before the routines write, a
+    /// following machine's camera reads at the eye in every referential").
     pub fn cameras(&self) -> Handle {
         let (handle, origin) = self.origin();
         self.cx.call(SimService::cameras_for, origin);
@@ -671,7 +672,7 @@ impl SimService {
     fn remove_for(me: &mut SimService, (origin, object): (Origin, u32), cx: &mut Cx) {
         // A remove made as the unit leaves the flight runs after a profile's unload has closed
         // the unit's connection, which took the object with it, so a remove of an object the
-        // connection no longer holds makes no call, rather than opening a new connection to
+        // connection doesn't hold makes no call, rather than opening a new connection to
         // remove what isn't there.
         let held = me
             .holders

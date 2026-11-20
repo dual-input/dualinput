@@ -293,7 +293,9 @@ fn usage(process: &str, ms: &str) -> Result<(), String> {
     // 15.6ms clock tick at a time, charged to whichever thread runs at the tick, so a helper
     // that wakes 100 times a second for a few µs read anywhere from 0.31% to 1.25% of a core
     // in three runs of the same 10s (measured on our development machine, 2026-10-22,
-    // record/areas/core/log.md).
+    // record/areas/core/log.md, "Stage 6's helper passes on nothing it wasn't asked for and
+    // comes back 2s after a kill, but capturing a continuous tone takes 1.4% of a core against
+    // 1%").
     let cycles = || {
         let mut cycles = 0;
         // SAFETY: QueryProcessCycleTime writes one u64.

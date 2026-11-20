@@ -15,7 +15,8 @@ rustflags = ["-C", "target-feature=+crt-static"]
 # on a message's shape, ts-rs generates the TypeScript types from the message crate when
 # its tests run, into the folder named here. `relative` resolves the folder from the
 # repository's root, so the types land in the same place whichever folder `cargo test`
-# runs from.
+# runs from. `TYPES` in tools/lib/messages.ts names the same folder, so change both
+# together.
 #
 # Messages reach TypeScript as JSON, which `JSON.parse` reads as plain numbers, so 64-bit
 # integers are typed as `number` rather than ts-rs's default, `bigint`. A number holds an

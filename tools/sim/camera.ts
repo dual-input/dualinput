@@ -1,8 +1,8 @@
-// Stage 16b's cases in the sim, for one session with someone at the sim, in the Black Square
-// Baron 58P (record/areas/build/plan.md, "16b A following pilot's camera"): with the camera read
-// by the platform's `Camera` in our module, a pilot whose 58P follows a bench core's stand-in in
-// flight keeps their seat, and a click lands where it did at the stand, while following, in
-// active pause, with ChasePlane off, on foot, and after taking control in flight.
+// A following pilot's camera's cases in the sim, for one session with someone at the sim, in the
+// Black Square Baron 58P (record/areas/build/plan.md, "16b A following pilot's camera"): with the
+// camera read by the platform's `Camera` in our module, a pilot whose 58P follows a bench core's
+// stand-in in flight keeps their seat, and a click lands where it did at the stand, while
+// following, in active pause, with ChasePlane off, on foot, and after taking control in flight.
 //
 // The 58P's profile locates no switch, so a click is judged against the pilot's own click on the
 // same target at the stand, where the camera reads true: the bench core is fed the pilot's figure,
@@ -43,7 +43,7 @@ import { evaluate, listPages } from "./inspector.ts"
 const OUT = path.join(ROOT, "target", "bench", "release-with-checks")
 const BARON = /baronpro/i
 
-/** The copilot's eye in the 58P's profile, where the second pilot's camera sits, as tools/sim/flight-model.ts has it. */
+/** The copilot's eye in the 58P's profile, where the second pilot's camera sits, as tools/sim/flight-model.ts has it, so change both together. */
 const COPILOT_EYE: [number, number, number] = [-0.282, 0.855, -0.144]
 /** How far a click's hand may land from the stand's, and the eye from the stand's, in meters. */
 const CLICK_WITHIN = 0.05

@@ -1,6 +1,7 @@
-// Builds our code in the sim: each esbuild bundle at es2017, the EFB app's stylesheet, fonts, and icon, and our VCockpit.js, made from
-// the sim's stock file with our two blocks put in at named anchors; then checks each file
-// against what Coherent GT runs (record/areas/build/01-the-build.md, "The Coherent GT check";
+// Builds our code in the sim: each esbuild bundle at es2017; the EFB app's and the banner's
+// stylesheets, fonts, and icons; our BlurPage copy; and our VCockpit.js, made from the sim's
+// stock file with our two blocks put in at named anchors. Then it checks each file against
+// what Coherent GT runs (record/areas/build/01-the-build.md, "The Coherent GT check";
 // record/areas/core/02-clients-and-panel-bridge.md, "Our VCockpit.js").
 
 import { spawnSync } from "node:child_process"
@@ -19,7 +20,7 @@ import { STOCK } from "./stock.ts"
 /** Where the build writes our code in the sim, with each bundle's map beside it. */
 export const PAGES = path.join(ROOT, "target", "sim-pages")
 
-/** Our EFB app's folder, by whose name the EFB finds it, and the name its script and stylesheet take. `INTERNAL_NAME` in src/sim-package/pages/efb.tsx names it too. */
+/** Our EFB app's folder, by whose name the EFB finds it, and the name its script and stylesheet take. `INTERNAL_NAME` in src/sim-package/pages/efb.tsx names it too, so change both together. */
 const EFB_APP = "html_ui/efb_ui/efb_apps/DualInput"
 
 /** The banner's folder, which its panel definition names, src/sim-package/panel/InGamePanels/dualinput-banner.xml. */
@@ -62,14 +63,16 @@ function panelModules(root = ROOT): { entry: string; to: string }[] {
 /** Our VCockpit.js, where our package puts it, so it takes the stock file's place in every cockpit panel. */
 const VCOCKPIT = "html_ui/Pages/VCockpit/Core/VCockpit.js"
 
-/** BlurPage, the smallest of the components MasterPage places in the menu, which no other package we've seen copies (record/areas/interface/log.md, 2026-10-06). */
+/** BlurPage, the smallest of the components MasterPage places in the menu, which no other package we've seen copies (record/areas/interface/log.md, "Our copy of BlurPage brings our script into the menu from the first screen, and from there it runs the whole join to Ready to fly"). */
 const BLURPAGE = "{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}"
 
 /**
  * What our BlurPage copy adds before the stock component's last closing tag, so it sits inside
  * its root element: a hidden image with no source, whose error handler loads menu.js once in
  * each document, as Flow Pro's copy of the start page loads its script (read in
- * p42-util-flow-pro 26.33.5; record/areas/interface/log.md, 2026-10-06).
+ * p42-util-flow-pro 26.33.5; record/areas/interface/log.md, "Our copy of BlurPage brings our
+ * script into the menu from the first screen, and from there it runs the whole join to Ready
+ * to fly").
  */
 const MENU_LOADER = `<svg style="display:none"><foreignObject><img src onerror="(function () { if (!window.DUALINPUT_MENU_LOADED) { window.DUALINPUT_MENU_LOADED = true; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = 'coui://html_ui/DualInput/menu.js'; document.head.appendChild(script); } })()"></img></foreignObject></svg>`
 
@@ -136,7 +139,7 @@ async function buildEfbAssets(out: string): Promise<Built[]> {
   ]
 }
 
-/** What the banner takes beside its script: its page, its stylesheet, whose fonts sit beside it, and the toolbar's icon, which 2024 looks for under html_ui/icons/toolbar/ (measured on MSFS 2024, 2026-10-04, record/areas/interface/log.md). */
+/** What the banner takes beside its script: its page, its stylesheet, whose fonts sit beside it, and the toolbar's icon, which 2024 looks for under html_ui/icons/toolbar/ (measured on MSFS 2024, 2026-10-04, record/areas/interface/log.md, "Our toolbar icon loads a script of ours into the toolbar's document, and it opens our panel with no click"). */
 async function buildBannerAssets(out: string): Promise<Built[]> {
   const dir = path.join(out, BANNER.replace(/^html_ui\//, ""))
   fs.mkdirSync(dir, { recursive: true })

@@ -8,7 +8,7 @@
 //   node tools/bench.ts state-sync                    once, so target/bench holds this tree
 //   node tools/sim/state-sync.ts --core <program>     the release core, built from this tree
 //
-// Stage 4's case of a group on one connection runs two of p08's clients, which
+// The case of a group on one connection runs two of p08's clients, which
 // `cargo build --release -p p08-client`, in experiments/areas/architecture/flight, writes. The
 // loop under load beside the A350 needs no one, so it runs on its own after the session, with
 // `node tools/bench.ts load 1` while the A350 stays loaded and in focus.
@@ -159,7 +159,9 @@ async function fly(plane: Plane, c: { real: Desktop; second: Core; say: Flight["
   if (!flying()) say(`Load a flight in the ${plane.name}, ${plane.at ? `${plane.at} ` : ""}on the ground at a stand, ${power}, and press Ready to fly.`, true)
   await until(() => (flying() ? true : undefined), 60 * 60_000)
   // The A220 went back to Loading 7s after it first flew, a second load of its own, so the
-  // flight counts as loaded once it has flown for 15s straight.
+  // flight counts as loaded once it has flown for 15s straight (measured on MSFS 2024,
+  // 2026-11-09, record/areas/sync/log.md, "Stage 14's session in the sim passed in four
+  // aircraft, and no aircraft took an H: event our module fired").
   for (let since = Date.now(); Date.now() - since < 15_000; await sleep(250)) {
     if (!flying()) {
       await until(() => (flying() ? true : undefined), 10 * 60_000)
@@ -251,7 +253,9 @@ async function setSim(name: string, value: number, unit = "number"): Promise<voi
  * The whole key of the sim's display whose identifier is `identifier`, as its panel's bridge
  * reports it. Pointer sync plays a gesture only on a display of the same whole key, and the
  * A220's carries its livery, as `DisplayUnits|config=C-GUAC`, so the second pilot's display
- * takes the sim's (record/areas/pointer-sync/log.md, the known limit of 2026-10-25).
+ * takes the sim's (measured on MSFS 2024, 2026-11-09, record/areas/pointer-sync/log.md,
+ * "Pointer sync's cases in the sim pass on the A220's ND and the Baron's tablet, once the second
+ * pilot's display carries the A220's livery").
  */
 async function displayKey(identifier: string): Promise<string> {
   for (const page of await cockpits()) {

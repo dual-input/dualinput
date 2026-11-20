@@ -1,7 +1,7 @@
-// Drives the development host's window from outside it: a picture of what the GPU drew, and a click
-// or a wheel posted to the window, which take neither the real cursor nor the focus. The picture
-// comes back all white about half the time just after posted input, for any page, so a white one is
-// taken again (experiments/areas/interface/p24-efb-scale).
+// Drives the debugger's window that tools/dev.ts runs a page in, from outside it: a picture of what
+// the GPU drew, and a click or a wheel posted to the window, which take neither the real cursor nor
+// the focus. The picture comes back all white about half the time just after posted input, for any
+// page, so a white one is taken again (experiments/areas/interface/p24-efb-scale).
 
 import { execFileSync } from "node:child_process"
 

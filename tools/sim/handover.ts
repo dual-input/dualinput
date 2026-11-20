@@ -1,10 +1,11 @@
-// Stage 14b's cases in the sim, for one session with someone at the sim, in the Black Square
-// Baron 58P (record/areas/build/plan.md, "14b State sync's writes that read another value"): the
-// real core flies, and a bench core on a stand-in plays the second pilot. The second pilot sets
-// the heading bug, an altimeter, and a cabin handle, which the 58P takes through `_Set` presets,
-// then takes control and flies at 3,000 ft on the autopilot in heading mode; the 58P follows,
-// takes control back, and should fly straight on with its trim at the second pilot's. The script
-// reads the 58P through the sim's inspector and writes report.txt in the run's folder.
+// The cases in the sim of state sync's writes that read another value, for one session with
+// someone at the sim, in the Black Square Baron 58P (record/areas/build/plan.md, "14b State
+// sync's writes that read another value"): the real core flies, and a bench core on a stand-in
+// plays the second pilot. The second pilot sets the heading bug, an altimeter, and a cabin
+// handle, which the 58P takes through `_Set` presets, then takes control and flies at 3,000 ft on
+// the autopilot in heading mode; the 58P follows and takes control back, and the script checks
+// that it flies straight on with its trim at the second pilot's. The script reads the 58P
+// through the sim's inspector and writes report.txt in the run's folder.
 //
 //   node tools/build.ts install                         with the sim closed
 //   node tools/bench.ts state-sync                      once, so target/bench holds this tree
@@ -229,7 +230,10 @@ async function inTheAir(c: Session): Promise<void> {
   // The second pilot engages the autopilot once the 58P has come up to its altitude, as a crew
   // engages altitude hold at the altitude both aircraft fly. Engaged in the same change as the
   // jump to 3,000 ft, the 58P's autopilot held 300 ft, likely the altitude it had reached on the
-  // way up as the mode engaged (unverified), and the 58P dived for it after taking control.
+  // way up as the mode engaged (unverified), and the 58P dived for it after taking control
+  // (measured on MSFS 2024, 2026-11-18, record/areas/sync/log.md, "In stage 14b's session the
+  // 58P took every preset value and its heading bug followed, and as it took control its own trim
+  // fell and it banked, after our trim write went out").
   for (const started = Date.now(); Math.abs((await readSim("A:PLANE ALTITUDE", "feet")) - target) > 50; ) {
     if (Date.now() - started > 15_000) throw new Failed("the 58P didn't come up to the second pilot's altitude within 15s")
     await sleep(250)

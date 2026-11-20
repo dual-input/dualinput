@@ -1,7 +1,9 @@
 // The development loop for our pages: builds a page with esbuild and Tailwind, runs it in Coherent GT
 // with no sim, in a copy of the SDK's CoherentGT Debugger whose start page is replaced with a frame of
 // the page, and reloads it after each edit. It matches the sim's EFB on 1,159 of 1,170 CSS items
-// (record/areas/interface/log.md, 2026-11-01). Leave it running in a terminal.
+// (measured on MSFS 2024, 2026-11-01, record/areas/interface/log.md, "The SDK's CoherentGT Debugger
+// runs our pages in Coherent GT with no sim, and matches the sim's EFB on 1,159 of p14's 1,170 CSS
+// items and on repeated work in a loaded page"). Leave it running in a terminal.
 //
 //   node tools/dev.ts [page]       the kit's page by default, or a page's own file
 //

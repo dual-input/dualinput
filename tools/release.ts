@@ -1,7 +1,7 @@
 // A release's steps after the build: packing the folder `node tools/build.ts release` laid out
-// into Velopack's Setup.exe, full package, and delta (record/areas/build/01-the-build.md, "A
-// release"). The release workflow, which also fetches the release before for the delta,
-// uploads, and publishes, comes with GitHub.
+// into Velopack's Setup.exe, full package, and delta. Fetching the release before for the
+// delta, uploading, and publishing are the release workflow's
+// (record/areas/build/01-the-build.md, "A release").
 //
 //   node tools/release.ts pack
 //

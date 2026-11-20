@@ -1,8 +1,7 @@
-// CI will run a set of checks on every pull request. This runs the same checks on the code
-// that exists so far, so a problem shows up before a push rather than after. Run it before
-// every push; it stops at the first check that fails. When you add the first code that
-// another of CI's checks covers, add that check here
-// (record/areas/architecture/02-code-map.md, "CI", lists them).
+// This runs the checks the code map gives CI for every pull request that changes code
+// (record/areas/architecture/02-code-map.md, "CI"), so a problem shows up before a push
+// rather than after. Run it before every push; it stops at the first check that fails.
+// When you add a check to that list, add it here too.
 //
 //   node tools/check.ts
 
@@ -101,7 +100,9 @@ function checkLevels(): void {
 /**
  * A module that lacks a function the sim calls in a standalone module builds, packages, and
  * loads without a word, and fails only in the sim. So this builds the module with cargo-msfs,
- * which the default members' build and tests leave out, and fails unless it exports each.
+ * which the default members' build and tests leave out, and fails unless it exports each
+ * (record/learn/foundations/05-03-toolchain-versioning-and-debugging.md, "Debugging, crashes,
+ * required exports").
  */
 function checkModule(): void {
   requireSdk()

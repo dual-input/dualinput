@@ -69,10 +69,10 @@ main(async () => {
 })
 
 /**
- * Builds the core with its `stand-in` feature, the stand-in core helper, and the bench relay,
- * into target/bench, and returns the paths Cargo wrote them to. A build with the feature in
- * target/ would replace the dualinput-core.exe a plain `cargo build` writes there, and a
- * developer's next build would replace the bench's.
+ * Builds the core with its `stand-in` feature, the stand-in core helper, the bench relay, and
+ * the profile builder, into target/bench, and returns the paths Cargo wrote them to. A build
+ * with the feature in target/ would replace the dualinput-core.exe a plain `cargo build` writes
+ * there, and a developer's next build would replace the bench's.
  */
 function buildBench(release: boolean): { core: string; helper: string; relay: string; builder: string } {
   const programs = ["dualinput-core", "stand-in-core-helper", "bench-relay", "dualinput-profile-builder"] as const

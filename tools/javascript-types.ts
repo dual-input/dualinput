@@ -1,11 +1,12 @@
 // Writes the JavaScript a profile's write functions are type-checked against: TypeScript
 // 6.0.3's own library declarations, kept to the globals the sandbox's QuickJS-ng context
 // defines, and each to the members it defines, which src/engines/profile-engine/javascript/
-// sandbox.json lists, as the sandbox's probe found them (record/areas/profiles/log.md,
-// 2026-10-24). A global the context lacks, such as Date, JSON, or Promise, goes, and so does
-// every member or type that names one, so a write function that would fail in the sandbox
-// fails its type check instead. The profile engine puts the result in level 1's
-// declarations.
+// sandbox.json lists, as the sandbox's probe found them (record/areas/profiles/log.md, "The
+// sandbox's context runs QuickJS-ng's base objects, past ES2020, without JSON, Map, Set, Date,
+// or Promise, and level 1 types write functions by exactly what it runs"). A global the
+// context lacks, such as Date, JSON, or Promise, goes, and so does every member or type that
+// names one, so a write function that would fail in the sandbox fails its type check
+// instead. The profile engine puts the result in level 1's declarations.
 //
 //   node tools/javascript-types.ts
 

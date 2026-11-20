@@ -1,7 +1,8 @@
 // What the sim's own stylesheets set on bare elements, which reach our pages in the sim and which the dev loop's copy of
 // the engine doesn't load. Without them a page can look right in the debugger and wrong in the sim, as the banner's lines
-// at twice their size did (measured on MSFS 2024, 2026-11-02, record/areas/interface/log.md). The kit's reset answers
-// them in src/packages/ui/src/kit.css, so when you find another such rule, restate it here and answer it there.
+// at twice their size did (measured on MSFS 2024, 2026-11-02, record/areas/interface/log.md, "The sim's stylesheets set
+// text-align, size, and font on bare elements around our pages, and Coherent GT draws no `title`"). The kit's reset
+// answers them in src/packages/ui/src/kit.css, so when you find another such rule, restate it here and answer it there.
 
 /** Every element the EFB's efb_os/Assets/reset.css lists that our pages can draw, whose rule sets text-align: left. */
 const RESET_LISTS = "a, b, button, div, em, h1, h2, h3, h4, h5, h6, i, img, input, label, li, ol, p, select, small, span, strong, textarea, ul"

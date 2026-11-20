@@ -19,8 +19,9 @@ use crate::sim::{Events, Received, Sim};
 const MOST: f32 = 20.0;
 
 /// Steam's `UserCfg.opt`, then the Microsoft Store's, each naming the packages folder, as the
-/// sim service reads them in src/platform/sim-service/src/aircraft.rs, so change both
-/// together.
+/// sim service reads them. `USER_CFGS` in src/platform/sim-service/src/aircraft.rs and in
+/// src/apps/desktop/src/places.rs, and `userCfgs` in tools/lib/install.ts, name the same files,
+/// so change all four together.
 const USER_CFGS: [(&str, &str); 2] = [
     ("APPDATA", r"Microsoft Flight Simulator 2024\UserCfg.opt"),
     (
@@ -31,7 +32,7 @@ const USER_CFGS: [(&str, &str); 2] = [
 
 /// The packages folders' children that hold packages, and how deep a package sits under
 /// each, in the order the sim prefers a package found in two, as the sim service's `ROOTS`
-/// in the same file.
+/// in src/platform/sim-service/src/aircraft.rs holds them, so change both together.
 const ROOTS: [(&str, u8); 4] = [
     ("Community2024", 1),
     ("Community", 1),
@@ -208,7 +209,11 @@ pub fn cast(model: &mut Model, camera: &Camera, cursor: &Cursor) -> Option<(Hit,
     model.cast(scene, &ray, MOST).map(|hit| (hit, scene))
 }
 
-/// The packages folders each `UserCfg.opt` names on its `InstalledPackagesPath` line.
+/// The packages folders each `UserCfg.opt` names on its `InstalledPackagesPath` line, matched
+/// by its name and a space, so a longer name such as `InstalledPackagesPathNextBoot` doesn't
+/// match. `packages_folder` in src/platform/sim-service/src/aircraft.rs and in
+/// src/apps/desktop/src/places.rs, and `packagesFolders` in tools/lib/install.ts, read the
+/// line the same way, so change all four together.
 fn packages_folders() -> Vec<String> {
     USER_CFGS
         .iter()

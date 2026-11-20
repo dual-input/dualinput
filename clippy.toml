@@ -6,9 +6,10 @@
 # Cargo.toml and EDGE_ENGINES in tools/map-check.ts list the same crates, so change all
 # three together.
 #
-# Clippy reads the clippy.toml nearest a crate's folder, so src/apps/ and tools/ each have one of
-# their own, which lists nothing. When you add the first crate under src/sim-package/, or an
-# edge engine, the transport, the sim edge, or the stand-in sim, give its folder one too.
+# Clippy reads the clippy.toml nearest a crate's folder, so src/apps/, src/sim-package/, tools/,
+# and the folders of the transport, the sim edge, and the stand-in sim each have one of their
+# own, which lists nothing. When you add another engine that runs at the core's edge, give its
+# folder one too.
 #
 # Clippy prints each reason as a note under the error, so each says what to do instead.
 disallowed-methods = [

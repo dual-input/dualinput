@@ -21,7 +21,7 @@ export function writeMessageTypes(): void {
   run("cargo", ["test", "-p", "messages", "--lib"])
 }
 
-/** Each file under `TYPES` and its text, keyed by its path from `TYPES`, such as `pointer-sync/press.ts`. */
+/** Each file under `TYPES` and its text, keyed by its path from `TYPES`, such as `pointer-sync/Gesture.ts`. */
 export function readMessageTypes(): Map<string, string> {
   const files = new Map<string, string>()
   if (!fs.existsSync(TYPES)) return files

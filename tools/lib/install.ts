@@ -32,8 +32,9 @@ export function userCfgs(env: NodeJS.ProcessEnv = process.env): string[] {
  * `InstalledPackagesPath "D:\MSFS 2024\Packages"`. The line's name must be followed by a
  * space, since a longer name, `InstalledPackagesPathNextBoot`, starts with the same letters
  * (read in flybywiresim/installer v3.7.2, `src/renderer/actions/install-path.utils.tsx`).
- * `packages_folder` in src/platform/sim-service/src/aircraft.rs and in src/apps/desktop/src/places.rs
- * read the line the same way, so change all three together.
+ * `packages_folder` in src/platform/sim-service/src/aircraft.rs and in src/apps/desktop/src/places.rs,
+ * and `packages_folders` in tools/profile-author's cockpit.rs, read the line the same way, so change
+ * all four together.
  */
 export function packagesFolders(cfgs: string[]): string[] {
   const folders = new Map<string, string>()

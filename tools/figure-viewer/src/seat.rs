@@ -1,7 +1,7 @@
 //! The seat the scripts sit the figure in, laid out as a profile's `seats` gives one
-//! (record/areas/profiles/01-format-and-delivery.md, "Seats"). The Baron 58P's profile has no
-//! seats until tools/profile-author writes them, so the page starts the seat at the cockpit's
-//! `PILOT_0` node and tunes it, and serve.ts hands it over in seat.json.
+//! (record/areas/profiles/01-format-and-delivery.md, "Seats"). The program reads no profile,
+//! so it starts the seat at the mirror of the cockpit's `PILOT_1` node, the copilot's, the page
+//! tunes it, and serve.ts hands it over in seat.json.
 
 use serde::{Deserialize, Serialize};
 

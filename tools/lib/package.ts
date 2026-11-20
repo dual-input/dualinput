@@ -44,7 +44,11 @@ export function layOutPackage(wasm: string, pages: Built[], dir = PACKAGE, versi
   // layout.json lists every file with its size and last write as a Windows FILETIME, 100ns
   // ticks since 1601, written as a bare number though it's past what a JavaScript number
   // holds exactly, which JSON.stringify can't write. p08's package was laid out this way,
-  // and the sim mounted it and ran its module in a flight (record/areas/architecture/log.md).
+  // and the sim mounted it and ran its module in a flight (measured on MSFS 2024, 2026-10-09,
+  // record/areas/architecture/log.md, "In a flight, a Rust client on SimConnect.dll masks,
+  // creates AI objects with liveries, sets input events, reads the camera, and follows the
+  // load; the Rust module echoes; Raw Input gets a person's key and button; and the module's
+  // clock counts the counter's ticks from near the sim's start").
   const files = filesIn(dir)
   const entries = files.map(
     (f) => `    {\n      "path": "${f.path}",\n      "size": ${f.size},\n      "date": ${filetime(f.written)}\n    }`,

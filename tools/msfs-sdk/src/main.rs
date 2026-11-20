@@ -53,7 +53,9 @@ use zip::ZipArchive;
 /// This program needs an exact version's installer, and Microsoft's SDK listing links
 /// only the newest two. Older installers are still served under this URL, such as
 /// `1.7.3/MSFS2024_SDK_Core_Installer_1.7.3.zip` for 1.7.3. On 2026-10-18 all 10 versions
-/// we tried, 0.9.3 to 1.8.1, were there. Nothing promises they stay.
+/// we tried, 0.9.3 to 1.8.1, were there. Nothing promises they stay (record/areas/build/log.md,
+/// "The SDK's listing links only its newest two versions, and every older installer we tried
+/// is still served").
 const INSTALLERS: &str = "https://sdk.flightsimulator.com/msfs2024/files/installers";
 
 /// The installer holds more than the SDK, and this program unpacks only this folder of

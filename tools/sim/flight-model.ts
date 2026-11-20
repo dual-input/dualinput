@@ -44,9 +44,10 @@ const BARON = /baronpro/i
 const DELAY = 0.4
 
 /**
- * The copilot's eye in the 58P's profile, in meters right, up, and forward of the aircraft's
+ * The copilot's eye in the 58P's profile, in meters left, up, and forward of the aircraft's
  * datum: its hip, `[-0.282, 0.212, -0.09]`, and its eye 0.643m above and 0.054m behind it. The
- * second pilot's camera sits there, so its figure takes that seat in the sim.
+ * second pilot's camera sits there, so its figure takes that seat in the sim. `COPILOT_EYE` in
+ * tools/sim/camera.ts is the same eye, so change both together.
  */
 const COPILOT_EYE: [number, number, number] = [-0.282, 0.855, -0.144]
 
@@ -227,7 +228,7 @@ async function onTheGround(c: Session): Promise<void> {
   const went = meters(moved[0]!, moved.at(-1)!)
   result(went > 15 && percentile(off, 0.99) < 1.5, `fsVarsAVarSet holds the pilot's own aircraft's pose: the 58P moved ${went.toFixed(1)}m and rose ${(moved.at(-1)!.alt - moved[0]!.alt).toFixed(1)}ft with the stand-in, ${percentile(off, 0.5).toFixed(2)}m from its path 400ms before at the median, ${percentile(off, 0.99).toFixed(2)}m at p99, ${Math.max(...off).toFixed(2)}m at most, over ${off.length} frames`)
 
-  // The five axis events, from the PF's surfaces and brakes.
+  // The five axis events, from the pilot flying's surfaces and brakes.
   const before = await controls()
   second.act({ act: "set", numbers: [["A:AILERON POSITION", -8_000], ["A:ELEVATOR POSITION", 6_000], ["A:RUDDER POSITION", -5_000], ["A:BRAKE LEFT POSITION", 24_000], ["A:BRAKE RIGHT POSITION", 8_000]], texts: [] })
   await sleep(2_000)

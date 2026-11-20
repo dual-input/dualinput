@@ -81,7 +81,7 @@ test("install writes the package into each packages folder's Community", (t) => 
 test("install deletes nothing beside the folder a Community junction leads to", (t) => {
   const { temp, cfgs, folders, pkg } = layout(t)
   // A Community that's a junction to a folder whose parent holds a folder of the same name
-  // as ours, as %APPDATA%\\Community would beside our data folder, %APPDATA%\\DualInput.
+  // as ours, as %APPDATA%\Community would beside our data folder, %APPDATA%\DualInput.
   const parent = path.join(temp, "appdata")
   fs.mkdirSync(path.join(parent, "DualInput"), { recursive: true })
   fs.writeFileSync(path.join(parent, "DualInput", "settings.json"), "a pilot's settings")

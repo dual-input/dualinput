@@ -28,11 +28,13 @@ use crate::screen::{self, Cursor, Key};
 use crate::sim::{Event, Received, SLOT_WRITE};
 use crate::yaml;
 
-/// Our figure's SimObject (record/areas/avatars/01-avatars.md, "Names").
+/// Our figure's SimObject (record/areas/avatars/01-avatars.md, "Names"). `TITLE` in
+/// src/features/avatars/core/src/crew.rs names the same object, so change both together.
 const TITLE: &str = "DUALINPUT_FIGURE_PILOT";
 
 /// The sim's freeze events, which hold each figure where `Figure` writes it, as avatars
-/// freezes the figures it creates (src/features/avatars/core/src/crew.rs, `FREEZES`).
+/// freezes the figures it creates with `FREEZES` in src/features/avatars/core/src/crew.rs, so
+/// change both together.
 const FREEZES: [&str; 3] = [
     "K:FREEZE_LATITUDE_LONGITUDE_SET",
     "K:FREEZE_ALTITUDE_SET",
@@ -40,7 +42,8 @@ const FREEZES: [&str; 3] = [
 ];
 
 /// How often the tool writes `Figure`'s slot again, as the core does: the routine host drops a
-/// routine 1s after its last write (src/platform/sim-service/src/module.rs, `REWRITE`).
+/// routine 1s after its last write. `REWRITE` in src/platform/sim-service/src/module.rs is the
+/// core's, so change both together.
 const REWRITE: Duration = Duration::from_millis(200);
 
 /// How long the tool waits for our WASM module's status before saying it has none.

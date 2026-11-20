@@ -1,7 +1,7 @@
 // The figure viewer: a page that draws avatars' figure from its source in the Baron 58P's
 // cockpit, posed by `Figure`'s own code over scripted looks, reaches, grips, walks, runs,
 // crouches, and a slump, so the figure's look and its levels of detail are tuned by eye before
-// it's compiled (record/areas/build/plan.md, "17 Avatars").
+// it's compiled (record/areas/architecture/02-code-map.md, "Apps, the sim package, and tools").
 //
 //   node tools/figure-viewer/serve.ts
 //

@@ -1,12 +1,12 @@
-// Stage 21's cases in the sim, in one session with someone at the sim (record/areas/build/plan.md,
-// "21 Rate and pause, and Go to"): the menu script seeing Free flight's world map; which entry of the
-// world map's aircraft list and liveries is the pilot flying's; Join's Set up only at a stand; Join
-// now on a runway through Ready to fly, with the Baron 58P's engines running after it and Go to's
-// budget; active pause from our EFB app's code with the EFB closed, both ways; and a gate whose
-// list name has a letter against its flight file. A bench core plays the pilot flying, James, in a
-// Baron 58P on a stand-in sim at KSEA's PARKING 140, through a relay and backend on this PC, and
-// the real core, built from this tree, joins James's session as Adam. It writes the report to
-// report.txt in the run's folder.
+// Rate and pause's and Go to's cases in the sim, in one session with someone at the sim
+// (record/areas/build/plan.md, "21 Rate and pause, and Go to"): the menu script seeing Free
+// flight's world map; which entry of the world map's aircraft list and liveries is the pilot
+// flying's; Join's Set up only at a stand; Join now on a runway through Ready to fly, with the
+// Baron 58P's engines running after it and Go to's budget; active pause from our EFB app's code
+// with the EFB closed, both ways; and a gate whose list name has a letter against its flight
+// file. A bench core plays the pilot flying, James, in a Baron 58P on a stand-in sim at KSEA's
+// PARKING 140, through a relay and backend on this PC, and the real core, built from this tree,
+// joins James's session as Adam. It writes the report to report.txt in the run's folder.
 //
 //   node tools/build.ts install                   with the sim closed, so our package holds this
 //                                                  tree's menu script and EFB app
@@ -40,10 +40,10 @@ process.env.DUALINPUT_BENCH_RELAY = path.join(BENCH, "bench-relay.exe")
 process.env.DUALINPUT_BENCH_BUILDER = path.join(BENCH, "dualinput-profile-builder.exe")
 process.env.DUALINPUT_BENCH_PROFILES = path.join(ROOT, "target", "bench", "profiles")
 
-/** James's flight file, at a stand KSEA lists as "PARKING 140 -- RAMP CARGO" (record/areas/interface/log.md, 2026-10-05). */
+/** James's flight file, at a stand KSEA lists as "PARKING 140 -- RAMP CARGO" (record/areas/interface/log.md, "Code in the menu's document sets the world map's departure, stand, aircraft, and livery, and starts the flight"). */
 const DEPARTURE = "[Departure]\r\nICAO=KSEA\r\nGateName=PARKING\r\nGateNumber=140\r\nGateSuffix=NONE\r\n"
 
-/** The Baron 58P's `A:TITLE`, as p10 read it (record/areas/interface/log.md, 2026-10-06), and the livery that title names. */
+/** The Baron 58P's `A:TITLE`, as p10 read it (record/areas/interface/log.md, "Our copy of BlurPage brings our script into the menu from the first screen, and from there it runs the whole join to Ready to fly"), and the livery that title names. */
 const BARON_TITLE = "Black Square Baron 58P Professional N515MR"
 const BARON_LIVERY = "N515MR"
 

@@ -51,7 +51,8 @@ export function scopeDefaults(rootClass: string): Plugin {
 /**
  * With `important` set to a selector, Tailwind wraps a selector of several parts in `:is()`, as in
  * `.root :is(.space-x-1 > :not([hidden]) ~ :not([hidden]))`, and Coherent GT drops `:is`, which takes
- * the whole rule with it. Under one root the plain form means the same.
+ * the whole rule with it (record/areas/architecture/coherent-gt.md, "CSS"). Under one root the plain
+ * form means the same.
  */
 export function unwrapIs(): Plugin {
   return {

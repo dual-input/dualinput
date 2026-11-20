@@ -635,7 +635,8 @@ async function sim(s: Session): Promise<void> {
     await ask(say, `Listening to ATC with ${loss}% of frames lost, ${path.relative(ROOT, wav)}, which opens now. Press Enter when you've heard enough.`)
   }
   // A fault a pilot would hear passes, as long as they can understand every call (user, 2026-11-16,
-  // record/areas/core/log.md).
+  // record/areas/core/log.md, "Capturing BeyondATC with a binding and the mouse on, the helper took
+  // 1.44% of a core, and opus-rs at 5% loss stayed understandable").
   const lost = await ask(say, "Is any of the 5% one impossible to understand, as a pilot listening for their call? Type y or n, then Enter.")
   check(lost === "n", "ATC speech through opus-rs with 5% of frames lost stays understandable", lost === "y" ? "it doesn't, so libopus goes in its place" : "")
 }

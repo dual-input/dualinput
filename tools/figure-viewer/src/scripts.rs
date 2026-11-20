@@ -54,7 +54,7 @@ pub const AIMS: [(&str, f32, f32); 4] = [
 /// The figure's color in every script but the slump, a palette index: blue.
 const COLOR: u32 = 1;
 
-/// A walk's and a run's speeds, in m/s.
+/// A walk's, a run's, and a crouched creep's speeds, in m/s.
 const WALK: f32 = 1.4;
 const RUN: f32 = 4.0;
 const CREEP: f32 = 0.7;
@@ -216,9 +216,9 @@ fn look(stage: Stage) -> Script {
     }
 }
 
-/// Seated as the PF: the left hand on the yoke while the right taps the center panel, the
-/// throttles, and the right panel, then the left taps the left panel while the right holds the
-/// yoke, the head turning to each.
+/// Seated as the pilot flying: the left hand on the yoke while the right taps the center panel,
+/// the throttles, and the right panel, then the left taps the left panel while the right holds
+/// the yoke, the head turning to each.
 fn reach(stage: Stage) -> Script {
     let spot = move |name: &str, stage: &Stage| {
         stage

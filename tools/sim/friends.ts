@@ -1,8 +1,8 @@
-// The servers for a flight with friends while Dual Input's own aren't deployed
-// (record/areas/build/plan.md, "22 GitHub"): the bench's backend, one relay, and profiles' site
-// on this PC, each behind a Cloudflare quick tunnel, so a friend's installed Dual Input on
-// another home network reaches them. It prints the settings both pilots put into
-// %APPDATA%\DualInput\settings.json before they start Dual Input, and runs until q.
+// The servers for a flight with friends, run on this PC in place of Dual Input's deployed ones:
+// the bench's backend, one relay, and profiles' site, each behind a Cloudflare quick tunnel, so a
+// friend's installed Dual Input on another home network reaches them. It prints the settings
+// both pilots put into %APPDATA%\DualInput\settings.json before they start Dual Input, and runs
+// until q.
 //
 //   node tools/bench.ts flight-model                  once, so target/bench holds this tree's
 //                                                      relay and its published profiles

@@ -9,7 +9,7 @@
 # Cargo.toml.
 #
 # - When you add the first crate under a top folder that has no glob yet, such as
-#   src/features/, add that folder's glob along with it.
+#   src/relays/, add that folder's glob along with it.
 # - When you add a TypeScript folder that a glob matches, list it in an `exclude` list
 #   beside `members`.
 members = ["src/engines/*", "src/platform/*", "src/features/*/core", "src/features/*/routines", "src/apps/*", "src/sim-package/*", "tools/msfs-sdk", "tools/profile-author", "tools/figure-viewer", "tools/profile-builder", "tools/bench/core-helper", "tools/bench/droplet", "tools/bench/relay", "tools/sim/desk"]

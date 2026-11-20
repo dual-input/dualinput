@@ -43,8 +43,11 @@ test("panels connect only in a session, each of 20 is answered within 1s of the 
   t.after(() => net.stop())
   const core = await announcing(run, "a", net.core())
   // As many cockpit panels as the Black Square Baron 58P has, 3 of them with a display the
-  // profile's panel module takes (record/areas/interface/log.md, 2026-10-04), and the last
-  // two each holding an instrument keyed GNS_DISABLED, as two of the Baron's do.
+  // profile's panel module takes, and the last two each holding an instrument keyed
+  // GNS_DISABLED, as two of the Baron's do (measured on MSFS 2024, record/areas/core/log.md,
+  // "2026-10-22: Stage 5's bridge loads in all 20 of the Baron's panels, joins the core on a
+  // session's announcement, and leaves the cockpit whole when bridge.js is missing or throws,
+  // but two panels shared an instrument key").
   const instruments = (i: number) => (i < 3 ? [`PFD_${i}|side=${i}`, `KNOB_${i}`] : i >= 18 ? ["GNS_DISABLED"] : [`GAUGE_${i}`])
   const panels = Array.from({ length: 20 }, (_, i) => panel(core, `VCockpit${i + 60}`, instruments(i)))
   t.after(() => panels.forEach((p) => p.close()))
@@ -111,7 +114,9 @@ test("a panel module's messages reach its feature and come back, and a reloaded 
   assert.deepEqual(first.messages("unit"), [{ t: "unit", unit: "bench-panel", body: { n: 1 } }])
 
   // The panel reloads: a new page names the same panel, and the old page's socket stays
-  // open, as a reloaded page's did (record/areas/interface/log.md, 2026-10-08).
+  // open, as a reloaded page's did (measured on MSFS 2024, record/areas/interface/log.md,
+  // "2026-10-08: A page's WebSocket stays open after the page is gone, and the CommBus reaches
+  // every page we use in the menu and every cockpit panel").
   const reloaded = panel(core, "VCockpit60", ["PFD_0|side=0"])
   t.after(() => reloaded.close())
   await reloaded.until(() => reloaded.messages("load").length === 1, "the reloaded panel's load")

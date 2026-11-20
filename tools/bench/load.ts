@@ -72,7 +72,9 @@ const report = [
   `queue wait, most\t${us(whole.wait_max_us!)}`,
   `busy\t${whole.busy_percent}%\tbudget ${BUSY_PERCENT}%\t${verdict(Number(whole.busy_percent) < BUSY_PERCENT)}`,
   // The input that loads the engine compiles its 100 write functions, which took 1.1ms on a
-  // quiet PC and counts against the profile's load, not a handler's 1ms.
+  // quiet PC and counts against the profile's load, not a handler's 1ms (measured,
+  // record/areas/core/log.md, "2026-11-10: Beside the A350, the loop's queue keeps its budget,
+  // and the sim's share of the CPU puts about 640 inputs over a handler's 1ms").
   besideSim
     ? `inputs over 1ms\t${whole.over_1ms}, of which the load's 100ms stops are ${stops} or ${stops - 1}, and the engine's load 1\tbeside the sim, recorded with no budget`
     : `inputs over 1ms\t${whole.over_1ms}, of which the load's 100ms stops are ${stops} or ${stops - 1}, and the engine's load 1\tbudget 1ms but the stops and the load\t${verdict(Number(whole.over_1ms) <= stops + 1)}`,

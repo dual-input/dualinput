@@ -16,7 +16,10 @@
 //!   {"rates":{}}                                   answers `rates {...}`: each process's bytes sent and its busiest second
 //!
 //! On iroh's relay a lost packet only holds back the packets behind it until TCP resends it,
-//! and QUIC sees no loss, so holding a read back stands in for a lost packet.
+//! and QUIC sees no loss, so holding a read back stands in for a lost packet (measured,
+//! record/areas/network/log.md, "2026-10-11: on iroh's relay under loss, v1's streams run as
+//! late as its one-off packets and no later, because QUIC never sees a loss there, so a sender
+//! that keeps only each channel's newest packet changes nothing").
 
 use std::collections::HashMap;
 use std::net::{Ipv4Addr, SocketAddr};

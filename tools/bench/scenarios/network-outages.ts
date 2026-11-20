@@ -1,6 +1,6 @@
 // Outages between two cores through the bench's relay: a core suspended for 60s, the proxy
 // cutting both cores for 30s, 60s, and 120s, and the relay down for 40s, each with the time
-// from the outage's end to the link up again, which has no bound until this first run sets one
+// from the outage's end to the link up again, recorded with no bound
 // (record/areas/network/02-units.md, "Cases for the bench"). The 10s cut runs in network.ts.
 
 import assert from "node:assert/strict"

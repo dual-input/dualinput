@@ -2,8 +2,7 @@
 // test unit that stands in for state sync, and pointer sync's tap: a held value's rate, a cut's paced
 // and collapsed replay, a takeover during a cut, a late joiner's catch-up, control passing during
 // one, a pilot flying who leaves during a replay, and a member with no profile
-// (record/areas/sync/05-units.md, "Cases for the bench"; record/areas/build/plan.md, "13 The sync
-// engine and the cockpit stream").
+// (record/areas/sync/05-units.md, "Cases for the bench").
 
 import assert from "node:assert/strict"
 import { test } from "node:test"

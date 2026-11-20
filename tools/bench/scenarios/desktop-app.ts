@@ -1,9 +1,9 @@
 // The desktop app's jobs, on a stand-in install with a bench core as its dualinput-core.exe and
 // a stub named FlightSimulator2024.exe as the sim's process: starting the core with the sim and
 // again after a crash, writing our package, a second start, and update checks
-// (record/areas/install/01-installing-and-updating.md, "Cases for the bench" and "Budgets";
-// record/areas/build/plan.md, "15 Installing and updating"). The app finds the sim by its
-// program's name, so no sim and no other scenario may run beside these.
+// (record/areas/install/01-installing-and-updating.md, "Cases for the bench" and "Budgets").
+// The app finds the sim by its program's name, so no sim and no other scenario may run beside
+// these.
 
 import assert from "node:assert/strict"
 import fs from "node:fs"

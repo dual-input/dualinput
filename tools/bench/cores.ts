@@ -367,7 +367,8 @@ export class Core {
    * Waits until a line of the core's log matches `wanted`, and returns it. A handler sends its
    * line to the log's writer, which writes it on its own thread, so the line can reach the
    * file after the bench has seen what the handler did, by as long as Windows holds the write:
-   * up to 49ms (record/areas/core/log.md, 2026-11-18).
+   * up to 49ms (record/areas/core/log.md, "2026-11-18: Windows held a core's early writes to
+   * its log for up to 49ms on the loop's thread, so the log gets a writer of its own").
    */
   async logged(wanted: string | RegExp, { ms = 5_000 } = {}): Promise<string> {
     const match = (line: string) => (typeof wanted === "string" ? line.includes(wanted) : wanted.test(line))
@@ -401,6 +402,7 @@ export class Core {
   /**
    * How many times the core has written the slot of the routine `name`, such as `CAMERA`, feeds and the sim service's
    * rewrites together, or 0 before its first: the writes into the area the connection mapped the slot's name to.
+   * `RoutineId::slot` in src/engines/messages/src/module.rs makes the same name, so change both together.
    */
   async routineWrites(name: string): Promise<number> {
     const { calls } = await this.report()

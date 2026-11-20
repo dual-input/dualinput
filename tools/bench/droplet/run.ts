@@ -8,8 +8,9 @@
 //
 // <program> is tools/bench/droplet built for x86_64-unknown-linux-musl, which runs on the
 // droplets' Ubuntu whatever its glibc. The run reaches each droplet as root@<host> through your
-// own SSH key, as src/relays/deploy.ts does, and needs TCP 3340, the listener's relay, and UDP
-// open between the two droplets. Each run takes <secs>, 60 unless given, plus about 15s.
+// own SSH key, as src/relays/deploy.ts does, and needs TCP 3340, the listener's relay at
+// `RELAY_PORT` in src/main.rs, and UDP open between the two droplets. Each run takes <secs>, 60
+// unless given, plus about 15s.
 //
 // The dialer, which sends the mix, runs in a network namespace of its own on the Frankfurt
 // droplet, whose link alone carries `tc netem`, losing packets each way at the run's rate. A near

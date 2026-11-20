@@ -2,7 +2,8 @@
 // a routine's life between feedings, the module taken as stopped once its counter stays still
 // with a routine live in Flying, unpaused, and the core lifting the freeze only when that
 // routine ends (record/areas/core/03-sim-seam-and-wasm-module.md, "Cases for the bench";
-// record/areas/architecture/log.md, 2026-10-23).
+// record/areas/architecture/log.md, "2026-10-23: A review against the simplicity rule cut eight
+// guards, and kept every designed feature it questioned").
 
 import assert from "node:assert/strict"
 import { test } from "node:test"

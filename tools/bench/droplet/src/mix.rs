@@ -1,7 +1,9 @@
 //! The droplet's test unit. It stands in for the session crate, opening the session from the
 //! droplet's config with no backend, and for v1's features, sending p06's busy mix on a channel
-//! for each and noting when each probe came (record/areas/network/log.md, 2026-10-11, p06's
-//! entry). The bench's own test unit has one channel of each delivery; this one has a channel
+//! for each and noting when each probe came (record/areas/network/log.md, "2026-10-11: on iroh's
+//! relay under loss, v1's streams run as late as its one-off packets and no later, because QUIC
+//! never sees a loss there, so a sender that keeps only each channel's newest packet changes
+//! nothing"). The bench's own test unit has one channel of each delivery; this one has a channel
 //! for each of the mix's parts, so a newest-only slot of one part never replaces another's.
 
 use std::collections::BTreeMap;
@@ -28,7 +30,8 @@ const CODE: &str = "DROPLET";
 /// so the mix starts this long after the link comes up, and the report refuses a run whose
 /// path wasn't direct from the mix's start.
 const WARM_UP: Duration = Duration::from_secs(5);
-/// After the mix, for what's still on its way.
+/// After the mix, for what's still on its way. `DRAIN_US` in tools/bench/droplet/report.ts
+/// holds the same, so change both together.
 const DRAIN: Duration = Duration::from_secs(5);
 
 /// A probe's postcard bytes besides its padding: its number, send stamp, deadline, and the
@@ -60,8 +63,8 @@ pub struct Config {
 const SESSION: Channel<String> = Channel::new(1100, Delivery::Stream, u8::MAX);
 
 /// One part of the mix: its channel, the end that sends it, and its probes' size and rate.
-/// The sizes and rates are p06's busy mix; the priorities are this run's own, since each of
-/// v1's channels takes its priority in the stage that builds its feature.
+/// The sizes and rates are p06's busy mix; the priorities are this run's own, not the ones
+/// the message crate gives v1's channels.
 struct Part {
     name: &'static str,
     channel: Channel<Probe>,
@@ -81,6 +84,8 @@ const COCKPIT: Channel<Probe> = Channel::new(1106, Delivery::Stream, 100);
 const REQUEST: Channel<Probe> = Channel::new(1107, Delivery::Stream, 110);
 const REPLY: Channel<Probe> = Channel::new(1108, Delivery::Stream, 110);
 
+/// `ONE_OFFS` and `STREAMS` in tools/bench/droplet/report.ts list these by name and end, so
+/// change both together.
 const PARTS: [Part; 8] = [
     Part {
         name: "flight",

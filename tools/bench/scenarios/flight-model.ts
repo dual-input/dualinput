@@ -273,8 +273,8 @@ test("the 2s move to the relay is carried and eased back, and a 20s gap is carri
   mark(a, b)
   const cut = now()
   await net.relays[0]!.cut(a.core.process.pid!, 2_000)
-  // A fixed wait fails here on a quiet PC. QUIC sends again only at its next probe of the silent path, and its probes come at intervals that double, so the samples can return about 2s after the cut ends, and the ease back takes 3s more.
-  // The aircraft was back within 6s of the cut's start with other programs running, and 7.5s after it on a quiet PC, so this waits for its return (measured on our development machine, 2026-11-12, record/areas/flight-model/log.md).
+  // A fixed wait fails here on a quiet PC. QUIC sends again only at its next probe of the silent path, and its probes come at intervals that double, so the samples can return about 2s after the cut ends, and the ease back takes 3s more (unverified against iroh's timers).
+  // The aircraft was back within 6s of the cut's start with other programs running, and 7.5s after it on a quiet PC, so this waits for its return (measured on our development machine, 2026-11-12, record/areas/flight-model/log.md, "2026-11-12: At the stage's close the bench passed 130 of 131 tests, and the gap's test had waited a fixed 6s for a return that takes 7.5s on a quiet PC").
   await sleep(4_000)
   await settled(a, b, 6_000)
   const returned = now()

@@ -35,11 +35,11 @@ type Line = { t: number; conn: number; path?: unknown; sent?: number; lost?: num
 
 type End = { results: Results; transport: Line[] }
 
-/** The one-off parts, each way, and the stream parts, as src/mix.rs sends them. */
+/** The one-off parts, each way, and the stream parts, as `PARTS` in src/mix.rs sends them, so change both together. */
 const ONE_OFFS = { dial: ["flight", "controls", "avatar", "batch", "audio"], listen: ["avatar"] }
 const STREAMS = { dial: ["cockpit", "request"], listen: [] as string[] }
 
-/** What src/mix.rs's `DRAIN` gives after the mix, in µs. */
+/** What src/mix.rs's `DRAIN` gives after the mix, in µs, so change both together. */
 const DRAIN_US = 5_000_000
 
 export type Part = { part: string; made: number; got: number; p50: number; p99: number; max: number }

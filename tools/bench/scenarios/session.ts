@@ -2,7 +2,7 @@
 // relay, with a fake desktop app on each sending the session crate's commands: who is in the
 // flight, preflight and its hold, control's passes, leaving and quitting, a restarted core,
 // the match check, and when a core exits (record/areas/session/02-units.md, "Cases for the
-// bench"; record/areas/build/plan.md, "9 The session").
+// bench").
 
 import assert from "node:assert/strict"
 import fs from "node:fs"
@@ -86,7 +86,7 @@ async function crew(a: Pilot, b: Pilot): Promise<string> {
   return code
 }
 
-/** Both pilots ready, then the countdown, then preflight's end on both. */
+/** Readies each of `pilots` once Ready is allowed. */
 async function ready(...pilots: Pilot[]): Promise<void> {
   for (const p of pilots) {
     await until(p, (s) => me(s)?.in_flight === true && s.ready?.length === 0, "Ready allowed")

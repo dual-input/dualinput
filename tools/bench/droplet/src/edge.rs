@@ -149,7 +149,8 @@ pub fn start_job(
                 "{} got no answer: the droplet run has no backend",
                 fetch.url
             )),
-            // Only the recording crate lists, deletes, and opens folders, and the droplet runs none.
+            // Only the recording crate, the profile loader, and the session crate list, delete,
+            // and open folders, and the droplet runs none of them.
             Work::List { path } | Work::Delete { path } | Work::OpenFolder { path } => {
                 Err(format!("{path}: the droplet program keeps no runs"))
             }
@@ -157,8 +158,8 @@ pub fn start_job(
             Work::OpenLink { url, .. } => {
                 Err(format!("{url}: the droplet program opens no window"))
             }
-            // Only the session crate, the sim service, and avatars ask these, and the droplet
-            // runs none of them.
+            // Only the session crate, the sim service, avatars, and traffic ask these, and the
+            // droplet runs none of them.
             Work::Find { .. } | Work::InviteCode | Work::CopyText { .. } | Work::Gather { .. } => {
                 Err("the droplet program has no sim and no clipboard".to_string())
             }

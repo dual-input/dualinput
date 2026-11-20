@@ -19,7 +19,7 @@ import { BARON, load, PA24, toMenu } from "../flights.ts"
 import { app, BenchNetwork, host, join } from "../network.ts"
 import { FakeApp, FakeMenuScript } from "../pages.ts"
 
-/** The flight file's `[Departure]` section as the sim writes it (record/areas/interface/log.md, 2026-10-05). */
+/** The flight file's `[Departure]` section as the sim writes it (measured on MSFS 2024, record/areas/interface/log.md, "2026-10-05: Code in the menu's document sets the world map's departure, stand, aircraft, and livery, and starts the flight"). */
 const AT_PARKING_140 = "[Departure]\r\nICAO=EGLL\r\nGateName=PARKING\r\nGateNumber=140\r\nGateSuffix=NONE\r\n"
 
 type Pilot = { core: Core; app: FakeApp; name: string }

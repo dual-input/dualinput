@@ -1,7 +1,8 @@
 // The recording crate's runs over the core's real WebSocket: the slice lists the runs with
 // the newest in progress, a page's command deletes an older run and is refused the one in
-// progress, and marking the moment writes a line to the run's log, as
-// record/areas/recording/01-recording-and-bug-reports.md's note of 2026-10-23 has it.
+// progress, and marking the moment writes a line to the run's log
+// (record/areas/recording/01-recording-and-bug-reports.md, "What each PC keeps" and "Marking
+// the moment").
 
 import assert from "node:assert/strict"
 import fs from "node:fs"

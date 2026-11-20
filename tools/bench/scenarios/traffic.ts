@@ -161,7 +161,7 @@ test("a traffic host's AI aircraft and tugs show on the other core as frozen, dr
   const run = new BenchRun("traffic", t)
   const a = await pilot(run, net, "James")
   const b = await pilot(run, net, "Adam")
-  // 130 aircraft, 10 of them taxiing, a helicopter, 20 tugs, 700 GSX signs, and one object of ours, as at EGLL within 1km (record/areas/traffic-atc/log.md, 2026-10-17).
+  // 130 aircraft, 10 of them taxiing, a helicopter, 20 tugs, 700 GSX signs, and one object of ours, as at EGLL within 1km (measured on MSFS 2024, record/areas/traffic-atc/log.md, "2026-10-17: FS Copilot's code holds the traffic and ATC mechanisms 6.14 carries over, p10's ground objects at EGLL were GSX's gate signs and the sim's pushback tugs, and SayIntentions' program is SayIntentionsAI").
   const fleet = Array.from({ length: 130 }, (_, n) => aircraft(0x10_000 + n, n, { moving: n < 10 }))
   fleet.push(aircraft(0x10_200, 200, { kind: "helicopter", title: "Asobo Bell 407" }))
   const grounds = [

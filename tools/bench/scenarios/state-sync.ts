@@ -1,8 +1,7 @@
 // State sync between bench cores on the stand-in sim: each route a control can take through the
 // sim, a value's echo, the notification for a write that never lands, the guard on Ready, and a
 // late joiner's catch-up, on a small profile of the scenario's own, built as a local bundle
-// (record/areas/sync/05-units.md, "Cases for the bench"; record/areas/build/plan.md, "14 State
-// sync").
+// (record/areas/sync/05-units.md, "Cases for the bench").
 
 import assert from "node:assert/strict"
 import fs from "node:fs"
@@ -258,8 +257,11 @@ test("a switch flipped on one core's aircraft moves on the other's, and nothing 
 
 test("a following machine never flags what the PF owns, and writes it at the old PF's last value as it takes control", { timeout: 120_000 }, async (t) => {
   const { pf, pm } = await crew(t, "take-over")
-  // The stand-in takes no K:SET_TRIM, so the PM's trim stays where its own systems hold it, as a
-  // following 58P's autopilot held its trim against every write in the sim.
+  // The stand-in takes no K:SET_TRIM, so the pilot monitoring's trim stays where its own systems
+  // hold it, as a following 58P's autopilot held its trim against every write in the sim
+  // (measured on MSFS 2024, record/areas/sync/log.md, "2026-11-12: In the first flight with
+  // friends 14 of state sync's writes read another value 1.5s later, 11 on the following
+  // machine, the elevator trim and autopilot modes among them").
   setVariable(pf, "L:TRIM", 5)
   await settles("the PM's write of the PF's trim", () => keysSentWith(pm, "SET_TRIM", 5), 1)
   await sleep(2_000)
@@ -333,8 +335,8 @@ test("a pulse set and cleared within one frame never fires its event entry", { t
 test("a press on a display that sets a variable the profile also syncs, the variable first, ends on one value", { timeout: 120_000 }, async (t) => {
   const { pf, pm } = await crew(t, "press")
   await pf.app.until(() => pf.panel.loaded() && pm.panel.loaded(), "both panels run pointer sync")
-  // Each machine's own click sets the variable, as a page key's code would, so the PM's copy of
-  // the press sets the value its write already put there.
+  // Each machine's own click sets the variable, as a page key's code would, so the pilot
+  // monitoring's copy of the press sets the value its write already put there.
   pm.panel.buttons[0]!.addEventListener("click", () => setVariable(pm, "L:BEACON", 1))
   setVariable(pf, "L:BEACON", 1)
   await pf.core.hear(/^cockpit sent other beacon /)
@@ -348,11 +350,11 @@ test("a press on a display that sets a variable the profile also syncs, the vari
 
 test("altitude hold and vertical speed mode changed in one frame leave the other machine in altitude hold, and nothing comes back", { timeout: 120_000 }, async (t) => {
   const { pf, pm } = await crew(t, "coupled")
-  // The PM's autopilot as the 58P's KFC 150 has it: altitude hold's event turns vertical speed
-  // mode off, and vertical speed mode's turns altitude hold off, each in the order sent
-  // (record/areas/sync/log.md, "No route showed an autopilot event's effect in the frame it was
-  // sent, so a guard in the sim reads the old mode, and the events of one frame apply in the
-  // order sent").
+  // The pilot monitoring's autopilot as the 58P's KFC 150 has it: altitude hold's event turns
+  // vertical speed mode off, and vertical speed mode's turns altitude hold off, each in the order
+  // sent (record/areas/sync/log.md, "2026-11-19: No route showed an autopilot event's effect in
+  // the frame it was sent, so a guard in the sim reads the old mode, and the events of one frame
+  // apply in the order sent").
   const rule = (event: string, then: { then: "flip"; name: string } | { then: "set"; name: string; value: number }) =>
     pm.core.act({ act: "rule", when: { when: "sent", name: event }, after_ms: 0, then })
   rule("AP_ALT_HOLD", { then: "flip", name: "L:ALT_HOLD" })
@@ -363,8 +365,8 @@ test("altitude hold and vertical speed mode changed in one frame leave the other
   setVariable(pf, "L:VS_HOLD", 1)
   await settles("the PM's vertical speed mode", () => variable(pm, "L:VS_HOLD"), 1)
   await sleep(500)
-  // The PF presses ALT: its autopilot turns altitude hold on and vertical speed mode off in one
-  // frame, and both changes reach the PM together.
+  // The pilot flying presses ALT: its autopilot turns altitude hold on and vertical speed mode
+  // off in one frame, and both changes reach the pilot monitoring together.
   pf.core.act({ act: "set", numbers: [["L:ALT_HOLD", 1], ["L:VS_HOLD", 0]], texts: [] })
   await settles("the PM's altitude hold", () => variable(pm, "L:ALT_HOLD"), 1)
   await sleep(2_000)

@@ -2,8 +2,8 @@
 // routine host built natively, flying our own bench aircraft through the bench's relay. A
 // scenario moves the camera and the mouse, and reads what each core fed `Figure`, and what
 // `Figure` wrote on each figure's object (record/areas/avatars/01-avatars.md, "Cases for the
-// bench"; record/areas/build/plan.md, "17 Avatars"). The case that needs `Follow` comes with
-// stage 16, and the 58P's budgets are measured by hand on the installed 58P.
+// bench"). The 58P's budgets are measured by hand, by
+// src/engines/aircraft-model/tests/installed.rs on the installed 58P.
 
 import assert from "node:assert/strict"
 import fs from "node:fs"
@@ -655,7 +655,8 @@ test("after a reset of the sim's variables Figure's writes still land, and after
   t.diagnostic(`after the reset, the head turned from ${before.toFixed(1)} to ${turned.toFixed(1)} degrees`)
 
   // The sim loads the flight again, which unloads the profile, whose connection takes its
-  // figures with it, and resets the variables as an aircraft change does.
+  // figures with it, and resets the variables as an aircraft change does
+  // (record/areas/core/03-sim-seam-and-wasm-module.md, "Wants and the sim's APIs").
   await toMenu(a.core)
   for (const started = Date.now(); (await a.core.report()).objects.some((o) => o.id === own); await sleep(50)) {
     assert.ok(Date.now() - started < 10_000, "the figures stayed after the profile unloaded")
@@ -702,7 +703,7 @@ test("a pilot following in flight keeps their seat, their figure's eye at the se
     await sleep(4_000)
     const moved = await groundSpeed(b)
     assert.ok(moved > speed * 0.8, `the following aircraft flies at ${moved.toFixed(1)} m/s, against ${speed} m/s`)
-    // A camera a frame behind, 0.94m at 85 m/s in the stand-in's 11ms frames, can still sit in the seat's 0.8m, so the eye is what tells.
+    // A camera a frame behind, 0.44m at 40 m/s in the stand-in's 11ms frames, still keeps the seat, which it gives up only past 0.8m behind the hip, so the eye is what tells.
     const since = Math.max(0, a.core.fed().length - 1)
     await sleep(2_000)
     for (const fed of a.core.fed().slice(since)) {

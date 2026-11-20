@@ -3,7 +3,7 @@
 // drags, and holds playing on the other display, gestures cut short by a late up, a cut, and a
 // killed core, the locks a press meets, the ups a panel never answers, catch-ups, and the
 // visible lock through outages (record/areas/pointer-sync/01-pointer-sync.md, "Cases for the
-// bench"; record/areas/build/plan.md, "19 Pointer sync").
+// bench").
 
 import assert from "node:assert/strict"
 import { test } from "node:test"
@@ -468,7 +468,7 @@ test("the PM's displays lock with no link to the PF, until it takes control or i
     await soon(() => b.panel.lockText() === NO_LINK, "the PM's lock", 3_000)
     lockedAt = performance.now() - cutAt
     assert.equal(a.panel.locks().length, 0, "the PF's never lock")
-    // Events of the PF's, which the PM's replay plays at their gaps once the link is back.
+    // Events of the pilot flying's, which the pilot monitoring's replay plays at their gaps once the link is back.
     act(a, { act: "send", kind: "event", key: "starter", value: 1, count: 3, every_ms: 1_500 })
   })
   t.diagnostic(`the PM's displays locked ${lockedAt.toFixed(0)}ms after the cut, as the link was lost 5s in`)

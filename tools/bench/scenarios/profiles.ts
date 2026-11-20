@@ -1,7 +1,7 @@
 // Profiles: cores fetching the bench's profiles' site at start, the pilot flying's loader
 // pinning a bundle, every core in the flight loading it, and the match check's item, with the
 // site held back, cut, or given newer bundles mid-session (record/areas/profiles/02-units.md,
-// "Cases for the bench" and "Budgets"; record/areas/build/plan.md, "10 Profiles").
+// "Cases for the bench" and "Budgets").
 
 import assert from "node:assert/strict"
 import crypto from "node:crypto"

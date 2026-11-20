@@ -1,7 +1,8 @@
 // An aircraft package of our own, which avatars' scenarios load, since the Baron 58P's files
 // can't be in the tree: a cabin with a panel and a switch, an invisible shell, a yoke for each
-// seat marked with its grips, an exterior with a chock beside it, and a profile that gives it
-// two seats and located entries (record/areas/build/plan.md, "17 Avatars").
+// seat, the pilot's marked with its grips, an exterior with a chock beside it, and a profile
+// that gives it two seats and located entries (record/areas/avatars/01-avatars.md, "Cases for
+// the bench").
 //
 // Every point is in the aircraft's frame, in meters from its reference point, x left, y up, and
 // z forward, and the models' own space is that frame.

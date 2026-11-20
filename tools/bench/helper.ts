@@ -1,7 +1,8 @@
 // The bench's end of the stand-in core helper's line. The core owns both ends of its pipe to
 // the helper, so the bench listens on a port of its own, which a core's environment carries to
 // the stand-in the core starts. Each start of the stand-in connects, says what the core sent
-// it, and does what a scenario tells it (record/areas/build/02-testing.md's note of 2026-10-22).
+// it, and does what a scenario tells it (record/areas/build/02-testing.md, "The stand-in core
+// helper").
 
 import net from "node:net"
 import { setTimeout as sleep } from "node:timers/promises"

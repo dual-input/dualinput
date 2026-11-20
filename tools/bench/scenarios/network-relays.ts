@@ -1,6 +1,7 @@
 // Two relays, with the two cores homed at different ones, and a core's home relay cut from it
 // mid-session (record/areas/network/02-units.md, "Cases for the bench"). Each endpoint homes at
-// the relay that answers it fastest, so the proxy's delay picks each core's home.
+// the relay that answers it fastest, so the proxy's delay picks each core's home
+// (record/areas/network/01-between-machines.md, "The relays").
 
 import assert from "node:assert/strict"
 import { test } from "node:test"
@@ -49,7 +50,7 @@ test("with the cores homed at different relays, both directions cross the dialed
   assert.ok((await report(b)).probes["1002"]?.count, "the joiner should get the host's probes")
 
   // The host's home relay cut from it for 60s: whether the link stays up or comes back by a
-  // redial, and how long, which nothing has measured.
+  // redial, and how long, which the scenario records with no bound.
   const marks = [a.heard().length, b.heard().length]
   const cut = performance.now()
   await one.cut(a.process.pid!, 60_000)

@@ -19,7 +19,7 @@ import { type FakeApp, FakeEfbApp } from "../pages.ts"
 /** A pilot: a core with the bench's network, its sim running, the fake desktop app the session's commands go through, and a fake EFB app whose part makes the toolbar's call. */
 type Pilot = { core: Core; app: FakeApp; efb: FakeEfbApp; name: string }
 
-/** `Pause_EX1`'s flags: active pause, and the pause menu's sim pause. */
+/** `Pause_EX1`'s flags: active pause, and the pause menu's sim pause (record/areas/session/02-units.md, "Rate and pause"). */
 const ACTIVE = 4
 const MENU = 8
 
@@ -30,7 +30,7 @@ async function pilot(t: TestContext, run: BenchRun, net: BenchNetwork, name: str
   const core = await run.core(name, net.core())
   core.act({ act: "watch", process: run.stub().id })
   await core.hear("stage Starting aircraft none")
-  // The sim's rate at 1, and a step either way moving it between 1 and 2, as `K:SIM_RATE_INCR` and `K:SIM_RATE_DECR` do.
+  // The sim's rate at 1, and a step either way moving it between 1 and 2, as `K:SIM_RATE_INCR` and `K:SIM_RATE_DECR` do (measured on MSFS 2024, record/areas/environment/log.md, "2026-10-03: The rate steps and the time events work from SimConnect, and `K:SIM_RATE_SET` doesn't").
   core.act({ act: "set", numbers: [["E:SIMULATION RATE", 1]], texts: [] })
   core.act({ act: "rule", when: { when: "sent", name: "SIM_RATE_INCR" }, after_ms: 0, then: { then: "set", name: "SIMULATION RATE", value: 2 } })
   core.act({ act: "rule", when: { when: "sent", name: "SIM_RATE_DECR" }, after_ms: 0, then: { then: "set", name: "SIMULATION RATE", value: 1 } })

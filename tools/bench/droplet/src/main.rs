@@ -35,11 +35,13 @@ use crate::mix::{Config, Mix, Role};
 const USAGE: &str = "usage: bench-droplet listen <folder> <public IPv4> <secs>
        bench-droplet dial <folder> <pilot> <endpoint> <relay URL> <token> <secs>";
 
-/// The port the listener's relay serves plain HTTP on, the bench's own relays' port.
+/// The port the listener's relay serves plain HTTP on, the one iroh-relay's dev mode serves
+/// on (read in iroh-relay 1.3.0, `src/main.rs`, `DEV_MODE_HTTP_PORT`). The usage in
+/// tools/bench/droplet/run.ts names it as a port to open, so change both together.
 const RELAY_PORT: u16 = 3340;
 
 /// The 750ms the core's edges get to finish once it exits, as `GRACE` in
-/// src/apps/core/src/run.rs gives them.
+/// src/apps/core/src/run.rs gives them, so change both together.
 const GRACE: Duration = Duration::from_millis(750);
 
 /// Every unit, in the core's order, with the test unit last.

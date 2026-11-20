@@ -232,7 +232,7 @@ export class FakeEfbApp extends FakePage {
     return this.slice("banner") === true
   }
 
-  /** Each active pause rate and pause's part was asked for, oldest first. */
+  /** Each turn of active pause on or off that rate and pause's part was asked for, oldest first. */
   readonly pauses: boolean[] = []
   /** How long the toolbar's call takes to bring its flag back, in ms. */
   toolbarLateMs = 0

@@ -27,8 +27,9 @@ const PA24 =
 
 /**
  * p08's signals, in their order, from experiments/areas/architecture/results/
- * p08-flight-2026-10-09-17-12-31.ndjson, which the core log's 2026-10-15 entry on
- * `AircraftLoaded` tabulates, with the gaps cut to tens of ms so the scenario runs quickly.
+ * p08-flight-2026-10-09-17-12-31.ndjson, which record/areas/core/log.md's entry "2026-10-15:
+ * Two of the three `AircraftLoaded` our client heard around a flight load came in the main
+ * menu" tabulates, with the gaps cut to tens of ms so the scenario runs quickly.
  * The flight file is one the scenario writes.
  */
 function p08(flight: string): Played[] {

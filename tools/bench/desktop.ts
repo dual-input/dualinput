@@ -20,7 +20,7 @@ import { VERSION } from "../../src/engines/messages/ts/stamp.ts"
 import { benchCore, benchSettings, type BenchRun, Core } from "./cores.ts"
 import { SIM_ORIGIN } from "./pages.ts"
 
-/** The sim's program, which the desktop app looks for. `SIM` in src/apps/desktop/src/processes.rs names the same one. */
+/** The sim's program, which the desktop app looks for. `SIM` in src/apps/desktop/src/processes.rs names the same one, so change both together. */
 const SIM = "FlightSimulator2024.exe"
 
 /** The desktop app that tools/bench.ts built. */
@@ -111,7 +111,7 @@ export class DesktopBench {
     this.community = path.join(this.packages, "Community")
     fs.mkdirSync(this.current, { recursive: true })
     fs.copyFileSync(benchDesktop(), path.join(this.current, "dualinput-desktop.exe"))
-    // The core's build script copies SimConnect.dll beside it, which a bench core loads too.
+    // The sim edge's build script copies SimConnect.dll beside the core, which a bench core loads too.
     const core = benchCore()
     fs.copyFileSync(core, path.join(this.current, "dualinput-core.exe"))
     const simConnect = path.join(path.dirname(core), "SimConnect.dll")
@@ -315,7 +315,8 @@ export class DesktopLink {
  * clock, at which its cycle counter runs. `TotalProcessorTime` can't judge an app this quiet: Windows charges it a whole
  * 15.625ms tick at a time, to whichever thread runs as the clock interrupt fires, so an app working in 1ms bursts read 5 to
  * 9 ticks over the same quiet minute, 0.130% to 0.234% of a core around a 0.2% budget (measured on our development
- * machine, 2026-11-11, record/areas/install/log.md).
+ * machine, 2026-11-11, record/areas/install/log.md, "2026-11-11: The bench read the desktop app's CPU in whole 15.6ms
+ * clock ticks; read from cycles, the app uses 0.14% to 0.15% of a core").
  */
 const CPU_MS = (pid: number) => `
 Add-Type -Namespace DualInputBench -Name Cycles -MemberDefinition '[DllImport("kernel32.dll")] public static extern bool QueryProcessCycleTime(IntPtr process, out ulong cycles);'

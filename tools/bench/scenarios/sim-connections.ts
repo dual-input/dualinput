@@ -72,7 +72,7 @@ test("an AI create whose title the sim lacks has its exception reach the call, a
 test("the platform's connection takes its masking group before the sim's open reply", { timeout: 30_000 }, async (t) => {
   const run = new BenchRun("sim-mask", t)
   const core = await run.core("a")
-  // The sim sent its open reply 46s after S_OK as it booted (record/areas/architecture/01-spine.md).
+  // The sim sent its open reply 46s after S_OK as it booted (record/areas/architecture/01-spine.md, "The core").
   core.act({ act: "open-reply", delay_ms: 60_000 })
   core.act({ act: "watch", process: run.stub().id })
   const report = await until(core, (r) => r.calls.some((c) => c.function === "SetNotificationGroupPriority"))

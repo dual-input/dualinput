@@ -215,7 +215,9 @@ test("a press passes control with a cue and a notification on both machines, and
   samples.sort((x, y) => x - y)
   const at = (share: number) => samples[Math.min(samples.length - 1, Math.floor(samples.length * share))]!
   // The output stream took up to 89ms on our development machine (record/areas/control/log.md,
-  // 2026-11-04), so about 10ms of the budget's 100ms is left for this part.
+  // "2026-11-04: Stage 20's take-control passes its cases on the bench, and a press reaches the
+  // cue about 80ms later, past the 50ms budget"), so about 10ms of the budget's 100ms is left
+  // for this part.
   console.log(`budget: a single press to the cue reached the helper in ${at(0.5)}µs at p50, ${at(0.99)}µs at p99, and ${samples.at(-1)}µs at most, of ${samples.length} presses, against 10,000µs, the output stream's own time and this making the budget's 100,000µs`)
   assert.ok(at(0.99) < 10_000, `${at(0.99)}µs`)
 })

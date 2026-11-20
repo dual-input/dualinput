@@ -200,9 +200,10 @@ impl Sim for Aircraft {
 
     /// The camera through the Camera API, whose `FsCameraData` carries the same angles as
     /// `SimConnect_CameraGet`'s answer: the pitch in `pbh.p`, the yaw in `pbh.b`, and the roll
-    /// in `pbh.h` (measured on MSFS 2024, 2026-11-17, record/areas/avatars/log.md). Its `fov`
-    /// passes through as `SimConnect_CameraGet`'s view's height in radians, which is
-    /// unverified for this API.
+    /// in `pbh.h` (measured on MSFS 2024, 2026-11-17, record/areas/avatars/log.md, "Inside our
+    /// module, before the routines write, a following machine's camera reads at the eye in every
+    /// referential"). Its `fov` passes through as `SimConnect_CameraGet`'s view's height in
+    /// radians, which is unverified for this API.
     fn camera(&mut self, referential: u32) -> Option<CameraRead> {
         let referential_id = i32::try_from(referential).ok()?;
         // SAFETY: FsCameraData holds numbers alone, which zeros fill.

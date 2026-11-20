@@ -1,5 +1,6 @@
 // Reads the two TOML files deploy.ts needs, relays.toml and the tokens repository's
-// tokens.toml, which hold only tables of arrays, strings, integers, and arrays of strings.
+// tokens.toml, which hold only `[[name]]` tables and keys whose values are strings, integers,
+// or arrays of strings.
 // The network crate's build reads the same files with the toml crate, so a file that
 // passes this and fails there stops the build.
 

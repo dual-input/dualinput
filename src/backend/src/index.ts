@@ -44,6 +44,8 @@ export interface Env {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    // `BACKEND_ANSWERS` in src/platform/network/src/reach.rs takes this 405 as our Worker
+    // answering, so change both together.
     if (request.method !== "POST") return refuse(405, "only POST is answered")
     if (Number(request.headers.get("content-length") ?? 0) > MOST_BYTES) return refuse(413, "the body is too large")
     const bytes = new Uint8Array(await request.arrayBuffer())

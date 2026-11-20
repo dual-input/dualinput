@@ -1,6 +1,7 @@
 // A React page's link to the core, Dual Input's service, on page-client, for the EFB app and the banner. It turns
 // page-client's five states into what either page shows for the link
-// (record/areas/interface/decisions.md, "Without the service the EFB app shows one of three screens"),
+// (record/areas/interface/decisions.md, "Without the service the EFB app shows one of three screens, and another
+// version shows setup's box"),
 // and hands React the slices of client state.
 
 import { useSyncExternalStore } from "react"
@@ -50,7 +51,7 @@ export class CoreLink {
     else if (connection === "quit") this.set("closed")
     else if (connection === "no-core") this.set("not-running")
     else if (this.state === "connected" || this.state === "reconnecting") {
-      // A crashed core comes back 2s after it exits, so most losses end under the pill.
+      // The desktop app restarts a crashed core 2s after it exits, so most losses end inside `RECONNECT_FOR`.
       this.set("reconnecting")
       this.giveUpAt = this.env.now() + RECONNECT_FOR
     }

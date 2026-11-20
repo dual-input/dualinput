@@ -237,7 +237,10 @@ async function stand(name: string, number: number): Promise<WorldMapOutcome> {
 /**
  * The runway takes its `ID`, as the stand does, since the world map's list passes each entry's
  * `ID` to `SetDepartureRunwayIndex` (read in fs-base-ui 0.1.10, html_ui/Global/pkg/base.bundle.js,
- * FreeflightPlanCombobox._updateDropdown); no run has tried it.
+ * FreeflightPlanCombobox._updateDropdown), and Join selected a runway by its `ID` in the sim
+ * (measured on MSFS 2024, 2026-11-17, record/areas/session/log.md, "In the sim, Join set the world
+ * map and started the flight within 0.9s, and active pause followed from our EFB app's code in
+ * 264ms, once the menu script parsed").
  */
 async function runway(): Promise<WorldMapOutcome> {
   const first = (departure()?.worldLocation?.airportInfos?.runways ?? [])[0]

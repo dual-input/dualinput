@@ -139,7 +139,10 @@ unsafe extern "C" {
 /// WASI's monotonic clock, in µs. It counted `QueryPerformanceCounter`'s ticks in a flight,
 /// and the core stamps each slot's header on that counter, so the routine host keeps its
 /// estimate of the core's counter from this clock (measured on MSFS 2024, 2026-10-09,
-/// record/areas/architecture/log.md). It reads 0 if the sim refuses the call.
+/// record/areas/architecture/log.md, "In a flight, a Rust client on SimConnect.dll masks, creates
+/// AI objects with liveries, sets input events, reads the camera, and follows the load; the Rust
+/// module echoes; Raw Input gets a person's key and button; and the module's clock counts the
+/// counter's ticks from near the sim's start"). It reads 0 if the sim refuses the call.
 fn clock_us() -> u64 {
     const MONOTONIC: u32 = 1;
     let mut ns = 0;

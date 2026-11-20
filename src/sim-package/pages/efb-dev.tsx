@@ -1,5 +1,5 @@
-// The EFB app in the dev loop, as tools/dev.ts runs it: the shell's sample, with each feature's part that's built, one
-// line each, as efb.tsx lists them. A built part takes its sample's place, so the tabs keep their order.
+// The EFB app in the dev loop, as tools/dev.ts runs it: the shell's sample, with each feature's part in `BUILT`, one
+// line each, as efb.tsx lists them. A part in `BUILT` takes its sample's place, so the tabs keep their order.
 
 import { avatars } from "../../features/avatars/efb/part.tsx"
 import { stateSync } from "../../features/state-sync/efb/part.tsx"

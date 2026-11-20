@@ -57,7 +57,9 @@ export function simEnv(): Env {
       // through RegisterCommBusListener. The menu's document, mainUi, has neither common.js
       // nor Coherent, and takes it as its own view listeners do: it adds the CommBus's view
       // listener, and hears each call as an EVENT_FROM_VIEW_LISTENER naming that listener
-      // (measured on MSFS 2024, 2026-10-08, record/areas/interface/log.md).
+      // (measured on MSFS 2024, 2026-10-08, record/areas/interface/log.md, "Every page we use
+      // reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:`
+      // variable, and a flight load resets one").
       if (typeof RegisterViewListenerT === "function" && typeof Coherent !== "undefined") {
         withCommBus(() => RegisterCommBusListener(() => {}).on(ANNOUNCE, heard))
       } else if (typeof engine !== "undefined") {

@@ -2,7 +2,9 @@
 //! type has the width the sim gives it. A declaration written by hand with a wrong width
 //! compiles and loads, and nothing reports it until the sim's calls fail: p03's 32-bit
 //! `HANDLE` made every call after `SimConnect_Open` fail (measured on MSFS 2024, 2026-10-08,
-//! record/areas/architecture/log.md).
+//! record/areas/architecture/log.md, "A standalone module built from Rust with cargo-msfs, and
+//! packaged by our own script, runs on MSFS 2024 and trades data slots with a SimConnect client,
+//! once its SimConnect handle is 64 bits wide").
 //!
 //! cargo-msfs names the SDK in `MSFS_SDK` and its WASI sysroot in `WASI_SYSROOT`, so the
 //! module builds only through cargo-msfs, as `node tools/build.ts` runs it. Every build of

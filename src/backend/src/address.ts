@@ -1,7 +1,7 @@
 // What the count of wrong codes is kept by. A home on IPv6 usually gets a /64, billions of
 // addresses its PCs may switch among freely, so an IPv6 address counts by its /64, and an
-// IPv4 address by itself (user, 2026-10-23; record/areas/network/02-units.md's note of that
-// date).
+// IPv4 address by itself (user, 2026-10-23; record/areas/network/02-units.md, "Codes, lapses,
+// and wrong codes").
 
 /** The key an address's wrong codes count under: an IPv4 address whole, an IPv6 one's /64. */
 export function counted(address: string): string {

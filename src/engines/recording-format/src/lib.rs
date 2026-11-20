@@ -8,8 +8,9 @@
 //! second. The file is one zstd frame, and a flush ends zstd's block, so everything written
 //! before it decompresses without what comes after, and `Reader` stops at the last whole
 //! record before the cut. One frame lets zstd find what repeats from one second to the next,
-//! such as ground vehicles polled every 500ms: p10's flight came to 42.6 MB an hour that way,
-//! and to 66.7 MB with a frame ended each second (record/areas/recording/log.md, 2026-10-23).
+//! such as ground vehicles polled every 500ms: the flight of p10, a probe that recorded a
+//! flight's inputs, came to 42.6 MB an hour that way, and to 66.7 MB with a frame ended each
+//! second (record/areas/recording/log.md, 2026-10-23).
 //!
 //! Decompressed, a recording reads:
 //!
@@ -22,9 +23,8 @@
 //!
 //! An input's sequence number and stamp are each its gap from the input before, and every
 //! number but a checkpoint's is a varint, 7 bits to a byte, as LEB128 has it. Gaps and
-//! varints took the recording of p10, a probe that recorded a flight's inputs, from 45.4 to
-//! 42.5 MB an hour with zstd at level 3, against 14 fixed bytes an input
-//! (record/areas/recording/01-recording-and-bug-reports.md, "The inputs").
+//! varints took p10's recording from 45.4 to 42.5 MB an hour with zstd at level 3, against 14
+//! fixed bytes an input (record/areas/recording/01-recording-and-bug-reports.md, "The inputs").
 
 use std::io::{self, BufReader, Read, Write};
 
@@ -34,7 +34,8 @@ use serde::{Deserialize, Serialize};
 pub const MAGIC: &[u8] = b"DualInput recording\n";
 
 /// The level p10's sizes above were measured at (record/areas/architecture/log.md,
-/// 2026-10-16).
+/// 2026-10-16). src/engines/aircraft-model/tests/installed.rs compresses at the same level to
+/// size the model's job's result in a recording, so change both together.
 const LEVEL: i32 = 3;
 
 const INPUT: u8 = 0;

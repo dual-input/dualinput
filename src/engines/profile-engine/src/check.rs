@@ -339,7 +339,7 @@ impl Checker {
                 "A profile names the aircraft it covers under `aircraft:`; a file without it is a module, which a profile imports",
             );
         }
-        // The EFB app's list of supported aircraft shows every profile by these two, so a
+        // The EFB app's list of supported aircraft shows every profile by these three, so a
         // profile without them would have no row to show.
         if !file.module {
             for key in ["maker", "name", "maturity"] {

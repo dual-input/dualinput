@@ -6,8 +6,8 @@
 # newest first, live in the private repository dual-input/relay-tokens, in its tokens.toml,
 # under the relay's region, since this repository goes public.
 #
-# The cap is 256 KiB/s, about 6 times what p06's busiest mix sent with headers, until the
-# bench's peak rate sets it (record/areas/network/02-units.md, "Budgets").
+# The cap is 256 KiB/s, about 6 times what p06's busiest mix sent with headers
+# (record/areas/network/02-units.md, "Budgets").
 
 [[relay]]
 region = "nyc"

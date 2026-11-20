@@ -4,9 +4,10 @@
 //! (record/areas/architecture/02-code-map.md, "Tiers").
 //!
 //! A feature's module is a file in `features/`, with its own types, and one `Module` value.
-//! It joins the format through four lines here: its `mod`, its place in `MODULES`, and its
-//! field in `Blocks` and in `EntryFields`. When you delete a feature, delete those four and its
-//! file. A level only adds, so a block a released level holds stays after its feature goes
+//! It joins the format through its lines here: its `mod`, its place in `MODULES`, its field in
+//! `Blocks` with its line in `Blocks::resolve`, and its field in `EntryFields` if it adds fields
+//! to an entry. When you delete a feature, delete those lines and its file. A level only adds, so
+//! a block a released level holds stays after its feature goes
 //! (record/areas/profiles/01-format-and-delivery.md, "Levels").
 
 pub mod avatars;

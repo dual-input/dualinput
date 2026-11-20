@@ -417,9 +417,9 @@ fn the_time_limit_stops_a_write_functions_endless_loop_in_about_100ms() {
     }
 }
 
-/// Stand-ins for what a write function calls, as the sync engine will give them: `host(v)`,
-/// which keeps a number, and `K(name)` and `write(target)`, which each build an object, as a
-/// name and the chain `write()` returns do, with `write()` keeping its target's name.
+/// Stand-ins for what a write function calls: `host(v)`, which keeps a number, and `K(name)` and
+/// `write(target)`, which each build an object, as the sync engine's name calls and the chain
+/// `write()` returns do, with `write()` keeping its target's name.
 fn stand_ins<'js>(ctx: &Ctx<'js>) -> sandbox::rquickjs::Result<()> {
     let kept = Rc::new(RefCell::new(Vec::<f64>::new()));
     let host = Function::new(ctx.clone(), move |v: f64| kept.borrow_mut().push(v))?;

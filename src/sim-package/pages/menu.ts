@@ -28,9 +28,12 @@ const WATCH_MS = 500
 /**
  * The master page on screen. The pause menu puts `MasterPage_Pause` over a flight's
  * `MasterPage_InGame`, so a flight's master page decides first (measured on MSFS 2024,
- * 2026-10-06, record/areas/interface/log.md). The world map shows as the large page component
- * `FreeFlightPage` over the main menu's master page (same log); that it's an element in this
- * form is unverified, and a session in the sim settles it.
+ * 2026-10-06, record/areas/interface/log.md, "Code in the menu's document tells which page is up,
+ * and nothing we found takes the menu home without the sim in front"). The world map shows as the
+ * large page component `FreeFlightPage` over the main menu's master page (same entry), and the
+ * menu script found it in this form (measured on MSFS 2024, 2026-11-17,
+ * record/areas/session/log.md, "In the sim, Join set the world map and started the flight within
+ * 0.9s, and active pause followed from our EFB app's code in 264ms, once the menu script parsed").
  */
 function masterPage(): MenuPage {
   if (document.querySelector('ui-resource-element[name="MasterPage_InGame"]')) return "in-game"

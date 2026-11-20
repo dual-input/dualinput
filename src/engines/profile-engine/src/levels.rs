@@ -15,6 +15,9 @@ use crate::features::{self, Module};
 /// TypeScript's own libraries and the globals javascript/sandbox.json lists, so a script that
 /// names something the sandbox lacks, such as `Date` or `Math.random`, fails its type check
 /// (record/areas/architecture/02-code-map.md, "One loop").
+///
+/// `PRELUDE` in src/engines/sync-engine/src/script.rs defines at run time what the second part
+/// declares, so change both together.
 const DECLARATIONS: &[(u32, &str)] = &[
     (1, include_str!("../javascript/javascript.d.ts")),
     (

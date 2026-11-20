@@ -9,8 +9,8 @@
 //! process to crash it, has it quit, lose a connection, or play a flight load's signals, and
 //! asks it what the core called and what its aircraft holds.
 //!
-//! The stand-in answers each call the platform's units make. Each later stage adds the
-//! answers to its own units' calls, beside the edge that makes them in the sim.
+//! The stand-in answers each call the platform's units make. When a unit gains a call of the
+//! sim's, add its answer here, beside the edge that makes the call in the sim.
 
 mod aircraft;
 mod motion;
@@ -72,9 +72,11 @@ pub enum Act {
     Watch { process: u32 },
     /// Loses the newest connection of the unit at `unit`, as a failed call on it would.
     Lose { unit: u32 },
-    /// Sends the quit message on every open connection. Whether a sim closing from its menu
-    /// sends it before its process exits is unmeasured
-    /// (record/areas/core/03-sim-seam-and-wasm-module.md, "Cases for the bench").
+    /// Sends the quit message on every open connection, as the sim's window's close button
+    /// sent it 8.8s before the sim's process exited (measured on MSFS 2024, 2026-10-21,
+    /// record/areas/core/log.md, "Stage 4's core follows the sim through three boots and five
+    /// loads, and replays all of it, but ending a flight sends no BACK_TO_MAIN_MENU, and a
+    /// failed open blocks for 4.5s").
     Quit,
     /// Plays `signals`, each the given ms after the one before.
     Play(Vec<(u64, Signal)>),
@@ -91,8 +93,9 @@ pub enum Act {
     StopModule,
     /// Runs this module from now on, such as one from another build.
     Module(Box<dyn Module>),
-    /// Hands up one more message on the unit's last connection that's gone, as the sim can
-    /// send one the edge reads after the connection closed.
+    /// Hands up one more message on the unit's last connection that's gone, as the edge can
+    /// bring one for a connection the sim service has since closed
+    /// (record/areas/architecture/02-code-map.md, "A connection for each feature, for each load").
     Stale { unit: u32 },
     /// Sets the aircraft's variables, each a number or a text, such as `SIM ON GROUND` or
     /// `TITLE`, as the sim's aircraft holds them.

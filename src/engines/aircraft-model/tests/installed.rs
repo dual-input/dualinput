@@ -7,7 +7,7 @@
 //! without the 58P installed in its Community folder.
 
 // A test runs off the core's loop, so it reads files and the clock, which the root's
-// clippy.toml forbids only the loop.
+// clippy.toml forbids only in code on the loop.
 #![allow(clippy::disallowed_methods, clippy::unwrap_used, clippy::expect_used)]
 
 use std::collections::BTreeMap;

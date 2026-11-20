@@ -163,7 +163,8 @@ impl SimAwareness {
                     // The last run's page, aircraft, departure, and pause describe a sim that
                     // has gone, so a new run starts with none, and the new sim reports its
                     // own. How the last run ended stays, for the crew's notification that their sim
-                    // closed or crashed (record/areas/sync/04-order-and-recovery.md).
+                    // closed or crashed (record/areas/sync/04-order-and-recovery.md, "A sim that
+                    // closed").
                     *self = SimAwareness {
                         stage: Stage::Starting,
                         run: Some(SimRun { process, created }),
@@ -269,7 +270,7 @@ impl SimAwareness {
 ///
 /// The sim reported one A350 load twice, 1ms apart, once relative and mixed-case and once
 /// absolute and lowercase, so only this part of the path, in one case, names one aircraft
-/// both times (record/learn/foundations/02-02-aircraft.md, "Traps").
+/// both times (record/learn/foundations/02-02-aircraft.md, "How an aircraft is identified").
 pub fn aircraft(path: &str) -> Option<Aircraft> {
     // The leading `/` matches `simobjects` only as a whole folder's name.
     let path = format!("/{}", path.to_lowercase().replace('\\', "/"));

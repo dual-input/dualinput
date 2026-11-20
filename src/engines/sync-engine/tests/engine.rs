@@ -3,7 +3,7 @@
 //! from the sync units' cases for the bench (record/areas/sync/05-units.md, "Cases for the
 //! bench").
 
-// The timing test reads the clock, which the root's clippy.toml forbids only the loop.
+// The timing test reads the clock, which the root's clippy.toml forbids only in code on the loop.
 #![allow(clippy::disallowed_methods)]
 
 use profile_engine::{
@@ -489,7 +489,8 @@ fn a_toggle_that_arrives_with_another_entrys_write_decides_once_that_write_reads
     let mut pm = Machine::new(PM, &p);
     pm.read(&alt, 0.0);
     pm.read(&vs, 1.0);
-    // The PF pressed ALT in vertical speed mode: altitude hold on and vertical speed mode off.
+    // The pilot flying pressed ALT in vertical speed mode: altitude hold on and vertical speed
+    // mode off.
     assert_eq!(pm.arrive("alt", 1.0, stamp(PF, 1, &[])), Applied::Done);
     assert_eq!(pm.arrive("vs", 0.0, stamp(PF, 2, &[])), Applied::Stepping);
     assert_eq!(pm.acts(), vec![key("AP_ALT_HOLD")]);
@@ -559,7 +560,8 @@ fn a_following_machines_write_of_what_the_pf_owns_holds_no_toggle_and_a_value_wr
         pm.read(name, 0.0);
     }
     pm.read(&vs, 1.0);
-    // The PM's own autopilot holds its trim where it wants it, so the write never reads back.
+    // This machine's own autopilot holds the trim where it wants it, so the write never reads
+    // back.
     pm.arrive("trim", 5.0, stamp(PF, 1, &[]));
     assert_eq!(pm.arrive("vs", 0.0, stamp(PF, 2, &[])), Applied::Done);
     assert_eq!(pm.arrive("beacon", 1.0, stamp(PF, 3, &[])), Applied::Done);

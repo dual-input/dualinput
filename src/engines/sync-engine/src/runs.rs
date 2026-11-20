@@ -44,7 +44,7 @@ pub(crate) struct Run {
     /// Whether each step's value goes pending, which a put-back's and a shadow's don't.
     pub(crate) checked: bool,
     /// Whether a pending value still unread at its check is flagged, which a following
-    /// machine's write of a PF-owned entry's isn't.
+    /// machine's write of an entry the pilot flying owns isn't.
     pub(crate) flags: bool,
     /// Its values don't go pending, as a put-back's don't, so this machine's readings while it
     /// runs start no put-back of their own.

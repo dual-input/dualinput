@@ -30,11 +30,13 @@ use crate::state::{Held, StateSlot};
 /// flagged. A profile watches the switch it writes, which shows a write within a few frames, as
 /// the Fenix's switches did in about 130ms, and the slowest watch is an `instrument()` entry,
 /// which its panel module reads every 250ms, so 1.5s leaves a wide margin (measured on MSFS
-/// 2024, 2026-11-09, record/areas/sync/log.md). State sync waits as long after a load before
-/// its catch-up step can give, for every watch's first reading.
+/// 2024, 2026-11-09, record/areas/sync/log.md, "Stage 14's session in the sim passed in four
+/// aircraft, and no aircraft took an H: event our module fired"). State sync waits as long
+/// after a load before its catch-up step can give, for every watch's first reading.
 pub const CHECK: u64 = 1_500_000;
 /// A token, or an `ignore`, that no occurrence uses within this long expires, since an aircraft
-/// that masks an event never reports it, and the token would swallow the pilot's next press.
+/// that masks an event never reports it, and the token would swallow the pilot's next press
+/// (record/areas/sync/02-live-sync.md, "Keeping a change from applying twice").
 const TOKEN: u64 = 1_000_000;
 /// An aircraft counts as settled this long after Ready to fly (decision 048).
 pub const SETTLE: u64 = 30_000_000;

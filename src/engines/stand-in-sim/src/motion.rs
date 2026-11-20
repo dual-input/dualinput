@@ -22,9 +22,11 @@ const FT_PER_S_IN_KNOTS: f64 = FT * 3_600.0 / 1_852.0;
 /// velocities in feet per second, x right, y up, and z forward, and the rotation velocities
 /// in radians per second, x about the pitch axis, y about the heading's, and z about the
 /// bank's, each in the sign its angle counts in. `E:SIMULATION RATE` multiplies the motion,
-/// as a raised rate moves the sim's aircraft that many times faster than its velocity, which
-/// is unverified (record/areas/flight-model/01-flight-model-sync.md, "Its first frames"); a
-/// rate nothing set counts as 1.
+/// and a rate nothing set counts as 1. A raised rate moved the sim's aircraft that many times
+/// faster than its velocity (measured on MSFS 2024, 2026-11-11,
+/// record/areas/flight-model/log.md, "Seated on the pose `Follow` says it writes, a figure
+/// keeps its seat on the following machine, and the 58P banks and pitches with the aircraft it
+/// follows").
 pub(crate) fn fly(aircraft: &mut Aircraft, seconds: f64) {
     let rate = match aircraft.number("SIMULATION RATE") {
         r if r > 0.0 => r,

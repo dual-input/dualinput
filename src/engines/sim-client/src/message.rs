@@ -95,7 +95,7 @@ pub enum Message {
     Assigned { request: u32, object: u32 },
     /// `SimConnect_CameraGet`'s answer, which names no request.
     Camera(Camera),
-    /// A kind of message nothing of ours asks for yet.
+    /// A kind of message nothing of ours asks for.
     Other { id: u32 },
 }
 

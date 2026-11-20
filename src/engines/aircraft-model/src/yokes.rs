@@ -12,7 +12,8 @@ use ray_cast::{Affine, Ray, Vec3};
 use crate::Aircraft;
 use crate::model::{AnimationMeta, Model, ProgramMeta, Rest, Scene, Yoke, YokeStage, to_12};
 
-/// The frames across an animation a stage samples, from its first to its last.
+/// The frames across an animation a stage samples, from its first to its last. `SAMPLES` in the
+/// message crate's avatars slots holds the same count, so change both together.
 const SAMPLES: usize = 21;
 /// The animated nodes a yoke's grips can sit below, the stages `YokeSlot` in the message crate's
 /// avatars slots holds, so change both together. Past them, the grips would sit in a frame
@@ -140,8 +141,9 @@ fn yoke(model: &Model, aircraft: &Aircraft, node: u32, grips: [Vec3; 2]) -> Opti
 
 /// Where a hand's center goes for a grip at `grip`: one hand's radius out from where the line
 /// from the seat's eye on that side meets the horn, since the marked nodes sit inside the
-/// horns, and a hand placed on them sank into the yoke (record/areas/avatars/log.md,
-/// 2026-10-03).
+/// horns, and a hand placed on them sank into the yoke (measured on MSFS 2024, 2026-10-03,
+/// record/areas/avatars/log.md, "One hand holds the yoke through its whole travel, posed from
+/// the aircraft's own code, while the other taps and they swap by side").
 fn spot(model: &Model, aircraft: &Aircraft, left: bool, grip: Vec3) -> Vec3 {
     let eye = aircraft
         .eyes

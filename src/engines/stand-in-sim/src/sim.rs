@@ -26,8 +26,8 @@ use crate::{
     World, motion,
 };
 
-/// What the sim's open message names, as MSFS 2024's did on three sim releases: SunRise
-/// 12.2, build 282174.999, and SimConnect 12.2.0.0 (measured,
+/// What the sim's open message names, as MSFS 2024's named SunRise 12.2, build 282174.999,
+/// and SimConnect 12.2.0.0 on sim releases 1.8.14, 1.8.16, and 1.9.18 (measured,
 /// record/areas/build/results/2026-10-18-msfs-packages-and-sdk.txt).
 const APPLICATION: &str = "SunRise";
 const APPLICATION_VERSION: [u32; 4] = [12, 2, 282_174, 999];
@@ -275,8 +275,11 @@ impl Sim {
 
     fn open(&mut self, connection: Connection) {
         // SimConnect_Open returned E_FAIL until the sim took connections, 109s into its
-        // boot (measured on MSFS 2024, 2026-10-09, record/areas/architecture/log.md,
-        // "Connecting as the sim boots").
+        // boot (measured on MSFS 2024, 2026-10-09, record/areas/architecture/log.md, "In a
+        // flight, a Rust client on SimConnect.dll masks, creates AI objects with liveries, sets
+        // input events, reads the camera, and follows the load; the Rust module echoes; Raw
+        // Input gets a person's key and button; and the module's clock counts the counter's
+        // ticks from near the sim's start").
         if self.process.is_none() {
             self.hand_up(Up::Opened {
                 connection,
@@ -570,7 +573,8 @@ impl Sim {
                     self.hold_polls -= 1;
                     objects.pop();
                 }
-                // A poll that finds nothing answers once, with a count of 0.
+                // A poll that finds nothing answers once, with a count of 0
+                // (record/areas/traffic-atc/01-traffic-and-atc.md, "Polling").
                 if out_of == 0 {
                     let none = Data {
                         request,
@@ -697,7 +701,9 @@ impl Sim {
     }
 
     /// A request's values, each after its datum's ID when `tagged`, or `None` for an object the
-    /// sim doesn't hold. A by-type read's answer has no tags, as the sim's has none.
+    /// sim doesn't hold. A by-type read's answer has no tags, as the sim's has none (measured on
+    /// MSFS 2024, 2026-11-05, record/areas/avatars/log.md, "A click that took the focus from
+    /// the sim left a figure's hand out, and the rest of the session passed").
     fn data(
         &self,
         connection: Connection,
@@ -762,7 +768,8 @@ impl Sim {
             let clock = self.clock();
             let (module, world) = (&mut self.module, &mut self.world);
             // A panic in our module stops it in the sim, which marks it DIRTY and runs it no
-            // more, while the sim runs on, so the stand-in stops it too.
+            // more, while the sim runs on, so the stand-in stops it too
+            // (record/areas/build/02-testing.md, "Our WASM module").
             match std::panic::catch_unwind(AssertUnwindSafe(|| module.frame(clock, world))) {
                 Ok(writes) => {
                     for (slot, bytes) in writes {
@@ -996,8 +1003,11 @@ impl Sim {
     /// event's value negated, in Position 16k, as each read on the Baron 58P through our
     /// masking probe (measured on MSFS 2024, 2026-10-01,
     /// experiments/areas/flight-controls/results/p01-mask-2026-10-01-20-28-54.txt), and each
-    /// brake's takes its event's value plus 16,384, which is unverified
-    /// (record/areas/flight-model/01-flight-model-sync.md, "Drawing").
+    /// brake's takes its event's value plus 16,384, a straight line where the 58P's brakes
+    /// followed a curve, reading 8,846 for an event of 0 (measured on MSFS 2024, 2026-11-11,
+    /// record/areas/flight-model/log.md, "In the sim the 58P follows a stand-in's path within
+    /// centimeters, a figure on the following machine slid along the aircraft, and the brake
+    /// events follow a curve").
     fn move_control(&mut self, name: &str, value: i32) {
         let aircraft = &mut self.world.aircraft;
         let value = f64::from(value);
@@ -1025,7 +1035,8 @@ impl Sim {
     /// `ELECTRICAL_Battery_1_Toggle`: its input event moves by the operation, and a name with
     /// no such input event or operation does nothing, as a bare
     /// write of an input event did nothing on the Baron 58P (measured on MSFS 2024, 2026-08-29,
-    /// fsc-editor, `docs/sim-vars/build/v1-log.md`).
+    /// fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-29 — The arity probes: bare K: pops
+    /// one and broadcasts; bare B: writes are per-preset dead air").
     fn call_preset(&mut self, name: &str, value: Option<f64>) {
         self.trigger(Trigger::Fired(name), value);
         let Some((event, operation)) = name.rsplit_once('_') else {
@@ -1067,7 +1078,8 @@ impl Sim {
 
     /// `SimConnect_EnumerateInputEvents`' answer, in pages, with each name in capitals, as the
     /// sim listed the Baron 58P's `ELECTRICAL_Battery_1` as `ELECTRICAL_BATTERY_1` (measured
-    /// on MSFS 2024, 2026-11-09, record/areas/sync/log.md).
+    /// on MSFS 2024, 2026-11-09, record/areas/sync/log.md, "The first session in the sim stopped
+    /// on a catch-up that six unread instrument() entries held open").
     fn list_inputs(&mut self, connection: Connection, request: u32) {
         let events: Vec<InputEvent> = self
             .world
@@ -1192,10 +1204,12 @@ impl Sim {
         });
     }
 
-    /// Hands up the exit code of the sim's process. How a crash reaches a SimConnect
-    /// connection, as a failed call or as nothing until the process is gone, is unmeasured
-    /// (record/areas/core/03-sim-seam-and-wasm-module.md, "Its inputs"), so the stand-in
-    /// hands up nothing more for the connections it drops.
+    /// Hands up the exit code of the sim's process, and nothing more for the connections it
+    /// drops, as a kill of the sim reached the core as its process's exit, with no lost
+    /// connection or failed call before it (measured on MSFS 2024, 2026-10-21,
+    /// record/areas/core/log.md, "Stage 4's core follows the sim through three boots and five
+    /// loads, and replays all of it, but ending a flight sends no BACK_TO_MAIN_MENU, and a
+    /// failed open blocks for 4.5s").
     fn exited(&mut self) {
         let Some((id, process)) = self.process.take() else {
             return;

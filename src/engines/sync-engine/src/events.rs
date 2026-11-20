@@ -13,18 +13,18 @@ use crate::{
     Watching, Why,
 };
 
-/// The sim reported each of the PA-24's input events twice, one frame apart (measured on MSFS
-/// 2024, 2026-10-05, record/areas/sync/log.md), so a report with the same name and value as one
-/// from the last 3 frames drops, but never one more than 200ms after it, since at a low frame
-/// rate 3 frames could reach a real repeat 261ms later (measured on MSFS 2024, 2026-08-23,
-/// fsc-editor, docs/sim-vars/build/v1-log.md).
+/// The sim reported each of the PA-24's input events twice, one frame apart, so a report with
+/// the same name and value as one from the last 3 frames drops, but never one more than 200ms
+/// after it, since at a low frame rate 3 frames could reach a real repeat 261ms later (measured
+/// on MSFS 2024, record/areas/sync/02-live-sync.md, "Keeping a change from applying twice").
 const DOUBLE_FIRE_FRAMES: u64 = 3;
 pub(crate) const DOUBLE_FIRE_MOST: u64 = 200_000;
 
-/// The driven-entry test's starting values, which v1's recordings tune: an entry its own
-/// aircraft changed in each 3s window for 30s, while another machine's change to it came too.
-/// The windows are fixed from the first change, so a change every 3s, give or take a frame, hits
-/// each one.
+/// The driven-entry test's values: an entry its own aircraft changed in each 3s window for 30s,
+/// while another machine's change to it came too. The windows are fixed from the first change,
+/// so a change every 3s, give or take a frame, hits each one. The 3s and the 30s are starting
+/// values, which the record leaves open (record/areas/sync/04-order-and-recovery.md, "Left
+/// open").
 const DRIVEN_EVERY: u64 = 3_000_000;
 const DRIVEN_WINDOWS: u64 = 10;
 

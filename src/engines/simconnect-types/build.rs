@@ -7,7 +7,7 @@
 //! (record/areas/build/01-the-build.md, "The SDK").
 
 // A build script runs as the crate builds, never on the core's loop, so reading files and
-// the environment is its job, which the root's clippy.toml forbids only the loop.
+// the environment is its job, which the root's clippy.toml forbids only in code on the loop.
 #![allow(clippy::disallowed_methods)]
 
 use std::env;

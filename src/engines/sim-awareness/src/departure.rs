@@ -1,5 +1,5 @@
 //! Where a flight departed, from the flight file the sim names in `FlightLoaded`, which Go to
-//! reads to put a joining pilot at the PF's airport and stand (record/areas/session/
+//! reads to put a joining pilot at the pilot flying's airport and stand (record/areas/session/
 //! 02-units.md, "Go to").
 
 /// A flight's departure: its `[Departure]` section's `ICAO`, `GateName`, and `GateNumber`.

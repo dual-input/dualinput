@@ -97,12 +97,13 @@ const CATCH_UP: How = How {
 impl How {
     /// How `how` goes for `owner`'s entry on this machine. On a following machine, flight-model
     /// sync's routine `Follow` freezes the aircraft and writes its pose, and the aircraft's
-    /// own systems still move what the PF owns, as its autopilot trims, faster than putting it
-    /// back brings it home, so a flag there would only report the trim in every flight on
-    /// autopilot (measured on MSFS 2024, 2026-11-17, record/areas/sync/log.md, "A preset called
-    /// with a value from our WASM module took only its first value, and from a panel it took
-    /// every one"). Its values still go pending, so the echo of the write is still its own.
-    /// The PF's machine writes those entries' last values as it takes control, when they count.
+    /// own systems still move what the pilot flying owns, as its autopilot trims, faster than
+    /// putting it back brings it home, so a flag there would only report the trim in every
+    /// flight on autopilot (measured on MSFS 2024, 2026-11-17, record/areas/sync/log.md, "A
+    /// preset called with a value from our WASM module took only its first value, and from a
+    /// panel it took every one"). Its values still go pending, so the echo of the write is
+    /// still its own. The pilot flying's machine writes those entries' last values as it takes
+    /// control, when they count.
     fn for_owner(self, owner: Owner, cx: Ctx) -> How {
         let following = owner == Owner::PilotFlying && !cx.flying();
         How {
@@ -507,16 +508,16 @@ impl Engine {
         self.write(i, value, how, cx, out)
     }
 
-    /// Control passed to this machine: each PF-owned entry whose reading differs from the old
-    /// PF's last value is written to that value once, so the machine takes control with the
-    /// controls the old PF flew. While this machine followed, its own systems could move those
-    /// entries away, as its autopilot ran the 58P's trim to full nose-down. The write doesn't
-    /// hold a 58P's trim with its autopilot engaged: the autopilot, wound up while the aircraft
-    /// was frozen, runs the trim away within a second of the write (measured on MSFS 2024,
-    /// 2026-11-19, record/areas/flight-model/log.md, "After a handover the 58P's own autopilot
-    /// rolls the aircraft and runs its trim, wound up while `Follow` held it frozen, which v1
-    /// keeps as a known limit"). A toggle is left out, since a write of it still on its way would
-    /// flip it back, and nothing but a pilot moves a switch.
+    /// Control passed to this machine: each entry the pilot flying owns whose reading differs
+    /// from the old pilot flying's last value is written to that value once, so the machine
+    /// takes control with the controls the old pilot flying flew. While this machine followed,
+    /// its own systems could move those entries away, as its autopilot ran the 58P's trim to
+    /// full nose-down. The write doesn't hold a 58P's trim with its autopilot engaged: the
+    /// autopilot, wound up while the aircraft was frozen, runs the trim away within a second of
+    /// the write (measured on MSFS 2024, 2026-11-19, record/areas/flight-model/log.md, "After a
+    /// handover the 58P's own autopilot rolls the aircraft and runs its trim, wound up while
+    /// `Follow` held it frozen, which v1 keeps as a known limit"). A toggle is left out, since a
+    /// write of it still on its way would flip it back, and nothing but a pilot moves a switch.
     pub(crate) fn took_control(&mut self, cx: Ctx, out: &mut Vec<Out>) {
         if !cx.flying() {
             return;
@@ -595,9 +596,9 @@ impl Engine {
     }
 
     /// Whether another entry has a value pending that its check would flag. A following
-    /// machine's write of what the PF owns doesn't flag, as `How::for_owner` sets it, since that
-    /// machine's own autopilot moves the trim faster than it reads back, so it could hold every
-    /// switch for a check's length; so it holds nothing here either.
+    /// machine's write of what the pilot flying owns doesn't flag, as `How::for_owner` sets it,
+    /// since that machine's own autopilot moves the trim faster than it reads back, so it could
+    /// hold every switch for a check's length; so it holds nothing here either.
     fn pending_besides(&self, i: usize) -> bool {
         self.state
             .iter()
@@ -706,7 +707,9 @@ impl Engine {
             Write::Steps(s) => {
                 // A new value while it steps aims again from its count, and one that comes
                 // while its last step is still pending starts from that step, since the reading
-                // can lag the last step by 2 frames.
+                // can lag the last step by 2 frames (measured on MSFS 2024, 2026-10-05,
+                // record/areas/sync/log.md, "Two writes in one frame land in the order sent, and
+                // a write shows within 2 frames").
                 let from = match self.runs.get(&slot_id).and_then(|r| r.count) {
                     Some(count) => Some(count.at),
                     None => slot
@@ -849,7 +852,8 @@ impl Engine {
     /// started is made, and flagged as never landed. Without this, an `instrument()` entry no
     /// panel reads holds the catch-up open, and the stream holds everything this machine sends
     /// for as long as it's open: six of the Baron 58P's did (measured on MSFS 2024, 2026-11-09,
-    /// record/areas/sync/log.md).
+    /// record/areas/sync/log.md, "The first session in the sim stopped on a catch-up that six
+    /// unread instrument() entries held open").
     fn unread_catch_up(&mut self, cx: Ctx, out: &mut Vec<Out>) {
         let Some(c) = self.catch_up.as_ref() else {
             return;

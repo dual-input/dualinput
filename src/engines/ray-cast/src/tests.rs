@@ -44,7 +44,7 @@ impl Numbers {
     }
 }
 
-/// A bumpy sheet of 2 Ã— 60 Ã— 60 triangles over a metre square, and loose triangles above it.
+/// A bumpy sheet of 2 × 60 × 60 triangles over a meter square, and loose triangles above it.
 fn sheet() -> Plain {
     let n = 60;
     let mut positions = Vec::new();

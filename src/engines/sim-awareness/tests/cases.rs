@@ -176,9 +176,9 @@ fn a_restart_is_one_loading_and_no_menu() {
 }
 
 /// The A350's one load, which the sim reported twice, 1ms apart
-/// (record/learn/foundations/02-02-aircraft.md, "Traps"). The chapter elides the preset
-/// folder and the absolute path's middle, so `inibuilds\a350-1000` and the folders between
-/// `c:\users\` and `community\` are made up.
+/// (record/learn/foundations/02-02-aircraft.md, "How an aircraft is identified"). The chapter
+/// elides the preset folder and the absolute path's middle, so `inibuilds\a350-1000` and the
+/// folders between `c:\users\` and `community\` are made up.
 #[test]
 fn the_a350s_two_paths_for_one_load_name_one_aircraft() {
     let relative = r"SimObjects\Airplanes\A350\presets\iniBuilds\A350-1000\config\aircraft.CFG";
@@ -300,8 +300,8 @@ fn leaving_a_flight_reaches_menu() {
     assert_eq!(changes, Changes { steps: 1, entered });
 }
 
-/// The pause menu's End flight, then a load of the L-1011, as p05 heard them beside stage 4's
-/// core, with seconds from the probe's start (measured on MSFS 2024, 2026-10-21,
+/// The pause menu's End flight, then a load of the L-1011, as p05 heard them beside our core,
+/// with seconds from the probe's start (measured on MSFS 2024, 2026-10-21,
 /// experiments/areas/core/results/p05-leaving-a-flight-2026-10-21.txt): no
 /// `BACK_TO_MAIN_MENU` came.
 #[test]
@@ -342,7 +342,10 @@ fn ending_a_flight_from_the_pause_menu_reaches_menu() {
     );
 }
 
-/// No run of ours has recorded a clean close, so the exit code 0 here is made up.
+/// The sim's window's close button sent the quit message, and the sim exited with code 0
+/// (measured on MSFS 2024, 2026-10-21, record/areas/core/log.md, "Stage 4's core follows the
+/// sim through three boots and five loads, and replays all of it, but ending a flight sends no
+/// BACK_TO_MAIN_MENU, and a failed open blocks for 4.5s").
 #[test]
 fn the_quit_message_then_the_exit_ends_the_run_as_a_close() {
     let mut sim = flying(PA24);

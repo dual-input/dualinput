@@ -9,7 +9,7 @@
 
 use crate::xml;
 
-/// What a read gave: the file's bytes, or that it isn't there.
+/// What a read gave: the file's bytes, that it isn't there, or that it hasn't been read yet.
 pub enum Read<'a> {
     Bytes(&'a [u8]),
     Missing,

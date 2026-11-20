@@ -144,7 +144,8 @@ struct Inputs<K> {
     /// Each name's hash, from the pages so far, under the name in capitals. The sim lists names
     /// in capitals, the Baron 58P's `ELECTRICAL_Battery_1` as `ELECTRICAL_BATTERY_1`, while an
     /// aircraft's files and our profiles spell them as the aircraft declares them (measured on
-    /// MSFS 2024, 2026-11-09, record/areas/sync/log.md).
+    /// MSFS 2024, 2026-11-09, record/areas/sync/log.md, "The first session in the sim stopped on
+    /// a catch-up that six unread instrument() entries held open").
     hashes: BTreeMap<String, u64>,
     /// Whether the last page has come.
     whole: bool,
@@ -435,8 +436,9 @@ impl<K: Clone> Client<K> {
     /// Sends the sim's event `name` with `values`, by the legacy call for one value or none and
     /// by `_EX1` only for more, since the PMDG 777's module dropped a masked axis sent with
     /// `_EX1` and acted on the same event sent with the legacy call (measured on MSFS 2024,
-    /// 2026-10-01, record/areas/flight-controls/log.md). Delivery starts at the highest priority,
-    /// so our own sends reach the group `listen` adds its events to.
+    /// 2026-10-01, record/areas/flight-controls/log.md, "The PMDG 777 takes a value sent back
+    /// with the legacy transmit call"). Delivery starts at the highest priority, so our own
+    /// sends reach the group `listen` adds its events to.
     pub fn key_values(&mut self, by: &K, object: u32, name: &str, values: &[u32]) -> Vec<Op> {
         let (event, mut ops) = self.event(by, name);
         let group = SIMCONNECT_GROUP_PRIORITY_HIGHEST;
@@ -503,9 +505,10 @@ impl<K: Clone> Client<K> {
     }
 
     /// Reads the input event `name` once and subscribes to its changes, since subscribing alone
-    /// reports nothing until the value changes (measured on MSFS 2024, fsc-editor,
-    /// `docs/sim-vars/build/v1-log.md`). The first `B:` call on a connection asks for the list
-    /// of input events, and every call waits until it's whole.
+    /// reports nothing until the value changes (measured on MSFS 2024, 2026-09-04, fsc-editor,
+    /// `docs/sim-vars/build/v1-log.md`, "2026-09-04 — The `B:` subscription is a change feed;
+    /// the entry below was wrong"). The first `B:` call on a connection asks for the list of
+    /// input events, and every call waits until it's whole.
     pub fn input(&mut self, by: &K, name: &str) -> InputAsk<K> {
         let name = sim_name(name, "B:").to_string();
         if self.inputs.whole {
@@ -744,7 +747,10 @@ impl<K: Clone> Client<K> {
 /// The name SimConnect takes for a variable, so `A:TITLE` is `TITLE`, while `L:` stays on.
 /// SimConnect reads an environment variable with no prefix too, so `E:IS AVATAR` is `IS AVATAR`,
 /// and it answers `NAME_UNRECOGNIZED` to the prefix, which left a pilot on foot seated (measured
-/// on MSFS 2024, 2026-11-05, record/areas/avatars/log.md, "The session in the sim").
+/// on MSFS 2024, 2026-11-05, record/areas/avatars/log.md, "The session in the sim: the figure
+/// spawns and sits, the sim sizes it by its 2.57m at-rest sphere, and a pilot on foot read as
+/// seated"). `bare` in src/engines/stand-in-sim/src/sim.rs does the same, so change both
+/// together.
 fn var_name(name: &str) -> &str {
     name.strip_prefix("A:")
         .or_else(|| name.strip_prefix("E:"))

@@ -14,7 +14,9 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > The sim service reads it in our WASM module, through the platform's own routine `Camera`, which it feeds on the platform's connection while any unit's subscription is open and ends when the last one's connection closes, and each subscriber reads `Camera`'s report on its own connection.
 > On a following machine, `SimConnect_CameraGet` read the camera one frame of the aircraft's travel behind the pilot's eye, and a read in the module before the routines' writes read it at the eye ([avatars log](../avatars/log.md#2026-11-17-inside-our-module-before-the-routines-write-a-following-machines-camera-reads-at-the-eye-in-every-referential)).
 > In [wants and the sim's APIs](#wants-and-the-sims-apis), reading the camera is a want, which `fsCameraGet` carries in the referential the routine names; it gives the same position and angles as `SimConnect_CameraGet`, with the yaw in `FsCameraData`'s `pbh.b` and the roll in its `pbh.h` (measured on MSFS 2024, 2026-11-17, [avatars log](../avatars/log.md#2026-11-17-inside-our-module-before-the-routines-write-a-following-machines-camera-reads-at-the-eye-in-every-referential)).
-> Whether its `fov` is the view's height in radians, as `SimConnect_CameraGet`'s is, is unverified, and stage 16b's click in the sim settles it, since the click's ray reads it.
+> Whether its `fov` is the view's height in radians, as `SimConnect_CameraGet`'s is, is unverified.
+> Stage 16b's session in the sim didn't settle it: it judged each click against the pilot's own click on the same knob at the stand, and both clicks' rays read the module's `fov`, so a wrong value would move both hands alike ([avatars log](../avatars/log.md#2026-11-17-with-the-camera-read-in-our-module-a-pilot-following-in-flight-keeps-their-seat-and-their-click-lands-on-the-switch)).
+> A click on a known target settles it, as p20's clicks did for `SimConnect_CameraGet` ([avatars log](../avatars/log.md#2026-10-03-the-ray-through-the-cursor-needs-no-calibration-cameragets-field-of-view-is-the-views-height-and-clicks-land-within-2mm-at-any-zoom-and-window-shape)).
 > `sim-client` keeps `CameraGet` for `tools/profile-author`, which reads the camera with no session running, so no routine moves its aircraft.
 
 > **Note**
@@ -34,6 +36,11 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > **Note**
 > Stage 11b's tentative decision on [what reaches the banner](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) drops the notification that [the aircraft's facts](#the-aircrafts-facts) gives as the use of `A:TITLE` (user, 2026-11-01).
 > It names the aircraft on a joiner's Join instead, such as "Install the Baron 58P to fly with James".
+
+> **Note**
+> In [a crash and a close](#a-crash-and-a-close), a run has recorded a clean close: the sim window's close button sent the quit message, and the process exited 8.8s later with code 0 (measured on MSFS 2024, 2026-10-21, [core log][session]).
+> Whether a close from the sim's own menu does the same, the first of the [cases for the bench](#cases-for-the-bench) in the sim, is unrecorded.
+> The kill case has its answer: `taskkill /F` reached the core as the process's exit, code 1, with no quit message, lost connection, or failed call before it, and the core read Closed on that input (same entry).
 
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.

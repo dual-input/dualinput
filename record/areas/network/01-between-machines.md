@@ -6,6 +6,12 @@ Depends on:  ../architecture/01-spine.md, ../product/01-aims.md, ../product/03-v
 Decides:     The topology, the transport, the way through home routers, the relay and its language, encryption, how a crew finds each other, how each channel travels and tells a copy from a late message, how control travels, what a session does while a link is lost and when it comes back, which ways to soften a short gap v1 builds, two cores on one PC, and how a receiver estimates a sender's clock offset.
 ```
 
+> **Note**
+> In [sending](#sending), the core hands one-off packets over in this order: the heartbeat, the flight model, ATC audio, avatars, traffic, then the cockpit stream's clocks, the one-off channel of its own that node 6.4 gave each member's vector clock ([architecture decisions](../architecture/decisions.md#a-channel-declares-its-delivery-and-priority-and-the-heartbeat-carries-only-the-clock-exchange); read in `src/engines/messages/src/cockpit.rs`, `CLOCKS`, at priority 10).
+> A received clock only tells the cockpit stream which kept messages it can drop (read in `src/platform/cockpit-stream/src/lib.rs`, `prune`).
+> A late clock keeps them in memory a moment longer, and if a cut's replay resends one the receiver has already applied, the receiver drops it as a copy.
+> Every other one-off channel carries something a pilot sees or hears, so the clocks go last (user, 2026-11-20).
+
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.
 Four models carry the rest:

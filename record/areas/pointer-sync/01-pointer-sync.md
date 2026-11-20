@@ -17,6 +17,10 @@ Decides:     What a gesture sends, and when; how another machine's panel plays i
 > Stage 11b's tentative decision that [a visible lock is a veil over the display with one centered card](../interface/decisions.md#a-visible-lock-is-a-veil-over-the-display-with-one-centered-card) settles the look and words of [locks](#locks) until the apps' design confirms it (user, 2026-11-01), and the flash's color, our error red at 55%.
 > A lock that turns into a warning keeps a lock's look, its card taking presses and its veil passing them, with a Dismiss that clears it on every display.
 
+> **Note**
+> In [playing a gesture](#playing-a-gesture), the cases in the sim passed on the A220's ND, among them a drag whose four moves and up played under the unseen lock its down took (measured on MSFS 2024, 2026-11-09, [pointer sync log](log.md#2026-11-09-pointer-syncs-cases-in-the-sim-pass-on-the-a220s-nd-and-the-barons-tablet-once-the-second-pilots-display-carries-the-a220s-livery)), but they don't settle whether the hit test sees past the overlay.
+> The session's script heard each event on the document in its capture phase (read in `tools/sim/state-sync.ts`, `pointerCases`), where an event fired at the lock lands too, so a check that logs each played event's target settles it.
+
 A gesture is one press or drag on a synced display, an instrument the profile's `displays` names, from a button's down to its up.
 It goes to the crew as it happens: its down, its moves, and its up, each a cockpit message keyed by the display.
 Each other machine's panel plays each message on its own copy of the display, at the same fractions of the display's size, as it arrives.

@@ -1264,7 +1264,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** the edge's writer records every input the core takes, from its first, and a replay checks every unit's outputs.
   No unit is partly recorded, and no channel, sim call, core helper want, or job is declared unrecorded, so the edge drops no input, no unit is held to a leaf rule, no setting records everything, and the header lists no partly recorded units.
-  The kernel draws every unit's handles from one counter and its random IDs from one generator, each output still names its unit, for the log, and the core still sends each client `alive` every 2s whatever else it sends ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-10-22).
+  The kernel draws every unit's handles from one counter and its random IDs from one generator, each output still names its unit, for the log, and the core still sends each client `alive` every 2s whatever else it sends (02-clients-and-panel-bridge's [protocol](../core/02-clients-and-panel-bridge.md#the-protocol)).
   A replay on the same commit with uncommitted changes warns and runs.
   Settled in node 6.6 by the user, 2026-10-16, changed to every input by the user, 2026-10-21 ([recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)), and its drift rules dropped by the user, 2026-10-23 ([recording log][writer]).
 - **Because:**

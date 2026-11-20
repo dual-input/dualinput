@@ -36,6 +36,7 @@ Decides:     What runs on a pilot's own machine and what on every machine; what 
 
 > **Note**
 > Since 2026-11-05, [the budgets](#budgets) for `Figure` and the sim's frame stand at what stage 17 measured, which the user accepted: about 140µs at p99 with two figures, and each figure in view 35µs to 64µs still, 63µs to 105µs moving ([log](log.md#2026-11-05-a-click-that-took-the-focus-from-the-sim-left-a-figures-hand-out-and-the-rest-of-the-session-passed)).
+> Stage 17 closed with the times in [which hand, and its target](#which-hand-and-its-target) as p27's, as [the hands' habits](decisions.md#the-hands-follow-a-pilots-habits-with-the-right-hand-on-the-yoke-in-the-right-seat) records.
 
 > **Note**
 > On 2026-10-25, stage 17 settled five of the items [left open](#left-open) ([log](log.md#2026-10-25-stage-17-settles-five-items-01-avatars-left-open-a-run-of-its-own-the-seat-in-the-pose-an-info-item-for-a-model-a-machine-cant-read-vr-as-a-known-limit-and-an-eye-on-what-the-figure-costs)): the figure runs on foot with a gait of its own past a speed; the seat stays in the pose; a model a machine can't read becomes a match-check item at a new level, `info`, saying avatar interaction isn't supported in that pilot's copy of the aircraft; VR stays a known limit for v1; and the figure's model and `Figure` keep its frame time down now, changing and writing a joint only when it moved past what shows.

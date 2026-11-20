@@ -32,7 +32,7 @@ Decides:     What the traffic host polls, how often, and which objects it carrie
 
 > **Note**
 > The traffic host carries 500 objects at most, the first it finds, counting those whose identity it's still reading, and logs once that it reached them (user, 2026-11-15).
-> A receiving pilot who enters or leaves the flight queues a call for each copy in one input, which the kernel stops past 1,000, and a busy hub's traffic is about 165 objects, p10's 145 aircraft and 20 tugs at EGLL ([log](log.md)).
+> A receiving pilot who enters or leaves the flight queues a call for each copy in one input, which the kernel stops past 1,000, and a busy hub's traffic is under 180 objects (arithmetic): at EGLL, p10 counted 142 to 153 aircraft ([architecture log](../architecture/log.md#2026-10-16-a-flying-machine-that-hosts-traffic-at-egll-takes-in-285-mb-of-inputs-an-hour-45-mb-with-zstd-mostly-traffic-and-one-loop-carries-them-at-05-of-a-core-and-replays-them-exactly)), and 23 of the sim's pushback tugs came within 1km of the pilot's aircraft over p10's 10 minutes ([log](log.md#2026-10-17-fs-copilots-code-holds-the-traffic-and-atc-mechanisms-614-carries-over-p10s-ground-objects-at-egll-were-gsxs-gate-signs-and-the-sims-pushback-tugs-and-sayintentions-program-is-sayintentionsai)).
 > [Which objects the host carries](#which-objects-the-host-carries) skips every object past those.
 
 > **Note**

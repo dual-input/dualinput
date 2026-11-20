@@ -25,6 +25,10 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 > A session under way has no start card, so there only the log says it.
 > The network raises `EndpointBound` or `BindFailed` for the session's one bind, and the session crate keeps a Host an attempt until the first and ends the session on the second, so the start card says why and [no session that can't reach anyone shows](../interface/decisions.md#host-and-join-answer-inside-the-start-card) (user, 2026-11-02).
 
+> **Note**
+> In [cases for the bench](#cases-for-the-bench), the proxy's cuts still record the time from the cut's end to `LinkUp` with `again` with no bound, since the bench's first run set none (read in `tools/bench/scenarios/network-outages.ts`).
+> In the bench's first run, `LinkUp` with `again` came 5.1s to 7.8s after a 10s cut ended, 16.8s and 26.8s after a 30s one, 14.8s and 16.3s after 60s, and 30.2s and 31.9s after 120s (measured on 2026-10-22, [network log](log.md#2026-10-22-on-the-bench-two-cores-join-in-11s-lose-the-link-50s-into-each-outage-and-get-it-back-01s-to-30s-after-and-every-channel-runs-within-8ms-of-the-others-through-a-lossy-relay)).
+
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.
 The network owns everything between machines, the backend's requests among it, and the session crate fills each connection's first message with the session's keys through one hook.

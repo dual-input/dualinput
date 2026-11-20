@@ -664,7 +664,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   A dismissed card stays hidden while its words last, so news that moves on under one ID shows again.
   `list`, for several controls at one load, joins the type with the state sync feature that raises it.
 - **Because:**
-  - The sim blurs whatever lies behind a panel's painted pixels, so a translucent pixel would show it, and we know no way to turn it off (unverified: no run has measured it, and a look at a translucent card in the sim settles it).
+  - The sim blurs whatever lies behind a panel's painted pixels, so a translucent pixel would show it, and we know no way to turn it off: under a see-through pink layer of p05's panel, the instruments showed as a smooth blur, not tinted pink (measured on MSFS 2024, 2026-10-04, [interface log](log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
   - A full-height column would block a third of the cockpit if clicks don't pass through its empty part, which no run has tried ([cases in the sim](01-apps.md#cases-for-the-bench)).
 - **Leaves out:** how the banner shows in VR, beyond the same panel.
 

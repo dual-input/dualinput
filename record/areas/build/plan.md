@@ -968,7 +968,8 @@ Done on 2026-11-20: every chunk was read and fixed, changing comments in 254 fil
 
 ## 22 GitHub
 
-Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)): CI's workflows for each pull request and each merge to `main` ([CI](../architecture/02-code-map.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green)), the release workflow with the check before a release ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)), the profiles' workflow and their Pages site ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)), `tools/replay.ts`, which fetches the core a recording's release shipped ([running a replay](../core/01-loop-and-edge.md#running-a-replay)), and the repositories of ours beside this one, the Coherent GT check's and the one that holds the relays' tokens ([the build](01-the-build.md)).
+Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)): CI's workflows for each pull request and each merge to `main` ([CI](../architecture/02-code-map.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green)), the release workflow with the check before a release ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)), the profiles' workflow and their Pages site ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)), and `tools/replay.ts`, which fetches the core a recording's release shipped ([running a replay](../core/01-loop-and-edge.md#running-a-replay)).
+The repositories of ours beside this one exist already, made in stages 7 and 11b ([how the stages are ordered](#how-the-stages-are-ordered)).
 Needs: every stage before it.
 
 Tests:

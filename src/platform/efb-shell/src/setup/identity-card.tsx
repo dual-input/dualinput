@@ -14,7 +14,7 @@ import type { V } from "@dualinput/crew/trace"
 /** A display name runs to 20 characters, so it fits every place the app shows it, and a Windows account's name runs to 20 too, so the one the field starts with always fits. */
 export const NAME_MAX = 20
 
-/** As tall as the name and color fields beside it, in the root's units, and square, since Coherent GT drops aspect-ratio. */
+/** As tall as the name and color fields beside it, in the root's units, and square, since Coherent GT drops aspect-ratio (record/areas/architecture/coherent-gt.md, "CSS"). */
 const PORTRAIT = 128
 
 /** Each swatch is a 28px target, for a VR pointer, showing a 22px dot, so the picked one's 2px ring sits 1px off the dot inside it. */

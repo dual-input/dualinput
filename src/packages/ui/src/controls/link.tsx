@@ -16,11 +16,12 @@ export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & { tone?: LinkT
 /**
  * Words that do what they're given, in a sentence or on their own, in a box's color where a box holds
  * them. The underline is a border on an inline element, since Coherent GT drops text-underline-offset
- * and a plain underline hugs the letters: it sits at the foot of the font's own box, a little below the
- * baseline, takes no room from the line, and follows the words onto a second. An icon sits before the
- * words, outside the line. A press moves it down a pixel, as it does a button, through `top`, since a
- * transform doesn't move an inline element. A link on its own reads as a control, so its caller gives
- * it font-medium, and one in a sentence keeps the sentence's weight.
+ * (record/areas/architecture/coherent-gt.md, "CSS") and a plain underline hugs the letters: it sits at
+ * the foot of the font's own box, a little below the baseline, takes no room from the line, and follows
+ * the words onto a second. An icon sits before the words, outside the line. A press moves it down a
+ * pixel, as it does a button, through `top`, since a transform doesn't move an inline element. A link on
+ * its own reads as a control, so its caller gives it font-medium, and one in a sentence keeps the
+ * sentence's weight.
  */
 export function Link({ tone = "primary", disabled, icon, className, children, onMouseDown, ...rest }: LinkProps) {
   return (

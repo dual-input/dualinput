@@ -10,7 +10,7 @@ import type { DesktopLink, Sample, Screen, Usage, View } from "../src/link.ts"
 import { DesktopWindow } from "../src/window.tsx"
 
 const MB = 1024 * 1024
-/** `WIDTH` in src/apps/desktop/src/screens.rs names the same one, so change both together. */
+/** `WIDTH` in src/apps/desktop/src/screens.rs and in welcome.tsx here names the same one, so change all three together. */
 const WIDTH = 400
 const NOW = 1_800_000_000
 

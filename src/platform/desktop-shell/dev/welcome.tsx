@@ -12,7 +12,7 @@ import type { DesktopState } from "../../../engines/messages/ts/desktop/DesktopS
 import type { DesktopLink, View } from "../src/link.ts"
 import { Welcome, WELCOME_HEIGHT, type WelcomeStill } from "../src/welcome.tsx"
 
-/** `WIDTH` in src/apps/desktop/src/screens.rs names the same one, so change both together. */
+/** `WIDTH` in src/apps/desktop/src/screens.rs and in main.tsx here names the same one, so change all three together. */
 const WIDTH = 400
 const REMEMBERED = "dualinput-welcome-bench"
 /** A Windows desktop's color behind the window, so its edge shows. */

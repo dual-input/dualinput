@@ -68,6 +68,8 @@ export function HomeRest({ page, signals, aircraft, onFigureGone }: { page: RefO
   const [guideGone, setGuideGone] = useState(false)
   const supported = !!aircraft?.maturity
   const guiding = guideDone === false && !guideGone
+  // Orange for a pilot who never picked a color. `FIRST_COLOR` in src/features/avatars/efb/part.tsx and `CrewCard`'s
+  // color in ../setup/setup-flow.tsx name the same color, so change all three together.
   const color = FIGURE_COLORS.find((candidate) => candidate.name === figureColor)?.hex ?? FIGURE_COLORS[5]!.hex
   const onPick = (picked: PickableAircraft) => link.client.command("profiles.pick", { maker: picked.maker, model: picked.model })
   return (

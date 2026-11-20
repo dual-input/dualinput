@@ -34,7 +34,8 @@ fn version_in(package: &Path) -> Option<String> {
 
 /// Writes `package`, whose version is `version`, into `packages`' `Community`, unless what's there is that version.
 /// `sim_running` is asked right before the swap, since the sim reads packages only as it starts, and a swap under a starting
-/// sim could hand it half of each.
+/// sim could hand it half of each (record/learn/foundations/02-01-installs-and-packages.md, "Packages and the virtual file
+/// system").
 pub fn write(
     package: &Path,
     version: &str,
@@ -69,7 +70,8 @@ fn swap_in(
     sim_running: &impl Fn() -> bool,
 ) -> io::Result<Wrote> {
     // A copy made inside Community would most likely mount as a second package, and our FS Copilot exerciser's sync that
-    // deleted before it copied "deleted 349 of 355 files" before it reached one in use, so it copies first, then swaps.
+    // deleted before it copied "deleted 349 of 355 files" before it reached one in use, so it copies first, then swaps
+    // (record/areas/install/01-installing-and-updating.md, "Our package").
     let fresh = stage.join(NAME);
     copy_folder(package, &fresh)?;
     if sim_running() {
@@ -83,7 +85,8 @@ fn swap_in(
     Ok(Wrote::Written)
 }
 
-/// A folder beside `community`'s target named `dualinput-install-` and a suffix no other copy has.
+/// A folder in `beside`, which holds Community or the folder its junction leads to, named `dualinput-install-` and a suffix
+/// no other copy has.
 fn fresh_folder(beside: &Path) -> io::Result<PathBuf> {
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)

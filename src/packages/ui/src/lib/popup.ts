@@ -55,7 +55,7 @@ export function useAnchored(open: boolean, anchor: RefObject<HTMLElement | null>
   return placed
 }
 
-/** Closes a popup on a press outside every one of `inside`, or on Escape, which arrives by its keyCode alone in the EFB. */
+/** Closes a popup on a press outside every one of `inside`, or on Escape, which arrives by its keyCode alone in the EFB (record/areas/interface/decisions.md, "The kit follows what the sim gives an EFB app"). */
 export function useDismiss(open: boolean, inside: RefObject<HTMLElement | null>[], onDismiss: () => void): void {
   const latest = useRef(onDismiss)
   latest.current = onDismiss

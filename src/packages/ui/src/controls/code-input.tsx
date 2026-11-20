@@ -54,7 +54,7 @@ export function CodeInput({ value, onChange, groups = [3, 3], disabled, invalid,
                       isActive ? (invalid ? "z-10 border-destructive" : "z-10 border-ring") : invalid ? "border-destructive/60" : "border-input",
                     )}
                   >
-                    {/* The focus ring is a border of its own, around the slot's, since Coherent GT squares off the corners of a box-shadow on a box rounded on one side. */}
+                    {/* The focus ring is a border of its own, around the slot's, since Coherent GT squares off the corners of a box-shadow on a box rounded on one side (record/areas/architecture/coherent-gt.md, "CSS"). */}
                     {isActive && (
                       <span
                         aria-hidden

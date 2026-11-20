@@ -157,8 +157,9 @@ pub fn packages_folders() -> Vec<PathBuf> {
 }
 
 /// The folder `UserCfg.opt`'s `InstalledPackagesPath` line names, matched by its name and a space, so a longer name such as
-/// `InstalledPackagesPathNextBoot` doesn't match. `packages_folder` in src/platform/sim-service/src/aircraft.rs and
-/// `packagesFolders` in tools/lib/install.ts read the line the same way, so change all three together.
+/// `InstalledPackagesPathNextBoot` doesn't match. `packages_folder` in src/platform/sim-service/src/aircraft.rs,
+/// `packagesFolders` in tools/lib/install.ts, and `packages_folders` in tools/profile-author's cockpit.rs read the line the
+/// same way, so change all four together.
 fn packages_folder(cfg: &str) -> Option<String> {
     let line = cfg
         .lines()

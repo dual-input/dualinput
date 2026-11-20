@@ -1,6 +1,7 @@
-// Parts for the sample, so the app shows its five tabs and the card's fold before the features' stages bring
-// theirs: the checklist state sync's part will draw, on the entries a profile's authors would write, and a tab
-// for each feature with what a page of its kind holds.
+// Stand-ins for the features' parts, so the sample shows its five tabs and the card's fold with any feature's part
+// left out: the checklist state sync's part draws, on the entries a profile's authors would write, and a tab for
+// each feature with what a page of its kind holds. src/sim-package/pages/efb-dev.tsx puts each part it takes from
+// src/features/ in its stand-in's place.
 
 import { Card, CardContent, Fades, ScrollPage, Slider, Switch } from "@dualinput/ui"
 import { Headset, Plane, PersonStanding } from "lucide-react"

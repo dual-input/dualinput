@@ -180,6 +180,8 @@ function Checks({ phase, failing, onFix, onSkip }: { phase: Extract<Phase, { kin
 
 function CrewCard({ username, onDone }: { username: string; onDone: (name: string, color: string) => void }) {
   const [name, setName] = useState(username.slice(0, NAME_MAX))
+  // `FIRST_COLOR` in src/features/avatars/efb/part.tsx and `HomeRest`'s fallback in ../session/home-rest.tsx name the
+  // same color, so change all three together.
   const [color, setColor] = useState("orange")
   const form = useRef<HTMLFormElement>(null)
   return (

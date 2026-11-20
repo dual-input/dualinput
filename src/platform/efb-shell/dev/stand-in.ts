@@ -23,7 +23,7 @@ import type { Socket } from "../../../engines/page-client/src/page-client.ts"
 import type { DesktopEnv } from "../src/desktop-link.ts"
 import { GUIDE_DONE, OUTPUT, SETUP_DONE } from "../src/settings/setting.ts"
 
-/** A made-up pilot ID, 32 hex digits, which picks the color of their figure. */
+/** A made-up pilot ID, 32 hex digits, which seeds their head's own pace. */
 const pilotId = (seed: number) => Array.from({ length: 32 }, (_, at) => ((seed * 7 + at * at * 13 + seed * at) % 16).toString(16)).join("")
 const ME = pilotId(1)
 const JAMES = pilotId(2)

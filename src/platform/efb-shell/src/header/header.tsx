@@ -92,7 +92,8 @@ export function Header({ version, phase, icons, issues, offline, opened }: Heade
     timer.current = window.setTimeout(then, ms)
   }
   useEffect(() => () => window.clearTimeout(timer.current), [])
-  // Coherent GT has no ResizeObserver, so the pill and the rows are measured after every render.
+  // Coherent GT has no ResizeObserver, so the pill and the rows are measured after every render
+  // (record/areas/architecture/coherent-gt.md, "Web APIs").
   const [size, setSize] = useState({ pill: 0, rows: 0 })
   useLayoutEffect(() => {
     const pill = place.current?.offsetWidth ?? 0

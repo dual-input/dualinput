@@ -1,5 +1,5 @@
 //! The desktop app: a tray icon from login that does a watcher's jobs, with a window of its own screens the pilot opens from
-//! it, and the fixed local port that tells the EFB app about updates and the firewall.
+//! it, and the fixed local port that tells the EFB app about updates, the firewall, and starting with Windows.
 
 // A release has no console. A debug build keeps one, or its messages would go nowhere.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]

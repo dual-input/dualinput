@@ -96,7 +96,8 @@ function fadeOne(element: HTMLElement, box: HTMLElement): void {
 
 /**
  * The scroll box starts 1px above the page with 1px of padding, so its clip doesn't cut the top card's
- * edge. Coherent GT drops `gap`, so space between parts comes from `space-y`.
+ * edge. Coherent GT drops `gap`, so space between parts comes from `space-y`
+ * (record/areas/architecture/coherent-gt.md, "CSS").
  */
 export function ScrollPage({ className, children }: { className?: string; children: ReactNode }) {
   const folds = useRef(new Set<Fold>())

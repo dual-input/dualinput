@@ -1,5 +1,5 @@
 // What keeps the crew's heads alive in preflight: each watches the cursor while it's on the EFB, a little
-// late and at its own pace, both seeded by its pilot's name, so a sweep ripples across the crew, and rests
+// late and at its own pace, both seeded by its pilot's ID, so a sweep ripples across the crew, and rests
 // when the cursor leaves. Over this pilot's unpressed Ready every head looks at it and bobs, over Leave every
 // head shakes slowly, and a pilot who readies nods while the rest turn to them for a moment
 // (record/areas/interface/decisions.md, "In preflight the heads watch the cursor").
@@ -7,7 +7,7 @@
 // A head draws by one pass a frame, blended into the passes before, so its edges smooth over a few frames,
 // and only while its look moves and for a few frames after, so a still cursor costs nothing. One loop draws
 // every head, in at most a few milliseconds a frame. Coherent GT has no IntersectionObserver, so the loop
-// measures which heads show.
+// measures which heads show (record/areas/architecture/coherent-gt.md, "Web APIs").
 
 import { useLayoutEffect, useRef } from "react"
 import type { RefObject } from "react"

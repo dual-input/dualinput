@@ -71,9 +71,10 @@ const MEASURE_EVERY = 250
 
 /**
  * A part that comes and goes: its room opens to its content's height, or shuts, in the moment's second
- * step, and holds what it had while it shuts. Coherent GT has no ResizeObserver, so the content is
- * measured after every render, and again a few times a second, since it can change size with no render
- * here, as a font loads, or as the tab of a page that rendered while hidden opens. A room on a hidden page
+ * step, and holds what it had while it shuts. Coherent GT has no ResizeObserver
+ * (record/areas/architecture/coherent-gt.md, "Web APIs"), so the content is measured after every render,
+ * and again a few times a second, since it can change size with no render here, as a font loads, or as
+ * the tab of a page that rendered while hidden opens. A room on a hidden page
  * measures nothing, since its content reads 0 there: the EFB app keeps every tab's page mounted, and one
  * that took 0 left its content spilling over the page below it once its tab opened. An open room follows its
  * content's height. It cuts off what overflows it only while it's shut or moving, so a card at rest in it

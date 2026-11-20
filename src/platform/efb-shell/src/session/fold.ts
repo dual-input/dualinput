@@ -143,7 +143,7 @@ export function foldLook(parts: FoldParts, p: number): FoldLook {
   return { parts: look, full: p >= 1 ? 0 : 1 }
 }
 
-/** Draws a look, with the whole card scrolled `scrolled` into the fold. A part at its place takes no transform, since a transform blurs text in Coherent GT. */
+/** Draws a look, with the whole card scrolled `scrolled` into the fold. A part at its place takes no transform, since a transform blurs text in Coherent GT (record/areas/architecture/coherent-gt.md, "CSS"). */
 export function showLook({ full, row }: FoldParts, look: FoldLook, scrolled: number): void {
   full.style.transform = `translateY(${-scrolled}px)`
   full.style.opacity = String(look.full)

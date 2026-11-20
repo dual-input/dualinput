@@ -2,7 +2,8 @@
 // each page's stylesheet reads in Node, since it brings in Tailwind. The reasons for each choice are in
 // record/areas/interface/decisions.md, "The apps take shadcn's Luma look".
 //
-// Each color is written as hex, since Coherent GT reads hex and not oklch. The kit's stylesheet
+// Each color is written as hex, since Coherent GT reads hex and not oklch
+// (record/areas/architecture/coherent-gt.md, "CSS"). The kit's stylesheet
 // holds most of them as RGB triplets with commas in a custom property, so Tailwind's opacity
 // modifiers can write `rgba(var(--primary), 0.8)` (msfs-tailwind's colorVar).
 

@@ -17,7 +17,7 @@ import { useShell } from "../part.ts"
 
 export type Action = "host" | "join"
 
-/** Where an attempt stands. A join is dialing once our servers have found its code and it's reaching the crew; slow, once the attempt has taken 6s. */
+/** Where an attempt stands. A join is dialing once our servers have found its code and it's reaching the crew; slow, once the attempt has run past `SLOW_AFTER` in session-tab.tsx. */
 export type Status = { kind: "idle" } | { kind: "busy"; on: Action; dialing: boolean; slow: boolean } | { kind: "done"; on: Action } | { kind: "refused"; on: Action; refusal: Refusal } | { kind: "rejected"; on: Action; why: string }
 
 /** The loaded aircraft, as home names it, with its profile's maturity, or null with no profile. Any name can be missing, as a streamed copy's are. */

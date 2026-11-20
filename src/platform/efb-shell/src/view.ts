@@ -72,8 +72,9 @@ export function useEverShown(): boolean {
 
 /**
  * Follows the view. A change of the tablet's size or turn fires a few `resize` events, and `PanelSize`
- * changes 8ms to 16ms after the last, so each is measured again a moment later (same log entry).
- * Coherent GT has no ResizeObserver.
+ * changes 8ms to 16ms after the last, so each is measured again a moment later (measured on MSFS 2024,
+ * 2026-10-30, record/areas/interface/log.md). Coherent GT has no ResizeObserver
+ * (record/areas/architecture/coherent-gt.md, "Web APIs").
  */
 export function useViewSize(host: HTMLElement | null): ViewSize {
   const [size, setSize] = useState<ViewSize>({ width: DESIGN_WIDTH, height: DESIGN_WIDTH, scale: 1 })

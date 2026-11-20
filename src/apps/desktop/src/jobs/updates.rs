@@ -10,7 +10,9 @@ use velopack::{UpdateCheck, UpdateInfo, UpdateManager, VelopackAsset};
 /// The development setting that names a folder or an address to take releases from, in place of our GitHub repository's,
 /// such as a folder `vpk pack` wrote. The bench and a developer's test of an update use it.
 pub const FEED_SETTING: &str = "desktop.update-feed";
-/// Our repository, whose newest 10 releases `GithubSource` reads, so a pilot up to 10 releases behind gets deltas.
+/// Our repository, whose newest 10 releases `GithubSource` reads, so a pilot up to 10 releases behind gets deltas (read in
+/// velopack 1.2.161, unverified by a run; record/areas/install/01-installing-and-updating.md, "The installer and the
+/// updater").
 const REPOSITORY: &str = "https://github.com/dual-input/dualinput";
 
 /// A release newer than the running one.

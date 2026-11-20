@@ -80,7 +80,7 @@ export function Rolling({ value }: { value: number }) {
   )
 }
 
-/** How long the countdown runs once every counted pilot is ready, in seconds. The core's `COUNTDOWN` runs it, and this draws it. */
+/** How long the countdown runs once every counted pilot is ready, in seconds. `COUNTDOWN` in src/platform/session/src/preflight.rs runs it, and this draws it, so change both together. */
 export const COUNTDOWN = 3
 
 const RING = { size: 28, stroke: 2.5, out: 150 }
@@ -107,7 +107,8 @@ export function CountdownRing({ left }: { left: number | null }) {
   }, [running])
   const center = RING.size / 2
   const radius = center - RING.stroke / 2
-  // Each run drains from full, a frame at a time, by redrawing its arc, since Coherent GT draws an SVG stroke with no dashes.
+  // Each run drains from full, a frame at a time, by redrawing its arc, since Coherent GT draws an SVG stroke with no dashes
+  // (record/areas/architecture/coherent-gt.md, "CSS").
   const arc = useRef<SVGPathElement>(null)
   useEffect(() => {
     if (!running) return

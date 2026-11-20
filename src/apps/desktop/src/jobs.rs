@@ -480,8 +480,9 @@ impl Jobs {
     }
 
     /// Runs the elevated copy, which shows the UAC prompt, then reads the rules again: from the welcome, as the first run's
-    /// step asks, and from the EFB app's Fix. Fix's prompt opens on the desktop behind the sim, which a pilot in VR can't see,
-    /// a cost the design names. `Shared::ask` has marked the fix running already.
+    /// step asks, and from the EFB app's Fix. Fix's prompt opens on the desktop behind the sim, which a pilot in VR can't see
+    /// (record/areas/interface/decisions.md, "The desktop app tells the EFB app about updates and the firewall over a fixed
+    /// local port"). `Shared::ask` has marked the fix running already.
     fn fix_firewall(&self) {
         log::line("asking Windows to let the core take connections, through the UAC prompt");
         self.blocking(firewall::run_elevated, |_| Event::FirewallFixed);

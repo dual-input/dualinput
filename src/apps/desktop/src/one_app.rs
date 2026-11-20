@@ -1,5 +1,5 @@
-//! One desktop app for each data folder. Without it, a second start, from the Start menu while the app sits in the tray, made
-//! a second tray icon and a second writer to the usage file. The first app holds a named pipe named for its data folder, and
+//! One desktop app for each data folder. Without it, a second start, from the Start menu while the app sits in the tray, would
+//! make a second tray icon and a second writer to the usage file. The first app holds a named pipe named for its data folder, and
 //! a second start that finds it writes what it was started for, and exits, so the running app opens its window
 //! (record/areas/install/01-installing-and-updating.md, "One program from login").
 //!

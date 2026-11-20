@@ -9,7 +9,7 @@ export type SliderProps = Omit<HTMLAttributes<HTMLDivElement>, "onChange"> & { v
 /** The thumb's width in px, which keeps it inside the track at either end. */
 const THUMB = 24
 
-/** Follows a drag from the window, so it keeps going off the slider, since Coherent GT has no pointer capture. */
+/** Follows a drag from the window, so it keeps going off the slider, since Coherent GT has no pointer events, and so no pointer capture (record/areas/architecture/coherent-gt.md, "Web APIs"). */
 export function Slider({ value, min = 0, max = 100, step = 1, disabled, onValueChange, className, ...rest }: SliderProps) {
   const { scale } = useRoot()
   const track = useRef<HTMLDivElement>(null)

@@ -1,6 +1,6 @@
 # A workspace of its own, with its own Cargo.lock, since Cargo turns on each crate's features for every crate a build
-# holds: in the root's workspace, Tauri's uuid gave the loop's crates getrandom, which the map check refuses, and would
-# have changed how the core compiles (record/areas/build/log.md, 2026-11-01).
+# holds: in the root's workspace, Tauri's uuid gave the loop's crates getrandom, which tools/map-check.ts refuses, and
+# would have changed how the core compiles (record/areas/build/log.md, 2026-11-01).
 [workspace]
 
 [package]

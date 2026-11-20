@@ -4,7 +4,8 @@
 // own shading, draws every ball of a tint. Matching the tracer leans on three of the engine's limits: a radial
 // gradient with a focal point draws nothing, so it's centered on the highlight; a viewBox in units as small as
 // meters draws nothing, so everything here is in the page's pixels; and a clip path wipes what's under it, so a
-// shadow is a gradient on a circle the size of its ball, which keeps it on the ball.
+// shadow is a gradient on a circle the size of its ball, which keeps it on the ball
+// (record/areas/architecture/coherent-gt.md, "CSS").
 
 import { add, albedo, clamp01, display, lightAlbedo, scale, shade, sub, unit } from "@dualinput/crew/trace"
 import type { Shape, V } from "@dualinput/crew/trace"

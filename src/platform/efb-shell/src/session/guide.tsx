@@ -1,7 +1,7 @@
 // The welcome text's place on a pilot's first visit: pages on how a session works, then the aircraft check. Done and
 // Skip guide close it for good, leaving the start card alone, as home is on later visits, with a send-off on the page
-// by itself in the room the guide leaves (record/areas/interface/decisions.md, "Home is the start card and, on a
-// first visit, a guide").
+// by itself in the room the guide leaves (record/areas/interface/decisions.md, "Home names the loaded aircraft and
+// offers Host and Join, in any aircraft").
 
 import { Button, Card, CardContent, cx, Link } from "@dualinput/ui"
 import { CircleCheck, TriangleAlert } from "lucide-react"
@@ -57,7 +57,8 @@ export function WelcomeGuide({ supported, onPick, onLeave, onClose }: { supporte
   const content = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState<number>()
   const { tab } = useShell()
-  // The card eases to the page's height, measured after every render, since Coherent GT has no ResizeObserver. A hidden tab measures nothing.
+  // The card eases to the page's height, measured after every render, since Coherent GT has no ResizeObserver
+  // (record/areas/architecture/coherent-gt.md, "Web APIs"). A hidden tab measures nothing.
   useLayoutEffect(() => {
     const measured = content.current?.offsetHeight
     if (tab === "session" && measured !== undefined && measured !== height) setHeight(measured)
@@ -141,7 +142,7 @@ export function WelcomeGuide({ supported, onPick, onLeave, onClose }: { supporte
   )
 }
 
-/** The send-off, in milliseconds: it fades in as the guide goes, from a little low, holds, and fades out as it rises on. It mounts unseen, since Coherent GT has no @starting-style, and a transition brings it in two frames later. */
+/** The send-off, in milliseconds: it fades in as the guide goes, from a little low, holds, and fades out as it rises on. It mounts unseen, since Coherent GT has no @starting-style (record/areas/architecture/coherent-gt.md, "CSS"), and a transition brings it in two frames later. */
 const FAREWELL = { delay: 150, in: 700, hold: 1500, out: 600 }
 
 export function Farewell({ onGone }: { onGone: () => void }) {

@@ -51,7 +51,8 @@ export function Tooltip({ content, children, side = "top", align = "center", cla
             ref={popup}
             role="tooltip"
             // No w-max, since Coherent GT takes the padding out of max-content under border-box, so
-            // the words wrap; an absolute box left to its width fits its words.
+            // the words wrap; an absolute box left to its width fits its words
+            // (record/areas/architecture/coherent-gt.md, "CSS").
             className={cx("pointer-events-none absolute z-50 max-w-xs rounded-xl bg-foreground px-3 py-1.5 text-xs text-background", leaving ? "animate-pop-out" : "animate-pop-in", className)}
             style={{ left: placed?.left, top: placed?.top, visibility: placed ? "visible" : "hidden" }}
           >

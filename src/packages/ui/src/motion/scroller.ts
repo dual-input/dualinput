@@ -7,7 +7,7 @@ import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react"
 
 import { useRoot } from "../lib/root.tsx"
 
-/** Coherent GT keeps ::-webkit-scrollbar, where it drops scrollbar-width. A box that scrolls down scrolls down alone, so a line that runs too wide can't bring a scrollbar along its foot. */
+/** Coherent GT keeps ::-webkit-scrollbar, where it drops scrollbar-width (record/areas/architecture/coherent-gt.md, "CSS"). A box that scrolls down scrolls down alone, so a line that runs too wide can't bring a scrollbar along its foot. */
 export const NO_SCROLLBAR = "overflow-x-hidden [&::-webkit-scrollbar]:w-0"
 
 // A drag let go of while moving coasts on, slowing as iOS's scroll views do: each millisecond keeps
@@ -62,7 +62,8 @@ export function useScroller({ nested, ...said }: ScrollerOptions = {}) {
   }
   useLayoutEffect(measure)
   // What the box holds can change size with no render here, as a font loads, a child's slice arrives, or a
-  // room eases, and Coherent GT has no ResizeObserver, so it measures a few times a second.
+  // room eases, and Coherent GT has no ResizeObserver, so it measures a few times a second
+  // (record/areas/architecture/coherent-gt.md, "Web APIs").
   useEffect(() => {
     const timer = window.setInterval(() => {
       measure()

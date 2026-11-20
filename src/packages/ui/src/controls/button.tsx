@@ -34,8 +34,9 @@ export type ButtonSize = keyof typeof SIZES
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; size?: ButtonSize; ref?: Ref<HTMLButtonElement> }
 
 /**
- * Coherent GT drops `gap`, and the margins that stand in for it reach only elements, so a word beside
- * an icon needs an element of its own for the space between them to land on.
+ * Coherent GT drops `gap` (record/areas/architecture/coherent-gt.md, "CSS"), and the margins that stand
+ * in for it reach only elements, so a word beside an icon needs an element of its own for the space
+ * between them to land on.
  */
 export function spaced(children: ReactNode): ReactNode {
   return Children.map(children, (child) => {

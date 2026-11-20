@@ -1,7 +1,7 @@
-// The EFB app's link to the desktop app, over its fixed local port, for what the core can't carry: the update's state and
-// the firewall rule's (record/areas/interface/decisions.md, "The desktop app tells the EFB app about updates and the
-// firewall over a fixed local port"). With no desktop app, or another program on the port, the state stays null, and the
-// app shows no update and no firewall row.
+// The EFB app's link to the desktop app, over its fixed local port, for what the core can't carry: the update's state,
+// the firewall rule's, and whether Windows starts the desktop app (record/areas/interface/decisions.md, "The desktop app
+// tells the EFB app about updates and the firewall over a fixed local port"). With no desktop app, or another program on
+// the port, the state stays null, and the app shows no update, no firewall row, and no Start with Windows switch.
 
 import { useSyncExternalStore } from "react"
 

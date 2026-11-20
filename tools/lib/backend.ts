@@ -10,11 +10,11 @@ import path from "node:path"
 import { ROOT } from "./repo.ts"
 import { Failed } from "./run.ts"
 
-const WRANGLER = path.join(ROOT, "node_modules", "wrangler", "bin", "wrangler.js")
-const CONFIG = path.join(ROOT, "src", "backend", "wrangler.jsonc")
+export const WRANGLER = path.join(ROOT, "node_modules", "wrangler", "bin", "wrangler.js")
+export const CONFIG = path.join(ROOT, "src", "backend", "wrangler.jsonc")
 
 /** wrangler asks no question with CI set, and sends Cloudflare no usage data with the other. */
-const QUIET = { ...process.env, CI: "true", WRANGLER_SEND_METRICS: "false" }
+export const QUIET = { ...process.env, CI: "true", WRANGLER_SEND_METRICS: "false" }
 
 /** How long `wrangler dev` may take to bundle the Worker and start workerd. */
 const READY_WITHIN_MS = 60_000

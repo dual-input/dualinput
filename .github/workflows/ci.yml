@@ -1,0 +1,139 @@
+# CI for every pull request and every push to main: the checks the code map lists, and the
+# bench split into 8 jobs that run at once on programs one job builds
+# (record/areas/build/02-testing.md, "What keeps CI green"; record/areas/build/01-the-build.md,
+# "CI"). A push to main blocks nothing, and the release workflow takes only a commit whose
+# run here is green.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push cancels the run still going for the same pull request or branch.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # bindgen finds libclang here, in the runner image's LLVM, which sets no LIBCLANG_PATH.
+  LIBCLANG_PATH: C:\Program Files\LLVM\bin
+
+jobs:
+  changes:
+    runs-on: windows-latest
+    outputs:
+      code: ${{ steps.changes.outputs.code }}
+      profiles: ${{ steps.changes.outputs.profiles }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - id: changes
+        run: node tools/ci.ts changes
+
+  checks:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: rustup toolchain install
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/AppData/Roaming/cargo-msfs/data/msfs2024
+          key: msfs-sdk-${{ hashFiles('msfs-sdk.txt') }}
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: |
+            . -> target
+            src/apps/desktop -> ../../../target/desktop
+      - run: npm ci
+      - run: node tools/setup.ts
+      - run: node tools/check.ts
+
+  bench-build:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: rustup toolchain install
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/AppData/Roaming/cargo-msfs/data/msfs2024
+          key: msfs-sdk-${{ hashFiles('msfs-sdk.txt') }}
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: |
+            . -> target/bench
+            src/apps/desktop -> ../../../target/desktop
+      - run: npm ci
+      - run: node tools/setup.ts
+      - run: node tools/bench.ts build target/bench-programs
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bench-programs
+          path: target/bench-programs
+          retention-days: 1
+
+  bench:
+    needs: bench-build
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    name: bench ${{ matrix.shard }} of 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - run: npm ci
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bench-programs
+          path: target/bench-programs
+      - run: node tools/bench.ts --programs target/bench-programs --shard ${{ matrix.shard }}/8
+      # Each failed scenario's run folder holds its cores' logs and recordings.
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bench-runs-${{ matrix.shard }}
+          path: target/bench/runs
+          retention-days: 7
+
+  profiles:
+    needs: changes
+    # A pull request checks the profiles here only when it changes nothing else, since the
+    # checks build them too; every push to main publishes, which adds nothing when nothing
+    # changed, so a run a newer push canceled publishes with that push's run.
+    if: github.event_name == 'push' || (needs.changes.outputs.profiles == 'true' && needs.changes.outputs.code == 'false')
+    permissions:
+      contents: write
+    uses: ./.github/workflows/profiles.yml
+    with:
+      publish: ${{ github.event_name == 'push' }}
+
+  # What branch protection requires: a job skipped by its condition counts as passed, and a
+  # skipped matrix job reports under no shard's name, so the protection names this job alone.
+  ci:
+    needs: [changes, checks, bench-build, bench, profiles]
+    if: always()
+    runs-on: windows-latest
+    steps:
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

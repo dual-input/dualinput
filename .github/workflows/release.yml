@@ -1,0 +1,100 @@
+# A release, run by hand on main with the commit the check before a release ran on
+# (record/areas/build/01-the-build.md, "A release"; record/areas/build/02-testing.md, "Before a
+# release"). It takes only a commit whose CI run on main is green, so it runs neither the
+# checks nor the bench again. A job that can't write to the repository builds and packs the
+# release, and a job that can uploads it as a draft, checks the draft, deploys the backend,
+# and publishes it. A run that fails after publishing is run again with "Re-run failed jobs",
+# since a new run stops at its first step.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: The commit to release, as 40 hex digits, whose CI run on main is green
+        required: true
+
+# One release at a time, and none canceled midway.
+concurrency:
+  group: release
+
+env:
+  LIBCLANG_PATH: C:\Program Files\LLVM\bin
+  # The input reaches each step's command through the environment, never pasted into its
+  # script, so no input can add a command.
+  COMMIT: ${{ inputs.commit }}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    # Read-only, so `vpk download github` can't list a draft as the newest release.
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.commit }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - run: node tools/release.ts start $env:COMMIT
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: dual-input/relay-tokens
+          ssh-key: ${{ secrets.RELAY_TOKENS_DEPLOY_KEY }}
+          path: target/relay-tokens
+      - run: rustup toolchain install
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/AppData/Roaming/cargo-msfs/data/msfs2024
+          key: msfs-sdk-${{ hashFiles('msfs-sdk.txt') }}
+      - run: npm ci
+      - run: node tools/setup.ts
+      - run: node tools/build.ts release
+        env:
+          DUALINPUT_RELAY_TOKENS: ${{ github.workspace }}/target/relay-tokens
+      - run: node tools/release.ts download
+      - run: node tools/release.ts pack
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release
+          path: target/releases
+          retention-days: 7
+
+  publish:
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.commit }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - run: npm ci
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: target/releases
+      - run: node tools/release.ts upload $env:COMMIT
+      - run: node tools/release.ts check
+      - run: node tools/backend.ts deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - run: node tools/release.ts publish
+
+  profiles:
+    needs: publish
+    permissions:
+      contents: write
+    uses: ./.github/workflows/profiles.yml
+    with:
+      publish: true

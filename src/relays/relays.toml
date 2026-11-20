@@ -10,11 +10,6 @@
 # (record/areas/network/02-units.md, "Budgets").
 
 [[relay]]
-region = "nyc"
-url = "https://nyc.relay.dualinput.app"
-cap = 262144
-
-[[relay]]
 region = "fra"
 url = "https://fra.relay.dualinput.app"
 cap = 262144

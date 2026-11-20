@@ -31,9 +31,10 @@ The stages follow these rules (user, 2026-10-18):
 - The first session in the sim, with a bench core as the second pilot, comes once the platform and state sync are built, and the first flight with friends once flight-model sync is built too.
   Friends fly their installed Dual Input ([the four levels](02-testing.md#the-four-levels)), so the install stage comes before that flight.
 - No stage builds code that a later stage replaces: what a stage builds is final, and only the bench's stand-ins and test units stand in for what isn't built yet.
-- Nothing on GitHub comes before [stage 22](#22-github): no pull requests, no workflows, no releases, no Pages site, and no repository of ours beside this one, since waiting on pull requests and CI slows the build down (user, 2026-10-18).
-  Until then a stage's commits go straight to `main`, and are pushed once the user has reviewed the stage, and stage 22 builds CI as [testing](02-testing.md#what-keeps-ci-green) and [the build](01-the-build.md#ci) design it.
-  The exceptions are private repositories, since the rule keeps Dual Input out of public view rather than off GitHub: the one that holds the relays' tokens, `dual-input/relay-tokens`, made in stage 7, which needs the tokens before stage 22 (user, 2026-10-22), and two that stage 11b makes, which Dual Input installs with npm: `dual-input/msfs-tailwind`, a Tailwind 3 preset for Coherent GT, and `dual-input/coherent-checks`, the Coherent GT check's, whose data msfs-tailwind's test reads (user, 2026-10-25).
+- Nothing on GitHub that a stage waits on comes before [stage 22](#22-github): no pull requests, no workflows, no releases, and no Pages site, since waiting on pull requests and CI slows the build down (user, 2026-10-18).
+  A stage's commits go straight to `main`, pushed once the user has reviewed the stage, which `main`'s rule of a pull request for every change allows only its admins, and stage 22 builds CI as [testing](02-testing.md#what-keeps-ci-green) and [the build](01-the-build.md#ci) design it, blocking no push to `main` (user, 2026-11-20).
+  The repositories of ours beside this one came with the stages that needed them: `dual-input/relay-tokens`, which holds the relays' tokens and stays private, in stage 7 (user, 2026-10-22), and in stage 11b two that Dual Input installs with npm, `dual-input/msfs-tailwind`, a Tailwind 3 preset for Coherent GT, and `dual-input/coherent-checks`, the Coherent GT check's, whose data msfs-tailwind's test reads (user, 2026-10-25).
+  This repository went public on 2026-11-20, ahead of stage 22, and those two with it (user, 2026-11-20).
 
 ## Working a stage
 
@@ -968,16 +969,36 @@ Done on 2026-11-20: every chunk was read and fixed, changing comments in 254 fil
 
 ## 22 GitHub
 
-Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)): CI's workflows for each pull request and each merge to `main` ([CI](../architecture/02-code-map.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green)), the release workflow with the check before a release ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)), the profiles' workflow and their Pages site ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)), and `tools/replay.ts`, which fetches the core a recording's release shipped ([running a replay](../core/01-loop-and-edge.md#running-a-replay)).
+Designs first: how CI, releases, and the relays run once the repository went public on 2026-11-20, which the user settled that day, and which the design docs these lines link carry (user, 2026-11-20):
+
+- CI runs on every pull request and every push to `main`, where it blocks nothing, on GitHub's standard runners, which are free on a public repository, 20 jobs at once on the Free plan.
+  It runs the bench as 8 jobs at once, on programs one job builds, each running its share of the scenarios balanced by each file's time, and a new push cancels the run still going for the same pull request or branch ([what keeps CI green](02-testing.md#what-keeps-ci-green)).
+- The release workflow takes a commit whose CI run on `main` is green, runs neither the checks nor the bench again, and releases a commit `main` has moved past ([a release](01-the-build.md#a-release)).
+  Releases are public, pre-v1 builds included.
+- One relay, in Frankfurt, so `nyc` leaves `src/relays/relays.toml` ([the network's units](../network/02-units.md)' note of 2026-11-20).
+
+Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)):
+
+- CI's workflow, `.github/workflows/ci.yml`, with `node tools/bench.ts --shard`, the bench's programs built once, and `tools/ci.ts` ([CI](../architecture/02-code-map.md#ci), [the build's CI](01-the-build.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green))
+- the release workflow, `release.yml`, with `tools/release.ts`'s steps ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release))
+- the backend's first deploy to Cloudflare, its D1 database made and its migrations applied, and its own workflow, `backend.yml`, with `tools/backend.ts` ([the backend](01-the-build.md#the-backend))
+- the profiles' workflow, `profiles.yml`, the `pages` branch, and the Pages site at `profiles.dualinput.app` ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository), [publishing](../profiles/02-units.md#publishing))
+- the relay in Frankfurt, on a droplet of ours at `fra.relay.dualinput.app` ([their configuration](../network/02-units.md#their-configuration))
+- the repository's secrets: a read-only deploy key for `dual-input/relay-tokens`, and a Cloudflare token
+- `tools/replay.ts`, which fetches the core a recording's release shipped ([running a replay](../core/01-loop-and-edge.md#running-a-replay))
+
 The repositories of ours beside this one exist already, made in stages 7 and 11b ([how the stages are ordered](#how-the-stages-are-ordered)).
 Needs: every stage before it.
 
 Tests:
 
 - From stage 1: CI's time against the 20 minutes of [budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace), with `cargo build --timings`; one commit built on our development machine and on CI's runner gives one hash ([the build's cases on a desk](01-the-build.md#cases-for-the-bench)); and the runner, set up from nothing by the steps for a new PC in [building every target](../architecture/02-code-map.md#building-every-target), builds and tests the tree.
-- From stage 3: whether a GitHub-hosted Windows runner holds three cores, two relays, and their proxies ([testing's left open](02-testing.md#left-open)); a pull request's bench within the code map's 20 minutes, as a job beside the others; and the check before a release within 15 minutes of a person's time, from a sim at the main menu ([testing's budgets](02-testing.md#budgets)).
-- From stage 15, in a session with friends on releases the release workflow made, through the servers it deployed: Setup.exe run over the install during the session, a crewmate's core seeing its link lost at an uninstall, and a host who is behind, and if Windows shows its firewall prompt on a PC with no rule naming the core, whether the desktop app's fix deletes the block rules a canceled prompt leaves, which stage 16's first flight with friends left for the live path (user, 2026-11-12; [install log](../install/log.md#2026-11-12-in-a-session-an-update-downloads-and-waits-then-installs-as-the-sim-closes-the-trays-quit-reads-as-a-leave-and-a-session-raised-no-firewall-prompt-from-windows)).
-- From stage 7: once `nyc.relay.dualinput.app` and `fra.relay.dualinput.app` point at our droplets, `node src/relays/deploy.ts nyc fra` deploys both relays, and each answers `/ping` over HTTPS with the certificate it took from Let's Encrypt, before the first release ([their configuration](../network/02-units.md#their-configuration)).
+- From stage 3: whether a GitHub-hosted Windows runner holds three cores, two relays, and their proxies ([testing's left open](02-testing.md#left-open)); a pull request's bench within the code map's 20 minutes, as 8 jobs beside the others; and the check before a release within 15 minutes of a person's time, from a sim at the main menu ([testing's budgets](02-testing.md#budgets)).
+- [The build's cases on a desk](01-the-build.md#cases-for-the-bench) for a release: the first release publishes with no delta and the next with one, a run whose draft is left unpublished leaves a draft the next run deletes before it publishes, and a run for a version that's published stops at its first step.
+- From stage 15, in a session with friends on releases the release workflow made, through the servers it deployed: Setup.exe run over the install during the session, a crewmate's core seeing its link lost at an uninstall, a host who is behind, an update downloaded in the app, through `GithubSource` and its delta, and if Windows shows its firewall prompt on a PC with no rule naming the core, whether the desktop app's fix deletes the block rules a canceled prompt leaves, which stage 16's first flight with friends left for the live path (user, 2026-11-12; [install log](../install/log.md#2026-11-12-in-a-session-an-update-downloads-and-waits-then-installs-as-the-sim-closes-the-trays-quit-reads-as-a-leave-and-a-session-raised-no-firewall-prompt-from-windows)).
+- From stage 7: once `fra.relay.dualinput.app` points at our droplet, `node src/relays/deploy.ts fra` deploys the relay, and it answers `/ping` over HTTPS with the certificate it took from Let's Encrypt, before the first release ([their configuration](../network/02-units.md#their-configuration)).
+
+Exit: on GitHub's runners, CI passes on a pull request and on `main`, the bench as 8 jobs, and the [build log](log.md) has CI's times against the 20 minutes and whether a runner held three cores and two relays; the release workflow has published a release from a commit whose run on `main` passed, after the check before a release; the backend answers at `api.dualinput.app`, the relay at `fra.relay.dualinput.app`, and the profiles' index at `profiles.dualinput.app`; and the session with friends has run on the workflow's releases, or is scheduled with the user, as the line under this one says.
 
 ## 23 v1's release
 

@@ -1,0 +1,41 @@
+# The profiles' job, which CI and the release workflow both call, since a release published
+# with a workflow's own token starts no other workflow (record/areas/build/01-the-build.md,
+# "CI"). It builds every profile, which fails on any error, and with `publish` adds each new
+# bundle at a released level to the `pages` branch, which Pages serves at
+# profiles.dualinput.app (record/areas/profiles/02-units.md, "Publishing"). It needs no SDK,
+# so a new SDK can't fail a pull request that changes only profiles/.
+name: Profiles
+
+on:
+  workflow_call:
+    inputs:
+      publish:
+        type: boolean
+        required: true
+
+jobs:
+  profiles:
+    runs-on: windows-latest
+    # Two runs that publish at once, one for a push and one for a release, would push to
+    # `pages` from the same commit, so the second waits for the first.
+    concurrency:
+      group: ${{ inputs.publish && 'pages' || format('profiles-{0}', github.run_id) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Every tag, which the publish step reads each release's level from.
+          fetch-depth: ${{ inputs.publish && '0' || '1' }}
+      - if: inputs.publish
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: pages
+          path: target/pages
+      - run: rustup toolchain install
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - if: ${{ !inputs.publish }}
+        run: cargo run --locked -p dualinput-profile-builder -- build profiles
+      - if: inputs.publish
+        run: node tools/ci.ts publish-profiles target/pages

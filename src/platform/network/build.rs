@@ -30,7 +30,7 @@ struct Relay {
 }
 
 /// tokens.toml in dual-input/relay-tokens: each region's tokens, newest first, as
-/// `nyc = ["newest", "older"]`.
+/// `fra = ["newest", "older"]`.
 type Tokens = BTreeMap<String, Vec<String>>;
 
 fn main() {

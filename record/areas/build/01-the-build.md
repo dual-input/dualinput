@@ -13,7 +13,7 @@ Decides:     What a release holds; how every x86_64 program links the C runtime 
 `tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll` and the three C runtime DLLs it imports, and our one Community package, `dualinput`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.
 The Coherent GT check is a Node tool of its own on acorn, run on every bundle after each edit and in CI, and the message crate's hash is SHA-256 over its own source and the locked versions of what it depends on.
-A release runs by hand on `main`: a job that can't write to the repository builds, checks, and packs it, and a job that can uploads it as a draft, checks the draft, deploys the backend, and publishes it.
+A release runs by hand on `main`, from a commit whose CI run there passed: a job that can't write to the repository builds and packs it, and a job that can uploads it as a draft, checks the draft, deploys the backend, and publishes it.
 
 This answers node 6.18 of the [architecture plan](../architecture/plan.md#618-the-build).
 The docs in its Depends on line and decisions [025](../../decisions/025-messages-in-one-rust-crate.md), [026](../../decisions/026-first-message-carries-version-and-hash.md), [030](../../decisions/030-in-sim-code-es2017-esbuild.md), and [031](../../decisions/031-coherent-gt-check-tool.md) give the rules this design builds on, and it holds only what they leave out.
@@ -199,51 +199,57 @@ Beside the code map's [CI](../architecture/02-code-map.md#ci):
 
 - **The runner** is `windows-latest`, Windows Server 2025 with Visual Studio 2026, which in its image of 2026-10-07 holds .NET SDKs 8 to 10, rustup, Node 22, LLVM 20.1.8, the GitHub CLI, the C++ workload, and the Windows SDK (documented, [Windows2025-VS2026's readme](https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-VS2026-Readme.md)).
   It sets no `LIBCLANG_PATH`, so CI sets it to the image's LLVM for bindgen (read, [results][velopack]).
+- **The workflows** are in `.github/workflows/`: `ci.yml` for every pull request and every push to `main`, `release.yml` and `backend.yml`, which a person runs by hand on `main`, and `profiles.yml`, the profiles' job.
 - **A pull request that changes code also runs** the unit tests and the bench, as [what keeps CI green](02-testing.md#what-keeps-ci-green) gives them.
+  A change is code unless every file it changes is in `profiles/`, `record/`, `docs/`, `experiments/`, or `.claude/`, or is Markdown, which `node tools/ci.ts changes` reads from the pull request's merge commit, and a push to `main` runs every job.
+- **`ci.yml`'s jobs:** one runs `node tools/check.ts`; one builds the bench's programs, and 8 run its shares; the profiles' job runs for a pull request that changes `profiles/` and no code, and publishes on every push to `main`; and the last, `ci`, fails when any other failed or was canceled.
+  The profiles publish on every push rather than on those that change a bundle, since a newer push cancels the run before it, and publishing adds nothing when no bundle changed, so a canceled run's bundles publish with the next.
+- **`main`'s branch protection requires `ci` alone,** since GitHub counts a job its condition skipped as passed, and a skipped matrix job reports under no shard's name, so a required check named for a shard would never report on a pull request that changes no code.
 - **A pull request also checks** the files compiled with the sim against `source.json`, and the stock files against `stock.json`.
 - **`tools/check.ts`** builds the module and fails unless it exports what p03 checked, as [CI](../architecture/02-code-map.md#ci) has a pull request do, runs [the Coherent GT check](#the-coherent-gt-check), and checks the stock files against `stock.json`.
 - **A pull request's build carries no relay tokens,** and the network's tests run through a local relay with a test token (user, 2026-10-18; [cases for the bench](../network/02-units.md#cases-for-the-bench)).
 - **Each step runs one command,** a script in `tools/` where a step needs more, since a PowerShell step's result is its last native command's exit code (documented, [log][vpk]), and each script stops at its first failing command.
-- **The profiles' job** is one reusable workflow, which the merge trigger and the release workflow both call as a job, since a release published with the workflow's own token starts no other workflow (documented, [GITHUB_TOKEN](https://docs.github.com/en/actions/concepts/security/github_token)).
+- **Caches** hold the SDK's folder, keyed on its version, and each job's Cargo dependencies, through `Swatinem/rust-cache`, and each action is pinned by its commit, with its tag beside it.
+- **The profiles' job** is one reusable workflow, which `ci.yml` and the release workflow both call as a job, since a release published with the workflow's own token starts no other workflow (documented, [GITHUB_TOKEN](https://docs.github.com/en/actions/concepts/security/github_token)).
 
 ## A release
 
 A short session in the sim, on a build of the commit, comes before a person runs the `release` workflow on `main` by hand, and the workflow takes that commit ([before a release](02-testing.md#before-a-release)).
 It reads the version from the root's `[workspace.package]`.
-Each step of its build and publish jobs is one `node tools/release.ts` command.
+Each step of its build and publish jobs runs one command, each of the release's own through `node tools/release.ts`, which reaches GitHub through `gh` and `vpk` with the job's token.
 
 The **build job**, whose token reads the repository and can't write to it:
 
-1. It stops when a published release of that version exists, or when `main`'s head isn't the commit it was given, and passes over a draft, which the publish job deletes.
-2. It installs the toolchain, runs `npm ci` and `node tools/setup.ts`, and installs `vpk` with `dotnet tool install` at the version `Cargo.lock` gives the desktop app's `velopack` crate, since `vpk` packs its own Update.exe, which that crate drives, and doesn't check that the two match for a Rust program (read in velopack 1.2.161, [results][velopack]).
-   It also checks out `dual-input/relay-tokens`, the private repository of the relays' tokens ([their configuration](../network/02-units.md#their-configuration)), with a read-only key from this repository's secrets (user, 2026-10-18).
-   Stage 7 of [the build plan](plan.md#7-the-network) makes that repository, ahead of the rest of GitHub in [stage 22](plan.md#22-github).
-3. It runs every check a pull request runs, the unit tests and the bench among them ([what keeps CI green](02-testing.md#what-keeps-ci-green)).
-4. It runs `node tools/build.ts release` ([what a release holds](#what-a-release-holds)); the network crate's build compiles each release's default relay list from `src/relays/relays.toml` and that checkout, and stops when a relay in `relays.toml` has no token.
-5. It runs `vpk download github`, which fetches the newest release's full package so `vpk pack` can make a delta, and fails unless that package is the one `releases/latest` holds, or none came and no release is published.
+1. It stops when a published release of that version exists, or unless CI's newest run on `main` at that commit passed, and passes over a draft, which the publish job deletes (user, 2026-11-20).
+   So it runs neither the checks nor the bench again, and it releases a commit `main` has moved past as it releases `main`'s head.
+2. It checks out `dual-input/relay-tokens`, the private repository of the relays' tokens ([their configuration](../network/02-units.md#their-configuration)), with a read-only deploy key from this repository's secrets (user, 2026-10-18), then installs the toolchain and runs `npm ci` and `node tools/setup.ts`.
+3. It runs `node tools/build.ts release` ([what a release holds](#what-a-release-holds)); the network crate's build compiles each release's default relay list from `src/relays/relays.toml` and that checkout, and stops when a relay in `relays.toml` has no token.
+4. It runs `vpk download github`, which fetches the newest release's full package so `vpk pack` can make a delta, and fails unless that package is the one `releases/latest` holds, or none came and no release is published.
    That one check catches both ways the delta's base goes wrong: `vpk` exits 0 having fetched nothing, and its feed takes in any draft its token can list ([log][vpk]).
-6. It runs `vpk pack` with the desktop app as the main program, `--framework webview2`, and `--shortcuts StartMenuRoot` ([the installer and the updater](../install/01-installing-and-updating.md#the-installer-and-the-updater)), and keeps what it wrote as the job's artifact.
+5. It runs `vpk pack` with the desktop app as the main program, `--framework webview2`, and `--shortcuts StartMenuRoot` ([the installer and the updater](../install/01-installing-and-updating.md#the-installer-and-the-updater)), and keeps what it wrote as the job's artifact.
    It also passes `--packId DualInput`, which never changes, since Setup.exe's folder most likely takes that name (inference, [results][velopack]), and `--noPortable`, so no release carries a portable copy that no design covers.
+   `vpk` is installed with `dotnet tool install` at the version `Cargo.lock` gives the desktop app's `velopack` crate, since `vpk` packs its own Update.exe, which that crate drives, and doesn't check that the two match for a Rust program (read in velopack 1.2.161, [results][velopack]).
 
 The **publish job**, whose token can write releases, then:
 
-1. Deletes a draft of this version that a failed run left, since `vpk upload github` refuses a tag that exists ([log][vpk]).
-2. Runs `vpk upload github` without `--publish`, naming the commit it built as the tag's target, which leaves a draft no pilot sees ([log][vpk]).
-3. Checks the draft: that its assets hold every file `vpk pack` listed in `assets.win.json`, and that its `releases.win.json`, the file `GithubSource` reads, lists this version's full package, and a delta whenever the build job fetched a base ([log][vpk]); that `gh` reaches a draft's file this way is unverified.
-4. Deploys the backend ([the backend](#the-backend)).
-5. Publishes the draft with `gh release edit --draft=false --latest`.
+1. Deletes a draft of this version that a failed run left, since `vpk upload github` refuses a tag that exists ([log][vpk]), and runs `vpk upload github` without `--publish`, naming the commit it built as the tag's target, which leaves a draft no pilot sees ([log][vpk]).
+   `vpk` takes the token from `VPK_TOKEN`, so no command line in the job's log shows it (read in velopack 1.2.161, `src/vpk/Velopack.Vpk/Commands/BaseCommand.cs`).
+2. Checks the draft: that its assets hold every file `vpk pack` listed in `assets.win.json`, and that its `releases.win.json`, the file `GithubSource` reads, lists this version's full package, and this version's delta whenever it lists an older full package ([log][vpk]); that the API's asset path reaches a draft's file is unverified.
+3. Deploys the backend, with `node tools/backend.ts deploy` ([the backend](#the-backend)).
+4. Publishes the draft as the newest release, through GitHub's API.
 
 A third job, which needs the publish job, calls the profiles' workflow, which publishes the bundles at any level this release brings ([publishing](../profiles/02-units.md#publishing)).
 
-- A release with nothing attached stops at the publish job's third step, where fsc-editor's v0.1.0 shipped empty while its publisher logged a warning and exited 0 (fsc-editor, commit 7b2348e).
+- A release with nothing attached stops at the draft's check, where fsc-editor's v0.1.0 shipped empty while its publisher logged a warning and exited 0 (fsc-editor, commit 7b2348e).
 - A run that fails after publishing is run again with GitHub's "Re-run failed jobs", since a new run stops at its first step.
 - The tag is the bare version, such as `1.0.0`, as `vpk upload github` writes it (read, [results][velopack]), and the profiles' job reads each release's level from those tags.
 - Every release on the repository is Dual Input's, so the newest 10 releases `GithubSource` lists are ours; the Coherent GT check's releases are its own repository's.
 
 ## The backend
 
-- The publish job runs D1's migrations and then `wrangler deploy`, with a Cloudflare token from the repository's secrets, just before it publishes, so the backend running is never older than the newest release, and a release's backend deploys only once that release has passed every check.
-- A second workflow, run by hand on `main`, runs the backend's tests, its migrations, and `wrangler deploy`, for a fix between releases.
+- The publish job runs D1's migrations and then `wrangler deploy`, through `node tools/backend.ts deploy`, with a Cloudflare token from the repository's secrets, just before it publishes, so the backend running is never older than the newest release, and a release's backend deploys only once that release has passed every check.
+- A second workflow, `backend.yml`, run by hand on `main`, runs the backend's tests and then `node tools/backend.ts deploy`, for a fix between releases.
+- `wrangler.jsonc` names the D1 database that `wrangler d1 create` made in Cloudflare once, by hand, since a deploy makes no database.
 - The backend answers older releases' cores too, so a change to a released path's request or answer goes on a new path beside it, such as `/v2/lookup` ([its requests](../network/02-units.md#its-requests)).
   Each path's tests send its request written out as literal JSON, which once a release serves that path is never edited, only added to, so the backend's own tests catch a change that would break an older core, with no job of their own (user, 2026-10-22; [build plan](plan.md#7-the-network)).
 

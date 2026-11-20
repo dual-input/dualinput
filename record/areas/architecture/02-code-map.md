@@ -715,8 +715,10 @@ dualinput/
     backend/             the Cloudflare Worker, on D1, with no framework
     relays/              each relay's region, URL, and cap, and the script that deploys them
   profiles/              aircraft/ and modules/, as 01-format-and-delivery's repository
-  tools/                 build.ts, check.ts, setup.ts, stock.ts, release.ts, the map check, and prose-lint;
-                         profile-builder/, profile-author/, msfs-sdk/, and the bench
+  tools/                 build.ts, check.ts, setup.ts, stock.ts, release.ts, replay.ts, ci.ts, backend.ts,
+                         the map check, and prose-lint; profile-builder/, profile-author/, msfs-sdk/,
+                         and the bench
+  .github/workflows/     CI's, the release's, the backend's, and the profiles' workflows
 ```
 
 A feature has only the parts it needs: pointer sync has a crate in the core and panel modules, and no routines or part in the EFB app.

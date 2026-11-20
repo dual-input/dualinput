@@ -14,21 +14,18 @@ const LIST: &str = include_str!("../../../relays/relays.toml");
 
 #[test]
 fn a_build_with_the_tokens_takes_each_relays_newest() {
-    let out = build::render(LIST, Some("nyc = [\"new\", \"old\"]\nfra = [\"only\"]\n")).unwrap();
+    let out = build::render(LIST, Some("fra = [\"new\", \"old\"]\n")).unwrap();
     assert!(
-        out.contains(r#"("https://nyc.relay.dualinput.app", "new", 262144)"#),
+        out.contains(r#"("https://fra.relay.dualinput.app", "new", 262144)"#),
         "{out}"
     );
-    assert!(
-        out.contains(r#"("https://fra.relay.dualinput.app", "only", 262144)"#),
-        "{out}"
-    );
+    assert!(!out.contains("old"), "{out}");
 }
 
 /// No release ships a relay it holds no token for.
 #[test]
 fn a_build_with_the_tokens_stops_at_a_relay_with_none() {
-    let error = build::render(LIST, Some("nyc = [\"new\"]\n")).unwrap_err();
+    let error = build::render(LIST, Some("sgp = [\"new\"]\n")).unwrap_err();
     assert!(error.contains("a token for the relay fra"), "{error}");
 }
 
@@ -36,7 +33,7 @@ fn a_build_with_the_tokens_stops_at_a_relay_with_none() {
 fn a_build_without_the_tokens_lists_every_relay_with_none() {
     let out = build::render(LIST, None).unwrap();
     assert!(
-        out.contains(r#"("https://nyc.relay.dualinput.app", "", 262144)"#),
+        out.contains(r#"("https://fra.relay.dualinput.app", "", 262144)"#),
         "{out}"
     );
 }

@@ -16,7 +16,7 @@ Decides:     The four levels of testing, and where and when each runs; which tes
 > In [the loop under load](#the-loop-under-load), the test unit runs a real sync engine of 100 write functions, fed a frame before each flight-model input and its writes back as readings, in place of the 98.7µs hold; a handler's 1ms holds on a quiet PC alone, with the input that loads the engine counted as a load beside the stops, and beside the sim the queue's wait judges the loop while the inputs over 1ms are recorded with no budget, since the sim's share of the CPU put about 640 over it ([core log](../core/log.md#2026-11-10-beside-the-a350-the-loops-queue-keeps-its-budget-and-the-sims-share-of-the-cpu-puts-about-640-inputs-over-a-handlers-1ms); user, 2026-11-10).
 
 Dual Input is tested at four levels: each crate's and each TypeScript part's own tests; the bench, two or three real cores on one PC, each on a stand-in sim; our own MSFS; and friends on two PCs.
-CI runs the first two on every pull request that changes code, and the release workflow runs them again, so a merge and a release each need both green.
+CI runs the first two on every pull request that changes code and on every push to `main`, so a merge needs both green, and the release workflow takes only a commit whose run on `main` passed.
 [The four levels](#the-four-levels) gives when the sim and friends come in.
 The bench reaches a core only where a pilot's surroundings do: the stand-in sim below the sim seam, fake pages over the real WebSocket, a stand-in core helper over the real pipe, local stand-ins for the network and the profiles' site, and the processes and files on the PC.
 The stand-in sim takes the sim edge's place in a bench build of the core, and runs our WASM module's routines natively.
@@ -39,7 +39,13 @@ The tests of `page-client` and of the panel bridge run on Node's test runner, as
 ## What keeps CI green
 
 - A pull request that changes code runs the bench beside the checks the code map's [CI](../architecture/02-code-map.md#ci) lists, the unit tests among them, and a merge needs every one green.
-- The release workflow's build job runs the bench once, as a pull request does, beside every check a pull request runs ([a release](01-the-build.md#a-release)), so no release ships past a red run (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+- The bench runs as 8 jobs at once on GitHub's standard runners, which a public repository gets free, 20 jobs at once on the Free plan (user, 2026-11-20).
+  One job builds the bench's programs once, with `node tools/bench.ts build`, and each of the 8 downloads them and runs its share of `tools/bench/scenarios/`, one scenario at a time, with `node tools/bench.ts --programs <folder> --shard <n>/8`.
+  `tools/bench/shards.ts` balances the shares by each file's time on our development machine: the whole bench took 52 minutes of scenarios there on 2026-11-20, with `network-outages` the longest at 392s, so a share runs about 6.5 minutes.
+- A new push cancels the run still going for the same pull request or branch.
+- The same workflow runs on every push to `main`, merges included, and blocks nothing.
+  A push to `main` runs every job, whatever it changed, so each commit there has a run of its own.
+- The release workflow takes only a commit whose run on `main` passed, and runs neither the checks nor the bench again ([a release](01-the-build.md#a-release); user, 2026-11-20).
 - CI's bench checks behavior, and no timing budget fails a pull request, since a shared runner's other load would move a timing from run to run (inference).
 
 ## What runs outside CI
@@ -225,7 +231,7 @@ The sandbox's recursion and interrupt-check cases are its own unit tests, with n
 
 ### Before a release
 
-The release workflow takes the commit this check ran on, and its build job stops when `main`'s head isn't that commit, so a merge after the check releases nothing unchecked.
+The release workflow takes the commit this check ran on, which may sit behind `main`'s head, so a merge after the check releases nothing unchecked, and it stops unless that commit's CI run on `main` passed.
 
 1. If the commit's runs on `main` aren't green, stop: the release workflow would stop at them.
 2. Install a build of the commit with `node tools/build.ts install`: our package's folder, `dualinput`, is in the Community folder.
@@ -250,7 +256,7 @@ Each is a starting value, which the first stage of [node 8](../architecture/plan
 
 | What | Budget |
 | --- | --- |
-| A pull request's bench, its bench build included | Within the code map's 20 minutes for a pull request's CI ([budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace)), as a job beside the others |
+| A pull request's bench, the job that builds its programs included | Within the code map's 20 minutes for a pull request's CI ([budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace)), as 8 jobs beside the others, after the one that builds |
 | The check before a release | Within 15 minutes of a person's time, from a sim at the main menu |
 
 ## Cases for the bench

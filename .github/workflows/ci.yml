@@ -98,7 +98,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [atc-audio, avatars, builds, clients-apps, clients-outages, clients-panels, clients-protocol, cockpit, core-helper, desktop-app, flight-model, go-to, killed-core, network, network-loss, network-outages, network-relays, pointer-sync, profiles, rate-and-pause, recording, session, sim-connections, sim-load, sim-module, sim-runs, state-sync, take-control, traffic]
+        # Longest first, so the longest scenario isn't the last to get a runner.
+        scenario: [network-outages, pointer-sync, cockpit, session, avatars, network-loss, state-sync, traffic, flight-model, take-control, desktop-app, profiles, clients-panels, network-relays, network, sim-module, atc-audio, rate-and-pause, clients-outages, go-to, core-helper, clients-protocol, sim-runs, recording, sim-connections, clients-apps, killed-core, sim-load, builds]
     name: scenario ${{ matrix.scenario }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

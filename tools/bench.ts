@@ -9,24 +9,26 @@
 //   node tools/bench.ts <scenario>...          runs the scenarios named, such as `network network-loss`,
 //                                              as a stage closes on the ones it added or changed
 //                                              (record/areas/build/plan.md, "Working a stage")
-//   node tools/bench.ts --shard <n>/<count>    runs share n of `count` shares of the scenarios,
-//                                              balanced by each file's time, as each of CI's bench
-//                                              jobs runs its own
 //   node tools/bench.ts build <folder>         builds the bench's programs into <folder> and runs
 //                                              nothing, as CI's job that builds them once does
-//   node tools/bench.ts --programs <folder> …  runs the scenarios, all, named, or a share, on the
-//                                              programs `build` put in <folder>, building nothing
+//   node tools/bench.ts --programs <folder> …  runs the scenarios, all or those named, on the
+//                                              programs `build` put in <folder>, building nothing,
+//                                              as each of CI's scenario jobs runs its one
 //   node tools/bench.ts load [plays]           runs the loop under load: p10's flight, played
 //                                              `plays` times over, 6 unless given, which is an hour
 //
 // `--programs` is for CI, where the job that built the folder checked out the same commit as
-// the job that runs it, so the programs still come from the tree under test.
+// the job that runs it, so the programs still come from the tree under test. In CI, where
+// GITHUB_STEP_SUMMARY names a file, the run adds a line to the job's summary, such as
+// "Cockpit state sync: 12/12 passed in 3m 4s".
 
 import fs from "node:fs"
 import path from "node:path"
 
+import { spawnSync } from "node:child_process"
+
+import { SCENARIOS } from "./bench/order.ts"
 import { level } from "./bench/profiles.ts"
-import { seconds, share } from "./bench/shards.ts"
 import { buildPrograms } from "./lib/cargo.ts"
 import { buildDesktopPages, DESKTOP } from "./lib/desktop-pages.ts"
 import { writeMessageTypes } from "./lib/messages.ts"
@@ -37,7 +39,7 @@ import { requireSdk } from "./lib/sdk.ts"
 /** The scenarios that run the desktop app, which the bench builds only when one of them runs. */
 const WITH_DESKTOP = ["desktop-app"]
 
-const USAGE = `usage: node tools/bench.ts [--programs <folder>] [<scenario>... | --shard <n>/<count>]
+const USAGE = `usage: node tools/bench.ts [--programs <folder>] [<scenario>...]
        node tools/bench.ts build <folder>
        node tools/bench.ts load [plays]`
 
@@ -78,14 +80,7 @@ main(async () => {
     return
   }
 
-  let chosen = args.length > 0 ? args : all
-  if (args[0] === "--shard") {
-    const [, n, count] = /^(\d+)\/(\d+)$/.exec(args[1] ?? "")?.map(Number) ?? []
-    if (args.length !== 2 || !n || !count || n > count) throw new Failed(USAGE)
-    chosen = share(all, n, count)
-    if (chosen.length === 0) return console.log(`share ${n} of ${count} holds no scenario, since there are only ${all.length}`)
-    console.log(`share ${n} of ${count}: ${chosen.join(", ")}, about ${Math.round(seconds(chosen) / 60)} minutes on our development machine`)
-  }
+  const chosen = args.length > 0 ? args : all
   const unknown = chosen.filter((n) => !all.includes(n))
   if (unknown.length > 0) throw new Failed(`${USAGE}\nno scenario named ${unknown.join(", ")}; the scenarios are ${all.join(", ")}`)
 
@@ -94,9 +89,29 @@ main(async () => {
   if (chosen.some((n) => WITH_DESKTOP.includes(n))) env.DUALINPUT_BENCH_DESKTOP = from ? found(path.resolve(from), FILES.desktop) : await buildDesktop()
   const files = chosen.map((n) => fromRoot(path.join(scenarios, `${n}.ts`)))
   // One scenario at a time, so no scenario's cores take CPU from another's timing; and each
-  // scenario's process exits once its tests end, whatever handle a failed one left open.
-  run(process.execPath, ["--test", "--test-concurrency=1", "--test-force-exit", ...files], { env })
+  // scenario's process exits once its tests end, whatever handle a failed one left open. A
+  // second reporter writes TAP to a file, whose totals the job's summary reads.
+  const tap = path.join(ROOT, "target", "bench", "results.tap")
+  fs.mkdirSync(path.dirname(tap), { recursive: true })
+  const reporters = ["--test-reporter=spec", "--test-reporter-destination=stdout", "--test-reporter=tap", `--test-reporter-destination=${tap}`]
+  const started = Date.now()
+  console.log(`> node --test ${files.join(" ")}`)
+  const result = spawnSync(process.execPath, ["--test", "--test-concurrency=1", "--test-force-exit", ...reporters, ...files], { cwd: ROOT, env, stdio: "inherit" })
+  summarize(chosen, tap, Date.now() - started)
+  if (result.status !== 0) throw new Failed(`the bench's scenarios exited with ${result.status}`)
 })
+
+/** Adds the run's line to the job's summary in CI, as "Cockpit state sync: 12/12 passed in 3m 4s". */
+function summarize(chosen: string[], tap: string, ms: number): void {
+  const summary = process.env.GITHUB_STEP_SUMMARY
+  if (!summary) return
+  const text = fs.existsSync(tap) ? fs.readFileSync(tap, "utf8") : ""
+  const count = (what: string) => Number(new RegExp(`^# ${what} (\\d+)$`, "m").exec(text)?.[1] ?? 0)
+  const passed = count("pass")
+  const title = chosen.map((n) => SCENARIOS[n]?.title ?? n).join(", ")
+  const time = `${Math.floor(ms / 60_000)}m ${Math.round((ms % 60_000) / 1000)}s`
+  fs.appendFileSync(summary, `${title}: ${passed}/${passed + count("fail") + count("cancelled")} passed in ${time}\n`)
+}
 
 /**
  * Builds what the scenarios run from the tree. The loop under load builds with the release

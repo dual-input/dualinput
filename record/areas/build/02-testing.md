@@ -39,10 +39,10 @@ The tests of `page-client` and of the panel bridge run on Node's test runner, as
 ## What keeps CI green
 
 - A pull request that changes code runs the bench beside the checks the code map's [CI](../architecture/02-code-map.md#ci) lists, the unit tests among them, and a merge needs every one green.
-- The bench runs as 8 jobs on GitHub's standard runners, which a public repository gets free (user, 2026-11-20).
-  GitHub documents 20 jobs at once on the Free plan ([Actions limits](https://docs.github.com/en/actions/reference/limits)), but ran at most 5 and then 7 of the shares at once beside the checks (measured on 2026-11-21, [build log](log.md#2026-11-21-with-warm-caches-a-pull-requests-ci-took-19-minutes-12-seconds-inside-its-20-and-the-bench-passed-in-8-jobs-on-githubs-runners)).
-  One job builds the bench's programs once, with `node tools/bench.ts build`, and each of the 8 downloads them and runs its share of `tools/bench/scenarios/`, one scenario at a time, with `node tools/bench.ts --programs <folder> --shard <n>/8`.
-  `tools/bench/shards.ts` balances the shares by each file's time on our development machine: the whole bench took 52 minutes of scenarios there on 2026-11-20, with `network-outages` the longest at 392s, so a share runs about 6.5 minutes.
+- The bench runs as one job for each scenario file on GitHub's standard runners, which a public repository gets free, so each check a pull request shows is one scenario, named by its title, and a failed one reruns alone (user, 2026-11-20 and 2026-11-21).
+  GitHub documents 20 jobs at once on the Free plan ([Actions limits](https://docs.github.com/en/actions/reference/limits)), but ran 6 to 15 of our jobs at once (measured on 2026-11-21, [build log](log.md#2026-11-21-with-warm-caches-a-pull-requests-ci-took-19-minutes-12-seconds-inside-its-20-and-the-bench-passed-in-8-jobs-on-githubs-runners)).
+  One job builds the bench's programs once, with `node tools/bench.ts build`, and each scenario's job downloads them and runs its file with `node tools/bench.ts --programs <folder> <scenario>`, which adds its tests' count and time to the job's summary.
+  `tools/bench/order.ts` holds each scenario's title and its time on our development machine, where the whole bench took 52 minutes on 2026-11-20, and the jobs start longest first, since the run lasts until its longest scenario, `network-outages`, ends.
 - A new push cancels the run still going for the same pull request or branch.
 - The same workflow runs on every push to `main`, merges included, and blocks nothing.
   A push to `main` runs every job, whatever it changed, so each commit there has a run of its own.
@@ -246,7 +246,7 @@ Each is a starting value, which the first stage of [node 8](../architecture/plan
 
 | What | Budget |
 | --- | --- |
-| A pull request's bench, the job that builds its programs included | Within the code map's 20 minutes for a pull request's CI ([budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace)), as 8 jobs beside the others, after the one that builds |
+| A pull request's bench, the job that builds its programs included | Within the code map's 20 minutes for a pull request's CI ([budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace)), as one job per scenario beside the others, after the one that builds |
 
 ## Cases for the bench
 

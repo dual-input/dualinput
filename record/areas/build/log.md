@@ -1,5 +1,22 @@
 # The build: log
 
+## 2026-11-21: One CI job per scenario, started longest first, ran the bench as fast as the 8 shares
+
+**Asked:** whether CI can run each scenario file as a job of its own, so each check a pull request shows is one scenario, within the code map's [20 minutes](../architecture/02-code-map.md#budgets-for-the-workspace).
+
+**Expected:** about 3 minutes over the shares, from 29 jobs' setup at the 6 to 8 jobs GitHub ran at once the night before.
+
+**Found:** on [pull request 2](https://github.com/dual-input/dualinput/pull/2), a trial not for merging, all 29 jobs passed twice with warm caches:
+
+- In alphabetical order, the run took 22 minutes 33 seconds, since `network-outages`, the longest at 490s, got a runner last.
+- Started longest first, it took 18 minutes 54 seconds, against the shares' 19 minutes 12 seconds, the last 3 minutes beside `main`'s own run.
+- GitHub ran 14 of the scenario jobs at once beside the checks, where the night before it held 6 to 8 jobs in all.
+- The 29 jobs used 5,812 runner seconds, about 1,500 more than the shares, for each job's setup; standard runners are free on a public repository.
+
+**Changed:** CI runs one job per scenario, longest first, named by the titles in `tools/bench/order.ts`, which replaces the shares (user, 2026-11-21).
+
+**Affects:** [what keeps CI green](02-testing.md#what-keeps-ci-green) and [the build's CI](01-the-build.md#ci).
+
 ## 2026-11-21: With warm caches, a pull request's CI took 19 minutes 12 seconds, inside its 20, and the bench passed in 8 jobs on GitHub's runners
 
 **Asked:** the questions of [the entry below](#2026-11-21-cis-first-run-on-githubs-runners-took-47-minutes-with-every-cache-cold-ran-6-jobs-at-once-and-failed-on-the-benchs-own-timing-budgets-and-races), on a run whose SDK and Cargo caches the first run saved.

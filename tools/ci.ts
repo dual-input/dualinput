@@ -19,6 +19,7 @@
 import fs from "node:fs"
 import path from "node:path"
 
+import { matrix } from "./bench/order.ts"
 import { buildPrograms } from "./lib/cargo.ts"
 import { checkReleasedLevels, releasedLevels } from "./lib/levels.ts"
 import { ROOT } from "./lib/repo.ts"
@@ -49,7 +50,10 @@ function changes(): void {
   console.log(`code: ${code}, profiles: ${profiles}`)
   const out = process.env.GITHUB_OUTPUT
   if (!out) throw new Failed("GITHUB_OUTPUT isn't set; this step runs only in a workflow")
-  fs.appendFileSync(out, `code=${code}\nprofiles=${profiles}\n`)
+  // Each scenario's job, longest first, which the bench's matrix takes.
+  const files = fs.readdirSync(path.join(ROOT, "tools", "bench", "scenarios")).filter((f) => f.endsWith(".ts"))
+  const scenarios = JSON.stringify(matrix(files.map((f) => f.replace(/\.ts$/, ""))))
+  fs.appendFileSync(out, `code=${code}\nprofiles=${profiles}\nscenarios=${scenarios}\n`)
 }
 
 function publishProfiles(pages: string): void {

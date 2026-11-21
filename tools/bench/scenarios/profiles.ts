@@ -335,7 +335,7 @@ function userCfg(folder: string, empty = false): string {
     const airplanes = (name: string) => path.join(packages, "Community", name, "SimObjects", "Airplanes")
     const baron = path.join(airplanes("bksq-aircraft-baronpro"), BARON.path)
     fs.mkdirSync(baron, { recursive: true })
-    fs.writeFileSync(path.join(baron, "aircraft.cfg"), `[FLTSIM.0]\r\ntitle = "Baron"\r\nui_manufacturer = "Black Square" ; e.g. Boeing, Cessna\r\nui_type = "Baron 58P"\r\n`)
+    fs.writeFileSync(path.join(baron, "aircraft.cfg"), `[FLTSIM.0]\r\ntitle = "Baron"\r\nui_manufacturer = "Black Square" ; e.g. Boeing, Cessna\r\nui_type = "Baron 58P Professional"\r\n`)
     const pa24 = path.join(airplanes("a2a-aircraft-pa24"), ...PA24.path.split("/"), "config")
     fs.mkdirSync(pa24, { recursive: true })
     fs.writeFileSync(path.join(pa24, "aircraft.cfg"), `[FLTSIM.0]\r\nui_manufacturer = "TT:AIRCRAFT.UI_MANUFACTURER"\r\nui_type = "PA24-250 Comanche"\r\n`)
@@ -358,7 +358,7 @@ test("the apps see where the pilot is, the aircraft the sim last loaded by name,
   const installed = (s: ProfilesSlice | undefined) => s?.supported.every((p) => p.installed) === true && s.supported.length > 0
 
   await watching.until(() => installed(profiles()), "the Baron's profile, installed")
-  assert.deepEqual(profiles(), { loaded: null, supported: [{ maker: "Black Square", model: "Baron 58P", maturity: "Experimental", installed: true }], pick_failed: 0, test: null })
+  assert.deepEqual(profiles(), { loaded: null, supported: [{ maker: "Black Square", model: "Baron 58P Professional", maturity: "Experimental", installed: true, folders: [BARON.path] }], pick_failed: 0, test: null })
   assert.equal(sim()?.where, "main-menu")
   assert.equal(sim()?.aircraft, null)
 
@@ -366,7 +366,7 @@ test("the apps see where the pilot is, the aircraft the sim last loaded by name,
   a.core.act({ act: "set", numbers: [], texts: [["A:ATC ID", "N58BS"]] })
   a.core.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "aircraft-loaded", path: BARON.cfg } }] })
   const named = (want: NamedAircraft) => watching.until(() => JSON.stringify(sim()?.aircraft) === JSON.stringify(want), `the slice naming ${want.path}`)
-  await named({ path: BARON.path, maker: "Black Square", model: "Baron 58P", tail: "N58BS" })
+  await named({ path: BARON.path, maker: "Black Square", model: "Baron 58P Professional", tail: "N58BS" })
   await watching.until(() => profiles()?.loaded?.maturity === "Experimental", "the loaded aircraft's maturity")
 
   // An `aircraft.cfg` in a `config` folder, whose token names no maker, and no profile covers it.
@@ -379,11 +379,11 @@ test("the apps see where the pilot is, the aircraft the sim last loaded by name,
   await watching.until(() => sim()?.where === "world-map", "the world map")
   await load(a.core, BARON)
   await watching.until(() => sim()?.where === "flight", "the flight")
-  await named({ path: BARON.path, maker: "Black Square", model: "Baron 58P", tail: "N58BS" })
+  await named({ path: BARON.path, maker: "Black Square", model: "Baron 58P Professional", tail: "N58BS" })
 
   // In a flight the picker loads nothing; at the world map the menu script selects the Baron's
   // folder, and a pick the world map can't carry out counts as failed.
-  const pick = () => watching.command("profiles.pick", { maker: "Black Square", model: "Baron 58P" })
+  const pick = () => watching.command("profiles.pick", { maker: "Black Square", model: "Baron 58P Professional" })
   assert.match((await pick()) ?? "", /only at the world map/)
   await toMenu(a.core)
   await watching.until(() => sim()?.where === "world-map", "back at the world map")

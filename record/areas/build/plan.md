@@ -1070,7 +1070,7 @@ Designs first: the audit's list of gaps, each ruled on by the user, on 2026-11-2
 Needs: every stage before 22, so it can be built beside stage 22.
 Tests: the profile engine's cases for a bracketed map, a byte-order mark, a schema for each kind of file, and the bundle's order; the builder's type check of a number and a text `instrument()` entry; `instrument-reads`' cases for a reading of each kind; `tools/levels.test.ts` for which tags hold a level; and the scenarios that load the 58P's profile, `state-sync`, `clients-panels`, and `profiles`.
 Exit: `node tools/check.ts` passes with the 58P's profile in the layout, and `node tools/bench.ts state-sync clients-panels profiles` passes.
-Done on 2026-11-21.
+Done on 2026-11-21: the bug the audit found in the aircraft picker, which kept a pick of the 58P on "Loading…" since it waited for the sim's names for the aircraft to match the profile's, went to the user rather than into the stage, and was fixed in a commit of its own that day at the user's word.
 
 ## 22d The profile extension
 

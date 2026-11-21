@@ -6,4 +6,10 @@ export type SupportedAircraft = { maker: string, model: string, maturity: Maturi
  * Whether a package on disk holds it. A streamed copy keeps no folder on disk, so one reads
  * as not installed.
  */
-installed: boolean, };
+installed: boolean, 
+/**
+ * The `SimObjects\Airplanes\` folders its profile's variants are in, in lowercase. A pick
+ * asks the world map for one of them, and the aircraft picker sees the pick land by them
+ * (src/platform/efb-shell/src/session/pick.ts).
+ */
+folders: Array<string>, };

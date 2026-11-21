@@ -91,6 +91,8 @@ pub struct Aircraft {
 
 impl Aircraft {
     /// The aircraft's folder under `SimObjects\Airplanes\`, the path's first part.
+    /// `inFolders` in src/platform/efb-shell/src/session/pick.ts reads a path the same way, so
+    /// change both together.
     pub fn folder(&self) -> &str {
         self.path.split('/').next().unwrap_or(&self.path)
     }

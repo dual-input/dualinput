@@ -61,19 +61,19 @@ const noSession: SessionSlice = { held: false, code: null, me: ME, pf: null, mem
 const held = (rest: Partial<SessionSlice>): SessionSlice => ({ ...noSession, held: true, code: CODE, pf: ME, ready: [], share: [], roles: roles(), ...rest })
 const running = { aircraft: inFlight.aircraft, phase: "running" as const }
 
-const BARON: NamedAircraft = { path: "baron58p/presets/blacksquare/baron58p", maker: "Black Square", model: "Baron 58P", tail: "N58BS" }
+const BARON: NamedAircraft = { path: "bksq-aircraft-baronpropress", maker: "Black Square", model: "Baron 58P Professional", tail: "N58BS" }
 const FENIX: NamedAircraft = { path: "fnx320/presets/fenix/a320", maker: "Fenix", model: "A320", tail: "G-FNXA" }
 const SUPPORTED: ProfilesSlice["supported"] = [
-  { maker: "Black Square", model: "Baron 58P", maturity: "Stable", installed: true },
-  { maker: "Synaptic Simulations", model: "A220-300", maturity: "Stable", installed: true },
-  { maker: "A2A Simulations", model: "PA24-250 Comanche", maturity: "Experimental", installed: true },
-  { maker: "FSReborn", model: "Phenom 300E", maturity: "Experimental", installed: true },
-  { maker: "PMDG", model: "777-300ER", maturity: "Experimental", installed: true },
-  { maker: "A2A Simulations", model: "Aerostar 600", maturity: "Experimental", installed: false },
-  { maker: "Black Square", model: "Bonanza", maturity: "Stable", installed: false },
-  { maker: "iniBuilds", model: "A350", maturity: "Experimental", installed: false },
-  { maker: "iniBuilds", model: "A380", maturity: "Experimental", installed: false },
-  { maker: "iniBuilds", model: "L-1011 TriStar", maturity: "Experimental", installed: false },
+  { maker: "Black Square", model: "Baron 58P Professional", maturity: "Stable", installed: true, folders: [BARON.path] },
+  { maker: "Synaptic Simulations", model: "A220-300", maturity: "Stable", installed: true, folders: ["synaptic-a220-300"] },
+  { maker: "A2A Simulations", model: "PA24-250 Comanche", maturity: "Experimental", installed: true, folders: ["pa24-250"] },
+  { maker: "FSReborn", model: "Phenom 300E", maturity: "Experimental", installed: true, folders: ["fsr-phenom-300e"] },
+  { maker: "PMDG", model: "777-300ER", maturity: "Experimental", installed: true, folders: ["pmdg-777-300er"] },
+  { maker: "A2A Simulations", model: "Aerostar 600", maturity: "Experimental", installed: false, folders: ["a2a-aerostar-600"] },
+  { maker: "Black Square", model: "Bonanza", maturity: "Stable", installed: false, folders: ["bksq-bonanza"] },
+  { maker: "iniBuilds", model: "A350", maturity: "Experimental", installed: false, folders: ["inibuilds-a350"] },
+  { maker: "iniBuilds", model: "A380", maturity: "Experimental", installed: false, folders: ["inibuilds-a380"] },
+  { maker: "iniBuilds", model: "L-1011 TriStar", maturity: "Experimental", installed: false, folders: ["inibuilds-l1011"] },
 ]
 const NO_PROFILE: ProfilesSlice = { loaded: null, supported: SUPPORTED, pick_failed: 0, test: null }
 const atWorldMap: SimSlice = { stage: "menu", page: "world-map", where: "world-map", aircraft: BARON, pause: 0, ended: null, module: "running" }
@@ -368,6 +368,18 @@ export class StandInCore extends StandInBase {
     else if (name === "session.share") this.share(Number(fields.key), !!fields.on)
     else if (name === "traffic.list-packs") this.set({ [TRAFFIC]: { ...(this.slices[TRAFFIC] as Record<string, unknown>), packs: PACKS } })
     else if (name === "go-to.join") this.join(!!fields.now)
+    else if (name === "profiles.pick") this.pick(String(fields.maker), String(fields.model))
+  }
+
+  /** A pick loads its tile's first folder a moment later, and the loaded aircraft's maturity changes with it, as the core's slices do. */
+  private pick(maker: string, model: string): void {
+    const tile = SUPPORTED.find((one) => one.maker === maker && one.model === model)
+    if (!tile) return
+    window.clearTimeout(this.answer)
+    this.answer = window.setTimeout(() => {
+      const aircraft = tile.folders.includes(BARON.path) ? BARON : { path: tile.folders[0]!, maker, model, tail: null }
+      this.set({ sim: { ...(this.slices.sim as SimSlice), aircraft }, profiles: { ...(this.slices.profiles as ProfilesSlice), loaded: { maturity: tile.maturity } } })
+    }, AFTER.answer)
   }
 
   /** A switch claims its role or lets it go, at once, as the core's does with no other member to ask. */

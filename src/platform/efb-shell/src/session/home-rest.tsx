@@ -10,11 +10,11 @@ import { StandingFigure } from "../figure/standing-figure.tsx"
 import type { FigureSignals } from "../figure/standing-figure.tsx"
 import { FIGURE_COLORS } from "@dualinput/crew"
 import type { ProfilesSlice } from "../../../../engines/messages/ts/profiles/ProfilesSlice.ts"
+import type { SupportedAircraft } from "../../../../engines/messages/ts/profiles/SupportedAircraft.ts"
 import type { SimSlice } from "../../../../engines/messages/ts/sim/SimSlice.ts"
 import { useCoreSlice, useShell } from "../part.ts"
 import { FIGURE_COLOR, GUIDE_DONE, useSetting, writeSetting } from "../settings/setting.ts"
 import { AircraftPicker } from "./aircraft-picker.tsx"
-import type { PickableAircraft } from "./aircraft-picker.tsx"
 import { Farewell, WelcomeGuide } from "./guide.tsx"
 import type { HomeAircraft } from "./start-side.tsx"
 
@@ -71,7 +71,7 @@ export function HomeRest({ page, signals, aircraft, onFigureGone }: { page: RefO
   // Orange for a pilot who never picked a color. `FIRST_COLOR` in src/features/avatars/efb/part.tsx and `CrewCard`'s
   // color in ../setup/setup-flow.tsx name the same color, so change all three together.
   const color = FIGURE_COLORS.find((candidate) => candidate.name === figureColor)?.hex ?? FIGURE_COLORS[5]!.hex
-  const onPick = (picked: PickableAircraft) => link.client.command("profiles.pick", { maker: picked.maker, model: picked.model })
+  const onPick = (picked: SupportedAircraft) => link.client.command("profiles.pick", { maker: picked.maker, model: picked.model })
   return (
     <div className="relative mt-6 flex min-h-0 flex-1 flex-col">
       {guiding ? (

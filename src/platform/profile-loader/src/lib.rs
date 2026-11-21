@@ -201,7 +201,8 @@ impl Profiles {
     /// world map, as Join selects the pilot flying's, by a folder its profile covers, one a package
     /// on disk holds where the sim service has found one (record/areas/interface/decisions.md, "The
     /// aircraft picker loads an aircraft through the world map's store, and only at the world
-    /// map"). The picker sees the pick land in the sim's loaded aircraft, and fail in `pick_failed`.
+    /// map"). The picker sees the pick land when the sim's loaded aircraft is in one of the
+    /// slice's `folders` for it, and fail in `pick_failed`.
     fn pick(me: &mut Profiles, pick: Pick, cx: &mut Cx) -> Result<(), String> {
         let sim = cx.read::<SimAwareness>();
         if sim.stage != Stage::Menu
@@ -210,10 +211,10 @@ impl Profiles {
         {
             return Err("The aircraft picker loads an aircraft only at the world map".into());
         }
-        let folders: Vec<String> = me
+        let folders = me
             .published()
             .find(|b| b.shown.maker == pick.maker && b.shown.name == pick.model)
-            .map(|b| b.variants.iter().map(|v| folder(v)).collect())
+            .map(folders_of)
             .unwrap_or_default();
         let Some(chosen) = folders
             .iter()
@@ -268,14 +269,15 @@ impl Profiles {
                 }),
             supported: me
                 .published()
-                .map(|b| SupportedAircraft {
-                    maker: b.shown.maker.clone(),
-                    model: b.shown.name.clone(),
-                    maturity: shown(b.shown.maturity),
-                    installed: b
-                        .variants
-                        .iter()
-                        .any(|v| me.installed.get(&folder(v)) == Some(&true)),
+                .map(|b| {
+                    let folders = folders_of(b);
+                    SupportedAircraft {
+                        maker: b.shown.maker.clone(),
+                        model: b.shown.name.clone(),
+                        maturity: shown(b.shown.maturity),
+                        installed: folders.iter().any(|f| me.installed.get(f) == Some(&true)),
+                        folders,
+                    }
                 })
                 .collect(),
             pick_failed: me.pick_failed,
@@ -676,6 +678,18 @@ fn folder(variant: &str) -> String {
         .next()
         .unwrap_or(variant)
         .to_ascii_lowercase()
+}
+
+/// The folders a bundle's variants cover, each once, in the variants' order, so `pick` asks for
+/// the first one installed.
+fn folders_of(bundle: &IndexBundle) -> Vec<String> {
+    let mut folders: Vec<String> = Vec::new();
+    for f in bundle.variants.iter().map(|v| folder(v)) {
+        if !folders.contains(&f) {
+            folders.push(f);
+        }
+    }
+    folders
 }
 
 fn shown(maturity: Maturity) -> wire::Maturity {

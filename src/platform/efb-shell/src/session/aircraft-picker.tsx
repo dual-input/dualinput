@@ -8,17 +8,18 @@ import { Check, ChevronRight } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
-export type PickableAircraft = { maker: string; model: string; maturity: "Stable" | "Experimental"; installed: boolean }
+import type { SupportedAircraft } from "../../../../engines/messages/ts/profiles/SupportedAircraft.ts"
+import { inFolders, sameAircraft } from "./pick.ts"
 
-const nameOf = (aircraft: PickableAircraft) => `${aircraft.maker} ${aircraft.model}`
-const byName = (a: PickableAircraft, b: PickableAircraft) => nameOf(a).localeCompare(nameOf(b))
-const maturityBadge = (aircraft: PickableAircraft) => <Badge variant={aircraft.maturity === "Stable" ? "secondary" : "outline"}>{aircraft.maturity}</Badge>
+const nameOf = (aircraft: SupportedAircraft) => `${aircraft.maker} ${aircraft.model}`
+const byName = (a: SupportedAircraft, b: SupportedAircraft) => nameOf(a).localeCompare(nameOf(b))
+const maturityBadge = (aircraft: SupportedAircraft) => <Badge variant={aircraft.maturity === "Stable" ? "secondary" : "outline"}>{aircraft.maturity}</Badge>
 
 /** How long a tile says it's loaded before the popup closes, in milliseconds. */
 const LOADED_MS = 500
 
 /** The maker over the model, as the start card names the loaded aircraft, with the maturity beside it. */
-function Naming({ aircraft }: { aircraft: PickableAircraft }) {
+function Naming({ aircraft }: { aircraft: SupportedAircraft }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="truncate text-xs text-muted-foreground">{aircraft.maker}</span>
@@ -39,27 +40,27 @@ function Heading({ first, children }: { first: boolean; children: ReactNode }) {
 export type AircraftPickerProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  aircraft: PickableAircraft[]
+  aircraft: SupportedAircraft[]
   /** Whether the pilot is at Free flight's world map, the one place a pick can load. */
   canLoad: boolean
   inFlight: boolean
-  /** What the sim says is loaded, which tells a pick has landed. */
-  loaded: { maker: string | null; model: string | null } | null
+  /** What the sim says is loaded, by its path, which tells a pick has landed. */
+  loaded: { path: string } | null
   /** Asks the core to load it, which refuses or takes the ask. */
-  onPick: (aircraft: PickableAircraft) => Promise<void>
+  onPick: (aircraft: SupportedAircraft) => Promise<void>
   /** How many picks the world map couldn't carry out, which counts up when one the core took fails. */
   failed: number
 }
 
 export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, inFlight, loaded, onPick, failed }: AircraftPickerProps) {
-  const [choice, setChoice] = useState<{ aircraft: PickableAircraft; loaded: boolean; failed: number } | null>(null)
+  const [choice, setChoice] = useState<{ aircraft: SupportedAircraft; loaded: boolean; failed: number } | null>(null)
   const scroller = useScroller()
   const timer = useRef(0)
   useEffect(() => () => window.clearTimeout(timer.current), [])
   useEffect(() => {
     if (open) setChoice(null)
   }, [open])
-  const choose = (picked: PickableAircraft) => {
+  const choose = (picked: SupportedAircraft) => {
     if (choice) return
     setChoice({ aircraft: picked, loaded: false, failed })
     onPick(picked).catch(() => {
@@ -74,7 +75,7 @@ export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, inFlight
     setChoice(null)
     toast("Dual Input couldn't load that aircraft")
   }, [missed])
-  const landed = !!choice && !choice.loaded && loaded?.maker === choice.aircraft.maker && loaded.model === choice.aircraft.model
+  const landed = !!choice && !choice.loaded && !!loaded && inFolders(loaded.path, choice.aircraft.folders)
   useEffect(() => {
     if (!landed) return
     setChoice((now) => now && { ...now, loaded: true })
@@ -83,8 +84,9 @@ export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, inFlight
   const installed = aircraft.filter((one) => one.installed).sort(byName)
   const others = aircraft.filter((one) => !one.installed).sort(byName)
   const pickable = canLoad && installed.length > 0
-  const state = (one: PickableAircraft) =>
-    choice?.aircraft !== one ? (
+  const chosen = (one: SupportedAircraft) => !!choice && sameAircraft(choice.aircraft, one)
+  const state = (one: SupportedAircraft) =>
+    !choice || !chosen(one) ? (
       <span className="ml-3 flex shrink-0 items-center text-sm font-medium text-primary">
         Load <ChevronRight className="ml-0.5 size-4" />
       </span>
@@ -118,7 +120,7 @@ export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, inFlight
                     type="button"
                     onMouseDown={showPress}
                     onClick={() => choose(one)}
-                    disabled={!!choice && choice.aircraft !== one}
+                    disabled={!!choice && !chosen(one)}
                     className={cx(TILE, "bg-muted/40 hover:bg-muted/70 disabled:opacity-40 data-[pressed]:translate-y-[var(--hair)] data-[pressed]:bg-muted")}
                   >
                     <Naming aircraft={one} />

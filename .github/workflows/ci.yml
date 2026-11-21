@@ -13,7 +13,8 @@ on:
 # A new push cancels the run still going for the same pull request or branch. A release
 # commit's run has a group of its own, since the release starts only when that run passes.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || (startsWith(github.event.head_commit.message, 'chore(release): ') && github.sha) || github.ref }}
+  # Quoted, since the colon and space in the release title would end a bare value.
+  group: "ci-${{ github.event.pull_request.number || (startsWith(github.event.head_commit.message, 'chore(release): ') && github.sha) || github.ref }}"
   cancel-in-progress: true
 
 permissions:

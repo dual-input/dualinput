@@ -28,16 +28,21 @@ jobs:
           # an older commit's would roll back a profile; it reads each release's level from every tag.
           ref: ${{ inputs.publish && 'main' || '' }}
           fetch-depth: ${{ inputs.publish && '0' || '1' }}
-      - if: inputs.publish
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: pages
-          path: target/pages
       - run: rustup toolchain install
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      # The publish commits to the `pages` branch from its checkout in target/pages, so the
+      # checkout comes after rust-cache: on a cache that only partly matches, rust-cache cleans
+      # every folder in target/ as a build profile's, keeping only build, .fingerprint, and deps,
+      # and the publish's `git add` would then find no repository in target/pages and reach this
+      # one, which ignores target/ (Swatinem/rust-cache 2.9.3, src/cleanup.ts, `cleanTargetDir`).
+      - if: inputs.publish
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: pages
+          path: target/pages
       # The profile builder compiles in TypeScript 6.0.3's typescript.js from node_modules.
       - run: npm ci
       - if: ${{ !inputs.publish }}

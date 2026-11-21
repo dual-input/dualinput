@@ -1,0 +1,22 @@
+{ "width": 1074, "height": 1518, "scale": 2, "elements": [
+  {"role":"button","label":"Session","x":0,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Traffic","x":215,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"ATC audio","x":430,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Figures","x":644,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Settings","x":859,"y":1403,"width":215,"height":115},
+  {"role":"textbox","label":"Display name","x":391,"y":387,"width":599,"height":75},
+  {"role":"button","label":"red","x":391,"y":545,"width":58,"height":58},
+  {"role":"button","label":"blue","x":469,"y":545,"width":58,"height":58},
+  {"role":"button","label":"green","x":546,"y":545,"width":58,"height":58},
+  {"role":"button","label":"yellow","x":623,"y":545,"width":58,"height":58},
+  {"role":"button","label":"purple","x":701,"y":545,"width":58,"height":58},
+  {"role":"button","label":"orange","x":778,"y":545,"width":58,"height":58},
+  {"role":"button","label":"teal","x":855,"y":545,"width":58,"height":58},
+  {"role":"button","label":"pink","x":933,"y":545,"width":58,"height":58},
+  {"role":"button","label":"Inside the aircraft","x":42,"y":770,"width":991,"height":75},
+  {"role":"button","label":"Walkaround","x":42,"y":845,"width":991,"height":75},
+  {"role":"button","label":"Inside the aircraft","x":42,"y":1013,"width":991,"height":75},
+  {"role":"button","label":"Walkaround","x":42,"y":1088,"width":991,"height":75},
+  {"role":"button","label":"How seats work","x":42,"y":1230,"width":991,"height":92},
+  {"role":"button","label":"How pointing and clicking works","x":42,"y":1346,"width":991,"height":55}
+] }

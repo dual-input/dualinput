@@ -1,0 +1,8 @@
+{ "width": 784, "height": 844, "scale": 2, "elements": [
+  {"role":"button","label":"Open Dual Input on the EFB","x":32,"y":32,"width":720,"height":124},
+  {"role":"button","label":"Dismiss","x":672,"y":48,"width":64,"height":64},
+  {"role":"button","label":"Open Dual Input on the EFB","x":32,"y":172,"width":720,"height":104},
+  {"role":"button","label":"Dismiss","x":672,"y":192,"width":64,"height":64},
+  {"role":"button","label":"Open Dual Input on the EFB","x":32,"y":292,"width":720,"height":104},
+  {"role":"button","label":"Dismiss","x":672,"y":312,"width":64,"height":64}
+] }

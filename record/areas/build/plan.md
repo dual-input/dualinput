@@ -1084,9 +1084,23 @@ Needs: nothing for the guides; 22b, 22c, and 22d for the profile authors' docume
 
 ## 22f The graphics
 
-Builds: the graphics Dual Input presents itself with ([the product plan](../product/plan.md#3-v1-or-later)): the desktop app's and the tray's icons, the icons for our GitHub organization and repository and for Discord, and the README's screenshots, with a tool that renders the apps' screens for them from a made-up session.
+Builds: the graphics Dual Input presents itself with ([the product plan](../product/plan.md#3-v1-or-later)), each drawn by a tool from the tree ([the graphics](01-the-build.md#the-graphics); [their looks](../interface/decisions.md#dual-inputs-icon-is-the-sky-glyph-on-the-apps-background-and-the-sims-toolbar-and-efb-get-the-glyph-alone-in-white)):
+
+- `tools/icons.ts`, which draws the desktop app's and the tray's icon, our app's icon in the EFB and the banner's toolbar icon, and the avatar of our GitHub organization and Discord server, from the glyph in `src/packages/ui/src/glyph.ts`
+- `tools/screenshots.ts`, with `tools/lib/dev-pages.ts` and playwright-core, which pictures every scene of the EFB app's, the banner's, the desktop window's, and the welcome's dev pages in `docs/screenshots/`, a layout beside each for the docs' crops, with the scenes and the handle each dev page gives it and the standing figure's `FigureStill` ([the screenshots](01-the-build.md#the-screenshots))
+- the repository's social preview, which the same tool draws and the README opens with; the README's other pictures are stage 22e's, which writes the words around them (user, 2026-11-21)
+
 Designs first: each graphic's look, with the user, and the screenshot tool.
 Needs: every stage before 22, so it can be built beside stage 22.
+
+Tests, by hand, since the tools have no tests of their own:
+
+- Three runs of `node tools/screenshots.ts` in a row, the second and third changing no file ([build log](log.md#2026-11-21-a-picture-of-an-apps-screen-comes-out-the-same-on-every-run-once-its-clock-fonts-motion-chance-drawing-and-standing-figure-are-held)).
+- Each layout's boxes drawn over four pictures land on their elements, and the tool's social preview matches the draft the user chose, pixel for pixel.
+- The icons by eye: the tray icon in the tray on our development machine (user, 2026-11-21), and the glyph alone beside other packages' toolbar icons and EFB icons, drawn as the EFB's stylesheet draws them; in the sim, at its next sitting, with the toolbar button's hover and open states.
+
+Exit: on our development machine, `node tools/check.ts` passes, and a second run of `node tools/screenshots.ts` changes no file; the avatar is set on GitHub and Discord, the social preview in the repository's settings, and the README opens with it.
+Done on 2026-11-21: 105 pictures came out identical on three runs in a row, `node tools/check.ts` passed, the user set the avatar on GitHub and Discord and uploaded the social preview, and the icons in the sim's toolbar and EFB wait for the next sitting to be looked at.
 
 ## 23 v1's release
 

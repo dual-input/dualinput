@@ -1,0 +1,18 @@
+{ "width": 1074, "height": 1518, "scale": 2, "elements": [
+  {"role":"button","label":"Session","x":0,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Traffic","x":215,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"ATC audio","x":430,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Figures","x":644,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Settings","x":859,"y":1403,"width":215,"height":115},
+  {"role":"heading","label":"Welcome to Dual Input","x":42,"y":714,"width":361,"height":50},
+  {"role":"link","label":"Skip guide","x":892,"y":720,"width":140,"height":42},
+  {"role":"button","label":"Page 1 of 5","x":83,"y":1159,"width":33,"height":12},
+  {"role":"button","label":"Page 2 of 5","x":129,"y":1159,"width":12,"height":12},
+  {"role":"button","label":"Page 3 of 5","x":154,"y":1159,"width":12,"height":12},
+  {"role":"button","label":"Page 4 of 5","x":179,"y":1159,"width":12,"height":12},
+  {"role":"button","label":"Page 5 of 5","x":204,"y":1159,"width":12,"height":12},
+  {"role":"button","label":"Next","x":872,"y":1105,"width":119,"height":75},
+  {"role":"heading","label":"Flying together","x":83,"y":830,"width":908,"height":50},
+  {"role":"button","label":"Host a session","x":83,"y":353,"width":908,"height":83},
+  {"role":"button","label":"Join","x":878,"y":542,"width":113,"height":75}
+] }

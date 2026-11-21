@@ -1,5 +1,37 @@
 # The build: log
 
+## 2026-11-21: A picture of an app's screen comes out the same on every run once its clock, fonts, motion, chance, drawing, and standing figure are held
+
+**Asked:** whether `node tools/screenshots.ts`, which pictures every scene of the apps' dev pages in Edge, writes the same bytes for a screen that didn't change, so that after a run `git status` lists only the pictures whose screen did.
+
+**Expected:** yes, with Playwright's clock paused and stepped, since the stand-in cores make up every value a page shows.
+
+**Found:** each hold below took a run's changed pictures down, of 103:
+
+- Playwright's clock alone, stepped 100ms at a time with 25ms of real time after each step, left 13 changed on a second run, four scenes at once.
+  Each difference was in the EFB app's standing figure, by up to 58 levels over about 1,500 pixels.
+  At rest the figure poses only every 150ms, so the pose a picture caught depended on when, in real time, its layout had settled.
+- Playwright's `runFor` waits a task after each timer it fires, so the browser's own frames, and the layout they deliver, fall between a step's timers wherever real time puts them.
+  Steps of one 16ms frame, with a frame forced after each, still differed under load.
+  So did Chrome's own virtual time, through the DevTools protocol, which holds the frames but not when the figure's idle draws land.
+- CSS animations and transitions run on the browser's time, not the paused clock, and the figure turns toward Host while the start card rises in.
+  Ending every animation at once, and loading every font before the clock starts, took the figure's differences from every take to some.
+- Posting three tasks on a `MessageChannel` after each step, which run after the tasks React posts there to render, and taking each picture again until two in a row match, left no picture changing partway through a render.
+- Scenes one at a time still changed 6, at 4 minutes a run.
+  Holding the figure still at rest, with its breathing and sway at zero in a test build, gave 8 identical takes of 8, four at once, each after 25 other scenes in the same browser.
+- With the figure still, 2 pictures still changed, by one level in the Figures tab's portrait and one pixel of the header, which the 256-color palette spread into widely different bytes.
+  With Edge drawing in software, `--disable-gpu`, every picture came out the same.
+- Setup's checks run for random lengths, from `Math.random`, so its pictures differed too until the tool seeded it.
+
+**Changed:** the tool holds all of these, keeping the 100ms steps with the tasks posted after each, and takes four scenes at once.
+A full run takes about 27s.
+The EFB app's standing figure reads `FigureStill`, a context only the dev page sets, to stand still for pictures (user, 2026-11-21).
+Three full runs in a row then changed nothing.
+The pictures also showed that a page started on a setup scene drew home.
+The stand-in answered a page's watch with the slice as it was when asked, after a change sent in between, so the stale value landed last, and the stand-in now sends the slice as it is when the answer goes.
+
+**Affects:** [the graphics](01-the-build.md#the-graphics).
+
 ## 2026-11-21: 0.1.0 published from a release commit at main's tip, and tools/replay.ts replayed the released core's own recording
 
 **Asked:** whether a release commit whose workflows match `main`'s publishes, and how the parts of a release that stage 22's tests name hold up on GitHub.

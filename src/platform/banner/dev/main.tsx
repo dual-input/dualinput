@@ -1,6 +1,7 @@
 // The banner in the dev loop, as tools/dev.ts runs it: its box over a stand-in for the sky through the windshield, on
 // a stand-in core, beside a chooser of the states a person looks at. The cards are opaque, so what's behind them
-// doesn't change how they read.
+// doesn't change how they read. A scene named in the address, as `?scene=Crewmates`, is the one it starts on, so
+// tools/screenshots.ts can take a picture of each with no jump from another.
 
 import { Button, Root } from "@dualinput/ui"
 import { useState } from "react"
@@ -68,6 +69,8 @@ aside.style.cssText = "margin-left:16px"
 page.append(sky, aside)
 
 const core = new StandInCore()
+const asked = new URLSearchParams(window.location.search).get("scene")
+if (asked !== null && asked in SCENES) core.sceneName = asked
 const link = new CoreLink("banner", core.env())
 link.start()
 const askToReopen = () => console.log("the banner asks for a new opening")
@@ -78,4 +81,6 @@ createRoot(aside).render(
     <Chooser core={core} />
   </Root>,
 )
-Object.assign(window, { DUALINPUT_DEV: { core } })
+// The handle tools/screenshots.ts drives: the scenes by name, a jump to one, and the element its picture is of, the box
+// over its sky.
+Object.assign(window, { DUALINPUT_DEV: { core, scenes: Object.keys(SCENES), show: (name: string) => core.scene(name), shot: sky } })

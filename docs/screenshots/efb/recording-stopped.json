@@ -1,0 +1,20 @@
+{ "width": 1074, "height": 1518, "scale": 2, "elements": [
+  {"role":"button","label":"Session","x":0,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Traffic","x":215,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"ATC audio","x":430,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Figures","x":644,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Settings","x":859,"y":1403,"width":215,"height":115},
+  {"role":"heading","label":"Take control","x":42,"y":112,"width":167,"height":42},
+  {"role":"heading","label":"Sound","x":42,"y":458,"width":88,"height":42},
+  {"role":"heading","label":"Recordings","x":42,"y":774,"width":154,"height":42},
+  {"role":"button","label":"Bind","x":875,"y":191,"width":116,"height":67},
+  {"role":"button","label":"Windows default · Headset (USB Audio)","x":83,"y":616,"width":908,"height":75},
+  {"role":"link","label":"Discord","x":164,"y":1346,"width":87,"height":34},
+  {"role":"radio","label":"Press","x":722,"y":270,"width":139,"height":58},
+  {"role":"radio","label":"Hold","x":861,"y":270,"width":126,"height":58},
+  {"role":"button","label":"Open folder","x":849,"y":911,"width":67,"height":67},
+  {"role":"button","label":"Open folder","x":849,"y":986,"width":67,"height":67},
+  {"role":"button","label":"Open folder","x":849,"y":1061,"width":67,"height":67},
+  {"role":"button","label":"Open folder","x":849,"y":1136,"width":67,"height":67},
+  {"role":"button","label":"Open folder","x":849,"y":1211,"width":67,"height":50}
+] }

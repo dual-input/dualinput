@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
-import { Button, cx, Mark, MarkTile, MOMENT, part, Spinner, useMoment } from "@dualinput/ui"
+import { ALONE, Button, cx, GLYPH, glyphBox, Mark, MarkTile, MOMENT, part, Spinner, useMoment } from "@dualinput/ui"
 import { ChevronUp, Monitor, ShieldAlert, ShieldCheck, Volume2, Wifi } from "lucide-react"
 
 import type { DesktopLink, View } from "./link.ts"
@@ -23,13 +23,22 @@ type Step = "firewall" | "tray" | "efb"
 /** A state the welcome holds still in, for its bench in src/platform/desktop-shell/dev/welcome.tsx, which picks one to look at. */
 export type WelcomeStill = "greeting" | Step | "firewall-declined"
 
-/** Our app's icon in the sim's EFB. src/sim-package/pages/efb-icon.svg draws the same, so change both together. */
+/**
+ * Our app's button in the sim's EFB, as the pilot finds it there: the EFB's own tile, 64px with 5px corners and a gradient,
+ * around the white glyph that src/sim-package/pages/efb-icon.svg gives it (read in fs-base-efb 0.1.10,
+ * html_ui/efb_ui/efb_os/efb_os.css, `.app-button > .icon-button.icon`).
+ */
+const EFB_TILE = { side: 64, radius: 5, background: "linear-gradient(to right top, #144893 0%, #1e2836 100%)" }
+
 function EfbAppIcon({ size }: { size: number }) {
+  const scale = size / EFB_TILE.side
+  const { viewBox, aspect } = glyphBox(ALONE.stroke)
   return (
-    <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden>
-      <rect x="4" y="4" width="56" height="56" rx="12" fill="#74d4ff" />
-      <path d="M16 23C24 23 25.5 32 33 32M16 41C24 41 25.5 32 33 32H48" fill="none" stroke="#052f4a" strokeWidth={4.5} strokeLinecap="round" />
-    </svg>
+    <span className="flex shrink-0 items-center justify-center" style={{ width: size, height: size, borderRadius: EFB_TILE.radius * scale, background: EFB_TILE.background }} aria-hidden>
+      <svg viewBox={viewBox} width={ALONE.efbWidth * scale} height={ALONE.efbWidth * scale * aspect}>
+        <path d={GLYPH} fill="none" stroke="#ffffff" strokeWidth={ALONE.stroke} strokeLinecap="round" />
+      </svg>
+    </span>
   )
 }
 

@@ -1,0 +1,5 @@
+{ "width": 960, "height": 848, "scale": 2, "elements": [
+  {"role":"heading","label":"Let other pilots reach you","x":120,"y":337,"width":720,"height":48},
+  {"role":"button","label":"Not now","x":491,"y":664,"width":162,"height":64},
+  {"role":"button","label":"Try again","x":669,"y":664,"width":171,"height":64}
+] }

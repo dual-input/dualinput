@@ -1,0 +1,4 @@
+{ "width": 960, "height": 848, "scale": 2, "elements": [
+  {"role":"heading","label":"Fly from the EFB","x":120,"y":387,"width":720,"height":48},
+  {"role":"button","label":"Done","x":720,"y":664,"width":121,"height":64}
+] }

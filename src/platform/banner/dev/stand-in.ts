@@ -81,6 +81,22 @@ export const SCENES: Record<string, { slices: Slices; play?: Script }> = {
       { after: 3500, notes: [N.caughtUp] },
     ],
   },
+  ...alone(),
+}
+
+/**
+ * Each notification alone, named for its words, so a doc about one has its picture. Two that share their words are told
+ * apart by their detail. The page keeps to ES2017, which has no `Object.fromEntries`.
+ */
+function alone(): Record<string, { slices: Slices }> {
+  const notes: Note[] = Object.values(N)
+  const scenes: Record<string, { slices: Slices }> = {}
+  for (const note of notes) {
+    const shared = notes.filter((other) => other.text === note.text).length > 1
+    const name = shared && note.detail ? `${note.text}, ${note.detail.replace(/\.$/, "")}` : note.text
+    scenes[`Notification: ${name}`] = { slices: { session: flying, notifications: [note] } }
+  }
+  return scenes
 }
 
 export class StandInCore extends StandInBase {

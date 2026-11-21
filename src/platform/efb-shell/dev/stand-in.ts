@@ -157,6 +157,7 @@ const CLIPBOARD = "clipboard"
 /** Each state a person looks at, by name, with what it sets on top of the sim's healthy slices. */
 export const SCENES: Record<string, Slices> = {
   "First-time setup": firstRun,
+  "First-time setup, checking": firstRun,
   "Setup: add-on mismatch": { ...firstRun, core: { ...firstRun.core, version: "0.0.9" } },
   "Setup: offline": { ...firstRun, network: { members: [], internet: false, servers: "unreachable" } },
   "Setup: our servers": { ...firstRun, network: { members: [], internet: true, servers: "unreachable" } },
@@ -193,6 +194,13 @@ export const SCENES: Record<string, Slices> = {
   },
   Flying: { ...netUp, ...boundTo("F9"), session: flying(ME), [TAKE_CONTROL]: control({ mine: true }) },
   "James flying": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({}) },
+  "Flying together": {
+    ...netUp,
+    ...boundTo("F9"),
+    session: { ...flying(JAMES, { traffic: JAMES, atc: ME }), differences: [] },
+    [TAKE_CONTROL]: control({}),
+    [ATC]: { capturing: "BeyondATC" },
+  },
   "James flying, a key bound": { ...netUp, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({}) },
   "James flying, a long key's name": { ...netUp, ...boundTo("Thrustmaster TCA Sidestick button 12"), session: flying(JAMES), [TAKE_CONTROL]: control({}) },
   "James flying, catching up": { ...netUp, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ denied: ["You're catching up with James."] }), [STREAM]: { catching_up: true, from_preflight_end: false, replaying: false } },
@@ -234,6 +242,43 @@ export const SCENES: Record<string, Slices> = {
   "Another version": { core: { ...CORE, version: "0.0.9" } },
   "Figures: model can't be read": { avatars: { note: "model" } },
   "Figures: no seats": { avatars: { note: "seats" } },
+  "Traffic: nobody shares": { ...netUp, session: flying(JAMES) },
+  "ATC: nobody shares": { ...netUp, session: flying(JAMES) },
+  Figures: { ...netUp, session: flying(JAMES) },
+  Settings: { ...netUp, ...boundTo("F9"), session: flying(JAMES) },
+}
+
+/**
+ * How long a scene runs before tools/screenshots.ts takes its picture, in ms of its own time, where the tool's 5s would
+ * catch it too early: setup greets the pilot for 2s and then runs its checks one by one, reaching the name card at about
+ * 9s, or stopping at the check that fails.
+ */
+export const SCENE_TIMES: Partial<Record<string, number>> = {
+  "First-time setup": 12_000,
+  "Setup: add-on mismatch": 12_000,
+  "Setup: offline": 12_000,
+  "Setup: our servers": 12_000,
+  "Setup: firewall": 12_000,
+}
+
+/** The tab a scene is about, by its label, where it isn't the Session tab. */
+export const SCENE_TABS: Partial<Record<string, string>> = {
+  "Traffic: James shares, some missing": "Traffic",
+  "Traffic: you share": "Traffic",
+  "Traffic: nobody shares": "Traffic",
+  "ATC: you share": "ATC audio",
+  "ATC: James shares": "ATC audio",
+  "ATC: nobody shares": "ATC audio",
+  "Figures: model can't be read": "Figures",
+  "Figures: no seats": "Figures",
+  Figures: "Figures",
+  "Recording stopped": "Settings",
+  "Output device missing": "Settings",
+  "Update available": "Settings",
+  "Update ready": "Settings",
+  "No tray app": "Settings",
+  "Turned off in Windows": "Settings",
+  Settings: "Settings",
 }
 const AFTER = { answer: 1000, slowAnswer: 10_000 }
 

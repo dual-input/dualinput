@@ -1,0 +1,5 @@
+{ "width": 960, "height": 848, "scale": 2, "elements": [
+  {"role":"heading","label":"Let other pilots reach you","x":120,"y":395,"width":720,"height":48},
+  {"role":"button","label":"Not now","x":450,"y":664,"width":162,"height":64},
+  {"role":"button","label":"Add the rule","x":628,"y":664,"width":212,"height":64}
+] }

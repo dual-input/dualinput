@@ -20,8 +20,8 @@ use crate::{places, processes};
 
 /// The window's one label, by which a second open finds the first.
 const WINDOW: &str = "main";
-/// The window's width, which the page fills. `WIDTH` in src/platform/desktop-shell/dev/main.tsx and in
-/// src/platform/desktop-shell/dev/welcome.tsx names the same one, so change all three together.
+/// The window's width, which the page fills. `WIDTH` in src/platform/desktop-shell/dev/frame.tsx names the same one, so
+/// change both together.
 const WIDTH: f64 = 400.0;
 /// What stays clear of a screen's height, for its taskbar.
 const SCREEN_MARGIN: f64 = 60.0;

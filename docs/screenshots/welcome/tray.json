@@ -1,0 +1,4 @@
+{ "width": 960, "height": 848, "scale": 2, "elements": [
+  {"role":"heading","label":"Dual Input lives in your tray","x":120,"y":437,"width":720,"height":48},
+  {"role":"button","label":"Next","x":726,"y":664,"width":114,"height":64}
+] }

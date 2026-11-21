@@ -1,0 +1,11 @@
+{ "width": 1074, "height": 1518, "scale": 2, "elements": [
+  {"role":"button","label":"Session","x":0,"y":1254,"width":215,"height":115},
+  {"role":"button","label":"Traffic","x":215,"y":1254,"width":215,"height":115},
+  {"role":"button","label":"ATC audio","x":430,"y":1254,"width":215,"height":115},
+  {"role":"button","label":"Figures","x":644,"y":1254,"width":215,"height":115},
+  {"role":"button","label":"Settings","x":859,"y":1254,"width":215,"height":115},
+  {"role":"button","label":"Hold to take control F9","x":33,"y":1385,"width":1007,"height":100},
+  {"role":"button","label":"Copy the invite code","x":319,"y":196,"width":67,"height":67},
+  {"role":"button","label":"Leave","x":815,"y":175,"width":176,"height":67},
+  {"role":"button","label":"1 errors and 2 warnings between the crew's setups","x":67,"y":568,"width":225,"height":87}
+] }

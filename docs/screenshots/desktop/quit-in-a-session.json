@@ -1,0 +1,10 @@
+{ "width": 960, "height": 1076, "scale": 2, "elements": [
+  {"role":"button","label":"Close","x":824,"y":87,"width":48,"height":48},
+  {"role":"button","label":"Quit anyway","x":398,"y":903,"width":213,"height":64},
+  {"role":"button","label":"Keep running","x":628,"y":903,"width":224,"height":64},
+  {"role":"image","label":"Memory over the last 24 hours: 5 MB average","x":372,"y":273,"width":456,"height":70},
+  {"role":"image","label":"CPU over the last 24 hours: 0.1% average","x":372,"y":397,"width":456,"height":70},
+  {"role":"image","label":"Network over the last 24 hours: 18 MB total","x":372,"y":521,"width":456,"height":70},
+  {"role":"button","label":"What does this do?","x":96,"y":684,"width":318,"height":48},
+  {"role":"heading","label":"If you quit","x":108,"y":760,"width":744,"height":40}
+] }

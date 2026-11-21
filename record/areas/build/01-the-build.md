@@ -3,7 +3,7 @@
 ```text
 Purpose:     How one repository's code becomes a checked, published release.
 Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, ../architecture/coherent-gt.md, ../install/01-installing-and-updating.md, ../profiles/02-units.md, ../core/01-loop-and-edge.md, ../core/02-clients-and-panel-bridge.md, ../avatars/01-avatars.md, ../network/02-units.md, 02-testing.md, log.md
-Decides:     What a release holds; how every x86_64 program links the C runtime statically; which SDK the build uses; where the sim's stock files live and how a sim update that changes them shows; our package's folder name, order hint, and contents, and how a development build reaches the sim; how the files only the sim compiles get built; how the Coherent GT check is built and when it runs, and that no for-of rewrite runs; how the message crate is hashed, and how the version and the hash reach each component; how a release is built, checked, and published, when the backend deploys, and how its tests hold a released path's bodies; and that v1 ships no authoring tools (node 6.18).
+Decides:     What a release holds; how every x86_64 program links the C runtime statically; which SDK the build uses; where the sim's stock files live and how a sim update that changes them shows; our package's folder name, order hint, and contents, and how a development build reaches the sim; how the files only the sim compiles get built; how the Coherent GT check is built and when it runs, and that no for-of rewrite runs; how the message crate is hashed, and how the version and the hash reach each component; how a release is built, checked, and published, when the backend deploys, and how its tests hold a released path's bodies; that v1 ships no authoring tools (node 6.18); and how the icons, the screenshots, and the social preview are drawn (stage 22f).
 ```
 
 > **Note**
@@ -289,6 +289,59 @@ v1 ships no authoring tool (user, 2026-10-18):
 - Both are Rust on the workspace's engines and platform crates, and the profile author tool needs the SDK too, so running one from a clone takes [the workspace](../architecture/02-code-map.md#the-workspace)'s whole setup on a new PC, which a pilot who writes YAML won't have; the IDE brings authoring to them later (user, 2026-10-18).
 - A contributor without that setup can still send a profile's change as a pull request, and CI's check reports on it, while testing a bundle in their own core waits for the IDE.
 - That settles the profiles' units' [left open](../profiles/02-units.md#left-open) item on the builder program: it keeps the name `dualinput-profile-builder`, and authors get it with the repository.
+
+## The graphics
+
+Three tools draw the pictures Dual Input presents itself with, from the tree, so each changes with what it shows and none is drawn by hand ([build plan](plan.md#22f-the-graphics)).
+Their looks are the interface's [tentative decision on the icon and the preview](../interface/decisions.md#dual-inputs-icon-is-the-sky-glyph-on-the-apps-background-and-the-sims-toolbar-and-efb-get-the-glyph-alone-in-white).
+
+| Tool | Draws | From |
+| --- | --- | --- |
+| `node tools/icons.ts` | The desktop app's `src/apps/desktop/icons/icon.ico`; our app's icon in the EFB and the banner's toolbar icon, `efb-icon.svg` and `banner-icon.svg` in `src/sim-package/pages/`; and `target/icons/avatar.png`, for our GitHub organization and Discord server | The glyph's path and how the icon places it, in `src/packages/ui/src/glyph.ts`, which the kit's mark draws from too, and the palette |
+| `node tools/splash.ts` | Setup.exe's splash, `src/apps/desktop/icons/splash.gif` | Its own code |
+| `node tools/screenshots.ts` | A picture of every scene of the apps' dev pages, a layout beside each, and the repository's social preview, in `docs/screenshots/` | The dev pages' stand-in cores, whose sessions are made up, so no real pilot's data shows |
+
+A person uploads the avatar and the social preview in GitHub's and Discord's settings when either changes, since no tool of ours changes an account's settings.
+
+### The screenshots
+
+- The tool builds the EFB app's, the banner's, the desktop window's, and the welcome's dev pages as `tools/dev.ts` builds them, with the list of pages in `tools/lib/dev-pages.ts`, opens each scene in the Edge that Windows installs, through playwright-core, and takes a picture of the element the page names, at 2x.
+  `node tools/screenshots.ts efb` takes one page's scenes, and `node tools/screenshots.ts efb "James flying"` one scene.
+- A scene is the page's own: each dev page puts three things on `window.DUALINPUT_DEV`, its scenes' names, a `show` function that switches to one, and the element to picture, and it starts on the scene its address names, as `?scene=Preflight`.
+  A scene of the EFB app's can name the tab it shows, and can run longer than the default 5s before its picture: setup's scenes run 12s, since its checks reach the name card at about 9s.
+  So a new screen gets its picture from a new scene in its page's stand-in, and the stand-in's scenes are what "every state" means.
+- Every picture stays in the tree, as `docs/screenshots/<page>/<scene>.png`, the scene's name in lowercase with dashes between its words, so a doc links any state with no run first (user, 2026-11-21).
+  `docs/screenshots/README.md` shows them all, each under its scene's name and its path.
+  They're PNGs of up to 256 colors, which drew the same as full ones on the apps' screens at half the bytes: 105 pictures took 3 MB.
+  A whole page's run deletes the pictures of scenes that are gone, and names each, since a doc may still link it.
+- A picture of an unchanged screen comes out the same, byte for byte, and the tool writes a picture or a layout only when its bytes differ from the file's, so after a run `git status` lists only the pictures whose screen changed.
+  It takes all of these ([build log](log.md#2026-11-21-a-picture-of-an-apps-screen-comes-out-the-same-on-every-run-once-its-clock-fonts-motion-chance-drawing-and-standing-figure-are-held)):
+  - Playwright's clock, paused from the page's start and run 5s in 100ms steps.
+    React renders in tasks it posts on a `MessageChannel`, so after each step the page posts three tasks of its own on one, which run after React's.
+  - every font loaded before the clock starts
+  - every CSS animation and transition ended at once
+  - `Math.random` seeded
+  - Edge drawing in software, `--disable-gpu`, with text smoothed in gray, `--disable-lcd-text`
+  - the EFB app's standing figure held still, through the figure's `FigureStill` context, which only the dev page sets
+  - the picture taken again until two in a row match
+- Beside each picture, `<scene>.json` says where each labeled element shows in it, so the docs site can crop a picture around one element, and its build fails when a label it crops around is gone (stage 22e, 2026-11-21):
+
+  ```text
+  { "width": 1074, "height": 1518, "scale": 2, "elements": [
+    {"role":"button","label":"Host a session","x":83,"y":353,"width":908,"height":83},
+    ...
+  ] }
+  ```
+
+  `width` and `height` are the picture's size in its own pixels, and `scale` is how many picture pixels make one CSS pixel of the page, along each axis.
+  An element is a node of Chrome's accessibility tree with a role and a name, other than text alone and the page itself, in the tree's order, two of a role and a name both kept.
+  Its role is Chrome's, and its label is its accessible name, the words a pilot sees or a screen reader reads.
+  `x` and `y` are the element's top-left corner, in picture pixels from the picture's top-left corner, and its `width` and `height` are measured after its box is cut to each ancestor that clips it and to the picture.
+  An element that isn't drawn, is under 5% opaque, or is clipped out of the picture has no entry, and neither does an icon button the app gives no name.
+- Every run also draws `docs/screenshots/social-preview.png`, 1280x640, from the EFB app's "Flying together" over a night valley from the sim, `tools/screenshots/night-valley.webp`, and the README opens with it.
+
+The tool can't picture what no dev page draws: the cockpit's locks, the sim's own screens, and Velopack's windows.
+Its pictures are Edge's drawing, while the sim draws the same pages with Coherent GT, which can differ ([its measured limits](../architecture/coherent-gt.md)); the dev loop's debugger shows Coherent GT's drawing.
 
 ## Budgets
 

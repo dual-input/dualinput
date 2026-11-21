@@ -1,10 +1,13 @@
 // The EFB app in the dev loop: at the tablet's three sizes in portrait, as the EFB draws them in a 1,844 by 1,316 window
-// (record/areas/interface/log.md, 2026-11-01), beside a chooser of its states.
+// (record/areas/interface/log.md, 2026-11-01), beside a chooser of its states. A scene named in the address, as
+// `?scene=Preflight`, is the one it starts on, so tools/screenshots.ts can take a picture of each with no jump from another,
+// and `&still` holds the standing figure still at rest, so each picture comes out the same every time.
 
 import { VERSION } from "../../../engines/messages/ts/stamp.ts"
 import type { Part } from "../src/part.ts"
 import { viewShown } from "../src/view.ts"
 import { mountSample } from "./sample.tsx"
+import { SCENE_TIMES, SCENES } from "./stand-in.ts"
 
 const SIZES = { Small: [447, 632], Medium: [537, 759], Large: [621, 879] } as const
 
@@ -27,6 +30,9 @@ export function mountDev(parts: Part[]): void {
   }
   setSize("Medium")
 
-  const core = mountSample({ host, aside, version: VERSION, parts })
-  Object.assign(window, { DUALINPUT_DEV: { setSize, core } })
+  const asked = new URLSearchParams(window.location.search)
+  const { core, show } = mountSample({ host, aside, version: VERSION, parts, scene: asked.get("scene") ?? undefined, still: asked.has("still") })
+  // The handle tools/screenshots.ts drives: the scenes by name, how long a scene runs where it isn't the tool's own time,
+  // a jump to one, and the element its picture is of.
+  Object.assign(window, { DUALINPUT_DEV: { setSize, core, scenes: Object.keys(SCENES), times: SCENE_TIMES, show, shot: host } })
 }

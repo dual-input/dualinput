@@ -1,0 +1,13 @@
+{ "width": 1074, "height": 1518, "scale": 2, "elements": [
+  {"role":"image","label":"Sharing traffic","x":244,"y":44,"width":25,"height":25},
+  {"role":"button","label":"Session","x":0,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Traffic","x":215,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"ATC audio","x":430,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Figures","x":644,"y":1403,"width":215,"height":115},
+  {"role":"button","label":"Settings","x":859,"y":1403,"width":215,"height":115},
+  {"role":"generic","label":"Needs attention","x":331,"y":1469,"width":17,"height":17},
+  {"role":"button","label":"Take over","x":806,"y":154,"width":184,"height":67},
+  {"role":"heading","label":"How it works","x":42,"y":312,"width":991,"height":42},
+  {"role":"heading","label":"Check","x":42,"y":545,"width":991,"height":42},
+  {"role":"heading","label":"Detected traffic packs on this PC","x":42,"y":837,"width":991,"height":92}
+] }

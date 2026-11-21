@@ -87,7 +87,11 @@ export abstract class StandInBase {
       const watched = this.sockets.get(socket)
       message.slices.forEach((name) => {
         watched?.add(name)
-        if (this.slices[name] !== undefined) reply({ t: "state", slice: name, value: this.slices[name] })
+        // The answer carries the slice as it is when it goes, since a change set in between reaches the page first, and
+        // the slice as it was would land after it: a page that started on a setup scene saw setup as done.
+        window.setTimeout(() => {
+          if (this.slices[name] !== undefined) socket.onmessage?.(JSON.stringify({ t: "state", slice: name, value: this.slices[name] }))
+        }, 0)
       })
     } else if (message.t === "hello") {
       this.greeted()

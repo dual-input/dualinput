@@ -1,0 +1,6 @@
+{ "width": 960, "height": 848, "scale": 2, "elements": [
+  {"role":"heading","label":"Let other pilots reach you","x":120,"y":395,"width":720,"height":48},
+  {"role":"button","label":"Not now","x":288,"y":664,"width":162,"height":64},
+  {"role":"button","label":"Loading Waiting for Windows","x":466,"y":664,"width":374,"height":64},
+  {"role":"status","label":"Loading","x":492,"y":680,"width":32,"height":32}
+] }

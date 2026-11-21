@@ -352,6 +352,32 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - With the core left out, the samples stay flat except for the minutes the window is open, so a plain average says what the tray app cost over the last 24 hours, its window's cost included, where the core's figures during a flight would have skewed it (user, 2026-11-03).
   - A window that showed less than Task Manager would read as a lie to the pilot it's trying to reassure (user, 2026-11-03).
 
+## Dual Input's icon is the sky glyph on the apps' background, and the sim's toolbar and EFB get the glyph alone in white
+
+- **Decided:**
+  - The app's icon is the glyph, two lines merging into one, in the kit's sky, `#74d4ff`, on the apps' background, `#0a0a0a`.
+    The square fills the icon to its edges, with a corner radius of 3/16 of its side, and the glyph's 32-unit box is scaled to 0.63 of the side, centered, with a stroke 4.2 of those units wide.
+    The desktop app takes it for its program, the taskbar, and the tray, and our GitHub organization and Discord server take it as a plain square, which each site rounds itself.
+  - The banner's toolbar icon and our app's icon in the EFB are the glyph alone, in white, with a 5-unit stroke outlined into filled shapes.
+    In the toolbar's 64-unit square, the glyph's 32-unit box is scaled to 0.7 of the side and centered, and in the EFB the SVG's box ends at the stroke's edges and is drawn 31px wide.
+    The welcome's last step draws our app's button as the EFB does, the white glyph on the EFB's own tile.
+  - The repository's social preview, 1280x640, has the glyph in sky, its left edge on the title's ink, "Dual Input", and "Shared cockpit for MSFS 2024" with a faded superscript "(only)" on the left, and the EFB app's "Flying together" on the right, over a night valley from the sim, darkened most behind the words, with a faint sky glow behind the app.
+    The README opens with it.
+
+  Settled by the user on 2026-11-21.
+  [The graphics](../build/01-the-build.md#the-graphics) says which tool draws each.
+- **Because:**
+  - The user chose a near-black square with the glyph in the accent color, after choom collector's icon, and the second-largest of four glyph sizes (user, 2026-11-21).
+  - The EFB draws each app's tile itself, a 64px square with 5px corners and a gradient from `#144893` to `#1e2836`, and fills the app's SVG with its content color, white (read in fs-base-efb 0.1.10, `html_ui/efb_ui/efb_os/efb_os.css`, `.app-button > .icon-button.icon`).
+    The sim's own Aircraft, Atlas, Pilot Book, and Settings apps give it a white glyph (read in fs-base-efb-app-aircraft, fs-base-efb-app-atlas, fs-base-efb-app-pilot-book, and fs-base-efb-app-settings 0.1.10, each app's icon getter and the SVG it names), and so do the EFB apps of Fenix, GSX, A2A, iniBuilds, and Navigraph installed on our development machine.
+    Drawn as `efb_os.css` draws the tile, our dark square showed as a box inside it (user, 2026-11-21).
+  - Other packages' toolbar icons are filled shapes with no fill of their own, such as FSLTL's (read in fsltl-traffic-injector 2.0.0, `html_ui/icons/toolbar/FSLTL_ICON_TOOLBAR.svg`).
+    So ours is filled shapes too, on the inference that the toolbar fills each icon's shapes with its own color, where it could fill the inside of a stroked path as a blob (unverified; the next sitting in the sim settles it, with the button's hover and open states).
+  - The glyph alone stands as heavy as the solid shapes beside it only with a heavier stroke than the app's icon, as a sheet of the glyph beside FSLTL's and GEES's toolbar icons showed (user, 2026-11-21).
+  - On the dark preview the icon's dark square vanished and only the glyph read, so the preview draws the glyph alone; the user chose the night valley over a runway's approach lights and a cockpit with the figures in it (user, 2026-11-21).
+- **Leaves out:** how the glyph alone sits beside the sim's own icons in the toolbar and the EFB, which the next sitting in the sim looks at.
+  The tray takes the 256px picture Tauri hands it, which Windows shrinks, and it looked right to the user on our development machine at its scaling (user, 2026-11-21).
+
 ## The desktop app tells the EFB app about updates and the firewall over a fixed local port
 
 - **Decided:** updates stay out of the core: the desktop app serves the update's state and the firewall rule's on a fixed 127.0.0.1 port, and the EFB app connects to it directly.

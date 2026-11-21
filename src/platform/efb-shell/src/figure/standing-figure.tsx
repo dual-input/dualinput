@@ -6,7 +6,7 @@
 // Join winds it up, and once our servers answer it jumps for joy and falls over backward, off the page.
 
 import { useRoot } from "@dualinput/ui"
-import { useEffect, useRef, useState } from "react"
+import { createContext, useContext, useEffect, useRef, useState } from "react"
 import type { RefObject } from "react"
 
 import { add, scale, sub, unit } from "@dualinput/crew/trace"
@@ -18,6 +18,13 @@ import type { Cheer, Pose } from "./standing-pose.ts"
 
 /** Marks what the figure reacts to in the page around it: what it locks on to, what winds it up when pressed, and Host, which it looks at by default. */
 export const FIGURE_MARKS = { target: "data-figure-target", press: "data-figure-press", host: "data-figure-host" }
+
+/**
+ * Whether the figure stands still at rest, neither breathing nor shifting, which the EFB app's dev page sets for
+ * tools/screenshots.ts. At rest it poses only every so often, so a picture would catch it at a moment the browser's
+ * timing picks, and the same screen would come out different from run to run (record/areas/build/log.md, 2026-11-21).
+ */
+export const FigureStill = createContext(false)
 
 /** What the page tells the figure of an attempt to host or join. */
 export class FigureSignals {
@@ -55,6 +62,7 @@ export function StandingFigure({ hex, page: pageRef, signals, onGone }: Standing
   const holder = useRef<HTMLDivElement>(null)
   const { scale: rootScale } = useRoot()
   const { efbClosed } = useShell()
+  const still = useContext(FigureStill)
   const goneNow = useRef(onGone)
   goneNow.current = onGone
 
@@ -211,7 +219,7 @@ export function StandingFigure({ hex, page: pageRef, signals, onGone }: Standing
       let shrugTarget = shrugShown
       const shrugBefore = shrugShown
       if (!attending) {
-        clock += dt
+        if (!still) clock += dt
         const hold = () => Math.max(SHRUG.hold, Number.isFinite(heldUntil) ? heldUntil - shrugAt - SHRUG.rise : 0)
         // Teasing, shaking the cursor at it, keeps a shrug that's under way at its height.
         const since = clock - shrugAt
@@ -311,7 +319,7 @@ export function StandingFigure({ hex, page: pageRef, signals, onGone }: Standing
     }
     // A new color draws anew; the rest are fixed for the figure's life.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hex, opened])
+  }, [hex, opened, still])
 
   return <div ref={holder} className="absolute inset-x-0 bottom-0 top-0" />
 }

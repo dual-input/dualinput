@@ -1,0 +1,6 @@
+{ "width": 784, "height": 844, "scale": 2, "elements": [
+  {"role":"button","label":"Open Dual Input on the EFB","x":32,"y":32,"width":720,"height":200},
+  {"role":"generic","label":"You, not ready","x":56,"y":60,"width":56,"height":56},
+  {"role":"generic","label":"James, not ready","x":124,"y":60,"width":56,"height":56},
+  {"role":"button","label":"Ready","x":593,"y":56,"width":135,"height":64}
+] }

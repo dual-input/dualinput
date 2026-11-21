@@ -1,0 +1,4 @@
+{ "width": 1074, "height": 1518, "scale": 2, "elements": [
+  {"role":"button","label":"Fix","x":356,"y":884,"width":94,"height":75},
+  {"role":"link","label":"Continue anyway","x":484,"y":900,"width":234,"height":42}
+] }

@@ -1,0 +1,9 @@
+{ "width": 960, "height": 1478, "scale": 2, "elements": [
+  {"role":"button","label":"Close","x":824,"y":87,"width":48,"height":48},
+  {"role":"image","label":"Memory over the last 24 hours: 5 MB average","x":372,"y":273,"width":456,"height":70},
+  {"role":"image","label":"CPU over the last 24 hours: 0.1% average","x":372,"y":397,"width":456,"height":70},
+  {"role":"image","label":"Network over the last 24 hours: 18 MB total","x":372,"y":521,"width":456,"height":70},
+  {"role":"heading","label":"What does this do?","x":108,"y":684,"width":744,"height":40},
+  {"role":"switch","label":"Start with Windows","x":764,"y":1084,"width":88,"height":40},
+  {"role":"button","label":"Check now","x":654,"y":1304,"width":198,"height":64}
+] }

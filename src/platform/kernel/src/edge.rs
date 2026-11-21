@@ -256,12 +256,14 @@ impl Fetched {
     }
 }
 
-/// One entry of a folder a job listed: its name, and its size in bytes, a folder's being the
-/// total of every file inside it.
+/// One entry of a folder a job listed: its name; its size in bytes, a folder's being the total of
+/// every file inside it; and when it last changed, in ms since the Unix epoch, or 0 when Windows
+/// can't say, which lets the profile loader see a rewritten bundle of the same size.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Entry {
     pub name: String,
     pub size: u64,
+    pub modified: u64,
 }
 
 impl Entry {

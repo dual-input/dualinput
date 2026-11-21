@@ -101,6 +101,7 @@ pub fn register(r: &mut Registry) {
         .on::<ControlPassed>(StateSync::control_passed)
         .guard::<Ready>(StateSync::settled)
         .on_sim(StateSync::on_sim)
+        .ends_with_profile()
         .panel_module(H_EVENTS, panels::h_events_rule, panels::any_h_event)
         .panel_module(
             INSTRUMENT_READS,

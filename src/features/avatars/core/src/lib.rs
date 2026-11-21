@@ -132,6 +132,7 @@ pub fn register(r: &mut Registry) {
     me.channel(wire::POSES, crew::Crew::on_pose)
         .mouse(mouse::on_mouse)
         .on_sim(sim::on_sim)
+        .ends_with_profile()
         .on::<ProfileLoaded>(Avatars::loaded)
         .on::<ProfileUnloaded>(Avatars::unloaded)
         .on::<AircraftChanged>(|me, _, cx| me.start_model(cx))

@@ -233,6 +233,18 @@ fn bundle_fetched(me: &mut Profiles, job: JobId, result: Result<Vec<u8>, String>
     me.update(cx);
 }
 
+/// Keeps a test session's local bundle, which no site holds, under its hash, unless the cache
+/// holds it or is writing it. A start with no session deletes it, as it does every bundle no
+/// level takes.
+pub(crate) fn keep(me: &mut Profiles, hash: &str, bytes: Vec<u8>, cx: &mut Cx) {
+    let c = &mut me.cache;
+    if c.holds(hash) || c.fetching.contains_key(hash) {
+        return;
+    }
+    let job = cx.job(Job::write(path(hash), bytes), bundle_written);
+    c.fetching.insert(hash.to_string(), job);
+}
+
 fn bundle_written(me: &mut Profiles, job: JobId, result: Result<Vec<u8>, String>, cx: &mut Cx) {
     let Some(hash) = job_hash(me, job) else {
         return;

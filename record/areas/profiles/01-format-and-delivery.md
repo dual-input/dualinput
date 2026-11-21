@@ -481,14 +481,18 @@ profiles/
 
 ### Testing an edit
 
-- The author's local folder holds bundles that the profile builder or the IDE wrote, and the core reads it before the published profiles: a bundle there overrides the published one for its variants ([the local folder](02-units.md#the-local-folder)).
+- The author's local folder holds bundles that the profile builder, the profile extension, or the IDE wrote, and the core reads it before the published profiles: a bundle there overrides the published one for its variants ([the local folder](02-units.md#the-local-folder)).
 - The builder is the same code CI runs, and type-checks and compiles with TypeScript 6.0.3 inside QuickJS-ng (measured on our development machine, 2026-10-16, [profiles log](log.md#2026-10-16-typescript-603s-compiler-type-checks-and-compiles-inside-quickjs-ng-as-under-node-in-09s-for-300-write-functions-on-a-1-mb-stack)), so a local bundle is the one CI would build from the same files.
   The core builds no bundle, and the match check shows a local one as "unpublished".
-  A crewmate testing with the author puts the same files in their own local folder, and equal hashes prove they run the same copy.
 
-Rapid testing, where the profile builder or the IDE rebuilds on every save and the author's core sends each new bundle to the crew over the session, which reloads the session's profile on every machine, is a test session (user, 2026-10-12).
+A test session is a session in which the author saves, their tool builds a new bundle into the local folder, and the author's core sends it to the crew, which reloads the session's profile on every machine, so a profile changes during a test flight with no new session (user, 2026-10-12 and 2026-11-21; [test sessions](02-units.md#test-sessions)).
 The one-file bundle makes each reload one message, and a crewmate's core runs the author's exact bytes with no folder or compiler of its own.
-Test sessions are for step 8, with the Dual Input IDE's dev loop, a Soon pick ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client) lists reloading a profile mid-session among the IDE's commands), and node 4's review found three things they need: a reload starts a plugin that was turned off afresh, a reload skips [catch-up's settling window](../sync/04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session), since the aircraft didn't load again, and the author's core sends the current bundle to a pilot who joins or rejoins, since a test bundle isn't on Pages.
+Any member can be the author, and the newest save wins.
+Node 4's review found three things a reload needs, and a reload is a load like any other, which has each:
+
+- A plugin turned off starts again: v1 has no plugins, and an entry that stopped syncing for the rest of the last load syncs again under the new one.
+- The reload skips catch-up's settling window, since the aircraft didn't load again: it counts as settled 30s after Ready to fly, not after the load ([an aircraft that loaded before its session](../sync/04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session)).
+- A pilot who joins or rejoins gets the current bundle, which isn't on Pages, from the PF's core.
 
 ## Delivery
 
@@ -507,7 +511,7 @@ The core uses them:
 2. It loads a profile from its cache whenever the spine's [what moves them](../architecture/01-spine.md#what-moves-them) says to, such as when a session starts with the aircraft already loaded, so a load never waits on the network.
 3. A session flies one aircraft, its PF's ([roles and members](../session/01-roles-and-members.md#the-pf)), and the PF's profile loader pins by its hash a local bundle that covers that aircraft, or else the bundle its cached index gives its level ([the pin](02-units.md#the-pin)).
    It writes the pin as a session key whenever the aircraft changes before preflight ends, and whenever the key holds none and its choice becomes one ([which bundle a session pins](../session/02-units.md#which-bundle-a-session-pins)).
-   After preflight ends, the pin changes only from none, and outside a test session a pinned bundle stays for the rest of the session; a pilot whose cache lacks a published pin fetches it by its hash, and no core fetches a local one ([tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-dual-inputs-releases)).
+   After preflight ends, the pin changes only from none, or to a new local bundle in a test session, so outside one a pinned bundle stays for the rest of the session; a pilot whose cache lacks a published pin fetches it by its hash, and no core fetches a local one, which the PF's core sends to the crew instead ([tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-dual-inputs-releases), [test sessions](02-units.md#test-sessions)).
 4. Offline, the core uses what it has cached.
 
 - **Why Pages:** GitHub Pages "sites have a soft bandwidth limit of 100 GB per month", and a published site "may be no larger than 1 GB" (documented, [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)), while GitHub's REST API allows an unauthenticated address 60 requests an hour (documented, [rate limits for the REST API](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api)).

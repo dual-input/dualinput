@@ -21,6 +21,7 @@ export const SCENARIOS: Readonly<Record<string, { title: string; seconds: number
   "take-control": { title: "Take-control", seconds: 164 },
   "desktop-app": { title: "Desktop app", seconds: 140 },
   profiles: { title: "Profiles", seconds: 124 },
+  "test-sessions": { title: "Test sessions", seconds: 45 },
   "clients-panels": { title: "Cockpit panels", seconds: 77 },
   "network-relays": { title: "Two relays", seconds: 76 },
   network: { title: "Network", seconds: 69 },

@@ -244,9 +244,9 @@ me.on::<FlightChanged>(|me, _, cx| cx.set_match(rate_and_pause::TIME_OF_DAY, me.
 ## Which bundle a session pins
 
 - The profile loader, on the PF's core, writes the pinned bundle's hash into a `PilotFlying` key of its own whenever the session's aircraft changes, and when the key holds none and its choice becomes one, after preflight ends too ([the pin](../profiles/02-units.md#the-pin)).
-  Its choice is a local bundle that covers the aircraft, which the pin marks so no core fetches it from Pages, or else the bundle its cached index gives its level ([delivery](../profiles/01-format-and-delivery.md#delivery)); every other core's loader loads that hash, and fetches a published one by hash when its cache lacks it.
+  Its choice is a local bundle that covers the aircraft, which the pin marks so no core fetches it from Pages, and which the PF's core sends to every other member, or else the bundle its cached index gives its level ([delivery](../profiles/01-format-and-delivery.md#delivery)); every other core's loader loads that hash, and fetches a published one by hash when its cache lacks it.
 - Every pilot in a session runs one release, by the version check at join, so two caches differ only when one core started before a merge and the other after, and the PF's choice settles it without the cores comparing their caches.
-- After preflight ends the aircraft stays, so a pinned bundle does too, as [delivery](../profiles/01-format-and-delivery.md#delivery) requires outside a test session, and the pin changes only from none; how the loader writes, fetches, and loads is [6.8](../architecture/plan.md#68-profiles)'s.
+- After preflight ends the aircraft stays, so a pinned bundle does too, as [delivery](../profiles/01-format-and-delivery.md#delivery) requires outside a test session, and the pin changes only from none, or to a new local bundle a member's core sent in a test session ([test sessions](../profiles/02-units.md#test-sessions)); how the loader writes, fetches, and loads is [6.8](../architecture/plan.md#68-profiles)'s.
 
 ## Rate and pause
 

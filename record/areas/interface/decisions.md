@@ -617,7 +617,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 - **Decided:** a notification is information, a warning, or trouble, the last for trouble that costs the pilot a feature, and none carries a button in v1.
   - On the banner, held while its cause lasts: the lost link; catching up, one word for a late joiner's catch-up and a short outage's replay; the PF in the pause menu, on the others' banners; Dual Input's service gone or reconnecting; the panel bridge not loading; our WASM module stopped or missing; the Windows helper down; a key Windows refuses; and "This seat is taken", while this pilot's camera is in the seat.
-  - On the banner, shown once: control passing or refused, with the reason; for a PF who lost control through the lost link, once back, that what they changed alone was undone; a crewmate leaving the flight or the session, closing their sim, crashing, or coming back; and a control that couldn't sync, once per entry each load, several at one load as one.
+  - On the banner, shown once: control passing or refused, with the reason; for a PF who lost control through the lost link, once back, that what they changed alone was undone; a crewmate leaving the flight or the session, closing their sim, crashing, or coming back; and a control that couldn't sync, once per entry each load, several at one load as one; and in a test session, every PC in the flight having loaded a new save, naming who saved it ([a test session shows the bundle each PC runs](#a-test-session-shows-the-bundle-each-pc-runs); user, 2026-11-21).
   - Elsewhere: the output device in Settings; traffic's counts on its tab; the unreadable model on the Figures tab; offline, our servers, the firewall, and the update in the header; Host and Join refused in the start card, where a pilot's PC refusing the other's connection takes the same words, with a connection to other pilots that won't open beside them; and a recording that stops in Settings.
   - Dropped: the warning after a takeover through a lost link, by which time the deed is done, with its words on the lost link's line; "Adam is in the A320", which the crew row shows; "Load the Baron 58P to fly with James", since [Join](#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up) says how to get in; the crash's ask for a bug report; our package missing or from another version, which [the EFB app's box](#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-shows-setups-box) shows; and each crewmate's link, which the crew rows show.
 
@@ -728,6 +728,18 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   This changes [marking the moment](../recording/01-recording-and-bug-reports.md#marking-the-moment) and [the scope's EFB app](../product/03-v1-scope.md#efb-app).
   Settled by the user on 2026-10-31.
 - **Because:** every input is recorded with its time, so a pilot's rough time still finds the moment (user, 2026-10-31).
+
+## A test session shows the bundle each PC runs
+
+- **Decided:** while the session's pinned profile is a local bundle, as in a [test session](../profiles/02-units.md#test-sessions):
+  - The session card shows the bundle's short hash, its first 7 hex digits, and who saved it.
+  - Each crew row shows the short hash that pilot's PC runs, or that it's loading.
+  - The banner says once, naming who saved it, when every PC in the flight has loaded a new save, and its click lands on the Session tab ([the banner's content](#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on)).
+
+  A published profile shows none of these: every PC loads only the pinned bundle, and a PC that can't get it already shows in the match check.
+  Settled by the user on 2026-11-21.
+- **Because:** two pilots testing a change can't otherwise tell whether a fault they see is real or the change hasn't reached both PCs, and two rows that read the same seven characters answer that with no comparing out loud (user, 2026-11-21).
+  A tester flying with the EFB closed sees only the banner.
 
 [coverage]: log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel
 [efb-frames]: log.md#2026-11-01-the-efbs-document-draws-15-frames-a-second-at-the-world-map-half-the-rate-of-the-sims-other-documents-so-a-quick-click-often-lands-between-two-frames

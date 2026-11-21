@@ -16,12 +16,12 @@ use crate::{SimEvent, SimService};
 const RECENT: usize = 4_096;
 
 /// The profile unloaded. The profile loader says so right after it raises `ProfileUnloaded`,
-/// so this runs once every unit has handled that moment: each feature's routines end, and
-/// each feature's connection closes, taking what the feature set up and created in the sim
-/// with it, so its first call after the next load opens an empty one
-/// (record/areas/architecture/02-code-map.md, "A connection for each feature, for each
-/// load"). A sim call a feature makes as it hears `ProfileUnloaded` runs after this, and
-/// opens its connection again, so a feature makes none then.
+/// so this runs once every unit has handled that moment: the routines end, and the connections
+/// close, of each unit whose sim work ends with the profile, taking what it set up and created
+/// in the sim with them, so its first call after the next load opens an empty one
+/// (record/areas/architecture/02-code-map.md, "A connection for each feature, for each load",
+/// and its note of 2026-11-21). A sim call such a unit makes as it hears `ProfileUnloaded` runs
+/// after this, and opens its connection again, so it makes none then.
 pub fn profile_unloaded(cx: &Cx) {
     cx.call(SimService::unloaded, ());
 }
@@ -29,14 +29,20 @@ pub fn profile_unloaded(cx: &Cx) {
 impl SimService {
     fn unloaded(me: &mut SimService, _: (), cx: &mut Cx) {
         let platform = me.me();
-        for routine in me.module.routines_of_features(platform) {
+        let routines: Vec<(UnitId, _)> = me
+            .module
+            .routines_of_features(platform)
+            .into_iter()
+            .filter(|(unit, _)| me.with_profile.contains(&unit.place()))
+            .collect();
+        for routine in routines {
             SimService::end(me, routine, cx);
         }
         let features: Vec<UnitId> = me
             .holders
             .values()
             .map(|h| h.unit)
-            .filter(|&u| u != platform)
+            .filter(|&u| u != platform && me.with_profile.contains(&u.place()))
             .collect();
         for unit in features {
             me.close(unit, cx);

@@ -1,7 +1,8 @@
 //! The profile loader, the platform's crate for profiles in the core: the published profiles'
 //! index and bundles, fetched at each start into a cache in the data folder; the local folder
 //! of bundles an author built; the bundle a session pins, which the pilot flying's loader
-//! chooses; loading the pinned bundle on this pilot's aircraft; and the match check's item
+//! chooses; a test session's new local bundles, which reach the crew over the session; loading
+//! the pinned bundle on this pilot's aircraft; and the match check's item
 //! (record/areas/profiles/02-units.md).
 //!
 //! The core builds no bundle: it reads one, checks it at its level in a job, and decodes the
@@ -13,18 +14,22 @@
 
 mod cache;
 mod local;
+mod test_sessions;
 
 use std::collections::{BTreeMap, BTreeSet};
 
 use clients::{Clients, ClientsUnit, SettingChanged, SettingDef};
 use kernel::{Cx, Handle, JobId, Moment, Registry, Started, View};
 use messages::clients::SettingKind;
+use messages::net::PilotId;
 use messages::profiles::{
-    self as wire, BUNDLE, Bundle, LoadedProfile, PIN, Pick, Pin, ProfilesSlice, SupportedAircraft,
+    self as wire, BUNDLE, BUNDLES, Bundle, LoadedProfile, PIN, Pick, Pin, ProfilesSlice,
+    SupportedAircraft,
 };
-use messages::session::{Phase, Severity};
+use messages::session::{MATCH, Phase, Severity};
 use messages::sim::{MenuPage, Stage, WorldMapOutcome, WorldMapRequest};
 use messages::{hex, unhex};
+use network::{LinkUp, NetUnit};
 use profile_engine::{Index, IndexBundle, Maturity, Profile, Resolved};
 use serde_json::json;
 use session::{
@@ -40,7 +45,7 @@ pub const SITE: &str = "profiles.site";
 const SITE_URL: &str = "https://profiles.dualinput.app";
 /// The development setting that names the local folder: bundles an author built, which a
 /// session takes over a published one for the aircraft they cover. Empty, the default, means
-/// none (record/areas/profiles/02-units.md, "The local folder").
+/// `profiles\local\` in the data folder (record/areas/profiles/02-units.md, "The local folder").
 pub const LOCAL: &str = "profiles.local";
 
 /// A profile loaded on this pilot's aircraft, which the features read.
@@ -95,6 +100,7 @@ pub struct Profiles {
     picking: Option<Handle>,
     /// How many picks the world map couldn't carry out.
     pick_failed: u32,
+    pub(crate) test: test_sessions::Test,
 }
 
 impl Profiles {
@@ -120,6 +126,8 @@ pub fn register(r: &mut Registry) {
         .on::<FlightChanged>(Profiles::flight_changed)
         .on::<SettingChanged>(Profiles::setting_changed)
         .on::<PackageFound>(Profiles::package_found)
+        .on::<LinkUp>(test_sessions::link_up)
+        .channel(BUNDLES, test_sessions::on_bundle)
         .command(wire::command::PICK, Profiles::pick)
         .on_sim(Profiles::on_sim)
         .client_state(wire::SLICE, Profiles::slice)
@@ -138,7 +146,7 @@ pub fn register(r: &mut Registry) {
     .setting(
         LOCAL,
         SettingDef {
-            label: "A folder of bundles you built, which a session takes over the published ones",
+            label: "A folder of bundles you built, which a session takes over the published ones, profiles\\local in the data folder when empty",
             kind: SettingKind::Text,
             default: json!(""),
             part_only: false,
@@ -150,18 +158,19 @@ pub fn register(r: &mut Registry) {
 impl Profiles {
     fn started(me: &mut Profiles, _: &Started, cx: &mut Cx) {
         cache::start(me, cx);
-        local::refresh(me, cx);
+        local::refresh(me, false, cx);
         me.update(cx);
     }
 
-    /// A fetch that failed at start is tried again at the next Host or Join, and a new local
-    /// bundle takes effect at the next session.
+    /// A fetch that failed at start is tried again at the next Host or Join, and the local folder
+    /// is listed again, as what a test session's changes count from, and then each second.
     fn session_started(me: &mut Profiles, _: &SessionStarted, cx: &mut Cx) {
         if me.cache.start_failed {
             tracing::info!("the profiles' fetch failed at start, so a new session tries it again");
             cache::start(me, cx);
         }
-        local::refresh(me, cx);
+        local::refresh(me, true, cx);
+        local::start_polling(me, cx);
         me.update(cx);
     }
 
@@ -179,7 +188,7 @@ impl Profiles {
 
     fn setting_changed(me: &mut Profiles, changed: &SettingChanged, cx: &mut Cx) {
         if changed.key == LOCAL {
-            local::refresh(me, cx);
+            local::refresh(me, true, cx);
             me.update(cx);
         }
     }
@@ -270,6 +279,7 @@ impl Profiles {
                 })
                 .collect(),
             pick_failed: me.pick_failed,
+            test: test_sessions::slice(me, view.read::<Session>()),
         }
     }
 
@@ -321,13 +331,14 @@ impl Profiles {
             if session.preflight().phase != Phase::Ended {
                 self.repin = true;
             }
-            // A new local bundle takes effect when the session's aircraft next changes.
-            local::refresh(self, cx);
         }
         self.pin(cx);
+        test_sessions::offer(self, cx);
+        test_sessions::send_pinned(self, cx);
         self.fetch_pin(cx);
         self.load(cx);
         self.match_item(cx);
+        test_sessions::notice(self, cx);
     }
 
     /// On the pilot flying's core, writes its choice into the pin: whenever the session's
@@ -348,7 +359,7 @@ impl Profiles {
             return;
         }
         let held = session.key(PIN);
-        let choice = self.choice(&aircraft);
+        let choice = self.choice(&aircraft, session.me());
         let write = self.repin || held.is_none() || (held == Some(None) && choice.is_some());
         self.repin = false;
         if !write || held == Some(choice) || self.asked == Some((cx.now(), choice)) {
@@ -370,10 +381,11 @@ impl Profiles {
         cx.ask(WriteKeys::one(PIN, &choice));
     }
 
-    /// A local bundle that covers the aircraft, or else the bundle the cached index gives this
-    /// core's level for it, when the cache holds that bundle, or else none.
-    fn choice(&self, aircraft: &str) -> Option<Pin> {
-        if let Some(local) = self.local.covering(aircraft) {
+    /// A local bundle that covers the aircraft, this pilot's own, `me`, or else the bundle the
+    /// cached index gives this core's level for it, when the cache holds that bundle, or else
+    /// none.
+    fn choice(&self, aircraft: &str, me: Option<PilotId>) -> Option<Pin> {
+        if let Some(local) = self.local.covering(aircraft, me) {
             return Some(local);
         }
         let index = self.cache.index.as_ref()?;
@@ -388,6 +400,7 @@ impl Profiles {
         Some(Pin {
             hash: unhex(&bundle.hash)?,
             local: false,
+            from: None,
         })
     }
 
@@ -433,23 +446,10 @@ impl Profiles {
             return;
         };
         let hash = hex(&pin.hash);
-        let path = if pin.local {
-            match self.local.file(&hash) {
-                Some(file) => file,
-                None if self.local.busy() => return,
-                None => {
-                    tracing::info!(
-                        hash,
-                        "couldn't get the session's profile, since the pin names a local bundle this core's local folder lacks"
-                    );
-                    self.load = Load::Failed(pin);
-                    return;
-                }
-            }
-        } else if self.cache.holds(&hash) {
-            cache::path(&hash)
-        } else {
-            if self.cache.failed.contains(&hash) {
+        // A local bundle this core doesn't hold yet waits for the pilot flying's core to send it,
+        // and a published one for its fetch.
+        let Some(path) = self.held_path(&hash) else {
+            if !pin.local && self.cache.failed.contains(&hash) {
                 self.load = Load::Failed(pin);
             }
             return;
@@ -536,24 +536,48 @@ impl Profiles {
     }
 
     /// Hands the session crate this member's value of the match check's item, and takes it
-    /// back while it isn't known, such as while the bundle loads.
+    /// back while it isn't known, as while this member is out of the flight.
     fn match_item(&self, cx: &mut Cx) {
-        let session = cx.read::<Session>();
-        let value = match session.key(PIN) {
-            None => None,
-            Some(None) => Some(Bundle::NoProfile),
-            Some(Some(pin)) => match &self.load {
-                Load::Loaded(l) if l.pin == pin => Some(Bundle::Loaded(pin)),
-                Load::Failed(p) if *p == pin => Some(Bundle::Unavailable),
-                _ if self.cache.failed.contains(&hex(&pin.hash)) => Some(Bundle::Unavailable),
-                _ => None,
-            },
-        };
+        let value = self.mine(cx.read::<Session>());
         // The session crate writes this member's match key only when a value changes.
         match value {
             Some(value) => set_match(cx, BUNDLE, &value),
             None => clear_match(cx, BUNDLE),
         }
+    }
+
+    /// This member's value of the match check's item.
+    fn mine(&self, session: &Session) -> Option<Bundle> {
+        match session.key(PIN)? {
+            None => Some(Bundle::NoProfile),
+            Some(pin) => match &self.load {
+                Load::Loaded(l) if l.pin == pin => Some(Bundle::Loaded(pin)),
+                Load::Failed(p) if *p == pin => Some(Bundle::Unavailable),
+                _ if self.cache.failed.contains(&hex(&pin.hash)) => Some(Bundle::Unavailable),
+                _ if session.me().is_some_and(|me| session.in_flight(&me)) => Some(Bundle::Loading),
+                _ => None,
+            },
+        }
+    }
+
+    /// Where this core holds a bundle, by its hash: its cache, or else its local folder.
+    pub(crate) fn held_path(&self, hash: &str) -> Option<String> {
+        if self.cache.holds(hash) {
+            Some(cache::path(hash))
+        } else {
+            self.local.file(hash)
+        }
+    }
+
+    /// A member's value of the match check's item: this member's own as the loader holds it, and
+    /// another's as its `match` key carries it.
+    pub(crate) fn value_of(&self, session: &Session, member: &PilotId) -> Option<Bundle> {
+        if session.me().as_ref() == Some(member) {
+            return self.mine(session);
+        }
+        let values = session.member_key(MATCH, member)?;
+        let (_, bytes) = values.items.iter().find(|(n, _)| *n == BUNDLE.number)?;
+        postcard::from_bytes(bytes).ok()
     }
 }
 
@@ -698,6 +722,7 @@ mod tests {
         Pin {
             hash: [n; 32],
             local: false,
+            from: None,
         }
     }
 
@@ -744,10 +769,21 @@ mod tests {
     }
 
     #[test]
+    fn a_member_still_loading_shows_no_difference() {
+        let values = [
+            ("A".into(), Bundle::Loaded(pin(1))),
+            ("B".into(), Bundle::Loading),
+        ];
+        assert_eq!(compare(&values, Some(0)), None);
+        assert_eq!(compare(&values, Some(1)), None);
+    }
+
+    #[test]
     fn an_unpublished_bundle_names_whose_it_is_from_each_side() {
         let local = Pin {
             hash: [1; 32],
             local: true,
+            from: None,
         };
         let values = [
             ("James".into(), Bundle::Loaded(local)),

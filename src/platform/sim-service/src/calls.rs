@@ -20,6 +20,13 @@ pub trait SimUnit {
     type State;
     /// Hands `f` each value, exception, and loss that comes for the unit's calls.
     fn on_sim(&mut self, f: fn(&mut Self::State, SimEvent, &mut Cx)) -> &mut Self;
+    /// Marks the unit's sim work as the loaded profile's, as state sync's watches and avatars'
+    /// figures are: when the profile unloads, the service ends the unit's routines and closes
+    /// its connection, taking what it set up and created with it. An unmarked unit keeps its
+    /// connection and routines through an unload, since a test session reloads the profile in
+    /// flight, and flight-model sync's `Follow` would otherwise end with it
+    /// (record/areas/architecture/log.md, 2026-11-21).
+    fn ends_with_profile(&mut self) -> &mut Self;
 }
 
 impl<S: 'static> SimUnit for Unit<'_, S> {
@@ -32,6 +39,15 @@ impl<S: 'static> SimUnit for Unit<'_, S> {
             .state_mut::<SimService>()
             .hooks
             .insert(unit, hook);
+        self
+    }
+
+    fn ends_with_profile(&mut self) -> &mut Self {
+        let unit = self.id().place();
+        self.registry()
+            .state_mut::<SimService>()
+            .with_profile
+            .insert(unit);
         self
     }
 }

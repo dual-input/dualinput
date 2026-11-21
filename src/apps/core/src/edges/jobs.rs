@@ -362,7 +362,7 @@ mod clipboard {
 }
 
 /// `folder`'s entries by name, each with its size, a folder's being the total of every file
-/// inside it.
+/// inside it, and when it last changed.
 fn list(folder: &Path) -> std::io::Result<Vec<Entry>> {
     let read = match std::fs::read_dir(folder) {
         Ok(read) => read,
@@ -375,11 +375,23 @@ fn list(folder: &Path) -> std::io::Result<Vec<Entry>> {
             Ok(Entry {
                 name: entry.file_name().to_string_lossy().into_owned(),
                 size: size(&entry.path()),
+                modified: modified(&entry.path()),
             })
         })
         .collect::<std::io::Result<Vec<_>>>()?;
     entries.sort_by(|a, b| a.name.cmp(&b.name));
     Ok(entries)
+}
+
+/// When a file or folder last changed, in ms since the Unix epoch, or 0 when Windows can't say.
+fn modified(path: &Path) -> u64 {
+    std::fs::metadata(path)
+        .and_then(|m| m.modified())
+        .ok()
+        .and_then(|at| at.duration_since(std::time::UNIX_EPOCH).ok())
+        .map_or(0, |since| {
+            u64::try_from(since.as_millis()).unwrap_or(u64::MAX)
+        })
 }
 
 /// A file's size, or a folder's total. One entry it can't read, such as a junction whose target is

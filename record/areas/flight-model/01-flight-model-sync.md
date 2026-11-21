@@ -25,10 +25,8 @@ Decides:     Who reads the flying aircraft, and how often; what a sample carries
 > In [the sample](#the-sample), `Lead`'s report and the sample between cores are one struct, `Sample`, and the feed that starts `Follow` carries no sample ([flight-model log](log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump)).
 
 > **Note**
-> A known limit: a profile that unloads while its pilot stays in the flight ends `Lead` for good, and the flying machine sends no more samples until control passes.
-> The sim service ends every feature's routines at a profile's unload, and flight-model sync starts none again.
-> Nothing in v1 unloads a profile mid-flight, since the pin changes only from none once preflight has ended ([the pin](../profiles/02-units.md#the-pin)), so v1 builds nothing for it (user, 2026-11-11).
-> The IDE's reload of a profile mid-session is the first thing that can, and its design adds the fix: a feature that follows the session says so as it registers, and the sim service ends its routines and closes its connection at the session's end, not at a profile's unload ([flight-model log](log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump)).
+> `Lead` and `Follow` run on through a profile's unload while their pilot stays in the flight, as a [test session](../profiles/02-units.md#test-sessions)'s reload makes one, since the sim service ends at an unload only the routines of a feature that marks its sim work as ending with the profile, which flight-model sync doesn't ([architecture log](../architecture/log.md#2026-11-21-a-profiles-unload-ended-every-features-sim-work-flight-model-syncs-included-so-it-ends-only-the-work-of-features-that-load-a-profile); user, 2026-11-21).
+> The fix the [flight-model log](log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump) sketched marked the features that follow the session instead, and the mark went to the two features that load a profile, state sync and avatars.
 
 > **Note**
 > A known limit, measured on the 58P: a following machine's own autopilot, when engaged, keeps flying the aircraft `Follow` holds frozen and winds up, and once `Follow` lets the aircraft go at a handover, it rolls the aircraft and runs its trim for several seconds.

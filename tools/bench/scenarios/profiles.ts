@@ -171,7 +171,7 @@ test("a member offline whose cache lacks the pin shows the error, loads nothing,
   await until(a, (s) => bundleDifference(s) === undefined, "the error clearing")
 })
 
-test("the pilot flying pins a local bundle: a member with the same file loads it, and one without it fetches nothing and shows the error", { timeout: 120_000 }, async (t) => {
+test("the pilot flying pins a local bundle: a member with the same file loads it, and one without it fetches nothing, gets it from the pilot flying, and loads it", { timeout: 120_000 }, async (t) => {
   const net = await BenchNetwork.start()
   t.after(() => net.stop())
   const run = new BenchRun("profiles-local", t)
@@ -184,9 +184,9 @@ test("the pilot flying pins a local bundle: a member with the same file loads it
   await crew(a, b, c)
   for (const p of [a, b, c]) await load(p.core, BARON)
   await logged(a.core, new RegExp(`the pilot flying pinned the session's profile hash="${hash}" local=true`))
-  for (const p of [a, b]) await logged(p.core, loadedLine(hash))
-  const s = await until(a, (s) => bundleDifference(s) !== undefined, "Rosa's error")
-  assert.equal(bundleDifference(s)?.words, "Rosa doesn't have your unpublished profile for this aircraft")
+  for (const p of [a, b, c]) await logged(p.core, loadedLine(hash))
+  await cached(c.core, hash)
+  await until(a, (s) => s.members.every((m) => m.in_flight) && bundleDifference(s) === undefined, "every member in the flight with no difference")
   assert.ok(!net.profiles.requests.some((r) => r.path.includes(hash)), "no core fetched the local bundle")
 })
 
@@ -358,7 +358,7 @@ test("the apps see where the pilot is, the aircraft the sim last loaded by name,
   const installed = (s: ProfilesSlice | undefined) => s?.supported.every((p) => p.installed) === true && s.supported.length > 0
 
   await watching.until(() => installed(profiles()), "the Baron's profile, installed")
-  assert.deepEqual(profiles(), { loaded: null, supported: [{ maker: "Black Square", model: "Baron 58P", maturity: "Experimental", installed: true }], pick_failed: 0 })
+  assert.deepEqual(profiles(), { loaded: null, supported: [{ maker: "Black Square", model: "Baron 58P", maturity: "Experimental", installed: true }], pick_failed: 0, test: null })
   assert.equal(sim()?.where, "main-menu")
   assert.equal(sim()?.aircraft, null)
 

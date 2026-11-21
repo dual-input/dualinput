@@ -1015,9 +1015,43 @@ Exit: on GitHub's runners, CI passes on a pull request and on `main`, the bench 
 
 ## 22b Test sessions
 
-Builds: test sessions, in which the author's core sends each new bundle of a profile to the crew and every machine reloads it mid-session ([testing an edit](../profiles/01-format-and-delivery.md#testing-an-edit)), which moved to v1 on 2026-11-21 ([the product plan's picks](../product/plan.md#3-v1-or-later)).
-Designs first: the reload, with the three things node 4's review found it needs, which [testing an edit](../profiles/01-format-and-delivery.md#testing-an-edit) lists.
+Designs first: test sessions, in which the author's core sends each new bundle of a profile to the crew and every machine reloads it mid-session, which moved to v1 on 2026-11-21 ([the product plan's picks](../product/plan.md#3-v1-or-later)), with the three things node 4's review found a reload needs, which [testing an edit](../profiles/01-format-and-delivery.md#testing-an-edit) lists.
+The user settled it that day, and [test sessions](../profiles/02-units.md#test-sessions) carries it (user, 2026-11-21):
+
+- Any member's core sends a new bundle from its local folder, the PF's loader pins the newest it gets, after preflight too, and no setting turns a test session on.
+- The local folder defaults to `profiles\local\` in the core's data folder, where [stage 22d](#22d-the-profile-extension)'s extension writes each bundle as [writing a bundle there](../profiles/02-units.md#writing-a-bundle-there) has it.
+- A local bundle the session pins reaches each member that lacks it, from the PF's core, so a crewmate needs none of the author's files.
+- While the profile is unpublished, the EFB app's session card shows the pinned bundle's short hash and who saved it, each crew row the short hash that member's PC runs, and the banner says once when every PC in the flight has loaded a new one.
+- A profile's unload ends the sim work of the features that load a profile and no other's, since flight-model sync's `Lead` and `Follow` would otherwise end at a reload in flight ([architecture log](../architecture/log.md#2026-11-21-a-profiles-unload-ended-every-features-sim-work-flight-model-syncs-included-so-it-ends-only-the-work-of-features-that-load-a-profile)).
+- Known limits: a reload starts each counted entry's shadow value at its `default`, the crew's figures go and come back at each reload, and a change made while a machine's profile reloads is lost.
+
+Builds:
+
+- in `profile-loader`: the local folder's default, and its listing each second while a session is held, which reads a file again when its size or last-modified time changed; a new local bundle that covers the session's aircraft kept in the cache and offered to the PF on `BUNDLES`, and passed on to the PF by a core that gets it after control passed; the PF's pin of the newest offer, after preflight too, naming whose it is; a pinned local bundle sent to every other member once its pin lands, and to each member at their `LinkUp`; every local bundle offered, sent, or received kept in the cache; a local pin loading from the cache or the local folder, and waiting for its bytes; the match check's `Loading`; the slice's `test`; and the banner's notice once every PC in the flight has loaded a new local bundle ([the local folder](../profiles/02-units.md#the-local-folder), [test sessions](../profiles/02-units.md#test-sessions), [the pin](../profiles/02-units.md#the-pin), [loading](../profiles/02-units.md#loading), [the match check's item](../profiles/02-units.md#the-match-checks-item))
+- in the message crate's profiles module: the channel `BUNDLES`, the pin's `from`, `Bundle::Loading`, and `ProfilesSlice`'s `test`
+- in `kernel` and the core's jobs edge: each listed file's last-modified time
+- in `sim-service`: a unit's mark that its sim work ends with the profile, which state sync and avatars take, so a profile's unload ends their routines and closes their connections alone ([02-code-map](../architecture/02-code-map.md)'s note of 2026-11-21); and flight-model sync's comment that leaned on the old rule
+- in `efb-shell`: the session card's line and the crew rows' hashes ([a test session shows the bundle each PC runs](../interface/decisions.md#a-test-session-shows-the-bundle-each-pc-runs))
+
 Needs: every stage before 22, so it can be built beside stage 22.
+
+Tests:
+
+- From [the profiles' cases](../profiles/02-units.md#cases-for-the-bench), on the bench, with the stand-in sim and the local profiles' site:
+  - In the `profiles` scenario: the PF pins a local bundle at the session's start, and a member whose local folder lacks it gets it from the PF and loads it.
+  - In a scenario of its own, `test-sessions`, with a crew in flight on a profile of the scenario's own:
+    - After preflight, a new bundle in the PF's local folder: the pin moves to it, both cores reload it, the following core catches up, the slice shows its short hash for both PCs, and the banner says once that both loaded it.
+    - A local file written again with the same bytes moves no pin.
+    - Through a reload in flight, flight-model sync's `Follow` runs on.
+    - With settling at 4s, a reload more than 4s after Ready to fly ends its catch-up without waiting to settle.
+    - A new bundle in the following pilot's local folder reaches the PF, which pins it, naming that pilot.
+    - An entry whose write function hit the sandbox's limit, which stopped syncing, syncs again once a new bundle fixes it.
+    - A pilot who joins after a new bundle was pinned gets it from the PF and loads it.
+- As the profile loader's own tests: the match check's comparison shows no difference while a member is loading.
+
+The stage changes the kernel and the core's edge, so it closes on the whole bench, which CI runs on the stage's pull request, as a job per scenario, since our development machine's disk was short (user, 2026-11-21).
+
+Exit: on our development machine, `node tools/check.ts` and the scenarios the stage touches pass, and on CI the whole bench passes, the `test-sessions` scenario and the `profiles` scenario's changed case among them; on the bench, a bundle the following pilot's local folder gets reloads on both cores in flight, and a bundle the PF's gets reloads while `Follow` runs on; and the [profiles' log](../profiles/log.md) has an entry for the cases.
 
 ## 22c The format's audit
 

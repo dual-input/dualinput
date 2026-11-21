@@ -8,6 +8,7 @@ import type { Slices } from "../../../engines/page-client/dev/stand-in-base.ts"
 import type { CoreSlice } from "../../../engines/messages/ts/clients/CoreSlice.ts"
 import type { Setting } from "../../../engines/messages/ts/clients/Setting.ts"
 import type { ProfilesSlice } from "../../../engines/messages/ts/profiles/ProfilesSlice.ts"
+import type { Runs } from "../../../engines/messages/ts/profiles/Runs.ts"
 import type { Difference } from "../../../engines/messages/ts/session/Difference.ts"
 import type { RefusedWhy } from "../../../engines/messages/ts/session/RefusedWhy.ts"
 import type { NamedAircraft } from "../../../engines/messages/ts/sim/NamedAircraft.ts"
@@ -74,7 +75,7 @@ const SUPPORTED: ProfilesSlice["supported"] = [
   { maker: "iniBuilds", model: "A380", maturity: "Experimental", installed: false },
   { maker: "iniBuilds", model: "L-1011 TriStar", maturity: "Experimental", installed: false },
 ]
-const NO_PROFILE: ProfilesSlice = { loaded: null, supported: SUPPORTED, pick_failed: 0 }
+const NO_PROFILE: ProfilesSlice = { loaded: null, supported: SUPPORTED, pick_failed: 0, test: null }
 const atWorldMap: SimSlice = { stage: "menu", page: "world-map", where: "world-map", aircraft: BARON, pause: 0, ended: null, module: "running" }
 const fenix: SimSlice = { ...atWorldMap, aircraft: FENIX }
 const CORE: CoreSlice = { version: VERSION, hash: "", username: null }
@@ -102,7 +103,15 @@ const OUTPUTS = {
 }
 
 const reach = { internet: true, servers: "reachable" as const }
-const healthy = { network: { members: [], ...reach }, sim: atWorldMap, profiles: { loaded: { maturity: "Stable" }, supported: SUPPORTED, pick_failed: 0 }, session: noSession, settings: settings(true, true) }
+const healthy = { network: { members: [], ...reach }, sim: atWorldMap, profiles: { loaded: { maturity: "Stable" }, supported: SUPPORTED, pick_failed: 0, test: null }, session: noSession, settings: settings(true, true) }
+
+/** A test session's profiles' slice: James's save, with what each PC runs. */
+const testSession = (yours: Runs, james: Runs): ProfilesSlice => ({
+  loaded: { maturity: "Experimental" },
+  supported: SUPPORTED,
+  pick_failed: 0,
+  test: { hash: "3f9c2a1", from: JAMES, members: [{ pilot: ME, runs: yours }, { pilot: JAMES, runs: james }] },
+})
 
 /**
  * Take control's slice and its stream's, by name alone, since no shell names a feature: live once this pilot is in the
@@ -188,6 +197,14 @@ export const SCENES: Record<string, Slices> = {
   "James flying, a long key's name": { ...netUp, ...boundTo("Thrustmaster TCA Sidestick button 12"), session: flying(JAMES), [TAKE_CONTROL]: control({}) },
   "James flying, catching up": { ...netUp, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ denied: ["You're catching up with James."] }), [STREAM]: { catching_up: true, from_preflight_end: false, replaying: false } },
   "James flying, another guard refuses": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({ denied: ["Only the instructor can take control"] }) },
+  "Test session": {
+    ...netUp,
+    session: flying(JAMES),
+    [TAKE_CONTROL]: control({}),
+    profiles: testSession({ t: "loaded", hash: "3f9c2a1" }, { t: "loaded", hash: "3f9c2a1" }),
+    notifications: [{ id: "profile-loader.edit", level: "information", text: "James's profile edit is loaded on both PCs", detail: "Profile 3f9c2a1", pilot: JAMES, once: true, landing: "session" }],
+  },
+  "Test session, a save loading": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({}), profiles: testSession({ t: "loading" }, { t: "loaded", hash: "3f9c2a1" }) },
   "James's link lost": { network: { members: [{ pilot: JAMES, up: false, path: null, round_trip_ms: null }], ...reach }, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ warning: "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect." }) },
   "Traffic: James shares, some missing": { ...netUp, session: flying(JAMES, { traffic: JAMES }), [TRAFFIC]: { ...noTraffic, missing: 3, others: 12 } },
   "Traffic: you share": { ...netUp, session: flying(ME, { traffic: ME }) },

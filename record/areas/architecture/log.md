@@ -3,6 +3,24 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-11-21: A profile's unload ended every feature's sim work, flight-model sync's included, so it ends only the work of features that load a profile
+
+**Asked:** what a reload in flight, which [stage 22b](../build/plan.md#22b-test-sessions)'s test sessions make, does to the features that load no profile, as its design read the code before any was written.
+
+**Expected:** nothing, since flight-model sync, traffic, rate and pause, and Go to run in a session whose aircraft has no profile.
+
+**Found:** at a profile's unload, the sim service ended the routines of every unit but its own and closed every unit's connection, as [a connection for each feature, for each load](02-code-map.md#a-connection-for-each-feature-for-each-load) has it (read in `src/platform/sim-service/src/connections.rs`, `unloaded`).
+Flight-model sync's crate counted on that never happening while its pilot stayed in the flight: its comment said an unload "happens only as its pilot leaves the flight or the session ends", since no pin changed while a pilot stayed in the flight (read in `src/features/flight-model/core/src/lib.rs`).
+So a reload in flight would have ended `Follow` on a following machine and `Lead` on the flying one while the crate went on as if they ran, leaving the following aircraft flying on its own or held where it stood until control passed.
+Traffic's copies would have gone too, and come back at their next states.
+Stage 16 had found the same gap and left it as a known limit, sketching a mark on each feature that follows the session ([flight-model log](../flight-model/log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump)).
+
+**Changed:** the mark goes the other way: a unit marks that its sim work ends with the profile, as state sync and avatars do, and a profile's unload ends the routines and closes the connections of the marked units alone (user, 2026-11-21).
+Two features load a profile and the rest don't, so two marks cover it, and a feature added later keeps its connection unless it loads a profile.
+The rest need no unload: flight-model sync ends its routine and traffic removes its copies when their pilot leaves the flight, as they must in a session whose aircraft has no profile, which never unloads one.
+
+**Affects:** [02-code-map](02-code-map.md)'s note of 2026-11-21, [01-flight-model-sync](../flight-model/01-flight-model-sync.md)'s note on `Lead` and `Follow`, and [test sessions](../profiles/02-units.md#test-sessions).
+
 ## 2026-11-09: A group on one SimConnect connection keeps hearing an event while a group on another is cleared
 
 **Asked:** does a notification group on one SimConnect connection keep hearing a sim event while a group on another connection, holding the same event, is cleared, as [a connection for each feature](02-code-map.md#a-connection-for-each-feature-for-each-load) left unmeasured?

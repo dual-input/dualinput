@@ -8,12 +8,10 @@
 //! Which routine runs follows the session: `Lead` while this pilot holds control and is in
 //! the flight, and `Follow` while this pilot is in the flight and another holds control.
 //!
-//! It loads no profile, so it flies a session whose aircraft has none. The platform ends
-//! every feature's routines when a profile unloads, this feature's among them, which happens
-//! only as its pilot leaves the flight or the session ends, when this crate ends its routine
-//! too: the pilot flying pins the session's profile once, and no pin changes while a pilot
-//! stays in the flight (record/areas/profiles/02-units.md, "The pin"). Register it after
-//! every crate of the platform.
+//! It loads no profile, so it flies a session whose aircraft has none, and its routines run on
+//! through a profile's unload, as a test session's reload in flight makes one, since only a unit
+//! marked `ends_with_profile` has its routines ended there (record/areas/architecture/log.md,
+//! 2026-11-21). Register it after every crate of the platform.
 
 use std::time::Duration;
 

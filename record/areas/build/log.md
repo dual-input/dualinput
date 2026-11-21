@@ -45,13 +45,15 @@ The stand-in answered a page's watch with the slice as it was when asked, after 
 - The release holds `DualInput-0.1.0-full.nupkg` at 16,402,961 bytes, `DualInput-win-Setup.exe` at 23,924,753 bytes, `RELEASES`, and `releases.win.json`, with no delta, as the first release, and its body is `Dual Input's first release.`
 - The publish job's check read the draft's `releases.win.json` through the API's asset path, so that path reaches a draft's file.
 - `release-pr.yml`, which the publish job started, logged `nothing since 0.1.0 is a feat, fix, or perf, so there's nothing to release`.
+  Once stage 22b's `feat(profiles)!` reached `main`, it opened [the release pull request for 0.2.0](https://github.com/dual-input/dualinput/pull/4), which changes the five files that hold the version.
+  Opening it and updating it, both as `github-actions[bot]`, each made a run of `ci.yml` that GitHub held as `action_required`, waiting for a maintainer's approval, where we expected the workflow's token to start no run at all.
 - The build job, run again, stopped at its first step: `version 0.1.0 is published already, at https://github.com/dual-input/dualinput/releases/tag/0.1.0`.
 - `profiles.dualinput.app` serves `index.json` over HTTPS, listing the Baron 58P's level-1 bundle that the profiles' job published to `pages`; Pages' certificate expires 2027-02-19.
 - The backend deployed when CI passed on `19f93078`, once both Cloudflare secrets were set again with `gh secret set --body`: set through a PowerShell pipe, the account ID had carried a line ending, which the API refused as an invalid account ID, and the token a byte-order mark, which Wrangler named: `The configured Cloudflare API token contains a character that cannot be used in an HTTP Authorization header: "﻿"`.
 - The released core, run for 12s with a data folder of its own and no sim, fetched the index and the bundle from `profiles.dualinput.app` and logged `what this PC reaches changed backend=true relay=true`.
   `node tools/replay.ts` on its recording fetched the release's full package and replayed it on the release's core: `replayed 81 inputs, and all 11 checkpoints matched, up to the last flush of a cut recording`.
 
-**Changed:** the build's unverified note on the API's asset path goes, and its left open item on who writes a release's notes, which the `Release-Note:` trailers settle.
+**Changed:** the build's unverified note on the API's asset path goes, and its left open item on who writes a release's notes, which the `Release-Note:` trailers settle; the build's design has the release pull request's CI run held for approval.
 
 **Affects:** [a release](01-the-build.md#a-release) and [the build's left open](01-the-build.md#left-open).
 

@@ -224,7 +224,7 @@ On each push to `main`, `release-pr.yml` runs `node tools/release.ts pr`, which 
 - It opens the release pull request from that branch, or updates the one open, with the release's notes so far as its body: each `Release-Note:` trailer, grouped as New for a `feat`, Fixed for a `fix` or `perf`, and Changed for the rest.
 - Between a release commit's merge and its tag, `main` holds a version no release has yet, and it waits.
 
-The workflow's own token pushes the branch, so GitHub starts no CI on the release pull request, which keeps CI from running twice on every push to `main` (documented, [GITHUB_TOKEN](https://docs.github.com/en/actions/concepts/security/github_token)).
+The workflow's own token pushes the branch and opens the release pull request, so GitHub holds the pull request's CI run for a maintainer's approval rather than starting it (measured, 2026-11-21, [log][published]), and nobody approves it, which keeps CI from running twice on every push to `main`.
 So `ci` never reports there, and an admin merges it past the check, with a rebase or a squash.
 Nothing ships unchecked: the merge is a push to `main`, and `ci.yml` checks the merged commit before anything is released (user, 2026-11-21).
 

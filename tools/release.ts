@@ -92,7 +92,8 @@ function vpkEnv(): NodeJS.ProcessEnv {
  * it, and the pull request's body holds the release's notes so far. It does nothing while no
  * commit since the last release changes what pilots run. The first release, with no tag before
  * it, is a commit of that title pushed to main by hand. The workflow's own token pushes the
- * branch, so GitHub starts no CI on it; merging it runs CI on main, which releases it.
+ * branch, so GitHub holds the pull request's CI run for an approval nobody gives; merging it
+ * runs CI on main, which releases it.
  */
 function pullRequest(): void {
   const last = lastRelease()
@@ -113,7 +114,7 @@ function pullRequest(): void {
   run("git", [...bot, "commit", "--quiet", "--all", "-m", `chore(release): ${next}`, "-m", notes])
   run("git", ["push", "--quiet", "--force", "origin", BRANCH])
   const title = `chore(release): ${next}`
-  const body = `${notes}\nMerging this releases ${next}: CI runs on the merged commit, and the release workflow publishes it once CI passes. This pull request gets no CI run of its own, so merge it past the \`ci\` check as an admin, with a rebase or a squash.\n`
+  const body = `${notes}\nMerging this releases ${next}: CI runs on the merged commit, and the release workflow publishes it once CI passes. This pull request's own CI run waits for an approval it doesn't need, so leave that unapproved and merge it past the \`ci\` check as an admin, with a rebase or a squash.\n`
   const file = path.join(RELEASES, "..", "release-pr.md")
   fs.mkdirSync(path.dirname(file), { recursive: true })
   fs.writeFileSync(file, body)

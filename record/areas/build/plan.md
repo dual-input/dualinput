@@ -576,10 +576,10 @@ Tests:
 - [Installing and updating's cases for the bench](../install/01-installing-and-updating.md#cases-for-the-bench), in three groups (user, 2026-11-10):
   - those that need no Setup.exe, Update.exe, or uninstall: on the bench, with a stub named `FlightSimulator2024.exe` for the sim's process and the desktop app beside a bench build of the core named `dualinput-core.exe` ([what it runs](02-testing.md#what-it-runs));
   - those that need one and no session: on our development machine, from releases this stage packs, since CI's runner waits for [stage 22](#22-github);
-  - those that need a session: in [stage 16](#16-flight-model-sync)'s first flight with friends, and three of them in [stage 22](#22-github).
+  - those that need a session: in [stage 16](#16-flight-model-sync)'s first flight with friends, and three of them in [stage 23](#23-v1s-release)'s sessions with friends.
 
   The case of a window that holds a core is left out, since an open window keeps no core running, as [installing and updating](../install/01-installing-and-updating.md)'s first note has it.
-- [Its cases on a desk](../install/01-installing-and-updating.md#cases-on-a-desk) on our development machine, but for Windows 10 without WebView2, which needs a PC we don't have, and deltas through `GithubSource`, which need stage 22's releases.
+- [Its cases on a desk](../install/01-installing-and-updating.md#cases-on-a-desk) on our development machine, but for Windows 10 without WebView2, which needs a PC we don't have, and deltas through `GithubSource`, which need two releases from the release workflow, in [stage 23](#23-v1s-release).
 - [Its cases in the sim](../install/01-installing-and-updating.md#cases-in-the-sim) in one session, but for a fresh install of the sim and the Store edition, which need a pilot's PC, and Windows' firewall prompt, which needs a session and goes to stage 16.
 - The EFB app's Install and restart, in the same session: the desktop app closes the sim, installs, and starts the sim again, which no run had done ([the fixed local port](../interface/decisions.md#the-desktop-app-tells-the-efb-app-about-updates-and-the-firewall-over-a-fixed-local-port)).
 - [Its budgets](../install/01-installing-and-updating.md#budgets), on the bench but for the update's, which runs with the release cases.
@@ -1006,12 +1006,14 @@ Tests:
 
 - From stage 1: CI's time against the 20 minutes of [budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace), with `cargo build --timings`; one commit built on our development machine and on CI's runner gives one hash ([the build's cases on a desk](01-the-build.md#cases-for-the-bench)); and the runner, set up from nothing by the steps for a new PC in [building every target](../architecture/02-code-map.md#building-every-target), builds and tests the tree.
 - From stage 3: whether a GitHub-hosted Windows runner holds three cores, two relays, and their proxies ([testing's left open](02-testing.md#left-open)); and a pull request's bench within the code map's 20 minutes, as a job per scenario beside the others ([testing's budgets](02-testing.md#budgets)).
-- [The build's cases on a desk](01-the-build.md#cases-for-the-bench) for a release: the first release publishes with no delta and the next with one, a run whose draft is left unpublished leaves a draft the next run deletes before it publishes, and a run for a version that's published stops at its first step.
-- The release pull request: a `fix` since the last release raises the patch and a `feat` the minor, both `Cargo.toml` files, both `Cargo.lock` files, and `stamp.ts` take the version, and its body groups the `Release-Note:` trailers; and the merge releases it once CI passes.
-- From stage 15, in a session with friends on releases the release workflow made, through the servers it deployed: Setup.exe run over the install during the session, a crewmate's core seeing its link lost at an uninstall, a host who is behind, an update downloaded in the app, through `GithubSource` and its delta, and if Windows shows its firewall prompt on a PC with no rule naming the core, whether the desktop app's fix deletes the block rules a canceled prompt leaves, which stage 16's first flight with friends left for the live path (user, 2026-11-12; [install log](../install/log.md#2026-11-12-in-a-session-an-update-downloads-and-waits-then-installs-as-the-sim-closes-the-trays-quit-reads-as-a-leave-and-a-session-raised-no-firewall-prompt-from-windows)).
+- [The build's cases on a desk](01-the-build.md#cases-for-the-bench) for a release: the first release publishes with no delta, and a run for a version that's published stops at its first step.
+- The release pull request: a `fix` since the last release raises the patch and a `feat` the minor, both `Cargo.toml` files, both `Cargo.lock` files, and `stamp.ts` take the version, and its body groups the `Release-Note:` trailers.
 - From stage 7: once `fra.relay.dualinput.app` points at our droplet, `node src/relays/deploy.ts fra` deploys the relay, and it answers `/ping` over HTTPS with the certificate it took from Let's Encrypt, before the first release ([their configuration](../network/02-units.md#their-configuration)).
 
-Exit: on GitHub's runners, CI passes on a pull request and on `main`, the bench as a job per scenario, and the [build log](log.md) has CI's times against the 20 minutes and whether a runner held three cores and two relays; the release workflow has published 0.1.0 from its release commit once CI passed on it, and a release pull request has opened for the next; the backend deploys when CI passes on `main` and answers at `api.dualinput.app`, the relay at `fra.relay.dualinput.app`, and the profiles' index at `profiles.dualinput.app`; and the session with friends that the tests' item from stage 15 lists has run on the workflow's releases, or the user has scheduled it, which the stage's `Done on` line names.
+Exit: on GitHub's runners, CI passes on a pull request and on `main`, the bench as a job per scenario, and the [build log](log.md) has CI's times against the 20 minutes and whether a runner held three cores and two relays; the release workflow has published 0.1.0 from its release commit once CI passed on it, and a release pull request has opened for the next; the backend deploys when CI passes on `main` and answers at `api.dualinput.app`, the relay at `fra.relay.dualinput.app`, and the profiles' index at `profiles.dualinput.app`.
+The cases that need a second release, and the session with friends that stage 15 left here, wait for [stage 23](#23-v1s-release)'s sessions with friends (user, 2026-11-21).
+
+Done on 2026-11-21: CI passed on pull requests and on `main`, the bench a job per scenario, 0.1.0 published from its release commit, the release pull request for 0.2.0 opened, and the backend, the relay, and the profiles' site answer ([build log](log.md#2026-11-21-010-published-from-a-release-commit-at-mains-tip-and-toolsreplayts-replayed-the-released-cores-own-recording)).
 
 ## 22b Test sessions
 
@@ -1106,4 +1108,10 @@ Done on 2026-11-21: 105 pictures came out identical on three runs in a row, `nod
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.
 Needs: every stage before it.
+
+Tests, from stage 22 (user, 2026-11-21):
+
+- [The build's cases on a desk](01-the-build.md#cases-for-the-bench) that need a second release: the next release publishes with a delta from the one before, and a run whose draft is left unpublished leaves a draft the next run deletes before it publishes; and the release pull request's merge releases it once CI passes.
+- From stage 15, in a session with friends on releases the release workflow made, through the servers it deployed: Setup.exe run over the install during the session, a crewmate's core seeing its link lost at an uninstall, a host who is behind, an update downloaded in the app, through `GithubSource` and its delta, and if Windows shows its firewall prompt on a PC with no rule naming the core, whether the desktop app's fix deletes the block rules a canceled prompt leaves, which stage 16's first flight with friends left for the live path (user, 2026-11-12; [install log](../install/log.md#2026-11-12-in-a-session-an-update-downloads-and-waits-then-installs-as-the-sim-closes-the-trays-quit-reads-as-a-leave-and-a-session-raised-no-firewall-prompt-from-windows)).
+
 Exit: [step 9](../product/plan.md#9-build-test-and-release-v1)'s exit happens.

@@ -5,13 +5,13 @@
       "bundles": [
         {
           "level": 1,
-          "hash": "0940e57d4657780a08f97cf94081985a46b96eb76c3e30cffcef09595807ec84",
-          "published": "2026-11-21T15:03:54Z",
+          "hash": "9d7d1836704f93ac0375912d089110497ee51df11ea84b0253aae97c9c51267d",
+          "published": "2026-11-21T17:12:02Z",
           "variants": [
             "bksq-aircraft-baronpropress"
           ],
           "maker": "Black Square",
-          "name": "Baron 58P",
+          "name": "Baron 58P Professional",
           "maturity": "experimental"
         }
       ]

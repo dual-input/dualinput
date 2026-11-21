@@ -38,6 +38,8 @@ jobs:
         with:
           node-version: 22
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      # The profile builder compiles in TypeScript 6.0.3's typescript.js from node_modules.
+      - run: npm ci
       - if: ${{ !inputs.publish }}
         run: cargo run --locked -p dualinput-profile-builder -- build profiles
       - if: inputs.publish

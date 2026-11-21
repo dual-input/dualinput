@@ -85,9 +85,10 @@ export function layOutRelease(programs: ReleasePrograms, pkg: string, folder = R
 /**
  * Packs `folder` as version `version` with the desktop app as Velopack's main program, a
  * Start-menu shortcut, and WebView2 as a prerequisite, and no portable copy, which no design
- * covers (record/areas/build/01-the-build.md, "A release").
+ * covers (record/areas/build/01-the-build.md, "A release"). The package carries `notes`, a
+ * Markdown file, which `vpk upload github` makes the release's body.
  */
-export function pack(version: string, folder = RELEASE_FOLDER, releases = RELEASES): void {
+export function pack(version: string, notes: string, folder = RELEASE_FOLDER, releases = RELEASES): void {
   const icons = path.join(ROOT, "src", "apps", "desktop", "icons")
   run(vpk(), [
     "pack",
@@ -96,6 +97,7 @@ export function pack(version: string, folder = RELEASE_FOLDER, releases = RELEAS
     "--packDir", folder,
     "--packTitle", "Dual Input",
     "--packAuthors", "Dual Input",
+    "--releaseNotes", notes,
     "--mainExe", "dualinput-desktop.exe",
     // Every program in the folder is x86_64, and with no runtime named, `vpk` takes x86.
     "--runtime", "win-x64",

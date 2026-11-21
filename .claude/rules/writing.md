@@ -387,7 +387,32 @@ Leave out commented-out code.
 
 ## Commit messages
 
-Until the repository goes public, a commit title only has to say what changed.
+A commit's title is a conventional commit, `type(scope): summary`, since the release pull request reads the types since the last release to choose the next version, and takes the release's notes from the `Release-Note:` trailers ([a release](../../record/areas/build/01-the-build.md#a-release)).
+
+| Type | For | The next release |
+| --- | --- | --- |
+| `feat` | something a pilot or a profile's author can do that they couldn't | raises the minor version |
+| `fix` | a fix of something that went wrong | raises the patch |
+| `perf` | the same behavior, in less time, memory, or bandwidth | raises the patch |
+| `refactor`, `test`, `docs`, `build`, `ci`, `chore` | everything else | changes nothing |
+
+- The scope is the area in `record/areas/` the change belongs to, such as `sync`, `core`, or `bench`, and a change across areas leaves it out.
+- The summary says what the change does, in the imperative and in lowercase, with no period: `fix(sync): hold a pending write until the sim reads it back`.
+- A `!` after the scope, or a `BREAKING CHANGE:` trailer, marks a change that an older release, a profile, or a plugin can't take, and raises the major version, or the minor before 1.0.
+- The body says why, for developers, and the rest of this file holds for it.
+- A change a pilot will notice carries a `Release-Note:` trailer: one sentence for pilots, which becomes a line of the release's notes.
+  A commit can carry several.
+- A pull request that's squash-merged takes its title as the commit's, so its title keeps these rules, and its description carries the trailers.
+- `chore(release): <version>` is the release pull request's title, and otherwise only an empty commit pushed by hand takes it: the first release's, and one that releases a version whose release commit failed CI, once a fix is in.
+
+```text
+fix(sync): hold a pending write until the sim reads it back
+
+A flip the stand-in sim took before the core read its own write counted as the
+write never landing, so the flip was never sent.
+
+Release-Note: A switch you flip right after your crewmate's stays where you put it.
+```
 
 ## Instructions for agents
 

@@ -1,8 +1,8 @@
 # CI for every pull request and every push to main: the checks the code map lists, and the
 # bench split into 8 jobs that run at once on programs one job builds
 # (record/areas/build/02-testing.md, "What keeps CI green"; record/areas/build/01-the-build.md,
-# "CI"). A push to main blocks nothing, and the release workflow takes only a commit whose
-# run here is green.
+# "CI"). A push to main blocks nothing. When a run on main passes, backend.yml deploys the
+# backend, and release.yml releases the commit if it's a release commit.
 name: CI
 
 on:
@@ -10,9 +10,10 @@ on:
   push:
     branches: [main]
 
-# A new push cancels the run still going for the same pull request or branch.
+# A new push cancels the run still going for the same pull request or branch. A release
+# commit's run has a group of its own, since the release starts only when that run passes.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
+  group: ci-${{ github.event.pull_request.number || (startsWith(github.event.head_commit.message, 'chore(release): ') && github.sha) || github.ref }}
   cancel-in-progress: true
 
 permissions:

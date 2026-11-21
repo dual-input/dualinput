@@ -1,11 +1,19 @@
-# The backend alone, for a fix between releases: its tests, then D1's migrations and the
-# Worker, run by hand on main (record/areas/build/01-the-build.md, "The backend"). Each release
-# deploys it too, in the release workflow.
+# The backend deploys whenever CI passes on main: D1's migrations, then the Worker
+# (record/areas/build/01-the-build.md, "The backend"). Its tests hold every released path's
+# requests and answers as literal JSON, so a main that passes CI answers every released core,
+# and the backend running is main's. It can also be run by hand on main, to deploy again.
 name: Backend
 
 on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
+# Deploys run one at a time, and none is canceled midway. A deploy whose commit main has moved
+# past deploys nothing, since a run of CI passing late, such as one run again, would otherwise
+# put an older Worker over main's.
 concurrency:
   group: backend
 
@@ -14,16 +22,21 @@ permissions:
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
+          cache: npm
       - run: npm ci
-      - run: node --test src/backend/test/*.test.ts
-      - run: node tools/backend.ts deploy
+      - run: node tools/backend.ts deploy $env:COMMIT
         env:
+          COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

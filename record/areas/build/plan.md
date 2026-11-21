@@ -48,7 +48,7 @@ The stages follow these rules (user, 2026-10-18):
    The proposal can go out while the stage before is still running its bench or its review, so neither the runs nor the user's answer wait on the other (user, 2026-10-24).
    You'll see the design in its doc before any of the stage's code.
 4. Write the stage's code, and turn its cases into tests, as [left to each stage](02-testing.md#left-to-each-stage) says, until `node tools/check.ts` passes, and from stage 3 the bench's scenarios that the stage added or changed, with `node tools/bench.ts <scenario>...`.
-   The whole bench, `node tools/bench.ts`, runs in their place at the close of stages 10, 15, and 20, before a release, and at the close of any stage that changes what every scenario runs on: the kernel, the core's edge, the message crate's framing, or a pinned dependency such as iroh, since waiting on it at every stage slowed the build (user, 2026-10-23).
+   The whole bench, `node tools/bench.ts`, runs in their place at the close of stages 10, 15, and 20, and at the close of any stage that changes what every scenario runs on: the kernel, the core's edge, the message crate's framing, or a pinned dependency such as iroh, since waiting on it at every stage slowed the build (user, 2026-10-23).
    An `Exit:` line's `node tools/bench.ts` means whichever of the two the stage runs.
    Once `node tools/check.ts` passes, run the `code-reviewer` agent on the stage's code while the bench runs, without asking, and fix or answer each finding, so the review doesn't wait for the bench (user, 2026-10-24).
    You'll see every check pass on our development machine, and each of the review's findings fixed or answered.
@@ -975,15 +975,23 @@ Designs first: how CI, releases, and the relays run once the repository went pub
 
 - CI runs on every pull request and every push to `main`, where it blocks nothing, on GitHub's standard runners, which are free on a public repository.
   It runs the bench as 8 jobs, on programs one job builds, each running its share of the scenarios balanced by each file's time, and a new push cancels the run still going for the same pull request or branch ([what keeps CI green](02-testing.md#what-keeps-ci-green)).
-- The release workflow takes a commit whose CI run on `main` passed, which may sit behind `main`'s head, and runs neither the checks nor the bench again ([a release](01-the-build.md#a-release)).
+- A release runs neither the checks nor the bench again, once CI has passed on its commit on `main` ([a release](01-the-build.md#a-release)).
   Releases are public, pre-v1 builds included.
 - One relay, in Frankfurt, so `nyc` leaves `src/relays/relays.toml` ([the network's units](../network/02-units.md)' note of 2026-11-20).
+
+The user changed how releases and the backend ship on 2026-11-21, once CI ran:
+
+- A release is merging a pull request, and nothing else is done by hand: a workflow keeps the release pull request open with the next version, from the commits' conventional titles, and the release's notes, from their `Release-Note:` trailers, and a release runs when CI passes on the merged release commit ([a release](01-the-build.md#a-release)).
+  No session in the sim checks a release first ([before a release](02-testing.md#before-a-release)).
+- The backend deploys whenever CI passes on `main`, apart from releases ([the backend](01-the-build.md#the-backend)).
+- Commits follow conventional commits, as [writing.md](../../../.claude/rules/writing.md#commit-messages) has them.
+- A relay deploys by hand, and a new token reaches every relay before its commit reaches `relay-tokens` ([their configuration](../network/02-units.md#their-configuration)).
 
 Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)):
 
 - CI's workflow, `.github/workflows/ci.yml`, with `node tools/bench.ts --shard`, the bench's programs built once, and `tools/ci.ts` ([CI](../architecture/02-code-map.md#ci), [the build's CI](01-the-build.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green))
-- the release workflow, `release.yml`, with `tools/release.ts`'s steps ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release))
-- the backend's first deploy to Cloudflare, its D1 database made and its migrations applied, and its own workflow, `backend.yml`, with `tools/backend.ts` ([the backend](01-the-build.md#the-backend))
+- the release pull request's workflow, `release-pr.yml`, and the release workflow, `release.yml`, with `tools/release.ts`'s steps and `tools/lib/changes.ts`, which reads the commits since the last release ([a release](01-the-build.md#a-release))
+- the backend's first deploy to Cloudflare, its D1 database made and its migrations applied, and `backend.yml`, which deploys it whenever CI passes on `main`, with `tools/backend.ts` ([the backend](01-the-build.md#the-backend))
 - the profiles' workflow, `profiles.yml`, the `pages` branch, and the Pages site at `profiles.dualinput.app` ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository), [publishing](../profiles/02-units.md#publishing))
 - CI's check that a released level's files match each release tag that holds the level, which `tools/check.ts` runs and the profiles' publish runs first, as [stage 10](#10-profiles) left it here
 - the relay in Frankfurt, on a droplet of ours at `fra.relay.dualinput.app` ([their configuration](../network/02-units.md#their-configuration))
@@ -996,12 +1004,13 @@ Needs: every stage before it.
 Tests:
 
 - From stage 1: CI's time against the 20 minutes of [budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace), with `cargo build --timings`; one commit built on our development machine and on CI's runner gives one hash ([the build's cases on a desk](01-the-build.md#cases-for-the-bench)); and the runner, set up from nothing by the steps for a new PC in [building every target](../architecture/02-code-map.md#building-every-target), builds and tests the tree.
-- From stage 3: whether a GitHub-hosted Windows runner holds three cores, two relays, and their proxies ([testing's left open](02-testing.md#left-open)); a pull request's bench within the code map's 20 minutes, as 8 jobs beside the others; and the check before a release within 15 minutes of a person's time, from a sim at the main menu ([testing's budgets](02-testing.md#budgets)).
+- From stage 3: whether a GitHub-hosted Windows runner holds three cores, two relays, and their proxies ([testing's left open](02-testing.md#left-open)); and a pull request's bench within the code map's 20 minutes, as 8 jobs beside the others ([testing's budgets](02-testing.md#budgets)).
 - [The build's cases on a desk](01-the-build.md#cases-for-the-bench) for a release: the first release publishes with no delta and the next with one, a run whose draft is left unpublished leaves a draft the next run deletes before it publishes, and a run for a version that's published stops at its first step.
+- The release pull request: a `fix` since the last release raises the patch and a `feat` the minor, both `Cargo.toml` files, both `Cargo.lock` files, and `stamp.ts` take the version, and its body groups the `Release-Note:` trailers; and the merge releases it once CI passes.
 - From stage 15, in a session with friends on releases the release workflow made, through the servers it deployed: Setup.exe run over the install during the session, a crewmate's core seeing its link lost at an uninstall, a host who is behind, an update downloaded in the app, through `GithubSource` and its delta, and if Windows shows its firewall prompt on a PC with no rule naming the core, whether the desktop app's fix deletes the block rules a canceled prompt leaves, which stage 16's first flight with friends left for the live path (user, 2026-11-12; [install log](../install/log.md#2026-11-12-in-a-session-an-update-downloads-and-waits-then-installs-as-the-sim-closes-the-trays-quit-reads-as-a-leave-and-a-session-raised-no-firewall-prompt-from-windows)).
 - From stage 7: once `fra.relay.dualinput.app` points at our droplet, `node src/relays/deploy.ts fra` deploys the relay, and it answers `/ping` over HTTPS with the certificate it took from Let's Encrypt, before the first release ([their configuration](../network/02-units.md#their-configuration)).
 
-Exit: on GitHub's runners, CI passes on a pull request and on `main`, the bench as 8 jobs, and the [build log](log.md) has CI's times against the 20 minutes and whether a runner held three cores and two relays; the release workflow has published a release from a commit whose run on `main` passed, after the check before a release; the backend answers at `api.dualinput.app`, the relay at `fra.relay.dualinput.app`, and the profiles' index at `profiles.dualinput.app`; and the session with friends that the tests' item from stage 15 lists has run on the workflow's releases, or the user has scheduled it, which the stage's `Done on` line names.
+Exit: on GitHub's runners, CI passes on a pull request and on `main`, the bench as 8 jobs, and the [build log](log.md) has CI's times against the 20 minutes and whether a runner held three cores and two relays; the release workflow has published 0.1.0 from its release commit once CI passed on it, and a release pull request has opened for the next; the backend deploys when CI passes on `main` and answers at `api.dualinput.app`, the relay at `fra.relay.dualinput.app`, and the profiles' index at `profiles.dualinput.app`; and the session with friends that the tests' item from stage 15 lists has run on the workflow's releases, or the user has scheduled it, which the stage's `Done on` line names.
 
 ## 23 v1's release
 

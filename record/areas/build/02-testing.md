@@ -3,7 +3,7 @@
 ```text
 Purpose:     How Dual Input is tested, from a crate's own tests to friends on two PCs, and which tests keep CI green.
 Depends on:  01-the-build.md, ../architecture/02-code-map.md, ../architecture/01-spine.md, ../core/03-sim-seam-and-wasm-module.md, ../core/04-core-helper.md, ../network/01-between-machines.md, ../network/02-units.md, ../profiles/02-units.md, ../recording/01-recording-and-bug-reports.md, ../plugins/01-plugins.md, ../install/01-installing-and-updating.md
-Decides:     The four levels of testing, and where and when each runs; which tests a merge and a release need green, and which run outside CI; what the bench runs, touches, and checks, and how it runs only what it built; the stand-in sim's place, rules, model, frames, WASM module, pages, and process; the stand-in core helper; the replay check; the loop under load; the check before a release; and that no second MSFS runs in a virtual machine (node 7).
+Decides:     The four levels of testing, and where and when each runs; which tests a merge and a release need green, and which run outside CI; what the bench runs, touches, and checks, and how it runs only what it built; the stand-in sim's place, rules, model, frames, WASM module, pages, and process; the stand-in core helper; the replay check; the loop under load; and that no second MSFS runs in a virtual machine (node 7).
 ```
 
 > **Note**
@@ -31,7 +31,7 @@ Two rules from our earlier benches hold throughout, as node 7 gives them: no dev
 | --- | --- | --- | --- |
 | Unit tests | Each crate's tests, the engines alone, the routines built natively, and each TypeScript part's tests; seam inputs recorded from the real sim, such as p08's signals, played into the sim client and sim awareness ([cases for the bench](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)) | CI, and a developer's PC | Every pull request that changes code, and while developing |
 | The bench | Two or three bench builds of the core, each on a stand-in sim, with fake pages, a stand-in core helper, and local stand-ins for the relays, the backend, and the profiles' site | CI's Windows runner, and a developer's PC | Every pull request that changes code, and while developing |
-| In the sim | A build of the core from the tree, its package installed with `node tools/build.ts install` ([our package](01-the-build.md#our-package)), on our MSFS, with a bench core on a stand-in as the second pilot where a case needs a crew | Our development machine | At the end of each stage whose system has cases in the sim, and before each release |
+| In the sim | A build of the core from the tree, its package installed with `node tools/build.ts install` ([our package](01-the-build.md#our-package)), on our MSFS, with a bench core on a stand-in as the second pilot where a case needs a crew | Our development machine | At the end of each stage whose system has cases in the sim |
 | With friends | Each pilot's installed Dual Input | Two PCs on two home networks | At a stage whose cases need two PCs, and before v1 ships |
 
 The tests of `page-client` and of the panel bridge run on Node's test runner, as the tools' and the bench's do ([build plan](plan.md#5-clients-and-the-panel-bridge)).
@@ -46,7 +46,7 @@ The tests of `page-client` and of the panel bridge run on Node's test runner, as
 - A new push cancels the run still going for the same pull request or branch.
 - The same workflow runs on every push to `main`, merges included, and blocks nothing.
   A push to `main` runs every job, whatever it changed, so each commit there has a run of its own.
-- The release workflow takes only a commit whose run on `main` passed, and runs neither the checks nor the bench again ([a release](01-the-build.md#a-release); user, 2026-11-20).
+- A release runs only once CI passes on its release commit on `main`, and runs neither the checks nor the bench again ([a release](01-the-build.md#a-release); user, 2026-11-20).
 - CI's bench checks behavior, and no timing budget fails it: CI's bench jobs set `DUALINPUT_BENCH_BUDGETS` to `report`, so `tools/bench/budgets.ts` prints a missed budget and the scenario passes.
   A shared runner's other load moves a timing from run to run: a profile's build took 2,711ms in one run and 2,905ms in the next, against 2,000ms, and a handler over 1ms came in different scenarios in each (measured on 2026-11-21, [build log](log.md#2026-11-21-cis-first-run-on-githubs-runners-took-47-minutes-with-every-cache-cold-ran-6-jobs-at-once-and-failed-on-the-benchs-own-timing-budgets-and-races)).
 
@@ -59,7 +59,6 @@ The tests of `page-client` and of the panel bridge run on Node's test runner, as
 | The system's [cases in the sim](#in-the-sim) | One session in the sim | At the stage's end |
 | Installing and updating's [cases on a desk](../install/01-installing-and-updating.md#cases-on-a-desk) | A PC set up for each | At the install stage |
 | v1's full mix on a direct path under loss | Our droplets, by hand ([cases for the bench](../network/02-units.md#cases-for-the-bench)) | At the network's stage, and whenever the pinned iroh or noq changes |
-| The [check before a release](#before-a-release) | One short session in the sim | Before each run of the release workflow |
 | A [session with friends](#with-friends) | Two PCs | At a stage whose cases need two PCs, and before v1 ships |
 
 ## The bench
@@ -233,19 +232,8 @@ The sandbox's recursion and interrupt-check cases are its own unit tests, with n
 
 ### Before a release
 
-The release workflow takes the commit this check ran on, which may sit behind `main`'s head, so a merge after the check releases nothing unchecked, and it stops unless that commit's CI run on `main` passed.
-
-1. If the commit's runs on `main` aren't green, stop: the release workflow would stop at them.
-2. Install a build of the commit with `node tools/build.ts install`: our package's folder, `dualinput`, is in the Community folder.
-3. Start the sim: our BlurPage copy's script, the EFB app, and the banner's panel load, as the build's [cases in the sim](01-the-build.md#cases-for-the-bench) list.
-4. Start a session from the EFB app: the EFB app shows its code.
-5. Have the bench join a bench core on a stand-in to the session with that code, as the second pilot: both show as members.
-6. Load a flight at a stand: the figure spawns, and preflight ends once both pilots are ready.
-7. Flip a synced switch in the sim: the bench core's stand-in aircraft follows.
-8. Have the bench core flip a synced switch: the sim's cockpit follows.
-9. Press a synced display: the press plays on the bench core's fake panel.
-10. Take control from the bench core: control passes to you.
-11. Give control back: control passes to the bench core.
+No session in the sim runs before a release, since a release is merging its pull request, with no step by hand (user, 2026-11-21; [a release](01-the-build.md#a-release)).
+What only the real sim shows, such as our package's pages loading and a session's switches moving in a real cockpit, is checked in the sessions of the stages whose systems have cases in the sim, and a release that breaks something there is followed by a fix's release.
 
 ## With friends
 
@@ -259,7 +247,6 @@ Each is a starting value, which the first stage of [node 8](../architecture/plan
 | What | Budget |
 | --- | --- |
 | A pull request's bench, the job that builds its programs included | Within the code map's 20 minutes for a pull request's CI ([budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace)), as 8 jobs beside the others, after the one that builds |
-| The check before a release | Within 15 minutes of a person's time, from a sim at the main menu |
 
 ## Cases for the bench
 

@@ -236,7 +236,7 @@ It pins `noq-proto`, `noq-udp`, `iroh-base`, and `iroh-dns` at 1.3.0 beside them
   A captured request could be sent again, but only by someone who also holds the code it carries, which admits them to the session outright, and the requests travel inside HTTPS.
 - A member entry's pilot ID isn't tied to its key, so someone holding the code could list another pilot's ID under a key of their own, and v1 leaves that, since only someone the crew gave the code to could (user, 2026-10-23).
 - The path carries the backend's version.
-  The release workflow deploys the backend, its D1 migrations and then its Worker, just before it publishes each release, and a second workflow deploys it alone for a fix, so the backend running is the newest release's and answers older releases' cores too, and a change to a request's body takes a new path beside the old one ([the backend](../build/01-the-build.md#the-backend)).
+  The backend deploys, its D1 migrations and then its Worker, whenever CI passes on `main`, so the backend running is `main`'s, no older than any release, and answers older releases' cores too, and a change to a request's body takes a new path beside the old one ([the backend](../build/01-the-build.md#the-backend); user, 2026-11-21).
 
 ### Codes, lapses, and wrong codes
 
@@ -274,6 +274,8 @@ It pins `noq-proto`, `noq-udp`, `iroh-base`, and `iroh-dns` at 1.3.0 beside them
 - A deploy script beside `relays.toml`, `src/relays/deploy.ts`, run by Node as `tools/build.ts` is, reads the tokens from a clone of `dual-input/relay-tokens` and installs n0's own build of `iroh-relay` 1.3.0, checked against its SHA-256.
   - It renders each relay's `iroh-relay` configuration from its entries, `access.shared_token` with all its tokens and `limits.client.rx.bytes_per_second` with its cap (read in iroh-relay 1.3.0, `src/main.rs`, `AccessConfig` and `RateLimitConfig`), installs it over SSH, and restarts the relay, at a quiet hour ([the relays](01-between-machines.md#the-relays)).
   - A new token reaches every relay before the release that carries it.
+    A release builds in the newest token `relay-tokens` holds as soon as a release commit merges, so a new token goes in that order: deploy every relay from a clone whose `tokens.toml` holds it, then push that commit to `relay-tokens` (user, 2026-11-21).
+  - A relay deploys by hand, and rarely: for a new or retired token, a new `iroh-relay` when we raise the pinned iroh, a new cap, or a new region; `iroh-relay` renews its own certificate.
 - A relay of our own, if we ever write one, lives in `src/relays/` too (user, 2026-10-16).
 
 ## What the code map changes in 01-between-machines

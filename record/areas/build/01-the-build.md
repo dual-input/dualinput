@@ -13,7 +13,7 @@ Decides:     What a release holds; how every x86_64 program links the C runtime 
 `tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll` and the three C runtime DLLs it imports, and our one Community package, `dualinput`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.
 The Coherent GT check is a Node tool of its own on acorn, run on every bundle after each edit and in CI, and the message crate's hash is SHA-256 over its own source and the locked versions of what it depends on.
-A release runs by hand on `main`, from a commit whose CI run there passed: a job that can't write to the repository builds and packs it, and a job that can uploads it as a draft, checks the draft, deploys the backend, and publishes it.
+A release is merging the release pull request, which a workflow keeps open with the next version and its notes; once CI passes on the merged commit, a job that can't write to the repository builds and packs it, and a job that can uploads it as a draft, checks the draft, and publishes it, while the backend deploys whenever CI passes on `main`.
 
 This answers node 6.18 of the [architecture plan](../architecture/plan.md#618-the-build).
 The docs in its Depends on line and decisions [025](../../decisions/025-messages-in-one-rust-crate.md), [026](../../decisions/026-first-message-carries-version-and-hash.md), [030](../../decisions/030-in-sim-code-es2017-esbuild.md), and [031](../../decisions/031-coherent-gt-check-tool.md) give the rules this design builds on, and it holds only what they leave out.
@@ -199,7 +199,7 @@ Beside the code map's [CI](../architecture/02-code-map.md#ci):
 
 - **The runner** is `windows-latest`, Windows Server 2025 with Visual Studio 2026, which in its image of 2026-10-07 holds .NET SDKs 8 to 10, rustup, Node 22, LLVM 20.1.8, the GitHub CLI, the C++ workload, and the Windows SDK (documented, [Windows2025-VS2026's readme](https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-VS2026-Readme.md)).
   It sets no `LIBCLANG_PATH`, so CI sets it to the image's LLVM for bindgen (read, [results][velopack]).
-- **The workflows** are in `.github/workflows/`: `ci.yml` for every pull request and every push to `main`, `release.yml` and `backend.yml`, which a person runs by hand on `main`, and `profiles.yml`, the profiles' job.
+- **The workflows** are in `.github/workflows/`: `ci.yml` for every pull request and every push to `main`; `release-pr.yml` on every push to `main`; `release.yml` and `backend.yml`, which start when a run of `ci.yml` on `main` passes; and `profiles.yml`, the profiles' job.
 - **A pull request that changes code also runs** the unit tests and the bench, as [what keeps CI green](02-testing.md#what-keeps-ci-green) gives them.
   A change is code unless every file it changes is in `profiles/`, `record/`, `docs/`, `experiments/`, or `.claude/`, or is Markdown, which `node tools/ci.ts changes` reads from the pull request's merge commit, and a push to `main` runs every job.
 - **`ci.yml`'s jobs:** one runs `node tools/check.ts`; one builds the bench's programs, and 8 run its shares; the profiles' job runs for a pull request that changes `profiles/` and no code, and publishes on every push to `main`; and the last, `ci`, fails when any other failed or was canceled.
@@ -214,21 +214,37 @@ Beside the code map's [CI](../architecture/02-code-map.md#ci):
 
 ## A release
 
-A short session in the sim, on a build of one commit, comes first ([before a release](02-testing.md#before-a-release)).
-Then a person runs the `release` workflow on `main` by hand and gives it that commit's 40-digit hash as its `commit` input.
+A release is merging a pull request, and nothing else is done by hand (user, 2026-11-21).
+On each push to `main`, `release-pr.yml` runs `node tools/release.ts pr`, which reads the commits since the newest release's tag:
+
+- Their conventional titles give the next version, as [writing.md](../../../.claude/rules/writing.md#commit-messages) has them: a breaking change raises the major, or before 1.0 the minor; a `feat` raises the minor; and a `fix` or `perf` the patch.
+  While none of them is a `feat`, `fix`, or `perf`, there's nothing to release, and it does nothing.
+- It rewrites the `release` branch as `main` plus one commit, `chore(release): <version>`, which writes the version into the root `Cargo.toml`'s `[workspace.package]`, the desktop app's `Cargo.toml`, our crates' entries in both `Cargo.lock` files, the entries with no `source`, and `stamp.ts`'s `VERSION`.
+  The message crate's hash leaves out the crate's own version, so the bump doesn't change it.
+- It opens the release pull request from that branch, or updates the one open, with the release's notes so far as its body: each `Release-Note:` trailer, grouped as New for a `feat`, Fixed for a `fix` or `perf`, and Changed for the rest.
+- Between a release commit's merge and its tag, `main` holds a version no release has yet, and it waits.
+
+The workflow's own token pushes the branch, so GitHub starts no CI on the release pull request, which keeps CI from running twice on every push to `main` (documented, [GITHUB_TOKEN](https://docs.github.com/en/actions/concepts/security/github_token)).
+So `ci` never reports there, and an admin merges it past the check, with a rebase or a squash.
+Nothing ships unchecked: the merge is a push to `main`, and `ci.yml` checks the merged commit before anything is released (user, 2026-11-21).
+
+When a run of `ci.yml` on `main` passes on a commit whose title is `chore(release): <version>`, `release.yml` releases that commit.
+A squash merge adds ` (#<n>)` to the title, which changes nothing.
+The first release, 0.1.0, has no tag before it to count commits from, so its commit is pushed to `main` by hand, empty, with that title.
 It reads the version from the root's `[workspace.package]`.
 Each step of its build and publish jobs runs one command, each of the release's own through `node tools/release.ts`, which reaches GitHub through `gh` and `vpk` with the job's token.
 
 The **build job**, whose token reads the repository and can't write to it:
 
-1. It stops when a published release of that version exists, or when CI's newest run on `main` at that commit didn't pass (user, 2026-11-20).
+1. It stops unless the commit's title names the version the tree holds, and when a published release of that version exists.
    A draft of that version doesn't stop it, since the publish job deletes the draft.
-   So it runs neither the checks nor the bench again, and it releases a commit that `main` has moved past the same way it releases `main`'s head.
+   CI passed on the commit, or the workflow wouldn't have started, so it runs neither the checks nor the bench again (user, 2026-11-20).
 2. It checks out `dual-input/relay-tokens`, the private repository of the relays' tokens ([their configuration](../network/02-units.md#their-configuration)), with a read-only deploy key from this repository's secrets (user, 2026-10-18), then installs the toolchain and runs `npm ci` and `node tools/setup.ts`.
 3. It runs `node tools/build.ts release` ([what a release holds](#what-a-release-holds)); the network crate's build compiles each release's default relay list from `src/relays/relays.toml` and that checkout, and stops when a relay in `relays.toml` has no token.
 4. It runs `vpk download github`, which fetches the newest release's full package so `vpk pack` can make a delta, and fails unless that package is the one `releases/latest` holds, or none came and no release is published.
    That one check catches both ways the delta's base goes wrong: `vpk` exits 0 having fetched nothing, and its feed takes in any draft its token can list ([log][vpk]).
 5. It runs `vpk pack` with the desktop app as the main program, `--framework webview2`, and `--shortcuts StartMenuRoot` ([the installer and the updater](../install/01-installing-and-updating.md#the-installer-and-the-updater)), and keeps what it wrote as the job's artifact.
+   It passes the release's notes, from the trailers since the last release, as `--releaseNotes`, which `vpk upload github` makes the release's body (read, [results][velopack]).
    It also passes `--packId DualInput`, which never changes, since Setup.exe's folder most likely takes that name (inference, [results][velopack]), and `--noPortable`, so no release carries a portable copy that no design covers.
    `vpk` is installed with `dotnet tool install` at the version `Cargo.lock` gives the desktop app's `velopack` crate, since `vpk` packs its own Update.exe, which that crate drives, and doesn't check that the two match for a Rust program (read in velopack 1.2.161, [results][velopack]).
 
@@ -237,20 +253,27 @@ The **publish job**, whose token can write releases, then:
 1. Deletes a draft of this version that a failed run left, since `vpk upload github` refuses a tag that exists ([log][vpk]), and runs `vpk upload github` without `--publish`, naming the commit it built as the tag's target, which leaves a draft no pilot sees ([log][vpk]).
    `vpk` takes the token from `VPK_TOKEN`, so no command line in the job's log shows it (read in velopack 1.2.161, `src/vpk/Velopack.Vpk/Commands/BaseCommand.cs`).
 2. Checks the draft: that its assets hold every file `vpk pack` listed in `assets.win.json`, and that its `releases.win.json`, the file `GithubSource` reads, lists this version's full package, and this version's delta whenever the build job fetched a base, since the draft's feed lists only this build's packages ([log][vpk]); that the API's asset path reaches a draft's file is unverified.
-3. Deploys the backend, with `node tools/backend.ts deploy` ([the backend](#the-backend)).
-4. Publishes the draft as the newest release, through GitHub's API.
+3. Publishes the draft as the newest release, through GitHub's API.
 
 A third job, which needs the publish job, calls the profiles' workflow, which publishes the bundles at any level this release brings ([publishing](../profiles/02-units.md#publishing)).
 
 - A release with nothing attached stops at the draft's check, where fsc-editor's v0.1.0 shipped empty while its publisher logged a warning and exited 0 (fsc-editor, commit 7b2348e).
-- A run that fails after publishing is run again with GitHub's "Re-run failed jobs", since a new run stops at its first step.
+- A run that fails partway is run again with GitHub's "Re-run failed jobs".
+- A release commit's CI run has a concurrency group of its own, so a newer push to `main` can't cancel it.
+- When CI fails on a release commit for a real reason, `main` holds a version no release has, and the release pull request waits; once a fix is on `main`, an empty `chore(release): <that version>` commit pushed by hand releases it.
+- The publish job ends by starting `release-pr.yml`, so a `feat` or `fix` merged while the release ran gets its release pull request without waiting for a push.
+- GitHub lets a workflow's token open a pull request only where the organization and the repository both allow Actions to create and approve pull requests, which both do (user, 2026-11-21).
+- A squash merge takes the pull request's title and description as its commit's, a repository setting, so a contributor's `Release-Note:` trailers in the description reach `main`, where GitHub's default would list the pull request's commits instead (user, 2026-11-21).
+- No session in the sim checks a release first: the bench checks behavior on every push, and the stages' own sessions in the sim check what only the real sim shows, so a release that breaks something there is followed by a fix's release (user, 2026-11-21).
 - The tag is the bare version, such as `1.0.0`, as `vpk upload github` writes it (read, [results][velopack]), and the profiles' job reads each release's level from those tags.
 - Every release on the repository is Dual Input's, so the newest 10 releases `GithubSource` lists are ours; the Coherent GT check's releases are its own repository's.
 
 ## The backend
 
-- The publish job runs D1's migrations and then `wrangler deploy`, through `node tools/backend.ts deploy`, with a Cloudflare token from the repository's secrets, just before it publishes, so the backend running is never older than the newest release, and a release's backend deploys only once that release has passed every check.
-- A second workflow, `backend.yml`, run by hand on `main`, runs the backend's tests and then `node tools/backend.ts deploy`, for a fix between releases.
+- The backend deploys on its own, apart from releases: whenever a run of `ci.yml` on `main` passes, `backend.yml` runs D1's migrations and then `wrangler deploy`, through `node tools/backend.ts deploy`, with a Cloudflare token from the repository's secrets (user, 2026-11-21).
+  So the backend running is `main`'s, and a path a release's cores use is live before that release ships, since its release commit comes after it on `main`.
+  A deploy whose commit `main` has moved past deploys nothing, since a CI run passing late, such as one run again, would otherwise put an older Worker over `main`'s, on a D1 holding `main`'s newer migrations.
+  The workflow can also be run by hand on `main`, to deploy again.
 - `wrangler.jsonc` names the D1 database that `wrangler d1 create` made in Cloudflare once, by hand, since a deploy makes no database.
 - The backend answers older releases' cores too, so a change to a released path's request or answer goes on a new path beside it, such as `/v2/lookup` ([its requests](../network/02-units.md#its-requests)).
   Each path's tests send its request written out as literal JSON, which once a release serves that path is never edited, only added to, so the backend's own tests catch a change that would break an older core, with no job of their own (user, 2026-10-22; [build plan](plan.md#7-the-network)).

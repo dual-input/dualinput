@@ -1,39 +1,58 @@
-// A release's steps after the build, each one step of the release workflow,
-// .github/workflows/release.yml (record/areas/build/01-the-build.md, "A release"):
+// A release's steps, each one step of a workflow (record/areas/build/01-the-build.md, "A
+// release"):
 //
-//   node tools/release.ts start <commit>    stops unless the commit's CI run on main is green and
-//                                           its version isn't published yet
+//   node tools/release.ts pr                opens or updates the release pull request, from the
+//                                           commits since the last release
+//   node tools/release.ts start <commit>    stops unless <commit> is a release commit whose version
+//                                           isn't published yet
 //   node tools/release.ts download          fetches the newest release's full package, which `pack`
 //                                           makes a delta from
-//   node tools/release.ts pack              packs target/release-folder
+//   node tools/release.ts pack              packs target/release-folder, with the release's notes
 //   node tools/release.ts upload <commit>   uploads what `pack` wrote as a draft, with the tag on <commit>
 //   node tools/release.ts check             checks that the draft holds what `pack` wrote
 //   node tools/release.ts publish           publishes the draft as the newest release
+//
+// `pr` runs on each push to main (.github/workflows/release-pr.yml), and the rest when CI
+// passes on a release commit, `chore(release): <version>` (.github/workflows/release.yml).
 //
 // `pack` packs target/release-folder, which `node tools/build.ts release` lays out, as the root
 // Cargo.toml's version into target/releases, where `vpk` makes a delta from the release before
 // when that one is there. It installs `vpk` into target/vpk the first time, which needs the
 // .NET 8 SDK or later. It runs on a developer's PC too; the other steps reach GitHub, through
-// `gh` with the workflow's token in GH_TOKEN, and run only in the workflow.
+// `gh` with the workflow's token in GH_TOKEN, and run only in a workflow.
 
 import { spawnSync } from "node:child_process"
 import fs from "node:fs"
 import path from "node:path"
 
+import { commitsSince, lastRelease, nextVersion, releaseNotes, setVersion } from "./lib/changes.ts"
 import { workspaceVersion } from "./lib/package.ts"
 import { fullPackage, pack, RELEASE_FOLDER, RELEASES, vpk } from "./lib/release.ts"
 import { Failed, main, output, run } from "./lib/run.ts"
 
-const USAGE = "usage: node tools/release.ts start <commit> | download | pack | upload <commit> | check | publish"
+const USAGE = "usage: node tools/release.ts pr | start <commit> | download | pack | upload <commit> | check | publish"
+
+/**
+ * A release commit's title, which the release pull request's commit takes, and a release
+ * commit pushed by hand, the first release's or a stuck one's; squash-merging adds ` (#<n>)`.
+ */
+const RELEASE_TITLE = /^chore\(release\): (\d+\.\d+\.\d+)(?: \(#\d+\))?$/
+
+/** The branch the release pull request comes from, which `pr` rewrites from main each time. */
+const BRANCH = "release"
 
 main(() => {
   const [step, ...args] = process.argv.slice(2)
   const commit = args.length === 1 && /^[0-9a-f]{40}$/.test(args[0]!) ? args[0]! : undefined
   if (step === "pack" && args.length === 0) {
     if (!fs.existsSync(RELEASE_FOLDER)) throw new Failed(`${RELEASE_FOLDER} holds no release; run node tools/build.ts release first`)
-    pack(workspaceVersion())
+    const last = lastRelease()
+    const notes = path.join(RELEASES, "..", "release-notes.md")
+    fs.writeFileSync(notes, releaseNotes(commitsSince(last), last === null))
+    pack(workspaceVersion(), notes)
     console.log(`packed version ${workspaceVersion()} into ${RELEASES}`)
-  } else if (step === "start" && commit) start(commit)
+  } else if (step === "pr" && args.length === 0) pullRequest()
+  else if (step === "start" && commit) start(commit)
   else if (step === "download" && args.length === 0) download()
   else if (step === "upload" && commit) upload(commit)
   else if (step === "check" && args.length === 0) check()
@@ -67,23 +86,57 @@ function vpkEnv(): NodeJS.ProcessEnv {
 }
 
 /**
- * Stops unless CI's newest run on main at `commit` passed, so a release ships only what CI
- * checked, and unless no published release has this version, since a release's tag is its
- * version and a published one never changes. A draft of it doesn't stop it: `upload` deletes it.
+ * Opens the release pull request, or rewrites it: the `release` branch becomes main plus one
+ * commit, `chore(release): <version>`, which writes the next version into every file that holds
+ * it, and the pull request's body holds the release's notes so far. It does nothing while no
+ * commit since the last release changes what pilots run. The first release, with no tag before
+ * it, is a commit of that title pushed to main by hand. The workflow's own token pushes the
+ * branch, so GitHub starts no CI on it; merging it runs CI on main, which releases it.
+ */
+function pullRequest(): void {
+  const last = lastRelease()
+  if (!last) return console.log("no release is tagged yet: push the first, `chore(release): <version>`, to main by hand")
+  // Between a release commit's merge and its tag, main holds a version no release has yet. A
+  // release commit whose CI failed holds main there too, until a fix and a release commit
+  // pushed by hand release it.
+  if (workspaceVersion() !== last) {
+    return console.log(`main holds ${workspaceVersion()}, which isn't released yet: if CI failed on its release commit, fix it, then push an empty \`chore(release): ${workspaceVersion()}\` to main`)
+  }
+  const commits = commitsSince(last)
+  const next = nextVersion(last, commits)
+  if (!next) return console.log(`nothing since ${last} is a feat, fix, or perf, so there's nothing to release`)
+  const notes = releaseNotes(commits, false)
+  setVersion(last, next)
+  const bot = ["-c", "user.name=github-actions[bot]", "-c", "user.email=41898282+github-actions[bot]@users.noreply.github.com"]
+  run("git", ["switch", "--quiet", "-C", BRANCH])
+  run("git", [...bot, "commit", "--quiet", "--all", "-m", `chore(release): ${next}`, "-m", notes])
+  run("git", ["push", "--quiet", "--force", "origin", BRANCH])
+  const title = `chore(release): ${next}`
+  const body = `${notes}\nMerging this releases ${next}: CI runs on the merged commit, and the release workflow publishes it once CI passes. This pull request gets no CI run of its own, so merge it past the \`ci\` check as an admin, with a rebase or a squash.\n`
+  const file = path.join(RELEASES, "..", "release-pr.md")
+  fs.mkdirSync(path.dirname(file), { recursive: true })
+  fs.writeFileSync(file, body)
+  const open = output("gh", ["pr", "list", "--repo", repository(), "--head", BRANCH, "--state", "open", "--json", "number", "--jq", ".[0].number"]).trim()
+  if (open) run("gh", ["pr", "edit", open, "--repo", repository(), "--title", title, "--body-file", file])
+  else run("gh", ["pr", "create", "--repo", repository(), "--base", "main", "--head", BRANCH, "--title", title, "--body-file", file])
+}
+
+/**
+ * Stops unless `commit` is a release commit whose version the tree holds, and unless no
+ * published release has that version, since a release's tag is its version and a published one
+ * never changes. A draft of it doesn't stop it: `upload` deletes it. CI's run on the commit
+ * passed, or the release workflow wouldn't have started.
  */
 function start(commit: string): void {
   const head = output("git", ["rev-parse", "HEAD"]).trim()
   if (head !== commit) throw new Failed(`the checkout is at ${head}, not ${commit}`)
+  const title = output("git", ["log", "-1", "--format=%s", commit]).trim()
+  const titled = RELEASE_TITLE.exec(title)?.[1]
   const version = workspaceVersion()
+  if (titled !== version) throw new Failed(`${commit}'s title, "${title}", doesn't release the version the tree holds, ${version}`)
   const published = releases().find((r) => r.tag_name === version && !r.draft)
-  if (published) throw new Failed(`version ${version} is published already, at ${published.html_url}: raise the version in the root Cargo.toml's [workspace.package]`)
-  type Run = { status: string; conclusion: string | null; created_at: string; html_url: string }
-  const { workflow_runs: runs } = api<{ workflow_runs: Run[] }>(`actions/workflows/ci.yml/runs?branch=main&event=push&head_sha=${commit}`)
-  const newest = runs.sort((a, b) => b.created_at.localeCompare(a.created_at))[0]
-  if (!newest) throw new Failed(`CI has no run on main at ${commit}: release a commit on main once its run has passed`)
-  if (newest.status !== "completed") throw new Failed(`CI's run on main at ${commit} is ${newest.status.replaceAll("_", " ")}: release it once the run has passed, ${newest.html_url}`)
-  if (newest.conclusion !== "success") throw new Failed(`CI's run on main at ${commit} ended ${newest.conclusion}, ${newest.html_url}`)
-  console.log(`releasing version ${version} from ${commit}, whose CI run on main passed: ${newest.html_url}`)
+  if (published) throw new Failed(`version ${version} is published already, at ${published.html_url}`)
+  console.log(`releasing version ${version} from ${commit}`)
 }
 
 /**

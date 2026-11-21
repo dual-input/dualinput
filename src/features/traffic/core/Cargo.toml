@@ -11,7 +11,6 @@ messages = { path = "../../../engines/messages" }
 network = { path = "../../../platform/network" }
 object-mirror = { path = "../../../engines/object-mirror" }
 postcard = { version = "1.1.3", default-features = false, features = ["use-std"] }
-profile-loader = { path = "../../../platform/profile-loader" }
 serde_json = "1.0.145"
 session = { path = "../../../platform/session" }
 sim-service = { path = "../../../platform/sim-service" }

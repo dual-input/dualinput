@@ -8,8 +8,9 @@
 //! the routine `Traffic`, which draws each one every frame in our WASM module, 1s behind the
 //! traffic host's reads.
 //!
-//! It loads no profile, so it shares traffic in any aircraft, but a profile's unload closes its
-//! connection with every feature's. Register it after every crate of the platform.
+//! It loads no profile, so it shares traffic in any aircraft, and its connection stays open
+//! through a profile's unload, as a test session's reload makes one in flight. Register it after
+//! every crate of the platform.
 
 mod count;
 mod host;
@@ -21,7 +22,6 @@ use clients::ClientsUnit;
 use kernel::{Cx, Registry, TimerId, View};
 use messages::traffic::{self as messages_traffic, Batch, HOST, Identified, TrafficSlice};
 use network::{LinkUp, NetUnit, Sender};
-use profile_loader::ProfileUnloaded;
 use session::{FlightChanged, KeyChanged, Session, SessionEnded, SessionUnit};
 use sim_service::{SimEvent, SimUnit};
 
@@ -58,11 +58,6 @@ pub fn register(r: &mut Registry) {
         })
         .on::<FlightChanged>(|me, _, cx| me.settle(cx))
         .on::<SessionEnded>(|me, _, cx| me.settle(cx))
-        // The platform closes every feature's connection once a profile's unload is heard,
-        // traffic's too, and the close takes the copies, their definitions, and every read
-        // that was out (record/areas/architecture/02-code-map.md, "A connection for each
-        // feature, for each load").
-        .on::<ProfileUnloaded>(|me, _, cx| me.connection_gone(cx))
         .on::<LinkUp>(Traffic::link_up)
         .command(messages_traffic::LIST_PACKS, packs::list)
         .client_state(messages_traffic::SLICE, Traffic::slice);
@@ -93,9 +88,10 @@ impl Traffic {
         }
     }
 
-    /// Traffic's connection went, lost or closed by a profile's unload, with everything traffic
-    /// had in the sim: each copy is created again at its next state, and each object the host
-    /// was reading is read again at the next poll.
+    /// Traffic's connection was lost, with everything traffic had in the sim: each copy is
+    /// created again at its next state, and each object the host was reading is read again at
+    /// the next poll. A profile's unload leaves the connection open, since traffic's work doesn't
+    /// end with the profile (record/areas/architecture/02-code-map.md's note of 2026-11-21).
     fn connection_gone(&mut self, cx: &mut Cx) {
         self.receiving.lost(cx);
         if let Some(hosting) = &mut self.hosting {

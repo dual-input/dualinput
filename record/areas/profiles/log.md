@@ -7,6 +7,43 @@ The sandbox's context runs QuickJS-ng's base objects and lacks JSON, Map, Set, D
 The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), and [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 None needs the sim.
 
+## 2026-11-21: Stage 22b's test sessions pass their bench cases, and a reload's catch-up ended 1.5s after its load, against 4s of settling
+
+**Asked:** do [stage 22b](../build/plan.md#22b-test-sessions)'s cases hold on its code: [the profiles' cases for the bench](02-units.md#cases-for-the-bench) that [test sessions](02-units.md#test-sessions) added, in the new `test-sessions` scenario and the changed case of `profiles`?
+
+**Expected:** each case as designed, with a reload's catch-up ending within about 1.5s of the load, the time the new sync engine takes its first readings, since the aircraft settled long before.
+
+**Found:** on our development machine, with the bench's profile `release-with-checks`, after the code review's fixes, `node tools/bench.ts test-sessions profiles traffic` passed 26 of 26 cases ([results](results/2026-11-21-stage-22b-bench.txt)):
+
+- A new bundle in the PF's local folder moved the pin, both cores reloaded it, the following core's catch-up wrote the strobe the new bundle's entry covers, and the slice showed its short hash for both PCs, saved by the PF, with the banner's notice once on each.
+- With settling at 4s, the following core's catch-up ended 1,494ms after its load of the new bundle, and 1,498ms in the run before the fixes.
+- Through the reload, `Follow`'s slot went on being written on the connection it had before, so flight-model sync ran on.
+- A file written again with the same bytes moved no pin.
+- A new bundle in the following pilot's local folder reached the PF, which pinned it naming that pilot; the beacon, whose write function the sandbox had stopped, synced again under it; and the PF sent the first bundle once, as it was pinned, and never again.
+- A pilot who joined after the save got the bundle from the PF as their link came up, fetched nothing, and kept it in their cache.
+- In `profiles`, a member with no copy of the PF's local bundle got it from the PF and loaded it, and the match check showed no difference.
+- In `traffic`, a pilot who left the flight had each copy removed once, on the connection that made it, by traffic's own removes, since a profile's unload no longer closes traffic's connection.
+
+The build of the 200 KB profile took 2,016ms in the run before the fixes, 16ms past its 2s, while other work held the PC, and 1,718ms in the run after them, with no change to the builder.
+CI's run on the stage's pull request is its whole bench.
+
+The code review found five faults, which the stage fixed before the run above:
+
+- From the second local pin on, the PF's core sent the previous bundle to the crew again, and a member that took control while that copy was on its way would pin it, taking the session back to the earlier save; the PF sends once the pin lands, and pins only a bundle marked as an offer.
+- A member's offer that reached a core after control passed from it was dropped; that core passes it on to the PF.
+- The PF's own pinned local bundle lived only in its local folder, so an author who deleted the file left a joiner loading for good; every core keeps each local bundle it sends or gets in its cache.
+- A failed read of a local file made its next good read count as a new save, though its bytes hadn't changed; the folder's listing keeps each file's last good hash.
+- Comments in traffic and the sim seam still said a profile's unload closes every feature's connection.
+
+It also found that the old unload stopped rate and pause's and Go to's watches for the rest of a sim run once a profile first unloaded, since each makes its watch once and makes it again only when told its connection was lost, which a close for an unload never told it; with their connections open through an unload, the watches stay (read in `src/features/rate-and-pause/core/src/lib.rs`, `sim_changed`).
+No case measured it before the change.
+
+**Changed:** the design's known limit on a change lost during a reload covers a following machine's own gap too, while it waits for the bundle to arrive ([test sessions](02-units.md#test-sessions)).
+
+**Affects:** [test sessions](02-units.md#test-sessions), and [the build plan](../build/plan.md)'s stage 22b.
+
+**Evidence:** [results/2026-11-21-stage-22b-bench.txt](results/2026-11-21-stage-22b-bench.txt).
+
 ## 2026-11-21: The format's audit before level 1 freezes puts maps on their own lines, types instrument readings, and names one layout
 
 **Asked:** what does an ordinary profile run into at level 1 that we'd change before v1's release freezes the level ([stage 22c](../build/plan.md#22c-the-formats-audit))?

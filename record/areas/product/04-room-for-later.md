@@ -207,7 +207,8 @@ So the EFB app speaks the same protocol as a browser, rather than reach Dual Inp
 - **The tablet in a browser** is one more client on the same protocol, reached across the home network.
   The tablet loads the PC's address, which the desktop app shows as a QR code that also carries a token, so other devices on the network can't take control.
   The tablet's design adds the listener beyond the PC that this needs, and that way in, without changing what v1 built, since the protocol takes nothing about a client from its address (user, 2026-10-15; [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#clients-beyond-the-pc)).
-- **The Dual Input IDE** is one more client too, with commands of its own: discovering what an aircraft exposes, live values, running one entry's write, and reloading a profile mid-session.
+- **The Dual Input IDE** is one more client too, with commands of its own: discovering what an aircraft exposes, live values, and running one entry's write.
+  It reloads a profile mid-session as v1's test sessions do, by building a bundle into the local folder, which needs no command ([test sessions](../profiles/02-units.md#test-sessions)).
 
 **v1 builds** one protocol that every client speaks, and no listener beyond the PC.
 An EFB app loaded the sim's way, rather than code in the EFB's document, is untried, and so is an in-game panel of our own.

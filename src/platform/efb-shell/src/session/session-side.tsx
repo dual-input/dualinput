@@ -12,6 +12,9 @@ import type { ComponentType, HTMLAttributes } from "react"
 
 import type { MemberLink } from "../../../../engines/messages/ts/net/MemberLink.ts"
 import type { NetSlice } from "../../../../engines/messages/ts/net/NetSlice.ts"
+import type { ProfilesSlice } from "../../../../engines/messages/ts/profiles/ProfilesSlice.ts"
+import type { Runs } from "../../../../engines/messages/ts/profiles/Runs.ts"
+import type { TestProfile } from "../../../../engines/messages/ts/profiles/TestProfile.ts"
 import type { SessionSlice } from "../../../../engines/messages/ts/session/SessionSlice.ts"
 import type { SliceMember } from "../../../../engines/messages/ts/session/SliceMember.ts"
 import { useCoreSlice, useShell } from "../part.ts"
@@ -69,7 +72,37 @@ function HostChip({ chip }: { chip: RoleChip }) {
   )
 }
 
-function CrewRow({ member, you, flying, link, pop, alive, slumped, end, hosts, said }: { member: SliceMember; you: boolean; flying: boolean; link: MemberLink | undefined; pop?: number; alive: boolean; slumped: boolean; end?: React.ReactNode; hosts: RoleChip[]; said?: string }) {
+/**
+ * In a test session, the profile that pilot's PC runs: its short hash, so two rows that read the same seven characters
+ * show both PCs run the latest save, or that it's still loading, or that the PC couldn't get it
+ * (record/areas/interface/decisions.md, "A test session shows the bundle each PC runs").
+ */
+function RunsChip({ runs }: { runs: Runs }) {
+  const [shows, says, variant] =
+    runs.t === "loaded" ? [runs.hash, "The profile this PC runs", "outline" as const] : runs.t === "loading" ? ["Loading", "Loading the new profile", "outline" as const] : ["No profile", "This PC couldn't get the profile", "warning" as const]
+  return (
+    <Tooltip content={says}>
+      <span className="mr-2 inline-flex">
+        <Badge variant={variant} aria-label={says} className={cx(runs.t === "loaded" && "font-mono", variant === "outline" && "text-muted-foreground")}>
+          {shows}
+        </Badge>
+      </span>
+    </Tooltip>
+  )
+}
+
+/** In a test session, the line under the crew: the pinned profile's short hash, and who saved it. */
+function TestLine({ test, session }: { test: TestProfile; session: SessionSlice }) {
+  const saver = test.from === session.me ? "you" : session.members.find((member) => member.pilot === test.from)?.name
+  return (
+    <p data-fold-fade className="mt-3 text-xs text-muted-foreground">
+      Unpublished profile <span className="font-mono text-foreground">{test.hash}</span>
+      {saver && `, saved by ${saver}`}
+    </p>
+  )
+}
+
+function CrewRow({ member, you, flying, link, pop, alive, slumped, end, hosts, said, runs }: { member: SliceMember; you: boolean; flying: boolean; link: MemberLink | undefined; pop?: number; alive: boolean; slumped: boolean; end?: React.ReactNode; hosts: RoleChip[]; said?: string; runs?: Runs }) {
   // A row's pop is fixed when the row first shows.
   const [popAfter] = useState(pop)
   const where = you ? undefined : whereabouts(member, link)
@@ -94,6 +127,7 @@ function CrewRow({ member, you, flying, link, pop, alive, slumped, end, hosts, s
               {chip}
             </Badge>
           )}
+          {runs && <RunsChip runs={runs} />}
           {hosts.map((host) => (
             <HostChip key={host.label} chip={host} />
           ))}
@@ -131,6 +165,8 @@ export function SessionSide({ session, started, turnedIn, folded, onEase, roles,
     return {}
   }
   const net = useCoreSlice<NetSlice>("network")
+  const test = useCoreSlice<ProfilesSlice>("profiles")?.test ?? null
+  const runsOf = (pilot: string) => test?.members.find((candidate) => candidate.pilot === pilot)?.runs
   const crew = useCrew()
   const { scale } = useRoot()
   crew.scale = scale
@@ -224,6 +260,7 @@ export function SessionSide({ session, started, turnedIn, folded, onEase, roles,
                     end={endOf(member) ?? viewOf(member).end}
                     said={viewOf(member).under}
                     hosts={roles.filter((role) => session.roles.some((r) => r.label === role.label && r.holder === member.pilot))}
+                    runs={runsOf(member.pilot)}
                   />
                 ))}
                 {others.length === 0 && (
@@ -236,6 +273,7 @@ export function SessionSide({ session, started, turnedIn, folded, onEase, roles,
                 )}
               </ul>
             </ScrollWindow>
+            {test && <TestLine test={test} session={session} />}
             {(preflight || started) && session.differences.length > 0 && <CrewDifferences differences={session.differences} started={started} onEase={onEase} />}
           </CardContent>
         </div>

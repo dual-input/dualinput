@@ -33,7 +33,7 @@ pub use sim_awareness::SimAwareness;
 pub use sim_client::message::Camera;
 pub use sim_client::{InitPosition, Period, Value, Var};
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
 
 use clients::ClientsUnit;
@@ -138,6 +138,9 @@ pub struct SimService {
     holders: BTreeMap<u32, Holder>,
     /// Each unit's `on_sim` handler, by the unit's place.
     hooks: BTreeMap<u32, Handler<SimEvent>>,
+    /// The units whose sim work ends with the profile, by their places, which a profile's
+    /// unload ends the routines and closes the connections of.
+    with_profile: BTreeSet<u32>,
     /// The platform's own uses of its connection.
     platform: connections::Platform,
     module: ModuleWatch,

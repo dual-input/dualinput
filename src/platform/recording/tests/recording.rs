@@ -63,10 +63,12 @@ impl Core {
                 Entry {
                     name: OLD.into(),
                     size: 10,
+                    modified: 0,
                 },
                 Entry {
                     name: CURRENT.into(),
                     size: 20,
+                    modified: 0,
                 },
             ]),
         );
@@ -198,10 +200,12 @@ fn the_run_in_progress_alone_has_its_size_read_again_every_10s() {
             Entry {
                 name: "inputs.zst".into(),
                 size: 5_000,
+                modified: 0,
             },
             Entry {
                 name: "log.txt".into(),
                 size: 300,
+                modified: 0,
             },
         ]),
     );

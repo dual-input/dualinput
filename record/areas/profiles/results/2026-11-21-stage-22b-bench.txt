@@ -1,0 +1,45 @@
+Stage 22b's bench run of 2026-11-21, after the code review's fixes, on our development machine:
+node tools/bench.ts test-sessions profiles traffic, on the bench's release-with-checks build.
+The lines below are the run's results, its budget lines, and its counts, as node --test printed them.
+
+> node --test tools/bench/scenarios/test-sessions.ts tools/bench/scenarios/profiles.ts tools/bench/scenarios/traffic.ts
+✔ the pilot flying's fetch finishing after the session's aircraft is set takes the pin from none to the bundle, which every core in the flight loads, and a replay loads the same (10882.628ms)
+✔ a member whose cache holds an older bundle fetches the pinned one by its hash and loads it, and a pass of control before preflight ends keeps the pin (10311.4078ms)
+✔ a member offline whose cache lacks the pin shows the error, loads nothing, and fetches it when it next enters the flight online (9369.0863ms)
+✔ the pilot flying pins a local bundle: a member with the same file loads it, and one without it fetches nothing, gets it from the pilot flying, and loads it (11506.811ms)
+✔ the pilot flying loads the wrong aircraft, then the right one, and the pin follows; a member in the new aircraft before the new pin loads nothing for it, then the new bundle (9525.6813ms)
+✔ a member leaves the flight and comes back: the profile unloads, and the same pin loads again, though a newer bundle was published meanwhile (9244.0739ms)
+✔ a session that starts airborne with the pilot flying's cache empty pins the bundle once the fetch finishes, after preflight ended (5435.7014ms)
+✔ a bundle whose fetch failed at start is fetched again when the pilot hosts, and the pin goes from none to it (5336.7379ms)
+✔ a cached bundle whose bytes don't match its name is deleted and fetched again (5285.9249ms)
+✔ a fetch's result that arrives after this member left the flight loads nothing, and the bundle loads from the cache when it comes back (10405.3384ms)
+✔ a session in an aircraft with no published profile shows the loader's error (8592.7842ms)
+✔ the apps see where the pilot is, the aircraft the sim last loaded by name, and every profile's aircraft, with no session (7315.1956ms)
+✔ a profile's aircraft no package on disk holds shows as not installed, and an aircraft with no package has no name (6113.3954ms)
+budget: a start with nothing new got [{"path":"/index.json","status":304}], against one answer of headers
+✔ a start with nothing new published costs one answer of headers (3624.8261ms)
+budget: the builder checked and built a profile of 300 write functions in 1718ms, its compiler's load included, against 2,000ms for the build
+budget: the bundle is 221,190 bytes
+budget: a run that loaded a 221,190-byte bundle: the slowest input took 5352µs, 1 over 1ms, against 1,000µs for a handler with one pause under 10,000µs allowed
+✔ a 200 KB profile of 300 write functions builds within 2s, and its load stays inside 10ms, the sync engine's compile of them included (8787.3535ms)
+test sessions: Adam's catch-up ended 1494ms after his core loaded the new bundle, against 4,000ms of settling
+✔ a new bundle in the pilot flying's local folder reloads on every core in flight while Follow runs on, its catch-up waits for no settling, both PCs show its hash, the banner says so once, and the same bytes again move no pin (22269.632ms)
+✔ a new bundle in the following pilot's local folder reaches the pilot flying, which pins it, an entry the sandbox stopped syncs again under it, and a pilot who joins after gets it from the pilot flying (16765.075ms)
+budget: traffic: objects=151 polls=42 dropped=5 poll_ms=1 read=40165 refused=0 sent=1585 bytes_per_s=1819, against about 2.5KB/s for 120 aircraft
+budget: James's run, with 851 objects polled twice a second: the slowest input took 1362µs, 1 over 1ms, against 1,000µs for a handler with one pause under 2,000µs allowed
+budget: Adam's run, with 851 objects polled twice a second: the slowest input took 1326µs, 1 over 1ms, against 1,000µs for a handler with one pause under 2,000µs allowed
+✔ a traffic host's AI aircraft and tugs show on the other core as frozen, dressed copies 1s behind, its GSX signs and our own objects never do, and a poll that isn't whole sends nothing as gone (43154.1779ms)
+✔ a taxiing copy trails its original by 1s and stops where it stopped, and a receiving pilot who leaves the flight or loads one has every copy removed and shown again once back (20445.953ms)
+✔ a receiving pilot who takes the role has their copies removed and their poll carries none of them, and the old host gets the new host's traffic, and every copy back once it takes the role again (30682.0042ms)
+budget: traffic: a joiner created 150 copies within 5ms of entering the flight, against 5s
+✔ a joiner creates 150 copies within 5s of entering the flight, from the identities its link brought, and draws them once the clock offset arrives (9689.3632ms)
+budget: traffic: a pilot already in the flight created 150 copies 326ms after its link came up, against 500ms
+✔ a pilot already in the flight whose link comes up gets every identity, and creates every copy within 500ms (9955.1546ms)
+✔ a state that comes before its identity waits for it, and its copy is created as the identity comes (11852.7544ms)
+✔ a traffic host carries 500 objects at most, so a receiving pilot who leaves the flight and comes back stays within the kernel's 1,000 calls an input (11831.0138ms)
+✔ a create that throws makes the stand-in, the stand-in throwing too leaves the copy missing, both counted on the tab, and a copy with no state for 15s is removed and created again at its next (44304.358ms)
+✔ LIST_PACKS lists the known traffic packs in Community with their manifests' versions, and no other package (115.6873ms)
+ℹ tests 26
+ℹ pass 26
+ℹ fail 0
+ℹ duration_ms 343147.6326

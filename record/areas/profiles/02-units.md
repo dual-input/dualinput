@@ -3,7 +3,7 @@
 ```text
 Purpose:     The profile engine's, the profile builder's, and the profile loader's interfaces, and how a bundle is built, published, fetched, cached, pinned, and loaded.
 Depends on:  01-format-and-delivery.md, ../architecture/02-code-map.md, ../core/01-loop-and-edge.md, ../core/03-sim-seam-and-wasm-module.md, ../session/02-units.md, ../sync/05-units.md, ../plugins/01-plugins.md, ../recording/01-recording-and-bug-reports.md, ../build/01-the-build.md, log.md
-Decides:     Which compiler builds a bundle, and where it runs; the YAML parser; a bundle's exact bytes and its hash; the index; how CI publishes and keeps every bundle, and at which levels; whether CI holds a released level's builder output to its release tag; where the core fetches from; the cache; the local folder; the pin's key; how a bundle loads; the match check's item; the budgets; and the cases for the bench (node 6.8).
+Decides:     Which compiler builds a bundle, and where it runs; the YAML parser; a bundle's exact bytes and its hash; the index; how CI publishes and keeps every bundle, and at which levels; whether CI holds a released level's builder output to its release tag; where the core fetches from; the cache; the local folder, and how a tool writes a bundle there; test sessions; the pin's key; how a bundle loads; the match check's item; the budgets; and the cases for the bench (node 6.8).
 ```
 
 > **Note**
@@ -207,12 +207,57 @@ FS Copilot's app downloads every profile at once, as one zip from its own server
 
 ## The local folder
 
-- The local folder is a setting the loader registers, empty at first, naming a folder of bundle files that the builder or the IDE wrote, one for each profile (user, 2026-10-16).
-  It's a development setting, which no app shows, since v1 ships no authoring tool, and the IDE makes it a pilot's setting (user, 2026-10-18).
-- The loader lists it at start and whenever it chooses or looks up a bundle, as a job that runs `read` at `LEVEL` on each file and skips, and logs, one that fails, so it never takes a bundle at a level this core can't read.
-  A local bundle that covers an aircraft is taken over a published one, as [testing an edit](01-format-and-delivery.md#testing-an-edit) has it.
-- A new local bundle takes effect when the session's aircraft next changes before preflight ends, or at the next session, and a crewmate testing with the author puts the same file in their own folder before joining; equal hashes prove they run the same copy.
-- The core builds nothing, so the report on a profile's errors is the builder's or the IDE's, and the apps show none.
+- The local folder holds bundle files that the builder, the profile extension, or the IDE wrote, one for each profile (user, 2026-10-16): `%APPDATA%\DualInput\profiles\local\`, in the core's data folder ([on disk](../install/01-installing-and-updating.md#on-disk)), or the folder the loader's development setting `profiles.local` names, as each bench core's does (user, 2026-11-21).
+  A pilot who never builds a profile has nothing in it, and no app shows the setting.
+- The loader lists it at start, at each session's start, and each second while a session is held, as a job that gives each file's size and last-modified time.
+  It reads each file whose name is new or whose size or time changed, as a job that runs `read` at `LEVEL` and hashes the bytes, and skips, and logs, one that fails, so it never takes a bundle at a level this core can't read.
+  A file whose bytes hash as before is no change, so a program that only touches a file, such as a virus scanner, changes nothing.
+- A local bundle that covers an aircraft is taken over a published one, as [testing an edit](01-format-and-delivery.md#testing-an-edit) has it, and one that's new while a session is held goes to the crew ([test sessions](#test-sessions)).
+- The core builds nothing, so the report on a profile's errors is the builder's, the extension's, or the IDE's, and the apps show none.
+
+### Writing a bundle there
+
+A tool that builds bundles for a test session, such as the profile extension, writes each one so a core reads it whole:
+
+1. It writes into `%APPDATA%\DualInput\profiles\local\`, or, for a development core, the folder that core's `profiles.local` setting names.
+2. It writes only a bundle that built with no error, the bytes `profile-build` gave, unchanged.
+3. It names the file for the profile's own file, as the builder does, so `profiles/aircraft/bksq-baronpro.yaml` builds to `bksq-baronpro.yaml`, and each build replaces the last.
+4. It writes the bytes under a name in the same folder that doesn't end in `.yaml`, such as `bksq-baronpro.yaml.new`, then renames that file over the bundle's, as the builder's `build` does, since the core reads only names ending in `.yaml`, and a file read half-written fails its `read`.
+
+Nothing else passes between the tool and the core: a core that holds a session finds the new file within 1s.
+
+## Test sessions
+
+A test session is a session in which an author's core sends a new local bundle to the crew and every machine reloads it, so a profile changes during a test flight with no new session (user, 2026-10-12 and 2026-11-21).
+No setting turns one on: a session becomes one at the first such bundle.
+
+- While a session is held, a core whose local folder gets a new bundle that covers the session's aircraft keeps it in its cache, under its hash, and offers it to the PF on the loader's channel `BUNDLES`, unless it's the PF.
+  A core that gets an offer after control passed from it sends it on to the PF.
+- The PF's loader pins the newest such bundle, from its own folder or a member's, as it comes, after preflight too, and the pin names the member whose folder it came from ([the pin](#the-pin)).
+  Two authors who save in turn each replace the other's bundle, and nothing merges.
+- Once a local pin lands, at a session's start included, the PF's core sends the bundle to every other member but the one it came from.
+  While the pin stays local, the PF also sends it to each member at that member's `LinkUp`, so a pilot who joins, rejoins, or restarts their core gets the bundle no site holds.
+  The PF pins only an offer, never a copy of the pinned bundle, so a copy of an earlier pin still on its way as control passes can't take the session back to it.
+- A core keeps each local bundle it offers, sends, or gets in its cache, under its hash, so a core that restarts during the session, or an author who deletes their file, still holds it, and the next start with no session deletes it, as it does every bundle no level takes ([the cache](#the-cache)).
+  A received bundle is checked against its hash as it loads, as every bundle is, and one whose bytes don't match fails its load.
+- `BUNDLES` is a stream at the lowest priority, so through a relay a bundle waits behind the live channels within the relay's cap ([sending](../network/01-between-machines.md#sending)).
+- Every core in the flight then unloads the old profile and loads the new one ([loading](#loading)), and each following machine asks the PF for a catch-up, as it does after any load once preflight has ended ([catch-up](../sync/05-units.md#catch-up)).
+
+A reload is a load like any other, which covers what node 4's review asked of it ([testing an edit](01-format-and-delivery.md#testing-an-edit)):
+
+- An entry that stopped syncing for the rest of the load, because its write function hit [the sandbox's limits](01-format-and-delivery.md#the-sandbox) or [the aircraft drives it itself](../sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself), syncs again under the new load's sync engine, and v1 has no plugin to start again ([no plugins in v1](../plugins/01-plugins.md#no-plugins-in-v1)).
+- The aircraft counts as settled 30s after its pilot's Ready to fly, not after the load ([an aircraft that loaded before its session](../sync/04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session)), and state sync keeps that moment across loads, so a reload's catch-up ends at its last write.
+- A profile's unload ends the sim work of the features that load a profile and no other's, so flight-model sync goes on following the PF, and traffic keeps its copies ([02-code-map](../architecture/02-code-map.md)'s note of 2026-11-21).
+
+From the bundle's write to a synced cockpit takes about 3s: up to 1s for the author's core to find the file, the bundle's trip to the PF and, when the author isn't the PF, on to the crew, 1.5s while the new sync engine takes its first readings, a round trip for the catch-up, and its writes (arithmetic, from `CHECK` in `src/engines/sync-engine/src/lib.rs`).
+The build before the write takes up to 2s more ([budgets](#budgets)).
+
+Known limits (user, 2026-11-21):
+
+- A reload starts each counted entry's shadow value at its `default` on every machine, so one the PF moved before the reload counts from the wrong start; the 58P's profile has no counted entry.
+- The crew's figures go and come back at each reload, since avatars' sim work ends with the old profile.
+- A change made while a machine reloads is lost: a crewmate's change that reaches the PF between its unload and its load is skipped, and a following pilot's own change between their core's unload and its load, which waits for the bundle to arrive, is never sent.
+  Either way, the following machine's catch-up then moves that control to the PF's value.
 
 ## The pin
 
@@ -220,15 +265,15 @@ FS Copilot's app downloads every profile at once, as one zip from its own server
 // a sketch: the message crate's profile-loader module; the number is hypothetical
 pub const PIN: Key<Option<Pin>> = Key::new(60, Writer::PilotFlying);
 
-pub struct Pin { pub hash: [u8; 32], pub local: bool }
+pub struct Pin { pub hash: [u8; 32], pub local: bool, pub from: Option<PilotId> }   // from: whose local folder it came from
 ```
 
 - The PF's loader writes its choice into `PIN` when the session's aircraft changes before preflight ends, as [which bundle a session pins](../session/02-units.md#which-bundle-a-session-pins) has it, and when the key holds none and its choice becomes one, as when the start's fetch finishes after the aircraft was set.
 - Its choice is a local bundle that covers the session's aircraft, or else the bundle the cached index gives this core's `LEVEL` for it, when the cache holds that bundle, or else none.
-- After preflight ends, the pin changes only from none, as when the PF's fetch finishes after a session that started airborne.
-  A following machine asks for a catch-up whenever its profile loads after preflight has ended, so that late pin brings every following cockpit to the flying machine's ([catch-up](../sync/05-units.md#catch-up)).
+- After preflight ends, the pin changes only from none, as when the PF's fetch finishes after a session that started airborne, or to a new local bundle in a test session ([test sessions](#test-sessions)).
+  A following machine asks for a catch-up whenever its profile loads after preflight has ended, so a late pin, or a new one, brings every following cockpit to the flying machine's ([catch-up](../sync/05-units.md#catch-up)).
 - Every core looks for the pinned hash in its cache, then in its local folder.
-  It fetches a published pin it lacks as soon as the pin names it, and doesn't fetch a local one, since no copy of it is on Pages.
+  It fetches a published pin it lacks as soon as the pin names it, and waits for a local one, which no site holds and the PF's core sends it.
 
 ## Loading
 
@@ -236,6 +281,7 @@ pub struct Pin { pub hash: [u8; 32], pub local: bool }
 - Whenever that starts to hold, a job reads the file, runs `read` at `LEVEL` on it, and returns the checked profile encoded with postcard.
 - The loop decodes it, finds the variant from this member's aircraft, folder and preset ([the aircraft](../core/03-sim-seam-and-wasm-module.md#the-aircraft)), and raises `ProfileLoaded`.
 - A pinned bundle that covers none of this member's aircraft loads nothing until the pin changes, as when the session's aircraft has changed and the PF's loader hasn't yet written the new pin.
+- A pinned local bundle this core doesn't hold yet loads nothing until the PF's core sends it.
 - Leaving the flight, a new pin, and the session's end raise `ProfileUnloaded` first, and a job's result for a pin or a flight that no longer holds is dropped, as the code map's [one loop](../architecture/02-code-map.md#one-loop) requires of a job's handler.
 - A bundle that fails `read` loads nothing, and the core logs why.
 
@@ -260,16 +306,19 @@ State sync's sync engine compiles the write functions from it ([6.9](../architec
 me.match_item(profile_loader::BUNDLE, ProfileLoader::bundle);
 ```
 
-Each member's value is one of three (user, 2026-10-18):
+Each member's value is one of four (user, 2026-10-18; `Loading`, user, 2026-11-21):
 
 | Value | When | Level |
 | --- | --- | --- |
-| Loaded | This core loaded the pinned bundle, from Pages or from its local folder | None, since two cores' hashes can't differ |
+| Loaded | This core loaded the pinned bundle, from Pages, its cache, or its local folder | None, since two cores' hashes can't differ |
+| Loading | This core is in the flight and is reading the pinned bundle, or waiting for it to arrive | None |
 | "No profile for this aircraft" | The pin holds none, since no profile covers the aircraft ([the match check](../session/02-units.md#the-match-check)) | An error, even when every member shows it |
 | "Couldn't get the session's profile" | The pin names a bundle this core couldn't fetch, find, or read | An error, even when every member shows it |
 
-- The session shows the pinned hash once, as "unpublished" for a local bundle, since every core loads only the pinned bundle (user, 2026-10-18).
+- For a published bundle, the session shows the pinned hash once, since every core loads only the pinned bundle (user, 2026-10-18); a local one shows as below.
 - The value changes on `ProfileLoaded`, on a failed fetch or read, and on a new pin, and the session crate writes this member's `match` key again whenever one of its values changes, so a profile that loads after its member entered the flight shows as loaded.
+- While the pin is a local bundle, the slice `profiles` carries its short hash, its first 7 hex digits, who it came from, and each member's value, which every core reads from that member's `match` key, so the EFB app shows the bundle each PC runs ([a test session shows the bundle each PC runs](../interface/decisions.md#a-test-session-shows-the-bundle-each-pc-runs)).
+- Once every member in the flight shows a new local pin loaded, every core raises a notification shown once, which names who it came from and lands on the Session tab.
 - The wording, and how a hash shows, are [6.16](../architecture/plan.md#616-the-apps)'s.
 
 ## What this changes in 01-format-and-delivery
@@ -296,7 +345,14 @@ Each is a starting value:
 - Control passes before preflight ends to a pilot whose cache holds an older bundle: the pin stays.
 - A member whose cache lacks the pinned bundle fetches it by hash and loads it, and the match check shows it loaded.
 - A member offline whose cache lacks the pin shows "Couldn't get the session's profile", loads nothing, and fetches it when it next enters the flight online.
-- The PF pins a local bundle: a member with the same file loads it, and one without it fetches nothing and shows the error.
+- The PF pins a local bundle: a member with the same file loads it, and one without it fetches nothing, gets it from the PF, and loads it.
+- After preflight, a new bundle in the PF's local folder: the pin moves to it, every core in the flight reloads it, each following machine catches up, the slice shows each member's short hash, and the notification shows once.
+- A new bundle in a following pilot's local folder reaches the PF, which pins it, naming that pilot.
+- A local file written again with the same bytes moves no pin.
+- A member whose link comes back after a new local bundle was pinned gets it from the PF and loads it.
+- Through a reload in flight, flight-model sync's `Follow` runs on.
+- A reload after the aircraft has settled ends its catch-up at its last write.
+- An entry whose write function hit the sandbox's limit syncs again once a new bundle fixes it.
 - The session's aircraft changes before preflight ends, and a member enters the new aircraft before the new pin arrives: it loads nothing, then loads the new bundle.
 - A member leaves the flight and comes back: the profile unloads, and the same pin loads again, though CI published a newer bundle meanwhile.
 - A session starts airborne with the PF's cache empty, and the PF's fetch finishes after preflight ended: the pin goes from none to the bundle.
@@ -319,7 +375,6 @@ The builder's own tests, which CI runs, take these:
 - How a run's folder, which a pilot sends by hand, carries a local bundle's text (user, 2026-10-21; [recording log][every]).
 - Where the apps show the match check's item: [6.16](../architecture/plan.md#616-the-apps).
 - Which TypeScript the IDE's editor runs, which may move the builder to TypeScript 7: the IDE's design.
-- Test sessions, in which the author's core sends each new bundle to the crew: the IDE's dev loop, as [testing an edit](01-format-and-delivery.md#testing-an-edit) has them.
 - Expiring superseded bundles, if the Pages site nears 1 GB, since a pin needs only recent ones.
 
 [p01]: log.md#2026-10-16-github-pages-answers-a-repeat-fetch-of-an-unchanged-file-with-a-304-and-no-body-and-compresses-what-it-sends-when-asked

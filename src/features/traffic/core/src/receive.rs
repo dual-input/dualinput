@@ -479,8 +479,7 @@ impl Receiving {
     }
 
     /// Removes every copy, and ends `Traffic` with no feed of their removals, since it has
-    /// nothing left to draw. As this pilot leaves the flight, a profile's unload may already
-    /// have closed traffic's connection, which a feed would open again.
+    /// nothing left to draw.
     fn remove_all(&mut self, cx: &Cx) -> BTreeSet<u32> {
         let objects: Vec<u32> = self.copies.keys().copied().collect();
         let removed = objects
@@ -526,8 +525,8 @@ impl Receiving {
         self.feed_removed(cx);
     }
 
-    /// Traffic's connection went, lost or closed by a profile's unload, and every copy and
-    /// definition with it: each copy is created again at its next state.
+    /// Traffic's connection was lost, and every copy and definition with it: each copy is created
+    /// again at its next state.
     pub(crate) fn lost(&mut self, cx: &Cx) {
         self.copies.clear();
         self.by_object.clear();

@@ -248,6 +248,7 @@ mod tests {
             .map(|(i, &size)| Entry {
                 name: format!("2026-10-{:02}_12-00-00", i + 1),
                 size,
+                modified: 0,
             })
             .collect()
     }

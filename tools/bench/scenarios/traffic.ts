@@ -255,7 +255,7 @@ test("a taxiing copy trails its original by 1s and stops where it stopped, and a
   await toMenu(b.core)
   await until(b, (s) => mine(s)?.in_flight === false, "out of the flight")
   await untilCopies(b, (c) => c.length === 0, "every copy removed out of the flight")
-  // Leaving the flight unloads the 58P's profile, whose close of traffic's connection removes the copies, so traffic's own removes, which run after it, make no call.
+  // Leaving the flight, traffic removes each copy itself, since a profile's unload leaves traffic's connection open (record/areas/architecture/02-code-map.md's note of 2026-11-21).
   const { calls } = await b.core.report()
   const made = calls.filter((c) => c.function === "AICreateNonAtcAircraft")
   // Avatars' figures go on avatars' own connection, so only traffic's unit counts.

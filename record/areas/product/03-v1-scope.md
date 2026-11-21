@@ -817,6 +817,33 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 
 - [The connection](#the-connection), for the session's ID that labels every part after v1.
 
+### Test sessions
+
+A profile's author changes the profile during a test flight, and every pilot's cockpit takes the change within seconds, with no new session.
+
+**In v1:**
+
+- An author's save builds a new bundle into their local folder, through the profile builder's `watch` or the profile extension, and their Dual Input sends it to the crew, whose PCs all reload it ([test sessions](../profiles/02-units.md#test-sessions); user, 2026-11-21).
+- Any pilot in the session can be the author, and the newest save wins, so two authors can take turns.
+- A crewmate needs none of the author's files: a pilot who joins or rejoins gets the bundle from the PF's Dual Input.
+- While the profile is unpublished, the EFB app's session card shows the profile's short hash and who saved it, each crew row shows the hash that pilot's PC runs, or that it's still loading, and the banner says once when every PC has loaded a new save ([a test session shows the bundle each PC runs](../interface/decisions.md#a-test-session-shows-the-bundle-each-pc-runs)).
+
+**Not in v1:**
+
+- Merging two authors' edits: each save replaces the whole bundle.
+- The Dual Input IDE's dev loop, with live values and running one entry's write ([the IDE](ideas.md#dual-input-ide)).
+
+**Rules:**
+
+- No setting turns a test session on: a session becomes one at the first save, and only a tool that builds a profile writes into the local folder.
+- A save that fails to build changes nothing, since only a bundle that built reaches the folder.
+- A reload changes nothing but the profile: the aircraft keeps following the PF's, and traffic stays, while the crew's figures go and come back.
+
+**Depends on:**
+
+- [The connection](#the-connection), which carries the bundle.
+- [State sync](#state-sync), whose catch-up brings each cockpit to the PF's after a reload.
+
 ## Getting Dual Input
 
 ### Installing and updating

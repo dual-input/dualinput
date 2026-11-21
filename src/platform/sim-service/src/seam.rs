@@ -45,7 +45,7 @@ impl SimService {
 
     /// The sim's process ended. Every connection went with it, and each unit hears so; the
     /// platform's keeps its setup for the sim's next run, and a feature's next call opens an
-    /// empty one, as it would after its profile unloaded.
+    /// empty one, as a feature whose sim work ends with the profile's does after it unloads.
     fn exited(&mut self, code: u32, cx: &Cx) {
         tracing::info!(code = format!("{code:#x}"), "the sim's process exited");
         self.process = None;

@@ -43,6 +43,7 @@ v1 has these whatever is picked, because they're the product rather than ideas:
 - flight-model sync, which keeps the aircraft's position, attitude, and velocity the same on every machine
 - the connection between machines
 - profiles, starting with the 58P's, written without the Dual Input IDE, which is a Soon pick
+- documentation for pilots, for developers of Dual Input's code, and for profile authors (user, 2026-11-21)
 
 v1's aircraft is the pressurized 58P variant of the Black Square Baron Pro.
 
@@ -66,12 +67,14 @@ The picks, picked on 2026-10-02:
   - [Avatar sync](ideas.md#avatar-sync), moved from Soon on 2026-10-03, which in v1 takes the 58P's seats and the spots of its controls from the profile, set without the Dual Input IDE
   - [Plugins](ideas.md#plugins) for aircraft, with one for the 58P, picked on 2026-10-04, because the code that serves one aircraft needs a home outside Dual Input's own code from the first aircraft on
   - The crew's notification that a pilot's sim crashed, from [Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed), picked on 2026-10-07, and free to move to Soon if telling a crash from a quit proves hard (user)
+  - Test sessions, from the [Dual Input IDE](ideas.md#dual-input-ide), moved from Soon on 2026-11-21: the author's core sends each new bundle of a profile to the crew, and every machine reloads it mid-session, because test flights need a profile changed without starting the session again, and the IDE is months from usable (user)
+  - A VS Code extension for writing profiles, standing in for the IDE's editor, picked on 2026-11-21 for the same reason: completion and checks from the format's schema, the builder's errors on save, an outline from section headings, snippets, formatting, and building on save into the local folder (user)
 - **Soon:**
   - [Ground operations sync](ideas.md#ground-operations-sync)
   - [Soft takeover](ideas.md#soft-takeover-on-handover), moved from v1 on 2026-10-03, because it needs masking, which is too large a job for v1
   - [Mixed flight controls](ideas.md#mixed-flight-controls)
   - The rest of the profile's checklist, and state watching, both from [Pre-sync checklist](ideas.md#pre-sync-checklist)
-  - The [Dual Input IDE](ideas.md#dual-input-ide), out of v1's baseline on 2026-10-03, because the 58P's profile can be written without it
+  - The rest of the [Dual Input IDE](ideas.md#dual-input-ide), out of v1's baseline on 2026-10-03, because the 58P's profile can be written without it
   - The voice phrases, from [Voice handover](ideas.md#voice-handover), moved from v1 on 2026-10-17, because a voice handover is a nice-to-have that v1 can ship without (user)
   - [Binding conflicts with the sim](ideas.md#binding-conflicts-with-the-sim), if the sim's bindings can be read, picked on 2026-10-17 (user)
 - **Later:**

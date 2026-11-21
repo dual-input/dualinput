@@ -1013,6 +1013,30 @@ Tests:
 
 Exit: on GitHub's runners, CI passes on a pull request and on `main`, the bench as a job per scenario, and the [build log](log.md) has CI's times against the 20 minutes and whether a runner held three cores and two relays; the release workflow has published 0.1.0 from its release commit once CI passed on it, and a release pull request has opened for the next; the backend deploys when CI passes on `main` and answers at `api.dualinput.app`, the relay at `fra.relay.dualinput.app`, and the profiles' index at `profiles.dualinput.app`; and the session with friends that the tests' item from stage 15 lists has run on the workflow's releases, or the user has scheduled it, which the stage's `Done on` line names.
 
+## 22b Test sessions
+
+Builds: test sessions, in which the author's core sends each new bundle of a profile to the crew and every machine reloads it mid-session ([testing an edit](../profiles/01-format-and-delivery.md#testing-an-edit)), which moved to v1 on 2026-11-21 ([the product plan's picks](../product/plan.md#3-v1-or-later)).
+Designs first: the reload, with the three things node 4's review found it needs, which [testing an edit](../profiles/01-format-and-delivery.md#testing-an-edit) lists.
+Needs: every stage before 22, so it can be built beside stage 22.
+
+## 22c The format's audit
+
+Builds: the changes to the profile format, the profile engine, and the profile builder that an audit of the format finds before v1's release fixes level 1 ([01-format-and-delivery](../profiles/01-format-and-delivery.md), [02-units](../profiles/02-units.md)).
+Designs first: the audit's list of gaps, each ruled on by the user.
+Needs: every stage before 22, so it can be built beside stage 22.
+
+## 22d The profile extension
+
+Builds: a VS Code extension for writing profiles, loaded from disk, which moved to v1 on 2026-11-21 ([the product plan's picks](../product/plan.md#3-v1-or-later)).
+Designs first: the extension, its language and where it lives under `src/`, and how its building on save meets test sessions.
+Needs: 22c, for the schema the extension completes and checks from.
+
+## 22e The docs
+
+Builds: the documentation for pilots, for developers of Dual Input's code, and for profile authors ([the product plan](../product/plan.md#3-v1-or-later)).
+Designs first: a guide to how each of the three is written, from research the user directs, where the docs are published, and what `CLAUDE.md` says of `docs/` once agents write there.
+Needs: nothing for the guides; 22b, 22c, and 22d for the profile authors' documentation.
+
 ## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.

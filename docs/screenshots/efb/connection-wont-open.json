@@ -5,5 +5,5 @@
   {"role":"button","label":"Figures","x":644,"y":1403,"width":215,"height":115},
   {"role":"button","label":"Settings","x":859,"y":1403,"width":215,"height":115},
   {"role":"button","label":"Host a session","x":83,"y":353,"width":908,"height":83},
-  {"role":"button","label":"Join","x":878,"y":542,"width":113,"height":75}
+  {"role":"button","label":"Join","x":878,"y":536,"width":113,"height":75}
 ] }

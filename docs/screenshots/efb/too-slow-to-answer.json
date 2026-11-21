@@ -5,5 +5,7 @@
   {"role":"button","label":"Figures","x":644,"y":1403,"width":215,"height":115},
   {"role":"button","label":"Settings","x":859,"y":1403,"width":215,"height":115},
   {"role":"button","label":"Host a session","x":83,"y":353,"width":908,"height":83},
-  {"role":"button","label":"Join","x":878,"y":542,"width":113,"height":75}
+  {"role":"button","label":"Loading","x":904,"y":536,"width":87,"height":75},
+  {"role":"status","label":"Loading","x":931,"y":557,"width":33,"height":33},
+  {"role":"link","label":"Cancel","x":478,"y":636,"width":92,"height":38}
 ] }

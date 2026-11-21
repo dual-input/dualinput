@@ -153,6 +153,12 @@ const LOCAL: DesktopState = { update: { state: "current", checked: "4 minutes ag
 const REFUSING = "refusing"
 /** What a scene puts on the clipboard, which is no slice of the core's either. */
 const CLIPBOARD = "clipboard"
+/**
+ * What a scene has the stand-in try as it starts, as the core does with a code on the clipboard, so the scene shows the
+ * answer its `REFUSING` gives without a press of Host or Join. It's no slice of the core's either.
+ */
+const ATTEMPTING = "attempting"
+type Trying = { on: "host" | "join"; code?: string }
 
 /** Each state a person looks at, by name, with what it sets on top of the sim's healthy slices. */
 export const SCENES: Record<string, Slices> = {
@@ -167,10 +173,10 @@ export const SCENES: Record<string, Slices> = {
   "Before a session": {},
   "No profile for the aircraft": { sim: fenix, profiles: NO_PROFILE },
   "No profile, in a flight": { sim: { ...fenix, where: "flight" }, profiles: NO_PROFILE },
-  "Servers refuse": { [REFUSING]: "servers" },
-  "No session has the code": { [REFUSING]: "no-code" },
-  "Connection won't open": { [REFUSING]: "no-connection" },
-  "Too slow to answer": { [REFUSING]: "slow" },
+  "Servers refuse": { [REFUSING]: "servers", [ATTEMPTING]: { on: "host" } },
+  "No session has the code": { [REFUSING]: "no-code", [ATTEMPTING]: { on: "join", code: CODE } },
+  "Connection won't open": { [REFUSING]: "no-connection", [ATTEMPTING]: { on: "join", code: CODE } },
+  "Too slow to answer": { [REFUSING]: "slow", [ATTEMPTING]: { on: "join", code: CODE } },
   "A code on the clipboard": { [CLIPBOARD]: CODE },
   "Alone in a session": { session: held({ members: [me(atMenu)] }) },
   "James joins": { session: held({ members: [me(atMenu), james({ ...atMenu, stage: "loading" })] }) },
@@ -251,9 +257,11 @@ export const SCENES: Record<string, Slices> = {
 /**
  * How long a scene runs before tools/screenshots.ts takes its picture, in ms of its own time, where the tool's 5s would
  * catch it too early: setup greets the pilot for 2s and then runs its checks one by one, reaching the name card at about
- * 9s, or stopping at the check that fails.
+ * 9s, or stopping at the check that fails, and a join says it's still trying only 6s in (`SLOW_AFTER` in
+ * src/platform/efb-shell/src/session/session-tab.tsx).
  */
 export const SCENE_TIMES: Partial<Record<string, number>> = {
+  "Too slow to answer": 8_000,
   "First-time setup": 12_000,
   "Setup: add-on mismatch": 12_000,
   "Setup: offline": 12_000,
@@ -318,7 +326,11 @@ export class StandInCore extends StandInBase {
     this.local = DESKTOP in scene ? (scene[DESKTOP] as DesktopState | null) : LOCAL
     this.tellDesktop()
     this.set({ settings: settings(true, true) })
-    window.setTimeout(() => this.set({ ...healthy, [TAKE_CONTROL]: control({ live: false }), [STREAM]: { catching_up: false, from_preflight_end: false, replaying: false }, recording: { runs: RUNS, stopped: null }, "core-helper": { ...OUTPUTS, outputs: [] }, notifications: [], core: CORE, avatars: { note: null }, [TRAFFIC]: noTraffic, [ATC]: { capturing: null }, [GO_TO]: noJoin, ...scene }), 0)
+    const trying = scene[ATTEMPTING] as Trying | undefined
+    window.setTimeout(() => {
+      this.set({ ...healthy, [TAKE_CONTROL]: control({ live: false }), [STREAM]: { catching_up: false, from_preflight_end: false, replaying: false }, recording: { runs: RUNS, stopped: null }, "core-helper": { ...OUTPUTS, outputs: [] }, notifications: [], core: CORE, avatars: { note: null }, [TRAFFIC]: noTraffic, [ATC]: { capturing: null }, [GO_TO]: noJoin, ...scene })
+      if (trying) this.attempt(trying.on, trying.code ?? null)
+    }, 0)
   }
 
   private setControl(changes: Record<string, unknown>): void {

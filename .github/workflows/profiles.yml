@@ -23,7 +23,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Every tag, which the publish step reads each release's level from.
+          # Publishing takes main's newest commit, since a release's run started from an older
+          # one, and a bundle published again counts as the newest at its level, so publishing
+          # an older commit's would roll back a profile; it reads each release's level from every tag.
+          ref: ${{ inputs.publish && 'main' || '' }}
           fetch-depth: ${{ inputs.publish && '0' || '1' }}
       - if: inputs.publish
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

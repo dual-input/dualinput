@@ -9,8 +9,9 @@ const NTDLL = `Add-Type -TypeDefinition 'using System; using System.Runtime.Inte
 
 /**
  * Runs the call in a PowerShell of its own without blocking the bench, whose fake pages keep
- * sending to the core while PowerShell starts and compiles the call: on a GitHub runner that
- * took over 8s, and a core that hears nothing from a page for 8s closes its socket.
+ * sending to the core while PowerShell starts and compiles the call, since a core that hears
+ * nothing from a page for 8s closes its socket. On a GitHub runner, PowerShell's start and
+ * compile took over 8s (record/areas/build/log.md, 2026-11-21).
  */
 function nt(call: "NtSuspendProcess" | "NtResumeProcess", pid: number): Promise<void> {
   const script = `${NTDLL}; $p = [System.Diagnostics.Process]::GetProcessById(${pid}); exit [DualInputNt]::${call}($p.Handle)`

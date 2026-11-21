@@ -4,7 +4,7 @@
 # The network crate's build compiles each release's default relay list from this file, and
 # src/relays/deploy.ts renders each relay's iroh-relay configuration from it. Each relay's tokens,
 # newest first, live in the private repository dual-input/relay-tokens, in its tokens.toml,
-# under the relay's region, since this repository goes public.
+# under the relay's region, since this repository is public.
 #
 # The cap is 256 KiB/s, about 6 times what p06's busiest mix sent with headers
 # (record/areas/network/02-units.md, "Budgets").

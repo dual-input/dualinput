@@ -21,6 +21,11 @@ const VPK_FOLDER = path.join(ROOT, "target", "vpk")
  * (record/areas/install/01-installing-and-updating.md, "On disk").
  */
 const PACK_ID = "DualInput"
+
+/** The file name `vpk pack` gives a version's full package, which holds the release folder as lib/app/. */
+export function fullPackage(version: string): string {
+  return `${PACK_ID}-${version}-full.nupkg`
+}
 /** The C runtime's DLLs `SimConnect.dll` imports, which the core loads beside it (record/areas/build/01-the-build.md, "The C runtime"). */
 const RUNTIME_DLLS = ["VCRUNTIME140.dll", "VCRUNTIME140_1.dll", "MSVCP140.dll"]
 

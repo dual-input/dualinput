@@ -983,6 +983,7 @@ Builds: what waits for the end because it's on GitHub ([how the stages are order
 - the release workflow, `release.yml`, with `tools/release.ts`'s steps ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release))
 - the backend's first deploy to Cloudflare, its D1 database made and its migrations applied, and its own workflow, `backend.yml`, with `tools/backend.ts` ([the backend](01-the-build.md#the-backend))
 - the profiles' workflow, `profiles.yml`, the `pages` branch, and the Pages site at `profiles.dualinput.app` ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository), [publishing](../profiles/02-units.md#publishing))
+- CI's check that a released level's files match each release tag that holds the level, which `tools/check.ts` runs and the profiles' publish runs first, as [stage 10](#10-profiles) left it here
 - the relay in Frankfurt, on a droplet of ours at `fra.relay.dualinput.app` ([their configuration](../network/02-units.md#their-configuration))
 - the repository's secrets: a read-only deploy key for `dual-input/relay-tokens`, and a Cloudflare token
 - `tools/replay.ts`, which fetches the core a recording's release shipped ([running a replay](../core/01-loop-and-edge.md#running-a-replay))

@@ -2,6 +2,21 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-11-21: our relay in Frankfurt answers `/ping` over HTTPS on the certificate it took from Let's Encrypt
+
+**Asked:** whether `node src/relays/deploy.ts fra` deploys the relay that [their configuration](02-units.md#their-configuration) describes, once `fra.relay.dualinput.app` points at a droplet of ours, the test stage 7 left to [stage 22](../build/plan.md#22-github).
+
+**Expected:** iroh-relay 1.3.0 installed and checked against its SHA-256, its certificate ordered from Let's Encrypt once it runs, and `/ping` answering within the script's 60s.
+
+**Found:** on 2026-11-21 the script reached `dualinput-relay-fra`, a $4 droplet in fra1 with 1 vCPU and 512 MiB on Ubuntu 24.04, as root over SSH.
+The release's archive passed its SHA-256 check, the service started, and the script reported `fra answers at https://fra.relay.dualinput.app`.
+Node then read the relay's certificate as issued by Let's Encrypt's YE1 for `fra.relay.dualinput.app`, valid to 2027-02-18 and trusted, and `/ping` answered 200 with an empty body.
+`dual-input/relay-tokens` held no commit until that day, so its first `tokens.toml` holds one token for `fra`, 32 random bytes as hex, which the relay's configuration lists and the next release's build compiles in.
+
+**Changed:** nothing in the design; the relay runs as [the network's units](02-units.md)' note of 2026-11-20 has it, one in Frankfurt and none in New York.
+
+**Affects:** nothing beyond [stage 22](../build/plan.md#22-github)'s test.
+
 ## 2026-10-23: on a direct path 85ms away at 3% loss, the newest-only slots keep one-off packets within 39ms at p99, where without them they run up to 221ms late
 
 **Asked:** do the newest-only slots change anything on a direct path, which [left open](02-units.md#left-open) asks, and how late does v1's busy mix run on a direct path under loss, the case [02-units](02-units.md#cases-for-the-bench) runs by hand on our droplets?

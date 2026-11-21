@@ -358,7 +358,7 @@ test("a state that comes before its identity waits for it, and its copy is creat
   // The parked aircraft's next state comes with its 5s heartbeat, so its copy coming within 1s of the identities says its first state was kept.
   await untilCopies(b, (c) => c.length === 2, "both copies once the identities come", 5_000)
   const after = Date.now() - (held + HOLD_MS)
-  budget(after < 1_000, `both copies came ${after}ms after the identities`)
+  assert.ok(after < 1_000, `both copies came ${after}ms after the identities`)
 })
 
 test("a traffic host carries 500 objects at most, so a receiving pilot who leaves the flight and comes back stays within the kernel's 1,000 calls an input", { timeout: 240_000 }, async (t) => {

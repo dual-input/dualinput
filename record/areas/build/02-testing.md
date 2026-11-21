@@ -288,7 +288,7 @@ A second MSFS with its own Dual Input in a virtual machine on the same PC, which
 
 ## Left open
 
-- Whether a GitHub-hosted Windows runner holds three cores, two relays, and their proxies within the bench's budget: the first stage that runs the bench in CI.
+Nothing: a GitHub-hosted Windows runner holds the bench's three cores, two relays, and their proxies, and a pull request's bench finished within the 20 minutes ([build log](log.md#2026-11-21-with-warm-caches-a-pull-requests-ci-took-19-minutes-12-seconds-inside-its-20-and-the-bench-passed-in-8-jobs-on-githubs-runners)).
 
 ## What this changes elsewhere
 

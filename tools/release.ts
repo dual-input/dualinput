@@ -21,7 +21,7 @@ import fs from "node:fs"
 import path from "node:path"
 
 import { workspaceVersion } from "./lib/package.ts"
-import { pack, RELEASE_FOLDER, RELEASES, vpk } from "./lib/release.ts"
+import { fullPackage, pack, RELEASE_FOLDER, RELEASES, vpk } from "./lib/release.ts"
 import { Failed, main, output, run } from "./lib/run.ts"
 
 const USAGE = "usage: node tools/release.ts start <commit> | download | pack | upload <commit> | check | publish"
@@ -98,7 +98,7 @@ function download(): void {
   run(vpk(), ["download", "github", "--repoUrl", `https://github.com/${repository()}`, "--outputDir", RELEASES], { env: vpkEnv() })
   const newest = latestTag()
   const fetched = fs.readdirSync(RELEASES).filter((f) => f.endsWith("-full.nupkg"))
-  const wanted = newest ? [`DualInput-${newest}-full.nupkg`] : []
+  const wanted = newest ? [fullPackage(newest)] : []
   if (fetched.join() !== wanted.join()) {
     throw new Failed(`vpk download github fetched ${fetched.join(", ") || "nothing"}, where the newest release, ${newest ?? "none yet"}, holds ${wanted.join("") || "nothing"}`)
   }
@@ -135,8 +135,10 @@ function draft(): Release {
 /**
  * Fails unless the draft holds every file `vpk pack` listed in assets.win.json, and its
  * releases.win.json, the feed the desktop app's updater reads, lists this version's full
- * package and, when it lists an older one, this version's delta from it. fsc-editor's v0.1.0
- * shipped with nothing attached while its publisher exited 0 (fsc-editor, commit 7b2348e).
+ * package and, when `download` fetched the release before into target/releases, this version's
+ * delta from it. The draft's feed lists only this build's packages, so the release before shows
+ * only here. fsc-editor's v0.1.0 shipped with nothing attached while its publisher exited 0
+ * (fsc-editor, commit 7b2348e).
  */
 function check(): void {
   const version = workspaceVersion()
@@ -151,8 +153,8 @@ function check(): void {
   }
   const ours = (type: string) => feed.Assets.some((a) => a.Version === version && a.Type === type && uploaded.has(a.FileName))
   if (!ours("Full")) throw new Failed(`the draft's releases.win.json lists no full package of ${version} that the draft holds`)
-  const older = feed.Assets.some((a) => a.Type === "Full" && a.Version !== version)
-  if (older && !ours("Delta")) throw new Failed(`the draft's releases.win.json lists an older release but no delta of ${version} that the draft holds`)
+  const older = fs.readdirSync(RELEASES).some((f) => f.endsWith("-full.nupkg") && f !== fullPackage(version))
+  if (older && !ours("Delta")) throw new Failed(`the build fetched the release before, but the draft's releases.win.json lists no delta of ${version} that the draft holds`)
   console.log(`the draft holds the ${packed.length} files vpk pack wrote, and its feed lists ${version}'s full package${older ? " and its delta" : ""}`)
 }
 

@@ -17,6 +17,7 @@ import fs from "node:fs"
 import path from "node:path"
 import zlib from "node:zlib"
 
+import { fullPackage } from "./lib/release.ts"
 import { ROOT } from "./lib/repo.ts"
 import { Failed, main, output, run } from "./lib/run.ts"
 
@@ -36,6 +37,7 @@ main(async () => {
   const core = await releasedCore(version)
   console.log(`replaying on the core of release ${version}, built from ${commit}`)
   const result = spawnSync(core, ["replay", path.resolve(file), ...rest], { stdio: "inherit" })
+  if (result.error) throw new Failed(`${core} didn't start: ${result.error.message}`)
   process.exit(result.status ?? 1)
 })
 
@@ -97,11 +99,12 @@ function releaseAt(commit: string): string {
 /** The release's core, from its full package in target/replay/<version>/, fetched the first time. */
 async function releasedCore(version: string): Promise<string> {
   const folder = path.join(ROOT, "target", "replay", version)
-  // Velopack's full package is a zip that holds the release's `current\` folder as lib/app/,
-  // whose SimConnect.dll and C runtime DLLs the core loads from beside it.
+  // Velopack's full package is a zip that holds the release's `current\` folder as lib/app/
+  // (read in velopack 1.2.161, src/vpk/Velopack.Packaging/PackageBuilder.cs), whose
+  // SimConnect.dll and C runtime DLLs the core loads from beside it.
   const core = path.join(folder, "lib", "app", "dualinput-core.exe")
   if (fs.existsSync(core)) return core
-  const name = `DualInput-${version}-full.nupkg`
+  const name = fullPackage(version)
   const url = `${REPOSITORY}/releases/download/${version}/${name}`
   console.log(`fetching ${url}`)
   const answer = await fetch(url)

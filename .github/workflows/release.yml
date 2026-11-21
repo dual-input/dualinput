@@ -26,6 +26,7 @@ env:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: windows-latest
     # Read-only, so `vpk download github` can't list a draft as the newest release.
     permissions:

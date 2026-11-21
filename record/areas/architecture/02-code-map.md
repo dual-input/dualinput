@@ -853,7 +853,8 @@ cargo-deny can ban a dependency only by naming, for each crate, which crates may
 
 ### Budgets for the workspace
 
-A pull request's CI finishes within 20 minutes with a warm cache, a starting value the first stage of [node 8](plan.md#8-the-build-order) that builds real code measures.
+A pull request's CI finishes within 20 minutes with a warm cache.
+On GitHub's runners it took 19 minutes 12 seconds with warm caches, and 47 minutes with every cache cold (measured on 2026-11-21, [build log](../build/log.md#2026-11-21-with-warm-caches-a-pull-requests-ci-took-19-minutes-12-seconds-inside-its-20-and-the-bench-passed-in-8-jobs-on-githubs-runners)).
 
 ## Left open
 
@@ -862,7 +863,6 @@ A pull request's CI finishes within 20 minutes with a warm cache, a starting val
 - Which operations an `ops` module in the bridge offers plugins, and how a plugin's API names the panels they reach: plugins' design, after v1 ([plugins and the sandbox](../plugins/01-plugins.md#what-this-answers)).
 - Two cores in sessions on one sim would feed the same slots, which a developer running a development core beside the installed one doesn't do, so nothing guards against it (user, 2026-10-15).
 - Which unit of the platform loads the EventBus bridge's listener into the EFB's document, which [04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim) leaves open, for after v1.
-- How long CI takes on Windows runners, and how much a warm cache saves: the first stage of [node 8](plan.md#8-the-build-order) that builds real code measures it with `cargo build --timings`, against [budgets for the workspace](#budgets-for-the-workspace).
 - Which of the platform's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which this design gives no feature: plugins' design, after v1.
 - The self-describing record a later version reads, which comes with the uploads after v1.
 

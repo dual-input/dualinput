@@ -1,5 +1,46 @@
 # The build: log
 
+## 2026-11-21: With warm caches, a pull request's CI took 19 minutes 12 seconds, inside its 20, and the bench passed in 8 jobs on GitHub's runners
+
+**Asked:** the questions of [the entry below](#2026-11-21-cis-first-run-on-githubs-runners-took-47-minutes-with-every-cache-cold-ran-6-jobs-at-once-and-failed-on-the-benchs-own-timing-budgets-and-races), on a run whose SDK and Cargo caches the first run saved.
+
+**Expected:** most of the cold run's 47 minutes gone with `node tools/setup.ts`'s 15 to 18, and the bench passing now that CI reports its budgets.
+
+**Found:** the second run on [pull request 1](https://github.com/dual-input/dualinput/pull/1), with the fixes the entry below names, passed every job in 19 minutes 12 seconds from start to end ([results](results/2026-11-21-ci-runs.txt)):
+
+- The longest path was the job that builds the bench's programs, 9 minutes 13 seconds, 6 minutes 42 seconds of them building, and then the slowest share, 9 minutes 25 seconds.
+- The checks job took 10 minutes 8 seconds beside it, 7 minutes 20 seconds of them in `node tools/check.ts`.
+- `node tools/setup.ts` took 1s in each job, the caches holding cargo-msfs and the SDK, and `npm ci` took about 1 minute in every job.
+- At most 8 jobs ran at once this time, the checks and 7 shares, where the first run held 6, so the count GitHub runs at once isn't steady.
+- The runner held every scenario, three cores and two relays included, and the shares reported 8 missed budgets rather than failing on them: a handler's 1ms in `cockpit`, `session`, `profiles`, `flight-model`, and `traffic`, and a profile's build at 2,905ms against 2,000ms.
+- Every program built with the static C runtime on the runner, so its Windows SDK holds `libucrt.lib`.
+
+**Changed:** the budget stands; the code map's and testing's left open items on CI's time and on whether a runner holds the bench, and the build's on the runner's static C runtime, are answered here.
+
+**Affects:** [budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace), which a change that builds more than this one could miss, since this run finished 48s inside it; [testing's left open](02-testing.md#left-open); and [the build's left open](01-the-build.md#left-open).
+
+## 2026-11-21: CI's first run on GitHub's runners took 47 minutes with every cache cold, ran 6 jobs at once, and failed on the bench's own timing budgets and races
+
+**Asked:** how long CI takes on GitHub's standard Windows runners against the code map's [20 minutes](../architecture/02-code-map.md#budgets-for-the-workspace), whether a runner holds the bench's three cores, two relays, and their proxies ([testing's left open](02-testing.md#left-open)), and whether the 8 shares of the bench run at once.
+
+**Expected:** a cold run well over 20 minutes, the 8 shares at once, since GitHub's Free plan runs up to 20 jobs at once (documented, [Actions limits](https://docs.github.com/en/actions/reference/limits)), and the bench passing as it does on our development machine.
+
+**Found:** the first run on [pull request 1](https://github.com/dual-input/dualinput/pull/1), with no cache of any kind, took 47 minutes from start to end ([results](results/2026-11-21-ci-runs.txt)):
+
+- The checks job took 43 minutes and passed all 17 checks, so the messages' types and `stamp.ts` that `cargo test` wrote on the runner matched those our development machine committed, and one commit gives one message crate's hash on both.
+  `node tools/setup.ts` took 18 of those minutes, compiling cargo-msfs and fetching the SDK, and `node tools/check.ts` 19.
+- The job that builds the bench's programs took 29 minutes, 15 of them in `node tools/setup.ts`.
+- Each share of the bench took 8 to 10 minutes, against about 6.5 on our development machine.
+- At most 6 jobs ran at once, the checks and 5 shares, so 3 shares waited for others to end.
+- The runner held every scenario with three cores and two relays, among them `network-relays`, `traffic`, and `session`, and 5 shares failed one or two tests each, none on behavior of the product:
+  - Four timing budgets: one input over 1ms past the one allowed under 2ms, in `flight-model`, `cockpit`, and `session`, at 2,093µs to 2,184µs, and a profile's build at 2,711ms against 2,000ms in `profiles`.
+  - `state-sync` flipped the PM's beacon back before the PM's core read the 1 it wrote, so state sync took the 0 for its write not landing, as it's built to.
+  - `clients-outages`' suspension blocked the bench's own process while PowerShell compiled the call, so the core heard nothing from its pages for 8s and closed their sockets before it was suspended.
+
+**Changed:** CI's bench jobs report a missed budget and pass, through `tools/bench/budgets.ts`, as [what keeps CI green](02-testing.md#what-keeps-ci-green) has it; `state-sync` waits 500ms before the PM flips the beacon back, as a pilot who sees it move would; and `tools/bench/suspend.ts` runs PowerShell without blocking the bench.
+
+**Affects:** [testing's left open](02-testing.md#left-open), and [the code map's left open](../architecture/02-code-map.md#left-open) on CI's time, which a run with warm caches answers.
+
 ## 2026-11-18: The one input over 1ms the bench allows each core was a job's result, on the CPU, not a pause
 
 **Asked:** what took the one input over 1ms that [building what it runs](02-testing.md#building-what-it-runs) allows each core, which that section puts down to a pause of the loop's thread.

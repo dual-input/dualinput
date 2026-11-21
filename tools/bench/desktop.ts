@@ -17,6 +17,7 @@ import { setTimeout as sleep } from "node:timers/promises"
 import type { DesktopState } from "../../src/engines/messages/ts/desktop/DesktopState.ts"
 import type { ToDesktop } from "../../src/engines/messages/ts/desktop/ToDesktop.ts"
 import { VERSION } from "../../src/engines/messages/ts/stamp.ts"
+import { fullPackage } from "../lib/release.ts"
 import { benchCore, benchSettings, type BenchRun, Core } from "./cores.ts"
 import { SIM_ORIGIN } from "./pages.ts"
 
@@ -68,7 +69,7 @@ export function writeFeed(folder: string, versions: string[]): string {
     PackageId: "DualInput",
     Version: version,
     Type: "Full",
-    FileName: `DualInput-${version}-full.nupkg`,
+    FileName: fullPackage(version),
     SHA1: "",
     SHA256: "",
     Size: 1,

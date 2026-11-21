@@ -234,7 +234,7 @@ The **publish job**, whose token can write releases, then:
 
 1. Deletes a draft of this version that a failed run left, since `vpk upload github` refuses a tag that exists ([log][vpk]), and runs `vpk upload github` without `--publish`, naming the commit it built as the tag's target, which leaves a draft no pilot sees ([log][vpk]).
    `vpk` takes the token from `VPK_TOKEN`, so no command line in the job's log shows it (read in velopack 1.2.161, `src/vpk/Velopack.Vpk/Commands/BaseCommand.cs`).
-2. Checks the draft: that its assets hold every file `vpk pack` listed in `assets.win.json`, and that its `releases.win.json`, the file `GithubSource` reads, lists this version's full package, and this version's delta whenever it lists an older full package ([log][vpk]); that the API's asset path reaches a draft's file is unverified.
+2. Checks the draft: that its assets hold every file `vpk pack` listed in `assets.win.json`, and that its `releases.win.json`, the file `GithubSource` reads, lists this version's full package, and this version's delta whenever the build job fetched a base, since the draft's feed lists only this build's packages ([log][vpk]); that the API's asset path reaches a draft's file is unverified.
 3. Deploys the backend, with `node tools/backend.ts deploy` ([the backend](#the-backend)).
 4. Publishes the draft as the newest release, through GitHub's API.
 
@@ -298,7 +298,6 @@ On a desk:
 - The check's name, and whether our `package.json` takes it from npm or from its repository: its repository's, when it's made.
 - What each release's notes say, and who writes them.
 - Whether Microsoft keeps serving older SDK installers: a build of a commit whose SDK it stopped serving can't run, so a rebuild for added logging, to replay a recording with, would then need that SDK kept elsewhere.
-- Whether the runner's Windows SDK holds the static UCRT, `libucrt.lib`, which the first build on the runner settles ([results][velopack]).
 - Whether the Microsoft Store edition keeps the stock files where a program can read them ([log][stock]).
 - Why our `VCockpit.js` won over FS Copilot's in one flight with both packages installed, against the documented rule ([installing log](../install/log.md#2026-10-22-our-vcockpitjs-won-over-fs-copilots-though-fscopilot-bridge-sorts-after-dualinput-with-the-same-order-hint)).
 

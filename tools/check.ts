@@ -13,6 +13,7 @@ import { buildDesktopPages, DESKTOP } from "./lib/desktop-pages.ts"
 import { readMessageTypes, writeMessageTypes } from "./lib/messages.ts"
 import { buildModule, clippyModule, missingExports } from "./lib/module.ts"
 import { workspaceVersion } from "./lib/package.ts"
+import { checkReleasedLevels } from "./lib/levels.ts"
 import { buildPages, checkPages } from "./lib/pages.ts"
 import { panelCompileProblem } from "./lib/panel.ts"
 import { fromRoot, ROOT } from "./lib/repo.ts"
@@ -42,6 +43,8 @@ const checks: [string, () => void | Promise<void>][] = [
   ["the Coherent GT check on our code in the sim", async () => checkPages(await buildPages())],
   ["the map check", () => run(process.execPath, [path.join("tools", "map-check.ts")])],
   ["the profiles' level files", checkLevels],
+  // A clone with no release tags, such as a fork's, checks nothing here.
+  ["the released levels against their release tags", checkReleasedLevels],
   ["the profiles' build", () => run("cargo", [...BUILDER, "build", "profiles"])],
   // The tools' tests, and our TypeScript's own, such as page-client's and the backend's, the
   // backend's on a local D1, on Node's test runner.

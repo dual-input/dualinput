@@ -30,7 +30,8 @@ use std::io::{self, BufReader, Read, Write};
 
 use serde::{Deserialize, Serialize};
 
-/// The first bytes of every recording, so a replay refuses any other file.
+/// The first bytes of every recording, so a replay refuses any other file. `MAGIC` in
+/// tools/replay.ts holds the same bytes, so change both together.
 pub const MAGIC: &[u8] = b"DualInput recording\n";
 
 /// The level p10's sizes above were measured at (record/areas/architecture/log.md,
@@ -47,7 +48,8 @@ const CHECKPOINT: u8 = 1;
 /// (record/areas/core/01-loop-and-edge.md, "Running a replay").
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Header {
-    /// The commit the core was built from, as 40 hex digits.
+    /// The commit the core was built from, as 40 hex digits. tools/replay.ts reads it as the
+    /// header's first field to find the release that shipped the core, so it stays first.
     pub commit: String,
     /// A SHA-256 of the changes not yet committed when it was built, or `None` when there
     /// were none.

@@ -20,6 +20,7 @@ import fs from "node:fs"
 import path from "node:path"
 
 import { buildPrograms } from "./lib/cargo.ts"
+import { checkReleasedLevels, releasedLevels } from "./lib/levels.ts"
 import { ROOT } from "./lib/repo.ts"
 import { Failed, main, output, run } from "./lib/run.ts"
 
@@ -39,7 +40,8 @@ function changes(): void {
   if (process.env.GITHUB_EVENT_NAME === "pull_request") {
     // A pull request's run checks out its merge into the base branch, whose first parent is
     // the base, so the two differ by exactly what the pull request changes.
-    const files = output("git", ["diff", "--name-only", "HEAD^1", "HEAD"]).split("\n").filter(Boolean)
+    // A rename lists both paths, so code moved into experiments/ still counts as changed code.
+    const files = output("git", ["diff", "--name-only", "--no-renames", "HEAD^1", "HEAD"]).split("\n").filter(Boolean)
     console.log(`the pull request changes ${files.length} ${files.length === 1 ? "file" : "files"}:\n  ${files.join("\n  ")}`)
     code = files.some((f) => !NOT_CODE.test(f))
     profiles = files.some((f) => f.startsWith("profiles/"))
@@ -50,28 +52,16 @@ function changes(): void {
   fs.appendFileSync(out, `code=${code}\nprofiles=${profiles}\n`)
 }
 
-/**
- * The highest level a release supports: the profile engine's `LEVEL` at each release tag,
- * every tag on this repository being a release's bare version
- * (record/areas/build/01-the-build.md, "A release"), or 0 before the first.
- */
-function releasedLevel(): number {
-  const tags = output("git", ["tag", "--list"]).split("\n").filter(Boolean)
-  const levels = tags.map((tag) => {
-    const engine = output("git", ["show", `${tag}:src/engines/profile-engine/src/lib.rs`])
-    const level = /^pub const LEVEL: u32 = (\d+);/m.exec(engine)?.[1]
-    if (!level) throw new Failed(`the profile engine at the tag ${tag} names no LEVEL`)
-    return Number(level)
-  })
-  return Math.max(0, ...levels)
-}
-
 function publishProfiles(pages: string): void {
-  const level = releasedLevel()
+  // A push to main publishes beside its checks rather than after them, so this check runs here
+  // too: a bundle published under a changed level stays published for good.
+  checkReleasedLevels()
+  const level = Math.max(0, ...releasedLevels().values())
   console.log(level === 0 ? "no release is published, so no level is released yet" : `releases support levels up to ${level}`)
   const { "dualinput-profile-builder": builder } = buildPrograms(["-p", "dualinput-profile-builder"], ["dualinput-profile-builder"])
   run(builder, ["publish", "--released", String(level), "--profiles", path.join(ROOT, "profiles"), "--pages", pages])
-  run("git", ["add", "--all"], { cwd: pages })
+  // The branch keeps every file it ever held, since a session may pin any bundle published.
+  run("git", ["add", "--ignore-removal", "."], { cwd: pages })
   if (output("git", ["status", "--porcelain"], { cwd: pages }).trim() === "") {
     console.log("the pages branch holds every bundle already")
     return

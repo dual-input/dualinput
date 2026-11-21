@@ -12,7 +12,7 @@ use velopack::{UpdateCheck, UpdateInfo, UpdateManager, VelopackAsset};
 pub const FEED_SETTING: &str = "desktop.update-feed";
 /// Our repository, whose newest 10 releases `GithubSource` reads, so a pilot up to 10 releases behind gets deltas (read in
 /// velopack 1.2.161, unverified by a run; record/areas/install/01-installing-and-updating.md, "The installer and the
-/// updater").
+/// updater"). `REPOSITORY` in tools/replay.ts names the same repository, so change both together.
 const REPOSITORY: &str = "https://github.com/dual-input/dualinput";
 
 /// A release newer than the running one.

@@ -334,6 +334,7 @@ export class Core {
    */
   checkHandlers(run: string, { pauseUs = 2_000 } = {}): void {
     const stats = this.log().split("\n").filter((l) => l.includes("the loop's stats")).at(-1) ?? ""
+    assert.ok(stats, `${run}: the core logged no loop's stats as it exited`)
     const slowest = Number(/slowest_us=(\d+)/.exec(stats)?.[1])
     const over = Number(/over_1ms=(\d+)/.exec(stats)?.[1])
     console.log(`budget: ${run}: the slowest input took ${slowest}µs, ${over} over 1ms, against 1,000µs for a handler with one pause under ${pauseUs.toLocaleString("en-US")}µs allowed`)

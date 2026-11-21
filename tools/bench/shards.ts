@@ -4,7 +4,7 @@
 // files, balanced by how long each file takes.
 
 /**
- * Each scenario file's time in seconds on our development machine: the twelve longest from the
+ * Each scenario file's time in seconds on our development machine: the 12 longest from the
  * whole bench of 2026-11-20, the rest from a run of those files alone on 2026-11-21. When a
  * share's job runs long in CI, or a scenario is added, write its file's time from a run here.
  */

@@ -9,8 +9,6 @@ use profile_engine::{Name, Resolved, Watch as EntryWatch, key_names};
 use profile_loader::Profiles;
 use sync_engine::Watch;
 
-use crate::StateSync;
-
 fn profile<'v>(view: &'v View<'_>) -> Option<&'v Resolved> {
     view.read::<Profiles>().loaded().map(|l| &l.profile)
 }
@@ -29,24 +27,14 @@ pub(crate) fn any_h_event(view: &View) -> bool {
     })
 }
 
-/// `h-events` goes to one panel, since a handler in every panel would hear each event once in
-/// each: the first asked about after the load, and that panel again, by its instruments' keys,
-/// after it reloads. A panel whose instrument the sim created after its `hello` joins again
-/// naming that one too, so the panel is the one whose keys include every key kept.
+/// `h-events` takes every instrument of its panel, and the clients crate keeps it to one panel,
+/// since it's registered with `one_panel_module`.
 pub(crate) fn h_events_rule(view: &View, instruments: &[String]) -> Vec<String> {
-    if !any_h_event(view) {
-        return Vec::new();
+    if any_h_event(view) {
+        instruments.to_vec()
+    } else {
+        Vec::new()
     }
-    let me = view.read::<StateSync>();
-    let mut chosen = me.h_events_panel.borrow_mut();
-    if chosen
-        .as_ref()
-        .is_some_and(|keys| !keys.iter().all(|k| instruments.contains(k)))
-    {
-        return Vec::new();
-    }
-    *chosen = Some(instruments.to_vec());
-    instruments.to_vec()
 }
 
 /// Each `instrument()` the loaded variant's state entries name, by its key.

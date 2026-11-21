@@ -11,7 +11,6 @@ mod notices;
 mod panels;
 mod watch;
 
-use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::time::Duration;
 
@@ -51,10 +50,6 @@ pub struct StateSync {
     live: Option<Live>,
     /// When this sim last reached Flying from Ready to fly, while it stays in Flying.
     rtc_end: Option<u64>,
-    /// The instruments of the panel that holds `h-events`, by their keys, once it's been picked.
-    /// A rule can only read, and this is what it remembers between one panel's hello and the
-    /// next's, so it's a cell (record/areas/sync/05-units.md, "`H:` events").
-    h_events_panel: RefCell<Option<Vec<String>>>,
 }
 
 struct Live {
@@ -102,7 +97,7 @@ pub fn register(r: &mut Registry) {
         .guard::<Ready>(StateSync::settled)
         .on_sim(StateSync::on_sim)
         .ends_with_profile()
-        .panel_module(H_EVENTS, panels::h_events_rule, panels::any_h_event)
+        .one_panel_module(H_EVENTS, panels::h_events_rule, panels::any_h_event)
         .panel_module(
             INSTRUMENT_READS,
             panels::instruments_rule,
@@ -202,7 +197,6 @@ impl StateSync {
         live.frames = Some(cx.sim().frames());
         live.carry_out(out, cx);
         me.live = Some(live);
-        *me.h_events_panel.borrow_mut() = None;
     }
 
     fn unload(me: &mut StateSync, _: &ProfileUnloaded, cx: &mut Cx) {
@@ -213,7 +207,6 @@ impl StateSync {
                 cx.cockpit().applied(applying);
             }
         }
-        *me.h_events_panel.borrow_mut() = None;
         cx.cockpit().step_ready(STATE, false);
     }
 

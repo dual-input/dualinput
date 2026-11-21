@@ -23,6 +23,8 @@ pub(crate) struct PanelModuleRule {
     pub(crate) name: &'static str,
     pub(crate) rule: fn(&View, &[String]) -> Vec<String>,
     pub(crate) needed: fn(&View) -> bool,
+    /// Whether it goes to one panel at a time, which `ClientsUnit::one_panel_module` says.
+    pub(crate) one_panel: bool,
 }
 
 #[derive(Default)]
@@ -125,8 +127,10 @@ impl Clients {
             .collect()
     }
 
-    /// Answers a panel with the panel modules whose rules pick any of its instruments, or
-    /// with `none`, after which it closes its socket.
+    /// Answers a panel with the panel modules whose rules pick any of its instruments, less a
+    /// one-panel module another open socket holds, or with `none`, after which it closes its
+    /// socket. `Clients::hello` closes a reloaded panel's old socket before it calls
+    /// `panel_joined`, so a one-panel module follows its panel through a reload.
     fn answer_panel(&mut self, socket: u64, cx: &Cx) {
         let Some(client) = self.sockets.get(&socket) else {
             return;
@@ -140,6 +144,7 @@ impl Clients {
         let modules: Vec<PanelModule> = self
             .panel_modules
             .iter()
+            .filter(|m| !m.one_panel || !self.held_elsewhere(m.name, socket))
             .filter_map(|m| {
                 let picked = (m.rule)(&view, &instruments);
                 (!picked.is_empty()).then(|| PanelModule {
@@ -161,5 +166,12 @@ impl Clients {
         if let Some(client) = self.sockets.get_mut(&socket) {
             client.answered = answered;
         }
+    }
+
+    /// Whether an open socket other than `socket` was answered with `module`.
+    fn held_elsewhere(&self, module: &str, socket: u64) -> bool {
+        self.sockets
+            .iter()
+            .any(|(&s, c)| s != socket && c.answered.loaded(module))
     }
 }

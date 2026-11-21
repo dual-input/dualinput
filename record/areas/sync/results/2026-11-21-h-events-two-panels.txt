@@ -1,0 +1,56 @@
+The clients-panels scenario on the bench, on our development machine, 2026-11-21.
+
+The run during stage 22c whose first case failed with "h-events went to panels 18, 19".
+The scenario's panels 18 and 19 are VCockpit78 and VCockpit79, each holding one instrument keyed
+GNS_DISABLED. The order in which the panels said hello, from the core's log, the socket's number
+being the order the clients crate answers them in:
+
+clients::sockets: a client joined socket=1 component="panel-bridge" panel="VCockpit79" instruments=1
+clients::sockets: a client joined socket=2 component="panel-bridge" panel="VCockpit68" instruments=1
+clients::sockets: a client joined socket=3 component="panel-bridge" panel="VCockpit69" instruments=1
+clients::sockets: a client joined socket=4 component="panel-bridge" panel="VCockpit70" instruments=1
+clients::sockets: a client joined socket=5 component="panel-bridge" panel="VCockpit71" instruments=1
+clients::sockets: a client joined socket=6 component="panel-bridge" panel="VCockpit72" instruments=1
+clients::sockets: a client joined socket=7 component="panel-bridge" panel="VCockpit73" instruments=1
+clients::sockets: a client joined socket=8 component="panel-bridge" panel="VCockpit74" instruments=1
+clients::sockets: a client joined socket=9 component="panel-bridge" panel="VCockpit75" instruments=1
+clients::sockets: a client joined socket=10 component="panel-bridge" panel="VCockpit76" instruments=1
+clients::sockets: a client joined socket=11 component="panel-bridge" panel="VCockpit77" instruments=1
+clients::sockets: a client joined socket=12 component="panel-bridge" panel="VCockpit78" instruments=1
+clients::sockets: a client joined socket=13 component="panel-bridge" panel="VCockpit60" instruments=2
+clients::sockets: a client joined socket=14 component="panel-bridge" panel="VCockpit61" instruments=2
+clients::sockets: a client joined socket=15 component="panel-bridge" panel="VCockpit62" instruments=2
+clients::sockets: a client joined socket=16 component="panel-bridge" panel="VCockpit63" instruments=1
+clients::sockets: a client joined socket=17 component="panel-bridge" panel="VCockpit64" instruments=1
+clients::sockets: a client joined socket=18 component="panel-bridge" panel="VCockpit65" instruments=1
+clients::sockets: a client joined socket=19 component="panel-bridge" panel="VCockpit66" instruments=1
+clients::sockets: a client joined socket=20 component="panel-bridge" panel="VCockpit67" instruments=1
+clients::panels: the profile loaded, so the clients crate answers each cockpit panel panels=20
+
+The scenario at 071f1768, with the new case added, before the fix. Its 20-panel case's first
+hello came from VCockpit79 again, and VCockpit67 said hello second:
+
+✖ panels connect only in a session, each of 20 is answered within 1s of the flight's load, the profile's among it, and one told none stays away until the next session
+  AssertionError [ERR_ASSERTION]: h-events went to panels 18, 19
+✔ a panel module's messages reach its feature and come back, and a reloaded panel gets its modules on its new socket while the core closes the old
+✖ state sync's h-events goes to one of two panels that hold instruments of one key, and to that panel's new socket when it reloads
+  AssertionError [ERR_ASSERTION]: h-events went to VCockpit66 and VCockpit67
+✔ a slice 20 panels watch reaches each under 30 messages a second, though it changes 100 times a second, and each round takes under 1ms on the loop
+✔ no cockpit panel within 10s of the profile loading raises the clients crate's trouble notification, cleared once one connects
+✔ no cockpit panel raises no trouble under a profile whose panel modules need none
+✔ a module from another build while a test routine is fed raises the sim service's trouble notification for our package
+pass 5, fail 2
+
+The same scenarios with stage 14d's fix, `node tools/bench.ts clients-panels state-sync pointer-sync`.
+The 20-panel case's first hello came from VCockpit79 again:
+
+clients::sockets: a client joined socket=1 component="panel-bridge" panel="VCockpit79" instruments=1
+
+✔ panels connect only in a session, each of 20 is answered within 1s of the flight's load, the profile's among it, and one told none stays away until the next session
+✔ a panel module's messages reach its feature and come back, and a reloaded panel gets its modules on its new socket while the core closes the old
+✔ state sync's h-events goes to one of two panels that hold instruments of one key, and to that panel's new socket when it reloads
+✔ a slice 20 panels watch reaches each under 30 messages a second, though it changes 100 times a second, and each round takes under 1ms on the loop
+✔ no cockpit panel within 10s of the profile loading raises the clients crate's trouble notification, cleared once one connects
+✔ no cockpit panel raises no trouble under a profile whose panel modules need none
+✔ a module from another build while a test routine is fed raises the sim service's trouble notification for our package
+pass 28, fail 0, across clients-panels (7), pointer-sync (9), and state-sync (12)

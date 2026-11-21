@@ -4,6 +4,30 @@ What our experiments and the build's stages found about keeping cockpits in sync
 The probes are in [experiments/areas/sync](../../../experiments/areas/sync), and their raw output is in its `results/` folder.
 Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on our development machine with Flow Pro 26.33.5, ChasePlane 2026.39.1.16, and GSX Pro 4.0.19 installed, with the frame rate capped near 30 fps unless the entry says otherwise.
 
+## 2026-11-21: `h-events` went to two panels whose instruments share a key, since state sync knew its panel only by its keys
+
+**Asked:** in one run during [stage 22c](../build/plan.md#22c-the-formats-audit), the bench's `clients-panels` scenario sent state sync's `h-events` to panels 18 and 19, and it passed on a rerun; stage 22c's changes touch neither the clients crate nor how panels are answered, so what sent it to two panels?
+
+**Expected:** a race in the clients crate, such as two panels answered in one input before the first answer was recorded.
+
+**Found:** no race.
+State sync's rule gave `h-events` to the first panel it was asked about after the load, then to any panel whose instruments' keys included every key of that panel's, so a reloaded panel, or one that joined again naming an instrument the sim created after its `hello`, got it back ([the entry of 2026-11-10](#2026-11-10-stage-14s-code-review-found-a-catch-up-answered-with-no-values-a-preset-fired-again-after-a-gap-and-a-stream-stalled-by-an-unload)).
+The scenario's panels 18 and 19, `VCockpit78` and `VCockpit79`, each hold one instrument keyed `GNS_DISABLED`, as two of the Baron's panels do ([core log](../core/log.md#2026-10-22-stage-5s-bridge-loads-in-all-20-of-the-barons-panels-joins-the-core-on-a-sessions-announcement-and-leaves-the-cockpit-whole-when-bridgejs-is-missing-or-throws-but-two-panels-shared-an-instrument-key)).
+The clients crate answers the panels in the order their sockets opened, and in the failing run `VCockpit79` opened first, so `VCockpit78`'s keys matched and both panels got the module ([results](results/2026-11-21-h-events-two-panels.txt)).
+A run passes whenever neither of the two opens first.
+A new case with only two such panels fails every run, since one of the two always opens first, and it failed in the one run before the fix, at 071f1768, where the 20-panel case failed again with `VCockpit79` first again ([results](results/2026-11-21-h-events-two-panels.txt)).
+Read in the code, a panel with no instruments answered first would have given the module to every panel, since the rule asked only that a panel's keys include each key of the first panel's, and that panel had none.
+
+In the sim, the same would happen in the Baron whenever one of its two `GNS_DISABLED` panels opens its socket first, and each `H:` event would then reach state sync twice (unverified).
+
+**Changed:** the clients crate puts a panel module registered with `one_panel_module` in a panel's `load` only if the module's rule picks some of that panel's instruments and no other open socket was answered with it, so the first such panel answered keeps it until its socket closes (user, 2026-11-21).
+A reloaded panel's new socket names the panel, so the clients crate closes the old socket before it answers the new one, and the new one gets the module, by the name that already decides a replacement.
+State sync registers `h-events` that way, and its rule remembers no panel.
+With the fix, `clients-panels`, `state-sync`, and `pointer-sync` passed 28 of 28, the 20-panel case with `VCockpit79` first again ([results](results/2026-11-21-h-events-two-panels.txt)).
+This rests on a reloaded panel keeping its name, which [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#left-open) leaves open: if the sim renames it, the reloaded panel goes without `h-events` until the next load, where the old rule, matching keys, would have given it back.
+
+**Affects:** [the sync units](05-units.md) and [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), each with a note at its top, and [stage 14d](../build/plan.md#14d-h-events-in-one-panel).
+
 ## 2026-11-19: No route showed an autopilot event's effect in the frame it was sent, so a guard in the sim reads the old mode, and the events of one frame apply in the order sent
 
 **Asked:** for [stage 14c](../build/plan.md#14c-two-coupled-writes-in-one-input), how soon can the sim read the effect of a `K:` event, sent through SimConnect as the core sends it, through our WASM module's calculator code or its Events API, or from a cockpit panel?

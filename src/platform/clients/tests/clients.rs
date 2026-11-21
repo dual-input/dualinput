@@ -44,6 +44,9 @@ impl Feature {
         .panel_module("feature-panel", Feature::rule, |view: &View| {
             view.read::<Feature>().panel_needed
         })
+        .one_panel_module("feature-one", Feature::gns, |view: &View| {
+            view.read::<Feature>().panel_needed
+        })
         .client_messages("feature-panel", Feature::echo)
         .setting(
             "feature.loud",
@@ -111,6 +114,18 @@ impl Feature {
         instruments
             .iter()
             .filter(|i| i.starts_with("PFD"))
+            .cloned()
+            .collect()
+    }
+
+    /// The one-panel module's rule, which picks no instrument the other tests' panels hold.
+    fn gns(view: &View, instruments: &[String]) -> Vec<String> {
+        if !view.read::<Feature>().profile {
+            return Vec::new();
+        }
+        instruments
+            .iter()
+            .filter(|i| i.starts_with("GNS"))
             .cloned()
             .collect()
     }
@@ -579,6 +594,36 @@ fn two_panels_that_hold_instruments_of_one_key_both_keep_their_sockets() {
         !out.iter().any(|o| matches!(o, SocketOut::Close { .. })),
         "{out:?}"
     );
+}
+
+#[test]
+fn a_one_panel_module_goes_to_one_of_two_panels_of_one_key_and_follows_it_through_a_reload() {
+    let (mut core, _) = Core::new(None);
+    core.join_panel(1, "VCockpit66", &["GNS_DISABLED"]);
+    core.join_panel(2, "VCockpit67", &["GNS_DISABLED"]);
+    let out = core.handle_profile(true);
+    let one = ToClient::Load {
+        modules: vec![messages::clients::PanelModule {
+            name: "feature-one".into(),
+            instruments: vec!["GNS_DISABLED".into()],
+        }],
+    };
+    let one = std::slice::from_ref(&one);
+    assert_eq!(to(1, &out), one);
+    assert_eq!(to(2, &out), [ToClient::None]);
+    // VCockpit66 reloads: its new socket names the same panel, and gets the module back.
+    let out = core.join_panel(3, "VCockpit66", &["GNS_DISABLED"]);
+    assert_eq!(to(3, &out), one);
+    // VCockpit67 joins again, as for an instrument the sim created after its hello.
+    let out = core.join_panel(4, "VCockpit67", &["GNS_DISABLED", "GNS_LATE"]);
+    assert_eq!(to(4, &out), [ToClient::None]);
+    core.handle_profile(false);
+    let out = core.handle_profile(true);
+    let holders = [3, 4]
+        .into_iter()
+        .filter(|&s| matches!(to(s, &out).as_slice(), [ToClient::Load { .. }]))
+        .count();
+    assert_eq!(holders, 1, "{out:?}");
 }
 
 #[test]

@@ -1072,6 +1072,28 @@ Tests: the profile engine's cases for a bracketed map, a byte-order mark, a sche
 Exit: `node tools/check.ts` passes with the 58P's profile in the layout, and `node tools/bench.ts state-sync clients-panels profiles` passes.
 Done on 2026-11-21: the bug the audit found in the aircraft picker, which kept a pick of the 58P on "Loading…" since it waited for the sim's names for the aircraft to match the profile's, went to the user rather than into the stage, and was fixed in a commit of its own that day at the user's word.
 
+## 14d `h-events` in one panel
+
+Designs first: how state sync's `h-events` stays in one panel, since its rule knew that panel by its instruments' keys, two of the Baron's panels each hold one instrument keyed `GNS_DISABLED`, and the `clients-panels` scenario sent it to both of its panels that copy them, 18 and 19, during stage 22c ([sync log](../sync/log.md#2026-11-21-h-events-went-to-two-panels-whose-instruments-share-a-key-since-state-sync-knew-its-panel-only-by-its-keys)).
+The clients crate keeps it there, by the panel's name, as [05-units](../sync/05-units.md)' note of 2026-11-21 has it (user, 2026-11-21).
+
+Builds:
+
+- in `clients`: `one_panel_module`, which registers a panel module that goes to one panel at a time ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-11-21)
+- in `state-sync`: `h-events` registered that way, with a rule that remembers no panel
+
+Needs: 14.
+
+Tests:
+
+- As the clients crate's own tests: of two panels holding instruments of one key, a one-panel module goes to the first answered, to its new socket when it reloads, and never to the other, even when the other joins again; and after the profile unloads and loads again, to one panel.
+- On the bench, in the `clients-panels` scenario: state sync's `h-events` goes to one of two panels that hold instruments of one key, and to that panel's new socket when it reloads.
+
+It closes on `clients-panels`, whose panels share keys; `state-sync`, whose cases hear `H:` events through `h-events`; and `pointer-sync`, whose panels reload and share the tablet's key.
+
+Exit: on our development machine, `node tools/check.ts` passes, and `node tools/bench.ts clients-panels state-sync pointer-sync` passes, the new case among them, which fails before the fix.
+Done on 2026-11-21: `node tools/check.ts` passed, and the three scenarios passed 28 of 28, the new case among them, which failed before the fix ([sync log](../sync/log.md#2026-11-21-h-events-went-to-two-panels-whose-instruments-share-a-key-since-state-sync-knew-its-panel-only-by-its-keys)).
+
 ## 22d The profile extension
 
 Builds: a VS Code extension for writing profiles, loaded from disk, which moved to v1 on 2026-11-21 ([the product plan's picks](../product/plan.md#3-v1-or-later)).

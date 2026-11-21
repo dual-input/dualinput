@@ -13,6 +13,11 @@ Decides:     The core's WebSocket library and its Origin check; the client proto
 > A panel module also says whether the loaded profile names anything it serves, and `clients` raises [its trouble notification](#cockpit-panels-and-their-modules) over a panel that never connects only when one does ([the apps' note](../interface/01-apps.md)).
 > `clients` gains the slice `core`, with the core's version, its hash, and the Windows username, which a core reads only before first-time setup is done, so a later recording never holds it, and the settings `app.setup-done` and `app.guide-done`.
 
+> **Note**
+> In [cockpit panels and their modules](#cockpit-panels-and-their-modules), a unit can register a panel module with `one_panel_module`, and `clients` puts it in a panel's `load` only if the module's rule picks some of that panel's instruments and no other open socket was answered with it, so the first such panel answered keeps it until its socket closes ([sync log](../sync/log.md#2026-11-21-h-events-went-to-two-panels-whose-instruments-share-a-key-since-state-sync-knew-its-panel-only-by-its-keys); user, 2026-11-21).
+> A panel's new socket replaces its old one before `clients` answers it, so the module follows the panel's name through a reload, and state sync's `h-events` is the one such module.
+> A known limit: if a reloaded panel takes a new name, which [left open](#left-open) asks, its old socket keeps the module until the core closes it 8s after the old page's last message, and the new socket, told `none`, stays closed, so `h-events` reaches no panel until the profile loads again.
+
 The core serves every client over one protocol of JSON messages on a WebSocket, through tokio-websockets, which iroh already brings into the core.
 A client opens with a `hello` that names it and its version, and from then on each side sends `alive` every 2s, while only the core closes a socket that goes quiet.
 A unit reaches the clients through slices of state, which the `clients` crate sends on a timer to the clients that show them, through commands the clients send it, and through messages of its own to a client by name.

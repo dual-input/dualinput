@@ -66,6 +66,21 @@ pub trait ClientsUnit<S> {
         needed: fn(&View) -> bool,
     ) -> &mut Self;
 
+    /// A panel module that goes to one panel at a time, for a module whose handler would hear
+    /// each sim event once in every panel that ran it. It goes to the first panel answered
+    /// whose instruments `rule` picks, while no other open socket holds it. A reloaded panel's
+    /// new socket replaces the old by the panel's name before the panel is answered, so the
+    /// module follows the panel; `Clients::hello` says why the name decides, not the
+    /// instruments' keys. A panel that reloads under a new name breaks this: its old socket
+    /// holds the module until the core closes it, and the new one gets none until the profile
+    /// loads again.
+    fn one_panel_module(
+        &mut self,
+        name: &'static str,
+        rule: fn(&View, &[String]) -> Vec<String>,
+        needed: fn(&View) -> bool,
+    ) -> &mut Self;
+
     /// A setting, by a key no other unit registers, whose value any unit reads through
     /// `Clients::setting`.
     fn setting(&mut self, key: &'static str, setting: SettingDef) -> &mut Self;
@@ -132,14 +147,33 @@ impl<S: 'static> ClientsUnit<S> for Unit<'_, S> {
         rule: fn(&View, &[String]) -> Vec<String>,
         needed: fn(&View) -> bool,
     ) -> &mut Self {
-        let clients = self.registry().state_mut::<Clients>();
-        assert!(
-            !clients.panel_modules.iter().any(|m| m.name == name),
-            "panel module {name} should be registered once"
+        register_panel_module(
+            self.registry().state_mut::<Clients>(),
+            PanelModuleRule {
+                name,
+                rule,
+                needed,
+                one_panel: false,
+            },
         );
-        clients
-            .panel_modules
-            .push(PanelModuleRule { name, rule, needed });
+        self
+    }
+
+    fn one_panel_module(
+        &mut self,
+        name: &'static str,
+        rule: fn(&View, &[String]) -> Vec<String>,
+        needed: fn(&View) -> bool,
+    ) -> &mut Self {
+        register_panel_module(
+            self.registry().state_mut::<Clients>(),
+            PanelModuleRule {
+                name,
+                rule,
+                needed,
+                one_panel: true,
+            },
+        );
         self
     }
 
@@ -150,4 +184,13 @@ impl<S: 'static> ClientsUnit<S> for Unit<'_, S> {
             .register(key, setting);
         self
     }
+}
+
+fn register_panel_module(clients: &mut Clients, module: PanelModuleRule) {
+    assert!(
+        !clients.panel_modules.iter().any(|m| m.name == module.name),
+        "panel module {} should be registered once",
+        module.name
+    );
+    clients.panel_modules.push(module);
 }

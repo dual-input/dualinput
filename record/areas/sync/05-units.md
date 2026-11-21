@@ -48,6 +48,10 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 > Each `panel_module` call below takes a third argument, a function that says whether the loaded profile names anything the module serves, and `clients` raises its trouble over a panel that never connects only when one says yes ([the apps' note](../interface/01-apps.md); user, 2026-11-01).
 > `h-events` says yes when the loaded variant's `watches` holds an `H:` event, and `instrument-reads` when they hold an `instrument()`.
 
+> **Note**
+> In [`H:` events](#h-events), the clients crate, not state sync's rule, keeps `h-events` in one panel, since two panels can hold instruments of one key, and a rule that knew its panel by its keys gave the module to both ([sync log](log.md#2026-11-21-h-events-went-to-two-panels-whose-instruments-share-a-key-since-state-sync-knew-its-panel-only-by-its-keys); user, 2026-11-21).
+> State sync registers it with `one_panel_module`, and its rule takes every instrument of a panel, so the first panel answered that holds an instrument gets it, and keeps it through a reload by its name, as [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-11-21 has it.
+
 The sync engine is one state machine for each loaded profile, with no I/O, so the IDE and the bench link it on their own.
 The cockpit stream, in the platform, carries every cockpit message in causal order, holds each state entry's newest value, paces what it applies, keeps what it sent for a replay, and runs catch-up, which the catching-up machine asks for.
 State sync is the feature that joins the engine to the sim, the stream, and the session.

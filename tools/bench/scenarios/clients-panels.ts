@@ -2,7 +2,8 @@
 // a flight in the Baron 58P, whose profile the loader loads from the bench's profiles' site,
 // and the clients' test unit standing in for a feature with a panel module: panels connect
 // only in a session, each is answered once the profile loads, a panel told none stays away, a reloaded
-// panel replaces its socket, and trouble shows when no panel connects under a profile that needs one
+// panel replaces its socket, state sync's `h-events` goes to one panel, and trouble shows when no
+// panel connects under a profile that needs one
 // (record/areas/core/02-clients-and-panel-bridge.md, "Cases for the bench" and "Budgets";
 // record/areas/interface/01-apps.md, "Cases for the bench").
 
@@ -122,6 +123,33 @@ test("a panel module's messages reach its feature and come back, and a reloaded 
   await reloaded.until(() => reloaded.messages("load").length === 1, "the reloaded panel's load")
   await first.until(() => first.client.state === "closed", "the core closing the old socket")
   await core.logged(/a cockpit panel's new socket replaced its old one/)
+})
+
+test("state sync's h-events goes to one of two panels that hold instruments of one key, and to that panel's new socket when it reloads", { timeout: 60_000 }, async (t) => {
+  const run = new BenchRun("clients-h-events", t)
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const core = await announcing(run, "a", net.core())
+  // Two of the Black Square Baron 58P's panels each hold one instrument keyed GNS_DISABLED, so
+  // whichever the core answers first, the other names the same keys (measured on MSFS 2024,
+  // record/areas/core/log.md, "2026-10-22: Stage 5's bridge loads in all 20 of the Baron's
+  // panels, joins the core on a session's announcement, and leaves the cockpit whole when
+  // bridge.js is missing or throws, but two panels shared an instrument key").
+  const names = ["VCockpit66", "VCockpit67"]
+  const panels = names.map((name) => panel(core, name, ["GNS_DISABLED"]))
+  t.after(() => panels.forEach((p) => p.close()))
+  await host(core, "Host")
+  await panels[0]!.until(() => panels.every((p) => p.client.connected), "both panels connecting")
+  await load(core, BARON)
+  await panels[0]!.until(() => panels.every((p) => p.messages("load").length + p.messages("none").length > 0), "both panels' answers")
+  const holds = (p: FakePage) => p.messages("load").some((m) => m.modules.some((x) => x.name === "h-events"))
+  const holders = names.filter((_, i) => holds(panels[i]!))
+  assert.equal(holders.length, 1, `h-events went to ${holders.join(" and ")}`)
+
+  const reloaded = panel(core, holders[0]!, ["GNS_DISABLED"])
+  t.after(() => reloaded.close())
+  await reloaded.until(() => reloaded.messages("load").length === 1, "the reloaded panel's load")
+  assert.deepEqual(reloaded.messages("load")[0]!.modules, [{ name: "h-events", instruments: ["GNS_DISABLED"] }])
 })
 
 test("a slice 20 panels watch reaches each under 30 messages a second, though it changes 100 times a second, and each round takes under 1ms on the loop", { timeout: 60_000 }, async (t) => {

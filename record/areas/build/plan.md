@@ -1052,6 +1052,7 @@ Tests:
 The stage changes the kernel and the core's edge, so it closes on the whole bench, which CI runs on the stage's pull request, as a job per scenario, since our development machine's disk was short (user, 2026-11-21).
 
 Exit: on our development machine, `node tools/check.ts` and the scenarios the stage touches pass, and on CI the whole bench passes, the `test-sessions` scenario and the `profiles` scenario's changed case among them; on the bench, a bundle the following pilot's local folder gets reloads on both cores in flight, and a bundle the PF's gets reloads while `Follow` runs on; and the [profiles' log](../profiles/log.md) has an entry for the cases.
+Done on 2026-11-21: on our development machine, `node tools/check.ts` passed, and the three scenarios the stage touches passed 26 of 26, a reload's catch-up ending 1,494ms after its load against 4s of settling ([profiles log](../profiles/log.md#2026-11-21-stage-22bs-test-sessions-pass-their-bench-cases-and-a-reloads-catch-up-ended-15s-after-its-load-against-4s-of-settling)); on CI, the stage's pull request, rebased onto stage 22c, passed every check, its 30 scenario jobs among them, before it merged.
 
 ## 22c The format's audit
 

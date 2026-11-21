@@ -242,6 +242,11 @@ test("a switch flipped on one core's aircraft moves on the other's, and nothing 
   const { pf, pm } = await crew(t, "switch")
   setVariable(pf, "L:BEACON", 1)
   await settles("the PM's beacon", () => variable(pm, "L:BEACON"), 1)
+  // The PM's core holds its write pending until it reads the beacon back, and until then takes
+  // a reading of 0 for the switch not having moved yet. A pilot flips it back only after seeing
+  // it move, so the PM waits too: on a GitHub runner, a flip the stand-in sim took before the
+  // PM's core read the 1 counted as the write never landing.
+  await sleep(500)
   setVariable(pm, "L:BEACON", 0)
   await settles("the PF's beacon", () => variable(pf, "L:BEACON"), 0)
   await sleep(500)

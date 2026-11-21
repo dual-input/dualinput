@@ -510,7 +510,7 @@ test("with the core suspended, a visible lock turns into a warning within 10s, u
   await net.relays[0]!.cut(b.core.process.pid!, 120_000)
   await soon(() => b.panel.blocked() && other.blocked(), "both of the PM's panels locking", 10_000)
 
-  suspend(b.core.process.pid!)
+  await suspend(b.core.process.pid!)
   try {
     const warned: number[] = []
     await soon(() => {
@@ -526,7 +526,7 @@ test("with the core suspended, a visible lock turns into a warning within 10s, u
     b.panel.bridge.unlock()
     assert.equal(b.panel.locks().length, 0, "unlock removes it at once")
   } finally {
-    resume(b.core.process.pid!)
+    await resume(b.core.process.pid!)
   }
   await soon(() => other.blocked(), "the other panel's lock once the core answers again", 5_000)
   await b.core.kill()

@@ -14,6 +14,7 @@ import type { Made } from "../../../src/engines/messages/ts/bench/Made.ts"
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
 import type { TrafficSlice } from "../../../src/engines/messages/ts/traffic/TrafficSlice.ts"
 import { userCfgText } from "../aircraft.ts"
+import { budget } from "../budgets.ts"
 import { BenchRun, type Core } from "../cores.ts"
 import { BARON, load, toMenu } from "../flights.ts"
 import { app, BenchNetwork, host, join } from "../network.ts"
@@ -310,7 +311,7 @@ test("a joiner creates 150 copies within 5s of entering the flight, from the ide
   const shown = await untilCopies(b, (c) => c.length === 150, "150 copies", 10_000)
   const took = Date.now() - entered
   console.log(`budget: traffic: a joiner created 150 copies within ${took}ms of entering the flight, against 5s`)
-  assert.ok(took < 5_000, `150 copies took ${took}ms`)
+  budget(took < 5_000, `150 copies took ${took}ms`)
   assert.ok(shown.every((c) => c.title.startsWith("FSLTL_FAIB_B738_")))
   // `Traffic` draws a copy once the network holds the host's clock offset.
   await untilCopies(b, (c) => c.length === 150 && drawn(c), "every copy drawn", 10_000)
@@ -337,7 +338,7 @@ test("a pilot already in the flight whose link comes up gets every identity, and
   await untilCopies(b, (c) => c.length === 150, "150 copies", 10_000)
   const took = Date.now() - up
   console.log(`budget: traffic: a pilot already in the flight created 150 copies ${took}ms after its link came up, against 500ms`)
-  assert.ok(took < 500, `150 copies took ${took}ms from the link`)
+  budget(took < 500, `150 copies took ${took}ms from the link`)
 })
 
 test("a state that comes before its identity waits for it, and its copy is created as the identity comes", { timeout: 180_000 }, async (t) => {
@@ -357,7 +358,7 @@ test("a state that comes before its identity waits for it, and its copy is creat
   // The parked aircraft's next state comes with its 5s heartbeat, so its copy coming within 1s of the identities says its first state was kept.
   await untilCopies(b, (c) => c.length === 2, "both copies once the identities come", 5_000)
   const after = Date.now() - (held + HOLD_MS)
-  assert.ok(after < 1_000, `both copies came ${after}ms after the identities`)
+  budget(after < 1_000, `both copies came ${after}ms after the identities`)
 })
 
 test("a traffic host carries 500 objects at most, so a receiving pilot who leaves the flight and comes back stays within the kernel's 1,000 calls an input", { timeout: 240_000 }, async (t) => {

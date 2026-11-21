@@ -14,6 +14,7 @@ import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import { VERSION } from "../../../src/engines/messages/ts/stamp.ts"
+import { budget } from "../budgets.ts"
 import { BenchRun } from "../cores.ts"
 import { DesktopApp, DesktopBench, ended, figures, kill, running, writeFeed } from "../desktop.ts"
 import { BenchNetwork, host, join } from "../network.ts"
@@ -37,7 +38,7 @@ test("the sim's start starts a core within 3s, and an app that starts while the 
   const pid = await app.started({ after, ms: START_MS + 1_000 })
   const tookMs = performance.now() - appeared
   t.diagnostic(`the core started ${tookMs.toFixed(0)}ms after the sim's process appeared`)
-  assert.ok(tookMs < START_MS, `the core started ${tookMs.toFixed(0)}ms after the sim, over the budget's 3s`)
+  budget(tookMs < START_MS, `the core started ${tookMs.toFixed(0)}ms after the sim, over the budget's 3s`)
   // A bench core, on the app's own data folder, answers on its bench socket there.
   await run.attach(bench.data, pid)
 
@@ -67,7 +68,7 @@ test("a core that crashes while the sim runs comes back within 3s as a bench cor
   const again = await app.started({ after, ms: START_MS + 1_000 })
   const tookMs = performance.now() - crashed
   t.diagnostic(`the core started again ${tookMs.toFixed(0)}ms after the crash`)
-  assert.ok(tookMs < START_MS, `the core started again ${tookMs.toFixed(0)}ms after its crash, over the budget's 3s`)
+  budget(tookMs < START_MS, `the core started again ${tookMs.toFixed(0)}ms after its crash, over the budget's 3s`)
   const core = await run.attach(bench.data, again)
 
   // An exit with 0 is the core's choice, as a quit is, so none starts while this sim runs.
@@ -248,8 +249,8 @@ test("the app with no window and the sim closed takes under 5 MB and 0.2% of one
   const after = figures(pid)
   const share = (after.cpuMs - before.cpuMs) / 60_000
   t.diagnostic(`the app held ${(after.memory / 1e6).toFixed(2)} MB and used ${(share * 100).toFixed(3)}% of one CPU core over 60s`)
-  assert.ok(after.memory < 5e6, `the app held ${(after.memory / 1e6).toFixed(2)} MB, over 5 MB`)
-  assert.ok(share < 0.002, `the app used ${(share * 100).toFixed(3)}% of one CPU core, over 0.2%`)
+  budget(after.memory < 5e6, `the app held ${(after.memory / 1e6).toFixed(2)} MB, over 5 MB`)
+  budget(share < 0.002, `the app used ${(share * 100).toFixed(3)}% of one CPU core, over 0.2%`)
 })
 
 /** Serves the feed in `folder` over HTTP, answering each request after `delayMs`. */

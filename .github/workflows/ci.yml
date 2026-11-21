@@ -108,6 +108,10 @@ jobs:
           name: bench-programs
           path: target/bench-programs
       - run: node tools/bench.ts --programs target/bench-programs --shard ${{ matrix.shard }}/8
+        env:
+          # A shared runner's timings move from run to run, so a missed budget is printed
+          # and passes; behavior still fails (tools/bench/budgets.ts).
+          DUALINPUT_BENCH_BUDGETS: report
       # Each failed scenario's run folder holds its cores' logs and recordings.
       - if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

@@ -1,7 +1,7 @@
-// The backend's Worker (record/areas/network/02-units.md, "The backend"). The release
-// workflow runs D1's migrations and then `wrangler deploy` with this file
-// (record/areas/build/01-the-build.md, "A release"); until then the bench and the backend's
-// tests run it locally, through `wrangler dev --local`, on a local D1.
+// The backend's Worker (record/areas/network/02-units.md, "The backend"). tools/backend.ts
+// deploys it with this file, D1's migrations and then `wrangler deploy`, from the release
+// workflow and the backend's own (record/areas/build/01-the-build.md, "The backend"), and the
+// bench and the backend's tests run it locally, through `wrangler dev --local`, on a local D1.
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "dualinput-backend",
@@ -16,9 +16,9 @@
     {
       "binding": "DB",
       "database_name": "dualinput",
-      // A placeholder, which local runs key their database by: the release's first deploy
-      // creates the database in Cloudflare and writes its real ID here.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      // The database `wrangler d1 create` made in Cloudflare, once, by hand, since a deploy
+      // makes none; local runs key their own database by the same ID.
+      "database_id": "fa54a58e-a88b-4f41-af27-f3caee8e63db",
       "migrations_dir": "migrations"
     }
   ],

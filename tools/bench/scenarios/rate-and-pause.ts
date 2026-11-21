@@ -11,6 +11,7 @@ import { setTimeout as sleep } from "node:timers/promises"
 
 import type { Notification } from "../../../src/engines/messages/ts/clients/Notification.ts"
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
+import { budget } from "../budgets.ts"
 import { BenchRun, type Core } from "../cores.ts"
 import { BARON, load } from "../flights.ts"
 import { app, BenchNetwork, host, join } from "../network.ts"
@@ -129,7 +130,7 @@ test("active pause and the simulation rate follow every pilot, the flag the part
   await b.efb.until(() => b.efb.pauses.length === 1, "Adam's part asked to pause")
   const tookMs = performance.now() - started
   console.log(`budget: the following machine's active pause asked of its part ${tookMs.toFixed(0)}ms after the pilot flying's press, the key's way between the cores included, against ${PAUSE_BUDGET_MS}ms from the key arriving`)
-  assert.ok(tookMs < PAUSE_BUDGET_MS, `Adam's pause took ${tookMs.toFixed(0)}ms`)
+  budget(tookMs < PAUSE_BUDGET_MS, `Adam's pause took ${tookMs.toFixed(0)}ms`)
   await settles([a, b], true, "after James's press")
   await sleep(500)
   assert.deepEqual(b.efb.pauses, [true])

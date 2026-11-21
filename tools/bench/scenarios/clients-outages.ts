@@ -27,13 +27,13 @@ test("the core suspended for 12s leaves every page its socket, and each panel's 
   await load(core, BARON)
   await panel.until(() => panel.messages("load").length === 1, "the panel's load")
 
-  suspend(core.process.pid!)
+  await suspend(core.process.pid!)
   try {
     await sleep(12_000)
     assert.equal(efb.client.state, "silent", "a page notes the core's silence")
     assert.equal(panel.client.state, "silent")
   } finally {
-    resume(core.process.pid!)
+    await resume(core.process.pid!)
   }
   await panel.until(() => panel.client.state === "connected" && efb.client.state === "connected", "both pages hearing the core again")
   await sleep(4_000)

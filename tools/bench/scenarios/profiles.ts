@@ -14,6 +14,7 @@ import type { ProfilesSlice } from "../../../src/engines/messages/ts/profiles/Pr
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
 import type { NamedAircraft } from "../../../src/engines/messages/ts/sim/NamedAircraft.ts"
 import type { SimSlice } from "../../../src/engines/messages/ts/sim/SimSlice.ts"
+import { budget } from "../budgets.ts"
 import { BenchRun, type Core, type CoreOptions } from "../cores.ts"
 import { BARON, load, PA24, toMenu } from "../flights.ts"
 import { app, BenchNetwork, host, join } from "../network.ts"
@@ -463,7 +464,7 @@ test("a 200 KB profile of 300 write functions builds within 2s, and its load sta
   runBuilder(["build", file])
   const built = performance.now() - started
   console.log(`budget: the builder checked and built a profile of 300 write functions in ${built.toFixed(0)}ms, its compiler's load included, against 2,000ms for the build`)
-  assert.ok(built < 2_000, `the build took ${built.toFixed(0)}ms`)
+  budget(built < 2_000, `the build took ${built.toFixed(0)}ms`)
 
   const hash = net.profiles.publish(profiles).get("aircraft/large.yaml")!
   const size = fs.statSync(path.join(net.profiles.folder, "bundles", `${hash}.yaml`)).size

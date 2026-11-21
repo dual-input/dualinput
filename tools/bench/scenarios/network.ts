@@ -10,6 +10,7 @@ import { setTimeout as sleep } from "node:timers/promises"
 
 import type { NetSlice } from "../../../src/engines/messages/ts/net/NetSlice.ts"
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
+import { budget } from "../budgets.ts"
 import { BenchRun } from "../cores.ts"
 import { app, BenchNetwork, EARLIEST_LOST_MS, host, join, report, session, took } from "../network.ts"
 import { FakeApp } from "../pages.ts"
@@ -142,7 +143,7 @@ test("a join on a direct path links within 3s of the code entered", { timeout: 6
   const b = await run.core("b", direct)
   const { joinMs } = await session(a, [b])
   t.diagnostic(`from the code entered to the link up: ${joinMs.toFixed(0)}ms`)
-  assert.ok(joinMs < 3_000, `the join took ${joinMs.toFixed(0)}ms`)
+  budget(joinMs < 3_000, `the join took ${joinMs.toFixed(0)}ms`)
   await sleep(3_000)
   assert.match(b.log(), /a connection's path changed conn=\d+ path=Direct/, "the link should move to a direct path")
   // The crew rows show each link's path and round trip from this slice.

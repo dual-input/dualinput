@@ -7,6 +7,7 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
+import { budget } from "../budgets.ts"
 import { BenchRun, type Core } from "../cores.ts"
 import { BenchNetwork, cpuMs, report, session } from "../network.ts"
 
@@ -46,7 +47,7 @@ test("at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the
       )
       assert.equal(newest?.behind ?? 0, 0, "no newest probe should come after a newer one")
       const gap = Math.abs((stream?.p99_us ?? 0) - (newest?.p99_us ?? 0)) / 1_000
-      assert.ok(gap <= 17, `the stream's p99 sat ${gap.toFixed(1)}ms from the one-off packets'`)
+      budget(gap <= 17, `the stream's p99 sat ${gap.toFixed(1)}ms from the one-off packets'`)
     }
   }
 })

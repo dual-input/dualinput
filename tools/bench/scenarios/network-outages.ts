@@ -63,10 +63,10 @@ test("the link is lost 4s to 5s into each outage, and comes back after it", { ti
 
   {
     const after = at()
-    suspend(b.process.pid!)
+    await suspend(b.process.pid!)
     await a.hear(/^net lost /, { after: after[0], ms: 10_000 })
     await sleep(55_000)
-    resume(b.process.pid!)
+    await resume(b.process.pid!)
     const resumed = performance.now()
     await a.hear(/^net up \S+ again=true restart=0$/, { after: after[0], ms: 60_000 })
     await b.hear(/^net up \S+ again=true restart=0$/, { after: after[1], ms: 60_000 })

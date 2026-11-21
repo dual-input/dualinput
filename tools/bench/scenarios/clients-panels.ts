@@ -12,6 +12,7 @@ import path from "node:path"
 import { type TestContext, test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
+import { budget } from "../budgets.ts"
 import { announcing, BenchRun, type Core, type CoreOptions } from "../cores.ts"
 import { BARON, load } from "../flights.ts"
 import { StandInHelper } from "../helper.ts"
@@ -60,7 +61,7 @@ test("panels connect only in a session, each of 20 is answered within 1s of the 
   const announced = nextAnnouncement(core, true)
   await host(core, "Host")
   const ms = await announced
-  assert.ok(ms < 500, `the announcement came ${ms.toFixed(0)}ms after the session started`)
+  budget(ms < 500, `the announcement came ${ms.toFixed(0)}ms after the session started`)
   await panels[0]!.until(() => panels.every((p) => p.client.connected), "every panel connecting")
 
   // The flight's load takes the profile's with it, so this measures more than the budget's

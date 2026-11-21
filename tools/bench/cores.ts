@@ -22,6 +22,7 @@ import type { StandInAct } from "../../src/engines/messages/ts/bench/StandInAct.
 import type { ToCore } from "../../src/engines/messages/ts/bench/ToCore.ts"
 import { HASH, VERSION } from "../../src/engines/messages/ts/stamp.ts"
 import { ROOT } from "../lib/repo.ts"
+import { budget } from "./budgets.ts"
 
 /**
  * The bench build of the core that tools/bench.ts built, by the path Cargo reported, so a
@@ -336,7 +337,7 @@ export class Core {
     const slowest = Number(/slowest_us=(\d+)/.exec(stats)?.[1])
     const over = Number(/over_1ms=(\d+)/.exec(stats)?.[1])
     console.log(`budget: ${run}: the slowest input took ${slowest}µs, ${over} over 1ms, against 1,000µs for a handler with one pause under ${pauseUs.toLocaleString("en-US")}µs allowed`)
-    assert.ok(over <= 1 && slowest < pauseUs, `inputs took over 1ms: ${stats}`)
+    budget(over <= 1 && slowest < pauseUs, `inputs took over 1ms: ${stats}`)
   }
 
   /** Every line the sim's test unit has told the bench so far, oldest first. */

@@ -14,6 +14,7 @@ import { setTimeout as sleep } from "node:timers/promises"
 import type { Setting } from "../../../src/engines/messages/ts/clients/Setting.ts"
 import type { NetSlice } from "../../../src/engines/messages/ts/net/NetSlice.ts"
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
+import { budget } from "../budgets.ts"
 import { BenchRun, type Core, type CoreOptions, type Stub } from "../cores.ts"
 import { type Aircraft, BARON, load as loadFlight, PA24, toMenu as endFlight } from "../flights.ts"
 import { app, BenchNetwork, host, join } from "../network.ts"
@@ -246,7 +247,7 @@ test("both pilots ready: the countdown ends preflight on both, each held until t
   const ended = "preflight ended, and the session's keys take this much"
   const apart = Math.abs(stamp(a.core, ended) - stamp(b.core, ended)) / 1_000
   console.log(`budget: preflight ended on the two cores ${apart.toFixed(1)}ms apart, against one network delay`)
-  assert.ok(apart < 100, `preflight ended ${apart}ms apart`)
+  budget(apart < 100, `preflight ended ${apart}ms apart`)
 
   // The loop's stats for the whole run, which the core logs as it exits, give its slowest
   // input, the session crate's handlers among them (record/areas/core/01-loop-and-edge.md,
@@ -351,7 +352,7 @@ test("a pilot flying who leaves mid-flight hands control over within 1s and is a
   await until(b, (s) => s.pf === s.me, "control on the pilot left", 2_000)
   const handed = performance.now() - left
   console.log(`budget: control reached the other pilot ${handed.toFixed(0)}ms after the leave, against 1,000ms`)
-  assert.ok(handed < 1_000, `control took ${handed.toFixed(0)}ms`)
+  budget(handed < 1_000, `control took ${handed.toFixed(0)}ms`)
   await b.core.hear(/^net left /, { after: heard, ms: 5_000 })
   assert.ok(!b.core.heard().slice(heard).some((l) => l.startsWith("net lost")), "a leave reached the other core as an outage")
 
@@ -365,7 +366,7 @@ test("a pilot flying who leaves mid-flight hands control over within 1s and is a
   await b.app.ok("session.quit")
   assert.equal(await b.core.exited, 0, "a quit exits with 0")
   const quitMs = performance.now() - quit
-  assert.ok(quitMs < 3_000, `the quit took ${quitMs.toFixed(0)}ms to exit, against 3s`)
+  budget(quitMs < 3_000, `the quit took ${quitMs.toFixed(0)}ms to exit, against 3s`)
   // That a leave stops the other core's dials, and tells the backend, the network crate's own
   // tests hold: a_close_with_leaves_code_is_a_leave_and_any_other_a_lost_link and
   // a_joiner_lists_itself_at_its_first_link_up_and_tells_the_backend_it_left.

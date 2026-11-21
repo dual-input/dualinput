@@ -20,6 +20,18 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 > In [write functions](#write-functions), a state entry's function may return the value its entry will read once the write lands, a number or a text of the entry's type, and the sync engine waits for that reading in place of the value it gave the function; an event entry's function still returns nothing.
 > The Baron 58P's heading-bug preset turns degrees into 1/16,384ths of a turn, so a written 1° read back as 1.0107°, which matched no write and went back to the crew as the pilot's own turn ([sync log](../sync/log.md#2026-11-16-the-drift-after-a-handover-was-the-hosts-heading-bug-which-no-write-moved-after-its-first-and-every-_set-preset-that-missed-took-the-value-of-its-first-call); user, 2026-11-17).
 
+> **Note**
+> From stage 22c, the format's audit before level 1 freezes ([profiles log](log.md#2026-11-21-the-formats-audit-before-level-1-freezes-puts-maps-on-their-own-lines-types-instrument-readings-and-names-one-layout); user, 2026-11-21):
+>
+> - A map goes on its own lines, and a bracketed map, `{…}`, anywhere in a profile fails the load, with an error that shows the map written out, since YAML splits one at its commas: `{toggle: K('X', 2, 6)}` reads the name's values as keys.
+>   So [writing](#writing)'s `toggle` example is `write:` with `toggle: K('TOGGLE_BEACON_LIGHTS')` on the line below it, and a list keeps both of the forms in [a profile](#a-profile).
+> - A file may start with a UTF-8 byte-order mark, which the reader skips.
+> - In [names](#names), `instrument(key, path)` reads a number, and `instrument(key, path, 'string')` reads text, as a string unit does on `A()`; a reading of the other kind is an error ([its values](../plugins/01-plugins.md#its-values)).
+> - [Layout](#layout) gives the one layout a formatter writes.
+> - In [levels](#levels), each level has a schema for a profile and one for a module, and a release that lets a profile do what a level's checker refused, such as `only` in a module, raises the level, as a new field does, since a core on an earlier release would refuse the bundle.
+> - In [the repository](#the-repository), CI holds a level's files only to release tags from 1.0.0 on, since nobody flies a release before it.
+> - A profile's variants share its `name`, and once a profile has a second variant, the aircraft picker asks which one to load, naming each by its own `aircraft.cfg`'s `ui_type`, such as "Baron 58TC Professional" (read in bksq-aircraft-baronpro 0.1.1); v1's aircraft is the 58P alone.
+
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Dual Input defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
 Profiles live as flat files in `profiles/` in Dual Input's own public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules in it, under its hash.
@@ -80,6 +92,21 @@ The 58P's mixture lever drags `L:BKSQ_MixtureLeverPosition_1`, and the aircraft'
 
 A field that takes a list also takes one item on its own, so `only: press` means `only: [press]`, and a list can be written in YAML's block form or its bracketed form.
 The loader ignores comments, and the IDE reads and writes section headings in them by fsc-editor's convention, `# ═══ TITLE` for a section and `# ── Title` for a subsection, so one file holds what would otherwise be a folder of files (fsc-editor, `docs/profile-format.md`).
+
+## Layout
+
+Every profile and module takes one layout, which a formatter writes and a reviewer can expect:
+
+- The top-level keys come in this order: `maker`, `name`, `maturity`, `authors`, `aircraft`, `import`, `displays`, `seats`, `state`, `events`, with a blank line before `aircraft` and before each key after it.
+- An entry's fields come in the order of its table in [state entries](#state-entries) or [event entries](#event-entries), with `description` after `name`.
+- Each level indents 2 spaces.
+- A map goes on its own lines.
+  A list of numbers or variant IDs goes on one line in brackets, as `range: [0, 359]`, and a list of names takes a line for each.
+- A script is a `|` block, indented 2 spaces from its key, and a formatter leaves its lines as they are.
+- A heading is `# ═══ TITLE` for a section and `# ── Title` for a subsection, at its entries' indent, with a blank line before it unless it opens its block.
+  A formatter reads fsc-editor's forms as headings too: those that pad the line to 78 columns with `═` or `─`, and the ASCII forms, `# === TITLE ===` and `# --- Title ---` (fsc-editor, `docs/profile-format.md`).
+- A comment above an entry stays with the entry.
+- Entries have no blank line between them but before a heading, lines have no trailing spaces, and the file has LF line ends and one newline at its end.
 
 ## Names
 

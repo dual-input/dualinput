@@ -122,7 +122,7 @@ pub(crate) const EVENT_ENTRY: &[Field] = &[
     field(
         "write",
         1,
-        "What to do on the other machines: a name, a map, or a function",
+        "What to do on the other machines: a name or a function",
     ),
     profile_only("only", 1, "The variant IDs the entry applies to"),
     field("ignore", 1, "The names this entry's action also fires"),

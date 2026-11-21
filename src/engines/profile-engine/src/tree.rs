@@ -61,14 +61,20 @@ impl Node {
 
 /// Parses one file. YAML that doesn't parse, a repeated key in one map among it, is an error
 /// at the place saphyr gives, and so is an anchor, an alias, or a tag, which a profile has no
-/// use for and which would let one node stand in two places.
-pub(crate) fn parse(file: &str, text: &str) -> Result<Node, Diagnostic> {
+/// use for and which would let one node stand in two places. A leading byte-order mark, which
+/// Windows PowerShell 5.1's `Set-Content -Encoding utf8` writes, is skipped, since saphyr reads
+/// it as part of the first key.
+///
+/// A bracketed map, which a file that parses can hold anywhere, fails the file too, and every one
+/// in it is reported at once, so an author converting a profile sees them all in one build.
+pub(crate) fn parse(file: &str, text: &str) -> Result<Node, Vec<Diagnostic>> {
+    let text = text.strip_prefix('\u{FEFF}').unwrap_or(text);
     let docs = MarkedYaml::load_from_str(text).map_err(|e| {
-        Diagnostic::error(
+        vec![Diagnostic::error(
             Place::new(file, e.marker().line(), e.marker().col() + 1),
             "yaml",
             format!("The YAML doesn't parse: {}", e.info()),
-        )
+        )]
     })?;
     let mut docs = docs.into_iter();
     let Some(doc) = docs.next() else {
@@ -78,21 +84,34 @@ pub(crate) fn parse(file: &str, text: &str) -> Result<Node, Diagnostic> {
         });
     };
     if let Some(second) = docs.next() {
-        return Err(Diagnostic::error(
+        return Err(vec![Diagnostic::error(
             place(file, &second),
             "yaml",
             "A profile is one YAML document, so it can't hold a second after `---`",
-        ));
+        )]);
     }
     let lines: Vec<&str> = text.split('\n').collect();
-    convert(file, &lines, &doc)
+    let mut bracketed = Vec::new();
+    let root = convert(file, &lines, &doc, &mut bracketed).map_err(|e| vec![e])?;
+    if bracketed.is_empty() {
+        Ok(root)
+    } else {
+        Err(bracketed)
+    }
 }
 
 fn place(file: &str, node: &MarkedYaml) -> Place {
     Place::new(file, node.span.start.line(), node.span.start.col() + 1)
 }
 
-fn convert(file: &str, lines: &[&str], node: &MarkedYaml) -> Result<Node, Diagnostic> {
+/// Converts saphyr's node, pushing an error for each bracketed map into `bracketed` and leaving
+/// nothing in its place, so the walk goes on to find the rest.
+fn convert(
+    file: &str,
+    lines: &[&str],
+    node: &MarkedYaml,
+    bracketed: &mut Vec<Diagnostic>,
+) -> Result<Node, Diagnostic> {
     let at = place(file, node);
     let kind = match &node.data {
         YamlData::Value(Scalar::Null) => Kind::Null,
@@ -110,10 +129,21 @@ fn convert(file: &str, lines: &[&str], node: &MarkedYaml) -> Result<Node, Diagno
         YamlData::Sequence(items) => Kind::Seq(
             items
                 .iter()
-                .map(|n| convert(file, lines, n))
+                .map(|n| convert(file, lines, n, bracketed))
                 .collect::<Result<_, _>>()?,
         ),
         YamlData::Mapping(map) => {
+            if let Some(form) = in_brackets(lines, &at) {
+                bracketed.push(Diagnostic::error(
+                    at.clone(),
+                    "map-form",
+                    written_out(&form),
+                ));
+                return Ok(Node {
+                    at,
+                    kind: Kind::Null,
+                });
+            }
             let mut entries = Vec::new();
             for (k, v) in map {
                 let Some(text) = k.data.as_str() else {
@@ -128,7 +158,7 @@ fn convert(file: &str, lines: &[&str], node: &MarkedYaml) -> Result<Node, Diagno
                         text: text.to_string(),
                         at: place(file, k),
                     },
-                    convert(file, lines, v)?,
+                    convert(file, lines, v, bracketed)?,
                 ));
             }
             Kind::Map(entries)
@@ -145,6 +175,78 @@ fn convert(file: &str, lines: &[&str], node: &MarkedYaml) -> Result<Node, Diagno
         }
     };
     Ok(Node { at, kind })
+}
+
+/// A map written in brackets, `{…}`, which a profile refuses: YAML splits one at its commas,
+/// so `{toggle: K('X', 2, 6)}` reads the name's values as keys, and the error that follows names
+/// a key, far from the cause (record/areas/profiles/01-format-and-delivery.md, "Layout").
+/// Returns the map's entries as the file writes them, split at the commas outside a name's
+/// parentheses, its brackets, and its quotes, or none for a map the file doesn't bracket.
+fn in_brackets(lines: &[&str], at: &Place) -> Option<Bracketed> {
+    let line = lines.get(at.line - 1)?;
+    let rest: String = line.chars().skip(at.column - 1).collect();
+    let inner = rest.strip_prefix('{')?;
+    let mut entries = Vec::new();
+    let mut entry = String::new();
+    let mut depth = 0usize;
+    let mut quote = None;
+    for c in inner.chars() {
+        match (quote, c) {
+            (Some(q), _) if c == q => quote = None,
+            (Some(_), _) => {}
+            (None, '\'' | '"') => quote = Some(c),
+            (None, '(' | '[' | '{') => depth += 1,
+            (None, '}') if depth == 0 => {
+                entries.push(entry.trim().to_string());
+                return Some(Bracketed::Closed(
+                    entries.into_iter().filter(|e| !e.is_empty()).collect(),
+                ));
+            }
+            (None, ')' | ']' | '}') => depth = depth.saturating_sub(1),
+            (None, ',') if depth == 0 => {
+                entries.push(entry.trim().to_string());
+                entry.clear();
+                continue;
+            }
+            _ => {}
+        }
+        entry.push(c);
+    }
+    Some(Bracketed::PastItsLine)
+}
+
+/// A bracketed map as its line shows it.
+enum Bracketed {
+    /// Its entries, none for `{}`.
+    Closed(Vec<String>),
+    /// It runs onto the lines below, which the error doesn't write out.
+    PastItsLine,
+}
+
+/// The error for a bracketed map, with its entries as the lines that replace it.
+fn written_out(form: &Bracketed) -> String {
+    let lead =
+        "A map in a profile goes on its own lines, since YAML splits a map in `{…}` at its commas";
+    let entries = match form {
+        Bracketed::PastItsLine => {
+            return format!(
+                "{lead}: write each of its entries on a line of its own, below its key"
+            );
+        }
+        Bracketed::Closed(entries) => entries,
+    };
+    let lines: Vec<String> = entries.iter().map(|e| format!("`{e}`")).collect();
+    match lines.as_slice() {
+        [] => "A map in a profile goes on its own lines, so an empty one, `{}`, is left out: delete its key".to_string(),
+        [one] => format!("{lead}: write {one} on the line below its key"),
+        [first, last] => {
+            format!("{lead}: write {first} and {last} below its key, each on a line of its own")
+        }
+        [rest @ .., last] => format!(
+            "{lead}: write {}, and {last} below its key, each on a line of its own",
+            rest.join(", ")
+        ),
+    }
 }
 
 /// Where a string's text starts, and whether it's a block. saphyr places a block, `|` or `>`,
@@ -209,9 +311,81 @@ mod tests {
 
     #[test]
     fn a_repeated_key_is_an_error_where_saphyr_finds_it() {
-        let error = parse("a.yaml", "authors: A\nauthors: B\n").expect_err("a repeat");
-        assert_eq!(error.code, "yaml");
-        assert_eq!(error.at.line, 2);
+        let errors = parse("a.yaml", "authors: A\nauthors: B\n").expect_err("a repeat");
+        assert_eq!(errors[0].code, "yaml");
+        assert_eq!(errors[0].at.line, 2);
+    }
+
+    /// The one error a parse gives.
+    fn only(errors: Vec<Diagnostic>) -> Diagnostic {
+        assert_eq!(errors.len(), 1, "{errors:?}");
+        errors.into_iter().next().expect("one error")
+    }
+
+    #[test]
+    fn a_bracketed_map_is_refused_with_its_entries_written_out() {
+        let error =
+            only(parse("a.yaml", "write: {toggle: K('BUS', 2, 6)}\n").expect_err("brackets"));
+        assert_eq!(error.code, "map-form");
+        assert_eq!((error.at.line, error.at.column), (1, 8));
+        assert!(
+            error
+                .message
+                .contains("write `toggle: K('BUS', 2, 6)` on the line below its key"),
+            "{}",
+            error.message
+        );
+        let error = only(
+            parse("a.yaml", "w: {inc: K('A, B'), dec: K('C'), wrap: false}\n")
+                .expect_err("brackets"),
+        );
+        assert!(
+            error
+                .message
+                .contains("write `inc: K('A, B')`, `dec: K('C')`, and `wrap: false` below"),
+            "{}",
+            error.message
+        );
+    }
+
+    #[test]
+    fn a_bracketed_map_inside_a_list_is_refused_and_a_bracketed_list_is_not() {
+        let error = only(parse("a.yaml", "x: [{a: 1}]\n").expect_err("brackets"));
+        assert_eq!(error.code, "map-form");
+        let root = parse("a.yaml", "range: [0, 359]\n").expect("parses");
+        assert!(matches!(map(&root)[0].1.kind, Kind::Seq(_)));
+    }
+
+    #[test]
+    fn every_bracketed_map_in_a_file_is_reported_at_once() {
+        let yaml = "state:\n  a:\n    write: {toggle: K('A')}\n  b:\n    write: {toggle: K('B')}\n";
+        let errors = parse("a.yaml", yaml).expect_err("brackets");
+        let lines: Vec<usize> = errors.iter().map(|e| e.at.line).collect();
+        assert_eq!(lines, [3, 5]);
+    }
+
+    #[test]
+    fn an_empty_bracketed_map_is_left_out_and_one_past_its_line_is_written_out_in_general() {
+        let error = only(parse("a.yaml", "events: {}\n").expect_err("brackets"));
+        assert!(
+            error.message.contains("delete its key"),
+            "{}",
+            error.message
+        );
+        let error = only(parse("a.yaml", "w: {toggle: K('A'),\n  x: 1}\n").expect_err("brackets"));
+        assert!(
+            error.message.contains("each of its entries"),
+            "{}",
+            error.message
+        );
+    }
+
+    #[test]
+    fn a_leading_byte_order_mark_is_skipped() {
+        let root = parse("a.yaml", "\u{FEFF}maker: M\n").expect("parses");
+        let (key, _) = &map(&root)[0];
+        assert_eq!(key.text, "maker");
+        assert_eq!((key.at.line, key.at.column), (1, 1));
     }
 
     #[test]

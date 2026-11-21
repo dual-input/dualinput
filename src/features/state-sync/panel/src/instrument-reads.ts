@@ -23,7 +23,7 @@ const EVERY_MS = 250
 /** The most a value can hold, as sent (decision 046). */
 const MOST_TEXT = 4 * 1024
 
-type Path = { number: number; element: Element; steps: string[]; last: string | null }
+type Path = { number: number; element: Element; steps: string[]; text: boolean; last: string | null }
 
 /**
  * Walks a dotted path from `start`. Each step must be an own data property of the object before
@@ -41,14 +41,22 @@ function walk(start: unknown, steps: string[]): unknown {
   return at
 }
 
-/** What a path read, as an entry can hold it (record/areas/plugins/01-plugins.md, "Its values"). */
-function reading(value: unknown): Reading {
-  if (typeof value === "number" && isFinite(value)) return { as: "number", value }
-  if (typeof value === "boolean") return { as: "number", value: value ? 1 : 0 }
-  if (typeof value === "string") {
+/**
+ * What a path read, as its entry holds it: a number entry takes a finite number, or 1 or 0 for a
+ * boolean, and a text entry a string, since a write function compares the value as the type its
+ * entry declares, and a reading of the other kind is an error (record/areas/plugins/01-plugins.md,
+ * "Its values").
+ */
+function reading(value: unknown, text: boolean): Reading {
+  const found = value === null ? "null" : typeof value
+  if (text) {
+    if (typeof value !== "string") return { as: "error", value: `it reads ${found}, and its entry reads text` }
     return value.length <= MOST_TEXT ? { as: "text", value } : { as: "error", value: "its text is too long" }
   }
-  return { as: "error", value: `it reads ${value === null ? "null" : typeof value}` }
+  if (typeof value === "number" && isFinite(value)) return { as: "number", value }
+  if (typeof value === "boolean") return { as: "number", value: value ? 1 : 0 }
+  if (typeof value === "string") return { as: "error", value: "it reads text, and its entry reads a number, unless its instrument() ends in 'string'" }
+  return { as: "error", value: `it reads ${found}` }
 }
 
 export function instrumentReads(): PanelModuleDef {
@@ -61,7 +69,7 @@ export function instrumentReads(): PanelModuleDef {
         for (const path of paths) {
           let now: Reading
           try {
-            now = reading(walk(path.element, path.steps))
+            now = reading(walk(path.element, path.steps), path.text)
           } catch (e) {
             now = { as: "error", value: String(e) }
           }
@@ -79,7 +87,7 @@ export function instrumentReads(): PanelModuleDef {
         paths = []
         for (const p of message.paths) {
           const element = ctx.instruments.filter((e) => keyFor(e) === p.instrument)[0]
-          if (element) paths.push({ number: p.number, element, steps: p.path.split("."), last: null })
+          if (element) paths.push({ number: p.number, element, steps: p.path.split("."), text: p.text, last: null })
         }
         if (timer === null) timer = setInterval(read, EVERY_MS)
         read()

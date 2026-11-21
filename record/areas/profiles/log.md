@@ -7,6 +7,42 @@ The sandbox's context runs QuickJS-ng's base objects and lacks JSON, Map, Set, D
 The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), and [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 None needs the sim.
 
+## 2026-11-21: The format's audit before level 1 freezes puts maps on their own lines, types instrument readings, and names one layout
+
+**Asked:** what does an ordinary profile run into at level 1 that we'd change before v1's release freezes the level ([stage 22c](../build/plan.md#22c-the-formats-audit))?
+And should CI's check that a released level's files match its release tag hold them to 0.1.0, the one release so far?
+
+**Expected:** a few unclear errors, since the 58P's profile had built and flown since stage 14.
+
+**Found:** reading the format's design docs, the profile engine, the builder, the 58P's profile, and fsc-editor's `docs/profile-format.md`, and building test profiles on our development machine:
+
+- A map in YAML's bracketed form, `write: {toggle: K('ELECTRICAL_BUS_TO_BUS_CONNECTION_TOGGLE', 2, 6)}`, failed with "Each key in a profile is text", because YAML splits a bracketed map at its commas and the name's values became keys.
+  [Writing](01-format-and-delivery.md#writing)'s example, `write: {toggle: K('TOGGLE_BEACON_LIGHTS')}`, and the ADF sketch in [01-plugins](../plugins/01-plugins.md#the-58ps-state-in-its-gauges) both use that form, and the 58P's profile wrote 32 of its toggles in it, and its 10 toggles with values on their own lines.
+- A file that starts with a UTF-8 byte-order mark failed at its first key, which the parser read with the mark in front, so `maker` read as an unknown block and the profile as missing `maker`.
+  Windows PowerShell 5.1's `Set-Content -Encoding utf8` wrote one into our first test file.
+- A write function comparing an `instrument()` entry, `value > state.knob`, failed its type check with TS18046, since level 1's declarations type that entry `unknown`, and the 58P's profile wraps each such value in `Number()`.
+- The aircraft picker shows one tile per profile and loads the first installed variant it covers (`src/platform/profile-loader/src/lib.rs`, `pick`).
+  Each variant's own `aircraft.cfg` names it in `ui_type`: "Baron 58 Professional", "Baron 58TC Professional", and "Baron 58P Professional" (read in bksq-aircraft-baronpro 0.1.1, each variant's `SimObjects\Airplanes\<folder>\aircraft.cfg`).
+- The format names no layout for a formatter to write, and the 58P's profile puts `displays` and `seats` before `state`, where a bundle puts them last.
+  Its headings hold as written: `# ═══ TITLE` and `# ── Title` are comments to the parser, in fsc-editor's convention.
+- Level 1's one schema, `schema.json`, required only a seat's fields, offered `aircraft`, `maker`, `only`, and `location` in a module, and let an event entry count, toggle, or step, each of which the checker refuses.
+- The checker's rules live in the engine's code, which CI's frozen-level check doesn't compare, so a release that loosens one, letting a module use `only`, say, would publish a level-1 bundle that every core on an earlier release refuses.
+  FS Copilot's fork did that with its `pointer:` key, which "bricks profile loading on older releases" (FS Copilot fork, `record/pointer-forwarding/docs/11-fsc-implementation-plan.md`, item 6).
+- A profile with CRLF line ends built to the same bytes as with LF.
+
+**Changed** (user, 2026-11-21):
+
+- A map in a profile goes on its own lines: the reader refuses a bracketed map anywhere, with an error that shows the map written out, and a list keeps both forms.
+- The reader skips a leading byte-order mark.
+- `instrument(key, path)` reads a number and `instrument(key, path, 'string')` reads text, each typed to match in a write function, and the panel module reports a reading of the other kind as an error.
+- The format names one layout, and a bundle's top-level keys come in its order ([layout](01-format-and-delivery.md#layout)).
+- Each level has two schemas, `profile.json` and `module.json`, each with its required fields, and an event entry's fields only as the checker takes them; an editor picks one by the file's folder, as the builder takes a file in `profiles/aircraft/` as a profile and one it imports as a module.
+- A release that lets a profile do what a level's checker refused raises the level, as a new field does.
+- A profile's variants share its `name`, and once a profile has a second variant, the picker asks which one to load, naming each by its `ui_type`; v1's aircraft is the 58P alone, so nothing changes for v1.
+- CI holds a level's files only to release tags from 1.0.0 on, since nobody flies a release before it, and publishing still counts every release's level as released, so 0.x releases get the tree's profiles (`tools/lib/levels.ts`).
+
+**Affects:** [01-format-and-delivery](01-format-and-delivery.md), [02-units](02-units.md), [01-plugins](../plugins/01-plugins.md), the code map's [profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository), and the architecture's tentative decision that [one repository holds all of Dual Input](../architecture/decisions.md#one-repository-holds-all-of-dual-input-its-folders-by-tier-with-each-features-parts-in-one-folder).
+
 ## 2026-10-24: Stage 10's profiles pass the stage's bench cases, load a 221 KB bundle in one input under 730µs, and build one of 300 write functions in 1.7s
 
 **Asked:** do [stage 10](../build/plan.md#10-profiles)'s cases and budgets hold on its code: [the profiles' cases for the bench](02-units.md#cases-for-the-bench), the builder's own, two of the session's, and the budgets for a build, a load, and a start with nothing new?

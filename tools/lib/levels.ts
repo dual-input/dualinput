@@ -1,13 +1,16 @@
 // A released level of the profile format never changes: a bundle published at it stays
 // published for good, and every core of a release at or above it reads the bundle by the
 // level's schema and declarations as that release's tag holds them
-// (record/areas/architecture/02-code-map.md, "Profiles in this repository"). So CI fails a tree
-// whose levels/<n>/ differs from any release tag that holds level n, and publishes nothing from
-// one. Every tag on this repository is a release's bare version
-// (record/areas/build/01-the-build.md, "A release").
+// (record/areas/architecture/02-code-map.md, "Profiles in this repository"). So CI fails, and
+// publishes nothing from, a tree whose levels/<n>/ differs from a release tag that holds level n.
+// A release before 1.0.0 freezes no level, since nobody flies one: its core may refuse a bundle
+// published after its level changed, until it updates. Publishing still counts those releases'
+// levels, so they get the tree's profiles (user, 2026-11-21). Every tag on this repository is a
+// release's bare version (record/areas/build/01-the-build.md, "A release").
 
 import { spawnSync } from "node:child_process"
 
+import { compareVersions } from "./changes.ts"
 import { ROOT } from "./repo.ts"
 import { Failed, output } from "./run.ts"
 
@@ -26,10 +29,16 @@ export function releasedLevels(): Map<string, number> {
   )
 }
 
-/** Each released level whose files in the tree differ from a release tag's, as `level 1, released in 0.1.0`. */
+/** Whether a release tag freezes its levels: one from 1.0.0 on. */
+export function holdsLevels(tag: string): boolean {
+  return compareVersions(tag, "1.0.0") >= 0
+}
+
+/** Each held level whose files in the tree differ from a release tag's, as `level 1, released in 1.0.0`. */
 export function changedReleasedLevels(): string[] {
   const changed: string[] = []
   for (const [tag, level] of releasedLevels()) {
+    if (!holdsLevels(tag)) continue
     for (let n = 1; n <= level; n++) {
       // `git diff` against the working tree reads both sides with the repository's line ends.
       const diff = spawnSync("git", ["diff", "--quiet", tag, "--", `${ENGINE}/levels/${n}/`], { cwd: ROOT })

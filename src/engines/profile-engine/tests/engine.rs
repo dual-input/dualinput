@@ -594,8 +594,39 @@ fn a_checked_profile_survives_postcard() {
 }
 
 #[test]
+fn a_modules_schema_leaves_out_what_only_a_profile_holds_and_requires_no_aircraft() {
+    let parse = |file| -> serde_json::Value {
+        serde_json::from_str(&profile_engine::schema(LEVEL, file)).expect("a schema is JSON")
+    };
+    let profile = parse(profile_engine::Schema::Profile);
+    let module = parse(profile_engine::Schema::Module);
+    assert_eq!(
+        profile["required"],
+        serde_json::json!(["maker", "name", "maturity", "aircraft"])
+    );
+    assert!(module.get("required").is_none());
+    for key in ["maker", "name", "maturity", "aircraft", "seats"] {
+        assert!(profile["properties"].get(key).is_some(), "{key}");
+        assert!(module["properties"].get(key).is_none(), "{key}");
+    }
+    let state = |s: &serde_json::Value| s["properties"]["state"]["additionalProperties"].clone();
+    for key in ["only", "location"] {
+        assert!(state(&profile)["properties"].get(key).is_some(), "{key}");
+        assert!(state(&module)["properties"].get(key).is_none(), "{key}");
+    }
+    assert_eq!(
+        state(&profile)["required"],
+        serde_json::json!(["name", "watch", "write"])
+    );
+    // An event entry neither counts nor toggles nor steps, which the checker refuses.
+    let event = &profile["properties"]["events"]["additionalProperties"]["properties"];
+    assert_eq!(event["write"]["type"], "string");
+    assert_eq!(event["watch"]["type"], "string");
+}
+
+#[test]
 fn the_levels_files_name_every_field() {
-    let schema = profile_engine::schema(LEVEL);
+    let schema = profile_engine::schema(LEVEL, profile_engine::Schema::Profile);
     for key in [
         "name",
         "maturity",

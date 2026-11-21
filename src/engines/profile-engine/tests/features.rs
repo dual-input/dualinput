@@ -103,6 +103,17 @@ fn seats_and_locations_check_and_come_back_from_a_bundle() {
     // Written again from the bundle, it gives the same bytes.
     let again = source(&tree(&[("b.yaml", &text)]), "b.yaml").expect("a bundle loads");
     assert_eq!(write(&again, &compiled(&again)), bytes);
+    // The source puts `seats` after `events`, and the bundle puts it in the layout's place,
+    // after `aircraft` and before `state` (record/areas/profiles/01-format-and-delivery.md,
+    // "Layout").
+    let at = |key: &str| {
+        text.find(&format!("\n{key}:"))
+            .unwrap_or_else(|| panic!("no {key}"))
+    };
+    assert!(
+        at("aircraft") < at("seats") && at("seats") < at("state") && at("state") < at("events"),
+        "{text}"
+    );
 }
 
 #[test]
@@ -187,7 +198,7 @@ fn a_module_holds_no_seats_or_locations() {
         ),
         (
             "modules/m.yaml",
-            "state:\n  y:\n    name: Y\n    watch: L('Y')\n    write: L('Y')\n    location: [0, 0, 0]\n    deadband: 1\nseats: {}\n",
+            "state:\n  y:\n    name: Y\n    watch: L('Y')\n    write: L('Y')\n    location: [0, 0, 0]\n    deadband: 1\nseats:\n  pilot:\n    name: Pilot\n",
         ),
     ]);
     let report = check(&source(&files, "p.yaml").expect("loads"), LEVEL);
@@ -200,7 +211,7 @@ fn a_module_holds_no_seats_or_locations() {
 
 #[test]
 fn the_levels_schema_names_avatars_fields() {
-    let schema = profile_engine::schema(LEVEL);
+    let schema = profile_engine::schema(LEVEL, profile_engine::Schema::Profile);
     for key in ["seats", "take_radius", "location", "deadband"] {
         assert!(schema.contains(&format!("\"{key}\"")), "{key}");
     }

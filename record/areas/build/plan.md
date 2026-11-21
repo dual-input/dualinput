@@ -1021,9 +1021,19 @@ Needs: every stage before 22, so it can be built beside stage 22.
 
 ## 22c The format's audit
 
-Builds: the changes to the profile format, the profile engine, and the profile builder that an audit of the format finds before v1's release fixes level 1 ([01-format-and-delivery](../profiles/01-format-and-delivery.md), [02-units](../profiles/02-units.md)).
-Designs first: the audit's list of gaps, each ruled on by the user.
+Builds: the changes to the profile format, the profile engine, and the profile builder that an audit of the format finds before v1's release fixes level 1, which [the profiles log](../profiles/log.md#2026-11-21-the-formats-audit-before-level-1-freezes-puts-maps-on-their-own-lines-types-instrument-readings-and-names-one-layout) lists:
+
+- the reader's refusal of a bracketed map, with an error that shows the map written out, and its skip of a leading byte-order mark ([01-format-and-delivery](../profiles/01-format-and-delivery.md)'s note of stage 22c)
+- `instrument(key, path, 'string')`, an `instrument()` entry typed as a number or as text in level 1's declarations, and `instrument-reads`' check of a reading's kind ([01-plugins](../plugins/01-plugins.md)'s note of stage 22c)
+- each level's two schemas, `profile.json` and `module.json`, and a bundle's top-level keys in [the layout](../profiles/01-format-and-delivery.md#layout)'s order ([02-units](../profiles/02-units.md)'s note of stage 22c)
+- the 58P's profile in the layout, its maps on their own lines and its `instrument()` values without `Number()`
+- CI's check that a released level's files match each release tag from 1.0.0 on, in `tools/lib/levels.ts`
+
+Designs first: the audit's list of gaps, each ruled on by the user, on 2026-11-21.
 Needs: every stage before 22, so it can be built beside stage 22.
+Tests: the profile engine's cases for a bracketed map, a byte-order mark, a schema for each kind of file, and the bundle's order; the builder's type check of a number and a text `instrument()` entry; `instrument-reads`' cases for a reading of each kind; `tools/levels.test.ts` for which tags hold a level; and the scenarios that load the 58P's profile, `state-sync`, `clients-panels`, and `profiles`.
+Exit: `node tools/check.ts` passes with the 58P's profile in the layout, and `node tools/bench.ts state-sync clients-panels profiles` passes.
+Done on 2026-11-21.
 
 ## 22d The profile extension
 

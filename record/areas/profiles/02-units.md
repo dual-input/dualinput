@@ -6,6 +6,14 @@ Depends on:  01-format-and-delivery.md, ../architecture/02-code-map.md, ../core/
 Decides:     Which compiler builds a bundle, and where it runs; the YAML parser; a bundle's exact bytes and its hash; the index; how CI publishes and keeps every bundle, and at which levels; whether CI holds a released level's builder output to its release tag; where the core fetches from; the cache; the local folder; the pin's key; how a bundle loads; the match check's item; the budgets; and the cases for the bench (node 6.8).
 ```
 
+> **Note**
+> From stage 22c ([profiles log](log.md#2026-11-21-the-formats-audit-before-level-1-freezes-puts-maps-on-their-own-lines-types-instrument-readings-and-names-one-layout); user, 2026-11-21):
+>
+> - In [levels](#levels), each level has two schemas in `levels/<n>/`: `profile.json` for a file in `profiles/aircraft/` and `module.json` for one in `profiles/modules/`, each with its required fields, and an editor picks one by the file's folder.
+>   The declarations type an `instrument()` entry as a number, or as text with `'string'`.
+> - In [a bundle's bytes](#a-bundles-bytes), the top-level keys come in [the format's layout](01-format-and-delivery.md#layout)'s order.
+> - CI holds a level's files only to release tags from 1.0.0 on, since nobody flies a release before it, and [publishing](#publishing) still counts every release tag's `LEVEL` as released, so a 0.x release gets the tree's profiles.
+
 The core loads bundles and never builds one.
 A published bundle comes from our Pages site under its hash, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.
 The profile builder type-checks and compiles with TypeScript 6.0.3's own compiler inside QuickJS-ng, the same code in CI, in the `dualinput-profile-builder` program the core team runs from the repository, and later in the IDE, so `typescript.js` never ships to pilots.

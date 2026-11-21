@@ -70,9 +70,9 @@ test("instrument-reads reads each path, sends only what changed, and says an err
   sent.length = 0
   hear({
     paths: [
-      { number: 0, instrument: "KR87A", path: "bfoMode" },
-      { number: 1, instrument: "KR87A", path: "nested.ranges.1" },
-      { number: 2, instrument: "KR87A", path: "inherited" },
+      { number: 0, instrument: "KR87A", path: "bfoMode", text: false },
+      { number: 1, instrument: "KR87A", path: "nested.ranges.1", text: false },
+      { number: 2, instrument: "KR87A", path: "inherited", text: false },
     ],
   })
   assert.equal(sent.length, 1, "the first read goes at once")
@@ -89,4 +89,28 @@ test("instrument-reads reads each path, sends only what changed, and says an err
   ;(element as { bfoMode: boolean }).bfoMode = false
   await sleep(300)
   assert.deepEqual(sent, [{ t: "read", readings: [{ number: 0, reading: { as: "number", value: 0 } }] }])
+})
+
+test("instrument-reads fails a reading of the other kind than its entry reads", (t) => {
+  const element = gauge({ ident: "ADF", mode: 2, armed: true })
+  const module = instrumentReads()
+  t.after(() => module.stop!())
+  const { ctx, sent, hear } = context([element])
+  module.start(ctx)
+  sent.length = 0
+  hear({
+    paths: [
+      { number: 0, instrument: "KR87A", path: "ident", text: true },
+      { number: 1, instrument: "KR87A", path: "ident", text: false },
+      { number: 2, instrument: "KR87A", path: "mode", text: true },
+      { number: 3, instrument: "KR87A", path: "armed", text: true },
+    ],
+  })
+  const read = sent[0] as unknown as { readings: { number: number; reading: { as: string; value: unknown } }[] }
+  assert.deepEqual(read.readings[0], { number: 0, reading: { as: "text", value: "ADF" } })
+  assert.deepEqual(
+    read.readings.slice(1).map((r) => r.reading.as),
+    ["error", "error", "error"],
+    "text where a number is read, and a number or a boolean where text is",
+  )
 })

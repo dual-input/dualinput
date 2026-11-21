@@ -2,6 +2,7 @@ maker: Black Square
 name: Baron 58P
 maturity: experimental
 authors: Dual Input
+
 aircraft:
   variants:
     press: bksq-aircraft-baronpropress
@@ -10,6 +11,7 @@ aircraft:
 # radios and engine monitor take knobs and buttons, and the GTNs are other packages' (read in
 # bksq-aircraft-baronpro 0.1.1, panel.*\PANEL.CFG and the gauges' JavaScript).
 displays: BlackSquareTablet
+
 seats:
   copilot:
     name: Copilot
@@ -29,23 +31,28 @@ state:
   battery:
     name: Battery
     watch: B('ELECTRICAL_Battery_1')
-    write: {toggle: B('ELECTRICAL_Battery_1_Toggle')}
+    write:
+      toggle: B('ELECTRICAL_Battery_1_Toggle')
   alternator_1:
     name: Left alternator
     watch: B('ELECTRICAL_Alternator_1')
-    write: {toggle: B('ELECTRICAL_Alternator_1_Toggle')}
+    write:
+      toggle: B('ELECTRICAL_Alternator_1_Toggle')
   alternator_2:
     name: Right alternator
     watch: B('ELECTRICAL_Alternator_2')
-    write: {toggle: B('ELECTRICAL_Alternator_2_Toggle')}
+    write:
+      toggle: B('ELECTRICAL_Alternator_2_Toggle')
   avionics_master:
     name: Avionics master
     watch: B('ELECTRICAL_Avionics_Bus_1')
-    write: {toggle: B('ELECTRICAL_Avionics_Bus_1_Toggle')}
+    write:
+      toggle: B('ELECTRICAL_Avionics_Bus_1_Toggle')
   external_power:
     name: External power
     watch: A('EXTERNAL POWER ON:1', 'Bool')
-    write: {toggle: K('TOGGLE_EXTERNAL_POWER')}
+    write:
+      toggle: K('TOGGLE_EXTERNAL_POWER')
 
   # ── Breakers
   # Only the seven breakers that export a variable are synced: the others read through
@@ -96,31 +103,38 @@ state:
   beacon:
     name: Beacon
     watch: B('LIGHTING_BEACON_1')
-    write: {toggle: B('LIGHTING_BEACON_1_Toggle')}
+    write:
+      toggle: B('LIGHTING_BEACON_1_Toggle')
   strobe:
     name: Strobe
     watch: B('LIGHTING_STROBE_1')
-    write: {toggle: B('LIGHTING_STROBE_1_Toggle')}
+    write:
+      toggle: B('LIGHTING_STROBE_1_Toggle')
   nav_lights:
     name: Navigation lights
     watch: B('LIGHTING_NAV_1')
-    write: {toggle: B('LIGHTING_NAV_1_Toggle')}
+    write:
+      toggle: B('LIGHTING_NAV_1_Toggle')
   taxi_light:
     name: Taxi light
     watch: B('LIGHTING_TAXI_1')
-    write: {toggle: B('LIGHTING_TAXI_1_Toggle')}
+    write:
+      toggle: B('LIGHTING_TAXI_1_Toggle')
   landing_light_1:
     name: Left landing light
     watch: B('LIGHTING_LANDING_1')
-    write: {toggle: B('LIGHTING_LANDING_1_Toggle')}
+    write:
+      toggle: B('LIGHTING_LANDING_1_Toggle')
   landing_light_2:
     name: Right landing light
     watch: B('LIGHTING_LANDING_2')
-    write: {toggle: B('LIGHTING_LANDING_2_Toggle')}
+    write:
+      toggle: B('LIGHTING_LANDING_2_Toggle')
   ice_light:
     name: Ice light
     watch: B('LIGHTING_WING_1')
-    write: {toggle: B('LIGHTING_WING_1_Toggle')}
+    write:
+      toggle: B('LIGHTING_WING_1_Toggle')
   glareshield_flood:
     name: Glareshield flood
     watch: L('bksq_MasterGlareshieldLights')
@@ -336,31 +350,38 @@ state:
   ap_master:
     name: Autopilot
     watch: A('AUTOPILOT MASTER', 'Bool')
-    write: {toggle: K('AP_MASTER')}
+    write:
+      toggle: K('AP_MASTER')
   flight_director:
     name: Flight director
     watch: A('AUTOPILOT FLIGHT DIRECTOR ACTIVE', 'Bool')
-    write: {toggle: K('TOGGLE_FLIGHT_DIRECTOR')}
+    write:
+      toggle: K('TOGGLE_FLIGHT_DIRECTOR')
   yaw_damper:
     name: Yaw damper
     watch: A('AUTOPILOT YAW DAMPER', 'Bool')
-    write: {toggle: K('YAW_DAMPER_TOGGLE')}
+    write:
+      toggle: K('YAW_DAMPER_TOGGLE')
   ap_heading_mode:
     name: Autopilot heading mode
     watch: A('AUTOPILOT HEADING LOCK', 'Bool')
-    write: {toggle: K('AP_PANEL_HEADING_HOLD')}
+    write:
+      toggle: K('AP_PANEL_HEADING_HOLD')
   ap_nav_mode:
     name: Autopilot nav mode
     watch: A('AUTOPILOT NAV1 LOCK', 'Bool')
-    write: {toggle: K('AP_NAV1_HOLD')}
+    write:
+      toggle: K('AP_NAV1_HOLD')
   ap_approach_mode:
     name: Autopilot approach mode
     watch: A('AUTOPILOT APPROACH HOLD', 'Bool')
-    write: {toggle: K('AP_APR_HOLD')}
+    write:
+      toggle: K('AP_APR_HOLD')
   ap_back_course_mode:
     name: Autopilot back course mode
     watch: A('AUTOPILOT BACKCOURSE HOLD', 'Bool')
-    write: {toggle: K('AP_BC_HOLD')}
+    write:
+      toggle: K('AP_BC_HOLD')
   ap_altitude_hold:
     name: Autopilot altitude hold
     watch: A('AUTOPILOT ALTITUDE LOCK', 'Bool')
@@ -409,7 +430,8 @@ state:
   kas_arm:
     name: Altitude arm
     watch: instrument('KAS297B_1|Index=1', 'optionalArmingMode')
-    write: {toggle: H('kas297b_ArmButton')}
+    write:
+      toggle: H('kas297b_ArmButton')
   kas_armed_vs:
     name: Armed vertical speed
     watch: instrument('KAS297B_1|Index=1', 'armedVerticalSpeed')
@@ -417,7 +439,7 @@ state:
       (value) => {
         const vsHold = state.pms50_apga_running ? state.pms50_apga_vertical_mode > 0 : state.ap_vs_hold == 1
         if (state.kas_vs_adjust != 1 || vsHold) return
-        const steps = Math.round((Number(value) - Number(state.kas_armed_vs)) / 100)
+        const steps = Math.round((value - state.kas_armed_vs) / 100)
         if (steps > 0) write(H('kas297b_100_INC')).repeat(steps)
         else if (steps < 0) write(H('kas297b_100_DEC')).repeat(-steps)
       }
@@ -495,7 +517,8 @@ state:
   alternate_static:
     name: Alternate static
     watch: A('ALTERNATE STATIC SOURCE OPEN', 'Bool')
-    write: {toggle: K('TOGGLE_ALTERNATE_STATIC')}
+    write:
+      toggle: K('TOGGLE_ALTERNATE_STATIC')
   gps_drives_nav1:
     name: NAV GPS source
     watch: A('GPS DRIVES NAV1', 'Bool')
@@ -741,27 +764,33 @@ state:
   com1_spacing:
     name: COM 1 spacing
     watch: A('COM SPACING MODE:1', 'Enum')
-    write: {toggle: H('RADIO1_COM_Freq_Spacing_PUSH')}
+    write:
+      toggle: H('RADIO1_COM_Freq_Spacing_PUSH')
   com2_spacing:
     name: COM 2 spacing
     watch: A('COM SPACING MODE:2', 'Enum')
-    write: {toggle: H('RADIO2_COM_Freq_Spacing_PUSH')}
+    write:
+      toggle: H('RADIO2_COM_Freq_Spacing_PUSH')
   com1_knob_pulled:
     name: COM 1 knob pulled
     watch: L('COM_1_KNOB_PULLED')
-    write: {toggle: H('RADIO1_COM_Knob_Small_PUSH')}
+    write:
+      toggle: H('RADIO1_COM_Knob_Small_PUSH')
   nav1_knob_pulled:
     name: NAV 1 knob pulled
     watch: L('NAV_1_KNOB_PULLED')
-    write: {toggle: H('RADIO1_NAV_Knob_Small_PUSH')}
+    write:
+      toggle: H('RADIO1_NAV_Knob_Small_PUSH')
   com2_knob_pulled:
     name: COM 2 knob pulled
     watch: L('COM_2_KNOB_PULLED')
-    write: {toggle: H('RADIO2_COM_Knob_Small_PUSH')}
+    write:
+      toggle: H('RADIO2_COM_Knob_Small_PUSH')
   nav2_knob_pulled:
     name: NAV 2 knob pulled
     watch: L('NAV_2_KNOB_PULLED')
-    write: {toggle: H('RADIO2_NAV_Knob_Small_PUSH')}
+    write:
+      toggle: H('RADIO2_NAV_Knob_Small_PUSH')
   com1_power:
     name: COM 1 power
     watch: A('CIRCUIT SWITCH ON:63', 'Bool')
@@ -813,11 +842,13 @@ state:
   audio_nav1_ident:
     name: NAV 1 ident
     watch: A('NAV SOUND:1', 'Bool')
-    write: {toggle: K('RADIO_VOR1_IDENT_TOGGLE')}
+    write:
+      toggle: K('RADIO_VOR1_IDENT_TOGGLE')
   audio_nav2_ident:
     name: NAV 2 ident
     watch: A('NAV SOUND:2', 'Bool')
-    write: {toggle: K('RADIO_VOR2_IDENT_TOGGLE')}
+    write:
+      toggle: K('RADIO_VOR2_IDENT_TOGGLE')
   cabin_intercom:
     name: Cabin intercom
     watch: L('var_cabinIntercom')
@@ -844,18 +875,20 @@ state:
   adf_ant:
     name: ADF ANT mode
     watch: instrument('KR87A', 'antMode')
-    write: {toggle: H('adf_AntAdf')}
+    write:
+      toggle: H('adf_AntAdf')
   adf_bfo:
     name: ADF BFO
     watch: instrument('KR87A', 'bfoMode')
-    write: {toggle: H('adf_bfo')}
+    write:
+      toggle: H('adf_bfo')
   adf_mode:
     name: ADF mode
     watch: instrument('KR87A', 'multiMode')
     write: |
       (value) => {
         if (value == 0) { if (state.adf_mode != 0) write(H('adf_frqTransfert')) }
-        else if (state.adf_mode == 0) write(H('adf_FltEt')).repeat(Number(value))
+        else if (state.adf_mode == 0) write(H('adf_FltEt')).repeat(value)
         else if (state.adf_mode != value) write(H('adf_FltEt'))
       }
 
@@ -908,7 +941,8 @@ state:
   radar_alert:
     name: Radar alert
     watch: instrument('bksq_wradar1', 'weatherRadarMainMap.map.alertMode')
-    write: {toggle: H('bksq_wradar1_radarAlertToggle')}
+    write:
+      toggle: H('bksq_wradar1_radarAlertToggle')
   radar_profile:
     name: Radar vertical profile
     watch: instrument('bksq_wradar1', 'weatherRadarMainMap.map.verticalMode')
@@ -931,7 +965,7 @@ state:
     write: |
       (value) => {
         if (state.radar_mode > 3) return
-        const steps = Math.round((Number(value) - Number(state.radar_track)) / 2.5)
+        const steps = Math.round((value - state.radar_track) / 2.5)
         if (steps > 0) write(H('bksq_wradar1_radarTrackRight')).repeat(steps)
         else if (steps < 0) write(H('bksq_wradar1_radarTrackLeft')).repeat(-steps)
       }

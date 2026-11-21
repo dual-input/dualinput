@@ -81,12 +81,35 @@ pub fn declarations(level: u32) -> String {
         .join("\n")
 }
 
-/// The level's JSON Schema, from the format's tables, as pretty JSON with a final line break.
-pub fn schema(level: u32) -> String {
+/// Which file a schema is for. An editor picks one by the file's folder, as the builder takes a
+/// file in `profiles/aircraft/` as a profile and one it imports as a module, so a module's schema
+/// leaves out what only a profile holds (record/areas/profiles/02-units.md, "Levels").
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Schema {
+    Profile,
+    Module,
+}
+
+impl Schema {
+    /// The schema's file in `levels/<n>/`.
+    pub fn file_name(self) -> &'static str {
+        match self {
+            Schema::Profile => "profile.json",
+            Schema::Module => "module.json",
+        }
+    }
+}
+
+/// The level's JSON Schema for one kind of file, from the format's tables, as pretty JSON with a
+/// final line break. It requires the fields the checker always requires, takes in each field
+/// the kinds of name the checker takes there, and leaves to the checker the checks that depend
+/// on another field, such as `wrap: true` needing `range`.
+pub fn schema(level: u32, file: Schema) -> String {
+    let module = file == Schema::Module;
     let fields = |table: &[Field], each: &dyn Fn(&str) -> Value| -> Map<String, Value> {
         table
             .iter()
-            .filter(|f| f.level <= level)
+            .filter(|f| f.level <= level && !(module && f.profile_only))
             .map(|f| {
                 let mut v = each(f.key);
                 if let Value::Object(o) = &mut v {
@@ -96,30 +119,52 @@ pub fn schema(level: u32) -> String {
             })
             .collect()
     };
-    let object = |props: Map<String, Value>| json!({ "type": "object", "additionalProperties": false, "properties": props });
-    let name = json!({ "type": "string", "pattern": r"^\s*(L|A|B|K|H|instrument)\s*\(.*\)\s*$" });
-    let name_or_names = json!({ "anyOf": [name, { "type": "array", "items": name }] });
+    let object = |props: Map<String, Value>, required: &[&str]| {
+        let mut o = json!({ "type": "object", "additionalProperties": false, "properties": props });
+        if !required.is_empty() {
+            o["required"] = json!(required);
+        }
+        o
+    };
+    // A name made by one of `calls`, as the checker's `Allowed` takes each field's.
+    let name = |calls: &str| json!({ "type": "string", "pattern": format!(r"^\s*({calls})\s*\(.*\)\s*$") });
+    let event_name = name("B|K|H");
+    let variable_name = name("L|A");
+    let ignored = name("L|A|B|K|H");
+    let name_or_names = json!({ "anyOf": [ignored, { "type": "array", "items": ignored }] });
     let text_or_texts = json!({ "anyOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }] });
     let range =
         json!({ "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 });
     let pace =
         json!({ "type": "string", "pattern": r"^(1 frame|[1-9][0-9]* frames|[1-9][0-9]*ms)$" });
-    let steps = object(fields(blocks::STEPS, &|key| match key {
-        "inc" | "dec" => name.clone(),
-        "step" => json!({ "type": "number", "exclusiveMinimum": 0 }),
-        "wrap" => json!({ "type": "boolean" }),
-        "range" => range.clone(),
-        "pace" => pace.clone(),
-        _ => json!({}),
-    }));
-    let toggle = object(fields(blocks::TOGGLE, &|_| name.clone()));
-    let count = object(fields(blocks::COUNT, &|key| match key {
-        "step" => json!({ "type": "number", "exclusiveMinimum": 0 }),
-        "wrap" => json!({ "type": "boolean" }),
-        "range" => range.clone(),
-        _ => name.clone(),
-    }));
-    let write = json!({ "anyOf": [{ "type": "string" }, toggle, steps] });
+    let steps = object(
+        fields(blocks::STEPS, &|key| match key {
+            "inc" | "dec" => event_name.clone(),
+            "step" => json!({ "type": "number", "exclusiveMinimum": 0 }),
+            "wrap" => json!({ "type": "boolean" }),
+            "range" => range.clone(),
+            "pace" => pace.clone(),
+            _ => json!({}),
+        }),
+        &["inc", "dec"],
+    );
+    let toggle = object(fields(blocks::TOGGLE, &|_| event_name.clone()), &["toggle"]);
+    let mut count = object(
+        fields(blocks::COUNT, &|key| match key {
+            "step" => json!({ "type": "number", "exclusiveMinimum": 0 }),
+            "wrap" => json!({ "type": "boolean" }),
+            "range" => range.clone(),
+            "count" => variable_name.clone(),
+            _ => event_name.clone(),
+        }),
+        &["wrap", "range"],
+    );
+    count["anyOf"] = json!(["inc", "dec", "set", "count"].map(|f| json!({ "required": [f] })));
+    // A state entry's write is a name, a function, or `none`, or a map that toggles or steps; an
+    // event entry's is a name or a function alone, since an event has no value of the cockpit's
+    // to compare or step from.
+    let state_write = json!({ "anyOf": [{ "type": "string" }, toggle, steps] });
+    let event_write = json!({ "type": "string", "not": { "pattern": r"^\s*none\s*$" } });
     // Each feature's blocks or fields of one kind, `of` picking which, after the format's own.
     let with_features = |own: Map<String, Value>, of: fn(&Module) -> &'static [Field]| {
         let mut all = own;
@@ -128,49 +173,67 @@ pub fn schema(level: u32) -> String {
         }
         all
     };
-    let entry = |table: &[Field], of: fn(&Module) -> &'static [Field]| {
-        object(with_features(
-            fields(table, &|key| match key {
-                "name" | "description" => json!({ "type": "string" }),
-                "watch" => json!({ "anyOf": [name.clone(), count.clone()] }),
-                "write" => write.clone(),
-                "default" => json!({ "type": "number" }),
-                "owner" => json!({ "enum": ["pilot_flying", "shared"] }),
-                "only" => text_or_texts.clone(),
-                "ignore" => name_or_names.clone(),
-                _ => json!({}),
-            }),
-            of,
-        ))
+    let entry = |table: &[Field], of: fn(&Module) -> &'static [Field], event: bool| {
+        object(
+            with_features(
+                fields(table, &|key| match key {
+                    "name" | "description" => json!({ "type": "string" }),
+                    "watch" if event => name("L|B|K|H"),
+                    "watch" => json!({ "anyOf": [name("L|A|B|instrument"), count.clone()] }),
+                    "write" if event => event_write.clone(),
+                    "write" => state_write.clone(),
+                    "default" => json!({ "type": "number" }),
+                    "owner" => json!({ "enum": ["pilot_flying", "shared"] }),
+                    "only" => text_or_texts.clone(),
+                    "ignore" => name_or_names.clone(),
+                    _ => json!({}),
+                }),
+                of,
+            ),
+            &["name", "watch", "write"],
+        )
     };
-    let entries = |table: &[Field], of: fn(&Module) -> &'static [Field]| {
+    let entries = |table: &[Field], of: fn(&Module) -> &'static [Field], event: bool| {
         json!({
             "type": "object",
             "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
-            "additionalProperties": entry(table, of),
+            "additionalProperties": entry(table, of, event),
         })
     };
-    let aircraft = object(fields(blocks::AIRCRAFT, &|key| match key {
-        "variants" => {
-            json!({ "type": "object", "minProperties": 1, "additionalProperties": text_or_texts.clone() })
-        }
-        _ => pace.clone(),
-    }));
-    let top = object(with_features(
-        fields(blocks::TOP, &|key| match key {
-            "maker" | "name" | "authors" => json!({ "type": "string" }),
-            "maturity" => json!({ "enum": ["stable", "experimental"] }),
-            "aircraft" => aircraft.clone(),
-            "import" => text_or_texts.clone(),
-            "state" => entries(blocks::STATE_ENTRY, |m| m.state_fields),
-            "events" => entries(blocks::EVENT_ENTRY, |m| m.event_fields),
-            _ => json!({}),
+    let aircraft = object(
+        fields(blocks::AIRCRAFT, &|key| match key {
+            "variants" => {
+                json!({ "type": "object", "minProperties": 1, "additionalProperties": text_or_texts.clone() })
+            }
+            _ => pace.clone(),
         }),
-        |m| m.blocks,
-    ));
+        &["variants"],
+    );
+    let top = object(
+        with_features(
+            fields(blocks::TOP, &|key| match key {
+                "maker" | "name" | "authors" => json!({ "type": "string" }),
+                "maturity" => json!({ "enum": ["stable", "experimental"] }),
+                "aircraft" => aircraft.clone(),
+                "import" => text_or_texts.clone(),
+                "state" => entries(blocks::STATE_ENTRY, |m| m.state_fields, false),
+                "events" => entries(blocks::EVENT_ENTRY, |m| m.event_fields, true),
+                _ => json!({}),
+            }),
+            |m| m.blocks,
+        ),
+        match file {
+            Schema::Profile => &["maker", "name", "maturity", "aircraft"][..],
+            Schema::Module => &[][..],
+        },
+    );
+    let what = match file {
+        Schema::Profile => "profile",
+        Schema::Module => "module",
+    };
     let mut schema = json!({
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": format!("A Dual Input profile, at level {level} of the format"),
+        "title": format!("A Dual Input {what}, at level {level} of the format"),
     });
     if let (Value::Object(s), Value::Object(t)) = (&mut schema, top) {
         s.extend(t);

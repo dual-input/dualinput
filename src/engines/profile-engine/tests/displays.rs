@@ -99,5 +99,8 @@ fn a_wasm_instrument_fails_the_load_at_its_place() {
 
 #[test]
 fn the_levels_schema_names_displays() {
-    assert!(profile_engine::schema(LEVEL).contains("\"displays\""));
+    assert!(
+        profile_engine::schema(LEVEL, profile_engine::Schema::Profile).contains("\"displays\"")
+    );
+    assert!(profile_engine::schema(LEVEL, profile_engine::Schema::Module).contains("\"displays\""));
 }

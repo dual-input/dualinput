@@ -25,7 +25,7 @@ pub use format::{
     Variant, Watch, Write,
 };
 pub use index::{Index, IndexBundle, IndexProfile, Shown, covers};
-pub use levels::{declarations, schema};
+pub use levels::{Schema, declarations, schema};
 pub use names::{Arg, Name, key_names};
 pub use program::{Compiled, Program, ProgramFile, TypeError};
 pub use report::{Diagnostic, Place, Report, Severity};
@@ -52,7 +52,7 @@ pub fn read(bundle: &[u8], level: u32) -> Result<Profile, Report> {
             "A bundle is UTF-8 text",
         ))
     })?;
-    let root = tree::parse(BUNDLE, text).map_err(one)?;
+    let root = tree::parse(BUNDLE, text).map_err(|diagnostics| Report { diagnostics })?;
     let files = [File {
         root: &root,
         module: false,

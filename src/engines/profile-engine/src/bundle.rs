@@ -1,10 +1,11 @@
 //! A bundle's bytes, laid out one way, so the same files and the same builder give the same
 //! bytes on any PC, and its hash (record/areas/profiles/02-units.md, "A bundle's bytes").
 //!
-//! The top-level keys come in one fixed order, the entries in their source's order, each
-//! entry's fields in the order of the format's tables, every script as a `|` block of the
-//! compiled JavaScript, and every other value plain where YAML allows it, with no comments and
-//! no `import`, in UTF-8 with LF line endings.
+//! The top-level keys come in the format's layout's order, `maker` to `events`, with each
+//! feature's blocks before `state` (record/areas/profiles/01-format-and-delivery.md, "Layout").
+//! The entries come in their source's order, each entry's fields in the order of the format's
+//! tables, every script as a `|` block of the compiled JavaScript, and every other value plain
+//! where YAML allows it, with no comments and no `import`, in UTF-8 with LF line endings.
 
 use saphyr::Scalar;
 use sha2::{Digest, Sha256};
@@ -51,6 +52,9 @@ pub(crate) fn emit(p: &Profile) -> Vec<u8> {
     if let Some(pace) = p.aircraft.pace {
         out.line(1, &format!("pace: {pace}"));
     }
+    for m in crate::features::MODULES {
+        (m.emit_blocks)(&p.features, &mut out);
+    }
     if !p.state.is_empty() {
         out.line(0, "state:");
         for e in &p.state {
@@ -62,9 +66,6 @@ pub(crate) fn emit(p: &Profile) -> Vec<u8> {
         for e in &p.events {
             event_entry(&mut out, e);
         }
-    }
-    for m in crate::features::MODULES {
-        (m.emit_blocks)(&p.features, &mut out);
     }
     out.text.into_bytes()
 }

@@ -33,7 +33,7 @@ pub(crate) struct Module {
     /// into `Checker::variants_named`, which the checker holds to the profile's variants as it
     /// holds `only`.
     pub(crate) check_field: fn(&mut Checker, &Key, &Node, &mut EntryFields),
-    /// Writes its blocks into a bundle, after the format's own.
+    /// Writes its blocks into a bundle, after `aircraft` and before `state`, in `MODULES`' order.
     pub(crate) emit_blocks: fn(&Blocks, &mut crate::bundle::Out),
     /// Writes its fields of an entry into a bundle, after the entry's own.
     pub(crate) emit_fields: fn(&EntryFields, &mut crate::bundle::Out),
@@ -41,8 +41,9 @@ pub(crate) struct Module {
     pub(crate) schema: fn(&str) -> Value,
 }
 
-/// Every feature's module, in the order a bundle writes their blocks.
-pub(crate) const MODULES: &[&Module] = &[&avatars::MODULE, &pointer_sync::MODULE];
+/// Every feature's module, in the order a bundle writes their blocks, which is the format's
+/// layout's: `displays`, then `seats` (record/areas/profiles/01-format-and-delivery.md, "Layout").
+pub(crate) const MODULES: &[&Module] = &[&pointer_sync::MODULE, &avatars::MODULE];
 
 /// Every feature's blocks, as a profile holds them.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]

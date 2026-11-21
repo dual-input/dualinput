@@ -107,6 +107,33 @@ fn a_function_reading_a_key_one_variant_lacks_fails_at_its_line() {
     });
 }
 
+/// An `instrument()` entry's value is a number, or text with `'string'`, so a function compares
+/// it as one with no conversion (record/areas/plugins/01-plugins.md, "Its values").
+#[test]
+fn an_instrument_entry_is_typed_as_a_number_or_with_string_as_text() {
+    let entry = |watch: &str, body: &str| {
+        format!(
+            "{PROFILE}  knob:\n    name: Knob\n    watch: {watch}\n    write: |\n      (value) => {{\n        {body}\n      }}\n"
+        )
+    };
+    let number = entry(
+        "instrument('KR87A', 'multiMode')",
+        "if (value > state.knob) write(H('UP')).repeat(value - state.knob)",
+    );
+    let text = entry(
+        "instrument('KR87A', 'ident', 'string')",
+        "if (value != state.knob) write(H('UP')).repeat(Math.round(value))",
+    );
+    with_compiler(move |compiler| {
+        let path = "aircraft/bksq-baronpro.yaml";
+        let built = build(&tree(&[(path, &number)]), path, compiler);
+        assert!(!built.report.has_errors(), "{}", built.report);
+        let built = build(&tree(&[(path, &text)]), path, compiler);
+        let e = built.report.errors().next().expect("an error");
+        assert_eq!(e.code, "TS2345", "{}", built.report);
+    });
+}
+
 #[test]
 fn a_wrong_pace_in_a_chain_fails_the_type_check() {
     let profile = PROFILE.replace("'2 frames'", "'2 frame'");

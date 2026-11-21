@@ -39,6 +39,9 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > **Note**
 > In [the traffic and ATC switch](#the-traffic-and-atc-switch), the platform offers no request that claims several keys together: each switch's `session.share` claims or releases its own role's key alone (user, 2026-11-15).
 
+> **Note**
+> In [profiles in this repository](#profiles-in-this-repository), CI holds a level's schemas and declarations only to release tags from 1.0.0 on, since nobody flies a release before it, and each level has two schemas, one for a profile and one for a module ([profiles log](../profiles/log.md#2026-11-21-the-formats-audit-before-level-1-freezes-puts-maps-on-their-own-lines-types-instrument-readings-and-names-one-layout); user, 2026-11-21).
+
 Dual Input's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
 A feature reads the platform's state, reaches other features only through moments the platform raises, and reaches the world only through outputs, and a feature that can block a request registers a guard rather than having the platform check on it.

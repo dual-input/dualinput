@@ -74,8 +74,10 @@ impl<F: Files> Loader<'_, F> {
         };
         let root = match tree::parse(path, &text) {
             Ok(root) => root,
-            Err(e) => {
-                self.report.push(e);
+            Err(errors) => {
+                for e in errors {
+                    self.report.push(e);
+                }
                 return;
             }
         };

@@ -78,7 +78,7 @@ pub(crate) fn instruments_rule(view: &View, instruments: &[String]) -> Vec<Strin
 pub(crate) fn send_paths(watches: &[Watch], instruments: &[String], socket: u64, cx: &Cx) {
     let mut paths = Vec::new();
     for (number, watch) in watches.iter().enumerate() {
-        let Name::Instrument { key, path } = &watch.name else {
+        let Name::Instrument { key, path, text } = &watch.name else {
             continue;
         };
         for instrument in instruments.iter().filter(|i| key_names(key, i)) {
@@ -86,6 +86,7 @@ pub(crate) fn send_paths(watches: &[Watch], instruments: &[String], socket: u64,
                 number: number as u32,
                 instrument: instrument.clone(),
                 path: path.clone(),
+                text: *text,
             });
         }
     }

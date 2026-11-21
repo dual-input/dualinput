@@ -35,10 +35,13 @@ pub enum Name {
         name: String,
     },
     /// A value in a gauge's JavaScript: the instrument's key, then a dotted path from its
-    /// object.
+    /// object. It reads a number unless `text`, which `'string'` after the path gives, so a
+    /// write function compares it with no conversion
+    /// (record/areas/plugins/01-plugins.md, "Its values").
     Instrument {
         key: String,
         path: String,
+        text: bool,
     },
 }
 
@@ -75,7 +78,7 @@ impl Name {
             Name::B { name } => ('B', name.clone()),
             Name::K { name, .. } => ('K', name.clone()),
             Name::H { name } => ('H', name.clone()),
-            Name::Instrument { key, path } => ('I', format!("{key}.{path}")),
+            Name::Instrument { key, path, .. } => ('I', format!("{key}.{path}")),
         }
     }
 
@@ -208,23 +211,36 @@ fn build(call: &str, args: Vec<Raw>) -> Result<Name, NotAName> {
             }
             Ok(Name::K { name, values })
         }
-        "instrument" => match rest.as_slice() {
-            [Raw::Str(path)] => {
-                if !instrument_path(path) {
-                    return Err(NotAName(format!(
-                        "`{path}` is a path of names and whole numbers separated by dots, such as `config.range`"
-                    )));
+        "instrument" => {
+            let (path, text) = match rest.as_slice() {
+                [Raw::Str(path)] => (path, false),
+                [Raw::Str(path), Raw::Str(kind)] if kind.eq_ignore_ascii_case("string") => {
+                    (path, true)
                 }
-                Ok(Name::Instrument {
-                    key: name,
-                    path: path.clone(),
-                })
+                [Raw::Str(_), _] => {
+                    return Err(NotAName(
+                        "`instrument()` takes `'string'` after its path, for a value that's text, and nothing else there"
+                            .into(),
+                    ));
+                }
+                _ => {
+                    return Err(NotAName(
+                        "`instrument()` takes the instrument's key and a dotted path, each in quotes, and `'string'` for a value that's text"
+                            .into(),
+                    ));
+                }
+            };
+            if !instrument_path(path) {
+                return Err(NotAName(format!(
+                    "`{path}` is a path of names and whole numbers separated by dots, such as `config.range`"
+                )));
             }
-            _ => Err(NotAName(
-                "`instrument()` takes the instrument's key and a dotted path, each in quotes"
-                    .into(),
-            )),
-        },
+            Ok(Name::Instrument {
+                key: name,
+                path: path.clone(),
+                text,
+            })
+        }
         _ => Err(NotAName(format!("`{call}` isn't a name"))),
     }
 }
@@ -376,8 +392,12 @@ impl fmt::Display for Name {
                 }
                 write!(f, ")")
             }
-            Name::Instrument { key, path } => {
-                write!(f, "instrument({}, {})", quoted(key), quoted(path))
+            Name::Instrument { key, path, text } => {
+                write!(f, "instrument({}, {}", quoted(key), quoted(path))?;
+                if *text {
+                    write!(f, ", 'string'")?;
+                }
+                write!(f, ")")
             }
         }
     }
@@ -411,6 +431,7 @@ mod tests {
             "K('SOME_EVENT', 3, value)",
             "H('bksq_wradar1_radarAlertToggle')",
             "instrument('KNS81', 'waypoints.0.frequency')",
+            "instrument('KNS81', 'waypoints.0.ident', 'string')",
             "L('it\\'s')",
         ] {
             let name = parse(text).unwrap_or_else(|e| panic!("{text}: {}", e.0));
@@ -430,6 +451,16 @@ mod tests {
     fn an_instrument_path_calls_nothing() {
         assert!(parse("instrument('KNS81', 'getWaypoint()')").is_err());
         assert!(parse("instrument('KNS81', 'a..b')").is_err());
+    }
+
+    #[test]
+    fn an_instrument_reads_a_number_or_with_string_text() {
+        let number = parse("instrument('KR87A', 'bfoMode')").expect("a name");
+        assert!(matches!(number, Name::Instrument { text: false, .. }));
+        let text = parse("instrument('KR87A', 'ident', 'String')").expect("a name");
+        assert!(matches!(text, Name::Instrument { text: true, .. }));
+        assert!(parse("instrument('KR87A', 'bfoMode', 'Bool')").is_err());
+        assert!(parse("instrument('KR87A', 'bfoMode', 2)").is_err());
     }
 
     #[test]

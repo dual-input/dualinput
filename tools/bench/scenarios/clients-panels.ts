@@ -193,7 +193,7 @@ test("no cockpit panel raises no trouble under a profile whose panel modules nee
   const copy = copyProfiles(path.join(run.folder, "no-displays"))
   const file = path.join(copy, "aircraft", "bksq-baronpro.yaml")
   const head = fs.readFileSync(file, "utf8").split("\nstate:\n")[0]!.replace("displays: BlackSquareTablet", "")
-  const battery = ["state:", "  battery:", "    name: Battery", "    watch: B('ELECTRICAL_Battery_1')", "    write: {toggle: B('ELECTRICAL_Battery_1_Toggle')}", ""]
+  const battery = ["state:", "  battery:", "    name: Battery", "    watch: B('ELECTRICAL_Battery_1')", "    write:", "      toggle: B('ELECTRICAL_Battery_1_Toggle')", ""]
   fs.writeFileSync(file, `${head}\n${battery.join("\n")}`)
   const hash = net.profiles.publish(copy).get("aircraft/bksq-baronpro.yaml")!
   const core = await announcing(run, "a", await withHelper(net, t))

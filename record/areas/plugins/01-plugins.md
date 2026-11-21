@@ -6,6 +6,13 @@ Depends on:  ../profiles/01-format-and-delivery.md, ../profiles/02-units.md, ../
 Decides:     That plugins come after v1; the `instrument()` name, what its path may reach, and the values it reads; how state sync reads it and writes a gauge's state through its H: events; the Baron 58P's entries for its gauges' state; and the sandbox's rules against randomness a replay can't repeat (node 6.15).
 ```
 
+> **Note**
+> From stage 22c ([profiles log](../profiles/log.md#2026-11-21-the-formats-audit-before-level-1-freezes-puts-maps-on-their-own-lines-types-instrument-readings-and-names-one-layout); user, 2026-11-21):
+>
+> - `instrument(key, path)` reads a number, and `instrument(key, path, 'string')` reads text, so a write function compares the entry's value without a `Number()`.
+>   In [its values](#its-values), a number entry gets a finite number, or 1 or 0 for `true` or `false`, and a text entry gets a string, and a reading of the other kind is an error.
+> - A map goes on its own lines, so the sketch's `adf_bfo` writes `write:` with `toggle: H('adf_bfo')` on the line below it ([layout](../profiles/01-format-and-delivery.md#layout)).
+
 v1 builds no plugins.
 The Baron 58P's profile reads the settings that live only in its gauges' JavaScript through a name, `instrument()`, which a panel module of state sync's reads every 250ms.
 It writes them only through the gauges' own H: events, in write functions that check the mode another entry syncs.

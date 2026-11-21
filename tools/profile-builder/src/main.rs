@@ -233,8 +233,9 @@ fn stamps(root: &Path) -> BTreeMap<PathBuf, SystemTime> {
     found
 }
 
-/// Writes each level's JSON Schema and declarations into the profile engine's `levels/`, where
-/// they're committed; `node tools/check.ts` writes them again and fails on a difference.
+/// Writes each level's JSON Schemas, a profile's and a module's, and its declarations into the
+/// profile engine's `levels/`, where they're committed; `node tools/check.ts` writes them again
+/// and fails on a difference.
 fn levels() -> Result<(), String> {
     let folder =
         Path::new(env!("CARGO_MANIFEST_DIR")).join("../../src/engines/profile-engine/levels");
@@ -242,10 +243,15 @@ fn levels() -> Result<(), String> {
         let dir = folder.join(level.to_string());
         std::fs::create_dir_all(&dir)
             .map_err(|e| format!("couldn't make {}: {e}", dir.display()))?;
-        write_whole(
-            &dir.join("schema.json"),
-            profile_engine::schema(level).as_bytes(),
-        )?;
+        for file in [
+            profile_engine::Schema::Profile,
+            profile_engine::Schema::Module,
+        ] {
+            write_whole(
+                &dir.join(file.file_name()),
+                profile_engine::schema(level, file).as_bytes(),
+            )?;
+        }
         write_whole(
             &dir.join("declarations.d.ts"),
             profile_engine::declarations(level).as_bytes(),

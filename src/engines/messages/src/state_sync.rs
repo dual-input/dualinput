@@ -172,6 +172,9 @@ pub struct InstrumentPath {
     /// The instrument's key, as the module's `start` was given it.
     pub instrument: String,
     pub path: String,
+    /// Whether the entry reads text, which a reading of a number or a boolean fails, as a
+    /// reading of text fails an entry that reads a number.
+    pub text: bool,
 }
 
 /// One row of the pilot flying's preflight checklist: a counted control and the value it starts

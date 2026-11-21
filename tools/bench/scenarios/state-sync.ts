@@ -53,15 +53,18 @@ state:
   lamp:
     name: Lamp
     watch: L('LAMP')
-    write: {toggle: K('TOGGLE_LAMP')}
+    write:
+      toggle: K('TOGGLE_LAMP')
   nav:
     name: Nav lights
     watch: B('LIGHTING_NAV_1')
-    write: {toggle: B('LIGHTING_NAV_1_Toggle')}
+    write:
+      toggle: B('LIGHTING_NAV_1_Toggle')
   adf_bfo:
     name: ADF BFO
     watch: instrument('KR87A', 'bfoMode')
-    write: {toggle: H('adf_bfo')}
+    write:
+      toggle: H('adf_bfo')
   alt_hold:
     name: Altitude hold
     watch: L('ALT_HOLD')

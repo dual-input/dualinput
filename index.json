@@ -1,3 +1,20 @@
 {
-  "profiles": []
+  "profiles": [
+    {
+      "path": "aircraft/bksq-baronpro",
+      "bundles": [
+        {
+          "level": 1,
+          "hash": "8ccd13c99e60a6f4b5d936285f7b2dbea9c4726e29afb61fd82cac0babadb9ae",
+          "published": "2026-11-21T13:42:14Z",
+          "variants": [
+            "bksq-aircraft-baronpropress"
+          ],
+          "maker": "Black Square",
+          "name": "Baron 58P",
+          "maturity": "experimental"
+        }
+      ]
+    }
+  ]
 }

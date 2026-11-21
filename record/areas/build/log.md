@@ -1,5 +1,28 @@
 # The build: log
 
+## 2026-11-21: 0.1.0 published from a release commit at main's tip, and tools/replay.ts replayed the released core's own recording
+
+**Asked:** whether a release commit whose workflows match `main`'s publishes, and how the parts of a release that stage 22's tests name hold up on GitHub.
+
+**Expected:** a release, if [the entry below](#2026-11-21-github-refused-010s-release-since-a-change-to-ciyml-reached-main-after-its-release-commit) named the cause.
+
+**Found:**
+
+- `19f93078`, an empty `chore(release): 0.1.0` on top of the check of the entry below, passed CI in 15 minutes 42 seconds, and the release workflow's build job took 25 minutes 24 seconds, its publish job 1 minute 57 seconds, and its profiles' job 2 minutes 9 seconds.
+  0.1.0 published at 13:40 UTC with its tag on `19f93078`, which confirms the entry below's cause.
+- The release holds `DualInput-0.1.0-full.nupkg` at 16,402,961 bytes, `DualInput-win-Setup.exe` at 23,924,753 bytes, `RELEASES`, and `releases.win.json`, with no delta, as the first release, and its body is `Dual Input's first release.`
+- The publish job's check read the draft's `releases.win.json` through the API's asset path, so that path reaches a draft's file.
+- `release-pr.yml`, which the publish job started, logged `nothing since 0.1.0 is a feat, fix, or perf, so there's nothing to release`.
+- The build job, run again, stopped at its first step: `version 0.1.0 is published already, at https://github.com/dual-input/dualinput/releases/tag/0.1.0`.
+- `profiles.dualinput.app` serves `index.json` over HTTPS, listing the Baron 58P's level-1 bundle that the profiles' job published to `pages`; Pages' certificate expires 2027-02-19.
+- The backend deployed when CI passed on `19f93078`, once both Cloudflare secrets were set again with `gh secret set --body`: set through a PowerShell pipe, the account ID had carried a line ending, which the API refused as an invalid account ID, and the token a byte-order mark, which Wrangler named: `The configured Cloudflare API token contains a character that cannot be used in an HTTP Authorization header: "﻿"`.
+- The released core, run for 12s with a data folder of its own and no sim, fetched the index and the bundle from `profiles.dualinput.app` and logged `what this PC reaches changed backend=true relay=true`.
+  `node tools/replay.ts` on its recording fetched the release's full package and replayed it on the release's core: `replayed 81 inputs, and all 11 checkpoints matched, up to the last flush of a cut recording`.
+
+**Changed:** the build's unverified note on the API's asset path goes, and its left open item on who writes a release's notes, which the `Release-Note:` trailers settle.
+
+**Affects:** [a release](01-the-build.md#a-release) and [the build's left open](01-the-build.md#left-open).
+
 ## 2026-11-21: GitHub refused 0.1.0's release, since a change to ci.yml reached main after its release commit
 
 **Asked:** why 0.1.0's publish job stopped at `vpk upload github`, which logged `Creating draft release titled '0.1.0'` and then `Octokit.ForbiddenException: Resource not accessible by integration`.

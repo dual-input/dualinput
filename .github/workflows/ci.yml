@@ -98,19 +98,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8]
-    name: bench ${{ matrix.shard }} of 8
+        scenario: [atc-audio, avatars, builds, clients-apps, clients-outages, clients-panels, clients-protocol, cockpit, core-helper, desktop-app, flight-model, go-to, killed-core, network, network-loss, network-outages, network-relays, pointer-sync, profiles, rate-and-pause, recording, session, sim-connections, sim-load, sim-module, sim-runs, state-sync, take-control, traffic]
+    name: scenario ${{ matrix.scenario }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
+          cache: npm
       - run: npm ci
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: bench-programs
           path: target/bench-programs
-      - run: node tools/bench.ts --programs target/bench-programs --shard ${{ matrix.shard }}/8
+      - run: node tools/bench.ts --programs target/bench-programs ${{ matrix.scenario }}
         env:
           # A shared runner's timings move from run to run, so a missed budget is printed
           # and passes; behavior still fails (tools/bench/budgets.ts).
@@ -119,7 +120,7 @@ jobs:
       - if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: bench-runs-${{ matrix.shard }}
+          name: bench-runs-${{ matrix.scenario }}
           path: target/bench/runs
           retention-days: 7
 

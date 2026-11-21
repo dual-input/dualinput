@@ -261,6 +261,9 @@ A third job, which needs the publish job, calls the profiles' workflow, which pu
 - A run that fails partway is run again with GitHub's "Re-run failed jobs".
 - A release commit's CI run has a concurrency group of its own, so a newer push to `main` can't cancel it.
 - When CI fails on a release commit for a real reason, `main` holds a version no release has, and the release pull request waits; once a fix is on `main`, an empty `chore(release): <that version>` commit pushed by hand releases it.
+- GitHub refuses a release whose commit's `.github/workflows/` differs from `main`'s to any token that can't change workflows, and no workflow's token can (documented, [create a release](https://docs.github.com/en/rest/releases/releases#create-a-release)), so a workflow change that reaches `main` while a release runs stops it, as one stopped 0.1.0's first run ([log][workflows]).
+  The build job checks before it builds, and the publish job again before its upload, each stopping with a message that names the recovery: the same empty commit, which releases from `main`'s tip.
+  The gap is a known limit, rather than a GitHub App whose token could change workflows (user, 2026-11-21).
 - The publish job ends by starting `release-pr.yml`, so a `feat` or `fix` merged while the release ran gets its release pull request without waiting for a push.
 - GitHub lets a workflow's token open a pull request only where the organization and the repository both allow Actions to create and approve pull requests, which both do (user, 2026-11-21).
 - A squash merge takes the pull request's title and description as its commit's, a repository setting, so a contributor's `Release-Note:` trailers in the description reach `main`, where GitHub's default would list the pull request's commits instead (user, 2026-11-21).
@@ -336,6 +339,7 @@ The text or the notes at the top of [the code map](../architecture/02-code-map.m
 [crt]: log.md#2026-10-18-one-line-of-cargo-config-links-every-x86_64-programs-c-runtime-statically-and-alternating-with-cargo-msfss-build-rebuilds-nothing
 [check]: log.md#2026-10-18-acorn-at-es2017-fails-every-p09-sample-the-engine-fails-and-the-frameworks-whole-bundle-gives-two-false-hits-by-name
 [vpk]: log.md#2026-10-18-vpk-uploads-a-draft-unless-told-to-publish-and-two-of-its-paths-exit-0-having-shipped-less
+[workflows]: log.md#2026-11-21-github-refused-010s-release-since-a-change-to-ciyml-reached-main-after-its-release-commit
 [workspace]: log.md#2026-10-18-cargo-refuses-a-member-glob-that-matches-no-folder-or-a-folder-without-a-cargotoml-and-typescript-702s---explainfiles-lists-a-type-only-import
 [bindgen]: log.md#2026-10-20-bindgen-builds-the-windows-sides-simconnect-types-with-the-static-c-runtime-and-ts-rss-derive-reaches-windows-sys
 [package]: log.md#2026-10-21-bindgen-brings-the-freeze-events-numbers-into-our-wasm-module-and-the-module-its-package-and-the-cores-simconnectdll-build-from-the-tree

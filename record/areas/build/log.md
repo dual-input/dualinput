@@ -1,5 +1,19 @@
 # The build: log
 
+## 2026-11-21: GitHub refused 0.1.0's release, since a change to ci.yml reached main after its release commit
+
+**Asked:** why 0.1.0's publish job stopped at `vpk upload github`, which logged `Creating draft release titled '0.1.0'` and then `Octokit.ForbiddenException: Resource not accessible by integration`.
+
+**Expected:** a draft, since the job's log listed its token's `Contents: write`, and the repository has no rulesets.
+
+**Found:** GitHub's documentation for creating a release says that when the target commit adds or modifies a file under `.github/workflows/` relative to the default branch, the token must be allowed to modify workflows, which the `GITHUB_TOKEN` of GitHub Actions can't be ([create a release](https://docs.github.com/en/rest/releases/releases#create-a-release)).
+0.1.0's release commit, `f628bf1b`, was `main`'s tip when it was pushed, and `4cc15174`, which changed `ci.yml`, reached `main` while its CI ran, so the two commits' workflows differed when the release ran.
+The documentation names a 404 where we got a 403, so the cause stays unverified until a release commit at `main`'s tip publishes.
+
+**Changed:** `node tools/release.ts start` and `upload` stop when `main`'s `.github/workflows/` differs from the release commit's, naming the recovery, an empty `chore(release): <version>` pushed to `main`, which 0.1.0 took; the gap stays a known limit (user, 2026-11-21).
+
+**Affects:** [a release](01-the-build.md#a-release).
+
 ## 2026-11-21: One CI job per scenario, started longest first, ran the bench as fast as the 8 shares
 
 **Asked:** whether CI can run each scenario file as a job of its own, so each check a pull request shows is one scenario, within the code map's [20 minutes](../architecture/02-code-map.md#budgets-for-the-workspace).

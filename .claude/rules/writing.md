@@ -403,7 +403,7 @@ A commit's title is a conventional commit, `type(scope): summary`, since the rel
 - A change a pilot will notice carries a `Release-Note:` trailer: one sentence for pilots, which becomes a line of the release's notes.
   A commit can carry several.
 - A pull request that's squash-merged takes its title as the commit's, so its title keeps these rules, and its description carries the trailers.
-- `chore(release): <version>` is the release pull request's title, and otherwise only an empty commit pushed by hand takes it: the first release's, and one that releases a version whose release commit failed CI, once a fix is in.
+- `chore(release): <version>` is the release pull request's title, and otherwise only an empty commit pushed by hand takes it: the first release's, and one that retries a version whose release commit failed CI or failed to release, once the cause is fixed.
 
 ```text
 fix(sync): hold a pending write until the sim reads it back

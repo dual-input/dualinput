@@ -4,11 +4,12 @@
 //   node tools/release.ts pr                opens or updates the release pull request, from the
 //                                           commits since the last release
 //   node tools/release.ts start <commit>    stops unless <commit> is a release commit whose version
-//                                           isn't published yet
+//                                           isn't published yet, and whose workflows match main's
 //   node tools/release.ts download          fetches the newest release's full package, which `pack`
 //                                           makes a delta from
 //   node tools/release.ts pack              packs target/release-folder, with the release's notes
-//   node tools/release.ts upload <commit>   uploads what `pack` wrote as a draft, with the tag on <commit>
+//   node tools/release.ts upload <commit>   uploads what `pack` wrote as a draft, with the tag on
+//                                           <commit>, once its workflows still match main's
 //   node tools/release.ts check             checks that the draft holds what `pack` wrote
 //   node tools/release.ts publish           publishes the draft as the newest release
 //
@@ -97,10 +98,10 @@ function pullRequest(): void {
   const last = lastRelease()
   if (!last) return console.log("no release is tagged yet: push the first, `chore(release): <version>`, to main by hand")
   // Between a release commit's merge and its tag, main holds a version no release has yet. A
-  // release commit whose CI failed holds main there too, until a fix and a release commit
-  // pushed by hand release it.
+  // release commit whose CI or release failed holds main there too, until a release commit
+  // pushed by hand, once the cause is fixed, releases it.
   if (workspaceVersion() !== last) {
-    return console.log(`main holds ${workspaceVersion()}, which isn't released yet: if CI failed on its release commit, fix it, then push an empty \`chore(release): ${workspaceVersion()}\` to main`)
+    return console.log(`main holds ${workspaceVersion()}, which isn't released yet: if its release commit's CI or release failed, fix the cause, then push an empty \`chore(release): ${workspaceVersion()}\` to main`)
   }
   const commits = commitsSince(last)
   const next = nextVersion(last, commits)
@@ -136,7 +137,27 @@ function start(commit: string): void {
   if (titled !== version) throw new Failed(`${commit}'s title, "${title}", doesn't release the version the tree holds, ${version}`)
   const published = releases().find((r) => r.tag_name === version && !r.draft)
   if (published) throw new Failed(`version ${version} is published already, at ${published.html_url}`)
+  workflowsMatchMain(commit)
   console.log(`releasing version ${version} from ${commit}`)
+}
+
+/**
+ * Stops, naming the recovery, unless `commit`'s .github/workflows/ matches main's. GitHub
+ * refuses a release whose commit's workflows differ from the default branch's to a token that
+ * can't change workflows, and no workflow's token can, so a workflow change that reaches main
+ * while a release runs stops it. A release commit pushed on top of that change releases the
+ * version from main's tip. `start` checks before the build, and `upload` again before GitHub
+ * would refuse. (documented, https://docs.github.com/en/rest/releases/releases#create-a-release)
+ */
+function workflowsMatchMain(commit: string): void {
+  run("git", ["fetch", "--quiet", "origin", "main"])
+  const diff = spawnSync("git", ["diff", "--quiet", commit, "FETCH_HEAD", "--", ".github/workflows"], { encoding: "utf8" })
+  if (diff.status === 0) return
+  if (diff.status !== 1) throw new Failed(`git diff of ${commit}'s workflows against main's failed:\n${diff.stderr}`)
+  const version = workspaceVersion()
+  throw new Failed(
+    `main's .github/workflows/ changed after ${commit}, and GitHub won't let this workflow's token release a commit whose workflows differ from main's: push an empty \`chore(release): ${version}\` to main, whose CI run releases ${version} from main's tip`,
+  )
 }
 
 /**
@@ -169,6 +190,7 @@ function latestTag(): string | null {
 
 /** Deletes a draft of this version that a failed run left, since `vpk upload github` refuses a tag a release holds, then uploads a draft no pilot sees. */
 function upload(commit: string): void {
+  workflowsMatchMain(commit)
   const version = workspaceVersion()
   for (const draft of releases().filter((r) => r.tag_name === version && r.draft)) {
     console.log(`deleting the draft a failed run left: ${draft.html_url}`)

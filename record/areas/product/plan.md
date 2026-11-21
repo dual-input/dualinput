@@ -44,6 +44,7 @@ v1 has these whatever is picked, because they're the product rather than ideas:
 - the connection between machines
 - profiles, starting with the 58P's, written without the Dual Input IDE, which is a Soon pick
 - documentation for pilots, for developers of Dual Input's code, and for profile authors (user, 2026-11-21)
+- the graphics Dual Input presents itself with: its icons for the desktop app, the tray, GitHub, and Discord, and the README's screenshots (user, 2026-11-21)
 
 v1's aircraft is the pressurized 58P variant of the Black Square Baron Pro.
 

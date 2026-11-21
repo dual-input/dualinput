@@ -1037,6 +1037,12 @@ Builds: the documentation for pilots, for developers of Dual Input's code, and f
 Designs first: a guide to how each of the three is written, from research the user directs, where the docs are published, and what `CLAUDE.md` says of `docs/` once agents write there.
 Needs: nothing for the guides; 22b, 22c, and 22d for the profile authors' documentation.
 
+## 22f The graphics
+
+Builds: the graphics Dual Input presents itself with ([the product plan](../product/plan.md#3-v1-or-later)): the desktop app's and the tray's icons, the icons for our GitHub organization and repository and for Discord, and the README's screenshots, with a tool that renders the apps' screens for them from a made-up session.
+Designs first: each graphic's look, with the user, and the screenshot tool.
+Needs: every stage before 22, so it can be built beside stage 22.
+
 ## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.

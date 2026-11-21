@@ -12,7 +12,7 @@
 - The checks job took 10 minutes 8 seconds beside it, 7 minutes 20 seconds of them in `node tools/check.ts`.
 - `node tools/setup.ts` took 1s in each job, the caches holding cargo-msfs and the SDK, and `npm ci` took about 1 minute in every job.
 - At most 8 jobs ran at once this time, the checks and 7 shares, where the first run held 6, so the count GitHub runs at once isn't steady.
-- The runner held every scenario, three cores and two relays included, and the shares reported 8 missed budgets rather than failing on them: a handler's 1ms in `cockpit`, `session`, `profiles`, `flight-model`, and `traffic`, and a profile's build at 2,905ms against 2,000ms.
+- The runner held every scenario, three cores and two relays included, and the shares reported their missed budgets rather than failing on them: one input over 1ms past the one allowed in `cockpit` and in `session`, inputs over 1ms on 4 cores of `flight-model` and `traffic`, the handlers of the `profiles` run that loaded the 200 KB bundle, and a profile's build at 2,905ms against 2,000ms; one `traffic` core's queue also waited 2,559µs at p50.
 - Every program built with the static C runtime on the runner, so its Windows SDK holds `libucrt.lib`.
 
 **Changed:** the budget stands; the code map's and testing's left open items on CI's time and on whether a runner holds the bench, and the build's on the runner's static C runtime, are answered here.

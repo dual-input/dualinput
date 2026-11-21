@@ -214,14 +214,16 @@ Beside the code map's [CI](../architecture/02-code-map.md#ci):
 
 ## A release
 
-A short session in the sim, on a build of the commit, comes before a person runs the `release` workflow on `main` by hand, and the workflow takes that commit ([before a release](02-testing.md#before-a-release)).
+A short session in the sim, on a build of one commit, comes first ([before a release](02-testing.md#before-a-release)).
+Then a person runs the `release` workflow on `main` by hand and gives it that commit's 40-digit hash as its `commit` input.
 It reads the version from the root's `[workspace.package]`.
 Each step of its build and publish jobs runs one command, each of the release's own through `node tools/release.ts`, which reaches GitHub through `gh` and `vpk` with the job's token.
 
 The **build job**, whose token reads the repository and can't write to it:
 
-1. It stops when a published release of that version exists, or unless CI's newest run on `main` at that commit passed, and passes over a draft, which the publish job deletes (user, 2026-11-20).
-   So it runs neither the checks nor the bench again, and it releases a commit `main` has moved past as it releases `main`'s head.
+1. It stops when a published release of that version exists, or when CI's newest run on `main` at that commit didn't pass (user, 2026-11-20).
+   A draft of that version doesn't stop it, since the publish job deletes the draft.
+   So it runs neither the checks nor the bench again, and it releases a commit that `main` has moved past the same way it releases `main`'s head.
 2. It checks out `dual-input/relay-tokens`, the private repository of the relays' tokens ([their configuration](../network/02-units.md#their-configuration)), with a read-only deploy key from this repository's secrets (user, 2026-10-18), then installs the toolchain and runs `npm ci` and `node tools/setup.ts`.
 3. It runs `node tools/build.ts release` ([what a release holds](#what-a-release-holds)); the network crate's build compiles each release's default relay list from `src/relays/relays.toml` and that checkout, and stops when a relay in `relays.toml` has no token.
 4. It runs `vpk download github`, which fetches the newest release's full package so `vpk pack` can make a delta, and fails unless that package is the one `releases/latest` holds, or none came and no release is published.

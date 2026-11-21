@@ -32,7 +32,9 @@ The stages follow these rules (user, 2026-10-18):
   Friends fly their installed Dual Input ([the four levels](02-testing.md#the-four-levels)), so the install stage comes before that flight.
 - No stage builds code that a later stage replaces: what a stage builds is final, and only the bench's stand-ins and test units stand in for what isn't built yet.
 - Nothing on GitHub that a stage waits on comes before [stage 22](#22-github): no pull requests, no workflows, no releases, and no Pages site, since waiting on pull requests and CI slows the build down (user, 2026-10-18).
-  A stage's commits go straight to `main`, pushed once the user has reviewed the stage, which `main`'s rule of a pull request for every change allows only its admins, and stage 22 builds CI as [testing](02-testing.md#what-keeps-ci-green) and [the build](01-the-build.md#ci) design it, blocking no push to `main` (user, 2026-11-20).
+  A stage's commits go straight to `main` once the user has reviewed the stage.
+  `main` requires a pull request for every change, and only its admins may push past that rule (user, 2026-11-20).
+  Stage 22 builds CI as [testing](02-testing.md#what-keeps-ci-green) and [the build](01-the-build.md#ci) design it, and from then CI runs on each push to `main` and blocks none.
   The repositories of ours beside this one came with the stages that needed them: `dual-input/relay-tokens`, which holds the relays' tokens and stays private, in stage 7 (user, 2026-10-22), and in stage 11b two that Dual Input installs with npm, `dual-input/msfs-tailwind`, a Tailwind 3 preset for Coherent GT, and `dual-input/coherent-checks`, the Coherent GT check's, whose data msfs-tailwind's test reads (user, 2026-10-25).
   This repository went public on 2026-11-20, ahead of stage 22, and those two with it (user, 2026-11-20).
 
@@ -971,9 +973,9 @@ Done on 2026-11-20: every chunk was read and fixed, changing comments in 254 fil
 
 Designs first: how CI, releases, and the relays run once the repository went public on 2026-11-20, which the user settled that day, and which the design docs these lines link carry (user, 2026-11-20):
 
-- CI runs on every pull request and every push to `main`, where it blocks nothing, on GitHub's standard runners, which are free on a public repository, 20 jobs at once on the Free plan.
-  It runs the bench as 8 jobs at once, on programs one job builds, each running its share of the scenarios balanced by each file's time, and a new push cancels the run still going for the same pull request or branch ([what keeps CI green](02-testing.md#what-keeps-ci-green)).
-- The release workflow takes a commit whose CI run on `main` is green, runs neither the checks nor the bench again, and releases a commit `main` has moved past ([a release](01-the-build.md#a-release)).
+- CI runs on every pull request and every push to `main`, where it blocks nothing, on GitHub's standard runners, which are free on a public repository.
+  It runs the bench as 8 jobs, on programs one job builds, each running its share of the scenarios balanced by each file's time, and a new push cancels the run still going for the same pull request or branch ([what keeps CI green](02-testing.md#what-keeps-ci-green)).
+- The release workflow takes a commit whose CI run on `main` passed, which may sit behind `main`'s head, and runs neither the checks nor the bench again ([a release](01-the-build.md#a-release)).
   Releases are public, pre-v1 builds included.
 - One relay, in Frankfurt, so `nyc` leaves `src/relays/relays.toml` ([the network's units](../network/02-units.md)' note of 2026-11-20).
 
@@ -999,7 +1001,7 @@ Tests:
 - From stage 15, in a session with friends on releases the release workflow made, through the servers it deployed: Setup.exe run over the install during the session, a crewmate's core seeing its link lost at an uninstall, a host who is behind, an update downloaded in the app, through `GithubSource` and its delta, and if Windows shows its firewall prompt on a PC with no rule naming the core, whether the desktop app's fix deletes the block rules a canceled prompt leaves, which stage 16's first flight with friends left for the live path (user, 2026-11-12; [install log](../install/log.md#2026-11-12-in-a-session-an-update-downloads-and-waits-then-installs-as-the-sim-closes-the-trays-quit-reads-as-a-leave-and-a-session-raised-no-firewall-prompt-from-windows)).
 - From stage 7: once `fra.relay.dualinput.app` points at our droplet, `node src/relays/deploy.ts fra` deploys the relay, and it answers `/ping` over HTTPS with the certificate it took from Let's Encrypt, before the first release ([their configuration](../network/02-units.md#their-configuration)).
 
-Exit: on GitHub's runners, CI passes on a pull request and on `main`, the bench as 8 jobs, and the [build log](log.md) has CI's times against the 20 minutes and whether a runner held three cores and two relays; the release workflow has published a release from a commit whose run on `main` passed, after the check before a release; the backend answers at `api.dualinput.app`, the relay at `fra.relay.dualinput.app`, and the profiles' index at `profiles.dualinput.app`; and the session with friends has run on the workflow's releases, or is scheduled with the user, as the line under this one says.
+Exit: on GitHub's runners, CI passes on a pull request and on `main`, the bench as 8 jobs, and the [build log](log.md) has CI's times against the 20 minutes and whether a runner held three cores and two relays; the release workflow has published a release from a commit whose run on `main` passed, after the check before a release; the backend answers at `api.dualinput.app`, the relay at `fra.relay.dualinput.app`, and the profiles' index at `profiles.dualinput.app`; and the session with friends that the tests' item from stage 15 lists has run on the workflow's releases, or the user has scheduled it, which the stage's `Done on` line names.
 
 ## 23 v1's release
 

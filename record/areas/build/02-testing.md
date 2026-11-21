@@ -39,14 +39,16 @@ The tests of `page-client` and of the panel bridge run on Node's test runner, as
 ## What keeps CI green
 
 - A pull request that changes code runs the bench beside the checks the code map's [CI](../architecture/02-code-map.md#ci) lists, the unit tests among them, and a merge needs every one green.
-- The bench runs as 8 jobs at once on GitHub's standard runners, which a public repository gets free, 20 jobs at once on the Free plan (user, 2026-11-20).
+- The bench runs as 8 jobs on GitHub's standard runners, which a public repository gets free (user, 2026-11-20).
+  GitHub documents 20 jobs at once on the Free plan ([Actions limits](https://docs.github.com/en/actions/reference/limits)), but ran at most 5 and then 7 of the shares at once beside the checks (measured on 2026-11-21, [build log](log.md#2026-11-21-with-warm-caches-a-pull-requests-ci-took-19-minutes-12-seconds-inside-its-20-and-the-bench-passed-in-8-jobs-on-githubs-runners)).
   One job builds the bench's programs once, with `node tools/bench.ts build`, and each of the 8 downloads them and runs its share of `tools/bench/scenarios/`, one scenario at a time, with `node tools/bench.ts --programs <folder> --shard <n>/8`.
   `tools/bench/shards.ts` balances the shares by each file's time on our development machine: the whole bench took 52 minutes of scenarios there on 2026-11-20, with `network-outages` the longest at 392s, so a share runs about 6.5 minutes.
 - A new push cancels the run still going for the same pull request or branch.
 - The same workflow runs on every push to `main`, merges included, and blocks nothing.
   A push to `main` runs every job, whatever it changed, so each commit there has a run of its own.
 - The release workflow takes only a commit whose run on `main` passed, and runs neither the checks nor the bench again ([a release](01-the-build.md#a-release); user, 2026-11-20).
-- CI's bench checks behavior, and no timing budget fails a pull request, since a shared runner's other load would move a timing from run to run (inference).
+- CI's bench checks behavior, and no timing budget fails it: CI's bench jobs set `DUALINPUT_BENCH_BUDGETS` to `report`, so `tools/bench/budgets.ts` prints a missed budget and the scenario passes.
+  A shared runner's other load moves a timing from run to run: a profile's build took 2,711ms in one run and 2,905ms in the next, against 2,000ms, and a handler over 1ms came in different scenarios in each (measured on 2026-11-21, [build log](log.md#2026-11-21-cis-first-run-on-githubs-runners-took-47-minutes-with-every-cache-cold-ran-6-jobs-at-once-and-failed-on-the-benchs-own-timing-budgets-and-races)).
 
 ## What runs outside CI
 

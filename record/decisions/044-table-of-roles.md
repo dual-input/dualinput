@@ -1,5 +1,9 @@
 # 044: v1's table of roles holds the PF and the traffic and ATC host, whom a pilot chooses by hand
 
+> **Note**
+> Stage 11b's tentative decision that [traffic and ATC audio are shared apart](../areas/interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) reverses this one's single host role.
+> The traffic host and the ATC host are two roles, each taken by a switch of its own, "Share my traffic" or "Share my ATC", and each keeps the rest of the one role's row.
+
 v1's table of roles gives each role who may hold it, how it moves, and what happens when its holder loses the link, leaves the flight, or leaves the session, and it holds two rows: the PF and the traffic and ATC host.
 A pilot in the flight takes control by the take-control key or button, or by voice, unless their own catch-up or replay runs over a link that's up, and when the PF leaves the flight, control passes to a pilot still in it; a lost link changes nothing.
 Any pilot takes the traffic and ATC host's role at any time by turning on "Share my traffic and ATC", which turns the old host's switch off, and the host releases it by turning theirs off; through a lost link, a flight left, or a crash it stays with its holder until they leave the session.

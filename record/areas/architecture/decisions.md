@@ -716,6 +716,9 @@ Numbered as [decision 043](../../decisions/043-driven-entries-and-putting-back.m
 
 ## v1's table of roles holds the PF and the traffic and ATC host, whom a pilot chooses by hand
 
+> **Note**
+> Stage 11b's tentative decision that [traffic and ATC audio are shared apart](../interface/decisions.md#traffic-and-atc-audio-are-shared-apart-each-by-a-switch-of-its-own) makes the traffic host and the ATC host two roles, each taken by a switch of its own, "Share my traffic" or "Share my ATC", in place of one "Share my traffic and ATC" switch, and each keeps the rest of this role's rules (user, 2026-10-31).
+
 Numbered as [decision 044](../../decisions/044-table-of-roles.md) on 2026-10-13.
 
 - **Decided:** each member writes its own entry on the session channel, crew in v1 and passenger later; crew members hold vector clock counters and acknowledge on the heartbeat, and a passenger, on a one-way feed off the crew's links, holds nothing up.
@@ -1554,6 +1557,10 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Traffic carries aircraft and helicopters within its radius, and ground objects within 1km only by an allowlist of titles
 
+> **Note**
+> Stage 11b's tentative decision that [traffic polls within the sim's 200km cap, with no radius setting](../interface/decisions.md#traffic-polls-within-the-sims-200km-cap-with-no-radius-setting) takes out the radius setting, so the traffic host carries the AI aircraft and helicopters within 200km (user, 2026-10-31).
+> The allowlist's one prefix is `ASO_Pushback_`: GSX's tugs stay off it, with GSX's other vehicles, until [ground operations sync](../product/ideas.md#ground-operations-sync) carries them (user, 2026-11-15; [traffic and ATC log](../traffic-atc/log.md#2026-11-15-in-the-sim-copies-drew-at-016-on-fs-copilots-jitter-measure-written-lights-and-flaps-took-on-them-and-ai-aircrafts-light-switches-showed-what-the-sim-drew-where-no-flap-variable-did)).
+
 - **Decided:** the traffic host carries the AI aircraft and helicopters within its radius setting, 200km at most and at first, and the ground objects within 1km whose title starts with a prefix on a list in traffic's crate, which starts with `ASO_Pushback_` and takes other pushback tugs, GSX's among them, as the build finds them; it never carries the pilot's own aircraft or avatar, an object traffic created, or a title starting `DUALINPUT_`.
   This changes [traffic sync](../product/03-v1-scope.md#traffic-sync), which carries ground vehicles, GSX's tugs, fuel trucks, and catering among them (user, 2026-10-17).
   Settled in node 6.14 by the user, 2026-10-17 ([which objects the host carries](../traffic-atc/01-traffic-and-atc.md#which-objects-the-host-carries)).
@@ -1564,6 +1571,11 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Leaves out:** the titles beyond `ASO_Pushback_`, which the build adds.
 
 ## A receiving machine tells its pilot of other traffic and of missing copies by notifications, and a page lists the machine's traffic packs on demand, so the match check has no traffic item
+
+> **Note**
+> Stage 11b's tentative decision that [the Traffic and ATC audio tabs hold their sharing, settings, and warnings](../interface/decisions.md#the-traffic-and-atc-audio-tabs-hold-their-sharing-settings-and-warnings-flagged-by-a-dot-on-the-tabs-icon) puts both warnings on a receiving pilot's Traffic tab in place of the two notifications, as two counts kept live, with a dot on the tab's icon while either is above 0 (user, 2026-10-31).
+> One counts the traffic host's aircraft this sim shows as stand-ins or not at all, and the other the aircraft that aren't the traffic host's.
+> Each pilot's Traffic tab lists the traffic packs on their own PC.
 
 - **Decided:** while another member holds traffic's key and its pilot is in the flight, a receiving machine counts every 10s the aircraft and helicopters within 200km that are neither its pilot's nor its copies, and raises a notification after two counts above 0; it raises another while any of the traffic host's aircraft and helicopters shows as a stand-in or not at all; and when a page asks, a job lists this machine's traffic packs, from a list of known folder names in traffic's crate starting with `fsltl-traffic-base`, with each one's manifest version, into traffic's slice.
   This changes [the session's units](../session/02-units.md#the-match-check), whose match check has an item of traffic's for traffic packs, injectors, and multiplayer, and [traffic sync](../product/03-v1-scope.md#traffic-sync), which puts them in the match check's list.

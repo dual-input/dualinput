@@ -29,6 +29,12 @@ Decides:     How a pilot binds the key or button, as a single or a long press; h
 > Stage 20b kept stage 20's two cues as v1's, since four rounds of candidates didn't beat them, and sketched the voice phrases' two cues in their style ([control log](log.md#2026-11-15-four-rounds-of-candidate-cues-didnt-beat-stage-20s-stand-ins-so-v1-keeps-them); user, 2026-11-15).
 > Richer cues would come from a licensed pack or a sound designer.
 
+> **Note**
+> Stage 20's build gives take-control the lost link's notification, as [the banner's content](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) has it ([stage 20](../build/plan.md#20-take-control)).
+> While this core's link to the PF is lost, take-control holds a "Reconnecting to James" notification on the banner, and clears it once the link is back or control passes.
+> While this pilot could take control, the notification's detail is the warning, so the pilot reads it before a press, on the banner and under the EFB app's button.
+> Once the link is back, the old PF gets "Adam took control while you were disconnected", with the detail "What you changed in that time was undone, and your pages and FMS entries may differ from Adam's.", in place of [a pass](#a-pass)'s "Adam has control".
+
 A pilot binds one keyboard key or flight-hardware button in the desktop app, as a single press, which takes control on its down, or a long press, which takes control once it has been held 1s.
 The press, or the take-control button in the EFB app or the desktop app, asks the session crate's `TakeControl`, whose guards decide, and a refused press plays a short refusal cue and shows the guards' reason on the banner.
 When control passes, every machine whose pilot is in the flight plays the control-passed cue and shows who has control, with no recorded line.

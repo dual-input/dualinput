@@ -1,10 +1,12 @@
 // The extension runs in VS Code's extension host, on Node, and esbuild bundles src/extension.ts
 // into one CommonJS file, while Node's test runner runs the tests beside it by stripping their
-// types, so `erasableSyntaxOnly` flags what Node can't strip, such as an enum. VS Code 1.91, the
-// lowest that package.json's `engines` takes, runs Node 20, hence ES2022.
+// types, so `erasableSyntaxOnly` flags what Node can't strip, such as an enum. VS Code 1.106, the
+// lowest that package.json's `engines` takes, runs Electron 37.7.0, whose Node 22 takes ES2022
+// (read in VS Code 1.106.0's .npmrc).
 //
 // src/package.json marks src/ as ES modules, for Node running the tests and for this check. The
-// manifest a folder up names no `type`, since VS Code 1.91 loads `main` with `require`.
+// manifest a folder up names no `type`, since VS Code loads `main` with `require`. The panel's
+// webview, in ../panel, is a project of its own, and this one reads only its types.
 //
 // vscode-oniguruma's declarations, which the grammar's test uses, name `WebAssembly`'s types,
 // which only the DOM's library declares, so the check skips libraries' declarations rather than

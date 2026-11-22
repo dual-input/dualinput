@@ -5,8 +5,9 @@
 
 /**
  * Each scenario file's title, and its time in seconds on our development machine: the 12
- * longest from the whole bench of 2026-11-20, the rest from a run of those files alone on
- * 2026-11-21. When you add a scenario, add it here; tools/bench/order.test.ts fails until you do.
+ * longest from the whole bench of 2026-11-20, `authoring` from a run of it alone on 2026-11-22,
+ * and the rest from a run of those files alone on 2026-11-21. When you add a scenario, add it
+ * here; tools/bench/order.test.ts fails until you do.
  */
 export const SCENARIOS: Readonly<Record<string, { title: string; seconds: number }>> = {
   "network-outages": { title: "Network outages", seconds: 392 },
@@ -21,6 +22,7 @@ export const SCENARIOS: Readonly<Record<string, { title: string; seconds: number
   "take-control": { title: "Take-control", seconds: 164 },
   "desktop-app": { title: "Desktop app", seconds: 140 },
   profiles: { title: "Profiles", seconds: 124 },
+  authoring: { title: "Authoring", seconds: 95 },
   "test-sessions": { title: "Test sessions", seconds: 45 },
   "clients-panels": { title: "Cockpit panels", seconds: 77 },
   "network-relays": { title: "Two relays", seconds: 76 },

@@ -39,11 +39,14 @@ export type Manifest = {
  * add it here.
  */
 const MEDIA_TYPES: Record<string, string> = {
+  ".css": "text/css",
   ".exe": "application/octet-stream",
   ".js": "application/javascript",
   ".json": "application/json",
   ".png": "image/png",
   ".svg": "image/svg+xml",
+  ".ttf": "font/ttf",
+  ".txt": "text/plain",
   ".vsixmanifest": "text/xml",
 }
 

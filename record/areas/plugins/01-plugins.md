@@ -13,6 +13,10 @@ Decides:     That plugins come after v1; the `instrument()` name, what its path 
 >   In [its values](#its-values), a number entry gets a finite number, or 1 or 0 for `true` or `false`, and a text entry gets a string, and a reading of the other kind is an error.
 > - A map goes on its own lines, so the sketch's `adf_bfo` writes `write:` with `toggle: H('adf_bfo')` on the line below it ([layout](../profiles/01-format-and-delivery.md#layout)).
 
+> **Note**
+> From stage 22g, the panel module that reads `instrument()` values is the platform crate `sim-variables`' `instrument-reads`, for every feature, not state sync's, and it gets every instrument of a panel that holds one any feature watches, rather than the named ones alone, since a module a panel already runs takes no new instruments, and a second `instrument()` in that panel would otherwise never read ([04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md#reaching-the-sim-by-name); user, 2026-11-22).
+> It still reads only the paths a watch names.
+
 v1 builds no plugins.
 The Baron 58P's profile reads the settings that live only in its gauges' JavaScript through a name, `instrument()`, which a panel module of state sync's reads every 250ms.
 It writes them only through the gauges' own H: events, in write functions that check the mode another entry syncs.

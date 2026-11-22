@@ -165,6 +165,7 @@ pub fn start_job(
             }
             // The clients crate asks at its start, for a setup no droplet runs.
             Work::Username => Ok(Vec::new()),
+            Work::Bytes { bytes } => Ok(bytes.clone()),
         };
         let result = match start.job.then {
             Some(then) => result.and_then(then),

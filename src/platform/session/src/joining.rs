@@ -7,7 +7,7 @@ use std::time::Duration;
 
 use clients::{Clients, SettingChanged};
 use kernel::{Cx, Exit, Job, JobId, TimerId};
-use messages::backend::{Kind, Older};
+use messages::backend::{Kind, Older, older};
 use messages::hex;
 use messages::net::{PilotId, Relay};
 use messages::session::{
@@ -120,22 +120,6 @@ fn refused_by_backend(on: Attempting, refusal: &Refusal) -> Refused {
             ..refused(on, RefusedWhy::TooMany)
         },
         Refusal::OtherHash | Refusal::Other(_) => refused(on, RefusedWhy::Servers),
-    }
-}
-
-/// Whose version is older, as this core sees it. `older` in src/backend/src/index.ts reads x.y.z
-/// versions the same way, so change both together.
-fn older(mine: &str, theirs: &str) -> Older {
-    let numbers = |version: &str| -> Vec<u64> {
-        version
-            .split('.')
-            .map(|number| number.parse().unwrap_or(0))
-            .collect()
-    };
-    if numbers(mine) < numbers(theirs) {
-        Older::Mine
-    } else {
-        Older::Theirs
     }
 }
 
@@ -846,11 +830,5 @@ mod tests {
         for why in [Mismatch::Version(None), Mismatch::Hash] {
             assert_eq!(refused_by_crew(&why).why, RefusedWhy::Servers);
         }
-    }
-
-    #[test]
-    fn a_version_reads_by_its_numbers_rather_than_its_letters() {
-        assert_eq!(older("0.9.0", "0.10.0"), Older::Mine);
-        assert_eq!(older("1.0.0", "0.10.0"), Older::Theirs);
     }
 }

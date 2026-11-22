@@ -22,6 +22,7 @@ stand-in = [
 
 [dependencies]
 atc-audio = { path = "../../features/atc-audio/core" }
+authoring = { path = "../../features/authoring/core" }
 avatars = { path = "../../features/avatars/core" }
 bytemuck = { version = "1.25.2", optional = true }
 clients = { path = "../../platform/clients" }
@@ -51,6 +52,7 @@ sim-awareness = { path = "../../engines/sim-awareness" }
 sim-client = { path = "../../engines/sim-client" }
 sim-edge = { path = "../../engines/sim-edge" }
 sim-service = { path = "../../platform/sim-service" }
+sim-variables = { path = "../../platform/sim-variables" }
 simconnect-types = { path = "../../engines/simconnect-types" }
 stand-in-sim = { path = "../../engines/stand-in-sim", optional = true }
 state-sync = { path = "../../features/state-sync/core" }

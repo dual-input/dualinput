@@ -25,12 +25,13 @@ export function mouseIn(event: MouseEvent | ReactMouseEvent, scale: number): { x
  * property, since a transform blurs text in Coherent GT and sizes written through calc() would have
  * to reach every number in our code (record/areas/interface/log.md, p24). `--hair` is the length of
  * one real pixel at that scale, for lines that must neither vanish nor blur. It takes no `className`, since the
- * kit's classes reach only what's inside a root, so one on the root itself would do nothing.
+ * kit's classes reach only what's inside a root, so one on the root itself would do nothing. `palette` is the kit's
+ * dark palette unless a page outside the sim asks for the light one.
  */
-export function Root({ scale = 1, style, children, ...rest }: Omit<HTMLAttributes<HTMLDivElement>, "className"> & { scale?: number }) {
+export function Root({ scale = 1, palette = "dark", style, children, ...rest }: Omit<HTMLAttributes<HTMLDivElement>, "className"> & { scale?: number; palette?: "dark" | "light" }) {
   const [element, setElement] = useState<HTMLDivElement | null>(null)
   return (
-    <div ref={setElement} className={ROOT_CLASS} style={{ ...style, zoom: scale, "--hair": `${1 / scale}px` } as CSSProperties} {...rest}>
+    <div ref={setElement} className={ROOT_CLASS} data-palette={palette === "light" ? "light" : undefined} style={{ ...style, zoom: scale, "--hair": `${1 / scale}px` } as CSSProperties} {...rest}>
       <RootContext.Provider value={{ element, scale }}>{children}</RootContext.Provider>
     </div>
   )

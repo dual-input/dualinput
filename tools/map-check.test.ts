@@ -95,6 +95,8 @@ test("a tree that keeps every rule passes", () => {
       `import { bridge } from "../../../platform/panel-bridge/index.ts";\n` +
       `import type { Press } from "../../../engines/messages/ts/pointer-sync/press.ts";\n` +
       `export const press = (p: Press) => bridge + p.x;\n`,
+    // A crate of the core's platform holds its panel modules in `panel/`, on the panel bridge.
+    "src/platform/clients/panel/heard.ts": `import { bridge } from "../../panel-bridge/index.ts";\nexport const heard = bridge;\n`,
   }
   assert.deepEqual(findings(tree), [])
 })
@@ -310,6 +312,20 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
       "src/engines/messages/ts/traffic/copy.ts": `export type Copy = { id: string };\n`,
       "src/features/traffic/efb/slice.ts": `export const slice = 1;\n`,
       "src/platform/efb-shell/frame.ts": `import type { Copy } from "../../engines/messages/ts/traffic/copy.ts";\nexport const frame = (c: Copy) => c.id;\n`,
+    },
+  },
+  {
+    name: "a core platform crate's panel module importing a feature's module of the messages' types",
+    rules: ["platform-names-feature"],
+    tree: {
+      ...TS,
+      "src/engines/messages/ts/traffic/copy.ts": `export type Copy = { id: string };\n`,
+      "src/features/traffic/efb/slice.ts": `export const slice = 1;\n`,
+      "src/platform/panel-bridge/index.ts": `export const bridge = 1;\n`,
+      "src/platform/clients/panel/heard.ts":
+        `import { bridge } from "../../panel-bridge/index.ts";\n` +
+        `import type { Copy } from "../../../engines/messages/ts/traffic/copy.ts";\n` +
+        `export const heard = (c: Copy) => c.id + bridge;\n`,
     },
   },
 ]

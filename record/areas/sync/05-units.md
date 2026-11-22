@@ -52,6 +52,13 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 > In [`H:` events](#h-events), the clients crate, not state sync's rule, keeps `h-events` in one panel, since two panels can hold instruments of one key, and a rule that knew its panel by its keys gave the module to both ([sync log](log.md#2026-11-21-h-events-went-to-two-panels-whose-instruments-share-a-key-since-state-sync-knew-its-panel-only-by-its-keys); user, 2026-11-21).
 > State sync registers it with `one_panel_module`, and its rule takes every instrument of a panel, so the first panel answered that holds an instrument gets it, and keeps it through a reload by its name, as [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-11-21 has it.
 
+> **Note**
+> From stage 22g ([04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md#reaching-the-sim-by-name); user, 2026-11-22):
+>
+> - State sync reaches the sim through the platform crate `sim-variables`, which takes the routes of [reaching the sim](#reaching-the-sim) and [`H:` events](#h-events) with the same code, for every feature: `carry.rs`'s routing becomes its act, `NamedEvents` the routine host's own `HtmlAndInputEvents`, and `h-events` and `instrument-reads` its panel modules, which run while some feature watches a name they serve.
+>   So state sync holds no routine or panel module, and [the units](#the-units)' `state-sync` row runs only its crate in the core; it ends its watches at the profile's unload, and keeps `frames` on its own connection.
+> - The sync engine gains `write_once`, one entry's write outside a sync, `plan`, the same actions changing nothing, and the mark of an engine that only runs the writes it's asked for, for the profile extension's Run and its preview.
+
 The sync engine is one state machine for each loaded profile, with no I/O, so the IDE and the bench link it on their own.
 The cockpit stream, in the platform, carries every cockpit message in causal order, holds each state entry's newest value, paces what it applies, keeps what it sent for a replay, and runs catch-up, which the catching-up machine asks for.
 State sync is the feature that joins the engine to the sim, the stream, and the session.

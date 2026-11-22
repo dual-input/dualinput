@@ -9,6 +9,7 @@
 //! counts the sim's frames and their stamps, which state sync hands over as `frame` calls.
 
 mod events;
+mod once;
 mod runs;
 mod script;
 mod state;
@@ -183,6 +184,28 @@ pub enum Action {
     Fire { name: Name },
 }
 
+/// What one entry's write outside a sync is given, as the profile extension's Run takes it from
+/// the field its author types in.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Given {
+    /// The value to write.
+    Value(Value),
+    /// An event entry's empty field, whose write fires with no value.
+    Nothing,
+    /// A counting entry's step count, as `+3` or `-2`: that many of its write's `inc`, or of its
+    /// `dec`, since the shadow value a value would step from is state sync's.
+    Steps(i32),
+}
+
+/// One action of a write outside a sync, as its plan shows it: sent `times` times, `every`
+/// apart, the first in the same call as the action before it, or at once for the write's first.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Planned {
+    pub action: Action,
+    pub times: u64,
+    pub every: Pace,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Change {
     pub entry: String,
@@ -285,6 +308,8 @@ pub struct Engine {
     pub(crate) settle_after: u64,
     pub(crate) settled: bool,
     pub(crate) catch_up: Option<CatchUpRun>,
+    /// It runs only the writes it's asked for, as `load_only_asked` says.
+    pub(crate) only_asked: bool,
     /// Last of the fields, since its runtime has to outlive every function it compiled.
     pub(crate) script: Script,
 }
@@ -293,6 +318,26 @@ impl Engine {
     /// The engine for `profile`, as one variant has it, with its write functions compiled in
     /// `sandbox`. A function that doesn't compile stops its entry, which the outs say.
     pub fn load(profile: &Resolved, sandbox: Sandbox, load: Load) -> (Engine, Vec<Out>) {
+        Engine::loaded(profile, sandbox, load, false)
+    }
+
+    /// An engine that runs only the writes it's asked for through `write_once`, off the cockpit
+    /// stream, as the profile extension's Run asks for them. An engine that synced there would
+    /// put back a following pilot's change to an entry the pilot flying owns a second time, after
+    /// state sync's own engine, and a put-back that steps comes out of `frame` among the Run's
+    /// steps. So this one sends, withdraws, and puts back nothing, and takes no arrival,
+    /// catch-up, or pass of control: `seen` only notes the readings, and the only outs of
+    /// `write_once` and `frame` are the actions of the writes it was asked for.
+    pub fn load_only_asked(profile: &Resolved, sandbox: Sandbox, load: Load) -> (Engine, Vec<Out>) {
+        Engine::loaded(profile, sandbox, load, true)
+    }
+
+    fn loaded(
+        profile: &Resolved,
+        sandbox: Sandbox,
+        load: Load,
+        only_asked: bool,
+    ) -> (Engine, Vec<Out>) {
         let mut engine = Engine {
             state: Vec::new(),
             events: Vec::new(),
@@ -311,6 +356,7 @@ impl Engine {
             settle_after: load.settle,
             settled: false,
             catch_up: None,
+            only_asked,
             script: Script::new(sandbox),
         };
         let mut out = Vec::new();
@@ -351,6 +397,15 @@ impl Engine {
         self.settled
     }
 
+    /// Whether `entry`'s write has actions still to send, such as a stepping write's later steps
+    /// or a chain's repeats, which `frame` carries on, so the profile extension's Run knows when
+    /// its last action went.
+    pub fn writing(&self, entry: &str) -> bool {
+        self.keys
+            .get(entry)
+            .is_some_and(|slot| self.runs.contains_key(slot))
+    }
+
     /// A reading or an occurrence on this machine.
     pub fn seen(&mut self, what: Seen, cx: Ctx) -> Vec<Out> {
         let mut out = Vec::new();
@@ -380,6 +435,9 @@ impl Engine {
     /// Another machine's change to `entry`, or its firing, as the stream applies it.
     pub fn arrived(&mut self, entry: &str, change: Arrived, cx: Ctx) -> (Applied, Vec<Out>) {
         let mut out = Vec::new();
+        if self.only_asked {
+            return (Applied::Skipped, out);
+        }
         let applied = match (self.keys.get(entry).copied(), change) {
             (Some(Slot::State(i)), Arrived::Change { value, stamp }) => {
                 self.arrived_change(i, value, stamp, cx, &mut out)
@@ -415,7 +473,9 @@ impl Engine {
     /// Control passed, and `cx` holds the new control value.
     pub fn control_passed(&mut self, cx: Ctx) -> Vec<Out> {
         let mut out = Vec::new();
-        self.took_control(cx, &mut out);
+        if !self.only_asked {
+            self.took_control(cx, &mut out);
+        }
         out
     }
 

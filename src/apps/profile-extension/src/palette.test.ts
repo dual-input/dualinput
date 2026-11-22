@@ -8,7 +8,7 @@ import assert from "node:assert/strict"
 import fs from "node:fs"
 import { test } from "node:test"
 
-import { defaultPalette, isOurs, paletteOf, palettes, uiThemeOf, withPalette } from "./palette.ts"
+import { defaultPalette, isOurs, paletteFor, paletteOf, palettes, uiThemeOf, withPalette } from "./palette.ts"
 
 const MANIFEST: unknown = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"))
 const ALL = palettes(MANIFEST)
@@ -33,6 +33,13 @@ test("a theme's kind takes its palette, and the defaults give one by the theme's
   // VS Code matches `[*Light*]` case and all, so a light theme named otherwise gets the dark palette.
   assert.equal(defaultPalette("Catppuccin Latte"), "dark")
   assert.equal(defaultPalette("Moonlight"), "dark")
+})
+
+test("dualInput.colors forces its palette over the theme's kind, and auto leaves the kind's", () => {
+  assert.equal(paletteFor("light", "vs-dark"), "light")
+  assert.equal(paletteFor("dark", "vs"), "dark")
+  assert.equal(paletteFor("auto", "vs"), "light")
+  assert.equal(paletteFor(undefined, "hc-black"), "dark")
 })
 
 test("a theme is found by its contribution's id, or else its label", () => {

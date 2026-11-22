@@ -1,0 +1,17 @@
+[package]
+name = "sim-variables"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+clients = { path = "../clients" }
+kernel = { path = "../kernel" }
+messages = { path = "../../engines/messages" }
+profile-engine = { path = "../../engines/profile-engine" }
+session = { path = "../session" }
+sim-service = { path = "../sim-service" }
+tracing = "0.1.44"
+
+[lints]
+workspace = true

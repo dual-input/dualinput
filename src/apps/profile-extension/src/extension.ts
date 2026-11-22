@@ -2,22 +2,34 @@
 // `dualinput-profile-builder serve`, which checks and formats profiles and builds each save into
 // Dual Input's local folder. The server owns building and the local folder, so another editor
 // needs only a client of its own, and this holds what only VS Code draws: the status bar, the
-// commands, the Output panel, where the server's log and each build's report go, and the palette
-// each theme needs in the author's settings (record/areas/profiles/03-the-extension.md, "How it
-// works").
+// commands, the Output panel, where the server's log and each build's report go, the palette
+// each theme needs in the author's settings, and in a session's flight, the boxes after `watch:`
+// lines and the Dual Input panel (record/areas/profiles/03-the-extension.md, "How it works", and
+// 04-the-extension-in-the-sim.md, "The connection").
 
 import { spawn } from "node:child_process"
+import { randomBytes } from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
 
 import * as vscode from "vscode"
-import { ExecuteCommandRequest, LanguageClient } from "vscode-languageclient/node"
+import { ExecuteCommandRequest, LanguageClient, State } from "vscode-languageclient/node"
 
-import { type Palette, type Rule, paletteOf, palettes, uiThemeOf, withPalette } from "./palette.ts"
+import type { FromPanel, ToPanel } from "../panel/src/messages.ts"
+import { type Box, type BoxKind, boxStyle, byKind, KINDS, type Values } from "./boxes.ts"
+import { PanelBridge, placeOf, type ServerView } from "./bridge.ts"
+import { panelPage } from "./page.ts"
+import { isForced, type Palette, paletteFor, type Rule, palettes, uiThemeOf, withPalette } from "./palette.ts"
 import { type Build, Builds, kindOf, PATTERNS, profileName } from "./status.ts"
 
 /** The language's ID, which package.json's `contributes.languages` names too. */
 const LANGUAGE = "dualinput-profile"
+
+/**
+ * The Dual Input panel's view, which package.json's `views` names too. VS Code gives every view a command that shows
+ * and focuses it, `dualInput.view.focus` for this one.
+ */
+const VIEW = "dualInput.view"
 
 let client: LanguageClient | undefined
 
@@ -88,16 +100,76 @@ export function activate(context: vscode.ExtensionContext): void {
     return document && kind ? { document, kind } : undefined
   }
 
+  /**
+   * Sends the server one of its commands for the sim's features, whose answer says only that it was taken, since what
+   * follows comes back in `dualInput/panel` and `dualInput/values`. A failure only logs, as the panel's calls run on
+   * each key typed.
+   */
+  const tell = (command: string, args: unknown[]): void => {
+    server.sendRequest(ExecuteCommandRequest.method, { command, arguments: args }).then(undefined, (error: unknown) => {
+      output.error(`Dual Input's language server didn't take ${command}: ${error instanceof Error ? error.message : String(error)}`)
+    })
+  }
+
+  /**
+   * Shows and focuses the Dual Input panel, then tells the server what to open in it. A panel that wasn't open loads as
+   * it's shown and asks for the view the server sends next, and with the focus there, Enter in Run's value field runs.
+   */
+  const openPanel = async (command: string, args: unknown[]): Promise<void> => {
+    await vscode.commands.executeCommand(`${VIEW}.focus`)
+    tell(command, args)
+  }
+
+  const bridge = new PanelBridge(currentPalette(), { execute: ({ command, arguments: args }) => tell(command, args), reveal: (where) => void reveal(where) })
+  const boxes = new Boxes(currentPalette())
+  const repaint = (): void => {
+    const palette = currentPalette()
+    bridge.repaint(palette)
+    boxes.repaint(palette)
+  }
+  server.onNotification("dualInput/panel", (view: ServerView) => bridge.show(view))
+  server.onNotification("dualInput/values", (values: Values) => boxes.show(values))
+  // A stopped server sends nothing more, so the panel and the boxes would show the last state they heard as the sim's.
+  server.onDidChangeState(({ newState }) => {
+    if (newState !== State.Stopped) return
+    bridge.reset()
+    boxes.clear()
+  })
+
   // The client registers the server's own commands, `dualInput.build`, `dualInput.removeLocalBundle`,
-  // `dualInput.importers`, and `dualInput.localFolder`, with VS Code under those IDs, so the
-  // extension's take others. `COMMANDS` in tools/profile-builder/src/serve.rs lists the server's,
-  // so change both together.
+  // `dualInput.importers`, `dualInput.localFolder`, and the panel's `dualInput.panel.*`, with VS Code
+  // under those IDs, so the extension's take others, `dualInput.run` and `dualInput.pickDisplays`
+  // among them, which the server's code lenses name. `COMMANDS` in tools/profile-builder/src/serve.rs
+  // lists the server's, so change both together.
   context.subscriptions.push(
     output,
     item,
     ...watchers,
     ...watchColors(context, output),
+    boxes,
+    registerPanel(context, bridge),
+    vscode.window.onDidChangeActiveColorTheme(repaint),
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration("dualInput.colors")) repaint()
+    }),
     vscode.window.onDidChangeActiveTextEditor(show),
+    // A `▶ Run` lens's command, with the file's URI and the entry's key, as the server wrote them.
+    vscode.commands.registerCommand("dualInput.run", (uri: unknown, key: unknown) => {
+      if (typeof uri === "string" && typeof key === "string") void openPanel("dualInput.panel.open", [uri, key])
+    }),
+    // "Run entry" names the entry by the cursor's place, which the server reads its entry from.
+    vscode.commands.registerCommand("dualInput.runEntry", () => {
+      const editor = vscode.window.activeTextEditor
+      if (editor?.document.languageId !== LANGUAGE) return
+      const converter = server.code2ProtocolConverter
+      void openPanel("dualInput.panel.open", [converter.asUri(editor.document.uri), converter.asPosition(editor.selection.active)])
+    }),
+    // The "Pick displays" lens passes its file's URI, and from the palette, the command takes the active editor's file.
+    vscode.commands.registerCommand("dualInput.pickDisplays", (uri: unknown) => {
+      const document = active()?.document
+      const file = typeof uri === "string" ? uri : document && server.code2ProtocolConverter.asUri(document.uri)
+      if (file) void openPanel("dualInput.panel.pick", [file])
+    }),
     vscode.commands.registerCommand("dualInput.buildNow", async () => {
       const file = active()
       if (!file) return
@@ -150,6 +222,11 @@ const UI_THEMES: Record<vscode.ColorThemeKind, string> = {
   [vscode.ColorThemeKind.HighContrastLight]: "hc-light",
 }
 
+/** The palette the active theme and `dualInput.colors` give the profile's token colors, which the boxes and the panel take too. */
+function currentPalette(): Palette {
+  return paletteFor(vscode.workspace.getConfiguration("dualInput").get("colors"), UI_THEMES[vscode.window.activeColorTheme.kind])
+}
+
 /**
  * Keeps the palette the active theme's kind calls for, or the one `dualInput.colors` forces, in
  * the author's user settings, now and whenever the theme or that setting changes. The defaults
@@ -179,19 +256,15 @@ async function keepColors(all: Record<Palette, Rule[]>, output: vscode.LogOutput
   const theme = vscode.workspace.getConfiguration("workbench").get<string>("colorTheme")
   if (!theme) return
   const forced = vscode.workspace.getConfiguration("dualInput").get<string>("colors")
-  let palette: Palette
-  if (forced === "dark" || forced === "light") palette = forced
-  else {
-    // The theme picker applies each theme it previews without writing its name to
-    // `workbench.colorTheme`, and writes the name once a theme is picked, which the listener on
-    // that setting catches (read in VS Code 1.147.0, workbench.desktop.main.js,
-    // `writeConfiguration`). A check during a preview would put the previewed theme's palette under
-    // the named theme's key, so the check acts only while the active theme is of the kind the named
-    // theme declares, when the palette it picks is the named theme's own.
-    const active = UI_THEMES[vscode.window.activeColorTheme.kind]
-    if (uiThemeOf(theme, vscode.extensions.all.map((extension) => extension.packageJSON)) !== active) return
-    palette = paletteOf(active)
-  }
+  const active = UI_THEMES[vscode.window.activeColorTheme.kind]
+  // The theme picker applies each theme it previews without writing its name to
+  // `workbench.colorTheme`, and writes the name once a theme is picked, which the listener on
+  // that setting catches (read in VS Code 1.147.0, workbench.desktop.main.js,
+  // `writeConfiguration`). A check during a preview would put the previewed theme's palette under
+  // the named theme's key, so unless a palette is forced, the check acts only while the active
+  // theme is of the kind the named theme declares, when the palette it picks is the named theme's own.
+  if (!isForced(forced) && uiThemeOf(theme, vscode.extensions.all.map((extension) => extension.packageJSON)) !== active) return
+  const palette = paletteFor(forced, active)
   const editor = vscode.workspace.getConfiguration("editor")
   const next = withPalette(editor.inspect("tokenColorCustomizations")?.globalValue, theme, palette, all)
   if (!next) return
@@ -241,4 +314,129 @@ async function openLocalFolder(server: LanguageClient, output: vscode.LogOutputC
   spawn("explorer.exe", [folder], { detached: true, stdio: "ignore" })
     .on("error", (error) => output.error(`File Explorer didn't start: ${error.message}`))
     .unref()
+}
+
+/**
+ * Gives the Dual Input panel's view its webview: the page tools/lib/profile-extension.ts packs into panel/, which the
+ * webview may load and nothing else of the extension's. VS Code drops a hidden webview's page unless the extension asks
+ * it to keep the page, which its guide advises against, since a kept page costs a lot of memory (documented,
+ * https://code.visualstudio.com/api/extension-guides/webview, "retainContextWhenHidden"). So the page asks for the view
+ * each time it loads.
+ */
+function registerPanel(context: vscode.ExtensionContext, bridge: PanelBridge): vscode.Disposable {
+  const folder = vscode.Uri.joinPath(context.extensionUri, "panel")
+  return vscode.window.registerWebviewViewProvider(VIEW, {
+    resolveWebviewView(view) {
+      const { webview } = view
+      webview.options = { enableScripts: true, localResourceRoots: [folder] }
+      const file = (name: string) => webview.asWebviewUri(vscode.Uri.joinPath(folder, name)).toString()
+      webview.html = panelPage({ source: webview.cspSource, nonce: randomBytes(16).toString("base64"), script: file("panel.js"), style: file("panel.css") })
+      const heard = webview.onDidReceiveMessage((message: FromPanel) => bridge.heard(message))
+      const detach = bridge.attach((message: ToPanel) => void webview.postMessage(message))
+      view.onDidDispose(() => {
+        heard.dispose()
+        detach()
+      })
+    },
+  })
+}
+
+/**
+ * Opens the file at a build error's place, as Run's preview names it, as `bksq-baronpro.yaml:270:45`, in the editor
+ * that shows the file already, if one does.
+ */
+async function reveal(where: string): Promise<void> {
+  const place = placeOf(where)
+  const uri = place && (await findProfile(place.file))
+  if (!place || !uri) {
+    void vscode.window.showWarningMessage(`Dual Input couldn't find ${where}.`)
+    return
+  }
+  const at = new vscode.Position(place.line, place.character)
+  const shown = vscode.window.visibleTextEditors.find((editor) => editor.document.uri.toString() === uri.toString())
+  await vscode.window.showTextDocument(uri, { viewColumn: shown?.viewColumn, selection: new vscode.Range(at, at) })
+}
+
+/**
+ * The profile or module a build error names by its file's name: an open one, since Run builds the open text, or else
+ * the first of the workspace's.
+ */
+async function findProfile(file: string): Promise<vscode.Uri | undefined> {
+  if (path.isAbsolute(file)) return vscode.Uri.file(file)
+  const name = `/${file.replaceAll("\\", "/").toLowerCase()}`
+  const named = (uri: vscode.Uri) => uri.path.toLowerCase().endsWith(name)
+  const open = vscode.workspace.textDocuments.find((document) => document.languageId === LANGUAGE && named(document.uri))
+  return open?.uri ?? (await vscode.workspace.findFiles(`{${PATTERNS.join(",")}}`)).find(named)
+}
+
+/**
+ * Draws each open file's boxes, as `serve` sends them, into every editor that shows the file. An editor's decorations
+ * last only while VS Code shows it, so the boxes are kept by file and drawn again into each editor VS Code shows.
+ */
+class Boxes implements vscode.Disposable {
+  /** Each open file's boxes, by its URI, which the server writes as VS Code does. */
+  private readonly files = new Map<string, Box[]>()
+  private palette: Palette
+  private types: Record<BoxKind, vscode.TextEditorDecorationType>
+  private readonly listening: vscode.Disposable[]
+
+  constructor(palette: Palette) {
+    this.palette = palette
+    this.types = decorationTypes(palette)
+    this.listening = [
+      vscode.window.onDidChangeVisibleTextEditors((editors) => editors.forEach((editor) => this.draw(editor))),
+      vscode.workspace.onDidCloseTextDocument((document) => this.files.delete(document.uri.toString())),
+    ]
+  }
+
+  /** The server's `dualInput/values`, whose boxes replace every box the file had. */
+  show({ uri, boxes }: Values): void {
+    this.files.set(uri, boxes)
+    this.drawEach((editor) => editor.document.uri.toString() === uri)
+  }
+
+  clear(): void {
+    this.files.clear()
+    this.drawEach(() => true)
+  }
+
+  /** A decoration type's look is fixed when it's made, so another palette takes new ones, which disposing the old clears. */
+  repaint(palette: Palette): void {
+    if (palette === this.palette) return
+    this.palette = palette
+    for (const type of Object.values(this.types)) type.dispose()
+    this.types = decorationTypes(palette)
+    this.drawEach(() => true)
+  }
+
+  dispose(): void {
+    for (const type of Object.values(this.types)) type.dispose()
+    for (const listener of this.listening) listener.dispose()
+  }
+
+  private drawEach(which: (editor: vscode.TextEditor) => boolean): void {
+    for (const editor of vscode.window.visibleTextEditors) if (which(editor)) this.draw(editor)
+  }
+
+  /**
+   * Each box after the end of its line. The boxes come as typing pauses, so they can name a line past the file's end
+   * after the author deletes lines, and such a box is skipped.
+   */
+  private draw(editor: vscode.TextEditor): void {
+    const { document } = editor
+    const kinds = byKind(this.files.get(document.uri.toString()) ?? [])
+    for (const kind of KINDS) {
+      const options = kinds[kind].flatMap((box): vscode.DecorationOptions[] => {
+        if (box.line < 0 || box.line >= document.lineCount) return []
+        const end = document.lineAt(box.line).range.end
+        return [{ range: new vscode.Range(end, end), renderOptions: { after: { contentText: box.text } } }]
+      })
+      editor.setDecorations(this.types[kind], options)
+    }
+  }
+}
+
+function decorationTypes(palette: Palette): Record<BoxKind, vscode.TextEditorDecorationType> {
+  const make = (kind: BoxKind) => vscode.window.createTextEditorDecorationType(boxStyle(kind, palette))
+  return { value: make("value"), firing: make("firing"), error: make("error") }
 }

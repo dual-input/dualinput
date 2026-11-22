@@ -265,6 +265,13 @@ impl Sim<'_, '_> {
         handle
     }
 
+    /// Closes the unit's connection and ends its routines, taking what it set up and created in
+    /// the sim with them, as a profile's unload does for a unit marked `ends_with_profile`, so
+    /// the unit's next call opens an empty connection. The unit hears no loss, since it asked.
+    pub fn close(&self) {
+        self.cx.call(SimService::close_for, self.cx.unit());
+    }
+
     /// Hands the menu script a world map request, as a `unit` message to the newest menu
     /// script's socket. Its answer arrives as `SimEvent::WorldMap` with this handle, or
     /// `SimEvent::Failed` once no menu script can answer it: at once when none is connected, or

@@ -271,6 +271,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "authoring"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "kernel",
+ "messages",
+ "postcard",
+ "profile-engine",
+ "profile-loader",
+ "sandbox",
+ "session",
+ "sim-service",
+ "sim-variables",
+ "sync-engine",
+ "tracing",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1062,6 +1080,7 @@ name = "dualinput-core"
 version = "0.1.0"
 dependencies = [
  "atc-audio",
+ "authoring",
  "avatars",
  "bytemuck",
  "cc",
@@ -1093,6 +1112,7 @@ dependencies = [
  "sim-client",
  "sim-edge",
  "sim-service",
+ "sim-variables",
  "simconnect-types",
  "stand-in-sim",
  "state-sync",
@@ -1135,13 +1155,17 @@ name = "dualinput-profile-builder"
 version = "0.1.0"
 dependencies = [
  "crossbeam-channel",
+ "futures-util",
  "lsp-server",
  "lsp-types",
+ "messages",
  "profile-build",
  "profile-engine",
  "profile-language",
  "serde",
  "serde_json",
+ "tokio",
+ "tokio-websockets",
 ]
 
 [[package]]
@@ -3790,7 +3814,6 @@ dependencies = [
  "flight-model-routines",
  "messages",
  "routine-host",
- "state-sync-routines",
  "traffic-routines",
 ]
 
@@ -4305,6 +4328,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "sim-variables"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "kernel",
+ "messages",
+ "profile-engine",
+ "session",
+ "sim-service",
+ "tracing",
+]
+
+[[package]]
 name = "simconnect-types"
 version = "0.1.0"
 dependencies = [
@@ -4460,16 +4496,9 @@ dependencies = [
  "serde_json",
  "session",
  "sim-service",
+ "sim-variables",
  "sync-engine",
  "tracing",
-]
-
-[[package]]
-name = "state-sync-routines"
-version = "0.1.0"
-dependencies = [
- "messages",
- "routine-host",
 ]
 
 [[package]]

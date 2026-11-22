@@ -77,7 +77,7 @@ const ENGINE_LINES = [
   ["messages", "simconnect-types", "msfs-gltf", "msfs-rpn", "ray-cast", "object-mirror"],
 ]
 const CORE_PLATFORM_LINES = [
-  ["profile-loader", "cockpit-stream"],
+  ["profile-loader", "cockpit-stream", "sim-variables"],
   ["session"],
   ["sim-service", "network", "core-helper-service", "recording"],
   ["clients"],
@@ -135,7 +135,11 @@ function unitOf(rel: string): Unit | undefined | null {
     case "platform": {
       if (OUTSIDE_PLATFORM.includes(name)) return { tier: "outside-platform", name }
       const line = lineOf(CORE_PLATFORM_LINES)
-      return line < 0 ? undefined : { tier: "core-platform", name, line }
+      if (line < 0) return undefined
+      // A crate of the core's platform can hold panel modules in its `panel/` folder, as sim
+      // variables holds `h-events`, and those run in the sim's panels, on the panel bridge.
+      if (part === "panel") return { tier: "outside-platform", name: `${name}/panel` }
+      return { tier: "core-platform", name, line }
     }
     case "features":
       return part && FEATURE_PARTS.includes(part) ? { tier: "feature", name, part } : undefined

@@ -7,7 +7,7 @@ use std::collections::VecDeque;
 use profile_engine::{Arg, Name, Pace};
 
 use crate::script::Written;
-use crate::{Action, CHECK, Ctx, Engine, Out, Slot, Value};
+use crate::{Action, CHECK, Ctx, Engine, Out, Planned, Slot, Value};
 
 /// One action, sent `times` times, `pace` apart.
 #[derive(Clone, Debug)]
@@ -78,6 +78,20 @@ impl Run {
     /// more than once waits.
     pub(crate) fn takes_frames(&self) -> bool {
         self.chains.iter().any(|c| c.times > 1)
+    }
+
+    /// Its chains as a plan shows them, each action with its times and its pace, in the
+    /// spacing `Engine::step_run` sends them at, so change both together.
+    pub(crate) fn planned(&self) -> Vec<Planned> {
+        self.chains
+            .iter()
+            .filter(|c| c.times > 0)
+            .map(|c| Planned {
+                action: c.action.clone(),
+                times: c.times,
+                every: c.pace,
+            })
+            .collect()
     }
 }
 
@@ -205,6 +219,9 @@ impl Engine {
         }
     }
 
+    /// Sends what's due of `slot`'s run: a chain's first action in the same call as the action
+    /// before it, and each of its others its pace after the one before. `Run::planned` shows a
+    /// write's plan in this spacing, so change both together.
     fn step_run(&mut self, slot: Slot, cx: Ctx, out: &mut Vec<Out>) {
         let frame = self.frame;
         loop {

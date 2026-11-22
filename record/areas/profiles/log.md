@@ -8,6 +8,26 @@ TypeScript's language service answers inside a write function in about 40ms in Q
 The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and [p04-language-service.mjs](../../../experiments/areas/profiles/p04-language-service.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 None needs the sim.
 
+## 2026-11-22: Building 22g found that moving state sync's routes to the platform moved their code but not their lifetimes, so sim-variables has one of its own
+
+**Asked:** does [stage 22g](../build/plan.md#22g-the-extension-in-the-sim)'s design for the platform's routes by name, which moved state sync's watches, writes, routine, and two panel modules one tier down for every feature, hold against the code it changes ([reaching the sim by name](04-the-extension-in-the-sim.md#reaching-the-sim-by-name))?
+
+**Expected:** a move of the same code, with each call made on the connection of the feature that asked.
+
+**Found:** the agent building it stopped before changing a file, and the sync engine's single write showed a fourth gap; each was something state sync had supplied by owning the piece, which the move left behind (read in the tree at 490966f8):
+
+- **Order.** `clients` answered every cockpit panel at the profile's load (`src/platform/clients/src/panels.rs`, `loaded`), which was right while state sync's rules read the loaded profile; with rules that ask what features watch, the answer came before state sync's watches arrived, so every panel would have been told `none` and closed.
+- **Lifetime.** Only a profile's unload closes a feature's connection and ends its routines, and only for a feature marked to end with the profile (`src/platform/sim-service/src/connections.rs`, `unloaded`), so `NamedEvents`, moved into the platform, would have run on after every session.
+- **Scope.** Failing an `instrument()` as "no panel holds" its key is true only while the extension keeps every panel, so in the platform it would have failed state sync's entries whenever a profile loaded before its panels said hello.
+- **Role.** A sync engine loaded to run single writes still put back a PM's change to a PF-owned entry, which state sync already does, and the builder's way around it, telling that engine preflight never ended, used a flag for its side effect.
+
+The user asked why, and what we'd missed: the design said where each piece lives and never walked when each starts, answers, and ends, through the code; the review round had walked authors' scenarios, not the core's load, reload, and teardown (user, 2026-11-22).
+A second walk, of a reworked design through the core's start, a profile's load, a test session's reload, control passing, leaving the flight, a second flight in one run, a lost connection, and the sim closing, held once four rules were stated, and we read the code behind its claims: a watch reports only changes (`src/engines/sim-client/src/client.rs`, `watch_on`), the sim client can't take a watch back since its setup only grows, `clients` stops every module at an unload and answers no panel with no profile loaded, and two of state sync's entries listening to one `K:` event have the second listen overwrite the first's handle (`src/platform/sim-service/src/calls.rs`, `listen_for`).
+
+**Changed:** the user took the reworked crate on 2026-11-22, named `sim-variables`, with state sync's `NamedEvents` renamed `HtmlAndInputEvents`: one connection and one lifetime of its own, a flight, closed through a new `close` in the sim service; watches shared by what SimConnect reads, with each one's last reading kept for a feature that starts watching later; its panel modules running while a feature watches what they serve, with `clients` answering the panels once every unit has handled the load; and its own types for watches and actions on the profile engine's `Name`. The no-panel check went to `authoring`, and the sync engine gained the mark of an engine that only runs the writes it's asked for.
+
+**Affects:** [04-the-extension-in-the-sim](04-the-extension-in-the-sim.md), edited in place before its first commit, and the notes of stage 22g in [the code map](../architecture/02-code-map.md), [sync's units](../sync/05-units.md), [clients and the panel bridge](../core/02-clients-and-panel-bridge.md), and [the sim seam](../core/03-sim-seam-and-wasm-module.md).
+
 ## 2026-11-22: Stage 22d's language server answers inside a script within 73ms at p95 on the 58P, and the scenarios whose bundles changed pass
 
 **Asked:** do [stage 22d](../build/plan.md#22d-the-profile-extension)'s budgets hold ([budgets](03-the-extension.md#budgets)), and do the bench's scenarios that load the 58P's bundle, whose bytes the stage changes by putting `seats` last, still pass?

@@ -25,7 +25,7 @@ pub use aircraft::{
     AircraftChanged, PackageFound, USER_CFG, aircraft_awareness, find_package, package_roots,
     package_version, packages_folder, user_cfgs,
 };
-pub use announce::announce;
+pub use announce::{ANNOUNCE_EVERY, announce, recall_panels};
 pub use calls::{ModuleCalls, Sim, SimCx, SimUnit};
 pub use connections::profile_unloaded;
 pub use module::{Status, hold};

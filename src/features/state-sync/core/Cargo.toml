@@ -16,6 +16,7 @@ sandbox = { path = "../../../engines/sandbox" }
 serde_json = "1.0.145"
 session = { path = "../../../platform/session" }
 sim-service = { path = "../../../platform/sim-service" }
+sim-variables = { path = "../../../platform/sim-variables" }
 sync-engine = { path = "../../../engines/sync-engine" }
 tracing = "0.1.44"
 

@@ -827,11 +827,12 @@ A profile's author changes the profile during a test flight, and every pilot's c
 - Any pilot in the session can be the author, and the newest save wins, so two authors can take turns.
 - A crewmate needs none of the author's files: a pilot who joins or rejoins gets the bundle from the PF's Dual Input.
 - While the profile is unpublished, the EFB app's session card shows the profile's short hash and who saved it, each crew row shows the hash that pilot's PC runs, or that it's still loading, and the banner says once when every PC has loaded a new save ([a test session shows the bundle each PC runs](../interface/decisions.md#a-test-session-shows-the-bundle-each-pc-runs)).
+- In a session's flight, the profile extension shows each `watch:` line's live value, runs one entry's write with a value the author types, and lists the cockpit's panels for `displays`, outlining in the sim the one the author is on ([04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md); user, 2026-11-21).
 
 **Not in v1:**
 
 - Merging two authors' edits: each save replaces the whole bundle.
-- The Dual Input IDE's dev loop, with live values and running one entry's write ([the IDE](ideas.md#dual-input-ide)).
+- The Dual Input IDE's dev loop beyond the profile extension's, such as discovering what an aircraft exposes ([the IDE](ideas.md#dual-input-ide)).
 
 **Rules:**
 

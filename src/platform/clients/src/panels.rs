@@ -1,7 +1,9 @@
 //! Cockpit panels and their modules: once the profile has loaded and a panel's `hello` has
 //! arrived, the clients crate answers the panel with `load` and the panel modules its
-//! instruments get, or with `none`, and a profile that unloads sends `stop`
-//! (record/areas/core/02-clients-and-panel-bridge.md, "Cockpit panels and their modules").
+//! instruments get, or with `none`, and a profile that unloads, or a module's rule that
+//! changes, answers each panel running a module again
+//! (record/areas/core/02-clients-and-panel-bridge.md, "Cockpit panels and their modules", with
+//! the doc's notes on it).
 
 use std::time::Duration;
 
@@ -61,8 +63,21 @@ impl Clients {
         self.answer_panel(socket, cx);
     }
 
+    /// The profile loaded. Answering the panels here would tell every waiting panel `none`: a
+    /// module's rule asks what features watch through sim variables, and a feature's watch
+    /// reaches sim variables in a call it queues as it handles `ProfileLoaded`, which runs after
+    /// this one. So the answers, and the check for a panel that never comes, go in a call of
+    /// their own, queued behind those (record/areas/profiles/04-the-extension-in-the-sim.md,
+    /// "Reaching the sim by name").
     pub(crate) fn loaded(me: &mut Clients, _: (), cx: &mut Cx) {
         me.profile.loaded = true;
+        cx.call(Clients::answer_loaded, ());
+    }
+
+    fn answer_loaded(me: &mut Clients, _: (), cx: &mut Cx) {
+        if !me.profile.loaded {
+            return;
+        }
         let panels = me.panels();
         tracing::info!(
             panels = panels.len(),
@@ -76,19 +91,32 @@ impl Clients {
         }
     }
 
+    /// The profile unloaded. Each panel running a module is answered again, once every unit
+    /// has handled `ProfileUnloaded`, as at the load, so a module whose rule reads no profile,
+    /// as the profile extension's `outline` doesn't, carries on through a test session's reload,
+    /// and the rest stop.
     pub(crate) fn unloaded(me: &mut Clients, _: (), cx: &mut Cx) {
         me.profile.loaded = false;
         if let Some(timer) = me.profile.no_panel.take() {
             cx.cancel_timer(timer);
         }
         me.clear_no_panel();
-        for socket in me.panels() {
-            let Some(client) = me.sockets.get_mut(&socket) else {
-                continue;
-            };
-            if let Answered::Load(modules) = std::mem::take(&mut client.answered) {
-                me.to(socket, &ToClient::Stop { modules }, cx);
-            }
+        cx.call(Clients::answer_again, ());
+    }
+
+    /// Answers each panel running a module again, as a rule changed or the profile unloaded.
+    pub(crate) fn answer_again(me: &mut Clients, _: (), cx: &mut Cx) {
+        let running: Vec<u64> = me
+            .panels()
+            .into_iter()
+            .filter(|s| {
+                me.sockets
+                    .get(s)
+                    .is_some_and(|c| matches!(c.answered, Answered::Load(_)))
+            })
+            .collect();
+        for socket in running {
+            me.answer_panel(socket, cx);
         }
     }
 
@@ -131,6 +159,12 @@ impl Clients {
     /// one-panel module another open socket holds, or with `none`, after which it closes its
     /// socket. `Clients::hello` closes a reloaded panel's old socket before it calls
     /// `panel_joined`, so a one-panel module follows its panel through a reload.
+    ///
+    /// A panel already running modules hears only the change: `load` for the modules it gains,
+    /// then `stop` for those it loses, in that order, since a bridge left with no module closes
+    /// its socket. One left with none closes it so, and joins again at the next announcement,
+    /// when it's answered afresh. A module a panel keeps keeps the instruments it started
+    /// with, since the bridge carries on a module it runs.
     fn answer_panel(&mut self, socket: u64, cx: &Cx) {
         let Some(client) = self.sockets.get(&socket) else {
             return;
@@ -153,16 +187,37 @@ impl Clients {
                 })
             })
             .collect();
-        let (answered, message) = if modules.is_empty() {
-            (Answered::None, ToClient::None)
-        } else {
-            (
-                Answered::Load(modules.iter().map(|m| m.name.clone()).collect()),
-                ToClient::Load { modules },
-            )
+        let names: Vec<String> = modules.iter().map(|m| m.name.clone()).collect();
+        let answered = match &client.answered {
+            Answered::Load(before) => {
+                let before = before.clone();
+                let gained: Vec<PanelModule> = modules
+                    .into_iter()
+                    .filter(|m| !before.contains(&m.name))
+                    .collect();
+                let lost: Vec<String> = before.into_iter().filter(|n| !names.contains(n)).collect();
+                if !gained.is_empty() {
+                    self.to(socket, &ToClient::Load { modules: gained }, cx);
+                }
+                if !lost.is_empty() {
+                    self.to(socket, &ToClient::Stop { modules: lost }, cx);
+                }
+                if names.is_empty() {
+                    Answered::No
+                } else {
+                    Answered::Load(names)
+                }
+            }
+            _ if modules.is_empty() => {
+                self.to(socket, &ToClient::None, cx);
+                Answered::None
+            }
+            _ => {
+                self.to(socket, &ToClient::Load { modules }, cx);
+                Answered::Load(names)
+            }
         };
         tracing::debug!(socket, ?answered, "a cockpit panel was answered");
-        self.to(socket, &message, cx);
         if let Some(client) = self.sockets.get_mut(&socket) {
             client.answered = answered;
         }

@@ -28,28 +28,43 @@ pub fn profile_unloaded(cx: &Cx) {
 
 impl SimService {
     fn unloaded(me: &mut SimService, _: (), cx: &mut Cx) {
-        let platform = me.me();
-        let routines: Vec<(UnitId, _)> = me
+        let ending = me.with_profile.clone();
+        me.end_work(&ending, cx);
+    }
+
+    /// `cx.sim().close()`, as the service: the unit's sim work ends as a marked unit's does at
+    /// an unload.
+    pub(crate) fn close_for(me: &mut SimService, unit: UnitId, cx: &mut Cx) {
+        me.end_work(&BTreeSet::from([unit.place()]), cx);
+    }
+
+    /// Ends the routines, and closes the connections, of the units whose places `ending` holds,
+    /// the platform's own left out: each routine's end mark goes out on its unit's connection
+    /// before the connection closes.
+    fn end_work(&mut self, ending: &BTreeSet<u32>, cx: &mut Cx) {
+        let platform = self.me();
+        let ends = |unit: &UnitId| *unit != platform && ending.contains(&unit.place());
+        let routines: Vec<(UnitId, _)> = self
             .module
             .routines_of_features(platform)
             .into_iter()
-            .filter(|(unit, _)| me.with_profile.contains(&unit.place()))
+            .filter(|(unit, _)| ends(unit))
             .collect();
         for routine in routines {
-            SimService::end(me, routine, cx);
+            SimService::end(self, routine, cx);
         }
-        let features: Vec<UnitId> = me
+        let units: Vec<UnitId> = self
             .holders
             .values()
             .map(|h| h.unit)
-            .filter(|&u| u != platform && me.with_profile.contains(&u.place()))
+            .filter(|u| ends(u))
             .collect();
-        for unit in features {
-            me.close(unit, cx);
-            me.module.closed(unit);
+        for unit in units {
+            self.close(unit, cx);
+            self.module.closed(unit);
         }
         // Each subscriber's connection closed, and its camera subscription with it.
-        me.run_camera(cx);
+        self.run_camera(cx);
     }
 }
 

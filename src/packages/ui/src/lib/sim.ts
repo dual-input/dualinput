@@ -2,7 +2,7 @@
 // efb_os.js, the text box's onmousedown and onFocusIn; record/areas/interface/log.md, 2026-11-01).
 // While a field holds the keyboard the pilot's keys don't reach the sim, so anything that goes wrong
 // must give it back: each field releases it on blur and when it leaves the page, a field left idle
-// lets go by itself, and window.DUALINPUT_UI_RELEASE_KEYBOARD() gives it back from anywhere.
+// in the sim lets go by itself, and window.DUALINPUT_UI_RELEASE_KEYBOARD() gives it back from anywhere.
 
 type CoherentApi = {
   trigger(name: string, ...args: unknown[]): void
@@ -51,10 +51,14 @@ export function releaseKeyboard(): void {
   field?.blur()
 }
 
-/** Starts or restarts the wait that lets the keyboard go, for each key the field takes. */
+/**
+ * Starts or restarts the wait that lets the keyboard go, for each key the field takes. A page outside the sim, such as
+ * the profile extension's panel in VS Code, has no sim keyboard to give back, and a release there would only take the
+ * focus from a field an author runs Enter after Enter in, so the wait runs only in a page Coherent GT gives `Coherent`.
+ */
 export function stillTyping(): void {
   window.clearTimeout(idle)
-  idle = window.setTimeout(releaseKeyboard, IDLE_RELEASE)
+  if (window.Coherent) idle = window.setTimeout(releaseKeyboard, IDLE_RELEASE)
 }
 
 /** Asks the sim for the keyboard, for `field`, which has the focus. */

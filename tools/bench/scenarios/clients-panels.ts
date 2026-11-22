@@ -125,6 +125,43 @@ test("a panel module's messages reach its feature and come back, and a reloaded 
   await core.logged(/a cockpit panel's new socket replaced its old one/)
 })
 
+test("a rule's change answers each panel running a module with what it gains and loses, and a recall brings back a panel told none", { timeout: 60_000 }, async (t) => {
+  const run = new BenchRun("clients-panels-again", t)
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const core = await announcing(run, "a", net.core())
+  await host(core, "Host")
+  // The first panel answered gets state sync's `h-events`, since the Baron watches `H:` events,
+  // and the second is told none.
+  const first = panel(core, "VCockpit60", ["GAUGE_0"])
+  t.after(() => first.close())
+  await first.until(() => first.client.connected, "the first panel connecting")
+  const second = panel(core, "VCockpit61", ["GAUGE_1"])
+  t.after(() => second.close())
+  await second.until(() => second.client.connected, "the second panel connecting")
+  await load(core, BARON)
+  await second.until(() => second.messages("none").length === 1, "the second panel's none")
+  assert.deepEqual(first.messages("load"), [{ t: "load", modules: [{ name: "h-events", instruments: ["GAUGE_0"] }] }])
+
+  core.clients({ act: "picks", picks: ["GAUGE"] })
+  await first.until(() => first.messages("load").length === 2, "the first panel's load of the module it gains")
+  assert.deepEqual(first.messages("load")[1], { t: "load", modules: [{ name: "bench-panel", instruments: ["GAUGE_0"] }] })
+  await sleep(2_500)
+  assert.equal(second.opened.length, 1, "a rule's change doesn't bring back a panel told none")
+
+  const counted = second.panelsCount()
+  core.clients({ act: "recall-panels" })
+  await second.until(() => second.messages("load").length === 1, "the second panel's load after the recall")
+  assert.equal(second.panelsCount(), (counted ?? 0) + 1)
+  assert.equal(second.opened.length, 2)
+  assert.deepEqual(second.messages("load")[0], { t: "load", modules: [{ name: "bench-panel", instruments: ["GAUGE_1"] }] }, "h-events stays in the first panel")
+
+  core.clients({ act: "picks", picks: [] })
+  await first.until(() => first.messages("stop").length === 1, "the first panel's stop")
+  assert.deepEqual(first.messages("stop"), [{ t: "stop", modules: ["bench-panel"] }], "h-events carries on")
+  await second.until(() => second.messages("stop").length === 1, "the second panel's stop")
+})
+
 test("state sync's h-events goes to one of two panels that hold instruments of one key, and to that panel's new socket when it reloads", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-h-events", t)
   const net = await BenchNetwork.start()

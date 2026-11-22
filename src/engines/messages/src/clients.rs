@@ -15,7 +15,7 @@ use ts_rs::TS;
 /// src/engines/page-client/src/page-client.ts names it too, so change both together.
 pub const ANNOUNCE: &str = "DUALINPUT_CORE_ANNOUNCE";
 
-/// The body of the core's announcement, such as `{"port":51234,"session":false}`.
+/// The body of the core's announcement, such as `{"port":51234,"session":false,"panels":0}`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "clients/")]
 pub struct Announce {
@@ -23,6 +23,9 @@ pub struct Announce {
     pub port: u16,
     /// Whether a session runs, without which a cockpit panel doesn't connect.
     pub session: bool,
+    /// How many times this core has asked for every cockpit panel again, which a panel told
+    /// `none` under another count connects again for.
+    pub panels: u32,
 }
 
 /// The port file, which the core writes in its data folder once its WebSocket server listens,
@@ -61,6 +64,9 @@ pub mod component {
     /// `CoreLink`'s constructor in src/engines/page-client/src/core-link.ts names it too, so
     /// change both together.
     pub const BANNER: &str = "banner";
+    /// The profile extension's language server, `dualinput-profile-builder serve`, which the
+    /// core's feature `authoring` serves.
+    pub const PROFILE_EXTENSION: &str = "profile-extension";
 }
 
 /// A client's first message.

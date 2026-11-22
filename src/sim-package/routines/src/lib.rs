@@ -21,10 +21,10 @@ pub fn list() -> Vec<Kind> {
     routines![
         routine_host::Hold,
         routine_host::Camera,
+        routine_host::HtmlAndInputEvents,
         flight_model_routines::Lead,
         flight_model_routines::Follow,
         avatars_routines::Figure,
-        traffic_routines::Traffic,
-        state_sync_routines::NamedEvents
+        traffic_routines::Traffic
     ]
 }

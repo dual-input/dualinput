@@ -69,8 +69,12 @@ export class PageClient {
   private socket: Socket | null = null
   private open = false
   private port: number | null = null
-  /** The port of the core that told this panel `none`, after which it stays closed until an announcement brings another port or says the session ended. */
-  private toldNone: number | null = null
+  /**
+   * The port of the core that told this panel `none`, and the announcement's `panels` count it
+   * was told under, after which it stays closed until an announcement brings another port or
+   * another count, or says the session ended.
+   */
+  private toldNone: { port: number; panels: number | undefined } | null = null
   private heard = 0
   /** The last announcement the page heard, and how many it has heard. */
   private lastAnnounce: Announce | null = null
@@ -187,7 +191,10 @@ export class PageClient {
 
   /**
    * One announcement. A page that hears one with no socket open, or one naming a port other
-   * than its socket's, connects to that port; a core that restarted announces a new one.
+   * than its socket's, connects to that port; a core that restarted announces a new one. A
+   * panel told `none` connects again only for another port, another `panels` count, which the
+   * core raises when a feature wants every panel, or after the session's end, and not for the
+   * announcement that repeats every 2s, which would only bring it back to be told `none` again.
    */
   hear(text: string): void {
     let announce: Announce
@@ -200,7 +207,8 @@ export class PageClient {
     if (typeof announce.port !== "number") return
     this.lastAnnounce = announce
     this.announcements++
-    if (!announce.session || announce.port !== this.toldNone) this.toldNone = null
+    const told = this.toldNone
+    if (told && (!announce.session || announce.port !== told.port || announce.panels !== told.panels)) this.toldNone = null
     if (this.options.sessionOnly && !announce.session) {
       // A cockpit panel connects only in a session, so one that ends closes its socket
       // (decision 011).
@@ -285,7 +293,7 @@ export class PageClient {
       case "none":
         for (const f of this.panel) guard(this.env, () => f(message))
         if (message.t === "none") {
-          this.toldNone = this.port
+          this.toldNone = this.port === null ? null : { port: this.port, panels: this.lastAnnounce ? this.lastAnnounce.panels : undefined }
           this.close()
         }
         break

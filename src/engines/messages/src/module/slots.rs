@@ -28,6 +28,19 @@ pub struct SlotHeader {
 #[repr(C)]
 pub struct HoldSlot {}
 
+/// The bytes one feed of `HtmlAndInputEvents` holds for its events.
+pub const HTML_AND_INPUT_EVENT_BYTES: usize = 8_000;
+
+/// `HtmlAndInputEvents`' slot: one batch of events, `count` of them in `names`, in call order,
+/// each ended by a 0 byte. An `H:` event is its letter and its name, as `HFUEL`, and an input
+/// event's preset is `B`, its name, and any value after `=`, as `BINSTRUMENT_HEADING_BUG_Set=180`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Pod, Zeroable)]
+#[repr(C)]
+pub struct HtmlAndInputEventsSlot {
+    pub count: u16,
+    pub names: [u8; HTML_AND_INPUT_EVENT_BYTES],
+}
+
 /// `Camera`'s slot, which carries nothing: the routine reads the camera in both referentials
 /// while it runs.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Pod, Zeroable)]

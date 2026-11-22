@@ -99,6 +99,11 @@ export class FakePage {
     return performance.now() - this.started
   }
 
+  /** The `panels` count of the last announcement the page heard, which the core raises when a feature asks for every cockpit panel again. */
+  panelsCount(): number | undefined {
+    return this.client.announced.last?.panels
+  }
+
   /** The messages the core sent of type `t`, oldest first. */
   messages<T extends ToClient["t"]>(t: T): Extract<ToClient, { t: T }>[] {
     return this.received.filter((r) => r.message.t === t).map((r) => r.message as Extract<ToClient, { t: T }>)

@@ -30,7 +30,7 @@ use messages::session::{MATCH, Phase, Severity};
 use messages::sim::{MenuPage, Stage, WorldMapOutcome, WorldMapRequest};
 use messages::{hex, unhex};
 use network::{LinkUp, NetUnit};
-use profile_engine::{Index, IndexBundle, Maturity, Profile, Resolved};
+use profile_engine::{Index, IndexBundle, Maturity, Profile, Resolved, Shown};
 use serde_json::json;
 use session::{
     ControlPassed, FlightChanged, Found, KeyChanged, Session, SessionEnded, SessionStarted,
@@ -60,6 +60,9 @@ impl Moment for ProfileUnloaded {}
 #[derive(Clone, Debug)]
 pub struct Loaded {
     pub pin: Pin,
+    /// The profile's maker and model, as the EFB app names it, which `Resolved` leaves out, and
+    /// by which the profile extension's Run tells the session's profile from another.
+    pub shown: Shown,
     /// Each block as this pilot's variant has it.
     pub profile: Resolved,
 }
@@ -524,6 +527,7 @@ impl Profiles {
         };
         let loaded = Loaded {
             pin,
+            shown: Shown::of(&profile),
             profile: profile.resolve(&variant),
         };
         tracing::info!(

@@ -19,6 +19,10 @@ export function useField(field: RefObject<HTMLInputElement | null>, title: strin
   }, [field])
   return {
     onMouseDown(event: MouseEvent<HTMLInputElement>) {
+      // Canceling the press is what the sim's field needs, and in a browser, a WebView2 window, or
+      // a VS Code webview it also cancels the double and triple click that select a word and the
+      // whole text, so only a page Coherent GT gives `Coherent` cancels it.
+      if (!window.Coherent) return
       event.preventDefault()
       if (document.activeElement !== event.currentTarget) event.currentTarget.focus()
     },

@@ -24,12 +24,14 @@
 mod camera;
 mod freeze;
 mod hold;
+mod html_and_input_events;
 mod key;
 mod vars;
 
 pub use camera::Camera;
 pub use freeze::Flag;
 pub use hold::Hold;
+pub use html_and_input_events::HtmlAndInputEvents;
 pub use key::Key;
 pub use vars::{AVATAR, Ids, Named, Space, USER, VarRef};
 

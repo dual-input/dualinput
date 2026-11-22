@@ -6,6 +6,11 @@ Depends on:  01-format-and-delivery.md, 02-units.md, ../architecture/02-code-map
 Decides:     What the extension does for an author; the profile language and its highlighting; completion, hovers, checks, navigation, the outline, the formatter, and snippets; how a save builds a bundle into the local folder; the language server and its two runtimes; where each part lives; how the extension is packed, published, and installed; its budgets, known limits, and cases (stage 22d).
 ```
 
+> **Note**
+> Stage 22g adds the extension's features that need the sim, live values on `watch:` lines, Run, the display picker, and the Dual Input panel in the right-hand side bar, which [04-the-extension-in-the-sim](04-the-extension-in-the-sim.md) designs (user, 2026-11-22).
+> [Commands and settings](#commands-and-settings) gain "Dual Input: Run entry", "Dual Input: Pick displays", and the setting `dualInput.dataFolder`, empty for `%APPDATA%\DualInput\`, which names a development core's data folder, where `serve` finds its `port.json`.
+> In [the extension](#the-extension), the lowest VS Code is 1.106.0, and `@types/vscode` 1.106.0, since the Dual Input panel's view container sits in the secondary side bar, which VS Code takes from an extension from 1.106.0.
+
 The profile extension is a VS Code extension for writing profiles.
 It knows the format, shows the profile builder's errors as you type, and builds each profile you save into Dual Input's local folder, so a test session reloads it on every PC in the flight.
 It's a thin client in TypeScript of a language server in Rust, `dualinput-profile-builder serve`, which runs the profile engine and TypeScript 6.0.3 inside QuickJS-ng, the code CI builds profiles with, so its checks and its bundles are those of CI at the extension's release ([known limits](#known-limits)).

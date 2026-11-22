@@ -1,16 +1,23 @@
 //! The language server's own cases (record/areas/profiles/03-the-extension.md, "Cases"), each
-//! through lsp-server's connection in memory, with a workspace and a local folder of its own in
-//! the system's temporary folder, never `%APPDATA%`.
+//! through lsp-server's connection in memory, with a workspace, a local folder, and a data folder
+//! of its own in the system's temporary folder, never `%APPDATA%`, and the author's core faked
+//! behind the channels the connection's thread would talk over, so no case reaches a core running
+//! on the PC.
+
+mod sim;
 
 use std::collections::VecDeque;
 use std::path::PathBuf;
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
+use crossbeam_channel::Sender;
 use lsp_server::{Connection, Message, Notification, Request, RequestId, Response};
 use profile_build::STACK;
 use serde_json::{Value, json};
+use tokio::sync::mpsc::UnboundedReceiver;
 
+use super::connection::{Down, Link, Up};
 use super::convert::uri_of;
 use super::{full, run};
 use crate::format::tests::Scratch;
@@ -55,19 +62,32 @@ const MODULE: &str = "state:
     write: L('COM_POWER')
 ";
 
-/// A client of a server of its own, which answers the server's `workspace/configuration`.
+/// A client of a server of its own, which answers the server's `workspace/configuration`, and
+/// the core behind the server's connection.
 struct Session {
     connection: Connection,
     next: i32,
     inbox: VecDeque<Notification>,
+    /// The server's requests of the client other than `workspace/configuration`, unanswered.
+    asked: VecDeque<Request>,
     settings: Value,
     scratch: Scratch,
     server: Option<JoinHandle<Result<(), String>>>,
+    core: FakeCore,
+}
+
+/// The core's end of the server's connection: what the server sends it, and what it tells the
+/// server, as the connection's thread hands both on.
+struct FakeCore {
+    heard: UnboundedReceiver<Up>,
+    /// What it heard that no case has taken yet.
+    held: VecDeque<Up>,
+    tell: Sender<Down>,
 }
 
 impl Session {
     /// A server on a workspace holding `files`, by their paths from `profiles/`, with `settings`
-    /// and its own local folder.
+    /// and its own local and data folders.
     fn start(name: &str, files: &[(&str, &str)], settings: Value) -> Session {
         let scratch = Scratch::new(&format!("serve-{name}"));
         let workspace = scratch.0.join("workspace");
@@ -77,27 +97,36 @@ impl Session {
             std::fs::write(&path, text).expect("writes a file");
         }
         let mut settings = settings;
-        settings["localFolder"] = scratch
-            .0
-            .join("local")
-            .to_string_lossy()
-            .into_owned()
-            .into();
+        let folder = |name: &str| Value::from(scratch.0.join(name).to_string_lossy().into_owned());
+        settings["localFolder"] = folder("local");
+        settings["dataFolder"] = folder("data");
         let (client, server) = Connection::memory();
+        let (up, heard) = tokio::sync::mpsc::unbounded_channel();
+        let (tell, down) = crossbeam_channel::unbounded();
         let thread = std::thread::Builder::new()
             .stack_size(STACK)
-            .spawn(move || run(server))
+            .spawn(move || run(server, Link { up, down }))
             .expect("the server's thread should start");
         let mut session = Session {
             connection: client,
             next: 0,
             inbox: VecDeque::new(),
+            asked: VecDeque::new(),
             settings,
             scratch,
             server: Some(thread),
+            core: FakeCore {
+                heard,
+                held: VecDeque::new(),
+                tell,
+            },
         };
         let params = json!({
-            "capabilities": { "workspace": { "configuration": true } },
+            "capabilities": { "workspace": {
+                "configuration": true,
+                "applyEdit": true,
+                "codeLens": { "refreshSupport": true },
+            } },
             "workspaceFolders": [{ "uri": uri_of(&workspace), "name": "workspace" }],
         });
         session.request("initialize", params).expect("initializes");
@@ -149,7 +178,8 @@ impl Session {
             .expect("the server takes messages");
     }
 
-    /// The next message, after answering any request of the server's.
+    /// The next message, after answering any `workspace/configuration` of the server's. Its other
+    /// requests are kept in `asked` too, for a case to take.
     fn receive(&mut self, until: Instant) -> Option<Message> {
         loop {
             let left = until.saturating_duration_since(Instant::now());
@@ -157,6 +187,10 @@ impl Session {
                 Message::Request(r) if r.method == "workspace/configuration" => {
                     let answer = Response::new_ok(r.id, json!([self.settings.clone()]));
                     self.connection.sender.send(answer.into()).expect("answers");
+                }
+                Message::Request(r) => {
+                    self.asked.push_back(r.clone());
+                    return Some(Message::Request(r));
                 }
                 other => return Some(other),
             }

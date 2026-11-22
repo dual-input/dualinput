@@ -48,6 +48,15 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > `tools/profile-builder` links `profile-language`, as `tools/profile-author` does to write the seats it tunes in the format's layout, and the builder's program ships inside the extension; it stays in `tools/`, since a folder there is what builds, checks, and tests the rest, and nothing keeps a tool from shipping (user, 2026-11-22).
 
 > **Note**
+> From stage 22g, two units join ([04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md#how-it-works); user, 2026-11-22):
+>
+> - `src/platform/sim-variables`, a platform crate in the core on the top line beside `profile-loader`, above `sim-service`, `clients`, and `session`, using `profile-engine`, through which every feature reads and writes the sim's variables and fires its events by a profile's names, each kind by its route, on a connection of its own for each flight.
+>   It holds the panel modules `h-events` and `instrument-reads` in `src/platform/sim-variables/panel/`, built into `/DualInput/modules/` as a feature's are.
+> - `src/features/authoring`, the feature that serves the profile extension's live values, Run, and display picker, with a crate in the core and a panel module, `outline`, using `sim-variables`, `session`, `profile-loader`, `clients`, `sim-service`, and `sync-engine`.
+>
+> In [features](#features), state sync uses `sim-variables` and holds no routine or panel module: its routine `NamedEvents` becomes the routine host's own, as `Hold` and `Camera` are, renamed `HtmlAndInputEvents`, so the module's list gains `routine_host::HtmlAndInputEvents` and [names the sim shares](#names-the-sim-shares) `DUALINPUT_ROUTINE_HTML_AND_INPUT_EVENTS`, and its two panel modules are `sim-variables`'.
+
+> **Note**
 > In [profiles in this repository](#profiles-in-this-repository), CI holds a level's schemas and declarations only to release tags from 1.0.0 on, since nobody flies a release before it, and each level has two schemas, one for a profile and one for a module ([profiles log](../profiles/log.md#2026-11-21-the-formats-audit-before-level-1-freezes-puts-maps-on-their-own-lines-types-instrument-readings-and-names-one-layout); user, 2026-11-21).
 
 Dual Input's code is a platform, engines, and features.
@@ -101,7 +110,7 @@ features/     state-sync  pointer-sync  flight-model  avatars  traffic
               atc-audio  take-control  voice (Soon)  rate-and-pause  go-to
 platform/     in the core                                          outside the core
                                                                    routine-host
-              profile-loader  cockpit-stream                       panel-bridge
+              profile-loader  cockpit-stream  sim-variables        panel-bridge
               session                                              efb-shell  banner  desktop-shell
               sim-service  network  core-helper-service  recording
               clients
@@ -688,7 +697,7 @@ A probe's kind is its ID, as in p08's `L:CROSSCHECK_P08_ECHO`, which carries the
 | `UI` | The EFB document's `window`, and the sim's keyboard calls | The kit, `@dualinput/ui` | `DUALINPUT_UI_RELEASE_KEYBOARD`, which gives back the keyboard a text field took, and `DUALINPUT_UI_FIELD`, the field's name in `UNFOCUS_INPUT_FIELD` |
 | `EFB` | The EFB document's `window`, and `L:` variables | efb-shell | `DUALINPUT_EFB_REGISTERED`, which says our app has registered, so a script loaded twice registers once; and `L:DUALINPUT_EFB_ON_SCREEN`, which says our app is on screen, so the banner hides what the app shows ([the banner's box](../interface/decisions.md#the-banner-is-a-box-of-opaque-cards-at-the-screens-top-right)) |
 | `BANNER` | `L:` variables, and the sim's panels and icons | The banner's page | `L:DUALINPUT_BANNER_OPEN_EFB`, which a click on a card raises while no core can carry it ([a notification's click](../interface/decisions.md#a-notifications-click-opens-the-efb-app-where-its-explained-or-acted-on)); `L:DUALINPUT_BANNER_RESIZED`, which asks the EFB app to open the panel anew once the sim's window changed; and `PANEL_DUALINPUT_BANNER` and `ICON_TOOLBAR_DUALINPUT_BANNER`, the panel and its toolbar icon, which start with what the sim's own names for those start with |
-| `CHECK` | A cockpit panel's `window`, and the menu document's | tools/sim/'s session scripts | `DUALINPUT_CHECK_HEARD`, the `H:` events a panel heard, `DUALINPUT_CHECK_MOUSE`, the mouse events on a display, and `DUALINPUT_CHECK_FLIGHT`, the aircraft's pose and velocities at each of a panel's frames, and `DUALINPUT_CHECK_HANDOVER`, its heading, bank, altitude, and trim, which a script reads through the inspector; and `DUALINPUT_CHECK_LIST`, a list of the world map's store, which tools/sim/go-to.ts reads the same way |
+| `CHECK` | A cockpit panel's `window`, and the menu document's | tools/sim/'s session scripts | `DUALINPUT_CHECK_HEARD`, the `H:` events a panel heard, `DUALINPUT_CHECK_MOUSE`, the mouse events on a display, and `DUALINPUT_CHECK_FLIGHT`, the aircraft's pose and velocities at each of a panel's frames, and `DUALINPUT_CHECK_HANDOVER`, its heading, bank, altitude, and trim, and `DUALINPUT_CHECK_READINGS`, the values a panel read at each of its frames, which tools/sim/authoring.ts times live values against, which a script reads through the inspector; and `DUALINPUT_CHECK_LIST`, a list of the world map's store, which tools/sim/go-to.ts reads the same way |
 
 A unit that needs a name of a new kind adds the kind to this table.
 

@@ -143,10 +143,15 @@ impl Clients {
             }
         }
         let component = hello.component.clone();
+        let version = hello.version.clone();
         if let Some(client) = self.sockets.get_mut(&socket) {
             client.hello = Some(hello);
         }
-        cx.raise(ClientJoined { socket, component });
+        cx.raise(ClientJoined {
+            socket,
+            component,
+            version,
+        });
         if panel {
             self.panel_joined(socket, cx);
         }

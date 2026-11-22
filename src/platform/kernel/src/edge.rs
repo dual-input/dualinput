@@ -219,6 +219,10 @@ pub enum Work {
     /// aircraft's `aircraft.cfg`, the `model.cfg` it names, and on to the model's buffers.
     /// The result is a `Gathered`.
     Gather { context: Vec<u8> },
+    /// Hands `bytes` to the job's `then`, whose result is the job's, so an engine's work on bytes
+    /// the loop already holds runs off the loop when it would take a handler past its 1ms, as
+    /// authoring's read of a bundle a client sent does.
+    Bytes { bytes: Vec<u8> },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -336,6 +340,10 @@ impl Job {
 
     pub fn fetch(fetch: Fetch) -> Job {
         Job::of(Work::Fetch(fetch))
+    }
+
+    pub fn bytes(bytes: Vec<u8>) -> Job {
+        Job::of(Work::Bytes { bytes })
     }
 
     pub fn gather(context: Vec<u8>, follow: Follow) -> Job {

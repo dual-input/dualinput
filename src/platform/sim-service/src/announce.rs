@@ -1,7 +1,8 @@
 //! The core's announcement, and what the sim service shows the apps: every 2s from the
-//! platform's connection opening, and at once when the session crate calls `announce`, a
-//! CommBus call for JavaScript with the clients crate's port and whether a session runs, so
-//! every page in the sim finds the core (record/areas/core/03-sim-seam-and-wasm-module.md,
+//! platform's connection opening, and at once when the session crate calls `announce` or a
+//! unit calls `recall_panels`, a CommBus call for JavaScript with the clients crate's port,
+//! whether a session runs, and the count of asks for every cockpit panel, so every page in the
+//! sim finds the core (record/areas/core/03-sim-seam-and-wasm-module.md,
 //! "The announcement"); the slice of client state `sim`; and the module's trouble notifications.
 
 use std::time::Duration;
@@ -21,7 +22,7 @@ use crate::module::Status;
 /// How often the core announces itself while the sim takes its calls. A page that loaded
 /// before the core hears the next one, so no page asks (record/areas/architecture/01-spine.md,
 /// "Finding the core").
-const EVERY: Duration = Duration::from_secs(2);
+pub const ANNOUNCE_EVERY: Duration = Duration::from_secs(2);
 
 /// The one trouble notification for our package, which the check of our package on disk raises
 /// too, and the module's own for a module that stopped (record/areas/interface/01-apps.md,
@@ -36,9 +37,20 @@ pub fn announce(cx: &Cx, session: bool) {
     cx.call(SimService::announce_session, session);
 }
 
+/// Asks for every cockpit panel again: the announcement's `panels` count goes up, and goes out
+/// at once, so each panel told `none` under the count before connects again and is answered
+/// anew, as the profile extension's feature `authoring` asks for every panel as its server
+/// connects (record/areas/profiles/04-the-extension-in-the-sim.md, "Every panel stays while the
+/// extension is connected").
+pub fn recall_panels(cx: &Cx) {
+    cx.call(SimService::recall, ());
+}
+
 #[derive(Default)]
 pub(crate) struct Announcing {
     session: bool,
+    /// How many times a unit has asked for every cockpit panel again.
+    panels: u32,
     timer: Option<TimerId>,
     /// Which of the module's trouble notifications are raised.
     package: bool,
@@ -50,7 +62,7 @@ impl SimService {
     pub(crate) fn start_announcing(&mut self, cx: &Cx) {
         self.announce_now(cx);
         if self.announcing.timer.is_none() {
-            self.announcing.timer = Some(cx.timer(EVERY, SimService::announce_tick));
+            self.announcing.timer = Some(cx.timer(ANNOUNCE_EVERY, SimService::announce_tick));
         }
     }
 
@@ -60,7 +72,7 @@ impl SimService {
             return;
         }
         me.announce_now(cx);
-        me.announcing.timer = Some(cx.timer(EVERY, SimService::announce_tick));
+        me.announcing.timer = Some(cx.timer(ANNOUNCE_EVERY, SimService::announce_tick));
     }
 
     fn announce_session(me: &mut SimService, session: bool, cx: &mut Cx) {
@@ -72,6 +84,15 @@ impl SimService {
             );
         }
         me.announcing.session = session;
+        me.announce_now(cx);
+    }
+
+    fn recall(me: &mut SimService, _: (), cx: &mut Cx) {
+        me.announcing.panels = me.announcing.panels.wrapping_add(1);
+        tracing::info!(
+            panels = me.announcing.panels,
+            "the core asks for every cockpit panel again"
+        );
         me.announce_now(cx);
     }
 
@@ -87,6 +108,7 @@ impl SimService {
         let body = Announce {
             port,
             session: self.announcing.session,
+            panels: self.announcing.panels,
         };
         let origin = Origin {
             unit: self.me(),

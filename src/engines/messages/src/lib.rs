@@ -24,6 +24,7 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 include!(concat!(env!("OUT_DIR"), "/hash.rs"));
 
 pub mod atc_audio;
+pub mod authoring;
 pub mod avatars;
 pub mod backend;
 pub mod bench;
@@ -41,6 +42,7 @@ pub mod rate_and_pause;
 pub mod recording;
 pub mod session;
 pub mod sim;
+pub mod sim_variables;
 pub mod state_sync;
 pub mod sync;
 pub mod take_control;

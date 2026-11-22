@@ -10,11 +10,20 @@
 //! pauses and runs each save's build. A check runs to its end, since TypeScript drops its whole
 //! type checker when one is canceled, and its errors show only if the text hasn't changed since
 //! it began.
+//!
+//! In a session's flight, it reaches the sim through the author's own core, as one more of its
+//! clients, over a socket a thread of its own holds (record/areas/profiles/
+//! 04-the-extension-in-the-sim.md, "The connection").
 
+mod connection;
 mod convert;
+mod displays;
+mod facts;
 mod requests;
+mod sim;
 #[cfg(test)]
 mod tests;
+mod view;
 mod worker;
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -24,14 +33,14 @@ use std::time::{Duration, Instant};
 use crossbeam_channel::{Receiver, Sender, select, unbounded};
 use lsp_server::{Connection, Message, Notification, Request, RequestId, Response};
 use lsp_types::{
-    CodeActionKind, CodeActionOptions, CodeActionProviderCapability, CompletionOptions,
-    DidChangeConfigurationParams, DidChangeTextDocumentParams, DidChangeWatchedFilesParams,
-    DidCloseTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams,
-    DocumentOnTypeFormattingOptions, ExecuteCommandOptions, FileChangeType,
-    FoldingRangeProviderCapability, HoverProviderCapability, InitializeParams, OneOf,
-    RenameOptions, SaveOptions, ServerCapabilities, SignatureHelpOptions, TextDocumentSaveReason,
-    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
-    TextDocumentSyncSaveOptions, WillSaveTextDocumentParams,
+    CodeActionKind, CodeActionOptions, CodeActionProviderCapability, CodeLensOptions,
+    CompletionOptions, DidChangeConfigurationParams, DidChangeTextDocumentParams,
+    DidChangeWatchedFilesParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+    DidSaveTextDocumentParams, DocumentOnTypeFormattingOptions, ExecuteCommandOptions,
+    FileChangeType, FoldingRangeProviderCapability, HoverProviderCapability, InitializeParams,
+    OneOf, RenameOptions, SaveOptions, ServerCapabilities, SignatureHelpOptions,
+    TextDocumentSaveReason, TextDocumentSyncCapability, TextDocumentSyncKind,
+    TextDocumentSyncOptions, TextDocumentSyncSaveOptions, WillSaveTextDocumentParams,
 };
 use profile_build::Service;
 use profile_engine::{
@@ -40,32 +49,46 @@ use profile_engine::{
 use profile_language::{Pos, Workspace, closure, imports, programs};
 use serde_json::{Value, json};
 
+use connection::Link;
 use convert::{Lines, path_of, uri_of};
+use sim::Sim;
 use worker::{Done, Job, Target};
 
-/// How long typing pauses before TypeScript checks the scripts.
+/// How long typing pauses before TypeScript checks the scripts, and before the sim's features
+/// take the open text.
 const PAUSE: Duration = Duration::from_millis(300);
 
-/// The commands the server runs through `workspace/executeCommand`. The extension registers its
-/// own under other IDs, as src/apps/profile-extension/src/extension.ts says, so change both
-/// together.
-const COMMANDS: [&str; 4] = [
+/// The commands the server runs through `workspace/executeCommand`, which the extension's
+/// client registers with VS Code under these IDs; the panel's go to the server from its calls.
+/// The extension registers its own under other IDs, as src/apps/profile-extension/src/
+/// extension.ts says, and `PANEL_COMMANDS` in src/apps/profile-extension/src/bridge.ts names the
+/// panel's, so change all three together.
+const COMMANDS: [&str; 12] = [
     "dualInput.build",
     "dualInput.removeLocalBundle",
     "dualInput.importers",
     "dualInput.localFolder",
+    "dualInput.panel.open",
+    "dualInput.panel.pick",
+    "dualInput.panel.typed",
+    "dualInput.panel.run",
+    "dualInput.panel.move",
+    "dualInput.panel.tick",
+    "dualInput.panel.write",
+    "dualInput.panel.leave",
 ];
 
 pub(crate) fn serve() -> Result<(), String> {
     let (connection, io) = Connection::stdio();
-    run(connection)?;
+    run(connection, connection::start())?;
     io.join()
         .map_err(|e| format!("the server's input and output failed: {e}"))
 }
 
-/// Serves one client until it says to exit. The worker loads its runtime on its own thread while
-/// this one loads the requests' runtime, before the client's `initialize` is answered.
-pub(crate) fn run(connection: Connection) -> Result<(), String> {
+/// Serves one client until it says to exit, reaching the author's core through `link`. The
+/// worker loads its runtime on its own thread while this one loads the requests' runtime, before
+/// the client's `initialize` is answered.
+pub(crate) fn run(connection: Connection, link: Link) -> Result<(), String> {
     let started = Instant::now();
     let (done, finished) = unbounded();
     let worker = worker::start(done);
@@ -84,9 +107,17 @@ pub(crate) fn run(connection: Connection) -> Result<(), String> {
         "Dual Input's profile server started in {}ms",
         started.elapsed().as_millis()
     );
-    let mut server = Server::new(connection.sender.clone(), worker, Some(service), &params);
+    let core = link.down.clone();
+    let sim = Sim::new(link, &params);
+    let mut server = Server::new(
+        connection.sender.clone(),
+        worker,
+        Some(service),
+        sim,
+        &params,
+    );
     server.start();
-    server.serve(&connection.receiver, &finished)
+    server.serve(&connection.receiver, &finished, &core)
 }
 
 fn capabilities() -> ServerCapabilities {
@@ -130,6 +161,9 @@ fn capabilities() -> ServerCapabilities {
             code_action_kinds: Some(vec![CodeActionKind::QUICKFIX]),
             ..CodeActionOptions::default()
         })),
+        code_lens_provider: Some(CodeLensOptions {
+            resolve_provider: Some(false),
+        }),
         execute_command_provider: Some(ExecuteCommandOptions {
             commands: COMMANDS.iter().map(|c| c.to_string()).collect(),
             work_done_progress_options: Default::default(),
@@ -144,6 +178,8 @@ struct Settings {
     build_on_save: bool,
     /// Empty for the core's own local folder.
     local_folder: String,
+    /// Empty for the core's own data folder.
+    data_folder: String,
 }
 
 impl Default for Settings {
@@ -151,24 +187,40 @@ impl Default for Settings {
         Settings {
             build_on_save: true,
             local_folder: String::new(),
+            data_folder: String::new(),
         }
     }
 }
 
 impl Settings {
     fn read(section: &Value) -> Settings {
+        let text = |key: &str| {
+            section
+                .get(key)
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .trim()
+                .to_string()
+        };
         Settings {
             build_on_save: section
                 .get("buildOnSave")
                 .and_then(Value::as_bool)
                 .unwrap_or(true),
-            local_folder: section
-                .get("localFolder")
-                .and_then(Value::as_str)
-                .unwrap_or("")
-                .trim()
-                .to_string(),
+            local_folder: text("localFolder"),
+            data_folder: text("dataFolder"),
         }
+    }
+
+    /// The core's data folder, whose `port.json` names the core's port: the one the setting
+    /// names, for a development core, or the core's own, `%APPDATA%\DualInput\`.
+    fn data(&self) -> Result<PathBuf, String> {
+        if !self.data_folder.is_empty() {
+            return Ok(PathBuf::from(&self.data_folder));
+        }
+        let app_data = std::env::var_os("APPDATA")
+            .ok_or("APPDATA isn't set, and the dualInput.dataFolder setting names no folder")?;
+        Ok(PathBuf::from(app_data).join("DualInput"))
     }
 
     /// The folder bundles go into, which the extension asks for with `dualInput.localFolder`: the
@@ -290,6 +342,7 @@ pub(crate) struct Server {
     errors: BTreeMap<PathBuf, usize>,
     /// The files whose diagnostics were last published with any in them.
     published: BTreeSet<PathBuf>,
+    sim: Sim,
 }
 
 impl Server {
@@ -297,6 +350,7 @@ impl Server {
         out: Sender<Message>,
         worker: Sender<Job>,
         service: Option<Service>,
+        sim: Sim,
         params: &InitializeParams,
     ) -> Server {
         let folders: Vec<PathBuf> = params
@@ -331,6 +385,7 @@ impl Server {
             next_build: 0,
             errors: BTreeMap::new(),
             published: BTreeSet::new(),
+            sim,
         }
     }
 
@@ -341,6 +396,7 @@ impl Server {
         } else {
             self.configured = true;
             self.announce(false);
+            self.point_at_core();
         }
     }
 
@@ -348,11 +404,14 @@ impl Server {
         &mut self,
         inbox: &Receiver<Message>,
         finished: &Receiver<Done>,
+        core: &Receiver<connection::Down>,
     ) -> Result<(), String> {
+        let mut core = core.clone();
         loop {
             let wait = self.next_due().map_or(Duration::from_secs(3600), |t| {
                 t.saturating_duration_since(Instant::now())
             });
+            let mut lost = false;
             select! {
                 recv(inbox) -> message => match message {
                     Ok(Message::Request(request)) => {
@@ -369,7 +428,17 @@ impl Server {
                     Ok(done) => self.finished(done),
                     Err(_) => return Err("the server's second thread stopped".into()),
                 },
+                recv(core) -> down => match down {
+                    Ok(down) => self.heard(down),
+                    Err(_) => lost = true,
+                },
                 default(wait) => {}
+            }
+            // The editor's features don't need the sim, so a connection that stopped leaves them
+            // working, and the loop waits on it no more.
+            if lost {
+                eprintln!("The connection to Dual Input stopped, so the sim's features are off");
+                core = crossbeam_channel::never();
             }
             self.fire_due();
         }
@@ -393,6 +462,7 @@ impl Server {
                 {
                     self.open.insert(path.clone(), p.text_document.text);
                     self.changed(&path);
+                    self.sim_edited(&path, true, true);
                 }
             }
             "textDocument/didChange" => {
@@ -402,6 +472,7 @@ impl Server {
                 {
                     self.open.insert(path.clone(), change.text);
                     self.changed(&path);
+                    self.sim_edited(&path, true, false);
                 }
             }
             "textDocument/didClose" => {
@@ -410,6 +481,7 @@ impl Server {
                 {
                     self.open.remove(&path);
                     self.changed(&path);
+                    self.sim_edited(&path, false, true);
                 }
             }
             "textDocument/willSave" => {
@@ -461,8 +533,26 @@ impl Server {
         self.send(Request::new(id, "workspace/configuration".into(), params).into());
     }
 
-    /// The client's answer to `workspace/configuration`, the server's one request of it.
+    /// The client's answer to one of the server's requests: `workspace/configuration`, whose ID
+    /// `start_configuration` makes, or the sim's lenses' refresh or Sync's edit.
     fn response(&mut self, response: Response) {
+        let id = serde_json::to_value(&response.id).unwrap_or(Value::Null);
+        if !id
+            .as_str()
+            .is_some_and(|id| id.starts_with("configuration-"))
+        {
+            match response.response_result {
+                Ok(answer) if answer.get("applied") == Some(&Value::Bool(false)) => eprintln!(
+                    "The editor didn't take Sync's edit to displays: {}",
+                    answer["failureReason"]
+                        .as_str()
+                        .unwrap_or("it gave no reason")
+                ),
+                Err(e) => eprintln!("The editor refused {id}: {}", e.message),
+                Ok(_) => {}
+            }
+            return;
+        }
         match response.response_result {
             Ok(Value::Array(sections)) => {
                 let section = sections.into_iter().next().unwrap_or(Value::Null);
@@ -478,12 +568,19 @@ impl Server {
 
     fn apply(&mut self, next: Settings) {
         let moved = next.local_folder != self.settings.local_folder;
+        let core_moved = next.data_folder != self.settings.data_folder;
         self.settings = next;
         if !self.configured {
             self.configured = true;
             self.announce(false);
-        } else if moved {
-            self.announce(true);
+            self.point_at_core();
+        } else {
+            if moved {
+                self.announce(true);
+            }
+            if core_moved {
+                self.point_at_core();
+            }
         }
     }
 
@@ -583,6 +680,7 @@ impl Server {
         };
         if !self.open.contains_key(path) {
             self.changed(path);
+            self.sim_edited(path, false, false);
         }
     }
 
@@ -755,6 +853,7 @@ impl Server {
             .iter()
             .filter(|(p, _)| !self.in_flight.contains(*p))
             .map(|(_, t)| *t)
+            .chain(self.sim.next_due())
             .min()
     }
 
@@ -787,6 +886,7 @@ impl Server {
                 eprintln!("The server's second thread stopped, so TypeScript checks nothing");
             }
         }
+        self.fire_sim();
     }
 
     fn finished(&mut self, done: Done) {
@@ -846,6 +946,7 @@ impl Server {
                     self.send(Response::new_ok(request, Value::Null).into());
                 }
             }
+            Done::Bundled { texts, bundle } => self.bundled(texts, bundle),
         }
     }
 

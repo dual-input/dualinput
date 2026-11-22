@@ -1,7 +1,7 @@
 # Record
 
 The documents agents write for Dual Input live here, in the kinds [writing.md](../.claude/rules/writing.md) describes.
-Documentation people write for other people lives in `docs/` instead.
+Documentation written for people lives in `docs/` instead.
 
 - [learn/foundations/outline.md](learn/foundations/outline.md): the foundations course, the concepts we need to build Dual Input, in the order we'll learn them, with the depth each one gets.
 - [areas/commbus/log.md](areas/commbus/log.md): what our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, on the Synaptic A220, the A2A PA-24, and the iniBuilds A350, and listening and publishing on the avionics framework's `wt.eb.evt`.

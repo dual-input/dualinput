@@ -7,7 +7,7 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
 ## Layout
 
 - `src/` holds the product's code, in the folders [the workspace](record/areas/architecture/02-code-map.md#the-workspace) lays out, and `tools/` holds what builds, checks, and tests it, so a new part of Dual Input goes in a folder under `src/`, never a new one at the root.
-- `docs/` is reserved for documentation people write for other people.
+- `docs/` is reserved for documentation written for people.
   Create or edit it only when asked, and keep the author's voice.
 - `record/` holds the documents agents write.
   [record/index.md](record/index.md) is the map.

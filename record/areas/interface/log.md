@@ -3,6 +3,28 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-23: In the sim's EFB, a tab's icon painted blank when its color changed as the cursor left it after a click, and keeping the active tab's color on hover stopped it
+
+**Asked:** why an icon in the EFB app's tab bar went black: a click on a tab, then the cursor moved away with no other click, left the tab's icon blank until the cursor hovered it again, nearly every time on Traffic (user, 2026-11-22).
+
+**Expected:** a wrong color from our CSS, where the kit's tab bar gave the active tab `text-primary` and every tab `hover:text-foreground`.
+
+**Found:** on MSFS 2024, in the Baron 58P, read through the sim's inspector while the Traffic icon showed blank:
+
+- The icon's computed color was right: the button, the Lucide `svg`, and its path all read `rgb(116, 212, 255)`, the kit's sky, at opacity 1, visible, and 19 by 19.
+- So Coherent GT kept a blank paint of an SVG whose color had changed.
+  The hover kept the clicked tab white through the click that made it active, and the cursor leaving turned it sky, which is the change that didn't show; hovering again turned it white and painted it.
+- With a rule added to the EFB's document that kept the active tab sky while hovered, the user clicked Traffic and moved away about five times, did the same on other tabs, and saw no icon go blank.
+
+It's the second change the EFB failed to paint, after a canvas's new pixels ([second session](#2026-11-02-a-second-session-in-the-sim-confirms-bootmode-2-restart-and-a-load-from-the-world-map-and-finds-a-large-l-value-reads-0-and-a-canvas-repaints-only-when-its-element-changes)).
+
+**Changed:** the kit's tab bar gives only an inactive tab a hover color, so the active tab's color changes with the click alone.
+
+What we don't know is what about the click leaves the paint stale: an inactive tab's hover ending, the same kind of change with no click before it, hasn't left an icon blank that the pilot has seen.
+So another icon whose color changes under the cursor as it's clicked could go blank the same way.
+
+**Affects:** the kit's [tab bar](../../../src/packages/ui/src/controls/tab-bar.tsx), and the SVG line of [Coherent GT's measured limits](../architecture/coherent-gt.md).
+
 ## 2026-11-04: The desktop window's memory figure matches Windows' to within 0.4 MB, the app and its WebView2 read about 95 MB to 114 MB with the window open, and a window can follow its content frame by frame
 
 **Asked:** whether the desktop window's figures agree with what a pilot would see in Task Manager, what the window costs while it's open, and whether a native window can follow content easing open.

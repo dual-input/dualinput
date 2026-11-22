@@ -92,6 +92,7 @@ Neither probe looked at the paint, so a kept declaration can still paint unlike 
   There's no 3D context: `getContext` returns null for `webgl`, `webgl2`, and their prefixed names, and `WebGLRenderingContext` and `OffscreenCanvas` aren't defined, while CSS's `preserve-3d`, `perspective`, and `rotate3d` parse.
 - **SVG:** in the SDK's debugger, a stroke ignores `stroke-dasharray` and `stroke-dashoffset`, by attribute or style, and `getTotalLength` is missing, while an arc in a path draws, and changing its `d` from code redraws it.
   A radial gradient with a focal point draws nothing, and one centered off center draws; a `viewBox` in units as small as meters draws nothing; a `clip-path` wiped what lay under it; and a filled shape's edge isn't smoothed, however it's stroked or scaled, while a gradient's alpha is (same entry).
+  In the sim's EFB, an icon stroked in `currentColor` painted blank when its color changed as the cursor left it right after a click, though its computed color was right ([interface log][tab-icon]).
 - **Limits met:** tens of thousands of `fillRect`s on one canvas closed the debugger's window, and so, in one run we didn't repeat, did a page with a PNG in a data URI on an `<img>` (same entry).
 - **Time:** in the SDK's debugger, a `requestAnimationFrame` callback's timestamp counts from another moment than `performance.now()`, 2,104,645 against 1,171,353 at one reading, so code that compares the two reads `performance.now()` in the callback (same entry).
 - **Shadows:** a `box-shadow` on a box rounded on one side comes out square at its corners in the SDK's debugger, where a border around it follows them (same entry).
@@ -112,3 +113,4 @@ A sim update can change any of this, so re-run [p09](../../../experiments/areas/
 [await]: ../session/log.md#2026-11-17-in-the-sim-join-set-the-world-map-and-started-the-flight-within-09s-and-active-pause-followed-from-our-efb-apps-code-in-264ms-once-the-menu-script-parsed
 [canvas]: ../interface/log.md#2026-11-01-coherent-gts-canvas-takes-no-pixels-so-a-figure-drawn-by-rays-cant-reach-the-screen-at-any-size-above-a-heads-while-the-fold-its-pin-and-its-masks-all-work
 [second-session]: ../interface/log.md#2026-11-02-a-second-session-in-the-sim-confirms-bootmode-2-restart-and-a-load-from-the-world-map-and-finds-a-large-l-value-reads-0-and-a-canvas-repaints-only-when-its-element-changes
+[tab-icon]: ../interface/log.md#2026-11-23-in-the-sims-efb-a-tabs-icon-painted-blank-when-its-color-changed-as-the-cursor-left-it-after-a-click-and-keeping-the-active-tabs-color-on-hover-stopped-it

@@ -29,7 +29,10 @@ export function TabBar<Id extends string>({ tabs, active, onSelect, className, .
           aria-label={label}
           aria-current={id === active ? "page" : undefined}
           data-force={force}
-          className={cx("relative flex flex-1 items-center justify-center hover:text-foreground", id === active ? "text-primary" : "text-muted-foreground")}
+          // An active tab with a hover color went blank in the sim's EFB: clicked while hovered, it kept the hover's color
+          // until the cursor left, and the EFB painted that change as nothing, though the icon's computed color was right.
+          // So only an inactive tab takes one (record/areas/interface/log.md, 2026-11-23).
+          className={cx("relative flex flex-1 items-center justify-center", id === active ? "text-primary" : "text-muted-foreground hover:text-foreground")}
           onClick={() => onSelect?.(id)}
         >
           {id === active && <span className="absolute inset-x-4 -top-px h-0.5 rounded-full bg-primary" />}

@@ -359,7 +359,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
     The square fills the icon to its edges, with a corner radius of 3/16 of its side, and the glyph's 32-unit box is scaled to 0.63 of the side, centered, with a stroke 4.2 of those units wide.
     The desktop app takes it for its program, the taskbar, and the tray, and our GitHub organization and Discord server take it as a plain square, which each site rounds itself.
   - The banner's toolbar icon and our app's icon in the EFB are the glyph alone, in white, with a 5-unit stroke outlined into filled shapes.
-    In the toolbar's 64-unit square, the glyph's 32-unit box is scaled to 0.7 of the side and centered, and in the EFB the SVG's box ends at the stroke's edges and is drawn 31px wide.
+    In the toolbar's 64-unit square, the glyph's 32-unit box is scaled to 0.7 of the side and centered, and in the EFB the SVG's box is a square centered on the glyph, as wide as its stroke, 29 units.
     The welcome's last step draws our app's button as the EFB does, the white glyph on the EFB's own tile.
   - The repository's social preview, 1280x640, has the glyph in sky, its left edge on the title's ink, "Dual Input", and "Shared cockpit for MSFS 2024" with a faded superscript "(only)" on the left, and the EFB app's "Flying together" on the right, over a night valley from the sim, darkened most behind the words, with a faint sky glow behind the app.
     The README opens with it.
@@ -371,6 +371,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - The EFB draws each app's tile itself, a 64px square with 5px corners and a gradient from `#144893` to `#1e2836`, and fills the app's SVG with its content color, white (read in fs-base-efb 0.1.10, `html_ui/efb_ui/efb_os/efb_os.css`, `.app-button > .icon-button.icon`).
     The sim's own Aircraft, Atlas, Pilot Book, and Settings apps give it a white glyph (read in fs-base-efb-app-aircraft, fs-base-efb-app-atlas, fs-base-efb-app-pilot-book, and fs-base-efb-app-settings 0.1.10, each app's icon getter and the SVG it names), and so do the EFB apps of Fenix, GSX, A2A, iniBuilds, and Navigraph installed on our development machine.
     Drawn as `efb_os.css` draws the tile, our dark square showed as a box inside it (user, 2026-11-21).
+  - The EFB draws an app's SVG 35px tall in that tile, as wide as the SVG's viewBox makes it, through `.icon-element`'s height and `svg { width: 100%; height: 100% }` (read in fs-base-efb 0.1.10, `efb_os.css`).
+    The sim's own apps' icons are about square, such as Aircraft's 30 by 27.4 and Flight Planner's 31 by 31, so each fills a 35px square, and our glyph on a box as tight as its stroke, 29 by 20, came out about 50px wide beside them (user, 2026-11-22).
   - Other packages' toolbar icons are filled shapes with no fill of their own, such as FSLTL's (read in fsltl-traffic-injector 2.0.0, `html_ui/icons/toolbar/FSLTL_ICON_TOOLBAR.svg`).
     So ours is filled shapes too, on the inference that the toolbar fills each icon's shapes with its own color, where it could fill the inside of a stroked path as a blob (unverified; the next sitting in the sim settles it, with the button's hover and open states).
   - The glyph alone stands as heavy as the solid shapes beside it only with a heavier stroke than the app's icon, as a sheet of the glyph beside FSLTL's and GEES's toolbar icons showed (user, 2026-11-21).

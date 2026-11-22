@@ -14,12 +14,21 @@ export function glyphBox(stroke: number): { viewBox: string; aspect: number } {
   return { viewBox: `${GLYPH_BOUNDS.x - stroke / 2} ${GLYPH_BOUNDS.y - stroke / 2} ${width} ${height}`, aspect: height / width }
 }
 
+/** The glyph drawn alone, as the sim draws an icon in its toolbar and its EFB: a heavier stroke than the app's icon, to stand as heavy as the solid shapes beside it. */
+export const ALONE = { stroke: 5 } as const
+
 /**
- * The glyph drawn alone, as the sim draws an icon in its toolbar and its EFB: a heavier stroke than the app's icon, to
- * stand as heavy as the solid shapes beside it, and in the EFB as wide as the sim's own apps' icons, whose Aircraft is
- * 30 by 27.4 (read in fs-base-efb-app-aircraft 0.1.10, html_ui/efb_ui/efb_apps/AircraftApp/Assets/icons/Aircraft.svg).
+ * A square SVG viewBox centered on the glyph, as wide as the glyph drawn with a stroke `stroke` units wide. The EFB draws each app's icon 35px
+ * tall, as wide as its viewBox's shape, and the sim's own apps' icons are about square, so each fills a 35px square (read
+ * in fs-base-efb 0.1.10, html_ui/efb_ui/efb_os/efb_os.css, `.icon-element`). The glyph's own box, 29 by 20, drew it
+ * about 50px wide there, so our icon takes this square.
  */
-export const ALONE = { stroke: 5, efbWidth: 31 } as const
+export function glyphSquare(stroke: number): string {
+  const side = GLYPH_BOUNDS.width + stroke
+  const x = GLYPH_BOUNDS.x - stroke / 2
+  const y = GLYPH_BOUNDS.y + GLYPH_BOUNDS.height / 2 - side / 2
+  return `${x} ${y} ${side} ${side}`
+}
 
 /**
  * The app's icon on a 256-unit square, the sky glyph on the apps' background: its corners' radius, the share of its side

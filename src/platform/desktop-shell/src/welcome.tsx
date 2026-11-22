@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
-import { ALONE, Button, cx, GLYPH, glyphBox, Mark, MarkTile, MOMENT, part, Spinner, useMoment } from "@dualinput/ui"
+import { ALONE, Button, cx, GLYPH, glyphSquare, Mark, MarkTile, MOMENT, part, Spinner, useMoment } from "@dualinput/ui"
 import { ChevronUp, Monitor, ShieldAlert, ShieldCheck, Volume2, Wifi } from "lucide-react"
 
 import type { DesktopLink, View } from "./link.ts"
@@ -25,17 +25,16 @@ export type WelcomeStill = "greeting" | Step | "firewall-declined"
 
 /**
  * Our app's button in the sim's EFB, as the pilot finds it there: the EFB's own tile, 64px with 5px corners and a gradient,
- * around the white glyph that src/sim-package/pages/efb-icon.svg gives it (read in fs-base-efb 0.1.10,
+ * around the white glyph that src/sim-package/pages/efb-icon.svg gives it, drawn 35px tall (read in fs-base-efb 0.1.10,
  * html_ui/efb_ui/efb_os/efb_os.css, `.app-button > .icon-button.icon`).
  */
-const EFB_TILE = { side: 64, radius: 5, background: "linear-gradient(to right top, #144893 0%, #1e2836 100%)" }
+const EFB_TILE = { side: 64, radius: 5, icon: 35, background: "linear-gradient(to right top, #144893 0%, #1e2836 100%)" }
 
 function EfbAppIcon({ size }: { size: number }) {
   const scale = size / EFB_TILE.side
-  const { viewBox, aspect } = glyphBox(ALONE.stroke)
   return (
     <span className="flex shrink-0 items-center justify-center" style={{ width: size, height: size, borderRadius: EFB_TILE.radius * scale, background: EFB_TILE.background }} aria-hidden>
-      <svg viewBox={viewBox} width={ALONE.efbWidth * scale} height={ALONE.efbWidth * scale * aspect}>
+      <svg viewBox={glyphSquare(ALONE.stroke)} width={EFB_TILE.icon * scale} height={EFB_TILE.icon * scale}>
         <path d={GLYPH} fill="none" stroke="#ffffff" strokeWidth={ALONE.stroke} strokeLinecap="round" />
       </svg>
     </span>

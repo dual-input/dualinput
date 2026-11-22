@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url"
 import sharp from "sharp"
 
 import { colors } from "../src/packages/ui/palette/palette.ts"
-import { ALONE, GLYPH, glyphBox, ICON, placeGlyph } from "../src/packages/ui/src/glyph.ts"
+import { ALONE, GLYPH, glyphSquare, ICON, placeGlyph } from "../src/packages/ui/src/glyph.ts"
 import { ROOT } from "./lib/repo.ts"
 import { main } from "./lib/run.ts"
 
@@ -185,14 +185,15 @@ function toolbarIcon(): string {
 }
 
 /**
- * Our app's icon in the EFB: the glyph alone, on a viewBox as tight as its stroke, and as wide as the sim's own apps'
- * icons. The EFB draws each app's tile itself, a 64px square with a gradient, and fills the app's SVG with its content
- * color (read in fs-base-efb 0.1.10, html_ui/efb_ui/efb_os/efb_os.css, `.app-button > .icon-button.icon`), so an icon
- * of our own tile would stand as a square inside its.
+ * Our app's icon in the EFB: the glyph alone, on the square `glyphSquare` gives, which the EFB draws as large as the sim's
+ * own apps' icons. The EFB draws each app's tile itself, a 64px square with a gradient, and fills the app's SVG with its
+ * content color (read in fs-base-efb 0.1.10, html_ui/efb_ui/efb_os/efb_os.css, `.app-button > .icon-button.icon`), so
+ * an icon of our own tile would stand as a square inside its.
  */
 function efbIcon(): string {
-  const { viewBox, aspect } = glyphBox(ALONE.stroke)
-  return alone(1, 0, viewBox, ` width="${ALONE.efbWidth}" height="${round(ALONE.efbWidth * aspect)}"`)
+  const viewBox = glyphSquare(ALONE.stroke)
+  const side = viewBox.split(" ")[2]
+  return alone(1, 0, viewBox, ` width="${side}" height="${side}"`)
 }
 
 /** The app's icon drawn at `size` pixels square, from the SVG rendered at that size rather than shrunk from a large one. */

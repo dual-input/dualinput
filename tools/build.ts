@@ -10,6 +10,7 @@
 //   node tools/build.ts
 //   node tools/build.ts install
 //   node tools/build.ts release
+//   node tools/build.ts extension
 //
 // `install` then copies the package into each of the sim's Community folders, and refuses
 // while the sim runs. Only an installed desktop app writes our package there otherwise, and
@@ -19,10 +20,19 @@
 // `release` then builds the programs a release ships with Cargo's release profile, and lays out
 // the folder Setup.exe installs as `current\` in target/release-folder, which
 // `node tools/release.ts pack` packs (record/areas/build/01-the-build.md, "What a release
-// holds").
+// holds"), and packs the profile extension as `extension` does.
+//
+// `extension` builds only the profile extension, the VS Code extension for writing profiles: the
+// profile builder with Cargo's release profile, since the extension's language server is its
+// `serve`, then the extension's own code, packed as
+// target/profile-extension/dualinput-profiles-<version>.vsix
+// (record/areas/profiles/03-the-extension.md, "Packing and publishing"). Neither needs the SDK,
+// so a profile's author or a developer working on the format can build it from a tree that
+// lacks one.
 
 import path from "node:path"
 
+import { extensionIcon, languageIcons } from "./icons.ts"
 import { buildPrograms } from "./lib/cargo.ts"
 import { buildDesktopPages, DESKTOP } from "./lib/desktop-pages.ts"
 import { install, refuseWhileSimRuns, userCfgs } from "./lib/install.ts"
@@ -31,15 +41,18 @@ import { buildModule } from "./lib/module.ts"
 import { layOutPackage, PACKAGE } from "./lib/package.ts"
 import { buildPages, checkPages } from "./lib/pages.ts"
 import { panelCompileProblem } from "./lib/panel.ts"
+import { packProfileExtension } from "./lib/profile-extension.ts"
 import { layOutRelease, RELEASE_FOLDER } from "./lib/release.ts"
+import { fromRoot } from "./lib/repo.ts"
 import { Failed, main, run } from "./lib/run.ts"
 import { requireSdk } from "./lib/sdk.ts"
 import { checkStock } from "./lib/stock.ts"
 
 main(async () => {
   const args = process.argv.slice(2)
-  const step = args.length === 1 && ["install", "release"].includes(args[0]!) ? args[0] : undefined
-  if (args.length && !step) throw new Failed(`unknown arguments: ${args.join(" ")}; run node tools/build.ts [install|release]`)
+  const step = args.length === 1 && ["install", "release", "extension"].includes(args[0]!) ? args[0] : undefined
+  if (args.length && !step) throw new Failed(`unknown arguments: ${args.join(" ")}; run node tools/build.ts [install|release|extension]`)
+  if (step === "extension") return buildExtension()
 
   requireSdk()
   checkStock()
@@ -70,5 +83,12 @@ main(async () => {
     // The sim edge's build script copies the SDK's SimConnect.dll beside the core it builds.
     layOutRelease({ desktop, core, helper, simConnect: path.join(path.dirname(core), "SimConnect.dll") }, PACKAGE)
     console.log(`laid out the release in ${RELEASE_FOLDER}; pack it with node tools/release.ts pack`)
+    await buildExtension()
   }
 })
+
+async function buildExtension(): Promise<void> {
+  const { "dualinput-profile-builder": builder } = buildPrograms(["--release", "-p", "dualinput-profile-builder"], ["dualinput-profile-builder"])
+  const vsix = packProfileExtension(builder, await extensionIcon(), languageIcons())
+  console.log(`packed the profile extension in ${fromRoot(vsix)}`)
+}

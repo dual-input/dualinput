@@ -47,5 +47,9 @@ jobs:
       - run: npm ci
       - if: ${{ !inputs.publish }}
         run: cargo run --locked -p dualinput-profile-builder -- build profiles
+      # A profile edited on GitHub's site, or without the profile extension, can come in out of
+      # the layout the formatter writes (record/areas/profiles/03-the-extension.md, "Formatting").
+      - if: ${{ !inputs.publish }}
+        run: cargo run --locked -p dualinput-profile-builder -- format profiles --check
       - if: inputs.publish
         run: node tools/ci.ts publish-profiles target/pages

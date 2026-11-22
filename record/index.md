@@ -34,6 +34,7 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/session/01-roles-and-members.md](areas/session/01-roles-and-members.md): who is in a session, the table of roles with the PF and the traffic and ATC host, and how each role moves.
 - [areas/profiles/01-format-and-delivery.md](areas/profiles/01-format-and-delivery.md): how a profile and its plugin are written, checked, and limited, and how CI publishes them and the core fetches them.
 - [areas/profiles/02-units.md](areas/profiles/02-units.md): the profile engine's, the profile builder's, and the profile loader's interfaces, and how a bundle is built, published, fetched, cached, pinned, and loaded.
+- [areas/profiles/03-the-extension.md](areas/profiles/03-the-extension.md): the profile extension for VS Code, what an author sees and does in it, and the language server behind it.
 - [areas/profiles/log.md](areas/profiles/log.md): what our experiments found about building profiles' bundles with TypeScript inside QuickJS-ng, and fetching them from GitHub Pages.
 - [areas/sync/log.md](areas/sync/log.md): what our experiments found about settling after a load, write order, the double-fire, and how aircraft take stepped writes.
 - [areas/product/plan.md](areas/product/plan.md): Dual Input's master plan, the steps from ideas to a released v1, and where each one stands.

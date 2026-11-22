@@ -4,8 +4,90 @@ What our experiments and the build found about building profiles' bundles and de
 TypeScript's own compiler type-checks and compiles inside the QuickJS-ng we embed, with the same results as under Node, in about 0.66s for a profile of 300 write functions once it's loaded, which takes 0.24s.
 GitHub Pages answers a repeat fetch of an unchanged file with a 304 and no body.
 The sandbox's context runs QuickJS-ng's base objects and lacks JSON, Map, Set, Date, and Promise, which level 1's declarations follow.
-The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), and [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
+TypeScript's language service answers inside a write function in about 40ms in QuickJS-ng, and about 3ms in Node.
+The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and [p04-language-service.mjs](../../../experiments/areas/profiles/p04-language-service.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 None needs the sim.
+
+## 2026-11-22: Stage 22d's language server answers inside a script within 73ms at p95 on the 58P, and the scenarios whose bundles changed pass
+
+**Asked:** do [stage 22d](../build/plan.md#22d-the-profile-extension)'s budgets hold ([budgets](03-the-extension.md#budgets)), and do the bench's scenarios that load the 58P's bundle, whose bytes the stage changes by putting `seats` last, still pass?
+
+**Expected:** requests inside a script near p04's 40ms in QuickJS-ng, and the scenarios passing as before.
+
+**Found:** on our development machine, with a release build of `dualinput-profile-builder`, [p05](../../../experiments/areas/profiles/p05-language-server.mjs) drove `serve` over stdio as VS Code does, on the 58P's profile, with 30 runs of each request, each right after an edit, the PC otherwise idle ([results](../../../experiments/areas/profiles/results/p05-language-server-2026-11-22-14-16-43.txt)):
+
+| Request | p50 | p95 | Budget |
+| --- | --- | --- | --- |
+| Completion after `state.` | 53.1ms | 72.9ms | 100ms at p95 |
+| Signature help in `write(` | 46.4ms | 64.4ms | 100ms at p95 |
+| A hover on a key of `state` | 44.8ms | 65.6ms | 100ms at p95 |
+| The engine's checks on a keystroke, from `didChange` to the diagnostics, stdio included | 1.9ms | 2.2ms | 20ms |
+
+- The server answered `initialize` 535ms after its process started, against 1s, and its first completion in a script 798ms after, which took 262.8ms itself, as TypeScript built its first program; an earlier run of the same probe gave 282ms and 539ms.
+- In a QuickJS-ng runtime of its own, TypeScript's language service took 253ms to load, a list of completions with no edit before it 5.5ms, one item's details 2.5ms, and the details of all 183 of the 58P's keys at once 410ms, so the server fetches an item's details as the editor highlights it.
+- `node tools/bench.ts state-sync clients-panels profiles test-sessions` passed 36 of 36 cases ([results](results/2026-11-22-stage-22d-bench.txt)), and `node tools/check.ts` passed its 19 checks, `format --check` on `profiles/` among them.
+- The formatter changed the 58P's profile only by moving `seats` last and refilling six paragraphs of comment to 100 columns; its bundle's hash is `1cd007862a57eb56e1ff8c9c262dae14bb055b43d71d8039b5fd56266da8e3a6`, the same before and after the format, since a bundle holds no comments.
+
+**Changed:** nothing; each budget holds.
+
+**Affects:** [03-the-extension](03-the-extension.md)'s budgets.
+
+## 2026-11-22: The profile extension's design finds what VS Code reads of a .vsix and a language, what vsce costs, and what Zed allows, and the format puts seats last and takes single quotes
+
+**Asked:** what does [stage 22d](../build/plan.md#22d-the-profile-extension)'s profile extension lean on: how VS Code gives a file a language and installs a `.vsix` from disk, what Microsoft's packer, vsce, would cost us, where an installed Dual Input names its version, and what Zed lets an extension do, since the user weighs Zed as a base for the Dual Input IDE?
+
+**Expected:** that a `.vsix` VS Code installs needs the manifest vsce writes.
+
+**Found:** on our development machine:
+
+- VS Code 1.140.0 turns each of an extension's `filenamePatterns` into a file pattern, matches a pattern that holds a `/` against the file's whole path, ignoring case, and takes a file name's match over a pattern's, and a pattern's over a file extension's (read in VS Code 1.140.0, `resources/app/out/vs/workbench/workbench.desktop.main.js`).
+- Installing a `.vsix`, VS Code 1.140.0 reads the extension's manifest from `extension/package.json` in the zip, and no bundle of its code holds the string `.vsixmanifest` (read in `resources/app/out/vs/code/electron-utility/sharedProcess/sharedProcessMain.js`).
+- vsce 1.0.0, published 2015-12-16, writes a `PackageManifest` of version 2.0.0, with `Microsoft.VisualStudio.Code` as its installation target and `extension/package.json` as its manifest asset, and `@vscode/vsce` 4.1.1, published 2026-11-16, writes the same, with optional properties added for the Marketplace: the engine, dependencies, the target platform, pre-release, and a sponsor (read in each npm package, `resources/extension.vsixmanifest` and `out/package.js`).
+- `@vscode/vsce` 4.1.1 on its own installs 135 packages and 50.4 MB, in 11.6s from an empty cache and 6.5s through a warm `npm ci`, with install scripts off, where the root's lockfile holds 218 packages and its `node_modules` 301 MB; CI runs `npm ci` in its checks job, in its bench build, and in each scenario's job.
+- An installed Dual Input names its version in `%LOCALAPPDATA%\DualInput\current\sq.version`, Velopack's nuspec, which holds `<version>0.1.1</version>` here.
+- "On December 1, 2026, global Personal Access Tokens (PATs) in Azure DevOps are retired", and publishing from GitHub Actions takes the Marketplace's Trusted Publishing instead, `vsce publish --oidc`, which trades the job's GitHub OIDC token for a Marketplace credential by a policy on the publisher naming the repository and the workflow's file ([publishing extensions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)); vsce 4.1.1 has `--oidc` (read in its npm package, `out/main.js`).
+- As of 2026-11-22, Zed's extensions provide languages, with Tree-sitter grammars and queries, language servers, and default rules for semantic tokens, and themes, icon themes, snippets, debuggers, and MCP servers ([developing extensions](https://zed.dev/docs/extensions/developing-extensions), [languages](https://zed.dev/docs/extensions/languages)), and the docs describe no panel, status bar item, webview, or command of an extension's own.
+  Zed takes semantic tokens, which are "disabled" by default ([semantic tokens](https://zed.dev/docs/semantic-tokens)), and an extension's `path_suffixes` "does not support glob patterns", which a user's `file_types` setting does ([languages](https://zed.dev/docs/extensions/languages)).
+  Panels, status bar items, and webviews are proposals on Zed's GitHub, such as [RFC #53403](https://github.com/zed-industries/zed/discussions/53403) and [issue #21208](https://github.com/zed-industries/zed/issues/21208).
+- The 58P's profile has 28 lines of comment, the longest 98 characters and 17 of them 90 to 99, and double quotes only in its comments (read in `profiles/aircraft/bksq-baronpro.yaml`).
+
+**Changed** (user, 2026-11-21 and 2026-11-22): the extension's design, in [03-the-extension](03-the-extension.md), and five rules of the format:
+
+- `seats` goes last among the top-level keys, after `events`, where [Layout](01-format-and-delivery.md#layout) put it before `state`, since an airliner's profile may hold hundreds of seats ([budgets](02-units.md#budgets)).
+- Outside scripts, a profile takes single quotes only, and a double-quoted string there fails the build, while a script takes any string JavaScript takes.
+- The formatter reflows each paragraph of a comment to 100 columns.
+- A heading's rule runs on to column 100, as in `# ═══ ELECTRICAL ═══…`, as fsc-editor's ran on to 78.
+- A script that declares `state`, `write`, `L`, `A`, `B`, `K`, or `H` fails the build, so the extension's grammar paints them as Dual Input's with no semantic tokens from its server; `value` stays free, since every write function names its parameter so.
+
+**Affects:** [01-format-and-delivery](01-format-and-delivery.md), [02-units](02-units.md), [the build](../build/01-the-build.md), [the code map](../architecture/02-code-map.md), and the architecture's tentative decision on authoring tools.
+
+## 2026-11-22: TypeScript's language service answers in about 40ms in QuickJS-ng on the 58P's write functions, against 3ms in Node, once QuickJS-ng has a stand-in for `Intl`
+
+**Asked:** how fast does TypeScript 6.0.3's language service answer what the profile extension asks inside a write function, completion, signature help, a hover, and the file's diagnostics, in the QuickJS-ng the profile builder runs TypeScript in, against Node, on the 58P's own program?
+The answer decides where [stage 22d](../build/plan.md#22d-the-profile-extension)'s language service runs: in the builder's language server, or in the extension's Node.
+
+**Expected:** QuickJS-ng about ten times slower than Node, as p02's check of 300 write functions was slower there.
+
+**Found:** on our development machine, with 30 runs of each request, each after an edit to the file, on `press.ts`, the program file for the 58P's one variant, of 303 lines, with 18 write functions and level 1's declarations of 143,541 bytes ([results](../../../experiments/areas/profiles/results/p04-language-service-2026-11-21-23-01-35.txt)):
+
+| Request | QuickJS-ng, rquickjs 0.14.0 | Node 22.23.1 |
+| --- | --- | --- |
+| Loading `typescript.js` | 243.1ms | 146.0ms |
+| The first completion, which builds the program | 249.6ms | 114.0ms |
+| Completion after `state.` | median 42.5ms, p95 57.8ms | median 3.0ms, p95 8.4ms |
+| Signature help after `write(` | median 35.9ms, p95 55.6ms | median 2.6ms, p95 9.7ms |
+| A hover on `write` | median 34.8ms, p95 61.0ms | median 2.4ms, p95 8.1ms |
+| The file's diagnostics | median 61.1ms, p95 68.3ms | median 8.0ms, p95 13.1ms |
+| Memory | 43 MB | 23 MB of V8's heap |
+
+- Both gave the same 183 completions after `state.`, the same 3 signatures for `write(`, and the same hover text.
+- QuickJS-ng as rquickjs 0.14.0 builds it has no `Intl`, and the first completion failed with `Intl is not defined` in TypeScript's `createIntlCollatorStringComparer`, which sorts completions with `Intl.Collator`.
+  The probe defines a stand-in that compares by code unit, and the run above used it.
+- The diagnostics check the whole file, so they grow with its write functions, while completion, signature help, and a hover read the code around the caret (inference, from p02's check of 300 functions, which took 0.66s in QuickJS-ng).
+
+**Changed:** the language service runs in the profile builder's language server, in two runtimes, one for requests and one for checks and builds (user, 2026-11-22; [TypeScript in two runtimes](03-the-extension.md#typescript-in-two-runtimes)).
+
+**Affects:** [03-the-extension](03-the-extension.md).
 
 ## 2026-11-21: Stage 22b's test sessions pass their bench cases, and a reload's catch-up ended 1.5s after its load, against 4s of settling
 

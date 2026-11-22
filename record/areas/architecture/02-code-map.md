@@ -44,6 +44,10 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > In [the traffic and ATC switch](#the-traffic-and-atc-switch), the platform offers no request that claims several keys together: each switch's `session.share` claims or releases its own role's key alone (user, 2026-11-15).
 
 > **Note**
+> Since 2026-11-22, stage 22d's profile extension adds two units ([03-the-extension](../profiles/03-the-extension.md#how-it-works); user, 2026-11-22): `src/engines/profile-language`, an engine on the engines' top line beside `profile-build`, using `profile-engine`, which holds the editor's features over the format; and `src/apps/profile-extension`, the VS Code extension, in TypeScript, which the root `Cargo.toml` lists in `exclude`.
+> `tools/profile-builder` links `profile-language`, as `tools/profile-author` does to write the seats it tunes in the format's layout, and the builder's program ships inside the extension; it stays in `tools/`, since a folder there is what builds, checks, and tests the rest, and nothing keeps a tool from shipping (user, 2026-11-22).
+
+> **Note**
 > In [profiles in this repository](#profiles-in-this-repository), CI holds a level's schemas and declarations only to release tags from 1.0.0 on, since nobody flies a release before it, and each level has two schemas, one for a profile and one for a module ([profiles log](../profiles/log.md#2026-11-21-the-formats-audit-before-level-1-freezes-puts-maps-on-their-own-lines-types-instrument-readings-and-names-one-layout); user, 2026-11-21).
 
 Dual Input's code is a platform, engines, and features.

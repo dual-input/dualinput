@@ -10,6 +10,13 @@ Decides:     What a release holds; how every x86_64 program links the C runtime 
 > Stage 15 packs with `node tools/release.ts pack`, the build job's step 6 below, which installs `vpk` into `target/vpk`.
 > It also passes `--runtime win-x64`, since `vpk` 1.2.161 packs for x86 when no runtime is named, and `--splashImage` and `--splashProgressColor` for Setup.exe's splash, which `node tools/splash.ts` draws ([installing log](../install/log.md#2026-11-10-the-desktop-app-starts-the-core-18s-after-the-sim-and-20s-to-24s-after-a-crash-and-holds-its-02-of-a-core-only-with-a-walk-cheaper-than-toolhelps)).
 
+> **Note**
+> From stage 22d, v1 ships one authoring tool, the profile extension, with `dualinput-profile-builder` inside it, so [authoring tools](#authoring-tools)' rule that v1 ships none no longer holds, while `tools/profile-author` still runs from the repository alone ([03-the-extension](../profiles/03-the-extension.md#packing-and-publishing); user, 2026-11-21 and 2026-11-22):
+>
+> - `node tools/build.ts extension` builds the extension's `.vsix` into `target/profile-extension/`, and `node tools/build.ts release` builds it too, beside the folder in [what a release holds](#what-a-release-holds).
+> - In [a release](#a-release), `node tools/release.ts pack` copies the `.vsix` into the build job's artifact, the publish job's `upload` attaches it to the draft beside the installer and `check` fails a draft without it, and once the release is published, a job of its own, `marketplace`, publishes it on VS Code's Marketplace with vsce, run through `npx` at a pinned version in that job alone, signed in by the Marketplace's Trusted Publishing from the job's GitHub OIDC token, so the repository holds no secret for it ([packing and publishing](../profiles/03-the-extension.md#packing-and-publishing)).
+> - `tools/check.ts` and the profiles' job run `dualinput-profile-builder format --check` on `profiles/`.
+
 `tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll` and the three C runtime DLLs it imports, and our one Community package, `dualinput`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.
 The Coherent GT check is a Node tool of its own on acorn, run on every bundle after each edit and in CI, and the message crate's hash is SHA-256 over its own source and the locked versions of what it depends on.

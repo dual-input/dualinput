@@ -23,6 +23,8 @@ use crate::{LOCAL, Profiles};
 
 /// The local folder when the development setting names none, in the core's data folder, where
 /// the profile extension writes (record/areas/profiles/02-units.md, "Writing a bundle there").
+/// `Settings::local` in tools/profile-builder/src/serve.rs names the same folder, as the
+/// extension's language server writes into it, so change both together.
 const FOLDER: &str = "profiles\\local";
 
 /// How often the loader lists the folder while a session is held, so an author's save reaches

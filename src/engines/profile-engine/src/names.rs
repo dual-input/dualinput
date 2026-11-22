@@ -60,12 +60,122 @@ pub(crate) enum Kind {
     Instrument,
 }
 
+/// One of the calls a name is made with.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Call {
+    L,
+    A,
+    B,
+    K,
+    H,
+    Instrument,
+}
+
+impl Call {
+    /// Every call, in the order the format's documents list them.
+    pub const ALL: [Call; 6] = [
+        Call::L,
+        Call::A,
+        Call::B,
+        Call::K,
+        Call::H,
+        Call::Instrument,
+    ];
+
+    /// The call's function, as a profile writes it.
+    pub fn word(self) -> &'static str {
+        match self {
+            Call::L => "L",
+            Call::A => "A",
+            Call::B => "B",
+            Call::K => "K",
+            Call::H => "H",
+            Call::Instrument => "instrument",
+        }
+    }
+
+    /// The call with the texts it needs left empty, as `A('', '')`, since `A()` takes a unit
+    /// every time and `instrument()` a path, for an editor to fill in.
+    pub fn blank(self) -> &'static str {
+        match self {
+            Call::L => "L('')",
+            Call::A => "A('', '')",
+            Call::B => "B('')",
+            Call::K => "K('')",
+            Call::H => "H('')",
+            Call::Instrument => "instrument('', '')",
+        }
+    }
+}
+
+/// Which names a field takes: the checker refuses any other there, and an editor offers only
+/// these. Each field's table in blocks.rs says which one it takes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Allowed {
+    /// A state entry's `watch`: a variable, an input event, or an `instrument()` value.
+    StateWatch,
+    /// An event entry's `watch`: an event, or an `L:` variable as a pulse.
+    EventWatch,
+    /// A `write` that's a name.
+    Write,
+    /// A field that sends an event, such as `toggle` or `inc`.
+    Event,
+    /// A counting watch's `count`.
+    Variable,
+    Ignore,
+}
+
+impl Allowed {
+    /// The calls it takes, in `Call::ALL`'s order.
+    pub fn calls(self) -> &'static [Call] {
+        match self {
+            Allowed::StateWatch => &[Call::L, Call::A, Call::B, Call::Instrument],
+            Allowed::EventWatch => &[Call::L, Call::B, Call::K, Call::H],
+            Allowed::Write | Allowed::Ignore => &[Call::L, Call::A, Call::B, Call::K, Call::H],
+            Allowed::Event => &[Call::B, Call::K, Call::H],
+            Allowed::Variable => &[Call::L, Call::A],
+        }
+    }
+
+    /// Why the field refuses `name`, said to the author, or nothing when it takes it.
+    pub(crate) fn refuses(self, name: &Name) -> Option<String> {
+        if self.calls().contains(&name.call()) {
+            return None;
+        }
+        Some(match self {
+            Allowed::StateWatch => format!(
+                "a state entry watches a variable, an input event, or an instrument() value, and {name} is an event, which an event entry watches"
+            ),
+            Allowed::EventWatch => format!(
+                "an event entry watches a K:, H:, or B: event, or an L: variable as a pulse, and {name} isn't one"
+            ),
+            Allowed::Write | Allowed::Ignore => {
+                "instrument() can be watched but never written or ignored; write the gauge through its H: events".to_string()
+            }
+            Allowed::Event => format!("this takes an event, K(), H(), or B(), and {name} isn't one"),
+            Allowed::Variable => format!("this takes a variable, L() or A(), and {name} isn't one"),
+        })
+    }
+}
+
 impl Name {
     pub(crate) fn kind(&self) -> Kind {
         match self {
             Name::L { .. } | Name::A { .. } => Kind::Variable,
             Name::B { .. } | Name::K { .. } | Name::H { .. } => Kind::Event,
             Name::Instrument { .. } => Kind::Instrument,
+        }
+    }
+
+    /// The call the name is made with.
+    pub fn call(&self) -> Call {
+        match self {
+            Name::L { .. } => Call::L,
+            Name::A { .. } => Call::A,
+            Name::B { .. } => Call::B,
+            Name::K { .. } => Call::K,
+            Name::H { .. } => Call::H,
+            Name::Instrument { .. } => Call::Instrument,
         }
     }
 
@@ -107,16 +217,35 @@ pub(crate) struct NotAName(pub(crate) String);
 /// `(value) => …`, is a function.
 pub(crate) fn looks_like_name(text: &str) -> bool {
     let text = text.trim();
-    ["L", "A", "B", "K", "H", "instrument"].iter().any(|call| {
-        text.strip_prefix(call)
+    Call::ALL.iter().any(|call| {
+        text.strip_prefix(call.word())
             .is_some_and(|rest| rest.trim_start().starts_with('('))
     })
 }
 
-pub(crate) fn parse(text: &str) -> Result<Name, NotAName> {
+/// The name a text writes, such as `K("X", 2)`, or none for a text that isn't one, for an editor
+/// to write it again in single quotes through `Display`, as the checker's `quotes` error shows it.
+pub fn read_name(text: &str) -> Option<Name> {
+    looks_like_name(text)
+        .then(|| parse(text).ok())
+        .flatten()
+        .map(|p| p.name)
+}
+
+/// A name as the text writes it.
+pub(crate) struct Parsed {
+    pub(crate) name: Name,
+    /// Where each of its texts written in double quotes starts, in characters from the start of
+    /// the text it was read from, for the checker's error on double quotes outside a script.
+    pub(crate) double: Vec<usize>,
+}
+
+pub(crate) fn parse(text: &str) -> Result<Parsed, NotAName> {
+    let lead = text.chars().take_while(|c| c.is_whitespace()).count();
     let mut p = Parser {
         chars: text.trim().chars().collect(),
         at: 0,
+        double: Vec::new(),
     };
     let call = p.ident();
     p.space();
@@ -148,7 +277,10 @@ pub(crate) fn parse(text: &str) -> Result<Name, NotAName> {
             text.trim()
         )));
     }
-    build(&call, args)
+    Ok(Parsed {
+        name: build(&call, args)?,
+        double: p.double.iter().map(|at| lead + at).collect(),
+    })
 }
 
 #[derive(Debug)]
@@ -263,6 +395,8 @@ fn instrument_path(path: &str) -> bool {
 struct Parser {
     chars: Vec<char>,
     at: usize,
+    /// Where each text in double quotes starts.
+    double: Vec<usize>,
 }
 
 impl Parser {
@@ -299,6 +433,9 @@ impl Parser {
     fn arg(&mut self) -> Result<Raw, NotAName> {
         match self.peek() {
             Some(q @ ('\'' | '"')) => {
+                if q == '"' {
+                    self.double.push(self.at);
+                }
                 self.at += 1;
                 let mut s = String::new();
                 loop {
@@ -407,6 +544,31 @@ impl fmt::Display for Name {
 mod tests {
     use super::*;
 
+    fn parse(text: &str) -> Result<Name, NotAName> {
+        super::parse(text).map(|p| p.name)
+    }
+
+    #[test]
+    fn a_text_in_double_quotes_is_found_where_it_starts() {
+        let p = super::parse(" K(\"X\", 2, value)").expect("a name");
+        assert_eq!(p.double, [3]);
+        assert_eq!(p.name.to_string(), "K('X', 2, value)");
+        let p = super::parse("A('X', \"Bool\")").expect("a name");
+        assert_eq!(p.double, [7]);
+        assert!(super::parse("L('X')").expect("a name").double.is_empty());
+    }
+
+    #[test]
+    fn each_field_takes_the_calls_its_rule_names() {
+        let k = parse("K('X')").expect("a name");
+        let i = parse("instrument('G', 'a')").expect("a name");
+        assert!(Allowed::StateWatch.refuses(&k).is_some());
+        assert!(Allowed::StateWatch.refuses(&i).is_none());
+        assert!(Allowed::EventWatch.refuses(&k).is_none());
+        assert!(Allowed::Write.refuses(&i).is_some());
+        assert_eq!(Allowed::Event.calls(), [Call::B, Call::K, Call::H]);
+    }
+
     #[test]
     fn a_bare_identifier_names_every_instrument_that_carries_it_and_a_full_key_names_one() {
         assert!(key_names("DisplayUnits", "DisplayUnits|config=N324DU"));
@@ -461,6 +623,18 @@ mod tests {
         assert!(matches!(text, Name::Instrument { text: true, .. }));
         assert!(parse("instrument('KR87A', 'bfoMode', 'Bool')").is_err());
         assert!(parse("instrument('KR87A', 'bfoMode', 2)").is_err());
+    }
+
+    #[test]
+    fn a_name_read_from_its_text_writes_again_in_single_quotes() {
+        let name = read_name("K(\"X\", 2, value)").expect("a name");
+        assert_eq!(name.to_string(), "K('X', 2, value)");
+        assert_eq!(
+            read_name("L(\"it's\")").expect("a name").to_string(),
+            "L('it\\'s')"
+        );
+        assert!(read_name("(value) => write(L('X'), value)").is_none());
+        assert!(read_name("L('X'").is_none());
     }
 
     #[test]

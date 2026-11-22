@@ -1,15 +1,16 @@
 //! A bundle's bytes, laid out one way, so the same files and the same builder give the same
 //! bytes on any PC, and its hash (record/areas/profiles/02-units.md, "A bundle's bytes").
 //!
-//! The top-level keys come in the format's layout's order, `maker` to `events`, with each
-//! feature's blocks before `state` (record/areas/profiles/01-format-and-delivery.md, "Layout").
-//! The entries come in their source's order, each entry's fields in the order of the format's
-//! tables, every script as a `|` block of the compiled JavaScript, and every other value plain
-//! where YAML allows it, with no comments and no `import`, in UTF-8 with LF line endings.
+//! The top-level keys come in `LAYOUT`'s order, the format's layout's, from `maker` to `seats`
+//! (record/areas/profiles/01-format-and-delivery.md, "Layout"). The entries come in their
+//! source's order, each entry's fields in the order of the format's tables, every script as a `|`
+//! block of the compiled JavaScript, and every other value plain where YAML allows it, with no
+//! comments and no `import`, in UTF-8 with LF line endings.
 
 use saphyr::Scalar;
 use sha2::{Digest, Sha256};
 
+use crate::blocks::LAYOUT;
 use crate::format::{Count, EventEntry, Maturity, Owner, Profile, StateEntry, Steps, Watch, Write};
 use crate::names::Name;
 
@@ -24,50 +25,70 @@ pub fn hash(bytes: &[u8]) -> String {
 
 pub(crate) fn emit(p: &Profile) -> Vec<u8> {
     let mut out = Out::default();
-    out.line(0, &format!("maker: {}", scalar(&p.maker)));
-    out.line(0, &format!("name: {}", scalar(&p.name)));
-    out.line(
-        0,
-        match p.maturity {
-            Maturity::Stable => "maturity: stable",
-            Maturity::Experimental => "maturity: experimental",
-        },
-    );
-    if let Some(authors) = &p.authors {
-        out.line(0, &format!("authors: {}", scalar(authors)));
+    for key in LAYOUT {
+        block(&mut out, p, key);
     }
-    out.line(0, "aircraft:");
-    out.line(1, "variants:");
-    for v in &p.aircraft.variants {
-        match v.paths.as_slice() {
-            [one] => out.line(2, &format!("{}: {}", scalar(&v.id), scalar(one))),
-            paths => {
-                out.line(2, &format!("{}:", scalar(&v.id)));
-                for path in paths {
-                    out.line(3, &format!("- {}", scalar(path)));
+    out.text.into_bytes()
+}
+
+/// Writes the top-level block `key`, if the profile has it.
+fn block(out: &mut Out, p: &Profile, key: &str) {
+    match key {
+        "maker" => out.line(0, &format!("maker: {}", scalar(&p.maker))),
+        "name" => out.line(0, &format!("name: {}", scalar(&p.name))),
+        "maturity" => out.line(
+            0,
+            match p.maturity {
+                Maturity::Stable => "maturity: stable",
+                Maturity::Experimental => "maturity: experimental",
+            },
+        ),
+        "authors" => {
+            if let Some(authors) = &p.authors {
+                out.line(0, &format!("authors: {}", scalar(authors)));
+            }
+        }
+        "aircraft" => {
+            out.line(0, "aircraft:");
+            out.line(1, "variants:");
+            for v in &p.aircraft.variants {
+                match v.paths.as_slice() {
+                    [one] => out.line(2, &format!("{}: {}", scalar(&v.id), scalar(one))),
+                    paths => {
+                        out.line(2, &format!("{}:", scalar(&v.id)));
+                        for path in paths {
+                            out.line(3, &format!("- {}", scalar(path)));
+                        }
+                    }
+                }
+            }
+            if let Some(pace) = p.aircraft.pace {
+                out.line(1, &format!("pace: {pace}"));
+            }
+        }
+        // A bundle has its modules merged in.
+        "import" => {}
+        "state" => {
+            if !p.state.is_empty() {
+                out.line(0, "state:");
+                for e in &p.state {
+                    state_entry(out, e);
                 }
             }
         }
-    }
-    if let Some(pace) = p.aircraft.pace {
-        out.line(1, &format!("pace: {pace}"));
-    }
-    for m in crate::features::MODULES {
-        (m.emit_blocks)(&p.features, &mut out);
-    }
-    if !p.state.is_empty() {
-        out.line(0, "state:");
-        for e in &p.state {
-            state_entry(&mut out, e);
+        "events" => {
+            if !p.events.is_empty() {
+                out.line(0, "events:");
+                for e in &p.events {
+                    event_entry(out, e);
+                }
+            }
         }
+        other => match crate::features::owner(other, |m| m.blocks) {
+            Some((m, _)) => (m.emit_block)(other, &p.features, out),
+            None => unreachable!("every key in LAYOUT is the format's or a feature's"),
+        },
     }
-    if !p.events.is_empty() {
-        out.line(0, "events:");
-        for e in &p.events {
-            event_entry(&mut out, e);
-        }
-    }
-    out.text.into_bytes()
 }
 
 fn state_entry(out: &mut Out, e: &StateEntry) {
@@ -209,21 +230,36 @@ fn name(n: &Name) -> String {
 }
 
 /// Text as a plain scalar where YAML reads it back as the same text, and double-quoted with
-/// JSON's escapes, which YAML's double quotes take too, where it wouldn't.
+/// JSON's escapes, which YAML's double quotes take too, where it wouldn't. A bundle keeps double
+/// quotes, since the builder alone writes one, and only they hold a text with a line break.
 pub(crate) fn scalar(s: &str) -> String {
-    let plain = !s.is_empty()
-        && s.trim() == s
-        && !s.starts_with(|c: char| "-?:,[]{}#&*!|>'\"%@`".contains(c))
-        && !s.ends_with(':')
-        && !s.contains(": ")
-        && !s.contains(" #")
-        && !s.contains(['\n', '\r', '\t'])
-        && matches!(Scalar::parse_from_cow(s.into()), Scalar::String(_));
-    if plain {
+    if plain(s) {
         s.to_string()
     } else {
         serde_json::to_string(s).expect("serde_json should quote any text")
     }
+}
+
+/// Whether YAML reads `text` written plain, with no quotes, as the same text, so a bundle and a
+/// formatter write it plain, and quote it otherwise: `Left mixture` goes plain, and
+/// `Radio: COM1`, which YAML would read as a map, and `true`, which it would read as a boolean,
+/// don't.
+pub fn plain(text: &str) -> bool {
+    !text.is_empty()
+        && text.trim() == text
+        && !text.starts_with(|c: char| "-?:,[]{}#&*!|>'\"%@`".contains(c))
+        && !text.ends_with(':')
+        && !text.contains(": ")
+        && !text.contains(" #")
+        && !text.contains(['\n', '\r', '\t'])
+        && matches!(Scalar::parse_from_cow(text.into()), Scalar::String(_))
+}
+
+/// `text` in YAML's single quotes, which take a quote inside as `''`, as a profile's author
+/// writes a value that can't go plain. A text with a line break has no single-quoted form on one
+/// line, so a profile writes it as a `|` block.
+pub fn single_quoted(text: &str) -> String {
+    format!("'{}'", text.replace('\'', "''"))
 }
 
 /// A bundle's text as it's written, a line at a time.
@@ -268,5 +304,6 @@ mod tests {
         ] {
             assert_eq!(scalar(text), written);
         }
+        assert_eq!(single_quoted("Pilot's yoke"), "'Pilot''s yoke'");
     }
 }

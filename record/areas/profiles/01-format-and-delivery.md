@@ -32,6 +32,19 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 > - In [the repository](#the-repository), CI holds a level's files only to release tags from 1.0.0 on, since nobody flies a release before it.
 > - A profile's variants share its `name`, and once a profile has a second variant, the aircraft picker asks which one to load, naming each by its own `aircraft.cfg`'s `ui_type`, such as "Baron 58TC Professional" (read in bksq-aircraft-baronpro 0.1.1); v1's aircraft is the 58P alone.
 
+> **Note**
+> From stage 22d, which builds the profile extension ([03-the-extension](03-the-extension.md); [profiles log][22d]; user, 2026-11-22):
+>
+> - In [layout](#layout), the top-level keys come in this order: `maker`, `name`, `maturity`, `authors`, `aircraft`, `import`, `displays`, `state`, `events`, `seats`, since an airliner's profile may hold hundreds of seats, and a bundle's keys follow it.
+> - Outside scripts, a profile takes single quotes only: a double-quoted string in a YAML value, or in a name call on a YAML line, is an error, which shows it in single quotes, while a script takes any string JavaScript takes.
+>   A formatter writes a value plain where YAML reads it as the same text, and in single quotes where it doesn't.
+> - In [layout](#layout), a heading's rule runs on to column 100, as in `# ═══ ELECTRICAL ═══…`, so a section shows as a line across the file in any editor, and a formatter writes fsc-editor's forms of a heading that way too.
+> - A formatter reflows each paragraph of a comment to 100 columns, and a line holding only `#` ends a paragraph, while a heading, a line laid out by hand, an entry set aside in a comment, and a comment after a value keep their lines, as [comments](03-the-extension.md#comments) gives them.
+> - In [what fails a load](#what-fails-a-load), a script that declares `state`, `write`, `L`, `A`, `B`, `K`, or `H`, the names Dual Input gives every script, fails the build, so a script's `state` and `write` are always Dual Input's; `value` stays free, since every write function names its parameter `value` ([checks](03-the-extension.md#checks)).
+> - What this document asks of the IDE's editor, such as filling in `dec`, `wrap`, and `range` once `inc` is typed, the profile extension does until the IDE comes, and the extension is the tool in [testing an edit](#testing-an-edit) that builds each save into the local folder.
+
+[22d]: log.md#2026-11-22-the-profile-extensions-design-finds-what-vs-code-reads-of-a-vsix-and-a-language-what-vsce-costs-and-what-zed-allows-and-the-format-puts-seats-last-and-takes-single-quotes
+
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Dual Input defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
 Profiles live as flat files in `profiles/` in Dual Input's own public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules in it, under its hash.

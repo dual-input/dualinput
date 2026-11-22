@@ -148,6 +148,88 @@ fn a_wrong_pace_in_a_chain_fails_the_type_check() {
     });
 }
 
+/// A script may declare none of the names Dual Input gives every script, in any of the ways a
+/// script declares a name, and the error lands on the declaring name in the YAML
+/// (record/areas/profiles/03-the-extension.md, "Checks").
+#[test]
+fn a_script_that_declares_a_reserved_name_fails_at_its_place() {
+    let profile = |body: &str| {
+        format!(
+            "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\n    b: y\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => {{\n        {body}\n      }}\n"
+        )
+    };
+    // Each body, the reserved name it declares, and the column of that name, on line 14.
+    let cases = [
+        ("const state = 1", "state", 15),
+        ("let write = 1", "write", 13),
+        ("function L() {}", "L", 18),
+        ("const f = (A: number) => A", "A", 20),
+        ("const { B } = { B: 1 }", "B", 17),
+        ("const [K] = [1]", "K", 16),
+        ("try { write(H('X')) } catch (H) {}", "H", 38),
+        ("const g = function state() {}", "state", 28),
+        ("class K {}", "K", 15),
+    ];
+    let messages = [
+        (
+            "state",
+            "A script can't declare `state`, which holds the profile's entries",
+        ),
+        (
+            "write",
+            "A script can't declare `write`, which hands Dual Input an action",
+        ),
+        (
+            "L",
+            "A script can't declare `L`, which names an `L:` variable",
+        ),
+        (
+            "A",
+            "A script can't declare `A`, which names an `A:` variable",
+        ),
+        (
+            "B",
+            "A script can't declare `B`, which names an input event",
+        ),
+        ("K", "A script can't declare `K`, which names a `K:` event"),
+        ("H", "A script can't declare `H`, which names an `H:` event"),
+    ];
+    let cases: Vec<(String, &str, usize)> = cases
+        .iter()
+        .map(|(body, name, column)| (profile(body), *name, *column))
+        .collect();
+    with_compiler(move |compiler| {
+        for (yaml, name, column) in &cases {
+            let built = build(&tree(&[("p.yaml", yaml)]), "p.yaml", compiler);
+            assert!(built.bundle.is_none(), "{yaml}");
+            let found: Vec<_> = built
+                .report
+                .errors()
+                .filter(|e| e.code == "reserved-name")
+                .collect();
+            assert_eq!(found.len(), 1, "{yaml}\n{}", built.report);
+            let e = found[0];
+            assert_eq!(
+                (e.at.line, e.at.column),
+                (14, *column),
+                "{yaml}\n{}",
+                built.report
+            );
+            let message = messages
+                .iter()
+                .find(|(n, _)| n == name)
+                .expect("a message")
+                .1;
+            assert_eq!(e.message, message, "{yaml}");
+        }
+        // Every write function names its parameter `value`, which stays free, and a name that
+        // only reads `state` or calls `write` declares nothing.
+        let fine = profile("const on = state.x > 0; if (on) write(L('X'), value)");
+        let built = build(&tree(&[("p.yaml", &fine)]), "p.yaml", compiler);
+        assert!(!built.report.has_errors(), "{}", built.report);
+    });
+}
+
 /// A write function gets the JavaScript the sandbox runs, and nothing it lacks, which fails
 /// the type check rather than the write (record/areas/profiles/log.md, 2026-10-24).
 #[test]

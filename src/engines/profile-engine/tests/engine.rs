@@ -569,7 +569,7 @@ fn a_type_error_lands_at_its_scripts_line_and_column() {
         file: file.name.clone(),
         line,
         column: 2,
-        code: 2345,
+        code: "TS2345".into(),
         message: "a mistake".into(),
     }];
     let report = profile_engine::place(&p, &found);
@@ -641,6 +641,187 @@ fn the_levels_files_name_every_field() {
         assert!(schema.contains(&format!("\"{key}\"")), "{key}");
     }
     assert!(profile_engine::declarations(LEVEL).contains("declare function write("));
+}
+
+const HEAD: &str = "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\n";
+
+/// The `quotes` errors in a profile's source, by line and column, with their messages.
+fn quotes(yaml: &str) -> Vec<(usize, usize, String)> {
+    let report = check(
+        &source(&tree(&[("p.yaml", yaml)]), "p.yaml").expect("loads"),
+        LEVEL,
+    );
+    report
+        .errors()
+        .filter(|d| d.code == "quotes")
+        .map(|d| (d.at.line, d.at.column, d.message.clone()))
+        .collect()
+}
+
+/// Outside a script, an author's file takes single quotes alone, and the error shows the text
+/// in them (record/areas/profiles/03-the-extension.md, "Quotes").
+#[test]
+fn a_double_quoted_text_in_a_source_fails_with_its_single_quoted_form() {
+    let yaml = format!(
+        "{HEAD}state:\n  radio:\n    name: \"Radio: COM1\"\n    description: \"Pilot's\"\n    watch: L('X')\n    write: L('X')\n    only: [\"a\"]\n"
+    );
+    let found = quotes(&yaml);
+    let places: Vec<(usize, usize)> = found.iter().map(|(l, c, _)| (*l, *c)).collect();
+    assert_eq!(places, [(9, 11), (10, 18), (13, 12)], "{found:?}");
+    assert_eq!(
+        found[0].2,
+        "Outside a script, a profile writes text in single quotes, as `'Radio: COM1'`"
+    );
+    assert!(found[1].2.ends_with("as `'Pilot''s'`"), "{}", found[1].2);
+}
+
+#[test]
+fn a_name_call_with_a_double_quoted_text_fails_at_that_text() {
+    let yaml = format!(
+        "{HEAD}state:\n  x:\n    name: X\n    watch: A('X', \"Bool\")\n    write: K(\"it's\", value)\n"
+    );
+    let found = quotes(&yaml);
+    assert_eq!(found.len(), 2, "{found:?}");
+    assert_eq!((found[0].0, found[0].1), (10, 19));
+    assert_eq!(
+        found[0].2,
+        "Outside a script, a profile writes text in single quotes, as `A('X', 'Bool')`"
+    );
+    assert_eq!((found[1].0, found[1].1), (11, 14));
+    assert!(
+        found[1].2.ends_with("as `K('it\\'s', value)`"),
+        "{}",
+        found[1].2
+    );
+}
+
+#[test]
+fn a_script_and_a_comment_take_double_quotes() {
+    let yaml = format!(
+        "{HEAD}state:\n  x:\n    name: X # \"a comment\"\n    watch: L('X')\n    write: |\n      (value) => write(L(\"X\"), value + \"'\".length)\n"
+    );
+    assert!(quotes(&yaml).is_empty());
+}
+
+/// A bundle keeps double quotes where YAML needs quotes, as the builder writes it, so the rule
+/// holds an author's files alone.
+#[test]
+fn a_bundle_that_holds_double_quotes_reads_back() {
+    let yaml =
+        format!("{HEAD}state:\n  x:\n    name: 'true'\n    watch: L('X')\n    write: L('X')\n");
+    let s = source(&tree(&[("p.yaml", &yaml)]), "p.yaml").expect("loads");
+    let bytes = write(&s, &compiled(&s));
+    let text = String::from_utf8(bytes.clone()).expect("UTF-8");
+    assert!(text.contains("name: \"true\""), "{text}");
+    let p = read(&bytes, LEVEL).unwrap_or_else(|r| panic!("{r}\n{text}"));
+    assert_eq!(p.state[0].name, "true");
+}
+
+/// TypeScript's completion and hovers show a key's doc comment, so an author reads the entry's
+/// name beside `state.battery_1`.
+#[test]
+fn each_key_of_state_carries_its_entrys_name_as_a_doc_comment() {
+    let yaml = format!(
+        "{HEAD}state:\n  battery_1:\n    name: Battery 1\n    watch: L('X')\n    write: L('X')\n  odd:\n    name: Ends */ here\n    watch: L('Y')\n    write: |\n      (value) => write(L('Y'), value)\n"
+    );
+    let s = source(&tree(&[("p.yaml", &yaml)]), "p.yaml").expect("loads");
+    let p = program(&s, LEVEL);
+    let text = &p.files[0].text;
+    assert!(
+        text.contains("  /** Battery 1 */\n  readonly battery_1: number;\n"),
+        "{text}"
+    );
+    assert!(text.contains("/** Ends *\\/ here */"), "{text}");
+    let line = text
+        .lines()
+        .position(|l| l.starts_with("(value) =>"))
+        .expect("the script");
+    let found = [profile_engine::TypeError {
+        file: "a.ts".into(),
+        line,
+        column: 0,
+        code: "TS2304".into(),
+        message: "a mistake".into(),
+    }];
+    let d = &profile_engine::place(&p, &found).diagnostics[0];
+    assert_eq!((d.at.line, d.at.column), (16, 7));
+}
+
+#[test]
+fn a_place_in_a_script_maps_to_the_program_and_back() {
+    let s = source(&baron(), "aircraft/bksq-baronpro.yaml").expect("loads");
+    let p = program(&s, LEVEL);
+    let at = profile_engine::Place::new("aircraft/bksq-baronpro.yaml", 34, 9);
+    let in_program = p.to_program(&at);
+    let files: Vec<&str> = in_program.iter().map(|q| q.file.as_str()).collect();
+    assert_eq!(files, ["base.ts", "press.ts"]);
+    let line = &p.files[0]
+        .text
+        .lines()
+        .nth(in_program[0].line)
+        .expect("a line");
+    assert_eq!(&line[in_program[0].column..], "write(H('FUEL'))");
+    assert_eq!(p.to_yaml(&in_program[1]), Some(at));
+    let outside = profile_engine::Place::new("aircraft/bksq-baronpro.yaml", 30, 5);
+    assert!(p.to_program(&outside).is_empty());
+    let one_line = source(
+        &tree(&[(
+            "p.yaml",
+            &format!("{HEAD}state:\n  x:\n    name: X\n    watch: L('X')\n    write: '(value) => write(L(''X''), value)'\n"),
+        )]),
+        "p.yaml",
+    )
+    .expect("loads");
+    let p = program(&one_line, LEVEL);
+    assert!(
+        p.to_program(&profile_engine::Place::new("p.yaml", 11, 12))
+            .is_empty()
+    );
+    let q = p.to_program(&profile_engine::Place::new("p.yaml", 11, 15));
+    assert_eq!((q[0].line, q[0].column), (6, 2));
+}
+
+/// A module that no profile imports is checked against its own entries alone, by a module's
+/// rules (record/areas/profiles/03-the-extension.md, "Checks").
+#[test]
+fn a_module_read_on_its_own_checks_as_a_module_and_declares_its_own_entries() {
+    let files = tree(&[("modules/radio.yaml", RADIO)]);
+    let s = profile_engine::module_source(&files, "modules/radio.yaml").expect("loads");
+    let report = check(&s, LEVEL);
+    assert!(report.diagnostics.is_empty(), "{report}");
+    let p = program(&s, LEVEL);
+    let names: Vec<&str> = p.files.iter().map(|f| f.name.as_str()).collect();
+    assert_eq!(names, ["module.ts"]);
+    assert!(p.files[0].text.contains("readonly com_1: number;"));
+    let profile_only = tree(&[("modules/m.yaml", "maker: M\n")]);
+    let s = profile_engine::module_source(&profile_only, "modules/m.yaml").expect("loads");
+    assert_eq!(
+        place_of(&check(&s, LEVEL), "module-only"),
+        ("modules/m.yaml", 1, 1)
+    );
+}
+
+/// An editor offers a field's names from its table, which are the names the checker takes there.
+#[test]
+fn the_tables_give_each_fields_names_words_and_whether_its_required() {
+    use profile_engine::{Allowed, Call, Table, fields};
+    let state = fields(Table::StateEntry);
+    let field = |key: &str| *state.iter().find(|f| f.key == key).expect("a field");
+    assert_eq!(field("watch").names, Some(Allowed::StateWatch));
+    assert!(!Allowed::StateWatch.calls().contains(&Call::K));
+    assert!(field("watch").required && !field("owner").required);
+    assert_eq!(field("owner").words, ["pilot_flying", "shared"]);
+    assert_eq!(field("write").words, ["none"]);
+    let toggle = fields(Table::Toggle);
+    assert_eq!(toggle[0].names, Some(Allowed::Event));
+    assert_eq!(Call::A.blank(), "A('', '')");
+    assert!(profile_engine::is_entry_key("battery_1"));
+    assert!(!profile_engine::is_entry_key("Battery"));
+    assert_eq!(
+        profile_engine::module_file("modules/gns-430").as_deref(),
+        Some("modules/gns-430.yaml")
+    );
+    assert!(profile_engine::plain("Left mixture") && !profile_engine::plain("Radio: COM1"));
 }
 
 /// A bundle that fails its level's frozen fields fails to read, as the builder's read-back and

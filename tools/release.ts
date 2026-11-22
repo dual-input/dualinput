@@ -12,6 +12,7 @@
 //                                           <commit>, once its workflows still match main's
 //   node tools/release.ts check             checks that the draft holds what `pack` wrote
 //   node tools/release.ts publish           publishes the draft as the newest release
+//   node tools/release.ts marketplace       publishes the profile extension on VS Code's Marketplace
 //
 // `pr` runs on each push to main (.github/workflows/release-pr.yml), and the rest when CI
 // passes on a release commit, `chore(release): <version>` (.github/workflows/release.yml).
@@ -28,10 +29,19 @@ import path from "node:path"
 
 import { commitsSince, lastRelease, nextVersion, releaseNotes, setVersion } from "./lib/changes.ts"
 import { workspaceVersion } from "./lib/package.ts"
+import { EXTENSION_PACKAGE, extensionVsix } from "./lib/profile-extension.ts"
 import { fullPackage, pack, RELEASE_FOLDER, RELEASES, vpk } from "./lib/release.ts"
 import { Failed, main, output, run } from "./lib/run.ts"
 
-const USAGE = "usage: node tools/release.ts pr | start <commit> | download | pack | upload <commit> | check | publish"
+const USAGE = "usage: node tools/release.ts pr | start <commit> | download | pack | upload <commit> | check | publish | marketplace"
+
+/**
+ * vsce, Microsoft's tool that publishes an extension on the Marketplace, at a pinned version,
+ * whose `--oidc` came in by 4.1.1. It runs through npx in the release workflow's Marketplace job
+ * alone, since it would add 135 packages to every `npm ci` (record/areas/profiles/log.md,
+ * 2026-11-22).
+ */
+const VSCE = "@vscode/vsce@4.1.1"
 
 /**
  * A release commit's title, which the release pull request's commit takes, and a release
@@ -51,13 +61,17 @@ main(() => {
     const notes = path.join(RELEASES, "..", "release-notes.md")
     fs.writeFileSync(notes, releaseNotes(commitsSince(last), last === null))
     pack(workspaceVersion(), notes)
-    console.log(`packed version ${workspaceVersion()} into ${RELEASES}`)
+    const extension = extensionVsix(EXTENSION_PACKAGE)
+    if (!fs.existsSync(extension)) throw new Failed(`${extension} isn't built; node tools/build.ts release builds it`)
+    fs.copyFileSync(extension, extensionVsix(RELEASES))
+    console.log(`packed version ${workspaceVersion()} into ${RELEASES}, with the profile extension`)
   } else if (step === "pr" && args.length === 0) pullRequest()
   else if (step === "start" && commit) start(commit)
   else if (step === "download" && args.length === 0) download()
   else if (step === "upload" && commit) upload(commit)
   else if (step === "check" && args.length === 0) check()
   else if (step === "publish" && args.length === 0) publish()
+  else if (step === "marketplace" && args.length === 0) marketplace()
   else throw new Failed(`${USAGE}\nA commit is its 40 hex digits.`)
 })
 
@@ -198,6 +212,9 @@ function upload(commit: string): void {
     output("gh", ["api", "--method", "DELETE", `repos/${repository()}/releases/${draft.id}`])
   }
   run(vpk(), ["upload", "github", "--repoUrl", `https://github.com/${repository()}`, "--tag", version, "--targetCommitish", commit, "--outputDir", RELEASES], { env: vpkEnv() })
+  // The profile extension's .vsix goes beside the installer, for an author who installs it by
+  // hand rather than from the Marketplace.
+  run("gh", ["release", "upload", version, extensionVsix(RELEASES), "--repo", repository(), "--clobber"])
 }
 
 /** This version's draft, which `upload` left. */
@@ -221,7 +238,7 @@ function check(): void {
   const release = draft()
   const uploaded = new Set(release.assets.map((a) => a.name))
   const packed = (JSON.parse(fs.readFileSync(path.join(RELEASES, "assets.win.json"), "utf8")) as { RelativeFileName: string }[]).map((a) => a.RelativeFileName)
-  const missing = [...packed, "releases.win.json"].filter((f) => !uploaded.has(f))
+  const missing = [...packed, "releases.win.json", path.basename(extensionVsix(RELEASES))].filter((f) => !uploaded.has(f))
   if (missing.length) throw new Failed(`the draft ${release.html_url} lacks ${missing.join(", ")}`)
   const feedAsset = release.assets.find((a) => a.name === "releases.win.json")!
   const feed = JSON.parse(output("gh", ["api", "-H", "Accept: application/octet-stream", `repos/${repository()}/releases/assets/${feedAsset.id}`])) as {
@@ -238,4 +255,20 @@ function publish(): void {
   const release = draft()
   output("gh", ["api", "--method", "PATCH", `repos/${repository()}/releases/${release.id}`, "-F", "draft=false", "-f", "make_latest=true"])
   console.log(`published https://github.com/${repository()}/releases/tag/${release.tag_name}`)
+}
+
+/**
+ * Publishes the profile extension on VS Code's Marketplace, under the publisher `dual-input`,
+ * through the Marketplace's Trusted Publishing: vsce trades the job's GitHub OIDC token for a
+ * Marketplace credential, which the publisher's policy grants to release.yml in this repository,
+ * so no secret is stored, where a personal access token would be, and Azure DevOps retires
+ * those on 2026-12-01 (documented,
+ * https://code.visualstudio.com/api/working-with-extensions/publishing-extension). npx runs from
+ * Node's own install, since Node refuses to start the `npx.cmd` shim without a shell.
+ */
+function marketplace(): void {
+  const extension = extensionVsix(RELEASES)
+  if (!fs.existsSync(extension)) throw new Failed(`${extension} isn't in the release's artifact`)
+  const npx = path.join(path.dirname(process.execPath), "node_modules", "npm", "bin", "npx-cli.js")
+  run(process.execPath, [npx, "--yes", VSCE, "publish", "--oidc", "--packagePath", extension])
 }

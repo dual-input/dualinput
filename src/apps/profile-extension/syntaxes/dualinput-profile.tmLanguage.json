@@ -1,0 +1,355 @@
+{
+  "name": "Dual Input Profile",
+  "scopeName": "source.dualinput-profile",
+  "patterns": [
+    { "include": "#comment-line" },
+    { "include": "#entries-block" },
+    { "include": "#variant-map" },
+    { "include": "#block-key" },
+    { "include": "#field" },
+    { "include": "#list-item" }
+  ],
+  "injections": {
+    "L:meta.embedded.block.javascript.dualinput-profile -comment -string -meta.name-call.dualinput-profile": {
+      "comment": "Reaches into every rule of VS Code's JavaScript grammar inside a script, which a script's own patterns can't, and wins where a JavaScript rule starts at the same place.",
+      "patterns": [{ "include": "#script-names" }]
+    }
+  },
+  "repository": {
+    "comment-line": {
+      "patterns": [{ "include": "#section" }, { "include": "#subsection" }, { "include": "#comment" }]
+    },
+    "section": {
+      "comment": "Layout's `# ═══ TITLE`, and fsc-editor's padded and ASCII forms, `# ═══ TITLE ═══…` and `# === TITLE ===`.",
+      "match": "^[ \\t]*(#[ \\t]*(?:═{2,}|={3,})[ \\t]+\\S.*)$",
+      "captures": {
+        "1": { "name": "comment.line.number-sign.dualinput-profile markup.heading.section.dualinput-profile" }
+      }
+    },
+    "subsection": {
+      "comment": "Layout's `# ── Title`, and fsc-editor's padded and ASCII forms, `# ── Title ──…` and `# --- Title ---`.",
+      "match": "^[ \\t]*(#[ \\t]*(?:─{2,}|-{3,})[ \\t]+\\S.*)$",
+      "captures": {
+        "1": { "name": "comment.line.number-sign.dualinput-profile markup.heading.subsection.dualinput-profile" }
+      }
+    },
+    "comment": {
+      "match": "^[ \\t]*(#.*)$",
+      "captures": {
+        "1": { "name": "comment.line.number-sign.dualinput-profile" }
+      }
+    },
+    "trailing-comment": {
+      "match": "(?:^|(?<=[ \\t]))(#.*)$",
+      "captures": {
+        "1": { "name": "comment.line.number-sign.dualinput-profile" }
+      }
+    },
+    "entries-block": {
+      "comment": "The blocks whose keys at the first indent are entries or seats, which runs until the next top-level key.",
+      "begin": "^(state|events|seats)[ \\t]*(:)(?=[ \\t]|$)",
+      "beginCaptures": {
+        "1": { "name": "entity.name.tag.block.dualinput-profile" },
+        "2": { "name": "punctuation.separator.key-value.mapping.dualinput-profile" }
+      },
+      "while": "^(?=[ \\t]|$|#)",
+      "patterns": [{ "include": "#comment-line" }, { "include": "#entry" }, { "include": "#trailing-comment" }]
+    },
+    "entry": {
+      "begin": "^([ \\t]+)([A-Za-z_][\\w-]*)[ \\t]*(:)(?=[ \\t]|$)",
+      "beginCaptures": {
+        "2": { "name": "entity.name.tag.entry.dualinput-profile" },
+        "3": { "name": "punctuation.separator.key-value.mapping.dualinput-profile" }
+      },
+      "while": "^(?=\\1[ \\t]|[ \\t]*$|[ \\t]*#)",
+      "patterns": [
+        { "include": "#comment-line" },
+        { "include": "#script" },
+        { "include": "#only" },
+        { "include": "#variant-map" },
+        { "include": "#field" },
+        { "include": "#list-item" },
+        { "include": "#trailing-comment" }
+      ]
+    },
+    "variant-map": {
+      "comment": "`aircraft:`'s `variants`, and an entry's `location` when it's a map: their keys are variant IDs, which look as they do in `only`, so an ID looks the same where it's declared and where it's used.",
+      "begin": "^([ \\t]+)(variants|location)[ \\t]*(:)(?=[ \\t]|$)",
+      "beginCaptures": {
+        "2": { "name": "entity.name.tag.field.dualinput-profile" },
+        "3": { "name": "punctuation.separator.key-value.mapping.dualinput-profile" }
+      },
+      "while": "^(?=\\1[ \\t]|[ \\t]*$|[ \\t]*#)",
+      "patterns": [{ "include": "#comment-line" }, { "include": "#variant-key" }, { "include": "#value" }]
+    },
+    "variant-key": {
+      "begin": "^([ \\t]+)([A-Za-z_][\\w-]*)[ \\t]*(:)(?=[ \\t]|$)",
+      "beginCaptures": {
+        "2": { "name": "constant.other.variant.dualinput-profile" },
+        "3": { "name": "punctuation.separator.key-value.mapping.dualinput-profile" }
+      },
+      "end": "$",
+      "patterns": [{ "include": "#value" }]
+    },
+    "only": {
+      "comment": "`only:` and the variant IDs it names, which look like the format's words, since each is one of the IDs `variants` declares. It takes each of a list's forms: `only: press`, `only: [press, pro]`, and a list on the lines below.",
+      "begin": "^([ \\t]+)(only)[ \\t]*(:)(?=[ \\t]|$)",
+      "beginCaptures": {
+        "2": { "name": "entity.name.tag.field.dualinput-profile" },
+        "3": { "name": "punctuation.separator.key-value.mapping.dualinput-profile" }
+      },
+      "while": "^(?=\\1[ \\t]*-(?:[ \\t]|$))",
+      "patterns": [
+        { "include": "#trailing-comment" },
+        {
+          "match": "^[ \\t]*(-)(?=[ \\t]|$)",
+          "captures": {
+            "1": { "name": "punctuation.definition.block.sequence.item.dualinput-profile" }
+          }
+        },
+        { "match": "\\[", "name": "punctuation.definition.sequence.begin.dualinput-profile" },
+        { "match": "\\]", "name": "punctuation.definition.sequence.end.dualinput-profile" },
+        { "match": ",", "name": "punctuation.separator.sequence.dualinput-profile" },
+        { "match": "[A-Za-z_][\\w-]*", "name": "constant.other.variant.dualinput-profile" }
+      ]
+    },
+    "block-key": {
+      "begin": "^([A-Za-z_][\\w-]*)[ \\t]*(:)(?=[ \\t]|$)",
+      "beginCaptures": {
+        "1": { "name": "entity.name.tag.block.dualinput-profile" },
+        "2": { "name": "punctuation.separator.key-value.mapping.dualinput-profile" }
+      },
+      "end": "$",
+      "patterns": [{ "include": "#value" }]
+    },
+    "field": {
+      "begin": "^([ \\t]+)([A-Za-z_][\\w-]*)[ \\t]*(:)(?=[ \\t]|$)",
+      "beginCaptures": {
+        "2": { "name": "entity.name.tag.field.dualinput-profile" },
+        "3": { "name": "punctuation.separator.key-value.mapping.dualinput-profile" }
+      },
+      "end": "$",
+      "patterns": [{ "include": "#value" }]
+    },
+    "list-item": {
+      "begin": "^([ \\t]*)(-)(?=[ \\t]|$)",
+      "beginCaptures": {
+        "2": { "name": "punctuation.definition.block.sequence.item.dualinput-profile" }
+      },
+      "end": "$",
+      "patterns": [{ "include": "#value" }]
+    },
+    "value": {
+      "comment": "What follows a key's colon or a list item's dash, on the same line.",
+      "patterns": [
+        { "include": "#word" },
+        { "include": "#number" },
+        { "include": "#pace" },
+        { "include": "#single-quoted" },
+        { "include": "#double-quoted" },
+        { "include": "#flow-sequence" },
+        { "include": "#name-call" },
+        { "include": "#plain" },
+        { "include": "#trailing-comment" }
+      ]
+    },
+    "plain": {
+      "comment": "Any other value, such as an entry's `name: Left alternator`, up to a trailing comment. A value that opens with a quote, a bracket, a block scalar's `|` or `>`, or a name call takes its own pattern.",
+      "match": "\\G[ \\t]*((?![|>'\"\\[]|(?:L|A|B|K|H|instrument)\\()[^ \\t#](?:[^ \\t]|[ \\t]+(?=[^ \\t#]))*)",
+      "captures": {
+        "1": { "name": "string.unquoted.plain.dualinput-profile" }
+      }
+    },
+    "word": {
+      "match": "\\G[ \\t]*(none|pilot_flying|shared|stable|experimental|true|false)(?=[ \\t]*(?:#|$))",
+      "captures": {
+        "1": { "name": "keyword.other.word.dualinput-profile" }
+      }
+    },
+    "number": {
+      "match": "\\G[ \\t]*(-?(?:\\d+\\.?\\d*|\\.\\d+))(?=[ \\t]*(?:#|$))",
+      "captures": {
+        "1": { "name": "constant.numeric.dualinput-profile" }
+      }
+    },
+    "pace": {
+      "comment": "A pace, as in `pace: 2 frames` or `pace: 50ms`, which looks like a number, since the format reads it as one. One in a form the format refuses, such as `1.5 frames`, looks the same, and the check reports it.",
+      "match": "\\G[ \\t]*(\\d+(?:\\.\\d+)?[ \\t]*(?:frames?|ms))(?=[ \\t]*(?:#|$))",
+      "captures": {
+        "1": { "name": "constant.numeric.pace.dualinput-profile" }
+      }
+    },
+    "single-quoted": {
+      "begin": "\\G[ \\t]*(')",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.string.begin.dualinput-profile" }
+      },
+      "end": "(')(?!')|$",
+      "endCaptures": {
+        "1": { "name": "punctuation.definition.string.end.dualinput-profile" }
+      },
+      "name": "string.quoted.single.dualinput-profile",
+      "patterns": [{ "match": "''" }]
+    },
+    "double-quoted": {
+      "begin": "\\G[ \\t]*(\")",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.string.begin.dualinput-profile" }
+      },
+      "end": "(\")|$",
+      "endCaptures": {
+        "1": { "name": "punctuation.definition.string.end.dualinput-profile" }
+      },
+      "name": "string.quoted.double.dualinput-profile",
+      "patterns": [{ "match": "\\\\." }]
+    },
+    "flow-sequence": {
+      "begin": "\\G[ \\t]*(\\[)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.sequence.begin.dualinput-profile" }
+      },
+      "end": "(\\])|$",
+      "endCaptures": {
+        "1": { "name": "punctuation.definition.sequence.end.dualinput-profile" }
+      },
+      "patterns": [
+        { "match": ",", "name": "punctuation.separator.sequence.dualinput-profile" },
+        { "include": "#name-call" },
+        { "match": "(?<![\\w.-])-?(?:\\d+\\.?\\d*|\\.\\d+)(?![\\w.])", "name": "constant.numeric.dualinput-profile" }
+      ]
+    },
+    "name-call": {
+      "comment": "A name call by its shape, a kind and a bracket, as in `L('BKSQ_MixtureLeverPosition_1')`, in a value and in a script alike. It ends at its line's end, so one left open while typing doesn't run on into the lines below.",
+      "begin": "(?<![\\w$.])(L|A|B|K|H|instrument)(\\()",
+      "beginCaptures": {
+        "1": { "name": "entity.name.function.kind.dualinput-profile" },
+        "2": { "name": "punctuation.name-call.dualinput-profile" }
+      },
+      "end": "(\\))|$",
+      "endCaptures": {
+        "1": { "name": "punctuation.name-call.dualinput-profile" }
+      },
+      "name": "meta.name-call.dualinput-profile",
+      "patterns": [
+        { "include": "#name" },
+        { "match": ",", "name": "punctuation.name-call.dualinput-profile" },
+        { "include": "#arguments" }
+      ]
+    },
+    "name": {
+      "comment": "The string right after the name call's bracket.",
+      "begin": "\\G[ \\t]*(['\"])",
+      "beginCaptures": {
+        "1": { "name": "punctuation.name-call.dualinput-profile" }
+      },
+      "end": "(\\1)|$",
+      "endCaptures": {
+        "1": { "name": "punctuation.name-call.dualinput-profile" }
+      },
+      "name": "string.other.name.dualinput-profile",
+      "patterns": [{ "match": "\\\\." }]
+    },
+    "arguments": {
+      "comment": "A name call's arguments after its name, such as a unit, an index, or `value`.",
+      "patterns": [
+        {
+          "begin": "(['\"])",
+          "beginCaptures": {
+            "1": { "name": "punctuation.name-call.dualinput-profile" }
+          },
+          "end": "(\\1)|$",
+          "endCaptures": {
+            "1": { "name": "punctuation.name-call.dualinput-profile" }
+          },
+          "name": "variable.parameter.argument.dualinput-profile",
+          "patterns": [{ "match": "\\\\." }]
+        },
+        { "match": "(?<![\\w$.])-?(?:\\d+\\.?\\d*|\\.\\d+)(?![\\w$])", "name": "variable.parameter.argument.dualinput-profile" },
+        { "match": "[A-Za-z_$][\\w$]*", "name": "variable.parameter.argument.dualinput-profile" },
+        {
+          "begin": "\\(",
+          "beginCaptures": {
+            "0": { "name": "punctuation.name-call.dualinput-profile" }
+          },
+          "end": "\\)|$",
+          "endCaptures": {
+            "0": { "name": "punctuation.name-call.dualinput-profile" }
+          },
+          "patterns": [{ "match": ",", "name": "punctuation.name-call.dualinput-profile" }, { "include": "#arguments" }]
+        }
+      ]
+    },
+    "script": {
+      "comment": "A write function, `write: |` and the lines indented below it, which VS Code's JavaScript grammar paints, with `#script-names` injected into every rule of it.",
+      "begin": "^([ \\t]+)(write)[ \\t]*(:)[ \\t]+(\\|[-+1-9]*)[ \\t]*(#.*)?$",
+      "beginCaptures": {
+        "2": { "name": "entity.name.tag.field.dualinput-profile" },
+        "3": { "name": "punctuation.separator.key-value.mapping.dualinput-profile" },
+        "4": { "name": "punctuation.definition.block.scalar.dualinput-profile" },
+        "5": { "name": "comment.line.number-sign.dualinput-profile" }
+      },
+      "while": "^(?=\\1[ \\t]+\\S|[ \\t]*$)",
+      "contentName": "meta.embedded.block.javascript.dualinput-profile",
+      "patterns": [{ "include": "source.js" }]
+    },
+    "script-names": {
+      "comment": "What Dual Input gives every script. A script may not declare `state` or `write` (the `reserved-name` check), so each one in a script is Dual Input's.",
+      "patterns": [
+        { "include": "#name-call" },
+        {
+          "match": "(?<![\\w$.])(state)(\\.)([A-Za-z_][\\w$]*)",
+          "captures": {
+            "1": { "name": "variable.language.given.dualinput-profile" },
+            "2": { "name": "punctuation.accessor.dualinput-profile" },
+            "3": { "name": "variable.other.property.entry.dualinput-profile" }
+          }
+        },
+        { "match": "(?<![\\w$.])(?:state|value)(?![\\w$])", "name": "variable.language.given.dualinput-profile" },
+        { "include": "#write-chain" }
+      ]
+    },
+    "write-chain": {
+      "comment": "A chain of Dual Input's: `write()` and the `.repeat()` and `.every()` after it, as in `write(K('HEADING_BUG_INC')).repeat(steps).every('2 frames')`, on one line or across several. It ends after a bracket that no `.` follows, or at a line that doesn't open with one, so an array's `items.every()` or a string's `'-'.repeat(3)`, outside a chain or inside its brackets, keeps JavaScript's look.",
+      "begin": "(?<![\\w$.])(write)(?=[ \\t]*\\()",
+      "beginCaptures": {
+        "1": { "name": "support.function.builtin.dualinput-profile" }
+      },
+      "end": "(?<=\\))(?![ \\t]*(?:\\.|$))|^(?![ \\t]*\\.)",
+      "patterns": [
+        {
+          "match": "(\\.)[ \\t]*(every)[ \\t]*(\\()[ \\t]*(['\"])(\\d+(?:\\.\\d+)?[ \\t]*(?:frames?|ms))(\\4)[ \\t]*(\\))",
+          "comment": "`.every()` with a pace, as in `.every('2 frames')`, whose pace looks as one does in the YAML.",
+          "captures": {
+            "1": { "name": "punctuation.accessor.dualinput-profile" },
+            "2": { "name": "support.function.builtin.dualinput-profile" },
+            "3": { "name": "meta.brace.round.js" },
+            "4": { "name": "punctuation.definition.string.begin.dualinput-profile" },
+            "5": { "name": "constant.numeric.pace.dualinput-profile" },
+            "6": { "name": "punctuation.definition.string.end.dualinput-profile" },
+            "7": { "name": "meta.brace.round.js" }
+          }
+        },
+        {
+          "match": "(\\.)[ \\t]*(repeat|every)(?=[ \\t]*\\()",
+          "captures": {
+            "1": { "name": "punctuation.accessor.dualinput-profile" },
+            "2": { "name": "support.function.builtin.dualinput-profile" }
+          }
+        },
+        { "include": "#chain-arguments" }
+      ]
+    },
+    "chain-arguments": {
+      "comment": "The brackets of a call in a chain of Dual Input's, holding JavaScript.",
+      "begin": "\\(",
+      "beginCaptures": {
+        "0": { "name": "meta.brace.round.js" }
+      },
+      "end": "\\)",
+      "endCaptures": {
+        "0": { "name": "meta.brace.round.js" }
+      },
+      "patterns": [{ "include": "source.js" }]
+    }
+  }
+}

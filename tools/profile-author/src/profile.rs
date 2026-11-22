@@ -5,7 +5,8 @@
 use std::path::{Path, PathBuf};
 
 use profile_engine::features::avatars::{Location, Seat};
-use profile_engine::{Files, Variant};
+use profile_engine::{Files, Report, Variant, plain, single_quoted};
+use profile_language::Unformatted;
 
 use crate::yaml::{self, Value};
 
@@ -59,18 +60,33 @@ impl ProfileFile {
         )
     }
 
-    /// Writes `text`, once the profile engine finds no error in it, through a file beside the
-    /// profile renamed over it, so an editor holding the profile never reads half of it.
+    /// Writes `text` in the format's layout, once the profile engine finds no error in it,
+    /// through a file beside the profile renamed over it, so an editor holding the profile never
+    /// reads half of it.
     pub fn write(&self, text: &str) -> Result<(), String> {
-        self.check(text).map_err(|report| {
+        let text = laid_out(text)?;
+        self.check(&text).map_err(|report| {
             format!("the edit would break the profile, so it isn't written:\n{report}")
         })?;
         let mut new = self.path.as_os_str().to_owned();
         new.push(".new");
-        std::fs::write(&new, text)
+        std::fs::write(&new, &text)
             .and_then(|()| std::fs::rename(&new, &self.path))
             .map_err(|e| format!("couldn't write {}: {e}", self.path.display()))
     }
+}
+
+/// `text` as the profile extension's formatter writes it, since CI's
+/// `dualinput-profile-builder format profiles --check` fails a profile in any other layout, and
+/// the tool's edits add each key at the end of its map.
+fn laid_out(text: &str) -> Result<String, String> {
+    profile_language::format(text).map_err(|e| match e {
+        Unformatted::Yaml(diagnostics) => format!(
+            "the edit doesn't parse as YAML, so it isn't written:\n{}",
+            Report { diagnostics }
+        ),
+        Unformatted::Changed => "the formatter read the edit as a different profile, a fault of its own, so it isn't written".into(),
+    })
 }
 
 /// The profiles' folder with one file's text replaced.
@@ -331,23 +347,13 @@ pub fn write_seat(text: &str, seat: &Seat) -> Result<String, String> {
     Ok(text)
 }
 
-/// Text as a YAML scalar: plain where YAML reads it back as the same text, quoted otherwise.
+/// Text as a YAML scalar, as the formatter writes one: plain where YAML reads it back as the same
+/// text, and in single quotes otherwise.
 fn quoted(text: &str) -> String {
-    let plain = !text.is_empty()
-        && text
-            .chars()
-            .all(|c| c.is_alphanumeric() || " _-.()/".contains(c))
-        && text.chars().next().is_some_and(char::is_alphabetic)
-        && !text.ends_with(' ')
-        && yaml::parse(&format!("k: {text}"))
-            .ok()
-            .flatten()
-            .and_then(|r| yaml::get(&r, "k").and_then(yaml::text).map(|t| t == text))
-            .unwrap_or(false);
-    if plain {
+    if plain(text) {
         text.to_string()
     } else {
-        format!("'{}'", text.replace('\'', "''"))
+        single_quoted(text)
     }
 }
 
@@ -528,9 +534,45 @@ events:
         assert_eq!(meters(-0.0004), "0");
         assert_eq!(meters(2.0), "2");
         assert_eq!(quoted("Pilot"), "Pilot");
-        assert_eq!(quoted("Pilot's seat"), "'Pilot''s seat'");
+        assert_eq!(quoted("Pilot's seat"), "Pilot's seat");
         assert_eq!(quoted("yes"), "yes");
-        assert_eq!(quoted("1st officer"), "'1st officer'");
+        assert_eq!(quoted("1st officer"), "1st officer");
         assert_eq!(quoted("null"), "'null'");
+        assert_eq!(quoted("Radio: COM1"), "'Radio: COM1'");
+    }
+
+    /// A folder of its own under the system's temporary folder, deleted when the test ends.
+    struct Scratch(PathBuf);
+
+    impl Drop for Scratch {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+
+    #[test]
+    fn a_seat_written_to_the_profile_is_in_the_formats_layout() {
+        let scratch = Scratch(std::env::temp_dir().join(format!(
+            "dualinput-profile-author-layout-{}",
+            std::process::id()
+        )));
+        let path = scratch.0.join("aircraft").join("test.yaml");
+        std::fs::create_dir_all(path.parent().expect("a folder")).expect("makes folders");
+        std::fs::write(&path, PROFILE).expect("writes the profile");
+        let file = ProfileFile::open(&path).expect("opens");
+        let mut named = seat();
+        named.name = "Pilot's seat".into();
+        let text = write_seat(&file.read().expect("reads"), &named).expect("edits");
+        file.write(&text).expect("writes");
+        let written = file.read().expect("reads");
+        assert!(
+            written.contains("\n\nseats:\n  pilot:\n    name: Pilot's seat\n"),
+            "{written}"
+        );
+        // What `dualinput-profile-builder format --check` asks of each profile.
+        assert_eq!(
+            profile_language::format(&written).ok().as_deref(),
+            Some(written.as_str())
+        );
     }
 }

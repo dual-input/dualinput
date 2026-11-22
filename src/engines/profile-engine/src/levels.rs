@@ -7,6 +7,7 @@ use serde_json::{Map, Value, json};
 
 use crate::blocks::{self, Field};
 use crate::features::{self, Module};
+use crate::names::Allowed;
 
 /// Each part of the declarations, with the level it came in at.
 ///
@@ -101,22 +102,31 @@ impl Schema {
 }
 
 /// The level's JSON Schema for one kind of file, from the format's tables, as pretty JSON with a
-/// final line break. It requires the fields the checker always requires, takes in each field
-/// the kinds of name the checker takes there, and leaves to the checker the checks that depend
-/// on another field, such as `wrap: true` needing `range`.
+/// final line break. It requires the fields the tables mark required, takes in each field the
+/// kinds of name the checker takes there, and leaves to the checker the checks that depend on
+/// another field, such as `wrap: true` needing `range`.
 pub fn schema(level: u32, file: Schema) -> String {
     let module = file == Schema::Module;
-    let fields = |table: &[Field], each: &dyn Fn(&str) -> Value| -> Map<String, Value> {
+    let kept = |f: &&Field| f.level <= level && !(module && f.profile_only);
+    let fields = |table: &[Field], each: &dyn Fn(&Field) -> Value| -> Map<String, Value> {
         table
             .iter()
-            .filter(|f| f.level <= level && !(module && f.profile_only))
+            .filter(kept)
             .map(|f| {
-                let mut v = each(f.key);
+                let mut v = each(f);
                 if let Value::Object(o) = &mut v {
                     o.insert("description".into(), json!(f.about));
                 }
                 (f.key.to_string(), v)
             })
+            .collect()
+    };
+    let required = |table: &[Field]| -> Vec<&str> {
+        table
+            .iter()
+            .filter(kept)
+            .filter(|f| f.required)
+            .map(|f| f.key)
             .collect()
     };
     let object = |props: Map<String, Value>, required: &[&str]| {
@@ -126,11 +136,14 @@ pub fn schema(level: u32, file: Schema) -> String {
         }
         o
     };
-    // A name made by one of `calls`, as the checker's `Allowed` takes each field's.
-    let name = |calls: &str| json!({ "type": "string", "pattern": format!(r"^\s*({calls})\s*\(.*\)\s*$") });
-    let event_name = name("B|K|H");
-    let variable_name = name("L|A");
-    let ignored = name("L|A|B|K|H");
+    // A name made by one of the calls the checker's rule takes there.
+    let name = |allowed: Allowed| {
+        let calls: Vec<&str> = allowed.calls().iter().map(|c| c.word()).collect();
+        json!({ "type": "string", "pattern": format!(r"^\s*({})\s*\(.*\)\s*$", calls.join("|")) })
+    };
+    let event_name = name(Allowed::Event);
+    let variable_name = name(Allowed::Variable);
+    let ignored = name(Allowed::Ignore);
     let name_or_names = json!({ "anyOf": [ignored, { "type": "array", "items": ignored }] });
     let text_or_texts = json!({ "anyOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }] });
     let range =
@@ -138,7 +151,7 @@ pub fn schema(level: u32, file: Schema) -> String {
     let pace =
         json!({ "type": "string", "pattern": r"^(1 frame|[1-9][0-9]* frames|[1-9][0-9]*ms)$" });
     let steps = object(
-        fields(blocks::STEPS, &|key| match key {
+        fields(blocks::STEPS, &|f| match f.key {
             "inc" | "dec" => event_name.clone(),
             "step" => json!({ "type": "number", "exclusiveMinimum": 0 }),
             "wrap" => json!({ "type": "boolean" }),
@@ -146,18 +159,21 @@ pub fn schema(level: u32, file: Schema) -> String {
             "pace" => pace.clone(),
             _ => json!({}),
         }),
-        &["inc", "dec"],
+        &required(blocks::STEPS),
     );
-    let toggle = object(fields(blocks::TOGGLE, &|_| event_name.clone()), &["toggle"]);
+    let toggle = object(
+        fields(blocks::TOGGLE, &|_| event_name.clone()),
+        &required(blocks::TOGGLE),
+    );
     let mut count = object(
-        fields(blocks::COUNT, &|key| match key {
+        fields(blocks::COUNT, &|f| match f.key {
             "step" => json!({ "type": "number", "exclusiveMinimum": 0 }),
             "wrap" => json!({ "type": "boolean" }),
             "range" => range.clone(),
             "count" => variable_name.clone(),
             _ => event_name.clone(),
         }),
-        &["wrap", "range"],
+        &required(blocks::COUNT),
     );
     count["anyOf"] = json!(["inc", "dec", "set", "count"].map(|f| json!({ "required": [f] })));
     // A state entry's write is a name, a function, or `none`, or a map that toggles or steps; an
@@ -169,28 +185,28 @@ pub fn schema(level: u32, file: Schema) -> String {
     let with_features = |own: Map<String, Value>, of: fn(&Module) -> &'static [Field]| {
         let mut all = own;
         for m in features::MODULES {
-            all.extend(fields(of(m), &|key| (m.schema)(key)));
+            all.extend(fields(of(m), &|f| (m.schema)(f.key)));
         }
         all
     };
     let entry = |table: &[Field], of: fn(&Module) -> &'static [Field], event: bool| {
         object(
             with_features(
-                fields(table, &|key| match key {
+                fields(table, &|f| match f.key {
                     "name" | "description" => json!({ "type": "string" }),
-                    "watch" if event => name("L|B|K|H"),
-                    "watch" => json!({ "anyOf": [name("L|A|B|instrument"), count.clone()] }),
+                    "watch" if event => name(Allowed::EventWatch),
+                    "watch" => json!({ "anyOf": [name(Allowed::StateWatch), count.clone()] }),
                     "write" if event => event_write.clone(),
                     "write" => state_write.clone(),
                     "default" => json!({ "type": "number" }),
-                    "owner" => json!({ "enum": ["pilot_flying", "shared"] }),
+                    "owner" => json!({ "enum": f.words }),
                     "only" => text_or_texts.clone(),
                     "ignore" => name_or_names.clone(),
                     _ => json!({}),
                 }),
                 of,
             ),
-            &["name", "watch", "write"],
+            &required(table),
         )
     };
     let entries = |table: &[Field], of: fn(&Module) -> &'static [Field], event: bool| {
@@ -201,19 +217,20 @@ pub fn schema(level: u32, file: Schema) -> String {
         })
     };
     let aircraft = object(
-        fields(blocks::AIRCRAFT, &|key| match key {
+        fields(blocks::AIRCRAFT, &|f| match f.key {
             "variants" => {
                 json!({ "type": "object", "minProperties": 1, "additionalProperties": text_or_texts.clone() })
             }
             _ => pace.clone(),
         }),
-        &["variants"],
+        &required(blocks::AIRCRAFT),
     );
+    // A module holds no top-level block that's required, since each is a profile's alone.
     let top = object(
         with_features(
-            fields(blocks::TOP, &|key| match key {
+            fields(blocks::TOP, &|f| match f.key {
                 "maker" | "name" | "authors" => json!({ "type": "string" }),
-                "maturity" => json!({ "enum": ["stable", "experimental"] }),
+                "maturity" => json!({ "enum": f.words }),
                 "aircraft" => aircraft.clone(),
                 "import" => text_or_texts.clone(),
                 "state" => entries(blocks::STATE_ENTRY, |m| m.state_fields, false),
@@ -222,10 +239,7 @@ pub fn schema(level: u32, file: Schema) -> String {
             }),
             |m| m.blocks,
         ),
-        match file {
-            Schema::Profile => &["maker", "name", "maturity", "aircraft"][..],
-            Schema::Module => &[][..],
-        },
+        &required(blocks::TOP),
     );
     let what = match file {
         Schema::Profile => "profile",

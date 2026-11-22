@@ -7,27 +7,13 @@ aircraft:
   variants:
     press: bksq-aircraft-baronpropress
 
-# The tablet, the one display of the package's own that takes presses on its screen; its
-# radios and engine monitor take knobs and buttons, and the GTNs are other packages' (read in
+# The tablet, the one display of the package's own that takes presses on its screen; its radios and
+# engine monitor take knobs and buttons, and the GTNs are other packages' (read in
 # bksq-aircraft-baronpro 0.1.1, panel.*\PANEL.CFG and the gauges' JavaScript).
 displays: BlackSquareTablet
 
-seats:
-  copilot:
-    name: Copilot
-    hip: [-0.282, 0.212, -0.09]
-    knees: [-0.044, 0.218]
-    feet: [-0.198, 0.51]
-    eye: [0.643, -0.054]
-  pilot:
-    name: Pilot
-    hip: [0.282, 0.212, -0.09]
-    knees: [-0.044, 0.218]
-    feet: [-0.198, 0.51]
-    eye: [0.643, -0.054]
-
 state:
-  # ═══ ELECTRICAL
+  # ═══ ELECTRICAL ═════════════════════════════════════════════════════════════════════════════════
   battery:
     name: Battery
     watch: B('ELECTRICAL_Battery_1')
@@ -54,11 +40,11 @@ state:
     write:
       toggle: K('TOGGLE_EXTERNAL_POWER')
 
-  # ── Breakers
-  # Only the seven breakers that export a variable are synced: the others read through
-  # A:CIRCUIT CONNECTION ON:n, which needs A:BUS LOOKUP INDEX set first (read in
-  # bksq-aircraft-baronpro 0.1.1, BaronProfessional_Templates.xml; whether SimConnect reads one
-  # right without the index set is unmeasured).
+  # ── Breakers ────────────────────────────────────────────────────────────────────────────────────
+  # Only the seven breakers that export a variable are synced: the others read through A:CIRCUIT
+  # CONNECTION ON:n, which needs A:BUS LOOKUP INDEX set first (read in bksq-aircraft-baronpro 0.1.1,
+  # BaronProfessional_Templates.xml; whether SimConnect reads one right without the index set is
+  # unmeasured).
   breaker_gear_relay:
     name: Landing gear relay breaker
     watch: L('var_Breaker_LandingGearRelay_readonly')
@@ -99,7 +85,7 @@ state:
         write(K('ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE', 1, 32))
       }
 
-  # ═══ LIGHTS
+  # ═══ LIGHTS ═════════════════════════════════════════════════════════════════════════════════════
   beacon:
     name: Beacon
     watch: B('LIGHTING_BEACON_1')
@@ -196,7 +182,7 @@ state:
     watch: L('var_AnnunciatorTestButton')
     write: L('var_AnnunciatorTestButton')
 
-  # ═══ FUEL
+  # ═══ FUEL ═══════════════════════════════════════════════════════════════════════════════════════
   fuel_selector_1:
     name: Left fuel selector
     watch: A('FUEL TANK SELECTOR:1', 'Enum')
@@ -224,7 +210,7 @@ state:
     watch: L('var_FUEL_Switch_Pump_2')
     write: L('var_FUEL_Switch_Pump_2')
 
-  # ═══ ENGINE LEVERS
+  # ═══ ENGINE LEVERS ══════════════════════════════════════════════════════════════════════════════
   throttle_1:
     name: Left throttle
     watch: A('GENERAL ENG THROTTLE LEVER POSITION:1', 'Position 16k')
@@ -260,7 +246,7 @@ state:
     watch: L('var_FrictionLock')
     write: L('var_FrictionLock')
 
-  # ── Cowl flaps
+  # ── Cowl flaps ──────────────────────────────────────────────────────────────────────────────────
   cowl_flap_1:
     name: Left cowl flap
     watch: A('RECIP ENG COWL FLAP POSITION:1', 'Position 16k')
@@ -270,11 +256,11 @@ state:
     watch: A('RECIP ENG COWL FLAP POSITION:2', 'Position 16k')
     write: K('COWLFLAP2_SET')
 
-  # ── Magnetos and starters
-  # The knob's animation code springs position 4 back to 3 once the return time is 0.5s old,
-  # and only a click sets that time, so a written 4 would snap straight back; the far-future
-  # time holds it at 4 until the other pilot lets go and 3 arrives (read in
-  # bksq-aircraft-baronpro 0.1.1, BaronProfessional_Base_INT.xml, ELECTRICAL_Switch_Magneto_1).
+  # ── Magnetos and starters ───────────────────────────────────────────────────────────────────────
+  # The knob's animation code springs position 4 back to 3 once the return time is 0.5s old, and
+  # only a click sets that time, so a written 4 would snap straight back; the far-future time holds
+  # it at 4 until the other pilot lets go and 3 arrives (read in bksq-aircraft-baronpro 0.1.1,
+  # BaronProfessional_Base_INT.xml, ELECTRICAL_Switch_Magneto_1).
   ignition_1:
     name: Left ignition
     watch: L('BKSQ_IgnitionPosition_1')
@@ -296,7 +282,7 @@ state:
     watch: L('var_PropSyncSwitch')
     write: L('var_PropSyncSwitch')
 
-  # ═══ FLIGHT CONTROLS
+  # ═══ FLIGHT CONTROLS ════════════════════════════════════════════════════════════════════════════
   flaps:
     name: Flaps
     watch: A('FLAPS HANDLE PERCENT', 'Position 16k')
@@ -317,12 +303,12 @@ state:
     name: Parking brake
     watch: A('BRAKE PARKING POSITION', 'Bool')
     write: B('LANDING_GEAR_ParkingBrake_Set')
-  # A known limit: as a following 58P takes control with its autopilot engaged, the autopilot,
-  # wound up while the aircraft was frozen, runs this trim away within a second of the write that
-  # puts it at the old PF's, to -55% in one run, and rolls the aircraft, until it settles within
-  # about 9s (measured on MSFS 2024, 2026-11-19, record/areas/flight-model/log.md, "After a
-  # handover the 58P's own autopilot rolls the aircraft and runs its trim, wound up while `Follow`
-  # held it frozen, which v1 keeps as a known limit").
+  # A known limit: as a following 58P takes control with its autopilot engaged, the autopilot, wound
+  # up while the aircraft was frozen, runs this trim away within a second of the write that puts it
+  # at the old PF's, to -55% in one run, and rolls the aircraft, until it settles within about 9s
+  # (measured on MSFS 2024, 2026-11-19, record/areas/flight-model/log.md, "After a handover the
+  # 58P's own autopilot rolls the aircraft and runs its trim, wound up while `Follow` held it
+  # frozen, which v1 keeps as a known limit").
   elevator_trim:
     name: Elevator trim
     watch: A('ELEVATOR TRIM PCT', 'Percent')
@@ -346,7 +332,7 @@ state:
     watch: L('bksq_controlLocks')
     write: L('bksq_controlLocks')
 
-  # ═══ AUTOPILOT
+  # ═══ AUTOPILOT ══════════════════════════════════════════════════════════════════════════════════
   ap_master:
     name: Autopilot
     watch: A('AUTOPILOT MASTER', 'Bool')
@@ -395,10 +381,10 @@ state:
     watch: A('AUTOPILOT VERTICAL HOLD', 'Bool')
     write:
       toggle: K('AP_PANEL_VS_HOLD', 1)
-  # A known limit for this and the armed vertical speed below: as vertical speed mode engages,
-  # a following machine's autopilot sets its own target, likely from its own climb rate
-  # (unverified), which goes to the crew as its pilot's change (measured on MSFS 2024,
-  # 2026-11-16, record/areas/sync/log.md).
+  # A known limit for this and the armed vertical speed below: as vertical speed mode engages, a
+  # following machine's autopilot sets its own target, likely from its own climb rate (unverified),
+  # which goes to the crew as its pilot's change (measured on MSFS 2024, 2026-11-16,
+  # record/areas/sync/log.md).
   ap_vertical_speed:
     name: Autopilot vertical speed
     watch: A('AUTOPILOT VERTICAL HOLD VAR:1', 'Feet per minute')
@@ -415,7 +401,7 @@ state:
     watch: L('PMS50_APGA_ACTIVE_VERTICAL_MODE')
     write: none
 
-  # ── Altitude selector
+  # ── Altitude selector ───────────────────────────────────────────────────────────────────────────
   ap_altitude:
     name: Selected altitude
     watch: A('AUTOPILOT ALTITUDE LOCK VAR', 'Feet')
@@ -444,14 +430,14 @@ state:
         else if (steps < 0) write(H('kas297b_100_DEC')).repeat(-steps)
       }
 
-  # ═══ INSTRUMENTS
+  # ═══ INSTRUMENTS ════════════════════════════════════════════════════════════════════════════════
   # A reading that matches no write counts as this pilot's own turn and goes back to the crew, and
   # the knob's preset turns degrees into 1/16,384ths of a turn, so a written 1° reads back as
-  # 1.0107°. So the function returns the value the bug will read, which the sync engine waits for
-  # in place of the one it gave. It rounds to the nearest step, which 1° fits, though rounding up
-  # fits it too (unverified; measured on MSFS 2024, 2026-11-16, record/areas/sync/log.md, "The
-  # drift after a handover was the host's heading bug, which no write moved after its first, and
-  # every `_Set` preset that missed took the value of its first call").
+  # 1.0107°. So the function returns the value the bug will read, which the sync engine waits for in
+  # place of the one it gave. It rounds to the nearest step, which 1° fits, though rounding up fits
+  # it too (unverified; measured on MSFS 2024, 2026-11-16, record/areas/sync/log.md, "The drift
+  # after a handover was the host's heading bug, which no write moved after its first, and every
+  # `_Set` preset that missed took the value of its first call").
   heading_bug:
     name: Heading bug
     watch: A('AUTOPILOT HEADING LOCK DIR:1', 'Degrees')
@@ -549,7 +535,7 @@ state:
     watch: L('var_JpiTempUnit')
     write: L('var_JpiTempUnit')
 
-  # ═══ DEICE
+  # ═══ DEICE ══════════════════════════════════════════════════════════════════════════════════════
   pitot_heat_1:
     name: Pilot pitot heat
     watch: A('CIRCUIT SWITCH ON:29', 'Bool')
@@ -581,7 +567,7 @@ state:
     watch: L('var_surfaceDeiceSwitch')
     write: L('var_surfaceDeiceSwitch')
 
-  # ═══ CABIN AIR
+  # ═══ CABIN AIR ══════════════════════════════════════════════════════════════════════════════════
   vent_blowers:
     name: Vent blowers
     watch: L('var_VentBlowersSwitch')
@@ -643,7 +629,7 @@ state:
     watch: L('var_RamAirHandle')
     write: B('PASSENGER_Cabin_Heat_8_Set')
 
-  # ═══ PRESSURIZATION
+  # ═══ PRESSURIZATION ═════════════════════════════════════════════════════════════════════════════
   cabin_altitude_goal:
     name: Cabin altitude
     watch: L('var_pressurizationGoal')
@@ -682,7 +668,7 @@ state:
     watch: L('var_CoTest')
     write: L('var_CoTest')
 
-  # ═══ DOORS AND EXTERIOR
+  # ═══ DOORS AND EXTERIOR ═════════════════════════════════════════════════════════════════════════
   pilot_door:
     name: Pilot door
     watch: L('bksq_PilotDoor')
@@ -728,7 +714,7 @@ state:
     watch: L('var_globalFailureRate')
     write: L('var_globalFailureRate')
 
-  # ═══ RADIOS
+  # ═══ RADIOS ═════════════════════════════════════════════════════════════════════════════════════
   com1_active:
     name: COM 1 frequency
     watch: A('COM ACTIVE FREQUENCY:1', 'Hz')
@@ -810,7 +796,7 @@ state:
     watch: A('TRANSPONDER STATE:1', 'Enum')
     write: A('TRANSPONDER STATE:1', 'Enum')
 
-  # ── Audio panel
+  # ── Audio panel ─────────────────────────────────────────────────────────────────────────────────
   audio_source_knob:
     name: Audio source knob
     watch: L('var_KmaSourceSelectKnob')
@@ -858,7 +844,7 @@ state:
     watch: L('var_crewIsolate')
     write: L('var_crewIsolate')
 
-  # ── ADF
+  # ── ADF ─────────────────────────────────────────────────────────────────────────────────────────
   adf_standby:
     name: ADF standby
     watch: A('ADF STANDBY FREQUENCY:1', 'Frequency ADF BCD32')
@@ -892,13 +878,13 @@ state:
         else if (state.adf_mode != value) write(H('adf_FltEt'))
       }
 
-  # ── DME
+  # ── DME ─────────────────────────────────────────────────────────────────────────────────────────
   dme_mode:
     name: DME mode
     watch: L('var_dmeMode')
     write: L('var_dmeMode')
 
-  # ── RNAV
+  # ── RNAV ────────────────────────────────────────────────────────────────────────────────────────
   rnav_power:
     name: RNAV power
     watch: A('CIRCUIT SWITCH ON:69', 'Bool')
@@ -921,7 +907,7 @@ state:
     watch: L('var_RNAV_CHECKMODE')
     write: L('var_RNAV_CHECKMODE')
 
-  # ── Weather radar
+  # ── Weather radar ───────────────────────────────────────────────────────────────────────────────
   radar_mode:
     name: Radar mode
     watch: L('var_radarMode')
@@ -971,7 +957,7 @@ state:
       }
 
 events:
-  # ═══ AUTOPILOT
+  # ═══ AUTOPILOT ══════════════════════════════════════════════════════════════════════════════════
   go_around:
     name: Go around
     watch: K('AUTO_THROTTLE_TO_GA')
@@ -992,19 +978,19 @@ events:
         write(L('var_AutopilotStartupCounter'), 20)
       }
 
-  # ═══ GEAR
+  # ═══ GEAR ═══════════════════════════════════════════════════════════════════════════════════════
   gear_pump:
     name: Gear crank pump
     watch: K('GEAR_PUMP')
     write: K('GEAR_PUMP')
 
-  # ═══ RADIOS
+  # ═══ RADIOS ═════════════════════════════════════════════════════════════════════════════════════
   transponder_ident:
     name: Transponder ident
     watch: K('XPNDR_IDENT_ON')
     write: K('XPNDR_IDENT_ON')
 
-  # ── Volume knobs, whose step per event no source gives
+  # ── Volume knobs, whose step per event no source gives ──────────────────────────────────────────
   com1_volume_up:
     name: COM 1 volume up
     watch: K('COM1_VOLUME_INC')
@@ -1046,7 +1032,7 @@ events:
     watch: K('ADF_VOLUME_DEC')
     write: K('ADF_VOLUME_DEC')
 
-  # ── ADF
+  # ── ADF ─────────────────────────────────────────────────────────────────────────────────────────
   adf_timer:
     name: ADF timer
     watch: H('adf_SetRst')
@@ -1084,7 +1070,7 @@ events:
     watch: H('adf_decimalInc')
     write: H('adf_decimalInc')
 
-  # ── RNAV
+  # ── RNAV ────────────────────────────────────────────────────────────────────────────────────────
   rnav_big_up:
     name: RNAV outer knob up
     watch: H('KNS81_bigInc')
@@ -1130,7 +1116,7 @@ events:
     watch: H('KNS81_dataButton')
     write: H('KNS81_dataButton')
 
-  # ═══ ENGINE MONITOR
+  # ═══ ENGINE MONITOR ═════════════════════════════════════════════════════════════════════════════
   engine_monitor_left_short:
     name: Engine monitor left button
     watch: H('bksq_JpiButton_1_L_Short')
@@ -1151,3 +1137,17 @@ events:
     name: Engine monitor both buttons held
     watch: H('bksq_JpiButton_1_B_Long')
     write: H('bksq_JpiButton_1_B_Long')
+
+seats:
+  copilot:
+    name: Copilot
+    hip: [-0.282, 0.212, -0.09]
+    knees: [-0.044, 0.218]
+    feet: [-0.198, 0.51]
+    eye: [0.643, -0.054]
+  pilot:
+    name: Pilot
+    hip: [0.282, 0.212, -0.09]
+    knees: [-0.044, 0.218]
+    feet: [-0.198, 0.51]
+    eye: [0.643, -0.054]

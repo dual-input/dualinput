@@ -1,10 +1,16 @@
 //! The profile engine: the profile format, its checker, its levels, and a bundle's bytes,
-//! which the core, the builder, and later the IDE all share, so a profile CI publishes is one
-//! the core loads (record/areas/profiles/01-format-and-delivery.md,
+//! which the core, the builder, and the profile extension's language server all share, so a
+//! profile CI publishes is one the core loads (record/areas/profiles/01-format-and-delivery.md,
 //! record/areas/profiles/02-units.md).
 //!
 //! It reads no file: whoever runs it hands it the files' bytes, and it runs no TypeScript,
 //! which `profile-build` does, so the core links this crate alone.
+//!
+//! An editor reads what it knows of the format from here rather than knowing it twice: a file's
+//! tree with each node's place, in `tree`; the fields each place takes, with the names and words
+//! each field takes, in `fields`; the top-level keys' order, in `LAYOUT`; and where a script's
+//! text sits in the program TypeScript checks, through `Program`
+//! (record/areas/profiles/03-the-extension.md).
 
 mod blocks;
 mod bundle;
@@ -17,19 +23,21 @@ mod names;
 mod program;
 mod report;
 mod source;
-mod tree;
+pub mod tree;
 
-pub use bundle::hash;
+pub use blocks::{Field, LAYOUT, Table, fields};
+pub use bundle::{hash, plain, single_quoted};
+pub use check::is_entry_key;
 pub use format::{
     Aircraft, Count, EventEntry, Maturity, Owner, Pace, Profile, Resolved, StateEntry, Steps,
     Variant, Watch, Write,
 };
 pub use index::{Index, IndexBundle, IndexProfile, Shown, covers};
 pub use levels::{Schema, declarations, schema};
-pub use names::{Arg, Name, key_names};
-pub use program::{Compiled, Program, ProgramFile, TypeError};
+pub use names::{Allowed, Arg, Call, Name, key_names, read_name};
+pub use program::{Compiled, Program, ProgramFile, ProgramPlace, TypeError};
 pub use report::{Diagnostic, Place, Report, Severity};
-pub use source::{Files, Source, source};
+pub use source::{Files, Source, module_file, module_source, source};
 
 use check::{File, Mode};
 
@@ -77,7 +85,7 @@ fn checked(source: &Source, level: u32) -> (check::Checked, Report) {
         .enumerate()
         .map(|(i, f)| File {
             root: &f.root,
-            module: i > 0,
+            module: i > 0 || source.module,
         })
         .collect();
     check::check(&files, level, Mode::Source)

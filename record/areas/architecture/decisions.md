@@ -1807,14 +1807,16 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - The backend's tests hold every released path's requests and answers as literal JSON, so a `main` that passes CI answers every released core, and deploying it on every pass keeps a path a release uses live before that release ships.
 - **Leaves out:** nothing.
 
-## v1 ships no authoring tool
+## v1 ships the profile extension, with the profile builder inside it, and the profile author tool runs from the repository
 
-- **Decided:** the profile builder and the profile author tool run from the repository for the core team, and no release carries either; the builder keeps the name `dualinput-profile-builder`; a contributor without the toolchain sends a profile's change as a pull request and reads CI's check.
+- **Decided:** v1 ships one authoring tool, the profile extension, a VS Code extension on the Marketplace for Windows and attached to each release, whose `.vsix` carries `dualinput-profile-builder`, so an author on Windows builds a bundle on each save and tests it in their own core without the workspace's setup ([03-the-extension](../profiles/03-the-extension.md); user, 2026-11-21 and 2026-11-22).
+  The profile author tool runs from the repository for the core team, and no release carries it; the builder keeps the name `dualinput-profile-builder`; a contributor can still send a profile's change as a pull request and read CI's check.
   This settles the profiles' units' item in [left open](../profiles/02-units.md#left-open) on the builder program's name and how authors get it.
-  Settled in node 6.18 by the user, 2026-10-18 ([authoring tools](../build/01-the-build.md#authoring-tools)).
+  Settled in node 6.18 by the user, 2026-10-18 ([authoring tools](../build/01-the-build.md#authoring-tools)), when no release carried the builder either, and changed in stage 22d by the user, 2026-11-21 and 2026-11-22.
 - **Because:**
-  - Both are Rust on the workspace's engines and platform crates, so running either from a clone takes the workspace's whole setup, and a pilot who writes YAML needs the guidance the IDE brings anyway (user, 2026-10-18).
-- **Leaves out:** testing a bundle in a contributor's own core, which waits for the IDE.
+  - Test flights need a profile changed mid-session, and the IDE that was to bring authoring is months from usable (user, 2026-11-21; [the product plan's picks](../product/plan.md#3-v1-or-later)).
+  - The builder is a Rust program on the workspace's engines, so running it from a clone takes the workspace's whole setup, which its program inside the extension spares an author; the profile author tool needs the SDK and the sim, and serves the core team (user, 2026-10-18).
+- **Leaves out:** an author on macOS or Linux, who gets no extension, since its builder is a Windows program, and sends a change as a pull request that CI checks.
 
 ## The sim service holds the loaded aircraft's facts, which the match check and avatars read
 

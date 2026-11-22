@@ -1,0 +1,21 @@
+DUMPED 2 files, 18 scripts
+TypeScript 6.0.3 on /press.ts: 303 lines, 18 write functions, declarations 143541 bytes
+Node v22.23.1, AMD Ryzen 7 7800X3D 8-Core Processor           , 30 runs of each request, each after an edit
+
+QuickJS-ng (rquickjs 0.14.0)
+  load typescript.js   243.1ms
+  first completion     249.6ms (builds the program), 183 entries after state.
+  completion           median 42.5ms, p95 57.8ms, max 58.7ms
+  signature help       median 35.9ms, p95 55.6ms, max 55.7ms, 3 signatures for write(
+  hover                median 34.8ms, p95 61.0ms, max 64.5ms: function write(target: Event, value?: number | string): Chain (+2 overloads)
+  diagnostics          median 61.1ms, p95 68.3ms, max 69.3ms, 0 found
+  memory               43 MB
+
+Node (V8)
+  load typescript.js   146.0ms
+  first completion     114.0ms (builds the program), 183 entries after state.
+  completion           median 3.0ms, p95 8.4ms, max 12.6ms
+  signature help       median 2.6ms, p95 9.7ms, max 21.2ms, 3 signatures for write(
+  hover                median 2.4ms, p95 8.1ms, max 18.1ms: function write(target: Event, value?: number | string): Chain (+2 overloads)
+  diagnostics          median 8.0ms, p95 13.1ms, max 30.6ms, 0 found
+  memory               23 MB (V8 heap used)

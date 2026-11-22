@@ -13,7 +13,7 @@ use crate::format::{
     Aircraft, Count, EventEntry, Maturity, Owner, Pace, Profile, StateEntry, Steps, Variant, Watch,
     Write,
 };
-use crate::names::{self, Name};
+use crate::names::{self, Allowed, Name};
 use crate::report::{Diagnostic, Place, Report};
 use crate::tree::{Kind, Node, Text};
 
@@ -272,6 +272,9 @@ impl Checker {
 
     fn top(&mut self, file: &File) {
         self.module = file.module;
+        if self.mode == Mode::Source {
+            self.quotes(file.root);
+        }
         let Some(entries) = self.map(file.root, "A profile") else {
             return;
         };
@@ -440,16 +443,7 @@ impl Checker {
             return;
         };
         for (key, value) in entries {
-            let snake = key
-                .text
-                .chars()
-                .next()
-                .is_some_and(|c| c.is_ascii_lowercase())
-                && key
-                    .text
-                    .chars()
-                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_');
-            if !snake {
+            if !is_entry_key(&key.text) {
                 self.error(
                     &key.at,
                     "key-form",
@@ -499,23 +493,16 @@ impl Checker {
             match field.key {
                 "name" => name = self.text(value, "`name`"),
                 "description" => description = self.text(value, "`description`"),
-                "watch" if event => {
-                    if let Some(n) = self.name(value, "`watch`", Allowed::EventWatch, false) {
-                        placed.watches.push((n.clone(), value.at.clone()));
-                        watch = Some((Watch::Name(n), value.at.clone()));
-                    }
-                }
                 "watch" => {
-                    if let Kind::Map(_) = value.kind {
+                    if let (Kind::Map(_), false) = (&value.kind, event) {
                         count = self.count(value, &mut placed);
-                    } else if let Some(n) = self.name(value, "`watch`", Allowed::StateWatch, false)
-                    {
+                    } else if let Some(n) = self.name(value, "`watch`", takes(field), false) {
                         placed.watches.push((n.clone(), value.at.clone()));
                         watch = Some((Watch::Name(n), value.at.clone()));
                     }
                 }
                 "write" => {
-                    if let Some((w, text)) = self.write(value, event) {
+                    if let Some((w, text)) = self.write(value, event, takes(field)) {
                         script = text;
                         write = Some((w, value.at.clone()));
                     }
@@ -543,7 +530,7 @@ impl Checker {
                 }
                 "ignore" => {
                     for item in Self::items(value) {
-                        if let Some(n) = self.name(item, "`ignore`", Allowed::Ignore, false) {
+                        if let Some(n) = self.name(item, "`ignore`", takes(field), false) {
                             placed.ignore.push((n, item.at.clone()));
                         }
                     }
@@ -669,7 +656,7 @@ impl Checker {
             let what = format!("`{}`", field.key);
             match field.key {
                 "inc" | "dec" | "set" => {
-                    let n = self.name(value, &what, Allowed::Event, false);
+                    let n = self.name(value, &what, takes(field), false);
                     if let Some(n) = &n {
                         placed.watches.push((n.clone(), value.at.clone()));
                     }
@@ -680,7 +667,7 @@ impl Checker {
                     }
                 }
                 "count" => {
-                    c.count = self.name(value, &what, Allowed::Variable, false);
+                    c.count = self.name(value, &what, takes(field), false);
                     if let Some(n) = &c.count {
                         placed.watches.push((n.clone(), value.at.clone()));
                     }
@@ -749,8 +736,14 @@ impl Checker {
         None
     }
 
-    /// A write as written, and its script's text when it's a function.
-    fn write(&mut self, node: &Node, event: bool) -> Option<(WriteAt, Option<Text>)> {
+    /// A write as written, and its script's text when it's a function. `allowed` is the names a
+    /// write that's a name takes.
+    fn write(
+        &mut self,
+        node: &Node,
+        event: bool,
+        allowed: Allowed,
+    ) -> Option<(WriteAt, Option<Text>)> {
         match &node.kind {
             Kind::Str(t) if t.text.trim() == "none" => {
                 if event {
@@ -764,7 +757,7 @@ impl Checker {
                 Some((WriteAt::Ready(Write::None), None))
             }
             Kind::Str(t) if names::looks_like_name(&t.text) => {
-                let n = self.name(node, "`write`", Allowed::Write, true)?;
+                let n = self.name(node, "`write`", allowed, true)?;
                 Some((WriteAt::Ready(Write::Name(n)), None))
             }
             Kind::Str(t) => Some((
@@ -791,11 +784,10 @@ impl Checker {
                 let module = self.module;
                 let mut toggle = None;
                 for (k, value) in fields {
-                    if self
-                        .field(blocks::TOGGLE, k, module, "field of a `toggle` map")
-                        .is_some()
+                    if let Some(field) =
+                        self.field(blocks::TOGGLE, k, module, "field of a `toggle` map")
                     {
-                        toggle = self.name(value, "`toggle`", Allowed::Event, false);
+                        toggle = self.name(value, "`toggle`", takes(field), false);
                     }
                 }
                 Some((WriteAt::Ready(Write::Toggle(toggle?)), None))
@@ -819,8 +811,8 @@ impl Checker {
                     };
                     let what = format!("`{}`", field.key);
                     match field.key {
-                        "inc" => s.inc = self.name(value, &what, Allowed::Event, false),
-                        "dec" => s.dec = self.name(value, &what, Allowed::Event, false),
+                        "inc" => s.inc = self.name(value, &what, takes(field), false),
+                        "dec" => s.dec = self.name(value, &what, takes(field), false),
                         "step" => s.step = self.step(value).unwrap_or(1.0),
                         "wrap" => s.wrap = self.wrap(value).map(|w| (w, value.at.clone())),
                         "range" => s.range = self.range(value).map(|r| (r, value.at.clone())),
@@ -919,13 +911,21 @@ impl Checker {
             );
             return None;
         };
-        let name = match names::parse(&text.text) {
-            Ok(name) => name,
+        let parsed = match names::parse(&text.text) {
+            Ok(parsed) => parsed,
             Err(e) => {
                 self.error(&node.at, "name", e.0);
                 return None;
             }
         };
+        // A name on a YAML line takes single quotes, as the rest of the file outside its scripts
+        // does, and a block holds its text as a script does.
+        if let (Mode::Source, false, Some(&first)) = (self.mode, text.block, parsed.double.first())
+        {
+            let message = single_quotes(&parsed.name.to_string());
+            self.error(&text.at(first), "quotes", message);
+        }
+        let name = parsed.name;
         if let Some(why) = allowed.refuses(&name) {
             self.error(&node.at, "name-kind", format!("{what}: {why}"));
             return None;
@@ -939,6 +939,38 @@ impl Checker {
             return None;
         }
         Some(name)
+    }
+
+    /// An error at each text the file writes in double quotes, keys among them. An author's
+    /// files take single quotes alone outside their scripts, and a script is a block, which
+    /// holds no quotes of YAML's (record/areas/profiles/03-the-extension.md, "Quotes").
+    fn quotes(&mut self, node: &Node) {
+        match &node.kind {
+            Kind::Str(t) if t.quote == Some('"') => self.double_quoted(&node.at, &t.text),
+            Kind::Seq(items) => {
+                for item in items {
+                    self.quotes(item);
+                }
+            }
+            Kind::Map(entries) => {
+                for (key, value) in entries {
+                    if key.quote == Some('"') {
+                        self.double_quoted(&key.at, &key.text);
+                    }
+                    self.quotes(value);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn double_quoted(&mut self, at: &Place, text: &str) {
+        let message = if text.contains(['\n', '\r']) {
+            "Outside a script, a profile writes text in single quotes, and text of more than one line as a `|` block".to_string()
+        } else {
+            single_quotes(&crate::bundle::single_quoted(text))
+        };
+        self.error(at, "quotes", message);
     }
 
     /// The checks across entries, once every file is read.
@@ -1050,38 +1082,23 @@ struct CountAt {
     range: (f64, f64),
 }
 
-/// Which names a field takes.
-#[derive(Clone, Copy)]
-enum Allowed {
-    StateWatch,
-    EventWatch,
-    Write,
-    Event,
-    Variable,
-    Ignore,
+/// The names `field` takes, from its table, which the checker reads it with.
+fn takes(field: &Field) -> Allowed {
+    field
+        .names
+        .expect("a field the checker reads as a name says in its table which names it takes")
 }
 
-impl Allowed {
-    fn refuses(self, name: &Name) -> Option<String> {
-        let refused = match self {
-            Allowed::StateWatch => matches!(name, Name::K { .. } | Name::H { .. }),
-            Allowed::EventWatch => matches!(name, Name::A { .. } | Name::Instrument { .. }),
-            Allowed::Write | Allowed::Ignore => matches!(name, Name::Instrument { .. }),
-            Allowed::Event => name.kind() != names::Kind::Event,
-            Allowed::Variable => name.kind() != names::Kind::Variable,
-        };
-        refused.then(|| match self {
-            Allowed::StateWatch => format!(
-                "a state entry watches a variable, an input event, or an instrument() value, and {name} is an event, which an event entry watches"
-            ),
-            Allowed::EventWatch => format!(
-                "an event entry watches a K:, H:, or B: event, or an L: variable as a pulse, and {name} isn't one"
-            ),
-            Allowed::Write | Allowed::Ignore => {
-                "instrument() can be watched but never written or ignored; write the gauge through its H: events".to_string()
-            }
-            Allowed::Event => format!("this takes an event, K(), H(), or B(), and {name} isn't one"),
-            Allowed::Variable => format!("this takes a variable, L() or A(), and {name} isn't one"),
-        })
-    }
+/// The error on text in double quotes, giving `example`, the text in single quotes.
+fn single_quotes(example: &str) -> String {
+    format!("Outside a script, a profile writes text in single quotes, as `{example}`")
+}
+
+/// Whether `key` can be an entry's key: lowercase snake_case that starts with a letter, as
+/// `battery_1`, which the checker requires and an editor's rename keeps to.
+pub fn is_entry_key(key: &str) -> bool {
+    key.chars().next().is_some_and(|c| c.is_ascii_lowercase())
+        && key
+            .chars()
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
 }

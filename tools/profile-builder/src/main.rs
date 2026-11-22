@@ -1,15 +1,19 @@
-//! `dualinput-profile-builder`: checks each profile and builds its bundle, for authors and CI
-//! (record/areas/profiles/02-units.md, "The builder program").
+//! `dualinput-profile-builder`: checks each profile and builds its bundle, for authors and CI, and
+//! serves the profile extension (record/areas/profiles/02-units.md, "The builder program").
 //!
 //!   dualinput-profile-builder build <profile or folder> [--out <folder>]
 //!   dualinput-profile-builder watch <profile or folder> --out <folder>
 //!   dualinput-profile-builder publish --released <level> --pages <folder> [--profiles <folder>]
+//!   dualinput-profile-builder format <profile, module, or folder> [--check]
+//!   dualinput-profile-builder serve
 //!   dualinput-profile-builder levels
 //!
 //! A profile is a file in a folder named `aircraft`, whose parent is the profiles' folder that
 //! imports are found from, as `profiles/aircraft/bksq-baronpro.yaml`.
 
+mod format;
 mod publish;
+mod serve;
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -61,6 +65,8 @@ fn run(args: &[String]) -> Result<(), String> {
             let pages = flags.need("--pages")?;
             publish::publish(profiles, pages, released, &utc_now(), &mut Compiler::new())
         }
+        "format" => format::format(&flags.target()?, flags.check),
+        "serve" => serve::serve(),
         "levels" => levels(),
         _ => Err(usage()),
     }
@@ -71,6 +77,8 @@ fn usage() -> String {
   dualinput-profile-builder build <profile or folder> [--out <folder>]
   dualinput-profile-builder watch <profile or folder> --out <folder>
   dualinput-profile-builder publish --released <level> --pages <folder> [--profiles <folder>]
+  dualinput-profile-builder format <profile, module, or folder> [--check]
+  dualinput-profile-builder serve
   dualinput-profile-builder levels"
         .into()
 }
@@ -78,6 +86,8 @@ fn usage() -> String {
 struct Flags {
     target: Option<PathBuf>,
     values: BTreeMap<String, PathBuf>,
+    /// `--check`, the one flag that takes no value.
+    check: bool,
 }
 
 impl Flags {
@@ -85,10 +95,13 @@ impl Flags {
         let mut flags = Flags {
             target: None,
             values: BTreeMap::new(),
+            check: false,
         };
         let mut args = args.iter();
         while let Some(a) = args.next() {
-            if a.starts_with("--") {
+            if a == "--check" {
+                flags.check = true;
+            } else if a.starts_with("--") {
                 let value = args.next().ok_or_else(|| format!("{a} takes a value"))?;
                 flags.values.insert(a.clone(), PathBuf::from(value));
             } else if flags.target.is_none() {
@@ -261,7 +274,7 @@ fn levels() -> Result<(), String> {
 }
 
 /// The time now in UTC, as `2026-10-20T14:02:11Z`.
-fn utc_now() -> String {
+pub(crate) fn utc_now() -> String {
     let secs = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .expect("the clock should be after 1970")
@@ -270,7 +283,7 @@ fn utc_now() -> String {
 }
 
 /// A count of seconds since 1970 in UTC, by Howard Hinnant's days-to-civil algorithm.
-fn utc(secs: u64) -> String {
+pub(crate) fn utc(secs: u64) -> String {
     let days = (secs / 86_400) as i64;
     let rest = secs % 86_400;
     let z = days + 719_468;

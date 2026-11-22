@@ -103,17 +103,55 @@ fn seats_and_locations_check_and_come_back_from_a_bundle() {
     // Written again from the bundle, it gives the same bytes.
     let again = source(&tree(&[("b.yaml", &text)]), "b.yaml").expect("a bundle loads");
     assert_eq!(write(&again, &compiled(&again)), bytes);
-    // The source puts `seats` after `events`, and the bundle puts it in the layout's place,
-    // after `aircraft` and before `state` (record/areas/profiles/01-format-and-delivery.md,
-    // "Layout").
-    let at = |key: &str| {
-        text.find(&format!("\n{key}:"))
-            .unwrap_or_else(|| panic!("no {key}"))
-    };
-    assert!(
-        at("aircraft") < at("seats") && at("seats") < at("state") && at("state") < at("events"),
-        "{text}"
-    );
+}
+
+/// A bundle writes its top-level keys in the layout's order, whatever the source's, with `seats`
+/// last (record/areas/profiles/01-format-and-delivery.md, "Layout").
+#[test]
+fn a_bundles_keys_come_in_the_layouts_order_with_seats_last() {
+    let scrambled = "\
+seats:
+  pilot:
+    name: Pilot
+    hip: [0.31, 0.12, 1.4]
+    knees: [0.05, 0.45]
+    feet: [-0.42, 0.62]
+    eye: [0.63, -0.05]
+events:
+  ap_master:
+    name: Autopilot master
+    watch: K('AP_MASTER')
+    write: K('AP_MASTER')
+displays: BlackSquareTablet
+state:
+  battery:
+    name: Battery
+    watch: L('BATTERY')
+    write: L('BATTERY')
+aircraft:
+  variants:
+    base: bksq-aircraft-baronpro
+authors: Dual Input
+maturity: stable
+name: A
+maker: M
+";
+    let s = source(&tree(&[("p.yaml", scrambled)]), "p.yaml").expect("loads");
+    let report = check(&s, LEVEL);
+    assert!(report.diagnostics.is_empty(), "{report}");
+    let text = String::from_utf8(write(&s, &compiled(&s))).expect("UTF-8");
+    let keys: Vec<&str> = text
+        .lines()
+        .filter(|l| !l.starts_with(' '))
+        .filter_map(|l| l.split(':').next())
+        .collect();
+    let layout: Vec<&str> = profile_engine::LAYOUT
+        .iter()
+        .copied()
+        .filter(|k| *k != "import")
+        .collect();
+    assert_eq!(keys, layout, "{text}");
+    assert_eq!(keys.last(), Some(&"seats"));
 }
 
 #[test]

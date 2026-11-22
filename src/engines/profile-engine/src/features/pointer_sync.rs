@@ -5,7 +5,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-use crate::blocks::Field;
+use crate::blocks::field;
 use crate::bundle::{Out, scalar};
 use crate::check::Checker;
 use crate::features::{self, Module};
@@ -13,18 +13,18 @@ use crate::format::Resolved;
 use crate::tree::{Key, Node};
 
 pub(crate) const MODULE: Module = Module {
-    blocks: &[Field {
-        key: "displays",
-        level: 1,
-        profile_only: false,
-        about: "The instruments pointer sync plays presses into: an identifier, for every instrument that carries it, or a full key, identifier|query, for one",
-    }],
+    blocks: &[field(
+        "displays",
+        1,
+        "The instruments pointer sync plays presses into: an identifier, for every instrument that carries it, or a full key, identifier|query, for one",
+    )],
     state_fields: &[],
     event_fields: &[],
     check_block,
     check_field,
-    emit_blocks,
+    emit_block,
     emit_fields,
+    items: |_| &[],
     schema,
 };
 
@@ -80,7 +80,7 @@ fn check_field(_: &mut Checker, _: &Key, _: &Node, _: &mut features::EntryFields
     unreachable!("pointer sync adds no field to an entry")
 }
 
-fn emit_blocks(blocks: &features::Blocks, out: &mut Out) {
+fn emit_block(_: &str, blocks: &features::Blocks, out: &mut Out) {
     let displays = &blocks.pointer_sync.displays;
     if displays.is_empty() {
         return;

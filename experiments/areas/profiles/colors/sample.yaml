@@ -1,0 +1,100 @@
+maker: Black Square
+name: 'Baron 58P: colors bench'
+maturity: experimental
+authors: Dual Input
+
+aircraft:
+  variants:
+    press: bksq-aircraft-baronpropress
+  pace: 2 frames
+  maturity: stable                          # not a field here, so both words show
+
+displays:
+  - BlackSquareTablet
+
+state:
+  # ═══ ELECTRICAL ═════════════════════════════════════════════════════════════════════════════════
+  battery:
+    name: Battery
+    description: Double quotes, which the build refuses outside a script
+    watch: B('ELECTRICAL_Battery_1')
+    write:
+      toggle: B('ELECTRICAL_Battery_1_Toggle')
+    only: [press]
+  breaker_gear_relay:
+    name: Landing gear relay breaker        # a comment after a value
+    watch: L('var_Breaker_LandingGearRelay_readonly')
+    write:
+      toggle: K('ELECTRICAL_BUS_TO_BUS_CONNECTION_TOGGLE', 2, 6)
+    owner: shared
+  # external_power:
+  #   watch: A('EXTERNAL POWER ON:1', 'Bool')
+
+  # ── Instruments ─────────────────────────────────────────────────────────────────────────────────
+  altimeter_2:
+    name: Copilot altimeter
+    watch: L('INSTRUMENT_Altimeter_2')
+    write: K('KOHLSMAN_SET', 2, value)
+  decision_height:
+    name: Decision height
+    watch: A('DECISION HEIGHT', 'Feet')
+    write:
+      inc: K('INCREASE_DECISION_HEIGHT')
+      dec: K('DECREASE_DECISION_HEIGHT')
+      step: 10
+      wrap: false
+  fcu_heading:
+    name: FCU heading
+    watch:
+      count: L('E_FCU_HEADING')
+      wrap: true
+      range: [0, 359]
+    write:
+      inc: K('HEADING_BUG_INC')
+      dec: K('HEADING_BUG_DEC')
+    default: 0
+  throttle_1:
+    name: Left throttle
+    watch: A('GENERAL ENG THROTTLE LEVER POSITION:1', 'Position 16k')
+    write: A('GENERAL ENG THROTTLE LEVER POSITION:1', 'Position 16k')
+    owner: pilot_flying
+    location:
+      press: [0.21, 0.55, 1.92]
+  gns530_disabled:
+    name: GNS 530 disabled
+    watch: L('XMLVAR_GPS_DISABLED_AS530_1')
+    write: none
+  kas_armed_vs:
+    name: Armed vertical speed
+    watch: instrument('KAS297B_1|Index=1', 'armedVerticalSpeed')
+    write: |
+      (value) => {
+        // 100 fpm a step, and at most 20 steps a write
+        const clamp = (n) => Math.max(-20, Math.min(n, 20))
+        const steps = clamp(Math.round((value - state.kas_armed_vs) / 100))
+        if (steps === 0 || !state.battery) return
+        if (steps > 0) write(H('kas297b_100_INC')).repeat(steps).every('2 frames')
+        else write(H('kas297b_100_DEC')).repeat(-steps)
+      }
+
+events:
+  ap_master:
+    name: Autopilot master
+    watch: K('AP_MASTER')
+    write: K('AP_MASTER')
+    ignore:
+      - K('TOGGLE_FLIGHT_DIRECTOR')
+
+# The tablet is the one display of the package's own that takes presses on its screen, and its
+# radios take knobs and buttons.
+#
+# - A list item in a comment, reflowed under its first word
+# - A second item
+#
+# Control     Watch                        Write
+# Battery     B('ELECTRICAL_Battery_1')    toggle
+seats:
+  pilot:
+    name: Pilot
+    hip: [0.282, 0.212, -0.09]
+    eye: [0.643, -0.054]

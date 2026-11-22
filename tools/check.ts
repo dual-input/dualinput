@@ -46,6 +46,10 @@ const checks: [string, () => void | Promise<void>][] = [
   // A clone with no release tags, such as a fork's, checks nothing here.
   ["the released levels against their release tags", checkReleasedLevels],
   ["the profiles' build", () => run("cargo", [...BUILDER, "build", "profiles"])],
+  // A profile edited on GitHub's site, or without the profile extension, can come in out of the
+  // layout the format names, which the formatter writes (record/areas/profiles/03-the-extension.md,
+  // "Formatting").
+  ["the profiles' layout", () => run("cargo", [...BUILDER, "format", "profiles", "--check"])],
   // The tools' tests, and our TypeScript's own, such as page-client's and the backend's, the
   // backend's on a local D1, on Node's test runner.
   ["the TypeScript tests", () => run(process.execPath, ["--test", ...typeScriptTests()])],

@@ -6,10 +6,13 @@
 //   node tools/icons.ts    writes the files below
 //
 // GitHub and Discord round an avatar themselves, into a rounded square and a circle, so the avatar is the icon as a
-// plain square, which a person uploads in each site's settings.
+// plain square, which a person uploads in each site's settings. The profile extension's icon is the app's at 128px,
+// which `node tools/build.ts extension` draws from `extensionIcon` below as it packs the extension, so no copy of it is
+// committed.
 
 import fs from "node:fs"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 
 import sharp from "sharp"
 
@@ -30,6 +33,8 @@ const AVATAR = path.join(ROOT, "target", "icons", "avatar.png")
  */
 const SIZES = [16, 20, 24, 32, 40, 48, 64, 256]
 const AVATAR_SIZE = 1024
+/** The least an extension's manifest takes for its icon, "at least 128x128 pixels" (documented, https://code.visualstudio.com/api/references/extension-manifest, `icon`). */
+const EXTENSION_SIZE = 128
 
 /**
  * The toolbar's icon on a 64-unit square, as the toolbar icons of other packages are, such as FSLTL's (read in
@@ -150,12 +155,27 @@ function outline(segment: Segment, half: number, scale: number, offset: number):
  * EFB's stylesheet fills an app's SVG with its own color, which wins over the white on our root. We haven't read how the
  * toolbar colors an icon, so the white stands in wherever it sets none, and reads on the toolbar's dark buttons.
  */
-function alone(scale: number, offset: number, viewBox: string, size = ""): string {
+function alone(scale: number, offset: number, viewBox: string, size = "", fill = "#ffffff"): string {
   const shapes = segments(GLYPH).map((segment) => `  <path d="${outline(segment, ALONE.stroke / 2, scale, offset)}"/>`)
-  return `<svg xmlns="http://www.w3.org/2000/svg"${size} viewBox="${viewBox}" fill="#ffffff">
+  return `<svg xmlns="http://www.w3.org/2000/svg"${size} viewBox="${viewBox}" fill="${fill}">
 ${shapes.join("\n")}
 </svg>
 `
+}
+
+/**
+ * The profile language's icon, which VS Code shows beside "Dual Input Profile" in its list of
+ * languages: the glyph alone on a 16-unit square, at under two thirds of it, since the glyph is
+ * wider than it's tall and larger reads wider than the icons beside it, in the app's sky for dark
+ * themes, and in a darker sky for light ones, Tailwind's sky-700, since the app's reads too pale on
+ * white. The viewBox starts 1.5 units left of the square, which moves the glyph that far right: its
+ * weight sits in its two arms, so centered by its outline, its thin right end stops short of the
+ * right edges of the icons beside it, F#'s and Dotenv's among them.
+ */
+export function languageIcons(): { light: string; dark: string } {
+  const { scale, offset } = placeGlyph(16, 0.65)
+  const viewBox = "-1.5 0 16 16"
+  return { light: alone(scale, offset, viewBox, "", "#0369a1"), dark: alone(scale, offset, viewBox, "", colors.primary) }
 }
 
 /** The toolbar's icon: the glyph alone, centered on the toolbar's 64-unit square. */
@@ -204,12 +224,20 @@ function ico(images: { size: number; png: Buffer }[]): Buffer {
   return Buffer.concat([header, ...images.map((image) => image.png)])
 }
 
-main(async () => {
-  const images = await Promise.all(SIZES.map(async (size) => ({ size, png: await draw(true, size) })))
-  fs.writeFileSync(ICO, ico(images))
-  fs.writeFileSync(EFB, efbIcon())
-  fs.writeFileSync(TOOLBAR, toolbarIcon())
-  fs.mkdirSync(path.dirname(AVATAR), { recursive: true })
-  fs.writeFileSync(AVATAR, await draw(false, AVATAR_SIZE))
-  for (const file of [ICO, EFB, TOOLBAR, AVATAR]) console.log(`wrote ${path.relative(ROOT, file)}`)
-})
+/** The profile extension's icon, the app's rounded icon as a PNG. */
+export function extensionIcon(): Promise<Buffer> {
+  return draw(true, EXTENSION_SIZE)
+}
+
+// tools/build.ts imports this file for `extensionIcon`, which mustn't write the files below.
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main(async () => {
+    const images = await Promise.all(SIZES.map(async (size) => ({ size, png: await draw(true, size) })))
+    fs.writeFileSync(ICO, ico(images))
+    fs.writeFileSync(EFB, efbIcon())
+    fs.writeFileSync(TOOLBAR, toolbarIcon())
+    fs.mkdirSync(path.dirname(AVATAR), { recursive: true })
+    fs.writeFileSync(AVATAR, await draw(false, AVATAR_SIZE))
+    for (const file of [ICO, EFB, TOOLBAR, AVATAR]) console.log(`wrote ${path.relative(ROOT, file)}`)
+  })
+}

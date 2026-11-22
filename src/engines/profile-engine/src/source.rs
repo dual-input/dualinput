@@ -13,6 +13,8 @@ pub trait Files {
 /// in the order it's first imported, which is the order a bundle holds their entries in.
 pub struct Source {
     pub(crate) files: Vec<SourceFile>,
+    /// Whether the first file is a module read on its own, which `module_source` gives.
+    pub(crate) module: bool,
 }
 
 pub(crate) struct SourceFile {
@@ -30,6 +32,23 @@ impl Source {
 /// Reads and parses a profile and its modules. A file that's missing or doesn't parse, and an
 /// import cycle, fail it, since the checks need every file's tree.
 pub fn source(files: &impl Files, path: &str) -> Result<Source, Report> {
+    load(files, path).map(|files| Source {
+        files,
+        module: false,
+    })
+}
+
+/// Reads and parses a module and the modules it imports, for an editor to check a module that no
+/// profile imports: the checker holds it to a module's rules, and its program has one file, which
+/// declares its own entries alone (record/areas/profiles/03-the-extension.md, "Checks").
+pub fn module_source(files: &impl Files, path: &str) -> Result<Source, Report> {
+    load(files, path).map(|files| Source {
+        files,
+        module: true,
+    })
+}
+
+fn load(files: &impl Files, path: &str) -> Result<Vec<SourceFile>, Report> {
     let mut loader = Loader {
         files,
         loaded: Vec::new(),
@@ -41,9 +60,7 @@ pub fn source(files: &impl Files, path: &str) -> Result<Source, Report> {
         loader.report.sort();
         return Err(loader.report);
     }
-    Ok(Source {
-        files: loader.loaded,
-    })
+    Ok(loader.loaded)
 }
 
 struct Loader<'a, F: Files> {
@@ -88,7 +105,7 @@ impl<F: Files> Loader<'_, F> {
         });
         self.stack.push(path.to_string());
         for (name, at) in imports {
-            let Some(module) = module_path(&name) else {
+            let Some(module) = module_file(&name) else {
                 self.report.push(Diagnostic::error(
                     at,
                     "module-missing",
@@ -137,8 +154,9 @@ fn imports(root: &Node) -> Vec<(String, Place)> {
         .collect()
 }
 
-/// A module's file from its import, which stays inside `profiles/`.
-fn module_path(name: &str) -> Option<String> {
+/// A module's file from its import, as `modules/gns-430.yaml` from `modules/gns-430`, by its path
+/// from `profiles/`, which it stays inside; none for an import that would leave it.
+pub fn module_file(name: &str) -> Option<String> {
     let inside = !name.is_empty()
         && !name.starts_with('/')
         && !name.contains('\\')

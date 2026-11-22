@@ -14,6 +14,18 @@ Decides:     Which compiler builds a bundle, and where it runs; the YAML parser;
 > - In [a bundle's bytes](#a-bundles-bytes), the top-level keys come in [the format's layout](01-format-and-delivery.md#layout)'s order.
 > - CI holds a level's files only to release tags from 1.0.0 on, since nobody flies a release before it, and [publishing](#publishing) still counts every release tag's `LEVEL` as released, so a 0.x release gets the tree's profiles.
 
+> **Note**
+> From stage 22d, which builds the profile extension ([03-the-extension](03-the-extension.md); [profiles log][22d]; user, 2026-11-21 and 2026-11-22):
+>
+> - [The builder program](#the-builder-program) gains two commands: `serve`, the extension's language server, which builds each profile an author saves into the local folder, as [writing a bundle there](#writing-a-bundle-there) has it; and `format <profile or folder> [--check]`, which writes a file in [the format's layout](01-format-and-delivery.md#layout), or with `--check` fails on one that isn't in it, as `tools/check.ts` and CI's profiles job run it on `profiles/`.
+> - The builder's program ships inside the extension's `.vsix`, so an author without the workspace's setup builds and tests a bundle in their own core, where [the builder program](#the-builder-program) left that to the IDE.
+> - In [a bundle's bytes](#a-bundles-bytes), `seats` comes last among the top-level keys; a bundle keeps its double quotes where YAML needs quotes, since the rule that a profile takes single quotes outside scripts holds an author's files alone ([quotes](03-the-extension.md#quotes)).
+> - In [the profile engine](#the-profile-engine), `program` writes each entry's `name:` as a doc comment on its key of `state`, so TypeScript's completion and hovers show it.
+> - Of [left open](#left-open)'s items, the editor's TypeScript is settled for the extension: TypeScript 6.0.3's language service, in QuickJS-ng, in the builder's server, which the IDE can use as it is ([profiles log][p04]).
+
+[22d]: log.md#2026-11-22-the-profile-extensions-design-finds-what-vs-code-reads-of-a-vsix-and-a-language-what-vsce-costs-and-what-zed-allows-and-the-format-puts-seats-last-and-takes-single-quotes
+[p04]: log.md#2026-11-22-typescripts-language-service-answers-in-about-40ms-in-quickjs-ng-on-the-58ps-write-functions-against-3ms-in-node-once-quickjs-ng-has-a-stand-in-for-intl
+
 The core loads bundles and never builds one.
 A published bundle comes from our Pages site under its hash, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.
 The profile builder type-checks and compiles with TypeScript 6.0.3's own compiler inside QuickJS-ng, the same code in CI, in the `dualinput-profile-builder` program the core team runs from the repository, and later in the IDE, so `typescript.js` never ships to pilots.

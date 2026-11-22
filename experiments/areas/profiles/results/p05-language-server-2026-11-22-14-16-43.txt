@@ -1,0 +1,6 @@
+p05 on profiles/aircraft/bksq-baronpro.yaml, AMD Ryzen 7 7800X3D 8-Core Processor, Node v22.23.1, 30 runs of each request, each after an edit
+start: initialize answered 535ms after the process started; the first completion in a script 798ms after, itself 262.8ms
+completion after state.: p50 53.1ms, p95 72.9ms, max 74.1ms
+signature help in write(: p50 46.4ms, p95 64.4ms, max 77.0ms
+hover on state.breaker_starter: p50 44.8ms, p95 65.6ms, max 65.9ms
+the engine's checks, didChange to publishDiagnostics: p50 1.9ms, p95 2.2ms, max 2.2ms

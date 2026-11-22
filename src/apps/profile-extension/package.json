@@ -1,0 +1,752 @@
+{
+  "name": "dualinput-profiles",
+  "publisher": "dual-input",
+  "displayName": "Dual Input Profiles",
+  "description": "Write Dual Input's aircraft profiles, with the profile builder's errors as you type, and each profile you save built into Dual Input's local folder for a test session.",
+  "version": "0.0.0",
+  "engines": {
+    "vscode": "^1.91.0"
+  },
+  "categories": ["Programming Languages", "Formatters", "Linters"],
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dual-input/dualinput"
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": ["onLanguage:dualinput-profile", "workspaceContains:**/profiles/aircraft/*.yaml"],
+  "contributes": {
+    "languages": [
+      {
+        "id": "dualinput-profile",
+        "aliases": ["Dual Input Profile"],
+        "filenamePatterns": ["**/profiles/aircraft/*.yaml", "**/profiles/modules/*.yaml"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/language-light.svg",
+          "dark": "./icons/language-dark.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "dualinput-profile",
+        "scopeName": "source.dualinput-profile",
+        "path": "./syntaxes/dualinput-profile.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.javascript.dualinput-profile": "javascript"
+        }
+      }
+    ],
+    "commands": [
+      { "command": "dualInput.buildNow", "title": "Build now", "category": "Dual Input" },
+      { "command": "dualInput.removeBundle", "title": "Remove local bundle", "category": "Dual Input" },
+      { "command": "dualInput.openLocalFolder", "title": "Open local folder", "category": "Dual Input" },
+      { "command": "dualInput.restartServer", "title": "Restart language server", "category": "Dual Input" }
+    ],
+    "menus": {
+      "commandPalette": [
+        { "command": "dualInput.buildNow", "when": "editorLangId == dualinput-profile" },
+        { "command": "dualInput.removeBundle", "when": "editorLangId == dualinput-profile" }
+      ]
+    },
+    "configuration": {
+      "title": "Dual Input Profiles",
+      "properties": {
+        "dualInput.buildOnSave": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Build each profile you save with `Ctrl+S` into the local folder, so a test session reloads it on every PC in the flight. Saving a module builds each profile that imports it. A save VS Code makes on its own, with `files.autoSave` on, builds nothing."
+        },
+        "dualInput.localFolder": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "The folder bundles go into. Leave it empty for Dual Input's own, `%APPDATA%\\DualInput\\profiles\\local\\`, or name another, such as the one a development core's `profiles.local` setting names."
+        },
+        "dualInput.trace.server": {
+          "type": "string",
+          "enum": ["off", "messages", "verbose"],
+          "enumDescriptions": ["Log nothing extra.", "Log each message's name.", "Log each message with what it carries."],
+          "default": "off",
+          "description": "Log the messages between the extension and its language server in the Dual Input Profiles output, for debugging."
+        },
+        "dualInput.colors": {
+          "type": "string",
+          "enum": ["auto", "dark", "light"],
+          "enumDescriptions": [
+            "Take the palette from the theme's kind: the light one in a light theme, the dark one in a dark theme.",
+            "Take the dark palette, whatever the theme's kind.",
+            "Take the light palette, whatever the theme's kind."
+          ],
+          "default": "auto",
+          "markdownDescription": "Which of Dual Input's two palettes colors profiles. Set `dark` or `light` for a theme that declares the wrong kind, and `auto` to go back. A theme whose name holds \"Light\" gets the light palette by default and any other theme the dark one, so when the active theme needs the other, Dual Input writes it into your user settings, under the theme's key in `#editor.tokenColorCustomizations#`."
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[dualinput-profile]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.bracketPairColorization.enabled": false
+      },
+      "editor.tokenColorCustomizations": {
+        "textMateRules": [
+          {
+            "scope": [
+              "source.dualinput-profile",
+              "meta.name-call.dualinput-profile",
+              "meta.embedded.block.javascript.dualinput-profile",
+              "meta.embedded.block.javascript.dualinput-profile entity",
+              "meta.embedded.block.javascript.dualinput-profile entity.name.function.js",
+              "meta.embedded.block.javascript.dualinput-profile entity.name.function.tagged-template.js",
+              "meta.embedded.block.javascript.dualinput-profile entity.name.label.js",
+              "meta.embedded.block.javascript.dualinput-profile entity.name.type.alias.js",
+              "meta.embedded.block.javascript.dualinput-profile entity.name.type.class.js",
+              "meta.embedded.block.javascript.dualinput-profile entity.name.type.enum.js",
+              "meta.embedded.block.javascript.dualinput-profile entity.name.type.interface.js",
+              "meta.embedded.block.javascript.dualinput-profile entity.name.type.js",
+              "meta.embedded.block.javascript.dualinput-profile entity.name.type.module.js",
+              "meta.embedded.block.javascript.dualinput-profile entity.other.inherited-class.js",
+              "meta.embedded.block.javascript.dualinput-profile meta",
+              "meta.embedded.block.javascript.dualinput-profile meta.block.js",
+              "meta.embedded.block.javascript.dualinput-profile meta.object-literal.key.js",
+              "meta.embedded.block.javascript.dualinput-profile source.embedded.js",
+              "meta.embedded.block.javascript.dualinput-profile support",
+              "meta.embedded.block.javascript.dualinput-profile support.class.js",
+              "meta.embedded.block.javascript.dualinput-profile support.class.promise.js",
+              "meta.embedded.block.javascript.dualinput-profile support.constant.js",
+              "meta.embedded.block.javascript.dualinput-profile support.type.builtin.js",
+              "meta.embedded.block.javascript.dualinput-profile support.type.object.module.js",
+              "meta.embedded.block.javascript.dualinput-profile support.type.primitive.js",
+              "meta.embedded.block.javascript.dualinput-profile support.variable.property.importmeta.js",
+              "meta.embedded.block.javascript.dualinput-profile support.variable.property.js",
+              "meta.embedded.block.javascript.dualinput-profile support.variable.property.target.js",
+              "meta.embedded.block.javascript.dualinput-profile variable",
+              "meta.embedded.block.javascript.dualinput-profile variable.object.property.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.constant.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.constant.object.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.constant.object.property.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.constant.property.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.enummember.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.object.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.object.property.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.property.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.readwrite.alias.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.readwrite.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.parameter.js"
+            ],
+            "settings": { "foreground": "#d8dde2", "fontStyle": "" }
+          },
+          {
+            "scope": [
+              "entity.name.tag.entry.dualinput-profile",
+              "variable.other.property.entry.dualinput-profile"
+            ],
+            "settings": { "foreground": "#81b4f6", "fontStyle": "bold" }
+          },
+          {
+            "scope": [
+              "entity.name.tag.block.dualinput-profile"
+            ],
+            "settings": { "foreground": "#81b4f6", "fontStyle": "bold" }
+          },
+          {
+            "scope": [
+              "entity.name.tag.field.dualinput-profile"
+            ],
+            "settings": { "foreground": "#83a7d6", "fontStyle": "" }
+          },
+          {
+            "scope": [
+              "entity.name.function.kind.dualinput-profile"
+            ],
+            "settings": { "foreground": "#c4a2ed", "fontStyle": "bold" }
+          },
+          {
+            "scope": [
+              "string.other.name.dualinput-profile"
+            ],
+            "settings": { "foreground": "#edcfab", "fontStyle": "" }
+          },
+          {
+            "scope": [
+              "variable.parameter.argument.dualinput-profile"
+            ],
+            "settings": { "foreground": "#a597b8", "fontStyle": "" }
+          },
+          {
+            "scope": [
+              "support.function.builtin.dualinput-profile"
+            ],
+            "settings": { "foreground": "#f0c45a", "fontStyle": "bold" }
+          },
+          {
+            "scope": [
+              "string.unquoted.plain.dualinput-profile",
+              "string.quoted.single.dualinput-profile",
+              "string.quoted.double.dualinput-profile",
+              "meta.embedded.block.javascript.dualinput-profile string",
+              "meta.embedded.block.javascript.dualinput-profile constant.character.control.regexp",
+              "meta.embedded.block.javascript.dualinput-profile constant.character.escape.backslash.regexp",
+              "meta.embedded.block.javascript.dualinput-profile constant.character.escape.js",
+              "meta.embedded.block.javascript.dualinput-profile constant.character.numeric.regexp",
+              "meta.embedded.block.javascript.dualinput-profile constant.other.character-class.range.regexp",
+              "meta.embedded.block.javascript.dualinput-profile constant.other.character-class.regexp",
+              "meta.embedded.block.javascript.dualinput-profile constant.other.character-class.set.regexp",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.anchor.regexp",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.negation.regexp",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.or.regexp",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.quantifier.regexp",
+              "meta.embedded.block.javascript.dualinput-profile keyword.other.back-reference.regexp",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.character-class.regexp",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.group.assertion.regexp",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.group.no-capture.regexp",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.group.regexp",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.begin.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.end.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.template.begin.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.template.end.js",
+              "meta.embedded.block.javascript.dualinput-profile string.quoted.alias.js",
+              "meta.embedded.block.javascript.dualinput-profile string.quoted.double.js",
+              "meta.embedded.block.javascript.dualinput-profile string.quoted.single.js",
+              "meta.embedded.block.javascript.dualinput-profile string.regexp.js",
+              "meta.embedded.block.javascript.dualinput-profile string.template.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.regexp"
+            ],
+            "settings": { "foreground": "#82cb92", "fontStyle": "" }
+          },
+          {
+            "scope": [
+              "constant.numeric.dualinput-profile",
+              "constant.numeric.pace.dualinput-profile",
+              "constant.other.variant.dualinput-profile",
+              "meta.embedded.block.javascript.dualinput-profile constant.numeric",
+              "meta.embedded.block.javascript.dualinput-profile constant.numeric.binary.js",
+              "meta.embedded.block.javascript.dualinput-profile constant.numeric.decimal.js",
+              "meta.embedded.block.javascript.dualinput-profile constant.numeric.hex.js",
+              "meta.embedded.block.javascript.dualinput-profile constant.numeric.octal.js",
+              "meta.embedded.block.javascript.dualinput-profile meta.delimiter.decimal.period.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.numeric.bigint.js",
+              "keyword.other.word.dualinput-profile",
+              "meta.embedded.block.javascript.dualinput-profile constant.language",
+              "meta.embedded.block.javascript.dualinput-profile constant.language.boolean.false.js",
+              "meta.embedded.block.javascript.dualinput-profile constant.language.boolean.true.js",
+              "meta.embedded.block.javascript.dualinput-profile constant.language.import-export-all.js",
+              "meta.embedded.block.javascript.dualinput-profile constant.language.infinity.js",
+              "meta.embedded.block.javascript.dualinput-profile constant.language.nan.js",
+              "meta.embedded.block.javascript.dualinput-profile constant.language.null.js",
+              "meta.embedded.block.javascript.dualinput-profile constant.language.undefined.js"
+            ],
+            "settings": { "foreground": "#6ecdcc", "fontStyle": "" }
+          },
+          {
+            "scope": [
+              "meta.embedded.block.javascript.dualinput-profile keyword",
+              "meta.embedded.block.javascript.dualinput-profile storage",
+              "meta.embedded.block.javascript.dualinput-profile variable.language",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.as.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.assert.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.conditional.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.default.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.export.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.flow.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.from.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.import.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.intrinsic.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.loop.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.new.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.require.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.satisfies.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.switch.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.trycatch.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.type.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.control.with.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.generator.asterisk.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.delete.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.extends.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.import.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.in.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.infer.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.instanceof.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.is.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.keyof.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.of.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.typeof.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.void.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.new.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.type.asserts.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.other.debugger.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.other.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.modifier.async.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.modifier.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.class.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.enum.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.function.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.interface.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.internaldeclaration.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.namespace.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.property.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.type.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.language.arguments.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.language.super.js",
+              "meta.embedded.block.javascript.dualinput-profile variable.language.this.js"
+            ],
+            "settings": { "foreground": "#ee94bf", "fontStyle": "" }
+          },
+          {
+            "scope": [
+              "variable.language.given.dualinput-profile"
+            ],
+            "settings": { "foreground": "#f8a18a", "fontStyle": "bold" }
+          },
+          {
+            "scope": [
+              "punctuation.separator.key-value.mapping.dualinput-profile",
+              "punctuation.definition.block.sequence.item.dualinput-profile",
+              "punctuation.definition.sequence.begin.dualinput-profile",
+              "punctuation.definition.sequence.end.dualinput-profile",
+              "punctuation.separator.sequence.dualinput-profile",
+              "punctuation.definition.string.begin.dualinput-profile",
+              "punctuation.definition.string.end.dualinput-profile",
+              "punctuation.definition.block.scalar.dualinput-profile",
+              "punctuation.name-call.dualinput-profile"
+            ],
+            "settings": { "foreground": "#8796a3", "fontStyle": "" }
+          },
+          {
+            "scope": [
+              "punctuation.accessor.dualinput-profile",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator",
+              "meta.embedded.block.javascript.dualinput-profile punctuation",
+              "meta.embedded.block.javascript.dualinput-profile meta.brace",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.arithmetic.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.assignment.compound.bitwise.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.assignment.compound.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.assignment.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.bitwise.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.bitwise.shift.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.comparison.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.decrement.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.definiteassignment.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.increment.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.logical.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.optional.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.relational.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.rest.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.spread.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.ternary.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.type.annotation.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.type.js",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.type.modifier.js",
+              "meta.embedded.block.javascript.dualinput-profile meta.brace.round.js",
+              "meta.embedded.block.javascript.dualinput-profile meta.brace.square.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.accessor.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.accessor.optional.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.decorator.internaldeclaration.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.decorator.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.binding-pattern.array.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.binding-pattern.object.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.block.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.parameters.begin.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.parameters.end.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.section.case-statement.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.template-expression.begin.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.template-expression.end.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.typeparameters.begin.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.typeparameters.end.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.destructuring.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.separator.comma.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.separator.key-value.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.separator.label.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.separator.namespace.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.separator.parameter.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.terminator.statement.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.function.arrow.js"
+            ],
+            "settings": { "foreground": "#a9b5c1", "fontStyle": "" }
+          },
+          {
+            "scope": [
+              "markup.heading.section.dualinput-profile"
+            ],
+            "settings": { "foreground": "#8ccbff", "fontStyle": "bold" }
+          },
+          {
+            "scope": [
+              "markup.heading.subsection.dualinput-profile"
+            ],
+            "settings": { "foreground": "#8ccbff", "fontStyle": "" }
+          },
+          {
+            "scope": [
+              "comment.line.number-sign.dualinput-profile",
+              "meta.embedded.block.javascript.dualinput-profile comment",
+              "meta.embedded.block.javascript.dualinput-profile comment.block.documentation.js",
+              "meta.embedded.block.javascript.dualinput-profile comment.block.js",
+              "meta.embedded.block.javascript.dualinput-profile comment.line.double-slash.js",
+              "meta.embedded.block.javascript.dualinput-profile comment.line.shebang.js",
+              "meta.embedded.block.javascript.dualinput-profile comment.line.triple-slash.directive.js",
+              "meta.embedded.block.javascript.dualinput-profile constant.language.access-type.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile constant.language.symbol-type.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile constant.other.description.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile constant.other.email.link.underline.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile entity.name.type.instance.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.assignment.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile keyword.operator.control.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.angle.begin.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.angle.end.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.curly.begin.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.curly.end.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.square.begin.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.square.end.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.comment.js",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.optional-value.begin.bracket.square.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.optional-value.end.bracket.square.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.begin.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.end.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.separator.pipe.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile punctuation.whitespace.comment.leading.js",
+              "meta.embedded.block.javascript.dualinput-profile storage.type.class.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.description.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.jsdoc",
+              "meta.embedded.block.javascript.dualinput-profile variable.other.link.underline.jsdoc"
+            ],
+            "settings": { "foreground": "#76828b", "fontStyle": "italic" }
+          }
+        ],
+        "[*Light*]": {
+          "textMateRules": [
+            {
+              "scope": [
+                "source.dualinput-profile",
+                "meta.name-call.dualinput-profile",
+                "meta.embedded.block.javascript.dualinput-profile",
+                "meta.embedded.block.javascript.dualinput-profile entity",
+                "meta.embedded.block.javascript.dualinput-profile entity.name.function.js",
+                "meta.embedded.block.javascript.dualinput-profile entity.name.function.tagged-template.js",
+                "meta.embedded.block.javascript.dualinput-profile entity.name.label.js",
+                "meta.embedded.block.javascript.dualinput-profile entity.name.type.alias.js",
+                "meta.embedded.block.javascript.dualinput-profile entity.name.type.class.js",
+                "meta.embedded.block.javascript.dualinput-profile entity.name.type.enum.js",
+                "meta.embedded.block.javascript.dualinput-profile entity.name.type.interface.js",
+                "meta.embedded.block.javascript.dualinput-profile entity.name.type.js",
+                "meta.embedded.block.javascript.dualinput-profile entity.name.type.module.js",
+                "meta.embedded.block.javascript.dualinput-profile entity.other.inherited-class.js",
+                "meta.embedded.block.javascript.dualinput-profile meta",
+                "meta.embedded.block.javascript.dualinput-profile meta.block.js",
+                "meta.embedded.block.javascript.dualinput-profile meta.object-literal.key.js",
+                "meta.embedded.block.javascript.dualinput-profile source.embedded.js",
+                "meta.embedded.block.javascript.dualinput-profile support",
+                "meta.embedded.block.javascript.dualinput-profile support.class.js",
+                "meta.embedded.block.javascript.dualinput-profile support.class.promise.js",
+                "meta.embedded.block.javascript.dualinput-profile support.constant.js",
+                "meta.embedded.block.javascript.dualinput-profile support.type.builtin.js",
+                "meta.embedded.block.javascript.dualinput-profile support.type.object.module.js",
+                "meta.embedded.block.javascript.dualinput-profile support.type.primitive.js",
+                "meta.embedded.block.javascript.dualinput-profile support.variable.property.importmeta.js",
+                "meta.embedded.block.javascript.dualinput-profile support.variable.property.js",
+                "meta.embedded.block.javascript.dualinput-profile support.variable.property.target.js",
+                "meta.embedded.block.javascript.dualinput-profile variable",
+                "meta.embedded.block.javascript.dualinput-profile variable.object.property.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.constant.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.constant.object.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.constant.object.property.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.constant.property.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.enummember.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.object.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.object.property.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.property.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.readwrite.alias.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.readwrite.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.parameter.js"
+              ],
+              "settings": { "foreground": "#1f2328", "fontStyle": "" }
+            },
+            {
+              "scope": [
+                "entity.name.tag.entry.dualinput-profile",
+                "variable.other.property.entry.dualinput-profile"
+              ],
+              "settings": { "foreground": "#025eb8", "fontStyle": "bold" }
+            },
+            {
+              "scope": [
+                "entity.name.tag.block.dualinput-profile"
+              ],
+              "settings": { "foreground": "#025eb8", "fontStyle": "bold" }
+            },
+            {
+              "scope": [
+                "entity.name.tag.field.dualinput-profile"
+              ],
+              "settings": { "foreground": "#2a6cba", "fontStyle": "" }
+            },
+            {
+              "scope": [
+                "entity.name.function.kind.dualinput-profile"
+              ],
+              "settings": { "foreground": "#792fb5", "fontStyle": "bold" }
+            },
+            {
+              "scope": [
+                "string.other.name.dualinput-profile"
+              ],
+              "settings": { "foreground": "#5c3a02", "fontStyle": "" }
+            },
+            {
+              "scope": [
+                "variable.parameter.argument.dualinput-profile"
+              ],
+              "settings": { "foreground": "#7e649c", "fontStyle": "" }
+            },
+            {
+              "scope": [
+                "support.function.builtin.dualinput-profile"
+              ],
+              "settings": { "foreground": "#8f6a00", "fontStyle": "bold" }
+            },
+            {
+              "scope": [
+                "string.unquoted.plain.dualinput-profile",
+                "string.quoted.single.dualinput-profile",
+                "string.quoted.double.dualinput-profile",
+                "meta.embedded.block.javascript.dualinput-profile string",
+                "meta.embedded.block.javascript.dualinput-profile constant.character.control.regexp",
+                "meta.embedded.block.javascript.dualinput-profile constant.character.escape.backslash.regexp",
+                "meta.embedded.block.javascript.dualinput-profile constant.character.escape.js",
+                "meta.embedded.block.javascript.dualinput-profile constant.character.numeric.regexp",
+                "meta.embedded.block.javascript.dualinput-profile constant.other.character-class.range.regexp",
+                "meta.embedded.block.javascript.dualinput-profile constant.other.character-class.regexp",
+                "meta.embedded.block.javascript.dualinput-profile constant.other.character-class.set.regexp",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.anchor.regexp",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.negation.regexp",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.or.regexp",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.quantifier.regexp",
+                "meta.embedded.block.javascript.dualinput-profile keyword.other.back-reference.regexp",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.character-class.regexp",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.group.assertion.regexp",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.group.no-capture.regexp",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.group.regexp",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.begin.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.end.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.template.begin.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.template.end.js",
+                "meta.embedded.block.javascript.dualinput-profile string.quoted.alias.js",
+                "meta.embedded.block.javascript.dualinput-profile string.quoted.double.js",
+                "meta.embedded.block.javascript.dualinput-profile string.quoted.single.js",
+                "meta.embedded.block.javascript.dualinput-profile string.regexp.js",
+                "meta.embedded.block.javascript.dualinput-profile string.template.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.regexp"
+              ],
+              "settings": { "foreground": "#006e30", "fontStyle": "" }
+            },
+            {
+              "scope": [
+                "constant.numeric.dualinput-profile",
+                "constant.numeric.pace.dualinput-profile",
+                "constant.other.variant.dualinput-profile",
+                "meta.embedded.block.javascript.dualinput-profile constant.numeric",
+                "meta.embedded.block.javascript.dualinput-profile constant.numeric.binary.js",
+                "meta.embedded.block.javascript.dualinput-profile constant.numeric.decimal.js",
+                "meta.embedded.block.javascript.dualinput-profile constant.numeric.hex.js",
+                "meta.embedded.block.javascript.dualinput-profile constant.numeric.octal.js",
+                "meta.embedded.block.javascript.dualinput-profile meta.delimiter.decimal.period.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.numeric.bigint.js",
+                "keyword.other.word.dualinput-profile",
+                "meta.embedded.block.javascript.dualinput-profile constant.language",
+                "meta.embedded.block.javascript.dualinput-profile constant.language.boolean.false.js",
+                "meta.embedded.block.javascript.dualinput-profile constant.language.boolean.true.js",
+                "meta.embedded.block.javascript.dualinput-profile constant.language.import-export-all.js",
+                "meta.embedded.block.javascript.dualinput-profile constant.language.infinity.js",
+                "meta.embedded.block.javascript.dualinput-profile constant.language.nan.js",
+                "meta.embedded.block.javascript.dualinput-profile constant.language.null.js",
+                "meta.embedded.block.javascript.dualinput-profile constant.language.undefined.js"
+              ],
+              "settings": { "foreground": "#006666", "fontStyle": "" }
+            },
+            {
+              "scope": [
+                "meta.embedded.block.javascript.dualinput-profile keyword",
+                "meta.embedded.block.javascript.dualinput-profile storage",
+                "meta.embedded.block.javascript.dualinput-profile variable.language",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.as.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.assert.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.conditional.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.default.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.export.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.flow.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.from.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.import.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.intrinsic.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.loop.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.new.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.require.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.satisfies.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.switch.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.trycatch.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.type.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.control.with.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.generator.asterisk.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.delete.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.extends.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.import.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.in.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.infer.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.instanceof.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.is.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.keyof.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.of.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.typeof.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.expression.void.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.new.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.type.asserts.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.other.debugger.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.other.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.modifier.async.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.modifier.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.class.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.enum.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.function.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.interface.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.internaldeclaration.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.namespace.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.property.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.type.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.language.arguments.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.language.super.js",
+                "meta.embedded.block.javascript.dualinput-profile variable.language.this.js"
+              ],
+              "settings": { "foreground": "#a7016d", "fontStyle": "" }
+            },
+            {
+              "scope": [
+                "variable.language.given.dualinput-profile"
+              ],
+              "settings": { "foreground": "#9d2602", "fontStyle": "bold" }
+            },
+            {
+              "scope": [
+                "punctuation.separator.key-value.mapping.dualinput-profile",
+                "punctuation.definition.block.sequence.item.dualinput-profile",
+                "punctuation.definition.sequence.begin.dualinput-profile",
+                "punctuation.definition.sequence.end.dualinput-profile",
+                "punctuation.separator.sequence.dualinput-profile",
+                "punctuation.definition.string.begin.dualinput-profile",
+                "punctuation.definition.string.end.dualinput-profile",
+                "punctuation.definition.block.scalar.dualinput-profile",
+                "punctuation.name-call.dualinput-profile"
+              ],
+              "settings": { "foreground": "#6b7b87", "fontStyle": "" }
+            },
+            {
+              "scope": [
+                "punctuation.accessor.dualinput-profile",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator",
+                "meta.embedded.block.javascript.dualinput-profile punctuation",
+                "meta.embedded.block.javascript.dualinput-profile meta.brace",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.arithmetic.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.assignment.compound.bitwise.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.assignment.compound.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.assignment.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.bitwise.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.bitwise.shift.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.comparison.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.decrement.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.definiteassignment.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.increment.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.logical.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.optional.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.relational.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.rest.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.spread.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.ternary.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.type.annotation.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.type.js",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.type.modifier.js",
+                "meta.embedded.block.javascript.dualinput-profile meta.brace.round.js",
+                "meta.embedded.block.javascript.dualinput-profile meta.brace.square.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.accessor.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.accessor.optional.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.decorator.internaldeclaration.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.decorator.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.binding-pattern.array.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.binding-pattern.object.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.block.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.parameters.begin.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.parameters.end.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.section.case-statement.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.template-expression.begin.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.template-expression.end.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.typeparameters.begin.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.typeparameters.end.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.destructuring.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.separator.comma.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.separator.key-value.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.separator.label.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.separator.namespace.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.separator.parameter.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.terminator.statement.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.function.arrow.js"
+              ],
+              "settings": { "foreground": "#4a5a66", "fontStyle": "" }
+            },
+            {
+              "scope": [
+                "markup.heading.section.dualinput-profile"
+              ],
+              "settings": { "foreground": "#0859ac", "fontStyle": "bold" }
+            },
+            {
+              "scope": [
+                "markup.heading.subsection.dualinput-profile"
+              ],
+              "settings": { "foreground": "#0859ac", "fontStyle": "" }
+            },
+            {
+              "scope": [
+                "comment.line.number-sign.dualinput-profile",
+                "meta.embedded.block.javascript.dualinput-profile comment",
+                "meta.embedded.block.javascript.dualinput-profile comment.block.documentation.js",
+                "meta.embedded.block.javascript.dualinput-profile comment.block.js",
+                "meta.embedded.block.javascript.dualinput-profile comment.line.double-slash.js",
+                "meta.embedded.block.javascript.dualinput-profile comment.line.shebang.js",
+                "meta.embedded.block.javascript.dualinput-profile comment.line.triple-slash.directive.js",
+                "meta.embedded.block.javascript.dualinput-profile constant.language.access-type.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile constant.language.symbol-type.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile constant.other.description.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile constant.other.email.link.underline.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile entity.name.type.instance.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.assignment.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile keyword.operator.control.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.angle.begin.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.angle.end.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.curly.begin.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.curly.end.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.square.begin.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.bracket.square.end.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.comment.js",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.optional-value.begin.bracket.square.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.optional-value.end.bracket.square.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.begin.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.definition.string.end.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.separator.pipe.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile punctuation.whitespace.comment.leading.js",
+                "meta.embedded.block.javascript.dualinput-profile storage.type.class.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.description.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.jsdoc",
+                "meta.embedded.block.javascript.dualinput-profile variable.other.link.underline.jsdoc"
+              ],
+              "settings": { "foreground": "#85919a", "fontStyle": "italic" }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

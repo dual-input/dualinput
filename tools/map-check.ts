@@ -72,7 +72,7 @@ export type Finding = { rule: Rule; where: string; detail: string }
 // When you add a unit, add it to the picture and here; until it's here, the check reports
 // it as unmapped.
 const ENGINE_LINES = [
-  ["sync-engine", "profile-build", "sim-edge", "stand-in-sim"],
+  ["sync-engine", "profile-build", "profile-language", "sim-edge", "stand-in-sim"],
   ["sandbox", "profile-engine", "recording-format", "aircraft-model", "sim-client", "sim-awareness", "transport", "page-client"],
   ["messages", "simconnect-types", "msfs-gltf", "msfs-rpn", "ray-cast", "object-mirror"],
 ]

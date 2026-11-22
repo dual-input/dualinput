@@ -1096,9 +1096,42 @@ Done on 2026-11-21: `node tools/check.ts` passed, and the three scenarios passed
 
 ## 22d The profile extension
 
-Builds: a VS Code extension for writing profiles, loaded from disk, which moved to v1 on 2026-11-21 ([the product plan's picks](../product/plan.md#3-v1-or-later)).
-Designs first: the extension, its language and where it lives under `src/`, and how its building on save meets test sessions.
-Needs: 22c, for the schema the extension completes and checks from.
+Designs first: the profile extension, a VS Code extension for writing profiles, which moved to v1 on 2026-11-21 ([the product plan's picks](../product/plan.md#3-v1-or-later)).
+The user designed it with us on 2026-11-21 and 2026-11-22, a call at a time, and [03-the-extension](../profiles/03-the-extension.md) carries it (user):
+
+- It's on VS Code's Marketplace for Windows and attached to each release, and its `.vsix` carries `dualinput-profile-builder`, so any author on Windows builds and tests a profile without the workspace's setup, which reverses the rule that v1 ships no authoring tool.
+- It's a thin client in TypeScript of a language server in Rust, `dualinput-profile-builder serve`, over a new engine, `profile-language`, with TypeScript's language service in the server's QuickJS-ng, in two runtimes, so no request waits behind a check or a build.
+- It gives `profiles/aircraft/` and `profiles/modules/` a language of its own, keeping `.yaml`, highlighted in colors of its own that start from fsc-editor's; completion, hovers, and checks from the engine; Go to Definition, references, renames, and workspace symbols; an outline from the headings; a formatter that writes the format's layout and reflows comments, with indentation as you type from it and a check of layout in CI; and snippets.
+- A manual save builds into the local folder, and the server owns building, so the extension holds only VS Code's UI.
+- The format puts `seats` last, takes single quotes outside scripts, and runs a heading's rule on to column 100 ([profiles log](../profiles/log.md#2026-11-22-the-profile-extensions-design-finds-what-vs-code-reads-of-a-vsix-and-a-language-what-vsce-costs-and-what-zed-allows-and-the-format-puts-seats-last-and-takes-single-quotes)).
+- The three of fsc-editor's features that need the sim, live values, Run, and the display picker, go to [stage 22g](#22g-the-extension-in-the-sim).
+
+Builds:
+
+- `src/engines/profile-language` ([how it works](../profiles/03-the-extension.md#how-it-works))
+- in `tools/profile-builder`: `serve`, the language server, with its two runtimes and building on save, and `format`, with `--check` ([the language server](../profiles/03-the-extension.md#the-language-server), [TypeScript in two runtimes](../profiles/03-the-extension.md#typescript-in-two-runtimes))
+- `src/apps/profile-extension`: the extension, its grammar, and its tests ([the extension](../profiles/03-the-extension.md#the-extension))
+- `tools/lib/vsix.ts`, `node tools/build.ts extension`, and the extension's icon from `tools/icons.ts` ([packing and publishing](../profiles/03-the-extension.md#packing-and-publishing))
+- in `profile-engine`: `seats` last among a bundle's keys; a double-quoted string outside scripts refused in an author's files; and each entry's `name:` as a doc comment on its key in the program TypeScript checks ([01-format-and-delivery](../profiles/01-format-and-delivery.md)'s note of stage 22d, [02-units](../profiles/02-units.md)' note of stage 22d)
+- in `profile-build`: a script that declares `state`, `write`, `L`, `A`, `B`, `K`, or `H` refused, with the error `reserved-name` ([checks](../profiles/03-the-extension.md#checks))
+- the 58P's profile, as the formatter writes it
+- in `release.yml` and `tools/release.ts`: the `.vsix` attached to each release and published on the Marketplace ([the build](01-the-build.md)'s note of stage 22d)
+- in `tools/check.ts` and the profiles' workflow: `format --check` on `profiles/`
+- in `tools/map-check.ts`: `profile-language` on the engines' top line
+
+Needs: 22c, for the format's audited level 1.
+
+Tests:
+
+- [The extension's cases](../profiles/03-the-extension.md#cases), and [its budgets](../profiles/03-the-extension.md#budgets) for a request inside a script and for the engine's checks on a keystroke.
+- On the bench, the scenarios that load the 58P's bundle, whose bytes `seats` last changes: `state-sync`, `clients-panels`, `profiles`, and `test-sessions`.
+- The extension's first publish on the Marketplace waits for the publisher the user makes and for a release, so it joins [stage 23](#23-v1s-release)'s tests.
+
+The stage changes neither the kernel nor the core's edge, so it closes on those four scenarios.
+
+Exit: on our development machine, `node tools/check.ts` passes, `format --check` on `profiles/` among it, and `node tools/bench.ts state-sync clients-panels profiles test-sessions` passes; the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, each of the extension's features works on the 58P's profile, and a manual save writes into the local folder a bundle whose hash is the one `dualinput-profile-builder build` gives for the same file; and the [profiles' log](../profiles/log.md) has the budgets' measurements.
+
+Done on 2026-11-22.
 
 ## 22e The docs
 
@@ -1126,6 +1159,12 @@ Tests, by hand, since the tools have no tests of their own:
 Exit: on our development machine, `node tools/check.ts` passes, and a second run of `node tools/screenshots.ts` changes no file; the avatar is set on GitHub and Discord, the social preview in the repository's settings, and the README opens with it.
 Done on 2026-11-21: 105 pictures came out identical on three runs in a row, `node tools/check.ts` passed, the user set the avatar on GitHub and Discord and uploaded the social preview, and the icons in the sim's toolbar and EFB wait for the next sitting to be looked at.
 
+## 22g The extension in the sim
+
+Builds: three of fsc-editor's features that the user picked for the profile extension on 2026-11-21, which need the sim, so they come after [stage 22d](#22d-the-profile-extension): live values on each `watch:` line; Run, which fires an entry's write with a value the author types; and the display picker, which lists the cockpit's panels for `displays` and outlines one in the sim; and the profile authors' documentation of them.
+Designs first: all of it, with the user, before anything is assumed: what each feature does and how it looks, and what the core, state sync, the clients crate, the panel bridge, and the extension add for it (user, 2026-11-22).
+Needs: 22d.
+
 ## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.
@@ -1134,6 +1173,7 @@ Needs: every stage before it.
 Tests, from stage 22 (user, 2026-11-21):
 
 - [The build's cases on a desk](01-the-build.md#cases-for-the-bench) that need a second release: the next release publishes with a delta from the one before, and a run whose draft is left unpublished leaves a draft the next run deletes before it publishes; and the release pull request's merge releases it once CI passes.
+- From stage 22d: once the user has made the Marketplace's publisher, `dual-input`, with a Trusted Publishing policy for `release.yml`, a release publishes the profile extension there, and it installs in VS Code from the Marketplace ([packing and publishing](../profiles/03-the-extension.md#packing-and-publishing)).
 - From stage 15, in a session with friends on releases the release workflow made, through the servers it deployed: Setup.exe run over the install during the session, a crewmate's core seeing its link lost at an uninstall, a host who is behind, an update downloaded in the app, through `GithubSource` and its delta, and if Windows shows its firewall prompt on a PC with no rule naming the core, whether the desktop app's fix deletes the block rules a canceled prompt leaves, which stage 16's first flight with friends left for the live path (user, 2026-11-12; [install log](../install/log.md#2026-11-12-in-a-session-an-update-downloads-and-waits-then-installs-as-the-sim-closes-the-trays-quit-reads-as-a-leave-and-a-session-raised-no-firewall-prompt-from-windows)).
 
 Exit: [step 9](../product/plan.md#9-build-test-and-release-v1)'s exit happens.

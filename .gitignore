@@ -9,6 +9,9 @@ node_modules/
 # Scripts read out of the sim and aircraft by probes: Asobo's and aircraft developers' code
 experiments/sim-sources/
 
+# The profile colors page, which colors.mjs writes from the extension's grammar and palettes
+experiments/areas/profiles/colors/colors.html
+
 # Tools the study-aircraft skill fetches, pinned in its tools.json
 .claude/skills/study-aircraft/bin/
 

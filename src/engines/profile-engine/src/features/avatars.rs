@@ -5,96 +5,81 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-use crate::blocks::Field;
+use crate::blocks::{Field, field, profile_only};
 use crate::bundle::{Out, scalar};
 use crate::check::Checker;
 use crate::features::{self, Module};
 use crate::tree::{Key, Kind, Node};
 
 pub(crate) const MODULE: Module = Module {
-    blocks: &[Field {
-        key: "seats",
-        level: 1,
-        profile_only: true,
-        about: "Where each seated figure sits, by the seat's key",
-    }],
+    blocks: &[profile_only(
+        "seats",
+        1,
+        "Where each seated figure sits, by the seat's key",
+    )],
     state_fields: &[
-        Field {
-            key: "location",
-            level: 1,
-            profile_only: true,
-            about: "Where the control is, [x, y, z] in meters from the aircraft's reference point, x left, y up, z forward, or a map from variant ID to a point, for the figure's hand",
-        },
-        Field {
-            key: "deadband",
-            level: 1,
-            profile_only: false,
-            about: "With a location, the smallest change of the entry's number, in its own units, that brings the hand",
-        },
+        profile_only(
+            "location",
+            1,
+            "Where the control is, [x, y, z] in meters from the aircraft's reference point, x left, y up, z forward, or a map from variant ID to a point, for the figure's hand",
+        ),
+        field(
+            "deadband",
+            1,
+            "With a location, the smallest change of the entry's number, in its own units, that brings the hand",
+        ),
     ],
-    event_fields: &[Field {
-        key: "location",
-        level: 1,
-        profile_only: true,
-        about: "Where the control is, [x, y, z] in meters from the aircraft's reference point, or a map from variant ID to a point, for the figure's hand",
-    }],
+    event_fields: &[profile_only(
+        "location",
+        1,
+        "Where the control is, [x, y, z] in meters from the aircraft's reference point, or a map from variant ID to a point, for the figure's hand",
+    )],
     check_block,
     check_field,
-    emit_blocks,
+    emit_block,
     emit_fields,
+    items: |_| SEAT,
     schema,
 };
 
 /// The fields of one seat.
 const SEAT: &[Field] = &[
-    Field {
-        key: "name",
-        level: 1,
-        profile_only: true,
-        about: "The seat's name, which a pilot reads",
-    },
-    Field {
-        key: "hip",
-        level: 1,
-        profile_only: true,
-        about: "Where the figure's hip sits, [x, y, z] in meters from the aircraft's reference point",
-    },
-    Field {
-        key: "knees",
-        level: 1,
-        profile_only: true,
-        about: "Where the knees are, [up, forward] in meters from the hip, in the seat's own frame",
-    },
-    Field {
-        key: "feet",
-        level: 1,
-        profile_only: true,
-        about: "Where the feet are, [up, forward] in meters from the hip, in the seat's own frame",
-    },
-    Field {
-        key: "eye",
-        level: 1,
-        profile_only: true,
-        about: "Where the eyes are, [up, forward] in meters from the hip, in the seat's own frame",
-    },
-    Field {
-        key: "facing",
-        level: 1,
-        profile_only: true,
-        about: "Which way the seat faces, in degrees from the nose, positive to the right, 0 unless given",
-    },
-    Field {
-        key: "take_radius",
-        level: 1,
-        profile_only: true,
-        about: "How near its eye the camera takes the seat, in meters, 0.4 unless given",
-    },
-    Field {
-        key: "only",
-        level: 1,
-        profile_only: true,
-        about: "The variant IDs the seat applies to",
-    },
+    profile_only("name", 1, "The seat's name, which a pilot reads").with_required(),
+    profile_only(
+        "hip",
+        1,
+        "Where the figure's hip sits, [x, y, z] in meters from the aircraft's reference point",
+    )
+    .with_required(),
+    profile_only(
+        "knees",
+        1,
+        "Where the knees are, [up, forward] in meters from the hip, in the seat's own frame",
+    )
+    .with_required(),
+    profile_only(
+        "feet",
+        1,
+        "Where the feet are, [up, forward] in meters from the hip, in the seat's own frame",
+    )
+    .with_required(),
+    profile_only(
+        "eye",
+        1,
+        "Where the eyes are, [up, forward] in meters from the hip, in the seat's own frame",
+    )
+    .with_required(),
+    profile_only(
+        "facing",
+        1,
+        "Which way the seat faces, in degrees from the nose, positive to the right, 0 unless given",
+    ),
+    profile_only(
+        "take_radius",
+        1,
+        "How near its eye the camera takes the seat, in meters, 0.4 unless given",
+    ),
+    profile_only("only", 1, "The variant IDs the seat applies to"),
 ];
 
 /// Avatars' blocks of a profile.
@@ -219,10 +204,10 @@ fn seat(c: &mut Checker, key: &Key, node: &Node) -> Option<Seat> {
             _ => unreachable!("every field of a seat is read above"),
         }
     }
-    let missing: Vec<String> = ["name", "hip", "knees", "feet", "eye"]
+    let missing: Vec<String> = SEAT
         .iter()
-        .filter(|f| !given.contains(f))
-        .map(|f| format!("`{f}`"))
+        .filter(|f| f.required && !given.contains(&f.key))
+        .map(|f| format!("`{}`", f.key))
         .collect();
     if !missing.is_empty() {
         c.error(
@@ -294,7 +279,7 @@ fn check_field(c: &mut Checker, key: &Key, node: &Node, fields: &mut features::E
     }
 }
 
-fn emit_blocks(blocks: &features::Blocks, out: &mut Out) {
+fn emit_block(_: &str, blocks: &features::Blocks, out: &mut Out) {
     let seats = &blocks.avatars.seats;
     if seats.is_empty() {
         return;
@@ -364,12 +349,13 @@ fn schema(key: &str) -> Value {
                 }
                 props.insert(f.key.into(), v);
             }
+            let required: Vec<&str> = SEAT.iter().filter(|f| f.required).map(|f| f.key).collect();
             json!({
                 "type": "object",
                 "additionalProperties": {
                     "type": "object",
                     "additionalProperties": false,
-                    "required": ["name", "hip", "knees", "feet", "eye"],
+                    "required": required,
                     "properties": props,
                 },
             })

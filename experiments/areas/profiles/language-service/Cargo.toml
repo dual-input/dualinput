@@ -1,0 +1,17 @@
+[package]
+name = "p04-language-service"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+# A workspace of its own, so the root's workspace, whose members don't list experiments, leaves
+# it alone.
+[workspace]
+
+[dependencies]
+profile-engine = { path = "../../../../src/engines/profile-engine" }
+rquickjs = "=0.14.0"
+serde_json = "1.0.154"
+
+[profile.release]
+opt-level = 3

@@ -1,0 +1,11 @@
+[package]
+name = "profile-language"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+profile-engine = { path = "../profile-engine" }
+
+[lints]
+workspace = true

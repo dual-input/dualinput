@@ -123,7 +123,7 @@ export function Frame({ host, link, desktop, sim, version, parts }: FrameProps) 
   const setDot = useCallback((id: string, on: boolean) => setDots((now) => (!!now[id] === on ? now : { ...now, [id]: on })), [])
   // Asks Settings to show its update section, by counting up, since the page stays mounted between asks.
   const [updateAsks, setUpdateAsks] = useState(0)
-  const shell = useMemo<Shell>(() => ({ link, desktop, tab, efbClosed: sim.efbClosed, open: setTab, setDot, updateAsks }), [link, desktop, tab, sim, setDot, updateAsks])
+  const shell = useMemo<Shell>(() => ({ link, desktop, tab, view: { width, height }, efbClosed: sim.efbClosed, open: setTab, setDot, updateAsks }), [link, desktop, tab, width, height, sim, setDot, updateAsks])
   useEffect(() => {
     startParts(parts, link)
     return () => stopParts(parts)

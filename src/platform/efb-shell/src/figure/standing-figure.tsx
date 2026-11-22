@@ -61,24 +61,26 @@ export type StandingFigureProps = {
 export function StandingFigure({ hex, page: pageRef, signals, onGone }: StandingFigureProps) {
   const holder = useRef<HTMLDivElement>(null)
   const { scale: rootScale } = useRoot()
-  const { efbClosed } = useShell()
+  const { efbClosed, view } = useShell()
   const still = useContext(FigureStill)
   const goneNow = useRef(onGone)
   goneNow.current = onGone
 
-  // It keeps the size it opens with, from the bottom of the room it's given, so it stays put when the start card grows over a refusal and the room shrinks from the top. The card covers its empty top. It opens at the first frame it measures anything, since a hidden tab measures nothing.
-  const [opened, setOpened] = useState<{ width: number; height: number } | null>(null)
+  // It keeps the size it opens with, from the bottom of the room it's given, so it stays put when the start card grows over a refusal and the room shrinks from the top. The card covers its empty top. It opens at the first frame it measures anything, since a hidden tab measures nothing, and again whenever the view changes size, since a size it opened with in a view of another shape stays wrong: after the pilot changed the sim's resolution, it stood under a third of its height (user, 2026-11-22).
+  const viewKey = `${Math.round(view.width)}x${Math.round(view.height)}`
+  const [openedIn, setOpenedIn] = useState<{ width: number; height: number; view: string } | null>(null)
+  const opened = openedIn?.view === viewKey ? openedIn : null
   useEffect(() => {
     if (opened) return
     let frame = 0
     const look = () => {
       const element = holder.current
-      if (element && element.offsetWidth > 0 && element.offsetHeight > 0) setOpened({ width: element.offsetWidth, height: element.offsetHeight })
+      if (element && element.offsetWidth > 0 && element.offsetHeight > 0) setOpenedIn({ width: element.offsetWidth, height: element.offsetHeight, view: viewKey })
       else frame = requestAnimationFrame(look)
     }
     look()
     return () => cancelAnimationFrame(frame)
-  }, [opened])
+  }, [opened, viewKey])
 
   useEffect(() => {
     const element = holder.current

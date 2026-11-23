@@ -40,7 +40,8 @@ function HoldRing() {
   }, [])
   return (
     <span aria-hidden className="absolute inset-y-0 right-full mr-2.5 flex items-center">
-      <svg width={RING.size} height={RING.size} viewBox={`0 0 ${RING.size} ${RING.size}`} fill="none">
+      {/* Sized in CSS, so the ring takes the kit root's zoom with the button, which Coherent GT doesn't give an svg's width and height attributes (record/areas/interface/log.md, "2026-11-23: Under the kit root's zoom"). */}
+      <svg style={{ width: RING.size, height: RING.size }} viewBox={`0 0 ${RING.size} ${RING.size}`} fill="none">
         <circle cx={RING.center} cy={RING.center} r={RING.radius} strokeWidth={RING.stroke} className="stroke-primary-foreground/20" />
         <path ref={arc} strokeWidth={RING.stroke} strokeLinecap="round" className="stroke-primary-foreground" />
       </svg>

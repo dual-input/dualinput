@@ -23,15 +23,22 @@ The probes and their raw output are in [experiments/areas/interface](../../../ex
 The EFB app's session card draws the same ring under the EFB's own zoom, so it takes the fix too.
 We haven't seen the fix in the sim, since the countdown runs only in a session, but the debugger drew the sim's off-center ring before the fix and a centered one after it.
 
-Three other SVGs of ours are sized only by attributes and line up with boxes sized in CSS, so under the EFB's zoom they would come apart the way the ring did (unverified; reading each one's `svg` size in the debugger under the EFB's zoom would settle it):
+A code review then found four more SVGs of ours sized only by attributes.
+In the debugger at the EFB's Large tablet, a zoom of 1.203, each laid out at its attributes' size divided by the zoom, short of the box it lines up with:
 
-- the avatars part's seat diagram in [part.tsx](../../../src/features/avatars/efb/part.tsx), whose "You" labels sit over it at positions set in CSS;
-- the figure's hand strip in [portrait.tsx](../../../src/platform/efb-shell/src/figure/portrait.tsx);
-- the figure's body in [drawing.ts](../../../src/platform/efb-shell/src/figure/drawing.ts).
+| SVG | Its `svg` | Its box |
+| --- | --- | --- |
+| The figure's body, in [drawing.ts](../../../src/platform/efb-shell/src/figure/drawing.ts) | 106.4 by 106.4 | 128 by 128, the portrait's card |
+| The figure's hands, in the same file | 106.4 by 117.2 | 128 by 141, the hands' drawing |
+| The hands' shadows, in [portrait.tsx](../../../src/platform/efb-shell/src/figure/portrait.tsx) | 106.4 by 10.8 | 128 by 12.5 |
+| The seats, in the avatars part's [part.tsx](../../../src/features/avatars/efb/part.tsx) | 199.4 by 99.7 | 239.3 by 119.7, with "You" and "Free" placed over it in CSS |
 
-Take-control's hold ring in [strip.tsx](../../../src/features/take-control/efb/strip.tsx) is sized the same way but sits in a box that centers it, so it would only come out smaller than the page around it by the zoom's factor.
+So the figure drew small in its card's top-left corner.
+Each of the four sizes its `svg` in CSS too, and each then read its box's size, with the figure filling its card.
+Take-control's hold ring in [strip.tsx](../../../src/features/take-control/efb/strip.tsx), sized the same way, takes the same change.
+It sits in a box that centers it, so it could only draw small, and we didn't read it, since a press sent from code didn't start its hold.
 
-**Affects:** the countdown's [ring](../../../src/packages/crew/src/ready.tsx), and the scaling line of [Coherent GT's measured limits](../architecture/coherent-gt.md).
+**Affects:** the countdown's [ring](../../../src/packages/crew/src/ready.tsx), the four SVGs above and the hold ring, and the scaling line of [Coherent GT's measured limits](../architecture/coherent-gt.md).
 
 ## 2026-11-23: In the sim's EFB, a tab's icon painted blank when its color changed as the cursor left it after a click, and keeping the active tab's color on hover stopped it
 

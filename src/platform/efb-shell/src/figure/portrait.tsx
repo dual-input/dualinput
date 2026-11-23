@@ -191,7 +191,8 @@ export function FigurePortrait({ hex, size, aim }: { hex: string; size: number; 
     <>
       <div ref={bodyHolder} className="absolute inset-x-0 inset-y-0 overflow-hidden rounded-2xl bg-muted" />
       <div className="absolute left-0 overflow-hidden" style={{ top: size, width: size, height: strip }}>
-        <svg width={size} height={strip} viewBox={`0 0 ${size} ${strip}`} className="block">
+        {/* Sized in CSS, so the shadows take the kit root's zoom with the hands, which Coherent GT doesn't give an svg's width and height attributes (record/areas/interface/log.md, "2026-11-23: Under the kit root's zoom"). */}
+        <svg style={{ width: size, height: strip }} viewBox={`0 0 ${size} ${strip}`} className="block">
           <defs>
             <radialGradient id="dualinput-hand-shadow">
               {HAND_SHADOW_STOPS.map(([offset, opacity]) => (

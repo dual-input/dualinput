@@ -97,6 +97,10 @@ export class FigureDrawing {
   constructor(hex: string, width: number, height: number) {
     this.svg = make("svg", { width, height, viewBox: `0 0 ${width} ${height}` })
     this.svg.style.display = "block"
+    // The drawing fills its card under the kit root's zoom only with its size in CSS, since Coherent GT doesn't zoom an
+    // svg's width and height attributes (record/areas/interface/log.md, "2026-11-23: Under the kit root's zoom").
+    this.svg.style.width = `${width}px`
+    this.svg.style.height = `${height}px`
     this.defs = make("defs")
     this.svg.appendChild(this.defs)
     for (const gradient of [this.main, this.light]) {

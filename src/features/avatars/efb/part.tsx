@@ -212,7 +212,8 @@ function SeatsDrawing({ hex }: { hex: string }) {
   )
   return (
     <div className="relative mx-auto" style={{ width: 240, height: 120 }}>
-      <svg width={240} height={120} viewBox="0 0 240 120" fill="none" className="block" aria-hidden>
+      {/* Sized in CSS, so the seats take the kit root's zoom with the words placed over them, which Coherent GT doesn't give an svg's width and height attributes (record/areas/interface/log.md, "2026-11-23: Under the kit root's zoom"). */}
+      <svg style={{ width: 240, height: 120 }} viewBox="0 0 240 120" fill="none" className="block" aria-hidden>
         <path d={bubble(1)} fill="currentColor" fillOpacity={0.05} />
         <path d={dashedArc(right, seatY, r, corner - Math.PI, Math.PI - corner)} stroke="currentColor" strokeOpacity={0.4} />
         <path d={bubble(0)} fill={hex} fillOpacity={0.14} stroke={hex} strokeOpacity={0.85} strokeWidth={1.5} />

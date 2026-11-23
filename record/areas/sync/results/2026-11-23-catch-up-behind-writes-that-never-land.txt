@@ -1,4 +1,4 @@
-Stage 22g's session in the sim, 2026-11-22, tools/sim/authoring.ts: the second pilot, a bench core on a stand-in, takes the
+Stage 22g's session in the sim, early on 2026-11-23, tools/sim/authoring.ts: the second pilot, a bench core on a stand-in, takes the
 catch-up of the real core flying the Black Square Baron 58P Professional at preflight's end. Its log's lines from the
 catch-up's start to the last write flagged, in the core's clock in microseconds: 33 flags in 13 steps over 19.9s.
 
@@ -37,7 +37,7 @@ catch-up's start to the last write flagged, in the core's clock in microseconds:
 50352092645µs #16881 [state-sync]  INFO state_sync::carry: a write never landed entry="com1_spacing" wanted=Number(1.0) reading=Some(Number(0.0)) retries=0
 50353626875µs #17418 [state-sync]  INFO state_sync::carry: a write never landed entry="com2_spacing" wanted=Number(1.0) reading=Some(Number(0.0)) retries=0
 
-The same session on 2026-11-23, run twice with the script waiting up to 90s: each run's catch-up from its start to its end.
+The same session later that night, run twice with the script waiting up to 90s: each run's catch-up from its start to its end.
 
 51720844358µs #1677 [cockpit-stream]  INFO cockpit_stream: this machine takes the flying machine's catch-up
 51745403298µs #10379 [cockpit-stream]  INFO cockpit_stream: this machine's catch-up ended

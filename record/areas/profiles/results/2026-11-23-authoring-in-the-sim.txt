@@ -1,0 +1,105 @@
+Authoring's cases in the sim, from 2026-11-23_01-01-26, with the core target\release\dualinput-core.exe
+the open text is profiles\aircraft\bksq-baronpro.yaml, with 224 names on its watch lines, one misspelled name besides, and the bundle 1cd007862a57eb56e1ff8c9c262dae14bb055b43d71d8039b5fd56266da8e3a6
+Start the sim, load a flight in the Black Square Baron 58P on the ground at a stand, cold and dark, and press Ready to fly.
+the sim is flying bksq-aircraft-baronpropress; hosting the session
+waiting up to 75s for your aircraft to settle
+preflight ended; waiting up to 90s for the second pilot's catch-up to end
+The cases that need no one run now, for about two minutes. Keep your hands off the controls until a step asks for them.
+
+=== Live values: the 58P's names
+Dual Input 0.1.0; the session flies the Black Square Baron 58P Professional with the bundle the open text's own, and the sim loaded bksq-aircraft-baronpropress
+PASSED: authoring loaded the open text's bundle: {"t":"loaded","hash":"1cd007862a57eb56e1ff8c9c262dae14bb055b43d71d8039b5fd56266da8e3a6"}
+PASSED: each of the 225 names got a value, its firings, or an error within 30s: 184 values, 41 watched for firings, 0 errors
+PASSED: a misspelled L:, L('BKSQ_MixtureLeverPositon_1'), reads 0: {"t":"value","value":{"as":"number","value":0}}
+budget held: the slice with every name open: 21,948 bytes at most, against 65,536 for a message
+
+=== Run, by each route
+the ADF radio's panel's clock reads from -17ms to 55ms off the PC's, so each time below holds to that
+PASSED: an L: entry, windshield_heat, to 1: the panel read it 24ms after the command
+budget held: a Run of windshield_heat, from the command to the panel's reading: 24ms, against 100ms to its first action
+PASSED: an L: entry, windshield_heat, to 0: the panel read it 42ms after the command
+budget held: a Run of windshield_heat, from the command to the panel's reading: 42ms, against 100ms to its first action
+PASSED: an A: entry, rudder_trim, in percent, to 10: the panel read it 23ms after the command
+budget held: a Run of rudder_trim, from the command to the panel's reading: 23ms, against 100ms to its first action
+PASSED: an A: entry, rudder_trim, in percent, to 0: the panel read it 39ms after the command
+budget held: a Run of rudder_trim, from the command to the panel's reading: 39ms, against 100ms to its first action
+PASSED: a K: event entry, pitot_heat_1, whose toggle sends K:PITOT_HEAT_TOGGLE with 1, to 1: the panel read it 21ms after the command
+budget held: a Run of pitot_heat_1, from the command to the panel's reading: 21ms, against 100ms to its first action
+PASSED: a K: event entry, pitot_heat_1, whose toggle sends K:PITOT_HEAT_TOGGLE with 1, to 0: the panel read it 38ms after the command
+budget held: a Run of pitot_heat_1, from the command to the panel's reading: 38ms, against 100ms to its first action
+PASSED: a B: preset entry, battery, whose toggle calls ELECTRICAL_Battery_1_Toggle, to 1: the panel read it 60ms after the command
+budget held: a Run of battery, from the command to the panel's reading: 60ms, against 100ms to its first action
+PASSED: a second B: preset entry, avionics_master, turns the avionics on, as its box reads
+PASSED: the ADF radio has power, by its own isElectricityAvailable()
+PASSED: an H: event entry, adf_timer, fired with no value: the panel read it 35ms after the command
+budget held: a Run of adf_timer, from the command to the panel's reading: 35ms, against 100ms to its first action
+PASSED: the ADF radio's panel heard H:adf_SetRst 1 times in the 1.5s after the Run, which fired it once
+PASSED: an H: event entry's toggle, adf_bfo, which fires H:adf_bfo over the KR87A's bfoMode, to 1: the panel read it 51ms after the command
+budget held: a Run of adf_bfo, from the command to the panel's reading: 51ms, against 100ms to its first action
+PASSED: an H: event entry's toggle, adf_bfo, which fires H:adf_bfo over the KR87A's bfoMode, to 0: the panel read it 60ms after the command
+budget held: a Run of adf_bfo, from the command to the panel's reading: 60ms, against 100ms to its first action
+
+=== The revert notice
+PASSED: annunciator_test to 1: the notice said back to 0 after 49ms, and the panel read 1, then 0 again 36ms later
+PASSED: co_test to 1: the notice said back to 0 after 83ms, and the panel read 1, then 0 again 70ms later
+PASSED: audio_marker_test to 1: the notice said back to 0 after 63ms, and the panel read 1, then 0 again 34ms later
+PASSED: transponder_code to 4660: no notice, and the panel read it holding at 4660
+3 of 4 writes gave the revert notice
+
+=== State sync through sim-variables: H: events our module fires
+PASSED: our module fires both of the second pilot's two H:adf_SetRst in a burst: the ADF radio's panel heard 2, the first 43ms after the second pilot's panel
+
+=== Live values by hand
+Next, the left mixture lever. At the beep, move it slowly through its whole travel and back, and keep it moving until the second beep, about 15 seconds. Press Page Down to start, or Page Up to skip.
+PASSED: the left mixture lever's box followed the sim: 176 of its 177 changes matched to a frame of the panel's, -6ms at p50, 24ms at p95, and 38ms at most; 1 showed a value the panel never read or passed
+budget held: the left mixture lever's box, from the sim's change: 24ms at p95 over 176 changes, against 150ms
+  the panel's frames came every 34.8ms at the median, so each time is short of the sim's own by up to that; the box changed every 50ms at the median, against the slice's round of 50ms
+Next, the beacon switch. At the beep, flip it on and off, four times, slowly, until the second beep, about 15 seconds. Press Page Down to start, or Page Up to skip.
+PASSED: the beacon's box followed each flip: the panel read 8 flips of A:LIGHT BEACON, and the box 8 changes of B('LIGHTING_BEACON_1')
+PASSED: the beacon switch's box followed the sim: 8 of its 8 changes matched to a frame of the panel's, 0ms at p50, 27ms at p95, and 27ms at most
+budget held: the beacon switch's box, from the sim's change: 27ms at p95 over 8 changes, against 150ms
+  the panel's frames came every 34.0ms at the median, so each time is short of the sim's own by up to that; the box changed every 1310ms at the median, against the slice's round of 50ms
+
+=== State sync through sim-variables: an H: event heard, and an instrument() read
+Next, the ADF radio's SET RST button. At the beep, press it once, with the mouse. Press Page Down to start, or Page Up to skip.
+PASSED: the h-events module hears the pilot's press of SET RST beside the radio's own handler, and the second pilot's module fires it
+Next, the ADF radio's BFO button. At the beep, press it once. Press Page Down to start, or Page Up to skip.
+PASSED: instrument-reads sees the KR87A's bfoMode go from 0 to 1, and the second pilot's state sync toggles its own with H:adf_bfo
+
+=== The display picker
+Next, the display picker. Look at the radio stack, with the ADF radio and the NAV and COM radios in view. At the beep, keep the view still until the second beep, about half a minute. Press Page Down to start, or Page Up to skip.
+PASSED: the picker lists 20 panels, against the 58P's 20, and the inspector 20 cockpit pages: VCockpit43 (GTN750_INT); VCockpit44 (GTN650_INT_2|index=2); VCockpit45 (WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1); VCockpit46 (WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI650U2); VCockpit47 (GNS_DISABLED); VCockpit48 (GNS_DISABLED); VCockpit49 (KLN90B); VCockpit50 (KX155B_1|Index=1); VCockpit51 (KX155B_2|Index=2); VCockpit52 (KR87A); VCockpit53 (AS330); VCockpit54 (KDI572R); VCockpit55 (KNS81_1|Index=1); VCockpit56 (bksq_wradar1); VCockpit57 (KAS297B_1|Index=1); VCockpit58 (EDM760_1|Index=1); VCockpit59 (WTT1); VCockpit60 (WTT2); VCockpit61 (BlackSquareTablet); VCockpit62 (WeatherSquare4000_int)
+a picture of the outline on KX155B_1|Index=1: target\sim\runs\2026-11-23_01-01-26-authoring\picker-KX155B_1-Index-1.png
+a picture of the outline on KR87A: target\sim\runs\2026-11-23_01-01-26-authoring\picker-KR87A.png
+PASSED: moving the row outlined each panel's instrument in its own panel: 20 of 20
+PASSED: each row's outline left as the row moved on
+PASSED: the outline cleared from every panel as the picker closed
+
+=== State sync through sim-variables: a preset our module calls
+PASSED: the second pilot's battery switch to 0 reaches state sync here, and our module's call of ELECTRICAL_Battery_1_Toggle moves the 58P's, 84ms after
+PASSED: the second pilot's battery switch to 1 reaches state sync here, and our module's call of ELECTRICAL_Battery_1_Toggle moves the 58P's, 97ms after
+
+=== Results
+32 passed, 0 failed, 0 skipped
+  budget held: the slice with every name open: 21,948 bytes at most, against 65,536 for a message
+  budget held: a Run of windshield_heat, from the command to the panel's reading: 24ms, against 100ms to its first action
+  budget held: a Run of windshield_heat, from the command to the panel's reading: 42ms, against 100ms to its first action
+  budget held: a Run of rudder_trim, from the command to the panel's reading: 23ms, against 100ms to its first action
+  budget held: a Run of rudder_trim, from the command to the panel's reading: 39ms, against 100ms to its first action
+  budget held: a Run of pitot_heat_1, from the command to the panel's reading: 21ms, against 100ms to its first action
+  budget held: a Run of pitot_heat_1, from the command to the panel's reading: 38ms, against 100ms to its first action
+  budget held: a Run of battery, from the command to the panel's reading: 60ms, against 100ms to its first action
+  budget held: a Run of adf_timer, from the command to the panel's reading: 35ms, against 100ms to its first action
+  budget held: a Run of adf_bfo, from the command to the panel's reading: 51ms, against 100ms to its first action
+  budget held: a Run of adf_bfo, from the command to the panel's reading: 60ms, against 100ms to its first action
+  budget held: the left mixture lever's box, from the sim's change: 24ms at p95 over 176 changes, against 150ms
+  budget held: the beacon switch's box, from the sim's change: 27ms at p95 over 8 changes, against 150ms
+the report is target\sim\runs\2026-11-23_01-01-26-authoring\report.txt
+That's every case. Leave the flight loaded. Whoever runs the script stops it with q in its terminal, which replays the core's recording.
+the real core's last loop stats: 54084105813µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26039 busy_percent=1.57 wait_p50_us=9 wait_p99_us=151 wait_p999_us=447 wait_max_us=1370 over_1ms=11 slowest_us=1838 slowest_seq=33343 slowest_stamp=54029522159
+the core's replay: replayed 62151 inputs, and all 193 checkpoints matched, up to the last flush of a cut recording
+
+The real core's loop stats for each minute of the run, from its log:
+53964102280µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=7858 busy_percent=0.49 wait_p50_us=9 wait_p99_us=123 wait_p999_us=991 wait_max_us=8673 over_1ms=3 slowest_us=4718 slowest_seq=1524 slowest_stamp=53943737963
+54024105179µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=23124 busy_percent=1.40 wait_p50_us=10 wait_p99_us=175 wait_p999_us=575 wait_max_us=1368 over_1ms=9 slowest_us=2166 slowest_seq=21358 slowest_stamp=54001095512
+54084105813µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26039 busy_percent=1.57 wait_p50_us=9 wait_p99_us=151 wait_p999_us=447 wait_max_us=1370 over_1ms=11 slowest_us=1838 slowest_seq=33343 slowest_stamp=54029522159

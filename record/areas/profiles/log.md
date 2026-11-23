@@ -8,6 +8,44 @@ TypeScript's language service answers inside a write function in about 40ms in Q
 The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and [p04-language-service.mjs](../../../experiments/areas/profiles/p04-language-service.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 None needs the sim.
 
+## 2026-11-23: Stage 22g's session in the sim passed its 32 cases in the 58P, every budget held
+
+**Asked:** do the [cases](04-the-extension-in-the-sim.md#cases) and [budgets](04-the-extension-in-the-sim.md#budgets) of live values, Run, and the display picker hold in the sim?
+`tools/sim/authoring.ts` had a real core flying the Black Square Baron 58P Professional host, and a bench core on a stand-in join as the second pilot, and played the extension's `serve` with the tree's `bksq-baronpro.yaml` open.
+
+**Expected:** each case passes, as on the bench.
+
+**Found:** on MSFS 2024 on our development machine, 2026-11-23, the night's last run passed all 32 cases, with none skipped ([results](results/2026-11-23-authoring-in-the-sim.txt)).
+
+| Budget | Measured | Against |
+| --- | --- | --- |
+| A box after the sim's change, at p95 | 24ms for the left mixture lever over 176 changes, 27ms for the beacon switch over 8 | 150ms |
+| A Run, from the command to the panel's reading | 21ms to 60ms, over the 10 timed Runs on `L:`, `A:`, `K:`, `B:`, and `H:` entries | 100ms to its first action |
+| The slice with every name open | 21,948 bytes | 65,536 bytes for a message |
+
+A Run's time runs from the command to the panel's reading, a frame or more after the first action went out, and the panel's clock read from -17ms to 55ms off the PC's, so the slowest Run's first action went out within 77ms.
+The slice's round with the 58P's profile open is a bench case, and the `authoring` scenario passed it in CI on 762d432f.
+
+The rest of the run:
+- All 225 names on the profile's watch lines got a value or firings within 30s, and a misspelled `L:` read 0.
+- Three test buttons that spring back gave the revert notice, after 49ms to 83ms, and the transponder's code, which holds, gave none.
+- The picker listed the 58P's 20 panels, outlined each row's instrument in its own panel, and cleared every outline as it closed.
+- State sync's routes through `sim-variables` held: our module fired a burst of two `H:adf_SetRst`, the `h-events` module heard the pilot's SET RST, `instrument-reads` saw BFO change the KR87A's `bfoMode`, and the second pilot's battery switch moved the 58P's through its preset 84ms and 97ms after.
+- The real core's loop was 1.57% busy in the last minute, its slowest input took 4,718µs in the first minute and 1,838µs in the last, and 3 to 11 inputs a minute went over 1ms, with the sim running on the same PC.
+- The replay of the core's recording matched all 193 checkpoints.
+
+The first runs that night stopped at the script's 20s wait for the second pilot's catch-up, which crawls because its stand-in takes none of the 58P's writes ([sync log](../sync/log.md#2026-11-23-a-catch-up-crawls-when-its-writes-never-land-since-each-toggle-stepping-write-or-write-function-waits-out-the-15s-check-of-the-write-before-it)).
+In the next two, the script waited up to 90s, and the catch-up took 24.6s and 26.1s.
+The first of those was stopped partway, and the second ran every case and failed five, each on how the script measured:
+- The left mixture lever's box read 11,448ms behind the lever at p95, and the beacon's 2.7s behind its switch, the spacing of two flips, since the script paired each change of a box only with the panel's frames before it, and a box can show a value before the panel's frame reads it, so the script looks up to 100ms past the box's change.
+- `adf_bfo`'s second Run, sent 126ms after its first, moved nothing, since a toggle decides from the core's last reading and `instrument()` reads every 250ms, so the script waits for the box to show the first Run's value.
+- `annunciator_test` and `audio_marker_test` gave the notice after 32ms and 28ms, and the panel read no change, since the button sprang back within one of its frames, so the script skips a revert case whose notice comes within two of the panel's frames while the panel reads no change.
+  In the last run the panel read both buttons back after 36ms and 34ms, so a later run may skip them.
+
+**Changed:** the script, in e0f36bd8; nothing in the product.
+
+**Affects:** [stage 22g](../build/plan.md#22g-the-extension-in-the-sim)'s exit.
+
 ## 2026-11-22: Building 22g found that moving state sync's routes to the platform moved their code but not their lifetimes, so sim-variables has one of its own
 
 **Asked:** does [stage 22g](../build/plan.md#22g-the-extension-in-the-sim)'s design for the platform's routes by name, which moved state sync's watches, writes, routine, and two panel modules one tier down for every feature, hold against the code it changes ([reaching the sim by name](04-the-extension-in-the-sim.md#reaching-the-sim-by-name))?

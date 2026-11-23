@@ -43,6 +43,7 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 > - The stream applies nothing after a held arrival until the engine's `Stepped` says it went, as it waits on a stepping write's last step.
 > - In [its own echo](#its-own-echo), a reading that brings the value a held write wants is no change of this machine's, as vertical speed mode turned off by altitude hold's event.
 > - So the two-toggle known limit above no longer holds, and in [the cases for the bench](#cases-for-the-bench), a write function that checks for power in catch-up's burst behind the battery waits for the battery's write to read back and then writes, where it wrote nothing and was flagged.
+> - A known limit (user, 2026-11-23): a write the aircraft never takes holds each toggle, stepping write, or write function behind it until its 1.5s check drops it, so a catch-up whose writes don't land crawls, about 1.5s for each such write; a stand-in that took none of the 58P's writes made one take 24.6s ([sync log](log.md#2026-11-23-a-catch-up-crawls-when-its-writes-never-land-since-each-toggle-stepping-write-or-write-function-waits-out-the-15s-check-of-the-write-before-it)).
 
 > **Note**
 > Each `panel_module` call below takes a third argument, a function that says whether the loaded profile names anything the module serves, and `clients` raises its trouble over a panel that never connects only when one says yes ([the apps' note](../interface/01-apps.md); user, 2026-11-01).

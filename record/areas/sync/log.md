@@ -6,7 +6,7 @@ Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on 
 
 ## 2026-11-23: A catch-up crawls when its writes never land, since each toggle, stepping write, or write function waits out the 1.5s check of the write before it
 
-**Asked:** [stage 22g](../build/plan.md#22g-the-extension-in-the-sim)'s session in the sim on 2026-11-22, run by `tools/sim/authoring.ts`, had a real core flying the Black Square Baron 58P Professional host, and a bench core on a stand-in join as the second pilot.
+**Asked:** [stage 22g](../build/plan.md#22g-the-extension-in-the-sim)'s session in the sim on 2026-11-23, run by `tools/sim/authoring.ts`, had a real core flying the Black Square Baron 58P Professional host, and a bench core on a stand-in join as the second pilot.
 It stopped because the second pilot's catch-up at preflight's end didn't end within the script's 20s, and the second pilot's core logged 33 "a write never landed", such as `com1_spacing` wanted 1 and read 0.
 Was it the stage's move of state sync's routes into the platform crate `sim-variables`?
 
@@ -21,14 +21,14 @@ Stage 14's session, run by `tools/sim/state-sync.ts`, ended its catch-up within 
 
 A new bench case loads the pilot flying with values the pilot monitoring lacks on every route, and the pilot monitoring's stand-in takes each write: its catch-up ended 333ms after preflight's end, and 327ms on a rerun.
 With the stand-in's rules taken out, a toggle of a lamp never landed, the writes behind it waited its 1.5s check, and the catch-up took 1,744ms.
-On 2026-11-23 we ran the session in the sim twice, with the script waiting up to 90s, and the second pilot's catch-up took 24.6s and 26.1s ([results](results/2026-11-23-catch-up-behind-writes-that-never-land.txt)).
+Later that night we ran the session in the sim twice with the script waiting up to 90s, and the second pilot's catch-up took 24.6s and 26.1s ([results](results/2026-11-23-catch-up-behind-writes-that-never-land.txt)).
 
 In the sim, on a following machine, a catch-up's toggle, stepping write, or write function waits 1.5s the same way behind a write the aircraft never takes, unless that write is to an entry the pilot flying owns, which holds nothing (read in the code, unverified in the sim).
 
 **Changed:** `state-sync`'s bench scenario has the new case, and `tools/sim/authoring.ts` waits up to 90s for the catch-up and skips the cases on state sync's routes if it never ends.
-Whether the wait behind a write that never lands is a known limit of stage 14c or calls for a change is the user's call, open as of 2026-11-23.
+The user took the wait behind a write that never lands as a known limit of stage 14c on 2026-11-23.
 
-**Affects:** [the sync units](05-units.md)' stage 14c note, which gains a known limit if the user accepts it, and stage 22g's session.
+**Affects:** [the sync units](05-units.md)' stage 14c note, which names the known limit, and stage 22g's session.
 
 ## 2026-11-21: `h-events` went to two panels whose instruments share a key, since state sync knew its panel only by its keys
 

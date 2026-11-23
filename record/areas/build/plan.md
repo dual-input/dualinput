@@ -1198,6 +1198,9 @@ The stage changes the kernel, with a job that reads bytes off the loop, and the 
 
 Exit: on our development machine, `node tools/check.ts` passes, and `node tools/bench.ts` passes, the `authoring` scenario among it; the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, and the user has seen the Dual Input panel's dev page in each of its states; in one session in the sim on the 58P, `node tools/sim/authoring.ts` reports each of its cases passed; and the [profiles' log](../profiles/log.md) has the budgets' measurements and the session's report.
 
+Done on 2026-11-23: CI ran `node tools/check.ts` and the whole bench in place of our development machine, by the user's call, and both passed on the pull request's last commit, the `authoring` scenario among them, with a new `state-sync` case for a crew whose cockpits differ; the user installed the `.vsix` and saw the panel's dev page in each state; and `node tools/sim/authoring.ts` passed its 32 cases in one session on the 58P, every budget held ([profiles log](../profiles/log.md#2026-11-23-stage-22gs-session-in-the-sim-passed-its-32-cases-in-the-58p-every-budget-held)).
+The session found a catch-up that crawls behind writes that never land, which the user took as a known limit of stage 14c ([sync log](../sync/log.md#2026-11-23-a-catch-up-crawls-when-its-writes-never-land-since-each-toggle-stepping-write-or-write-function-waits-out-the-15s-check-of-the-write-before-it)).
+
 ## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.

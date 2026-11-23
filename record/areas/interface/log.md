@@ -38,6 +38,13 @@ Each of the four sizes its `svg` in CSS too, and each then read its box's size, 
 Take-control's hold ring in [strip.tsx](../../../src/features/take-control/efb/strip.tsx), sized the same way, takes the same change.
 It sits in a box that centers it, so it could only draw small, and we didn't read it, since a press sent from code didn't start its hold.
 
+With the fix, the countdown's digit still sat up to 1px above the ring's center, which the user saw at the Medium tablet.
+In the debugger, across the EFB's zooms from 0.866 to 1.2, its ink sat 0.5px to 1px high, and centered at 1.217, measured to the half pixel from the ring's and the digit's pixels.
+Geist SemiBold's metrics center a digit in its 16px line to within 0.1px: "3" spans −16 to 726 units against an ascender of 1005 and a descender of −295.
+So Coherent GT's whole-pixel placement of text leaves it, while the ring draws smooth at fractional positions.
+None of three changes centered it at every zoom: a 28px line for the digit and a `top` of 0.5px moved nothing, and 1px of top padding centered it at 1.04 but left it 0.5px low at 1.095 and 1px low at 1.217.
+We left it as it is, since the banner on the user's screen, at 1.218, shows it centered (user, 2026-11-23).
+
 **Affects:** the countdown's [ring](../../../src/packages/crew/src/ready.tsx), the four SVGs above and the hold ring, and the scaling line of [Coherent GT's measured limits](../architecture/coherent-gt.md).
 
 ## 2026-11-23: In the sim's EFB, a tab's icon painted blank when its color changed as the cursor left it after a click, and keeping the active tab's color on hover stopped it

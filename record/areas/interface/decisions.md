@@ -694,22 +694,19 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - A full-height column would block a third of the cockpit if clicks don't pass through its empty part, which no run has tried ([cases in the sim](01-apps.md#cases-for-the-bench)).
 - **Leaves out:** how the banner shows in VR, beyond the same panel.
 
-## A visible lock is a veil over the display with one centered card
+## A visible lock is a red-orange layer with its words, and the warning a gray one that blocks nothing
 
-- **Decided:** a visible lock is a veil over the whole display, which stays readable through it, tinted for its lock with a fine hatch, and over it a card like the banner's, one centered column of icon, title, message, and Dismiss where it has one, smaller only on a display too small for it.
-  - While this machine has no link up to the PF, in amber: "Reconnecting to James" over "When they reconnect, their actions during the outage will be replayed here."
-  - While it catches up, neutral with a spinner: "Catching up with James", with no way out, since it ends by itself.
-  - Once the core stops renewing the lock, 8s to 10s after its last renewal, tinted from our trouble color: "Dual Input stopped responding" over "This screen works, but won't be synced until Dual Input is back.", with Dismiss.
-    Presses pass through this veil to the display, and only its card takes them.
-    Dismiss clears the warning on every display at once, by the CommBus event `DUALINPUT_BRIDGE_DISMISS`, since the core is silent then.
-  - The unseen lock paints nothing, since the other pilot's figure at the display shows who's pressing, and the blocked press's flash fills the display in our error red at 55% while the press is held.
+- **Decided:** each lock is a layer over the whole display, the bridge's overlay in [what the bridge owns](../architecture/02-code-map.md#what-the-bridge-owns), as stage 19 built it ([pointer sync log](../pointer-sync/log.md#2026-10-25-stage-19-builds-pointer-sync-and-a-pfs-press-made-before-the-pms-catch-up-ask-reaches-the-pf-drops-on-the-pm); read in `src/platform/panel-bridge/src/locks.ts`, `RED_ORANGE`, `GRAY`, and `WARNING`):
+  - A visible lock is red-orange at 60% opacity, with its words in white at its center: "Lost the connection to the pilot flying. Take control to keep flying, or wait for the connection to come back." while this machine has no link up to the PF, and "Catching up with the pilot flying's cockpit. This display unlocks when it's done." while it replays or catches up.
+  - Once the core has been silent for 8s, a visible lock turns into the warning, a gray layer at 55% opacity that blocks nothing and has no button, which says "Dual Input stopped responding, so presses on this display aren't shared with the other pilot." until the core speaks again or its socket closes.
+  - The unseen lock paints nothing, since the other pilot's figure at the display shows who's pressing, and a press it blocks flashes it red-orange at 60% until the press's up.
 
-  This changes [what the bridge owns](../architecture/02-code-map.md#what-the-bridge-owns), whose warning blocks nothing and has no button, and adds to [names the sim shares](../architecture/02-code-map.md#names-the-sim-shares).
-  Settled by the user on 2026-11-01.
+  Settled by the user on 2026-10-17 and 2026-10-25, and kept on 2026-11-23 over the veil settled on 2026-11-01.
 - **Because:**
-  - The CommBus reached every cockpit panel (measured on MSFS 2024, 2026-10-08, [interface log][coverage]).
-  - Anything in the pilot's input path must fail open: blocking the whole display until Dismiss would hang the release on the pilot, or on the button's own script.
-  - "Replayed" is the record's word for how a link cut under 30 minutes comes back, and reads plainly where the sentence says whose actions and where (user, 2026-11-01).
+  - Anything in the pilot's input path must fail open, so the warning lets every press through to the display ([CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel)).
+  - The user kept what stage 19 built over the veil, which no stage built (user, 2026-11-23).
+- **Leaves out:** the veil of 2026-11-01, which no stage built: a see-through hatched layer tinted for each lock, under a banner-style card with an icon, a title naming the PF, and a message; a Dismiss on the warning's card, sent to every display by a CommBus event; and a flash in our error red at 55% opacity.
+  Its frames stay in `experiments/areas/interface/bench/src/frames/locks.tsx`.
 
 ## A scrolling page folds its surfaces, and a change on a page is one moment in three steps
 
@@ -767,7 +764,6 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 - **Because:** two pilots testing a change can't otherwise tell whether a fault they see is real or the change hasn't reached both PCs, and two rows that read the same seven characters answer that with no comparing out loud (user, 2026-11-21).
   A tester flying with the EFB closed sees only the banner.
 
-[coverage]: log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel
 [efb-frames]: log.md#2026-11-01-the-efbs-document-draws-15-frames-a-second-at-the-world-map-half-the-rate-of-the-sims-other-documents-so-a-quick-click-often-lands-between-two-frames
 [p24-efb]: log.md#2026-11-01-in-the-sims-own-efb-zoom-lays-out-and-hit-tests-as-in-the-debugger-the-efbs-status-bar-covers-the-views-top-25px-and-a-picture-taken-with-the-sims-hdr-on-reads-about-twice-too-bright
 [p24]: log.md#2026-11-01-in-the-sdks-debugger-zoom-scales-a-page-with-sharp-text-and-its-layout-motion-scrolling-and-real-input-in-step-where-a-transform-blurs-its-text

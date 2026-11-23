@@ -14,8 +14,7 @@ Decides:     What a gesture sends, and when; how another machine's panel plays i
 ```
 
 > **Note**
-> Stage 11b's tentative decision that [a visible lock is a veil over the display with one centered card](../interface/decisions.md#a-visible-lock-is-a-veil-over-the-display-with-one-centered-card) settles the look and words of [locks](#locks) until the apps' design confirms it (user, 2026-11-01), and the flash's color, our error red at 55%.
-> A lock that turns into a warning keeps a lock's look, its card taking presses and its veil passing them, with a Dismiss that clears it on every display.
+> The look of [locks](#locks) and the flash's color, which [left open](#left-open) lists, are what stage 19 built, as the tentative decision that [a visible lock is a red-orange layer with its words](../interface/decisions.md#a-visible-lock-is-a-red-orange-layer-with-its-words-and-the-warning-a-gray-one-that-blocks-nothing) gives them (user, 2026-11-23).
 
 > **Note**
 > In [playing a gesture](#playing-a-gesture), the cases in the sim passed on the A220's ND, among them a drag whose four moves and up played under the unseen lock its down took (measured on MSFS 2024, 2026-11-09, [pointer sync log](log.md#2026-11-09-pointer-syncs-cases-in-the-sim-pass-on-the-a220s-nd-and-the-barons-tablet-once-the-second-pilots-display-carries-the-a220s-livery)), but they don't settle whether the hit test sees past the overlay.

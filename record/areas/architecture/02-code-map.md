@@ -35,9 +35,6 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > In [what a routine can ask for](#what-a-routine-can-ask-for), a routine also reads `E:` variables, as `Follow` reads `E:SIMULATION RATE`; a routine picks an event with a value from the routine host's enum, `Key`, which holds the five axis events so far, since the sim's Events API takes an event's number; and a routine names its report's type, which gives it a report slot ([flight-model log](../flight-model/log.md#2026-11-11-on-the-bench-a-following-aircraft-keeps-to-the-flying-ones-path-400ms-behind-and-samples-that-arrive-together-after-a-gap-made-follow-jump)).
 
 > **Note**
-> In [what the bridge owns](#what-the-bridge-owns), a lock that turns into a warning keeps a lock's look, with a Dismiss on a card that takes presses while its veil passes them, and Dismiss reaches every panel by the CommBus event `DUALINPUT_BRIDGE_DISMISS`, which joins [names the sim shares](#names-the-sim-shares) under `BRIDGE` ([a visible lock](../interface/decisions.md#a-visible-lock-is-a-veil-over-the-display-with-one-centered-card); user, 2026-11-01).
-
-> **Note**
 > In [features](#features), take-control has no desktop part, and uses the network too ([control log](../control/log.md#2026-11-04-stage-20s-take-control-passes-its-cases-on-the-bench-and-a-press-reaches-the-cue-about-80ms-later-past-the-50ms-budget)).
 
 > **Note**

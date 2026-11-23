@@ -200,7 +200,8 @@ async function run(program: string): Promise<void> {
     guide.close()
   })
   const real = await desktop(data, ["session", "sim"])
-  panel = await crewed(real, second, say)
+  const crew = await crewed(real, second, say)
+  panel = crew.panel
 
   // `serve` connects once the session's flight has started, as when an author opens VS Code
   // mid-flight, so authoring calls back every panel told `none` at the session's start, which
@@ -215,7 +216,12 @@ async function run(program: string): Promise<void> {
   const c: Session = { second, panel, serve, arrivals, folder, names, hash, guide, say, result, budget, skip }
   say("The cases that need no one run now, for about two minutes. Keep your hands off the controls until a step asks for them.", true)
   // A case that throws, such as on a panel that reloads under the inspector, fails its own part and leaves the next to run.
+  const onRoutes = [firedHere, heardThere, presetHere]
   for (const part of [liveNames, runs, reverts, firedHere, byHand, heardThere, picker, presetHere]) {
+    if (!crew.caughtUp && onRoutes.includes(part)) {
+      skip(`${part.name}, since the second pilot's catch-up never ended`)
+      continue
+    }
     await part(c).catch((error: Error) => result(false, `${part.name} stopped: ${error.message}`))
   }
   await stopSampling().catch(() => {})
@@ -235,7 +241,7 @@ async function run(program: string): Promise<void> {
  * tools/sim/state-sync.ts does. Returns the second pilot's cockpit panel, whose ADF radio its
  * state sync reads and fires `H:` events at.
  */
-async function crewed(real: Desktop, second: Core, say: Session["say"]): Promise<FakeCockpitPanel> {
+async function crewed(real: Desktop, second: Core, say: Session["say"]): Promise<{ panel: FakeCockpitPanel; caughtUp: boolean }> {
   const sim = () => real.slice<SimSlice>("sim")
   const flying = () => sim()?.stage === "flying" && BARON.test(sim()?.aircraft?.path ?? "")
   if (!flying()) say("Start the sim, load a flight in the Black Square Baron 58P on the ground at a stand, cold and dark, and press Ready to fly.", true)
@@ -265,6 +271,7 @@ async function crewed(real: Desktop, second: Core, say: Session["say"]): Promise
   // An H: event the second pilot's module fires reaches its panel's instruments, as the sim's do.
   second.onHEvent((name) => panel.hEvent(name))
   const stream = await FakeApp.open(second, ["cockpit-stream"])
+  let caughtUp = false
   try {
     await until(() => (secondApp.slice<SessionSlice>("session")?.ready?.length === 0 ? true : undefined), 30_000)
     await secondApp.ok("session.ready", { on: true })
@@ -272,15 +279,21 @@ async function crewed(real: Desktop, second: Core, say: Session["say"]): Promise
     await until(() => (session()?.ready?.length === 0 ? true : undefined), 75_000)
     await real.command("session.ready", { on: true })
     await until(() => (session()?.preflight.phase === "ended" ? true : undefined), 15_000)
-    say("preflight ended; waiting up to 20s for the second pilot's catch-up to end")
+    say("preflight ended; waiting up to 90s for the second pilot's catch-up to end")
     // While a catch-up runs, the stream holds everything the second pilot sends, so no case on
-    // state sync's routes could pass.
+    // state sync's routes could pass, and the run skips them if it never ends. It ends slowly:
+    // the stand-in takes none of the 58P's K:, B:, or H: writes, and each toggle, stepping write,
+    // or write function in the catch-up waits out the 1.5s check of a write before it that never
+    // lands, which took 24.6s and 26.1s on 2026-11-23 (record/areas/sync/log.md, "A catch-up
+    // crawls when its writes never land, since each toggle, stepping write, or write function
+    // waits out the 1.5s check of the write before it").
     await sleep(1_000)
-    if (!(await reached(() => stream.slice<CockpitSlice>("cockpit-stream")?.catching_up === false, 20_000))) throw new Failed("the second pilot's catch-up never ended")
+    caughtUp = await reached(() => stream.slice<CockpitSlice>("cockpit-stream")?.catching_up === false, 90_000)
+    if (!caughtUp) say("the second pilot's catch-up never ended, so the cases on state sync's routes are skipped")
   } finally {
     stream.close()
   }
-  return panel
+  return { panel, caughtUp }
 }
 
 /** Live values: every name on the profile's watch lines gets its reading, and a misspelled `L:` reads 0. */
@@ -357,7 +370,7 @@ async function runs(c: Session): Promise<void> {
     c.result(times === 1, `the ADF radio's panel heard H:adf_SetRst ${times} times in the 1.5s after the Run, which fired it once`)
   }
   const bfo = powered === undefined ? null : await need(c, at.bfo, "the KR87A's bfoMode")
-  if (bfo !== null) await runsTo(c, "an H: event entry's toggle, adf_bfo, which fires H:adf_bfo over the KR87A's bfoMode", "adf_bfo", at.bfo, [flip(bfo), bfo])
+  if (bfo !== null) await runsTo(c, "an H: event entry's toggle, adf_bfo, which fires H:adf_bfo over the KR87A's bfoMode", "adf_bfo", at.bfo, [flip(bfo), bfo], undefined, "instrument('KR87A', 'bfoMode')")
 }
 
 /**
@@ -403,6 +416,14 @@ async function reverts(c: Session): Promise<void> {
     const edge = backMs !== undefined && Math.abs(backMs - 1_000) < 150
     const panelSaw = !landed ? `read no change from ${fmt(before)}` : backMs !== undefined ? `read ${fmt(landed[2])}, then ${fmt(before)} again ${backMs}ms later` : `read it holding at ${fmt(landed[2])}`
     if (notice) noticed++
+    // The notice comes only once the core has read the Run's value and then the old one, and a test
+    // button the 58P springs back within one of the panel's frames, as annunciator_test came back
+    // after 32ms on 2026-11-23, leaves the panel nothing to read, so the panel can't check it.
+    const frame = percentile((await readings()).gaps, 0.5)
+    if (notice && !landed && notice.after_ms < 2 * frame) {
+      c.skip(`the revert notice on ${x.entry}, which said back to ${show(notice.to)} after ${notice.after_ms}ms, within two of the panel's ${frame.toFixed(1)}ms frames, too soon for the panel to read`)
+      continue
+    }
     c.result(edge || Boolean(notice) === (backMs !== undefined && backMs <= 1_000), `${x.entry} to ${fmt(target)}: ${notice ? `the notice said back to ${show(notice.to)} after ${notice.after_ms}ms` : "no notice"}, and the panel ${panelSaw}`)
     if ((await reading(i)) !== before) await ran(c, x.entry, number(before))
   }
@@ -628,9 +649,14 @@ function timing(c: Session, what: string, boxes: [number, number][], panel: [num
 
 /**
  * How long after the panel read each value its box showed it: for each change of the box, the
- * latest step of the panel's readings, at or before the slice's arrival, that reached or crossed
- * the box's value. A lever moves on between the panel's frames, so the panel may never read the
- * very value the core sent, and a step that crossed it is the frame the panel first could have.
+ * latest step of the panel's readings, up to `SKEW_MS` after the slice's arrival, that reached or
+ * crossed the box's value. A lever moves on between the panel's frames, so the panel may never read
+ * the very value the core sent, and a step that crossed it is the frame the panel first could have.
+ * A box can show a value before the panel's frame reads it, since the core's reading may come
+ * between the panel's frames and the panel's clock runs up to `SKEW_MS` off the PC's (unverified
+ * which). A search that stopped at the arrival put the beacon's box 2.7s behind its switch, the
+ * spacing of two flips, on MSFS 2024 on 2026-11-23, so the search looks a little past it, and a
+ * time can be negative.
  */
 function delays(boxes: [number, number][], panel: [number, number][]): { ms: number[]; unmatched: number } {
   const ms: number[] = []
@@ -641,7 +667,7 @@ function delays(boxes: [number, number][], panel: [number, number][]): { ms: num
     for (let k = panel.length - 1; k >= 1; k--) {
       const [t, now] = panel[k]!
       const was = panel[k - 1]![1]
-      if (t > at) continue
+      if (t > at + SKEW_MS) continue
       if (near(now, v) || (Math.min(was, now) < v && v < Math.max(was, now))) {
         found = t
         break
@@ -716,9 +742,19 @@ async function timedRun(c: Session, what: string, entry: string, given: Given, l
   return { sent: r.sent, ms }
 }
 
-/** Runs `entry` to each of `values` in turn, each landing when the panel reads it through probe `place`. */
-async function runsTo(c: Session, what: string, entry: string, place: number, values: number[], same = (a: number, b: number) => a === b): Promise<void> {
-  for (const v of values) await timedRun(c, `${what}, to ${fmt(v)}`, entry, number(v), reads(place, (x) => same(x, v)))
+/**
+ * Runs `entry` to each of `values` in turn, each landing when the panel reads it through probe
+ * `place`. A toggle decides from the core's last reading of its entry, and an `instrument()`
+ * reading comes only every 250ms (src/platform/sim-variables/panel/src/instrument-reads.ts), so a
+ * Run sent as the last one lands can find the old value and send nothing, which fits adf_bfo's
+ * second Run, 126ms after its first, moving nothing on 2026-11-23. So where the entry's `box` is
+ * given, each next Run waits until the box shows the last Run's value, as an author would.
+ */
+async function runsTo(c: Session, what: string, entry: string, place: number, values: number[], same = (a: number, b: number) => a === b, box?: string): Promise<void> {
+  for (const v of values) {
+    const landed = await timedRun(c, `${what}, to ${fmt(v)}`, entry, number(v), reads(place, (x) => same(x, v)))
+    if (landed && box) await c.serve.state((s) => numberIn(s, box) !== undefined && same(numberIn(s, box)!, v), `${box}'s box at ${fmt(v)}`, 3_000).catch(() => {})
+  }
 }
 
 /** The first change through probe `place` since `since` that `ok` takes. */

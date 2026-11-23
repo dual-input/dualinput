@@ -130,7 +130,8 @@ export function CountdownRing({ left }: { left: number | null }) {
       className={cx("relative mr-2 flex shrink-0 items-center justify-center text-success", running && "animate-zoom-in")}
       style={{ width: RING.size, height: RING.size, opacity: running ? 1 : 0, transform: running ? "none" : "scale(0.5)", transition: running ? undefined : `opacity ${RING.out}ms ease-in, transform ${RING.out}ms ease-in` }}
     >
-      <svg className="absolute inset-x-0 inset-y-0" width={RING.size} height={RING.size} viewBox={`0 0 ${RING.size} ${RING.size}`} fill="none">
+      {/* The ring stays centered on the seconds only while it takes the kit root's zoom, and Coherent GT zooms an svg sized in CSS but lays one sized only by its width and height attributes out at its unzoomed size, so this one's size goes in its style (record/areas/interface/log.md, "2026-11-23: Under the kit root's zoom"). */}
+      <svg className="absolute inset-x-0 inset-y-0" style={{ width: RING.size, height: RING.size }} viewBox={`0 0 ${RING.size} ${RING.size}`} fill="none">
         <circle cx={center} cy={center} r={radius} strokeWidth={RING.stroke} className="stroke-success/20" />
         <path ref={arc} strokeWidth={RING.stroke} strokeLinecap="round" className="stroke-current" />
       </svg>

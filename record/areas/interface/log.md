@@ -3,6 +3,31 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-23: Under the kit root's zoom, Coherent GT draws an SVG sized by its attributes at its unzoomed size, which put the countdown's seconds 3px below its ring's center
+
+**Asked:** why the countdown's seconds sat off the center of their ring, beside the banner's Ready, in a screenshot from the sim (user, 2026-11-23).
+
+**Expected:** the digit's glyph sitting off center in its 16px line, from Geist's metrics, since one flex box centers the digit and holds the ring's `svg` at its edges.
+
+**Found:** on MSFS 2024, read through the sim's inspector, and in the SDK's debugger:
+
+- In the screenshot, the ring drew 28px across, and the digit's ink sat about 3px below its center and 2px right of it.
+- The banner's kit root read `zoom: 1.2179` in the sim, on a 1,440-line screen, since the banner scales its box to the panel's height.
+- In the debugger with no zoom, the ring's box, its `svg`, and the digit's box shared a center, and so did the ring and the digit's ink.
+- With the banner's host made 1.218 times its size, so its root took the sim's zoom, the debugger drew the sim's picture: the ring's box read 27.9 by 27.9 in the root's units, 34px on screen, while its `svg`, sized by `width` and `height` attributes of 28, read 23.0 by 23.0, 28px on screen.
+  Our `absolute inset-x-0 inset-y-0` pinned that shorter `svg` to the box's top-left corner, so the digit, centered in the box, sat 3px below the ring's center and 3px right of it.
+- With `width: 28px` and `height: 28px` in its style as well, the `svg` read 27.9 by 27.9, the ring drew 34px across, and its center matched the digit's to the pixel.
+  The Lucide check in the Ready button, sized by the kit's `size-4` class, took the zoom too.
+
+**Changed:** the countdown's ring sizes its `svg` in CSS.
+The EFB app's session card draws the same ring under the EFB's own zoom, so it takes the fix too.
+We haven't seen the fix in the sim, since the countdown runs only in a session, but the debugger drew the sim's off-center ring before the fix and a centered one after it.
+
+Our other SVGs sized only by attributes, such as take-control's hold ring in [strip.tsx](../../../src/features/take-control/efb/strip.tsx), would lay out at their unzoomed size too (unverified; reading the hold ring's `svg` size in the debugger under the EFB's zoom would settle it).
+Each sits in the flow of a box that centers it, so it would stay centered and come out smaller than the page around it by the zoom's factor.
+
+**Affects:** the countdown's [ring](../../../src/packages/crew/src/ready.tsx), and the scaling line of [Coherent GT's measured limits](../architecture/coherent-gt.md).
+
 ## 2026-11-23: In the sim's EFB, a tab's icon painted blank when its color changed as the cursor left it after a click, and keeping the active tab's color on hover stopped it
 
 **Asked:** why an icon in the EFB app's tab bar went black: a click on a tab, then the cursor moved away with no other click, left the tab's icon blank until the cursor hovered it again, nearly every time on Traffic (user, 2026-11-22).

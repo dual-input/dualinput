@@ -6,6 +6,5 @@ A shared cockpit for Microsoft Flight Simulator 2024: two pilots on two PCs, fly
 
 ## License
 
-Dual Input has no license yet, so all rights are reserved.
-You're welcome to read the code, but you may not copy, modify, or redistribute it.
-An open license will be adopted when Dual Input fully launches.
+Dual Input doesn't have a license yet.
+It'll get an open one when it fully launches.

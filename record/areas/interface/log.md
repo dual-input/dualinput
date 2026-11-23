@@ -14,7 +14,7 @@ The probes and their raw output are in [experiments/areas/interface](../../../ex
 - In the screenshot, the ring drew 28px across, and the digit's ink sat about 3px below its center and 2px right of it.
 - The banner's kit root read `zoom: 1.2179` in the sim, on a 1,440-line screen, since the banner scales its box to the panel's height.
 - In the debugger with no zoom, the ring's box, its `svg`, and the digit's box shared a center, and so did the ring and the digit's ink.
-- With the banner's host made 1.218 times its size, so its root took the sim's zoom, the debugger drew the sim's picture: the ring's box read 27.9 by 27.9 in the root's units, 34px on screen, while its `svg`, sized by `width` and `height` attributes of 28, read 23.0 by 23.0, 28px on screen.
+- With the banner's host made 1.218 times its size, so its root took the sim's zoom, the debugger drew the sim's picture: the ring's box read 27.9 by 27.9 in the root's units, 34px on screen, while its `svg`, sized by `width` and `height` attributes of 28 under the kit's `width: auto` and `height: auto`, read 23.0 by 23.0, 28px on screen.
   Our `absolute inset-x-0 inset-y-0` pinned that shorter `svg` to the box's top-left corner, so the digit, centered in the box, sat 3px below the ring's center and 3px right of it.
 - With `width: 28px` and `height: 28px` in its style as well, the `svg` read 27.9 by 27.9, the ring drew 34px across, and its center matched the digit's to the pixel.
   The Lucide check in the Ready button, sized by the kit's `size-4` class, took the zoom too.
@@ -23,8 +23,13 @@ The probes and their raw output are in [experiments/areas/interface](../../../ex
 The EFB app's session card draws the same ring under the EFB's own zoom, so it takes the fix too.
 We haven't seen the fix in the sim, since the countdown runs only in a session, but the debugger drew the sim's off-center ring before the fix and a centered one after it.
 
-Our other SVGs sized only by attributes, such as take-control's hold ring in [strip.tsx](../../../src/features/take-control/efb/strip.tsx), would lay out at their unzoomed size too (unverified; reading the hold ring's `svg` size in the debugger under the EFB's zoom would settle it).
-Each sits in the flow of a box that centers it, so it would stay centered and come out smaller than the page around it by the zoom's factor.
+Three other SVGs of ours are sized only by attributes and line up with boxes sized in CSS, so under the EFB's zoom they would come apart the way the ring did (unverified; reading each one's `svg` size in the debugger under the EFB's zoom would settle it):
+
+- the avatars part's seat diagram in [part.tsx](../../../src/features/avatars/efb/part.tsx), whose "You" labels sit over it at positions set in CSS;
+- the figure's hand strip in [portrait.tsx](../../../src/platform/efb-shell/src/figure/portrait.tsx);
+- the figure's body in [drawing.ts](../../../src/platform/efb-shell/src/figure/drawing.ts).
+
+Take-control's hold ring in [strip.tsx](../../../src/features/take-control/efb/strip.tsx) is sized the same way but sits in a box that centers it, so it would only come out smaller than the page around it by the zoom's factor.
 
 **Affects:** the countdown's [ring](../../../src/packages/crew/src/ready.tsx), and the scaling line of [Coherent GT's measured limits](../architecture/coherent-gt.md).
 

@@ -4,6 +4,32 @@ What our experiments and the build's stages found about keeping cockpits in sync
 The probes are in [experiments/areas/sync](../../../experiments/areas/sync), and their raw output is in its `results/` folder.
 Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on our development machine with Flow Pro 26.33.5, ChasePlane 2026.39.1.16, and GSX Pro 4.0.19 installed, with the frame rate capped near 30 fps unless the entry says otherwise.
 
+## 2026-11-23: A catch-up crawls when its writes never land, since each toggle, stepping write, or write function waits out the 1.5s check of the write before it
+
+**Asked:** [stage 22g](../build/plan.md#22g-the-extension-in-the-sim)'s session in the sim on 2026-11-22, run by `tools/sim/authoring.ts`, had a real core flying the Black Square Baron 58P Professional host, and a bench core on a stand-in join as the second pilot.
+It stopped because the second pilot's catch-up at preflight's end didn't end within the script's 20s, and the second pilot's core logged 33 "a write never landed", such as `com1_spacing` wanted 1 and read 0.
+Was it the stage's move of state sync's routes into the platform crate `sim-variables`?
+
+**Expected:** a regression in `sim-variables` on the second pilot's machine, which the bench missed because its two stand-ins start alike, so a crew's catch-up at preflight's end wrote nothing.
+
+**Found:** no regression.
+The stand-in takes none of the 58P's `K:`, `B:`, or `H:` writes: no rule of the script's takes them, and its only input events are the battery and the beacon.
+So none of the catch-up's writes could land, though the second pilot's recording shows each one sent.
+Since [stage 14c](../build/plan.md#14c-two-coupled-writes-in-one-input), a catch-up's toggle, stepping write, or write function waits while another entry has a value pending, and each later write waits behind it ([05-units](05-units.md)).
+Each toggle, stepping write, or write function waited out the 1.5s check of the write before it, and the writes that set a value, queued behind it, went in the same frame it did, so the 33 flags came in 13 steps about 1.5s apart, over 19.9s from the catch-up's start ([results](results/2026-11-23-catch-up-behind-writes-that-never-land.txt)).
+Stage 14's session, run by `tools/sim/state-sync.ts`, ended its catch-up within the same 20s because it ran before stage 14c, when no catch-up write waited: every write went out at once, and a catch-up counts an entry made once its write goes out, landed or not.
+
+A new bench case loads the pilot flying with values the pilot monitoring lacks on every route, and the pilot monitoring's stand-in takes each write: its catch-up ended 333ms after preflight's end, and 327ms on a rerun.
+With the stand-in's rules taken out, a toggle of a lamp never landed, the writes behind it waited its 1.5s check, and the catch-up took 1,744ms.
+On 2026-11-23 we ran the session in the sim twice, with the script waiting up to 90s, and the second pilot's catch-up took 24.6s and 26.1s ([results](results/2026-11-23-catch-up-behind-writes-that-never-land.txt)).
+
+In the sim, on a following machine, a catch-up's toggle, stepping write, or write function waits 1.5s the same way behind a write the aircraft never takes, unless that write is to an entry the pilot flying owns, which holds nothing (read in the code, unverified in the sim).
+
+**Changed:** `state-sync`'s bench scenario has the new case, and `tools/sim/authoring.ts` waits up to 90s for the catch-up and skips the cases on state sync's routes if it never ends.
+Whether the wait behind a write that never lands is a known limit of stage 14c or calls for a change is the user's call, open as of 2026-11-23.
+
+**Affects:** [the sync units](05-units.md)' stage 14c note, which gains a known limit if the user accepts it, and stage 22g's session.
+
 ## 2026-11-21: `h-events` went to two panels whose instruments share a key, since state sync knew its panel only by its keys
 
 **Asked:** in one run during [stage 22c](../build/plan.md#22c-the-formats-audit), the bench's `clients-panels` scenario sent state sync's `h-events` to panels 18 and 19, and it passed on a rerun; stage 22c's changes touch neither the clients crate nor how panels are answered, so what sent it to two panels?

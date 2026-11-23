@@ -2,7 +2,7 @@
 //! change, who sends and putting back, the conflict rule, the check, shadow values, and
 //! catch-up (record/areas/sync/05-units.md, "The sync engine").
 
-use profile_engine::{Owner, StateEntry, Watch as Watches, Write};
+use profile_engine::{Owner, StateEntry, Steps, Watch as Watches, Write};
 
 use crate::events::Driven;
 use crate::runs::{Chain, Count, Run, action, steps, wrapped};
@@ -114,7 +114,7 @@ impl How {
 }
 
 impl StateSlot {
-    fn counted(&self) -> Option<&profile_engine::Count> {
+    pub(crate) fn counted(&self) -> Option<&profile_engine::Count> {
         match &self.entry.watch {
             Watches::Count(c) => Some(c),
             Watches::Name(_) => None,
@@ -386,7 +386,7 @@ impl Engine {
         let Some(slot) = self.state.get_mut(i) else {
             return;
         };
-        if slot.stopped {
+        if slot.stopped || self.only_asked {
             return;
         }
         let shared = slot.entry.owner == Owner::Shared;
@@ -705,42 +705,16 @@ impl Engine {
                 }])
             }
             Write::Steps(s) => {
-                // A new value while it steps aims again from its count, and one that comes
-                // while its last step is still pending starts from that step, since the reading
-                // can lag the last step by 2 frames (measured on MSFS 2024, 2026-10-05,
-                // record/areas/sync/log.md, "Two writes in one frame land in the order sent, and
-                // a write shows within 2 frames").
-                let from = match self.runs.get(&slot_id).and_then(|r| r.count) {
-                    Some(count) => Some(count.at),
-                    None => slot
-                        .pending
-                        .last()
-                        .and_then(|p| p.value.number())
-                        .or_else(|| slot.reading.as_ref().and_then(Value::number)),
-                };
-                let (Some(from), Some(to)) = (from, wanted.number()) else {
+                let Some((chain, count)) = self.steps_to(i, &s, &wanted) else {
                     return Applied::Done;
                 };
-                let (wrap, range, step) = match &counted {
-                    Some(c) => (Some(c.wrap), Some(c.range), s.step),
-                    None => (s.wrap, s.range, s.step),
-                };
-                let (n, up) = steps(from, to, step, wrap, range);
-                if n == 0 {
+                if chain.times == 0 {
                     // Already at its count: a run still stepping elsewhere stops there.
                     self.cut_short(slot_id, cx, out);
                     return Applied::Done;
                 }
-                let mut run = Run::new(vec![Chain {
-                    action: action(if up { &s.inc } else { &s.dec }, None),
-                    times: n,
-                    pace: s.pace.unwrap_or(self.pace),
-                    step: Some(if up { step } else { -step }),
-                }]);
-                run.count = Some(Count {
-                    at: from,
-                    wrap: (wrap == Some(true)).then_some(range).flatten(),
-                });
+                let mut run = Run::new(vec![chain]);
+                run.count = Some(count);
                 run
             }
             Write::Function(_) => match self.script.run(slot_id, Some(&wanted)) {
@@ -807,6 +781,41 @@ impl Engine {
         } else {
             Applied::Done
         }
+    }
+
+    /// A stepping write's steps from where the entry stands to `wanted`, and the count they
+    /// start from, or `None` when either isn't a number. A new value while it steps aims again
+    /// from its count, and one that comes while its last step is still pending starts from that
+    /// step, since the reading can lag the last step by 2 frames (measured on MSFS 2024,
+    /// 2026-10-05, record/areas/sync/log.md, "Two writes in one frame land in the order sent, and
+    /// a write shows within 2 frames").
+    pub(crate) fn steps_to(&self, i: usize, s: &Steps, wanted: &Value) -> Option<(Chain, Count)> {
+        let slot = self.state.get(i)?;
+        let from = match self.runs.get(&Slot::State(i)).and_then(|r| r.count) {
+            Some(count) => count.at,
+            None => slot
+                .pending
+                .last()
+                .and_then(|p| p.value.number())
+                .or_else(|| slot.reading.as_ref().and_then(Value::number))?,
+        };
+        let to = wanted.number()?;
+        let (wrap, range, step) = match slot.counted() {
+            Some(c) => (Some(c.wrap), Some(c.range), s.step),
+            None => (s.wrap, s.range, s.step),
+        };
+        let (n, up) = steps(from, to, step, wrap, range);
+        let chain = Chain {
+            action: action(if up { &s.inc } else { &s.dec }, None),
+            times: n,
+            pace: s.pace.unwrap_or(self.pace),
+            step: Some(if up { step } else { -step }),
+        };
+        let count = Count {
+            at: from,
+            wrap: (wrap == Some(true)).then_some(range).flatten(),
+        };
+        Some((chain, count))
     }
 
     pub(crate) fn pend(&mut self, i: usize, value: Value, due: Option<u64>, flags: bool) {
@@ -995,6 +1004,9 @@ impl Engine {
     /// when control passes during one, starts over and skips what already matches.
     pub fn take(&mut self, state: &CatchUpState, cx: Ctx) -> Vec<Out> {
         let mut out = Vec::new();
+        if self.only_asked {
+            return out;
+        }
         self.catch_up = Some(CatchUpRun {
             started: cx.at,
             ..CatchUpRun::default()

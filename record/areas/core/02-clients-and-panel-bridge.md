@@ -18,6 +18,16 @@ Decides:     The core's WebSocket library and its Origin check; the client proto
 > A panel's new socket replaces its old one before `clients` answers it, so the module follows the panel's name through a reload, and state sync's `h-events` is the one such module.
 > A known limit: if a reloaded panel takes a new name, which [left open](#left-open) asks, its old socket keeps the module until the core closes it 8s after the old page's last message, and the new socket, told `none`, stays closed, so `h-events` reaches no panel until the profile loads again.
 
+> **Note**
+> From stage 22g ([04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md#every-panel-stays-while-the-extension-is-connected); user, 2026-11-22):
+>
+> - In [cockpit panels and their modules](#cockpit-panels-and-their-modules), `clients` answers the panels once every unit has handled the profile's load, so a module's rule sees what each feature registered as it loaded, as `sim-variables`' rules ask.
+> - A panel told `none` connects again when the announcement's `panels` count differs from the one it was told `none` under, as well as on another port or a session's end.
+> - A unit tells `clients` when a module's rule changes, and `clients` answers each open panel again, as it also does at the profile's unload in place of stopping every module: `load` for a module a panel gains, `stop` for one it loses, and a panel left with none closes its socket.
+>   So a module whose rule reads no profile, as the profile extension's `outline` doesn't, stays through a test session's reload.
+> - `clients` gives features each open panel's name and its instruments' keys, which the profile extension's display picker lists.
+> - `dualinput-profile-builder serve` is one more client, with the component `profile-extension` and no `Origin`.
+
 The core serves every client over one protocol of JSON messages on a WebSocket, through tokio-websockets, which iroh already brings into the core.
 A client opens with a `hello` that names it and its version, and from then on each side sends `alive` every 2s, while only the core closes a socket that goes quiet.
 A unit reaches the clients through slices of state, which the `clients` crate sends on a timer to the clients that show them, through commands the clients send it, and through messages of its own to a client by name.

@@ -10,8 +10,8 @@ use profile_engine::{
     Arg, Count, EventEntry, Name, Owner, Resolved, StateEntry, Steps, Watch as Watches, Write,
 };
 use sync_engine::{
-    Action, Applied, Arrived, CatchUpState, Change, Control, Ctx, Engine, Load, Origin, Out, Ready,
-    Sandbox, Seen, Stamp, Value, VectorClock, Why,
+    Action, Applied, Arrived, CatchUpState, Change, Control, Ctx, Engine, Given, Load, Origin, Out,
+    Pace, Planned, Ready, Sandbox, Seen, Stamp, Value, VectorClock, Why,
 };
 
 const SECOND: u64 = 1_000_000;
@@ -99,12 +99,27 @@ impl Machine {
     }
 
     fn loaded(me: Origin, profile: &Resolved, ready: Ready) -> Machine {
+        Machine::load_with(me, profile, ready, Engine::load)
+    }
+
+    /// A machine whose engine runs only the writes it's asked for, as the profile extension's
+    /// Run has its own.
+    fn only_asked(me: Origin, profile: &Resolved) -> Machine {
+        Machine::load_with(me, profile, Ready::At(0), Engine::load_only_asked)
+    }
+
+    fn load_with(
+        me: Origin,
+        profile: &Resolved,
+        ready: Ready,
+        load_engine: fn(&Resolved, Sandbox, Load) -> (Engine, Vec<Out>),
+    ) -> Machine {
         let load = Load {
             at: START,
             ready,
             settle: sync_engine::SETTLE,
         };
-        let (engine, out) = Engine::load(profile, Sandbox::new(), load);
+        let (engine, out) = load_engine(profile, Sandbox::new(), load);
         let mut m = Machine {
             engine,
             me,
@@ -1532,4 +1547,444 @@ fn value_in_a_functions_k_event_takes_the_functions_value() {
         matches!(acts.as_slice(), [Action::Key { values, .. }] if *values == vec![2.0, 16272.0]),
         "{acts:?}"
     );
+}
+
+/// What `write_once` sends, each action with the frame it went in, counted from the call, through
+/// the half second of frames after it.
+fn sent_once(m: &mut Machine, entry: &str, given: Given) -> Vec<(u64, Action)> {
+    let out = m
+        .engine
+        .write_once(entry, given, m.cx())
+        .expect("the write should go");
+    let mut sent = Vec::new();
+    for o in out {
+        match o {
+            Out::Act(a) => sent.push((0, a)),
+            other => panic!("a write outside a sync puts out only actions: {other:?}"),
+        }
+    }
+    for frame in 1..=30 {
+        m.frame();
+        sent.extend(m.acts().into_iter().map(|a| (frame, a)));
+    }
+    sent
+}
+
+/// A plan's actions, each with the frame it goes in, for paces in frames.
+fn in_frames(planned: &[Planned]) -> Vec<(u64, Action)> {
+    let mut at = 0;
+    let mut frames = Vec::new();
+    for p in planned {
+        for n in 0..p.times {
+            if n > 0 {
+                let Pace::Frames(every) = p.every else {
+                    panic!("these tests pace in frames: {p:?}");
+                };
+                at += u64::from(every);
+            }
+            frames.push((at, p.action.clone()));
+        }
+    }
+    frames
+}
+
+/// The preview of a write, then the write, which sends what the preview showed.
+fn previewed_then_sent(m: &mut Machine, entry: &str, given: Given) -> Vec<(u64, Action)> {
+    let planned = m
+        .engine
+        .plan(entry, given.clone())
+        .expect("the write should have a plan");
+    let sent = sent_once(m, entry, given);
+    assert_eq!(
+        in_frames(&planned),
+        sent,
+        "the preview is what the write sends: {planned:?}"
+    );
+    sent
+}
+
+fn number(n: f64) -> Given {
+    Given::Value(Value::Number(n))
+}
+
+#[test]
+fn a_run_of_a_name_or_a_toggle_sends_what_its_preview_shows() {
+    let mixture = l("BKSQ_MixtureLeverPosition_1");
+    let beacon = l("BEACON");
+    let p = profile(
+        vec![
+            state("mixture", mixture.clone(), Write::Name(mixture.clone())),
+            state(
+                "beacon",
+                beacon.clone(),
+                Write::Toggle(k("TOGGLE_BEACON_LIGHTS")),
+            ),
+        ],
+        vec![],
+    );
+    let mut m = Machine::new(PF, &p);
+    m.read(&mixture, 1.0);
+    m.read(&beacon, 0.0);
+    assert_eq!(
+        previewed_then_sent(&mut m, "mixture", number(0.5)),
+        vec![(0, set(&mixture, 0.5))]
+    );
+    m.read(&mixture, 0.5);
+    assert_eq!(
+        previewed_then_sent(&mut m, "beacon", number(1.0)),
+        vec![(0, key("TOGGLE_BEACON_LIGHTS"))],
+        "the toggle differs from the reading, so it flips"
+    );
+    m.read(&beacon, 1.0);
+    assert!(
+        m.sends().is_empty(),
+        "each write's echo is its own, not this pilot's change: {:?}",
+        m.out
+    );
+    assert_eq!(
+        previewed_then_sent(&mut m, "beacon", number(1.0)),
+        vec![],
+        "the toggle matches the reading, so it doesn't flip"
+    );
+    assert_eq!(
+        previewed_then_sent(&mut m, "mixture", number(0.5)),
+        vec![],
+        "a name writes only a value the cockpit doesn't already read"
+    );
+}
+
+#[test]
+fn a_runs_stepping_write_steps_from_the_reading_at_its_pace_in_the_frames_after_it() {
+    let (hdg, p) = heading_steps(Some(Pace::Frames(2)));
+    let mut m = Machine::new(PF, &p);
+    m.read(&hdg, 358.0);
+    let inc = key("HEADING_BUG_INC");
+    assert_eq!(
+        previewed_then_sent(&mut m, "heading", number(2.0)),
+        vec![
+            (0, inc.clone()),
+            (2, inc.clone()),
+            (4, inc.clone()),
+            (6, inc.clone())
+        ],
+        "358 to 2 is four steps up through 0, and only the first goes in the call"
+    );
+    // A run again with the reading a step behind starts from the last step, not the reading.
+    m.read(&hdg, 1.0);
+    assert_eq!(
+        previewed_then_sent(&mut m, "heading", number(3.0)),
+        vec![(0, inc)]
+    );
+}
+
+#[test]
+fn a_run_is_writing_until_the_frame_of_its_last_action() {
+    let (hdg, p) = heading_steps(Some(Pace::Frames(2)));
+    let mut m = Machine::new(PF, &p);
+    m.read(&hdg, 0.0);
+    assert!(!m.engine.writing("heading"));
+    m.engine
+        .write_once("heading", number(2.0), m.cx())
+        .expect("the write should go");
+    assert!(m.engine.writing("heading"), "one step of two went");
+    m.frame();
+    assert!(
+        m.engine.writing("heading"),
+        "the second step goes 2 frames on"
+    );
+    m.frame();
+    assert_eq!(m.acts().len(), 1, "the second step went");
+    assert!(!m.engine.writing("heading"));
+    assert!(!m.engine.writing("no_such_entry"));
+}
+
+#[test]
+fn a_runs_write_function_sees_state_and_spaces_its_chain_at_its_pace() {
+    let battery = l("BATTERY");
+    let hdg = l("HDG");
+    let function = r#"(value) => {
+      if (state.battery === 0) return
+      write(L('HDG_SET'), value)
+      write(K('HDG_INC')).repeat(3).every('2 frames')
+      write(H('DONE'))
+    }"#;
+    let p = profile(
+        vec![
+            state("battery", battery.clone(), Write::Name(battery.clone())),
+            state("heading", hdg.clone(), Write::Function(function.into())),
+        ],
+        vec![],
+    );
+    let mut m = Machine::new(PF, &p);
+    m.read(&battery, 0.0);
+    m.read(&hdg, 0.0);
+    assert_eq!(
+        previewed_then_sent(&mut m, "heading", number(10.0)),
+        vec![],
+        "with the battery off the function writes nothing"
+    );
+    m.read(&battery, 1.0);
+    let inc = key("HDG_INC");
+    let done = Action::Fire {
+        name: Name::H {
+            name: "DONE".into(),
+        },
+    };
+    assert_eq!(
+        previewed_then_sent(&mut m, "heading", number(10.0)),
+        vec![
+            (0, set(&l("HDG_SET"), 10.0)),
+            (0, inc.clone()),
+            (2, inc.clone()),
+            (4, inc),
+            (4, done)
+        ]
+    );
+}
+
+#[test]
+fn a_runs_event_entry_fires_its_write_with_the_value_given_or_with_none() {
+    let ap = k("AP_MASTER");
+    let command = l("CMD_PULSE");
+    let p = profile(
+        vec![],
+        vec![
+            event("ap_master", ap.clone(), Write::Name(ap.clone())),
+            event("command", command.clone(), Write::Name(command.clone())),
+        ],
+    );
+    let mut m = Machine::new(PF, &p);
+    assert_eq!(
+        previewed_then_sent(&mut m, "ap_master", Given::Nothing),
+        vec![(0, key("AP_MASTER"))]
+    );
+    m.fired(&ap, None);
+    assert!(
+        m.sends().is_empty(),
+        "the write's token takes the aircraft's report of it"
+    );
+    assert_eq!(
+        previewed_then_sent(&mut m, "ap_master", number(1.0)),
+        vec![(
+            0,
+            Action::Key {
+                name: ap.clone(),
+                values: vec![1.0]
+            }
+        )]
+    );
+    assert_eq!(
+        previewed_then_sent(&mut m, "command", number(1.0)),
+        vec![(0, set(&command, 1.0))]
+    );
+    let error = m.engine.plan("command", Given::Nothing).unwrap_err();
+    assert!(error.contains("takes a value"), "{error}");
+}
+
+#[test]
+fn a_runs_counting_entry_sends_its_step_count_of_inc_or_dec_at_its_pace() {
+    let speed = Watches::Count(Box::new(Count {
+        default: 80.0,
+        inc: Some(k("SPD_INC")),
+        dec: Some(k("SPD_DEC")),
+        step: 1.0,
+        set: None,
+        count: None,
+        wrap: false,
+        range: (0.0, 399.0),
+    }));
+    let write = Write::Steps(Steps {
+        inc: k("SPD_INC"),
+        dec: k("SPD_DEC"),
+        step: 1.0,
+        wrap: None,
+        range: None,
+        pace: None,
+    });
+    let mut entry = state("speed", l("unused"), write);
+    entry.watch = speed;
+    let mut m = Machine::new(PF, &profile(vec![entry], vec![]));
+    let (inc, dec) = (key("SPD_INC"), key("SPD_DEC"));
+    assert_eq!(
+        previewed_then_sent(&mut m, "speed", Given::Steps(3)),
+        vec![(0, inc.clone()), (1, inc.clone()), (2, inc)]
+    );
+    assert_eq!(
+        previewed_then_sent(&mut m, "speed", Given::Steps(-2)),
+        vec![(0, dec.clone()), (1, dec)]
+    );
+    let error = m.engine.plan("speed", number(90.0)).unwrap_err();
+    assert!(error.contains("step count"), "{error}");
+}
+
+#[test]
+fn a_runs_preview_leaves_the_engine_as_it_found_it() {
+    let battery = l("BATTERY");
+    let (hdg, mut p) = heading_steps(None);
+    p.state.push(state(
+        "battery",
+        battery.clone(),
+        Write::Name(battery.clone()),
+    ));
+    let mut m = Machine::new(PF, &p);
+    m.read(&hdg, 100.0);
+    m.read(&battery, 0.0);
+    let before = m.engine.give();
+    let planned = m.engine.plan("heading", number(103.0)).unwrap();
+    assert_eq!(planned.iter().map(|p| p.times).sum::<u64>(), 3);
+    assert_eq!(
+        m.engine.plan("heading", number(103.0)).unwrap(),
+        planned,
+        "no step went pending for the next plan to start from"
+    );
+    m.engine.plan("battery", number(1.0)).unwrap();
+    m.wait(SECOND);
+    assert!(m.take().is_empty(), "no write started");
+    assert_eq!(m.engine.give(), before);
+    m.read(&battery, 1.0);
+    assert_eq!(
+        m.sends().len(),
+        1,
+        "nothing went pending, so the cockpit reaching the previewed value is this pilot's change"
+    );
+}
+
+#[test]
+fn a_run_that_cant_write_says_why_in_words_for_the_author() {
+    let battery = l("BATTERY");
+    let lamp = l("LAMP");
+    let x = l("X");
+    let y = l("Y");
+    let p = profile(
+        vec![
+            state("battery", battery.clone(), Write::Name(battery.clone())),
+            state("lamp", lamp.clone(), Write::None),
+            state(
+                "throws",
+                x.clone(),
+                Write::Function("(value) => { null.x }".into()),
+            ),
+            state(
+                "loops",
+                y.clone(),
+                Write::Function("(value) => { while (true) { write(K('Y'), value) } }".into()),
+            ),
+        ],
+        vec![],
+    );
+    let mut m = Machine::new(PF, &p);
+    for name in [&lamp, &x, &y] {
+        m.read(name, 0.0);
+    }
+    let why = |m: &mut Machine, entry: &str| {
+        let planned = m.engine.plan(entry, number(1.0)).unwrap_err();
+        let sent = m.engine.write_once(entry, number(1.0), m.cx()).unwrap_err();
+        assert_eq!(planned, sent, "a run fails as its preview does");
+        planned
+    };
+    assert_eq!(why(&mut m, "nope"), "the profile has no entry `nope`");
+    let watch_only = why(&mut m, "lamp");
+    assert!(watch_only.contains("watch-only"), "{watch_only}");
+    let unread = why(&mut m, "battery");
+    assert!(unread.contains("no reading yet"), "{unread}");
+    let threw = why(&mut m, "throws");
+    assert!(
+        threw.starts_with("`throws`'s write function failed: TypeError"),
+        "{threw}"
+    );
+    // Each pass keeps an action, so the loop can reach the memory limit before the time limit.
+    let looped = why(&mut m, "loops");
+    assert!(
+        looped.starts_with("`loops`'s write function stopped: the call"),
+        "{looped}"
+    );
+    m.wait(SECOND);
+    assert!(
+        !m.take().iter().any(|o| matches!(o, Out::Act(_))),
+        "nothing was written"
+    );
+}
+
+#[test]
+fn an_engine_that_runs_only_what_its_asked_puts_back_and_sends_nothing() {
+    let trim = l("ELEVATOR_TRIM");
+    let beacon = l("BEACON");
+    let mut trims = state(
+        "elevator_trim",
+        trim.clone(),
+        Write::Steps(Steps {
+            inc: k("ELEV_TRIM_UP"),
+            dec: k("ELEV_TRIM_DN"),
+            step: 1.0,
+            wrap: Some(false),
+            range: None,
+            pace: None,
+        }),
+    );
+    trims.owner = Owner::PilotFlying;
+    let p = profile(
+        vec![
+            trims,
+            state("beacon", beacon.clone(), Write::Name(beacon.clone())),
+        ],
+        vec![],
+    );
+    // A following machine after preflight: it takes the pilot flying's trim and reads its echo,
+    // then its own pilot turns the trim wheel and flips the beacon.
+    let follow = |mut pm: Machine| -> (Vec<Out>, Vec<Out>) {
+        pm.read(&trim, 0.0);
+        pm.read(&beacon, 0.0);
+        pm.arrive("elevator_trim", 3.0, stamp(PF, 1, &[]));
+        pm.wait(SECOND / 10);
+        pm.read(&trim, 3.0);
+        let taken = pm.take();
+        pm.read(&trim, 0.0);
+        pm.read(&beacon, 1.0);
+        pm.wait(SECOND / 10);
+        (taken, pm.take())
+    };
+    let (_, synced) = follow(Machine::new(PM, &p));
+    let ups = synced
+        .iter()
+        .filter(|o| **o == Out::Act(key("ELEV_TRIM_UP")))
+        .count();
+    assert_eq!(
+        ups, 3,
+        "an engine that syncs steps the trim back: {synced:?}"
+    );
+    assert!(
+        synced.iter().any(|o| matches!(o, Out::Send(_))),
+        "and sends the beacon: {synced:?}"
+    );
+    let (taken, asked) = follow(Machine::only_asked(PM, &p));
+    assert!(taken.is_empty(), "it takes no arrival: {taken:?}");
+    assert!(
+        asked.is_empty(),
+        "it puts back and sends nothing: {asked:?}"
+    );
+
+    let mut late = Machine::only_asked(PM, &p);
+    late.read(&beacon, 0.0);
+    late.catching_up = true;
+    let state = CatchUpState {
+        entries: vec![entry("beacon", 1.0)],
+    };
+    assert!(
+        late.engine.take(&state, late.cx()).is_empty(),
+        "it takes no catch-up"
+    );
+}
+
+#[test]
+fn an_engine_that_runs_only_what_its_asked_still_runs_a_write_and_its_steps() {
+    let (hdg, p) = heading_steps(None);
+    let mut m = Machine::only_asked(PM, &p);
+    m.read(&hdg, 100.0);
+    let inc = key("HEADING_BUG_INC");
+    assert_eq!(
+        previewed_then_sent(&mut m, "heading", number(103.0)),
+        vec![(0, inc.clone()), (1, inc.clone()), (2, inc)]
+    );
+    m.read(&hdg, 103.0);
+    assert!(m.take().is_empty(), "frame returned only the write's steps");
 }

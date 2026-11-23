@@ -2,7 +2,7 @@
 //! the `unit` messages it takes from clients, its panel modules, and its settings
 //! (record/areas/core/02-clients-and-panel-bridge.md, "What a unit registers and calls").
 
-use kernel::{Cx, Unit, View};
+use kernel::{Cx, Handler, Unit, View};
 use messages::clients::SettingKind;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -46,6 +46,14 @@ pub trait ClientsUnit<S> {
         f: fn(&mut S, A, &mut Cx) -> Result<(), String>,
     ) -> &mut Self;
 
+    /// A command as `command` takes it, handed who sent it too, for a unit that serves only some
+    /// clients, as `authoring` serves one `profile-extension` client.
+    fn command_from<A: DeserializeOwned + 'static>(
+        &mut self,
+        name: &'static str,
+        f: fn(&mut S, Sender, A, &mut Cx) -> Result<(), String>,
+    ) -> &mut Self;
+
     /// The `unit` messages clients send this unit by `name`, such as a panel module's.
     fn client_messages<B: DeserializeOwned + 'static>(
         &mut self,
@@ -54,10 +62,11 @@ pub trait ClientsUnit<S> {
     ) -> &mut Self;
 
     /// A panel module, whose rule picks the instruments of a cockpit panel it loads for,
-    /// given the instruments' keys, once the profile has loaded. The rule reads the loaded
-    /// profile through `View`, and a panel none of whose instruments it picks doesn't load it.
-    /// `needed` says whether the loaded profile names anything the module serves, and when no
-    /// module's does, the clients crate raises no trouble over a panel that never connects.
+    /// given the instruments' keys, once the profile has loaded and every unit has handled
+    /// `ProfileLoaded`. The rule reads what it needs through `View`, such as the loaded profile
+    /// or what features watch, and a panel none of whose instruments it picks doesn't load it.
+    /// `needed` says whether anything the module serves is wanted, and when no module's is, the
+    /// clients crate raises no trouble over a panel that never connects.
     /// Both run inside a handler of the clients crate, so reading `Clients` there panics.
     fn panel_module(
         &mut self,
@@ -114,11 +123,27 @@ impl<S: 'static> ClientsUnit<S> for Unit<'_, S> {
             };
             cx.call(Clients::answered, (call.socket, call.id, result));
         });
-        let clients = self.registry().state_mut::<Clients>();
-        assert!(
-            clients.commands.insert(name, handler).is_none(),
-            "command {name} should be registered once"
-        );
+        register_command(self.registry().state_mut::<Clients>(), name, handler);
+        self
+    }
+
+    fn command_from<A: DeserializeOwned + 'static>(
+        &mut self,
+        name: &'static str,
+        f: fn(&mut S, Sender, A, &mut Cx) -> Result<(), String>,
+    ) -> &mut Self {
+        let handler = self.handler(move |state: &mut S, call: CommandCall, cx: &mut Cx| {
+            let from = Sender {
+                socket: call.socket,
+                component: cx.read::<Clients>().component_of(call.socket),
+            };
+            let result = match serde_json::from_value::<A>(call.args) {
+                Ok(args) => f(state, from, args, cx),
+                Err(error) => Err(format!("its arguments didn't read: {error}")),
+            };
+            cx.call(Clients::answered, (call.socket, call.id, result));
+        });
+        register_command(self.registry().state_mut::<Clients>(), name, handler);
         self
     }
 
@@ -184,6 +209,13 @@ impl<S: 'static> ClientsUnit<S> for Unit<'_, S> {
             .register(key, setting);
         self
     }
+}
+
+fn register_command(clients: &mut Clients, name: &'static str, handler: Handler<CommandCall>) {
+    assert!(
+        clients.commands.insert(name, handler).is_none(),
+        "command {name} should be registered once"
+    );
 }
 
 fn register_panel_module(clients: &mut Clients, module: PanelModuleRule) {

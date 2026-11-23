@@ -131,7 +131,7 @@ impl Engine {
         self.leave_token(name, value, cx);
     }
 
-    fn leave_token(&mut self, name: &Name, value: Option<f64>, cx: Ctx) {
+    pub(crate) fn leave_token(&mut self, name: &Name, value: Option<f64>, cx: Ctx) {
         let (letter, name) = ident(name);
         self.tokens.push(Token {
             letter,
@@ -242,7 +242,7 @@ impl Engine {
         let Some(slot) = self.events.get_mut(i) else {
             return;
         };
-        if slot.stopped {
+        if slot.stopped || self.only_asked {
             return;
         }
         if cx.preflight_ended && slot.driven.own(cx.at) {
@@ -279,40 +279,30 @@ impl Engine {
         }
         slot.driven.received(cx.at);
         let watched = slot.entry.watch.clone();
-        let chains = match slot.entry.write.clone() {
-            Write::Name(name @ (Name::L { .. } | Name::A { .. })) if value.is_none() => {
+        let write = slot.entry.write.clone();
+        let chains = match self.firing(i, write, value.as_ref()) {
+            Ok(chains) => chains,
+            Err(Unfired::NoValue(name)) => {
                 tracing::info!(
-                    entry = slot.entry.key,
+                    entry = self.events.get(i).map(|e| e.entry.key.as_str()),
                     %name,
                     "an event entry's write sets a variable, and its firing carried no value to set"
                 );
                 return Applied::Skipped;
             }
-            Write::Name(name) => vec![Chain {
-                action: action(&name, value.as_ref()),
-                times: 1,
-                pace: self.pace,
-                step: None,
-            }],
-            Write::Function(_) => match self.script.run(Slot::Event(i), value.as_ref()) {
-                Ok(ran) => self.chains_of(ran.written),
-                Err(RunFailed::Limit(failed)) => {
-                    self.stop(Slot::Event(i), Why::Limit(failed.to_string()), out);
-                    return Applied::Skipped;
-                }
-                Err(RunFailed::Wrong(error)) => {
-                    tracing::info!(
-                        entry = self.events.get(i).map(|e| e.entry.key.as_str()),
-                        error,
-                        "a write function failed, so its firing made nothing"
-                    );
-                    return Applied::Done;
-                }
-            },
-            // The checker refuses each of these on an event entry, which has no value of the
-            // cockpit's to compare or step from (record/areas/profiles/01-format-and-delivery.md,
-            // "What fails a load").
-            Write::Toggle(_) | Write::Steps(_) | Write::None => {
+            Err(Unfired::Failed(RunFailed::Limit(failed))) => {
+                self.stop(Slot::Event(i), Why::Limit(failed.to_string()), out);
+                return Applied::Skipped;
+            }
+            Err(Unfired::Failed(RunFailed::Wrong(error))) => {
+                tracing::info!(
+                    entry = self.events.get(i).map(|e| e.entry.key.as_str()),
+                    error,
+                    "a write function failed, so its firing made nothing"
+                );
+                return Applied::Done;
+            }
+            Err(Unfired::Refused) => {
                 tracing::warn!(
                     entry = self.events.get(i).map(|e| e.entry.key.as_str()),
                     "an event entry's write toggles, steps, or writes none, which its checker refuses"
@@ -332,4 +322,43 @@ impl Engine {
             Applied::Done
         }
     }
+
+    /// The chains an event entry's `write` makes for a firing that carried `value`, or why it
+    /// makes none.
+    pub(crate) fn firing(
+        &mut self,
+        i: usize,
+        write: Write,
+        value: Option<&Value>,
+    ) -> Result<Vec<Chain>, Unfired> {
+        match write {
+            Write::Name(name @ (Name::L { .. } | Name::A { .. })) if value.is_none() => {
+                Err(Unfired::NoValue(name))
+            }
+            Write::Name(name) => Ok(vec![Chain {
+                action: action(&name, value),
+                times: 1,
+                pace: self.pace,
+                step: None,
+            }]),
+            Write::Function(_) => self
+                .script
+                .run(Slot::Event(i), value)
+                .map(|ran| self.chains_of(ran.written))
+                .map_err(Unfired::Failed),
+            // The checker refuses each of these on an event entry, which has no value of the
+            // cockpit's to compare or step from (record/areas/profiles/01-format-and-delivery.md,
+            // "What fails a load").
+            Write::Toggle(_) | Write::Steps(_) | Write::None => Err(Unfired::Refused),
+        }
+    }
+}
+
+/// Why an event entry's write made nothing.
+pub(crate) enum Unfired {
+    /// It sets this variable, and the firing carried no value to set it to.
+    NoValue(Name),
+    Failed(RunFailed),
+    /// It toggles, steps, or writes none, which the checker refuses.
+    Refused,
 }

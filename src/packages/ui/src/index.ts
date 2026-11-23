@@ -4,6 +4,8 @@
 
 export { Button, spaced } from "./controls/button.tsx"
 export type { ButtonProps, ButtonSize, ButtonVariant } from "./controls/button.tsx"
+export { Checkbox } from "./controls/checkbox.tsx"
+export type { CheckboxProps } from "./controls/checkbox.tsx"
 export { Choice } from "./controls/choice.tsx"
 export type { ChoiceProps } from "./controls/choice.tsx"
 export { CodeInput } from "./controls/code-input.tsx"

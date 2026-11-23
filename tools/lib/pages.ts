@@ -41,22 +41,24 @@ const BUNDLES: { entry: string; to: string }[] = [
 ]
 
 /**
- * Each feature's panel modules: every `.ts` file directly in a feature's `panel/` folder is one,
- * such as src/features/pointer-sync/panel/pointer-sync.ts, which the bridge loads as
- * /DualInput/modules/pointer-sync.js once the core names it, so deleting a feature's folder
- * takes its modules out of our package with no edit here
+ * Each feature's and each platform unit's panel modules: every `.ts` file directly in a unit's
+ * `panel/` folder is one, such as src/features/pointer-sync/panel/pointer-sync.ts, which the
+ * bridge loads as /DualInput/modules/pointer-sync.js once the core names it, so deleting a
+ * feature's folder takes its modules out of our package with no edit here
  * (record/areas/core/02-clients-and-panel-bridge.md, "Panel modules").
  */
 function panelModules(root = ROOT): { entry: string; to: string }[] {
-  const features = path.join(root, "src", "features")
-  if (!fs.existsSync(features)) return []
-  return fs.readdirSync(features).flatMap((feature) => {
-    const panel = path.join(features, feature, "panel")
-    if (!fs.existsSync(panel)) return []
-    return fs
-      .readdirSync(panel)
-      .filter((f) => f.endsWith(".ts") && fs.statSync(path.join(panel, f)).isFile())
-      .map((f) => ({ entry: `src/features/${feature}/panel/${f}`, to: `html_ui/DualInput/modules/${f.replace(/\.ts$/, ".js")}` }))
+  return ["features", "platform"].flatMap((tier) => {
+    const units = path.join(root, "src", tier)
+    if (!fs.existsSync(units)) return []
+    return fs.readdirSync(units).flatMap((unit) => {
+      const panel = path.join(units, unit, "panel")
+      if (!fs.existsSync(panel)) return []
+      return fs
+        .readdirSync(panel)
+        .filter((f) => f.endsWith(".ts") && fs.statSync(path.join(panel, f)).isFile())
+        .map((f) => ({ entry: `src/${tier}/${unit}/panel/${f}`, to: `html_ui/DualInput/modules/${f.replace(/\.ts$/, ".js")}` }))
+    })
   })
 }
 

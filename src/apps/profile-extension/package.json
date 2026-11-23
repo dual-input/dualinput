@@ -5,7 +5,7 @@
   "description": "Write Dual Input's aircraft profiles, with the profile builder's errors as you type, and each profile you save built into Dual Input's local folder for a test session.",
   "version": "0.0.0",
   "engines": {
-    "vscode": "^1.91.0"
+    "vscode": "^1.106.0"
   },
   "categories": ["Programming Languages", "Formatters", "Linters"],
   "icon": "icon.png",
@@ -38,18 +38,35 @@
         }
       }
     ],
+    "viewsContainers": {
+      "secondarySidebar": [
+        { "id": "dualInput", "title": "Dual Input", "icon": "./icons/language-dark.svg" }
+      ]
+    },
+    "views": {
+      "dualInput": [
+        { "type": "webview", "id": "dualInput.view", "name": "Dual Input" }
+      ]
+    },
     "commands": [
       { "command": "dualInput.buildNow", "title": "Build now", "category": "Dual Input" },
       { "command": "dualInput.removeBundle", "title": "Remove local bundle", "category": "Dual Input" },
       { "command": "dualInput.openLocalFolder", "title": "Open local folder", "category": "Dual Input" },
-      { "command": "dualInput.restartServer", "title": "Restart language server", "category": "Dual Input" }
+      { "command": "dualInput.restartServer", "title": "Restart language server", "category": "Dual Input" },
+      { "command": "dualInput.runEntry", "title": "Run entry", "category": "Dual Input" },
+      { "command": "dualInput.pickDisplays", "title": "Pick displays", "category": "Dual Input" }
     ],
     "menus": {
       "commandPalette": [
         { "command": "dualInput.buildNow", "when": "editorLangId == dualinput-profile" },
-        { "command": "dualInput.removeBundle", "when": "editorLangId == dualinput-profile" }
+        { "command": "dualInput.removeBundle", "when": "editorLangId == dualinput-profile" },
+        { "command": "dualInput.runEntry", "when": "editorLangId == dualinput-profile" },
+        { "command": "dualInput.pickDisplays", "when": "editorLangId == dualinput-profile" }
       ]
     },
+    "keybindings": [
+      { "command": "dualInput.runEntry", "key": "ctrl+alt+f5", "when": "editorTextFocus && editorLangId == dualinput-profile" }
+    ],
     "configuration": {
       "title": "Dual Input Profiles",
       "properties": {
@@ -62,6 +79,11 @@
           "type": "string",
           "default": "",
           "markdownDescription": "The folder bundles go into. Leave it empty for Dual Input's own, `%APPDATA%\\DualInput\\profiles\\local\\`, or name another, such as the one a development core's `profiles.local` setting names."
+        },
+        "dualInput.dataFolder": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "A development core's data folder, such as the one `tools/sim/` runs a core on, where the language server finds the core's `port.json` and reaches the sim through it for live values, Run, and the display picker. Leave it empty for Dual Input's own, `%APPDATA%\\DualInput\\`."
         },
         "dualInput.trace.server": {
           "type": "string",

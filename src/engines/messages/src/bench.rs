@@ -238,8 +238,11 @@ pub enum StandInHelperLine {
 pub enum ClientsAct {
     /// Has the unit's panel module, `bench-panel`, take each instrument whose key starts with
     /// one of `picks`, once a profile loads, as a feature's rule picks instruments by its
-    /// profile's block.
+    /// profile's block. The clients crate answers each panel running a module again at once.
     Picks { picks: Vec<String> },
+    /// Asks for every cockpit panel again, through the announcement's `panels` count, as a
+    /// feature that wants panels told `none` does.
+    RecallPanels,
     /// Changes the slice `bench` `per_second` times a second for `for_ms`.
     Churn { per_second: u32, for_ms: u64 },
     /// Raises a notification with no action, as `bench-clients.<id>`, as a feature raises

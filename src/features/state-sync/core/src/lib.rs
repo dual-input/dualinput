@@ -2,19 +2,18 @@
 //! other pilot's cockpit (record/areas/sync/05-units.md, "State sync").
 //!
 //! It holds one sync engine for the loaded profile, and joins it to the rest of the core: what
-//! the engine watches comes from the sim service and two panel modules, its changes go out on
-//! the cockpit stream, what the crew changed comes back in the stream's order, and each action
-//! the engine asks for is carried out through the route its kind of name takes.
+//! the engine watches comes through sim variables, its changes go out on the cockpit stream,
+//! what the crew changed comes back in the stream's order, and each action the engine asks for
+//! goes to sim variables, which carries it out through the route its kind of name takes.
 
 mod carry;
 mod notices;
-mod panels;
 mod watch;
 
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use clients::{Clients, ClientsUnit, Sender, SettingDef};
+use clients::{Clients, ClientsUnit, SettingDef};
 use cockpit_stream::{
     Answer, Applying, CockpitCx, CockpitSent, CockpitStream, CockpitUnit, Delivered,
 };
@@ -23,20 +22,17 @@ use messages::clients::SettingKind;
 use messages::cockpit::Origin;
 use messages::session::{Control, Phase};
 use messages::sim::Stage;
-use messages::state_sync::{
-    CHANGE, ChecklistRow, FIRED, FromInstrumentReads, H_EVENTS, HeardH, INSTRUMENT_READS, NAME,
-    PF_CHANGE, Reading, STATE, StateSyncSlice,
-};
+use messages::state_sync::{CHANGE, ChecklistRow, FIRED, NAME, PF_CHANGE, STATE, StateSyncSlice};
 use messages::sync::{CatchUpState, Stamp, Value};
-use profile_engine::{Name, Resolved};
+use profile_engine::Resolved;
 use profile_loader::{ProfileLoaded, ProfileUnloaded, Profiles};
 use sandbox::Sandbox;
 use session::{ControlPassed, Ready, Session};
 use sim_service::{SimAwareness, SimChanged, SimCx, SimEvent, SimUnit};
-use sync_engine::{Applied, Arrived, Ctx, Engine, Load, Ready as Settling, Seen};
+use sim_variables::{VariablesCx, VariablesEvent, VariablesUnit};
+use sync_engine::{Applied, Arrived, Ctx, Engine, Load, Ready as Settling};
 
 use crate::notices::Notices;
-use crate::watch::Written;
 
 /// The development setting that says how long after Ready to fly an aircraft counts as settled,
 /// in ms. The bench sets it to 0, since every session scenario flies the 58P, whose profile would
@@ -54,12 +50,8 @@ pub struct StateSync {
 
 struct Live {
     engine: Engine,
-    /// Each sim call that reads a watch, by the watch's place in `engine.watches()`.
-    watches: BTreeMap<Handle, usize>,
-    /// Each `H:` event's watches, by its name with no `H:`.
-    h_watches: BTreeMap<String, Vec<usize>>,
-    /// Each variable's handle for a write, whether a watch's or a definition of its own.
-    written: Written,
+    /// The watch through sim variables of every name in `engine.watches()`, in its order.
+    watch: Handle,
     frames: Option<Handle>,
     /// The arrival each stepping write carries out, which the stream waits on.
     stepping: BTreeMap<String, Applying>,
@@ -97,14 +89,7 @@ pub fn register(r: &mut Registry) {
         .guard::<Ready>(StateSync::settled)
         .on_sim(StateSync::on_sim)
         .ends_with_profile()
-        .one_panel_module(H_EVENTS, panels::h_events_rule, panels::any_h_event)
-        .panel_module(
-            INSTRUMENT_READS,
-            panels::instruments_rule,
-            panels::any_instrument,
-        )
-        .client_messages(H_EVENTS, StateSync::heard_h)
-        .client_messages(INSTRUMENT_READS, StateSync::instrument_reads)
+        .on_variables(StateSync::on_variables)
         .client_state(NAME, StateSync::slice)
         .catch_up_step(STATE, StateSync::give, StateSync::take);
     me.cockpit_kind(CHANGE, StateSync::apply)
@@ -178,12 +163,11 @@ impl StateSync {
                 settle,
             },
         );
+        let watch = cx.variables().watch(&watch::watches(engine.watches()));
         let mut live = Live {
             engine,
-            watches: BTreeMap::new(),
-            h_watches: BTreeMap::new(),
-            written: Written::default(),
-            frames: None,
+            watch,
+            frames: Some(cx.sim().frames()),
             stepping: BTreeMap::new(),
             from: BTreeMap::new(),
             checklist: checklist(&profile),
@@ -193,8 +177,6 @@ impl StateSync {
                 StateSync::catch_up_ready,
             )),
         };
-        live.start_watching(cx);
-        live.frames = Some(cx.sim().frames());
         live.carry_out(out, cx);
         me.live = Some(live);
     }
@@ -203,6 +185,7 @@ impl StateSync {
         // The stream applies nothing after a stepping write's arrival until its unit says it's
         // applied, and an engine that's gone takes no more steps, so each counts as applied.
         if let Some(live) = me.live.take() {
+            cx.variables().end(live.watch);
             for applying in live.stepping.into_values() {
                 cx.cockpit().applied(applying);
             }
@@ -246,11 +229,34 @@ impl StateSync {
         }
     }
 
+    /// The sim drew a frame, which paces the engine's steps and checks. State sync's own
+    /// connection carries only this subscription, and closes with the profile.
     fn on_sim(me: &mut StateSync, event: SimEvent, cx: &mut Cx) {
         let (Some(live), Some(ctx)) = (me.live.as_mut(), engine_ctx(cx)) else {
             return;
         };
-        let out = live.heard_from_sim(event, ctx);
+        match event {
+            SimEvent::Frame { call, .. } if Some(call) == live.frames => {
+                let out = live.engine.frame(ctx);
+                live.carry_out(out, cx);
+            }
+            SimEvent::Lost => {
+                tracing::info!("state sync's connection to the sim was lost and opens again");
+            }
+            _ => {}
+        }
+    }
+
+    /// A reading, a firing, or a failure of one of the engine's watches.
+    fn on_variables(me: &mut StateSync, event: VariablesEvent, cx: &mut Cx) {
+        let (Some(live), Some(ctx)) = (me.live.as_mut(), engine_ctx(cx)) else {
+            return;
+        };
+        if event.watch != live.watch {
+            return;
+        }
+        let seen = live.seen(event.place, event.got, cx);
+        let out = live.engine.seen(seen, ctx);
         live.carry_out(out, cx);
     }
 
@@ -358,57 +364,6 @@ impl StateSync {
         live.carry_out(out, cx);
     }
 
-    /// An `H:` event heard in the panel that holds `h-events`.
-    fn heard_h(me: &mut StateSync, from: Sender, heard: HeardH, cx: &mut Cx) {
-        let (Some(live), Some(ctx)) = (me.live.as_mut(), engine_ctx(cx)) else {
-            return;
-        };
-        tracing::trace!(socket = from.socket, name = heard.name, target = ?heard.target, "a panel heard an H: event");
-        let watches = live.h_watches.get(&heard.name).cloned().unwrap_or_default();
-        for watch in watches {
-            let out = live.engine.seen(Seen::Fired { watch, value: None }, ctx);
-            live.carry_out(out, cx);
-        }
-    }
-
-    /// A message from an `instrument-reads` module: it started, or some paths' values changed.
-    fn instrument_reads(
-        me: &mut StateSync,
-        from: Sender,
-        message: FromInstrumentReads,
-        cx: &mut Cx,
-    ) {
-        let (Some(live), Some(ctx)) = (me.live.as_mut(), engine_ctx(cx)) else {
-            return;
-        };
-        match message {
-            FromInstrumentReads::Started { instruments } => {
-                panels::send_paths(live.engine.watches(), &instruments, from.socket, cx);
-            }
-            FromInstrumentReads::Read { readings } => {
-                for r in readings {
-                    let watch = r.number as usize;
-                    let seen = match r.reading {
-                        Reading::Number(n) => Seen::Value {
-                            watch,
-                            value: Value::Number(n),
-                        },
-                        Reading::Text(t) => Seen::Value {
-                            watch,
-                            value: Value::Text(t),
-                        },
-                        Reading::Error(error) => {
-                            live.path_failed(watch, &error, cx);
-                            Seen::Refused { watch }
-                        }
-                    };
-                    let out = live.engine.seen(seen, ctx);
-                    live.carry_out(out, cx);
-                }
-            }
-        }
-    }
-
     fn slice(me: &StateSync, view: &View) -> StateSyncSlice {
         let session = view.read::<Session>();
         let flying = session.me().is_some() && session.me() == session.pf();
@@ -427,19 +382,5 @@ fn answer(applied: Applied) -> Answer {
         Applied::Done => Answer::Done,
         Applied::Skipped => Answer::Skipped,
         Applied::Stepping => Answer::Unfinished,
-    }
-}
-
-/// What state sync reads a variable as: its name as SimConnect takes it, and its unit, `Number`
-/// for an `L:` one that gives none, as the profile format has it
-/// (record/areas/profiles/01-format-and-delivery.md, "Names").
-fn variable(name: &Name) -> Option<(String, String)> {
-    match name {
-        Name::L { name, unit } => Some((
-            format!("L:{name}"),
-            unit.clone().unwrap_or_else(|| "Number".to_string()),
-        )),
-        Name::A { name, unit } => Some((name.clone(), unit.clone())),
-        _ => None,
     }
 }

@@ -1,0 +1,20 @@
+// The Dual Input panel runs in a VS Code webview, a current Chromium, so this checks it against what that has. It still
+// draws with the kit, which keeps to what Coherent GT runs, and esbuild bundles it apart from the extension's own code in
+// ../src, which runs on Node in the extension host.
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["es2022", "dom"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "types": []
+  },
+  "include": ["src", "dev"]
+}

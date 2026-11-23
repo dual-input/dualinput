@@ -1137,7 +1137,7 @@ Done on 2026-11-22.
 
 Builds: the documentation for pilots, for developers of Dual Input's code, and for profile authors ([the product plan](../product/plan.md#3-v1-or-later)).
 Designs first: a guide to how each of the three is written, from research the user directs, where the docs are published, and what `CLAUDE.md` says of `docs/` once agents write there.
-Needs: nothing for the guides; 22b, 22c, and 22d for the profile authors' documentation.
+Needs: nothing for the guides; 22b, 22c, 22d, and 22g for the profile authors' documentation, 22g's of what [04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md#what-this-changes-elsewhere) asks it to say.
 
 ## 22f The graphics
 
@@ -1161,9 +1161,42 @@ Done on 2026-11-21: 105 pictures came out identical on three runs in a row, `nod
 
 ## 22g The extension in the sim
 
-Builds: three of fsc-editor's features that the user picked for the profile extension on 2026-11-21, which need the sim, so they come after [stage 22d](#22d-the-profile-extension): live values on each `watch:` line; Run, which fires an entry's write with a value the author types; and the display picker, which lists the cockpit's panels for `displays` and outlines one in the sim; and the profile authors' documentation of them.
-Designs first: all of it, with the user, before anything is assumed: what each feature does and how it looks, and what the core, state sync, the clients crate, the panel bridge, and the extension add for it (user, 2026-11-22).
+Designs first: three of fsc-editor's features that the user picked for the profile extension on 2026-11-21, which need the sim, so they come after [stage 22d](#22d-the-profile-extension): live values on each `watch:` line; Run, which fires an entry's write with a value the author types; and the display picker, which lists the cockpit's panels for `displays` and outlines one in the sim.
+The user designed them with us on 2026-11-22, a call at a time, and [04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md) carries it (user):
+
+- They work in a session's flight, through the author's own running core: `dualinput-profile-builder serve` connects to it as one more client, and a feature of the core's, `authoring`, serves it; the extension starts no session.
+- Live values show on `watch:` lines alone, from the open text, always visible in fsc-editor's box at the end of the line, and a misspelled `L:` reads 0, with no mark.
+- The Dual Input panel, a webview in VS Code's right-hand side bar drawn with our kit, holds a status line, Run, and the picker.
+- Run starts from a lens above each entry and runs the open text; it shows the values the entry has read, a preview of what it sends, and the revert notice; it takes a step count on a counting entry; and it runs only in the session's profile and its modules, and on an entry the PF owns only for the PF.
+- The picker lists every panel and outlines the row you're on, with no "pick in cockpit"; a `panels` count in the core's announcement brings back the panels told `none`, so every panel stays while the extension is connected.
+- Every feature reads and writes the sim's variables and fires its events by a profile's names through a platform crate of its own, `sim-variables`, which takes state sync's routes, with a lifetime of its own, one flight, and the sync engine gains one entry's write outside a sync.
+- The profile authors' documentation of these features goes to [stage 22e](#22e-the-docs).
+
+Building found that moving state sync's routes moved their code but not their lifetimes, and the user took a reworked `sim-variables` with four rules of its own on 2026-11-22 ([profiles log](../profiles/log.md#2026-11-22-building-22g-found-that-moving-state-syncs-routes-to-the-platform-moved-their-code-but-not-their-lifetimes-so-sim-variables-has-one-of-its-own)).
+
+Builds:
+
+- `src/platform/sim-variables`, with its connection for each flight, the panel modules `h-events` and `instrument-reads`, and `NamedEvents` as the routine host's own `HtmlAndInputEvents` ([reaching the sim by name](../profiles/04-the-extension-in-the-sim.md#reaching-the-sim-by-name))
+- in `sync-engine`: `write_once`, `plan`, and the mark of an engine that only runs the writes it's asked for ([the sync engine's single write](../profiles/04-the-extension-in-the-sim.md#the-sync-engines-single-write))
+- in `state-sync`: its watches and writes through `sim-variables` ([sync's units](../sync/05-units.md)' note of stage 22g)
+- in `sim-service`: `close`, a unit closing its own connection ([the sim seam](../core/03-sim-seam-and-wasm-module.md)'s note of stage 22g)
+- `src/features/authoring`: its crate in the core and its panel module `outline` ([what `authoring` does](../profiles/04-the-extension-in-the-sim.md#what-authoring-does), [the display picker](../profiles/04-the-extension-in-the-sim.md#the-display-picker))
+- in `clients`: answering the panels once every unit has handled the profile's load, each open panel's name and keys for features, and answering the open panels again when a module's rule changes or the profile unloads; in `sim-service` and `page-client`: the announcement's `panels` count ([every panel stays while the extension is connected](../profiles/04-the-extension-in-the-sim.md#every-panel-stays-while-the-extension-is-connected))
+- in `tools/profile-builder`'s `serve`: the connection to the author's core, the open files' names, the bundle for Run, the boxes' text, the lenses, and the picker's edit ([the connection](../profiles/04-the-extension-in-the-sim.md#the-connection))
+- in `src/apps/profile-extension`: the boxes, the lenses' commands, the setting `dualInput.dataFolder`, the Dual Input panel's webview in the kit with its dev page in `tools/lib/dev-pages.ts`, and `engines.vscode` raised to the version that takes the secondary side bar ([the Dual Input panel](../profiles/04-the-extension-in-the-sim.md#the-dual-input-panel))
+- in `tools/bench`: the fake `serve` and the scenario `authoring`; and `tools/sim/authoring.ts`, the session's cases in the sim
+- in `tools/map-check.ts`: `sim-variables` and `authoring`
+
 Needs: 22d.
+
+Tests:
+
+- [The design's cases](../profiles/04-the-extension-in-the-sim.md#cases), on the bench, as unit tests, by hand, and in one session in the sim, and [its budgets](../profiles/04-the-extension-in-the-sim.md#budgets).
+- State sync's scenarios on its routes through `sim-variables`: `state-sync`, `clients-panels`, `test-sessions`, and `profiles`.
+
+The stage changes the kernel, with a job that reads bytes off the loop, and the announcement and `page-client`, which every scenario's pages run on, so it closes on the whole bench.
+
+Exit: on our development machine, `node tools/check.ts` passes, and `node tools/bench.ts` passes, the `authoring` scenario among it; the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, and the user has seen the Dual Input panel's dev page in each of its states; in one session in the sim on the 58P, `node tools/sim/authoring.ts` reports each of its cases passed; and the [profiles' log](../profiles/log.md) has the budgets' measurements and the session's report.
 
 ## 23 v1's release
 

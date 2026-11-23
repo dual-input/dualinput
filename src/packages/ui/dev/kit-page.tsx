@@ -8,7 +8,7 @@ import { ArrowRightLeft, Check, Copy, Headset, Plane, PersonStanding, Settings, 
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 
-import { Badge, Button, Card, CardContent, Choice, CodeInput, Confirm, Dialog, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
+import { Badge, Button, Card, CardContent, Checkbox, Choice, CodeInput, Confirm, Dialog, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
 import type { ButtonProps, ButtonSize, ButtonVariant } from "../src/index.ts"
 
 const SCALES = [0.72, 0.884, 1, 1.056, 1.225]
@@ -228,10 +228,11 @@ function Fields() {
 
 function Switches() {
   const [on, setOn] = useState(true)
+  const [ticked, setTicked] = useState(true)
   const [volume, setVolume] = useState(70)
   const [choice, setChoice] = useState<"press" | "hold">("hold")
   return (
-    <Section title="Switch, choice, and slider">
+    <Section title="Switch, checkbox, choice, and slider">
       <Row>
         <State name="Live">
           <Choice value={choice} options={[["press", "Press"], ["hold", "Hold"]]} onChange={setChoice} />
@@ -258,6 +259,26 @@ function Switches() {
         </State>
         <State name="On, disabled">
           <Switch checked disabled />
+        </State>
+      </Row>
+      <Row>
+        <State name="Live">
+          <Checkbox checked={ticked} onCheckedChange={setTicked} />
+        </State>
+        <State name="Off">
+          <Checkbox checked={false} />
+        </State>
+        <State name="On">
+          <Checkbox checked />
+        </State>
+        <State name="Partly">
+          <Checkbox checked="mixed" />
+        </State>
+        <State name="Off, disabled">
+          <Checkbox checked={false} disabled />
+        </State>
+        <State name="On, disabled">
+          <Checkbox checked disabled />
         </State>
       </Row>
       <Row>

@@ -15,12 +15,14 @@ export { ROOT_CLASS }
 
 export const colors = {
   // `background_color` in src/apps/desktop/src/screens.rs and the page in tools/lib/desktop-pages.ts name the same color, for the moment before this stylesheet draws, so change all three together.
+  // `UNDER_KEY` in src/features/authoring/panel/src/outline.ts copies it at 80%, so change it there too.
   background: "#0a0a0a",
   foreground: "#fafafa",
   card: "#171717",
   "card-foreground": "#fafafa",
   popover: "#171717",
   "popover-foreground": "#fafafa",
+  // `COLORS` in src/apps/profile-extension/src/boxes.ts and `SKY` in src/features/authoring/panel/src/outline.ts copy it, since neither can import this file, so change all three together.
   primary: "#74d4ff",
   "primary-foreground": "#052f4a",
   secondary: "#262626",
@@ -33,6 +35,7 @@ export const colors = {
   // Information, a notification's lowest level; then the warning, trouble, and success colors.
   info: "#bdd7f5",
   "info-foreground": "#0a0a0a",
+  // `COLORS` in src/apps/profile-extension/src/boxes.ts copies it, so change both together.
   warning: "#f1be4d",
   "warning-foreground": "#461901",
   destructive: "#ea7977",
@@ -55,6 +58,81 @@ const washes = {
   "outline-hover": "rgba(255, 255, 255, 0.045)",
   // `secondary` with 5% of `foreground` mixed in, computed in oklch as the frames' color-mix does.
   "secondary-hover": "#2f2f2f",
+}
+
+/**
+ * The light palette, which a root takes with `palette="light"`, for a page outside the sim whose host is light, such as
+ * the profile extension's panel in a light VS Code theme; the apps in the sim stay dark (record/areas/interface/decisions.md,
+ * "The apps are dark only"). It takes Tailwind's neutral grays at the steps shadcn's light theme uses, sky-700 as the main
+ * color, since sky-300 is too pale for text on white, and the status colors at the steps that read as text on white.
+ */
+export const lightColors: Record<ColorName, string> = {
+  background: "#ffffff",
+  foreground: "#0a0a0a",
+  card: "#ffffff",
+  "card-foreground": "#0a0a0a",
+  popover: "#ffffff",
+  "popover-foreground": "#0a0a0a",
+  // `COLORS` in src/apps/profile-extension/src/boxes.ts copies it and `warning`, so change them together.
+  primary: "#0369a1",
+  "primary-foreground": "#f0f9ff",
+  secondary: "#f5f5f5",
+  "secondary-foreground": "#171717",
+  muted: "#f5f5f5",
+  "muted-foreground": "#737373",
+  accent: "#f5f5f5",
+  "accent-foreground": "#171717",
+  ring: "#0369a1",
+  info: "#475569",
+  "info-foreground": "#ffffff",
+  warning: "#b45309",
+  "warning-foreground": "#ffffff",
+  destructive: "#dc2626",
+  "destructive-foreground": "#ffffff",
+  success: "#15803d",
+  "success-foreground": "#ffffff",
+}
+
+/** The washes in black for the light palette, at strengths that read on white. */
+const lightWashes: Record<keyof typeof washes, string> = {
+  border: "rgba(0, 0, 0, 0.1)",
+  input: "rgba(0, 0, 0, 0.15)",
+  field: "rgba(0, 0, 0, 0.05)",
+  track: "rgba(0, 0, 0, 0.12)",
+  "outline-hover": "rgba(0, 0, 0, 0.04)",
+  "secondary-hover": "#ebebeb",
+}
+
+/**
+ * Each class the pages draw a wash with, as the selector Tailwind writes for it, with the property it sets and its light
+ * value. A wash is a fixed color rather than a custom property, so the dark palette's stylesheet stays as Coherent GT
+ * reads it, and the light palette restates each class under its root. When a page draws a wash under another class,
+ * add it here, or the light palette leaves it white.
+ */
+const LIGHT_WASH_CLASSES: [string, string, string][] = [
+  [".bg-field", "background-color", lightWashes.field],
+  [".bg-track", "background-color", lightWashes.track],
+  [".bg-border", "background-color", lightWashes.border],
+  [".border-border", "border-color", lightWashes.border],
+  [".border-input", "border-color", lightWashes.input],
+  [".hover\\:bg-outline-hover:hover", "background-color", lightWashes["outline-hover"]],
+  [".hover\\:bg-secondary-hover:hover", "background-color", lightWashes["secondary-hover"]],
+  // A choice's pill, white on the muted track as shadcn's light tabs draw it.
+  [".bg-input\\/30", "background-color", lightColors.background],
+]
+
+/**
+ * The light palette's rules, which go in Tailwind's base, ahead of the utilities: the colors as custom properties, the
+ * reset's edge, which a class that sets an edge, such as `border-transparent`, still overrides from later in the sheet,
+ * and the washes, which carry one more class than the utilities they restate.
+ */
+function lightRules(): Record<string, Record<string, string>> {
+  const root = `.${ROOT_CLASS}[data-palette="light"]`
+  return {
+    [root]: Object.fromEntries(Object.entries(lightColors).map(([name, hex]) => [`--${name}`, triplet(hex)])),
+    [`${root} *, ${root} *::before, ${root} *::after`]: { "border-color": lightWashes.border },
+    ...Object.fromEntries(LIGHT_WASH_CLASSES.map(([selector, property, value]) => [`${root} ${selector}`, { [property]: value }])),
+  }
 }
 
 /** The hex color as the comma-separated triplet colorVar reads. */
@@ -114,7 +192,10 @@ export function tailwindConfig(content: string[]) {
   return {
     presets: [msfsTailwind],
     content,
-    plugins: [({ addBase }: { addBase: (rules: never) => void }) => addBase(Object.fromEntries(Object.entries(KEYFRAMES).map(([name, frames]) => [`@keyframes ${name}`, frames])) as never)],
+    plugins: [
+      ({ addBase }: { addBase: (rules: never) => void }) => addBase(Object.fromEntries(Object.entries(KEYFRAMES).map(([name, frames]) => [`@keyframes ${name}`, frames])) as never),
+      ({ addBase }: { addBase: (rules: never) => void }) => addBase(lightRules() as never),
+    ],
     // Our stylesheet shares the EFB's document with the EFB and its other apps, so a class of ours
     // named like one of theirs, such as `hidden`, must reach only what's inside our root.
     important: `.${ROOT_CLASS}`,

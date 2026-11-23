@@ -11,6 +11,7 @@
 pub mod slots;
 
 use bytemuck::{Pod, Zeroable};
+use slots::{HTML_AND_INPUT_EVENT_BYTES, HtmlAndInputEventsSlot};
 
 /// The name of the module's status slot.
 pub const STATUS: &str = "DUALINPUT_MODULE_STATUS";
@@ -52,6 +53,91 @@ pub const CAMERA: RoutineId = RoutineId {
     freezes: false,
 };
 
+/// The platform's routine that fires `H:` events, the HTML events, and calls input events'
+/// presets, for whichever features act through sim variables.
+pub const HTML_AND_INPUT_EVENTS: RoutineId = RoutineId {
+    name: "HTML_AND_INPUT_EVENTS",
+    freezes: false,
+};
+
+/// One event `HtmlAndInputEvents` makes in the sim, in call order.
+#[derive(Clone, Debug, PartialEq)]
+pub enum HtmlOrInputEvent {
+    /// An `H:` event, its name with no `H:`, as an instrument receives it: the L-1011's engineer
+    /// panel answers `onInteractionEvent("FUEL")` for `H:FUEL` (read in inibuilds-aircraft-l1011
+    /// 1.0.8, html_ui/Pages/VCockpit/Instruments/L1011_COCKPIT/ENGINEER_PANEL/L1011_ENGINEER_PANEL.js).
+    H(String),
+    /// An input event's preset, its name with no `B:`, with the value `_Set` takes.
+    Preset { name: String, value: Option<f64> },
+}
+
+impl HtmlOrInputEvent {
+    /// How the event is written into a slot, with no 0 byte.
+    fn text(&self) -> String {
+        match self {
+            HtmlOrInputEvent::H(name) => format!("H{name}"),
+            HtmlOrInputEvent::Preset { name, value: None } => format!("B{name}"),
+            HtmlOrInputEvent::Preset {
+                name,
+                value: Some(value),
+            } => format!("B{name}={value}"),
+        }
+    }
+
+    fn read(text: &str) -> Option<HtmlOrInputEvent> {
+        match text.split_at_checked(1)? {
+            ("H", name) => Some(HtmlOrInputEvent::H(name.to_string())),
+            ("B", rest) => Some(match rest.split_once('=') {
+                Some((name, value)) => HtmlOrInputEvent::Preset {
+                    name: name.to_string(),
+                    value: Some(value.parse().ok()?),
+                },
+                None => HtmlOrInputEvent::Preset {
+                    name: rest.to_string(),
+                    value: None,
+                },
+            }),
+            _ => None,
+        }
+    }
+}
+
+/// `events` as the slots they take, each batch in call order, since a batch longer than one slot
+/// goes in several feeds.
+pub fn html_and_input_event_slots(events: &[HtmlOrInputEvent]) -> Vec<HtmlAndInputEventsSlot> {
+    let mut slots = Vec::new();
+    let mut slot: HtmlAndInputEventsSlot = Zeroable::zeroed();
+    let mut used = 0;
+    for event in events {
+        let text = event.text();
+        let bytes = text.as_bytes();
+        if used + bytes.len() + 1 > HTML_AND_INPUT_EVENT_BYTES && used > 0 {
+            slots.push(std::mem::replace(&mut slot, Zeroable::zeroed()));
+            used = 0;
+        }
+        let Some(place) = slot.names.get_mut(used..used + bytes.len()) else {
+            continue;
+        };
+        place.copy_from_slice(bytes);
+        used += bytes.len() + 1;
+        slot.count += 1;
+    }
+    if slot.count > 0 {
+        slots.push(slot);
+    }
+    slots
+}
+
+/// The events one slot holds, in call order. A name that doesn't read is left out, which only a
+/// feed from another build could hold, and a slots hash keeps those out.
+pub fn html_and_input_events(slot: &HtmlAndInputEventsSlot) -> Vec<HtmlOrInputEvent> {
+    slot.names
+        .split(|&b| b == 0)
+        .take(usize::from(slot.count))
+        .filter_map(|text| HtmlOrInputEvent::read(std::str::from_utf8(text).ok()?))
+        .collect()
+}
+
 /// The camera's referentials `Camera` reads, which `SimConnect.h` numbers in
 /// `SIMCONNECT_POSITION_REFERENTIAL` and `MSFS_Camera.h` in `FsPositionReferential` alike
 /// (read in MSFS 2024 SDK 1.8.1): the aircraft's frame, and the world's.
@@ -88,5 +174,52 @@ impl ModuleStatus {
     pub fn version(&self) -> String {
         let text = self.version.split(|&b| b == 0).next().unwrap_or_default();
         String::from_utf8_lossy(text).into_owned()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_batch_reads_back_in_call_order() {
+        let events = vec![
+            HtmlOrInputEvent::H("FUEL".into()),
+            HtmlOrInputEvent::Preset {
+                name: "ELECTRICAL_Battery_1_Toggle".into(),
+                value: None,
+            },
+            HtmlOrInputEvent::Preset {
+                name: "INSTRUMENT_ALTIMETER_1_Set".into(),
+                value: Some(16_272.5),
+            },
+        ];
+        let slots = html_and_input_event_slots(&events);
+        assert_eq!(slots.len(), 1);
+        assert_eq!(html_and_input_events(&slots[0]), events);
+    }
+
+    #[test]
+    fn a_batch_longer_than_a_slot_goes_in_several_in_order() {
+        let events: Vec<HtmlOrInputEvent> = (0..2_000)
+            .map(|i| HtmlOrInputEvent::H(format!("EVENT_{i}")))
+            .collect();
+        let slots = html_and_input_event_slots(&events);
+        assert!(slots.len() > 1);
+        let back: Vec<HtmlOrInputEvent> = slots.iter().flat_map(html_and_input_events).collect();
+        assert_eq!(back, events);
+    }
+
+    #[test]
+    fn a_name_too_long_for_a_slot_is_left_out_and_the_rest_go() {
+        let events = vec![
+            HtmlOrInputEvent::H("X".repeat(HTML_AND_INPUT_EVENT_BYTES + 1)),
+            HtmlOrInputEvent::H("FUEL".into()),
+        ];
+        let back: Vec<HtmlOrInputEvent> = html_and_input_event_slots(&events)
+            .iter()
+            .flat_map(html_and_input_events)
+            .collect();
+        assert_eq!(back, [HtmlOrInputEvent::H("FUEL".into())]);
     }
 }

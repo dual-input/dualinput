@@ -1,77 +1,32 @@
-//! Carrying out what the engine asks for, each action through the route its kind of name takes
-//! (record/areas/sync/05-units.md, "Reaching the sim").
+//! Carrying out what the engine asks for: its actions through sim variables, and the rest on the
+//! cockpit stream and in the pilot's notifications.
 
 use cockpit_stream::CockpitCx;
 use kernel::Cx;
-use messages::state_sync::{
-    CHANGE, FIRED, NAMED_EVENTS, NamedEvent, PF_CHANGE, STATE, named_event_slots,
-};
-use messages::sync::Value;
-use profile_engine::Name;
-use sim_service::{SimCx, Value as SimValue};
+use messages::state_sync::{CHANGE, FIRED, PF_CHANGE, STATE};
+use sim_variables::VariablesCx;
 use sync_engine::{Action, ChangeKind, Flagged, Out, Why};
 
-use crate::{Live, variable};
+use crate::Live;
 
 impl Live {
-    /// Carries out `outs` in the order they came. `H:` events and input events' presets go to
-    /// the routine as a batch, flushed before anything else, so a write function's actions go
-    /// out in its call order, though whether the sim keeps that order between two routes is
-    /// unverified (record/areas/sync/05-units.md, "Reaching the sim").
+    /// Carries out `outs` in the order they came, each run of actions in one call to sim
+    /// variables, which keeps a write function's call order within it.
     pub(crate) fn carry_out(&mut self, outs: Vec<Out>, cx: &Cx) {
-        let mut named: Vec<NamedEvent> = Vec::new();
+        let mut acts = Vec::new();
         for out in outs {
             match out {
-                Out::Act(Action::Fire { name }) => {
-                    if let Some(event) = named_event(&name, None) {
-                        named.push(event);
-                    }
-                }
-                Out::Act(Action::Set {
-                    name: Name::B { name },
-                    value,
-                }) => named.push(NamedEvent::Preset {
-                    name,
-                    value: value.number(),
-                }),
-                Out::Act(action) => {
-                    flush(&mut named, cx);
-                    self.act(action, cx);
-                }
+                Out::Act(action) => acts.push(action_of(action)),
                 other => {
-                    flush(&mut named, cx);
+                    if !acts.is_empty() {
+                        cx.variables().act(std::mem::take(&mut acts));
+                    }
                     self.apply_out(other, cx);
                 }
             }
         }
-        flush(&mut named, cx);
-    }
-
-    fn act(&mut self, action: Action, cx: &Cx) {
-        match action {
-            Action::Set { name, value } => {
-                let Some((sim_name, unit)) = variable(&name) else {
-                    tracing::warn!(?name, "a write named nothing state sync can set");
-                    return;
-                };
-                let handle = self.write_handle(&sim_name, &unit, cx);
-                let value = match value {
-                    Value::Number(n) => SimValue::Number(n),
-                    Value::Text(t) => SimValue::Text(t),
-                };
-                cx.sim().write(handle, vec![value]);
-            }
-            Action::Key { name, values } => {
-                let Name::K { name, .. } = name else {
-                    tracing::warn!(?name, "a key action named no K: event");
-                    return;
-                };
-                // A DWORD on the wire: a negative value goes as its `i32` bits, as an axis's
-                // low end does, and the cast from `f64` saturates.
-                let values: Vec<u32> = values.iter().map(|v| *v as i64 as u32).collect();
-                cx.sim().key(&name, &values);
-            }
-            Action::Fire { .. } => {}
+        if !acts.is_empty() {
+            cx.variables().act(acts);
         }
     }
 
@@ -152,29 +107,10 @@ impl Live {
     }
 }
 
-fn named_event(name: &Name, value: Option<f64>) -> Option<NamedEvent> {
-    match name {
-        Name::H { name } => Some(NamedEvent::H(name.clone())),
-        Name::B { name } => Some(NamedEvent::Preset {
-            name: name.clone(),
-            value,
-        }),
-        other => {
-            tracing::warn!(
-                ?other,
-                "a fired action named neither an H: event nor a preset"
-            );
-            None
-        }
+fn action_of(action: Action) -> sim_variables::Action {
+    match action {
+        Action::Set { name, value } => sim_variables::Action::Set { name, value },
+        Action::Key { name, values } => sim_variables::Action::Key { name, values },
+        Action::Fire { name } => sim_variables::Action::Fire { name },
     }
-}
-
-fn flush(named: &mut Vec<NamedEvent>, cx: &Cx) {
-    if named.is_empty() {
-        return;
-    }
-    for slot in named_event_slots(named) {
-        cx.module().feed(NAMED_EVENTS, &slot);
-    }
-    named.clear();
 }

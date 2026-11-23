@@ -19,6 +19,10 @@ struct Feature {
     counter: u32,
     profile: bool,
     panel_needed: bool,
+    /// Whether the module whose rule reads no profile, `feature-always`, takes `CLOCK`s.
+    always: bool,
+    /// The open cockpit panels, as `feature.list-panels` last read them.
+    panels: Vec<Value>,
 }
 
 #[derive(Deserialize)]
@@ -41,8 +45,14 @@ impl Feature {
         .command("feature.bump", Feature::bump)
         .command("feature.news", Feature::news)
         .command("feature.read-setting", Feature::read_setting)
+        .command("feature.always", Feature::set_always)
+        .command("feature.list-panels", Feature::list_panels)
+        .client_state("feature-panels", |me: &Feature, _: &View| json!(me.panels))
         .panel_module("feature-panel", Feature::rule, |view: &View| {
             view.read::<Feature>().panel_needed
+        })
+        .panel_module("feature-always", Feature::clocks, |view: &View| {
+            view.read::<Feature>().always
         })
         .one_panel_module("feature-one", Feature::gns, |view: &View| {
             view.read::<Feature>().panel_needed
@@ -114,6 +124,34 @@ impl Feature {
         instruments
             .iter()
             .filter(|i| i.starts_with("PFD"))
+            .cloned()
+            .collect()
+    }
+
+    /// Turns `feature-always` on or off, and says its rule changed.
+    fn set_always(me: &mut Feature, on: bool, cx: &mut Cx) -> Result<(), String> {
+        me.always = on;
+        clients::panel_rules_changed(cx);
+        Ok(())
+    }
+
+    fn list_panels(me: &mut Feature, _: Value, cx: &mut Cx) -> Result<(), String> {
+        me.panels = cx
+            .read::<Clients>()
+            .cockpit_panels()
+            .map(|p| json!([p.socket, p.name, p.instruments]))
+            .collect();
+        Ok(())
+    }
+
+    /// The rule of a module that reads no profile, as the profile extension's `outline` doesn't.
+    fn clocks(view: &View, instruments: &[String]) -> Vec<String> {
+        if !view.read::<Feature>().always {
+            return Vec::new();
+        }
+        instruments
+            .iter()
+            .filter(|i| i.starts_with("CLOCK"))
             .cloned()
             .collect()
     }
@@ -624,6 +662,111 @@ fn a_one_panel_module_goes_to_one_of_two_panels_of_one_key_and_follows_it_throug
         .filter(|&s| matches!(to(s, &out).as_slice(), [ToClient::Load { .. }]))
         .count();
     assert_eq!(holders, 1, "{out:?}");
+}
+
+fn module(name: &str, instruments: &[&str]) -> messages::clients::PanelModule {
+    messages::clients::PanelModule {
+        name: name.into(),
+        instruments: instruments.iter().map(|i| i.to_string()).collect(),
+    }
+}
+
+fn stop(names: &[&str]) -> ToClient {
+    ToClient::Stop {
+        modules: names.iter().map(|n| n.to_string()).collect(),
+    }
+}
+
+#[test]
+fn a_rule_change_answers_each_panel_running_a_module_with_what_it_gains_and_loses() {
+    let (mut core, _) = Core::new(None);
+    core.join(9, "efb-app", &[]);
+    core.join_panel(1, "VCockpit01", &["PFD_1|", "CLOCK|"]);
+    core.join_panel(2, "VCockpit02", &["CLOCK|"]);
+    core.handle_profile(true);
+    let always = |core: &mut Core, on: bool| {
+        core.say(
+            9,
+            json!({ "t": "command", "id": 1, "name": "feature.always", "args": on }),
+        )
+    };
+    let out = always(&mut core, true);
+    assert_eq!(
+        to(1, &out),
+        [ToClient::Load {
+            modules: vec![module("feature-always", &["CLOCK|"])]
+        }],
+        "the panel hears only the module it gains"
+    );
+    assert_eq!(to(2, &out), [], "a panel told none has closed its socket");
+    let out = always(&mut core, false);
+    assert_eq!(to(1, &out), [stop(&["feature-always"])]);
+    let out = always(&mut core, false);
+    assert_eq!(to(1, &out), [], "a rule that picks the same sends nothing");
+}
+
+#[test]
+fn an_unload_keeps_a_module_whose_rule_reads_no_profile_and_stops_the_rest() {
+    let (mut core, _) = Core::new(None);
+    core.join(9, "efb-app", &[]);
+    core.say(
+        9,
+        json!({ "t": "command", "id": 1, "name": "feature.always", "args": true }),
+    );
+    core.join_panel(1, "VCockpit01", &["PFD_1|", "CLOCK|"]);
+    core.join_panel(2, "VCockpit02", &["PFD_2|"]);
+    let out = core.handle_profile(true);
+    assert_eq!(
+        to(1, &out),
+        [ToClient::Load {
+            modules: vec![
+                module("feature-panel", &["PFD_1|"]),
+                module("feature-always", &["CLOCK|"])
+            ]
+        }]
+    );
+    let out = core.handle_profile(false);
+    assert_eq!(
+        to(1, &out),
+        [stop(&["feature-panel"])],
+        "feature-always carries on"
+    );
+    assert_eq!(
+        to(2, &out),
+        [stop(&["feature-panel"])],
+        "a panel left with none is told to stop it, and its bridge closes its socket"
+    );
+    let out = core.handle_profile(true);
+    assert_eq!(
+        to(1, &out),
+        [ToClient::Load {
+            modules: vec![module("feature-panel", &["PFD_1|"])]
+        }],
+        "the next load starts only what the panel lacks"
+    );
+}
+
+#[test]
+fn a_feature_reads_each_open_cockpit_panels_name_and_instruments() {
+    let (mut core, _) = Core::new(None);
+    core.join(9, "efb-app", &[]);
+    core.join_panel(1, "VCockpit01", &["PFD_1|side=1", "CLOCK"]);
+    core.join_panel(2, "VCockpit02", &[]);
+    core.say(9, json!({ "t": "watch", "slices": ["feature-panels"] }));
+    let out = core.say(
+        9,
+        json!({ "t": "command", "id": 1, "name": "feature.list-panels", "args": null }),
+    );
+    assert_eq!(to(9, &out), [answer(1, None)]);
+    let out = core.advance(core.now + 50_000);
+    assert_eq!(
+        states(9, &out),
+        [json!([
+            [1, "VCockpit01", ["PFD_1|side=1", "CLOCK"]],
+            [2, "VCockpit02", []]
+        ])],
+        "the EFB app's socket is no panel"
+    );
 }
 
 #[test]

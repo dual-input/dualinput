@@ -42,6 +42,13 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > Whether a close from the sim's own menu does the same, the first of the [cases for the bench](#cases-for-the-bench) in the sim, is unrecorded.
 > The kill case has its answer: `taskkill /F` reached the core as the process's exit, code 1, with no quit message, lost connection, or failed call before it, and the core read Closed on that input (same entry).
 
+> **Note**
+> From stage 22g ([04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md#how-it-works); user, 2026-11-22):
+>
+> - In [the announcement](#the-announcement), the body gains `panels`, a count the sim service raises when a unit asks for every cockpit panel again, as the profile extension's feature `authoring` does, such as a hypothetical `{"port":51234,"session":true,"panels":2}`.
+> - In [what a feature calls](#what-a-feature-calls), a profile's names reach the sim through the platform crate `sim-variables`, on a connection of its own for each flight, which fires `H:` events and calls presets through `HtmlAndInputEvents`, the routine host's own routine, where it was state sync's `NamedEvents`, feeding it as one unit, since the service keys a feed by its unit and two units' feeds of one slot would each read as new.
+> - The sim service gains `close`, through which a unit closes its own connection and ends its routines, as the service does at an unload for a unit marked to end with the profile; `sim-variables` calls it as its pilot leaves the session's flight.
+
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.
 A crash is a sim whose process ends with no quit message before it, and the loaded aircraft is the folder and preset in the path `AircraftLoaded` reports.

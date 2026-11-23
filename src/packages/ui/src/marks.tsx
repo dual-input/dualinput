@@ -25,8 +25,11 @@ export function Badge({ variant = "secondary", className, children, ...rest }: H
   )
 }
 
-export function Kbd({ className, ...rest }: HTMLAttributes<HTMLElement>) {
-  return <kbd className={cx("pointer-events-none inline-flex h-5.5 min-w-5.5 select-none items-center justify-center rounded-lg bg-muted px-1.5 font-sans text-xs font-medium text-muted-foreground", className)} {...rest} />
+const KBD_SIZES = { default: "h-5.5 min-w-5.5 rounded-lg px-1.5 text-xs", sm: "h-4 min-w-4 rounded-md px-1 text-[10px]" }
+
+/** A key to press. `sm` is for a row of key hints under a list, where several share a narrow line. */
+export function Kbd({ size = "default", className, ...rest }: HTMLAttributes<HTMLElement> & { size?: keyof typeof KBD_SIZES }) {
+  return <kbd className={cx("pointer-events-none inline-flex select-none items-center justify-center bg-muted font-sans font-medium text-muted-foreground", KBD_SIZES[size], className)} {...rest} />
 }
 
 export function Label({ className, ...rest }: LabelHTMLAttributes<HTMLLabelElement>) {

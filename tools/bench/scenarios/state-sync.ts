@@ -1,6 +1,7 @@
 // State sync between bench cores on the stand-in sim: each route a control can take through the
-// sim, a value's echo, the notification for a write that never lands, the guard on Ready, and a
-// late joiner's catch-up, on a small profile of the scenario's own, built as a local bundle
+// sim, a value's echo, the notification for a write that never lands, the guard on Ready, and the
+// catch-ups of a late joiner and of a crew at preflight's end, on a small profile of the
+// scenario's own, built as a local bundle
 // (record/areas/sync/05-units.md, "Cases for the bench").
 
 import assert from "node:assert/strict"
@@ -78,6 +79,14 @@ state:
     watch: L('VS_HOLD')
     write:
       toggle: K('AP_PANEL_VS_HOLD', 1)
+  com1:
+    name: COM 1 frequency
+    watch: A('COM ACTIVE FREQUENCY:1', 'Hz')
+    write: K('COM_RADIO_SET_HZ')
+  altimeter:
+    name: Altimeter
+    watch: L('ALTIMETER')
+    write: B('ALTIMETER_Set')
 events:
   ap_master:
     name: Autopilot master
@@ -450,4 +459,53 @@ test("a late joiner catches up onto the aircraft, the battery before the APU mas
   assert.ok(written("BATTERY") < written("APU"), "the battery before the APU master")
   await caughtUp(pm)
   assert.equal(sent(pm, "battery"), 0, "the joiner sends none of its catch-up")
+})
+
+test("a pilot monitoring whose cockpit differs from the pilot flying's as preflight ends catches up on every route within 5s, and every write lands", { timeout: 120_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("state-sync-differs", t)
+  const local = localBundle(run)
+  const pf = await pilot(run, net, "James", local)
+  const pm = await pilot(run, net, "Adam", local)
+  t.after(() => {
+    pf.panel.close()
+    pm.panel.close()
+  })
+  // Two stand-ins start alike, so a crew's catch-up at preflight's end writes nothing unless the
+  // pilot flying's aircraft loads holding values the pilot monitoring's doesn't. These make it
+  // write an entry on each route: a value through an L: variable, a K: event, and a preset, a
+  // toggle through a K: event, a preset, and an H: event, and a write function.
+  pf.core.act({ act: "set", numbers: [["L:BATTERY", 1], ["L:BEACON", 1], ["A:COM ACTIVE FREQUENCY:1", 118_300_000], ["L:ALTIMETER", 1013.25], ["L:LAMP", 1], ["L:ALT_HOLD", 1]], texts: [] })
+  pf.core.act({ act: "inputs", events: [["LIGHTING_NAV_1", 1]] })
+  Object.assign(pf.panel.gauges.get("KR87A")!, { bfoMode: true })
+  // The pilot monitoring's aircraft takes each write, as the sim's would.
+  const rule = (when: { when: "sent" | "fired"; name: string }, then: { then: "set"; name: string; value: number | null } | { then: "flip"; name: string }) =>
+    pm.core.act({ act: "rule", when, after_ms: 0, then })
+  rule({ when: "sent", name: "COM_RADIO_SET_HZ" }, { then: "set", name: "A:COM ACTIVE FREQUENCY:1", value: null })
+  rule({ when: "fired", name: "ALTIMETER_Set" }, { then: "set", name: "L:ALTIMETER", value: null })
+  rule({ when: "sent", name: "TOGGLE_LAMP" }, { then: "flip", name: "L:LAMP" })
+  rule({ when: "sent", name: "AP_ALT_HOLD" }, { then: "set", name: "L:ALT_HOLD", value: 1 })
+  pm.core.onHEvent((name) => {
+    if (name === "adf_bfo") Object.assign(pm.panel.gauges.get("KR87A")!, { bfoMode: true })
+  })
+
+  const code = await host(pf.core, pf.name)
+  await join(pm.core, code, pm.name)
+  for (const p of [pf, pm]) await until(p, (s) => s.members.length === 2, "every member")
+  for (const p of [pf, pm]) await load(p.core, BARON)
+  for (const p of [pf, pm]) await ready(p)
+  await until(pm, (s) => s.preflight.phase === "ended", "preflight's end")
+  const ended = Date.now()
+  await caughtUp(pm, 5_000)
+  console.log(`measure: the pilot monitoring's catch-up ended ${Date.now() - ended}ms after preflight's end`)
+  assert.equal(await variable(pm, "L:BATTERY"), 1)
+  assert.equal(await variable(pm, "L:BEACON"), 1)
+  assert.equal(await variable(pm, "COM ACTIVE FREQUENCY:1"), 118_300_000)
+  assert.equal(await variable(pm, "L:ALTIMETER"), 1013.25)
+  assert.equal(await variable(pm, "L:LAMP"), 1)
+  assert.equal(await variable(pm, "L:ALT_HOLD"), 1)
+  assert.equal(await input(pm, "LIGHTING_NAV_1"), 1)
+  assert.equal((pm.panel.gauges.get("KR87A") as unknown as { bfoMode: boolean }).bfoMode, true)
+  assert.doesNotMatch(pm.core.log(), /a write never landed/, "every write landed")
 })

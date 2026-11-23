@@ -61,6 +61,9 @@ const MESSAGE_BUDGET: usize = 64 * 1024;
 pub struct ClientJoined {
     pub socket: u64,
     pub component: String,
+    /// The version its `hello` carries, which a feature that serves only a client of the core's
+    /// release compares with `messages::VERSION`.
+    pub version: String,
 }
 
 /// A client's socket closed, or the core closed it.
@@ -91,6 +94,16 @@ impl Moment for SettingChanged {}
 pub struct Sender {
     pub socket: u64,
     pub component: String,
+}
+
+/// An open cockpit panel, as its `hello` names it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct CockpitPanel<'c> {
+    pub socket: u64,
+    /// The panel's name, as the sim gives it, such as `VCockpit66`.
+    pub name: Option<&'c str>,
+    /// Its instruments' keys, as the bridge's `hello` names them.
+    pub instruments: &'c [String],
 }
 
 /// Whom a `unit` message goes to.
@@ -179,6 +192,21 @@ impl Clients {
         self.sockets.values().filter(|c| c.hello.is_some()).count()
     }
 
+    /// Each open cockpit panel, as its `hello` names it, by socket.
+    pub fn cockpit_panels(&self) -> impl Iterator<Item = CockpitPanel<'_>> {
+        self.sockets.iter().filter_map(|(&socket, client)| {
+            let hello = client
+                .hello
+                .as_ref()
+                .filter(|h| h.component == messages::clients::component::PANEL_BRIDGE)?;
+            Some(CockpitPanel {
+                socket,
+                name: hello.panel.as_deref(),
+                instruments: &hello.instruments,
+            })
+        })
+    }
+
     /// The component `socket`'s client named in its `hello`, or nothing before it.
     pub(crate) fn component_of(&self, socket: u64) -> String {
         self.sockets
@@ -242,15 +270,25 @@ fn notification_id(id: &str) -> String {
 }
 
 /// The profile loader loaded a profile on the pilot's aircraft, so the clients crate answers
-/// each cockpit panel with the panel modules its instruments get. Each panel module's rule
-/// reads the loaded profile from the profile loader's state.
+/// each cockpit panel with the panel modules its instruments get, once every unit has handled
+/// `ProfileLoaded`, which the loader raises just before it calls this.
 pub fn profile_loaded(cx: &Cx) {
     cx.call(Clients::loaded, ());
 }
 
-/// The profile unloaded, so every panel module stops.
+/// The profile unloaded, so the clients crate answers each cockpit panel running a module
+/// again, once every unit has handled `ProfileUnloaded`: a module whose rule still picks the
+/// panel's instruments carries on, and the rest stop.
 pub fn profile_unloaded(cx: &Cx) {
     cx.call(Clients::unloaded, ());
+}
+
+/// One of the calling unit's panel modules' rules changed, so the clients crate answers each
+/// cockpit panel running a module again: `load` for the modules it gains and `stop` for those
+/// it loses. A panel told `none` has closed its socket, and the sim service's `recall_panels`
+/// brings it back.
+pub fn panel_rules_changed(cx: &Cx) {
+    cx.call(Clients::answer_again, ());
 }
 
 /// Says `bye` to every client, which the session crate asks for as the core quits, so the

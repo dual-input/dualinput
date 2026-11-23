@@ -119,6 +119,32 @@ pub enum Older {
     Theirs,
 }
 
+/// Whose version is older, `mine` or `theirs`: each version's numbers compared in turn, a
+/// missing one as 0, with a pre-release or build part, as in `1.0.0-dev`, left out. `older` in
+/// src/backend/src/index.ts reads x.y.z versions the same way, so change both together.
+pub fn older(mine: &str, theirs: &str) -> Older {
+    let numbers = |version: &str| -> Vec<u64> {
+        version
+            .split(['-', '+'])
+            .next()
+            .unwrap_or(version)
+            .split('.')
+            .map(|number| number.parse().unwrap_or(0))
+            .collect()
+    };
+    let (mine, theirs) = (numbers(mine), numbers(theirs));
+    for at in 0..mine.len().max(theirs.len()) {
+        let (a, b) = (
+            mine.get(at).copied().unwrap_or(0),
+            theirs.get(at).copied().unwrap_or(0),
+        );
+        if a != b {
+            return if a < b { Older::Mine } else { Older::Theirs };
+        }
+    }
+    Older::Theirs
+}
+
 /// `POST /v1/members`: a member lists itself, or renews its entry, every 10 minutes. The
 /// answer is `Taken`.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -147,4 +173,22 @@ pub struct Taken {}
 #[ts(export, export_to = "backend/")]
 pub struct Refused {
     pub error: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Older, older};
+
+    #[test]
+    fn a_version_reads_by_its_numbers_with_its_suffix_left_out() {
+        assert_eq!(older("0.9.0", "0.10.0"), Older::Mine);
+        assert_eq!(older("1.0.0", "0.10.0"), Older::Theirs);
+        assert_eq!(older("1.0.0-dev", "1.0.1"), Older::Mine);
+        assert_eq!(older("1.0.1+build.5", "1.0.0"), Older::Theirs);
+        assert_eq!(
+            older("1.0", "1.0.1"),
+            Older::Mine,
+            "a missing number reads as 0"
+        );
+    }
 }

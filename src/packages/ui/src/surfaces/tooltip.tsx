@@ -1,4 +1,4 @@
-import { cloneElement, useRef, useState } from "react"
+import { cloneElement, useEffect, useRef, useState } from "react"
 import type { ReactElement, ReactNode, Ref } from "react"
 import { createPortal } from "react-dom"
 
@@ -18,12 +18,16 @@ export type TooltipProps = {
   className?: string
   /** Holds it open, as the kit's page does. */
   open?: boolean
+  /** How long the mouse rests on its element before it opens, in milliseconds, as shadcn's TooltipProvider's `delay`. */
+  delay?: number
 }
 
 const ARROW = 10
 
-export function Tooltip({ content, children, side = "top", align = "center", className, open: openFromOutside }: TooltipProps) {
+export function Tooltip({ content, children, side = "top", align = "center", className, open: openFromOutside, delay = 0 }: TooltipProps) {
   const [hovered, setHovered] = useState(false)
+  const waiting = useRef(0)
+  useEffect(() => () => window.clearTimeout(waiting.current), [])
   const open = openFromOutside ?? hovered
   const { element: root } = useRoot()
   const trigger = useRef<HTMLElement>(null)
@@ -37,10 +41,12 @@ export function Tooltip({ content, children, side = "top", align = "center", cla
         ref: trigger,
         onMouseEnter: (event: never) => {
           children.props.onMouseEnter?.(event)
-          setHovered(true)
+          if (delay > 0) waiting.current = window.setTimeout(() => setHovered(true), delay)
+          else setHovered(true)
         },
         onMouseLeave: (event: never) => {
           children.props.onMouseLeave?.(event)
+          window.clearTimeout(waiting.current)
           setHovered(false)
         },
       })}

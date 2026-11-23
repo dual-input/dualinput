@@ -1,14 +1,15 @@
 //! The server's second thread, with TypeScript in a runtime of its own, which checks the scripts
-//! once typing pauses and runs each save's build, so a request inside a script, which the main
-//! thread's runtime answers, never waits behind either (record/areas/profiles/03-the-extension.md,
-//! "TypeScript in two runtimes").
+//! once typing pauses, runs each save's build, and builds the open text's bundle for Run, so a
+//! request inside a script, which the main thread's runtime answers, never waits behind any of
+//! them (record/areas/profiles/03-the-extension.md, "TypeScript in two runtimes").
 
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use profile_build::{Compiler, STACK, build};
-use profile_engine::{Diagnostic, Place, Program, Report, hash, place};
+use profile_engine::{Diagnostic, Files, Place, Program, Report, hash, place};
 
 use crate::{Disk, utc, utc_now, write_whole};
 
@@ -27,6 +28,14 @@ pub(crate) enum Job {
         profiles: Vec<Target>,
         /// The local folder, or why there's none.
         local: Result<PathBuf, String>,
+    },
+    /// The open text's bundle of the session's profile, `rel` in `root`, built as a save's build
+    /// is and written nowhere, from `texts`, each file of its program by its path in `root`, as
+    /// the open editors and the disk hold it.
+    Bundle {
+        root: PathBuf,
+        rel: String,
+        texts: BTreeMap<String, String>,
     },
 }
 
@@ -49,6 +58,40 @@ pub(crate) enum Done {
         trigger: PathBuf,
         built: Vec<Built>,
     },
+    Bundled {
+        /// The texts it was built from, which the server holds against the newest.
+        texts: BTreeMap<String, String>,
+        bundle: Result<Bundle, Failure>,
+    },
+}
+
+/// The open text's bundle, as the builder writes it, and its hash.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct Bundle {
+    pub(crate) text: String,
+    pub(crate) hash: String,
+}
+
+/// A build's first error, and where it is, as `aircraft/bksq-baronpro.yaml:270:45`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct Failure {
+    pub(crate) message: String,
+    pub(crate) place: String,
+}
+
+/// A profiles' folder seen through texts a job carries, or else the files on disk.
+struct Texts<'a> {
+    root: &'a Path,
+    texts: &'a BTreeMap<String, String>,
+}
+
+impl Files for Texts<'_> {
+    fn read(&self, rel: &str) -> Option<Vec<u8>> {
+        match self.texts.get(rel) {
+            Some(text) => Some(text.clone().into_bytes()),
+            None => std::fs::read(super::full(self.root, rel)).ok(),
+        }
+    }
 }
 
 /// One profile's build, and the bundle the local folder holds of it once it's done.
@@ -117,6 +160,38 @@ fn work(inbox: &Receiver<Job>, done: &Sender<Done>) {
                     .map(|t| build_one(&mut compiler, t, &local))
                     .collect(),
             },
+            Job::Bundle { root, rel, texts } => {
+                let built = build(
+                    &Texts {
+                        root: &root,
+                        texts: &texts,
+                    },
+                    &rel,
+                    &mut compiler,
+                );
+                let bundle = match (built.bundle, built.hash) {
+                    (Some(bytes), Some(hash)) => match String::from_utf8(bytes) {
+                        Ok(text) => Ok(Bundle { text, hash }),
+                        Err(_) => Err(Failure {
+                            message: "The bundle isn't UTF-8 text, a fault of the builder's".into(),
+                            place: format!("{rel}:1:1"),
+                        }),
+                    },
+                    _ => Err(match built.report.errors().next() {
+                        Some(d) => Failure {
+                            message: d.message.clone(),
+                            place: format!("{}:{}:{}", d.at.file, d.at.line, d.at.column),
+                        },
+                        None => Failure {
+                            message:
+                                "The build gave no bundle and no error, a fault of the builder's"
+                                    .into(),
+                            place: format!("{rel}:1:1"),
+                        },
+                    }),
+                };
+                Done::Bundled { texts, bundle }
+            }
         };
         if done.send(finished).is_err() {
             return;

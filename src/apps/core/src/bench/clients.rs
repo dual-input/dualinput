@@ -1,7 +1,8 @@
 //! The test unit that stands in for a feature that uses the clients crate: a slice, a
 //! setting, a command, a notification, and a panel module that echoes its panel's messages,
 //! which the clients crate answers each cockpit panel with once the profile loader has loaded
-//! a profile (record/areas/build/02-testing.md, "Its place").
+//! a profile. Its rule reads no profile, so the module carries on through an unload, as the
+//! profile extension's `outline` does (record/areas/build/02-testing.md, "Its place").
 
 use std::time::Duration;
 
@@ -60,7 +61,11 @@ impl BenchClients {
             return;
         };
         match act {
-            ClientsAct::Picks { picks } => me.picks = picks,
+            ClientsAct::Picks { picks } => {
+                me.picks = picks;
+                clients::panel_rules_changed(cx);
+            }
+            ClientsAct::RecallPanels => sim_service::recall_panels(cx),
             ClientsAct::Churn { per_second, for_ms } => {
                 let every = Duration::from_secs(1) / per_second.max(1);
                 me.churn = Some(Churn {

@@ -8,11 +8,12 @@
 // sim names another, at 0,0, 800 by 600, with a 4 by 3 grid of buttons, each 200 by 200, whose
 // events a scenario reads.
 
+import { NAME as OUTLINE, outline } from "../../src/features/authoring/panel/src/outline.ts"
 import { NAME, pointerSync } from "../../src/features/pointer-sync/panel/src/module.ts"
-import { type Coherent, hEvents, NAME as H_EVENTS } from "../../src/features/state-sync/panel/src/h-events.ts"
-import { instrumentReads, NAME as INSTRUMENT_READS } from "../../src/features/state-sync/panel/src/instrument-reads.ts"
 import { Bridge, keyFor } from "../../src/platform/panel-bridge/src/bridge.ts"
 import { asDocument, asElement, type FakeElement, FakeDocument, type Heard } from "../../src/platform/panel-bridge/test/fake-document.ts"
+import { type Coherent, hEvents, NAME as H_EVENTS } from "../../src/platform/sim-variables/panel/src/h-events.ts"
+import { instrumentReads, NAME as INSTRUMENT_READS } from "../../src/platform/sim-variables/panel/src/instrument-reads.ts"
 import type { Core } from "./cores.ts"
 import { FakePage } from "./pages.ts"
 
@@ -73,6 +74,7 @@ export class FakeCockpitPanel {
             if (src === `/DualInput/modules/${NAME}.js`) panel.bridge.define(NAME, pointerSync())
             else if (src === `/DualInput/modules/${H_EVENTS}.js`) panel.bridge.define(H_EVENTS, hEvents(() => coherent))
             else if (src === `/DualInput/modules/${INSTRUMENT_READS}.js`) panel.bridge.define(INSTRUMENT_READS, instrumentReads())
+            else if (src === `/DualInput/modules/${OUTLINE}.js`) panel.bridge.define(OUTLINE, outline())
             else failed()
           })
         },

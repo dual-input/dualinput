@@ -6,10 +6,10 @@ use std::path::{Path, PathBuf};
 
 use lsp_server::{ErrorCode, Request, RequestId, Response};
 use lsp_types::{
-    CodeActionParams, CompletionParams, DocumentFormattingParams, DocumentOnTypeFormattingParams,
-    DocumentSymbolParams, ExecuteCommandParams, FoldingRangeParams, GotoDefinitionParams,
-    HoverParams, NumberOrString, ReferenceParams, RenameParams, SignatureHelpParams,
-    TextDocumentPositionParams, WorkspaceSymbolParams,
+    CodeActionParams, CodeLensParams, CompletionParams, DocumentFormattingParams,
+    DocumentOnTypeFormattingParams, DocumentSymbolParams, ExecuteCommandParams, FoldingRangeParams,
+    GotoDefinitionParams, HoverParams, NumberOrString, ReferenceParams, RenameParams,
+    SignatureHelpParams, TextDocumentPositionParams, WorkspaceSymbolParams,
 };
 use profile_engine::{Place, ProgramPlace};
 use profile_language::{
@@ -65,6 +65,8 @@ impl Server {
             "textDocument/formatting" => parse(params).and_then(|p| self.formatting(p)),
             "textDocument/onTypeFormatting" => parse(params).and_then(|p| self.on_type(p)),
             "textDocument/codeAction" => parse(params).and_then(|p| self.code_actions(p)),
+            "textDocument/codeLens" => parse::<CodeLensParams>(params)
+                .map(|p| self.code_lenses(p.text_document.uri.as_str())),
             "workspace/executeCommand" => {
                 return match parse(params) {
                     Ok(p) => self.execute(id, p),
@@ -462,7 +464,8 @@ impl Server {
     }
 
     /// The server's commands, each on a file's URI but `dualInput.localFolder`, which takes none
-    /// and answers with the local folder's path. "Build now" is answered once its build is done.
+    /// and answers with the local folder's path, and the panel's, whose answer says only that the
+    /// command was taken. "Build now" is answered once its build is done.
     fn execute(&mut self, id: RequestId, p: ExecuteCommandParams) -> Option<Response> {
         let failed = |id: RequestId, message: String| {
             Some(Response::new_err(
@@ -471,6 +474,12 @@ impl Server {
                 message,
             ))
         };
+        if p.command.starts_with("dualInput.panel.") {
+            return match self.panel_command(&p.command, &p.arguments) {
+                Ok(()) => Some(Response::new_ok(id, Value::Null)),
+                Err(e) => failed(id, e),
+            };
+        }
         if p.command == "dualInput.localFolder" {
             return match self.settings.local() {
                 Ok(folder) => Some(Response::new_ok(id, folder.to_string_lossy())),

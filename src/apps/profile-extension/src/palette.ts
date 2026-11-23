@@ -50,6 +50,20 @@ export function paletteOf(uiTheme: string): Palette {
 }
 
 /**
+ * The palette the setting `dualInput.colors` forces, `dark` or `light`, or else the one the active theme's kind calls
+ * for, from the `uiTheme` a theme of that kind declares. The token colors, the boxes after `watch:` lines, and the Dual
+ * Input panel all take it, so a profile reads in one palette.
+ */
+export function paletteFor(forced: unknown, uiTheme: string): Palette {
+  return isForced(forced) ? forced : paletteOf(uiTheme)
+}
+
+/** Whether `dualInput.colors` names a palette, rather than `auto`. */
+export function isForced(colors: unknown): colors is Palette {
+  return colors === "dark" || colors === "light"
+}
+
+/**
  * The `uiTheme` of the theme named `theme`, among the themes the extensions' manifests contribute,
  * or undefined when none does. VS Code names a theme in `workbench.colorTheme` by its
  * contribution's `id`, or else its `label`, and reads a missing `uiTheme` as `vs-dark`.

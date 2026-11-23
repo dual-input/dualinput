@@ -24,7 +24,7 @@
 //
 // `extension` builds only the profile extension, the VS Code extension for writing profiles: the
 // profile builder with Cargo's release profile, since the extension's language server is its
-// `serve`, then the extension's own code, packed as
+// `serve`, then the extension's own code and its Dual Input panel's webview, packed as
 // target/profile-extension/dualinput-profiles-<version>.vsix
 // (record/areas/profiles/03-the-extension.md, "Packing and publishing"). Neither needs the SDK,
 // so a profile's author or a developer working on the format can build it from a tree that
@@ -89,6 +89,6 @@ main(async () => {
 
 async function buildExtension(): Promise<void> {
   const { "dualinput-profile-builder": builder } = buildPrograms(["--release", "-p", "dualinput-profile-builder"], ["dualinput-profile-builder"])
-  const vsix = packProfileExtension(builder, await extensionIcon(), languageIcons())
+  const vsix = await packProfileExtension(builder, await extensionIcon(), languageIcons())
   console.log(`packed the profile extension in ${fromRoot(vsix)}`)
 }

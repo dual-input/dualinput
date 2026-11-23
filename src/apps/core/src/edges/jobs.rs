@@ -142,6 +142,7 @@ fn run(jobs: &Jobs, start: &StartJob) -> Result<Vec<u8>, String> {
                 std::fs::read(resolve(&jobs.data, path)).ok()
             })
         }
+        Work::Bytes { bytes } => Ok(bytes.clone()),
     }
 }
 

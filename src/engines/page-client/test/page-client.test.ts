@@ -30,8 +30,8 @@ class FakePage implements Env {
     this.logs.push(message)
   }
 
-  announce(port: number, session: boolean): void {
-    this.hear(JSON.stringify({ port, session }))
+  announce(port: number, session: boolean, panels = 0): void {
+    this.hear(JSON.stringify({ port, session, panels }))
   }
   advance(ms: number): void {
     const to = this.clock + ms
@@ -136,6 +136,23 @@ test("a panel told none stays closed until an announcement brings another port o
   page.announce(1000, false)
   page.announce(1000, true)
   assert.equal(page.sockets.length, 2, "a new session connects it again")
+})
+
+test("a panel told none connects again when the announcement's panels count changes, and not when the same count repeats", () => {
+  const { page } = started({ sessionOnly: true, instruments: ["CLOCK"] })
+  page.announce(1000, true, 3)
+  page.last.accept()
+  page.announce(1000, true, 4)
+  page.last.say({ t: "none" })
+  assert.equal(page.last.closed, true)
+  page.announce(1000, true, 4)
+  page.announce(1000, true, 4)
+  assert.equal(page.sockets.length, 1, "the count it was told none under brings nothing")
+  page.announce(1000, true, 5)
+  assert.equal(page.sockets.length, 2, "a new count connects it again")
+  page.last.accept()
+  page.announce(1000, true, 6)
+  assert.equal(page.sockets.length, 2, "a panel with its socket open keeps it through a new count")
 })
 
 test("each side's alive goes every 2s, and a core quiet for 8s reads as silent with the socket kept", () => {

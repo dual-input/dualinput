@@ -50,7 +50,7 @@ The code review found two more:
 - Nothing in the network or the session crate caps a session at two pilots, and with three, a joiner's first message carries no control value either, so a core back from a restart could make generation 1 and outrank a host's value of generation 1 naming a higher pilot ID.
   The rule's comment names v1's two pilots, and [02-units](02-units.md)'s note leaves this to the pick that brings larger crews, as the pass on a PF's leave does.
 
-We left all three uncovered, and put them to the user as known limits, since Dual Input aims for a core that never crashes, so a crash is a bug to fix rather than a state to recover from ([decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md); user, 2026-10-12).
+We left all three uncovered, since Dual Input aims for a core that never crashes, so a crash is a bug to fix rather than a state to recover from ([decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md); user, 2026-10-12), and the user accepted them as known limits (user, 2026-11-24).
 The core's log line, "named nobody flying" in the evidence, reads "carried no control value" since the review, the term the documents use.
 
 **Evidence:** the bench's runs, before the fix, after it, and with the `restarted` flag left set, in `results/2026-11-24-restart-both-bench.txt`.

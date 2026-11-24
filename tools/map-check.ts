@@ -77,6 +77,7 @@ const ENGINE_LINES = [
   ["messages", "simconnect-types", "msfs-gltf", "msfs-rpn", "ray-cast", "object-mirror"],
 ]
 const CORE_PLATFORM_LINES = [
+  ["tape"],
   ["profile-loader", "cockpit-stream", "sim-variables"],
   ["session"],
   ["sim-service", "network", "core-helper-service", "recording"],

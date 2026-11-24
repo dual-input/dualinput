@@ -13,6 +13,7 @@ use messages::authoring::{
     RunState, Seen, SessionProfile, Status, Value as Wire, Watched,
 };
 use messages::clients::{CoreSlice, FromClient, ToClient};
+use messages::tape::{StoppedBy, Stopping, TapeOff, TapeSlice, TapeState, TapeStopped};
 use serde_json::{Value, json};
 use tokio::sync::mpsc::error::TryRecvError;
 
@@ -183,7 +184,7 @@ impl Session {
         assert_eq!(
             watch,
             FromClient::Watch {
-                slices: vec!["authoring".into(), "core".into()]
+                slices: vec!["authoring".into(), "core".into(), "tape".into()]
             }
         );
         let core = CoreSlice {
@@ -426,22 +427,48 @@ fn the_status_line_says_where_the_session_stands_and_unsaved_edits_show_only_wit
     s.view(|v| v["status"]["kind"] == "no-session");
     status.session = true;
     s.slice(&slice(&window, status.clone()));
-    s.view(|v| v["status"]["kind"] == "not-in-flight");
+    s.view(|v| {
+        v["status"]["kind"] == "not-in-flight"
+            && v["recorder"] == json!({ "kind": "off", "why": "no-flight", "lengthMs": null })
+    });
     s.slice(&slice(&window, flying()));
     let view = s.view(|v| v["status"]["kind"] == "in-flight");
     assert_eq!(
-        view,
-        json!({ "status": { "kind": "in-flight", "aircraft": "M Test", "runs": true, "crew": false }, "unpinned": false, "body": { "kind": "nothing" } })
+        (&view["status"], &view["unpinned"], &view["body"]),
+        (
+            &json!({ "kind": "in-flight", "aircraft": "M Test", "runs": true, "crew": false }),
+            &json!(false),
+            &json!({ "kind": "nothing" })
+        )
     );
 
-    // The open text's bundle differs from the pinned one, which concerns only a crew.
+    // The open text's bundle differs from the pinned one, which concerns a crew's Run, and the
+    // recorder, which plays the pinned bundle.
     let bundle = s.bundle();
     assert_eq!(bundle["t"], "built", "{bundle}");
     let built = profile_engine::hash(bundle["text"].as_str().expect("a text").as_bytes());
+    s.view(|v| v["recorder"] == json!({ "kind": "off", "why": "unsaved", "lengthMs": null }));
+    let mut saved = flying();
+    saved.profile.as_mut().expect("a profile").hash = built.clone();
+    s.slice(&slice(&window, saved));
+    s.view(|v| v["recorder"] == json!({ "kind": "empty" }));
+    // The recorder's buttons reach the core as `tape`'s commands.
+    for (panel, core) in [
+        ("dualInput.panel.record", "tape.record"),
+        ("dualInput.panel.stop", "tape.stop"),
+        ("dualInput.panel.play", "tape.play"),
+    ] {
+        s.execute(panel, json!([])).expect("taken");
+        assert_eq!(s.command(core, |_| true), Value::Null, "{core}");
+    }
     let mut crew = flying();
     crew.crew = true;
     s.slice(&slice(&window, crew.clone()));
-    s.view(|v| v["unpinned"] == true && v["status"]["crew"] == true);
+    s.view(|v| {
+        v["unpinned"] == true
+            && v["status"]["crew"] == true
+            && v["recorder"] == json!({ "kind": "off", "why": "crew", "lengthMs": null })
+    });
     crew.profile.as_mut().expect("a profile").hash = built;
     s.slice(&slice(&window, crew));
     s.view(|v| v["unpinned"] == false && v["status"]["crew"] == true);
@@ -586,19 +613,17 @@ fn run_shows_its_entry_and_sends_the_core_what_the_field_holds() {
     assert_eq!(failed["t"], "failed", "{failed}");
     let error = failed["error"].as_str().expect("an error");
     assert!(error.starts_with(&format!("{FILE}:")), "{error}");
-    let view = s.view(|v| {
-        v["body"]["run"]["preview"]["where"]
+    // The view with the build's error in its words, since the engine's refusal before it can sit at
+    // the same place.
+    s.view(|v| {
+        let preview = &v["body"]["run"]["preview"];
+        preview["where"]
             .as_str()
             .is_some_and(|w| error.starts_with(w))
-    });
-    assert!(
-        error.ends_with(
-            view["body"]["run"]["preview"]["message"]
+            && preview["message"]
                 .as_str()
-                .expect("words")
-        ),
-        "{view}"
-    );
+                .is_some_and(|m| error.ends_with(m))
+    });
 }
 
 /// Each lens's title and its command's arguments.
@@ -772,6 +797,52 @@ fn a_new_socket_gets_the_last_open_with_its_bundle_and_the_last_panel_again() {
 /// `satisfies` the extension's `ServerView`, so `tsc`, which tools/check.ts runs on the
 /// extension, fails when one of these types and view.ts's part.
 #[test]
+fn a_save_the_session_hasnt_loaded_yet_waits_and_edits_not_saved_ask_for_a_save() {
+    let facts = facts::read(PROFILE).expect("parses");
+    let core = CoreSlice {
+        version: messages::VERSION.into(),
+        hash: messages::HASH.into(),
+        username: None,
+    };
+    let flight = slice("w", flying());
+    let built: Result<Bundle, Failure> = Ok(Bundle {
+        text: "maker: M".into(),
+        hash: "b".repeat(64),
+    });
+    let tape = TapeSlice::default();
+    let view = |written: Option<&str>| {
+        let inputs = Inputs {
+            socket: Some(Some(&core)),
+            slice: Some(&flight),
+            tape: Some(&tape),
+            window: "w",
+            runs: true,
+            built: Some(&built),
+            written,
+            panel: &PanelState::Nothing,
+            facts: Some(&facts),
+            rel: Some(FILE.into()),
+        };
+        serde_json::to_value(panel_view(&inputs)).expect("encodes")["recorder"].clone()
+    };
+    let saved = "b".repeat(64);
+    assert_eq!(
+        view(Some(&saved)),
+        json!({ "kind": "off", "why": "loading", "lengthMs": null }),
+        "the open text's bundle is in the local folder, and the session hasn't pinned it yet"
+    );
+    assert_eq!(
+        view(None),
+        json!({ "kind": "off", "why": "unsaved", "lengthMs": null })
+    );
+    assert_eq!(
+        view(Some(&"c".repeat(64))),
+        json!({ "kind": "off", "why": "unsaved", "lengthMs": null }),
+        "the local folder holds an older save"
+    );
+}
+
+#[test]
 fn the_views_serve_sends_are_the_extensions_types() {
     let facts = facts::read(PROFILE).expect("parses");
     let window = "w";
@@ -893,15 +964,55 @@ fn the_views_serve_sends_are_the_extensions_types() {
     let away = slice(window, no_session);
     let before = slice(window, waiting);
 
+    let tape = |state, off, stopped| TapeSlice {
+        state,
+        off,
+        stopped,
+    };
+    let recording = tape(TapeState::Recording { elapsed_ms: 12_000 }, None, None);
+    let recorded = tape(
+        TapeState::Recorded { length_ms: 42_000 },
+        None,
+        Some(TapeStopped {
+            what: Stopping::Playback,
+            by: StoppedBy::Joined {
+                name: "James".into(),
+            },
+        }),
+    );
+    let restoring = tape(TapeState::Restoring { length_ms: 42_000 }, None, None);
+    let playing = tape(
+        TapeState::Playing {
+            at_ms: 15_000,
+            length_ms: 42_000,
+        },
+        None,
+        None,
+    );
+    let reloading = tape(
+        TapeState::Recorded { length_ms: 42_000 },
+        Some(TapeOff::Loading),
+        Some(TapeStopped {
+            what: Stopping::Recording,
+            by: StoppedBy::Reload,
+        }),
+    );
+
     let base = |socket, slice, runs, panel| Inputs {
         socket,
         slice,
+        tape: None,
         window,
         runs,
         built: None,
+        written: None,
         panel,
         facts: Some(&facts),
         rel: Some(FILE.into()),
+    };
+    let flying_with = |tape| Inputs {
+        tape: Some(tape),
+        ..base(Some(Some(&core)), Some(&flight), true, &nothing)
     };
     let (lever_run, event_run, counting_run) = (
         run("battery", "0.5"),
@@ -956,6 +1067,11 @@ fn the_views_serve_sends_are_the_extensions_types() {
             "the picker",
             base(Some(Some(&core)), Some(&picking), true, &picker),
         ),
+        ("recording", flying_with(&recording)),
+        ("recorded, stopped by a join", flying_with(&recorded)),
+        ("restoring", flying_with(&restoring)),
+        ("playing", flying_with(&playing)),
+        ("recorded, reloading after a save", flying_with(&reloading)),
     ];
     let mut out = String::from(
         "// Written by the test `the_views_serve_sends_are_the_extensions_types` in\n\
@@ -968,9 +1084,11 @@ fn the_views_serve_sends_are_the_extensions_types() {
          export const VIEWS = {\n",
     );
     let mut kinds = Vec::new();
+    let mut recorders = Vec::new();
     for (name, inputs) in &views {
         let view = serde_json::to_value(panel_view(inputs)).expect("encodes");
         kinds.push((view["status"]["kind"].clone(), view["body"]["kind"].clone()));
+        recorders.push(view["recorder"]["kind"].clone());
         let text = serde_json::to_string_pretty(&view).expect("encodes");
         let indented = text.replace('\n', "\n  ");
         out.push_str(&format!("  {name:?}: {indented} satisfies ServerView,\n"));
@@ -990,8 +1108,17 @@ fn the_views_serve_sends_are_the_extensions_types() {
             ("in-flight", "run"),
             ("in-flight", "run"),
             ("in-flight", "picker"),
+            ("in-flight", "nothing"),
+            ("in-flight", "nothing"),
+            ("in-flight", "nothing"),
+            ("in-flight", "nothing"),
+            ("in-flight", "nothing"),
         ]
         .map(|(status, body)| (json!(status), json!(body)))
+    );
+    assert_eq!(
+        recorders.get(recorders.len() - 5..),
+        Some(&["recording", "recorded", "putting-back", "playing", "off"].map(|k| json!(k))[..])
     );
     let file = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../src/apps/profile-extension/src/serve-views.test.ts");

@@ -54,6 +54,10 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > In [features](#features), state sync uses `sim-variables` and holds no routine or panel module: its routine `NamedEvents` becomes the routine host's own, as `Hold` and `Camera` are, renamed `HtmlAndInputEvents`, so the module's list gains `routine_host::HtmlAndInputEvents` and [names the sim shares](#names-the-sim-shares) `DUALINPUT_ROUTINE_HTML_AND_INPUT_EVENTS`, and its two panel modules are `sim-variables`'.
 
 > **Note**
+> From stage 22h, `src/platform/tape` joins, a platform crate in the core on a line of its own above the platform's top line, using `cockpit-stream`, `profile-loader`, `session`, and `clients`, which records the cockpit stream's messages and plays them back into the same cockpit from a pretend sender, for the profile extension's recorder ([05-the-recorder](../profiles/05-the-recorder.md#how-it-works); user, 2026-11-23).
+> In [features](#features), flight-model sync uses `tape` too, which records its samples and hands them back to it during a playback ([flying the recorded path](../profiles/05-the-recorder.md#flying-the-recorded-path); user, 2026-11-24).
+
+> **Note**
 > In [profiles in this repository](#profiles-in-this-repository), CI holds a level's schemas and declarations only to release tags from 1.0.0 on, since nobody flies a release before it, and each level has two schemas, one for a profile and one for a module ([profiles log](../profiles/log.md#2026-11-21-the-formats-audit-before-level-1-freezes-puts-maps-on-their-own-lines-types-instrument-readings-and-names-one-layout); user, 2026-11-21).
 
 Dual Input's code is a platform, engines, and features.
@@ -106,7 +110,7 @@ tools/        profile-builder  profile-author  bench (node 7)  build.ts  setup.t
 features/     state-sync  pointer-sync  flight-model  avatars  traffic
               atc-audio  take-control  voice (Soon)  rate-and-pause  go-to
 platform/     in the core                                          outside the core
-                                                                   routine-host
+              tape                                                 routine-host
               profile-loader  cockpit-stream  sim-variables        panel-bridge
               session                                              efb-shell  banner  desktop-shell
               sim-service  network  core-helper-service  recording

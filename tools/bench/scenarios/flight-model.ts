@@ -14,26 +14,20 @@ import { setTimeout as sleep } from "node:timers/promises"
 import type { Notification } from "../../../src/engines/messages/ts/clients/Notification.ts"
 import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
 import { BenchRun, type Core, type Stub } from "../cores.ts"
-import { BARON, load, toMenu } from "../flights.ts"
+import { BARON, load, METERS_EAST, METERS_NORTH, SPEED_FT, START, toMenu } from "../flights.ts"
 import { app, BenchNetwork, host, join } from "../network.ts"
 import { type FakeApp, fakeMenuScript } from "../pages.ts"
 
 /** What each stand-in sends after every frame, in this order. */
 const TRACKED = ["A:PLANE LATITUDE", "A:PLANE LONGITUDE", "A:PLANE ALTITUDE", "A:IS LATITUDE LONGITUDE FREEZE ON", "A:IS ALTITUDE FREEZE ON", "A:IS ATTITUDE FREEZE ON", "A:AILERON POSITION", "A:BRAKE LEFT POSITION"]
 
-/** 150 kt, in feet per second and in meters per second. */
-const SPEED_FT = 253.2
+/** 150 kt, in meters per second. */
 const SPEED = SPEED_FT * 0.3048
 /** How far behind the samples a following aircraft is drawn, in seconds. */
 const DELAY = 0.4
 
 /** One frame of a stand-in's aircraft: when, in seconds of the PC's time, where, in meters north and east of the scenario's start and feet up, whether all three freezes are on, and two of its controls. */
 type Point = { t: number; north: number; east: number; alt: number; frozen: boolean; aileron: number; brake: number }
-
-/** Where every scenario's flying aircraft starts: over Switzerland, heading east. */
-const START = { lat: 47, lon: 8, alt: 5_000 }
-const METERS_NORTH = 111_195
-const METERS_EAST = METERS_NORTH * Math.cos((START.lat * Math.PI) / 180)
 
 type Pilot = { core: Core; app: FakeApp; name: string; from: number; sim: Stub }
 

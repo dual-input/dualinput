@@ -6,6 +6,9 @@ Depends on:  03-the-extension.md, 01-format-and-delivery.md, 02-units.md, ../syn
 Decides:     What an author sees with the sim: live values on watch lines, the Dual Input panel, Run, and the display picker; how the extension reaches the sim through the author's own core; the feature `authoring`; the platform crate `sim-variables`, which reads and writes the sim's variables and fires its events by a profile's names for every feature; the sync engine's single write; how every panel stays for the picker; and the budgets, known limits, and cases (stage 22g).
 ```
 
+> **Note**
+> From stage 22h, [the Dual Input panel](#the-dual-input-panel) is a surface of islands in its one webview: the status island holds the status line with Run or the picker, and the recorder's island sits below it, which [05-the-recorder](05-the-recorder.md#the-recorders-island) designs (user, 2026-11-23).
+
 During a session's flight, the profile extension shows each `watch:` line's value at the end of the line, and runs one entry's write with a value the author types.
 For `displays`, it lists the cockpit's panels and outlines the one the author is on, in the sim.
 It reaches the sim through the author's own running Dual Input: `serve`, the extension's language server, `dualinput-profile-builder serve`, connects to the core as one more client, and a feature of the core's, `authoring`, serves it.

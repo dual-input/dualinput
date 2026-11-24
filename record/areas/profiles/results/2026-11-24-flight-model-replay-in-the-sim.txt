@@ -1,0 +1,144 @@
+﻿Stage 22h flight-model replay, tried in MSFS 2024 on 2026-11-24 with the tree's release core, in the Black Square Baron 58P Professional, a session of one, in the air.
+Lines from the core's log: tape's and flight model's, the session's start and end, the sim's stage, and the loop's stats each minute.
+Stamps are the core's clock in microseconds.
+
+25298495004µs #79301 [session]  INFO session::joining: this pilot leaves the session quit=false
+25298495004µs #79301 [session]  INFO session::joining: the session ended for this core code="5KXABD"
+25299365864µs #79351 [session]  INFO session::joining: this pilot hosts a session session="7bdd868c-e3b0-4938-99bd-98d805177546"
+25299540906µs #79357 [session]  INFO session::joining: the session started with its code code="5YX5E5"
+25299540906µs #79357 [session]  INFO session::members: a member entered the flight member="b7f11c8fcda34d8d9d44278547f0853b" in_flight=true
+25299540906µs #79357 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+25299584323µs #79381 [session]  INFO session::preflight: the pilot flying is in the air, so the flight starts with no preflight
+25343092278µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26780 busy_percent=1.33 wait_p50_us=9 wait_p99_us=239 wait_p999_us=639 wait_max_us=956 over_1ms=9 slowest_us=5446 slowest_seq=79672 slowest_stamp=25299903085
+25389416441µs #133403 [tape]  INFO tape: a recording started
+25393493442µs #135764 [tape]  INFO tape: a recording stopped messages=0 taken=81 ms=4077
+25394342349µs #136298 [tape]  INFO tape: a playback started messages=0 taken=81 ms=4077
+25394342349µs #136298 [flight-model]  INFO flight_model: a recording plays back, so flight-model sync starts Follow on it
+25398419790µs #138800 [tape]  INFO tape: a playback reached its end
+25398419790µs #138800 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+25402008014µs #141048 [tape]  INFO tape: a recording started
+25403095351µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36329 busy_percent=1.60 wait_p50_us=9 wait_p99_us=143 wait_p999_us=431 wait_max_us=1266 over_1ms=5 slowest_us=1261 slowest_seq=133404 slowest_stamp=25389421396
+25446391314µs #168244 [tape]  INFO tape: a recording stopped messages=0 taken=888 ms=44383
+25446924436µs #168542 [tape]  INFO tape: a playback started messages=0 taken=888 ms=44383
+25446924436µs #168542 [flight-model]  INFO flight_model: a recording plays back, so flight-model sync starts Follow on it
+25463097134µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36873 busy_percent=1.62 wait_p50_us=9 wait_p99_us=115 wait_p999_us=399 wait_max_us=6105 over_1ms=2 slowest_us=1109 slowest_seq=170258 slowest_stamp=25449904832
+25491307765µs #195789 [tape]  INFO tape: a playback reached its end
+25491307765µs #195789 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+25493609364µs #197093 [tape]  INFO tape: a recording started
+25506043503µs #204612 [tape]  INFO tape: a recording stopped messages=0 taken=249 ms=12434
+25506542628µs #204909 [tape]  INFO tape: a playback started messages=0 taken=249 ms=12434
+25506542628µs #204909 [flight-model]  INFO flight_model: a recording plays back, so flight-model sync starts Follow on it
+25518977418µs #212612 [tape]  INFO tape: a playback reached its end
+25518977418µs #212612 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+25523098519µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36492 busy_percent=1.61 wait_p50_us=9 wait_p99_us=115 wait_p999_us=415 wait_max_us=724 over_1ms=1 slowest_us=1026 slowest_seq=214333 slowest_stamp=25521800436
+25523605774µs #215362 [tape]  INFO tape: a recording started
+25542061446µs #226553 [tape]  INFO tape: a recording stopped messages=111 taken=369 ms=18455
+25542638160µs #226894 [tape]  INFO tape: a playback started messages=111 taken=369 ms=18455
+25542638160µs #226894 [flight-model]  INFO flight_model: a recording plays back, so flight-model sync starts Follow on it
+25558268323µs #236470 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Menu aircraft="bksq-aircraft-baronpropress"
+25558268323µs #236470 [session]  INFO session::members: a member left the flight member="b7f11c8fcda34d8d9d44278547f0853b" in_flight=false
+25558268323µs #236470 [session]  INFO session::joining: this pilot leaves the session quit=false
+25558268323µs #236470 [session]  INFO session::joining: the session ended for this core code="5YX5E5"
+25558268323µs #236470 [flight-model]  INFO flight_model: flight-model sync runs no routine
+25558268323µs #236470 [tape]  INFO tape: a playback stopped
+25568829024µs #236804 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Loading aircraft="bksq-aircraft-baronpropress"
+25580155152µs #237148 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=ReadyToFly aircraft="bksq-aircraft-baronpropress"
+25581286836µs #237188 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+25583100365µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=22168 busy_percent=1.18 wait_p50_us=9 wait_p99_us=231 wait_p999_us=607 wait_max_us=3867 over_1ms=4 slowest_us=2830 slowest_seq=236470 slowest_stamp=25558268323
+25591437431µs #237485 [session]  INFO session::joining: this pilot hosts a session session="81d202e8-0f60-4ae9-b0e6-f125c25fa851"
+25591544792µs #237489 [session]  INFO session::joining: the session started with its code code="HGS62G"
+25591544792µs #237489 [session]  INFO session::members: a member entered the flight member="c1df3bf803ac4e3bae2bbfca5cf17e8d" in_flight=true
+25591544792µs #237489 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+25643101109µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=23233 busy_percent=1.42 wait_p50_us=10 wait_p99_us=231 wait_p999_us=607 wait_max_us=7323 over_1ms=16 slowest_us=6298 slowest_seq=237813 slowest_stamp=25591920591
+25645945365µs #261898 [tape]  INFO tape: a recording started
+25658222908µs #267515 [tape]  INFO tape: a recording stopped messages=0 taken=245 ms=12277
+25658957632µs #267868 [tape]  INFO tape: a playback started messages=0 taken=245 ms=12277
+25658957632µs #267868 [flight-model]  INFO flight_model: a recording plays back, so flight-model sync starts Follow on it
+25671235393µs #273667 [tape]  INFO tape: a playback reached its end
+25671235393µs #273667 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+25703101242µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=28590 busy_percent=1.55 wait_p50_us=9 wait_p99_us=303 wait_p999_us=1087 wait_max_us=4267 over_1ms=11 slowest_us=1595 slowest_seq=271740 slowest_stamp=25667223294
+25763105322µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=29592 busy_percent=1.60 wait_p50_us=9 wait_p99_us=247 wait_p999_us=703 wait_max_us=7769 over_1ms=18 slowest_us=1620 slowest_seq=307728 slowest_stamp=25740617507
+25764264595µs #319135 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Loading aircraft="bksq-aircraft-baronpropress"
+25764264595µs #319135 [session]  INFO session::members: a member left the flight member="c1df3bf803ac4e3bae2bbfca5cf17e8d" in_flight=false
+25764264595µs #319135 [session]  INFO session::joining: this pilot leaves the session quit=false
+25764264595µs #319135 [session]  INFO session::joining: the session ended for this core code="HGS62G"
+25764264595µs #319135 [flight-model]  INFO flight_model: flight-model sync runs no routine
+25771029890µs #319366 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=ReadyToFly aircraft="bksq-aircraft-baronpropress"
+25772170717µs #319409 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+25823106752µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=2235 busy_percent=0.42 wait_p50_us=11 wait_p99_us=143 wait_p999_us=463 wait_max_us=1514 over_1ms=4 slowest_us=2641 slowest_seq=319135 slowest_stamp=25764264595
+25883108932µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1746 busy_percent=0.41 wait_p50_us=11 wait_p99_us=223 wait_p999_us=927 wait_max_us=1038 over_1ms=7 slowest_us=1383 slowest_seq=321102 slowest_stamp=25830314138
+25926047586µs #323892 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Loading aircraft="bksq-aircraft-baronpropress"
+25933486252µs #324119 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=ReadyToFly aircraft="bksq-aircraft-baronpropress"
+25934760468µs #324164 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+25943110594µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1769 busy_percent=0.41 wait_p50_us=11 wait_p99_us=199 wait_p999_us=831 wait_max_us=2295 over_1ms=2 slowest_us=1062 slowest_seq=324394 slowest_stamp=25942714517
+26003111994µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=1747 busy_percent=0.40 wait_p50_us=11 wait_p99_us=215 wait_p999_us=671 wait_max_us=992 over_1ms=1 slowest_us=1051 slowest_seq=325657 slowest_stamp=25985946275
+26059614283µs #327799 [session]  INFO session::joining: this pilot hosts a session session="e22e6063-5b31-45e4-b9cf-5d695863c5b5"
+26059744500µs #327803 [session]  INFO session::joining: the session started with its code code="7FR6KM"
+26059744500µs #327803 [session]  INFO session::members: a member entered the flight member="7014a03a336d4f7282937c0d3e6e6967" in_flight=true
+26059744500µs #327803 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+26063113858µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=2975 busy_percent=0.50 wait_p50_us=11 wait_p99_us=367 wait_p999_us=895 wait_max_us=1230 over_1ms=10 slowest_us=5662 slowest_seq=328153 slowest_stamp=26060170232
+26123115850µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25915 busy_percent=1.58 wait_p50_us=10 wait_p99_us=383 wait_p999_us=863 wait_max_us=4175 over_1ms=18 slowest_us=1832 slowest_seq=354227 slowest_stamp=26121268775
+26183118678µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25649 busy_percent=1.57 wait_p50_us=10 wait_p99_us=383 wait_p999_us=831 wait_max_us=1358 over_1ms=13 slowest_us=1597 slowest_seq=358868 slowest_stamp=26131942896
+26214878437µs #393673 [tape]  INFO tape: a recording started
+26243119511µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25197 busy_percent=1.58 wait_p50_us=10 wait_p99_us=399 wait_p999_us=767 wait_max_us=1643 over_1ms=17 slowest_us=1542 slowest_seq=393686 slowest_stamp=26214909548
+26303121215µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=29445 busy_percent=1.62 wait_p50_us=10 wait_p99_us=367 wait_p999_us=671 wait_max_us=1374 over_1ms=19 slowest_us=1620 slowest_seq=410843 slowest_stamp=26254134090
+26363122937µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=29642 busy_percent=1.60 wait_p50_us=10 wait_p99_us=271 wait_p999_us=703 wait_max_us=1496 over_1ms=8 slowest_us=1468 slowest_seq=442838 slowest_stamp=26318413246
+26390257844µs #477090 [tape]  INFO tape: a recording stopped messages=56 taken=3506 ms=175379
+26393888715µs #478874 [tape]  INFO tape: a playback started messages=56 taken=3506 ms=175379
+26393888715µs #478874 [flight-model]  INFO flight_model: a recording plays back, so flight-model sync starts Follow on it
+26397248795µs #480145 [tape]  INFO tape: a playback stopped
+26397248795µs #480145 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+26400459969µs #481670 [tape]  INFO tape: a playback started messages=56 taken=3506 ms=175379
+26400459969µs #481670 [flight-model]  INFO flight_model: a recording plays back, so flight-model sync starts Follow on it
+26413883215µs #487677 [tape]  INFO tape: a playback stopped
+26413883215µs #487677 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+26415345203µs #488366 [tape]  INFO tape: a playback started messages=56 taken=3506 ms=175379
+26415345203µs #488366 [flight-model]  INFO flight_model: a recording plays back, so flight-model sync starts Follow on it
+26419544781µs #490300 [tape]  INFO tape: a playback stopped
+26419544781µs #490300 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+26420192364µs #490625 [tape]  INFO tape: a playback started messages=56 taken=3506 ms=175379
+26420192364µs #490625 [flight-model]  INFO flight_model: a recording plays back, so flight-model sync starts Follow on it
+26421120531µs #491042 [tape]  INFO tape: a playback stopped
+26421120531µs #491042 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+26423125410µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26841 busy_percent=1.62 wait_p50_us=10 wait_p99_us=335 wait_p999_us=1407 wait_max_us=6499 over_1ms=18 slowest_us=1533 slowest_seq=485243 slowest_stamp=26408313583
+26483125724µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26006 busy_percent=1.61 wait_p50_us=10 wait_p99_us=383 wait_p999_us=895 wait_max_us=1419 over_1ms=17 slowest_us=1732 slowest_seq=515503 slowest_stamp=26477801327
+26543128027µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26001 busy_percent=1.62 wait_p50_us=10 wait_p99_us=415 wait_p999_us=895 wait_max_us=1305 over_1ms=20 slowest_us=1683 slowest_seq=519239 slowest_stamp=26486360958
+26603131617µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26063 busy_percent=1.62 wait_p50_us=10 wait_p99_us=367 wait_p999_us=767 wait_max_us=1307 over_1ms=17 slowest_us=1687 slowest_seq=562308 slowest_stamp=26585705476
+26663133739µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=24943 busy_percent=1.58 wait_p50_us=10 wait_p99_us=383 wait_p999_us=799 wait_max_us=1491 over_1ms=19 slowest_us=1762 slowest_seq=571864 slowest_stamp=26607813351
+26723133893µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25975 busy_percent=1.61 wait_p50_us=10 wait_p99_us=415 wait_p999_us=1023 wait_max_us=1455 over_1ms=12 slowest_us=1657 slowest_seq=613475 slowest_stamp=26706244652
+26783134984µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26039 busy_percent=1.60 wait_p50_us=10 wait_p99_us=351 wait_p999_us=863 wait_max_us=1359 over_1ms=17 slowest_us=1819 slowest_seq=631759 slowest_stamp=26748392465
+26843140035µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25620 busy_percent=1.60 wait_p50_us=10 wait_p99_us=383 wait_p999_us=927 wait_max_us=1969 over_1ms=23 slowest_us=1684 slowest_seq=652169 slowest_stamp=26795416975
+26903141773µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25487 busy_percent=1.57 wait_p50_us=10 wait_p99_us=383 wait_p999_us=703 wait_max_us=1465 over_1ms=15 slowest_us=1644 slowest_seq=684466 slowest_stamp=26871991371
+26963142223µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25920 busy_percent=1.60 wait_p50_us=10 wait_p99_us=367 wait_p999_us=799 wait_max_us=1645 over_1ms=18 slowest_us=1732 slowest_seq=705730 slowest_stamp=26921127097
+27023146359µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25905 busy_percent=1.60 wait_p50_us=10 wait_p99_us=399 wait_p999_us=895 wait_max_us=2808 over_1ms=13 slowest_us=1584 slowest_seq=726109 slowest_stamp=26968350624
+27083148067µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=24175 busy_percent=1.54 wait_p50_us=10 wait_p99_us=543 wait_p999_us=1343 wait_max_us=2358 over_1ms=11 slowest_us=2210 slowest_seq=754539 slowest_stamp=27034605327
+27143149781µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25816 busy_percent=1.58 wait_p50_us=10 wait_p99_us=399 wait_p999_us=927 wait_max_us=2392 over_1ms=15 slowest_us=1717 slowest_seq=797787 slowest_stamp=27138594512
+27203151341µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25588 busy_percent=1.57 wait_p50_us=10 wait_p99_us=399 wait_p999_us=831 wait_max_us=1477 over_1ms=17 slowest_us=1757 slowest_seq=811901 slowest_stamp=27171421183
+27263154271µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25242 busy_percent=1.56 wait_p50_us=10 wait_p99_us=367 wait_p999_us=799 wait_max_us=1127 over_1ms=13 slowest_us=1594 slowest_seq=833283 slowest_stamp=27222562764
+27323156856µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25862 busy_percent=1.57 wait_p50_us=10 wait_p99_us=335 wait_p999_us=799 wait_max_us=1308 over_1ms=19 slowest_us=1778 slowest_seq=866925 slowest_stamp=27301016177
+27383159473µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25771 busy_percent=1.57 wait_p50_us=10 wait_p99_us=383 wait_p999_us=927 wait_max_us=1745 over_1ms=18 slowest_us=1740 slowest_seq=898437 slowest_stamp=27374324970
+27443161041µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25732 busy_percent=1.58 wait_p50_us=10 wait_p99_us=383 wait_p999_us=895 wait_max_us=1796 over_1ms=17 slowest_us=1809 slowest_seq=917195 slowest_stamp=27418136458
+27503162943µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25630 busy_percent=1.57 wait_p50_us=10 wait_p99_us=367 wait_p999_us=895 wait_max_us=1774 over_1ms=20 slowest_us=1592 slowest_seq=941728 slowest_stamp=27475323399
+27563164416µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=24548 busy_percent=1.52 wait_p50_us=10 wait_p99_us=351 wait_p999_us=735 wait_max_us=1853 over_1ms=8 slowest_us=1734 slowest_seq=970782 slowest_stamp=27546062058
+27623166274µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25716 busy_percent=1.57 wait_p50_us=10 wait_p99_us=367 wait_p999_us=831 wait_max_us=2547 over_1ms=19 slowest_us=1614 slowest_seq=1001077 slowest_stamp=27616711223
+27683167136µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25657 busy_percent=1.57 wait_p50_us=10 wait_p99_us=367 wait_p999_us=895 wait_max_us=1458 over_1ms=17 slowest_us=1681 slowest_seq=1013998 slowest_stamp=27646975078
+27743169870µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25627 busy_percent=1.60 wait_p50_us=10 wait_p99_us=367 wait_p999_us=735 wait_max_us=1163 over_1ms=22 slowest_us=1735 slowest_seq=1045608 slowest_stamp=27720900944
+27803172279µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25588 busy_percent=1.59 wait_p50_us=10 wait_p99_us=383 wait_p999_us=767 wait_max_us=1760 over_1ms=15 slowest_us=1807 slowest_seq=1063110 slowest_stamp=27761890007
+27863174114µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25458 busy_percent=1.59 wait_p50_us=10 wait_p99_us=383 wait_p999_us=991 wait_max_us=2116 over_1ms=19 slowest_us=1849 slowest_seq=1104768 slowest_stamp=27859649642
+27865331166µs #1106937 [tape]  INFO tape: a playback started messages=56 taken=3506 ms=175379
+27865331166µs #1106937 [flight-model]  INFO flight_model: a recording plays back, so flight-model sync starts Follow on it
+27923176020µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26468 busy_percent=1.65 wait_p50_us=10 wait_p99_us=463 wait_p999_us=1279 wait_max_us=2846 over_1ms=22 slowest_us=2295 slowest_seq=1106931 slowest_stamp=27865321322
+27983180376µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=28908 busy_percent=1.65 wait_p50_us=9 wait_p99_us=335 wait_p999_us=863 wait_max_us=1956 over_1ms=11 slowest_us=1908 slowest_seq=1150808 slowest_stamp=27961185257
+28040710788µs #1186564 [tape]  INFO tape: a playback reached its end
+28040710788µs #1186564 [flight-model]  INFO flight_model: this pilot flies, so flight-model sync starts Lead
+28043182634µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25996 busy_percent=1.61 wait_p50_us=10 wait_p99_us=431 wait_p999_us=1151 wait_max_us=3942 over_1ms=19 slowest_us=1546 slowest_seq=1169457 slowest_stamp=28000395653
+28103184614µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=23781 busy_percent=1.67 wait_p50_us=11 wait_p99_us=703 wait_p999_us=2431 wait_max_us=3804 over_1ms=23 slowest_us=3297 slowest_seq=1198475 slowest_stamp=28070306619
+28163185451µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=24842 busy_percent=1.50 wait_p50_us=10 wait_p99_us=287 wait_p999_us=767 wait_max_us=4442 over_1ms=11 slowest_us=1922 slowest_seq=1213397 slowest_stamp=28108385304
+28223188815µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=25736 busy_percent=1.49 wait_p50_us=9 wait_p99_us=191 wait_p999_us=639 wait_max_us=1311 over_1ms=9 slowest_us=1317 slowest_seq=1261280 slowest_stamp=28221742135
+28283191381µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=26085 busy_percent=1.56 wait_p50_us=10 wait_p99_us=335 wait_p999_us=991 wait_max_us=5074 over_1ms=14 slowest_us=1920 slowest_seq=1285836 slowest_stamp=28277528217
+28343191802µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=24418 busy_percent=1.61 wait_p50_us=11 wait_p99_us=495 wait_p999_us=1215 wait_max_us=11072 over_1ms=22 slowest_us=2816 slowest_seq=1307899 slowest_stamp=28331942648
+28392739856µs #1331768 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Menu aircraft="bksq-aircraft-baronpropress"
+28392739856µs #1331768 [session]  INFO session::members: a member left the flight member="7014a03a336d4f7282937c0d3e6e6967" in_flight=false
+28392739856µs #1331768 [session]  INFO session::joining: this pilot leaves the session quit=false
+28392739856µs #1331768 [session]  INFO session::joining: the session ended for this core code="7FR6KM"
+28392739856µs #1331768 [flight-model]  INFO flight_model: flight-model sync runs no routine

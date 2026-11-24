@@ -3,14 +3,26 @@
 // and tick. The entries are the Black Square Baron 58P's, from profiles/aircraft/bksq-baronpro.yaml, except the counting
 // entry, which is hypothetical since that profile has none, and every reading is made up.
 
-import type { Action, DisplayRow, PanelHost, PanelView, PickerGroup, PickerView, Preview, RunView, Status } from "../src/view.ts"
+import type { Action, DisplayRow, PanelHost, PanelView, PickerGroup, PickerView, Preview, RecorderView, RunView, Status } from "../src/view.ts"
 
 export type Scene = Omit<PanelView, "palette">
 
 const BARON = "Black Square Baron 58P Professional"
 const flying: Status = { kind: "in-flight", aircraft: BARON, runs: true, crew: false }
 const withJames: Status = { ...flying, crew: true }
-const nothing: Scene = { status: flying, unpinned: false, body: { kind: "nothing" } }
+
+/** The recorder as a status leaves it with nothing recorded: ready alone in a flight, and off otherwise. */
+function recorderFor(status: Status): RecorderView {
+  if (status.kind !== "in-flight") return { kind: "off", why: "no-flight", lengthMs: null }
+  return status.crew ? { kind: "off", why: "crew", lengthMs: null } : { kind: "empty" }
+}
+
+const nothing: Scene = { status: flying, unpinned: false, body: { kind: "nothing" }, recorder: { kind: "empty" } }
+const at = (status: Status): Scene => ({ ...nothing, status, recorder: recorderFor(status) })
+
+/** A recording of 42s, the length the recorder's scenes show. */
+const RECORDED_MS = 42_000
+const recorded = (rest: Partial<Extract<RecorderView, { kind: "recorded" }>> = {}): RecorderView => ({ kind: "recorded", lengthMs: RECORDED_MS, stopped: null, ...rest })
 
 const act = (does: Action["does"], name: string, values: string[] = [], times = 1, apart: string | null = null): Action => ({ does, name, values, times, apart })
 const sends = (...actions: Action[]): Preview => ({ kind: "sends", actions })
@@ -53,7 +65,7 @@ const PLANS: Record<string, (text: string) => Preview> = {
 
 /** A scene of Run on one entry, in a flight alone unless `status` says otherwise. */
 function entry({ status = flying, ...run }: Omit<RunView, "preview" | "refused" | "revert"> & Partial<RunView> & { status?: Status }): Scene {
-  return { status, unpinned: false, body: { kind: "run", run: { preview: PLANS[run.key]!(run.field), refused: null, revert: null, ...run } } }
+  return { status, unpinned: false, body: { kind: "run", run: { preview: PLANS[run.key]!(run.field), refused: null, revert: null, ...run } }, recorder: recorderFor(status) }
 }
 
 const SWITCH = entry({ name: "Prop sync", key: "prop_sync", takes: "value", live: [{ of: null, value: "0" }], field: "", seen: ["0", "1"] })
@@ -94,16 +106,26 @@ const PANELS: PickerGroup[] = [
 
 /** Each state an author looks at, by name, in the order the dev page lists them. */
 export const SCENES: Record<string, Scene> = {
-  "Not running": { ...nothing, status: { kind: "not-running" } },
-  "No session": { ...nothing, status: { kind: "no-session" } },
-  "In a session, not in its flight": { ...nothing, status: { kind: "not-in-flight" } },
+  "Not running": at({ kind: "not-running" }),
+  "No session": at({ kind: "no-session" }),
+  "In a session, not in its flight": at({ kind: "not-in-flight" }),
   "In a flight": nothing,
-  "In a flight, mismatching aircraft": { ...nothing, status: { kind: "in-flight", aircraft: "Fenix A320", runs: false, crew: false } },
-  "Dual Input of an older release": { ...nothing, status: { kind: "other-release", extension: "0.4.0", dualInput: "0.3.2", update: "dual-input" } },
-  "Extension of an older release": { ...nothing, status: { kind: "other-release", extension: "0.3.2", dualInput: "0.4.0", update: "extension" } },
-  "Another window has the sim": { ...nothing, status: { kind: "other-window" } },
-  "Unsaved edits, with a crew": { ...IGNITION, status: withJames, unpinned: true },
-  "Unsaved edits, alone": { ...IGNITION, unpinned: true },
+  "In a flight, mismatching aircraft": at({ kind: "in-flight", aircraft: "Fenix A320", runs: false, crew: false }),
+  "Dual Input of an older release": at({ kind: "other-release", extension: "0.4.0", dualInput: "0.3.2", update: "dual-input" }),
+  "Extension of an older release": at({ kind: "other-release", extension: "0.3.2", dualInput: "0.4.0", update: "extension" }),
+  "Another window has the sim": at({ kind: "other-window" }),
+  "Unsaved edits, with a crew": { ...IGNITION, status: withJames, unpinned: true, recorder: recorderFor(withJames) },
+  "Unsaved edits, alone": { ...IGNITION, unpinned: true, recorder: { kind: "off", why: "unsaved", lengthMs: RECORDED_MS } },
+  "Recorder, nothing recorded": nothing,
+  "Recorder, recording": { ...nothing, recorder: { kind: "recording", elapsedMs: 12_000 } },
+  "Recorder, recorded": { ...SWITCH, recorder: recorded() },
+  "Recorder, restoring": { ...nothing, recorder: { kind: "putting-back", lengthMs: RECORDED_MS } },
+  "Recorder, playing": { ...nothing, recorder: { kind: "playing", atMs: 15_000, lengthMs: RECORDED_MS } },
+  "Recorder, stopped by a save": { ...nothing, recorder: recorded({ stopped: { what: "recording", by: { kind: "reload" } } }) },
+  "Recorder, stopped by a join, once alone": { ...nothing, recorder: recorded({ stopped: { what: "playback", by: { kind: "joined", who: "James" } } }) },
+  "Recorder, with a crew": { ...at(withJames), recorder: { kind: "off", why: "crew", lengthMs: RECORDED_MS } },
+  "Recorder, before Ready": { ...nothing, recorder: { kind: "off", why: "preflight", lengthMs: null } },
+  "Recorder, waiting for the profile": { ...nothing, recorder: { kind: "off", why: "loading", lengthMs: RECORDED_MS } },
   "Run, a switch": SWITCH,
   "Run, a lever": LEVER,
   "Run, a write function": IGNITION,
@@ -118,6 +140,21 @@ export const SCENES: Record<string, Scene> = {
 
 /** How long the 58P's stand-in takes to put a variable back after a Run of the scene that shows it. */
 const PUTS_BACK_MS = 120
+
+/** How long the stand-in takes to put the cockpit back before a Play plays. */
+const PUTTING_BACK_MS = 1_200
+
+/** When the recorder's state last changed, by the stand-in or by the page showing a scene, which a recording's time counts on from. */
+let recorderSince = Date.now()
+/** The stand-in's timers for a Play's steps, which a new scene or another press cancels. */
+let playTimers: number[] = []
+
+/** The page showed another scene, so a Play in the last one stops, and the new scene's times count from now. */
+export function sceneShown(): void {
+  playTimers.forEach((timer) => window.clearTimeout(timer))
+  playTimers = []
+  recorderSince = Date.now()
+}
 
 /** The stand-in for the extension: `view` reads the panel's view as it stands, `show` replaces it, and `heard` names each call. */
 export function standIn(view: () => Scene, show: (next: Scene) => void, heard: (call: string) => void): PanelHost {
@@ -175,6 +212,34 @@ export function standIn(view: () => Scene, show: (next: Scene) => void, heard: (
       heard("leave()")
       show({ ...view(), body: { kind: "nothing" } })
     },
+    record() {
+      heard("record()")
+      setRecorder({ kind: "recording", elapsedMs: 0 })
+    },
+    stop() {
+      heard("stop()")
+      const r = view().recorder
+      if (r.kind === "recording") setRecorder(recorded({ lengthMs: r.elapsedMs + (Date.now() - recorderSince) }))
+      if (r.kind === "putting-back" || r.kind === "playing") setRecorder(recorded({ lengthMs: r.lengthMs }))
+    },
+    play() {
+      heard("play()")
+      const r = view().recorder
+      if (r.kind !== "recorded") return
+      const { lengthMs } = r
+      setRecorder({ kind: "putting-back", lengthMs })
+      playTimers.push(
+        window.setTimeout(() => setRecorder({ kind: "playing", atMs: 0, lengthMs }), PUTTING_BACK_MS),
+        window.setTimeout(() => setRecorder(recorded({ lengthMs })), PUTTING_BACK_MS + lengthMs),
+      )
+    },
+  }
+
+  /** The recorder's next state, which ends the timers of a Play before it. */
+  function setRecorder(recorder: RecorderView) {
+    if (recorder.kind !== "playing") sceneShown()
+    recorderSince = Date.now()
+    show({ ...view(), recorder })
   }
 }
 

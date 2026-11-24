@@ -46,6 +46,7 @@ pub mod sim_variables;
 pub mod state_sync;
 pub mod sync;
 pub mod take_control;
+pub mod tape;
 pub mod traffic;
 
 /// Bytes as lowercase hex, two digits a byte, the form pilot and endpoint IDs take in the

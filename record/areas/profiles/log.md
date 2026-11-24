@@ -8,6 +8,101 @@ TypeScript's language service answers inside a write function in about 40ms in Q
 The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and [p04-language-service.mjs](../../../experiments/areas/profiles/p04-language-service.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 None needs the sim.
 
+## 2026-11-24: The recorder's messages reached the stream within 3.8ms of their recorded times, and a recording held about 205 bytes an entry
+
+**Asked:** do the recorder's two [budgets](05-the-recorder.md#budgets) hold, a message's arrival within 20ms of its recorded time, a sample's included, and what a recording's message costs in memory; and do the stage's scenarios pass on main with the session's two restart fixes?
+
+**Expected:** arrival within a few ms, since `tape` sets a timer for each message's time, and a recording small enough to need no cap.
+
+**Found:** on our development machine, 2026-11-24, with nothing else loading the PC, `node tools/bench.ts tape flight-model session` passed all 40 of its tests on main at `0eaca55e` with the stage on top, and `node tools/check.ts` passed all 19 checks on the same tree:
+
+- `tape` logs how late its timer handed each playback's messages over, from the inputs' stamps, and the loop's stats for the run give the longest any input then waited in the queue, so their sum bounds how late a message reached the stream.
+- Two playbacks of 13 messages each: the timer at most 0.5ms and 0.7ms late, and an input at most 3.1ms in the queue, so at most 3.8ms, against 20ms.
+- A playback of 71 samples along a turn: the timer at most 0.5ms late, and an input at most 2.8ms in the queue, so at most 3.3ms.
+- `tape` counts what a recording holds on the heap as its lists' slots, spare ones included, and each entry's key and body, without what the allocator adds: 13 messages took 29,830 bytes, most of it the catch-up's payloads at Record, and 71 samples over 3,527ms took 14,528 bytes, about 205 bytes an entry.
+- At 205 bytes an entry, an hour of a lever moved without a pause while the aircraft flies, 144,000 entries, holds about 30 MB, so a recording needs no cap (arithmetic).
+
+The stage's code review found that `tape`'s own figure left out the queue's wait, which is why the bench adds the loop's.
+
+**Changed:** nothing; each budget holds.
+
+**Affects:** [05-the-recorder](05-the-recorder.md)'s budgets.
+
+## 2026-11-24: In the sim, playbacks flew the 58P back along its recorded paths, with `Follow` from Play to the end
+
+**Asked:** do the design's two [cases in the sim](05-the-recorder.md#cases) for flying the recorded path hold in the 58P: the aircraft back where it stood at Record, the path flown with the cockpit's changes, and control back at the end?
+
+**Expected:** what the bench's path case found in the entry below.
+
+**Found:** in MSFS 2024, 2026-11-24, with the tree's release core, in the Black Square Baron 58P Professional 0.1.1 in the air, in a session of one ([the core's lines](results/2026-11-24-flight-model-replay-in-the-sim.txt)):
+
+- The user made 6 recordings, of 4.1s to 175.4s, and each took 20 samples a second, from 81 in 4,077ms to 3,506 in 175,379ms.
+- 4 of them held no cockpit change, one held 111 changes in 18.5s, and one 56 in 175.4s.
+- Of 10 playbacks, 5 ran to their end, each within 1ms of its recording's length, the user stopped 4, and 1 stopped as the user went to the sim's main menu, which ended the session.
+- Each Play started `Follow`, and each end or stop started `Lead` again, in the same input.
+- The loop took 8 to 23 inputs over 1ms a minute, of about 26,000, alike in the minutes a playback ran and those it didn't.
+
+The user watched each playback and found that it worked well.
+
+Not measured: how far the aircraft strayed from its recorded path in the sim, and whether the 4 playbacks with no cockpit change put the aircraft back at once or eased it back over 3s.
+The user judged that the second doesn't matter.
+
+**Changed:** 05-the-recorder's known limits take the ease back over 3s, and its cases in the sim drop the case that would have watched for it.
+
+## 2026-11-24: A playback flew the stand-in's aircraft back along a recorded turn within 0.09m of the recorded path
+
+**Asked:** does a playback put the aircraft back at the recording's first sample at once, hold it there while the cockpit is put back, fly it along the recorded path, and let it go at the end, as [flying the recorded path](05-the-recorder.md#flying-the-recorded-path) has it; and does `Follow` running through a playback leave flight-model sync's own scenario as it was?
+
+**Expected:** the played path within 5m of the recorded one, and `flight-model` passing as before.
+
+**Found:** on our development machine, 2026-11-24, `node tools/bench.ts tape flight-model` passed all 7 of `tape`'s tests, the new path case among them:
+
+- A recording of 3,536ms, with a 45° turn in it, held 71 samples, against 20 a second.
+- As Play was pressed, the aircraft froze and went back to the recording's first sample in one frame, and held there 2,450ms, while the cockpit stream's test unit held the putting back open for 2s.
+- It moved 456ms after the bench saw the playback's messages start, and flew the recorded path, the turn included, within 0.09m of where the recorded aircraft was one time shift earlier.
+- Once the playback ended, it was unfrozen and flew on at its recorded speed, and `Lead` ran again.
+
+In the same run, `flight-model` passed 6 of its 7 tests: James's core took 2 inputs over 1ms, the slowest 1,858µs, against one allowed under 2,000µs, while the sim and a review agent ran on the PC.
+`node tools/bench.ts flight-model` alone passed all 7, each core with one input over 1ms, at 1,838µs and 1,820µs.
+
+The code review found that a playback timer firing about 25s late, as after a debugger held the core, would hand 500 samples to the kernel in one input, past the 1,000 queued calls at which it panics, so `tape` hands over at most 100 messages an input and the rest in the inputs after.
+It also found that when a playback's catch-up has nothing to write, the put-back and the first played sample can reach `Follow` in one frame of our module, which [flying the recorded path](05-the-recorder.md#flying-the-recorded-path) now leaves to a case in the sim.
+After the fixes, `node tools/bench.ts tape flight-model` passed all 14 tests, the played path within 0.18m of the recorded one.
+
+Not measured: the memory a recording's samples take.
+Not yet run: the design's two cases in flight in the sim.
+
+**Changed:** 05-the-recorder's flying the recorded path, with the unmeasured case of two feeds in one frame, and its cases in the sim.
+
+## 2026-11-24: Stage 22h's recorder passed its bench scenario, and a playback that ended mid-step had left the stream pretending
+
+**Asked:** do the recorder's [cases](05-the-recorder.md#cases) hold on the stand-in sim, and does the cockpit stream's pretend sender leave every other scenario as it was?
+
+**Expected:** each case passes, and the whole bench as before.
+
+**Found:** on our development machine, 2026-11-24, `node tools/bench.ts tape` passed its 5 tests:
+
+- Play put each recorded entry back to its value at Record before the first played change, then played the changes in order, with a lamp's toggle after the heading knob's last step, and a pause recorded as 5,690ms to 5,723ms played as 5,723ms to 5,729ms.
+- A second Play made the same calls as the first: 30 `HDG_INC`, 40 `HDG_DEC`, 2 `TOGGLE_LAMP`, 1 `AP_MASTER`, 3 `COM_INC`, and 5 `COM_DEC`, with the same writes.
+- No banner notification showed while a playback's catch-up ran.
+- A crewmate joining during a playback stopped it, the slice named them, and their catch-up and the messages after it ran with nothing left waiting in their stream.
+- Stop while restoring and while playing left nothing waiting, and a crewmate who joined after a Stop mid-step waited on nothing.
+- A save stopped a recording and a playback, and Play was refused while the reloaded profile loaded.
+
+The scenario's first run found that a playback that reached its end while a knob still stepped left the stream pretending, so a crewmate who joined then waited on the pretend sender's counter for good: `tape` stopped the stream's pretending only when something ran.
+The stage's code review found the same, and `tape` now stops it on every join and unload, after which the scenario passed.
+Stop while restoring left a toggle that state sync held behind a knob's steps to go, which [when the recorder works](05-the-recorder.md#when-the-recorder-works) now says.
+
+The whole bench passed 201 of its 202 tests in 57 minutes.
+`authoring`'s check that every input takes under 1ms failed, with 2 inputs at 1,505µs early in its run, while other scenarios' cores shared the CPU, and `node tools/bench.ts authoring` alone passed all 8.
+
+In the sim on MSFS 2024, 2026-11-24, the user recorded the 58P's battery, avionics master, heading bug, and left mixture with the tree's core and extension, moved them, and played the recording: the cockpit went back to where it stood at Record, and the changes played in order at their pace.
+
+Not measured: the recorder's budgets of 20ms for a message's arrival, beyond the pause above, and of a recording's memory.
+Not covered: the 58P's vertical-mode case, since the stand-in has no vertical-mode rules, and a new value cutting a knob's steps short, which the stand-in's calls can't tell from steps that ran out.
+
+**Changed:** 05-the-recorder's line on Stop.
+
 ## 2026-11-23: Stage 22g's session in the sim passed its 32 cases in the 58P, every budget held
 
 **Asked:** do the [cases](04-the-extension-in-the-sim.md#cases) and [budgets](04-the-extension-in-the-sim.md#budgets) of live values, Run, and the display picker hold in the sim?

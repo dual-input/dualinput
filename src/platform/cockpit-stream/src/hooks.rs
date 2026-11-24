@@ -60,6 +60,8 @@ pub(crate) struct KindReg {
     pub(crate) collapse: bool,
     /// For a kind whose key names a profile entry, reads the entry's number from a body.
     pub(crate) entry: Option<EntryNumber>,
+    /// The recorder records its messages, which `CockpitSent` says.
+    pub(crate) recorded: bool,
 }
 
 /// A catch-up step, as its unit registered it.
@@ -128,6 +130,7 @@ impl<S: 'static> CockpitUnit<S> for Unit<'_, S> {
                         hold: false,
                         collapse: false,
                         entry: None,
+                        recorded: false,
                     },
                 )
                 .is_none(),
@@ -189,6 +192,13 @@ impl<B: DeserializeOwned + 'static> KindOptions<'_, B> {
     /// collapsing messages between them.
     pub fn collapse_in_replay(mut self) -> Self {
         self.kind().collapse = true;
+        self
+    }
+
+    /// The profile extension's recorder records the kind's messages as this machine sends them,
+    /// and plays them back from a pretend sender (record/areas/profiles/05-the-recorder.md).
+    pub fn recorded(mut self) -> Self {
+        self.kind().recorded = true;
         self
     }
 
@@ -261,5 +271,27 @@ impl Cockpit<'_, '_> {
     /// settled.
     pub fn step_done(&self, step: u16) {
         self.cx.call(CockpitStream::step_done, step);
+    }
+
+    /// Starts a playback from the pretend sender: the stream takes `payloads`, as `payloads`
+    /// made them at Record, as a catch-up, and raises `PretendCaughtUp` once it has ended. Only
+    /// alone in a session, which the caller's guards hold, since the pretend sender's counter
+    /// goes into this machine's clock, and a crewmate's stream would wait for its messages
+    /// (record/areas/profiles/05-the-recorder.md, "The pretend sender").
+    pub fn pretend(&self, payloads: Vec<(u16, Vec<u8>)>) {
+        self.cx.call(CockpitStream::pretend, payloads);
+    }
+
+    /// The pretend sender's next message, which the stream applies as it applies a crewmate's,
+    /// with `gap`, in µs, the time between it and the one before it as they were sent.
+    pub fn arrive(&self, kind: u16, key: String, body: Vec<u8>, gap: u32) {
+        self.cx
+            .call(CockpitStream::pretend_arrived, (kind, key, body, gap));
+    }
+
+    /// Ends a playback: the pretend sender's waiting messages drop, one still stepping counts as
+    /// applied at once, and its catch-up ends.
+    pub fn stop_pretending(&self) {
+        self.cx.call(CockpitStream::stop_pretending, ());
     }
 }

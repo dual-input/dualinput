@@ -7,6 +7,9 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 ```
 
 > **Note**
+> From stage 22h, the cockpit stream serves the profile extension's recorder ([05-the-recorder](../profiles/05-the-recorder.md#what-the-cockpit-stream-gains); user, 2026-11-23): a kind can be marked recorded, as state sync's three and pointer sync's gesture are; `CockpitSent` carries the message's body and whether its kind is recorded; the stream makes each catch-up step's payload on request; and alone in a session, it takes a catch-up from a pretend sender and applies that sender's messages in the order of [applying](#applying).
+
+> **Note**
 > In [`H:` events](#h-events), `fsEventsHEventCall` returned `FS_EVENTS_ERROR_FAIL` and reached no panel, so the routine host fires each `H:` event as calculator code, `(>H:<name>)`, as that section's fallback has it ([sync log](log.md#2026-11-10-the-sdks-h-event-call-fails-on-msfs-2024-so-our-module-fires-h-events-as-calculator-code-which-reached-every-panel); user, 2026-11-10).
 
 > **Note**

@@ -10,7 +10,7 @@ import { test } from "node:test"
 import type { FromPanel, ToPanel } from "../panel/src/messages.ts"
 import { type Command, commandFor, NOT_RUNNING, PanelBridge, placeOf, type ServerView } from "./bridge.ts"
 
-const FLYING: ServerView = { status: { kind: "in-flight", aircraft: "Black Square Baron 58P Professional", runs: true, crew: false }, unpinned: false, body: { kind: "nothing" } }
+const FLYING: ServerView = { status: { kind: "in-flight", aircraft: "Black Square Baron 58P Professional", runs: true, crew: false }, unpinned: false, body: { kind: "nothing" }, recorder: { kind: "empty" } }
 
 /** A bridge in the dark palette with a webview attached, and what it posted, sent, and revealed. */
 function bridged() {
@@ -86,6 +86,9 @@ test("each of the panel's calls goes to the server as its command, with its valu
     [{ kind: "tick", row: "KX155B" }, { command: "dualInput.panel.tick", arguments: ["KX155B"] }],
     [{ kind: "write" }, { command: "dualInput.panel.write", arguments: [] }],
     [{ kind: "leave" }, { command: "dualInput.panel.leave", arguments: [] }],
+    [{ kind: "record" }, { command: "dualInput.panel.record", arguments: [] }],
+    [{ kind: "stop" }, { command: "dualInput.panel.stop", arguments: [] }],
+    [{ kind: "play" }, { command: "dualInput.panel.play", arguments: [] }],
   ]
   for (const [call, command] of calls) {
     assert.deepEqual(commandFor(call), command)

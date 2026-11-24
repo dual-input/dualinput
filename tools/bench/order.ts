@@ -6,7 +6,8 @@
 /**
  * Each scenario file's title, and its time in seconds on our development machine: the 12
  * longest from the whole bench of 2026-11-20, `authoring` from a run of it alone on 2026-11-22,
- * and the rest from a run of those files alone on 2026-11-21. When you add a scenario, add it
+ * `tape` from a run of it alone on 2026-11-24, and the rest from a run of those files alone on
+ * 2026-11-21. When you add a scenario, add it
  * here; tools/bench/order.test.ts fails until you do.
  */
 export const SCENARIOS: Readonly<Record<string, { title: string; seconds: number }>> = {
@@ -23,6 +24,7 @@ export const SCENARIOS: Readonly<Record<string, { title: string; seconds: number
   "desktop-app": { title: "Desktop app", seconds: 140 },
   profiles: { title: "Profiles", seconds: 124 },
   authoring: { title: "Authoring", seconds: 95 },
+  tape: { title: "The recorder", seconds: 170 },
   "test-sessions": { title: "Test sessions", seconds: 45 },
   "clients-panels": { title: "Cockpit panels", seconds: 77 },
   "network-relays": { title: "Two relays", seconds: 76 },

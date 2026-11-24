@@ -12,7 +12,31 @@ export type PanelView = {
   /** Whether the open text differs from the bundle the session pinned, so a Run runs edits the crew's cockpits don't have until a save. */
   unpinned: boolean
   body: Body
+  /** The recorder's island, under the status island. */
+  recorder: RecorderView
 }
+
+/**
+ * The recorder's state, from `tape`'s slice and `serve`'s saved check (record/areas/profiles/05-the-recorder.md). Its
+ * times are in milliseconds as the core last counted them, and the island counts on from there between views, so its
+ * readout moves every second whatever the rate views come at.
+ */
+export type RecorderView =
+  /** Nothing recorded since the session started. */
+  | { kind: "empty" }
+  | { kind: "recording"; elapsedMs: number }
+  /** A recording ready to play. `stopped` says why it stopped, until the next press, when something other than Stop stopped it. */
+  | { kind: "recorded"; lengthMs: number; stopped: Stopped | null }
+  | { kind: "putting-back"; lengthMs: number }
+  | { kind: "playing"; atMs: number; lengthMs: number }
+  /** Record and Play can't act now, and why. `lengthMs` is the recording's, when there is one, which Play plays once they can. */
+  | { kind: "off"; why: RecorderOff; lengthMs: number | null }
+
+/** Why the recorder's buttons are off (record/areas/profiles/05-the-recorder.md, "When the recorder works"). */
+export type RecorderOff = "no-flight" | "preflight" | "crew" | "loading" | "unsaved"
+
+/** What stopped a recording or a playback other than Stop: a save, by the profile's reload, or a crewmate joining. */
+export type Stopped = { what: "recording" | "playback"; by: { kind: "reload" } | { kind: "joined"; who: string } }
 
 /** The status line's state, from your Dual Input, the session, and the open file. */
 export type Status =
@@ -136,4 +160,10 @@ export type PanelHost = {
   write(): void
   /** Leaves the picker, and the sim clears its outline. */
   leave(): void
+  /** Starts a recording, in place of the one there is. */
+  record(): void
+  /** Stops a recording, or a playback with its putting back. */
+  stop(): void
+  /** Puts the cockpit back as it was at Record, then plays the recording into it. */
+  play(): void
 }

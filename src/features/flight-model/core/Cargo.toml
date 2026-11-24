@@ -11,6 +11,7 @@ messages = { path = "../../../engines/messages" }
 network = { path = "../../../platform/network" }
 session = { path = "../../../platform/session" }
 sim-service = { path = "../../../platform/sim-service" }
+tape = { path = "../../../platform/tape" }
 tracing = "0.1.44"
 
 [lints]

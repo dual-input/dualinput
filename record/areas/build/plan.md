@@ -1137,7 +1137,7 @@ Done on 2026-11-22.
 
 Builds: the documentation for pilots, for developers of Dual Input's code, and for profile authors ([the product plan](../product/plan.md#3-v1-or-later)).
 Designs first: a guide to how each of the three is written, from research the user directs, where the docs are published, and what `CLAUDE.md` says of `docs/` once agents write there.
-Needs: nothing for the guides; 22b, 22c, 22d, and 22g for the profile authors' documentation, 22g's of what [04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md#what-this-changes-elsewhere) asks it to say.
+Needs: nothing for the guides; 22b, 22c, 22d, 22g, and 22h for the profile authors' documentation, 22g's of what [04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md#what-this-changes-elsewhere) asks it to say, and 22h's of what [05-the-recorder](../profiles/05-the-recorder.md#what-this-changes-elsewhere) asks.
 
 ## 22f The graphics
 
@@ -1200,6 +1200,46 @@ Exit: on our development machine, `node tools/check.ts` passes, and `node tools/
 
 Done on 2026-11-23: CI ran `node tools/check.ts` and the whole bench in place of our development machine, by the user's call, and both passed on the pull request's last commit, the `authoring` scenario among them, with a new `state-sync` case for a crew whose cockpits differ; the user installed the `.vsix` and saw the panel's dev page in each state; and `node tools/sim/authoring.ts` passed its 32 cases in one session on the 58P, every budget held ([profiles log](../profiles/log.md#2026-11-23-stage-22gs-session-in-the-sim-passed-its-32-cases-in-the-58p-every-budget-held)).
 The session found a catch-up that crawls behind writes that never land, which the user took as a known limit of stage 14c ([sync log](../sync/log.md#2026-11-23-a-catch-up-crawls-when-its-writes-never-land-since-each-toggle-stepping-write-or-write-function-waits-out-the-15s-check-of-the-write-before-it)).
+
+## 22h The recorder
+
+Designs first: the recorder, which the user proposed for the profile extension on 2026-11-23, so one author on one PC sees what a crewmate's changes do in their cockpit.
+The user designed it with us on 2026-11-23, a call at a time, and [05-the-recorder](../profiles/05-the-recorder.md) carries it (user):
+
+- Record, Stop, and Play: a recording holds the cockpit stream's own messages from Record to Stop, of state sync's kinds and pointer sync's gestures, and each catch-up step's payload at Record.
+- Play puts the cockpit back through that catch-up, then plays each message at its recorded time from a pretend sender, through the stream's order and state sync's own handlers, which run the saved profile.
+- It works alone in a session's flight, with the open text saved, and its buttons are off with a reason otherwise.
+- One recording, kept until the next Record or the session's end, in `tape`, a platform unit, so any feature's messages can join it.
+- The Dual Input panel becomes a surface of islands, with the recorder's island at the bottom: Record, Stop, and Play, as on a tape deck.
+- Flight-model replay, which the user added on 2026-11-24: a recording also holds flight-model sync's samples, and a playback is a second reason for flight-model sync to run `Follow`, from Play, fed from the recording, so the aircraft goes back to where it stood at Record and flies the recorded path, with control left with the author.
+
+Builds:
+
+- `src/platform/tape` ([how it works](../profiles/05-the-recorder.md#how-it-works)), with a feature's channel recorded and played back ([what a feature registers with `tape`](../profiles/05-the-recorder.md#what-a-feature-registers-with-tape))
+- in `cockpit-stream`: recorded kinds, `CockpitSent`'s body, a step's payloads on request, and the pretend sender ([what the cockpit stream gains](../profiles/05-the-recorder.md#what-the-cockpit-stream-gains))
+- in `state-sync`: its three kinds marked recorded; in `pointer-sync`: its gesture kind marked recorded
+- in `src/features/flight-model/core`: its samples handed to `tape` while a recording runs, and `Follow` run through a playback, fed the recording's samples ([flying the recorded path](../profiles/05-the-recorder.md#flying-the-recorded-path))
+- in `tools/profile-builder`'s `serve`: the island's view, the saved check, and the commands
+- in `src/apps/profile-extension`: the panel as islands, the recorder's island, and its states on the dev page ([the recorder's island](../profiles/05-the-recorder.md#the-recorders-island))
+- in `tools/bench`: the scenario `tape`
+- in `tools/map-check.ts`: `tape`
+
+Needs: 22g.
+
+Tests:
+
+- [The design's cases](../profiles/05-the-recorder.md#cases), on the bench, as unit tests, by hand, and in the sim, and [its budgets](../profiles/05-the-recorder.md#budgets).
+- State sync's scenarios, on the cockpit stream they run on: `state-sync`, `clients-panels`, `test-sessions`, and `profiles`.
+- Flight-model sync's scenario, `flight-model`, on the rule for which routine runs, which flight-model replay changes.
+
+The stage changes the cockpit stream, which every scenario with a crew runs on, so it closes on the whole bench.
+
+Exit: on our development machine, `node tools/check.ts` passes, and `node tools/bench.ts` passes, the `tape` scenario among it; the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, and the user has seen the recorder's island in each of its states on the dev page; in one session in the sim on the 58P, recordings play back as [the design's cases in the sim](../profiles/05-the-recorder.md#cases) have it; and the [profiles' log](../profiles/log.md) has the budgets' measurements.
+
+Done on 2026-11-24: on main with the session's two restart fixes, `node tools/check.ts` passed, and `node tools/bench.ts tape flight-model session` passed its 40 tests with both budgets held ([profiles log](../profiles/log.md#2026-11-24-the-recorders-messages-reached-the-stream-within-38ms-of-their-recorded-times-and-a-recording-held-about-205-bytes-an-entry)).
+The whole bench ran once, before pointer sync replay and flight-model replay joined the stage, and passed 201 of its 202 tests, `authoring`'s check of 1ms an input failing under the full bench's load and passing alone ([profiles log](../profiles/log.md#2026-11-24-stage-22hs-recorder-passed-its-bench-scenario-and-a-playback-that-ended-mid-step-had-left-the-stream-pretending)).
+The user installed the `.vsix`, saw the island in each of its states on the dev page, and kept as built the line before preflight ends and the island reading "recorded" while a knob still steps through a playback's last changes.
+In the sim on the 58P, recordings put the cockpit back and played its changes, and flew the aircraft along its recorded paths ([profiles log](../profiles/log.md#2026-11-24-in-the-sim-playbacks-flew-the-58p-back-along-its-recorded-paths-with-follow-from-play-to-the-end)).
 
 ## 23 v1's release
 

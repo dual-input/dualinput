@@ -34,6 +34,11 @@ Decides:     Who reads the flying aircraft, and how often; what a sample carries
 > Other aircraft are unmeasured.
 > v1 builds nothing for it (user, 2026-11-19).
 
+> **Note**
+> From stage 22h, a playback of the profile extension's recorder is a second reason to run `Follow`, so the aircraft flies a recorded path while control stays with its author ([flying the recorded path](../profiles/05-the-recorder.md#flying-the-recorded-path); user, 2026-11-24).
+> In [when each routine runs](#when-each-routine-runs), `Lead` runs only while no playback runs, and `Follow` runs while another pilot holds control or a playback runs, from Play to the playback's end or stop; flight-model sync also starts and ends them on `tape`'s `PlaybackChanged`.
+> While a recording runs, flight-model sync hands each sample it sends to the recorder's unit, `tape`, and during a playback it feeds `Follow` the recording's samples, the first at once and the rest at their recorded times, each on this core's counter with no clock offset.
+
 On the flying machine, the PF's, a routine in our WASM module, `Lead`, reads the aircraft's pose, velocities, control surfaces, and toe brakes about 20 times a second, each read stamped with its frame's time, and the core sends each read to the crew as a sample.
 On each following machine, any other pilot's, `Follow` draws the aircraft 400ms behind those samples, along straight lines between them, carries it on through a gap of up to 2s, and eases it back over 3s.
 Our module keeps an estimate of the core's counter, from a stamp the core puts in every slot it writes, so every routine runs on the core's timeline and the core never estimates the module's clock.

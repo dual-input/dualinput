@@ -21,3 +21,6 @@ export type FromPanel =
   | { kind: "tick"; row: string }
   | { kind: "write" }
   | { kind: "leave" }
+  | { kind: "record" }
+  | { kind: "stop" }
+  | { kind: "play" }

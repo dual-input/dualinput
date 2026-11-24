@@ -105,6 +105,13 @@ impl Inbox {
         self.replays.retain(|origin, _| origin.pilot != pilot);
     }
 
+    /// Drops every waiting message from `sender`, and when its last applied, so its next message
+    /// waits no gap from one of before, as a playback that stopped leaves nothing for the next.
+    pub(crate) fn drop_from(&mut self, sender: Origin) {
+        self.waiting.retain(|w| w.message.sender != sender);
+        self.last_applied.remove(&sender);
+    }
+
     /// Notes that a message applied, or was skipped, at `at`.
     pub(crate) fn applied(&mut self, message: &CockpitMessage, at: u64, skipped: Option<Skipped>) {
         match skipped {
@@ -518,5 +525,67 @@ mod tests {
         restarted.get(a.me, &m);
         restarted.pump();
         assert_eq!(restarted.applied.len(), 1);
+    }
+
+    /// A playback's message as the recorder hands it over: numbered by the pretend sender, its
+    /// clock holding that count alone, and its gap from the one before as recorded.
+    fn played(sender: Origin, number: u64, gap: u32, key: &str) -> CockpitMessage {
+        let mut clock = VectorClock::default();
+        clock.set(sender, number);
+        CockpitMessage {
+            sender,
+            clock,
+            control: control(1, 1),
+            gap,
+            kind: LEVER,
+            key: key.into(),
+            body: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn a_playbacks_messages_arriving_at_their_times_keep_a_long_pause_and_wait_their_gap_after_a_hold()
+     {
+        let pretend = origin(0xff);
+        let mut b = Machine::new(2);
+        b.get(pretend, &played(pretend, 1, 0, "one"));
+        b.pump();
+        // A 5s pause, longer than the 2s a burst waits at most, passes in full, since the second
+        // arrives at its time.
+        b.now = 5_000_000;
+        b.get(pretend, &played(pretend, 2, 5_000_000, "two"));
+        assert_eq!(b.pump(), Next::Nothing);
+        assert_eq!(b.applied.len(), 2, "the second applies as it arrives");
+        // The third arrives at 5.5s while the second's stepping write holds the stream until 7s,
+        // and then waits its own 0.5s after the second applied, as a crewmate's would.
+        b.now = 5_500_000;
+        let third = played(pretend, 3, 500_000, "three");
+        b.now = 7_000_000;
+        b.inbox
+            .applied(&played(pretend, 2, 5_000_000, "two"), b.now, None);
+        b.get(pretend, &third);
+        assert_eq!(b.pump(), Next::WaitUntil(7_500_000));
+        b.now = 7_500_000;
+        b.pump();
+        assert_eq!(b.applied.len(), 3);
+    }
+
+    #[test]
+    fn a_stopped_playback_leaves_nothing_waiting_and_the_next_waits_no_gap_from_it() {
+        let pretend = origin(0xff);
+        let mut b = Machine::new(2);
+        b.get(pretend, &played(pretend, 1, 0, "one"));
+        b.pump();
+        // Two more wait, the second behind the first's gap.
+        b.now = 100_000;
+        b.get(pretend, &played(pretend, 2, 1_000_000, "two"));
+        b.get(pretend, &played(pretend, 3, 2_000_000, "three"));
+        assert!(matches!(b.pump(), Next::WaitUntil(_)));
+        b.inbox.drop_from(pretend);
+        assert_eq!(b.inbox.len(), 0);
+        // The next playback numbers on from the last that applied, and waits no gap from before.
+        b.get(pretend, &played(pretend, 2, 3_000_000, "again"));
+        assert_eq!(b.pump(), Next::Nothing);
+        assert_eq!(b.applied.len(), 2);
     }
 }

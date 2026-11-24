@@ -18,6 +18,7 @@ const UNITS: &[fn(&mut Registry)] = &[
     profile_loader::register,
     cockpit_stream::register,
     sim_variables::register,
+    tape::register,
     pointer_sync::register,
     state_sync::register,
     take_control::register,

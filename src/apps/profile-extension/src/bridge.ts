@@ -12,7 +12,7 @@ import type { Palette } from "./palette.ts"
 export type ServerView = Omit<PanelView, "palette">
 
 /** What the panel shows until the server sends a view, and again once the server stops. */
-export const NOT_RUNNING: ServerView = { status: { kind: "not-running" }, unpinned: false, body: { kind: "nothing" } }
+export const NOT_RUNNING: ServerView = { status: { kind: "not-running" }, unpinned: false, body: { kind: "nothing" }, recorder: { kind: "off", why: "no-flight", lengthMs: null } }
 
 /**
  * The server's command for each of the panel's calls but `reveal`, which takes the call's one value, or none. `serve`
@@ -25,6 +25,9 @@ export const PANEL_COMMANDS = {
   tick: "dualInput.panel.tick",
   write: "dualInput.panel.write",
   leave: "dualInput.panel.leave",
+  record: "dualInput.panel.record",
+  stop: "dualInput.panel.stop",
+  play: "dualInput.panel.play",
 } as const
 
 /** A command for the server, as LSP's `workspace/executeCommand` carries it. */
@@ -44,6 +47,9 @@ export function commandFor(message: FromPanel): Command | null {
       return { command: PANEL_COMMANDS[message.kind], arguments: [message.row] }
     case "write":
     case "leave":
+    case "record":
+    case "stop":
+    case "play":
       return { command: PANEL_COMMANDS[message.kind], arguments: [] }
     case "ready":
     case "reveal":

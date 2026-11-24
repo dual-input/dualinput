@@ -21,6 +21,9 @@ const host: PanelHost = {
   tick: (row) => send({ kind: "tick", row }),
   write: () => send({ kind: "write" }),
   leave: () => send({ kind: "leave" }),
+  record: () => send({ kind: "record" }),
+  stop: () => send({ kind: "stop" }),
+  play: () => send({ kind: "play" }),
 }
 
 const root = createRoot(document.getElementById("panel") as HTMLElement)

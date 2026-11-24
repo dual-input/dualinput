@@ -63,7 +63,10 @@ pub fn register(r: &mut Registry) {
     // A panel whose socket a reload replaced leaves too, as the clients crate closes the old
     // socket, so an up handed to it counts as played.
     me.on::<ClientLeft>(PointerSync::left);
-    me.cockpit_kind(GESTURE, PointerSync::play);
+    // The profile extension's recorder records gestures and plays them back as a crewmate's. It
+    // replays only the presses, on whatever page each display shows, since nothing catches up a
+    // display (record/areas/profiles/05-the-recorder.md).
+    me.cockpit_kind(GESTURE, PointerSync::play).recorded();
 }
 
 /// The loaded profile's displays, or none while no profile is loaded.

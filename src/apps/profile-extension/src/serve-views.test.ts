@@ -10,6 +10,11 @@ export const VIEWS = {
     "body": {
       "kind": "nothing"
     },
+    "recorder": {
+      "kind": "off",
+      "lengthMs": null,
+      "why": "no-flight"
+    },
     "status": {
       "kind": "not-running"
     },
@@ -18,6 +23,11 @@ export const VIEWS = {
   "another release": {
     "body": {
       "kind": "nothing"
+    },
+    "recorder": {
+      "kind": "off",
+      "lengthMs": null,
+      "why": "no-flight"
     },
     "status": {
       "dualInput": "0.0.1",
@@ -31,6 +41,11 @@ export const VIEWS = {
     "body": {
       "kind": "nothing"
     },
+    "recorder": {
+      "kind": "off",
+      "lengthMs": null,
+      "why": "no-flight"
+    },
     "status": {
       "kind": "other-window"
     },
@@ -39,6 +54,11 @@ export const VIEWS = {
   "no session": {
     "body": {
       "kind": "nothing"
+    },
+    "recorder": {
+      "kind": "off",
+      "lengthMs": null,
+      "why": "no-flight"
     },
     "status": {
       "kind": "no-session"
@@ -49,6 +69,11 @@ export const VIEWS = {
     "body": {
       "kind": "nothing"
     },
+    "recorder": {
+      "kind": "off",
+      "lengthMs": null,
+      "why": "no-flight"
+    },
     "status": {
       "kind": "not-in-flight"
     },
@@ -57,6 +82,9 @@ export const VIEWS = {
   "in a flight": {
     "body": {
       "kind": "nothing"
+    },
+    "recorder": {
+      "kind": "empty"
     },
     "status": {
       "aircraft": "M Test",
@@ -69,6 +97,9 @@ export const VIEWS = {
   "another aircraft's file": {
     "body": {
       "kind": "nothing"
+    },
+    "recorder": {
+      "kind": "empty"
     },
     "status": {
       "aircraft": "M Test",
@@ -115,6 +146,11 @@ export const VIEWS = {
         "takes": "value"
       }
     },
+    "recorder": {
+      "kind": "off",
+      "lengthMs": null,
+      "why": "crew"
+    },
     "status": {
       "aircraft": "M Test",
       "crew": true,
@@ -147,6 +183,11 @@ export const VIEWS = {
         "seen": [],
         "takes": "event"
       }
+    },
+    "recorder": {
+      "kind": "off",
+      "lengthMs": null,
+      "why": "unsaved"
     },
     "status": {
       "aircraft": "M Test",
@@ -182,6 +223,9 @@ export const VIEWS = {
         "seen": "many",
         "takes": "steps"
       }
+    },
+    "recorder": {
+      "kind": "empty"
     },
     "status": {
       "aircraft": "M Test",
@@ -249,6 +293,98 @@ export const VIEWS = {
           }
         ]
       }
+    },
+    "recorder": {
+      "kind": "empty"
+    },
+    "status": {
+      "aircraft": "M Test",
+      "crew": false,
+      "kind": "in-flight",
+      "runs": true
+    },
+    "unpinned": false
+  } satisfies ServerView,
+  "recording": {
+    "body": {
+      "kind": "nothing"
+    },
+    "recorder": {
+      "elapsedMs": 12000,
+      "kind": "recording"
+    },
+    "status": {
+      "aircraft": "M Test",
+      "crew": false,
+      "kind": "in-flight",
+      "runs": true
+    },
+    "unpinned": false
+  } satisfies ServerView,
+  "recorded, stopped by a join": {
+    "body": {
+      "kind": "nothing"
+    },
+    "recorder": {
+      "kind": "recorded",
+      "lengthMs": 42000,
+      "stopped": {
+        "by": {
+          "kind": "joined",
+          "who": "James"
+        },
+        "what": "playback"
+      }
+    },
+    "status": {
+      "aircraft": "M Test",
+      "crew": false,
+      "kind": "in-flight",
+      "runs": true
+    },
+    "unpinned": false
+  } satisfies ServerView,
+  "restoring": {
+    "body": {
+      "kind": "nothing"
+    },
+    "recorder": {
+      "kind": "putting-back",
+      "lengthMs": 42000
+    },
+    "status": {
+      "aircraft": "M Test",
+      "crew": false,
+      "kind": "in-flight",
+      "runs": true
+    },
+    "unpinned": false
+  } satisfies ServerView,
+  "playing": {
+    "body": {
+      "kind": "nothing"
+    },
+    "recorder": {
+      "atMs": 15000,
+      "kind": "playing",
+      "lengthMs": 42000
+    },
+    "status": {
+      "aircraft": "M Test",
+      "crew": false,
+      "kind": "in-flight",
+      "runs": true
+    },
+    "unpinned": false
+  } satisfies ServerView,
+  "recorded, reloading after a save": {
+    "body": {
+      "kind": "nothing"
+    },
+    "recorder": {
+      "kind": "off",
+      "lengthMs": 42000,
+      "why": "loading"
     },
     "status": {
       "aircraft": "M Test",

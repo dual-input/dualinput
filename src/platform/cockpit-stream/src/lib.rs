@@ -60,9 +60,29 @@ pub struct CockpitSent {
     pub control: Control,
     pub names_entry: bool,
     pub number: Option<f64>,
+    /// Its kind is one the profile extension's recorder records.
+    pub recorded: bool,
+    /// The kind's own message, in postcard, which the recorder keeps to play back.
+    pub body: Vec<u8>,
 }
 
 impl Moment for CockpitSent {}
+
+/// The pretend sender's catch-up has ended, every step's writes landed and the aircraft settled,
+/// so a playback's messages can start arriving. They wait for that end, since pointer sync skips
+/// every gesture that comes during a catch-up but preflight's end's
+/// (record/areas/profiles/05-the-recorder.md, "Playback").
+pub struct PretendCaughtUp;
+
+impl Moment for PretendCaughtUp {}
+
+/// The pretend sender, from which a playback's messages arrive: one origin for the session, with
+/// a pilot ID no member holds, since a member's is a UUID v4, whose version nibble is 4, and
+/// every nibble of this one is f.
+const PRETEND: Origin = Origin {
+    pilot: [0xff; 16],
+    restart: 0,
+};
 
 /// The cockpit stream's state.
 #[derive(Default)]
@@ -107,6 +127,17 @@ struct Live {
     /// Whom the banner says this machine is catching up with, and whether a catch-up, rather
     /// than a replay, is why.
     catching_up_with: Option<(PilotId, bool)>,
+    /// A playback from the pretend sender, while one runs.
+    pretending: Option<Pretending>,
+}
+
+/// A playback from the pretend sender.
+struct Pretending {
+    /// The number its next message takes, on from the last of the pretend sender's that applied,
+    /// so two playbacks in one session never number a message the same.
+    next: u64,
+    /// The session's control value at Play, which each of its messages carries.
+    control: Control,
 }
 
 impl Live {
@@ -179,12 +210,30 @@ impl CockpitStream {
             .map_or((0, 0), |l| (l.kept.len(), l.inbox.len()))
     }
 
+    /// The slice says nothing of a playback's catch-up, which the recorder's island shows.
     fn slice(&self) -> CockpitSlice {
+        let playback = self.live.as_ref().is_some_and(
+            |l| matches!(l.catch_up, CatchUp::Taking { from, .. } if from == PRETEND.pilot),
+        );
         CockpitSlice {
-            catching_up: self.catching_up().is_some(),
+            catching_up: self.catching_up().is_some() && !playback,
             from_preflight_end: self.catching_up() == Some(true),
             replaying: !self.replaying().is_empty(),
         }
+    }
+
+    /// Whether every catch-up step can give and take, which holds for a pipeline of none.
+    pub fn steps_ready(&self) -> bool {
+        self.steps.iter().all(|s| self.ready.contains(&s.number))
+    }
+
+    /// Each catch-up step's payload as its unit's state stands, which a flying machine's answer
+    /// carries and the recorder keeps at Record.
+    pub fn payloads(&self, view: &View) -> Vec<(u16, Vec<u8>)> {
+        self.steps
+            .iter()
+            .map(|s| (s.number, (s.give)(view)))
+            .collect()
     }
 }
 
@@ -262,6 +311,7 @@ impl CockpitStream {
             askers: BTreeSet::new(),
             ask_after_replay: false,
             catching_up_with: None,
+            pretending: None,
         });
     }
 
@@ -390,7 +440,8 @@ impl CockpitStream {
         };
         network::send(cx, CHANNEL, To::Crew, &Wire::Message(message.clone()));
         if kind != CONTROL.number {
-            let entry = self.kinds.get(&kind).and_then(|k| k.entry.as_ref());
+            let registered = self.kinds.get(&kind);
+            let entry = registered.and_then(|k| k.entry.as_ref());
             cx.raise(CockpitSent {
                 kind,
                 key: message.key.clone(),
@@ -398,6 +449,8 @@ impl CockpitStream {
                 control: message.control,
                 names_entry: entry.is_some(),
                 number: entry.and_then(|f| f(&message.body)),
+                recorded: registered.is_some_and(|k| k.recorded),
+                body: message.body.clone(),
             });
         }
         // With nobody else in the session, nobody needs it replayed.
@@ -506,12 +559,22 @@ impl CockpitStream {
                         Self::commit(live, m, now, None);
                     }
                 }
-                Next::Apply(m) => {
+                Next::Apply(mut m) => {
                     let Some(kind) = self.kinds.get(&m.kind) else {
                         // A crew on one release never sends a kind this core lacks.
                         Self::commit(live, m, now, None);
                         continue;
                     };
+                    // A playback's message follows every change this cockpit made before it
+                    // applied, so it wins the conflict rule as a crewmate's newer change does,
+                    // over this machine's own sends during the playback too, such as the target
+                    // an autopilot sets as a played mode engages
+                    // (record/areas/profiles/05-the-recorder.md, "The pretend sender").
+                    if m.sender == PRETEND {
+                        let number = m.number();
+                        m.clock = live.clock.clone();
+                        m.clock.set(PRETEND, number);
+                    }
                     let id = live.next_id;
                     live.next_id += 1;
                     live.dispatched = Some((m.clone(), id));
@@ -561,6 +624,9 @@ impl CockpitStream {
                 preflight_end: true,
                 ..
             } => None,
+            // A playback's catch-up shows in the recorder's island, whose author pressed Play,
+            // and the banner would name nobody in the session.
+            CatchUp::Taking { from, .. } if *from == PRETEND.pilot => None,
             CatchUp::Asking { from, .. } | CatchUp::Taking { from, .. } => Some((*from, true)),
             CatchUp::Idle => live
                 .inbox
@@ -682,6 +748,11 @@ impl CockpitStream {
         }
         match answer {
             Answer::Done | Answer::Skipped => Self::commit(live, m, cx.now(), None),
+            // A playback that stopped while its message went to its handler leaves nothing
+            // unfinished, as `stop_pretending` leaves nothing.
+            Answer::Unfinished if m.sender == PRETEND && live.pretending.is_none() => {
+                Self::commit(live, m, cx.now(), None);
+            }
             Answer::Unfinished => live.unfinished = Some((m, id)),
         }
         me.pump(cx);
@@ -796,11 +867,6 @@ impl CockpitStream {
 
     // Catch-up.
 
-    /// Whether every catch-up step can give and take, which holds for a pipeline of none.
-    fn steps_ready(&self) -> bool {
-        self.steps.iter().all(|s| self.ready.contains(&s.number))
-    }
-
     pub(crate) fn step_ready(me: &mut CockpitStream, (step, ready): (u16, bool), cx: &mut Cx) {
         let was = me.steps_ready();
         if ready {
@@ -898,12 +964,7 @@ impl CockpitStream {
 
     fn answer(&mut self, to: PilotId, cx: &mut Cx) {
         let control = cx.read::<Session>().control().unwrap_or_default();
-        let view = cx.view();
-        let steps: Vec<(u16, Vec<u8>)> = self
-            .steps
-            .iter()
-            .map(|s| (s.number, (s.give)(&view)))
-            .collect();
+        let steps = self.payloads(&cx.view());
         let Some(live) = self.live.as_ref() else {
             return;
         };
@@ -956,22 +1017,37 @@ impl CockpitStream {
         }
         let me = live.me;
         live.clock.take(&clock, me);
+        tracing::info!("this machine takes the flying machine's catch-up");
+        self.take_catch_up(from, preflight_end, &steps, cx);
+    }
+
+    /// Hands each step its payload, a step with none counting as made and done at once, and
+    /// runs the catch-up until every step is done, for a flying machine's answer and for a
+    /// playback's alike.
+    fn take_catch_up(
+        &mut self,
+        from: PilotId,
+        preflight_end: bool,
+        payloads: &[(u16, Vec<u8>)],
+        cx: &mut Cx,
+    ) {
         let mut made = BTreeSet::new();
         for step in &self.steps {
-            match steps.iter().find(|(n, _)| *n == step.number) {
+            match payloads.iter().find(|(n, _)| *n == step.number) {
                 Some((_, payload)) => cx.call_handler(&step.take, payload.clone()),
                 None => {
                     made.insert(step.number);
                 }
             }
         }
-        live.catch_up = CatchUp::Taking {
-            from,
-            preflight_end,
-            done: made.clone(),
-            made,
-        };
-        tracing::info!("this machine takes the flying machine's catch-up");
+        if let Some(live) = self.live.as_mut() {
+            live.catch_up = CatchUp::Taking {
+                from,
+                preflight_end,
+                done: made.clone(),
+                made,
+            };
+        }
         self.steps_progress(cx);
     }
 
@@ -996,13 +1072,92 @@ impl CockpitStream {
     fn steps_progress(&mut self, cx: &mut Cx) {
         let all: BTreeSet<u16> = self.steps.iter().map(|s| s.number).collect();
         if let Some(live) = self.live.as_mut()
-            && let CatchUp::Taking { done, .. } = &live.catch_up
+            && let CatchUp::Taking { from, done, .. } = &live.catch_up
             && all.is_subset(done)
         {
+            let playback = *from == PRETEND.pilot;
             tracing::info!("this machine's catch-up ended");
             live.catch_up = CatchUp::Idle;
+            if playback && live.pretending.is_some() {
+                cx.raise(PretendCaughtUp);
+            }
         }
         self.pump(cx);
+    }
+
+    // The pretend sender.
+
+    /// A playback starts: the stream takes the recording's payloads as a catch-up from the
+    /// pretend sender, as `answered_catch_up` takes a flying machine's, with no clock, since the
+    /// pretend sender's messages carry their own.
+    pub(crate) fn pretend(me: &mut CockpitStream, payloads: Vec<(u16, Vec<u8>)>, cx: &mut Cx) {
+        let control = cx.read::<Session>().control().unwrap_or_default();
+        let Some(live) = me.live.as_mut() else {
+            return;
+        };
+        live.pretending = Some(Pretending {
+            next: live.clock.get(PRETEND) + 1,
+            control,
+        });
+        tracing::info!("a playback takes its recording's catch-up");
+        me.take_catch_up(PRETEND.pilot, false, &payloads, cx);
+    }
+
+    /// The pretend sender's next message, numbered on from its last, into the inbox, where it
+    /// waits and applies as a crewmate's does.
+    pub(crate) fn pretend_arrived(
+        me: &mut CockpitStream,
+        (kind, key, body, gap): (u16, String, Vec<u8>, u32),
+        cx: &mut Cx,
+    ) {
+        let Some(live) = me.live.as_mut() else {
+            return;
+        };
+        let Some(pretending) = live.pretending.as_mut() else {
+            return;
+        };
+        let mut clock = VectorClock::default();
+        clock.set(PRETEND, pretending.next);
+        pretending.next += 1;
+        let message = CockpitMessage {
+            sender: PRETEND,
+            clock,
+            control: pretending.control,
+            gap,
+            kind,
+            key,
+            body,
+        };
+        live.inbox.arrived(PRETEND, message);
+        me.pump(cx);
+    }
+
+    /// A playback ends. A message of its still stepping counts as applied at once, rather than
+    /// at its last step, so a crewmate who joins after it takes a clock that covers every
+    /// pretend message, and never waits for one.
+    pub(crate) fn stop_pretending(me: &mut CockpitStream, _: (), cx: &mut Cx) {
+        let Some(live) = me.live.as_mut() else {
+            return;
+        };
+        if live.pretending.take().is_none() {
+            return;
+        }
+        if live
+            .unfinished
+            .as_ref()
+            .is_some_and(|(m, _)| m.sender == PRETEND)
+            && let Some((m, _)) = live.unfinished.take()
+        {
+            Self::commit(live, m, cx.now(), None);
+        }
+        // After the commit, which notes when the message applied, so the next playback's first
+        // message waits no gap from this one's.
+        live.inbox.drop_from(PRETEND);
+        if matches!(live.catch_up, CatchUp::Taking { from, .. } if from == PRETEND.pilot) {
+            live.stop_catch_up(cx);
+        }
+        tracing::info!("the pretend sender stopped");
+        me.pump(cx);
     }
 
     // The crew.

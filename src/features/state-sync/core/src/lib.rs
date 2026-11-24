@@ -92,14 +92,19 @@ pub fn register(r: &mut Registry) {
         .on_variables(StateSync::on_variables)
         .client_state(NAME, StateSync::slice)
         .catch_up_step(STATE, StateSync::give, StateSync::take);
+    // The profile extension's recorder records all three, so a recording holds every change and
+    // firing a crewmate would receive.
     me.cockpit_kind(CHANGE, StateSync::apply)
         .hold_newest()
+        .recorded()
         .entry(Value::number);
     me.cockpit_kind(PF_CHANGE, StateSync::apply)
         .hold_newest()
         .collapse_in_replay()
+        .recorded()
         .entry(Value::number);
     me.cockpit_kind(FIRED, StateSync::fire)
+        .recorded()
         .entry(|value| value.as_ref().and_then(Value::number));
 }
 

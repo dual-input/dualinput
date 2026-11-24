@@ -8,6 +8,12 @@
 //! Which routine runs follows the session: `Lead` while this pilot holds control and is in
 //! the flight, and `Follow` while this pilot is in the flight and another holds control.
 //!
+//! The profile extension's recorder, the platform unit `tape`, replays the aircraft's path through
+//! the same routines, so control stays with the author. While a recording runs, this crate hands
+//! `tape` each sample it sends, and while a playback runs, it runs `Follow` in place of `Lead`,
+//! fed the recording's samples (record/areas/profiles/05-the-recorder.md, "Flying the recorded
+//! path").
+//!
 //! It loads no profile, so it flies a session whose aircraft has none, and its routines run on
 //! through a profile's unload, as a test session's reload in flight makes one, since only a unit
 //! marked `ends_with_profile` has its routines ended there (record/areas/architecture/log.md,
@@ -23,6 +29,7 @@ use network::{NetUnit, Network, Sender, Slewed, To};
 
 use session::{ControlPassed, FlightChanged, Session, SessionEnded};
 use sim_service::{SimAwareness, SimChanged, SimCx, SimEvent, SimUnit};
+use tape::{PlaybackChanged, Played, Tape, TapeCx, TapeUnit};
 
 /// How far behind the samples `Follow` draws the aircraft, in µs, the delay of FS Copilot's
 /// module (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.h`, `k_delay_sec`).
@@ -61,6 +68,8 @@ enum Running {
     },
     /// This pilot follows another.
     Follow(Following),
+    /// A recording plays back, and `Follow` draws its samples.
+    Replay,
 }
 
 /// What a following core keeps since `Follow` started.
@@ -93,14 +102,10 @@ impl Following {
         self.newest = sample.at;
         // The stamp moves from the pilot flying's counter onto this core's, the one `Follow`
         // draws on.
-        Some(FollowSlot {
-            delay: DELAY,
-            has_sample: 1,
-            sample: Sample {
-                at: sample.at.saturating_add_signed(-offset),
-                snapshot: sample.snapshot,
-            },
-        })
+        Some(fed(Sample {
+            at: sample.at.saturating_add_signed(-offset),
+            snapshot: sample.snapshot,
+        }))
     }
 }
 
@@ -110,28 +115,36 @@ enum Wanted {
     Neither,
     Lead,
     Follow(PilotId),
+    Replay,
 }
 
-/// Registers flight-model sync.
+/// Registers flight-model sync, after `tape`, which its samples register with.
 pub fn register(r: &mut Registry) {
     r.unit::<FlightModel>("flight-model")
         .channel(wire::SAMPLES, FlightModel::on_sample)
+        .taped(wire::SAMPLES, FlightModel::played)
         .on_sim(FlightModel::on_sim)
         .on::<FlightChanged>(|me, _, cx| me.settle(cx))
         .on::<ControlPassed>(|me, _, cx| me.settle(cx))
         .on::<SessionEnded>(|me, _, cx| me.settle(cx))
+        .on::<PlaybackChanged>(|me, _, cx| me.settle(cx))
         .on::<SimChanged>(FlightModel::sim_changed);
 }
 
 impl FlightModel {
-    /// Ends the routine this core runs and starts the one the session calls for, when the two
-    /// differ. A change of pilot flying on a machine that goes on following differs too, so
-    /// `Follow` starts new, with a new buffer for the new pilot flying's samples.
+    /// Ends the routine this core runs and starts the one the session and the recorder call for,
+    /// when the two differ. A change of pilot flying on a machine that goes on following differs
+    /// too, so `Follow` starts new, with a new buffer for the new pilot flying's samples. A
+    /// playback runs only alone, while this pilot holds control, and `Follow` takes the
+    /// recording's samples in place of `Lead`.
     fn settle(&mut self, cx: &mut Cx) {
         let session = cx.read::<Session>();
+        let playing = cx.read::<Tape>().playing();
         let wanted = match (session.me(), session.pf()) {
             (Some(me), Some(pf)) if session.in_flight(&me) => {
-                if pf == me {
+                if playing {
+                    Wanted::Replay
+                } else if pf == me {
                     Wanted::Lead
                 } else {
                     Wanted::Follow(pf)
@@ -143,6 +156,7 @@ impl FlightModel {
             Running::Neither => Wanted::Neither,
             Running::Lead { .. } => Wanted::Lead,
             Running::Follow(following) => Wanted::Follow(following.pf),
+            Running::Replay => Wanted::Replay,
         };
         if wanted == now {
             return;
@@ -155,7 +169,7 @@ impl FlightModel {
                 }
                 cx.module().end(wire::LEAD);
             }
-            Running::Follow(_) => cx.module().end(wire::FOLLOW),
+            Running::Follow(_) | Running::Replay => cx.module().end(wire::FOLLOW),
         }
         match wanted {
             Wanted::Neither => tracing::info!("flight-model sync runs no routine"),
@@ -174,12 +188,18 @@ impl FlightModel {
                     pf = messages::hex(&pf),
                     "another pilot flies, so flight-model sync starts Follow"
                 );
-                start_follow(cx);
+                start_follow(cx, None);
                 self.running = Running::Follow(Following {
                     pf,
                     newest: 0,
                     offset: Slewed::default(),
                 });
+            }
+            Wanted::Replay => {
+                tracing::info!("a recording plays back, so flight-model sync starts Follow on it");
+                let first = cx.read::<Tape>().first(wire::SAMPLES);
+                start_follow(cx, first.map(|first| put_back(first, cx.now())));
+                self.running = Running::Replay;
             }
         }
     }
@@ -205,7 +225,7 @@ impl FlightModel {
             return;
         }
         *last = Some((sample, cx.now()));
-        network::send_one_off(cx, wire::SAMPLES, To::Crew, &sample);
+        send(cx, &sample);
     }
 
     /// The flying sim paused or went on, which starts or stops the samples sent again.
@@ -249,7 +269,7 @@ impl FlightModel {
             return;
         }
         sample.at += PERIOD;
-        network::send_one_off(cx, wire::SAMPLES, To::Crew, sample);
+        send(cx, sample);
     }
 
     /// A sample from another core, which is dropped while this core doesn't run `Follow`, so
@@ -263,6 +283,20 @@ impl FlightModel {
             cx.module().feed(wire::FOLLOW, &slot);
         }
     }
+
+    /// A sample of the recording at its time in a playback, which `Follow` draws.
+    fn played(me: &mut FlightModel, played: Played<Sample>, cx: &mut Cx) {
+        if matches!(me.running, Running::Replay) {
+            cx.module().feed(wire::FOLLOW, &fed(replayed(played)));
+        }
+    }
+}
+
+/// Sends a sample to the crew, and hands it to the recorder, which keeps it while a recording
+/// runs.
+fn send(cx: &Cx, sample: &Sample) {
+    network::send_one_off(cx, wire::SAMPLES, To::Crew, sample);
+    cx.tape().take(wire::SAMPLES, sample);
 }
 
 /// Feeds `Lead` and asks for its reports, which a second call moves to the new handle.
@@ -272,17 +306,55 @@ fn start_lead(cx: &Cx) -> Handle {
     reports
 }
 
-/// Feeds `Follow` with no sample, so the aircraft freezes before the first one arrives.
-fn start_follow(cx: &Cx) {
-    let slot = FollowSlot {
-        delay: DELAY,
-        ..FollowSlot::default()
-    };
+/// Feeds `Follow` the sample to start on, or none, so the aircraft freezes before the first one
+/// arrives.
+fn start_follow(cx: &Cx, sample: Option<Sample>) {
+    let slot = sample.map_or(
+        FollowSlot {
+            delay: DELAY,
+            ..FollowSlot::default()
+        },
+        fed,
+    );
     cx.module().feed(wire::FOLLOW, &slot);
+}
+
+/// `Follow`'s feed of one sample.
+fn fed(sample: Sample) -> FollowSlot {
+    FollowSlot {
+        delay: DELAY,
+        has_sample: 1,
+        sample,
+    }
+}
+
+/// The recording's first sample, which puts the aircraft back where it stood at Record as `Follow`
+/// starts on it at `now`. The first frame that places the aircraft writes a sample old enough to
+/// draw at once, however far the aircraft stands from it, since no frame has written a pose to
+/// ease from. That frame's time is at least `now`, often exactly, since the feed's header carries
+/// `now`, and `Follow` draws only from a sample strictly older than its time less the delay, so
+/// the stamp goes a period further back than the delay.
+fn put_back(first: Sample, now: u64) -> Sample {
+    Sample {
+        at: now.saturating_sub(DELAY + PERIOD),
+        ..first
+    }
+}
+
+/// A recorded sample on the playback's timeline: it came from this core, so its stamp is on this
+/// core's counter already, and moves on by how far the playback lies after the recording, with no
+/// clock offset.
+fn replayed(played: Played<Sample>) -> Sample {
+    Sample {
+        at: played.body.at.saturating_add(played.shift),
+        ..played.body
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use messages::flight_model::Snapshot;
+
     use super::*;
 
     const PF: PilotId = [1; 16];
@@ -332,5 +404,31 @@ mod tests {
             .take(PF, &sample(10_000_000), Some(-3_000_000), 0)
             .unwrap();
         assert_eq!(slot.sample.at, 13_000_000);
+    }
+
+    /// The recorder's case: a played sample's stamp moves on by the playback's shift, and the
+    /// first sample is stamped a delay and a period before Play, so `Follow`'s first frame finds
+    /// it old enough to draw (record/areas/profiles/05-the-recorder.md, "Cases").
+    #[test]
+    fn a_played_sample_moves_by_the_shift_and_the_first_is_old_enough_to_draw_at_play() {
+        let recorded = Sample {
+            at: 5_000_000,
+            snapshot: Snapshot {
+                lat: 0.8,
+                ..Snapshot::default()
+            },
+        };
+        // The playback's messages started 60s after Record.
+        let played = replayed(Played {
+            body: recorded,
+            shift: 60_000_000,
+        });
+        assert_eq!(played.at, 65_000_000);
+        assert_eq!(played.snapshot, recorded.snapshot);
+        // Play pressed at 64s: `Follow` draws 400ms behind, and the stamp is 50ms further back.
+        let first = put_back(recorded, 64_000_000);
+        assert_eq!(first.at, 63_550_000);
+        assert_eq!(first.snapshot, recorded.snapshot);
+        assert!(first.at < 64_000_000 - DELAY);
     }
 }

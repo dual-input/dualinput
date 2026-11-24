@@ -20,6 +20,7 @@ use messages::authoring::{
 };
 use messages::backend::{Older, older};
 use messages::clients::{CORE, CoreSlice, FromClient, Hello, ToClient, component};
+use messages::tape::{self as tape, TapeOff, TapeSlice, TapeState, TapeStopped};
 use profile_language::{Pos, Workspace, closure};
 use serde::Serialize;
 use serde_json::{Value, json};
@@ -29,8 +30,9 @@ use super::convert::{Lines, path_of, uri_of};
 use super::displays;
 use super::facts::{self, EntryKind, Facts};
 use super::view::{
-    Body, LineBox, PickerView, Preview, Refusal, Revert, RunView, Seen, ServerView, Status, Takes,
-    Update, action, box_text, given, reading, shown, typed,
+    Body, LineBox, PickerView, Preview, Recorder, RecorderOff, Refusal, Revert, RunView, Seen,
+    ServerView, Status, Stopped, StoppedBy, Stopping, Takes, Update, action, box_text, given,
+    reading, shown, typed,
 };
 use super::worker::{Bundle, Failure, Job};
 use super::{PAUSE, Server, full, locate};
@@ -55,6 +57,8 @@ pub(crate) struct Sim {
     window: String,
     socket: Option<Socket>,
     slice: Option<AuthoringSlice>,
+    /// The recorder's slice, which the core's platform unit `tape` keeps.
+    tape: Option<TapeSlice>,
     /// Each command sent on this socket and not yet answered, by its ID.
     asked: BTreeMap<u32, &'static str>,
     next: u32,
@@ -147,6 +151,7 @@ impl Sim {
             window,
             socket: None,
             slice: None,
+            tape: None,
             asked: BTreeMap::new(),
             next: 0,
             facts: BTreeMap::new(),
@@ -240,7 +245,7 @@ impl Server {
                     instruments: Vec::new(),
                 }));
                 self.up(FromClient::Watch {
-                    slices: vec![wire::NAME.into(), CORE.into()],
+                    slices: vec![wire::NAME.into(), CORE.into(), tape::NAME.into()],
                 });
             }
             Down::Heard(ToClient::State { slice, value }) if slice == CORE => {
@@ -286,6 +291,15 @@ impl Server {
                     Err(_) => {}
                 }
             }
+            Down::Heard(ToClient::State { slice, value }) if slice == tape::NAME => {
+                match serde_json::from_value::<TapeSlice>(value) {
+                    Ok(next) => self.sim.tape = Some(next),
+                    Err(e) if self.sim.ready() => {
+                        eprintln!("Dual Input's slice `tape` didn't read: {e}");
+                    }
+                    Err(_) => {}
+                }
+            }
             Down::Heard(ToClient::Answer { id, error }) => {
                 let name = self.sim.asked.remove(&id).unwrap_or("a command");
                 if let Some(error) = error {
@@ -296,6 +310,7 @@ impl Server {
             Down::Closed => {
                 self.sim.socket = None;
                 self.sim.slice = None;
+                self.sim.tape = None;
                 self.sim.asked.clear();
             }
         }
@@ -601,12 +616,17 @@ impl Server {
     fn show_view(&mut self) {
         let runs = self.runs();
         let file = self.panel_file().map(Path::to_path_buf);
+        let written = self
+            .program()
+            .and_then(|p| self.written.get(&full(&p.root, &p.rel)));
         let view = panel_view(&Inputs {
             socket: self.sim.socket.as_ref().map(|s| s.core.as_ref()),
             slice: self.sim.slice.as_ref(),
+            tape: self.sim.tape.as_ref(),
             window: &self.sim.window,
             runs,
             built: self.sim.built.as_ref(),
+            written: written.map(String::as_str),
             panel: &self.sim.panel,
             facts: file.as_ref().and_then(|f| self.sim.facts.get(f)),
             rel: file.as_ref().and_then(|f| locate(f)).map(|(_, rel)| rel),
@@ -777,6 +797,9 @@ impl Server {
                 self.sim.panel = PanelState::Nothing;
                 self.send_panel();
             }
+            "dualInput.panel.record" => self.command(tape::command::RECORD, &Value::Null),
+            "dualInput.panel.stop" => self.command(tape::command::STOP, &Value::Null),
+            "dualInput.panel.play" => self.command(tape::command::PLAY, &Value::Null),
             other => return Err(format!("{other} isn't a command this server runs")),
         }
         self.show_sim();
@@ -900,6 +923,10 @@ pub(crate) struct Inputs<'a> {
     /// Whether the panel's file is the session's profile or a module it imports.
     pub(crate) runs: bool,
     pub(crate) built: Option<&'a Result<Bundle, Failure>>,
+    /// The recorder's slice.
+    pub(crate) tape: Option<&'a TapeSlice>,
+    /// The hash of the session's profile's bundle in the local folder, as last read.
+    pub(crate) written: Option<&'a str>,
     pub(crate) panel: &'a PanelState,
     /// The panel's file's facts and its path from `profiles/`.
     pub(crate) facts: Option<&'a Facts>,
@@ -934,10 +961,17 @@ pub(crate) fn panel_view(i: &Inputs) -> ServerView {
         },
     };
     let shows = matches!(status, Status::InFlight { runs: true, .. });
+    let differs = matches!((i.built, &s.profile), (Some(Ok(b)), Some(p)) if b.hash != p.hash);
     // A Run of unsaved edits runs on this PC alone, since each crewmate's state sync writes with
     // the bundle the session pinned.
-    let unpinned =
-        s.crew && matches!((i.built, &s.profile), (Some(Ok(b)), Some(p)) if b.hash != p.hash);
+    let unpinned = s.crew && differs;
+    // A bundle the local folder holds that the session hasn't loaded yet is a save on its way,
+    // which the recorder waits for in silence, rather than asking for a save just made. Text that
+    // doesn't build isn't the pinned bundle either, and counting it as unsaved keeps the
+    // recorder's line from coming and going as the text breaks and mends while you type.
+    let saving = matches!((i.built, i.written), (Some(Ok(b)), Some(w)) if b.hash == w);
+    let unsaved = (differs && !saving) || matches!(i.built, Some(Err(_)));
+    let recorder = recorder(&status, i.tape, unsaved, differs && saving);
     let body = match (shows, i.panel, i.facts) {
         (true, PanelState::Run { key, field, .. }, Some(facts)) => {
             run_view(i, slice, facts, key, field).map_or(Body::Nothing, |run| Body::Run { run })
@@ -959,6 +993,67 @@ pub(crate) fn panel_view(i: &Inputs) -> ServerView {
         status,
         unpinned,
         body,
+        recorder,
+    }
+}
+
+/// The recorder's island: what `tape` runs, or else why it can't act, which is the core's to say
+/// but for the open text being unsaved, which only `serve` can tell, or loading, as `saving` says
+/// of a save the session hasn't loaded yet (record/areas/profiles/05-the-recorder.md, "When the
+/// recorder works").
+fn recorder(status: &Status, tape: Option<&TapeSlice>, unsaved: bool, saving: bool) -> Recorder {
+    let length = tape.and_then(|t| match t.state {
+        TapeState::Recorded { length_ms } => Some(length_ms),
+        _ => None,
+    });
+    let off = |why| Recorder::Off {
+        why,
+        length_ms: length,
+    };
+    let Status::InFlight { crew, .. } = status else {
+        return off(RecorderOff::NoFlight);
+    };
+    if let Some(t) = tape {
+        match t.state {
+            TapeState::Recording { elapsed_ms } => return Recorder::Recording { elapsed_ms },
+            TapeState::Restoring { length_ms } => return Recorder::PuttingBack { length_ms },
+            TapeState::Playing { at_ms, length_ms } => {
+                return Recorder::Playing { at_ms, length_ms };
+            }
+            TapeState::Empty | TapeState::Recorded { .. } => {}
+        }
+    }
+    let why = match tape.and_then(|t| t.off) {
+        _ if *crew => Some(RecorderOff::Crew),
+        // The status line says "In a flight" from the flight's start, so under it the core's "no
+        // flight" can only be preflight, which the island says itself.
+        Some(TapeOff::NoFlight) => Some(RecorderOff::Preflight),
+        Some(TapeOff::Crew) => Some(RecorderOff::Crew),
+        Some(TapeOff::Loading) => Some(RecorderOff::Loading),
+        None if unsaved => Some(RecorderOff::Unsaved),
+        None if saving => Some(RecorderOff::Loading),
+        None => None,
+    };
+    match (why, length, tape) {
+        (Some(why), ..) => off(why),
+        (None, Some(length_ms), Some(t)) => Recorder::Recorded {
+            length_ms,
+            stopped: t.stopped.as_ref().map(stopped),
+        },
+        _ => Recorder::Empty,
+    }
+}
+
+fn stopped(s: &TapeStopped) -> Stopped {
+    Stopped {
+        what: match s.what {
+            tape::Stopping::Recording => Stopping::Recording,
+            tape::Stopping::Playback => Stopping::Playback,
+        },
+        by: match &s.by {
+            tape::StoppedBy::Reload => StoppedBy::Reload,
+            tape::StoppedBy::Joined { name } => StoppedBy::Joined { who: name.clone() },
+        },
     }
 }
 

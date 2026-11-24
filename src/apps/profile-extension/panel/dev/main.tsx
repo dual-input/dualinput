@@ -10,7 +10,7 @@ import { Button, Root } from "@dualinput/ui"
 
 import { Panel } from "../src/panel.tsx"
 import type { Palette } from "../src/view.ts"
-import { SCENES, standIn } from "./stand-in.ts"
+import { SCENES, sceneShown, standIn } from "./stand-in.ts"
 import type { Scene } from "./stand-in.ts"
 
 /** The side bar's widths to look at: about the 300px it opens at, and narrower and wider, since an author can drag its edge. */
@@ -64,6 +64,7 @@ function Page() {
     ),
   )
   const show = (next: string) => {
+    sceneShown()
     setName(next)
     setScene(SCENES[next]!)
     setHeard([])

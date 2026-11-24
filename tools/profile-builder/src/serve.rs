@@ -63,7 +63,7 @@ const PAUSE: Duration = Duration::from_millis(300);
 /// The extension registers its own under other IDs, as src/apps/profile-extension/src/
 /// extension.ts says, and `PANEL_COMMANDS` in src/apps/profile-extension/src/bridge.ts names the
 /// panel's, so change all three together.
-const COMMANDS: [&str; 12] = [
+const COMMANDS: [&str; 15] = [
     "dualInput.build",
     "dualInput.removeLocalBundle",
     "dualInput.importers",
@@ -76,6 +76,9 @@ const COMMANDS: [&str; 12] = [
     "dualInput.panel.tick",
     "dualInput.panel.write",
     "dualInput.panel.leave",
+    "dualInput.panel.record",
+    "dualInput.panel.stop",
+    "dualInput.panel.play",
 ];
 
 pub(crate) fn serve() -> Result<(), String> {
@@ -340,6 +343,10 @@ pub(crate) struct Server {
     next_build: u64,
     /// Each profile's last build's count of errors.
     errors: BTreeMap<PathBuf, usize>,
+    /// The hash of each profile's bundle in the local folder, as last read. When the open text's
+    /// bundle is that one and the session still flies another, the author has saved and the
+    /// session is loading the save, so the recorder waits rather than asking for a save.
+    written: BTreeMap<PathBuf, String>,
     /// The files whose diagnostics were last published with any in them.
     published: BTreeSet<PathBuf>,
     sim: Sim,
@@ -384,6 +391,7 @@ impl Server {
             builds: BTreeMap::new(),
             next_build: 0,
             errors: BTreeMap::new(),
+            written: BTreeMap::new(),
             published: BTreeSet::new(),
             sim,
         }
@@ -649,12 +657,16 @@ impl Server {
     }
 
     fn notify_build(
-        &self,
+        &mut self,
         profile: &Path,
         trigger: &Path,
         held: Option<&worker::Held>,
         errors: usize,
     ) {
+        match held {
+            Some(h) => self.written.insert(profile.to_path_buf(), h.hash.clone()),
+            None => self.written.remove(profile),
+        };
         self.notify(
             "dualInput/build",
             json!({
@@ -945,6 +957,9 @@ impl Server {
                 if let Some(Some(request)) = self.builds.remove(&id) {
                     self.send(Response::new_ok(request, Value::Null).into());
                 }
+                // The bundle just written may be the open text's, which turns the recorder's
+                // "save first" into waiting for the session to load it.
+                self.show_sim();
             }
             Done::Bundled { texts, bundle } => self.bundled(texts, bundle),
         }

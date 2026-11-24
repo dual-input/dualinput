@@ -33,6 +33,83 @@ pub(crate) struct ServerView {
     pub(crate) status: Status,
     pub(crate) unpinned: bool,
     pub(crate) body: Body,
+    pub(crate) recorder: Recorder,
+}
+
+/// The recorder's island (record/areas/profiles/05-the-recorder.md, "The recorder's island"),
+/// from the slice `tape` and the saved check.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(tag = "kind", rename_all = "kebab-case")]
+pub(crate) enum Recorder {
+    /// Nothing recorded, and Record can start.
+    Empty,
+    Recording {
+        #[serde(rename = "elapsedMs")]
+        elapsed_ms: u64,
+    },
+    Recorded {
+        #[serde(rename = "lengthMs")]
+        length_ms: u64,
+        stopped: Option<Stopped>,
+    },
+    /// Playback's catch-up, which restores the cockpit.
+    PuttingBack {
+        #[serde(rename = "lengthMs")]
+        length_ms: u64,
+    },
+    Playing {
+        #[serde(rename = "atMs")]
+        at_ms: u64,
+        #[serde(rename = "lengthMs")]
+        length_ms: u64,
+    },
+    /// Record and Play can't act, and why, with the recording's length when there is one.
+    Off {
+        why: RecorderOff,
+        #[serde(rename = "lengthMs")]
+        length_ms: Option<u64>,
+    },
+}
+
+/// Why the recorder's buttons are off, which the island says only where the status line doesn't
+/// (record/areas/profiles/05-the-recorder.md, "When the recorder works").
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub(crate) enum RecorderOff {
+    NoFlight,
+    /// In the flight before preflight ends, when the status line already says "In a flight" and
+    /// the cockpit stream sends nothing yet.
+    Preflight,
+    /// Playback's pretend sender would hold back a crewmate's cockpit stream.
+    Crew,
+    /// The profile is loading, as after a save, until the session flies it.
+    Loading,
+    /// Playback runs the bundle the session pinned, so the open text has to be it.
+    Unsaved,
+}
+
+/// What stopped a recording or a playback other than Stop.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub(crate) struct Stopped {
+    pub(crate) what: Stopping,
+    pub(crate) by: StoppedBy,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub(crate) enum Stopping {
+    Recording,
+    Playback,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(tag = "kind", rename_all = "kebab-case")]
+pub(crate) enum StoppedBy {
+    /// The profile reloaded, as a save reloads it.
+    Reload,
+    Joined {
+        who: String,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize)]

@@ -1118,6 +1118,7 @@ dependencies = [
  "state-sync",
  "sync-engine",
  "take-control",
+ "tape",
  "tokio",
  "tokio-websockets",
  "tracing",
@@ -1326,6 +1327,7 @@ dependencies = [
  "network",
  "session",
  "sim-service",
+ "tape",
  "tracing",
 ]
 
@@ -4628,6 +4630,22 @@ dependencies = [
  "kernel",
  "messages",
  "network",
+ "serde_json",
+ "session",
+ "tracing",
+]
+
+[[package]]
+name = "tape"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "cockpit-stream",
+ "kernel",
+ "messages",
+ "postcard",
+ "profile-loader",
+ "serde",
  "serde_json",
  "session",
  "tracing",

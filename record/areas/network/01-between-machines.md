@@ -16,6 +16,11 @@ Decides:     The topology, the transport, the way through home routers, the rela
 > Since 2026-11-24, in [a session file after a long outage](#a-session-file-after-a-long-outage), a core whose file holds no crew has nobody to dial, so it posts its own entry to the backend as it opens, which lists it again and renews it every 10 minutes, and asks the backend about its code 10s later, as when nobody answers ([session log](../session/log.md#2026-11-24-a-core-that-restarted-alone-in-its-session-never-learned-who-flies-so-it-takes-control-again-as-a-host-does); user, 2026-11-24).
 > With no other member, its code still holds the session while the backend finds it at all, its own entry included, and the core deletes the file once the backend finds no session under the code.
 
+> **Note**
+> In [leaving](#leaving), a PM whose PF's close arrives before the new control value can take control with no warning only once preflight has ended ([session log](../session/log.md#2026-11-24-two-cores-that-both-restarted-never-learned-who-flies-so-each-makes-control-itself-and-a-pfs-leave-in-preflight-whose-close-outruns-its-pass-is-a-known-limit); user, 2026-11-24).
+> A PF who leaves during preflight leaves that PM holding a control value that names a pilot who has gone, and the session crate refuses take-control until preflight ends, which only the PF's core can end, so preflight never ends.
+> We accept it as a known limit, since the flight hasn't begun and the PM is alone in the session: they leave and host again.
+
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.
 Four models carry the rest:

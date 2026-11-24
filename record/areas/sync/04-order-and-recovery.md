@@ -18,6 +18,11 @@ Decides:     What comes back after a link, a core, a sim, or a PC goes down; how
 > Since 2026-11-24, [a core that restarts](#a-core-that-restarts) with no crew in its session file, the session's only member, takes control again as a host does, rather than passing it on and catching up, since it has nobody to pass control to and no flying machine to catch up from ([session log](../session/log.md#2026-11-24-a-core-that-restarted-alone-in-its-session-never-learned-who-flies-so-it-takes-control-again-as-a-host-does); user, 2026-11-24).
 > So "a PF whose core crashes loses control" holds for a PF with a crew, and [known limits](#known-limits) gain one: such a core is the flying machine, so each shadow value starts at its `default` rather than the flying machine's, and is right only if its pilot left that control where the aircraft loaded with it, and a joiner's catch-up later copies it.
 
+> **Note**
+> Since 2026-11-24, when both cores of a crew restart, neither holds the control value, so each [core that restarts](#a-core-that-restarts) makes one naming its own pilot rather than passing control on, and the value naming the lower pilot ID wins ([session log](../session/log.md#2026-11-24-two-cores-that-both-restarted-never-learned-who-flies-so-each-makes-control-itself-and-a-pfs-leave-in-preflight-whose-close-outruns-its-pass-is-a-known-limit); user, 2026-11-24).
+> That pilot flies though their core came back from a crash, and the other machine catches up from theirs, so the aircraft that jumps is the other pilot's, whichever of the two flew before.
+> Their core is a restarted flying machine, as a core back alone is, so the same known limit holds for its shadow values.
+
 What comes back depends on what went down.
 A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.
 A pilot whose sim, core, or PC went down comes back as a late joiner, with the profile's entries caught up from the flying machine (user, 2026-10-11 and 2026-10-12).

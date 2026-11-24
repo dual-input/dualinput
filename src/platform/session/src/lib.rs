@@ -186,7 +186,8 @@ pub(crate) struct Held {
     pub(crate) ended_seen: bool,
     /// A core that started from a session file holding a crew passes control it held once the
     /// crew's first message has passed, since only then does it know the current control value
-    /// (record/areas/sync/04-order-and-recovery.md, "A core that restarts").
+    /// (record/areas/sync/04-order-and-recovery.md, "A core that restarts"), or makes control
+    /// itself when that message carries none.
     pub(crate) restarted: bool,
     /// Whether the session file holds what this core last wrote, which `network::open` waits
     /// for.
@@ -591,8 +592,9 @@ impl Session {
 
     /// Keys from another core, its first message's or a change after.
     fn keys_in(me: &mut Session, from: network::Sender, keys: Keys, cx: &mut Cx) {
-        if let Some(control) = keys.control {
-            control::arrived(me, control, cx);
+        match keys.control {
+            Some(control) => control::arrived(me, control, cx),
+            None => control::make_after_restart(me, cx),
         }
         let Some(held) = &mut me.held else {
             return;

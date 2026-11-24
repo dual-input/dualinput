@@ -2,6 +2,61 @@
 
 What we found building and testing the session, newest entry first.
 
+## 2026-11-24: Two cores that both restarted never learned who flies, so each makes control itself, and a PF's leave in preflight whose close outruns its pass is a known limit
+
+**Asked:** the code review of [the fix for a core back alone](#2026-11-24-a-core-that-restarted-alone-in-its-session-never-learned-who-flies-so-it-takes-control-again-as-a-host-does) found two more ways a session ends up with nobody holding control: what does each do, and how should it come out?
+
+**Expected:** that two cores restarting at once would stall as a core back alone did, since neither would hold a control value to send, and that a PF's leave in preflight would strand the other pilot only when its close outran its pass.
+
+**Found:** when both cores restart, reading the session crate gave the stall:
+
+- Each session file holds the other pilot as crew, so each core comes back flagged as restarted and holding no control value (`src/platform/session/src/joining.rs`, `start_with`).
+- A connection's first message carries the control value its sender holds, here none (`src/platform/session/src/lib.rs`, `all_keys`), so the receiver takes none (`keys_in`), and the pass after a restart waits for one (`src/platform/session/src/control.rs`, `pass_after_restart`).
+- With no pilot flying, nobody sets the session's aircraft, so nobody is in the flight, and the session crate's guard refuses take-control (`own_guard`); with both links up, nothing times out.
+
+On the bench, a new case in `node tools/bench.ts session` showed it: two bench cores in the Baron 58P in the air, preflight over, were both killed and started again over their data folders.
+They linked again within 0.2s of the first restart, and 30s later James's slice still named no pilot flying, and neither core had set the session's aircraft.
+
+When a PF leaves during preflight, reading the code gave the second case, which we didn't run:
+
+- The PF's core passes control as an ordinary handover and closes 1s later (`joining.rs`, `leave`).
+- If the close reaches the other member first, that member counts the PF as gone (`src/platform/session/src/members.rs`, `gone`), but holds a control value that names them.
+- The guard refuses take-control until preflight ends, and only the PF's core ends preflight (`src/platform/session/src/preflight.rs`, `run`), so preflight never ends.
+
+**Changed:** the user decided both (user, 2026-11-24):
+
+- A core back from a restart whose crew's first message carries no control value makes one naming its own pilot, and when both cores do, the value naming the lower pilot ID wins, as it does between any two changes of one generation (`Control::outranks`).
+- That pilot flies though their core came back from a crash.
+  [Decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md) has a restarted core pass control on, which can't hold here, since one of the two restarted cores must hold control.
+- Neither core kept the session's aircraft or preflight's phase, so the new PF's core sets the aircraft again: preflight ends at once in the air, and runs again on the ground, as for a core back alone.
+- A PF's leave in preflight whose close outruns its pass stays a known limit, with no code: the flight hasn't begun, and the pilot who stayed is alone in the session, so they leave and host again.
+
+A core that makes control this way passes nothing on after the restart.
+With the pass as well, each core would hand control to the other in the same input, and the lower pilot ID would fly all the same, after four changes of control where two do, so dropping the pass changes nothing the user decided.
+
+With the fix, `node tools/bench.ts session` passed all 26 of its cases.
+In the new case, run alone, each core made control naming its own pilot at the other's first message, Adam's core took the value naming James 0.8ms later, and James's core set the session's aircraft and ended preflight in the air as its sim reached Flying 1.8s later.
+With the core's `restarted` flag left set, so the pass after a restart ran too, each core passed control to the other at once, generation 2 naming James won on both, and the case failed on its check that no core passed control on, so it catches that half of the fix going.
+
+The session scenario's cores run no catch-up steps, so the bench didn't show Adam's core catching up from James's; the cockpit stream asks the PF for one on any machine that isn't flying once preflight has ended (`src/platform/cockpit-stream/src/lib.rs`, `maybe_ask`).
+
+The rule leaves one case uncovered: if the PC of the pilot with the lower ID crashed as well, so their sim is in no flight, nobody sets the session's aircraft until that pilot loads one, and if they load it on the ground, preflight runs and holds the other pilot's aircraft, even in the air.
+It takes a PC crash on one side and a core crash on the other while the first is down, since a crewmate whose core stays up holds control for the pilot coming back.
+
+The code review found two more:
+
+- Neither pilot hears the control-passed cue or sees a notification naming the new PF, since take-control announces a pass only from one pilot to another while this pilot is in the flight (`src/features/take-control/core/src/lib.rs`, `passed`), and no core sees one: the winning value is the first its maker held, and the losing core holds the other value only before the session has an aircraft.
+  So a pilot who was monitoring before both crashes, and has the lower ID, comes back flying with only the EFB app's take-control strip saying so.
+- Nothing in the network or the session crate caps a session at two pilots, and with three, a joiner's first message carries no control value either, so a core back from a restart could make generation 1 and outrank a host's value of generation 1 naming a higher pilot ID.
+  The rule's comment names v1's two pilots, and [02-units](02-units.md)'s note leaves this to the pick that brings larger crews, as the pass on a PF's leave does.
+
+We left all three uncovered, and put them to the user as known limits, since Dual Input aims for a core that never crashes, so a crash is a bug to fix rather than a state to recover from ([decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md); user, 2026-10-12).
+The core's log line, "named nobody flying" in the evidence, reads "carried no control value" since the review, the term the documents use.
+
+**Evidence:** the bench's runs, before the fix, after it, and with the `restarted` flag left set, in `results/2026-11-24-restart-both-bench.txt`.
+
+**Affects:** [02-units](02-units.md)'s control, joining and leaving, and cases for the bench, [01-between-machines](../network/01-between-machines.md)'s leaving, and [04-order-and-recovery](../sync/04-order-and-recovery.md)'s core that restarts.
+
 ## 2026-11-24: A core that restarted alone in its session never learned who flies, so it takes control again as a host does
 
 **Asked:** why did a core back from a restart, in a session of one, in the air in the Baron 58P, fly on without ever setting the session's aircraft, and how should it come back?

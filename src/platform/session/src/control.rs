@@ -108,6 +108,28 @@ pub(crate) fn pass_after_restart(me: &mut Session, cx: &Cx) {
     }
 }
 
+/// A core back from a restart whose crew's first message carries no control value makes one
+/// naming its own pilot, since without one nobody sets the session's aircraft or may take
+/// control. With v1's two pilots, a first message with none means no member holds one, as when
+/// the crewmate's core restarted too. When both cores make one, the value naming the lower
+/// pilot ID wins on both, so this core makes no pass after the restart, which would add two
+/// changes of control and end with the same pilot (record/areas/session/log.md, "Two cores
+/// that both restarted never learned who flies").
+pub(crate) fn make_after_restart(me: &mut Session, cx: &Cx) {
+    let Some(held) = &mut me.held else {
+        return;
+    };
+    if !held.restarted || held.control.is_some() {
+        return;
+    }
+    held.restarted = false;
+    let mine = held.me;
+    tracing::info!(
+        "the crew's first message after a restart carried no control value, so this core makes control itself"
+    );
+    make(me, mine, cx);
+}
+
 /// `TakeControl`, once every guard allowed it.
 pub(crate) fn take(me: &mut Session, _: TakeControl, cx: &mut Cx) {
     if let Some(mine) = me.me() {

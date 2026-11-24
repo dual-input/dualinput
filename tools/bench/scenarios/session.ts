@@ -412,9 +412,9 @@ function lapse(net: BenchNetwork, code: string): void {
   net.backend.execute(`UPDATE members SET renewed = renewed - ${31 * 60 * 1000} WHERE code = '${code}'`)
 }
 
-/** Starts James's core again over the data folder of the one killed, its sim still flying the Baron in the air. */
+/** Starts a pilot's core again over the data folder of the one killed, its sim still flying the Baron in the air. */
 async function restartInTheAir(run: BenchRun, net: BenchNetwork, a: Pilot, t: TestContext): Promise<Pilot> {
-  const restarted = await run.core("James", net.core())
+  const restarted = await run.core(a.name, net.core())
   restarted.act({ act: "set", numbers: [["A:SIM ON GROUND", 0]], texts: [["A:TITLE", "Baron 58P"]] })
   restarted.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "aircraft-loaded", path: BARON.cfg } }] })
   await sleep(100)
@@ -482,6 +482,34 @@ test("a core alone in its session that restarts after the backend dropped its co
   assert.match(back.core.log(), /no other member holds the session any more, so it ended/)
   await sleep(500)
   assert.ok(!fs.existsSync(path.join(back.core.data, "session.json")), "the session file goes with the session")
+})
+
+test("two cores that both restart each make control naming their own pilot, and the lower pilot ID flies", { timeout: 120_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("session-restart-both", t)
+  const a = await pilot(run, net, "James")
+  const b = await pilot(run, net, "Adam")
+  await load(a, BARON, { airborne: true })
+  await crew(a, b)
+  await load(b, BARON, { airborne: true })
+  await until(b, (s) => s.preflight.phase === "ended" && s.members.every((m) => m.in_flight), "both in the flight in the air")
+  const ids = [slice(a).me, slice(b).me]
+  // A pilot ID's hex orders as its bytes do, which is how control settles two values of one
+  // generation.
+  const lower = [...ids].sort()[0]
+
+  // Both cores crash while their sims fly on, so each session file holds the other as crew, and
+  // the first message each sends the other carries no control value.
+  await a.core.kill()
+  await b.core.kill()
+  const back = [await restartInTheAir(run, net, a, t), await restartInTheAir(run, net, b, t)]
+  for (const p of back) {
+    const s = await until(p, (s) => s.pf === lower && s.preflight.phase === "ended" && s.members.every((m) => m.in_flight), "control on the lower pilot ID and both in the flight", 30_000)
+    assert.equal(s.members.length, 2)
+    assert.match(p.core.log(), /the crew's first message after a restart carried no control value, so this core makes control itself/)
+    assert.doesNotMatch(p.core.log(), /this core restarted holding control, so it passed control on/)
+  }
 })
 
 test("the match check: a streamed copy against an installed one is a warning, and two streamed copies show nothing", { timeout: 90_000 }, async (t) => {

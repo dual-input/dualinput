@@ -1,0 +1,81 @@
+Both cores restart: node tools/bench.ts session, the case "two cores that both restart each make control naming their own pilot, and the lower pilot ID flies", run alone through --test-name-pattern.
+Each block gives the case's outcome, then each restarted core's log, filtered to the session's lines.
+Each run draws new pilot IDs: Adam's is the lower before the fix, and James's in the two runs after.
+
+== Before the fix
+✖ two cores that both restart each make control naming their own pilot, and the lower pilot ID flies (42456.4189ms)
+Error: James: control on the lower pilot ID and both in the flight didn't happen within 30000ms
+-- James, after the restart
+40164412345µs #0 [session]  INFO session::joining: the core found a session file, so it comes back to the session code="KKHCF3" restart=1
+40164416639µs #8 [network]  INFO network: the network opens the session code="KKHCF3" restart=1 crew=1
+40164601476µs #24 [session]  INFO session::members: a member joined the session member="277be4a82f3441959bc659a42b077c09"
+40165446927µs #64 [cockpit-stream]  INFO cockpit_stream: a member's link is up again, so it gets a replay messages=0
+40165447110µs #66 [cockpit-stream]  INFO cockpit_stream: another member's replay of what this machine missed begins
+40165447110µs #66 [cockpit-stream]  INFO cockpit_stream: a replay of what this machine missed ended
+-- Adam, after the restart
+40164565419µs #0 [session]  INFO session::joining: the core found a session file, so it comes back to the session code="KKHCF3" restart=1
+40164569040µs #7 [network]  INFO network: the network opens the session code="KKHCF3" restart=1 crew=1
+40164601117µs #19 [session]  INFO session::members: a member joined the session member="8bd33d1726db493a86804c245af95f5a"
+40165446796µs #55 [cockpit-stream]  INFO cockpit_stream: a member's link is up again, so it gets a replay messages=0
+40165447252µs #58 [cockpit-stream]  INFO cockpit_stream: another member's replay of what this machine missed begins
+40165447252µs #58 [cockpit-stream]  INFO cockpit_stream: a replay of what this machine missed ended
+
+== With the fix
+✔ two cores that both restart each make control naming their own pilot, and the lower pilot ID flies (11174.3736ms)
+-- James, after the restart
+40294757834µs #0 [session]  INFO session::joining: the core found a session file, so it comes back to the session code="ZXPHWY" restart=1
+40294762659µs #9 [network]  INFO network: the network opens the session code="ZXPHWY" restart=1 crew=1
+40294945214µs #24 [session]  INFO session::members: a member joined the session member="52f4ba162a804d8e9d4420c5bef0af0b"
+40294945214µs #24 [session]  INFO session::control: the crew's first message after a restart named nobody flying, so this core makes control itself
+40294945214µs #24 [session]  INFO session::control: this core passed control generation=1 pf="1f8c0ad402a840189baafeca756816f3"
+40295792562µs #66 [cockpit-stream]  INFO cockpit_stream: a member's link is up again, so it gets a replay messages=1
+40295792883µs #69 [cockpit-stream]  INFO cockpit_stream: another member's replay of what this machine missed begins
+40296761020µs #120 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+40296761020µs #120 [session]  INFO session::members: a member entered the flight member="1f8c0ad402a840189baafeca756816f3" in_flight=true
+40296761020µs #120 [cockpit-stream]  INFO cockpit_stream: a replay of what this machine missed ended
+40296761347µs #133 [session]  INFO session::preflight: the pilot flying is in the air, so the flight starts with no preflight
+40296761347µs #133 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=1087 members=2
+40296912734µs #362 [session]  INFO session::members: a member entered the flight member="52f4ba162a804d8e9d4420c5bef0af0b" in_flight=true
+-- Adam, after the restart
+40294910361µs #0 [session]  INFO session::joining: the core found a session file, so it comes back to the session code="ZXPHWY" restart=1
+40294913797µs #7 [network]  INFO network: the network opens the session code="ZXPHWY" restart=1 crew=1
+40294944829µs #19 [session]  INFO session::members: a member joined the session member="1f8c0ad402a840189baafeca756816f3"
+40294944829µs #19 [session]  INFO session::control: the crew's first message after a restart named nobody flying, so this core makes control itself
+40294944829µs #19 [session]  INFO session::control: this core passed control generation=1 pf="52f4ba162a804d8e9d4420c5bef0af0b"
+40294945602µs #20 [session]  INFO session::control: control passed generation=1 pf="1f8c0ad402a840189baafeca756816f3"
+40295792423µs #56 [cockpit-stream]  INFO cockpit_stream: a member's link is up again, so it gets a replay messages=1
+40295792953µs #59 [cockpit-stream]  INFO cockpit_stream: another member's replay of what this machine missed begins
+40296761474µs #101 [session]  INFO session::members: a member entered the flight member="1f8c0ad402a840189baafeca756816f3" in_flight=true
+40296761597µs #107 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=1087 members=2
+40296912339µs #130 [session]  INFO session::members: a member entered the flight member="52f4ba162a804d8e9d4420c5bef0af0b" in_flight=true
+40296912339µs #130 [cockpit-stream]  INFO cockpit_stream: a replay of what this machine missed ended
+
+== With the fix, but the restarted flag left set, so the pass after a restart runs too
+✖ two cores that both restart each make control naming their own pilot, and the lower pilot ID flies (11125.2585ms)
+expected: /this core restarted holding control, so it passed control on/,
+-- James, after the restart
+40367616090µs #0 [session]  INFO session::joining: the core found a session file, so it comes back to the session code="AQKVRR" restart=1
+40367620002µs #7 [network]  INFO network: the network opens the session code="AQKVRR" restart=1 crew=1
+40367792229µs #23 [session]  INFO session::members: a member joined the session member="a00606476d584b42aef0e2f0ca59928b"
+40367792229µs #23 [session]  INFO session::control: the crew's first message after a restart named nobody flying, so this core makes control itself
+40367792229µs #23 [session]  INFO session::control: this core passed control generation=1 pf="8b715c5fae7d4507976e59d1e456503c"
+40367792229µs #23 [session]  INFO session::control: this core passed control generation=2 pf="a00606476d584b42aef0e2f0ca59928b"
+40367792229µs #23 [session]  INFO session::control: this core restarted holding control, so it passed control on
+40367792895µs #24 [session]  INFO session::control: control passed generation=2 pf="8b715c5fae7d4507976e59d1e456503c"
+40369620111µs #117 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+40369620111µs #117 [session]  INFO session::members: a member entered the flight member="8b715c5fae7d4507976e59d1e456503c" in_flight=true
+40369620481µs #131 [session]  INFO session::preflight: the pilot flying is in the air, so the flight starts with no preflight
+40369620481µs #131 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=1087 members=2
+40369760378µs #356 [session]  INFO session::members: a member entered the flight member="a00606476d584b42aef0e2f0ca59928b" in_flight=true
+-- Adam, after the restart
+40367757957µs #0 [session]  INFO session::joining: the core found a session file, so it comes back to the session code="AQKVRR" restart=1
+40367761495µs #8 [network]  INFO network: the network opens the session code="AQKVRR" restart=1 crew=1
+40367792377µs #19 [session]  INFO session::members: a member joined the session member="8b715c5fae7d4507976e59d1e456503c"
+40367792377µs #19 [session]  INFO session::control: the crew's first message after a restart named nobody flying, so this core makes control itself
+40367792377µs #19 [session]  INFO session::control: this core passed control generation=1 pf="a00606476d584b42aef0e2f0ca59928b"
+40367792377µs #19 [session]  INFO session::control: this core passed control generation=2 pf="8b715c5fae7d4507976e59d1e456503c"
+40367792377µs #19 [session]  INFO session::control: this core restarted holding control, so it passed control on
+40369620648µs #100 [session]  INFO session::members: a member entered the flight member="8b715c5fae7d4507976e59d1e456503c" in_flight=true
+40369620759µs #106 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=1087 members=2
+40369759990µs #129 [session]  INFO session::members: a member entered the flight member="a00606476d584b42aef0e2f0ca59928b" in_flight=true
+

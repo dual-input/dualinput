@@ -12,6 +12,10 @@ Decides:     The topology, the transport, the way through home routers, the rela
 > A late clock keeps them in memory a moment longer, and if a cut's replay resends one the receiver has already applied, the receiver drops it as a copy.
 > Every other one-off channel keeps the link up or carries something a pilot sees or hears, so the clocks go last (user, 2026-11-20).
 
+> **Note**
+> Since 2026-11-24, in [a session file after a long outage](#a-session-file-after-a-long-outage), a core whose file holds no crew has nobody to dial, so it posts its own entry to the backend as it opens, which lists it again and renews it every 10 minutes, and asks the backend about its code 10s later, as when nobody answers ([session log](../session/log.md#2026-11-24-a-core-that-restarted-alone-in-its-session-never-learned-who-flies-so-it-takes-control-again-as-a-host-does); user, 2026-11-24).
+> With no other member, its code still holds the session while the backend finds it at all, its own entry included, and the core deletes the file once the backend finds no session under the code.
+
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.
 Four models carry the rest:

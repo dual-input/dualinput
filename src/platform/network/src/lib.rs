@@ -356,7 +356,18 @@ impl Network {
         }
         me.backend.renew =
             Some(cx.timer(backend::RENEW_EVERY, |me: &mut Network, _, cx| me.renew(cx)));
-        if !open.crew.is_empty() {
+        // A core back from a restart with no crew would otherwise never renew its entry, since a
+        // core renews only once listed, and its code would stop finding the session 30 minutes
+        // after the last renew before the crash. It was listed then: a host lists itself with its
+        // code, any other core at its first `LinkUp`, and only a member that linked leaves the
+        // crew. So it renews at once, and looks the code up as a core whose crew doesn't answer
+        // does, which tells it whether the backend still holds the session.
+        let alone = open.restart > 0 && open.crew.is_empty();
+        if alone {
+            me.backend.listed = true;
+            me.renew(cx);
+        }
+        if !open.crew.is_empty() || alone {
             me.start_check(cx);
         }
         for member in open.crew {

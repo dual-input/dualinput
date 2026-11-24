@@ -2,6 +2,51 @@
 
 What we found building and testing the session, newest entry first.
 
+## 2026-11-24: A core that restarted alone in its session never learned who flies, so it takes control again as a host does
+
+**Asked:** why did a core back from a restart, in a session of one, in the air in the Baron 58P, fly on without ever setting the session's aircraft, and how should it come back?
+
+**Expected:** that it would hold control and be in the flight, since its pilot was the session's only member.
+
+**Found:** on MSFS 2024, on 2026-11-24, while trying a flight-model replay in the sim, the restarted core's log said "the core found a session file, so it comes back to the session" with `restart=1`, then "the network opens the session" with `crew=0`.
+It then ran more than 3 minutes at the stage Flying with no "the pilot flying set the session's aircraft" and no "a member entered the flight", so preflight's end, flight-model sync's `Lead`, and the recorder never came.
+Leaving the session and hosting a new one fixed it at once.
+
+Reading the session crate gave the cause:
+
+- A core back from a restart holds no control value until the crew's first message brings one, and then passes control on if it held it (`src/platform/session/src/control.rs`, `pass_after_restart`).
+- A session file with no crew gives the network nobody to dial, and the network starts its backend check only for a crew (`src/platform/network/src/lib.rs`, `open_session`), so no first message ever came.
+- Only the pilot flying's core sets the session's aircraft (`src/platform/session/src/preflight.rs`, `run`), and a member is in the flight only in that aircraft (`src/platform/session/src/lib.rs`, `in_flight`), so with nobody flying, nobody was in the flight.
+
+A file with no crew means no other member holds the session: a member comes out of the file's crew only when it leaves the session (`src/platform/session/src/members.rs`, `gone`), and a core counted out by the last member leaves on its own.
+So nobody else can fly, and in nearly every case the core held control before it crashed, since a pilot flying who leaves a session that goes on passes control to the member who stays.
+
+On the bench, a new case in `node tools/bench.ts session` showed the same: a bench core that hosted alone in the air, killed and started again, logged `crew=0` and the stage Flying, and its slice named no pilot flying 15s later.
+
+**Changed:** of two ways back, the core taking control again or the session ending, the user took the first, which keeps the session open, invite code and all, for a crewmate who hasn't joined yet (user, 2026-11-24):
+
+- A core back from a restart with no crew in its file writes `control` naming its pilot and starts preflight over, as a host does, so in the air preflight ends at once.
+- On the ground, preflight runs again, so the aircraft holds until the pilot presses Ready, which we accept for a crash alone after preflight ended.
+- When a joiner's first message reaches a core back alone, the core keeps control, where a core back with a crew passes control on at the crew's first message; otherwise the core would hand control to a joiner already in the flight as it arrived.
+
+With the fix, `node tools/bench.ts session` passed all 24 of its cases.
+In the new case, the restarted core took control at its first input, and set the session's aircraft and ended preflight as its sim reached Flying 2.0s later, after which a joiner already in the Baron joined and found it the pilot flying.
+With the core's `restarted` flag set again for a core back alone, so that a joiner's first message passed control on as the crew's would, that joiner took control as it arrived and the case failed, so the case catches either half of the fix going.
+
+The code review then found that a core back alone never renewed its entry with the backend, since the network renews only once it has listed the core, at a Host's answer or a first `LinkUp` (`src/platform/network/src/backend.rs`, `renew`).
+So the invite code, the reason the user kept the session, would have stopped finding it 30 minutes after the last renew before the crash.
+A core back alone also never asked the backend about its code, which [a session file after a long outage](../network/01-between-machines.md#a-session-file-after-a-long-outage) asks of a core back from a file, so one that came back the next day would have sat in a session nobody could join, and blocked updates, which wait while a session file exists.
+So the network posts the entry of a core back alone as it opens, and looks its code up 10s later, as for a crew that doesn't answer; with no other member, the session goes on while the code finds it, and ends once the code finds no session.
+The solo case ages the host's entry past the 30 minutes before the restart, and a second case also runs the backend's hourly sweep, which deletes the session.
+In the first, the backend's lookup 10s after the restart found the session under the core's own entry, the session went on, and the joiner found the code; in the second, the renew was refused with "no session has the code", and the lookup 10s after the core opened found none, so the session ended and its file went.
+A network-crate test holds the post as the core opens, the lookup at 10s, and the renew 10 minutes on.
+
+The review also found a shadow value's known limit, which [04-order-and-recovery](../sync/04-order-and-recovery.md)'s note names: a core back alone is the flying machine, so its shadow values start at their `default` with nobody to take them from.
+
+**Evidence:** the bench's runs, before the fix, after it, with its joiner rule undone, and after the review's fixes, in `results/2026-11-24-restart-alone-bench.txt`; the sim's core log stays outside the tree.
+
+**Affects:** [02-units](02-units.md)'s control and its cases for the bench, [01-between-machines](../network/01-between-machines.md)'s session file after a long outage, and [04-order-and-recovery](../sync/04-order-and-recovery.md)'s core that restarts and its known limits.
+
 ## 2026-11-17: In the sim, Join set the world map and started the flight within 0.9s, and active pause followed from our EFB app's code in 264ms, once the menu script parsed
 
 **Asked:** stage 21's cases in the sim ([plan](../build/plan.md#21-rate-and-pause-and-go-to)): does our EFB app's code turn active pause on and off, which runway does Join's request pick, which entries of the world map's lists are the pilot flying's, does a gate with a letter match its flight file, does the menu script see Free flight's world map, and does Join now reach the flight within Go to's 5s?

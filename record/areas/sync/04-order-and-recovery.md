@@ -14,6 +14,10 @@ Decides:     What comes back after a link, a core, a sim, or a PC goes down; how
 > **Note**
 > Stage 11b's tentative decision on [the banner's content](../interface/decisions.md#the-banner-carries-what-a-pilot-must-see-without-the-efb-and-the-rest-shows-where-its-acted-on) drops the crash's ask for a bug report, from the crew and the pilot alike, until the apps' design confirms it (user, 2026-11-01): the crew's card says the pilot's sim crashed and that they're still in the session, and the pilot sees the service reconnecting, then catching up.
 
+> **Note**
+> Since 2026-11-24, [a core that restarts](#a-core-that-restarts) with no crew in its session file, the session's only member, takes control again as a host does, rather than passing it on and catching up, since it has nobody to pass control to and no flying machine to catch up from ([session log](../session/log.md#2026-11-24-a-core-that-restarted-alone-in-its-session-never-learned-who-flies-so-it-takes-control-again-as-a-host-does); user, 2026-11-24).
+> So "a PF whose core crashes loses control" holds for a PF with a crew, and [known limits](#known-limits) gain one: such a core is the flying machine, so each shadow value starts at its `default` rather than the flying machine's, and is right only if its pilot left that control where the aircraft loaded with it, and a joiner's catch-up later copies it.
+
 What comes back depends on what went down.
 A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.
 A pilot whose sim, core, or PC went down comes back as a late joiner, with the profile's entries caught up from the flying machine (user, 2026-10-11 and 2026-10-12).

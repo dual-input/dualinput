@@ -159,8 +159,9 @@ pub(crate) struct Backend {
     /// cross it, so the bench builds optimized").
     pub(crate) key: Option<SigningKey>,
     pub(crate) me: Option<Me>,
-    /// Whether the backend lists this core's entry: a host's is listed with its code, and
-    /// any other core posts its own at its first `LinkUp`.
+    /// Whether the backend lists this core's entry: a host's is listed with its code, a core
+    /// back alone from a restart posts its own as it opens, and any other core at its first
+    /// `LinkUp`.
     pub(crate) listed: bool,
     pub(crate) relays: Vec<Relay>,
     asking: Option<(Asked, JobId, TimerId)>,

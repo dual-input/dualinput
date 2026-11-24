@@ -8,7 +8,7 @@ import assert from "node:assert/strict"
 import fs from "node:fs"
 import { type AddressInfo, createServer, type Socket } from "node:net"
 import path from "node:path"
-import { test } from "node:test"
+import { test, type TestContext } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import type { Setting } from "../../../src/engines/messages/ts/clients/Setting.ts"
@@ -405,6 +405,83 @@ test("a restarted core with a session file comes back under a higher restart cou
   const passed = log.indexOf("this core restarted holding control, so it passed control on")
   const entered = log.indexOf("a member entered the flight")
   assert.ok(passed >= 0 && (entered < 0 || passed < entered), "the restarted core passed control before it entered the flight")
+})
+
+/** Ages every entry the backend lists under `code` past the 30 minutes after which a lookup drops it. */
+function lapse(net: BenchNetwork, code: string): void {
+  net.backend.execute(`UPDATE members SET renewed = renewed - ${31 * 60 * 1000} WHERE code = '${code}'`)
+}
+
+/** Starts James's core again over the data folder of the one killed, its sim still flying the Baron in the air. */
+async function restartInTheAir(run: BenchRun, net: BenchNetwork, a: Pilot, t: TestContext): Promise<Pilot> {
+  const restarted = await run.core("James", net.core())
+  restarted.act({ act: "set", numbers: [["A:SIM ON GROUND", 0]], texts: [["A:TITLE", "Baron 58P"]] })
+  restarted.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "aircraft-loaded", path: BARON.cfg } }] })
+  await sleep(100)
+  const menu = fakeMenuScript(restarted, "in-game")
+  t.after(() => menu.close())
+  restarted.act({ act: "watch", process: a.sim.id })
+  return { ...a, core: restarted, app: await app(restarted) }
+}
+
+test("a core alone in its session that restarts comes back holding control and in the flight, lists itself again, and keeps control when a joiner comes", { timeout: 90_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("session-restart-alone", t)
+  const a = await pilot(run, net, "James")
+  await load(a, BARON, { airborne: true })
+  const code = await host(a.core, a.name)
+  await until(a, (s) => s.preflight.phase === "ended", "no preflight in the air")
+
+  // The core crashes while its sim flies on, in the air, as in the restart above, and stays down
+  // past the 30 minutes after which the backend's lookup drops the host's entry.
+  await a.core.kill()
+  lapse(net, code)
+  const back = await restartInTheAir(run, net, a, t)
+  const restarted = back.core
+  await restarted.hear(`stage Flying aircraft ${BARON.path}`, { ms: 15_000 })
+  const s = await until(back, (s) => s.pf === s.me && me(s)?.in_flight === true && s.preflight.phase === "ended", "control and the flight after the restart", 15_000)
+  assert.equal(s.members.length, 1)
+  assert.match(restarted.log(), /the core found a session file, so it comes back to the session code=\S+ restart=1/)
+  assert.match(restarted.log(), /this core is back alone in its session, so it takes control again/)
+  await restarted.logged(/preflight ended, and the session's keys take this much/)
+
+  // It listed itself again as it opened, so the backend's lookup 10s in finds the session, and
+  // the session goes on.
+  await restarted.logged(/the backend answered asked=Check answer=Found/, { ms: 15_000 })
+  await sleep(500)
+  assert.equal(slice(back).held, true, "the session goes on while its code finds it")
+
+  // A joiner's first message isn't the crew's, so the core back alone passes nothing on, even to
+  // a joiner already in the flight.
+  const b = await pilot(run, net, "Adam")
+  await load(b, BARON)
+  await join(b.core, code, b.name)
+  const joined = await until(b, (s) => s.members.length === 2 && me(s)?.in_flight === true, "the joiner in the flight")
+  assert.equal(joined.pf, s.me, "the core back alone keeps control")
+  await sleep(1_000)
+  assert.equal(slice(back).pf, s.me)
+  assert.doesNotMatch(restarted.log(), /this core restarted holding control, so it passed control on/)
+})
+
+test("a core alone in its session that restarts after the backend dropped its code ends the session and deletes its file", { timeout: 90_000 }, async (t) => {
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const run = new BenchRun("session-restart-alone-lapsed", t)
+  const a = await pilot(run, net, "James")
+  await load(a, BARON, { airborne: true })
+  const code = await host(a.core, a.name)
+  await until(a, (s) => s.preflight.phase === "ended", "no preflight in the air")
+
+  // Down long enough for the hourly sweep to delete the session, as for a PC shut down mid-session.
+  await a.core.kill()
+  lapse(net, code)
+  await net.backend.scheduled()
+  const back = await restartInTheAir(run, net, a, t)
+  await until(back, (s) => !s.held, "the session ending once the code finds none", 20_000)
+  assert.match(back.core.log(), /no other member holds the session any more, so it ended/)
+  await sleep(500)
+  assert.ok(!fs.existsSync(path.join(back.core.data, "session.json")), "the session file goes with the session")
 })
 
 test("the match check: a streamed copy against an installed one is a warning, and two streamed copies show nothing", { timeout: 90_000 }, async (t) => {

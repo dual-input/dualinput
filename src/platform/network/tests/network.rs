@@ -49,6 +49,8 @@ enum Act {
     Cancel,
     /// Opens with no crew under this code.
     OpenAs(String),
+    /// Opens as a core back from a restart whose session file holds no crew.
+    ReopenAlone,
 }
 
 fn me() -> Me {
@@ -117,6 +119,17 @@ impl Session {
                     code,
                     me: me(),
                     restart: 0,
+                    key: [9; 32],
+                    relays: Vec::new(),
+                    crew: Vec::new(),
+                },
+            ),
+            Act::ReopenAlone => network::open(
+                cx,
+                network::Open {
+                    code: "ABC123".into(),
+                    me: me(),
+                    restart: 1,
                     key: [9; 32],
                     relays: Vec::new(),
                     crew: Vec::new(),
@@ -903,6 +916,27 @@ fn a_core_whose_crew_doesnt_answer_in_10s_looks_the_code_up() {
     core.advance(core.now + 10 * SECOND);
     let looked: Vec<String> = core.fetches().into_iter().map(|(w, _)| w).collect();
     assert_eq!(looked, ["Post https://api.dualinput.app/v1/lookup"]);
+}
+
+/// A core back from a restart with no crew lists itself again as it opens, since no `LinkUp`
+/// will, and renews every 10 minutes, so its code goes on finding the session; and it looks the
+/// code up after 10s, as a core whose crew doesn't answer does.
+#[test]
+fn a_core_back_alone_lists_itself_as_it_opens_and_looks_its_code_up() {
+    let mut core = Core::new();
+    core.act(Act::ReopenAlone);
+    let posted: Vec<String> = core.fetches().into_iter().map(|(w, _)| w).collect();
+    assert_eq!(posted, ["Post https://api.dualinput.app/v1/members"]);
+    core.event(Event::Bound(Ok(MY_ENDPOINT)));
+    core.advance(core.now + 10 * SECOND);
+    let looked: Vec<String> = core.fetches().into_iter().map(|(w, _)| w).collect();
+    assert_eq!(looked, ["Post https://api.dualinput.app/v1/lookup"]);
+    core.advance(core.now + 600 * SECOND);
+    let renewed: Vec<String> = core.fetches().into_iter().map(|(w, _)| w).collect();
+    assert!(
+        renewed.contains(&"Post https://api.dualinput.app/v1/members".to_string()),
+        "{renewed:?}"
+    );
 }
 
 /// A first message from another release, or another build of this one, closes with the code

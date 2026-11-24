@@ -184,8 +184,8 @@ pub(crate) struct Held {
     pub(crate) away: BTreeMap<PilotId, members::Away>,
     /// Whether this core has raised `PreflightEnded`.
     pub(crate) ended_seen: bool,
-    /// A core that started from the session file passes control it held once the crew's
-    /// first message has passed, since only then does it know the current control value
+    /// A core that started from a session file holding a crew passes control it held once the
+    /// crew's first message has passed, since only then does it know the current control value
     /// (record/areas/sync/04-order-and-recovery.md, "A core that restarts").
     pub(crate) restarted: bool,
     /// Whether the session file holds what this core last wrote, which `network::open` waits

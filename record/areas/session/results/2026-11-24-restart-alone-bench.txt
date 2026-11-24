@@ -1,0 +1,133 @@
+Bench runs of the session scenario's case 'a core alone in its session that restarts', on 2026-11-24, on our development machine.
+Each: node tools/bench.ts session, its spec lines, then the session crate's lines from each core's log.
+
+== Before the fix: the restarted core never took control
+✖ a core alone in its session that restarts comes back holding control and in the flight (29288.887ms)
+  Error: James: control and the flight after the restart didn't happen within 15000ms
+-- James's core, its run of 2026-11-24_18-59-14
+29578157291µs #85 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Starting
+29578158374µs #89 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Loading
+29578201887µs #98 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=ReadyToFly aircraft="bksq-aircraft-baronpropress"
+29578232837µs #109 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+29578302597µs #115 [session]  INFO session::control: this core passed control generation=1 pf="f66efda85fe846a49fdcbc10722a0f3b"
+29578302597µs #115 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+29578302597µs #115 [session]  INFO session::members: a member entered the flight member="f66efda85fe846a49fdcbc10722a0f3b" in_flight=true
+29578303041µs #123 [session]  INFO session::preflight: the pilot flying is in the air, so the flight starts with no preflight
+29578303041µs #123 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=697 members=1
+29578303982µs #124 [network]  INFO network: the network opens the session code="73HDGN" restart=0 crew=0
+-- James's core, its run of 2026-11-24_18-59-16
+29578420116µs #0 [session]  INFO session::joining: the core found a session file, so it comes back to the session code="73HDGN" restart=1
+29578428448µs #8 [network]  INFO network: the network opens the session code="73HDGN" restart=1 crew=0
+29580420700µs #51 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Starting
+29580424775µs #61 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+
+== After the fix: every case of the scenario
+✔ a host who starts before the sim runs: the joiner sees no aircraft yet, then the session's once the host loads one (7755.6493ms)
+✔ a host who starts from a flight sets the aircraft at once, and preflight runs on the ground, or ends at once in the air (7505.5142ms)
+✔ a joiner in another aircraft is a member out of the flight, and enters it as a late joiner once it loads the session's aircraft (10800.1603ms)
+✔ a pilot flying who loads the wrong aircraft in preflight returns to the menu holding control, and the right one becomes the session's (8517.852ms)
+✔ a pilot flying who leaves the session in preflight, with the other at the menu, passes control, and preflight runs once the new one is in a flight (9762.4505ms)
+✔ both pilots ready: the countdown ends preflight on both, each held until then; an un-ready inside it cancels it (15955.4309ms)
+✔ a lost link during the countdown cancels it, and a ready pilot whose sim crashes comes back unready (24603.0042ms)
+✔ going without a pilot whose sim kept running ends preflight, and that pilot raises PreflightEnded on return; nobody goes without the pilot flying (37600.9877ms)
+✔ a pilot flying who leaves the flight after preflight passes control, and the session ends once nobody is in the flight (11907.1029ms)
+✔ a pilot flying who leaves mid-flight hands control over within 1s and is a leave, not an outage; one who quits does the same, and exits (15881.9601ms)
+✔ a restarted core with a session file comes back under a higher restart count, announces the session, and passes control it held before it enters the flight (13657.1069ms)
+✔ a core alone in its session that restarts comes back holding control and in the flight, and keeps control when a joiner comes (10629.6199ms)
+✔ the match check: a streamed copy against an installed one is a warning, and two streamed copies show nothing (14986.3711ms)
+✔ a connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the state's aircraft, by the menu script's master page (5092.1896ms)
+✔ a quit sent from the EFB app's socket takes effect, and a core with no session and no desktop app exits once its sim closes (4097.118ms)
+✔ a module from another build while Hold is fed raises the sim service's trouble notification for our package (5820.4217ms)
+✔ the settings command refuses a display name over 20 characters from any app (3292.3416ms)
+✔ a wrong code shows why in the slice, and the next attempt clears it (8462.6605ms)
+✔ a join reaching the crew is an attempt until its first link, and a cancel stops it on this PC alone (8405.808ms)
+✔ a cancel stops an attempt waiting on the backend (5127.8386ms)
+✔ no answer from the backend is our servers while a relay answers, and this PC offline while nothing does (17447.3693ms)
+✔ a name or color changed in a session reaches the crew at once, an emptied name keeps the last, and the session file keeps both (8962.4407ms)
+✔ a join another core refuses stops, and says why in the words of the backend's refusal (7385.3555ms)
+✔ a Host whose connection won't open never starts, says why, and leaves no session to find (8306.1657ms)
+ℹ tests 24
+ℹ pass 24
+ℹ fail 0
+-- James's core, its run of 2026-11-24_20-25-44
+34767907925µs #86 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Starting
+34767908356µs #90 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Loading
+34767961919µs #100 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=ReadyToFly aircraft="bksq-aircraft-baronpropress"
+34767977502µs #107 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+34768023865µs #115 [session]  INFO session::control: this core passed control generation=1 pf="02bf1e48c3214828bed5d85fc7505337"
+34768023865µs #115 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+34768023865µs #115 [session]  INFO session::members: a member entered the flight member="02bf1e48c3214828bed5d85fc7505337" in_flight=true
+34768024394µs #122 [session]  INFO session::preflight: the pilot flying is in the air, so the flight starts with no preflight
+34768024394µs #122 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=687 members=1
+34768025177µs #124 [network]  INFO network: the network opens the session code="T2ZW5R" restart=0 crew=0
+-- James's core, its run of 2026-11-24_20-25-46
+34768121077µs #0 [session]  INFO session::joining: the core found a session file, so it comes back to the session code="T2ZW5R" restart=1
+34768121077µs #0 [session]  INFO session::joining: this core is back alone in its session, so it takes control again
+34768121077µs #0 [session]  INFO session::control: this core passed control generation=1 pf="02bf1e48c3214828bed5d85fc7505337"
+34768124979µs #7 [network]  INFO network: the network opens the session code="T2ZW5R" restart=1 crew=0
+34770121647µs #51 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Starting
+34770123238µs #60 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+34770123238µs #60 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+34770123238µs #60 [session]  INFO session::members: a member entered the flight member="02bf1e48c3214828bed5d85fc7505337" in_flight=true
+34770123583µs #73 [session]  INFO session::preflight: the pilot flying is in the air, so the flight starts with no preflight
+34770123583µs #73 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=683 members=1
+34772324027µs #964 [session]  INFO session::members: a member entered the flight member="f4df3b06ca62420b8ea39f02f0645121" in_flight=true
+-- Adam's core, its run of 2026-11-24_20-25-48
+34772167388µs #86 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Starting
+34772167610µs #90 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Loading
+34772210139µs #99 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=ReadyToFly aircraft="bksq-aircraft-baronpropress"
+34772240828µs #109 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+34772287236µs #118 [network]  INFO network: the network opens the session code="T2ZW5R" restart=0 crew=1
+34772323902µs #127 [session]  INFO session::members: a member entered the flight member="f4df3b06ca62420b8ea39f02f0645121" in_flight=true
+34772323902µs #127 [session]  INFO session::members: a member entered the flight member="02bf1e48c3214828bed5d85fc7505337" in_flight=true
+34772323902µs #127 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=1145 members=2
+
+== With the fix's second half undone, restarted true for a core back alone: the joiner took control
+✖ a core alone in its session that restarts comes back holding control and in the flight, and keeps control when a joiner comes (10022.906ms)
+  AssertionError [ERR_ASSERTION]: the core back alone keeps control
+    actual: '34c4f4aaab834f38b2700835b8ea419b',
+    expected: '2cd75e41f2d04b40860ca646a6c3d634',
+
+== After the code review's fixes: the two cases of a core back alone, the first with its entry aged 31 minutes, the second with its session swept
+✔ a core alone in its session that restarts comes back holding control and in the flight, lists itself again, and keeps control when a joiner comes (23097.6876ms)
+✔ a core alone in its session that restarts after the backend dropped its code ends the session and deletes its file (17254.8687ms)
+ℹ tests 2
+ℹ pass 2
+ℹ fail 0
+-- James's core, its run of 2026-11-24_20-57-27
+36671914573µs #115 [network]  INFO network::backend: the backend answered asked=Host answer=Created { code: "A3RJHX" }
+36671914573µs #115 [session]  INFO session::control: this core passed control generation=1 pf="1e14ec1b9b3b49229d0e587955559f76"
+36671914573µs #115 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+36671915080µs #122 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=687 members=1
+36671915700µs #124 [network]  INFO network: the network opens the session code="A3RJHX" restart=0 crew=0
+-- James's core, its run of 2026-11-24_20-57-31
+36673113523µs #0 [session]  INFO session::joining: the core found a session file, so it comes back to the session code="A3RJHX" restart=1
+36673113523µs #0 [session]  INFO session::joining: this core is back alone in its session, so it takes control again
+36673113523µs #0 [session]  INFO session::control: this core passed control generation=1 pf="1e14ec1b9b3b49229d0e587955559f76"
+36673117495µs #8 [network]  INFO network: the network opens the session code="A3RJHX" restart=1 crew=0
+36675116835µs #102 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+36675117247µs #115 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=683 members=1
+36683117886µs #2862 [network]  INFO network::backend: no member answered within 10s, so the network looks the code up
+36683131026µs #2869 [network]  INFO network::backend: the backend answered asked=Check answer=Found { session: "98ecbd1b-fbc5-4927-ae14-a64169eaf9bd", relays: [...], crew: [Entry { pilot: "1e14ec1b9b3b49229d0e587955559f76", name: "James", kind: Crew, endpoint: "3398503ceec58e652f923db0116b66736f9e6fe88f4aebcc8819a44972807e24" }] }
+-- Adam's core, its run of 2026-11-24_20-57-41
+36685781888µs #114 [network]  INFO network::backend: the backend answered asked=Join answer=Found { session: "98ecbd1b-fbc5-4927-ae14-a64169eaf9bd", relays: [...], crew: [Entry { pilot: "1e14ec1b9b3b49229d0e587955559f76", name: "James", kind: Crew, endpoint: "3398503ceec58e652f923db0116b66736f9e6fe88f4aebcc8819a44972807e24" }] }
+36685782748µs #118 [network]  INFO network: the network opens the session code="A3RJHX" restart=0 crew=1
+36685822286µs #127 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=1145 members=2
+-- James's core, its run of 2026-11-24_20-57-48
+36692302812µs #115 [network]  INFO network::backend: the backend answered asked=Host answer=Created { code: "KSGN7N" }
+36692302812µs #115 [session]  INFO session::control: this core passed control generation=1 pf="974b363fde204c7e852ee8801b306277"
+36692302812µs #115 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+36692303212µs #122 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=687 members=1
+36692303903µs #124 [network]  INFO network: the network opens the session code="KSGN7N" restart=0 crew=0
+-- James's core, its run of 2026-11-24_20-57-51
+36693608220µs #0 [session]  INFO session::joining: the core found a session file, so it comes back to the session code="KSGN7N" restart=1
+36693608220µs #0 [session]  INFO session::joining: this core is back alone in its session, so it takes control again
+36693608220µs #0 [session]  INFO session::control: this core passed control generation=1 pf="974b363fde204c7e852ee8801b306277"
+36693612151µs #7 [network]  INFO network: the network opens the session code="KSGN7N" restart=1 crew=0
+36693622153µs #13 [network]  WARN network::backend: the backend refused a member's request status=404 error="no session has the code" purpose=Renew
+36695610444µs #101 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+36695610870µs #115 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=683 members=1
+36703612384µs #2862 [network]  INFO network::backend: no member answered within 10s, so the network looks the code up
+36703620309µs #2864 [network]  INFO network::backend: the backend answered asked=Check answer=Refused(NoSuchCode)
+36703620309µs #2864 [session]  INFO session::joining: the session ended for this core code="KSGN7N"
+36703620309µs #2864 [sim-service]  INFO sim_service::announce: the core announces that a session ended session=false

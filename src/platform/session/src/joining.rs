@@ -389,18 +389,24 @@ pub(crate) fn answered(me: &mut Session, answered: &BackendAnswered, cx: &mut Cx
             me.refused = Some(refused(asking.on(), why));
         }
         // The network looks the code up when no member answered a core back from a restart:
-        // a session no member other than this core still holds is over.
+        // a session no member other than this core still holds is over. A core back alone has
+        // no other member, and listed itself again as it opened, so its session is over only
+        // once the code finds no session.
         (Asked::Check, answer) => {
             let mine = me.me();
-            let held_by_others = match answer {
-                Answer::Found { crew, .. } => crew
-                    .iter()
-                    .filter_map(network::member)
-                    .any(|m| Some(m.pilot) != mine),
+            let alone = me.held.as_ref().is_some_and(|h| h.crew.is_empty());
+            let still_held = match answer {
+                Answer::Found { crew, .. } => {
+                    alone
+                        || crew
+                            .iter()
+                            .filter_map(network::member)
+                            .any(|m| Some(m.pilot) != mine)
+                }
                 Answer::Refused(Refusal::NoSuchCode) => false,
                 _ => true,
             };
-            if !held_by_others {
+            if !still_held {
                 tracing::info!("no other member holds the session any more, so it ended");
                 // A join still reaching the crew was found by a code that has since lapsed.
                 if me.held.as_ref().is_some_and(|h| h.dialing) {
@@ -432,8 +438,8 @@ pub(crate) fn endpoint_bound(me: &mut Session, _: &EndpointBound, _: &mut Cx) {
 }
 
 /// The core started and found a session file: it raises the restart count, writes it, and
-/// dials the crew it holds, as a late joiner (record/areas/network/01-between-machines.md, "A
-/// session file after a long outage").
+/// dials the crew it holds, as a late joiner, or with no crew, takes control as a host does
+/// (record/areas/network/01-between-machines.md, "A session file after a long outage").
 pub(crate) fn session_file(me: &mut Session, bytes: Option<&[u8]>, cx: &mut Cx) {
     let Some(bytes) = bytes else {
         return;
@@ -530,6 +536,12 @@ fn start_with(me: &mut Session, start: Start, cx: &mut Cx) {
     // A core back from a restart returns to a session the pilot joined long ago, so it's no
     // attempt, whoever answers its dials.
     let dialing = !start.host && start.restart == 0 && !start.crew.is_empty();
+    // A core back from a restart learns who flies from the crew's first message, and a file with
+    // no crew has nobody to send one, so without this it would never set the session's aircraft.
+    // A member leaves the file's crew only when it leaves the session, so no other member holds
+    // it, and nobody else can fly. So the core takes control again, as a host does, and preflight
+    // starts over: none in the air, and Ready again on the ground.
+    let alone = start.restart > 0 && start.crew.is_empty();
     me.held = Some(Held {
         dialing,
         opening: start.host,
@@ -550,7 +562,11 @@ fn start_with(me: &mut Session, start: Start, cx: &mut Cx) {
         was_in: BTreeSet::new(),
         away: BTreeMap::new(),
         ended_seen: false,
-        restarted: start.restart > 0,
+        // A core flagged as restarted passes control on at the first message that reaches it
+        // while it holds a control value, taking that message for the crew's. A core back alone
+        // already holds the value it made, so the flag would hand control to the first joiner
+        // already in the flight.
+        restarted: start.restart > 0 && !alone,
         file: FileState::default(),
         run: start.run,
         countdown: None,
@@ -563,8 +579,11 @@ fn start_with(me: &mut Session, start: Start, cx: &mut Cx) {
     me.write(wire::MEMBER, entry.as_ref(), cx);
     me.write(wire::READY, Some(&Ready::default()), cx);
     matching::write_mine(me, cx);
-    // The host is the pilot flying when a session starts.
-    if start.host {
+    // The host is the pilot flying when a session starts, and so is a core back alone.
+    if start.host || alone {
+        if alone {
+            tracing::info!("this core is back alone in its session, so it takes control again");
+        }
         control::make(me, start.me.pilot, cx);
         me.write(wire::PREFLIGHT, Some(&Preflight::default()), cx);
     }

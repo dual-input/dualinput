@@ -20,6 +20,13 @@
       "port": 5190
     },
     {
+      "name": "profile-panel",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tools/dev.ts", "profile-panel"],
+      "port": 5190,
+      "url": "http://127.0.0.1:5190"
+    },
+    {
       "name": "figure-dev",
       "runtimeExecutable": "node",
       "runtimeArgs": ["experiments/areas/avatars/figure/serve.mjs"],

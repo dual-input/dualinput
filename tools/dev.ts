@@ -8,7 +8,9 @@
 //   node tools/dev.ts [page]       the kit's page by default, or a page's own file
 //
 // While it runs, http://127.0.0.1:5190 serves the page to a browser too, though only the debugger's
-// window draws what the sim's engine draws. These drive that window, from another shell:
+// window draws what the sim's engine draws. A page that runs in a browser engine rather than the
+// sim's, as the desktop app's and the profile panel's do, gets no debugger, and the browser alone
+// draws it. These drive the debugger's window, from another shell:
 //
 //   POST /eval   { "code": "document.title" }      runs JavaScript in the page, and answers its result
 //   POST /shot   { "file": "out.png" }             saves a picture of the window
@@ -18,7 +20,7 @@
 //   POST /wheel  { "x": 100, "y": 100, "notches": 3 }   turns the wheel there
 //   POST /type   { "text": "abc" }                 types into the field with the focus
 
-import { spawn } from "node:child_process"
+import { spawn, type ChildProcess } from "node:child_process"
 import fs from "node:fs"
 import http from "node:http"
 import path from "node:path"
@@ -118,6 +120,11 @@ async function afterBuild(): Promise<void> {
   const started = Date.now()
   const css = path.join(dir, "app.css")
   await writeCss(name, page!, dir)
+  // A page that runs in a browser engine never meets Coherent GT, so its findings would only be noise.
+  if (page!.simRules === null) {
+    console.log(`built in ${Date.now() - started}ms`)
+    return order({ reload: true })
+  }
   const findings = [path.join(dir, "app.js"), css].flatMap((file) => checkFile(file).map((f) => format(fromRoot(file), f)))
   for (const finding of findings) console.log(finding)
   console.log(`built in ${Date.now() - started}ms, ${findings.length ? `${findings.length} Coherent GT findings` : "no Coherent GT findings"}`)
@@ -156,6 +163,9 @@ function answer(res: http.ServerResponse, out: unknown): void {
   res.end(JSON.stringify(out))
 }
 
+/** The calls that drive the debugger's window, which a page that runs in a browser engine has none of. */
+const WINDOW = new Set(["/shot", "/click", "/drag", "/hover", "/wheel", "/type"])
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://x")
   if (req.method === "POST") {
@@ -165,6 +175,7 @@ const server = http.createServer(async (req, res) => {
       return res.end()
     }
     const body = JSON.parse((await readBody(req)) || "{}")
+    if (!host && WINDOW.has(url.pathname)) return answer(res, { error: `${name} runs in a browser, so no debugger's window draws it` })
     switch (url.pathname) {
       case "/log":
         console.log(`page ${body.level}: ${body.text}`)
@@ -176,21 +187,21 @@ const server = http.createServer(async (req, res) => {
       case "/eval":
         return answer(res, await evalInPage(body.code))
       case "/shot":
-        return answer(res, { saved: shoot(host.pid!, path.resolve(body.file)) })
+        return answer(res, { saved: shoot(host!.pid!, path.resolve(body.file)) })
       case "/click":
-        click(host.pid!, body.x, body.y)
+        click(host!.pid!, body.x, body.y)
         return answer(res, {})
       case "/drag":
-        drag(host.pid!, body.x, body.y, body.toX, body.toY, body.steps ?? 8, body.every ?? 16)
+        drag(host!.pid!, body.x, body.y, body.toX, body.toY, body.steps ?? 8, body.every ?? 16)
         return answer(res, {})
       case "/hover":
-        hover(host.pid!, body.x, body.y)
+        hover(host!.pid!, body.x, body.y)
         return answer(res, {})
       case "/wheel":
-        wheel(host.pid!, body.x, body.y, body.notches ?? 1)
+        wheel(host!.pid!, body.x, body.y, body.notches ?? 1)
         return answer(res, {})
       case "/type":
-        type(host.pid!, body.text)
+        type(host!.pid!, body.text)
         return answer(res, {})
       default:
         res.writeHead(404)
@@ -222,17 +233,23 @@ await new Promise<void>((resolve) => server.listen(PORT, "127.0.0.1", resolve))
 
 // ---------------------------------------------------------------- the debugger's copy
 
-// A copy, since its start page is what's replaced, and under target/, since its files are Microsoft's
-// and Coherent Labs'.
-const hostDir = path.join(OUT, "host")
-if (!fs.existsSync(hostDir)) fs.cpSync(path.join(sdkFolder(), "Tools", "CoherentGT Debugger"), hostDir, { recursive: true })
-fs.writeFileSync(path.join(hostDir, "html", "debugger.html"), `<html><body style="margin:0;background:#000"><iframe src="http://127.0.0.1:${PORT}/" style="position:absolute;left:0;top:0;width:100%;height:100%;border:0"></iframe></body></html>`)
-const host = spawn(path.join(hostDir, "Debugger.exe"), [], { cwd: hostDir, stdio: "ignore" })
-host.on("exit", () => {
-  console.log("the debugger's window closed")
-  process.exit(0)
-})
-process.on("exit", () => host.kill())
-// Wide enough for the EFB app at its largest beside its navigator's four columns.
-setTimeout(() => resize(host.pid!, 1540, 1000), 1500)
-console.log(`${name}: http://127.0.0.1:${PORT}, and in the debugger's window`)
+/** The debugger running the page, or null for a page that runs in a browser engine, which a browser alone draws. */
+const host = page.simRules === null ? null : openDebugger()
+console.log(host ? `${name}: http://127.0.0.1:${PORT}, and in the debugger's window` : `${name}: http://127.0.0.1:${PORT}`)
+
+function openDebugger(): ChildProcess {
+  // A copy, since its start page is what's replaced, and under target/, since its files are Microsoft's
+  // and Coherent Labs'.
+  const hostDir = path.join(OUT, "host")
+  if (!fs.existsSync(hostDir)) fs.cpSync(path.join(sdkFolder(), "Tools", "CoherentGT Debugger"), hostDir, { recursive: true })
+  fs.writeFileSync(path.join(hostDir, "html", "debugger.html"), `<html><body style="margin:0;background:#000"><iframe src="http://127.0.0.1:${PORT}/" style="position:absolute;left:0;top:0;width:100%;height:100%;border:0"></iframe></body></html>`)
+  const opened = spawn(path.join(hostDir, "Debugger.exe"), [], { cwd: hostDir, stdio: "ignore" })
+  opened.on("exit", () => {
+    console.log("the debugger's window closed")
+    process.exit(0)
+  })
+  process.on("exit", () => opened.kill())
+  // Wide enough for the EFB app at its largest beside its navigator's four columns.
+  setTimeout(() => resize(opened.pid!, 1540, 1000), 1500)
+  return opened
+}

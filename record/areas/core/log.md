@@ -3,6 +3,30 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-11-25: A helper warning named the feature by its unit's name, so each feature registers its warning's title
+
+**Asked:** what a pilot reads when the core helper can't carry out a want (issue dual-input/dualinput#10).
+
+**Expected:** a title that says what stopped working, as [the helper's life](04-core-helper.md#the-helpers-life) has the service show "a warning naming the feature whose want failed".
+
+**Found:** the service built each title from `owner`, the unit's name in the code, in `src/platform/core-helper-service/src/life.rs`: a bound key's as `format!("Your {owner} key isn't working")`, and every other want's as `format!("{owner}'s {what} isn't working")`, so a pilot read "avatars's mouse isn't working" and "atc-audio's audio capture isn't working".
+The bound key's title read well only because the unit is called take-control.
+A failure that arrived after its want went off still raised a warning, with "Dual Input" as its `owner`.
+
+**Changed:** each feature gives its warning's title as it registers a want, and the service shows that title, so the words stay with the feature that knows what the want is for (user, 2026-11-25):
+
+| Want | Title |
+| --- | --- |
+| Take-control's binding | Your take-control key isn't working |
+| Take-control's next press | Binding your take-control key isn't working |
+| Avatars' mouse | Your figure's pointing isn't working |
+| ATC audio's capture, on the ATC host | Sharing your ATC isn't working |
+| ATC audio's stream, on the other machines | The crew's ATC isn't playing |
+
+A failure that arrives after its want went off reaches only the log, since its warning would hold until some later change cleared it.
+
+**Affects:** [04-core-helper](04-core-helper.md)'s registration and the helper's life, in a note; [the architecture decision on the core helper](../architecture/decisions.md#the-core-helper-runs-while-a-feature-wants-something-of-it-and-the-core-sends-it-every-want-whole).
+
 ## 2026-11-18: Windows held a core's early writes to its log for up to 49ms on the loop's thread, so the log gets a writer of its own
 
 **Asked:** why the bench's `flight-model` scenario failed its first test in every run on `main` from 2026-11-16 to 2026-11-17, each time on the [1ms for a handler](../architecture/02-code-map.md#budgets), with the first core's slowest input #7 at 22,910µs to 44,331µs.

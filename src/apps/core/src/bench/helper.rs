@@ -62,11 +62,15 @@ impl BenchHelper {
                 development: false,
             },
         )
-        .binding(INPUT, BenchHelper::pressed)
-        .next_press(BenchHelper::next)
-        .mouse(BenchHelper::mouse)
-        .capture("bench", BenchHelper::captured)
-        .stream("bench")
+        .binding(INPUT, "The bench's key isn't working", BenchHelper::pressed)
+        .next_press("The bench's next press isn't working", BenchHelper::next)
+        .mouse("The bench's mouse isn't working", BenchHelper::mouse)
+        .capture(
+            "bench",
+            "The bench's capture isn't working",
+            BenchHelper::captured,
+        )
+        .stream("bench", "The bench's stream isn't working")
         .sound("bench", TONE);
     }
 

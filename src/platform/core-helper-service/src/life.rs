@@ -398,42 +398,40 @@ impl CoreHelper {
         self.changed(cx);
     }
 
-    /// A want the helper can't carry out: a warning naming the feature, until the want goes
-    /// off or the helper starts again.
+    /// A want the helper can't carry out: the warning its feature registered with it, until the
+    /// want goes off or the helper starts again.
     fn failed(&mut self, want: WantId, error: &str, cx: &Cx) {
-        let (owner, what, id) = match want {
+        // The name of the feature that has the want on, for the log, and the want's warning.
+        let (on, id) = match want {
             WantId::Binding(n) => (
                 self.bindings
                     .iter()
                     .find(|b| b.number == n)
-                    .and_then(|b| b.on),
-                "bound key or button",
+                    .and_then(|b| Some((b.on?, b.warning))),
                 format!("failed.binding-{n}"),
             ),
             WantId::NextPress => (
-                self.next_press.iter().find_map(|o| o.on),
-                "binding of a key or button",
+                self.next_press
+                    .iter()
+                    .find_map(|o| Some((o.on?, o.warning))),
                 "failed.next-press".into(),
             ),
             WantId::Mouse => (
-                self.mouse.iter().find_map(|o| o.on),
-                "mouse",
+                self.mouse.iter().find_map(|o| Some((o.on?, o.warning))),
                 "failed.mouse".into(),
             ),
             WantId::Capture(n) => (
                 self.captures
                     .iter()
                     .find(|c| c.number == n)
-                    .and_then(|c| Some(c.on.as_ref()?.1)),
-                "audio capture",
+                    .and_then(|c| Some((c.on.as_ref()?.1, c.warning))),
                 format!("failed.capture-{n}"),
             ),
             WantId::Stream(n) => (
                 self.streams
                     .iter()
                     .find(|s| s.number == n)
-                    .and_then(|s| Some(s.on.as_ref()?.1)),
-                "playback",
+                    .and_then(|s| Some((s.on.as_ref()?.1, s.warning))),
                 format!("failed.stream-{n}"),
             ),
             // The output device and the lists are the Settings tab's, which shows what's playing
@@ -444,16 +442,24 @@ impl CoreHelper {
                 return tracing::warn!(?want, error, "the core helper couldn't carry out a want");
             }
         };
-        let owner = owner.unwrap_or("Dual Input");
+        // A failure can arrive after its want went off, and a warning then would hold until some
+        // later change cleared it, so that failure reaches only the log.
+        let Some((owner, title)) = on else {
+            return tracing::warn!(
+                ?want,
+                error,
+                "the core helper couldn't carry out a want that's since gone off"
+            );
+        };
         tracing::warn!(
             ?want,
             owner,
             error,
             "the core helper couldn't carry out a want"
         );
-        // A pilot knows a binding by what it does and its key by its name, so a bound key's
-        // warning names the key and leaves the helper's own words to the log. Any other want's
-        // warning carries the helper's words as its detail.
+        // A pilot knows their key by its name, so a bound key's warning names the key and leaves
+        // the helper's own words to the log. Any other want's warning carries the helper's words
+        // as its detail.
         let bound = match want {
             WantId::Binding(n) => self.bindings.iter().find(|b| b.number == n).and_then(|b| {
                 cx.read::<Clients>()
@@ -462,22 +468,13 @@ impl CoreHelper {
             }),
             _ => None,
         };
+        let said = Notification::new(Level::Warning, title, Landing::Header);
         let said = match bound {
-            Some(bound) => Notification::new(
-                Level::Warning,
-                format!("Your {owner} key isn't working"),
-                Landing::Header,
-            )
-            .detail(format!(
+            Some(bound) => said.detail(format!(
                 "Windows didn't let Dual Input listen for {}.",
                 bound.name
             )),
-            None => Notification::new(
-                Level::Warning,
-                format!("{owner}'s {what} isn't working"),
-                Landing::Header,
-            )
-            .detail(error),
+            None => said.detail(error),
         };
         clients::notify(cx, &id, said);
         self.failed.insert(want, id);

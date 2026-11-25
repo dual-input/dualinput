@@ -24,6 +24,10 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > The read is for Win+L, which locks the PC: if Raw Input brings nothing from the lock screen's desktop, the Windows key's release never arrives, and no bound key presses until the pilot presses the Windows key again (unverified: pressing the bound key after Win+L and unlocking, without that read, settles it).
 > An `Input` saved before then reads as the key with no modifier.
 
+> **Note**
+> Since 2026-11-25, in [what a feature registers](#what-a-feature-registers-and-calls), each want but a sound and the phrases also takes its warning's title in the pilot's words, as `mouse("Your figure's pointing isn't working", f)`.
+> In [the helper's life](#the-helpers-life), a want the helper can't carry out shows that title in place of a warning naming the feature, and a failure that arrives after its want went off reaches only the log ([core log](log.md#2026-11-25-a-helper-warning-named-the-feature-by-its-units-name-so-each-feature-registers-its-warnings-title)).
+
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.
 Across the helper's standard input and output go postcard messages, each after a 4-byte length, and only what a feature asked for crosses: a bound key's or button's press, the next press while the pilot binds one, the mouse while the sim's main window is in front, and Opus frames.

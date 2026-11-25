@@ -130,7 +130,7 @@ impl Settings {
 pub fn register(r: &mut Registry) {
     let mut me = r.unit::<Avatars>("avatars");
     me.channel(wire::POSES, crew::Crew::on_pose)
-        .mouse(mouse::on_mouse)
+        .mouse("Your figure's pointing isn't working", mouse::on_mouse)
         .on_sim(sim::on_sim)
         .ends_with_profile()
         .on::<ProfileLoaded>(Avatars::loaded)

@@ -1217,7 +1217,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## The core helper runs while a feature wants something of it, and the core sends it every want whole
 
 - **Decided:** each feature registers its bindings, captures, playback streams, phrases, and the mouse with `core-helper-service`, each off until the feature turns it on, and its sounds, which the service sends after each `Hello`; the service runs the helper while anything is on, and sends it every want whole after its `Hello` and at each change.
-  A want the helper can't carry out it reports, and runs the rest, and the service shows a warning naming the feature.
+  The helper reports a want it can't carry out and runs the rest, and while that want is on, the service shows the title its feature registered with it, in the pilot's words, as "Your figure's pointing isn't working"; a failure that arrives after the want went off reaches only the log (user, 2026-11-25; [core log](../core/log.md#2026-11-25-a-helper-warning-named-the-feature-by-its-units-name-so-each-feature-registers-its-warnings-title)).
   When the helper exits while something is wanted, the service starts it again 2s later, for as long as something is wanted, and shows a trouble notification naming the features whose wants are on once 5s pass with no matching `Hello`; a helper whose version or hash differs is killed and counts as down.
   The helper sends no `Alive`, and the core kills no silent helper, since the writer thread that sent `Alive` kept sending while any other thread hung, so the kill caught only a deadlock of our own writer (the design review after node 6, user, 2026-10-18).
   The helper exits when its standard input closes.

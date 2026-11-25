@@ -91,8 +91,15 @@ pub fn register(r: &mut Registry) {
             development: false,
         },
     )
-    .binding(INPUT, TakeControl::on_press)
-    .next_press(TakeControl::on_next_press)
+    .binding(
+        INPUT,
+        "Your take-control key isn't working",
+        TakeControl::on_press,
+    )
+    .next_press(
+        "Binding your take-control key isn't working",
+        TakeControl::on_next_press,
+    )
     .sound(CONTROL_PASSED, include_bytes!("sounds/control-passed.opus"))
     .sound(REFUSED, include_bytes!("sounds/refused.opus"))
     .command(REQUEST, |me: &mut TakeControl, (): (), cx: &mut Cx| {

@@ -73,8 +73,8 @@ pub fn register(r: &mut Registry) {
         // so change all three together.
         .role_key(HOST, "Share my ATC")
         .channel(wire::FRAMES, AtcAudio::on_frame)
-        .capture(ATC, AtcAudio::captured)
-        .stream(ATC)
+        .capture(ATC, "Sharing your ATC isn't working", AtcAudio::captured)
+        .stream(ATC, "The crew's ATC isn't playing")
         .on::<KeyChanged>(|me, changed, cx| {
             if changed.key == HOST.number {
                 me.settle(cx);

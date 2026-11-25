@@ -175,13 +175,13 @@ async function withPage(t: TestContext, scenario: string) {
   return { core, helper, page, notifications }
 }
 
-test("a want the helper can't carry out warns, naming the feature, until the want goes off, and the device list ends at its answer or its failure", { timeout: 60_000 }, async (t) => {
+test("a want the helper can't carry out warns in the words its feature registered, until the want goes off, and the device list ends at its answer or its failure", { timeout: 60_000 }, async (t) => {
   const { core, helper, page, notifications } = await withPage(t, "core-helper-failed")
   core.helper({ act: "mouse", on: true })
   await helper.until(() => helper.latest?.wants().at(-1)?.mouse === true, "wants the mouse")
   helper.latest!.act({ act: "failed", want: "Mouse", error: "Raw Input refused the mouse" })
   await page.until(() => notifications().some((n) => n.id === "core-helper.failed.mouse"), "the mouse's warning")
-  assert.match(notifications().find((n) => n.id === "core-helper.failed.mouse")!.text, /bench-helper's mouse isn't working/)
+  assert.equal(notifications().find((n) => n.id === "core-helper.failed.mouse")!.text, "The bench's mouse isn't working")
   core.helper({ act: "mouse", on: false })
   await page.until(() => !notifications().some((n) => n.id === "core-helper.failed.mouse"), "the warning clearing with the mouse off")
   await helper.until(() => helper.latest!.closed !== undefined, "its exit with nothing wanted")

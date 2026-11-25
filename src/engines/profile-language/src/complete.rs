@@ -276,13 +276,6 @@ fn keys(
                     out.push(field(f, n, replace));
                 }
             }
-            if !has("write") {
-                match table {
-                    Table::StateEntry => snippets(&[&TOGGLE, &STEPPING, &FUNCTION], &mut out),
-                    Table::EventEntry => snippets(&[&FUNCTION], &mut out),
-                    _ => {}
-                }
-            }
         }
     }
     out
@@ -294,10 +287,24 @@ fn counted_entry(o: &Outline, l: usize, indent: usize) -> bool {
     let write = (0..l)
         .rev()
         .find(|&k| !is_blank(o.line(k)) && indent_of(o.line(k)) < indent);
-    write.is_some_and(|w| {
-        let fields = siblings(o, w, indent_of(o.line(w)));
-        fields.iter().any(|(k, v, _)| k == "watch" && v.is_none())
-    })
+    write.is_some_and(|w| counts(o, w, indent_of(o.line(w))))
+}
+
+/// Whether the field on line `l` holds a map or a block on the lines below it: the next line with
+/// text is indented past the field's.
+fn holds_lines_below(o: &Outline, l: usize) -> bool {
+    let indent = indent_of(o.line(l));
+    (l + 1..o.lines.len())
+        .find(|&k| !is_blank(o.line(k)))
+        .is_some_and(|k| indent_of(o.line(k)) > indent)
+}
+
+/// Whether the entry whose field is on line `l`, at `indent`, counts events into a shadow value:
+/// its `watch:` is a map, on the lines below it.
+fn counts(o: &Outline, l: usize, indent: usize) -> bool {
+    siblings(o, l, indent)
+        .iter()
+        .any(|(k, v, _)| k == "watch" && v.is_none())
 }
 
 /// A field's completion, which writes its key and offers its value next.
@@ -431,6 +438,27 @@ fn values(
             );
         }
     }
+    // The forms a write takes besides a name and `none` come after the names, on `write:` itself,
+    // which an author reaches by typing it or by picking the field. An event entry's write takes
+    // no map, since an event has no value of the cockpit's to compare or step from. A write that
+    // already holds a map or a block on the lines below gets none, since a form would add a second.
+    if key == "write" && !holds_lines_below(o, l) {
+        let forms: &[&Snippet] = match p.as_slice() {
+            ["state", _] if counts(o, l, indent) => &[&TOGGLE, &COUNTED_STEPPING, &FUNCTION],
+            ["state", _] => &[&TOGGLE, &STEPPING, &FUNCTION],
+            ["events", _] => &[&FUNCTION],
+            _ => &[],
+        };
+        for (n, s) in forms.iter().enumerate() {
+            // A map starts on the line below, so it takes no space after the colon.
+            let lead = if s.body.starts_with('\n') { "" } else { space };
+            out.push(Completion {
+                insert: format!("{lead}{}", s.body),
+                sort: format!("2{n:02}"),
+                ..s.completion(replace, n)
+            });
+        }
+    }
     Some(out)
 }
 
@@ -516,16 +544,32 @@ const EVENT_ENTRY: Snippet = Snippet {
     body: "${1:key}:\n  name: ${2:name}\n  watch: K('${3}')\n  write: K('${3}')",
 };
 
+// The four forms below are `write:`'s value, so each starts after `write:`, a map on the line
+// below it.
+
 const TOGGLE: Snippet = Snippet {
     label: "toggle",
     detail: "A write that sends an event when the wanted value differs",
-    body: "write:\n  toggle: K('${1}')",
+    body: "\n  toggle: K('${1}')",
 };
 
 const STEPPING: Snippet = Snippet {
     label: "stepping write",
     detail: "A write that steps the control with inc and dec",
-    body: "write:\n  inc: K('${1}')\n  dec: K('${2}')\n  wrap: ${3|false,true|}\n  range: [${4:0}, ${5:359}]",
+    body: "\n  inc: K('${1}')\n  dec: K('${2}')\n  wrap: ${3|false,true|}\n  range: [${4:0}, ${5:359}]",
+};
+
+/// A counted entry's write steps by the count's `wrap` and `range`.
+const COUNTED_STEPPING: Snippet = Snippet {
+    label: "stepping write",
+    detail: "A write that steps the count with inc and dec",
+    body: "\n  inc: K('${1}')\n  dec: K('${2}')",
+};
+
+const FUNCTION: Snippet = Snippet {
+    label: "write function",
+    detail: "A write function, which writes through write()",
+    body: "|\n  (value) => {\n    write(L('${1}'), value)\n  }",
 };
 
 /// `inc` in an empty write map, with the fields that go with it.
@@ -540,12 +584,6 @@ const COUNTED_STEPS: Snippet = Snippet {
     label: "inc",
     detail: "inc, with dec",
     body: "inc: K('${1}')\ndec: K('${2}')",
-};
-
-const FUNCTION: Snippet = Snippet {
-    label: "write function",
-    detail: "A write function, which writes through write()",
-    body: "write: |\n  (value) => {\n    write(L('${1}'), value)\n  }",
 };
 
 const SECTION: Snippet = Snippet {

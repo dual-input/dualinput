@@ -54,6 +54,10 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > In [features](#features), state sync uses `sim-variables` and holds no routine or panel module: its routine `NamedEvents` becomes the routine host's own, as `Hold` and `Camera` are, renamed `HtmlAndInputEvents`, so the module's list gains `routine_host::HtmlAndInputEvents` and [names the sim shares](#names-the-sim-shares) `DUALINPUT_ROUTINE_HTML_AND_INPUT_EVENTS`, and its two panel modules are `sim-variables`'.
 
 > **Note**
+> In [the map check](#the-map-check), the engines that only tools link are a list in the script, `profile-language` alone, and the loop's I/O rule skips them, since none runs on the loop: `profile-language` reaches `windows-sys` through the parser of dprint-plugin-typescript, [the formatter's](../profiles/03-the-extension.md#scripts), which grows its stack with `stacker` (read in `Cargo.lock`: stacker 0.1.25 depends on windows-sys 0.61.2).
+> The script fails any crate outside `tools/` that depends on one, so none comes onto the loop unchecked (user, 2026-11-25).
+
+> **Note**
 > From stage 22h, `src/platform/tape` joins, a platform crate in the core on a line of its own above the platform's top line, using `cockpit-stream`, `profile-loader`, `session`, and `clients`, which records the cockpit stream's messages and plays them back into the same cockpit from a pretend sender, for the profile extension's recorder ([05-the-recorder](../profiles/05-the-recorder.md#how-it-works); user, 2026-11-23).
 > In [features](#features), flight-model sync uses `tape` too, which records its samples and hands them back to it during a playback ([flying the recorded path](../profiles/05-the-recorder.md#flying-the-recorded-path); user, 2026-11-24).
 

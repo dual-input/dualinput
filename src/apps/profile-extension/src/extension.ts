@@ -205,9 +205,28 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
   )
   show()
-  // A server that fails to start leaves the commands and the status bar working, and the client
-  // shows the failure and logs it to the Output panel.
-  server.start().catch(() => undefined)
+  // The client tells the server of each language change, so the open profiles are refreshed before
+  // it starts. A server that fails to start leaves the commands and the status bar working, and the
+  // client shows the failure and logs it to the Output panel.
+  void refreshOptions(output).then(() => server.start().catch(() => undefined))
+}
+
+/**
+ * Gives each open profile the editor settings package.json's `configurationDefaults` sets for the language, bracket pair
+ * colorization off among them, which a profile VS Code restored at startup lacks. VS Code keeps no extension's defaults
+ * for a language between sessions, and a restored profile keeps its bracket colors until it's reopened. A language
+ * change makes VS Code read the language's settings again, so each profile goes to plain text and back
+ * (record/areas/profiles/03-the-extension.md, "Highlighting").
+ */
+async function refreshOptions(output: vscode.LogOutputChannel): Promise<void> {
+  for (const document of vscode.workspace.textDocuments.filter((open) => open.languageId === LANGUAGE)) {
+    try {
+      await vscode.languages.setTextDocumentLanguage(document, "plaintext")
+      await vscode.languages.setTextDocumentLanguage(document, LANGUAGE)
+    } catch (error) {
+      output.error(`Dual Input couldn't refresh ${profileName(document.uri.path)}'s editor settings: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
 }
 
 export function deactivate(): Promise<void> | undefined {

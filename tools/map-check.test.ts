@@ -79,7 +79,9 @@ test("a tree that keeps every rule passes", () => {
           deps: ["pointer-sync", "kernel", "routines"],
           source: `unsafe extern "C" {\n    fn _set_FMA3_enable(flag: i32) -> i32;\n}\n`,
         },
-        { dir: "tools/thing", name: "thing", deps: ["messages"] },
+        // An engine only tools link may reach I/O, since none of it runs on the loop.
+        { dir: "src/engines/profile-language", name: "profile-language", deps: ["messages", "windows-sys"] },
+        { dir: "tools/thing", name: "thing", deps: ["messages", "profile-language"] },
       ],
       [
         { dir: "outside/derive", name: "derive", deps: ["windows-sys"], procMacro: true },
@@ -212,6 +214,25 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
         { dir: "outside/tokio", name: "tokio" },
       ],
     ),
+  },
+  {
+    name: "a loop crate reaching an engine only tools link",
+    rules: ["tool-engines"],
+    tree: rust(
+      [
+        { dir: "src/features/traffic/core", name: "traffic", deps: ["profile-language"] },
+        { dir: "src/engines/profile-language", name: "profile-language", deps: ["windows-sys"] },
+      ],
+      [{ dir: "outside/windows-sys", name: "windows-sys" }],
+    ),
+  },
+  {
+    name: "the core's program linking an engine only tools link",
+    rules: ["tool-engines"],
+    tree: rust([
+      { dir: "src/apps/core", name: "dualinput-core", deps: ["profile-language"] },
+      { dir: "src/engines/profile-language", name: "profile-language" },
+    ]),
   },
   {
     name: "a loop crate reaching the transport",

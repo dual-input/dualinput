@@ -43,6 +43,9 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 > - In [what fails a load](#what-fails-a-load), a script that declares `state`, `write`, `L`, `A`, `B`, `K`, or `H`, the names Dual Input gives every script, fails the build, so a script's `state` and `write` are always Dual Input's; `value` stays free, since every write function names its parameter `value` ([checks](03-the-extension.md#checks)).
 > - What this document asks of the IDE's editor, such as filling in `dec`, `wrap`, and `range` once `inc` is typed, the profile extension does until the IDE comes, and the extension is the tool in [testing an edit](#testing-an-edit) that builds each save into the local folder.
 
+> **Note**
+> In [layout](#layout), a formatter lays out a script's JavaScript rather than leaving its lines as they are, and writes a script it finds on the `write:` line as a `|` block, as [scripts](03-the-extension.md#scripts) gives (user, 2026-11-23).
+
 [22d]: log.md#2026-11-22-the-profile-extensions-design-finds-what-vs-code-reads-of-a-vsix-and-a-language-what-vsce-costs-and-what-zed-allows-and-the-format-puts-seats-last-and-takes-single-quotes
 
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Dual Input defines.

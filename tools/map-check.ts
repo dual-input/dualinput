@@ -58,6 +58,7 @@ export type Rule =
   | "feature-parts" // each part may use messages and its own platform: routines the routine host and loop engines, panel modules the panel bridge, sections their app's shell
   | "nothing-on-apps" // nothing may use src/apps/, src/sim-package/, or tools/
   | "loop-io" // a loop crate may not reach a crate that does I/O, directly or through others (see EDGE_ENGINES)
+  | "tool-engines" // only a tool may depend on an engine only tools link (see TOOL_ENGINES)
   | "foreign-functions" // only the sim edge and our WASM module may declare foreign functions, and src/apps/core only _set_FMA3_enable
   | "feature-moments" // a feature may not implement Moment, since only the platform raises moments, the events features learn of each other through
   | "platform-names-feature" // the platform may not name a feature's module in messages
@@ -95,6 +96,12 @@ const PAGE_SHELLS = ["efb-shell", "banner", "desktop-shell"]
 // in tests. The loop's rules don't hold for them. The comments on the loop's lints in the
 // root Cargo.toml and clippy.toml list the same crates, so change all three together.
 const EDGE_ENGINES = ["sim-edge", "transport", "stand-in-sim"]
+
+// The engines only tools link, which run in the tools' programs and never on the loop, so the
+// loop's I/O rule skips them: profile-language reaches windows-sys through dprint's parser,
+// which grows its stack with stacker. Any crate outside tools/ that depends on one fails, so
+// none comes onto the loop unchecked.
+const TOOL_ENGINES = ["profile-language"]
 
 // The crates that do I/O, which no loop crate may reach. A crate that does I/O but isn't
 // listed passes, so when you add a dependency to a loop crate, check what it does, and
@@ -166,6 +173,7 @@ const sameUnit = (a: Unit, b: Unit) =>
 
 /** Whether one of our crates may depend on another, or the rule it breaks. */
 function crateRule(from: Unit, to: Unit): Rule | null {
+  if (to.tier === "engine" && TOOL_ENGINES.includes(to.name) && from.tier !== "tool") return "tool-engines"
   if (to.tier === "app" || to.tier === "sim-package" || to.tier === "tool") {
     // The one exception, which the note at the top of the code map allows: src/apps/core links
     // src/sim-package/routines, so tests can run our WASM module's routines inside the core,
@@ -305,10 +313,10 @@ function checkCrates(root: string, features: Set<string>, findings: Finding[]): 
   if (fs.existsSync(path.join(desktop, "Cargo.toml"))) checkRustSource({ id: "", name: "dualinput-desktop", dir: desktop, rel: "src/apps/desktop", unit: { tier: "app", name: "desktop" } }, features, findings, root)
 }
 
-/** Every crate outside src/apps/, src/sim-package/, tools/, and the edge engines runs on the loop. */
+/** Every crate outside src/apps/, src/sim-package/, tools/, the edge engines, and the tool engines runs on the loop. */
 function isLoopCrate(u: Unit): boolean {
   if (u.tier === "app" || u.tier === "sim-package" || u.tier === "tool") return false
-  return !(u.tier === "engine" && EDGE_ENGINES.includes(u.name))
+  return !(u.tier === "engine" && (EDGE_ENGINES.includes(u.name) || TOOL_ENGINES.includes(u.name)))
 }
 
 /** Each I/O crate that `start` reaches through normal dependencies, as the chain of crates that leads to it, such as `helper -> tokio`. */
@@ -322,6 +330,9 @@ function ioReached(start: string, deps: Map<string, string[]>, names: Map<string
       if (via.has(dep)) continue
       via.set(dep, id)
       const unit = ours.get(dep)?.unit
+      // A tool engine breaks a rule of its own here, which names it, so its dependencies aren't
+      // reported again.
+      if (unit?.tier === "engine" && TOOL_ENGINES.includes(unit.name)) continue
       const io = unit ? unit.tier === "engine" && EDGE_ENGINES.includes(unit.name) : IO_CRATES.has(names.get(dep)!)
       if (io) {
         const chain = []

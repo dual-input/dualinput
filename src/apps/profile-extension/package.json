@@ -107,6 +107,7 @@
     },
     "configurationDefaults": {
       "[dualinput-profile]": {
+        "editor.defaultFormatter": "dual-input.dualinput-profiles",
         "editor.formatOnSave": true,
         "editor.formatOnType": true,
         "editor.tabSize": 2,

@@ -4,7 +4,12 @@ version.workspace = true
 edition.workspace = true
 publish = false
 
+# dprint-plugin-typescript, Deno's code formatter as a library, formats each script's JavaScript, so
+# a script takes one layout as the rest of a file does (record/areas/profiles/03-the-extension.md,
+# "Formatting"). It's pinned, since a patch that changed its layout would fail CI's `format --check`
+# on every committed profile, and the extension and CI would write different layouts.
 [dependencies]
+dprint-plugin-typescript = "=0.101.0"
 profile-engine = { path = "../profile-engine" }
 
 [lints]

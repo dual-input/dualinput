@@ -25,6 +25,7 @@ mod hover;
 mod indent;
 mod navigate;
 mod outline;
+mod script;
 mod symbols;
 
 pub use complete::{Completion, CompletionKind, Context, complete, in_script};

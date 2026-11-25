@@ -84,6 +84,8 @@ The extension sets that default through `configurationDefaults` in its `package.
 VS Code matches a theme-specific key such as `[*Light*]` against the theme's name and nothing else (read in VS Code 1.140.0, `workbench.desktop.main.js`, `isThemeScopeMatch`).
 So the dark palette is the default, and the light one goes to every theme whose name holds "Light".
 VS Code's bracket pair colorization, which paints brackets gold, violet, and blue by their depth over any token's color, is off for the language the same way, so brackets take the punctuation's gray; VS Code reads that setting for each file by its language (read in VS Code 1.147.0, `workbench.desktop.main.js`, `getCreationOptions`; user, 2026-11-22).
+VS Code keeps no extension's defaults for a language between sessions, and a profile it restores at startup keeps its bracket colors until it's reopened (read in VS Code 1.147.0, `workbench.desktop.main.js`, `updateCachedConfigurationDefaultsOverrides`; user, 2026-11-23).
+So as it starts, the extension changes each open profile's language to plain text and back, since a language change makes VS Code read the language's settings again (read in VS Code 1.147.0, `workbench.desktop.main.js`, `_onDidChangeLanguage`; user, 2026-11-24).
 `experiments/areas/profiles/colors/colors.mjs` shows both palettes on a sample profile, colored through the real grammars, with a picker for each color, for changing them by eye.
 
 A theme's name can mislead, so as it starts and whenever the theme changes, the extension asks VS Code whether the active theme is light, dark, or high contrast, and where that differs from what the defaults give a theme of that name, it writes the right palette under that theme's name in the author's own `editor.tokenColorCustomizations`, with no prompt (user, 2026-11-22).
@@ -98,7 +100,7 @@ Every list comes from the profile engine's own blocks and levels, so the editor 
 | --- | --- |
 | A file's top level, or an entry | The keys and fields that aren't there yet, in [Layout](01-format-and-delivery.md#layout)'s order, each with its one-line description; a module offers only what a module takes |
 | `owner:`, `maturity:`, `wrap:` | `pilot_flying` and `shared`; `stable` and `experimental`; `true` and `false` |
-| `write:` | `none`, and the name calls |
+| `write:` | `none` and the name calls, then the [snippets](#snippets) for a toggle, a stepping write, and a write function; in an event entry, the write function is the only snippet, since an event entry's write takes no map |
 | `only:`, and a `location:` map's keys | The profile's variant IDs |
 | `import:` | The modules in `profiles/modules/`, by their paths without `.yaml` |
 | A field that takes a name | Only the kinds it takes: a state entry's `watch:` offers no `K()` or `H()`, an event entry's `watch:` no `A()`, and `toggle:` only `K()`, `H()`, and `B()`; each goes in with its quotes and its unit's place, as `A('', '')` |
@@ -151,13 +153,15 @@ The server gives VS Code each file's symbols and folding ranges, from which VS C
 
 ## Formatting
 
-The formatter writes [Layout](01-format-and-delivery.md#layout), with the changes this stage makes to it in [01-format-and-delivery](01-format-and-delivery.md)'s note of stage 22d.
+The formatter writes [Layout](01-format-and-delivery.md#layout), with the changes to it in [01-format-and-delivery](01-format-and-delivery.md)'s notes of stage 22d and of 2026-11-23.
 It runs on Format Document (Shift+Alt+F), and at each save before the save's build, since the extension turns on VS Code's `editor.formatOnSave` for its language alone.
+The extension also names itself the language's `editor.defaultFormatter`, since with a second formatter such as Prettier offered for a profile and neither set as the default, VS Code formatted nothing on save (user, 2026-11-23).
 
 - It puts the top-level keys in Layout's order, each with the comments above it, and an entry's fields in their table's order; indents 2 spaces; writes a bracketed map out on its own lines, from the entries its line holds, since YAML's own reading splits one at its commas; and writes a list of numbers or variant IDs on one line, in brackets, and every other list, of names, folders, imports, or displays, one item to a line.
 - Outside scripts, it writes a value plain where YAML reads it as the same text, and in single quotes where it doesn't: `name: 'Left mixture'` becomes `name: Left mixture`, while `name: 'Radio: COM1'` keeps its quotes, since a colon and a space would start a map.
 - It writes each heading in Layout's form, fsc-editor's forms among them, with its rule running on to column 100, as in `# ═══ ELECTRICAL ═══…`, so a section shows as a line across the file in any editor, as fsc-editor's did to 78 columns (user, 2026-11-22), and it reflows comments, as [comments](#comments) gives.
-- It never changes the order of entries, which is the author's and the bundle's, the words of a comment, or any line of a script.
+- It lays out each script's JavaScript, as [scripts](#scripts) gives.
+- It never changes the order of entries, which is the author's and the bundle's, or the words of a comment.
 - A file that doesn't parse as YAML gets no edits, and its errors show.
 
 Pressing Enter puts the caret where the formatter would put the next line, from the same code (user, 2026-11-22): 2 spaces in under `state:`, 4 under an entry's key, under the field after a field, and 2 deeper than `write:` after `write: |`.
@@ -179,6 +183,20 @@ These keep their lines, neither joined nor broken:
 - a line whose text starts with an entry's key or a field and a colon, such as `# watch: L('X')`, which is an entry set aside rather than prose, where a sentence such as `# A known limit: as` starts with a capital and goes on reflowing;
 - a comment after a value on the same line.
 
+### Scripts
+
+The formatter lays out each script's JavaScript with dprint-plugin-typescript 0.101.0, Deno's code formatter as a Rust library, since a script edited by hand comes out as ragged as a comment, and CI's `format --check` then holds every author's scripts to one layout, as it holds the rest of a profile (user, 2026-11-23).
+The layout is the one the 58P's scripts were written in: 2 spaces to a level, single quotes but for a string that holds more single quotes than double, no semicolons, and lines broken to fit 100 columns, their indent included.
+Run on the 58P's profile, dprint left 17 of its 18 scripts as they were, and broke the 18th's one line of 108 columns, `const vsHold = …`, into three (measured with `dualinput-profile-builder format`, 2026-11-23).
+It took the builder from 13.4 MB to 17.8 MB, and the `.vsix` from 4.2 MB to 6.0 MB (measured on our development machine, 2026-11-23, a release build).
+
+- A script on the `write:` line goes into a `|` block below it, since [Layout](01-format-and-delivery.md#layout) writes every script as one.
+  A value YAML reads as a boolean, a number, or null, as `write: true`, stays on the line, since it's no script, and the engine's checks report it.
+  A script written plain over two lines or more, as `write: (value) =>` with the rest on the lines below, keeps its lines, since the formatter moves only a script that the `write:` line holds whole.
+- A script that doesn't parse, as while you're typing it, keeps its lines, and TypeScript's check shows why.
+- A folded block, `>`, keeps its lines and its `>`, since YAML reads each of its line breaks as a space, except before a more-indented line, so a break dprint added, removed, or indented would change the text the script runs as.
+- dprint runs in `profile-language`, in Rust, so formatting a script waits on neither of TypeScript's runtimes, and `cargo test` covers it.
+
 ### Quotes
 
 Outside a script, a profile takes single quotes only: a double-quoted string in a YAML value, or in a name call on a YAML line, fails the build, with an error that shows it in single quotes (user, 2026-11-22).
@@ -191,6 +209,8 @@ The formatter and the bundle writer ask one test of the engine's whether a value
 ## Snippets
 
 The server offers each snippet as a completion only where it fits, such as a state entry inside `state:`, where a snippet file of VS Code's would offer every one everywhere (user, 2026-11-22).
+The three forms of a write come on `write:` itself, after the names, since an author who types the field and one who picks it from the list both end with the caret there (user, 2026-11-23).
+So an entry's list of fields holds `write` once, rather than `write` beside three snippets that each write it too.
 Each starts with the caret on its first blank, which is the entry's key where it has one, and Tab moves to the next blank.
 Each writes its fields in their table's order, as the formatter would, so a counted entry's `default:` comes after its `write:`.
 
@@ -200,10 +220,10 @@ Each writes its fields in their table's order, as the formatter would, so a coun
 | A new module | In an empty file in `profiles/modules/`: `authors`, and one state entry with blanks |
 | A state entry | Its key, `name`, `watch: L('')`, and a `write:` that takes the same name as you type the watch's |
 | A watch-only entry | The same, with `write: none` |
-| A toggle | `write:`, with `toggle: K('')` on the line below it |
-| A stepping write | `inc:`, `dec:`, `wrap:`, and `range:` |
+| A toggle | After `write:`, `toggle: K('')` on the line below it |
+| A stepping write | After `write:`, `inc:`, `dec:`, `wrap:`, and `range:` on the lines below it; in a counted entry, `inc:` and `dec:` alone, since its write steps by the `wrap:` and `range:` its `watch:` gives |
 | A counted entry | A counting `watch:` with `inc:`, `dec:`, `wrap:`, and `range:`, a stepping `write:`, and `default:` |
-| A write function | `write: \|`, with `(value) => {` and `write(L(''), value)` inside |
+| A write function | After `write:`, `\|`, with `(value) => {` and `write(L(''), value)` inside |
 | An event entry | Its key, `name`, `watch: K('')`, and a `write:` with the same name |
 | A heading | `# ═══ ` for a section, or `# ── ` for a subsection, at the entries' indent |
 | A seat | `name`, `hip`, `knees`, `feet`, and `eye`, with zeros to tune |
@@ -311,7 +331,7 @@ One runtime took 243ms to load and held 43 MB once it had answered the 58P's req
 ### The extension
 
 - It's TypeScript, checked by the root's TypeScript against `@types/vscode` 1.91.0, the lowest VS Code that `engines.vscode` takes in the `package.json` of `vscode-languageclient` 11.0.1, Microsoft's client for language servers (read on npm, 2026-11-22).
-- It gives its language VS Code's `editor.formatOnSave` and `editor.formatOnType`, `editor.tabSize` at 2, `editor.insertSpaces`, and `editor.bracketPairColorization.enabled` off, as defaults for that language alone.
+- It gives its language itself as `editor.defaultFormatter`, VS Code's `editor.formatOnSave` and `editor.formatOnType`, `editor.tabSize` at 2, `editor.insertSpaces`, and `editor.bracketPairColorization.enabled` off, as defaults for that language alone.
 - esbuild bundles it into one CommonJS file, with `vscode` left out as VS Code's guide to bundling has it ([bundling extensions](https://code.visualstudio.com/api/working-with-extensions/bundling-extension)), so the `.vsix` carries no `node_modules`.
 - Its manifest, `src/apps/profile-extension/package.json`, names no npm dependencies and isn't an npm workspace; the root's `package.json` holds `vscode-languageclient` and `@types/vscode`.
 - Its parts that don't import `vscode`, such as the status bar's text from a build's result, have tests that `node --test` runs, as `tools/check.ts` runs every `*.test.ts`; what only VS Code shows is checked by hand at the stage's close.
@@ -355,6 +375,7 @@ As `profile-language`'s own tests:
 
 - The 58P's profile gives its sections, subsections, and entries as symbols, each entry by its `name:` with its key beside it, and a fold for each heading.
 - The formatter writes every rule of Layout on a fixture that breaks each one, writes the 58P's profile as it stands, and changes nothing on a second run.
+- The formatter lays out a script out of layout, leaves one that doesn't parse as it was typed, and moves a script on the `write:` line into a block, every line within 100 columns.
 - Comments: a paragraph reflows to 100 columns, and a heading's rule runs on to it; a line holding only `#` ends a paragraph; a list item reflows under its first word, its indented lines with it; and a heading, a line with more than one space after `#` outside a list item, a line with two spaces inside its text, a line starting with a key and a colon, and a comment after a value each keep their lines, while the 58P's `# A known limit: as` reflows.
 - Quotes: a double-quoted value or name call outside a script is rewritten in single quotes, a name holding `'` is written with `\'`, and a script's `"'"` is left alone.
 - A module's scripts are checked in each importing profile's program, and a module nothing imports against its own entries.
@@ -401,7 +422,7 @@ By hand, at the stage's close:
 
 ## What this changes elsewhere
 
-- [01-format-and-delivery](01-format-and-delivery.md)'s Layout puts `seats` last, takes single quotes outside scripts, and reflows comments, in its note of stage 22d.
+- [01-format-and-delivery](01-format-and-delivery.md)'s Layout puts `seats` last, takes single quotes outside scripts, and reflows comments, in its note of stage 22d, and lays out scripts, in its note of 2026-11-23.
 - [02-units](02-units.md)' builder gains `serve` and `format`, and a bundle puts `seats` last, in its note of stage 22d.
 - [The build](../build/01-the-build.md) ships the extension, in its note of stage 22d.
 - [The code map](../architecture/02-code-map.md) gains `profile-language` and `profile-extension`, in its note of 2026-11-22.

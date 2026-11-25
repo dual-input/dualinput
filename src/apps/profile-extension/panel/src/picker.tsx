@@ -1,7 +1,8 @@
 // The display picker, in Run's place: a row for each of the cockpit's panels, from their `hello`s, ticked for those
 // already in `displays`, with the row you're on outlined in the sim, which is how you tell which panel a key names
 // (record/areas/profiles/04-the-extension-in-the-sim.md, "The display picker"). The keys and the mouse reach the same
-// rows: Up and Down move, Space ticks, Enter syncs, Escape leaves, and a click moves to a row and ticks it.
+// rows: Up and Down move, Space ticks, Enter selects the ticked rows, Escape cancels, and a click moves to a row and
+// ticks it.
 
 import { Button, Checkbox, cx, fadeMask, Kbd, NO_SCROLLBAR, Tooltip, useScroller } from "@dualinput/ui"
 import { useEffect } from "react"
@@ -15,8 +16,8 @@ const REASONS: Record<NonNullable<DisplayRow["refused"]>, string> = { "wasm-inst
 const KEYS = [
   ["↑↓", "move"],
   ["Space", "tick"],
-  ["Enter", "sync"],
-  ["Esc", "leave"],
+  ["Enter", "select"],
+  ["Esc", "cancel"],
 ]
 
 export function Picker({ picker, host }: { picker: PickerView; host: PanelHost }) {
@@ -99,10 +100,10 @@ export function Picker({ picker, host }: { picker: PickerView; host: PanelHost }
       <div className="shrink-0 border-t border-border px-4 pb-2 pt-3">
         <div className="flex items-center">
           <Button size="sm" onClick={() => host.write()}>
-            {`Sync ${ticked} ${ticked === 1 ? "display" : "displays"}`}
+            {`Select ${ticked} ${ticked === 1 ? "display" : "displays"}`}
           </Button>
           <Button size="sm" variant="ghost" className="ml-1 text-muted-foreground" onClick={() => host.leave()}>
-            Leave
+            Cancel
           </Button>
         </div>
         <div className="mt-2.5 flex flex-wrap text-[11px] text-muted-foreground">

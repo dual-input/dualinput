@@ -423,7 +423,9 @@ state:
     watch: instrument('KAS297B_1|Index=1', 'armedVerticalSpeed')
     write: |
       (value) => {
-        const vsHold = state.pms50_apga_running ? state.pms50_apga_vertical_mode > 0 : state.ap_vs_hold == 1
+        const vsHold = state.pms50_apga_running
+          ? state.pms50_apga_vertical_mode > 0
+          : state.ap_vs_hold == 1
         if (state.kas_vs_adjust != 1 || vsHold) return
         const steps = Math.round((value - state.kas_armed_vs) / 100)
         if (steps > 0) write(H('kas297b_100_INC')).repeat(steps)

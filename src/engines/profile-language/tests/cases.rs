@@ -314,7 +314,10 @@ fn completion_offers_what_each_place_takes_and_nothing_its_checker_refuses() {
     let fields = labels(entry, 8, false);
     assert_eq!(fields[..3], ["description", "watch", "write"]);
     assert!(
-        fields.contains(&"toggle".to_string()) && fields.contains(&"write function".to_string())
+        !fields
+            .iter()
+            .any(|f| matches!(f.as_str(), "toggle" | "stepping write" | "write function")),
+        "{fields:?}"
     );
 
     let words = |line: &str| labels(&format!("{entry}{line}"), 8, false);
@@ -333,11 +336,49 @@ fn completion_offers_what_each_place_takes_and_nothing_its_checker_refuses() {
     assert_eq!(words("write: ")[..2], ["none", "L('')"]);
     let write = offered(&format!("{entry}write: "), 8, false);
     assert_eq!(write[2].insert, "A('$1', '$2')");
+    let forms = &write[write.len() - 3..];
+    assert_eq!(
+        forms.iter().map(|c| c.label.as_str()).collect::<Vec<_>>(),
+        ["toggle", "stepping write", "write function"]
+    );
+    assert!(forms.iter().all(|c| c.kind == CompletionKind::Snippet));
+    assert_eq!(forms[0].insert, "\n  toggle: K('${1}')");
+    assert!(forms[1].insert.contains("wrap:") && forms[1].insert.contains("range:"));
+    // Right after the colon, a function takes the space and a map, which starts below, doesn't.
+    let tight = offered(&format!("{entry}write:"), 8, false);
+    let insert = |label: &str| {
+        let c = tight.iter().rev().find(|c| c.label == label);
+        c.map(|c| c.insert.clone()).unwrap_or_default()
+    };
+    assert!(insert("write function").starts_with(" |\n  (value) => {"));
+    assert!(insert("toggle").starts_with("\n  toggle:"));
+    let counted = "state:\n  c:\n    name: C\n    watch:\n      inc: K('A')\n      dec: K('B')\n      wrap: false\n      range: [0, 10]\n    write: ";
+    let steps = offered(counted, 9, false);
+    let stepping = steps.iter().find(|c| c.label == "stepping write");
+    assert_eq!(
+        stepping.map(|c| c.insert.as_str()),
+        Some("\n  inc: K('${1}')\n  dec: K('${2}')")
+    );
+    // A write that already holds a map below it gets no second form.
+    let held = offered(&format!("{entry}write:\n      toggle: K('X')\n"), 8, false);
+    assert!(
+        !held.iter().any(|c| c.kind == CompletionKind::Snippet),
+        "{:?}",
+        held.iter().map(|c| &c.label).collect::<Vec<_>>()
+    );
 
     let event = "events:\n  a:\n    name: A\n    watch: H('X')\n    write: ";
     assert_eq!(
         labels(event, 5, false),
-        ["H('X')", "L('')", "A('', '')", "B('')", "K('')", "H('')"]
+        [
+            "H('X')",
+            "L('')",
+            "A('', '')",
+            "B('')",
+            "K('')",
+            "H('')",
+            "write function"
+        ]
     );
     assert_eq!(
         labels("events:\n  a:\n    watch: ", 3, false),

@@ -4,20 +4,23 @@
 //! each with the comments above it, and an entry's fields in their table's order; 2 spaces to a
 //! level; a bracketed map written out; a list of numbers or variant IDs on one line in brackets,
 //! and any other list a line to an item; a value plain where YAML reads it as the same text, and
-//! in single quotes where it doesn't; headings in Layout's forms; and comments reflowed.
+//! in single quotes where it doesn't; headings in Layout's forms; comments reflowed; and each
+//! script in the layout `script` gives it.
 //!
-//! It never changes the order of entries, which is the author's and the bundle's, the words of a
-//! comment, or a script's lines, only their indentation as a whole. A file that doesn't parse
-//! gets no edits, and neither does one whose formatted text the engine reads as a different
-//! profile, which only a mistake of the formatter's own could give.
+//! It never changes the order of entries, which is the author's and the bundle's, or the words of
+//! a comment. A script that doesn't parse keeps its lines, only their indentation moving as a
+//! whole. A file that doesn't parse gets no edits, and neither does one whose formatted text the
+//! engine reads as a different profile, which only a mistake of the formatter's own could give.
 
 use profile_engine::tree::{self, Kind, Node};
 use profile_engine::{Diagnostic, LAYOUT, Place, Table, fields, plain, read_name, single_quoted};
 
-use crate::comments::reflow;
+use crate::comments::{WIDTH, reflow};
+use crate::complete::inline_script;
 use crate::outline::{
     self, Block, Head, Item, Outline, Token, comment_text, flow_items, indent_of, is_blank, unquote,
 };
+use crate::script::{canonical_script, format_script};
 use crate::{Edit, Pos, Range};
 
 /// The name the formatter gives the engine as a file's, for its errors.
@@ -186,7 +189,7 @@ struct Writer<'o, 't> {
     out: Vec<String>,
 }
 
-impl Writer<'_, '_> {
+impl<'t> Writer<'_, 't> {
     fn file(mut self) -> String {
         let place = |item: &Item| {
             item.key()
@@ -319,10 +322,19 @@ impl Writer<'_, '_> {
             self.items(&item.children, &item.trailing, indent + 2, ctx);
             return;
         };
+        let room = WIDTH.saturating_sub(indent + 2);
         if let Some(block) = &item.block {
             self.out
                 .push(format!("{lead} {}{comment}", header_out(&block.header)));
-            self.block(block, indent + 2);
+            // A folded block, `>`, joins its lines with spaces, so only a literal one, `|`, holds a
+            // script's lines as they're written.
+            let script = (key == "write" && block.header.starts_with('|'))
+                .then(|| format_script(&self.block_lines(block).join("\n"), room))
+                .flatten();
+            match script {
+                Some(script) => self.script(&script, indent + 2),
+                None => self.block(block, indent + 2),
+            }
             return;
         }
         if !item.more.is_empty() {
@@ -354,6 +366,18 @@ impl Writer<'_, '_> {
             }
             return;
         }
+        // Layout writes every script as a block, so a script on the `write:` line goes below it. A
+        // value YAML reads as a boolean, a number, or null, as `write: true`, isn't one: a block
+        // would turn it into text, and the same-profile check would refuse the whole file.
+        if key == "write"
+            && inline_script(&value.raw)
+            && plain(value.raw.trim())
+            && let Some(script) = format_script(&value.raw, room)
+        {
+            self.out.push(format!("{lead} |{comment}"));
+            self.script(&script, indent + 2);
+            return;
+        }
         self.out
             .push(format!("{lead} {}{comment}", value_out(&value.raw)));
     }
@@ -383,15 +407,40 @@ impl Writer<'_, '_> {
         self.run(trailing, indent, lead);
     }
 
-    /// A block's lines, moved to `indent` as a whole. A blank line's spaces past the block's
-    /// indentation are its text, so they stay.
+    /// A block's lines, moved to `indent` as a whole.
     fn block(&mut self, block: &Block, indent: usize) {
         let pad = " ".repeat(indent);
-        for &l in &block.lines {
-            let text = self.o.line(l);
-            match block.indent {
-                Some(old) if text.len() > old => self.out.push(format!("{pad}{}", &text[old..])),
-                _ => self.out.push(String::new()),
+        for line in self.block_lines(block) {
+            match line {
+                "" => self.out.push(String::new()),
+                text => self.out.push(format!("{pad}{text}")),
+            }
+        }
+    }
+
+    /// A block's lines without the block's indentation. A blank line's spaces past it are its
+    /// text, so they stay.
+    fn block_lines(&self, block: &Block) -> Vec<&'t str> {
+        block
+            .lines
+            .iter()
+            .map(|&l| {
+                let text = self.o.line(l);
+                match block.indent {
+                    Some(old) if text.len() > old => &text[old..],
+                    _ => "",
+                }
+            })
+            .collect()
+    }
+
+    /// A formatted script's lines at `indent`.
+    fn script(&mut self, script: &str, indent: usize) {
+        let pad = " ".repeat(indent);
+        for line in script.lines() {
+            match line {
+                "" => self.out.push(String::new()),
+                text => self.out.push(format!("{pad}{text}")),
             }
         }
     }
@@ -549,7 +598,20 @@ fn canon(node: &Node, brackets: &[Place], ordered: bool) -> Canon {
         Kind::Map(entries) => {
             let mut map: Vec<(String, Canon)> = entries
                 .iter()
-                .map(|(k, v)| (k.text.clone(), canon(v, brackets, false)))
+                .map(|(k, v)| {
+                    let c = match &v.kind {
+                        // The formatter lays a script out anew, so a script compares in the one
+                        // form dprint gives it however its lines are written.
+                        Kind::Str(t) if k.text == "write" && inline_script(&t.text) => {
+                            canonical_script(&t.text).map(Canon::Text)
+                        }
+                        _ => None,
+                    };
+                    (
+                        k.text.clone(),
+                        c.unwrap_or_else(|| canon(v, brackets, false)),
+                    )
+                })
                 .collect();
             if !ordered {
                 map.sort_by(|a, b| a.0.cmp(&b.0));
@@ -602,5 +664,53 @@ mod tests {
         assert!(out.contains("description: 'Radio: COM1'\n"), "{out}");
         assert!(out.contains("watch: L('X')\n"), "{out}");
         assert!(out.contains("write: 'true'\n"), "{out}");
+    }
+
+    #[test]
+    fn a_script_takes_the_layout_and_one_that_doesnt_parse_keeps_its_lines() {
+        let entry = "state:\n  a:\n    name: A\n    watch: B('X')\n";
+        let messy = format!(
+            "{entry}    write: |\n      (value) => {{\n          while (state.a === 2) {{\n\n      write(B('X'), value).every(\"1 frame\");\n            }}\n          }}\n"
+        );
+        assert_eq!(
+            formatted(&messy),
+            format!(
+                "{entry}    write: |\n      (value) => {{\n        while (state.a === 2) {{\n          write(B('X'), value).every('1 frame')\n        }}\n      }}\n"
+            )
+        );
+        let typing = format!("{entry}    write: |\n        (value) => {{\n          write(\n");
+        assert_eq!(
+            formatted(&typing),
+            format!("{entry}    write: |\n      (value) => {{\n        write(\n")
+        );
+    }
+
+    #[test]
+    fn a_script_on_the_write_line_goes_into_a_block_and_keeps_to_the_width() {
+        let entry = "state:\n  a:\n    name: A\n    watch: L('X')\n";
+        let short = format!("{entry}    write: (value)=>write(L(\"X\"),value*100)\n");
+        assert_eq!(
+            formatted(&short),
+            format!("{entry}    write: |\n      (value) => write(L('X'), value * 100)\n")
+        );
+        let long = format!(
+            "{entry}    write: (value) => write(L('A_VARIABLE_WITH_A_LONG_NAME'), value * 100 + state.another_entry * 2 + state.a_third_entry * 3)\n"
+        );
+        let out = formatted(&long);
+        assert!(
+            out.starts_with(&format!("{entry}    write: |\n      (value) =>")),
+            "{out}"
+        );
+        assert!(out.lines().count() > 6, "{out}");
+        assert!(out.lines().all(|l| l.chars().count() <= WIDTH), "{out}");
+    }
+
+    #[test]
+    fn a_write_yaml_reads_as_a_boolean_a_number_or_null_stays_on_its_line() {
+        let entry = "state:\n  a:\n    name: A\n    watch: L('X')\n";
+        for value in ["true", "0", "null"] {
+            let text = format!("{entry}    write: {value}\n");
+            assert_eq!(formatted(&text), text);
+        }
     }
 }

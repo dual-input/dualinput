@@ -1137,7 +1137,7 @@ Done on 2026-11-22.
 
 Builds: the documentation for pilots, for developers of Dual Input's code, and for profile authors ([the product plan](../product/plan.md#3-v1-or-later)).
 Designs first: a guide to how each of the three is written, from research the user directs, where the docs are published, and what `CLAUDE.md` says of `docs/` once agents write there.
-Needs: nothing for the guides; 22b, 22c, 22d, 22g, and 22h for the profile authors' documentation, 22g's of what [04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md#what-this-changes-elsewhere) asks it to say, and 22h's of what [05-the-recorder](../profiles/05-the-recorder.md#what-this-changes-elsewhere) asks.
+Needs: nothing for the guides; for the profile authors' documentation, 22b, 22c, 22d, 22g, 22h, and 22i, the last three for what [04-the-extension-in-the-sim](../profiles/04-the-extension-in-the-sim.md#what-this-changes-elsewhere), [05-the-recorder](../profiles/05-the-recorder.md#what-this-changes-elsewhere), and [06-the-sync-log](../profiles/06-the-sync-log.md#what-this-changes-elsewhere) ask it to say.
 
 ## 22f The graphics
 
@@ -1272,6 +1272,40 @@ Done on 2026-11-25: `node tools/check.ts` passed, and the two scenarios passed t
 The desk run passed every case of keys and binding in each of three runs on the final helper ([control log](../control/log.md#2026-11-25-the-take-control-binding-takes-shift-ctrl-and-alt-combinations-matched-exactly)).
 The first run also passed the mouse's cases and failed only the capture's CPU check, at 1.27% of a core against a 1% the desk run kept from before the helper's 2% budget, so the stage raised that check to 2%.
 The two runs after passed it and lost the mouse's corner clicks while someone used the PC; this stage doesn't change the mouse's path.
+
+## 22i The sync log
+
+Designs first: the Sync log, which the user chose on 2026-11-25 over an offline trace like fsc-editor's, so an author sees why each synced change on this PC did what it did, from the core's own engine.
+The user designed it with us on 2026-11-25, a call at a time, and [06-the-sync-log](../profiles/06-the-sync-log.md) carries it (user):
+
+- The sync engine logs each decision in the branch that takes it, at no cost while nobody watches, and state sync sends the steps as `unit` messages to the profile extension while one of this release is connected, since `authoring` can't read another feature's engine.
+- A row is a cause: a local change, a first reading, a crewmate's change, a playback's change, a catch-up's write, or control passing.
+  It opens to every step in order, and its verdict is its latest step.
+- The log uses the engine's own words, with a definition on hover, and the engine and the sync docs rename five things first: waits for a first reading, waits behind, synced value, local change, and read back.
+- A view in VS Code's bottom panel, "Sync log", lists every entry's rows in time order, with a filter box and entry names that open their lines; each entry's latest step shows at the end of its `watch:` line.
+- `serve` keeps the last 10,000 rows until Clear or VS Code closes, and notes a local change within 1.5s of a Run of its entry.
+- A replay with the log on gives a recording's sync log, which a later stage builds.
+
+Builds:
+
+- in `sync-engine`: the five renames, then the log, with `keep_log`, `take_log`, a step in each branch, and the row's number on what a write leaves ([the words](../profiles/06-the-sync-log.md#the-words), [what the engine logs](../profiles/06-the-sync-log.md#what-the-engine-logs))
+- in the message crate: `LogStep` and `Step` in `sync`, `SyncLog` in `state_sync`, and the Run result's stamp in `authoring`
+- in `state-sync`: the log kept on while an extension of this release is connected, and each engine call's steps sent with their senders' names; in `cockpit-stream`: its pretend sender told apart from a member, and whose catch-up `take` hands over ([how it reaches the view](../profiles/06-the-sync-log.md#how-it-reaches-the-view))
+- in `authoring`: the stamp of a Run's first action ([Run and the Sync log](../profiles/06-the-sync-log.md#run-and-the-sync-log))
+- in `tools/profile-builder`'s `serve`: the rows it keeps, the hint's text, the note after a Run, and the entries' lines for the links ([what `serve` keeps](../profiles/06-the-sync-log.md#what-serve-keeps))
+- in `src/apps/profile-extension`: the Sync log view, with its dev page `sync-log` in `tools/lib/dev-pages.ts`; the hint; and the words' definitions on hover ([the Sync log view](../profiles/06-the-sync-log.md#the-sync-log-view), [the hint at the end of a line](../profiles/06-the-sync-log.md#the-hint-at-the-end-of-a-line))
+- in `tools/bench`: the scenario `sync-log`; and `tools/sim/sync-log.ts`, the session's cases in the sim
+
+Needs: 22h, for the playback's rows.
+
+Tests:
+
+- [The design's cases](../profiles/06-the-sync-log.md#cases), on the bench, as unit tests, by hand, and in one session in the sim, and [its budgets](../profiles/06-the-sync-log.md#budgets).
+- The engine with the log off, against the same engine before the stage, on the `state-sync` scenario.
+
+The stage changes the sync engine, which every scenario with a profile runs on, and its log has to cost nothing while it's off, so it closes on the whole bench (user, 2026-11-25).
+
+Exit: on our development machine, `node tools/check.ts` passes, and `node tools/bench.ts` passes, the `sync-log` scenario among it, with an engine call with the log off within the bench's spread of its time before the stage; the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, and the user has seen the Sync log's dev page in each of its states; in one session in the sim on the 58P, `node tools/sim/sync-log.ts` reports each of its cases passed; and the [profiles' log](../profiles/log.md) has the budgets' measurements.
 
 ## 23 v1's release
 

@@ -20,10 +20,11 @@ The checks took about 7s after the 2s greeting before the name and color card, b
 - An add-on from another version has the window's own screen, whose red box has the same title, words, and Restart the sim as setup's failure box.
 
 **Changed:** setup greets the pilot and goes straight to the name and color card (user, 2026-11-25).
+Later that day the user dropped setup's greeting too, so setup opens on the card.
 The EFB app shows the add-on's mismatch screen in setup's place, as it already did Not running and Closed.
 The EFB app's dev page lost its five scenes of setup's checks, with their pictures in `docs/screenshots/efb/`, and code only the check used went with it: its failures' words and timings, the failure box's amber look, and the frame's list of failures.
 
-**Affects:** the tentative decisions on [setup](decisions.md#first-time-setup-greets-the-pilot-and-asks-for-the-name-and-color-once) and [the service's screens](decisions.md#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-asks-to-restart-the-sim), edited in place; [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-11-01, edited in place; and [01-apps](01-apps.md), [the network's units](../network/02-units.md), and [the build](../build/01-the-build.md), whose notes of 2026-11-25 amend them.
+**Affects:** the tentative decisions on [setup](decisions.md#first-time-setup-asks-for-the-name-and-color-once) and [the service's screens](decisions.md#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-asks-to-restart-the-sim), edited in place; [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-11-01, edited in place; and [01-apps](01-apps.md), [the network's units](../network/02-units.md), and [the build](../build/01-the-build.md), whose notes of 2026-11-25 amend them.
 
 ## 2026-11-23: Under the kit root's zoom, Coherent GT draws an SVG sized by its attributes at its unzoomed size, which put the countdown's seconds 3px below its ring's center
 

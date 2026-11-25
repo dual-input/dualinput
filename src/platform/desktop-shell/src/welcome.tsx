@@ -11,7 +11,7 @@ import { ChevronUp, Monitor, ShieldAlert, ShieldCheck, Volume2, Wifi } from "luc
 
 import type { DesktopLink, View } from "./link.ts"
 
-/** How long the greeting holds and fades. Setup in the EFB app, src/platform/efb-shell/src/setup/setup-flow.tsx, draws the same greeting with the same timings, so change both together. */
+/** How long the greeting holds and fades. */
 const GREETING = { hold: 1600, out: 450 }
 /** The window's height, the same on every step, so nothing jumps as the pilot steps through. */
 export const WELCOME_HEIGHT = 344

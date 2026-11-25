@@ -303,7 +303,7 @@ export const NAVIGATOR: NavigatorSection[][] = [
     {
       heading: "Session",
       blocks: [
-        { situation: "Setup", entries: [state("Welcome", "first-time-setup")] },
+        { situation: "Setup", entries: [state("Name and color", "first-time-setup")] },
         { situation: "First visit", entries: [state("Profile ready", "first-visit"), state("No profile", "first-visit-no-profile")] },
         { situation: "Before a session", entries: [state("Ready", "before-a-session"), state("No profile", "no-profile-for-the-aircraft"), state("No profile, in a flight", "no-profile-in-a-flight"), state("Code on the clipboard", "a-code-on-the-clipboard")] },
         { situation: "Host or join", entries: [state("Servers refuse", "servers-refuse"), state("No session has the code", "no-session-has-the-code"), state("Connection won't open", "connection-wont-open"), state("Too slow", "too-slow-to-answer")] },

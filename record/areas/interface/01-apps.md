@@ -114,7 +114,7 @@ These are the ones the apps need that no unit had:
 - A development setting says so when it registers, and shows in no app: a developer edits `settings.json` while the core is stopped.
 - The profile loader's local folder is a development setting, since v1 ships no authoring tool ([the local folder](../profiles/02-units.md#the-local-folder); user, 2026-10-18).
 - No setting records everything, since the core records every input (user, 2026-10-21; [recording log][recording 21]).
-- The display name is a setting like any other, which Host and Join need ([members](../session/02-units.md#members)), and first-time setup asks for it ([setup](decisions.md#first-time-setup-greets-the-pilot-and-asks-for-the-name-and-color-once)).
+- The display name is a setting like any other, which Host and Join need ([members](../session/02-units.md#members)), and first-time setup asks for it ([setup](decisions.md#first-time-setup-asks-for-the-name-and-color-once)).
 
 ## Quit
 

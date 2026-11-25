@@ -321,7 +321,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
     Its splash is our pixel-art night approach in a Cessna 172, down a 3-degree path toward a runway's approach lights, over a progress bar in the kit's sky.
     The install hook waits 3s, which keeps the splash up that long, where an install alone shows it for 0.3s to 1.0s (measured on our development machine, 2026-11-10, [install log](../install/log.md#2026-11-10-velopacks-splash-stays-up-03s-to-10s-on-our-install-so-the-apps-install-hook-holds-it-3s-for-the-splash-to-play)).
   - Velopack's first run after each install by `Setup.exe`, a reinstall's too, opens the welcome: a window 400px wide and one height on every step, with no title bar and no close button, since three short steps ask little, and Alt+F4 or the taskbar still close it.
-    It greets the pilot, "Welcome to [mark] Dual Input", as the EFB app's setup does, then takes them through three steps, each a picture, a heading, a line or two, and one button beside the step's dots:
+    It greets the pilot, "Welcome to [mark] Dual Input", then takes them through three steps, each a picture, a heading, a line or two, and one button beside the step's dots:
     1. "Let other pilots reach you": two PCs joined by a line with a shield on it, why Dual Input adds a Windows Firewall rule, and Add the rule, which shows the UAC prompt and says "Waiting for Windows" until the rule is in, with Not now beside it.
        A pilot who declines the prompt reads that relays still connect them, with more latency, and gets Try again.
        The step shows only when the rule is missing or blocked, so a reinstall over the rule an uninstall left behind skips it.
@@ -394,15 +394,15 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - How Start with Windows reaches the desktop app, which writes the Run value: this link is the likely way, and the build settles it.
   - A known cost: Fix's UAC prompt opens on the desktop behind the sim, which a pilot in VR can't see.
 
-## First-time setup greets the pilot and asks for the name and color once
+## First-time setup asks for the name and color once
 
 - **Decided:** first-time setup is a screen of the EFB app's own, shown once, with room for more steps later.
-  It greets the pilot, "Welcome to [mark] Dual Input", then shows the name and color card, and checks nothing.
+  It opens on the name and color card, with no greeting and no checks, and once the pilot has a name, the EFB app opens on its pages.
   Its name field starts with the Windows username, cut to [20 characters](#a-display-name-runs-to-20-characters), and the pilot changes it or presses Continue, which changes the call of 2026-10-16 that nothing fills it from the Windows account.
   The same name and color card serves [the Figures tab](#the-figures-tab-holds-the-pilots-figure-and-explains-what-its-figures-can-do).
   When the service is down, or the add-on is from another version, the EFB app shows that case's screen from [the service's screens](#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-asks-to-restart-the-sim) in setup's place.
   Settled by the user on 2026-10-25, 2026-10-28, and 2026-11-25.
-- **Because:** each failure setup's four checks could find shows elsewhere: the PC offline, our servers out of reach, and Windows Firewall blocking Dual Input in [the header](#the-header-shows-only-what-needs-the-pilot) once setup ends, and the service and the add-on in their own screens, so the checks only held the pilot back from the card ([interface log](log.md#2026-11-25-first-time-setup-drops-its-system-check-since-each-failure-it-found-shows-in-the-header-or-a-screen-of-its-own); user, 2026-11-25; [issue 8](https://github.com/dual-input/dualinput/issues/8)).
+- **Because:** each failure setup's four checks could find shows elsewhere: the PC offline, our servers out of reach, and Windows Firewall blocking Dual Input in [the header](#the-header-shows-only-what-needs-the-pilot) once setup ends, and the service and the add-on in their own screens, so the checks only held the pilot back from the card, and the greeting before them held the pilot 2s more ([interface log](log.md#2026-11-25-first-time-setup-drops-its-system-check-since-each-failure-it-found-shows-in-the-header-or-a-screen-of-its-own); user, 2026-11-25; [issue 8](https://github.com/dual-input/dualinput/issues/8)).
 - **Leaves out:** a custom color, which the user deferred on 2026-10-28, since the figure in the sim takes only a palette index, so custom means baking a ring of hues after the presets and storing a position on it, a change to avatars' design.
 
 ## The core's log keeps display names, and replaces only the home folder's path

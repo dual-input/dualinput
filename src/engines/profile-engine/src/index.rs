@@ -38,11 +38,6 @@ pub struct IndexBundle {
 pub struct Shown {
     pub maker: String,
     pub name: String,
-    /// Without the alias, CI's first publish after `maturity` became `status` would fail: it reads
-    /// the pages branch's index.json before adding to it, and that index names this field
-    /// `maturity`, with `experimental`, a value both keys take.
-    /// TODO: remove the alias once a publish has written index.json with `status`.
-    #[serde(alias = "maturity")]
     pub status: ProfileStatus,
 }
 

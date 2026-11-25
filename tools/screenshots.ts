@@ -103,20 +103,6 @@ export function slug(scene: string): string {
 type Dev = { DUALINPUT_DEV?: { scenes: string[]; names?: Record<string, string>; times?: Partial<Record<string, number>>; show: (name: string) => void; shot: HTMLElement } }
 type Scenes = { scenes: string[]; names: Record<string, string>; times: Partial<Record<string, number>> }
 
-/**
- * Seeds the page's `Math.random` with mulberry32, before any of its scripts run, so what a page draws by chance comes out
- * the same each time.
- */
-function seedRandom(): void {
-  let seed = 1
-  Math.random = () => {
-    seed = (seed + 0x6d2b79f5) | 0
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-
 /** A page's address, starting on `scene` with the standing figure held still. */
 const fileHref = (file: string) => pathToFileURL(file).href
 const fileUrl = (page: string, scene?: string) => `${fileHref(path.join(BUILT, page, "index.html"))}${scene === undefined ? "" : `?scene=${encodeURIComponent(scene)}&still`}`
@@ -193,7 +179,6 @@ async function labeledIn(tab: Page, shot: ElementHandle): Promise<Labeled[]> {
  * half the bytes, and the JSON of where its labeled elements show in it.
  */
 async function take(tab: Page, page: string, scene: string, runMs: number): Promise<{ picture: Buffer; layout: string }> {
-  await tab.addInitScript(seedRandom)
   // The installed clock runs until it's paused, so it starts a minute early, and the pause takes it to the same moment
   // however long the two calls took.
   await tab.clock.install({ time: CLOCK.getTime() - 60_000 })

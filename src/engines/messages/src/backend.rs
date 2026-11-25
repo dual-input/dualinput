@@ -28,10 +28,16 @@ pub const LEAVE: &str = "/v1/members/leave";
 pub const CODE_ALPHABET: &str = "ABCDEFGHJKMNPQRSTVWXYZ23456789";
 pub const CODE_LENGTH: usize = 6;
 
-/// The invite code `text` holds, as a pilot copied it, with the spaces around it and any
-/// lowercase forgiven; `None` for any other text.
+/// The invite code `text` holds, as a pilot copied it; `None` for any other text. The apps show
+/// a code with a dash, as `K7R-4XM`, so a host who types it into a chat types the dash too, and
+/// a chat may add spaces around it, so every dash and space is dropped, and any lowercase
+/// forgiven.
 pub fn invite_code(text: &str) -> Option<String> {
-    let code = text.trim().to_ascii_uppercase();
+    let code: String = text
+        .chars()
+        .filter(|c| *c != '-' && !c.is_whitespace())
+        .map(|c| c.to_ascii_uppercase())
+        .collect();
     (code.len() == CODE_LENGTH && code.chars().all(|c| CODE_ALPHABET.contains(c))).then_some(code)
 }
 
@@ -177,7 +183,35 @@ pub struct Refused {
 
 #[cfg(test)]
 mod tests {
-    use super::{Older, older};
+    use super::{Older, invite_code, older};
+
+    #[test]
+    fn a_code_reads_as_the_apps_show_it_with_a_chats_spaces_and_in_lowercase() {
+        for text in [
+            "K7R4XM",
+            "K7R-4XM",
+            "k7r-4xm",
+            "K7R - 4XM",
+            "K7R 4XM",
+            " K7R-4XM\r\n",
+        ] {
+            assert_eq!(invite_code(text).as_deref(), Some("K7R4XM"), "{text:?}");
+        }
+    }
+
+    #[test]
+    fn text_that_isnt_six_of_the_codes_characters_reads_as_no_code() {
+        for text in [
+            "",
+            "K7R-4X",
+            "K7R-4XMM",
+            "K0R-4XM",
+            "K7R_4XM",
+            "Code: K7R-4XM",
+        ] {
+            assert_eq!(invite_code(text), None, "{text:?}");
+        }
+    }
 
     #[test]
     fn a_version_reads_by_its_numbers_with_its_suffix_left_out() {

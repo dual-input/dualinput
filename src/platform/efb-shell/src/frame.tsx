@@ -25,12 +25,11 @@ import type { HeaderStatus } from "./header/issues.tsx"
 import { raisedRows } from "./header/raised.ts"
 import type { SessionPhase } from "./header/phase.tsx"
 import { askedAgain, useLanding } from "./landing.ts"
-import { Reconnecting, ServiceDown } from "./lost-service.tsx"
+import { AddonMismatch, Reconnecting, ServiceDown } from "./lost-service.tsx"
 import { ShellContext, startParts, stopParts } from "./part.ts"
 import type { Part, Shell } from "./part.ts"
 import { SessionTab } from "./session/session-tab.tsx"
-import { AddonMismatch, SetupFlow } from "./setup/setup-flow.tsx"
-import type { SetupFailure } from "./setup/setup-flow.tsx"
+import { SetupFlow } from "./setup/setup-flow.tsx"
 import { FIGURE_COLOR, NAME, SETUP_DONE, useSetting, writeSetting } from "./settings/setting.ts"
 import { SettingsPage } from "./settings/settings-page.tsx"
 import type { SimWindow } from "./sim-window.ts"
@@ -153,11 +152,10 @@ export function Frame({ host, link, desktop, sim, version, parts }: FrameProps) 
     else setTab(landing === "session" ? "session" : (parts.find((part) => part.tab?.landing === landing)?.name ?? "session"))
   })
   const coreSlice = useSlice<CoreSlice>(link, "core")
-  const net = useSlice<NetSlice>(link, "network")
-  const local = useDesktopState(desktop)
   const coreVersion = coreSlice?.version
   const mismatch = !down && coreVersion !== undefined && coreVersion !== version
   // Setup has the whole window, with no header or tabs, until the pilot has a name. Its Continue ends it here at once, ahead of the setting's coming back from the core.
+  // A service that's down, or an add-on from another version, shows its own screen in setup's place, since Dual Input can't work until it's mended.
   const setupDone = useSetting(link, SETUP_DONE)
   const [continued, setContinued] = useState(false)
   useEffect(() => {
@@ -179,8 +177,7 @@ export function Frame({ host, link, desktop, sim, version, parts }: FrameProps) 
     return sent
   }
   if (!everShown) return null
-  const failures = [mismatch && "addon", net?.internet === false && "offline", net?.servers === "unreachable" && "servers", local?.firewall === "blocks" && "firewall"].filter((failure): failure is SetupFailure => !!failure)
-  const inSetup = !down && setupDone === false && !continued
+  const inSetup = !down && !mismatch && setupDone === false && !continued
   return (
     <ShellContext.Provider value={shell}>
       <Root scale={scale} style={{ width, height, overflow: "hidden" }}>
@@ -188,13 +185,7 @@ export function Frame({ host, link, desktop, sim, version, parts }: FrameProps) 
           <div data-app-frame className="relative flex h-full flex-col bg-background" style={{ paddingTop: inset }}>
             {inSetup ? (
               <SetupFlow
-                facts={{ failures, username: coreSlice?.username ?? "", addonVersion: version, version: coreVersion ?? version }}
-                onFix={(failure) => {
-                  if (failure === "addon") return restartSim()
-                  const sent = desktop.ask({ t: "fix-firewall" })
-                  if (!sent) toast(NO_DESKTOP_APP)
-                  return sent
-                }}
+                username={coreSlice?.username ?? ""}
                 onDone={(name, color) => {
                   setContinued(true)
                   writeSetting(link, NAME, name)

@@ -168,11 +168,6 @@ type Trying = { on: "host" | "join"; code?: string }
  */
 export const SCENES: Record<string, Slices> = {
   "first-time-setup": firstRun,
-  "first-time-setup-checking": firstRun,
-  "setup-add-on-mismatch": { ...firstRun, core: { ...firstRun.core, version: "0.0.9" } },
-  "setup-offline": { ...firstRun, network: { members: [], internet: false, servers: "unreachable" } },
-  "setup-our-servers": { ...firstRun, network: { members: [], internet: true, servers: "unreachable" } },
-  "setup-firewall": { ...firstRun, [DESKTOP]: { ...LOCAL, firewall: "blocks" } },
   "first-visit": firstVisit,
   "first-visit-no-profile": { ...firstVisit, sim: fenix, profiles: NO_PROFILE },
   "before-a-session": {},
@@ -261,17 +256,11 @@ export const SCENES: Record<string, Slices> = {
 
 /**
  * How long a scene runs before tools/screenshots.ts takes its picture, in ms of its own time, where the tool's 5s would
- * catch it too early: setup greets the pilot for 2s and then runs its checks one by one, reaching the name card at about
- * 9s, or stopping at the check that fails, and a join says it's still trying only 6s in (`SLOW_AFTER` in
+ * catch it too early: a join says it's still trying only 6s in (`SLOW_AFTER` in
  * src/platform/efb-shell/src/session/session-tab.tsx).
  */
 export const SCENE_TIMES: Partial<Record<string, number>> = {
   "too-slow-to-answer": 8_000,
-  "first-time-setup": 12_000,
-  "setup-add-on-mismatch": 12_000,
-  "setup-offline": 12_000,
-  "setup-our-servers": 12_000,
-  "setup-firewall": 12_000,
 }
 
 /** The tab a scene is about, by the tab's label, where it isn't the Session tab. */
@@ -314,7 +303,7 @@ export const NAVIGATOR: NavigatorSection[][] = [
     {
       heading: "Session",
       blocks: [
-        { situation: "Setup", entries: [state("Welcome", "first-time-setup"), state("Checking", "first-time-setup-checking"), state("Add-on mismatch", "setup-add-on-mismatch"), state("Offline", "setup-offline"), state("Our servers", "setup-our-servers"), state("Firewall", "setup-firewall")] },
+        { situation: "Setup", entries: [state("Welcome", "first-time-setup")] },
         { situation: "First visit", entries: [state("Profile ready", "first-visit"), state("No profile", "first-visit-no-profile")] },
         { situation: "Before a session", entries: [state("Ready", "before-a-session"), state("No profile", "no-profile-for-the-aircraft"), state("No profile, in a flight", "no-profile-in-a-flight"), state("Code on the clipboard", "a-code-on-the-clipboard")] },
         { situation: "Host or join", entries: [state("Servers refuse", "servers-refuse"), state("No session has the code", "no-session-has-the-code"), state("Connection won't open", "connection-wont-open"), state("Too slow", "too-slow-to-answer")] },
@@ -395,7 +384,7 @@ export class StandInCore extends StandInBase {
     this.set({ session: { ...this.session(), ...changes } })
   }
 
-  /** Jumps to a scene: the sim's healthy slices with what it sets on top. Setup ends first, so one scene of it to another starts it over. */
+  /** Jumps to a scene: the sim's healthy slices with what it sets on top. Setup ends first, so its scene shown again starts it over. */
   scene(name: string): void {
     window.clearTimeout(this.countdown)
     window.clearTimeout(this.answer)

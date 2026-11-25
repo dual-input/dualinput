@@ -104,8 +104,8 @@ type Dev = { DUALINPUT_DEV?: { scenes: string[]; names?: Record<string, string>;
 type Scenes = { scenes: string[]; names: Record<string, string>; times: Partial<Record<string, number>> }
 
 /**
- * Seeds the page's `Math.random` with mulberry32, before any of its scripts run, so what a page draws by chance, such as
- * how long each of setup's checks runs, comes out the same each time.
+ * Seeds the page's `Math.random` with mulberry32, before any of its scripts run, so what a page draws by chance comes out
+ * the same each time.
  */
 function seedRandom(): void {
   let seed = 1

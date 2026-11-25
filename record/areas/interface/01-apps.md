@@ -10,6 +10,9 @@ Decides:     How a feature's part plugs into the EFB app and comes out; what a p
 > Since stage 21, a part also shows on the session card's crew rows, as Go to's Join ends the pilot flying's row, a row taking the first part's answer, and `profiles.pick` loads an aircraft at the world map through the menu script (user, 2026-11-17; [session log](../session/log.md#2026-11-17-in-the-sim-join-set-the-world-map-and-started-the-flight-within-09s-and-active-pause-followed-from-our-efb-apps-code-in-264ms-once-the-menu-script-parsed)).
 > The list is `PARTS` in `src/sim-package/pages/parts.ts`, which the app's entry, `efb.tsx`, and its dev loop, `efb-dev.tsx`, both import, since the dev loop's own list had fallen four parts behind the app's (user, 2026-11-20).
 
+> **Note**
+> Since 2026-11-25, first-time setup checks nothing, so the "Add-on version mismatch" box in [trouble](#trouble) is the window's own screen, which shows in setup's place too ([log](log.md#2026-11-25-first-time-setup-drops-its-system-check-since-each-failure-it-found-shows-in-the-header-or-a-screen-of-its-own)).
+
 A feature shows itself in the EFB app through one part, which the app lists in one line, so deleting a feature deletes its folder and that line, and the platform's shells never name a feature.
 The apps reach the core only through slices of state, commands, and a part's `unit` messages, and any client sends any command, a setting's change among them.
 In each flight of a session, the EFB app's code opens the banner, calling the toolbar again until the banner's page connects, and the page shows and hides its own content while the panel stays open.
@@ -111,7 +114,7 @@ These are the ones the apps need that no unit had:
 - A development setting says so when it registers, and shows in no app: a developer edits `settings.json` while the core is stopped.
 - The profile loader's local folder is a development setting, since v1 ships no authoring tool ([the local folder](../profiles/02-units.md#the-local-folder); user, 2026-10-18).
 - No setting records everything, since the core records every input (user, 2026-10-21; [recording log][recording 21]).
-- The display name is a setting like any other, which Host and Join need ([members](../session/02-units.md#members)), and first-time setup asks for it ([setup](decisions.md#first-time-setup-asks-for-the-name-and-color-once-and-checks-the-pc-and-our-servers)).
+- The display name is a setting like any other, which Host and Join need ([members](../session/02-units.md#members)), and first-time setup asks for it ([setup](decisions.md#first-time-setup-greets-the-pilot-and-asks-for-the-name-and-color-once)).
 
 ## Quit
 
@@ -144,7 +147,7 @@ A one-time notification stays 6s, and that time pauses while the pointer is over
 
 | Component | Trouble | Who sees it | It raises |
 | --- | --- | --- | --- |
-| The core | No core heard, a `bye`, 8s silent, or its socket closed | Each page, through [the connection's state](#when-the-core-goes), and the panel bridge, whose visible locks turn into warnings ([what the bridge owns](../architecture/02-code-map.md#what-the-bridge-owns)) | [One of the EFB app's three screens](decisions.md#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-shows-setups-box), and the banner's card |
+| The core | No core heard, a `bye`, 8s silent, or its socket closed | Each page, through [the connection's state](#when-the-core-goes), and the panel bridge, whose visible locks turn into warnings ([what the bridge owns](../architecture/02-code-map.md#what-the-bridge-owns)) | [One of the EFB app's three screens](decisions.md#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-asks-to-restart-the-sim), and the banner's card |
 | Our package | A module file missing from a package that otherwise loaded | The sim service | One trouble notification |
 | Our WASM module | Stopped while any routine is fed | The sim service | A trouble notification of its own, cleared when the module runs or no routine is fed |
 | The panel bridge | Under a profile that a panel module serves, no cockpit panel's `hello` within 10s of the profile loading | `clients` | A trouble notification, cleared when a panel connects or the profile unloads |

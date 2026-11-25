@@ -394,15 +394,15 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - How Start with Windows reaches the desktop app, which writes the Run value: this link is the likely way, and the build settles it.
   - A known cost: Fix's UAC prompt opens on the desktop behind the sim, which a pilot in VR can't see.
 
-## First-time setup asks for the name and color once, and checks the PC and our servers
+## First-time setup greets the pilot and asks for the name and color once
 
 - **Decided:** first-time setup is a screen of the EFB app's own, shown once, with room for more steps later.
+  It greets the pilot, "Welcome to [mark] Dual Input", then shows the name and color card, and checks nothing.
   Its name field starts with the Windows username, cut to [20 characters](#a-display-name-runs-to-20-characters), and the pilot changes it or presses Continue, which changes the call of 2026-10-16 that nothing fills it from the Windows account.
   The same name and color card serves [the Figures tab](#the-figures-tab-holds-the-pilots-figure-and-explains-what-its-figures-can-do).
-  Its server check tells a PC that's offline from our servers being out of reach.
-  The backend down and both relays down are one failure in setup, since either stops hosting and joining, while the shared check still tells them apart for the core's log and the header.
-  One relay down passes, and every server failure waits and offers Continue anyway.
-  Settled by the user on 2026-10-25 and 2026-10-28.
+  When the service is down, or the add-on is from another version, the EFB app shows that case's screen from [the service's screens](#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-asks-to-restart-the-sim) in setup's place.
+  Settled by the user on 2026-10-25, 2026-10-28, and 2026-11-25.
+- **Because:** each failure setup's four checks could find shows elsewhere: the PC offline, our servers out of reach, and Windows Firewall blocking Dual Input in [the header](#the-header-shows-only-what-needs-the-pilot) once setup ends, and the service and the add-on in their own screens, so the checks only held the pilot back from the card ([interface log](log.md#2026-11-25-first-time-setup-drops-its-system-check-since-each-failure-it-found-shows-in-the-header-or-a-screen-of-its-own); user, 2026-11-25; [issue 8](https://github.com/dual-input/dualinput/issues/8)).
 - **Leaves out:** a custom color, which the user deferred on 2026-10-28, since the figure in the sim takes only a palette index, so custom means baking a ring of hues after the presets and storing a position on it, a change to avatars' design.
 
 ## The core's log keeps display names, and replaces only the home folder's path
@@ -435,7 +435,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - In a session each row says what it costs there: offline stays an error, since every link is down, and says Dual Input will reconnect and catch the pilot up; our servers and the firewall become warnings, since a running session doesn't wait on the backend, and the crew still flies on links that may be slower; and the update row hides, since installing restarts the sim.
 
   It has no row for these:
-  - The service, since [the app's window](#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-shows-setups-box) covers a lost one.
+  - The service, since [the app's window](#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-asks-to-restart-the-sim) covers a lost one.
   - The sim, since the core's link to it ends only with the sim.
   - The aircraft, which home names.
   - A crewmate, whose crew row says what's wrong.
@@ -446,14 +446,14 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - `iroh` punches again every 60s, so a relayed link could go direct within a minute of the firewall rule landing, which is why Fix stays in a session (inference).
 - **Leaves out:** whether another pilot can still join when only this PC can't reach our servers, which is unverified.
 
-## Without the service the EFB app shows one of three screens, and another version shows setup's box
+## Without the service the EFB app shows one of three screens, and another version asks to restart the sim
 
 - **Decided:** the EFB app reaches everything through the core, so losing it is the whole window's state:
   - Reconnecting, for a socket closed without a `bye` or 8s of silence: the window dims under a pill with a spinner, and the dimming layer catches every press, since every command would fail, while the page stays as it was under it.
-  - Not running, for no core heard, or none 10s into reconnecting: the mark alone, no tabs, and setup's red box, with a line that it's waiting for the service to start.
+  - Not running, for no core heard, or none 10s into reconnecting: the mark alone, no tabs, and a red box, with a line that it's waiting for the service to start.
   - Closed, after a `bye`: the same with no box or spinner, and how to open it to fly together.
 
-  An EFB app whose version differs from the service's shows setup's "Add-on version mismatch" box in place of its pages, the same way.
+  An EFB app whose version differs from the service's shows Not running's layout in place of its pages: the mark, no tabs, and a red box, "Add-on version mismatch", with Restart the sim.
   That overrides [the core's rule](../core/02-clients-and-panel-bridge.md#a-client-whose-version-differs) and [Trouble's row](01-apps.md#trouble) that a page from another version reaches only the log.
   Settled by the user on 2026-10-29 and 2026-11-01.
 - **Because:**
@@ -479,7 +479,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 - **Decided:** Host shows that it's starting, then that the session started; Join shows a spinner, then a check; and the code field locks while our servers answer.
   Host stays starting until its connection to other pilots has opened, about 35ms past our servers' answer on our development machine, so a session that can't reach anyone never shows (user, 2026-11-02).
-  A refusal opens under the control that asked, in setup's red box: our servers not answering, the PC offline, that connection failing to open, or one of the backend's four, no such session, this pilot's version older, the host's version older, and too many wrong codes.
+  A refusal opens under the control that asked, in a red box: our servers not answering, the PC offline, that connection failing to open, or one of the backend's four, no such session, this pilot's version older, the host's version older, and too many wrong codes.
   A code naming no session also marks its slots red, and too many wrong codes says when the pause ends and points to our Discord.
   This pilot's older version offers "Restart the sim to update", and the host's says they need to leave the session and update, since a host updates only outside one.
   After 6s with no answer, a plain line opens under the control with a local Cancel, which keeps the code: one line while our servers haven't answered, and another once a join's code is found and it's dialing, which never gives up on its own.
@@ -491,7 +491,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   It has no explanation, since a simmer knows the consequences, and no Cancel, since a press outside or Escape cancels.
   The popover takes the focus, so Enter can't confirm, and a double click on the button shuts it rather than confirming.
   The button that opened it looks pressed in while it asks.
-  It serves restarting the sim to update, setup's add-on failure, Leave once anyone else is in the session, Join, and Delete on a recording; Take over takes over at once, and doesn't ask.
+  It serves restarting the sim to update or for an add-on from another version, Leave once anyone else is in the session, Join, and Delete on a recording; Take over takes over at once, and doesn't ask.
   Settled by the user on 2026-10-29, 2026-10-30, and 2026-10-31.
 
 ## The aircraft picker loads an aircraft through the world map's store, and only at the world map
@@ -652,7 +652,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - On the banner, held while its cause lasts: the lost link; catching up, one word for a late joiner's catch-up and a short outage's replay; the PF in the pause menu, on the others' banners; Dual Input's service gone or reconnecting; the panel bridge not loading; our WASM module stopped or missing; the Windows helper down; a key Windows refuses; and "This seat is taken", while this pilot's camera is in the seat.
   - On the banner, shown once: control passing or refused, with the reason; for a PF who lost control through the lost link, once back, that what they changed alone was undone; a crewmate leaving the flight or the session, closing their sim, crashing, or coming back; and a control that couldn't sync, once per entry each load, several at one load as one; and in a test session, every PC in the flight having loaded a new save, naming who saved it ([a test session shows the bundle each PC runs](#a-test-session-shows-the-bundle-each-pc-runs); user, 2026-11-21).
   - Elsewhere: the output device in Settings; traffic's counts on its tab; the unreadable model on the Figures tab; offline, our servers, the firewall, and the update in the header; Host and Join refused in the start card, where a pilot's PC refusing the other's connection takes the same words, with a connection to other pilots that won't open beside them; and a recording that stops in Settings.
-  - Dropped: the warning after a takeover through a lost link, by which time the deed is done, with its words on the lost link's line; "Adam is in the A320", which the crew row shows; "Load the Baron 58P to fly with James", since [Join](#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up) says how to get in; the crash's ask for a bug report; our package missing or from another version, which [the EFB app's box](#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-shows-setups-box) shows; and each crewmate's link, which the crew rows show.
+  - Dropped: the warning after a takeover through a lost link, by which time the deed is done, with its words on the lost link's line; "Adam is in the A320", which the crew row shows; "Load the Baron 58P to fly with James", since [Join](#join-takes-a-joiner-from-the-world-map-into-the-pfs-flight-or-only-sets-it-up) says how to get in; the crash's ask for a bug report; our package missing or from another version, which [the EFB app's box](#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-asks-to-restart-the-sim) shows; and each crewmate's link, which the crew rows show.
 
   Settled by the user on 2026-11-01.
 - **Because:**

@@ -338,9 +338,9 @@ pub const CORE: &str = "core";
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "clients/")]
 pub struct CoreSlice {
-    /// Dual Input's version, which the EFB app compares with its own for setup's "Add-on version
-    /// mismatch" box (record/areas/interface/decisions.md, "Without the service the EFB app
-    /// shows one of three screens, and another version shows setup's box").
+    /// Dual Input's version, which the EFB app compares with its own, showing "Add-on version
+    /// mismatch" when they differ (record/areas/interface/decisions.md, "Without the service the
+    /// EFB app shows one of three screens, and another version asks to restart the sim").
     pub version: String,
     /// The message crate's hash, `HASH`, as the core's build has it.
     pub hash: String,

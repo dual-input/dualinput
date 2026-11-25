@@ -1,4 +1,4 @@
-//! The check of what this PC reaches, which setup, the header, and a refused Host or Join read:
+//! The check of what this PC reaches, which the header and a refused Host or Join read:
 //! it asks the backend and each relay at once, and runs from the core's start whether or not a
 //! session is held, and again at each dial while a link is lost
 //! (record/areas/network/02-units.md, "What the pilot sees, and settings").
@@ -21,8 +21,8 @@ const ANSWER_WITHIN: Duration = Duration::from_secs(2);
 /// How long the next check waits while every server answers, which a pilot flying for hours
 /// makes about 180 requests of the backend's in 3 hours.
 const CHECK_EVERY: Duration = Duration::from_secs(60);
-/// How long it waits after a check that found a server not answering, so setup and the header
-/// see it come back within a few seconds.
+/// How long it waits after a check that found a server not answering, so the header sees it
+/// come back within a few seconds.
 const CHECK_AGAIN: Duration = Duration::from_secs(5);
 /// What the backend answers any method but POST with, whatever the path, with no database behind
 /// it. Only our Worker answers so: a captive portal fails HTTPS, and Cloudflare's own error page

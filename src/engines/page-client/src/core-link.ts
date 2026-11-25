@@ -1,7 +1,7 @@
 // A React page's link to the core, Dual Input's service, on page-client, for the EFB app and the banner. It turns
 // page-client's five states into what either page shows for the link
 // (record/areas/interface/decisions.md, "Without the service the EFB app shows one of three screens, and another
-// version shows setup's box"),
+// version asks to restart the sim"),
 // and hands React the slices of client state.
 
 import { useSyncExternalStore } from "react"

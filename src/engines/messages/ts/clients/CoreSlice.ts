@@ -5,9 +5,9 @@
  */
 export type CoreSlice = { 
 /**
- * Dual Input's version, which the EFB app compares with its own for setup's "Add-on version
- * mismatch" box (record/areas/interface/decisions.md, "Without the service the EFB app
- * shows one of three screens, and another version shows setup's box").
+ * Dual Input's version, which the EFB app compares with its own, showing "Add-on version
+ * mismatch" when they differ (record/areas/interface/decisions.md, "Without the service the
+ * EFB app shows one of three screens, and another version asks to restart the sim").
  */
 version: string, 
 /**

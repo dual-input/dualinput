@@ -23,6 +23,9 @@ Decides:     What a release holds; how every x86_64 program links the C runtime 
 > The EFB app's dev page lists every state at once beside the app, each situation a block of its states in four columns in the pilot's order, with the view's three sizes above them, and keeps the state and size it showed across an edit's reload (user, 2026-11-25).
 > `tools/dev.ts` sends an edit's reload to every page waiting on it and code to run only to the debugger's, since a browser tab left on its port took the reload and left the debugger on the old build.
 
+> **Note**
+> Since 2026-11-25, first-time setup checks nothing, so in [the screenshots](#the-screenshots) its one scene runs the default 5s, and only a join that's slow to answer runs longer, 8s ([interface log](../interface/log.md#2026-11-25-first-time-setup-drops-its-system-check-since-each-failure-it-found-shows-in-the-header-or-a-screen-of-its-own)).
+
 `tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll` and the three C runtime DLLs it imports, and our one Community package, `dualinput`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.
 The Coherent GT check is a Node tool of its own on acorn, run on every bundle after each edit and in CI, and the message crate's hash is SHA-256 over its own source and the locked versions of what it depends on.

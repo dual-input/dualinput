@@ -3,6 +3,28 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-11-25: First-time setup drops its system check, since each failure it found shows in the header or a screen of its own
+
+**Asked:** whether first-time setup's system check earns the time it holds a pilot back from the app ([issue 8](https://github.com/dual-input/dualinput/issues/8)).
+After its greeting, setup ran "Dual Input service", "Dual Input sim add-on", "Our servers", and "Windows Firewall" one at a time, and stopped at a failure.
+On a failure, setup's box offered Restart the sim for an add-on from another version, and Continue anyway for the PC offline, our servers out of reach, or the firewall blocking Dual Input, with Fix beside it for the firewall.
+The checks took about 7s after the 2s greeting before the name and color card, by the timings in `src/platform/efb-shell/src/setup/setup-flow.tsx` at 921e2112.
+
+**Expected:** that a pilot loses nothing without it, since the EFB app shows each of these failures outside setup too.
+
+**Found:** each failure has a place of its own:
+
+- The PC offline, our servers out of reach, and Windows Firewall blocking Dual Input are [the header's](decisions.md#the-header-shows-only-what-needs-the-pilot) rows, under the titles setup used, with Fix on the firewall's.
+  The header reads what setup read: the core's check of what the PC reaches, and the desktop app's local port for the firewall.
+- A service that's down has the window's Not running and Closed screens, which already showed in setup's place, so setup's service check could only pass.
+- An add-on from another version has the window's own screen, whose red box has the same title, words, and Restart the sim as setup's failure box.
+
+**Changed:** setup greets the pilot and goes straight to the name and color card (user, 2026-11-25).
+The EFB app shows the add-on's mismatch screen in setup's place, as it already did Not running and Closed.
+The EFB app's dev page lost its five scenes of setup's checks, with their pictures in `docs/screenshots/efb/`, and code only the check used went with it: its failures' words and timings, the failure box's amber look, and the frame's list of failures.
+
+**Affects:** the tentative decisions on [setup](decisions.md#first-time-setup-greets-the-pilot-and-asks-for-the-name-and-color-once) and [the service's screens](decisions.md#without-the-service-the-efb-app-shows-one-of-three-screens-and-another-version-asks-to-restart-the-sim), edited in place; [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-11-01, edited in place; and [01-apps](01-apps.md), [the network's units](../network/02-units.md), and [the build](../build/01-the-build.md), whose notes of 2026-11-25 amend them.
+
 ## 2026-11-23: Under the kit root's zoom, Coherent GT draws an SVG sized by its attributes at its unzoomed size, which put the countdown's seconds 3px below its ring's center
 
 **Asked:** why the countdown's seconds sat off the center of their ring, beside the banner's Ready, in a screenshot from the sim (user, 2026-11-23).

@@ -10,27 +10,21 @@ type Tone = "off" | "waiting" | "on" | "warning"
 
 const TONES: Record<Tone, string> = { off: "text-muted-foreground", waiting: "text-primary", on: "text-success", warning: "text-warning" }
 
-/** The tone, the label beside the dot, the line under it, if any, and the line that says more, for each state. */
-function says(status: Status): { tone: Tone; label: string; title: string | null; detail: string | null } {
+/** The tone, the label beside the dot, the line under it, and the line that says more, if any, for each state. */
+function says(status: Status): { tone: Tone; label: string; title: string; detail: string | null } {
   switch (status.kind) {
     case "not-running":
-      return { tone: "off", label: "Not running", title: "Dual Input isn't running", detail: "Open it from the Start menu to see live values here." }
+      return { tone: "off", label: "Not running", title: "Dual Input isn't running", detail: "Start it to use the live tools." }
     case "other-release":
-      return {
-        tone: "warning",
-        label: "Version mismatch",
-        title: null,
-        detail:
-          status.update === "dual-input"
-            ? `Dual Input is ${status.dualInput}. This extension was built for ${status.extension}. Update Dual Input.`
-            : `This extension was built for ${status.extension}. Dual Input is ${status.dualInput}. Update the extension.`,
-      }
+      return status.update === "dual-input"
+        ? { tone: "warning", label: "Version mismatch", title: `Dual Input is ${status.dualInput}. This extension was built for ${status.extension}.`, detail: "Update Dual Input." }
+        : { tone: "warning", label: "Version mismatch", title: `This extension was built for ${status.extension}. Dual Input is ${status.dualInput}.`, detail: "Update the extension." }
     case "other-window":
-      return { tone: "off", label: "In another window", title: "Another VS Code window has the sim", detail: "Dual Input's profile tools work in one VS Code window at a time." }
+      return { tone: "off", label: "In another window", title: "Another VS Code window has the sim", detail: "Dual Input's live tools work in one VS Code window at a time." }
     case "no-session":
-      return { tone: "off", label: "No session", title: "Host a session from the EFB app", detail: "Live values and Run only work in a session's flight." }
+      return { tone: "off", label: "No session", title: "Host a session from the EFB app", detail: "Live tools only work while a session is in flight." }
     case "not-in-flight":
-      return { tone: "waiting", label: "In a session", title: "Waiting for the flight to start", detail: "Live values and Run start once you're in it." }
+      return { tone: "waiting", label: "In a session", title: "Waiting for the flight to start", detail: "Load a flight to use the live tools." }
     case "in-flight":
       return status.runs
         ? { tone: "on", label: "In a flight", title: status.aircraft, detail: null }
@@ -50,9 +44,8 @@ export function StatusLine({ status }: { status: Status }) {
         </span>
         {label}
       </p>
-      {/* With no line of its own, the state's facts take its place and size. */}
-      {title ? <p className="mt-1.5 text-sm font-medium">{title}</p> : detail && <p className="mt-1.5 text-sm">{detail}</p>}
-      {title && detail && <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p>}
+      <p className="mt-1.5 text-sm font-medium">{title}</p>
+      {detail && <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p>}
     </div>
   )
 }

@@ -16,6 +16,13 @@ import type { PanelHost, PanelView } from "./view.ts"
 export function Panel({ view, host }: { view: PanelView; host: PanelHost }) {
   const { status, body } = view
   const runs = status.kind === "in-flight" && status.runs
+  // A tool's island opens with its name, in the words and icon of the lens that opened it.
+  const title =
+    body.kind === "run" ? (
+      <IslandTitle icon={<Play />}>Run</IslandTitle>
+    ) : body.kind === "picker" ? (
+      <IslandTitle icon={<SquareMousePointer />}>Pick displays</IslandTitle>
+    ) : null
   const tool =
     body.kind === "run" ? (
       // A new entry starts its value field afresh.
@@ -42,12 +49,26 @@ export function Panel({ view, host }: { view: PanelView; host: PanelHost }) {
         {/* Run's island takes the height between the status island and the recorder's, where the picker's list scrolls.
             With nothing to run or pick, as outside a flight, it stays empty, so the panel keeps its shape. */}
         <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-background">
+          {title}
           {runs && status.crew && view.unpinned && <Unpinned />}
           {tool}
         </div>
         <Recorder recorder={view.recorder} host={host} />
       </div>
     </Root>
+  )
+}
+
+/**
+ * An island's name, in the type of the status line's label. Unlike that label, which belongs with the line under it, it
+ * names the whole island, so it keeps as much room below it as above.
+ */
+function IslandTitle({ icon, children }: { icon: ReactNode; children: string }) {
+  return (
+    <p className="flex shrink-0 items-center whitespace-nowrap px-4 pt-3 text-[10px] font-semibold uppercase leading-4 tracking-widest text-muted-foreground [&>svg]:mr-2 [&>svg]:size-3">
+      {icon}
+      {children}
+    </p>
   )
 }
 

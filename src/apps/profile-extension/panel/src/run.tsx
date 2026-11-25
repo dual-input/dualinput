@@ -33,7 +33,7 @@ export function Run({ run, host }: { run: RunView; host: PanelHost }) {
       onWheel={scroller.onWheel}
       onMouseDown={scroller.onMouseDown}
       style={fadeMask(scroller.above, scroller.below, 24, 24)}
-      className={cx("min-h-0 flex-1 overflow-y-auto px-4 pb-5 pt-4", NO_SCROLLBAR, scroller.cursor)}
+      className={cx("min-h-0 flex-1 overflow-y-auto px-4 pb-5 pt-3", NO_SCROLLBAR, scroller.cursor)}
     >
       <h2 className="text-base font-semibold leading-snug">{run.name}</h2>
       <p className="font-mono text-xs text-muted-foreground">{run.key}</p>
@@ -118,7 +118,7 @@ function Refused({ refusal }: { refusal: Refusal }) {
   return (
     <Note tint="bg-muted/40 text-muted-foreground" icon={<Lock />}>
       <p className="font-medium text-foreground">Pilot flying only</p>
-      <p className="mt-0.5 text-xs">{refusal.pilotFlying} has control, so state sync would put your change back. Run works once you have control.</p>
+      <p className="mt-0.5 text-xs">{refusal.pilotFlying} has control, so your change would be reverted. Try again after you take control.</p>
     </Note>
   )
 }

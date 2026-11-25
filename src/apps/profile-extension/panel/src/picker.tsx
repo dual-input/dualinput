@@ -60,12 +60,9 @@ export function Picker({ picker, host }: { picker: PickerView; host: PanelHost }
   })
 
   return (
-    // The heading and the buttons stay put, and the list scrolls between them.
+    // The line under the island's title and the buttons stay put, and the list scrolls between them.
     <section className="flex min-h-0 flex-1 flex-col">
-      <div className="shrink-0 px-4 pb-2 pt-4">
-        <h2 className="text-base font-semibold leading-snug">Displays</h2>
-        <p className="mt-0.5 text-sm text-muted-foreground">Select the panels Dual Input should sync.</p>
-      </div>
+      <p className="shrink-0 px-4 pb-2 pt-3 text-sm text-muted-foreground">Select the panels Dual Input should sync.</p>
       <div
         ref={list}
         role="listbox"

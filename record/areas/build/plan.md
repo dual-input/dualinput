@@ -1279,20 +1279,19 @@ Designs first: the Sync log, which the user chose on 2026-11-25 over an offline 
 The user designed it with us on 2026-11-25, a call at a time, and [06-the-sync-log](../profiles/06-the-sync-log.md) carries it (user):
 
 - The sync engine logs each decision in the branch that takes it, at no cost while nobody watches, and state sync sends the steps as `unit` messages to the profile extension while one of this release is connected, since `authoring` can't read another feature's engine.
-- A row is a cause: a local change, a first reading, a crewmate's change, a playback's change, a catch-up's write, or control passing.
+- A row is a cause: a local change, a crewmate's change, a playback's change, a catch-up's write, or control passing.
   It opens to every step in order, and its verdict is its latest step.
 - The log uses the engine's own words, with a definition on hover, and the engine and the sync docs rename five things first: waits for a first reading, waits behind, synced value, local change, and read back.
 - A view in VS Code's bottom panel, "Sync log", lists every entry's rows in time order, with a filter box and entry names that open their lines; each entry's latest step shows at the end of its `watch:` line.
-- `serve` keeps the last 10,000 rows until Clear or VS Code closes, and notes a local change within 1.5s of a Run of its entry.
-- A replay with the log on gives a recording's sync log, which a later stage builds.
+- `serve` keeps the last 10,000 rows until Clear or VS Code closes, and notes a local change made while a Run of its entry runs, or within 1.5s of its last action.
+- A replay with the log on gives a recording's sync log, which a later stage designs and builds, and this stage keeps its rows' numbers and steps ready for it.
 
 Builds:
 
-- in `sync-engine`: the five renames, then the log, with `keep_log`, `take_log`, a step in each branch, and the row's number on what a write leaves ([the words](../profiles/06-the-sync-log.md#the-words), [what the engine logs](../profiles/06-the-sync-log.md#what-the-engine-logs))
-- in the message crate: `LogStep` and `Step` in `sync`, `SyncLog` in `state_sync`, and the Run result's stamp in `authoring`
-- in `state-sync`: the log kept on while an extension of this release is connected, and each engine call's steps sent with their senders' names; in `cockpit-stream`: its pretend sender told apart from a member, and whose catch-up `take` hands over ([how it reaches the view](../profiles/06-the-sync-log.md#how-it-reaches-the-view))
-- in `authoring`: the stamp of a Run's first action ([Run and the Sync log](../profiles/06-the-sync-log.md#run-and-the-sync-log))
-- in `tools/profile-builder`'s `serve`: the rows it keeps, the hint's text, the note after a Run, and the entries' lines for the links ([what `serve` keeps](../profiles/06-the-sync-log.md#what-serve-keeps))
+- in `sync-engine`: the five renames, then the log, with `keep_log`, `take_log`, a step in each branch, rows numbered from each load, the row's number on what a write leaves, and `sent` with its time ([the words](../profiles/06-the-sync-log.md#the-words), [what the engine logs](../profiles/06-the-sync-log.md#what-the-engine-logs))
+- in the message crate: `LogStep` and `Step` in `sync`, and `SyncLog` in `state_sync`
+- in `state-sync`: the log kept on while an extension of this release is connected, and each engine call's steps sent with their load and sender; in `cockpit-stream`: its pretend sender's ID public, and whose catch-up it's taking ([how it reaches the view](../profiles/06-the-sync-log.md#how-it-reaches-the-view))
+- in `tools/profile-builder`'s `serve`: the rows it keeps with their times of day, the hint's text, the note after a Run, the note on a row an unload left, and the entries' lines for the links ([what `serve` keeps](../profiles/06-the-sync-log.md#what-serve-keeps), [Run and the Sync log](../profiles/06-the-sync-log.md#run-and-the-sync-log))
 - in `src/apps/profile-extension`: the Sync log view, with its dev page `sync-log` in `tools/lib/dev-pages.ts`; the hint; and the words' definitions on hover ([the Sync log view](../profiles/06-the-sync-log.md#the-sync-log-view), [the hint at the end of a line](../profiles/06-the-sync-log.md#the-hint-at-the-end-of-a-line))
 - in `tools/bench`: the scenario `sync-log`; and `tools/sim/sync-log.ts`, the session's cases in the sim
 
@@ -1301,11 +1300,11 @@ Needs: 22h, for the playback's rows.
 Tests:
 
 - [The design's cases](../profiles/06-the-sync-log.md#cases), on the bench, as unit tests, by hand, and in one session in the sim, and [its budgets](../profiles/06-the-sync-log.md#budgets).
-- The engine with the log off, against the same engine before the stage, on the `state-sync` scenario.
+- The engine's calls with the log off, timed in-process on the stage's starting commit and on its last, by a harness left out of the tree ([budgets](../profiles/06-the-sync-log.md#budgets)).
 
 The stage changes the sync engine, which every scenario with a profile runs on, and its log has to cost nothing while it's off, so it closes on the whole bench (user, 2026-11-25).
 
-Exit: on our development machine, `node tools/check.ts` passes, and `node tools/bench.ts` passes, the `sync-log` scenario among it, with an engine call with the log off within the bench's spread of its time before the stage; the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, and the user has seen the Sync log's dev page in each of its states; in one session in the sim on the 58P, `node tools/sim/sync-log.ts` reports each of its cases passed; and the [profiles' log](../profiles/log.md) has the budgets' measurements.
+Exit: on our development machine, `node tools/check.ts` passes, and `node tools/bench.ts` passes, the `sync-log` scenario among it, and an engine call with the log off times within the spread of its time on the stage's starting commit; the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, and the user has seen the Sync log's dev page in each of its states; in one session in the sim on the 58P, `node tools/sim/sync-log.ts` reports each of its cases passed; and the [profiles' log](../profiles/log.md) has the budgets' measurements.
 
 ## 23 v1's release
 

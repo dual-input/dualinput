@@ -808,9 +808,11 @@ test("a short path with a turn, recorded and played: as Play is pressed the airc
 
   // The aircraft flies on, away from the path, and the cockpit stream's test unit holds the
   // playback's catch-up open for 2s, through which the aircraft holds at the recording's start.
+  // The frames are read from 1s before Play, since the stand-in freezes the aircraft in the frame
+  // it reports, so where the core takes Play between two frames, the first after Play is frozen.
+  const atPlay = p.core.lineCount()
   await sleep(1_000)
   p.core.cockpit({ act: "settle", ms: 2_000 })
-  const atPlay = p.core.lineCount()
   await p.deck.ok("tape.play")
   await tapeUntil(p, (s) => s.state.kind === "playing", "the playback")
   const playing = Date.now() / 1e3
@@ -819,7 +821,7 @@ test("a short path with a turn, recorded and played: as Play is pressed the airc
   const played = spots(p, atPlay)
 
   const firstFrozen = played.findIndex((s) => s.frozen)
-  assert.ok(firstFrozen > 0, "the aircraft froze after Play")
+  assert.ok(firstFrozen > 0, firstFrozen < 0 ? "the aircraft froze after Play" : "the aircraft flew on unfrozen before Play")
   const stood = played[firstFrozen - 1]!
   const lastFrozen = played.findLastIndex((s) => s.frozen)
   const frozen = played.slice(firstFrozen, lastFrozen + 1)

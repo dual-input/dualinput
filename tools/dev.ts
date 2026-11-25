@@ -43,9 +43,10 @@ const DEV_CLIENT = `(function () {
   window.addEventListener("error", function (e) { post("/log", { level: "error", text: e.message + " at " + e.filename + ":" + e.lineno }); });
   var error = console.error;
   console.error = function () { post("/log", { level: "error", text: Array.prototype.join.call(arguments, " ") }); error.apply(console, arguments); };
+  var framed = window.parent !== window;
   function next() {
     var x = new XMLHttpRequest();
-    x.open("GET", "/next");
+    x.open("GET", framed ? "/next?framed" : "/next");
     x.onload = function () {
       var order = JSON.parse(x.responseText);
       if (order.reload) { location.reload(); return; }
@@ -62,17 +63,29 @@ const DEV_CLIENT = `(function () {
   next();
 })();`
 
-let waiting: http.ServerResponse | null = null
+/**
+ * Each page waiting on `/next`, and whether it's the debugger's, which the debugger's start page frames. Another page
+ * can wait here too, such as a browser tab left on this port by an earlier run, and when it takes an edit's reload, the
+ * debugger's page stays on the old build. So a reload goes to every waiting page, and code to run goes only to the
+ * debugger's, whose answer is the one asked for.
+ */
+let waiting: { res: http.ServerResponse; framed: boolean }[] = []
 let orders: object[] = []
 const answers = new Map<number, (out: unknown) => void>()
 let nextOrder = 1
 
 function flush(): void {
-  if (!waiting || orders.length === 0) return
-  const res = waiting
-  waiting = null
-  res.writeHead(200, { "content-type": "application/json" })
-  res.end(JSON.stringify(orders.shift()))
+  while (orders.length > 0) {
+    const body = orders[0]!
+    const to = "reload" in body ? waiting : waiting.filter((one) => one.framed).slice(0, 1)
+    if (to.length === 0) return
+    orders.shift()
+    waiting = waiting.filter((one) => !to.includes(one))
+    for (const { res } of to) {
+      res.writeHead(200, { "content-type": "application/json" })
+      res.end(JSON.stringify(body))
+    }
+  }
 }
 
 function order(body: object): void {
@@ -185,7 +198,16 @@ const server = http.createServer(async (req, res) => {
     }
   }
   if (url.pathname === "/next") {
-    waiting = res
+    const one = { res, framed: url.searchParams.has("framed") }
+    // The debugger frames one page, so an earlier framed request is that page's before it reloaded, which Coherent GT
+    // leaves open, and code sent there would wait out its 10s with nobody to run it.
+    if (one.framed) {
+      for (const old of waiting.filter((other) => other.framed)) old.res.end()
+      waiting = waiting.filter((other) => !other.framed)
+    }
+    waiting.push(one)
+    // A page that reloads or closes drops its request, and a reload sent to it would reach nobody.
+    res.on("close", () => (waiting = waiting.filter((other) => other !== one)))
     return flush()
   }
   const file = path.join(dir, url.pathname === "/" ? "index.html" : url.pathname.replace(/^\/+/, ""))
@@ -211,5 +233,6 @@ host.on("exit", () => {
   process.exit(0)
 })
 process.on("exit", () => host.kill())
-setTimeout(() => resize(host.pid!, 1400, 1000), 1500)
+// Wide enough for the EFB app at its largest beside its navigator's four columns.
+setTimeout(() => resize(host.pid!, 1540, 1000), 1500)
 console.log(`${name}: http://127.0.0.1:${PORT}, and in the debugger's window`)

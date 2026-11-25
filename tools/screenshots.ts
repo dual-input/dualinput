@@ -4,7 +4,7 @@
 //
 //   node tools/screenshots.ts                         every scene of every page
 //   node tools/screenshots.ts efb                     every scene of the EFB app
-//   node tools/screenshots.ts efb "James flying"      one scene
+//   node tools/screenshots.ts efb james-flying       one scene, as its page lists it: the EFB app's by its ID
 //
 // A doc links a picture by its path, such as docs/screenshots/efb/james-flying.png. A run of a whole page deletes its
 // pictures whose scene is gone, and names each one, since a doc may still link it.
@@ -23,9 +23,10 @@
 // picture's pixels from the picture's top-left corner, and its box is cut to what shows, so an element that's hidden,
 // under 5% opaque, or clipped out of the picture is left out.
 //
-// Each page puts three things on `window.DUALINPUT_DEV`: its scenes' names, `show`, which switches to one, and `shot`,
-// the element to picture. It starts on the scene its address names, as `?scene=Preflight`. When you add a scene to a
-// page's stand-in, run this for that page.
+// Each page puts three things on `window.DUALINPUT_DEV`: its scenes, `show`, which switches to one, and `shot`, the
+// element to picture. It starts on the scene its address names, as `?scene=preflight`. A scene's picture is named for
+// it, so the EFB app's scenes are fixed IDs, such as `james-link-lost`, which the page names for people in `names`, and
+// the other pages' are still their names. When you add a scene to a page's stand-in, run this for that page.
 //
 // Every run also draws the repository's social preview, docs/screenshots/social-preview.png, from the EFB app's picture
 // of "Flying together" over a night valley from the sim, tools/screenshots/night-valley.webp. The README opens with
@@ -94,9 +95,13 @@ export function slug(scene: string): string {
     .replace(/^-|-$/g, "")
 }
 
-/** The page's handle. Playwright sends each function it runs in the page as text, so each one reads the handle itself rather than through a function of ours. */
-type Dev = { DUALINPUT_DEV?: { scenes: string[]; times?: Partial<Record<string, number>>; show: (name: string) => void; shot: HTMLElement } }
-type Scenes = { scenes: string[]; times: Partial<Record<string, number>> }
+/**
+ * The page's handle. Playwright sends each function it runs in the page as text, so each one reads the handle itself
+ * rather than through a function of ours. A page whose scenes are IDs, as the EFB app's are, gives each the name a person
+ * reads in `names`.
+ */
+type Dev = { DUALINPUT_DEV?: { scenes: string[]; names?: Record<string, string>; times?: Partial<Record<string, number>>; show: (name: string) => void; shot: HTMLElement } }
+type Scenes = { scenes: string[]; names: Record<string, string>; times: Partial<Record<string, number>> }
 
 /**
  * Seeds the page's `Math.random` with mulberry32, before any of its scripts run, so what a page draws by chance, such as
@@ -122,7 +127,7 @@ async function scenesOf(browser: Browser, page: string): Promise<Scenes> {
   await tab.waitForFunction(() => (window as unknown as Dev).DUALINPUT_DEV?.scenes !== undefined)
   const found = await tab.evaluate(() => {
     const dev = (window as unknown as Dev).DUALINPUT_DEV!
-    return { scenes: dev.scenes, times: dev.times ?? {} }
+    return { scenes: dev.scenes, names: dev.names ?? {}, times: dev.times ?? {} }
   })
   await tab.close()
   return found
@@ -285,7 +290,7 @@ async function drawPreview(browser: Browser): Promise<void> {
 }
 
 /** The folder's README.md: each page's pictures in a grid, each under its scene's name and the path a doc links. */
-function readme(scenes: Record<string, string[]>): string {
+function readme(scenes: Record<string, string[]>, names: Record<string, Record<string, string>>): string {
   const lines = [
     "# Screenshots",
     "",
@@ -300,7 +305,8 @@ function readme(scenes: Record<string, string[]>): string {
     for (let row = 0; row < all.length; row += 3) {
       const cells = all.slice(row, row + 3).map((scene) => {
         const file = `${name}/${slug(scene)}.png`
-        return `<td valign="top" width="33%"><img src="${file}" width="260" alt="${scene.replace(/"/g, "&quot;")}"><br>${scene}<br><code>${file}</code></td>`
+        const shown = names[name]?.[scene] ?? scene
+        return `<td valign="top" width="33%"><img src="${file}" width="260" alt="${shown.replace(/"/g, "&quot;")}"><br>${shown}<br><code>${file}</code></td>`
       })
       lines.push(`<tr>${cells.join("")}</tr>`)
     }
@@ -326,9 +332,10 @@ main(async () => {
   }
   try {
     const scenes: Record<string, string[]> = {}
+    const names: Record<string, Record<string, string>> = {}
     const times: Record<string, Partial<Record<string, number>>> = {}
     for (const { name } of PAGES) {
-      ;({ scenes: scenes[name], times: times[name] } = await scenesOf(browser, name))
+      ;({ scenes: scenes[name], names: names[name], times: times[name] } = await scenesOf(browser, name))
       const files = scenes[name]!.map(slug)
       const twice = files.find((file, at) => files.indexOf(file) !== at)
       if (twice) throw new Failed(`two of ${name}'s scenes are both ${twice}.png; rename one in its stand-in`)
@@ -372,7 +379,7 @@ main(async () => {
         }
       }
     }
-    fs.writeFileSync(path.join(OUT, "README.md"), readme(scenes))
+    fs.writeFileSync(path.join(OUT, "README.md"), readme(scenes, names))
     console.log(`${shots.length} ${shots.length === 1 ? "picture" : "pictures"} taken, ${changed} changed`)
     await drawPreview(browser)
   } finally {

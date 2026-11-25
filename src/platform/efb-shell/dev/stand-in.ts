@@ -4,7 +4,7 @@
 import { COUNTDOWN } from "@dualinput/crew"
 
 import { StandInBase } from "../../../engines/page-client/dev/stand-in-base.ts"
-import type { Slices } from "../../../engines/page-client/dev/stand-in-base.ts"
+import type { LostService, Slices } from "../../../engines/page-client/dev/stand-in-base.ts"
 import type { CoreSlice } from "../../../engines/messages/ts/clients/CoreSlice.ts"
 import type { Setting } from "../../../engines/messages/ts/clients/Setting.ts"
 import type { ProfilesSlice } from "../../../engines/messages/ts/profiles/ProfilesSlice.ts"
@@ -160,37 +160,42 @@ const CLIPBOARD = "clipboard"
 const ATTEMPTING = "attempting"
 type Trying = { on: "host" | "join"; code?: string }
 
-/** Each state a person looks at, by name, with what it sets on top of the sim's healthy slices. */
+/**
+ * Each state a person looks at, by its ID, with what it sets on top of the sim's healthy slices. tools/screenshots.ts names
+ * a state's picture by its ID, as docs/screenshots/efb/james-link-lost.png, which the docs link, so an ID never changes,
+ * and `NAVIGATOR` gives each state the name a person reads (user, 2026-11-25). A new state takes an ID of lowercase words
+ * with dashes between them, and a place in `NAVIGATOR`.
+ */
 export const SCENES: Record<string, Slices> = {
-  "First-time setup": firstRun,
-  "First-time setup, checking": firstRun,
-  "Setup: add-on mismatch": { ...firstRun, core: { ...firstRun.core, version: "0.0.9" } },
-  "Setup: offline": { ...firstRun, network: { members: [], internet: false, servers: "unreachable" } },
-  "Setup: our servers": { ...firstRun, network: { members: [], internet: true, servers: "unreachable" } },
-  "Setup: firewall": { ...firstRun, [DESKTOP]: { ...LOCAL, firewall: "blocks" } },
-  "First visit": firstVisit,
-  "First visit, no profile": { ...firstVisit, sim: fenix, profiles: NO_PROFILE },
-  "Before a session": {},
-  "No profile for the aircraft": { sim: fenix, profiles: NO_PROFILE },
-  "No profile, in a flight": { sim: { ...fenix, where: "flight" }, profiles: NO_PROFILE },
-  "Servers refuse": { [REFUSING]: "servers", [ATTEMPTING]: { on: "host" } },
-  "No session has the code": { [REFUSING]: "no-code", [ATTEMPTING]: { on: "join", code: CODE } },
-  "Connection won't open": { [REFUSING]: "no-connection", [ATTEMPTING]: { on: "join", code: CODE } },
-  "Too slow to answer": { [REFUSING]: "slow", [ATTEMPTING]: { on: "join", code: CODE } },
-  "A code on the clipboard": { [CLIPBOARD]: CODE },
-  "Alone in a session": { session: held({ members: [me(atMenu)] }) },
-  "James joins": { session: held({ members: [me(atMenu), james({ ...atMenu, stage: "loading" })] }) },
-  Preflight: { ...netUp, session: held({ members: [me(inFlight), james(inFlight, { ready: true })], preflight: running, differences: DIFFERENCES }) },
-  "Preflight, aircraft settling": { ...netUp, session: held({ members: [me(inFlight), james(inFlight)], preflight: running, differences: DIFFERENCES, ready: ["Ready opens once your aircraft has settled, about 30s after Ready to fly"] }) },
-  "Preflight, James dropped": {
+  "first-time-setup": firstRun,
+  "first-time-setup-checking": firstRun,
+  "setup-add-on-mismatch": { ...firstRun, core: { ...firstRun.core, version: "0.0.9" } },
+  "setup-offline": { ...firstRun, network: { members: [], internet: false, servers: "unreachable" } },
+  "setup-our-servers": { ...firstRun, network: { members: [], internet: true, servers: "unreachable" } },
+  "setup-firewall": { ...firstRun, [DESKTOP]: { ...LOCAL, firewall: "blocks" } },
+  "first-visit": firstVisit,
+  "first-visit-no-profile": { ...firstVisit, sim: fenix, profiles: NO_PROFILE },
+  "before-a-session": {},
+  "no-profile-for-the-aircraft": { sim: fenix, profiles: NO_PROFILE },
+  "no-profile-in-a-flight": { sim: { ...fenix, where: "flight" }, profiles: NO_PROFILE },
+  "servers-refuse": { [REFUSING]: "servers", [ATTEMPTING]: { on: "host" } },
+  "no-session-has-the-code": { [REFUSING]: "no-code", [ATTEMPTING]: { on: "join", code: CODE } },
+  "connection-wont-open": { [REFUSING]: "no-connection", [ATTEMPTING]: { on: "join", code: CODE } },
+  "too-slow-to-answer": { [REFUSING]: "slow", [ATTEMPTING]: { on: "join", code: CODE } },
+  "a-code-on-the-clipboard": { [CLIPBOARD]: CODE },
+  "alone-in-a-session": { session: held({ members: [me(atMenu)] }) },
+  "james-joins": { session: held({ members: [me(atMenu), james({ ...atMenu, stage: "loading" })] }) },
+  "preflight": { ...netUp, session: held({ members: [me(inFlight), james(inFlight, { ready: true })], preflight: running, differences: DIFFERENCES }) },
+  "preflight-aircraft-settling": { ...netUp, session: held({ members: [me(inFlight), james(inFlight)], preflight: running, differences: DIFFERENCES, ready: ["Ready opens once your aircraft has settled, about 30s after Ready to fly"] }) },
+  "preflight-james-dropped": {
     network: { members: [{ pilot: JAMES, up: false, path: null, round_trip_ms: null }], ...reach },
     session: held({ members: [me(inFlight, { ready: true }), james(inFlight)], preflight: running, differences: DIFFERENCES }),
   },
-  "Preflight, James at the menu": {
+  "preflight-james-at-the-menu": {
     ...netUp,
     session: held({ members: [me(inFlight, { ready: true }), james(atMenu)], preflight: running, differences: DIFFERENCES }),
   },
-  "Preflight, big crew": {
+  "preflight-big-crew": {
     ...netUp,
     session: held({
       members: [me(inFlight), james(inFlight, { ready: true }), extra("Adam", 3), extra("Mia", 4, { ready: false }), extra("Lena", 5), extra("Omar", 6, { ready: false }), extra("Priya", 7), extra("Theo", 8), extra("Sven", 9, { ready: false }), extra("Rosa", 10)],
@@ -198,37 +203,37 @@ export const SCENES: Record<string, Slices> = {
       differences: DIFFERENCES,
     }),
   },
-  Flying: { ...netUp, ...boundTo("F9"), session: flying(ME), [TAKE_CONTROL]: control({ mine: true }) },
-  "James flying": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({}) },
-  "Flying together": {
+  "flying": { ...netUp, ...boundTo("F9"), session: flying(ME), [TAKE_CONTROL]: control({ mine: true }) },
+  "james-flying": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({}) },
+  "flying-together": {
     ...netUp,
     ...boundTo("F9"),
     session: { ...flying(JAMES, { traffic: JAMES, atc: ME }), differences: [] },
     [TAKE_CONTROL]: control({}),
     [ATC]: { capturing: "BeyondATC" },
   },
-  "James flying, a key bound": { ...netUp, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({}) },
-  "James flying, a long key's name": { ...netUp, ...boundTo("Thrustmaster TCA Sidestick button 12"), session: flying(JAMES), [TAKE_CONTROL]: control({}) },
-  "James flying, catching up": { ...netUp, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ denied: ["You're catching up with James."] }), [STREAM]: { catching_up: true, from_preflight_end: false, replaying: false } },
-  "James flying, another guard refuses": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({ denied: ["Only the instructor can take control"] }) },
-  "Test session": {
+  "james-flying-a-key-bound": { ...netUp, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({}) },
+  "james-flying-a-long-key-name": { ...netUp, ...boundTo("Thrustmaster TCA Sidestick button 12"), session: flying(JAMES), [TAKE_CONTROL]: control({}) },
+  "james-flying-catching-up": { ...netUp, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ denied: ["You're catching up with James."] }), [STREAM]: { catching_up: true, from_preflight_end: false, replaying: false } },
+  "james-flying-another-guard-refuses": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({ denied: ["Only the instructor can take control"] }) },
+  "test-session": {
     ...netUp,
     session: flying(JAMES),
     [TAKE_CONTROL]: control({}),
     profiles: testSession({ t: "loaded", hash: "3f9c2a1" }, { t: "loaded", hash: "3f9c2a1" }),
     notifications: [{ id: "profile-loader.edit", level: "information", text: "James's profile edit is loaded on both PCs", detail: "Profile 3f9c2a1", pilot: JAMES, once: true, landing: "session" }],
   },
-  "Test session, a save loading": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({}), profiles: testSession({ t: "loading" }, { t: "loaded", hash: "3f9c2a1" }) },
-  "James's link lost": { network: { members: [{ pilot: JAMES, up: false, path: null, round_trip_ms: null }], ...reach }, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ warning: "If you take control, your session might desync." }) },
-  "Traffic: James shares, some missing": { ...netUp, session: flying(JAMES, { traffic: JAMES }), [TRAFFIC]: { ...noTraffic, missing: 3, others: 12 } },
-  "Traffic: you share": { ...netUp, session: flying(ME, { traffic: ME }) },
-  "ATC: you share": { ...netUp, session: flying(ME, { atc: ME }), [ATC]: { capturing: "BeyondATC" } },
-  "ATC: James shares": { ...netUp, session: flying(JAMES, { atc: JAMES }) },
-  "Join: James at a stand": { ...netUp, session: jamesAway, [GO_TO]: { ...noJoin, spot: AT_KSEA, join: { as: "ready" } } },
-  "Join: another aircraft": { ...netUp, sim: { ...fenix, stage: "ready-to-fly", where: "flight" }, session: jamesElsewhere, [GO_TO]: { ...noJoin, spot: AT_KSEA, join: { as: "unavailable", why: "other-aircraft" } } },
-  "Header: offline": { network: { members: [], internet: false, servers: null } },
-  "Header: several things": { network: { members: [], internet: true, servers: "unreachable" }, [DESKTOP]: { ...LOCAL, firewall: "blocks", update: { state: "ready", next: "1.0.3" } } },
-  "Header: our own parts": {
+  "test-session-a-save-loading": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({}), profiles: testSession({ t: "loading" }, { t: "loaded", hash: "3f9c2a1" }) },
+  "james-link-lost": { network: { members: [{ pilot: JAMES, up: false, path: null, round_trip_ms: null }], ...reach }, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ warning: "If you take control, your session might desync." }) },
+  "traffic-james-shares-some-missing": { ...netUp, session: flying(JAMES, { traffic: JAMES }), [TRAFFIC]: { ...noTraffic, missing: 3, others: 12 } },
+  "traffic-you-share": { ...netUp, session: flying(ME, { traffic: ME }) },
+  "atc-you-share": { ...netUp, session: flying(ME, { atc: ME }), [ATC]: { capturing: "BeyondATC" } },
+  "atc-james-shares": { ...netUp, session: flying(JAMES, { atc: JAMES }) },
+  "join-james-at-a-stand": { ...netUp, session: jamesAway, [GO_TO]: { ...noJoin, spot: AT_KSEA, join: { as: "ready" } } },
+  "join-another-aircraft": { ...netUp, sim: { ...fenix, stage: "ready-to-fly", where: "flight" }, session: jamesElsewhere, [GO_TO]: { ...noJoin, spot: AT_KSEA, join: { as: "unavailable", why: "other-aircraft" } } },
+  "header-offline": { network: { members: [], internet: false, servers: null } },
+  "header-several-things": { network: { members: [], internet: true, servers: "unreachable" }, [DESKTOP]: { ...LOCAL, firewall: "blocks", update: { state: "ready", next: "1.0.3" } } },
+  "header-our-own-parts": {
     session: held({ members: [me(inFlight), james(inFlight)], preflight: { aircraft: inFlight.aircraft, phase: "ended" }, ready: null }),
     network: { members: [], internet: true, servers: "unreachable" },
     notifications: [
@@ -239,19 +244,19 @@ export const SCENES: Record<string, Slices> = {
     ],
     [DESKTOP]: { ...LOCAL, firewall: "blocks" },
   },
-  "Recording stopped": { recording: { runs: RUNS, stopped: "no-space" } },
-  "Output device missing": { settings: [...settings(true, true), { ...setting(OUTPUT, false), kind: { type: "device" }, value: { id: "old", name: "Studio Headphones" } }] },
-  "Update available": { [DESKTOP]: { ...LOCAL, update: { state: "available", next: "1.0.3" } } },
-  "Update ready": { [DESKTOP]: { ...LOCAL, update: { state: "ready", next: "1.0.3" } } },
-  "No tray app": { [DESKTOP]: null },
-  "Turned off in Windows": { [DESKTOP]: { ...LOCAL, start_with_windows: "off-in-windows" } },
-  "Another version": { core: { ...CORE, version: "0.0.9" } },
-  "Figures: model can't be read": { avatars: { note: "model" } },
-  "Figures: no seats": { avatars: { note: "seats" } },
-  "Traffic: nobody shares": { ...netUp, session: flying(JAMES) },
-  "ATC: nobody shares": { ...netUp, session: flying(JAMES) },
-  Figures: { ...netUp, session: flying(JAMES) },
-  Settings: { ...netUp, ...boundTo("F9"), session: flying(JAMES) },
+  "recording-stopped": { recording: { runs: RUNS, stopped: "no-space" } },
+  "output-device-missing": { settings: [...settings(true, true), { ...setting(OUTPUT, false), kind: { type: "device" }, value: { id: "old", name: "Studio Headphones" } }] },
+  "update-available": { [DESKTOP]: { ...LOCAL, update: { state: "available", next: "1.0.3" } } },
+  "update-ready": { [DESKTOP]: { ...LOCAL, update: { state: "ready", next: "1.0.3" } } },
+  "no-tray-app": { [DESKTOP]: null },
+  "turned-off-in-windows": { [DESKTOP]: { ...LOCAL, start_with_windows: "off-in-windows" } },
+  "another-version": { core: { ...CORE, version: "0.0.9" } },
+  "figures-model-cant-be-read": { avatars: { note: "model" } },
+  "figures-no-seats": { avatars: { note: "seats" } },
+  "traffic-nobody-shares": { ...netUp, session: flying(JAMES) },
+  "atc-nobody-shares": { ...netUp, session: flying(JAMES) },
+  "figures": { ...netUp, session: flying(JAMES) },
+  "settings": { ...netUp, ...boundTo("F9"), session: flying(JAMES) },
 }
 
 /**
@@ -261,33 +266,109 @@ export const SCENES: Record<string, Slices> = {
  * src/platform/efb-shell/src/session/session-tab.tsx).
  */
 export const SCENE_TIMES: Partial<Record<string, number>> = {
-  "Too slow to answer": 8_000,
-  "First-time setup": 12_000,
-  "Setup: add-on mismatch": 12_000,
-  "Setup: offline": 12_000,
-  "Setup: our servers": 12_000,
-  "Setup: firewall": 12_000,
+  "too-slow-to-answer": 8_000,
+  "first-time-setup": 12_000,
+  "setup-add-on-mismatch": 12_000,
+  "setup-offline": 12_000,
+  "setup-our-servers": 12_000,
+  "setup-firewall": 12_000,
 }
 
-/** The tab a scene is about, by its label, where it isn't the Session tab. */
+/** The tab a scene is about, by the tab's label, where it isn't the Session tab. */
 export const SCENE_TABS: Partial<Record<string, string>> = {
-  "Traffic: James shares, some missing": "Traffic",
-  "Traffic: you share": "Traffic",
-  "Traffic: nobody shares": "Traffic",
-  "ATC: you share": "ATC audio",
-  "ATC: James shares": "ATC audio",
-  "ATC: nobody shares": "ATC audio",
-  "Figures: model can't be read": "Figures",
-  "Figures: no seats": "Figures",
-  Figures: "Figures",
-  "Recording stopped": "Settings",
-  "Output device missing": "Settings",
-  "Update available": "Settings",
-  "Update ready": "Settings",
-  "No tray app": "Settings",
-  "Turned off in Windows": "Settings",
-  Settings: "Settings",
+  "traffic-james-shares-some-missing": "Traffic",
+  "traffic-you-share": "Traffic",
+  "traffic-nobody-shares": "Traffic",
+  "atc-you-share": "ATC audio",
+  "atc-james-shares": "ATC audio",
+  "atc-nobody-shares": "ATC audio",
+  "figures-model-cant-be-read": "Figures",
+  "figures-no-seats": "Figures",
+  "figures": "Figures",
+  "recording-stopped": "Settings",
+  "output-device-missing": "Settings",
+  "update-available": "Settings",
+  "update-ready": "Settings",
+  "no-tray-app": "Settings",
+  "turned-off-in-windows": "Settings",
+  "settings": "Settings",
 }
+
+/** One line of a situation's block: a state by its ID, or the connection to the core lost or back, on top of the state shown. */
+export type NavigatorEntry = { label: string; scene: string } | { label: string; connection: LostService }
+/** A situation and its states, each named for what sets it apart from the rest of the block. */
+export type NavigatorBlock = { situation: string; entries: NavigatorEntry[] }
+/** A run of blocks in a column, under a heading where a new part of the app starts. */
+export type NavigatorSection = { heading?: string; blocks: NavigatorBlock[] }
+
+const state = (label: string, scene: string): NavigatorEntry => ({ label, scene })
+const lost = (label: string, connection: LostService): NavigatorEntry => ({ label, connection })
+
+/**
+ * The dev page's navigator: every state at once, in four columns in the pilot's order, each situation a block of its
+ * states, since a state hidden in a folded group took too long to find (user, 2026-11-25). Every ID in `SCENES` shows here
+ * once, and the screenshots' README lists them in this order.
+ */
+export const NAVIGATOR: NavigatorSection[][] = [
+  [
+    {
+      heading: "Session",
+      blocks: [
+        { situation: "Setup", entries: [state("Welcome", "first-time-setup"), state("Checking", "first-time-setup-checking"), state("Add-on mismatch", "setup-add-on-mismatch"), state("Offline", "setup-offline"), state("Our servers", "setup-our-servers"), state("Firewall", "setup-firewall")] },
+        { situation: "First visit", entries: [state("Profile ready", "first-visit"), state("No profile", "first-visit-no-profile")] },
+        { situation: "Before a session", entries: [state("Ready", "before-a-session"), state("No profile", "no-profile-for-the-aircraft"), state("No profile, in a flight", "no-profile-in-a-flight"), state("Code on the clipboard", "a-code-on-the-clipboard")] },
+        { situation: "Host or join", entries: [state("Servers refuse", "servers-refuse"), state("No session has the code", "no-session-has-the-code"), state("Connection won't open", "connection-wont-open"), state("Too slow", "too-slow-to-answer")] },
+      ],
+    },
+  ],
+  [
+    {
+      blocks: [
+        { situation: "In the session", entries: [state("Alone", "alone-in-a-session"), state("James joins", "james-joins"), state("Join James at a stand", "join-james-at-a-stand"), state("Join in another aircraft", "join-another-aircraft")] },
+        { situation: "Preflight", entries: [state("Ready", "preflight"), state("Aircraft settling", "preflight-aircraft-settling"), state("James dropped", "preflight-james-dropped"), state("James at the menu", "preflight-james-at-the-menu"), state("Big crew", "preflight-big-crew")] },
+        { situation: "You fly", entries: [state("Alone at the controls", "flying"), state("Together", "flying-together")] },
+        { situation: "Test session", entries: [state("Loaded", "test-session"), state("Save loading", "test-session-a-save-loading")] },
+      ],
+    },
+  ],
+  [
+    {
+      blocks: [
+        { situation: "James flies", entries: [state("Plain", "james-flying"), state("Key bound", "james-flying-a-key-bound"), state("Long key name", "james-flying-a-long-key-name"), state("Catching up", "james-flying-catching-up"), state("Guard refuses", "james-flying-another-guard-refuses"), state("Link lost", "james-link-lost")] },
+        { situation: "Header", entries: [state("Offline", "header-offline"), state("Several things", "header-several-things"), state("Our own parts", "header-our-own-parts")] },
+      ],
+    },
+    {
+      heading: "Whole app",
+      blocks: [{ situation: "Service", entries: [state("Another version", "another-version"), lost("Reconnecting", "reconnecting"), lost("Not running", "not-running"), lost("Closed", "closed"), lost("Back", "back")] }],
+    },
+  ],
+  [
+    {
+      heading: "Other tabs",
+      blocks: [
+        { situation: "Traffic", entries: [state("Nobody shares", "traffic-nobody-shares"), state("James shares, some missing", "traffic-james-shares-some-missing"), state("You share", "traffic-you-share")] },
+        { situation: "ATC audio", entries: [state("Nobody shares", "atc-nobody-shares"), state("You share", "atc-you-share"), state("James shares", "atc-james-shares")] },
+        { situation: "Figures", entries: [state("Plain", "figures"), state("Model can't be read", "figures-model-cant-be-read"), state("No seats", "figures-no-seats")] },
+        { situation: "Settings", entries: [state("Plain", "settings"), state("Recording stopped", "recording-stopped"), state("Output device missing", "output-device-missing"), state("Update available", "update-available"), state("Update ready", "update-ready"), state("No tray app", "no-tray-app"), state("Off in Windows", "turned-off-in-windows")] },
+      ],
+    },
+  ],
+]
+
+/**
+ * Each state's ID in the navigator's order, with the name a person reads, its situation's and its own, as "James flies:
+ * Link lost". Loops, since Coherent GT has no `flat` or `flatMap` (record/areas/architecture/coherent-gt.md).
+ */
+export const SCENE_NAMES: [scene: string, name: string][] = []
+for (const column of NAVIGATOR) {
+  for (const section of column) {
+    for (const { situation, entries } of section.blocks) {
+      for (const entry of entries) if ("scene" in entry) SCENE_NAMES.push([entry.scene, `${situation}: ${entry.label}`])
+    }
+  }
+}
+
 const AFTER = { answer: 1000, slowAnswer: 10_000 }
 
 
@@ -300,7 +381,7 @@ export class StandInCore extends StandInBase {
   private clipboard: string | null = null
   private desktopSocket: Socket | null = null
   private local: DesktopState | null = LOCAL
-  sceneName = "Before a session"
+  sceneName = "before-a-session"
 
   protected greeted(): void {
     if (!this.slices.session) this.scene(this.sceneName)

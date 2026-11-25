@@ -762,10 +762,23 @@ impl Checker {
                 let n = self.name(node, "`write`", allowed, true)?;
                 Some((WriteAt::Ready(Write::Name(n)), None))
             }
-            Kind::Str(t) => Some((
-                WriteAt::Ready(Write::Function(t.text.clone())),
-                Some(t.clone()),
-            )),
+            Kind::Str(t) => {
+                // An author's script takes one form, a `|` block, so there's one to learn and the
+                // formatter lays out only that one: a folded block, `>`, or a plain or quoted
+                // script runs as YAML joins its lines, which differs from what the file shows
+                // (record/areas/profiles/01-format-and-delivery.md, "What fails a load").
+                if self.mode == Mode::Source && (!t.block || t.folded) {
+                    self.error(
+                        &node.at,
+                        "script-block",
+                        "A script is a `|` block: write `write: |`, and the script on the lines below it, indented 2 spaces more than `write`",
+                    );
+                }
+                Some((
+                    WriteAt::Ready(Write::Function(t.text.clone())),
+                    Some(t.clone()),
+                ))
+            }
             // An event has no value of the cockpit's to compare with a wanted one, or to step
             // from, so on an event entry a toggle could only send its event, which a name
             // written on its own does, and a stepping write has nothing to step.

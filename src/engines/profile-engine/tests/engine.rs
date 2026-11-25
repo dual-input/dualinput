@@ -695,6 +695,40 @@ fn a_name_call_with_a_double_quoted_text_fails_at_that_text() {
     );
 }
 
+/// An author's script takes one form, a `|` block, and a folded block, a plain script, and a
+/// quoted one each fail where their text starts (record/areas/profiles/01-format-and-delivery.md,
+/// "What fails a load").
+#[test]
+fn a_script_other_than_a_literal_block_fails_with_script_block() {
+    let entry = |key: &str, write: &str| {
+        format!("  {key}:\n    name: X\n    watch: L('{key}')\n    write: {write}\n")
+    };
+    let yaml = format!(
+        "{HEAD}state:\n{}{}{}{}{}",
+        entry(
+            "literal",
+            "|\n      (value) => {\n        write(L('A'), value)\n      }"
+        ),
+        entry("trimmed", "|-\n      (value) => write(L('B'), value)"),
+        entry(
+            "folded",
+            ">\n      (value) => {\n        write(L('C'), value)\n      }"
+        ),
+        entry("plain", "(value) =>\n      write(L('D'), value)"),
+        entry("quoted", "'(value) => write(L(''E''), value)'"),
+    );
+    let report = check(
+        &source(&tree(&[("p.yaml", &yaml)]), "p.yaml").expect("loads"),
+        LEVEL,
+    );
+    let found: Vec<usize> = report
+        .errors()
+        .filter(|d| d.code == "script-block")
+        .map(|d| d.at.line)
+        .collect();
+    assert_eq!(found, [24, 30, 35], "{yaml}");
+}
+
 #[test]
 fn a_script_and_a_comment_take_double_quotes() {
     let yaml = format!(

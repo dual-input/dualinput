@@ -192,11 +192,11 @@ So `if (value == state.breaker_starter) return` comes out as three lines, and so
 Run on the 58P's profile, dprint broke one line of 108 columns, `const vsHold = …`, into three (measured with `dualinput-profile-builder format`, 2026-11-23), and gave the bodies of its 26 one-line `if` and `else` lines braces and lines of their own, which grew the file by 46 lines (measured the same way, 2026-11-25).
 It took the builder from 13.4 MB to 17.8 MB, and the `.vsix` from 4.2 MB to 6.0 MB (measured on our development machine, 2026-11-23, a release build).
 
-- A script on the `write:` line goes into a `|` block below it, since [Layout](01-format-and-delivery.md#layout) writes every script as one.
+- A script on the `write:` line goes into a `|` block below it, since a script in an author's files that isn't a `|` block fails the load with `script-block` ([01-format-and-delivery](01-format-and-delivery.md)'s note of 2026-11-25).
   A value YAML reads as a boolean, a number, or null, as `write: true`, stays on the line, since it's no script, and the engine's checks report it.
-  A script written plain over two lines or more, as `write: (value) =>` with the rest on the lines below, keeps its lines, since the formatter moves only a script that the `write:` line holds whole.
+- A script written plain over two lines or more, as `write: (value) =>` with the rest on the lines below, and a folded block, `>`, keep their lines, and `script-block` says to write them as a `|` block.
+  YAML reads each of their line breaks as a space, so a break dprint added, removed, or indented would change the text the script runs as.
 - A script that doesn't parse, as while you're typing it, keeps its lines, and TypeScript's check shows why.
-- A folded block, `>`, keeps its lines and its `>`, since YAML reads each of its line breaks as a space, except before a more-indented line, so a break dprint added, removed, or indented would change the text the script runs as.
 - dprint runs in `profile-language`, in Rust, so formatting a script waits on neither of TypeScript's runtimes, and `cargo test` covers it.
 
 ### Quotes
@@ -410,6 +410,7 @@ As the engine's and the builder's tests:
 
 - A double-quoted value or name call outside a script fails the build with its single-quoted form in the error.
 - A script that declares each of `state`, `write`, `L`, `A`, `B`, `K`, and `H`, as a variable, a parameter, a function, and a name taken apart from an object, fails with `reserved-name` at the YAML's line and column, and a write function whose parameter is `value` builds.
+- A folded script, a plain one over two lines, and a quoted one each fail with `script-block` where their text starts, and a `|` block, `|-` among them, builds.
 - A bundle's keys put `seats` last, and a bundle whose values hold double quotes, as `"true"`, reads back with no error.
 - `dualinput-profile-builder format --check` passes on `profiles/` and fails on a fixture out of layout.
 

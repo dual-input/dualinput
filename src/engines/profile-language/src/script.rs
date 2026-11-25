@@ -104,7 +104,9 @@ mod tests {
         let early = "(value) => {\n  if (value == state.starter) return\n  write(K('A'))\n}";
         assert_eq!(
             format_script(early, 94).as_deref(),
-            Some("(value) => {\n  if (value == state.starter) {\n    return\n  }\n  write(K('A'))\n}")
+            Some(
+                "(value) => {\n  if (value == state.starter) {\n    return\n  }\n  write(K('A'))\n}"
+            )
         );
         let chain = "(value) => {\n  if (value == 0) write(K('A'))\n  else if (value == 19) write(K('B'))\n  else write(K('C'))\n}";
         assert_eq!(
@@ -116,7 +118,9 @@ mod tests {
         let nested = "(value) => {\n  if (value) { if (state.mode == 3) write(H('X')) }\n}";
         assert_eq!(
             format_script(nested, 94).as_deref(),
-            Some("(value) => {\n  if (value) {\n    if (state.mode == 3) {\n      write(H('X'))\n    }\n  }\n}")
+            Some(
+                "(value) => {\n  if (value) {\n    if (state.mode == 3) {\n      write(H('X'))\n    }\n  }\n}"
+            )
         );
         let loops = "(value) => {\n  while (state.a > value) write(K('DEC'))\n  for (const k of [1, 2]) write(L('X'), k)\n}";
         assert_eq!(

@@ -41,6 +41,8 @@ pub struct Text {
     /// each line of the text starts; otherwise the place of the text's first character.
     pub content: Place,
     pub block: bool,
+    /// Whether the block is a folded one, `>`, whose line breaks YAML reads as spaces.
+    pub folded: bool,
     /// The quote the text is written in, `'` or `"`, or none for a plain text or a block.
     pub quote: Option<char>,
 }
@@ -171,11 +173,13 @@ fn convert(
         YamlData::Value(Scalar::Integer(i)) => Kind::Number(*i as f64),
         YamlData::Value(Scalar::FloatingPoint(f)) => Kind::Number(f.into_inner()),
         YamlData::Value(Scalar::String(s)) => {
-            let (content, block) = content(file, lines, &at, s);
+            let (content, indicator) = content(file, lines, &at, s);
+            let block = indicator.is_some();
             Kind::Str(Text {
                 text: s.to_string(),
                 content,
                 block,
+                folded: indicator == Some('>'),
                 quote: if block { None } else { quote_at(lines, &at) },
             })
         }
@@ -315,22 +319,23 @@ fn written_out(form: &Bracketed) -> String {
     }
 }
 
-/// Where a string's text starts, and whether it's a block. saphyr places a block, `|` or `>`,
-/// at its first line that holds text, past any blank lines, which the text starts with, so the
-/// text's first line is the one below the indicator, at the indentation the block strips from
-/// every line. Any other string's text starts after its opening quote, if it has one.
-fn content(file: &str, lines: &[&str], at: &Place, text: &str) -> (Place, bool) {
+/// Where a string's text starts, and its block's indicator, `|` or `>`, if it's a block. saphyr
+/// places a block at its first line that holds text, past any blank lines, which the text starts
+/// with, so the text's first line is the one below the indicator, at the indentation the block
+/// strips from every line. Any other string's text starts after its opening quote, if it has one.
+fn content(file: &str, lines: &[&str], at: &Place, text: &str) -> (Place, Option<char>) {
     let blank = text.chars().take_while(|c| *c == '\n').count();
     if at.line > blank + 1 {
         let header = lines[at.line - blank - 2];
         let header = header.split(" #").next().unwrap_or(header).trim_end();
         let indicator = header.rsplit(' ').next().unwrap_or(header);
         let mut chars = indicator.chars();
-        let block = matches!(chars.next(), Some('|' | '>'))
+        let first = chars.next().filter(|c| matches!(c, '|' | '>'));
+        let block = first.is_some()
             && chars.clone().count() <= 2
             && chars.all(|c| matches!(c, '+' | '-' | '1'..='9'));
         if block {
-            return (Place::new(file, at.line - blank, at.column), true);
+            return (Place::new(file, at.line - blank, at.column), first);
         }
     }
     let quoted = lines
@@ -338,9 +343,9 @@ fn content(file: &str, lines: &[&str], at: &Place, text: &str) -> (Place, bool) 
         .and_then(|l| l.chars().nth(at.column - 1))
         .is_some_and(|c| c == '\'' || c == '"');
     if quoted {
-        return (Place::new(file, at.line, at.column + 1), false);
+        return (Place::new(file, at.line, at.column + 1), None);
     }
-    (at.clone(), false)
+    (at.clone(), None)
 }
 
 #[cfg(test)]

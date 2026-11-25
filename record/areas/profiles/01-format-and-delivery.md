@@ -45,6 +45,10 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 > **Note**
 > In [layout](#layout), a formatter lays out a script's JavaScript rather than leaving its lines as they are, and writes a script it finds on the `write:` line as a `|` block, as [scripts](03-the-extension.md#scripts) gives (user, 2026-11-23).
 
+> **Note**
+> In [what fails a load](#what-fails-a-load), a script in an author's files that isn't a `|` block fails with the error `script-block`: a folded block, `>`, and a plain or quoted script, each of which YAML reads with its line breaks as spaces (user, 2026-11-25).
+> An author then learns one form, and the formatter lays out only that one.
+
 [22d]: log.md#2026-11-22-the-profile-extensions-design-finds-what-vs-code-reads-of-a-vsix-and-a-language-what-vsce-costs-and-what-zed-allows-and-the-format-puts-seats-last-and-takes-single-quotes
 
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Dual Input defines.

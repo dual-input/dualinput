@@ -10,7 +10,8 @@ aircraft:
 # The tablet, the one display of the package's own that takes presses on its screen; its radios and
 # engine monitor take knobs and buttons, and the GTNs are other packages' (read in
 # bksq-aircraft-baronpro 0.1.1, panel.*\PANEL.CFG and the gauges' JavaScript).
-displays: BlackSquareTablet
+displays:
+  - BlackSquareTablet
 
 state:
   # ═══ ELECTRICAL ═════════════════════════════════════════════════════════════════════════════════

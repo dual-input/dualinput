@@ -19,15 +19,15 @@
 //
 // `--programs` is for CI, where the job that built the folder checked out the same commit as
 // the job that runs it, so the programs still come from the tree under test. In CI, where
-// GITHUB_STEP_SUMMARY names a file, the run adds a line to the job's summary, such as
-// "Cockpit state sync: 12/12 passed in 3m 4s".
+// GITHUB_STEP_SUMMARY names a file, a run with a failed test lists each one in the job's summary
+// with its error, and a run that passes writes none, since GitHub's own view of the run already
+// shows which jobs passed and how long each took.
 
 import fs from "node:fs"
 import path from "node:path"
 
 import { spawnSync } from "node:child_process"
 
-import { SCENARIOS } from "./bench/order.ts"
 import { level } from "./bench/profiles.ts"
 import { buildPrograms } from "./lib/cargo.ts"
 import { buildDesktopPages, DESKTOP } from "./lib/desktop-pages.ts"
@@ -90,27 +90,51 @@ main(async () => {
   const files = chosen.map((n) => fromRoot(path.join(scenarios, `${n}.ts`)))
   // One scenario at a time, so no scenario's cores take CPU from another's timing; and each
   // scenario's process exits once its tests end, whatever handle a failed one left open. A
-  // second reporter writes TAP to a file, whose totals the job's summary reads.
+  // second reporter writes TAP to a file, whose failures the job's summary lists.
   const tap = path.join(ROOT, "target", "bench", "results.tap")
   fs.mkdirSync(path.dirname(tap), { recursive: true })
   const reporters = ["--test-reporter=spec", "--test-reporter-destination=stdout", "--test-reporter=tap", `--test-reporter-destination=${tap}`]
-  const started = Date.now()
   console.log(`> node --test ${files.join(" ")}`)
   const result = spawnSync(process.execPath, ["--test", "--test-concurrency=1", "--test-force-exit", ...reporters, ...files], { cwd: ROOT, env, stdio: "inherit" })
-  summarize(chosen, tap, Date.now() - started)
-  if (result.status !== 0) throw new Failed(`the bench's scenarios exited with ${result.status}`)
+  if (result.status !== 0) {
+    summarize(tap)
+    throw new Failed(`the bench's scenarios exited with ${result.status}`)
+  }
 })
 
-/** Adds the run's line to the job's summary in CI, as "Cockpit state sync: 12/12 passed in 3m 4s". */
-function summarize(chosen: string[], tap: string, ms: number): void {
+/** Lists each failed test in the job's summary in CI, with its error as the test reported it. */
+function summarize(tap: string): void {
   const summary = process.env.GITHUB_STEP_SUMMARY
-  if (!summary) return
-  const text = fs.existsSync(tap) ? fs.readFileSync(tap, "utf8") : ""
-  const count = (what: string) => Number(new RegExp(`^# ${what} (\\d+)$`, "m").exec(text)?.[1] ?? 0)
-  const passed = count("pass")
-  const title = chosen.map((n) => SCENARIOS[n]?.title ?? n).join(", ")
-  const time = `${Math.floor(ms / 60_000)}m ${Math.round((ms % 60_000) / 1000)}s`
-  fs.appendFileSync(summary, `${title}: ${passed}/${passed + count("fail") + count("cancelled")} passed in ${time}\n`)
+  if (!summary || !fs.existsSync(tap)) return
+  const failed = failures(fs.readFileSync(tap, "utf8"))
+  if (failed.length === 0) return
+  const fence = "````"
+  const listed = failed.map(({ name, error }) => `- ${name}\n\n  ${fence}text\n${error.replace(/^/gm, "  ")}\n  ${fence}\n`)
+  fs.appendFileSync(summary, `${failed.length === 1 ? "1 test" : `${failed.length} tests`} failed:\n\n${listed.join("\n")}`)
+}
+
+/**
+ * The failed tests in Node's TAP output, each a `not ok` line at the top level, such as
+ * `not ok 3 - a joiner catches up`, then a YAML block whose `error` is either one quoted line,
+ * `error: 'test timed out after 50ms'`, or the lines indented under `error: |-`.
+ */
+function failures(tap: string): { name: string; error: string }[] {
+  const lines = tap.split(/\r?\n/)
+  return lines.flatMap((line, i) => {
+    const failed = /^not ok \d+ - (.*)$/.exec(line)
+    if (!failed) return []
+    // TAP escapes a `#` in a name as `\#`, and a backslash as `\\`.
+    const name = failed[1]!.replace(/\\([\\#])/g, "$1")
+    const end = lines.findIndex((l, k) => k > i && l === "  ...")
+    const block = lines.slice(i + 1, end < 0 ? undefined : end)
+    const at = block.findIndex((l) => l.startsWith("  error: "))
+    if (at < 0) return [{ name, error: "" }]
+    const value = block[at]!.slice("  error: ".length)
+    if (value !== "|-") return [{ name, error: value.replace(/^'(.*)'$/, "$1").replace(/''/g, "'") }]
+    const below = block.slice(at + 1)
+    const until = below.findIndex((l) => l !== "" && !l.startsWith("    "))
+    return [{ name, error: below.slice(0, until < 0 ? undefined : until).map((l) => l.slice(4)).join("\n").trimEnd() }]
+  })
 }
 
 /**

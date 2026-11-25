@@ -34,8 +34,8 @@ export function Panel({ view, host }: { view: PanelView; host: PanelHost }) {
     // stylesheet leaves a webview's body transparent (read in VS Code 1.147.0,
     // out/vs/workbench/contrib/webview/browser/pre/index.html, `_defaultStyles`) and webview.css paints nothing.
     <Root palette={view.palette} style={{ height: "100%" }}>
-      {/* The islands keep the same inset from the view's title as from its sides and bottom. */}
-      <div className="flex h-full flex-col p-2">
+      {/* Half the inset at the top, where the view's title already sets the islands apart. */}
+      <div className="flex h-full flex-col px-2 pb-2 pt-1">
         <div className="shrink-0 rounded-2xl bg-background">
           <StatusLine status={status} />
         </div>

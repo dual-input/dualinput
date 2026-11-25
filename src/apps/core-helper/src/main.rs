@@ -30,11 +30,13 @@ fn main() {
     // SAFETY: SetProcessDpiAwarenessContext takes one of Windows' own contexts.
     let _ = unsafe { SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2) };
     let out = pipe::Out::start(std::io::stdout());
+    // The core counts a helper that said `Hello` as running, so the `Hello` waits for the input
+    // thread, which exits the helper if its window doesn't open.
+    let input = input::Input::start(out.clone());
     out.send(FromHelper::Hello {
         version: messages::VERSION.into(),
         hash: messages::HASH.into(),
     });
-    let input = input::Input::start(out.clone());
     let mut audio = audio::Audio::new(out);
     let mut stdin = std::io::stdin().lock();
     loop {

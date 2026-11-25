@@ -313,6 +313,14 @@ impl CoreHelper {
                 }
             }
             FromHelper::Capturing { capture, program } => {
+                // The helper names a program only once Windows streams its sound, so a capture
+                // that failed and then took, as after the pilot picks another ATC app, loses its
+                // warning here, though the want stayed on throughout.
+                if program.is_some()
+                    && let Some(id) = self.failed.remove(&WantId::Capture(capture))
+                {
+                    clients::clear_notification(cx, &id);
+                }
                 if let Some(c) = self
                     .captures
                     .iter()

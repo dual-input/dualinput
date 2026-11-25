@@ -76,20 +76,16 @@ impl Input {
                 // A thread has no message queue until it makes its first window, and a post
                 // to a thread with none fails, so the thread's ID goes out only once its window
                 // is made (documented, PostThreadMessageW).
-                let reader = Reader::new(out.clone(), shared);
+                // Without its window the helper reads no key, button, or mouse, while its audio
+                // would still run, so it would look healthy to the core. So it exits before
+                // `main` sends its `Hello`, and the core starts it again and shows that the
+                // helper is down while it keeps failing (record/areas/core/04-core-helper.md).
+                let Ok(mut reader) = Reader::new(out, shared) else {
+                    std::process::exit(4);
+                };
                 // SAFETY: GetCurrentThreadId takes nothing and can't fail.
                 let _ = started.send(unsafe { GetCurrentThreadId() });
-                match reader {
-                    Ok(mut reader) => reader.run(),
-                    Err(error) => {
-                        for want in [WantId::NextPress, WantId::Mouse] {
-                            out.send(FromHelper::Failed {
-                                want,
-                                error: format!("the input window didn't open: {error}"),
-                            });
-                        }
-                    }
-                }
+                reader.run();
             })
             .expect("the input thread should start");
         Input {

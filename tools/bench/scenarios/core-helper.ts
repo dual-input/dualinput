@@ -198,12 +198,16 @@ test("a want the helper can't carry out warns in the words its feature registere
   await helper.until(() => helper.latest!.closed !== undefined, "its exit once the lists failed")
 })
 
-test("a capture's program and frames reach its feature, and the helper's slice says what it plays on when a picked device goes missing", { timeout: 60_000 }, async (t) => {
+test("a capture's warning clears once the capture takes, its program and frames reach its feature, and the helper's slice says what it plays on when a picked device goes missing", { timeout: 60_000 }, async (t) => {
   const { core, helper, page, notifications } = await withPage(t, "core-helper-capture")
   core.helper({ act: "capture", programs: ["BeyondATC"] })
   await helper.until(() => helper.latest?.wants().at(-1)?.captures.length === 1, "wants a capture")
   const capture = helper.latest!.wants().at(-1)!.captures[0]!
+  const warned = () => notifications().some((n) => n.id === `core-helper.failed.capture-${capture}`)
+  helper.latest!.act({ act: "failed", want: { Capture: capture }, error: "BeyondATC couldn't be captured" })
+  await page.until(warned, "the capture's warning")
   helper.latest!.act({ act: "capturing", capture, program: "BeyondATC" })
+  await page.until(() => !warned(), "the warning clearing once the capture takes")
   helper.latest!.act({ act: "frame", capture, bytes: 60 })
   await core.hear('capturing Some("BeyondATC")')
   await core.hear(/^captured 60 bytes 0{120}$/)

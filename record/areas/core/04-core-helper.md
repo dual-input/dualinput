@@ -27,6 +27,8 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > **Note**
 > Since 2026-11-25, in [what a feature registers](#what-a-feature-registers-and-calls), each want but a sound and the phrases also takes its warning's title in the pilot's words, as `mouse("Your figure's pointing isn't working", f)`.
 > In [the helper's life](#the-helpers-life), a want the helper can't carry out shows that title in place of a warning naming the feature, and a failure that arrives after its want went off reaches only the log ([core log](log.md#2026-11-25-a-helper-warning-named-the-feature-by-its-units-name-so-each-feature-registers-its-warnings-title)).
+> A capture's warning also clears when the helper names the program it captures, which it does only once Windows streams the program's sound, so picking an ATC app that works clears the warning of one that didn't (user, 2026-11-25).
+> A helper whose input window doesn't open exits before its `Hello`, since it would read no key, button, or mouse while looking healthy, so the core starts it again and shows it as down (user, 2026-11-25).
 > A helper that's down shows one fixed line, "Keybinds, audio, and your figure's pointing won't work until it's back.", where the helper's life has its trouble notification name the features whose wants are on; those reach only the log (user, 2026-11-25).
 
 The core helper runs only what features want of it.

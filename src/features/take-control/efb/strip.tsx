@@ -3,7 +3,7 @@
 // It's the same element in every state, so nothing on the page moves when control passes.
 
 import { arcFromTop, cx, Kbd, Link, Room, Spinner, toast } from "@dualinput/ui"
-import { TriangleAlert } from "lucide-react"
+import { ExternalLink, TriangleAlert } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import type { CSSProperties } from "react"
 
@@ -124,12 +124,13 @@ function Strip({ slice, catchingUp }: { slice: TakeControlSlice; catchingUp: boo
           {slice.warning ? <TriangleAlert className="mr-2 mt-px size-3.5 shrink-0" /> : catchingUp ? <Spinner className="mr-2 mt-px size-3.5 shrink-0" /> : null}
           <span>
             {note}
-            {/* The warning says only that the session might desync, so the pilot reads the trade-off in the docs, which the core opens on the desktop, behind the sim. */}
+            {/* The warning says only that the session might desync, so the pilot reads the trade-off in the docs, which the core opens on the desktop, behind the sim. In the warning's own color, it reads as a link by its weight and the icon the app's other links out of the sim carry. */}
             {slice.warning && (
               <>
                 {" "}
                 <Link
                   tone="warning"
+                  className="font-medium"
                   onClick={() =>
                     void link.client.command(LEARN_MORE, null).then(
                       () => toast("Opening the docs on your desktop"),
@@ -137,7 +138,7 @@ function Strip({ slice, catchingUp }: { slice: TakeControlSlice; catchingUp: boo
                     )
                   }
                 >
-                  Learn more
+                  Learn more <ExternalLink className="inline size-3 align-[-1px]" />
                 </Link>
               </>
             )}

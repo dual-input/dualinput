@@ -67,7 +67,7 @@ Name calls are what a profile is made of, so they stand out at a glance, in the 
 | A script's variables and functions, JavaScript's built-ins among them | `steps`, `clamp`, `Math.round` | The text color |
 | The YAML's punctuation | `:` `-` `[` `]` | Gray |
 | A script's brackets, braces, and operators | `(` `{` `=` `===` `!`, and the `.` in `state.battery_1` | A lighter gray, since in a script they carry the logic, and a missed `!` reverses a line (user, 2026-11-22) |
-| A comment | `# Only the seven breakers...` | A darker gray, italic |
+| A comment | `# Only the seven breakers...` | A darker gray, upright, since the gray alone sets it apart (user, 2026-11-25) |
 
 A grammar of the extension's own, in TextMate's format, paints them, from the moment a file opens.
 It finds name calls by their shape, in a YAML value and in a script alike, and hands each script to VS Code's own JavaScript grammar for the rest.
@@ -331,7 +331,7 @@ One runtime took 243ms to load and held 43 MB once it had answered the 58P's req
 ### The extension
 
 - It's TypeScript, checked by the root's TypeScript against `@types/vscode` 1.91.0, the lowest VS Code that `engines.vscode` takes in the `package.json` of `vscode-languageclient` 11.0.1, Microsoft's client for language servers (read on npm, 2026-11-22).
-- It gives its language itself as `editor.defaultFormatter`, VS Code's `editor.formatOnSave` and `editor.formatOnType`, `editor.tabSize` at 2, `editor.insertSpaces`, and `editor.bracketPairColorization.enabled` off, as defaults for that language alone.
+- It gives its language itself as `editor.defaultFormatter`, VS Code's `editor.formatOnSave` and `editor.formatOnType`, `editor.tabSize` at 2, `editor.insertSpaces`, `editor.rulers` at 100, the column [comments](#comments) reflow to, in a gray at 15% opacity that stays faint on a dark theme and a light one alike (user, 2026-11-25), and `editor.bracketPairColorization.enabled` off, as defaults for that language alone.
 - esbuild bundles it into one CommonJS file, with `vscode` left out as VS Code's guide to bundling has it ([bundling extensions](https://code.visualstudio.com/api/working-with-extensions/bundling-extension)), so the `.vsix` carries no `node_modules`.
 - Its manifest, `src/apps/profile-extension/package.json`, names no npm dependencies and isn't an npm workspace; the root's `package.json` holds `vscode-languageclient` and `@types/vscode`.
 - Its parts that don't import `vscode`, such as the status bar's text from a build's result, have tests that `node --test` runs, as `tools/check.ts` runs every `*.test.ts`; what only VS Code shows is checked by hand at the stage's close.

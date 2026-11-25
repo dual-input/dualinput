@@ -112,6 +112,7 @@
         "editor.formatOnType": true,
         "editor.tabSize": 2,
         "editor.insertSpaces": true,
+        "editor.rulers": [{ "column": 100, "color": "#80808026" }],
         "editor.bracketPairColorization.enabled": false
       },
       "editor.tokenColorCustomizations": {
@@ -438,7 +439,7 @@
               "meta.embedded.block.javascript.dualinput-profile variable.other.jsdoc",
               "meta.embedded.block.javascript.dualinput-profile variable.other.link.underline.jsdoc"
             ],
-            "settings": { "foreground": "#76828b", "fontStyle": "italic" }
+            "settings": { "foreground": "#76828b", "fontStyle": "" }
           }
         ],
         "[*Light*]": {
@@ -765,7 +766,7 @@
                 "meta.embedded.block.javascript.dualinput-profile variable.other.jsdoc",
                 "meta.embedded.block.javascript.dualinput-profile variable.other.link.underline.jsdoc"
               ],
-              "settings": { "foreground": "#85919a", "fontStyle": "italic" }
+              "settings": { "foreground": "#85919a", "fontStyle": "" }
             }
           ]
         }

@@ -1,4 +1,4 @@
-// The recorder's island, under the status island: Record, Stop, and Play, as on a tape deck, with a readout of the time,
+// The recorder's island, at the panel's bottom: Record, Stop, and Play, as on a tape deck, with a readout of the time,
 // and above them a line when there's something to say, such as why the buttons are off
 // (record/areas/profiles/05-the-recorder.md, "The recorder's island").
 

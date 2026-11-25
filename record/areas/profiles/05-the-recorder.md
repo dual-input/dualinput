@@ -114,7 +114,7 @@ Otherwise the island's buttons are off, with a line that says why.
 ## The recorder's island
 
 The Dual Input panel is a surface of islands in its one webview, laid out as we choose, rather than one VS Code view for each tool, since switching views from a menu is cumbersome (user, 2026-11-23).
-The status island holds the status line with Run or the picker, and the recorder's island sits below it, about the size of a cassette, and stays in view while you Run (user, 2026-11-23).
+The status line's island sits at the top, Run's island below it holds Run or the picker, and the recorder's island sits at the bottom, about the size of a cassette, and stays in view while you Run (user, 2026-11-23 and 2026-11-25).
 Hiding and showing islands can come later.
 
 - Record, Stop, and Play side by side, as on a tape deck, with a readout of the time: recording so far, the recording's length, or how far playback has got (user, 2026-11-23).

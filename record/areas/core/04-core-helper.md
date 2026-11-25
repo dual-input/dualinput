@@ -27,6 +27,7 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > **Note**
 > Since 2026-11-25, in [what a feature registers](#what-a-feature-registers-and-calls), each want but a sound and the phrases also takes its warning's title in the pilot's words, as `mouse("Your figure's pointing isn't working", f)`.
 > In [the helper's life](#the-helpers-life), a want the helper can't carry out shows that title in place of a warning naming the feature, and a failure that arrives after its want went off reaches only the log ([core log](log.md#2026-11-25-a-helper-warning-named-the-feature-by-its-units-name-so-each-feature-registers-its-warnings-title)).
+> A helper that's down shows one fixed line, "Keybinds, audio, and your figure's pointing won't work until it's back.", where the helper's life has its trouble notification name the features whose wants are on; those reach only the log (user, 2026-11-25).
 
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.

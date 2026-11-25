@@ -1,12 +1,18 @@
 //! A script's JavaScript in one layout, written by dprint-plugin-typescript, Deno's formatter as a
-//! library (record/areas/profiles/03-the-extension.md, "Formatting"): 2 spaces to a level, single
+//! library (record/areas/profiles/03-the-extension.md, "Scripts"): 2 spaces to a level, single
 //! quotes but for a string that holds more of them than of double quotes, and no semicolons, as the
 //! 58P's scripts are written.
+//!
+//! A `return` or a `write()` at the end of an `if`'s line is easy to miss, and a profile that many
+//! authors edit breaks in part when a reader misses one. So every `if`, `else`, `for`, and `while`
+//! body takes braces, on lines of its own, and every arrow function's parameters take parentheses,
+//! as in `(value) =>`.
 
 use std::path::Path;
 
 use dprint_plugin_typescript::configuration::{
-    Configuration, ConfigurationBuilder, QuoteStyle, Semicolons,
+    Configuration, ConfigurationBuilder, QuoteStyle, SameOrNextLinePosition, Semicolons, UseBraces,
+    UseParentheses,
 };
 use dprint_plugin_typescript::{FormatTextOptions, format_text};
 
@@ -39,7 +45,19 @@ fn style() -> ConfigurationBuilder {
     builder
         .indent_width(2)
         .quote_style(QuoteStyle::PreferSingle)
-        .semicolons(Semicolons::Asi);
+        .semicolons(Semicolons::Asi)
+        .arrow_function_use_parentheses(UseParentheses::Force)
+        // Braces alone leave `if (x) { return }` on one line, so the body moves to the next.
+        .if_statement_use_braces(UseBraces::Always)
+        .if_statement_single_body_position(SameOrNextLinePosition::NextLine)
+        .for_statement_use_braces(UseBraces::Always)
+        .for_statement_single_body_position(SameOrNextLinePosition::NextLine)
+        .for_in_statement_use_braces(UseBraces::Always)
+        .for_in_statement_single_body_position(SameOrNextLinePosition::NextLine)
+        .for_of_statement_use_braces(UseBraces::Always)
+        .for_of_statement_single_body_position(SameOrNextLinePosition::NextLine)
+        .while_statement_use_braces(UseBraces::Always)
+        .while_statement_single_body_position(SameOrNextLinePosition::NextLine);
     builder
 }
 
@@ -78,9 +96,39 @@ mod tests {
             format_script("(value) => write(L(\"it's\"), value)", 94).as_deref(),
             Some("(value) => write(L(\"it's\"), value)")
         );
-        let chain = "(value) => {\n  if (value == 0) write(K('A'))\n  else if (value == 19) write(K('B'))\n}";
-        assert_eq!(format_script(chain, 94).as_deref(), Some(chain));
         assert_eq!(format_script("(value) => {\n  write(\n", 94), None);
+    }
+
+    #[test]
+    fn every_body_takes_braces_on_lines_of_its_own_and_every_arrow_takes_parentheses() {
+        let early = "(value) => {\n  if (value == state.starter) return\n  write(K('A'))\n}";
+        assert_eq!(
+            format_script(early, 94).as_deref(),
+            Some("(value) => {\n  if (value == state.starter) {\n    return\n  }\n  write(K('A'))\n}")
+        );
+        let chain = "(value) => {\n  if (value == 0) write(K('A'))\n  else if (value == 19) write(K('B'))\n  else write(K('C'))\n}";
+        assert_eq!(
+            format_script(chain, 94).as_deref(),
+            Some(
+                "(value) => {\n  if (value == 0) {\n    write(K('A'))\n  } else if (value == 19) {\n    write(K('B'))\n  } else {\n    write(K('C'))\n  }\n}"
+            )
+        );
+        let nested = "(value) => {\n  if (value) { if (state.mode == 3) write(H('X')) }\n}";
+        assert_eq!(
+            format_script(nested, 94).as_deref(),
+            Some("(value) => {\n  if (value) {\n    if (state.mode == 3) {\n      write(H('X'))\n    }\n  }\n}")
+        );
+        let loops = "(value) => {\n  while (state.a > value) write(K('DEC'))\n  for (const k of [1, 2]) write(L('X'), k)\n}";
+        assert_eq!(
+            format_script(loops, 94).as_deref(),
+            Some(
+                "(value) => {\n  while (state.a > value) {\n    write(K('DEC'))\n  }\n  for (const k of [1, 2]) {\n    write(L('X'), k)\n  }\n}"
+            )
+        );
+        assert_eq!(
+            format_script("value => write(L('A'), value)", 94).as_deref(),
+            Some("(value) => write(L('A'), value)")
+        );
     }
 
     #[test]

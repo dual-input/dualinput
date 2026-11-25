@@ -186,8 +186,10 @@ These keep their lines, neither joined nor broken:
 ### Scripts
 
 The formatter lays out each script's JavaScript with dprint-plugin-typescript 0.101.0, Deno's code formatter as a Rust library, since a script edited by hand comes out as ragged as a comment, and CI's `format --check` then holds every author's scripts to one layout, as it holds the rest of a profile (user, 2026-11-23).
-The layout is the one the 58P's scripts were written in: 2 spaces to a level, single quotes but for a string that holds more single quotes than double, no semicolons, and lines broken to fit 100 columns, their indent included.
-Run on the 58P's profile, dprint left 17 of its 18 scripts as they were, and broke the 18th's one line of 108 columns, `const vsHold = …`, into three (measured with `dualinput-profile-builder format`, 2026-11-23).
+The layout is the one the 58P's scripts were written in: 2 spaces to a level, single quotes but for a string that holds more single quotes than double, no semicolons, parentheses around every arrow function's parameters, as in `(value) =>`, and lines broken to fit 100 columns, their indent included.
+Every `if`, `else`, `for`, and `while` body takes braces, on lines of its own, since a `return` or a `write()` at the end of an `if`'s line is easy to miss, and a profile that many authors edit breaks in part when a reader misses one (user, 2026-11-25).
+So `if (value == state.breaker_starter) return` comes out as three lines, and so does a braced body written on its condition's line, which dprint would otherwise strip of its braces.
+Run on the 58P's profile, dprint broke one line of 108 columns, `const vsHold = …`, into three (measured with `dualinput-profile-builder format`, 2026-11-23), and gave the bodies of its 26 one-line `if` and `else` lines braces and lines of their own, which grew the file by 46 lines (measured the same way, 2026-11-25).
 It took the builder from 13.4 MB to 17.8 MB, and the `.vsix` from 4.2 MB to 6.0 MB (measured on our development machine, 2026-11-23, a release build).
 
 - A script on the `write:` line goes into a `|` block below it, since [Layout](01-format-and-delivery.md#layout) writes every script as one.
@@ -376,6 +378,7 @@ As `profile-language`'s own tests:
 - The 58P's profile gives its sections, subsections, and entries as symbols, each entry by its `name:` with its key beside it, and a fold for each heading.
 - The formatter writes every rule of Layout on a fixture that breaks each one, writes the 58P's profile as it stands, and changes nothing on a second run.
 - The formatter lays out a script out of layout, leaves one that doesn't parse as it was typed, and moves a script on the `write:` line into a block, every line within 100 columns.
+- The formatter gives a one-line `if`, `else`, `for`, or `while` body braces on lines of its own, nested ifs and `else if` chains among them, and parentheses to `value =>`.
 - Comments: a paragraph reflows to 100 columns, and a heading's rule runs on to it; a line holding only `#` ends a paragraph; a list item reflows under its first word, its indented lines with it; and a heading, a line with more than one space after `#` outside a list item, a line with two spaces inside its text, a line starting with a key and a colon, and a comment after a value each keep their lines, while the 58P's `# A known limit: as` reflows.
 - Quotes: a double-quoted value or name call outside a script is rewritten in single quotes, a name holding `'` is written with `\'`, and a script's `"'"` is left alone.
 - A module's scripts are checked in each importing profile's program, and a module nothing imports against its own entries.

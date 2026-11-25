@@ -81,7 +81,9 @@ state:
     watch: L('var_Breaker_Starter_readonly')
     write: |
       (value) => {
-        if (value == state.breaker_starter) return
+        if (value == state.breaker_starter) {
+          return
+        }
         write(K('ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE', 1, 1))
         write(K('ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE', 1, 32))
       }
@@ -189,18 +191,26 @@ state:
     watch: A('FUEL TANK SELECTOR:1', 'Enum')
     write: |
       (value) => {
-        if (value == 0) write(K('FUEL_SELECTOR_OFF'))
-        else if (value == 19) write(K('FUEL_SELECTOR_LEFT_MAIN'))
-        else if (value == 20) write(K('FUEL_SELECTOR_RIGHT_MAIN'))
+        if (value == 0) {
+          write(K('FUEL_SELECTOR_OFF'))
+        } else if (value == 19) {
+          write(K('FUEL_SELECTOR_LEFT_MAIN'))
+        } else if (value == 20) {
+          write(K('FUEL_SELECTOR_RIGHT_MAIN'))
+        }
       }
   fuel_selector_2:
     name: Right fuel selector
     watch: A('FUEL TANK SELECTOR:2', 'Enum')
     write: |
       (value) => {
-        if (value == 0) write(K('FUEL_SELECTOR_2_OFF'))
-        else if (value == 19) write(K('FUEL_SELECTOR_2_LEFT_MAIN'))
-        else if (value == 20) write(K('FUEL_SELECTOR_2_RIGHT_MAIN'))
+        if (value == 0) {
+          write(K('FUEL_SELECTOR_2_OFF'))
+        } else if (value == 19) {
+          write(K('FUEL_SELECTOR_2_LEFT_MAIN'))
+        } else if (value == 20) {
+          write(K('FUEL_SELECTOR_2_RIGHT_MAIN'))
+        }
       }
   fuel_pump_1:
     name: Left fuel pump
@@ -267,7 +277,9 @@ state:
     watch: L('BKSQ_IgnitionPosition_1')
     write: |
       (value) => {
-        if (value == 4) write(L('starterKnobReturnTime_L'), 1000000000)
+        if (value == 4) {
+          write(L('starterKnobReturnTime_L'), 1000000000)
+        }
         write(L('BKSQ_IgnitionPosition_1'), value)
       }
   ignition_2:
@@ -275,7 +287,9 @@ state:
     watch: L('BKSQ_IgnitionPosition_2')
     write: |
       (value) => {
-        if (value == 4) write(L('starterKnobReturnTime_R'), 1000000000)
+        if (value == 4) {
+          write(L('starterKnobReturnTime_R'), 1000000000)
+        }
         write(L('BKSQ_IgnitionPosition_2'), value)
       }
   prop_sync:
@@ -374,7 +388,9 @@ state:
     watch: A('AUTOPILOT ALTITUDE LOCK', 'Bool')
     write: |
       (value) => {
-        if (value == state.ap_altitude_hold) return
+        if (value == state.ap_altitude_hold) {
+          return
+        }
         write(value ? K('AP_ALT_HOLD') : K('AP_PITCH_LEVELER_ON'))
       }
   ap_vs_hold:
@@ -427,10 +443,15 @@ state:
         const vsHold = state.pms50_apga_running
           ? state.pms50_apga_vertical_mode > 0
           : state.ap_vs_hold == 1
-        if (state.kas_vs_adjust != 1 || vsHold) return
+        if (state.kas_vs_adjust != 1 || vsHold) {
+          return
+        }
         const steps = Math.round((value - state.kas_armed_vs) / 100)
-        if (steps > 0) write(H('kas297b_100_INC')).repeat(steps)
-        else if (steps < 0) write(H('kas297b_100_DEC')).repeat(-steps)
+        if (steps > 0) {
+          write(H('kas297b_100_INC')).repeat(steps)
+        } else if (steps < 0) {
+          write(H('kas297b_100_DEC')).repeat(-steps)
+        }
       }
 
   # ═══ INSTRUMENTS ════════════════════════════════════════════════════════════════════════════════
@@ -513,9 +534,14 @@ state:
     watch: A('GPS DRIVES NAV1', 'Bool')
     write: |
       (value) => {
-        if (value == state.gps_drives_nav1) return
-        if (state.gns530_disabled) write(K('TOGGLE_GPS_DRIVES_NAV1'))
-        else write(H('AS530_CDI_Push'))
+        if (value == state.gps_drives_nav1) {
+          return
+        }
+        if (state.gns530_disabled) {
+          write(K('TOGGLE_GPS_DRIVES_NAV1'))
+        } else {
+          write(H('AS530_CDI_Push'))
+        }
       }
   gns530_disabled:
     name: GNS 530 disabled
@@ -876,9 +902,15 @@ state:
     watch: instrument('KR87A', 'multiMode')
     write: |
       (value) => {
-        if (value == 0) { if (state.adf_mode != 0) write(H('adf_frqTransfert')) }
-        else if (state.adf_mode == 0) write(H('adf_FltEt')).repeat(value)
-        else if (state.adf_mode != value) write(H('adf_FltEt'))
+        if (value == 0) {
+          if (state.adf_mode != 0) {
+            write(H('adf_frqTransfert'))
+          }
+        } else if (state.adf_mode == 0) {
+          write(H('adf_FltEt')).repeat(value)
+        } else if (state.adf_mode != value) {
+          write(H('adf_FltEt'))
+        }
       }
 
   # ── DME ─────────────────────────────────────────────────────────────────────────────────────────
@@ -937,26 +969,40 @@ state:
     watch: instrument('bksq_wradar1', 'weatherRadarMainMap.map.verticalMode')
     write: |
       (value) => {
-        if (state.radar_mode > 3 || value == state.radar_profile) return
-        if (value) { if (state.radar_mode == 3) write(H('bksq_wradar1_radarProfile')) }
-        else write(H('bksq_wradar1_radarMap'))
+        if (state.radar_mode > 3 || value == state.radar_profile) {
+          return
+        }
+        if (value) {
+          if (state.radar_mode == 3) {
+            write(H('bksq_wradar1_radarProfile'))
+          }
+        } else {
+          write(H('bksq_wradar1_radarMap'))
+        }
       }
   radar_hold:
     name: Radar hold
     watch: instrument('bksq_wradar1', 'weatherRadarMainMap.map.radarHold')
     write: |
       (value) => {
-        if (state.radar_mode <= 3 && value != state.radar_hold) write(H('bksq_wradar1_radarHold'))
+        if (state.radar_mode <= 3 && value != state.radar_hold) {
+          write(H('bksq_wradar1_radarHold'))
+        }
       }
   radar_track:
     name: Radar track
     watch: instrument('bksq_wradar1', 'weatherRadarMainMap.map.radarTrack')
     write: |
       (value) => {
-        if (state.radar_mode > 3) return
+        if (state.radar_mode > 3) {
+          return
+        }
         const steps = Math.round((value - state.radar_track) / 2.5)
-        if (steps > 0) write(H('bksq_wradar1_radarTrackRight')).repeat(steps)
-        else if (steps < 0) write(H('bksq_wradar1_radarTrackLeft')).repeat(-steps)
+        if (steps > 0) {
+          write(H('bksq_wradar1_radarTrackRight')).repeat(steps)
+        } else if (steps < 0) {
+          write(H('bksq_wradar1_radarTrackLeft')).repeat(-steps)
+        }
       }
 
 events:

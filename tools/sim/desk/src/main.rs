@@ -9,13 +9,17 @@
 //!       and prints `done` after each, or `not-front` when it couldn't bring its window to the
 //!       front first:
 //!         front               brings its window to the front
-//!         key <scan> <ms>     holds a key by its scan code for `ms`, repeating its press
-//!                             every 33ms as Windows does, then releases it
+//!         key <keys> <ms>     holds keys by their scan codes for `ms`, repeating the last
+//!                             one's press every 33ms as Windows does, then releases them
+//!                             last first; `29+67` is Ctrl+F9, and a code of 0xE000 or
+//!                             more is an E0 key, as 57373, 0xE01D, is the right Ctrl
+//!         down <keys>         presses keys and leaves them down
+//!         up <keys>           releases keys
 //!         click <x> <y>       clicks the left button at that pixel of its client area
 //!   desk front
 //!       prints the class and title of the window in front, tab-separated
-//!   desk key <scan> <ms>
-//!       holds a key into whatever window is in front, as `key` above
+//!   desk key <keys> <ms>
+//!       holds keys into whatever window is in front, as `key` above
 //!   desk devices
 //!       prints each output device that's connected, its endpoint ID and name tab-separated
 //!   desk usage <process> <ms>
@@ -43,8 +47,9 @@ use windows::Win32::UI::HiDpi::{
     DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2, GetDpiForWindow, SetProcessDpiAwarenessContext,
 };
 use windows::Win32::UI::Input::KeyboardAndMouse::{
-    INPUT, INPUT_0, INPUT_KEYBOARD, INPUT_MOUSE, KEYBDINPUT, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE,
-    MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, MOUSEINPUT, SendInput, VIRTUAL_KEY,
+    INPUT, INPUT_0, INPUT_KEYBOARD, INPUT_MOUSE, KEYBDINPUT, KEYEVENTF_EXTENDEDKEY,
+    KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, MOUSEINPUT,
+    SendInput, VIRTUAL_KEY,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     AdjustWindowRect, BringWindowToTop, CS_HREDRAW, CS_VREDRAW, CW_USEDEFAULT, CreateWindowExW,
@@ -66,14 +71,14 @@ fn main() {
             front();
             Ok(())
         }
-        ["key", scan, ms] => {
-            key(scan.parse().unwrap_or(0), ms.parse().unwrap_or(0));
+        ["key", keys, ms] => {
+            key(&scans(keys), ms.parse().unwrap_or(0));
             Ok(())
         }
         ["devices"] => devices(),
         ["usage", process, ms] => usage(process, ms),
         ["frames", input, output, loss] => frames(input, output, loss),
-        _ => Err("usage: desk window <class> <title> | front | key <scan> <ms> | devices | usage <process> <ms> | frames <in> <out.wav> <loss percent>".into()),
+        _ => Err("usage: desk window <class> <title> | front | key <keys> <ms> | devices | usage <process> <ms> | frames <in> <out.wav> <loss percent>".into()),
     };
     if let Err(error) = result {
         eprintln!("{error}");
@@ -160,7 +165,9 @@ fn window(class: &str, title: &str) -> Result<(), String> {
         }
         match words[..] {
             ["front"] => {}
-            ["key", scan, ms] => key(scan.parse().unwrap_or(0), ms.parse().unwrap_or(0)),
+            ["key", keys, ms] => key(&scans(keys), ms.parse().unwrap_or(0)),
+            ["down", keys] => send(&each(&scans(keys), false)),
+            ["up", keys] => send(&each(&scans(keys), true)),
             ["click", x, y] => click(window, x.parse().unwrap_or(0), y.parse().unwrap_or(0)),
             _ => {
                 println!("unknown {line}");
@@ -215,18 +222,32 @@ fn send(inputs: &[INPUT]) {
     unsafe { SendInput(inputs, size_of::<INPUT>() as i32) };
 }
 
+/// The scan codes in `29+67`, each in decimal, where 0xE000 or more is an E0 key.
+fn scans(keys: &str) -> Vec<u16> {
+    keys.split('+')
+        .map(|scan| scan.parse().unwrap_or(0))
+        .collect()
+}
+
+/// Each key's press, or each one's release, in the order given.
+fn each(keys: &[u16], up: bool) -> Vec<INPUT> {
+    keys.iter().map(|&scan| key_input(scan, up)).collect()
+}
+
 fn key_input(scan: u16, up: bool) -> INPUT {
-    let flags = if up {
-        KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP
-    } else {
-        KEYEVENTF_SCANCODE
-    };
+    let mut flags = KEYEVENTF_SCANCODE;
+    if up {
+        flags |= KEYEVENTF_KEYUP;
+    }
+    if scan >= 0xe000 {
+        flags |= KEYEVENTF_EXTENDEDKEY;
+    }
     INPUT {
         r#type: INPUT_KEYBOARD,
         Anonymous: INPUT_0 {
             ki: KEYBDINPUT {
                 wVk: VIRTUAL_KEY(0),
-                wScan: scan,
+                wScan: scan & 0xff,
                 dwFlags: flags,
                 time: 0,
                 dwExtraInfo: 0,
@@ -235,14 +256,16 @@ fn key_input(scan: u16, up: bool) -> INPUT {
     }
 }
 
-fn key(scan: u16, ms: u64) {
+fn key(keys: &[u16], ms: u64) {
+    let Some(&last) = keys.last() else { return };
     let until = Instant::now() + Duration::from_millis(ms);
-    send(&[key_input(scan, false)]);
+    send(&each(keys, false));
     while Instant::now() < until {
         std::thread::sleep(Duration::from_millis(33));
-        send(&[key_input(scan, false)]);
+        send(&[key_input(last, false)]);
     }
-    send(&[key_input(scan, true)]);
+    let reversed: Vec<u16> = keys.iter().rev().copied().collect();
+    send(&each(&reversed, true));
 }
 
 fn click(window: HWND, x: i32, y: i32) {

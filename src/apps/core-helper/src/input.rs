@@ -22,7 +22,7 @@ use windows::Win32::Storage::FileSystem::{
     CreateFileW, FILE_FLAGS_AND_ATTRIBUTES, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING,
 };
 use windows::Win32::System::Threading::GetCurrentThreadId;
-use windows::Win32::UI::Input::KeyboardAndMouse::GetKeyNameTextW;
+use windows::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, GetKeyNameTextW};
 use windows::Win32::UI::Input::{
     GetRawInputData, GetRawInputDeviceInfoW, HRAWINPUT, RAWINPUT, RAWINPUTDEVICE, RAWINPUTHEADER,
     RID_INPUT, RIDEV_DEVNOTIFY, RIDEV_INPUTSINK, RIDEV_REMOVE, RIDI_DEVICENAME, RIDI_PREPARSEDDATA,
@@ -356,28 +356,51 @@ impl Reader {
         if !self.keys.changes(key, down) {
             return;
         }
-        let input = Bound::Key {
-            scan: key.0,
-            extended: key.1,
+        if !down {
+            return self.released(at);
+        }
+        self.keys.let_go_of_released(windows_holds);
+        let Some(input) = self.keys.combination(key) else {
+            return;
         };
         // While a pilot binds, a press acts on nothing else, or pressing the key already bound
         // to keep it would take control mid-flight. Its release finds no press that crossed.
-        if down && self.armed {
-            if self.keys.binds(key) {
-                self.armed = false;
-                self.out.send(FromHelper::NextPress {
-                    input,
-                    name: key_name(key),
-                    at,
-                });
-            }
+        if self.armed {
+            self.armed = false;
+            let name = combination_name(&input);
+            self.out.send(FromHelper::NextPress { input, name, at });
             return;
         }
         // A bound key counts only while a window of the sim is in front, its main window or
         // a popped-out display, so a key typed in another program takes nothing (user,
-        // 2026-10-17), though a release whose press crossed always crosses.
+        // 2026-10-17).
         let in_sim = windows_of::sim_in_front();
-        self.press(&input, down, in_sim, at);
+        self.press(&input, true, in_sim, at);
+    }
+
+    /// Ends each bound combination whose press crossed and whose keys aren't all still down, so
+    /// a hold ends when the pilot lets go of its key or one of its modifiers. Its release
+    /// crosses whatever is in front.
+    fn released(&mut self, at: u64) {
+        let ended: Vec<u16> = self
+            .wants
+            .bindings
+            .iter()
+            .filter(|(binding, bound)| {
+                matches!(bound, Bound::Key { .. })
+                    && self.pressed.contains(binding)
+                    && !self.keys.holds(bound)
+            })
+            .map(|(binding, _)| *binding)
+            .collect();
+        for binding in ended {
+            self.pressed.remove(&binding);
+            self.out.send(FromHelper::Press {
+                binding,
+                down: false,
+                at,
+            });
+        }
     }
 
     fn press(&mut self, input: &Bound, down: bool, counts: bool, at: u64) {
@@ -489,7 +512,37 @@ impl Reader {
     }
 }
 
-/// A key's name to show it by, in the keyboard's own layout.
+/// Whether Windows holds a key down, by its virtual-key code.
+fn windows_holds(code: u16) -> bool {
+    // SAFETY: GetAsyncKeyState reads one key's state, whose high bit is set while it's down.
+    let state = unsafe { GetAsyncKeyState(i32::from(code)) };
+    state < 0
+}
+
+/// A combination's name to show it by, its modifiers in Ctrl, Shift, Alt order and then its key,
+/// as Ctrl+Shift+F9.
+fn combination_name(input: &Bound) -> String {
+    let Bound::Key {
+        scan,
+        extended,
+        ctrl,
+        shift,
+        alt,
+    } = *input
+    else {
+        return String::new();
+    };
+    let held = [(ctrl, keys::CTRL), (shift, keys::SHIFT), (alt, keys::ALT)];
+    held.into_iter()
+        .filter(|&(on, _)| on)
+        .map(|(_, [left, _])| key_name(left))
+        .chain([key_name((scan, extended))])
+        .collect::<Vec<_>>()
+        .join("+")
+}
+
+/// A key's name to show it by, in the keyboard's own layout, where a modifier's left key is
+/// named for the modifier alone, as "Ctrl" against "Right Ctrl".
 fn key_name((scan, extended): keys::Key) -> String {
     let lparam = (i32::from(scan) << 16) | (i32::from(extended) << 24);
     let mut name = [0u16; 64];

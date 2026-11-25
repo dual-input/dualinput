@@ -26,6 +26,11 @@ pub const REQUEST: &str = "take-control.request";
 /// src/features/take-control/efb/names.ts names it too.
 pub const BIND: &str = "take-control.bind";
 
+/// The command the Learn more under the warning sends, with no arguments, which opens in the
+/// pilot's browser the docs' section on taking control while the link to the PF is lost.
+/// `LEARN_MORE` in src/features/take-control/efb/names.ts names it too.
+pub const LEARN_MORE: &str = "take-control.learn-more";
+
 /// The arguments of `BIND`. Off also forgets a next press that came, which the part sends once it
 /// has written that press into `INPUT`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -48,8 +53,8 @@ pub struct TakeControlSlice {
     /// pressed. Empty while the request is allowed, while it isn't `live`, and while this pilot
     /// holds control.
     pub denied: Vec<String>,
-    /// What taking control does while this core's link to the pilot flying is lost, which a pilot
-    /// reaching for the button should read first.
+    /// The warning while this core's link to the pilot flying is lost, which a pilot reaching for
+    /// the button should read first.
     pub warning: Option<String>,
     /// Bind waits for the next press.
     pub waiting: bool,

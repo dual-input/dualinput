@@ -16,8 +16,8 @@ import { BenchRun, type Core } from "../cores.ts"
 import { type HelperRun, StandInHelper } from "../helper.ts"
 import { FakePage } from "../pages.ts"
 
-const KEY_A: Bound = { input: { key: { scan: 30, extended: false } }, name: "A" }
-const KEY_B: Bound = { input: { key: { scan: 48, extended: false } }, name: "B" }
+const KEY_A: Bound = { input: { key: { scan: 30, extended: false, ctrl: false, shift: false, alt: false } }, name: "A" }
+const KEY_B: Bound = { input: { key: { scan: 48, extended: false, ctrl: false, shift: false, alt: false } }, name: "B" }
 const TONE_BYTES = fs.statSync(path.join(ROOT, "src", "apps", "core", "src", "bench", "tone.opus")).size
 
 async function started(run: BenchRun, name: string, settings: Record<string, unknown> = {}): Promise<{ core: Core; helper: StandInHelper }> {

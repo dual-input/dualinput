@@ -11,12 +11,14 @@ use std::time::Duration;
 
 use clients::{Clients, ClientsUnit, SettingDef};
 use core_helper_service::{HelperUnit, NextPressed, Press};
-use kernel::{Cx, Registry, TimerId, Verdict, View};
+use kernel::{Cx, Job, JobId, Registry, TimerId, Verdict, View};
 use messages::clients::{Landing, Level, Notification, SettingKind};
 use messages::core_helper::Bound;
 use messages::hex;
 use messages::net::PilotId;
-use messages::take_control::{BIND, Bind, INPUT, LONG_PRESS, NAME, REQUEST, TakeControlSlice};
+use messages::take_control::{
+    BIND, Bind, INPUT, LEARN_MORE, LONG_PRESS, NAME, REQUEST, TakeControlSlice,
+};
 use network::{LinkLost, LinkUp, Network};
 use serde_json::{Value, json};
 use session::{
@@ -40,6 +42,13 @@ const PASS: &str = "pass";
 const REFUSAL: &str = "refused";
 /// Held while this core's link to the pilot flying is lost.
 const LOST: &str = "lost-pf";
+
+/// The docs' section on what taking control while the link to the PF is lost gives up, which the
+/// warning's Learn more opens, as stage 22e's docs for pilots publish it (user, 2026-11-25). The
+/// core holds it, whatever a page sends, as it holds our Discord's link. When the docs rename the
+/// page "Who flies" or that section's heading, change this link with them.
+const WHO_FLIES: &str =
+    "https://docs.dualinput.app/pilots/who-flies#taking-control-while-the-connection-is-down";
 
 /// Take-control's state.
 #[derive(Default)]
@@ -91,6 +100,7 @@ pub fn register(r: &mut Registry) {
         Ok(())
     })
     .command(BIND, TakeControl::bind)
+    .command(LEARN_MORE, TakeControl::learn_more)
     .client_state(NAME, TakeControl::slice);
     me.on::<SessionStarted>(TakeControl::started)
         .on::<SessionEnded>(TakeControl::ended)
@@ -115,15 +125,11 @@ fn lost_pf(session: &Session, network: &Network) -> Option<PilotId> {
     (session.me() != Some(pf) && session.members().contains(&pf) && !network.up(&pf)).then_some(pf)
 }
 
-/// What taking control does while the link to `pf` is lost, since on reconnect the higher
-/// generation wins, and `pf`'s aircraft moves to this pilot's
-/// (record/areas/interface/decisions.md, "Take control is a held button under the tabs").
-fn warning(session: &Session, pf: &PilotId) -> String {
-    format!(
-        "{} may still be flying. If you take control, their aircraft will jump to yours when they reconnect.",
-        session.name_of(pf)
-    )
-}
+/// The warning while the link to the PF is lost. Taking control then raises control's generation,
+/// so on reconnect it wins, the PF's aircraft moves to this pilot's, and what the PF changed alone
+/// is undone. The line names none of that, so the pilot opens its Learn more, where the docs weigh
+/// it (record/areas/interface/decisions.md, "Take control is a held button under the tabs").
+const WARNING: &str = "If you take control, your session might desync.";
 
 impl TakeControl {
     /// The sounds run the whole of a session, so the cues play for a pilot who takes control from
@@ -207,6 +213,20 @@ impl TakeControl {
         Ok(())
     }
 
+    /// `LEARN_MORE`: opens the docs on the warning, in the pilot's browser, since a page in the sim
+    /// can't open anything outside it.
+    fn learn_more(_: &mut TakeControl, (): (), cx: &mut Cx) -> Result<(), String> {
+        cx.job(
+            Job::open_link(WHO_FLIES, WHO_FLIES),
+            |_: &mut TakeControl, _: JobId, result: Result<Vec<u8>, String>, _: &mut Cx| {
+                if let Err(error) = result {
+                    tracing::warn!(%error, "the docs on taking control couldn't be opened");
+                }
+            },
+        );
+        Ok(())
+    }
+
     fn on_next_press(me: &mut TakeControl, next: NextPressed, _: &mut Cx) {
         me.waiting = false;
         me.next_press = Some(next.bound);
@@ -264,8 +284,8 @@ impl TakeControl {
         me.hold_warning(cx);
     }
 
-    /// Holds "Reconnecting to James" while this core's link to the pilot flying is lost. It says
-    /// what taking control does only while this pilot could.
+    /// Holds "Reconnecting to James" while this core's link to the pilot flying is lost, with the
+    /// warning as its detail only while this pilot could take control.
     fn hold_warning(&self, cx: &Cx) {
         let session = cx.read::<Session>();
         match lost_pf(session, cx.read::<Network>()) {
@@ -276,7 +296,7 @@ impl TakeControl {
                     Landing::Session,
                 );
                 let said = if session.live_in_flight() {
-                    said.detail(warning(session, &pf))
+                    said.detail(WARNING)
                 } else {
                     said
                 };
@@ -302,7 +322,7 @@ impl TakeControl {
             denied,
             warning: lost_pf(session, view.read::<Network>())
                 .filter(|_| live)
-                .map(|pf| warning(session, &pf)),
+                .map(|_| WARNING.to_string()),
             waiting: me.waiting,
             next_press: me.next_press.clone(),
         }

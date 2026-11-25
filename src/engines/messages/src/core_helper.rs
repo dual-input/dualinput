@@ -9,7 +9,8 @@
 //! apart by its `Hello`, which stays `FromHelper`'s first variant, with its two fields, in
 //! every build. postcard can't read an enum that serde tags inside its content, so no type
 //! here carries `#[serde(tag)]`, and the settings that hold an `Input` or a device are JSON
-//! in serde's default shape, such as `{"key":{"scan":30,"extended":false}}`.
+//! in serde's default shape, such as
+//! `{"key":{"scan":30,"extended":false,"ctrl":true,"shift":false,"alt":false}}`.
 
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
@@ -93,8 +94,19 @@ pub struct Wants {
 #[ts(export, export_to = "core_helper/")]
 pub enum Input {
     /// A key by its scan code and whether it's an E0 key, so the physical key, whatever the
-    /// keyboard's layout.
-    Key { scan: u16, extended: bool },
+    /// keyboard's layout. The three flags are the modifiers held as it goes down, each on
+    /// either side, as `ctrl` with F9's scan code is Ctrl+F9. A setting written without them
+    /// reads as none held.
+    Key {
+        scan: u16,
+        extended: bool,
+        #[serde(default)]
+        ctrl: bool,
+        #[serde(default)]
+        shift: bool,
+        #[serde(default)]
+        alt: bool,
+    },
     /// A button by its device's vendor and product IDs and its number. Two devices of one
     /// model share both IDs, so a button bound on one fires from the other too.
     Button {
@@ -282,16 +294,54 @@ mod tests {
     }
 
     #[test]
-    fn a_bound_key_reads_from_its_setting() {
-        let bound: Bound =
-            serde_json::from_str(r#"{"input":{"key":{"scan":30,"extended":false}},"name":"A"}"#)
-                .unwrap();
+    fn a_bound_combination_reads_from_its_setting_and_a_key_saved_before_combinations_holds_none() {
+        let read = |json: &str| serde_json::from_str::<Bound>(json).unwrap().input;
+        let input = Input::Key {
+            scan: 30,
+            extended: false,
+            ctrl: true,
+            shift: false,
+            alt: true,
+        };
+        let json = serde_json::to_string(&Bound {
+            input: input.clone(),
+            name: "Ctrl+Alt+A".into(),
+        })
+        .unwrap();
+        assert_eq!(read(&json), input);
         assert_eq!(
-            bound.input,
+            read(r#"{"input":{"key":{"scan":30,"extended":false}},"name":"A"}"#),
             Input::Key {
                 scan: 30,
-                extended: false
+                extended: false,
+                ctrl: false,
+                shift: false,
+                alt: false
             }
+        );
+    }
+
+    /// postcard writes every field by its place, so a combination crosses the pipe whole, its
+    /// `serde(default)`s used only when JSON leaves a field out.
+    #[test]
+    fn a_combination_crosses_the_pipe_whole() {
+        let wants = Wants {
+            bindings: vec![(
+                1,
+                Input::Key {
+                    scan: 67,
+                    extended: false,
+                    ctrl: true,
+                    shift: true,
+                    alt: false,
+                },
+            )],
+            ..Wants::default()
+        };
+        let bytes = frame(&ToHelper::Wants(wants.clone())).unwrap();
+        assert_eq!(
+            decode::<ToHelper>(&bytes[4..]).unwrap(),
+            ToHelper::Wants(wants)
         );
     }
 }

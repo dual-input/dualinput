@@ -2,7 +2,7 @@
 // while this pilot is in the flight (record/areas/interface/decisions.md, "Take control is a held button under the tabs").
 // It's the same element in every state, so nothing on the page moves when control passes.
 
-import { arcFromTop, cx, Kbd, Room, Spinner } from "@dualinput/ui"
+import { arcFromTop, cx, Kbd, Link, Room, Spinner, toast } from "@dualinput/ui"
 import { TriangleAlert } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import type { CSSProperties } from "react"
@@ -14,7 +14,7 @@ import { useCoreSlice, useShell } from "../../../platform/efb-shell/src/part.ts"
 import { useSetting } from "../../../platform/efb-shell/src/settings/setting.ts"
 import { Hold, HOLD_MS, TAKEN_MS } from "./hold.ts"
 import type { HoldState } from "./hold.ts"
-import { INPUT, NAME, REQUEST } from "./names.ts"
+import { INPUT, LEARN_MORE, NAME, REQUEST } from "./names.ts"
 
 /** How far the button sinks through a hold, as a scale, and how fast it springs back when let go, in milliseconds. */
 const SINK = 0.97
@@ -122,7 +122,26 @@ function Strip({ slice, catchingUp }: { slice: TakeControlSlice; catchingUp: boo
       {note && (
         <p className={cx("flex items-start pt-2.5 text-xs", slice.warning ? "text-warning" : "text-muted-foreground")}>
           {slice.warning ? <TriangleAlert className="mr-2 mt-px size-3.5 shrink-0" /> : catchingUp ? <Spinner className="mr-2 mt-px size-3.5 shrink-0" /> : null}
-          <span>{note}</span>
+          <span>
+            {note}
+            {/* The warning says only that the session might desync, so the pilot reads the trade-off in the docs, which the core opens on the desktop, behind the sim. */}
+            {slice.warning && (
+              <>
+                {" "}
+                <Link
+                  tone="warning"
+                  onClick={() =>
+                    void link.client.command(LEARN_MORE, null).then(
+                      () => toast("Opening the docs on your desktop"),
+                      () => toast("Couldn't open the docs"),
+                    )
+                  }
+                >
+                  Learn more
+                </Link>
+              </>
+            )}
+          </span>
         </p>
       )}
     </div>

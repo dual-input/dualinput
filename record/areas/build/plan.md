@@ -1241,6 +1241,38 @@ The whole bench ran once, before pointer sync replay and flight-model replay joi
 The user installed the `.vsix`, saw the island in each of its states on the dev page, and kept as built the line before preflight ends and the island reading "recorded" while a knob still steps through a playback's last changes.
 In the sim on the 58P, recordings put the cockpit back and played its changes, and flew the aircraft along its recorded paths ([profiles log](../profiles/log.md#2026-11-24-in-the-sim-playbacks-flew-the-58p-back-along-its-recorded-paths-with-follow-from-play-to-the-end)).
 
+## 20c Combinations for the take-control key, and Learn more on its warning
+
+Designs first: the user's call on 2026-11-25 that the take-control key binds with Shift, Ctrl, or Alt held, such as Ctrl+F9, where [the Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version) had bound a key alone.
+A combination keeps a key typed into one of the sim's text boxes from taking control, and the Windows key binds nothing, alone or held.
+How a combination matches is this stage's: only with exactly its modifiers held, the left and right keys alike, and a hold from its key's down to the up of any of its keys ([04-core-helper](../core/04-core-helper.md)'s note of 2026-11-25).
+The user's call the same day, made while [stage 22e](#22e-the-docs) wrote the docs, that the lost link's warning under the button reads "If you take control, your session might desync.", with Learn more to the docs for pilots ([take control](../interface/decisions.md#take-control-is-a-held-button-under-the-tabs-with-one-hold-of-035s)).
+
+Builds:
+
+- the message crate's `Input::Key` with `ctrl`, `shift`, and `alt`, which a setting saved before reads as false, and take-control's command `LEARN_MORE`
+- the helper's next press and bindings: a key with the modifiers held as it goes down, nothing for a modifier alone or a key with the Windows key held, a name such as "Ctrl+F9", and a combination's release at the up of any of its keys; and, which the code review found, any modifier `GetAsyncKeyState` says is up let go at each key's down, so a release on the lock screen never leaves one held
+- in `src/features/take-control`: the warning's new line, on the banner and under the button, and under the button Learn more, which the core answers by opening the docs' section in the pilot's browser, with a toast
+- in `tools/sim/desk`: keys held together, and pressed and let go one at a time, for `node tools/sim/core-helper.ts desk`, whose binding becomes Ctrl+F24, and whose check of the capture takes the helper's 2% budget
+
+Needs: 20.
+
+Tests:
+
+- As the helper's own tests: a key presses with exactly the modifiers held, on either side; a modifier alone, and a key with the Windows key held, give nothing; a modifier whose release never came is let go once Windows says it's up, and Windows' state never holds one down; and a combination holds until any of its keys goes up.
+- As the message crate's own tests: a combination reads from its setting and crosses the pipe whole, and a key saved before reads with no modifier.
+- On the bench, in the `take-control` scenario: rebinding to Ctrl+B takes control by the combination, and the lost link's warning reads the new line; and the `core-helper` scenario, whose keys gain the three fields.
+- On the real helper, in `node tools/sim/core-helper.ts desk`: the bound Ctrl+F24 crosses held 2s and with a popped-out display in front, and not with another program in front; F24 alone and Ctrl+Shift+F24 don't cross; the right Ctrl crosses as Ctrl; letting go of Ctrl first ends the press; and Ctrl+Shift+F22 binds with both modifiers and a name that leads with them.
+- No test sends `LEARN_MORE`, since its job opens the pilot's browser, and take-control has no harness of its own, where the clients crate checks the same job for our Discord's link.
+
+It changes neither the kernel nor the core's edge, so it closes on the `take-control` and `core-helper` scenarios.
+
+Exit: on our development machine, `node tools/check.ts`, `node tools/bench.ts take-control core-helper`, and `node tools/sim/core-helper.ts desk` pass; and the [control log](../control/log.md) has an entry for the change.
+Done on 2026-11-25: `node tools/check.ts` passed, and the two scenarios passed their 20 tests.
+The desk run passed every case of keys and binding in each of three runs on the final helper ([control log](../control/log.md#2026-11-25-the-take-control-binding-takes-shift-ctrl-and-alt-combinations-matched-exactly)).
+The first run also passed the mouse's cases and failed only the capture's CPU check, at 1.27% of a core against a 1% the desk run kept from before the helper's 2% budget, so the stage raised that check to 2%.
+The two runs after passed it and lost the mouse's corner clicks while someone used the PC; this stage doesn't change the mouse's path.
+
 ## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.

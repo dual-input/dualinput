@@ -35,6 +35,16 @@ Decides:     How a pilot binds the key or button, as a single or a long press; h
 > While this pilot could take control, the notification's detail is the warning, so the pilot reads it before a press, on the banner and under the EFB app's button.
 > Once the link is back, the old PF gets "Adam took control while you were disconnected", with the detail "What you changed in that time was undone, and your pages and FMS entries may differ from Adam's.", in place of [a pass](#a-pass)'s "Adam has control".
 
+> **Note**
+> Since 2026-11-25, [the binding](#the-binding)'s key can take Shift, Ctrl, or Alt held with it, such as Ctrl+F9, as [the Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version) has it, so the first of [known limits](#known-limits) holds only for a key bound alone (user, 2026-11-25; [control log](log.md#2026-11-25-the-take-control-binding-takes-shift-ctrl-and-alt-combinations-matched-exactly)).
+> A combination presses only with exactly its modifiers held, the left and right keys alike, so a bound F9 does nothing on Ctrl+F9, nor a bound Ctrl+F9 on Ctrl+Shift+F9, as stage 20c chose, and nothing presses with the Windows key held.
+> A long press counts from the key's down, its modifiers already held, and the up of the key or of any of its modifiers ends it.
+> On a layout with AltGr, Windows sends AltGr as the left Ctrl and the right Alt, so typing a character with AltGr can read as Ctrl+Alt and its key, and a Ctrl+Alt combination there can still take control from a text box (unverified: binding Ctrl+Alt+L on the Polish layout and typing "ł" settles it).
+
+> **Note**
+> Since 2026-11-25, the warning while the link to the PF is lost reads "If you take control, your session might desync.", under the EFB app's button with a Learn more that sends take-control's command `take-control.learn-more`, which opens the docs for pilots on taking control while the connection is down, and on the banner as "Reconnecting to James"'s detail, as [take control](../interface/decisions.md#take-control-is-a-held-button-under-the-tabs-with-one-hold-of-035s) has it (user, 2026-11-25).
+> The docs, not the warning, name what follows: the PF's aircraft jumping to this pilot's when the PF reconnects.
+
 A pilot binds one keyboard key or flight-hardware button in the desktop app, as a single press, which takes control on its down, or a long press, which takes control once it has been held 1s.
 The press, or the take-control button in the EFB app or the desktop app, asks the session crate's `TakeControl`, whose guards decide, and a refused press plays a short refusal cue and shows the guards' reason on the banner.
 When control passes, every machine whose pilot is in the flight plays the control-passed cue and shows who has control, with no recorded line.

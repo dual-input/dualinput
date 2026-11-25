@@ -37,12 +37,16 @@ import { ROOT } from "../lib/repo.ts"
 import { Failed, main } from "../lib/run.ts"
 import { Guide } from "./guide.ts"
 
-/** Scan codes, which the helper binds a key by. F22 to F24 sit on no keyboard, so nothing takes them. */
+/** Scan codes, which the helper binds a key by. F22 to F24 sit on no keyboard, so nothing takes them. tools/sim/desk writes an E0 key as 0xE000 and its code. */
 const F22 = 0x6d
 const F23 = 0x6e
 const F24 = 0x76
 const LEFT_SHIFT = 0x2a
-const BOUND: Bound = { input: { key: { scan: F24, extended: false } }, name: "F24" }
+const LEFT_CTRL = 0x1d
+const RIGHT_CTRL = 0xe01d
+/** A combination, as a pilot binds Ctrl+F9 so that typing F9 into the sim takes nothing, and the desk's keys for it. */
+const BOUND: Bound = { input: { key: { scan: F24, extended: false, ctrl: true, shift: false, alt: false } }, name: "Ctrl+F24" }
+const BOUND_KEYS = `${LEFT_CTRL}+${F24}`
 
 /** The sim's main window's title starts this (record/areas/core/04-core-helper.md, "Raw Input"). */
 const MAIN_TITLE = "Microsoft Flight Simulator 2024"
@@ -187,25 +191,48 @@ async function desk(s: Session): Promise<void> {
     say(`the core started the real helper, process ${helper}`)
 
     let from = core.heard().length
-    check(await main.do(`key ${F24} 2000`), "the sim's main window came to the front")
+    check(await main.do(`key ${BOUND_KEYS} 2000`), "the sim's main window came to the front")
     await sleep(300)
     let presses = since(core, from, "press")
-    check(presses.length === 2 && presses[0]!.startsWith("press down") && presses[1]!.startsWith("press up"), "a bound key held for 2s crosses as one press and one release", presses.join("; "))
+    check(presses.length === 2 && presses[0]!.startsWith("press down") && presses[1]!.startsWith("press up"), "a bound combination held for 2s crosses as one press and one release", presses.join("; "))
 
     from = core.heard().length
-    await other.do(`key ${F24} 200`)
+    await other.do(`key ${BOUND_KEYS} 200`)
     await main.do(`key ${F23} 200`)
     await sleep(300)
     presses = since(core, from, "press")
-    check(presses.length === 0, "the bound key with another program in front, and a key nobody bound with the sim in front, never cross", presses.join("; "))
+    check(presses.length === 0, "the bound combination with another program in front, and a key nobody bound with the sim in front, never cross", presses.join("; "))
 
     from = core.heard().length
-    await popOut.do(`key ${F24} 200`)
+    await popOut.do(`key ${BOUND_KEYS} 200`)
     await sleep(300)
-    check(since(core, from, "press").length === 2, "the bound key crosses with a popped-out display in front")
+    check(since(core, from, "press").length === 2, "the bound combination crosses with a popped-out display in front")
 
     from = core.heard().length
-    for (let i = 0; i < 100; i++) await main.do(`key ${F24} 20`)
+    await main.do(`key ${F24} 200`)
+    await main.do(`key ${LEFT_CTRL}+${LEFT_SHIFT}+${F24} 200`)
+    await sleep(300)
+    presses = since(core, from, "press")
+    check(presses.length === 0, "with Ctrl+F24 bound, F24 alone and Ctrl+Shift+F24 never cross", presses.join("; "))
+
+    from = core.heard().length
+    await main.do(`key ${RIGHT_CTRL}+${F24} 200`)
+    await sleep(300)
+    check(since(core, from, "press").length === 2, "the right Ctrl crosses as Ctrl")
+
+    from = core.heard().length
+    await main.do(`down ${BOUND_KEYS}`)
+    await sleep(200)
+    await main.do(`up ${LEFT_CTRL}`)
+    await sleep(300)
+    const early = since(core, from, "press")
+    await main.do(`up ${F24}`)
+    await sleep(300)
+    presses = since(core, from, "press")
+    check(early.length === 2 && presses.length === 2, "letting go of Ctrl before F24 ends the press at Ctrl's release", presses.join("; "))
+
+    from = core.heard().length
+    for (let i = 0; i < 100; i++) await main.do(`key ${BOUND_KEYS} 20`)
     await sleep(300)
     const after = since(core, from, "press").map((h) => Number(/(\d+)us after/.exec(h)?.[1])).sort((a, b) => a - b)
     const p99 = after[Math.ceil(after.length * 0.99) - 1] ?? Infinity
@@ -238,11 +265,22 @@ async function desk(s: Session): Promise<void> {
     await main.do(`key ${LEFT_SHIFT} 100`)
     await sleep(300)
     check(since(core, from, "next press").length === 0, "while binding, a modifier alone doesn't bind")
-    await main.do(`key ${F24} 200`)
+    await main.do(`key ${BOUND_KEYS} 200`)
     await sleep(300)
     const kept = since(core, from, "next press")
     const crossed = since(core, from, "press")
-    check(kept.length === 1 && crossed.length === 0, "while binding, the key already bound crosses as the next press alone, so it takes nothing", [...kept, ...crossed].join("; "))
+    check(kept.length === 1 && crossed.length === 0, "while binding, the combination already bound crosses as the next press alone, so it takes nothing", [...kept, ...crossed].join("; "))
+
+    core.helper({ act: "next-press", on: true })
+    await sleep(300)
+    from = core.heard().length
+    await main.do(`key ${LEFT_CTRL}+${LEFT_SHIFT}+${F22} 100`)
+    await sleep(300)
+    const line = since(core, from, "next input ")[0]
+    const chosen = line ? (JSON.parse(line.slice("next input ".length)) as Bound) : undefined
+    const key = chosen && "key" in chosen.input ? chosen.input.key : undefined
+    const bound = key?.scan === F22 && key.ctrl && key.shift && !key.alt && chosen!.name.startsWith("Ctrl+Shift+")
+    check(!!bound, "while binding, Ctrl+Shift+F22 binds with both modifiers, and its name leads with them", line)
 
   } finally {
     for (const w of [main, popOut, other]) w.close()
@@ -308,9 +346,11 @@ async function audio(s: Session): Promise<void> {
   tone.kill()
   // A tone never falls below the gate, so every frame is encoded, sent, and played, as in
   // the longest ATC transmission; the ATC host captures, and each other machine plays.
-  say(`budget: the helper took ${capturing}% of one CPU core over 10s capturing a tone, and ${both}% capturing it and playing it back, so about ${(both - capturing).toFixed(2)}% playing, each against 1%`)
+  // In a desk run, the capture runs with the binding and the mouse still on from the cases before, as in a session, where
+  // the helper's budget is 2% (record/areas/core/04-core-helper.md, its note of 2026-11-16).
+  say(`budget: the helper took ${capturing}% of one CPU core over 10s capturing a tone, against 2%, and ${both}% capturing it and playing it back, so about ${(both - capturing).toFixed(2)}% playing, against 1%`)
   say(`budget: the helper held ${Math.max(memory, most)} MB of private working set, against 20 MB`)
-  check(capturing < 1, "the helper under 1% of one CPU core while it captures")
+  check(capturing < 2, "the helper under 2% of one CPU core while it captures, with a binding and the mouse on")
   check(both - capturing < 1, "the helper under 1% of one CPU core while it plays")
   check(Math.max(memory, most) < 20, "the helper under 20 MB of private working set")
   core.helper({ act: "loop", on: false })
@@ -522,7 +562,7 @@ async function sim(s: Session): Promise<void> {
   }
   const keyCrosses = async () => {
     const from = core.heard().length
-    runDesk(tools, "key", String(F24), "200")
+    runDesk(tools, "key", BOUND_KEYS, "200")
     await sleep(300)
     return since(core, from, "press").length
   }

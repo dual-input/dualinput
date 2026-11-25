@@ -22,8 +22,8 @@ mine: boolean,
  */
 denied: Array<string>, 
 /**
- * What taking control does while this core's link to the pilot flying is lost, which a pilot
- * reaching for the button should read first.
+ * The warning while this core's link to the pilot flying is lost, which a pilot reaching for
+ * the button should read first.
  */
 warning: string | null, 
 /**

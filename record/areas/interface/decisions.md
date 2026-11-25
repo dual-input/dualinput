@@ -586,9 +586,11 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   The hold is 0.35s, and a bound key's long press moves to 0.35s with it, so the gesture has one number; this changes [the binding](../control/01-take-control.md#the-binding)'s and [the scope's](../product/03-v1-scope.md#take-control-key) 1s.
   The bound key's name shows as an outline at the button's other end, and with no key bound there's none.
   The PF sees the same element as a state, "You have control", in a sky tint.
-  Lines go under the button with an icon of their own: while catching up, a neutral spinner and "Taking control disabled while you catch up", with the button dimmed; while the link to the PF is lost, the amber triangle and "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect."
-  Settled by the user on 2026-10-31.
+  Lines go under the button with an icon of their own: while catching up, a neutral spinner and "Taking control disabled while you catch up", with the button dimmed; while the link to the PF is lost, the amber triangle and "If you take control, your session might desync.", then Learn more, which opens in the pilot's browser the section of the docs for pilots on taking control while the connection is down, `https://docs.dualinput.app/pilots/who-flies#taking-control-while-the-connection-is-down`, which [stage 22e](../build/plan.md#22e-the-docs) will publish, naming the PF's aircraft jumping to this pilot's when the PF reconnects, with a toast, "Opening the docs on your desktop", since it opens behind the sim (user, 2026-11-25).
+  The lost link's notification on the banner carries the same line as its detail, with no Learn more, since no notification carries a button in v1.
+  Settled by the user on 2026-10-31 and 2026-11-25.
 - **Because:** a takeover through a lost link raises control's generation, so on reconnect it wins, the old PF's aircraft moves to the new PF's, and their solo changes are dropped and undone by a catch-up ([between machines](../network/01-between-machines.md#control)), which a pilot reaching for the key should read first.
+  The line warns without explaining, so the pilot opens Learn more, where the docs lay out that trade-off and the pilot decides (user, 2026-11-25).
 - **Leaves out:** left-aligning the label when a binding is set, which the user skipped for now.
 
 ## The sharing card is one row in every state, and each tab teaches its feature
@@ -626,7 +628,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 ## The Settings tab holds the binding, the output device, the recordings, and the version
 
 - **Decided:** four sections, in this order:
-  - Take control: the key or button, one key only, so neither a modifier alone nor a combination binds; Press or Hold; and a line to keep it unbound in the sim's own controls.
+  - Take control: the key or button, where a key binds alone or with Shift, Ctrl, or Alt held, such as Ctrl+F9, and neither a modifier alone nor anything with the Windows key held binds (user, 2026-11-25); Press or Hold; and a line to keep it unbound in the sim's own controls.
   - Sound: "Output device", since it carries every sound Dual Input plays; a picked device that's missing says what's playing instead, in amber, and lights the tab's dot.
   - Recordings: the space used of 1 GB, then each run by its start, in the pilot's time, and its size, newest first.
     The run in progress can be opened but not deleted, since a pilot reporting a problem now needs it, and a recording that stopped, at under 1 GB free or on a failed write, says so here, since nothing else tells the pilot.
@@ -637,8 +639,10 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
     In a session it says "Install it when you're not in a session." with no button.
 
   The name, color, sharing, the ATC app, and the volume stay on their tabs; the microphone comes with the voice phrases, after v1; and the relay list ships with each release.
-  Settled by the user on 2026-10-31, 2026-11-01, and 2026-11-10.
-- **Because:** [the one full window](#dual-inputs-one-full-window-is-its-efb-app) moves the desktop app's settings here, the runs' list with them, and a report asks for the log first and the recording only when the log isn't enough ([recording and bug reports](../recording/01-recording-and-bug-reports.md)).
+  Settled by the user on 2026-10-31, 2026-11-01, 2026-11-10, and 2026-11-25.
+- **Because:**
+  - [The one full window](#dual-inputs-one-full-window-is-its-efb-app) moves the desktop app's settings here, the runs' list with them, and a report asks for the log first and the recording only when the log isn't enough ([recording and bug reports](../recording/01-recording-and-bug-reports.md)).
+  - Pilots want a combination, such as Ctrl+F9, so that a key typed into one of the sim's text boxes doesn't take control, and Windows takes its own combinations with the Windows key (user, 2026-11-25; [control log](../control/log.md#2026-11-25-the-take-control-binding-takes-shift-ctrl-and-alt-combinations-matched-exactly)).
 - **Leaves out:** whether the core zips a report's folder, which for now opens in Windows Explorer; and turning off an aircraft plugin, skipped in the design for now.
 
 ## The banner carries what a pilot must see without the EFB, and the rest shows where it's acted on

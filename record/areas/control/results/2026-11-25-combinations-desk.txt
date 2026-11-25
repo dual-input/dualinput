@@ -1,0 +1,33 @@
+﻿a bench core started in target\bench\runs\2026-11-25_15-51-54-core-helper-desk, with the real helper
+the desk's windows are at 96 DPI, 100% scaling
+the core started the real helper, process 31072
+ok: the sim's main window came to the front
+ok: a bound combination held for 2s crosses as one press and one release: press down 234us after its stamp; press up 80us after its stamp
+ok: the bound combination with another program in front, and a key nobody bound with the sim in front, never cross
+ok: the bound combination crosses with a popped-out display in front
+ok: with Ctrl+F24 bound, F24 alone and Ctrl+Shift+F24 never cross
+ok: the right Ctrl crosses as Ctrl
+ok: letting go of Ctrl before F24 ends the press at Ctrl's release: press down 234us after its stamp; press up 73us after its stamp
+budget: of 200 presses and releases, the 99th percentile reached the loop 291µs after the helper's stamp, against 5,000µs
+ok: a press on the queue within 5ms of the helper's stamp at p99
+clicks, in a client area of 1280 by 720: mouse LeftDown -1.000 1.000; mouse LeftDown 0.998 -0.997
+ok: only the clicks in the sim's main window cross, not one in a popped-out display or another program
+ok: at 96 DPI, the top-left pixel of the client area crosses as -1, 1, and the bottom-right as nearly 1, -1
+ok: the next press crosses whatever is in front, once: next press key 0x6d
+ok: while binding, a modifier alone doesn't bind
+ok: while binding, the combination already bound crosses as the next press alone, so it takes nothing: next press Ctrl+key 0x76
+ok: while binding, Ctrl+Shift+F22 binds with both modifiers, and its name leads with them: next input {"input":{"key":{"scan":109,"extended":false,"ctrl":true,"shift":true,"alt":false}},"name":"Ctrl+Shift+key 0x6d"}
+desk-tone at 1 in the mixer, as captured: frames 251 small 0 level -26.0 decode 17
+desk-tone at 0.3 in the mixer, as captured: frames 250 small 0 level -26.0 decode 17
+ok: the captured program exited, the capture stopped, and attached again once it started again
+ok: frames from a program at 30% in the Windows mixer arrive at the level it has at 100%: -26 dBFS against -26 dBFS
+the helper took 1.17% of one CPU core over 10s with the output device open and nothing playing
+the helper took 0.87% of one CPU core over 10s capturing a program that plays silence
+budget: the helper took 1.27% of one CPU core over 10s capturing a tone, and 1.55% capturing it and playing it back, so about 0.28% playing, each against 1%
+budget: the helper held 4.2 MB of private working set, against 20 MB
+FAILED: the helper under 1% of one CPU core while it captures
+ok: the helper under 1% of one CPU core while it plays
+ok: the helper under 20 MB of private working set
+the helper plays on: "Speakers (Focusrite USB Audio)"
+ok: the bench's tone plays on the output device
+the core's recordings replayed to every checkpoint; 1 FAILED

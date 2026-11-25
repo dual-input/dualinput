@@ -21,6 +21,9 @@ Decides:     The topology, the transport, the way through home routers, the rela
 > A PF who leaves during preflight leaves that PM holding a control value that names a pilot who has gone, and the session crate refuses take-control until preflight ends, which only the PF's core can end, so preflight never ends.
 > We accept it as a known limit, since the flight hasn't begun and the PM is alone in the session: they leave and host again.
 
+> **Note**
+> Since 2026-11-25, in [while a link is lost](#while-a-link-is-lost), the PM's warning reads "If you take control, your session might desync.", and its Learn more opens the docs for pilots, which name what follows, as [take control](../interface/decisions.md#take-control-is-a-held-button-under-the-tabs-with-one-hold-of-035s) has it, so the warning itself no longer names the jump that [decision 037](../../decisions/037-while-a-link-is-lost.md) has it name (user, 2026-11-25).
+
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.
 Four models carry the rest:

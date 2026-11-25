@@ -3,4 +3,4 @@
 /**
  * A keyboard key or a flight-hardware button.
  */
-export type Input = { "key": { scan: number, extended: boolean, } } | { "button": { vendor: number, product: number, button: number, } };
+export type Input = { "key": { scan: number, extended: boolean, ctrl: boolean, shift: boolean, alt: boolean, } } | { "button": { vendor: number, product: number, button: number, } };

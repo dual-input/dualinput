@@ -33,7 +33,7 @@ const N = {
   controlThem: { id: "take-control.pass", level: "information", once: true, pilot: JAMES, text: "James has control", landing: "session" },
   controlLeft: { id: "take-control.pass", level: "information", once: true, pilot: ME, text: "You have control", detail: "James left the flight.", landing: "session" },
   refused: { id: "take-control.refused", level: "warning", once: true, text: "Couldn't take control", detail: "You're catching up with James.", landing: "session" },
-  lostPf: { id: "take-control.lost-pf", level: "warning", text: "Reconnecting to James", detail: "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect.", landing: "session" },
+  lostPf: { id: "take-control.lost-pf", level: "warning", text: "Reconnecting to James", detail: "If you take control, your session might desync.", landing: "session" },
   takenWhileAway: { id: "take-control.pass", level: "warning", once: true, text: "Adam took control while you were disconnected", detail: "What you changed in that time was undone, and your pages and FMS entries may differ from Adam's.", landing: "session" },
   catchingUp: { id: "cockpit-stream.catch", level: "information", busy: true, text: "Catching up with James", detail: "Anything you move in the cockpit now will be reset.", landing: "session" },
   caughtUp: { id: "cockpit-stream.catch", level: "information", once: true, text: "Caught up with James", detail: "Pages and FMS entries may still differ from James's.", landing: "session" },

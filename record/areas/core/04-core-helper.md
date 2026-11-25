@@ -15,6 +15,15 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > **Note**
 > Since 2026-11-05, a left release crosses whatever is in front, and a press or a wheel notch with the cursor off the sim's main window's area doesn't cross, though one on another window lying over that area still does, since a click that takes the focus away left a figure's hand out until the next click ([avatars log](../avatars/log.md#2026-11-05-a-click-that-took-the-focus-from-the-sim-left-a-figures-hand-out-and-the-rest-of-the-session-passed)).
 
+> **Note**
+> Since 2026-11-25, [Raw Input](#raw-input)'s key is bound with the Shift, Ctrl, and Alt held as it goes down, the left and right keys alike, and named by them and the key, each through `GetKeyNameTextW`, as "Ctrl+F9", in place of stage 20's next press, which skipped a key pressed with a modifier held (user, 2026-11-25; [control log](../control/log.md#2026-11-25-the-take-control-binding-takes-shift-ctrl-and-alt-combinations-matched-exactly)).
+> A bound key presses only with exactly its modifiers held, and its release crosses at the up of the key or of any of its modifiers, whatever is in front, as stage 20c chose ([control log](../control/log.md#2026-11-25-the-take-control-binding-takes-shift-ctrl-and-alt-combinations-matched-exactly)).
+> A modifier alone, and any key pressed with the Windows key held, binds and presses nothing.
+> At each key's down, the helper lets go of any Ctrl, Shift, Alt, or Windows key, left or right, that `GetAsyncKeyState` reads as up.
+> It never marks a key held from that read, since the read happens when the helper handles the press, so a Ctrl pressed just after F9 would count as held with it.
+> The read is for Win+L, which locks the PC: if Raw Input brings nothing from the lock screen's desktop, the Windows key's release never arrives, and no bound key presses until the pilot presses the Windows key again (unverified: pressing the bound key after Win+L and unlocking, without that read, settles it).
+> An `Input` saved before then reads as the key with no modifier.
+
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.
 Across the helper's standard input and output go postcard messages, each after a 4-byte length, and only what a feature asked for crosses: a bound key's or button's press, the next press while the pilot binds one, the mouse while the sim's main window is in front, and Opus frames.

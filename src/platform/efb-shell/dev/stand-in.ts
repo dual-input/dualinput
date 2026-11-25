@@ -219,7 +219,7 @@ export const SCENES: Record<string, Slices> = {
     notifications: [{ id: "profile-loader.edit", level: "information", text: "James's profile edit is loaded on both PCs", detail: "Profile 3f9c2a1", pilot: JAMES, once: true, landing: "session" }],
   },
   "Test session, a save loading": { ...netUp, session: flying(JAMES), [TAKE_CONTROL]: control({}), profiles: testSession({ t: "loading" }, { t: "loaded", hash: "3f9c2a1" }) },
-  "James's link lost": { network: { members: [{ pilot: JAMES, up: false, path: null, round_trip_ms: null }], ...reach }, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ warning: "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect." }) },
+  "James's link lost": { network: { members: [{ pilot: JAMES, up: false, path: null, round_trip_ms: null }], ...reach }, ...boundTo("F9"), session: flying(JAMES), [TAKE_CONTROL]: control({ warning: "If you take control, your session might desync." }) },
   "Traffic: James shares, some missing": { ...netUp, session: flying(JAMES, { traffic: JAMES }), [TRAFFIC]: { ...noTraffic, missing: 3, others: 12 } },
   "Traffic: you share": { ...netUp, session: flying(ME, { traffic: ME }) },
   "ATC: you share": { ...netUp, session: flying(ME, { atc: ME }), [ATC]: { capturing: "BeyondATC" } },

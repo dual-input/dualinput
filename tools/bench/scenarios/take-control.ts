@@ -21,9 +21,9 @@ import { StandInHelper } from "../helper.ts"
 import { app, BenchNetwork, host, join } from "../network.ts"
 import { FakeApp, FakeEfbApp } from "../pages.ts"
 
-const F9: Bound = { input: { key: { scan: 67, extended: false } }, name: "F9" }
-const B: Bound = { input: { key: { scan: 48, extended: false } }, name: "B" }
-const WARNING = "James may still be flying. If you take control, their aircraft will jump to yours when they reconnect."
+const F9: Bound = { input: { key: { scan: 67, extended: false, ctrl: false, shift: false, alt: false } }, name: "F9" }
+const CTRL_B: Bound = { input: { key: { scan: 48, extended: false, ctrl: true, shift: false, alt: false } }, name: "Ctrl+B" }
+const WARNING = "If you take control, your session might desync."
 
 /** Each cue's size, which tells it apart in the stand-in's lines, since a sound's number depends on what the build registered. */
 const CUE_BYTES = Object.fromEntries(["control-passed", "refused"].map((cue) => [cue, fs.statSync(path.join(ROOT, "src", "features", "take-control", "core", "src", "sounds", `${cue}.opus`)).size]))
@@ -470,9 +470,10 @@ test("a pilot with no binding has the helper through the session and takes contr
   await heard(b, "control-passed", 4)
   await until(b, (s) => s.pf === session(a).me, "control back at James")
 
-  // Rebinding: only the new key is wanted of the helper, so the old one does nothing.
-  await bindTo(B)
-  await press(b, B)
+  // Rebinding, to a combination: only it is wanted of the helper, with its modifier, so the old
+  // key does nothing.
+  await bindTo(CTRL_B)
+  await press(b, CTRL_B)
   await heard(b, "control-passed", 5)
 
   // Clearing.

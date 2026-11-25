@@ -2,6 +2,39 @@
 
 What we found about passing control between pilots, by the take-control key and buttons and by voice, newest entry first.
 
+## 2026-11-25: The take-control binding takes Shift, Ctrl, and Alt combinations, matched exactly
+
+**Asked:** can the take-control key be a combination such as Ctrl+F9, so a key typed into one of the sim's text boxes doesn't take control, with the Windows key still kept out, alone or held, as the user asked on 2026-11-25 ([stage 20c](../build/plan.md#20c-combinations-for-the-take-control-key-and-learn-more-on-its-warning))?
+And how should a combination match: with exactly its modifiers held or with at least them, the left and right keys as one or apart, and how does a hold count?
+
+**Expected:** that the core helper could bind and match a key with the modifiers it already tracks from Raw Input, since stage 20's next press read them to refuse a combination.
+
+**Found:** the code review found that a modifier whose release Raw Input never delivers would stay held in the helper's record and stop every bound key, and Win+L does that if Raw Input brings nothing from the lock screen's desktop (unverified: pressing the bound key after Win+L and unlocking, without the fix, settles it).
+So at each key's down, the helper lets go of any modifier or Windows key that `GetAsyncKeyState` says is up.
+
+With that fix, on our development machine, with no sim running, through `node tools/sim/core-helper.ts desk`, whose binding became Ctrl+F24 ([the run's report](results/2026-11-25-combinations-desk.txt)):
+
+- The bound Ctrl+F24 held 2s crossed as one press and one release, crossed with a popped-out display in front, and crossed nothing with another program in front.
+- F24 alone and Ctrl+Shift+F24 crossed nothing, and the right Ctrl with F24 crossed as Ctrl.
+- Letting go of Ctrl before F24 crossed the release at Ctrl's up, and F24's up then crossed nothing.
+- While binding, Ctrl+Shift+F22 bound with both modifiers, named "Ctrl+Shift+key 0x6d", since the US layout has no name for F22; the Ctrl, Shift, and Alt keys are named "Ctrl", "Shift", and "Alt" there, and the right ones "Right Ctrl", "Right Shift", and "Right Alt".
+- 200 presses and releases reached the loop within 291µs of the helper's stamp at p99, against 5,000µs.
+- The two corner clicks crossed, and only those in the sim's main window.
+- The capture's CPU check failed, at 1.27% of a core against the run's 1%, with a binding and the mouse still on, as stage 20's did at 1.08%; the helper's budget has been 2% since 2026-11-16 ([core log](../core/log.md#2026-11-16-capturing-beyondatc-with-a-binding-and-the-mouse-on-the-helper-took-144-of-a-core-and-opus-rs-at-5-loss-stayed-understandable)), and no key was pressed while it was measured.
+
+With the check raised to 2%, two more runs on the same helper passed every key case and the capture, at 1.4% and 1.14%, and lost the corner clicks: one of two, then both ([the last run's report](results/2026-11-25-combinations-desk-pc-in-use.txt)).
+Someone was using the PC, which read 0ms since its last input, so the desk's window likely didn't keep the focus for its clicks (unverified), and this change doesn't touch the mouse's path.
+
+On the bench, the `take-control` and `core-helper` scenarios passed their 20 tests, rebinding to Ctrl+B among them.
+
+**Changed because of it:** we chose exact matching, so a bound F9 does nothing on Ctrl+F9 and a bound Ctrl+F9 nothing on Ctrl+Shift+F9, as a shortcut's keys are matched; the left and right keys as one, since a combination's name says no side; and a hold from the key's down, its modifiers already held, to the up of any of its keys.
+A key's `Input` carries `ctrl`, `shift`, and `alt`, which a setting saved before reads as false, and the helper binds and matches it with the modifiers held as it goes down.
+The helper reads Windows' state only to let a modifier go, never to hold one: it reads that state when it handles a press, so a modifier pressed just after the key would wrongly count, and a release is the only input the lock screen's desktop can take that leaves a key stuck.
+A Ctrl+Alt combination on a layout with AltGr can still take control from a text box, since Windows sends AltGr as the left Ctrl and the right Alt, which we name in take-control's note rather than handle (unverified).
+The desk run checks the capture against the helper's 2% budget, since it captures with a binding and the mouse still on, where its 1% predated that budget.
+
+**Docs affected:** the notes at the top of [01-take-control](01-take-control.md) and [04-core-helper](../core/04-core-helper.md), [the Settings tab](../interface/decisions.md#the-settings-tab-holds-the-binding-the-output-device-the-recordings-and-the-version)'s tentative decision, and [stage 20c](../build/plan.md#20c-combinations-for-the-take-control-key-and-learn-more-on-its-warning).
+
 ## 2026-11-15: Four rounds of candidate cues didn't beat stage 20's stand-ins, so v1 keeps them
 
 **Asked:** which style should Dual Input's control-passed and refusal cues take, picked by ear from candidates that each play both and sketch the voice phrases' two cues, the offer opening and the offer timing out ([stage 20b](../build/plan.md#20b-the-sounds))?

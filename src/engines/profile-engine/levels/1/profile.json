@@ -165,15 +165,8 @@
       "description": "Who makes the aircraft, as the EFB app's list of supported aircraft shows it",
       "type": "string"
     },
-    "maturity": {
-      "description": "stable or experimental, which that list tags the aircraft with",
-      "enum": [
-        "stable",
-        "experimental"
-      ]
-    },
     "name": {
-      "description": "The aircraft's model, as that list shows it",
+      "description": "The aircraft's model, as the EFB app's list of supported aircraft shows it",
       "type": "string"
     },
     "seats": {
@@ -495,12 +488,21 @@
         "pattern": "^[a-z][a-z0-9_]*$"
       },
       "type": "object"
+    },
+    "status": {
+      "description": "How well a shared cockpit works in the aircraft, which the EFB app's list of supported aircraft tags it with: flawless, with no known issue; complete, syncing all the aircraft allows, though its limits or rough edges remain; partial, with more the aircraft would let it sync; or experimental, for an aircraft built in a way that works against a shared cockpit",
+      "enum": [
+        "flawless",
+        "complete",
+        "partial",
+        "experimental"
+      ]
     }
   },
   "required": [
     "maker",
     "name",
-    "maturity",
+    "status",
     "aircraft"
   ],
   "title": "A Dual Input profile, at level 1 of the format",

@@ -29,7 +29,7 @@ pub use blocks::{Field, LAYOUT, Table, fields};
 pub use bundle::{hash, plain, single_quoted};
 pub use check::is_entry_key;
 pub use format::{
-    Aircraft, Count, EventEntry, Maturity, Owner, Pace, Profile, Resolved, StateEntry, Steps,
+    Aircraft, Count, EventEntry, Owner, Pace, Profile, ProfileStatus, Resolved, StateEntry, Steps,
     Variant, Watch, Write,
 };
 pub use index::{Index, IndexBundle, IndexProfile, Shown, covers};

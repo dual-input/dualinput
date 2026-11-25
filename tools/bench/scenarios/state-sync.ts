@@ -22,7 +22,7 @@ import { builtHashes, runBuilder } from "../profiles.ts"
 /** Every kind of entry, each on a variable or event only this scenario's stand-in aircraft has. */
 const PROFILE = `maker: Black Square
 name: Baron 58P
-maturity: experimental
+status: experimental
 authors: The bench
 aircraft:
   variants:

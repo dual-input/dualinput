@@ -13,8 +13,7 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 > - A write function's `write()` on an `L:` or `A:` variable needs a value, which level 1's declarations require, so TypeScript refuses `write(L('X'))`; and a `K:` event with `value` among its values, written with none, takes the function's own value there.
 
 > **Note**
-> Stage 11b's tentative decision that [the profile format gains a name, a maturity, and an entry's description](../interface/decisions.md#the-profile-format-gains-a-name-a-maturity-and-an-entrys-description) adds `name` and `maturity` to [a profile's top-level keys](#a-profile) at level 1, and an optional `description` to a state entry, until the apps' design confirms it (user, 2026-10-26 and 2026-10-30).
-> A profile also needs `maker`, and `name` holds the model alone, since the aircraft picker's tiles show the two apart (2026-11-01), which the decision doesn't say yet.
+> Stage 11b's tentative decision that [the profile format gains a name, a status, and an entry's description](../interface/decisions.md#the-profile-format-gains-a-name-a-status-and-an-entrys-description) adds `maker` and `name`, the aircraft's maker and model apart, and `status`, how well a shared cockpit works in the aircraft, to [a profile's top-level keys](#a-profile) at level 1, and an optional `description` to a state entry, until the apps' design confirms it (user, 2026-10-26, 2026-10-30, 2026-11-01, and 2026-11-25).
 
 > **Note**
 > In [write functions](#write-functions), a state entry's function may return the value its entry will read once the write lands, a number or a text of the entry's type, and the sync engine waits for that reading in place of the value it gave the function; an event entry's function still returns nothing.
@@ -35,7 +34,7 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 > **Note**
 > From stage 22d, which builds the profile extension ([03-the-extension](03-the-extension.md); [profiles log][22d]; user, 2026-11-22):
 >
-> - In [layout](#layout), the top-level keys come in this order: `maker`, `name`, `maturity`, `authors`, `aircraft`, `import`, `displays`, `state`, `events`, `seats`, since an airliner's profile may hold hundreds of seats, and a bundle's keys follow it.
+> - In [layout](#layout), the top-level keys come in this order: `maker`, `name`, `status`, `authors`, `aircraft`, `import`, `displays`, `state`, `events`, `seats`, since an airliner's profile may hold hundreds of seats, and a bundle's keys follow it.
 > - Outside scripts, a profile takes single quotes only: a double-quoted string in a YAML value, or in a name call on a YAML line, is an error, which shows it in single quotes, while a script takes any string JavaScript takes.
 >   A formatter writes a value plain where YAML reads it as the same text, and in single quotes where it doesn't.
 > - In [layout](#layout), a heading's rule runs on to column 100, as in `# ═══ ELECTRICAL ═══…`, so a section shows as a line across the file in any editor, and a formatter writes fsc-editor's forms of a heading that way too.
@@ -113,7 +112,7 @@ The loader ignores comments, and the IDE reads and writes section headings in th
 
 Every profile and module takes one layout, which a formatter writes and a reviewer can expect:
 
-- The top-level keys come in this order: `maker`, `name`, `maturity`, `authors`, `aircraft`, `import`, `displays`, `seats`, `state`, `events`, with a blank line before `aircraft` and before each key after it.
+- The top-level keys come in this order: `maker`, `name`, `status`, `authors`, `aircraft`, `import`, `displays`, `seats`, `state`, `events`, with a blank line before `aircraft` and before each key after it.
 - An entry's fields come in the order of its table in [state entries](#state-entries) or [event entries](#event-entries), with `description` after `name`.
 - Each level indents 2 spaces.
 - A map goes on its own lines.

@@ -4,7 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::format::{Maturity, Profile};
+use crate::format::{Profile, ProfileStatus};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Index {
@@ -38,7 +38,12 @@ pub struct IndexBundle {
 pub struct Shown {
     pub maker: String,
     pub name: String,
-    pub maturity: Maturity,
+    /// Without the alias, CI's first publish after `maturity` became `status` would fail: it reads
+    /// the pages branch's index.json before adding to it, and that index names this field
+    /// `maturity`, with `experimental`, a value both keys take.
+    /// TODO: remove the alias once a publish has written index.json with `status`.
+    #[serde(alias = "maturity")]
+    pub status: ProfileStatus,
 }
 
 impl Shown {
@@ -46,7 +51,7 @@ impl Shown {
         Shown {
             maker: profile.maker.clone(),
             name: profile.name.clone(),
-            maturity: profile.maturity,
+            status: profile.status,
         }
     }
 }
@@ -131,7 +136,7 @@ mod tests {
             shown: Shown {
                 maker: "Black Square".into(),
                 name: "Baron 58P".into(),
-                maturity: Maturity::Experimental,
+                status: ProfileStatus::Partial,
             },
         }
     }
@@ -169,7 +174,7 @@ mod tests {
         index.add("aircraft/bksq-baronpro", bundle(1, "a1b2"));
         let text = String::from_utf8(index.encode()).expect("an index is text");
         assert!(text.contains(r#""maker": "Black Square""#), "{text}");
-        assert!(text.contains(r#""maturity": "experimental""#), "{text}");
+        assert!(text.contains(r#""status": "partial""#), "{text}");
         assert_eq!(Index::parse(text.as_bytes()), Some(index));
     }
 

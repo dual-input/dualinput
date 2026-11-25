@@ -5,7 +5,7 @@
 # on MSFS 2024, 2026-11-09, record/areas/sync/log.md).
 maker: Fenix
 name: A320 session check
-maturity: experimental
+status: experimental
 authors: Dual Input
 aircraft:
   variants:

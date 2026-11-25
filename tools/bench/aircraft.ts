@@ -224,7 +224,7 @@ export function writeProfiles(folder: string, { seats = true } = {}): string {
   const lines = [
     "maker: Dual Input",
     "name: Bench Plane",
-    "maturity: experimental",
+    "status: experimental",
     "authors: Dual Input",
     "aircraft:",
     "  variants:",

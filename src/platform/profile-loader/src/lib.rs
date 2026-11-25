@@ -30,7 +30,7 @@ use messages::session::{MATCH, Phase, Severity};
 use messages::sim::{MenuPage, Stage, WorldMapOutcome, WorldMapRequest};
 use messages::{hex, unhex};
 use network::{LinkUp, NetUnit};
-use profile_engine::{Index, IndexBundle, Maturity, Profile, Resolved, Shown};
+use profile_engine::{Index, IndexBundle, Profile, ProfileStatus, Resolved, Shown};
 use serde_json::json;
 use session::{
     ControlPassed, FlightChanged, Found, KeyChanged, Session, SessionEnded, SessionStarted,
@@ -266,9 +266,9 @@ impl Profiles {
         let selected = view.read::<SimAwareness>().selected.as_ref();
         ProfilesSlice {
             loaded: selected
-                .and_then(|aircraft| me.maturity_of(&aircraft.path))
-                .map(|maturity| LoadedProfile {
-                    maturity: shown(maturity),
+                .and_then(|aircraft| me.status_of(&aircraft.path))
+                .map(|status| LoadedProfile {
+                    status: shown(status),
                 }),
             supported: me
                 .published()
@@ -277,7 +277,7 @@ impl Profiles {
                     SupportedAircraft {
                         maker: b.shown.maker.clone(),
                         model: b.shown.name.clone(),
-                        maturity: shown(b.shown.maturity),
+                        status: shown(b.shown.status),
                         installed: folders.iter().any(|f| me.installed.get(f) == Some(&true)),
                         folders,
                     }
@@ -297,13 +297,13 @@ impl Profiles {
             .filter_map(|p| p.bundle_for(profile_engine::LEVEL))
     }
 
-    /// The maturity of the profile a session would take for an aircraft, by the same order as
+    /// The status of the profile a session would take for an aircraft, by the same order as
     /// the pilot flying's choice: a local bundle first.
-    fn maturity_of(&self, aircraft: &str) -> Option<Maturity> {
-        self.local.maturity_of(aircraft).or_else(|| {
+    fn status_of(&self, aircraft: &str) -> Option<ProfileStatus> {
+        self.local.status_of(aircraft).or_else(|| {
             self.published()
                 .find(|b| b.covers(aircraft))
-                .map(|b| b.shown.maturity)
+                .map(|b| b.shown.status)
         })
     }
 
@@ -696,10 +696,12 @@ fn folders_of(bundle: &IndexBundle) -> Vec<String> {
     folders
 }
 
-fn shown(maturity: Maturity) -> wire::Maturity {
-    match maturity {
-        Maturity::Stable => wire::Maturity::Stable,
-        Maturity::Experimental => wire::Maturity::Experimental,
+fn shown(status: ProfileStatus) -> wire::ProfileStatus {
+    match status {
+        ProfileStatus::Flawless => wire::ProfileStatus::Flawless,
+        ProfileStatus::Complete => wire::ProfileStatus::Complete,
+        ProfileStatus::Partial => wire::ProfileStatus::Partial,
+        ProfileStatus::Experimental => wire::ProfileStatus::Experimental,
     }
 }
 

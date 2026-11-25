@@ -73,7 +73,7 @@ impl Field {
 /// a bundle writes and a formatter puts a file in. `seats` comes last, since an airliner's profile
 /// may hold hundreds of seats (record/areas/profiles/01-format-and-delivery.md, "Layout").
 pub const LAYOUT: &[&str] = &[
-    "maker", "name", "maturity", "authors", "aircraft", "import", "displays", "state", "events",
+    "maker", "name", "status", "authors", "aircraft", "import", "displays", "state", "events",
     "seats",
 ];
 
@@ -84,14 +84,19 @@ pub(crate) const TOP: &[Field] = &[
         "Who makes the aircraft, as the EFB app's list of supported aircraft shows it",
     )
     .with_required(),
-    profile_only("name", 1, "The aircraft's model, as that list shows it").with_required(),
     profile_only(
-        "maturity",
+        "name",
         1,
-        "stable or experimental, which that list tags the aircraft with",
+        "The aircraft's model, as the EFB app's list of supported aircraft shows it",
+    )
+    .with_required(),
+    profile_only(
+        "status",
+        1,
+        "How well a shared cockpit works in the aircraft, which the EFB app's list of supported aircraft tags it with: flawless, with no known issue; complete, syncing all the aircraft allows, though its limits or rough edges remain; partial, with more the aircraft would let it sync; or experimental, for an aircraft built in a way that works against a shared cockpit",
     )
     .with_required()
-    .with_words(&["stable", "experimental"]),
+    .with_words(&["flawless", "complete", "partial", "experimental"]),
     field(
         "authors",
         1,

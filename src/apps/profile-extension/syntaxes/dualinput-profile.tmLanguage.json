@@ -161,7 +161,7 @@
       }
     },
     "word": {
-      "match": "\\G[ \\t]*(none|pilot_flying|shared|stable|experimental|true|false)(?=[ \\t]*(?:#|$))",
+      "match": "\\G[ \\t]*(none|pilot_flying|shared|flawless|complete|partial|experimental|true|false)(?=[ \\t]*(?:#|$))",
       "captures": {
         "1": { "name": "keyword.other.word.dualinput-profile" }
       }

@@ -10,8 +10,8 @@ use std::collections::BTreeMap;
 use crate::blocks::{self, Field};
 use crate::features::{self, EntryFields, Module};
 use crate::format::{
-    Aircraft, Count, EventEntry, Maturity, Owner, Pace, Profile, StateEntry, Steps, Variant, Watch,
-    Write,
+    Aircraft, Count, EventEntry, Owner, Pace, Profile, ProfileStatus, StateEntry, Steps, Variant,
+    Watch, Write,
 };
 use crate::names::{self, Allowed, Name};
 use crate::report::{Diagnostic, Place, Report};
@@ -63,7 +63,7 @@ pub(crate) fn check(files: &[File], level: u32, mode: Mode) -> (Checked, Report)
         profile: Profile {
             maker: String::new(),
             name: String::new(),
-            maturity: Maturity::Experimental,
+            status: ProfileStatus::Experimental,
             authors: None,
             aircraft: Aircraft::default(),
             state: Vec::new(),
@@ -296,13 +296,15 @@ impl Checker {
                         self.profile.name = name;
                     }
                 }
-                "maturity" => match node.str().map(|t| t.text.as_str()) {
-                    Some("stable") => self.profile.maturity = Maturity::Stable,
-                    Some("experimental") => self.profile.maturity = Maturity::Experimental,
+                "status" => match node.str().map(|t| t.text.as_str()) {
+                    Some("flawless") => self.profile.status = ProfileStatus::Flawless,
+                    Some("complete") => self.profile.status = ProfileStatus::Complete,
+                    Some("partial") => self.profile.status = ProfileStatus::Partial,
+                    Some("experimental") => self.profile.status = ProfileStatus::Experimental,
                     _ => self.error(
                         &node.at,
-                        "maturity",
-                        "`maturity` is `stable` or `experimental`",
+                        "status",
+                        "`status` is `flawless`, `complete`, `partial`, or `experimental`",
                     ),
                 },
                 "authors" => {
@@ -345,7 +347,7 @@ impl Checker {
         // The EFB app's list of supported aircraft shows every profile by these three, so a
         // profile without them would have no row to show.
         if !file.module {
-            for key in ["maker", "name", "maturity"] {
+            for key in ["maker", "name", "status"] {
                 if !entries.iter().any(|(k, _)| k.text == key) {
                     self.error(
                         &file.root.at,

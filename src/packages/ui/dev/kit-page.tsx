@@ -9,7 +9,7 @@ import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 
 import { Badge, Button, Card, CardContent, Checkbox, Choice, CodeInput, Confirm, Dialog, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
-import type { ButtonProps, ButtonSize, ButtonVariant } from "../src/index.ts"
+import type { BadgeVariant, ButtonProps, ButtonSize, ButtonVariant } from "../src/index.ts"
 
 const SCALES = [0.72, 0.884, 1, 1.056, 1.225]
 const VARIANTS: ButtonVariant[] = ["default", "secondary", "outline", "ghost", "destructive", "success", "warning", "danger"]
@@ -43,6 +43,20 @@ function State({ name, width, children }: { name: string; width?: number; childr
 
 function Row({ children }: { children: ReactNode }) {
   return <div className="flex flex-wrap items-start">{children}</div>
+}
+
+/** Each badge's look, with words the apps put in it. */
+const BADGE_LABELS: Record<BadgeVariant, string> = {
+  secondary: "Pilot flying",
+  outline: "Relay · 120ms",
+  primary: "New",
+  info: "Catching up",
+  warning: "Experimental",
+  trouble: "Sim crashed",
+  success: "Ready",
+  pearl: "Flawless",
+  soft: "Complete",
+  faint: "Partial",
 }
 
 function Buttons() {
@@ -548,9 +562,9 @@ function Surfaces() {
         </State>
       </Row>
       <Row>
-        {(["secondary", "outline", "primary", "info", "warning", "trouble", "success"] as const).map((variant) => (
+        {(["secondary", "outline", "primary", "info", "warning", "trouble", "success", "pearl", "soft", "faint"] as const).map((variant) => (
           <State key={variant} name={variant}>
-            <Badge variant={variant}>{variant === "trouble" ? "Sim crashed" : variant === "success" ? "Ready" : variant === "warning" ? "Experimental" : variant === "info" ? "Catching up" : variant === "primary" ? "New" : variant === "outline" ? "Relay · 120ms" : "Stable"}</Badge>
+            <Badge variant={variant}>{BADGE_LABELS[variant]}</Badge>
           </State>
         ))}
         <State name="With an icon">

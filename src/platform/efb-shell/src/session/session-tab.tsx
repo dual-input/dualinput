@@ -47,7 +47,7 @@ export function SessionTab({ parts }: { parts: Part[] }) {
   const session = useCoreSlice<SessionSlice>("session")
   const sim = useCoreSlice<SimSlice>("sim")
   const profiles = useCoreSlice<ProfilesSlice>("profiles")
-  const aircraft = sim?.aircraft ? { ...sim.aircraft, maturity: profiles?.loaded?.maturity ?? null } : null
+  const aircraft = sim?.aircraft ? { ...sim.aircraft, status: profiles?.loaded?.status ?? null } : null
   const held = !!session?.held
   const started = session?.preflight.phase === "ended"
   const preflight = inPreflight(session)

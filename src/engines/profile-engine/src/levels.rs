@@ -230,7 +230,7 @@ pub fn schema(level: u32, file: Schema) -> String {
         with_features(
             fields(blocks::TOP, &|f| match f.key {
                 "maker" | "name" | "authors" => json!({ "type": "string" }),
-                "maturity" => json!({ "enum": f.words }),
+                "status" => json!({ "enum": f.words }),
                 "aircraft" => aircraft.clone(),
                 "import" => text_or_texts.clone(),
                 "state" => entries(blocks::STATE_ENTRY, |m| m.state_fields, false),

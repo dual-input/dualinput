@@ -16,7 +16,7 @@ use clients::Clients;
 use kernel::{Cx, Entry, Job, JobId, TimerId};
 use messages::profiles::Pin;
 use messages::unhex;
-use profile_engine::Maturity;
+use profile_engine::ProfileStatus;
 use session::Session;
 
 use crate::{LOCAL, Profiles};
@@ -74,7 +74,7 @@ pub(crate) struct Bundle {
     pub(crate) file: String,
     pub(crate) hash: String,
     covers: Vec<String>,
-    maturity: Maturity,
+    status: ProfileStatus,
 }
 
 impl Bundle {
@@ -103,12 +103,12 @@ impl Local {
         })
     }
 
-    /// The maturity of the first local bundle, by file name, that covers the aircraft.
-    pub(crate) fn maturity_of(&self, aircraft: &str) -> Option<Maturity> {
+    /// The status of the first local bundle, by file name, that covers the aircraft.
+    pub(crate) fn status_of(&self, aircraft: &str) -> Option<ProfileStatus> {
         self.found
             .iter()
             .find(|b| b.covers(aircraft))
-            .map(|b| b.maturity)
+            .map(|b| b.status)
     }
 
     /// The file that holds a local bundle, by its hash.
@@ -221,18 +221,17 @@ fn listed(me: &mut Profiles, job: JobId, result: Result<Vec<u8>, String>, cx: &m
 }
 
 /// Runs at the edge on a local file: its hash, the folders and presets it covers, and its
-/// maturity, or why it doesn't read at this core's level.
+/// status, or why it doesn't read at this core's level.
 fn summarized(bytes: Vec<u8>) -> Result<Vec<u8>, String> {
     let profile = profile_engine::read(&bytes, profile_engine::LEVEL).map_err(|r| r.to_string())?;
-    let maturity = profile.maturity;
+    let status = profile.status;
     let covers: Vec<String> = profile
         .aircraft
         .variants
         .into_iter()
         .flat_map(|v| v.paths)
         .collect();
-    postcard::to_stdvec(&(profile_engine::hash(&bytes), covers, maturity))
-        .map_err(|e| e.to_string())
+    postcard::to_stdvec(&(profile_engine::hash(&bytes), covers, status)).map_err(|e| e.to_string())
 }
 
 fn read(me: &mut Profiles, job: JobId, result: Result<Vec<u8>, String>, cx: &mut Cx) {
@@ -240,14 +239,15 @@ fn read(me: &mut Profiles, job: JobId, result: Result<Vec<u8>, String>, cx: &mut
         return;
     };
     let summary = result.and_then(|bytes| {
-        postcard::from_bytes::<(String, Vec<String>, Maturity)>(&bytes).map_err(|e| e.to_string())
+        postcard::from_bytes::<(String, Vec<String>, ProfileStatus)>(&bytes)
+            .map_err(|e| e.to_string())
     });
     let bundle = match summary {
-        Ok((hash, covers, maturity)) => Some(Bundle {
+        Ok((hash, covers, status)) => Some(Bundle {
             file: listed.name.clone(),
             hash,
             covers,
-            maturity,
+            status,
         }),
         Err(why) => {
             tracing::warn!(

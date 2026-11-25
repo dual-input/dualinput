@@ -17,7 +17,7 @@ Decides:     The profile's two blocks, the fields of an entry, the writer API, a
 > In [the writer API](#the-writer-api), a state entry's write function may return the value its entry will read once the write lands, which the sync engine waits for, since an aircraft can round what it's given, as the 58P's heading bug read a written 1° back as 1.0107° ([profiles' format note](../profiles/01-format-and-delivery.md); user, 2026-11-17).
 
 > **Note**
-> Stage 11b's tentative decision that [the profile format gains a name, a maturity, and an entry's description](../interface/decisions.md#the-profile-format-gains-a-name-a-maturity-and-an-entrys-description) adds an optional `description` to a state entry, which the checklist shows under its name, until the apps' design confirms it (user, 2026-10-30).
+> Stage 11b's tentative decision that [the profile format gains a name, a status, and an entry's description](../interface/decisions.md#the-profile-format-gains-a-name-a-status-and-an-entrys-description) adds an optional `description` to a state entry, which the checklist shows under its name, until the apps' design confirms it (user, 2026-10-30).
 
 A profile describes an aircraft's cockpit in two blocks.
 `state:` holds the controls whose value Dual Input can read, or can track by counting the events that change it: it syncs them as values, checks that each write landed, and brings a cockpit that missed changes back to the flying machine's state.

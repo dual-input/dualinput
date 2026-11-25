@@ -24,7 +24,7 @@ const FILE = "aircraft/bksq-baronpro.yaml"
 function profile(entries: string): string {
   return `maker: Black Square
 name: Baron 58P
-maturity: experimental
+status: experimental
 authors: The bench
 aircraft:
   variants:

@@ -114,7 +114,7 @@ mod tests {
 
     use profile_build::STACK;
 
-    const BARON: &str = "maker: M\nname: A\nmaturity: stable\nauthors: Dual Input\naircraft:\n  variants:\n    press: bksq-aircraft-baronpropress\n";
+    const BARON: &str = "maker: M\nname: A\nstatus: complete\nauthors: Dual Input\naircraft:\n  variants:\n    press: bksq-aircraft-baronpropress\n";
 
     /// A folder of its own under the PC's temporary folder, empty.
     fn scratch(name: &str) -> std::path::PathBuf {

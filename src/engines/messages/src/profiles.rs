@@ -121,7 +121,7 @@ pub fn short(hash: &[u8; 32]) -> String {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "profiles/")]
 pub struct LoadedProfile {
-    pub maturity: Maturity,
+    pub status: ProfileStatus,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -129,7 +129,7 @@ pub struct LoadedProfile {
 pub struct SupportedAircraft {
     pub maker: String,
     pub model: String,
-    pub maturity: Maturity,
+    pub status: ProfileStatus,
     /// Whether a package on disk holds it. A streamed copy keeps no folder on disk, so one reads
     /// as not installed.
     pub installed: bool,
@@ -139,11 +139,13 @@ pub struct SupportedAircraft {
     pub folders: Vec<String>,
 }
 
-/// How far a profile's authors stand behind it.
+/// How well a shared cockpit works in the aircraft, as its profile's authors judge it, best first.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "profiles/")]
-pub enum Maturity {
-    Stable,
+pub enum ProfileStatus {
+    Flawless,
+    Complete,
+    Partial,
     Experimental,
 }
 

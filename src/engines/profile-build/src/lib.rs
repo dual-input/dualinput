@@ -443,7 +443,7 @@ mod tests {
     #[test]
     fn a_script_quickjs_ng_cant_parse_fails_at_its_place() {
         let profile = One(
-            "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => write(L('X'), value)\n",
+            "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => write(L('X'), value)\n",
         );
         let p = program(&source(&profile, "p.yaml").expect("loads"), LEVEL);
         let broken = Compiled {

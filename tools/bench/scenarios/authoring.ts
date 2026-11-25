@@ -36,7 +36,7 @@ const LEVELER = "write(K('AP_PITCH_LEVELER_ON'))"
 function profile(altHold = ALT_HOLD, extra = ""): string {
   return `maker: Black Square
 name: Baron 58P
-maturity: experimental
+status: experimental
 authors: The bench
 aircraft:
   variants:
@@ -131,7 +131,7 @@ ${extra}events:
 /** Another aircraft's profile, which no session of the scenario's flies. */
 const PIPER = `maker: Piper
 name: PA-24
-maturity: experimental
+status: experimental
 authors: The bench
 aircraft:
   variants:

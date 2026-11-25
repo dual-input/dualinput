@@ -496,10 +496,11 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
 ## The aircraft picker loads an aircraft through the world map's store, and only at the world map
 
-- **Decided:** home's Switch to a supported aircraft and the guide's "supported aircraft" link open a large popup over the app's window: the installed aircraft Dual Input has a profile for, as tiles with their maturity, then the rest under "Not installed", dimmed, which never load.
+- **Decided:** home's Switch to a supported aircraft and the guide's "supported aircraft" link open a large popup over the app's window: the installed aircraft Dual Input has a profile for, as tiles with their status, then the rest under "Not installed", dimmed, which never load.
   On the world map, a press on a tile loads it, the others dimming until it's done, and the popup closes with home following the new aircraft.
   In a flight the rows don't press, and the popup says to end the flight and pick on the world map.
-  Settled by the user on 2026-10-29.
+  Each status is a soft chip with an icon, which the start card shows too: Flawless in a pearl's sheen, lilac into sky, with a gem, so the rare one stands out; Complete in white with a check, and Partial dimmer with a half-filled circle, so the two rank by brightness; and Experimental in amber with a flask, apart from the start card's plain amber Not supported yet.
+  Settled by the user on 2026-10-29 and 2026-11-25.
 - **Because:** it works through the world map's store, as Go to does, with `game/aircraft/aircraftList` and `game/aircraft/configurator/setAircraftForConfigurator`, sent by the menu script, since the EFB's document can't send them ([interface log][p20]).
 - **Leaves out:**
   - Whether the aircraft list holds only owned aircraft, whose entries carry `isUsable` and rental data, and how a profile, matched by SimObjects folder and preset, finds its entry, which a sim session settles.
@@ -551,7 +552,7 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   While the session card is unfolded, the whole checklist, its title and subtitle included, shows at 50% opacity, and it comes up to full as the card folds, or at once under a pointer or keyboard focus, so it never reads as disabled.
   Settled by the user on 2026-10-30 and 2026-10-31.
 - **Because:**
-  - Dual Input's own items, the counted controls, are the PF's, and items for every pilot come only from profile authors after v1 ([the profile format's additions](#the-profile-format-gains-a-name-a-maturity-and-an-entrys-description)).
+  - Dual Input's own items, the counted controls, are the PF's, and items for every pilot come only from profile authors after v1 ([the profile format's additions](#the-profile-format-gains-a-name-a-status-and-an-entrys-description)).
   - An automatic clear on a reload could clear a pilot's checks on a signal that wasn't a reload (user, 2026-10-31).
 - **Leaves out:**
   - How a value displays, since v1's `default` is a bare number with no unit, zero padding, or switch labels.
@@ -744,12 +745,24 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
 
   Settled by the user on 2026-10-29, 2026-10-31, and 2026-11-01.
 
-## The profile format gains a name, a maturity, and an entry's description
+## The profile format gains a name, a status, and an entry's description
 
-- **Decided:** level 1 of the profile format gains `maker` and `name`, the aircraft's maker and model, apart, as the EFB app's list shows them, and `maturity`, `stable` or `experimental`, which the profile's authors set, and [stage 11b](../build/plan.md#11b-the-apps) adds them.
+- **Decided:** level 1 of the profile format gains `maker` and `name`, the aircraft's maker and model, apart, as the EFB app's list shows them, and `status`, how well a shared cockpit works in the aircraft, which the profile's authors set and that list tags the aircraft with, and [stage 11b](../build/plan.md#11b-the-apps) adds them.
+  `status` takes one of four values, best first:
+  - `flawless`: everything a crew uses syncs, with no known issue.
+  - `complete`: everything the aircraft lets sync does, and what's left is its limits or rough edges.
+  - `partial`: the profile doesn't yet sync everything the aircraft would let it.
+  - `experimental`: the aircraft is built in a way that works against a shared cockpit, as a custom flight model can.
+
+  A maintainer reviewing a profile's change checks a `flawless` claim against what crews report, and the profile authors' documentation, [stage 22e](../build/plan.md#22e-the-docs)'s, says `flawless` needs no known issue.
   A state entry gains an optional `description`, which the checklist shows under its name ([profile entries](../sync/01-profile-entries.md)).
   The `checklist:` block and the authors' notes come after v1, and the design has made room for both.
-  Settled by the user on 2026-10-26 and 2026-10-30.
+  Settled by the user on 2026-10-26, 2026-10-30, and 2026-11-25.
+- **Because:** a profile is usually as complete as its aircraft lets it be, so what differs between aircraft is how well a shared cockpit works in each, not how far along its profile is (user, 2026-11-25).
+  The key was `maturity` until then, `stable` or `experimental`, and nearly every profile that works with rough edges would have claimed `stable` ([issue 5](https://github.com/dual-input/dualinput/issues/5)).
+  `complete` measures a profile against what its aircraft allows, since a value measured against the whole cockpit would put a finished profile on a limited aircraft in `partial`, beside one barely started (user, 2026-11-25).
+  Authors' standards differ, so `complete` is a claim most can make honestly, and `flawless` admits no issue at all, for a pilot who wants a crew's best experience.
+  The key isn't `rating`, which stays free for a rating pilots may give profiles later.
 
 ## Mark the moment leaves the EFB app
 

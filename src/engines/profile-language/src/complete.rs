@@ -510,8 +510,8 @@ impl Snippet {
 /// The checker refuses an empty `state:`, so a new file's snippet writes one entry with blanks.
 pub(crate) const NEW_PROFILE: Snippet = Snippet {
     label: "new profile",
-    detail: "A profile: its maker, name, maturity, authors, one variant, and one state entry",
-    body: "maker: ${1:maker}\nname: ${2:model}\nmaturity: ${3|experimental,stable|}\nauthors: ${4:authors}\n\naircraft:\n  variants:\n    ${5:id}: ${6:folder}\n\nstate:\n  ${7:key}:\n    name: ${8:name}\n    watch: L('${9}')\n    write: L('${9}')\n",
+    detail: "A profile: its maker, name, status, authors, one variant, and one state entry",
+    body: "maker: ${1:maker}\nname: ${2:model}\nstatus: ${3|partial,complete,flawless,experimental|}\nauthors: ${4:authors}\n\naircraft:\n  variants:\n    ${5:id}: ${6:folder}\n\nstate:\n  ${7:key}:\n    name: ${8:name}\n    watch: L('${9}')\n    write: L('${9}')\n",
 };
 
 pub(crate) const NEW_MODULE: Snippet = Snippet {

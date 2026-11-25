@@ -4,7 +4,7 @@
 # html_ui/Pages/VCockpit/Instruments/L1011_COCKPIT/ENGINEER_PANEL/L1011_ENGINEER_PANEL.js).
 maker: iniBuilds
 name: L-1011 session check
-maturity: experimental
+status: experimental
 authors: Dual Input
 aircraft:
   variants:

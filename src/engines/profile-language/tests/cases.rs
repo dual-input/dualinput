@@ -73,11 +73,11 @@ fn the_58ps_outline_holds_its_sections_subsections_and_entries_by_name() {
 
 #[test]
 fn the_formatter_writes_every_rule_of_layout() {
-    let out_of_layout = "state:   \r\n    # === ELECTRICAL ===\r\n\r\n    battery:\r\n        write: {toggle: B('BAT_TOGGLE')}\r\n        watch: B('BAT')\r\n        name: \"Battery\"\r\n        only:\r\n        - press\r\n        - turbo\r\n\r\n    # Above the starter.\r\n    starter:\r\n        name: 'Starter'\r\n        watch: L('STARTER')\r\n        ignore: [K('A'), K('B')]\r\n        write: |\r\n            (value) => {\r\n              write(L('STARTER'), value)\r\n            }\r\n    # ─── Breakers ──────────\r\n    breaker:\r\n        name: Breaker\r\n        watch: L('BR')\r\n        write:\r\n            dec: K('BR_DEC')\r\n            inc: K('BR_INC')\r\n            range:\r\n            - 0\r\n            - 10\r\n            wrap: true\r\naircraft:\r\n    variants:\r\n        press: a-press\r\n        turbo: a-turbo\r\nmaturity: stable\r\nname: Model\r\nmaker: Maker";
+    let out_of_layout = "state:   \r\n    # === ELECTRICAL ===\r\n\r\n    battery:\r\n        write: {toggle: B('BAT_TOGGLE')}\r\n        watch: B('BAT')\r\n        name: \"Battery\"\r\n        only:\r\n        - press\r\n        - turbo\r\n\r\n    # Above the starter.\r\n    starter:\r\n        name: 'Starter'\r\n        watch: L('STARTER')\r\n        ignore: [K('A'), K('B')]\r\n        write: |\r\n            (value) => {\r\n              write(L('STARTER'), value)\r\n            }\r\n    # ─── Breakers ──────────\r\n    breaker:\r\n        name: Breaker\r\n        watch: L('BR')\r\n        write:\r\n            dec: K('BR_DEC')\r\n            inc: K('BR_INC')\r\n            range:\r\n            - 0\r\n            - 10\r\n            wrap: true\r\naircraft:\r\n    variants:\r\n        press: a-press\r\n        turbo: a-turbo\r\nstatus: complete\r\nname: Model\r\nmaker: Maker";
     // A heading's rule runs on to column 100.
     let in_layout = "maker: Maker
 name: Model
-maturity: stable
+status: complete
 
 aircraft:
   variants:
@@ -192,7 +192,7 @@ fn a_file_that_doesnt_parse_gets_no_edits() {
 
 const PROFILE: &str = "maker: M
 name: A
-maturity: stable
+status: complete
 
 aircraft:
   variants:
@@ -298,7 +298,7 @@ fn offered(text: &str, line: usize, module: bool) -> Vec<Completion> {
 fn completion_offers_what_each_place_takes_and_nothing_its_checker_refuses() {
     let top = "maker: M\n\n";
     let keys = labels(top, 2, false);
-    assert_eq!(keys[..3], ["name", "maturity", "authors"]);
+    assert_eq!(keys[..3], ["name", "status", "authors"]);
     assert!(!keys.contains(&"maker".to_string()));
     let module = labels("authors: X\n\n", 2, true);
     assert!(
@@ -323,8 +323,8 @@ fn completion_offers_what_each_place_takes_and_nothing_its_checker_refuses() {
     let words = |line: &str| labels(&format!("{entry}{line}"), 8, false);
     assert_eq!(words("owner: "), ["pilot_flying", "shared"]);
     assert_eq!(
-        labels("maker: M\nmaturity: ", 2, false),
-        ["stable", "experimental"]
+        labels("maker: M\nstatus: ", 2, false),
+        ["flawless", "complete", "partial", "experimental"]
     );
     assert_eq!(words("only: "), ["press", "turbo"]);
     assert_eq!(words("only: [press, "), ["press", "turbo"]);

@@ -27,7 +27,7 @@ use crate::serve::worker::{Bundle, Failure};
 /// flying owns, a counting map, an instrument, and an event, and a `displays:`.
 const PROFILE: &str = "maker: M
 name: Test
-maturity: experimental
+status: experimental
 
 aircraft:
   variants:
@@ -400,7 +400,7 @@ fn each_name_gets_its_box_on_its_line_and_a_files_boxes_go_only_when_they_change
 
 #[test]
 fn the_status_line_says_where_the_session_stands_and_unsaved_edits_show_only_with_a_crew() {
-    let other = "maker: X\nname: Other\nmaturity: experimental\n\naircraft:\n  variants:\n    x: other-aircraft\n\nstate:\n  lamp:\n    name: Lamp\n    watch: L('LAMP')\n    write: L('LAMP')\n";
+    let other = "maker: X\nname: Other\nstatus: experimental\n\naircraft:\n  variants:\n    x: other-aircraft\n\nstate:\n  lamp:\n    name: Lamp\n    watch: L('LAMP')\n    write: L('LAMP')\n";
     let files = [(FILE, PROFILE), ("aircraft/other.yaml", other)];
     let mut s = Session::start("sim-status", &files, json!({}));
     s.open(FILE, PROFILE);

@@ -27,7 +27,7 @@ fn tree(files: &[(&str, &str)]) -> Tree {
 const PROFILE: &str = "\
 maker: M
 name: A
-maturity: stable
+status: complete
 aircraft:
   variants:
     base: bksq-aircraft-baronpro
@@ -132,7 +132,7 @@ aircraft:
   variants:
     base: bksq-aircraft-baronpro
 authors: Dual Input
-maturity: stable
+status: complete
 name: A
 maker: M
 ";
@@ -179,7 +179,7 @@ fn a_variant_gets_its_own_seats_and_locations() {
 /// Each error avatars' module adds, at the line and column of what's wrong.
 #[test]
 fn each_error_avatars_adds_is_reported_at_its_place() {
-    let head = "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\n";
+    let head = "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\n";
     let entry = |rest: &str| {
         format!("{head}state:\n  x:\n    name: X\n    watch: L('X')\n    write: L('X')\n{rest}")
     };
@@ -232,7 +232,7 @@ fn a_module_holds_no_seats_or_locations() {
     let files = tree(&[
         (
             "p.yaml",
-            "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nimport: modules/m\n",
+            "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\nimport: modules/m\n",
         ),
         (
             "modules/m.yaml",

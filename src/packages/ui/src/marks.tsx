@@ -13,6 +13,12 @@ const BADGES = {
   warning: "border-transparent bg-warning/15 text-warning",
   trouble: "border-transparent bg-destructive/15 text-destructive",
   success: "border-transparent bg-success/15 text-success",
+  // A pearl's sheen, lilac into sky, for the one status meant to stand out. Its colors are its own rather than the
+  // palette's, so it's drawn for the dark palette alone, as the apps in the sim are.
+  pearl: "border-transparent bg-[linear-gradient(90deg,rgba(196,181,253,0.2),rgba(125,211,252,0.2))] text-[#e9e5ff]",
+  // A soft chip with no color of its own, at two strengths, so two neutral statuses can rank.
+  soft: "border-transparent bg-foreground/10 text-foreground",
+  faint: "border-transparent bg-foreground/5 text-muted-foreground",
 }
 
 export type BadgeVariant = keyof typeof BADGES

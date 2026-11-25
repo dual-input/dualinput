@@ -353,7 +353,7 @@ mod tests {
 
     const PROFILE: &str = "maker: M
 name: Test
-maturity: experimental
+status: experimental
 
 aircraft:
   variants:

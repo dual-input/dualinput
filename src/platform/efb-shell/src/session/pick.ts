@@ -8,7 +8,7 @@ type Named = { maker: string; model: string }
 
 /**
  * Whether two tiles are the same aircraft. The core sends its slice again whenever it changes, as when a pick loads and
- * the loaded aircraft's maturity changes with it, and each copy is new, so a tile is known by its names.
+ * the loaded aircraft's status changes with it, and each copy is new, so a tile is known by its names.
  */
 export function sameAircraft(a: Named, b: Named): boolean {
   return a.maker === b.maker && a.model === b.model

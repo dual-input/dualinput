@@ -195,7 +195,7 @@ test("the pilot flying loads the wrong aircraft, then the right one, and the pin
   t.after(() => net.stop())
   const run = new BenchRun("profiles-aircraft-change", t)
   const copy = copyProfiles(path.join(run.folder, "with-pa24"))
-  fs.writeFileSync(path.join(copy, "aircraft", "a2a-pa24.yaml"), "maker: M\nname: A\nmaturity: stable\nauthors: Dual Input\naircraft:\n  variants:\n    pa24: pa24-250\n")
+  fs.writeFileSync(path.join(copy, "aircraft", "a2a-pa24.yaml"), "maker: M\nname: A\nstatus: complete\nauthors: Dual Input\naircraft:\n  variants:\n    pa24: pa24-250\n")
   const hashes = net.profiles.publish(copy)
   const baron = hashes.get(BARON_FILE)!
   const pa24 = hashes.get("aircraft/a2a-pa24.yaml")!
@@ -358,7 +358,7 @@ test("the apps see where the pilot is, the aircraft the sim last loaded by name,
   const installed = (s: ProfilesSlice | undefined) => s?.supported.every((p) => p.installed) === true && s.supported.length > 0
 
   await watching.until(() => installed(profiles()), "the Baron's profile, installed")
-  assert.deepEqual(profiles(), { loaded: null, supported: [{ maker: "Black Square", model: "Baron 58P Professional", maturity: "Experimental", installed: true, folders: [BARON.path] }], pick_failed: 0, test: null })
+  assert.deepEqual(profiles(), { loaded: null, supported: [{ maker: "Black Square", model: "Baron 58P Professional", status: "Partial", installed: true, folders: [BARON.path] }], pick_failed: 0, test: null })
   assert.equal(sim()?.where, "main-menu")
   assert.equal(sim()?.aircraft, null)
 
@@ -367,7 +367,7 @@ test("the apps see where the pilot is, the aircraft the sim last loaded by name,
   a.core.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "aircraft-loaded", path: BARON.cfg } }] })
   const named = (want: NamedAircraft) => watching.until(() => JSON.stringify(sim()?.aircraft) === JSON.stringify(want), `the slice naming ${want.path}`)
   await named({ path: BARON.path, maker: "Black Square", model: "Baron 58P Professional", tail: "N58BS" })
-  await watching.until(() => profiles()?.loaded?.maturity === "Experimental", "the loaded aircraft's maturity")
+  await watching.until(() => profiles()?.loaded?.status === "Partial", "the loaded aircraft's status")
 
   // An `aircraft.cfg` in a `config` folder, whose token names no maker, and no profile covers it.
   a.core.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "aircraft-loaded", path: PA24.cfg } }] })
@@ -439,7 +439,7 @@ test("a start with nothing new published costs one answer of headers", { timeout
  * aircraft has none of them.
  */
 function largeProfile(): string {
-  let yaml = "maker: M\nname: A\nmaturity: stable\nauthors: Dual Input\naircraft:\n  variants:\n    press: bksq-aircraft-baronpropress\nstate:\n"
+  let yaml = "maker: M\nname: A\nstatus: complete\nauthors: Dual Input\naircraft:\n  variants:\n    press: bksq-aircraft-baronpropress\nstate:\n"
   for (let i = 0; i < 300; i++) {
     yaml += `  switch_${i}:\n    name: Switch ${i}, a control the bench made up\n    watch: L('BENCH_SWITCH_${i}')\n    write: |\n`
     yaml += `      (value) => {\n        if (value > 0) {\n          write(L('BENCH_SWITCH_${i}'), value)\n          write(H('BENCH_SWITCH_${i}_ON'))\n        } else {\n          write(L('BENCH_SWITCH_${i}'), 0)\n          write(H('BENCH_SWITCH_${i}_OFF'))\n        }\n      }\n`

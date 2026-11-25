@@ -11,7 +11,9 @@ use saphyr::Scalar;
 use sha2::{Digest, Sha256};
 
 use crate::blocks::LAYOUT;
-use crate::format::{Count, EventEntry, Maturity, Owner, Profile, StateEntry, Steps, Watch, Write};
+use crate::format::{
+    Count, EventEntry, Owner, Profile, ProfileStatus, StateEntry, Steps, Watch, Write,
+};
 use crate::names::Name;
 
 /// SHA-256 over the bytes, in lowercase hex, which Windows' `Get-FileHash` gives too, so anyone
@@ -36,11 +38,13 @@ fn block(out: &mut Out, p: &Profile, key: &str) {
     match key {
         "maker" => out.line(0, &format!("maker: {}", scalar(&p.maker))),
         "name" => out.line(0, &format!("name: {}", scalar(&p.name))),
-        "maturity" => out.line(
+        "status" => out.line(
             0,
-            match p.maturity {
-                Maturity::Stable => "maturity: stable",
-                Maturity::Experimental => "maturity: experimental",
+            match p.status {
+                ProfileStatus::Flawless => "status: flawless",
+                ProfileStatus::Complete => "status: complete",
+                ProfileStatus::Partial => "status: partial",
+                ProfileStatus::Experimental => "status: experimental",
             },
         ),
         "authors" => {

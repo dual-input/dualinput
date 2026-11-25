@@ -8,20 +8,21 @@ import { Check } from "lucide-react"
 import { useRef } from "react"
 import type { ReactNode } from "react"
 
-import type { Maturity } from "../../../../engines/messages/ts/profiles/Maturity.ts"
+import type { ProfileStatus } from "../../../../engines/messages/ts/profiles/ProfileStatus.ts"
 import type { Refused as Refusal } from "../../../../engines/messages/ts/session/Refused.ts"
 import type { NamedAircraft } from "../../../../engines/messages/ts/sim/NamedAircraft.ts"
 import { NO_DESKTOP_APP } from "../desktop-link.ts"
 import { FIGURE_MARKS } from "../figure/standing-figure.tsx"
 import { useShell } from "../part.ts"
+import { StatusBadge } from "./aircraft-picker.tsx"
 
 export type Action = "host" | "join"
 
 /** Where an attempt stands. A join is dialing once our servers have found its code and it's reaching the crew; slow, once the attempt has run past `SLOW_AFTER` in session-tab.tsx. */
 export type Status = { kind: "idle" } | { kind: "busy"; on: Action; dialing: boolean; slow: boolean } | { kind: "done"; on: Action } | { kind: "refused"; on: Action; refusal: Refusal } | { kind: "rejected"; on: Action; why: string }
 
-/** The loaded aircraft, as home names it, with its profile's maturity, or null with no profile. Any name can be missing, as a streamed copy's are. */
-export type HomeAircraft = NamedAircraft & { maturity: Maturity | null }
+/** The loaded aircraft, as home names it, with its profile's status, or null with no profile. Any name can be missing, as a streamed copy's are. */
+export type HomeAircraft = NamedAircraft & { status: ProfileStatus | null }
 
 /** A time the core gives in UTC, in the pilot's own. */
 function clockOf(utc: string): string {
@@ -121,7 +122,7 @@ export function StartSide({ aircraft, status, code, onCode, onCodeSelected, onHo
               <span className="truncate text-lg font-semibold leading-tight">{aircraft.model ?? "This aircraft"}</span>
               {aircraft.tail && <span className="text-xs text-muted-foreground">{aircraft.tail}</span>}
             </div>
-            {aircraft.maturity ? <Badge variant={aircraft.maturity === "Stable" ? "secondary" : "outline"}>{aircraft.maturity}</Badge> : <Badge variant="warning">Not supported yet</Badge>}
+            {aircraft.status ? <StatusBadge status={aircraft.status} /> : <Badge variant="warning">Not supported yet</Badge>}
           </CardContent>
           <Separator />
         </>

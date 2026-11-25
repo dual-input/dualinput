@@ -14,7 +14,7 @@ pub struct Profile {
     pub maker: String,
     /// The aircraft's model as that list shows it, such as "A220-300".
     pub name: String,
-    pub maturity: Maturity,
+    pub status: ProfileStatus,
     pub authors: Option<String>,
     pub aircraft: Aircraft,
     pub state: Vec<StateEntry>,
@@ -23,12 +23,18 @@ pub struct Profile {
     pub features: Blocks,
 }
 
-/// How far a profile's authors stand behind it, which the EFB app's list of supported aircraft
-/// tags the aircraft with.
+/// How well a shared cockpit works in the aircraft, as the profile's authors judge it, which the
+/// EFB app's list of supported aircraft tags the aircraft with. Best first.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum Maturity {
-    Stable,
+pub enum ProfileStatus {
+    /// Everything a crew uses syncs, with no known issue.
+    Flawless,
+    /// Everything the aircraft lets sync does, and what's left is its limits or rough edges.
+    Complete,
+    /// The profile doesn't yet sync everything the aircraft would let it.
+    Partial,
+    /// The way the aircraft is built works against a shared cockpit, as a custom flight model can.
     Experimental,
 }
 
@@ -226,7 +232,7 @@ mod tests {
         Profile {
             maker: "A maker".into(),
             name: "An aircraft".into(),
-            maturity: Maturity::Stable,
+            status: ProfileStatus::Complete,
             authors: None,
             aircraft: Aircraft {
                 variants: variants

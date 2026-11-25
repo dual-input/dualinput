@@ -39,7 +39,7 @@ fn with_compiler(f: impl FnOnce(&mut Compiler) + Send + 'static) {
 const PROFILE: &str = "\
 maker: M
 name: A
-maturity: stable
+status: complete
 authors: Dual Input
 aircraft:
   variants:
@@ -155,7 +155,7 @@ fn a_wrong_pace_in_a_chain_fails_the_type_check() {
 fn a_script_that_declares_a_reserved_name_fails_at_its_place() {
     let profile = |body: &str| {
         format!(
-            "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\n    b: y\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => {{\n        {body}\n      }}\n"
+            "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\n    b: y\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => {{\n        {body}\n      }}\n"
         )
     };
     // Each body, the reserved name it declares, and the column of that name, on line 14.
@@ -236,7 +236,7 @@ fn a_script_that_declares_a_reserved_name_fails_at_its_place() {
 fn a_write_function_types_what_the_sandbox_runs_and_nothing_it_lacks() {
     let profile = |body: &str| {
         format!(
-            "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => {{\n        {body}\n      }}\n"
+            "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: |\n      (value) => {{\n        {body}\n      }}\n"
         )
     };
     let fine = [

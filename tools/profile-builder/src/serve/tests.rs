@@ -28,7 +28,7 @@ const PATIENCE: Duration = Duration::from_secs(60);
 /// A profile whose one script reads `state.battery_1`.
 const PROFILE: &str = "maker: M
 name: Test
-maturity: experimental
+status: experimental
 
 aircraft:
   variants:

@@ -22,7 +22,7 @@ impl Files for Tree {
 /// A profile whose one script's line 17 holds `line`, at column 9.
 fn profile(line: &str) -> String {
     format!(
-        "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  battery_1:\n    name: Battery 1\n    watch: L('BATTERY_1')\n    write: L('BATTERY_1')\n  fuel_pump:\n    name: Fuel pump\n    watch: L('FUEL_PUMP')\n    write: |\n      (value) => {{\n        {line}\n      }}\n"
+        "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\nstate:\n  battery_1:\n    name: Battery 1\n    watch: L('BATTERY_1')\n    write: L('BATTERY_1')\n  fuel_pump:\n    name: Fuel pump\n    watch: L('FUEL_PUMP')\n    write: |\n      (value) => {{\n        {line}\n      }}\n"
     )
 }
 

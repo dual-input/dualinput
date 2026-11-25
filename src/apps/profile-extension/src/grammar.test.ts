@@ -38,7 +38,7 @@ const JAVASCRIPT = {
 
 const FIXTURE = String.raw`maker: Black Square
 name: Baron 58P Professional
-maturity: experimental
+status: experimental
 
 aircraft:
   variants:
@@ -372,7 +372,7 @@ test("values, numbers, and YAML's punctuation take their own scopes", async () =
 })
 
 test("the format's words take the keyword scope", async () => {
-  await looks("maturity: experimental", "experimental", WORD)
+  await looks("status: experimental", "experimental", WORD)
   await looks("    owner: pilot_flying", "pilot_flying", WORD)
   await looks("    write: none", "none", WORD)
   await looks("      wrap: true", "true", WORD)

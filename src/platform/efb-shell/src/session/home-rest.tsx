@@ -66,7 +66,7 @@ export function HomeRest({ page, signals, aircraft, onFigureGone }: { page: RefO
   const [picking, setPicking] = useState(false)
   const [farewell, setFarewell] = useState(false)
   const [guideGone, setGuideGone] = useState(false)
-  const supported = !!aircraft?.maturity
+  const supported = !!aircraft?.status
   const guiding = guideDone === false && !guideGone
   // Orange for a pilot who never picked a color. `FIRST_COLOR` in src/features/avatars/efb/part.tsx and `CrewCard`'s
   // color in ../setup/setup-flow.tsx name the same color, so change all three together.

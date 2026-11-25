@@ -99,7 +99,7 @@ Every list comes from the profile engine's own blocks and levels, so the editor 
 | Where | What it offers |
 | --- | --- |
 | A file's top level, or an entry | The keys and fields that aren't there yet, in [Layout](01-format-and-delivery.md#layout)'s order, each with its one-line description; a module offers only what a module takes |
-| `owner:`, `maturity:`, `wrap:` | `pilot_flying` and `shared`; `stable` and `experimental`; `true` and `false` |
+| `owner:`, `status:`, `wrap:` | `pilot_flying` and `shared`; `flawless`, `complete`, `partial`, and `experimental`; `true` and `false` |
 | `write:` | `none` and the name calls, then the [snippets](#snippets) for a toggle, a stepping write, and a write function; in an event entry, the write function is the only snippet, since an event entry's write takes no map |
 | `only:`, and a `location:` map's keys | The profile's variant IDs |
 | `import:` | The modules in `profiles/modules/`, by their paths without `.yaml` |
@@ -216,7 +216,7 @@ Each writes its fields in their table's order, as the formatter would, so a coun
 
 | Snippet | What it writes |
 | --- | --- |
-| A new profile | In an empty file in `profiles/aircraft/`: `maker`, `name`, `maturity`, `authors`, `aircraft` with one variant, and one state entry with blanks, since the checker refuses an empty `state:` |
+| A new profile | In an empty file in `profiles/aircraft/`: `maker`, `name`, `status`, `authors`, `aircraft` with one variant, and one state entry with blanks, since the checker refuses an empty `state:` |
 | A new module | In an empty file in `profiles/modules/`: `authors`, and one state entry with blanks |
 | A state entry | Its key, `name`, `watch: L('')`, and a `write:` that takes the same name as you type the watch's |
 | A watch-only entry | The same, with `write: none` |

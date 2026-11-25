@@ -3,8 +3,8 @@
 use std::collections::BTreeMap;
 
 use profile_engine::{
-    Compiled, Files, LEVEL, Maturity, Name, Owner, Severity, Watch, Write, check, program, read,
-    source, write,
+    Compiled, Files, LEVEL, Name, Owner, ProfileStatus, Severity, Watch, Write, check, program,
+    read, source, write,
 };
 
 struct Tree(BTreeMap<String, String>);
@@ -27,7 +27,7 @@ fn tree(files: &[(&str, &str)]) -> Tree {
 const BARON: &str = "\
 maker: M
 name: Black Square Baron
-maturity: experimental
+status: experimental
 authors: Dual Input
 aircraft:
   variants:
@@ -125,7 +125,7 @@ fn a_bundle_written_and_read_back_gives_the_profile_it_was_written_from() {
     let p = read(&bytes, LEVEL).unwrap_or_else(|r| panic!("{r}\n{text}"));
 
     assert_eq!(p.name, "Black Square Baron");
-    assert_eq!(p.maturity, Maturity::Experimental);
+    assert_eq!(p.status, ProfileStatus::Experimental);
     assert_eq!(p.authors.as_deref(), Some("Dual Input"));
     assert_eq!(
         p.state[0].description.as_deref(),
@@ -186,7 +186,7 @@ fn a_script_with_blank_lines_at_its_end_or_none_comes_back_the_same() {
             .collect();
         let trailing = "\n".repeat(text.len() - text.trim_end_matches('\n').len());
         let yaml = format!(
-            "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: {block}\n{body}{}",
+            "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: {block}\n{body}{}",
             if trailing.len() > 1 {
                 &trailing[1..]
             } else {
@@ -206,7 +206,7 @@ fn a_script_with_blank_lines_at_its_end_or_none_comes_back_the_same() {
 /// Each error a profile's own blocks can have, at the line and column of what's wrong.
 #[test]
 fn each_error_is_reported_at_its_place_with_its_code() {
-    let head = "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\n    b: y\n";
+    let head = "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\n    b: y\n";
     let entry = |rest: &str| format!("state:\n  x:\n    name: X\n{rest}");
     for (body, code, line, column) in [
         ("unknown: 1\n".to_string(), "unknown-block", 8, 1),
@@ -432,7 +432,7 @@ fn a_variants_path_is_written_with_slashes() {
         &source(
             &tree(&[(
                 "p.yaml",
-                "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\\y\n",
+                "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\\y\n",
             )]),
             "p.yaml",
         )
@@ -443,7 +443,7 @@ fn a_variants_path_is_written_with_slashes() {
 }
 
 #[test]
-fn a_profile_needs_a_maker_a_name_and_a_maturity_and_a_module_holds_none() {
+fn a_profile_needs_a_maker_a_name_and_a_status_and_a_module_holds_none() {
     let codes = |files: &[(&str, &str)]| -> Vec<String> {
         let report = check(&source(&tree(files), "p.yaml").expect("loads"), LEVEL);
         report.errors().map(|d| d.code.clone()).collect()
@@ -460,17 +460,17 @@ fn a_profile_needs_a_maker_a_name_and_a_maturity_and_a_module_holds_none() {
     assert_eq!(
         codes(&[(
             "p.yaml",
-            &format!("maker: M\nmaturity: beta\nname: A\n{head}")
+            &format!("maker: M\nstatus: stable\nname: A\n{head}")
         )]),
-        ["maturity"]
+        ["status"]
     );
     assert_eq!(
         codes(&[
             (
                 "p.yaml",
-                &format!("maker: M\nname: A\nmaturity: stable\nimport: modules/m\n{head}")
+                &format!("maker: M\nname: A\nstatus: complete\nimport: modules/m\n{head}")
             ),
-            ("modules/m.yaml", "maker: M\nname: M\nmaturity: stable\n"),
+            ("modules/m.yaml", "maker: M\nname: M\nstatus: complete\n"),
         ]),
         ["module-only", "module-only", "module-only"]
     );
@@ -478,7 +478,7 @@ fn a_profile_needs_a_maker_a_name_and_a_maturity_and_a_module_holds_none() {
 
 #[test]
 fn only_a_state_entry_takes_a_description() {
-    let yaml = "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nevents:\n  x:\n    name: X\n    description: An event\n    watch: K('X')\n    write: K('X')\n";
+    let yaml = "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\nevents:\n  x:\n    name: X\n    description: An event\n    watch: K('X')\n    write: K('X')\n";
     let report = check(
         &source(&tree(&[("p.yaml", yaml)]), "p.yaml").expect("loads"),
         LEVEL,
@@ -491,7 +491,7 @@ fn a_key_defined_in_a_profile_and_its_module_and_a_module_with_only_fail_in_the_
     let files = tree(&[
         (
             "p.yaml",
-            "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nimport: [modules/m]\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: L('X')\n",
+            "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\nimport: [modules/m]\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: L('X')\n",
         ),
         (
             "modules/m.yaml",
@@ -510,7 +510,7 @@ fn an_import_cycle_fails_at_the_import_that_closes_it() {
     let files = tree(&[
         (
             "p.yaml",
-            "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nimport: modules/m\n",
+            "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\nimport: modules/m\n",
         ),
         ("modules/m.yaml", "import: modules/n\n"),
         ("modules/n.yaml", "import: modules/m\n"),
@@ -521,7 +521,7 @@ fn an_import_cycle_fails_at_the_import_that_closes_it() {
 
 #[test]
 fn an_ignore_on_a_watched_variable_is_a_warning() {
-    let yaml = "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: L('X')\n  y:\n    name: Y\n    watch: L('Y')\n    write: L('Y')\n    ignore: L('X')\n";
+    let yaml = "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\nstate:\n  x:\n    name: X\n    watch: L('X')\n    write: L('X')\n  y:\n    name: Y\n    watch: L('Y')\n    write: L('Y')\n    ignore: L('X')\n";
     let report = check(
         &source(&tree(&[("p.yaml", yaml)]), "p.yaml").expect("loads"),
         LEVEL,
@@ -534,7 +534,7 @@ fn an_ignore_on_a_watched_variable_is_a_warning() {
 #[test]
 fn a_bundle_has_no_import() {
     let report = read(
-        b"maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\nimport: modules/m\n",
+        b"maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\nimport: modules/m\n",
         LEVEL,
     )
     .expect_err("an error");
@@ -602,10 +602,10 @@ fn a_modules_schema_leaves_out_what_only_a_profile_holds_and_requires_no_aircraf
     let module = parse(profile_engine::Schema::Module);
     assert_eq!(
         profile["required"],
-        serde_json::json!(["maker", "name", "maturity", "aircraft"])
+        serde_json::json!(["maker", "name", "status", "aircraft"])
     );
     assert!(module.get("required").is_none());
-    for key in ["maker", "name", "maturity", "aircraft", "seats"] {
+    for key in ["maker", "name", "status", "aircraft", "seats"] {
         assert!(profile["properties"].get(key).is_some(), "{key}");
         assert!(module["properties"].get(key).is_none(), "{key}");
     }
@@ -629,7 +629,7 @@ fn the_levels_files_name_every_field() {
     let schema = profile_engine::schema(LEVEL, profile_engine::Schema::Profile);
     for key in [
         "name",
-        "maturity",
+        "status",
         "description",
         "authors",
         "variants",
@@ -643,7 +643,7 @@ fn the_levels_files_name_every_field() {
     assert!(profile_engine::declarations(LEVEL).contains("declare function write("));
 }
 
-const HEAD: &str = "maker: M\nname: A\nmaturity: stable\naircraft:\n  variants:\n    a: x\n";
+const HEAD: &str = "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\n";
 
 /// The `quotes` errors in a profile's source, by line and column, with their messages.
 fn quotes(yaml: &str) -> Vec<(usize, usize, String)> {
@@ -829,7 +829,7 @@ fn the_tables_give_each_fields_names_words_and_whether_its_required() {
 #[test]
 fn a_bundle_using_a_field_above_its_level_fails_to_read() {
     let report = read(
-        b"maker: M\nname: A\nmaturity: stable\nauthors: X\naircraft:\n  variants:\n    a: x\n",
+        b"maker: M\nname: A\nstatus: complete\nauthors: X\naircraft:\n  variants:\n    a: x\n",
         0,
     )
     .expect_err("level 0");

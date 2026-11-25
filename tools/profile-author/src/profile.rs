@@ -232,7 +232,7 @@ impl Facts {
         let profile = profile_engine::Profile {
             maker: String::new(),
             name: String::new(),
-            maturity: profile_engine::Maturity::Experimental,
+            status: profile_engine::ProfileStatus::Experimental,
             authors: None,
             aircraft: profile_engine::Aircraft {
                 variants: self.variants.clone(),
@@ -366,7 +366,7 @@ pub(crate) mod tests {
     /// A profile with two variants, a state entry and an event entry, and comments to keep.
     pub(crate) const PROFILE: &str = "maker: Black Square
 name: Baron 58P
-maturity: experimental
+status: experimental
 authors: Dual Input # the team
 
 aircraft:

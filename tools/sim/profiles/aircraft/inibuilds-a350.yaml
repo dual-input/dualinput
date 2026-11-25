@@ -3,7 +3,7 @@
 # command every 2 frames (measured on MSFS 2024, 2026-10-05, record/areas/sync/log.md).
 maker: iniBuilds
 name: A350 session check
-maturity: experimental
+status: experimental
 authors: Dual Input
 aircraft:
   variants:

@@ -4,28 +4,53 @@
 // (record/areas/interface/decisions.md, "The aircraft picker loads an aircraft through the world map's store").
 
 import { Badge, cx, Dialog, fadeMask, NO_SCROLLBAR, showPress, Spinner, toast, useScroller } from "@dualinput/ui"
-import { Check, ChevronRight } from "lucide-react"
+import type { BadgeVariant } from "@dualinput/ui"
+import { Check, ChevronRight, CircleCheck, Contrast, FlaskConical, Gem } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
+import type { ProfileStatus } from "../../../../engines/messages/ts/profiles/ProfileStatus.ts"
 import type { SupportedAircraft } from "../../../../engines/messages/ts/profiles/SupportedAircraft.ts"
 import { inFolders, sameAircraft } from "./pick.ts"
 
 const nameOf = (aircraft: SupportedAircraft) => `${aircraft.maker} ${aircraft.model}`
 const byName = (a: SupportedAircraft, b: SupportedAircraft) => nameOf(a).localeCompare(nameOf(b))
-const maturityBadge = (aircraft: SupportedAircraft) => <Badge variant={aircraft.maturity === "Stable" ? "secondary" : "outline"}>{aircraft.maturity}</Badge>
+
+/**
+ * Flawless stands out in a pearl's sheen, since it's rare, Complete and Partial rank by brightness, and Experimental warns in
+ * amber, since the aircraft itself may misbehave with two pilots. Each carries an icon, so Complete and Partial differ
+ * at a glance, and Experimental differs from the start card's amber Not supported yet.
+ */
+const STATUS_BADGES: Record<ProfileStatus, [BadgeVariant, LucideIcon]> = {
+  Flawless: ["pearl", Gem],
+  Complete: ["soft", CircleCheck],
+  Partial: ["faint", Contrast],
+  Experimental: ["warning", FlaskConical],
+}
+
+/** How well a shared cockpit works in an aircraft, by its profile's status, as the picker and the start card tag it. */
+export function StatusBadge({ status }: { status: ProfileStatus }) {
+  const [variant, Icon] = STATUS_BADGES[status]
+  return (
+    <Badge variant={variant}>
+      <Icon />
+      {status}
+    </Badge>
+  )
+}
 
 /** How long a tile says it's loaded before the popup closes, in milliseconds. */
 const LOADED_MS = 500
 
-/** The maker over the model, as the start card names the loaded aircraft, with the maturity beside it. */
+/** The maker over the model, as the start card names the loaded aircraft, with the status beside it. */
 function Naming({ aircraft }: { aircraft: SupportedAircraft }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="truncate text-xs text-muted-foreground">{aircraft.maker}</span>
       <span className="flex min-w-0 items-center">
         <span className="mr-2 truncate font-medium">{aircraft.model}</span>
-        {maturityBadge(aircraft)}
+        <StatusBadge status={aircraft.status} />
       </span>
     </span>
   )
@@ -143,7 +168,7 @@ export function AircraftPicker({ open, onOpenChange, aircraft, canLoad, inFlight
               <span className="mr-3 truncate">
                 <span className="text-muted-foreground">{one.maker}</span> {one.model}
               </span>
-              {maturityBadge(one)}
+              <StatusBadge status={one.status} />
             </div>
           ))}
         </div>

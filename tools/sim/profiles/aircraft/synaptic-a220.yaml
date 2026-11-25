@@ -3,7 +3,7 @@
 # is a bare identifier, since the key carries the livery.
 maker: Synaptic Simulations
 name: A220 session check
-maturity: experimental
+status: experimental
 authors: Dual Input
 aircraft:
   variants:

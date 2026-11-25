@@ -40,15 +40,11 @@ export function Panel({ view, host }: { view: PanelView; host: PanelHost }) {
           <StatusLine status={status} />
         </div>
         {/* Run's island takes the height between the status island and the recorder's, where the picker's list scrolls.
-            With nothing to run or pick, as outside a flight, it isn't drawn, and the recorder keeps to the bottom. */}
-        {tool ? (
-          <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-background">
-            {runs && status.crew && view.unpinned && <Unpinned />}
-            {tool}
-          </div>
-        ) : (
-          <div className="flex-1" />
-        )}
+            With nothing to run or pick, as outside a flight, it stays empty, so the panel keeps its shape. */}
+        <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-background">
+          {runs && status.crew && view.unpinned && <Unpinned />}
+          {tool}
+        </div>
         <Recorder recorder={view.recorder} host={host} />
       </div>
     </Root>

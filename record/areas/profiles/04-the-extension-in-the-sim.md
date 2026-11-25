@@ -9,7 +9,7 @@ Decides:     What an author sees with the sim: live values on watch lines, the D
 > **Note**
 > From stage 22h, [the Dual Input panel](#the-dual-input-panel) is a surface of islands in its one webview, which [05-the-recorder](05-the-recorder.md#the-recorders-island) designs (user, 2026-11-23).
 > The status line takes an island of its own at the top, since it tells of Dual Input and the flight while Run and the picker tell of the entry under the cursor (user, 2026-11-25).
-> Run's island, holding Run or the picker, fills the height down to the recorder's island at the bottom, and holds the line "Unsaved edits run on this PC only"; with nothing to run or pick, as outside a flight, it isn't drawn.
+> Run's island, holding Run or the picker, fills the height down to the recorder's island at the bottom, and holds the line "Unsaved edits run on this PC only"; with nothing to run or pick, as outside a flight, it stays empty, so the panel keeps its shape.
 
 During a session's flight, the profile extension shows each `watch:` line's value at the end of the line, and runs one entry's write with a value the author types.
 For `displays`, it lists the cockpit's panels and outlines the one the author is on, in the sim.

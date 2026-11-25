@@ -59,14 +59,18 @@ impl Drop for CaptureThread {
 fn run(number: u16, capture: &Capture, out: &Out, stop: &AtomicBool) {
     let _ = wasapi::initialize_mta();
     let mut reported: Option<Option<String>> = None;
+    // A capture whose programs changed is stopped while its replacement, under the same number,
+    // may already have reported its own program, so a stopped thread sends nothing more: no
+    // program here, and no failure below.
     let mut report = |program: Option<String>| {
-        if reported.as_ref() != Some(&program) {
-            out.send(FromHelper::Capturing {
-                capture: number,
-                program: program.clone(),
-            });
-            reported = Some(program);
+        if stop.load(Ordering::Relaxed) || reported.as_ref() == Some(&program) {
+            return;
         }
+        out.send(FromHelper::Capturing {
+            capture: number,
+            program: program.clone(),
+        });
+        reported = Some(program);
     };
     while !stop.load(Ordering::Relaxed) {
         let Some(found) = programs::find_first(&capture.programs) else {
@@ -78,19 +82,24 @@ fn run(number: u16, capture: &Capture, out: &Out, stop: &AtomicBool) {
             sleep_unless_stopped(LOOK_EVERY, stop);
             continue;
         };
-        report(Some(found.name.clone()));
-        if let Err(error) = take(number, capture, found.process, &watched, out, stop) {
+        // The pilot sees a capture as working once the helper names its program, so `take`
+        // names it only after Windows starts streaming the program's sound: a capture Windows
+        // refuses stays unnamed, and the warning `Failed` brings is all that shows.
+        let taken = take(number, capture, found.process, &watched, out, stop, || {
+            report(Some(found.name.clone()));
+        });
+        // The program goes unnamed as soon as its capture ends, before a failure's wait, so a
+        // capture that fails mid-stream doesn't show as working until the next try.
+        report(None);
+        if stop.load(Ordering::Relaxed) {
+            break;
+        }
+        if let Err(error) = taken {
             out.send(FromHelper::Failed {
                 want: WantId::Capture(number),
                 error: format!("{} couldn't be captured: {error}", found.name),
             });
             sleep_unless_stopped(LOOK_EVERY, stop);
-        }
-        // A capture whose programs changed is stopped while its replacement, under the same
-        // number, may already have reported its own program, so a stopped thread says
-        // nothing more.
-        if !stop.load(Ordering::Relaxed) {
-            report(None);
         }
     }
 }
@@ -102,7 +111,8 @@ fn sleep_unless_stopped(how_long: Duration, stop: &AtomicBool) {
     }
 }
 
-/// Captures one process until it exits or the capture stops.
+/// Captures one process until it exits or the capture stops, and calls `started` once Windows
+/// streams its sound.
 fn take(
     number: u16,
     capture: &Capture,
@@ -110,6 +120,7 @@ fn take(
     watched: &Watched,
     out: &Out,
     stop: &AtomicBool,
+    started: impl FnOnce(),
 ) -> Result<(), String> {
     // Whether WASAPI converts a process-loopback stream to another format is unverified, so
     // the capture asks for the format our probe p02's did, 48 kHz stereo float, which got its
@@ -134,6 +145,7 @@ fn take(
     let event = client.set_get_eventhandle().map_err(|e| e.to_string())?;
     let reader = client.get_audiocaptureclient().map_err(|e| e.to_string())?;
     client.start_stream().map_err(|e| e.to_string())?;
+    started();
     let mut encoder = Encoder::new(capture.bitrate)?;
     let mut gate: Gate<Vec<f32>> = Gate::new(capture.gate_dbfs, capture.hangover_ms);
     let mut mixer = MixerLevel::new(process);

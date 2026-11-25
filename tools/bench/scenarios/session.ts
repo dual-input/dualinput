@@ -118,7 +118,9 @@ test("a host who starts before the sim runs: the joiner sees no aircraft yet, th
   assert.equal(s.pf, slice(a).me, "the host flies")
   await startSim(a)
   await load(a, BARON)
-  s = await until(b, (s) => s.preflight.aircraft?.path === BARON.path, "the session's aircraft")
+  // The pilot flying's core writes the aircraft, then the phase once the sim says the aircraft
+  // is on the ground, so the phase is read after it has moved on from no-aircraft.
+  s = await until(b, (s) => s.preflight.aircraft?.path === BARON.path && s.preflight.phase !== "no-aircraft", "the session's aircraft, with its phase")
   assert.equal(s.preflight.phase, "running")
   assert.equal(me(s)?.in_flight, false, "the joiner at the main menu is out of the flight")
 })
@@ -189,7 +191,8 @@ test("a pilot flying who loads the wrong aircraft in preflight returns to the me
   let s = await until(b, (s) => s.preflight.aircraft === null, "no aircraft again")
   assert.equal(s.pf, slice(a).me, "the pilot flying keeps control at the menu with nobody in the flight")
   await load(a, BARON)
-  s = await until(b, (s) => s.preflight.aircraft?.path === BARON.path, "the right aircraft")
+  // As in the host's first load above, the phase follows the aircraft in a write of its own.
+  s = await until(b, (s) => s.preflight.aircraft?.path === BARON.path && s.preflight.phase !== "no-aircraft", "the right aircraft, with its phase")
   assert.equal(s.preflight.phase, "running")
 })
 

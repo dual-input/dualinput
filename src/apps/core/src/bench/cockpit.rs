@@ -11,9 +11,10 @@ use cockpit_stream::{Answer, CockpitCx, CockpitSent, CockpitStream, CockpitUnit,
 use kernel::{Cx, Input, Registry, TimerId, Verdict, View};
 use messages::bench::{BenchKind, CockpitAct, EVENT, HELD, PILOT_FLYING, STEP, ToCore};
 use messages::cockpit::CockpitKind;
+use messages::profiles::PIN;
 use messages::state_sync::STATE;
 use profile_loader::Profiles;
-use session::{FlightChanged, Session, TakeControl};
+use session::{FlightChanged, KeyChanged, Session, TakeControl};
 
 use super::sim::Heard;
 
@@ -70,6 +71,11 @@ impl BenchCockpit {
         })
         .on::<FlightChanged>(|me: &mut BenchCockpit, _: &FlightChanged, cx: &mut Cx| {
             me.tell_ready(cx)
+        })
+        .on::<KeyChanged>(|me: &mut BenchCockpit, changed: &KeyChanged, cx: &mut Cx| {
+            if changed.key == PIN.number {
+                me.tell_ready(cx);
+            }
         })
         .catch_up_step(STEP, BenchCockpit::give, BenchCockpit::take);
         me.cockpit_kind(HELD, |me, d, cx| me.apply(BenchKind::Held, d, cx))
@@ -144,8 +150,11 @@ impl BenchCockpit {
         // State sync's step is ready only under a loaded profile, which the scenarios that use
         // this unit in its place have none of, so with this unit standing in, it's ready too.
         // A catch-up takes every step, and state sync's makes and ends at once with no engine.
+        // Where the session pins a profile, state sync's own step says when it's ready, since a
+        // catch-up taken in the moment before that profile loads would write none of its entries.
         if cx.read::<Profiles>().loaded().is_none() {
-            cx.cockpit().step_ready(STATE, ready);
+            let pinned = matches!(session.key(PIN), Some(Some(_)));
+            cx.cockpit().step_ready(STATE, ready && !pinned);
         }
     }
 

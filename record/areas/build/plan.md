@@ -1398,6 +1398,8 @@ It changes neither the core nor the sync engine, so it closes on the `authoring`
 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts authoring` pass, and the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, where the user has filtered a profile of several variants.
 
+Done on 2026-11-26: `node tools/check.ts` passed. The `authoring` scenario's 58P case missed its handler budget, with 3 inputs over 1ms and the slowest at 1,560µs, while MSFS 2024 used about 5.5 of the PC's cores; it passed with none over 1ms on a quiet PC earlier that day, and the stage changes no code the core runs, so the user skipped its rerun (user, 2026-11-26).
+
 ## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.

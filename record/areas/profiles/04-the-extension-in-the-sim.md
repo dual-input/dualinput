@@ -7,6 +7,9 @@ Decides:     What an author sees with the sim: live values on watch lines, the D
 ```
 
 > **Note**
+> In a profile whose variants don't cover the loaded aircraft, a name the sim refuses shows no box, since that profile names what its own aircraft has; its values still show ([profiles log](log.md#2026-11-26-a-profile-for-another-aircraft-shows-no-box-for-a-name-the-sim-refuses); user, 2026-11-26).
+
+> **Note**
 > In [the display picker](#the-display-picker), a `WasmInstrument` row ticks as any row does, with no reason beside it, since whether a WASM instrument takes a replayed press depends on how its aircraft builds it, which the profile's author tests ([profiles log](log.md#2026-11-26-a-wasminstrument-display-loads-and-ticks-like-any-other-and-its-profiles-author-tests-whether-it-syncs); user, 2026-11-26).
 > A lone WASM gauge's row writes its full key, such as `WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1`, rather than the identifier, since every WASM gauge's key starts `WasmInstrument`, so the identifier alone would opt in all of them, and a livery leaves a WASM gauge's query as it is.
 

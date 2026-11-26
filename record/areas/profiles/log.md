@@ -23,6 +23,13 @@ Changed: the profile engine drops the error `displays-wasm`, and level 1's schem
 A lone WASM gauge's row writes its full key rather than the identifier, which would opt in every WASM gauge the aircraft has, panels the sim hasn't loaded among them (user, 2026-11-26, from the change's code review).
 [01-format-and-delivery](01-format-and-delivery.md), [04-the-extension-in-the-sim](04-the-extension-in-the-sim.md), [03-v1-scope](../product/03-v1-scope.md), and [04-room-for-later](../product/04-room-for-later.md) gain a note of it, and [WASM instrument sync](../product/ideas.md#wasm-instrument-sync), the product plan's Later pick, and [stage 19](../build/plan.md#19-pointer-sync) say so.
 
+## 2026-11-26: A profile for another aircraft shows no box for a name the sim refuses
+
+The user saw "the loaded aircraft has no input event of this name" boxed at the end of a watch line in a profile whose variants don't cover the loaded aircraft, where a name only its own aircraft has is bound to fail (user, 2026-11-26).
+`serve` leaves out each error box in a profile under `profiles/aircraft/` that doesn't cover the loaded aircraft, and keeps its values and every box of a module and of the profile that covers it.
+The user's wider direction, errors as underlines rather than boxes, waits for a stage of its own.
+[04-the-extension-in-the-sim](04-the-extension-in-the-sim.md) gains a note of it.
+
 ## 2026-11-26: The hint at the end of a `watch:` line goes, since an author who wants a verdict opens the Sync log
 
 After using stage 22i's Sync log, the user judged the hint after each entry's first box, its latest step as `landed 84ms`, unnecessary: it repeats the log's verdicts on every watched line, beside the live values an author reads the line for, and an author who cares about a verdict opens the log (user, 2026-11-26).

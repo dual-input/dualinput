@@ -33,8 +33,8 @@ use super::facts::{self, EntryKind, Facts};
 use super::sync_log::SyncLogRows;
 use super::variants;
 use super::view::{
-    Body, LineBox, PickerView, Preview, Recorder, RecorderOff, Refusal, Revert, RunView, Seen,
-    ServerView, Status, Stopped, StoppedBy, Stopping, Takes, Update, action, box_text, given,
+    Body, BoxKind, LineBox, PickerView, Preview, Recorder, RecorderOff, Refusal, Revert, RunView,
+    Seen, ServerView, Status, Stopped, StoppedBy, Stopping, Takes, Update, action, box_text, given,
     reading, shown, typed,
 };
 use super::worker::{Bundle, Failure, Job};
@@ -740,7 +740,15 @@ impl Server {
                 continue;
             }
             let boxes = match (self.sim.ours(), self.sim.facts.get(&file)) {
-                (Some(slice), Some(facts)) => boxes(slice, facts),
+                (Some(slice), Some(facts)) => {
+                    let mut shown = boxes(slice, facts);
+                    // A profile for another aircraft names what that aircraft has, so the loaded
+                    // one refusing its names says nothing an author can act on.
+                    if !covers_loaded(&file, facts, slice) {
+                        shown.retain(|b| b.kind != BoxKind::Error);
+                    }
+                    shown
+                }
                 _ => Vec::new(),
             };
             if self
@@ -1269,6 +1277,22 @@ impl Server {
 /// with `aircraft:`, and so the only kind an aircraft can be added to.
 fn is_profile(file: &Path) -> bool {
     locate(file).is_some_and(|(_, rel)| rel.starts_with("aircraft/"))
+}
+
+/// Whether `file` is meant for the aircraft `slice` says is loaded: a profile whose variants cover
+/// it, or any file that isn't a profile, as a module any aircraft's profile may import.
+fn covers_loaded(file: &Path, facts: &Facts, slice: &AuthoringSlice) -> bool {
+    let Some(path) = slice
+        .status
+        .aircraft
+        .as_deref()
+        .filter(|_| is_profile(file))
+    else {
+        return true;
+    };
+    let named = facts.variants.as_ref().map_or(&[][..], |(_, v)| &v[..]);
+    let each = named.iter().map(|(id, p)| (id.as_str(), p.as_slice()));
+    profile_engine::covering(each, path).is_some()
 }
 /// The boxes of one file's watch lines, from the slice.
 fn boxes(slice: &AuthoringSlice, facts: &Facts) -> Vec<LineBox> {

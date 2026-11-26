@@ -464,6 +464,22 @@ fn each_name_gets_its_box_on_its_line_and_a_files_boxes_go_only_when_they_change
             .is_empty(),
         "the same boxes again send nothing"
     );
+    // In another aircraft, which the profile doesn't cover, its names failing say nothing, so
+    // only the values show.
+    let mut elsewhere = values.clone();
+    elsewhere.status.aircraft = Some("other-aircraft".into());
+    s.slice(&elsewhere);
+    let other = s.wait("dualInput/values", |p| p["uri"] == uri.as_str());
+    let kinds: Vec<&Value> = other["boxes"]
+        .as_array()
+        .expect("boxes")
+        .iter()
+        .map(|b| &b["kind"])
+        .collect();
+    assert!(
+        !kinds.is_empty() && !kinds.contains(&&json!("error")),
+        "{other}"
+    );
     // Another window's slice holds another window's names, and the boxes go.
     values.window = Some("another window".into());
     s.slice(&values);

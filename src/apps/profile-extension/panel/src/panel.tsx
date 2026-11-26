@@ -3,10 +3,11 @@
 // VS Code's theme (record/areas/profiles/04-the-extension-in-the-sim.md, "The Dual Input panel"). It draws from a
 // `PanelView` alone, so the extension wires it to `serve` by posting views and answering the host's calls.
 
-import { Card, Root } from "@dualinput/ui"
+import { Card, cx, Root } from "@dualinput/ui"
 import { Info, Play, SquareMousePointer } from "lucide-react"
 import type { ReactNode } from "react"
 
+import { GAP, INSET, ISLAND } from "./island.ts"
 import { Picker } from "./picker.tsx"
 import { Recorder } from "./recorder.tsx"
 import { Run } from "./run.tsx"
@@ -41,14 +42,17 @@ export function Panel({ view, host }: { view: PanelView; host: PanelHost }) {
     // stylesheet leaves a webview's body transparent (read in VS Code 1.147.0,
     // out/vs/workbench/contrib/webview/browser/pre/index.html, `_defaultStyles`) and webview.css paints nothing.
     <Root palette={view.palette} style={{ height: "100%" }}>
-      {/* Half the inset at the top, where the view's title already sets the islands apart. */}
-      <div className="flex h-full flex-col px-2 pb-2 pt-1">
-        <div className="shrink-0 rounded-2xl bg-background">
+      {/* The same inset on every side and between the islands, VS Code's own, so they sit evenly inside its card, but
+          none at the bottom: in VS Code 1.148 the side bar's webview stops about 5px above the card's inner edge, which
+          makes the bottom's gap (measured in a screenshot of VS Code 1.148.0, 2026-11-26: 4px at the sides, 9px below
+          with our inset; the rule behind it is unverified). */}
+      <div className={cx("flex h-full flex-col pb-0", INSET)}>
+        <div className={cx("shrink-0", ISLAND)}>
           <StatusLine status={status} />
         </div>
         {/* Run's island takes the height between the status island and the recorder's, where the picker's list scrolls.
             With nothing to run or pick, as outside a flight, it stays empty, so the panel keeps its shape. */}
-        <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-background">
+        <div className={cx("flex min-h-0 flex-1 flex-col overflow-hidden", GAP, ISLAND)}>
           {title}
           {runs && status.crew && view.unpinned && <Unpinned />}
           {tool}

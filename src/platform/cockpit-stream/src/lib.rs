@@ -78,8 +78,9 @@ impl Moment for PretendCaughtUp {}
 
 /// The pretend sender, from which a playback's messages arrive: one origin for the session, with
 /// a pilot ID no member holds, since a member's is a UUID v4, whose version nibble is 4, and
-/// every nibble of this one is f.
-const PRETEND: Origin = Origin {
+/// every nibble of this one is f. State sync names a row from it a playback in the Sync log
+/// (record/areas/profiles/06-the-sync-log.md, "How it reaches the view").
+pub const PRETEND: Origin = Origin {
     pilot: [0xff; 16],
     restart: 0,
 };
@@ -191,6 +192,16 @@ impl CockpitStream {
             Some(CatchUp::Asking { preflight_end, .. } | CatchUp::Taking { preflight_end, .. }) => {
                 Some(*preflight_end)
             }
+            _ => None,
+        }
+    }
+
+    /// The pilot whose catch-up this machine takes, `PRETEND`'s pilot for a playback's, which a
+    /// step's `take` reads as it runs, since the stream takes the answer before it hands each
+    /// step its payload.
+    pub fn taking_from(&self) -> Option<PilotId> {
+        match self.live.as_ref().map(|l| &l.catch_up) {
+            Some(CatchUp::Taking { from, .. }) => Some(*from),
             _ => None,
         }
     }

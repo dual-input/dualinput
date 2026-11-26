@@ -67,14 +67,14 @@ export function Run({ run, host }: { run: RunView; host: PanelHost }) {
   )
 }
 
-/** The watch's values, larger than the box after the line in the editor and in its sky on a tint of it, so the two read as one thing. */
+/** The watch's values, larger than the box after the line in the editor and in its live lime on a tint of it, so the two read as one thing. */
 function Live({ readings }: { readings: Reading[] }) {
   if (!readings.length) return <p className="mt-3 text-sm text-muted-foreground">No reading yet</p>
   return (
     <div className="mt-3 flex flex-wrap">
       {readings.map((reading) => (
         // A name the sim can't read is amber, as its box after the line is, since nothing went wrong in the sim.
-        <span key={reading.of ?? ""} className={cx("mb-1 mr-1 inline-flex max-w-full items-baseline rounded-xl px-3 py-1", reading.error ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary")}>
+        <span key={reading.of ?? ""} className={cx("mb-1 mr-1 inline-flex max-w-full items-baseline rounded-xl px-3 py-1", reading.error ? "bg-warning/10 text-warning" : "bg-live/10 text-live")}>
           {reading.of && <span className="mr-2 font-mono text-xs opacity-70">{reading.of}</span>}
           <span className={cx("min-w-0 break-words font-mono", reading.error ? "py-1 text-sm" : "text-2xl leading-9")}>{reading.value}</span>
           {reading.carried !== undefined && <span className="ml-2 whitespace-nowrap font-mono text-xs opacity-70">last {reading.carried}</span>}

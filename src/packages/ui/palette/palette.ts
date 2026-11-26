@@ -22,12 +22,13 @@ export const colors = {
   "card-foreground": "#fafafa",
   popover: "#171717",
   "popover-foreground": "#fafafa",
-  // `COLORS` in src/apps/profile-extension/src/boxes.ts and `SKY` in src/features/authoring/panel/src/outline.ts copy it, since neither can import this file, so change all three together.
+  // `SKY` in src/features/authoring/panel/src/outline.ts copies it, since it can't import this file, so change both together.
   primary: "#74d4ff",
   "primary-foreground": "#052f4a",
   secondary: "#262626",
   "secondary-foreground": "#fafafa",
   muted: "#262626",
+  // `COLORS` in src/apps/profile-extension/src/boxes.ts copies it, so change both together.
   "muted-foreground": "#a1a1a1",
   accent: "#262626",
   "accent-foreground": "#fafafa",
@@ -42,6 +43,9 @@ export const colors = {
   "destructive-foreground": "#460809",
   success: "#6fd58d",
   "success-foreground": "#052e16",
+  // A value read from the sim right now, as a box after a `watch:` line shows one; `COLORS` in
+  // src/apps/profile-extension/src/boxes.ts copies it, so change both together.
+  live: "#c5ee85",
 } as const
 
 export type ColorName = keyof typeof colors
@@ -73,24 +77,27 @@ export const lightColors: Record<ColorName, string> = {
   "card-foreground": "#0a0a0a",
   popover: "#ffffff",
   "popover-foreground": "#0a0a0a",
-  // `COLORS` in src/apps/profile-extension/src/boxes.ts copies it and `warning`, so change them together.
   primary: "#0369a1",
   "primary-foreground": "#f0f9ff",
   secondary: "#f5f5f5",
   "secondary-foreground": "#171717",
   muted: "#f5f5f5",
+  // `COLORS` in src/apps/profile-extension/src/boxes.ts copies it, `warning`, and `live`, so change them together.
   "muted-foreground": "#737373",
   accent: "#f5f5f5",
   "accent-foreground": "#171717",
   ring: "#0369a1",
   info: "#475569",
   "info-foreground": "#ffffff",
+  // `COLORS` in src/apps/profile-extension/src/boxes.ts copies it, so change both together.
   warning: "#b45309",
   "warning-foreground": "#ffffff",
   destructive: "#dc2626",
   "destructive-foreground": "#ffffff",
   success: "#15803d",
   "success-foreground": "#ffffff",
+  // `COLORS` in src/apps/profile-extension/src/boxes.ts copies it, so change both together.
+  live: "#4d7c0f",
 }
 
 /** The washes in black for the light palette, at strengths that read on white. */

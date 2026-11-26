@@ -46,6 +46,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   | Success, such as Ready | `oklch(79.2% 0.14 151.711)` | `#6fd58d` | 10.9:1 |
 
   A status chip is soft: its color at 15% behind text in its color.
+  A live value, a value read from the sim right now, takes Tailwind's lime-300 with its chroma held to 0.14 as well, `oklch(89.7% 0.14 126.665)`, which is `#c5ee85`, at 15.0:1 contrast on `neutral-950` (user, 2026-11-25).
+  A value the Sync log shows is what a step saw or wrote at its time, so it takes the profile's syntax colors instead, teal for a number (user, 2026-11-26).
   Settled by the user on 2026-10-25, and moved from Nova at 10px to Luma at 4px on 2026-10-26, on a bench of mockups in `experiments/areas/interface/bench`, which draws the user's sketch of an app's screen in each of shadcn's eight presets, nine grays, and any main color.
 - **Because:**
   - Luma takes each corner from `--radius` by a step of its own, from `--radius-sm` at 0.6 times it to `--radius-4xl` at 2.6 times, which its buttons and cards use (read in the bench's `src/index.css` and `src/presets/luma/`), so at 4px those keep corners near the 10px they had under Nova.
@@ -56,6 +58,8 @@ The apps' design in this area confirms each one, changes it, or drops it, as [st
   - Coherent GT reads hex colors but not oklch ([architecture log][p13]), so the kit takes each color as its hex.
   - Information takes a gray with a cool tint, so it stays apart from sky-300, where a blue of its own would read as a second main color, and the user found violet and purple ugly; its tint is raised from slate-300's 0.022 so it reads apart from the neutral grays too (user, 2026-10-25).
   - Tailwind's 400 steps, at chroma up to 0.209 for green, were too rough beside sky-300's 0.111, and their solid chips too strong, so the user held their chroma to 0.14 and took soft chips (user, 2026-10-25).
+  - A live value took a color of its own once sky-300 became our main color: fsc-editor drew one in blue, which there meant the sim alone.
+    Green already means a session's sync is on, so it took lime, which "has a live value feeling", at lime-300's lightness so it reads apart from the success green (user, 2026-11-25).
   - Coherent GT drew Geist's TTF, from our package and from 127.0.0.1, and drew its WOFF2 from neither ([interface log][p19]).
   - The hex values and contrasts are computed from the oklch colors.
 - **Leaves out:** whether the apps show the pilots' figure colors, and how those stay apart from the status colors; and how many of Luma's class names Tailwind 3 builds, which p17 measured for Nova's alone ([interface log][p17]).

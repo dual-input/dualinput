@@ -7,6 +7,7 @@ import { Circle, Info, Play, Square, TriangleAlert } from "lucide-react"
 import { useEffect, useState } from "react"
 import type { CSSProperties, ReactNode } from "react"
 
+import { GAP, ISLAND } from "./island.ts"
 import { TOOLTIP_DELAY } from "./run.tsx"
 import type { PanelHost, RecorderOff, RecorderView, Stopped } from "./view.ts"
 
@@ -14,7 +15,7 @@ export function Recorder({ recorder, host }: { recorder: RecorderView; host: Pan
   const { kind } = recorder
   return (
     // The island grows upward from the panel's bottom edge, so the buttons stay put as the lines above them come and go.
-    <div className="mt-2 shrink-0 rounded-2xl bg-background p-3">
+    <div className={cx("shrink-0 p-3", GAP, ISLAND)}>
       <Lines recorder={recorder} />
       <div className="flex items-center">
         <Transport label="Record" lit={kind === "recording" ? "record" : null} disabled={kind !== "empty" && kind !== "recorded"} onClick={host.record}>

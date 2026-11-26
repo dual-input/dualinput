@@ -25,14 +25,15 @@ struct Once {
 impl Engine {
     /// Writes `entry` with `given`, as a receiving machine writes an arrival, from this engine's
     /// readings and its `state`, but outside a sync: with no stamp, no conflict rule, and no wait
-    /// behind another entry's pending value. A stepping write's later steps, and a chain's later
+    /// for another entry's pending value. A stepping write's later steps, and a chain's later
     /// actions, come out of the `frame` calls after it, at their pace, and a second write of the
     /// entry cuts the first short, as a new arrival does.
     ///
-    /// It leaves what a receiving machine's write leaves, so the engine reads the write's echo as
-    /// its own: a state entry's values go pending, though no check flags them, and an event
-    /// entry's write leaves a token for the name it watches. So a stepping write started again
-    /// before its last step reads back starts from that step, not from a reading that lags it.
+    /// It leaves what a receiving machine's write leaves, so the engine takes the reading that
+    /// follows as the write's read back: a state entry's values go pending, though no check flags
+    /// them, and an event entry's write leaves a token for the name it watches. So a stepping
+    /// write started again before its last step reads back starts from that step, not from a
+    /// reading that lags it.
     ///
     /// It fails where `plan` fails, writing nothing, with the same words. What it returns is only
     /// actions. In an engine from `Engine::load_only_asked`, so is everything `frame` returns:
@@ -40,15 +41,17 @@ impl Engine {
     /// on the sync's own writes, such as a put-back that steps.
     pub fn write_once(&mut self, entry: &str, given: Given, cx: Ctx) -> Result<Vec<Out>, String> {
         let Once { slot, run, reads } = self.once(entry, given)?;
+        // A Run's write belongs to no row of the Sync log, which shows state sync's engine alone
+        // (record/areas/profiles/06-the-sync-log.md, "Run and the Sync log").
         match slot {
             Slot::State(i) => {
                 if let Some(value) = reads {
-                    self.pend(i, value, None, false);
+                    self.pend(i, value, None, false, 0);
                 }
             }
             Slot::Event(i) => {
                 if let Some(watched) = self.events.get(i).map(|e| e.entry.watch.clone()) {
-                    self.leave_token(&watched, None, cx);
+                    self.leave_token(&watched, None, cx, slot, 0);
                 }
             }
         }

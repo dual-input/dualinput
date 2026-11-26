@@ -1,8 +1,8 @@
 // Packs the profile extension, src/apps/profile-extension, as
 // target/profile-extension/dualinput-profiles-<version>.vsix: its TypeScript bundled by esbuild,
-// the Dual Input panel's webview with the kit's stylesheet and fonts, its grammar and language
-// configuration, its icon, and the profile builder, whose `serve` is the extension's language server
-// (record/areas/profiles/03-the-extension.md, "Packing and publishing").
+// the webviews of the Dual Input panel and the Sync log with the kit's stylesheet and fonts, its
+// grammar and language configuration, its icon, and the profile builder, whose `serve` is the
+// extension's language server (record/areas/profiles/03-the-extension.md, "Packing and publishing").
 
 import fs from "node:fs"
 import path from "node:path"
@@ -72,12 +72,12 @@ export async function packProfileExtension(builder: string, icon: Buffer, langua
       { path: "syntaxes/dualinput-profile.tmLanguage.json", data: read(path.join("syntaxes", "dualinput-profile.tmLanguage.json")) },
       { path: "language-configuration.json", data: read("language-configuration.json") },
       { path: "icon.png", data: icon },
-      // The manifest's `languages` entry names these two paths, and its `viewsContainers` entry
+      // The manifest's `languages` entry names these two paths, and its `viewsContainers` entries
       // the dark one, so change them together.
       { path: "icons/language-light.svg", data: Buffer.from(language.light) },
       { path: "icons/language-dark.svg", data: Buffer.from(language.dark) },
       { path: "bin/dualinput-profile-builder.exe", data: fs.readFileSync(builder) },
-      ...(await panelFiles()),
+      ...(await webviewFiles()),
     ],
     "win32-x64",
   )
@@ -85,32 +85,36 @@ export async function packProfileExtension(builder: string, icon: Buffer, langua
 }
 
 /**
- * The Dual Input panel's webview, under panel/: its script, its stylesheet, and the kit's fonts with their licenses,
- * which the stylesheet names as fonts/ beside it. The extension's webview page loads panel/panel.js and
- * panel/panel.css, and may load nothing outside panel/, which src/apps/profile-extension/src/extension.ts names too, so
- * change both together.
+ * The webviews of the Dual Input panel and the Sync log, under webviews/: a script for each, the one stylesheet both
+ * load, and the kit's fonts with their licenses, which the stylesheet names as fonts/ beside it, so the two share one
+ * copy. The extension's webview pages load webviews/panel.js, webviews/sync-log.js, and webviews/webviews.css, and may
+ * load nothing outside webviews/, which src/apps/profile-extension/src/extension.ts names too, so change both together.
  */
-async function panelFiles(): Promise<ExtensionFile[]> {
-  const panel = path.join(EXTENSION, "panel", "src")
-  // A webview runs in VS Code's own Chromium, a current one, so the script needs none of the dev pages' ES2017, which
+async function webviewFiles(): Promise<ExtensionFile[]> {
+  // A webview runs in VS Code's own Chromium, a current one, so a script needs none of the dev pages' ES2017, which
   // they keep to for Coherent GT.
-  const script = esbuild.buildSync({
-    entryPoints: [path.join(panel, "webview.tsx")],
-    outfile: "panel.js",
-    bundle: true,
-    format: "iife",
-    target: "es2022",
-    jsx: "automatic",
-    minify: true,
-    define: { "process.env.NODE_ENV": '"production"' },
-    write: false,
-    logLevel: "warning",
-  })
-  const css = await buildCss(["src/apps/profile-extension/panel/src/**/*.{ts,tsx}"])
+  const script = (entry: string) =>
+    Buffer.from(
+      esbuild.buildSync({
+        entryPoints: [path.join(EXTENSION, entry)],
+        outfile: "webview.js",
+        bundle: true,
+        format: "iife",
+        target: "es2022",
+        jsx: "automatic",
+        minify: true,
+        define: { "process.env.NODE_ENV": '"production"' },
+        write: false,
+        logLevel: "warning",
+      }).outputFiles[0]!.contents,
+    )
+  const css = await buildCss(["src/apps/profile-extension/panel/src/**/*.{ts,tsx}", "src/apps/profile-extension/sync-log/src/**/*.{ts,tsx}"])
+  const page = fs.readFileSync(path.join(EXTENSION, "panel", "src", "webview.css"), "utf8")
   const fonts = path.join(KIT, "fonts")
   return [
-    { path: "panel/panel.js", data: Buffer.from(script.outputFiles[0]!.contents) },
-    { path: "panel/panel.css", data: Buffer.from(`${css}\n${fs.readFileSync(path.join(panel, "webview.css"), "utf8")}`) },
-    ...fs.readdirSync(fonts).map((name) => ({ path: `panel/fonts/${name}`, data: fs.readFileSync(path.join(fonts, name)) })),
+    { path: "webviews/panel.js", data: script(path.join("panel", "src", "webview.tsx")) },
+    { path: "webviews/sync-log.js", data: script(path.join("sync-log", "src", "webview.tsx")) },
+    { path: "webviews/webviews.css", data: Buffer.from(`${css}\n${page}`) },
+    ...fs.readdirSync(fonts).map((name) => ({ path: `webviews/fonts/${name}`, data: fs.readFileSync(path.join(fonts, name)) })),
   ]
 }

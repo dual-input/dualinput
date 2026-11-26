@@ -4,11 +4,11 @@
 //
 //   node tools/dev.ts kit
 
-import { ArrowRightLeft, Check, Copy, Headset, Plane, PersonStanding, Settings, Trash2, TriangleAlert, Users, Volume2, X } from "lucide-react"
+import { ArrowRightLeft, Check, Copy, Headset, Plane, PersonStanding, Search, Settings, Trash2, TriangleAlert, Users, Volume2, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 
-import { Badge, Button, Card, CardContent, Checkbox, Choice, CodeInput, Confirm, Dialog, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
+import { Badge, Button, Card, CardContent, Checkbox, Choice, CodeInput, Confirm, Dialog, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
 import type { BadgeVariant, ButtonProps, ButtonSize, ButtonVariant } from "../src/index.ts"
 
 const SCALES = [0.72, 0.884, 1, 1.056, 1.225]
@@ -162,6 +162,14 @@ function Links() {
         <State name="Muted, live">
           <Link className="font-medium" tone="muted">Skip guide</Link>
         </State>
+        <State name="Plain, live">
+          <Link className="font-medium" tone="plain">battery_master</Link>
+        </State>
+        <State name="Plain, hover">
+          <Link className="font-medium" tone="plain" data-force="hover">
+            battery_master
+          </Link>
+        </State>
         <State name="Warning box's, live">
           <Link className="font-medium" tone="warning">Continue anyway</Link>
         </State>
@@ -211,6 +219,20 @@ function Fields() {
         </State>
         <State name="Disabled" width={220}>
           <Input defaultValue="James" disabled />
+        </State>
+      </Row>
+      <Row>
+        <State name="Flat, placeholder" width={220}>
+          <label className="flex items-center text-muted-foreground">
+            <Search className="mr-1.5 size-3.5 shrink-0" />
+            <Input look="flat" placeholder="Filter: battery, throttle" readOnly />
+          </label>
+        </State>
+        <State name="Flat, filled" width={220}>
+          <label className="flex items-center text-muted-foreground">
+            <Search className="mr-1.5 size-3.5 shrink-0" />
+            <Input look="flat" defaultValue="battery" readOnly className="text-foreground" />
+          </label>
         </State>
       </Row>
       <Row>
@@ -527,7 +549,7 @@ function Popups() {
 
 function Surfaces() {
   return (
-    <Section title="Card, chips, and small marks">
+    <Section title="Card, empty state, chips, and small marks">
       <Row>
         <State name="Card" width={320}>
           <Card>
@@ -558,6 +580,38 @@ function Surfaces() {
                 <Trash2 />
               </Button>
             </div>
+          </Card>
+        </State>
+        <State name="Empty, with what to do" width={320}>
+          <Card flush>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Users />
+                </EmptyMedia>
+                <EmptyTitle>No crew yet</EmptyTitle>
+                <EmptyDescription>Share the invite code, and each crew member who joins shows here.</EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button size="sm" variant="outline">
+                  <Copy />
+                  Copy invite code
+                </Button>
+              </EmptyContent>
+            </Empty>
+          </Card>
+        </State>
+        <State name="Empty, compact, for a short panel" width={320}>
+          <Card flush>
+            <Empty compact>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <ArrowRightLeft />
+                </EmptyMedia>
+                <EmptyTitle>Nothing synced yet</EmptyTitle>
+                <EmptyDescription>Fly in a session, and each change the sync engine handles shows here, step by step.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           </Card>
         </State>
       </Row>
@@ -624,6 +678,7 @@ function Type() {
               ["warning", "bg-warning"],
               ["destructive", "bg-destructive"],
               ["success", "bg-success"],
+              ["live", "bg-live"],
             ].map(([label, color]) => (
               <div key={label} className="mb-3 mr-3 w-24">
                 <div className={"h-10 rounded-xl ring-1 ring-foreground/10 " + color} />

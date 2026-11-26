@@ -480,6 +480,12 @@ impl Server {
                 Err(e) => failed(id, e),
             };
         }
+        if p.command.starts_with("dualInput.syncLog.") {
+            return match self.sync_log_command(&p.command, &p.arguments) {
+                Ok(()) => Some(Response::new_ok(id, Value::Null)),
+                Err(e) => failed(id, e),
+            };
+        }
         if p.command == "dualInput.localFolder" {
             return match self.settings.local() {
                 Ok(folder) => Some(Response::new_ok(id, folder.to_string_lossy())),

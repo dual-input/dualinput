@@ -10,7 +10,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::hash::{BuildHasher, Hasher};
 use std::path::{Path, PathBuf};
-use std::time::Instant;
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use lsp_server::{Request, RequestId};
 use lsp_types::{InitializeParams, Position};
@@ -20,6 +20,7 @@ use messages::authoring::{
 };
 use messages::backend::{Older, older};
 use messages::clients::{CORE, CoreSlice, FromClient, Hello, ToClient, component};
+use messages::state_sync::{self, SyncLog};
 use messages::tape::{self as tape, TapeOff, TapeSlice, TapeState, TapeStopped};
 use profile_language::{Pos, Workspace, closure};
 use serde::Serialize;
@@ -29,6 +30,7 @@ use super::connection::{Down, Link, Up};
 use super::convert::{Lines, path_of, uri_of};
 use super::displays;
 use super::facts::{self, EntryKind, Facts};
+use super::sync_log::SyncLogRows;
 use super::view::{
     Body, LineBox, PickerView, Preview, Recorder, RecorderOff, Refusal, Revert, RunView, Seen,
     ServerView, Status, Stopped, StoppedBy, Stopping, Takes, Update, action, box_text, given,
@@ -80,6 +82,9 @@ pub(crate) struct Sim {
     /// A count of every edit to the files, which the session's program is held against.
     edits: u64,
     program: Option<(u64, (String, String), Option<Program>)>,
+    /// The last program `program()` found, whose files a Sync log link searches once the session
+    /// ends, since the log's rows outlast it.
+    last_program: Option<Program>,
     panel: PanelState,
     /// The file the author last opened, typed in, or named in a panel's command, which the status
     /// line is about while the panel shows neither Run nor the picker.
@@ -92,6 +97,8 @@ pub(crate) struct Sim {
     apply: bool,
     /// A count of the requests it makes of the editor, which their IDs carry.
     requests: u64,
+    /// The Sync log's rows, which outlast the socket, so a core that restarts keeps them.
+    log: SyncLogRows,
 }
 
 /// A socket to the core, and the core's slice `core` once it comes.
@@ -165,6 +172,7 @@ impl Sim {
             sent: None,
             edits: 0,
             program: None,
+            last_program: None,
             panel: PanelState::Nothing,
             last_file: None,
             boxes: BTreeMap::new(),
@@ -176,6 +184,7 @@ impl Sim {
                 .unwrap_or(false),
             apply: workspace.and_then(|w| w.apply_edit).unwrap_or(false),
             requests: 0,
+            log: SyncLogRows::default(),
         }
     }
 
@@ -296,6 +305,21 @@ impl Server {
                     Ok(next) => self.sim.tape = Some(next),
                     Err(e) if self.sim.ready() => {
                         eprintln!("Dual Input's slice `tape` didn't read: {e}");
+                    }
+                    Err(_) => {}
+                }
+            }
+            Down::Heard(ToClient::Unit { unit, body }) if unit == state_sync::NAME => {
+                match serde_json::from_value::<SyncLog>(body) {
+                    Ok(log) if self.sim.ready() => {
+                        let wall = SystemTime::now()
+                            .duration_since(UNIX_EPOCH)
+                            .map_or(0, |d| u64::try_from(d.as_millis()).unwrap_or(u64::MAX));
+                        self.sim.log.heard(log, Instant::now(), wall);
+                    }
+                    Ok(_) => {}
+                    Err(e) if self.sim.ready() => {
+                        eprintln!("state sync's Sync log message didn't read: {e}");
                     }
                     Err(_) => {}
                 }
@@ -512,6 +536,9 @@ impl Server {
             return found.clone();
         }
         let found = self.find_program(&wanted.0, &wanted.1);
+        if found.is_some() {
+            self.sim.last_program.clone_from(&found);
+        }
         self.sim.program = Some((self.sim.edits, wanted, found.clone()));
         found
     }
@@ -569,6 +596,66 @@ impl Server {
         self.show_boxes();
         self.show_view();
         self.show_lenses();
+        self.show_log();
+    }
+
+    /// The Sync log's rows that changed, sent to the extension, which keeps its own copy for the
+    /// view (record/areas/profiles/06-the-sync-log.md, "What `serve` keeps").
+    fn show_log(&mut self) {
+        if let Some(update) = self.sim.log.update() {
+            let value = serde_json::to_value(&update).expect("the Sync log's rows should encode");
+            self.notify("dualInput/syncLog", value);
+        }
+    }
+
+    /// One of the Sync log's commands: Clear, and opening an entry's line from a link.
+    pub(super) fn sync_log_command(&mut self, command: &str, args: &[Value]) -> Result<(), String> {
+        match command {
+            "dualInput.syncLog.clear" => {
+                self.sim.log.clear();
+                self.show_log();
+                Ok(())
+            }
+            "dualInput.syncLog.reveal" => {
+                let key = args
+                    .first()
+                    .and_then(Value::as_str)
+                    .ok_or_else(|| format!("{command} takes an entry's key"))?;
+                self.reveal(key)
+            }
+            other => Err(format!("{other} isn't a command this server runs")),
+        }
+    }
+
+    /// Opens the line of the entry `key` in the editor, from the open files first, then from the
+    /// files of the session's profile, as Go to Definition finds an entry, or once the session
+    /// ends, from the files of the last profile a session had.
+    fn reveal(&mut self, key: &str) -> Result<(), String> {
+        let mut files: Vec<PathBuf> = self.sim.facts.keys().cloned().collect();
+        if let Some(program) = self.program().or_else(|| self.sim.last_program.clone()) {
+            files.extend(program.files);
+        }
+        for file in files {
+            let Some(text) = self.text_of(&file) else {
+                continue;
+            };
+            let Some(entry) = facts::read(&text).and_then(|f| f.entry(key).cloned()) else {
+                continue;
+            };
+            let at = Position::new(entry.line as u32, entry.column as u32);
+            self.sim.requests += 1;
+            let id = RequestId::from(format!("showDocument-{}", self.sim.requests));
+            let params = json!({
+                "uri": uri_of(&file),
+                "takeFocus": true,
+                "selection": { "start": at, "end": at },
+            });
+            self.send(Request::new(id, "window/showDocument".into(), params).into());
+            return Ok(());
+        }
+        Err(format!(
+            "no open file or file of the session's profile holds `{key}`"
+        ))
     }
 
     /// Each open file's boxes, sent when they changed.
@@ -586,7 +673,7 @@ impl Server {
                 continue;
             }
             let boxes = match (self.sim.ours(), self.sim.facts.get(&file)) {
-                (Some(slice), Some(facts)) => boxes(slice, facts),
+                (Some(slice), Some(facts)) => boxes(slice, facts, &self.sim.log),
                 _ => Vec::new(),
             };
             if self
@@ -822,6 +909,14 @@ impl Server {
         };
         let in_flight = self.sim.ours().is_some_and(|s| s.status.in_flight);
         if in_flight && self.runs() {
+            // The Sync log notes the local change state sync reads after it.
+            let preview = self
+                .sim
+                .ours()
+                .and_then(|s| s.run.as_ref())
+                .filter(|r| r.entry == key)
+                .map(|r| r.preview.clone());
+            self.sim.log.ran(&key, Instant::now(), preview.as_ref());
             self.command(command::RUN, &wire::Run { entry: key, given });
         }
     }
@@ -880,23 +975,31 @@ impl Server {
     }
 }
 
-/// The boxes of one file's watch lines, from the slice.
-fn boxes(slice: &AuthoringSlice, facts: &Facts) -> Vec<LineBox> {
+/// The boxes of one file's watch lines, from the slice, the first of each entry's with its hint,
+/// the entry's latest step in the Sync log (record/areas/profiles/06-the-sync-log.md, "The hint
+/// at the end of a line").
+fn boxes(slice: &AuthoringSlice, facts: &Facts, log: &SyncLogRows) -> Vec<LineBox> {
     // The slice comes up to 20 times a second, each time with every name the open files watch.
     let got: BTreeMap<&str, &Got> = slice
         .names
         .iter()
         .map(|n| (n.name.as_str(), &n.got))
         .collect();
+    let mut hinted = BTreeSet::new();
     facts
         .watches
         .iter()
         .filter_map(|w| {
             let (text, kind) = box_text(got.get(w.text.as_str())?, &w.name)?;
+            let hint = match hinted.insert(w.entry.as_str()) {
+                true => log.hint(&w.entry),
+                false => None,
+            };
             Some(LineBox {
                 line: w.line,
                 text,
                 kind,
+                hint,
             })
         })
         .collect()

@@ -7,7 +7,7 @@ use std::collections::VecDeque;
 use profile_engine::{Arg, Name, Pace};
 
 use crate::script::Written;
-use crate::{Action, CHECK, Ctx, Engine, Out, Planned, Slot, Value};
+use crate::{Action, CHECK, Ctx, Engine, Out, Planned, Slot, Step, Value};
 
 /// One action, sent `times` times, `pace` apart.
 #[derive(Clone, Debug)]
@@ -56,6 +56,8 @@ pub(crate) struct Run {
     pub(crate) count: Option<Count>,
     /// A token for each step's name, as a counting entry's step leaves one.
     pub(crate) tokens: bool,
+    /// The Sync log's row whose write it is.
+    pub(crate) row: u32,
 }
 
 impl Run {
@@ -70,6 +72,7 @@ impl Run {
             catch_up: false,
             count: None,
             tokens: false,
+            row: 0,
         }
     }
 
@@ -142,6 +145,19 @@ pub(crate) fn steps(
     (if n.is_finite() { n as u64 } else { 0 }, diff >= 0.0)
 }
 
+/// An action as the Sync log shows it: the name as the profile writes it, and its values.
+pub(crate) fn written_of(action: &Action) -> crate::Written {
+    let (name, values) = match action {
+        Action::Set { name, value } => (name, vec![value.clone()]),
+        Action::Key { name, values } => (name, values.iter().map(|v| Value::Number(*v)).collect()),
+        Action::Fire { name } => (name, Vec::new()),
+    };
+    crate::Written {
+        name: name.to_string(),
+        values,
+    }
+}
+
 /// The action that writes `value` into `name`, as a name on its own writes: a variable or an
 /// input event set, a `K:` event sent with the value before its own values, or where `value`
 /// marks, and an `H:` event fired.
@@ -199,16 +215,44 @@ impl Engine {
         if let Some(old) = self.runs.remove(&slot) {
             run.answers |= old.answers;
             run.catch_up |= old.catch_up;
+            self.take_over(slot, old.row, run.row, cx);
         }
         self.runs.insert(slot, run);
         self.step_run(slot, cx, out);
     }
 
-    /// Ends `slot`'s run where it stands, as one that sent its last action.
-    pub(crate) fn cut_short(&mut self, slot: Slot, cx: Ctx, out: &mut Vec<Out>) {
+    /// Ends `slot`'s run where it stands, as one that sent its last action, for `row`, the newer
+    /// row whose value stopped it.
+    pub(crate) fn cut_short(&mut self, slot: Slot, row: u32, cx: Ctx, out: &mut Vec<Out>) {
         if let Some(run) = self.runs.remove(&slot) {
+            self.take_over(slot, run.row, row, cx);
             self.ended(slot, run, cx, out);
         }
+    }
+
+    /// A newer row takes over an older row's run: the values its steps left pending, and a
+    /// counting entry's tokens, belong to the newer row from now, so a lagging reading of one is
+    /// the newer row's read back, and the older row ends `replaced`. It moves them whether the
+    /// log is on or not, so a row's steps never depend on when the log turned on.
+    fn take_over(&mut self, slot: Slot, older: u32, newer: u32, cx: Ctx) {
+        if older == newer {
+            return;
+        }
+        if let Slot::State(i) = slot
+            && let Some(s) = self.state.get_mut(i)
+        {
+            for p in s.pending.iter_mut().filter(|p| p.row == older) {
+                p.row = newer;
+            }
+        }
+        for t in self
+            .tokens
+            .iter_mut()
+            .filter(|t| t.slot == slot && t.row == older)
+        {
+            t.row = newer;
+        }
+        self.note_slot(slot, older, cx.at, || Step::Replaced);
     }
 
     /// Each run's actions that are due, and each run that ended.
@@ -221,20 +265,22 @@ impl Engine {
 
     /// Sends what's due of `slot`'s run: a chain's first action in the same call as the action
     /// before it, and each of its others its pace after the one before. `Run::planned` shows a
-    /// write's plan in this spacing, so change both together.
+    /// write's plan in this spacing, so change both together. The actions of one call are one
+    /// `writes` step of the run's row.
     fn step_run(&mut self, slot: Slot, cx: Ctx, out: &mut Vec<Out>) {
         let frame = self.frame;
-        loop {
-            let Some(run) = self.runs.get_mut(&slot) else {
-                return;
-            };
+        let logging = self.log.is_on();
+        let mut written = Vec::new();
+        let mut row = 0;
+        while let Some(run) = self.runs.get_mut(&slot) {
+            row = run.row;
             let due = match run.due {
                 Due::Now => true,
                 Due::Frame(f) => frame >= f,
                 Due::At(t) => cx.at >= t,
             };
             if !due {
-                return;
+                break;
             }
             while run.chains.front().is_some_and(|c| c.times == 0) {
                 run.chains.pop_front();
@@ -244,7 +290,7 @@ impl Engine {
                 if let Some(run) = run {
                     self.ended(slot, run, cx, out);
                 }
-                return;
+                break;
             };
             chain.times -= 1;
             let action = chain.action.clone();
@@ -266,16 +312,22 @@ impl Engine {
                 count.at = moved(*count, by);
                 let value = Value::Number(count.at);
                 if checked && let Slot::State(i) = slot {
-                    self.pend(i, value, None, flags);
+                    self.pend(i, value, None, flags, row);
                 }
             }
             if tokens {
-                self.token(&action, cx);
+                self.token(&action, cx, slot, row);
+            }
+            if logging {
+                written.push(written_of(&action));
             }
             out.push(Out::Act(action));
             if more {
-                return;
+                break;
             }
+        }
+        if !written.is_empty() {
+            self.note_slot(slot, row, cx.at, || Step::Writes { actions: written });
         }
     }
 

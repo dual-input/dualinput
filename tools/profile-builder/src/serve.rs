@@ -21,6 +21,7 @@ mod displays;
 mod facts;
 mod requests;
 mod sim;
+mod sync_log;
 #[cfg(test)]
 mod tests;
 mod view;
@@ -61,9 +62,10 @@ const PAUSE: Duration = Duration::from_millis(300);
 /// The commands the server runs through `workspace/executeCommand`, which the extension's
 /// client registers with VS Code under these IDs; the panel's go to the server from its calls.
 /// The extension registers its own under other IDs, as src/apps/profile-extension/src/
-/// extension.ts says, and `PANEL_COMMANDS` in src/apps/profile-extension/src/bridge.ts names the
-/// panel's, so change all three together.
-const COMMANDS: [&str; 15] = [
+/// extension.ts says, `PANEL_COMMANDS` in src/apps/profile-extension/src/bridge.ts names the
+/// panel's, and `SYNC_LOG_COMMANDS` in src/apps/profile-extension/src/sync-log.ts the Sync log's,
+/// so change all four together.
+const COMMANDS: [&str; 17] = [
     "dualInput.build",
     "dualInput.removeLocalBundle",
     "dualInput.importers",
@@ -79,6 +81,8 @@ const COMMANDS: [&str; 15] = [
     "dualInput.panel.record",
     "dualInput.panel.stop",
     "dualInput.panel.play",
+    "dualInput.syncLog.clear",
+    "dualInput.syncLog.reveal",
 ];
 
 pub(crate) fn serve() -> Result<(), String> {

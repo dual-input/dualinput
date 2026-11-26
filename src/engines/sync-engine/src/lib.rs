@@ -1,6 +1,6 @@
 //! The sync engine: for one loaded profile, what each entry watches, how to write it, whether a
-//! reading is this machine's own change or the echo of a write, which of two changes wins, and
-//! the state a catch-up hands over (record/areas/sync/05-units.md, "The sync engine").
+//! reading is a local change or the read back of a write, which of two changes wins, and the
+//! state a catch-up hands over (record/areas/sync/05-units.md, "The sync engine").
 //!
 //! It does no I/O and reads no clock. Each call takes the time and the roles in `Ctx`, and the
 //! engine answers with `Out`s, which state sync, the feature that joins it to the sim and the
@@ -18,14 +18,16 @@ use std::collections::{BTreeMap, VecDeque};
 
 pub use messages::cockpit::{Origin, VectorClock};
 pub use messages::session::Control;
-pub use messages::sync::{CatchUpEntry, CatchUpState, Stamp, Value};
+pub use messages::sync::{
+    CatchUpEntry, CatchUpState, LogStep, Stamp, Step, Stopping, Value, Withdrawal, Written,
+};
 pub use profile_engine::{Name, Pace, Resolved};
 pub use sandbox::Sandbox;
 
 use crate::events::EventSlot;
 use crate::runs::Run;
 use crate::script::Script;
-use crate::state::{Held, StateSlot};
+use crate::state::{StateSlot, Waiting};
 
 /// A value still pending this long after its write, or after a stepping write's last step, is
 /// flagged. A profile watches the switch it writes, which shows a write within a few frames, as
@@ -33,7 +35,9 @@ use crate::state::{Held, StateSlot};
 /// which its panel module reads every 250ms, so 1.5s leaves a wide margin (measured on MSFS
 /// 2024, 2026-11-09, record/areas/sync/log.md, "Stage 14's session in the sim passed in four
 /// aircraft, and no aircraft took an H: event our module fired"). State sync waits as long
-/// after a load before its catch-up step can give, for every watch's first reading.
+/// after a load before its catch-up step can give, for every watch's first reading, and the
+/// profile extension's `serve` notes a local change this long after a Run with it (`CHECK` in
+/// tools/profile-builder/src/serve/sync_log.rs), so change both together.
 pub const CHECK: u64 = 1_500_000;
 /// A token, or an `ignore`, that no occurrence uses within this long expires, since an aircraft
 /// that masks an event never reports it, and the token would swallow the pilot's next press
@@ -53,7 +57,7 @@ pub struct Ctx {
     pub me: Origin,
     /// The control value, which names the pilot flying.
     pub control: Control,
-    /// This machine's own catch-up runs, so its own changes are put back, not sent.
+    /// This machine's own catch-up runs, so its local changes are put back, not sent.
     pub catching_up: bool,
     /// Preflight has ended, before which the engine reads and keeps its order, and sends and
     /// puts back nothing.
@@ -120,7 +124,8 @@ pub enum Seen {
         watch: usize,
         value: Option<f64>,
     },
-    /// The sim refused the read, so the entry gets no reading, and a write held for one drops.
+    /// The sim refused the read, so the entry gets no reading, and a write waiting for its first
+    /// reading drops.
     Refused {
         watch: usize,
     },
@@ -138,7 +143,7 @@ pub enum Arrived {
 pub enum Applied {
     Done,
     Skipped,
-    /// Its write takes frames, or waits behind another entry's, and `Out::Stepped` says when
+    /// Its write takes frames, or waits for another entry's, and `Out::Stepped` says when
     /// its last step went.
     Stepping,
 }
@@ -164,7 +169,7 @@ pub enum Out {
         name: String,
         why: Why,
     },
-    /// The entry's stepping write sent its last step, or its held write went, so the arrival
+    /// The entry's stepping write sent its last step, or its waiting write went, so the arrival
     /// that started it counts as applied.
     Stepped(String),
     /// Every catch-up write is made, a stepping write's last step included.
@@ -255,6 +260,43 @@ pub enum Why {
     Compile(String),
 }
 
+/// The engine's log of its decisions, for the profile extension's Sync log, which holds steps only
+/// while it's on.
+#[derive(Debug, Default)]
+pub(crate) struct Log(Option<Vec<LogStep>>);
+
+impl Log {
+    fn on(&mut self, on: bool) {
+        match (on, self.0.is_some()) {
+            (true, false) => self.0 = Some(Vec::new()),
+            (false, true) => self.0 = None,
+            _ => {}
+        }
+    }
+
+    fn take(&mut self) -> Vec<LogStep> {
+        self.0.as_mut().map(std::mem::take).unwrap_or_default()
+    }
+
+    /// Logs a step for `row`, building it only while the log is on.
+    pub(crate) fn note(&mut self, row: u32, entry: &str, at: u64, step: impl FnOnce() -> Step) {
+        if let Some(steps) = self.0.as_mut() {
+            steps.push(LogStep {
+                row,
+                at,
+                entry: entry.to_string(),
+                step: step(),
+            });
+        }
+    }
+
+    /// Whether the log is on, for a step whose values take work to gather.
+    #[inline(always)]
+    pub(crate) fn is_on(&self) -> bool {
+        self.0.is_some()
+    }
+}
+
 /// An entry, by its block and its place there.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) enum Slot {
@@ -296,8 +338,9 @@ pub struct Engine {
     pub(crate) pace: Pace,
     /// The write in progress for each entry that has one.
     pub(crate) runs: BTreeMap<Slot, Run>,
-    /// Writes held behind other entries' pending writes, in the order they came.
-    pub(crate) held: VecDeque<Held>,
+    /// Writes waiting for other writes or other entries' pending values, in the order they
+    /// came.
+    pub(crate) waiting: VecDeque<Waiting>,
     pub(crate) tokens: Vec<events::Token>,
     pub(crate) ignores: Vec<events::Token>,
     pub(crate) reports: Vec<events::Report>,
@@ -310,6 +353,9 @@ pub struct Engine {
     pub(crate) catch_up: Option<CatchUpRun>,
     /// It runs only the writes it's asked for, as `load_only_asked` says.
     pub(crate) only_asked: bool,
+    /// The last row's number in this load, which counts whether the log is on or not.
+    pub(crate) rows: u32,
+    pub(crate) log: Log,
     /// Last of the fields, since its runtime has to outlive every function it compiled.
     pub(crate) script: Script,
 }
@@ -346,7 +392,7 @@ impl Engine {
             roles: Vec::new(),
             pace: profile.pace.unwrap_or(Pace::Frames(1)),
             runs: BTreeMap::new(),
-            held: VecDeque::new(),
+            waiting: VecDeque::new(),
             tokens: Vec::new(),
             ignores: Vec::new(),
             reports: Vec::new(),
@@ -357,6 +403,8 @@ impl Engine {
             settled: false,
             catch_up: None,
             only_asked,
+            rows: 0,
+            log: Log::default(),
             script: Script::new(sandbox),
         };
         let mut out = Vec::new();
@@ -425,7 +473,7 @@ impl Engine {
             },
             Seen::Refused { watch } => {
                 if let Some(Role::Value(i)) = self.roles.get(watch).copied() {
-                    self.refused(i, &mut out);
+                    self.refused(i, cx.at);
                 }
             }
         }
@@ -459,8 +507,7 @@ impl Engine {
         let mut out = Vec::new();
         self.frame += 1;
         self.advance_runs(cx, &mut out);
-        self.tokens.retain(|t| t.until > cx.at);
-        self.ignores.retain(|t| t.until > cx.at);
+        self.expire(cx);
         self.reports
             .retain(|r| cx.at.saturating_sub(r.at) <= events::DOUBLE_FIRE_MOST);
         self.check(cx, &mut out);
@@ -479,10 +526,68 @@ impl Engine {
         out
     }
 
-    /// The stream sent this machine's change to `entry` under `stamp`.
-    pub fn sent(&mut self, entry: &str, stamp: Stamp) {
+    /// The stream sent this machine's change to `entry` under `stamp`, at `at`.
+    pub fn sent(&mut self, entry: &str, stamp: Stamp, at: u64) {
         if let Some(Slot::State(i)) = self.keys.get(entry).copied() {
-            self.state_sent(i, stamp);
+            self.state_sent(i, stamp, at);
+        }
+    }
+
+    /// Turns the log on or off. An engine loads with it off, and while it's off, each decision
+    /// costs one check, since the engine is the core's hot path, run for every reading in a
+    /// flight (record/areas/profiles/06-the-sync-log.md, "What the engine logs").
+    pub fn keep_log(&mut self, on: bool) {
+        self.log.on(on);
+    }
+
+    /// The steps logged since the last call, in the order the engine took them.
+    pub fn take_log(&mut self) -> Vec<LogStep> {
+        self.log.take()
+    }
+
+    /// A new row's number. Rows count whether the log is on or not, so a row's number never
+    /// depends on when the log turned on, which a replay that keeps the log from the load needs
+    /// to send the bytes a live run sent.
+    pub(crate) fn row(&mut self) -> u32 {
+        self.rows += 1;
+        self.rows
+    }
+
+    /// Logs a step of `row` for the state entry `i`. The check that the log is on inlines into the
+    /// branch that calls it, and only while it's on is the step built and handed to `logged`,
+    /// which looks up the entry's key and keeps the step, so a branch costs one check while the
+    /// log is off.
+    #[inline(always)]
+    pub(crate) fn note_state(&mut self, i: usize, row: u32, at: u64, step: impl FnOnce() -> Step) {
+        if self.log.is_on() {
+            self.logged(Slot::State(i), row, at, step());
+        }
+    }
+
+    /// Logs a step of `row` for the event entry `i`, as `note_state` does.
+    #[inline(always)]
+    pub(crate) fn note_event(&mut self, i: usize, row: u32, at: u64, step: impl FnOnce() -> Step) {
+        if self.log.is_on() {
+            self.logged(Slot::Event(i), row, at, step());
+        }
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn logged(&mut self, slot: Slot, row: u32, at: u64, step: Step) {
+        let key = match slot {
+            Slot::State(i) => self.state.get(i).map(|s| &s.entry.key),
+            Slot::Event(i) => self.events.get(i).map(|e| &e.entry.key),
+        };
+        if let Some(key) = key {
+            self.log.note(row, key, at, || step);
+        }
+    }
+
+    #[inline(always)]
+    pub(crate) fn note_slot(&mut self, slot: Slot, row: u32, at: u64, step: impl FnOnce() -> Step) {
+        if self.log.is_on() {
+            self.logged(slot, row, at, step());
         }
     }
 

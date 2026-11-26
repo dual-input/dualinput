@@ -793,6 +793,34 @@ fn a_new_socket_gets_the_last_open_with_its_bundle_and_the_last_panel_again() {
     assert_eq!(s.command("authoring.panel", |_| true), panel);
 }
 
+#[test]
+fn a_sync_log_link_opens_its_entry_in_a_closed_file_after_the_session_ends() {
+    let (mut s, window) = connected("sim-reveal");
+    s.slice(&slice(&window, flying()));
+    s.view(|v| v["status"]["runs"] == true);
+    // The views so far go, so the no-session view below is the ended session's.
+    s.gather("dualInput/panel", Duration::ZERO);
+    let uri = s.uri(FILE);
+    s.notify(
+        "textDocument/didClose",
+        json!({ "textDocument": { "uri": uri } }),
+    );
+    let mut ended = flying();
+    ended.session = false;
+    ended.in_flight = false;
+    ended.profile = None;
+    s.slice(&slice(&window, ended));
+    s.view(|v| v["status"]["kind"] == "no-session");
+    s.execute("dualInput.syncLog.reveal", json!(["throttle"]))
+        .expect("opens");
+    let shown = s.asked_for("window/showDocument");
+    assert_eq!(shown["uri"], uri.as_str());
+    assert_eq!(
+        shown["selection"]["start"]["line"],
+        json!(line_of(PROFILE, "  throttle:"))
+    );
+}
+
 /// Views built from each state the panel shows, written as a TypeScript file whose every view
 /// `satisfies` the extension's `ServerView`, so `tsc`, which tools/check.ts runs on the
 /// extension, fails when one of these types and view.ts's part.
@@ -1076,9 +1104,13 @@ fn the_views_serve_sends_are_the_extensions_types() {
     let mut out = String::from(
         "// Written by the test `the_views_serve_sends_are_the_extensions_types` in\n\
          // tools/profile-builder/src/serve/tests/sim.rs, from views `serve` sends in its `dualInput/panel`,\n\
-         // so tsc checks that each is a `ServerView` as panel/src/view.ts writes one. cargo test writes it\n\
-         // again, so edit the test, not this file.\n\
+         // so tsc checks that each is a `ServerView` as panel/src/view.ts writes one, and from the Sync log's\n\
+         // `dualInput/syncLog` and the boxes' hints in `dualInput/values`, with every step the engine logs,\n\
+         // so tsc checks each against sync-log/src/view.ts and boxes.ts, and each word against words.ts.\n\
+         // cargo test writes it again, so edit the test, not this file.\n\
          \n\
+         import type { Update } from \"../sync-log/src/view.ts\"\n\
+         import type { Values } from \"./boxes.ts\"\n\
          import type { ServerView } from \"./bridge.ts\"\n\
          \n\
          export const VIEWS = {\n",
@@ -1120,7 +1152,170 @@ fn the_views_serve_sends_are_the_extensions_types() {
         recorders.get(recorders.len() - 5..),
         Some(&["recording", "recorded", "putting-back", "playing", "off"].map(|k| json!(k))[..])
     );
+    let (log, boxes) = sync_log_views();
+    let encode = |value: &Value| serde_json::to_string_pretty(value).expect("encodes");
+    out.push_str(&format!(
+        "\nexport const SYNC_LOG = {} satisfies Update\n",
+        encode(&log)
+    ));
+    out.push_str(&format!(
+        "\nexport const BOXES = {} satisfies Values\n",
+        encode(&boxes)
+    ));
     let file = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../src/apps/profile-extension/src/serve-views.test.ts");
     std::fs::write(file, out).expect("the extension's folder should be writable");
+}
+
+/// The Sync log's `dualInput/syncLog` with a row for each step the engine logs, every cause and
+/// both notes among them, and a file's boxes in `dualInput/values` with each row's verdict as a
+/// hint, so the extension's types are checked against every word `serve` sends.
+fn sync_log_views() -> (Value, Value) {
+    use messages::state_sync::{Source, SyncLog};
+    use messages::sync::{LogStep, Step, Stopping as Stop, Value as Synced, Withdrawal, Written};
+
+    use crate::serve::sync_log::SyncLogRows;
+    use crate::serve::view::{BoxKind, LineBox};
+
+    let one = || Synced::Number(1.0);
+    let failed = |error: &str| error.to_string();
+    // A row for each step that follows a row's cause, each after a crewmate's change.
+    let steps = vec![
+        Step::Sent,
+        Step::Replaced,
+        Step::Withdrawn {
+            why: Withdrawal::Lost,
+        },
+        Step::Withdrawn {
+            why: Withdrawal::Undone,
+        },
+        Step::NotSentDuringPreflight,
+        Step::PutBack { value: one() },
+        Step::PutBackCarriesOn,
+        Step::MatchesSyncedValue,
+        Step::NotSent,
+        Step::TooLarge { bytes: 5_000 },
+        Step::Stopped { why: Stop::Driven },
+        Step::Stopped {
+            why: Stop::Limit {
+                error: failed("the write function ran past 100ms"),
+            },
+        },
+        Step::Stopped {
+            why: Stop::Compile {
+                error: failed("Unexpected token"),
+            },
+        },
+        Step::ReportedTwice,
+        Step::Ignored {
+            event: "K('TOGGLE_FLIGHT_DIRECTOR')".into(),
+        },
+        Step::Lost,
+        Step::Won,
+        Step::Compared,
+        Step::Matches,
+        Step::Differs { reading: None },
+        Step::AwaitingReading,
+        Step::FirstReading { value: one() },
+        Step::WaitsFor {
+            ahead: vec!["battery".into()],
+        },
+        Step::NowReads { value: one() },
+        Step::AlreadyMatches,
+        Step::Writes {
+            actions: vec![Written {
+                name: "K('AP_MASTER')".into(),
+                values: vec![one()],
+            }],
+        },
+        Step::FunctionFailed {
+            error: failed("ReferenceError: valu is not defined"),
+        },
+        Step::Pending { value: one() },
+        Step::ReadBack {
+            value: one(),
+            landed: false,
+        },
+        Step::ReadBack {
+            value: one(),
+            landed: true,
+        },
+        Step::NeverLanded { reading: None },
+        Step::WarningSkipped,
+        Step::TokenUsed,
+        Step::TokenExpired,
+        Step::IgnoreExpired {
+            event: "K('TOGGLE_FLIGHT_DIRECTOR')".into(),
+        },
+        Step::NoValue,
+        Step::DroppedRefused,
+        Step::ShadowRestored { value: one() },
+        Step::SkippedStopped,
+    ];
+    let step = |row: u32, entry: &str, step: Step| LogStep {
+        row,
+        at: u64::from(row) * 1_000,
+        entry: entry.into(),
+        step,
+    };
+    let entry = |row: u32| format!("entry_{row}");
+    let mut arrived = Vec::new();
+    let mut row = 0;
+    for followed in steps {
+        row += 1;
+        arrived.push(step(row, &entry(row), Step::Arrived { value: Some(one()) }));
+        arrived.push(step(row, &entry(row), followed));
+    }
+    let (local, caught, passed) = (row + 1, row + 2, row + 3);
+    let mut rows = SyncLogRows::default();
+    let now = Instant::now();
+    rows.ran(&entry(local), now, None);
+    let log = |load, from, steps| SyncLog { load, from, steps };
+    rows.heard(log(1, Some(Source::Member("Ana".into())), arrived), now, 0);
+    let cause = |row, step: Step| {
+        vec![LogStep {
+            row,
+            at: 0,
+            entry: entry(row),
+            step,
+        }]
+    };
+    let local_change = Step::LocalChange { value: Some(one()) };
+    rows.heard(log(1, None, cause(local, local_change)), now, 0);
+    let catch_up = Step::CaughtUp { value: one() };
+    rows.heard(
+        log(1, Some(Source::Playback), cause(caught, catch_up)),
+        now,
+        0,
+    );
+    let control = Step::ControlPassed { value: one() };
+    rows.heard(log(1, None, cause(passed, control)), now, 0);
+    let boxes: Vec<LineBox> = (1..=passed)
+        .enumerate()
+        .map(|(line, row)| LineBox {
+            line,
+            text: "1".into(),
+            kind: BoxKind::Value,
+            hint: rows.hint(&entry(row)),
+        })
+        .collect();
+    assert!(
+        boxes.iter().all(|b| b.hint.is_some()),
+        "every row's entry has its hint"
+    );
+    // A newer load's step notes each older row still pending or waiting as unloaded.
+    let newer = vec![step(1, "battery", Step::LocalChange { value: None })];
+    rows.heard(log(2, None, newer), now, 0);
+    let update = rows.update().expect("rows");
+    let encoded = serde_json::to_value(&update).expect("encodes");
+    let notes: Vec<&Value> = encoded["rows"]
+        .as_array()
+        .expect("rows")
+        .iter()
+        .flat_map(|r| r["notes"].as_array().expect("notes"))
+        .map(|n| &n["kind"])
+        .collect();
+    assert!(notes.contains(&&json!("ran")) && notes.contains(&&json!("unloaded")));
+    let values = json!({ "uri": "file:///c%3A/profiles/aircraft/test.yaml", "boxes": boxes });
+    (encoded, values)
 }

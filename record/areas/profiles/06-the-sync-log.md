@@ -6,6 +6,26 @@ Depends on:  04-the-extension-in-the-sim.md, 05-the-recorder.md, ../sync/05-unit
 Decides:     What the sync engine logs, and that it costs nothing while nobody watches; how state sync sends the log to the profile extension; the rows and their steps; the words, and the five renames that give the code and the sync docs the same ones; the Sync log view, the hint at the end of a line, and the definitions on hover; how much history `serve` keeps; the note after a Run; what this stage keeps true for the sync log of a replayed recording; and the budgets, known limits, and cases (stage 22i).
 ```
 
+> **Note**
+> Building stage 22i changed five parts of this design ([profiles log](log.md#2026-11-25-building-stage-22is-sync-log-changed-five-parts-of-its-design-and-its-log-costs-nothing-while-off); user, 2026-11-25):
+>
+> - When a newer row takes over an older row's stepping write, the older row's pending values and tokens belong to the newer row from then on, whether the log is on or not.
+> - Rows, links, and the hint name an entry by its key, not its `name:`, so `serve` looks up no names.
+> - The extension keeps a copy of `serve`'s rows and repaints the view from it when it opens, where [what `serve` keeps](#what-serve-keeps) has `serve` send the whole list.
+> - The cases about what the engine decides run as the engine's own tests, and the scenario `sync-log` keeps the four that need a core.
+> - The hint draws in two decoration types of its own beside the box's, rather than in the decoration that draws the box.
+
+> **Note**
+> The view's draft changed one more part ([profiles log](log.md#2026-11-25-the-sync-logs-draft-shows-a-steps-time-only-where-time-passed-and-a-live-value-turns-lime-everywhere); user, 2026-11-25): an open row's step shows its time from the row's first only where time passed since the step before, where [what an author sees](#what-an-author-sees) gives every step its time.
+
+> **Note**
+> The view's copy pass changed the log's words, in the engine and the log alike ([profiles log](log.md#2026-11-26-the-sync-logs-copy-pass-renamed-five-steps-dropped-goes-and-draws-a-bug-in-the-profile-in-red); user, 2026-11-26):
+>
+> - `not sent before Ready` became `not sent during preflight`, `shadow taken` became `shadow restored`, `waits behind` became `waits for`, `brought` became `now reads`, and `unchecked` became `warning skipped`.
+> - `goes` left the log.
+> - `withdrawn` names its reason, `lost` or `undone`.
+> - `ignored` and `ignore expired` name the event the entry's `ignore` lists.
+
 The Sync log shows an author why a synced entry did what it did on this PC.
 Each row is one cause, such as a change on this PC or a value from a crewmate, and opens to every step the sync engine took for it, in order, with values and times: `waits behind Altitude hold`, `read back 1`, `never landed`.
 The engine logs each step in the branch that takes it, state sync sends the steps to the profile extension while one is connected, and the extension lists them in a view of its own in VS Code's bottom panel, with each entry's latest step at the end of its `watch:` line.
@@ -91,7 +111,7 @@ A row's verdict, in its header and in the hint, is its latest step's word, as `l
 | put back | This pilot may not send the change, as a PM moving an entry the PF owns, or during their own catch-up, so the engine writes the entry's synced value |
 | put back carries on | A local change while the entry's put-back still steps, which the engine leaves to finish |
 | matches its synced value | A local change this pilot may not send, which already reads the entry's synced value, as the reading of a put-back does |
-| not sent | A local change this pilot may not send, of a watch-only entry, which has nothing to put back |
+| not sent | A local change this pilot may not send, with nothing to put back: a watch-only entry's, one with no synced value yet, and an event's firing during this pilot's own catch-up |
 | too large | A text over 4 KB ([the sandbox](01-format-and-delivery.md#the-sandbox)) |
 | stopped: driven | The driven-entry test stopped the entry ([entries the aircraft drives itself](../sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself)) |
 | reported twice | An input event's second report within 3 frames and 200ms of the first, which drops |

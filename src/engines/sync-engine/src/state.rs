@@ -1,15 +1,16 @@
-//! State entries: the state object, telling the echo of a write from this machine's own
-//! change, who sends and putting back, the conflict rule, the check, shadow values, and
-//! catch-up (record/areas/sync/05-units.md, "The sync engine").
+//! State entries: the state object, telling a write's read back from a local change, who sends
+//! and putting back, the conflict rule, the check, shadow values, and catch-up
+//! (record/areas/sync/05-units.md, "The sync engine").
 
 use profile_engine::{Owner, StateEntry, Steps, Watch as Watches, Write};
 
-use crate::events::Driven;
+use crate::events::{Driven, Reported};
 use crate::runs::{Chain, Count, Run, action, steps, wrapped};
 use crate::script::RunFailed;
 use crate::{
     Applied, CHECK, CatchUpEntry, CatchUpRun, CatchUpState, Change, ChangeKind, Ctx, Engine, Flag,
-    Flagged, MOST_BYTES, Out, Ready, Role, Slot, Stamp, Value, VectorClock, Watch, Watching, Why,
+    Flagged, MOST_BYTES, Out, Ready, Role, Slot, Stamp, Step, Value, VectorClock, Watch, Watching,
+    Why,
 };
 
 /// How many of an entry's distinct values catch-up's order remembers when the cockpit first
@@ -20,37 +21,44 @@ pub(crate) struct StateSlot {
     pub(crate) entry: StateEntry,
     /// The entry's value in the state object: the reading, or the shadow of a counting entry.
     pub(crate) reading: Option<Value>,
-    /// The value this machine holds for the entry as synced, which a put-back writes.
-    pub(crate) held: Option<Value>,
-    /// The stamp of the value it holds, which the conflict rule compares.
+    /// The entry's synced value: the value of this machine's latest sent change, arrival, or
+    /// catch-up, which a put-back writes.
+    pub(crate) synced: Option<Value>,
+    /// The Sync log's row that set the synced value, to which a write that waits belongs, since
+    /// it writes the synced value as it goes.
+    synced_row: u32,
+    /// The stamp of the synced value, which the conflict rule compares.
     pub(crate) stamp: Option<Stamp>,
     /// Values the engine wrote that no reading has matched yet, oldest first.
     pub(crate) pending: Vec<Pending>,
     /// When the cockpit first took each of the entry's latest distinct values, the one it took
     /// longest ago first.
     history: Vec<(Value, u64)>,
-    /// A write held until the entry's first reading, so a toggle never flips blind.
-    waiting: Option<(Value, How)>,
-    /// A change handed to the stream that it hasn't sent yet.
+    /// A write that waits for the entry's first reading, so a toggle never flips blind.
+    awaiting_reading: Option<(Value, How)>,
+    /// A change handed to the stream that it hasn't sent yet, and its row.
     sending: Option<Value>,
+    sending_row: u32,
     last_sent: Option<Value>,
     pub(crate) stopped: bool,
     driven: Driven,
     /// A counting entry's `count` variable, as last read.
     count_at: Option<f64>,
-    /// A watch-only entry's values from other machines, each with when to compare it.
-    compare: Vec<(Value, u64)>,
+    /// A watch-only entry's values from other machines, each with when to compare it and its
+    /// row.
+    compare: Vec<(Value, u64, u32)>,
     refused: bool,
 }
 
-/// An arrival's or a catch-up's write to the entry `i`, held behind other entries' pending
-/// writes, in the order it came. It writes the value the entry holds when it goes, which a
-/// newer arrival, a catch-up taken again, or this pilot's own change may have moved since.
+/// An arrival's or a catch-up's write to the entry `i`, waiting for other writes or other
+/// entries' pending values, in the order it came. It writes the entry's synced value when it
+/// goes, which a newer arrival, a catch-up taken again, or this pilot's local change may have
+/// moved since.
 #[derive(Debug)]
-pub(crate) struct Held {
+pub(crate) struct Waiting {
     i: usize,
     how: How,
-    /// Nothing pending held it back at the last frame, so it goes at the next.
+    /// Nothing pending kept it waiting at the last frame, so it goes at the next.
     ready: bool,
 }
 
@@ -61,6 +69,8 @@ pub(crate) struct Pending {
     pub(crate) due: Option<u64>,
     /// Whether it's flagged when it's due, or only dropped.
     pub(crate) flags: bool,
+    /// The Sync log's row whose write it is.
+    pub(crate) row: u32,
 }
 
 /// How a write goes.
@@ -101,7 +111,7 @@ impl How {
     /// putting it back brings it home, so a flag there would only report the trim in every
     /// flight on autopilot (measured on MSFS 2024, 2026-11-17, record/areas/sync/log.md, "A
     /// preset called with a value from our WASM module took only its first value, and from a
-    /// panel it took every one"). Its values still go pending, so the echo of the write is
+    /// panel it took every one"). Its values still go pending, so the write's read back is
     /// still its own. The pilot flying's machine writes those entries' last values as it takes
     /// control, when they count.
     fn for_owner(self, owner: Owner, cx: Ctx) -> How {
@@ -191,12 +201,14 @@ impl Engine {
         let mut slot = StateSlot {
             entry: entry.clone(),
             reading: None,
-            held: None,
+            synced: None,
+            synced_row: 0,
             stamp: None,
             pending: Vec::new(),
             history: Vec::new(),
-            waiting: None,
+            awaiting_reading: None,
             sending: None,
+            sending_row: 0,
             last_sent: None,
             stopped: false,
             driven: Driven::default(),
@@ -234,7 +246,8 @@ impl Engine {
                     error,
                     "a write function didn't compile, so its entry stops"
                 );
-                self.stop(slot, Why::Compile(error), out);
+                // The builder refuses such a function first, so the Sync log gives it no row.
+                self.stop(slot, Why::Compile(error), None, out);
             }
         }
         for slot in &self.state {
@@ -248,16 +261,24 @@ impl Engine {
             return;
         };
         let Some(reading) = &slot.reading else {
-            // The first reading counts as taken at the load, and lets a held write go.
+            // The first reading counts as taken at the load, and lets a write that waits for it
+            // go. It starts no row of the Sync log, since the engine only keeps it.
             slot.took(&value, self.loaded_at);
             slot.reading = Some(value.clone());
+            let awaiting = slot.awaiting_reading.take();
+            let row = slot.synced_row;
+            // The step's value is the reading's, cloned only while the log is on.
+            let logged = (awaiting.is_some() && self.log.is_on()).then(|| value.clone());
             self.script.note(&slot.entry.key, Some(value));
-            if let Some((wanted, how)) = slot.waiting.take() {
+            if let Some((wanted, how)) = awaiting {
+                if let Some(value) = logged {
+                    self.note_state(i, row, cx.at, || Step::FirstReading { value });
+                }
                 let how = How {
                     answers: false,
                     ..how
                 };
-                self.write(i, wanted, how, cx, out);
+                self.write(i, wanted, how, row, cx, out);
                 if how.catch_up && !self.outstanding(i) {
                     self.made(i);
                 }
@@ -270,20 +291,48 @@ impl Engine {
         slot.took(&value, cx.at);
         slot.reading = Some(value.clone());
         self.script.note(&slot.entry.key, Some(value.clone()));
-        // A reading that equals a value the engine wrote is its echo, and clears it and every
-        // value pending before it; one that equals none is this machine's own change.
+        // A reading that equals a value the engine wrote is that write's read back, and clears it
+        // and every value pending before it; one that equals none is a local change.
         if let Some(p) = slot.pending.iter().position(|p| p.value.same(&value)) {
+            let row = slot.pending[p].row;
+            // Values of other rows that it clears end those rows, since a newer value of the
+            // entry read back first; this row's own earlier values, as a stepping write's, log
+            // nothing.
+            let replaced: Vec<u32> = if self.log.is_on() {
+                let mut rows: Vec<u32> = slot.pending[..p]
+                    .iter()
+                    .map(|q| q.row)
+                    .filter(|&r| r != row)
+                    .collect();
+                rows.dedup();
+                rows
+            } else {
+                Vec::new()
+            };
             slot.pending.drain(..=p);
+            if !self.log.is_on() {
+                return;
+            }
+            // The row's write has landed once its last value reads back after its last step.
+            let more = slot.pending.iter().any(|q| q.row == row);
+            let stepping = self.runs.get(&Slot::State(i)).is_some_and(|r| r.row == row);
+            for older in replaced {
+                self.note_state(i, older, cx.at, || Step::Replaced);
+            }
+            let landed = !more && !stepping;
+            self.note_state(i, row, cx.at, || Step::ReadBack { value, landed });
             return;
         }
-        // A reading that brings the value a held write will write came from the write before
-        // it, as altitude hold's event turns vertical speed mode off, so it's no change of this
-        // machine's either, and the held write finds it there.
-        let brings = slot.held.as_ref().is_some_and(|h| h.same(&value));
-        if brings && self.is_held(i) {
+        // A reading that brings the value a waiting write will write came from the write ahead
+        // of it, as altitude hold's event turns vertical speed mode off, so it's no local change
+        // either, and the waiting write finds it there.
+        let brings = slot.synced.as_ref().is_some_and(|s| s.same(&value));
+        let row = slot.synced_row;
+        if brings && self.is_waiting(i) {
+            self.note_state(i, row, cx.at, || Step::NowReads { value });
             return;
         }
-        self.own_change(i, value, cx, out);
+        self.local_change(i, value, cx, out);
     }
 
     /// A counting entry's `inc`, `dec`, or `set`.
@@ -311,11 +360,17 @@ impl Engine {
             Role::Dec(_) => (c.dec.as_ref(), shadow - c.step),
             _ => (c.set.as_ref(), value.unwrap_or(shadow)),
         };
-        if name.is_some_and(|n| self.double_fire(n, value, cx)) {
+        let reported = match name {
+            Some(n) => self.double_fire(n, value, cx),
+            None => Reported::NotInput,
+        };
+        if matches!(reported, Reported::Twice) {
             return;
         }
-        let ours = name.is_some_and(|n| self.use_token(n, None));
-        self.shadow_to(i, &c, to, ours, cx, out);
+        let used = name.and_then(|n| self.use_token(n, None, cx));
+        let row = self.shadow_to(i, &c, to, used.is_some(), cx, out);
+        let (slot, row) = used.unwrap_or((Slot::State(i), row));
+        self.reported_as(&reported, slot, row);
     }
 
     /// A counting entry's `count` variable, whose change is added to the shadow.
@@ -334,13 +389,15 @@ impl Engine {
             .as_ref()
             .and_then(Value::number)
             .unwrap_or(c.default);
-        let ours = c
+        let used = c
             .count
             .as_ref()
-            .is_some_and(|n| self.use_token(n, Some(now)));
-        self.shadow_to(i, &c, shadow + (now - before), ours, cx, out);
+            .and_then(|n| self.use_token(n, Some(now), cx));
+        self.shadow_to(i, &c, shadow + (now - before), used.is_some(), cx, out);
     }
 
+    /// Moves a counting entry's shadow to `to`, a local change unless a token of the engine's own
+    /// step explains it, and returns the local change's row, or 0 for none.
     fn shadow_to(
         &mut self,
         i: usize,
@@ -349,94 +406,149 @@ impl Engine {
         ours: bool,
         cx: Ctx,
         out: &mut Vec<Out>,
-    ) {
+    ) -> u32 {
         let value = Value::Number(counted_to(c, to));
         let Some(slot) = self.state.get_mut(i) else {
-            return;
+            return 0;
         };
         if slot.reading.as_ref().is_some_and(|r| r.same(&value)) {
-            return;
+            return 0;
         }
         slot.took(&value, cx.at);
         slot.reading = Some(value.clone());
         self.script.note(&slot.entry.key, Some(value.clone()));
-        if !ours {
-            self.own_change(i, value, cx, out);
+        if ours {
+            return 0;
         }
+        self.local_change(i, value, cx, out)
     }
 
-    pub(crate) fn refused(&mut self, i: usize, _out: &mut Vec<Out>) {
+    pub(crate) fn refused(&mut self, i: usize, at: u64) {
         let Some(slot) = self.state.get_mut(i) else {
             return;
         };
         slot.refused = true;
-        if let Some((_, how)) = slot.waiting.take() {
+        if let Some((_, how)) = slot.awaiting_reading.take() {
             tracing::info!(
                 entry = slot.entry.key,
-                "the sim refused an entry's read, so the write held for it dropped"
+                "the sim refused an entry's read, so the write waiting for its first reading dropped"
             );
+            let row = slot.synced_row;
+            self.note_state(i, row, at, || Step::DroppedRefused);
             if how.catch_up {
                 self.made(i);
             }
         }
     }
 
-    /// A change this machine's sim reports that Dual Input didn't write.
-    fn own_change(&mut self, i: usize, value: Value, cx: Ctx, out: &mut Vec<Out>) {
-        let Some(slot) = self.state.get_mut(i) else {
-            return;
-        };
-        if slot.stopped || self.only_asked {
-            return;
+    /// A local change: one this machine's sim reports that Dual Input didn't write. Returns its
+    /// row, or 0 when it starts none.
+    fn local_change(&mut self, i: usize, value: Value, cx: Ctx, out: &mut Vec<Out>) -> u32 {
+        // An entry that stopped syncing reads nothing more, so its changes start no row.
+        if self.state.get(i).is_none_or(|s| s.stopped) || self.only_asked {
+            return 0;
         }
+        let row = self.row();
+        self.note_state(i, row, cx.at, || Step::LocalChange {
+            value: Some(value.clone()),
+        });
+        let Some(slot) = self.state.get_mut(i) else {
+            return row;
+        };
         let shared = slot.entry.owner == Owner::Shared;
         if shared && cx.preflight_ended && slot.driven.own(cx.at) {
-            return self.stop(Slot::State(i), Why::Driven, out);
+            self.stop(Slot::State(i), Why::Driven, Some((row, cx.at)), out);
+            return row;
         }
         // The rest of sync starts at preflight's end.
         if !cx.preflight_ended {
-            return;
+            self.note_state(i, row, cx.at, || Step::NotSentDuringPreflight);
+            return row;
         }
         let Some(slot) = self.state.get(i) else {
-            return;
+            return row;
         };
         let may_not_send = (!shared && !cx.flying()) || cx.catching_up;
         if may_not_send {
-            if slot.watch_only() {
-                return;
-            }
+            let watch_only = slot.watch_only();
+            let synced = slot.synced.clone();
             // A put-back that still steps carries on, since each reading it passes would start it
             // again.
-            if self.runs.get(&Slot::State(i)).is_some_and(|r| r.put_back) {
-                return;
+            let putting_back = self.runs.get(&Slot::State(i)).is_some_and(|r| r.put_back);
+            match synced {
+                _ if watch_only => self.note_state(i, row, cx.at, || Step::NotSent),
+                _ if putting_back => self.note_state(i, row, cx.at, || Step::PutBackCarriesOn),
+                Some(synced) if !synced.same(&value) => {
+                    self.note_state(i, row, cx.at, || Step::PutBack {
+                        value: synced.clone(),
+                    });
+                    self.write(i, synced, PUT_BACK, row, cx, out);
+                }
+                Some(_) => self.note_state(i, row, cx.at, || Step::MatchesSyncedValue),
+                None => self.note_state(i, row, cx.at, || Step::NotSent),
             }
-            if let Some(held) = slot.held.clone().filter(|h| !h.same(&value)) {
-                self.write(i, held, PUT_BACK, cx, out);
-            }
-            return;
+            return row;
         }
-        self.send_state(i, value, cx, out);
+        self.send_state(i, value, row, cx, out);
+        row
     }
 
-    fn send_state(&mut self, i: usize, value: Value, cx: Ctx, out: &mut Vec<Out>) {
+    /// Makes `value`, from `row`, the entry's synced value. A write that waits belongs to the row
+    /// that set the synced value, since it writes that value as it goes, so a newer row takes it
+    /// over and the older row ends `replaced`.
+    fn set_synced(&mut self, i: usize, value: Value, row: u32, at: u64) {
+        let waits = self.log.is_on()
+            && (self.is_waiting(i)
+                || self
+                    .state
+                    .get(i)
+                    .is_some_and(|s| s.awaiting_reading.is_some()));
         let Some(slot) = self.state.get_mut(i) else {
             return;
         };
+        let older = slot.synced_row;
+        slot.synced = Some(value);
+        slot.synced_row = row;
+        if waits && older != row {
+            self.note_state(i, older, at, || Step::Replaced);
+        }
+    }
+
+    fn send_state(&mut self, i: usize, value: Value, row: u32, cx: Ctx, out: &mut Vec<Out>) {
         if let Value::Text(t) = &value
             && t.len() > MOST_BYTES
         {
             let bytes = t.len();
+            self.note_state(i, row, cx.at, || Step::TooLarge {
+                bytes: bytes as u64,
+            });
             return self.flag(i, Flagged::TooLarge { bytes }, out);
         }
-        slot.held = Some(value.clone());
+        self.set_synced(i, value.clone(), row, cx.at);
+        let Some(slot) = self.state.get_mut(i) else {
+            return;
+        };
         let key = slot.entry.key.clone();
+        let unsent = slot.sending.is_some().then_some(slot.sending_row);
         // A change undone before the stream sent it never goes out.
-        if slot.sending.is_some() && slot.last_sent.as_ref().is_some_and(|l| l.same(&value)) {
+        if unsent.is_some() && slot.last_sent.as_ref().is_some_and(|l| l.same(&value)) {
             slot.sending = None;
             out.push(Out::Withdraw(key));
+            let why = crate::Withdrawal::Undone;
+            if let Some(older) = unsent {
+                self.note_state(i, older, cx.at, || Step::Withdrawn { why });
+            }
+            self.note_state(i, row, cx.at, || Step::Withdrawn { why });
             return;
         }
         slot.sending = Some(value.clone());
+        slot.sending_row = row;
+        if let Some(older) = unsent {
+            self.note_state(i, older, cx.at, || Step::Replaced);
+        }
+        let Some(slot) = self.state.get(i) else {
+            return;
+        };
         let kind = match slot.entry.owner {
             Owner::Shared => ChangeKind::Shared,
             Owner::PilotFlying => ChangeKind::PilotFlying,
@@ -447,15 +559,18 @@ impl Engine {
             value: Some(value),
             kind,
         }));
-        self.start_ignores(&ignore, cx);
+        self.start_ignores(&ignore, cx, Slot::State(i), row);
     }
 
-    pub(crate) fn state_sent(&mut self, i: usize, stamp: Stamp) {
-        if let Some(slot) = self.state.get_mut(i) {
-            if let Some(sent) = slot.sending.take() {
-                slot.last_sent = Some(sent);
-            }
-            slot.stamp = Some(stamp);
+    pub(crate) fn state_sent(&mut self, i: usize, stamp: Stamp, at: u64) {
+        let Some(slot) = self.state.get_mut(i) else {
+            return;
+        };
+        slot.stamp = Some(stamp);
+        if let Some(sent) = slot.sending.take() {
+            slot.last_sent = Some(sent);
+            let row = slot.sending_row;
+            self.note_state(i, row, at, || Step::Sent);
         }
     }
 
@@ -468,10 +583,15 @@ impl Engine {
         cx: Ctx,
         out: &mut Vec<Out>,
     ) -> Applied {
+        let row = self.row();
+        self.note_state(i, row, cx.at, || Step::Arrived {
+            value: Some(value.clone()),
+        });
         let Some(slot) = self.state.get_mut(i) else {
             return Applied::Skipped;
         };
         if slot.stopped {
+            self.note_state(i, row, cx.at, || Step::SkippedStopped);
             return Applied::Skipped;
         }
         let shared = slot.entry.owner == Owner::Shared;
@@ -479,8 +599,9 @@ impl Engine {
             slot.driven.received(cx.at);
         }
         if slot.watch_only() {
-            slot.compare.push((value, cx.at + CHECK));
+            slot.compare.push((value, cx.at + CHECK, row));
             slot.stamp = Some(stamp);
+            self.note_state(i, row, cx.at, || Step::Compared);
             return Applied::Done;
         }
         if shared {
@@ -496,16 +617,26 @@ impl Engine {
                 None => slot.stamp.as_ref().is_none_or(|s| stamp.wins(s)),
             };
             if !wins {
+                self.note_state(i, row, cx.at, || Step::Lost);
                 return Applied::Skipped;
             }
             if slot.sending.take().is_some() {
                 out.push(Out::Withdraw(slot.entry.key.clone()));
+                let unsent = slot.sending_row;
+                self.note_state(i, unsent, cx.at, || Step::Withdrawn {
+                    why: crate::Withdrawal::Lost,
+                });
+                self.note_state(i, row, cx.at, || Step::Won);
             }
         }
+        let Some(slot) = self.state.get_mut(i) else {
+            return Applied::Skipped;
+        };
         slot.stamp = Some(stamp);
-        slot.held = Some(value.clone());
-        let how = ARRIVAL.for_owner(slot.entry.owner, cx);
-        self.write(i, value, how, cx, out)
+        let owner = slot.entry.owner;
+        self.set_synced(i, value.clone(), row, cx.at);
+        let how = ARRIVAL.for_owner(owner, cx);
+        self.write(i, value, how, row, cx, out)
     }
 
     /// Control passed to this machine: each entry the pilot flying owns whose reading differs
@@ -533,46 +664,63 @@ impl Engine {
             {
                 continue;
             }
-            let (Some(held), Some(reading)) = (&slot.held, &slot.reading) else {
+            let (Some(synced), Some(reading)) = (&slot.synced, &slot.reading) else {
                 continue;
             };
-            if !held.same(reading) {
-                let held = held.clone();
-                self.write(i, held, PUT_BACK, cx, out);
+            if !synced.same(reading) {
+                let synced = synced.clone();
+                let row = self.row();
+                self.note_state(i, row, cx.at, || Step::ControlPassed {
+                    value: synced.clone(),
+                });
+                self.write(i, synced, PUT_BACK, row, cx, out);
             }
         }
     }
 
-    /// Writes `wanted` into the entry through its `write`, or holds it for `release`. A toggle, a
-    /// stepping write, or a write function decides from the cockpit's readings, and another
-    /// entry's write can change them a few frames later: on a 58P in vertical speed mode,
+    /// Writes `wanted` into the entry through its `write`, or has it wait for `release`. A
+    /// toggle, a stepping write, or a write function decides from the cockpit's readings, and
+    /// another entry's write can change them a few frames later: on a 58P in vertical speed mode,
     /// altitude hold's `K:AP_ALT_HOLD` turns vertical speed mode off, and a vertical speed toggle
     /// that arrives with it, still reading the mode on, toggles it again and leaves the wrong
     /// mode. No route showed the autopilot taking an event in the frame it was sent, so a check
     /// made in the sim as the toggle goes reads the old mode too. So such a write waits while
     /// another entry has a value pending, and each write of an arrival or a catch-up after it
-    /// waits behind it, in order. A put-back goes at once, since it restores this machine's own
+    /// waits for it, in order. A put-back goes at once, since it restores this machine's own
     /// control (measured on MSFS 2024, 2026-11-19, record/areas/sync/log.md, "No route showed an
     /// autopilot event's effect in the frame it was sent, so a guard in the sim reads the old
     /// mode, and the events of one frame apply in the order sent").
-    fn write(&mut self, i: usize, wanted: Value, how: How, cx: Ctx, out: &mut Vec<Out>) -> Applied {
+    fn write(
+        &mut self,
+        i: usize,
+        wanted: Value,
+        how: How,
+        row: u32,
+        cx: Ctx,
+        out: &mut Vec<Out>,
+    ) -> Applied {
         let waits = how.checked
             && self.state.get(i).is_some_and(|s| s.reading.is_some())
-            && (!self.held.is_empty() || (self.decides(i) && self.pending_besides(i)));
+            && (!self.waiting.is_empty() || (self.decides(i) && self.pending_besides(i)));
         if !waits {
-            return self.write_now(i, wanted, how, cx, out);
+            return self.write_now(i, wanted, how, row, cx, out);
         }
-        // A newer value for an entry already held keeps its place, as the stream hands it over
-        // in place of the held arrival, and the held write takes the newer value as it goes.
-        match self.held.iter_mut().find(|h| h.i == i) {
-            Some(held) => {
-                held.how = How {
-                    answers: held.how.answers || how.answers,
-                    catch_up: held.how.catch_up || how.catch_up,
+        if self.log.is_on() {
+            let ahead = self.ahead_of(i);
+            self.note_state(i, row, cx.at, || Step::WaitsFor { ahead });
+        }
+        // A newer value for an entry whose write already waits keeps its place, as the stream
+        // hands it over in place of the waiting arrival, and the waiting write takes the newer
+        // value as it goes.
+        match self.waiting.iter_mut().find(|b| b.i == i) {
+            Some(waiting) => {
+                waiting.how = How {
+                    answers: waiting.how.answers || how.answers,
+                    catch_up: waiting.how.catch_up || how.catch_up,
                     ..how
                 };
             }
-            None => self.held.push_back(Held {
+            None => self.waiting.push_back(Waiting {
                 i,
                 how,
                 ready: false,
@@ -583,6 +731,31 @@ impl Engine {
         } else {
             Applied::Done
         }
+    }
+
+    /// What the entry's write waits for, by the entries' keys: the write that waits ahead of
+    /// it, or, with none waiting, each other entry whose pending value its check would flag.
+    fn ahead_of(&self, i: usize) -> Vec<String> {
+        let key = |j: usize| self.state.get(j).map(|s| s.entry.key.clone());
+        let place = self.waiting.iter().position(|b| b.i == i);
+        let before = match place {
+            Some(at) => at.checked_sub(1).and_then(|p| self.waiting.get(p)),
+            None => self.waiting.back(),
+        };
+        if let Some(b) = before {
+            return key(b.i).into_iter().collect();
+        }
+        // Another entry's pending value keeps only a write that decides from the readings
+        // waiting; a set write waits only for the writes ahead of it.
+        if !self.decides(i) {
+            return Vec::new();
+        }
+        self.state
+            .iter()
+            .enumerate()
+            .filter(|(j, s)| *j != i && s.pending.iter().any(|p| p.flags))
+            .map(|(_, s)| s.entry.key.clone())
+            .collect()
     }
 
     /// Whether the entry's write decides from the cockpit's readings, rather than setting a value.
@@ -598,7 +771,7 @@ impl Engine {
     /// Whether another entry has a value pending that its check would flag. A following
     /// machine's write of what the pilot flying owns doesn't flag, as `How::for_owner` sets it,
     /// since that machine's own autopilot moves the trim faster than it reads back, so it could
-    /// hold every switch for a check's length; so it holds nothing here either.
+    /// keep every switch waiting for a check's length; so it keeps nothing waiting here either.
     fn pending_besides(&self, i: usize) -> bool {
         self.state
             .iter()
@@ -606,8 +779,8 @@ impl Engine {
             .any(|(j, s)| j != i && s.pending.iter().any(|p| p.flags))
     }
 
-    /// Makes the held writes whose turn has come, in order, once a frame. A write that decides
-    /// from the readings goes a frame after nothing held it back, so the readings of the frame
+    /// Makes the waiting writes whose turn has come, in order, once a frame. A write that decides
+    /// from the readings goes a frame after nothing kept it waiting, so the readings of the frame
     /// its blocker read back in have all arrived: state sync watches each variable on a request
     /// of its own, and where the sim's `Frame` event falls among one frame's requests is
     /// unmeasured, while the autopilot's two modes changed in one frame (measured on MSFS 2024,
@@ -615,22 +788,25 @@ impl Engine {
     /// frame it was sent, so a guard in the sim reads the old mode, and the events of one frame
     /// apply in the order sent").
     pub(crate) fn release(&mut self, cx: Ctx, out: &mut Vec<Out>) {
-        while let Some(&Held { i, ready, .. }) = self.held.front() {
+        while let Some(&Waiting { i, ready, .. }) = self.waiting.front() {
             if self.decides(i) {
                 let blocked = self.pending_besides(i);
                 if blocked || !ready {
-                    if let Some(front) = self.held.front_mut() {
+                    if let Some(front) = self.waiting.front_mut() {
                         front.ready = !blocked;
                     }
                     return;
                 }
             }
-            let Some(Held { how, .. }) = self.held.pop_front() else {
+            let Some(Waiting { how, .. }) = self.waiting.pop_front() else {
                 return;
             };
-            let wanted = self.state.get(i).and_then(|s| s.held.clone());
+            let (wanted, row) = match self.state.get(i) {
+                Some(s) => (s.synced.clone(), s.synced_row),
+                None => (None, 0),
+            };
             let applied = match wanted {
-                Some(wanted) => self.write_now(i, wanted, how, cx, out),
+                Some(wanted) => self.write_now(i, wanted, how, row, cx, out),
                 None => Applied::Done,
             };
             if how.answers
@@ -645,25 +821,29 @@ impl Engine {
         }
     }
 
-    /// Whether a write of the entry is held.
-    pub(crate) fn is_held(&self, i: usize) -> bool {
-        self.held.iter().any(|h| h.i == i)
+    /// Whether a write of the entry waits for another.
+    pub(crate) fn is_waiting(&self, i: usize) -> bool {
+        self.waiting.iter().any(|b| b.i == i)
     }
 
     /// Whether the entry's write is still to be made: it runs, waits for the entry's first
-    /// reading, or is held. Catch-up counts it made once it isn't.
+    /// reading, or waits for another. Catch-up counts it made once it isn't.
     pub(crate) fn outstanding(&self, i: usize) -> bool {
         self.runs.contains_key(&Slot::State(i))
-            || self.state.get(i).is_some_and(|s| s.waiting.is_some())
-            || self.is_held(i)
+            || self
+                .state
+                .get(i)
+                .is_some_and(|s| s.awaiting_reading.is_some())
+            || self.is_waiting(i)
     }
 
-    /// Writes `wanted` into the entry through its `write`, as the engine chooses.
+    /// Writes `wanted` into the entry through its `write`, as the engine chooses, for `row`.
     fn write_now(
         &mut self,
         i: usize,
         wanted: Value,
         how: How,
+        row: u32,
         cx: Ctx,
         out: &mut Vec<Out>,
     ) -> Applied {
@@ -672,45 +852,52 @@ impl Engine {
         };
         let counted = slot.counted().cloned();
         if counted.is_none() && slot.reading.is_none() {
-            if !slot.refused {
-                slot.waiting = Some((wanted, how));
+            let refused = slot.refused;
+            if !refused {
+                slot.awaiting_reading = Some((wanted, how));
             }
+            let step = if refused {
+                Step::DroppedRefused
+            } else {
+                Step::AwaitingReading
+            };
+            self.note_state(i, row, cx.at, || step);
             return Applied::Done;
         }
         let matches = slot.reading.as_ref().is_some_and(|r| r.same(&wanted));
         let checked = how.checked && counted.is_none();
         let slot_id = Slot::State(i);
+        // The value that goes pending as the write starts, which logs after its actions.
+        let mut pending = None;
+        // A write function's checked write that the cockpit already reads, which ends its row
+        // after its actions, since no reading comes for a check to match.
+        let mut already = false;
         let run = match slot.entry.write.clone() {
             Write::None => return Applied::Done,
-            Write::Name(name) => {
-                if matches {
-                    return Applied::Done;
-                }
-                Run::new(vec![Chain {
-                    action: action(&name, Some(&wanted)),
-                    times: 1,
-                    pace: self.pace,
-                    step: None,
-                }])
+            Write::Name(_) | Write::Toggle(_) if matches => {
+                self.note_state(i, row, cx.at, || Step::AlreadyMatches);
+                return Applied::Done;
             }
-            Write::Toggle(name) => {
-                if matches {
-                    return Applied::Done;
-                }
-                Run::new(vec![Chain {
-                    action: action(&name, None),
-                    times: 1,
-                    pace: self.pace,
-                    step: None,
-                }])
-            }
+            Write::Name(name) => Run::new(vec![Chain {
+                action: action(&name, Some(&wanted)),
+                times: 1,
+                pace: self.pace,
+                step: None,
+            }]),
+            Write::Toggle(name) => Run::new(vec![Chain {
+                action: action(&name, None),
+                times: 1,
+                pace: self.pace,
+                step: None,
+            }]),
             Write::Steps(s) => {
                 let Some((chain, count)) = self.steps_to(i, &s, &wanted) else {
                     return Applied::Done;
                 };
                 if chain.times == 0 {
                     // Already at its count: a run still stepping elsewhere stops there.
-                    self.cut_short(slot_id, cx, out);
+                    self.note_state(i, row, cx.at, || Step::AlreadyMatches);
+                    self.cut_short(slot_id, row, cx, out);
                     return Applied::Done;
                 }
                 let mut run = Run::new(vec![chain]);
@@ -735,13 +922,29 @@ impl Engine {
                         .and_then(|s| s.reading.as_ref())
                         .is_some_and(|r| r.same(&reads));
                     if checked && !there {
-                        self.pend(i, reads, None, how.flags);
+                        if self.log.is_on() {
+                            pending = Some(reads.clone());
+                        }
+                        self.pend(i, reads, None, how.flags, row);
+                    }
+                    already = checked && there;
+                    // A run that writes nothing, as a transponder function that skips while the
+                    // battery is off, is a step of its own, since no action logs one.
+                    if ran.written.is_empty() {
+                        self.note_state(i, row, cx.at, || Step::Writes {
+                            actions: Vec::new(),
+                        });
                     }
                     Run::new(self.chains_of(ran.written))
                 }
                 Err(RunFailed::Limit(failed)) => {
                     tracing::info!(entry = self.state.get(i).map(|s| s.entry.key.as_str()), %failed, "a write function reached a limit, so its entry stops on this machine");
-                    self.stop(slot_id, Why::Limit(failed.to_string()), out);
+                    self.stop(
+                        slot_id,
+                        Why::Limit(failed.to_string()),
+                        Some((row, cx.at)),
+                        out,
+                    );
                     return Applied::Skipped;
                 }
                 Err(RunFailed::Wrong(error)) => {
@@ -750,8 +953,12 @@ impl Engine {
                         error,
                         "a write function failed, so its write made nothing"
                     );
+                    self.note_state(i, row, cx.at, || Step::FunctionFailed { error });
                     if checked {
-                        self.pend(i, wanted, Some(cx.at + CHECK), how.flags);
+                        self.note_state(i, row, cx.at, || Step::Pending {
+                            value: wanted.clone(),
+                        });
+                        self.pend(i, wanted, Some(cx.at + CHECK), how.flags, row);
                     }
                     return Applied::Done;
                 }
@@ -763,9 +970,13 @@ impl Engine {
             Some(Write::Function(_))
         );
         // A name's or a toggle's value goes pending as it's written; a stepping write's goes
-        // step by step, and a function's went pending whatever the run wrote.
+        // step by step, which its `writes` steps show, and a function's went pending whatever the
+        // run wrote.
         if checked && !function && run.count.is_none() {
-            self.pend(i, wanted, None, how.flags);
+            if self.log.is_on() {
+                pending = Some(wanted.clone());
+            }
+            self.pend(i, wanted, None, how.flags, row);
         }
         run.checked = checked;
         run.flags = how.flags;
@@ -773,9 +984,16 @@ impl Engine {
         // A counting entry hears its own write's events, which its tokens use up.
         run.tokens = counted.is_some();
         run.catch_up = how.catch_up;
+        run.row = row;
         let stepping = run.takes_frames();
         run.answers = how.answers && stepping;
         self.start(slot_id, run, cx, out);
+        if let Some(value) = pending {
+            self.note_state(i, row, cx.at, || Step::Pending { value });
+        }
+        if already {
+            self.note_state(i, row, cx.at, || Step::AlreadyMatches);
+        }
         if stepping && how.answers {
             Applied::Stepping
         } else {
@@ -818,31 +1036,65 @@ impl Engine {
         Some((chain, count))
     }
 
-    pub(crate) fn pend(&mut self, i: usize, value: Value, due: Option<u64>, flags: bool) {
+    pub(crate) fn pend(&mut self, i: usize, value: Value, due: Option<u64>, flags: bool, row: u32) {
         if let Some(slot) = self.state.get_mut(i) {
-            slot.pending.push(Pending { value, due, flags });
+            slot.pending.push(Pending {
+                value,
+                due,
+                flags,
+                row,
+            });
         }
     }
 
     /// Values pending past their check, and watch-only values to compare.
     pub(crate) fn check(&mut self, cx: Ctx, out: &mut Vec<Out>) {
+        let logging = self.log.is_on();
         for i in 0..self.state.len() {
             let Some(slot) = self.state.get_mut(i) else {
                 continue;
             };
-            let late: Vec<Value> = slot
+            let late: Vec<(Value, u32)> = slot
                 .pending
                 .iter()
                 .filter(|p| p.flags && p.due.is_some_and(|d| cx.at >= d))
-                .map(|p| p.value.clone())
+                .map(|p| (p.value.clone(), p.row))
                 .collect();
+            // A following machine's write of what the pilot flying owns drops at its check
+            // without a flag.
+            let skipped: Vec<u32> = match logging {
+                true => {
+                    let mut rows: Vec<u32> = slot
+                        .pending
+                        .iter()
+                        .filter(|p| !p.flags && p.due.is_some_and(|d| cx.at >= d))
+                        .map(|p| p.row)
+                        .collect();
+                    rows.dedup();
+                    rows
+                }
+                false => Vec::new(),
+            };
             slot.pending.retain(|p| p.due.is_none_or(|d| cx.at < d));
             let reading = slot.reading.clone();
-            let (due, later): (Vec<_>, Vec<_>) =
-                slot.compare.drain(..).partition(|(_, at)| cx.at >= *at);
-            slot.compare = later;
-            for (theirs, _) in due {
-                if !reading.as_ref().is_some_and(|r| r.same(&theirs)) {
+            let due = match slot.compare.is_empty() {
+                true => Vec::new(),
+                false => {
+                    let (due, later): (Vec<_>, Vec<_>) =
+                        slot.compare.drain(..).partition(|(_, at, _)| cx.at >= *at);
+                    slot.compare = later;
+                    due
+                }
+            };
+            for (theirs, _, row) in due {
+                if reading.as_ref().is_some_and(|r| r.same(&theirs)) {
+                    self.note_state(i, row, cx.at, || Step::Matches);
+                    continue;
+                }
+                self.note_state(i, row, cx.at, || Step::Differs {
+                    reading: reading.clone(),
+                });
+                if let Some(slot) = self.state.get(i) {
                     out.push(Out::Differ {
                         entry: slot.entry.key.clone(),
                         theirs,
@@ -850,14 +1102,29 @@ impl Engine {
                     });
                 }
             }
-            if let Some(wanted) = late.into_iter().last() {
+            if late.is_empty() && skipped.is_empty() {
+                continue;
+            }
+            for row in skipped {
+                self.note_state(i, row, cx.at, || Step::WarningSkipped);
+            }
+            if logging {
+                let mut rows: Vec<u32> = late.iter().map(|(_, row)| *row).collect();
+                rows.dedup();
+                for row in rows {
+                    self.note_state(i, row, cx.at, || Step::NeverLanded {
+                        reading: reading.clone(),
+                    });
+                }
+            }
+            if let Some((wanted, _)) = late.into_iter().last() {
                 self.flag(i, Flagged::NeverLanded { wanted, reading }, out);
             }
         }
         self.unread_catch_up(cx, out);
     }
 
-    /// A catch-up write still held for its entry's first reading a check after the catch-up
+    /// A catch-up write still waiting for its entry's first reading a check after the catch-up
     /// started is made, and flagged as never landed. Without this, an `instrument()` entry no
     /// panel reads holds the catch-up open, and the stream holds everything this machine sends
     /// for as long as it's open: six of the Baron 58P's did (measured on MSFS 2024, 2026-11-09,
@@ -877,15 +1144,20 @@ impl Engine {
             .filter(|&i| {
                 self.state
                     .get(i)
-                    .and_then(|s| s.waiting.as_ref())
+                    .and_then(|s| s.awaiting_reading.as_ref())
                     .is_some_and(|(_, how)| how.catch_up)
             })
             .collect();
         for i in unread {
-            let Some((wanted, _)) = self.state.get_mut(i).and_then(|s| s.waiting.take()) else {
+            let Some(slot) = self.state.get_mut(i) else {
                 continue;
             };
+            let Some((wanted, _)) = slot.awaiting_reading.take() else {
+                continue;
+            };
+            let row = slot.synced_row;
             self.made(i);
+            self.note_state(i, row, cx.at, || Step::NeverLanded { reading: None });
             let reading = None;
             self.flag(i, Flagged::NeverLanded { wanted, reading }, out);
         }
@@ -904,14 +1176,26 @@ impl Engine {
         }));
     }
 
-    /// Stops an entry syncing on this machine for the rest of the load.
-    pub(crate) fn stop(&mut self, slot: Slot, why: Why, out: &mut Vec<Out>) {
-        // An arrival waiting on the run's last step, or on a held write, counts as applied, so
-        // the stream moves on.
+    /// Stops an entry syncing on this machine for the rest of the load, a step of the row, at
+    /// its time, when a row's decision stopped it.
+    pub(crate) fn stop(
+        &mut self,
+        slot: Slot,
+        why: Why,
+        logged: Option<(u32, u64)>,
+        out: &mut Vec<Out>,
+    ) {
+        if let Some((row, at)) = logged
+            && self.log.is_on()
+        {
+            self.log_stop(slot, &why, row, at);
+        }
+        // An arrival waiting on the run's last step, or on a write waiting for another, counts
+        // as applied, so the stream moves on.
         let mut answered = self.runs.remove(&slot).is_some_and(|r| r.answers);
         if let Slot::State(i) = slot {
-            answered |= self.held.iter().any(|h| h.i == i && h.how.answers);
-            self.held.retain(|h| h.i != i);
+            answered |= self.waiting.iter().any(|b| b.i == i && b.how.answers);
+            self.waiting.retain(|b| b.i != i);
         }
         let (key, name) = match slot {
             Slot::State(i) => {
@@ -920,7 +1204,7 @@ impl Engine {
                 };
                 s.stopped = true;
                 s.pending.clear();
-                s.waiting = None;
+                s.awaiting_reading = None;
                 if s.sending.take().is_some() {
                     out.push(Out::Withdraw(s.entry.key.clone()));
                 }
@@ -952,6 +1236,43 @@ impl Engine {
         });
     }
 
+    /// Logs the stop on `row`, and on each other row whose run, pending value, waiting write, or
+    /// unsent change the stop clears, since each would otherwise show as under way for good: a
+    /// crew member's arrival is often still within its check when the entry turns out driven.
+    #[cold]
+    fn log_stop(&mut self, slot: Slot, why: &Why, row: u32, at: u64) {
+        let stopping = match why {
+            Why::Driven => crate::Stopping::Driven,
+            Why::Limit(error) => crate::Stopping::Limit {
+                error: error.clone(),
+            },
+            Why::Compile(error) => crate::Stopping::Compile {
+                error: error.clone(),
+            },
+        };
+        let mut cut: Vec<u32> = self.runs.get(&slot).map(|r| r.row).into_iter().collect();
+        if let Slot::State(i) = slot
+            && let Some(s) = self.state.get(i)
+        {
+            cut.extend(s.pending.iter().map(|p| p.row));
+            if s.awaiting_reading.is_some() || self.is_waiting(i) {
+                cut.push(s.synced_row);
+            }
+            if s.sending.is_some() {
+                cut.push(s.sending_row);
+            }
+        }
+        cut.sort_unstable();
+        cut.dedup();
+        // Rows count from 1, so 0 is a slot's row before it had one.
+        cut.retain(|&r| r != row && r != 0);
+        for r in std::iter::once(row).chain(cut) {
+            self.note_slot(slot, r, at, || Step::Stopped {
+                why: stopping.clone(),
+            });
+        }
+    }
+
     fn made(&mut self, i: usize) {
         if let Some(c) = self.catch_up.as_mut() {
             c.outstanding.remove(&i);
@@ -974,7 +1295,7 @@ impl Engine {
     }
 
     /// On the flying machine: each state entry it syncs, at the value its cockpit holds, in the
-    /// order the cockpit first took each value, those it held from the load first.
+    /// order the cockpit first took each value, those it kept from the load first.
     pub fn give(&self) -> CatchUpState {
         let mut entries: Vec<(u64, CatchUpEntry)> = self
             .state
@@ -1016,13 +1337,22 @@ impl Engine {
                 continue;
             };
             let missed = self.ready == Ready::Missed;
+            // Catch-up writes no watch-only entry, so it starts no row for one.
+            if self.state.get(i).is_none_or(|s| s.watch_only()) {
+                continue;
+            }
+            let row = self.row();
+            self.note_state(i, row, cx.at, || Step::CaughtUp {
+                value: e.value.clone(),
+            });
+            if self.state.get(i).is_some_and(|s| s.stopped) {
+                self.note_state(i, row, cx.at, || Step::SkippedStopped);
+                continue;
+            }
+            self.set_synced(i, e.value.clone(), row, cx.at);
             let Some(slot) = self.state.get_mut(i) else {
                 continue;
             };
-            if slot.stopped || slot.watch_only() {
-                continue;
-            }
-            slot.held = Some(e.value.clone());
             slot.stamp = e.stamp.clone();
             // A core back from a restart lost its shadows, and its aircraft kept the controls it
             // had, which matched the flying machine's, so it takes the flying machine's shadows
@@ -1031,13 +1361,17 @@ impl Engine {
                 slot.took(&e.value, cx.at);
                 slot.reading = Some(e.value.clone());
                 self.script.note(&e.key, Some(e.value.clone()));
+                self.note_state(i, row, cx.at, || Step::ShadowRestored {
+                    value: e.value.clone(),
+                });
                 continue;
             }
             if slot.reading.as_ref().is_some_and(|r| r.same(&e.value)) {
+                self.note_state(i, row, cx.at, || Step::AlreadyMatches);
                 continue;
             }
             let how = CATCH_UP.for_owner(slot.entry.owner, cx);
-            self.write(i, e.value.clone(), how, cx, &mut out);
+            self.write(i, e.value.clone(), how, row, cx, &mut out);
             if self.outstanding(i)
                 && let Some(c) = self.catch_up.as_mut()
             {

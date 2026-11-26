@@ -10,8 +10,9 @@ use profile_engine::{
     Arg, Count, EventEntry, Name, Owner, Resolved, StateEntry, Steps, Watch as Watches, Write,
 };
 use sync_engine::{
-    Action, Applied, Arrived, CatchUpState, Change, Control, Ctx, Engine, Given, Load, Origin, Out,
-    Pace, Planned, Ready, Sandbox, Seen, Stamp, Value, VectorClock, Why,
+    Action, Applied, Arrived, CatchUpState, Change, Control, Ctx, Engine, Given, Load, LogStep,
+    Origin, Out, Pace, Planned, Ready, Sandbox, Seen, Stamp, Step, Value, VectorClock, Why,
+    Withdrawal,
 };
 
 const SECOND: u64 = 1_000_000;
@@ -227,7 +228,7 @@ impl Machine {
                         clock: self.clock.clone(),
                         pilot_flying: self.pf.pilot,
                     };
-                    self.engine.sent(&change.entry, stamp.clone());
+                    self.engine.sent(&change.entry, stamp.clone(), self.at);
                     sent.push((change, stamp));
                 }
                 other => self.out.push(other),
@@ -269,6 +270,109 @@ impl Machine {
             .filter(|o| matches!(o, Out::Flag(_)))
             .count()
     }
+
+    /// A machine whose engine keeps its log from the load.
+    fn logging(me: Origin, profile: &Resolved) -> Machine {
+        let mut m = Machine::new(me, profile);
+        m.engine.keep_log(true);
+        m
+    }
+
+    /// The log so far, row by row in the order each began: its number, its entry, and its steps.
+    fn rows(&mut self) -> Vec<(u32, String, Vec<String>)> {
+        rows(&self.engine.take_log())
+    }
+}
+
+fn rows(log: &[LogStep]) -> Vec<(u32, String, Vec<String>)> {
+    let mut rows: Vec<(u32, String, Vec<String>)> = Vec::new();
+    for s in log {
+        match rows.iter_mut().find(|(row, _, _)| *row == s.row) {
+            Some((_, _, steps)) => steps.push(said(&s.step)),
+            None => rows.push((s.row, s.entry.clone(), vec![said(&s.step)])),
+        }
+    }
+    rows
+}
+
+/// A step in a few words, for the tests' assertions.
+fn said(step: &Step) -> String {
+    let v = |v: &Value| match v {
+        Value::Number(n) => n.to_string(),
+        Value::Text(t) => t.clone(),
+    };
+    let maybe = |o: &Option<Value>| o.as_ref().map_or("none".into(), v);
+    match step {
+        Step::LocalChange { value } => format!("local change {}", maybe(value)),
+        Step::Arrived { value } => format!("arrived {}", maybe(value)),
+        Step::CaughtUp { value } => format!("catch-up {}", v(value)),
+        Step::ControlPassed { value } => format!("control passed {}", v(value)),
+        Step::Sent => "sent".into(),
+        Step::Replaced => "replaced".into(),
+        Step::Withdrawn { why } => match why {
+            Withdrawal::Lost => "withdrawn: lost".into(),
+            Withdrawal::Undone => "withdrawn: undone".into(),
+        },
+        Step::NotSentDuringPreflight => "not sent during preflight".into(),
+        Step::PutBack { value } => format!("put back {}", v(value)),
+        Step::PutBackCarriesOn => "put back carries on".into(),
+        Step::MatchesSyncedValue => "matches its synced value".into(),
+        Step::NotSent => "not sent".into(),
+        Step::TooLarge { bytes } => format!("too large {bytes}"),
+        Step::Stopped { why } => format!("stopped {why:?}"),
+        Step::ReportedTwice => "reported twice".into(),
+        Step::Ignored { event } => format!("ignored {event}"),
+        Step::Lost => "lost".into(),
+        Step::Won => "won".into(),
+        Step::Compared => "compared".into(),
+        Step::Matches => "matches".into(),
+        Step::Differs { reading } => format!("differs {}", maybe(reading)),
+        Step::AwaitingReading => "waits for a first reading".into(),
+        Step::FirstReading { value } => format!("first reading {}", v(value)),
+        Step::WaitsFor { ahead } => format!("waits for {}", ahead.join(", ")),
+        Step::NowReads { value } => format!("now reads {}", v(value)),
+        Step::AlreadyMatches => "already matches".into(),
+        Step::Writes { actions } => {
+            let actions: Vec<String> = actions
+                .iter()
+                .map(|a| {
+                    let values: Vec<String> = a.values.iter().map(v).collect();
+                    [a.name.clone(), values.join(" ")]
+                        .join(" ")
+                        .trim()
+                        .to_string()
+                })
+                .collect();
+            format!("writes {}", actions.join(", ")).trim().to_string()
+        }
+        Step::FunctionFailed { .. } => "function failed".into(),
+        Step::Pending { value } => format!("pending {}", v(value)),
+        Step::ReadBack { value, landed } => {
+            format!(
+                "read back {}{}",
+                v(value),
+                if *landed { ", landed" } else { "" }
+            )
+        }
+        Step::NeverLanded { reading } => format!("never landed {}", maybe(reading)),
+        Step::WarningSkipped => "warning skipped".into(),
+        Step::TokenUsed => "token used".into(),
+        Step::TokenExpired => "token expired".into(),
+        Step::IgnoreExpired { event } => format!("ignore expired {event}"),
+        Step::NoValue => "no value".into(),
+        Step::DroppedRefused => "dropped: refused".into(),
+        Step::ShadowRestored { value } => format!("shadow restored {}", v(value)),
+        Step::SkippedStopped => "skipped: stopped".into(),
+    }
+}
+
+/// One row as `Machine::rows` gives it, for comparing.
+fn row(n: u32, entry: &str, steps: &[&str]) -> (u32, String, Vec<String>) {
+    (
+        n,
+        entry.into(),
+        steps.iter().map(|s| (*s).to_string()).collect(),
+    )
 }
 
 /// A stamp of another machine's, made after it saw `seen`'s changes.
@@ -321,7 +425,7 @@ fn a_knob_turned_a_detent_a_frame_sends_nothing_back_while_its_reading_lags() {
     );
     assert!(
         pm.sends().is_empty(),
-        "a lagging reading is the echo of a write: {:?}",
+        "a lagging reading is a write's read back: {:?}",
         pm.out
     );
     assert_eq!(pm.flags(), 0);
@@ -540,7 +644,7 @@ fn a_toggle_that_arrives_with_another_entrys_write_decides_once_that_write_reads
 }
 
 #[test]
-fn a_held_toggle_goes_once_the_write_before_it_is_flagged_and_flips_when_it_must() {
+fn a_waiting_toggle_goes_once_the_write_before_it_is_flagged_and_flips_when_it_must() {
     let (alt, vs, p) = vertical_modes();
     let mut pm = Machine::new(PM, &p);
     pm.read(&alt, 0.0);
@@ -561,7 +665,7 @@ fn a_held_toggle_goes_once_the_write_before_it_is_flagged_and_flips_when_it_must
 }
 
 #[test]
-fn a_following_machines_write_of_what_the_pf_owns_holds_no_toggle_and_a_value_write_never_waits() {
+fn a_following_machines_write_of_what_the_pf_owns_keeps_no_toggle_waiting_and_no_value_waits() {
     let (alt, vs, mut p) = vertical_modes();
     let trim = l("TRIM");
     let beacon = l("BEACON");
@@ -595,7 +699,7 @@ fn a_following_machines_write_of_what_the_pf_owns_holds_no_toggle_and_a_value_wr
 }
 
 #[test]
-fn catch_up_holds_a_toggle_behind_the_write_before_it_and_what_follows_in_order() {
+fn catch_up_has_a_toggle_wait_behind_the_write_before_it_and_what_follows_in_order() {
     let (alt, vs, mut p) = vertical_modes();
     let beacon = l("BEACON");
     p.state
@@ -627,7 +731,7 @@ fn catch_up_holds_a_toggle_behind_the_write_before_it_and_what_follows_in_order(
 }
 
 #[test]
-fn a_held_write_makes_the_value_its_entry_holds_as_it_goes_this_pilots_own_change_included() {
+fn a_write_waiting_behind_makes_its_entrys_synced_value_as_it_goes_a_local_change_included() {
     let beacon = l("BEACON");
     let selected = l("SELECTED_ALTITUDE");
     let function = r#"(value) => {
@@ -652,7 +756,7 @@ fn a_held_write_makes_the_value_its_entry_holds_as_it_goes_this_pilots_own_chang
         pm.arrive("selected", 9_000.0, stamp(PF, 2, &[])),
         Applied::Stepping
     );
-    // This pilot turns the selector while the other's 9,000 ft is held, which goes out.
+    // This pilot turns the selector while the other's 9,000 ft waits, which goes out.
     pm.read(&selected, 8_000.0);
     assert_eq!(pm.sends().len(), 1);
     pm.read(&beacon, 1.0);
@@ -667,7 +771,7 @@ fn a_held_write_makes_the_value_its_entry_holds_as_it_goes_this_pilots_own_chang
                 values: vec![8_000.0]
             }
         ],
-        "the held write makes this pilot's 8,000 ft, not the 9,000 ft it was held with"
+        "the waiting write makes this pilot's 8,000 ft, not the 9,000 ft it waited with"
     );
 }
 
@@ -697,7 +801,7 @@ fn a_value_read_back_within_f32_isnt_flagged() {
 }
 
 #[test]
-fn a_reading_that_matches_what_a_write_function_returned_is_its_echo() {
+fn a_reading_that_matches_what_a_write_function_returned_is_its_read_back() {
     let bug = l("BUG");
     // The 58P's heading-bug preset rounds to 1/16,384ths of a turn, so 1° reads back as 46 of
     // them.
@@ -1031,6 +1135,31 @@ fn each_write_that_never_lands_is_flagged_not_only_the_first() {
 }
 
 #[test]
+fn a_following_machines_write_of_what_the_pilot_flying_owns_ends_warning_skipped_when_it_never_reads_back()
+ {
+    let trim = l("ELEVATOR_TRIM");
+    let mut trims = state("elevator_trim", trim.clone(), Write::Name(trim.clone()));
+    trims.owner = Owner::PilotFlying;
+    let p = profile(vec![trims], vec![]);
+    let mut pm = Machine::logging(PM, &p);
+    pm.read(&trim, 0.0);
+    pm.arrive("elevator_trim", -5.0, stamp(PF, 1, &[]));
+    pm.read(&trim, -5.0);
+    pm.arrive("elevator_trim", -6.0, stamp(PF, 2, &[]));
+    pm.wait(2 * SECOND);
+    let ends: Vec<String> = pm
+        .rows()
+        .into_iter()
+        .map(|(_, _, steps)| steps.last().cloned().unwrap_or_default())
+        .collect();
+    assert_eq!(
+        ends,
+        vec!["read back -5, landed", "warning skipped"],
+        "a write that reads back lands, and one that doesn't drops at its check with no warning"
+    );
+}
+
+#[test]
 fn a_pilot_flying_entry_its_own_systems_move_on_a_following_machine_is_never_flagged() {
     let trim = l("ELEVATOR_TRIM");
     let mut trims = state("elevator_trim", trim.clone(), Write::Name(trim.clone()));
@@ -1041,10 +1170,13 @@ fn a_pilot_flying_entry_its_own_systems_move_on_a_following_machine_is_never_fla
     pm.arrive("elevator_trim", -5.0, stamp(PF, 1, &[]));
     pm.arrive("elevator_trim", -6.0, stamp(PF, 2, &[]));
     assert_eq!(pm.acts(), vec![set(&trim, -5.0), set(&trim, -6.0)]);
-    // Its writes still go pending, so a reading that lags behind them is their echo.
+    // Its writes still go pending, so a reading that lags behind them is their read back.
     pm.read(&trim, -5.0);
     pm.read(&trim, -6.0);
-    assert!(pm.acts().is_empty(), "a lagging echo starts no put-back");
+    assert!(
+        pm.acts().is_empty(),
+        "a lagging read back starts no put-back"
+    );
     // Its autopilot trims the frozen aircraft faster than putting it back brings it home.
     for f in 0..120 {
         pm.read(&trim, -6.0 - f64::from(f) * 0.1);
@@ -1638,7 +1770,7 @@ fn a_run_of_a_name_or_a_toggle_sends_what_its_preview_shows() {
     m.read(&beacon, 1.0);
     assert!(
         m.sends().is_empty(),
-        "each write's echo is its own, not this pilot's change: {:?}",
+        "each write's read back is its own, not a local change: {:?}",
         m.out
     );
     assert_eq!(
@@ -1929,7 +2061,7 @@ fn an_engine_that_runs_only_what_its_asked_puts_back_and_sends_nothing() {
         ],
         vec![],
     );
-    // A following machine after preflight: it takes the pilot flying's trim and reads its echo,
+    // A following machine after preflight: it takes the pilot flying's trim and reads it back,
     // then its own pilot turns the trim wheel and flips the beacon.
     let follow = |mut pm: Machine| -> (Vec<Out>, Vec<Out>) {
         pm.read(&trim, 0.0);
@@ -1987,4 +2119,635 @@ fn an_engine_that_runs_only_what_its_asked_still_runs_a_write_and_its_steps() {
     );
     m.read(&hdg, 103.0);
     assert!(m.take().is_empty(), "frame returned only the write's steps");
+}
+
+// The Sync log (record/areas/profiles/06-the-sync-log.md, "Cases"): each case's rows, as the
+// engine logs them, and the log changing nothing the engine decides.
+
+/// The vertical modes' case of stage 14c and a conflict on the battery, played on `m`, with the
+/// outs it put out.
+fn a_busy_minute(m: &mut Machine) -> Vec<Out> {
+    let alt = l("ALT_HOLD");
+    let vs = l("VS_HOLD");
+    let bat = l("BAT");
+    m.read(&alt, 0.0);
+    m.read(&vs, 1.0);
+    m.read(&bat, 0.5);
+    m.arrive("alt", 1.0, stamp(PF, 1, &[]));
+    m.arrive("vs", 0.0, stamp(PF, 2, &[]));
+    m.frame();
+    m.read(&alt, 1.0);
+    m.frame();
+    m.read(&vs, 0.0);
+    m.frame();
+    m.read(&bat, 1.0);
+    m.send_all();
+    m.read(&bat, 0.0);
+    m.arrive("battery", 0.25, stamp(PF, 3, &[]));
+    m.wait(2 * SECOND);
+    m.take()
+}
+
+fn busy_profile() -> Resolved {
+    let (_, _, mut p) = vertical_modes();
+    let bat = l("BAT");
+    p.state
+        .push(state("battery", bat.clone(), Write::Name(bat.clone())));
+    p
+}
+
+#[test]
+fn the_log_changes_nothing_the_engine_decides_and_holds_nothing_while_off() {
+    let p = busy_profile();
+    let mut off = Machine::new(PM, &p);
+    let mut on = Machine::logging(PM, &p);
+    assert_eq!(a_busy_minute(&mut off), a_busy_minute(&mut on));
+    assert!(off.engine.take_log().is_empty());
+    assert!(!on.engine.take_log().is_empty());
+}
+
+#[test]
+fn a_rows_number_is_the_same_whether_the_log_turned_on_at_the_load_or_later() {
+    let p = busy_profile();
+    let bat = l("BAT");
+    let mut early = Machine::logging(PM, &p);
+    let mut late = Machine::new(PM, &p);
+    for m in [&mut early, &mut late] {
+        m.read(&bat, 0.0);
+        m.arrive("battery", 1.0, stamp(PF, 1, &[]));
+    }
+    late.engine.keep_log(true);
+    for m in [&mut early, &mut late] {
+        m.read(&bat, 1.0);
+        m.arrive("battery", 0.0, stamp(PF, 2, &[]));
+    }
+    let early: Vec<_> = early
+        .rows()
+        .into_iter()
+        .filter(|(n, _, _)| *n == 2)
+        .collect();
+    let late: Vec<_> = late
+        .rows()
+        .into_iter()
+        .filter(|(n, _, _)| *n == 2)
+        .collect();
+    assert!(!early.is_empty());
+    assert_eq!(early, late);
+}
+
+#[test]
+fn a_crewmates_toggle_that_lands_is_one_row_from_its_arrival_to_its_read_back() {
+    let beacon = l("BEACON");
+    let toggle = Write::Toggle(k("TOGGLE_BEACON_LIGHTS"));
+    let p = profile(vec![state("beacon", beacon.clone(), toggle)], vec![]);
+    let mut pm = Machine::logging(PM, &p);
+    pm.read(&beacon, 0.0);
+    pm.arrive("beacon", 1.0, stamp(PF, 1, &[]));
+    pm.frame();
+    pm.read(&beacon, 1.0);
+    assert_eq!(
+        pm.rows(),
+        vec![row(
+            1,
+            "beacon",
+            &[
+                "arrived 1",
+                "writes K('TOGGLE_BEACON_LIGHTS')",
+                "pending 1",
+                "read back 1, landed"
+            ]
+        )],
+        "the entry's first reading starts no row"
+    );
+}
+
+#[test]
+fn a_write_that_waits_for_its_first_reading_goes_on_its_row() {
+    let beacon = l("BEACON");
+    let p = profile(
+        vec![state("beacon", beacon.clone(), Write::Name(beacon.clone()))],
+        vec![],
+    );
+    let mut pm = Machine::logging(PM, &p);
+    pm.arrive("beacon", 1.0, stamp(PF, 1, &[]));
+    pm.read(&beacon, 0.0);
+    pm.read(&beacon, 1.0);
+    assert_eq!(
+        pm.rows(),
+        vec![row(
+            1,
+            "beacon",
+            &[
+                "arrived 1",
+                "waits for a first reading",
+                "first reading 0",
+                "writes L('BEACON') 1",
+                "pending 1",
+                "read back 1, landed"
+            ]
+        )]
+    );
+}
+
+#[test]
+fn a_toggle_that_waits_behind_another_entrys_write_finds_its_value_brought() {
+    let (alt, vs, p) = vertical_modes();
+    let mut pm = Machine::logging(PM, &p);
+    pm.read(&alt, 0.0);
+    pm.read(&vs, 1.0);
+    pm.arrive("alt", 1.0, stamp(PF, 1, &[]));
+    pm.arrive("vs", 0.0, stamp(PF, 2, &[]));
+    pm.frame();
+    pm.read(&alt, 1.0);
+    pm.frame();
+    pm.read(&vs, 0.0);
+    pm.frame();
+    assert_eq!(
+        pm.rows(),
+        vec![
+            row(
+                1,
+                "alt",
+                &[
+                    "arrived 1",
+                    "writes K('AP_ALT_HOLD')",
+                    "pending 1",
+                    "read back 1, landed"
+                ]
+            ),
+            row(
+                2,
+                "vs",
+                &[
+                    "arrived 0",
+                    "waits for alt",
+                    "now reads 0",
+                    "already matches"
+                ]
+            ),
+        ]
+    );
+}
+
+#[test]
+fn the_conflict_rule_logs_a_lost_change_and_a_won_one_that_withdraws_this_pilots() {
+    let bat = l("BAT");
+    let p = profile(
+        vec![state("battery", bat.clone(), Write::Name(bat.clone()))],
+        vec![],
+    );
+    // The flying machine's change wins over one made without seeing it.
+    let mut pf = Machine::logging(PF, &p);
+    pf.read(&bat, 0.5);
+    pf.read(&bat, 0.0);
+    pf.send_all();
+    pf.arrive("battery", 1.0, stamp(PM, 1, &[]));
+    assert_eq!(
+        pf.rows(),
+        vec![
+            row(1, "battery", &["local change 0", "sent"]),
+            row(2, "battery", &["arrived 1", "lost"]),
+        ]
+    );
+    // A crewmate's change that beats one this pilot's stream still holds withdraws it.
+    let mut pm = Machine::logging(PM, &p);
+    pm.read(&bat, 0.5);
+    pm.read(&bat, 1.0);
+    pm.arrive("battery", 0.25, stamp(PF, 1, &[]));
+    assert_eq!(
+        pm.rows(),
+        vec![
+            row(1, "battery", &["local change 1", "withdrawn: lost"]),
+            row(
+                2,
+                "battery",
+                &[
+                    "arrived 0.25",
+                    "won",
+                    "writes L('BAT') 0.25",
+                    "pending 0.25"
+                ]
+            ),
+        ]
+    );
+}
+
+#[test]
+fn a_write_that_never_reads_back_ends_never_landed() {
+    let bug = l("HEADING_BUG");
+    let p = profile(
+        vec![state("heading_bug", bug.clone(), Write::Name(bug.clone()))],
+        vec![],
+    );
+    let mut pm = Machine::logging(PM, &p);
+    pm.read(&bug, 0.0);
+    pm.arrive("heading_bug", 90.0, stamp(PF, 1, &[]));
+    pm.wait(2 * SECOND);
+    assert_eq!(
+        pm.rows(),
+        vec![row(
+            1,
+            "heading_bug",
+            &[
+                "arrived 90",
+                "writes L('HEADING_BUG') 90",
+                "pending 90",
+                "never landed 0"
+            ]
+        )]
+    );
+}
+
+#[test]
+fn a_local_change_is_sent_replaced_withdrawn_or_kept_before_ready_and_a_firing_goes_at_once() {
+    let bat = l("BAT");
+    let h = Name::H {
+        name: "SOME_KEY_PRESSED".into(),
+    };
+    let p = profile(
+        vec![state("battery", bat.clone(), Write::Name(bat.clone()))],
+        vec![event("key", h.clone(), Write::Name(h.clone()))],
+    );
+    let mut pf = Machine::logging(PF, &p);
+    pf.preflight_ended = false;
+    pf.read(&bat, 0.0);
+    pf.read(&bat, 1.0);
+    pf.preflight_ended = true;
+    pf.read(&bat, 0.0);
+    pf.read(&bat, 1.0);
+    pf.send_all();
+    pf.read(&bat, 0.5);
+    pf.read(&bat, 1.0);
+    pf.fired(&h, None);
+    assert_eq!(
+        pf.rows(),
+        vec![
+            row(
+                1,
+                "battery",
+                &["local change 1", "not sent during preflight"]
+            ),
+            row(2, "battery", &["local change 0", "replaced"]),
+            row(3, "battery", &["local change 1", "sent"]),
+            row(4, "battery", &["local change 0.5", "withdrawn: undone"]),
+            row(5, "battery", &["local change 1", "withdrawn: undone"]),
+            row(6, "key", &["local change none", "sent"]),
+        ]
+    );
+}
+
+#[test]
+fn a_pm_moving_what_the_pf_owns_is_put_back_and_the_put_backs_reading_matches_its_synced_value() {
+    let throttle = l("THROTTLE_1");
+    let mut entry = state(
+        "throttle_1",
+        throttle.clone(),
+        Write::Name(throttle.clone()),
+    );
+    entry.owner = Owner::PilotFlying;
+    let p = profile(vec![entry], vec![]);
+    let mut pm = Machine::logging(PM, &p);
+    pm.read(&throttle, 0.0);
+    pm.arrive("throttle_1", 0.8, stamp(PF, 1, &[]));
+    pm.read(&throttle, 0.8);
+    pm.read(&throttle, 0.5);
+    pm.read(&throttle, 0.8);
+    assert_eq!(
+        pm.rows(),
+        vec![
+            row(
+                1,
+                "throttle_1",
+                &[
+                    "arrived 0.8",
+                    "writes L('THROTTLE_1') 0.8",
+                    "pending 0.8",
+                    "read back 0.8, landed"
+                ]
+            ),
+            row(
+                2,
+                "throttle_1",
+                &[
+                    "local change 0.5",
+                    "put back 0.8",
+                    "writes L('THROTTLE_1') 0.8"
+                ]
+            ),
+            row(
+                3,
+                "throttle_1",
+                &["local change 0.8", "matches its synced value"]
+            ),
+        ]
+    );
+}
+
+#[test]
+fn an_event_entrys_write_uses_its_token_on_its_row_and_an_unused_one_expires() {
+    let h = Name::H {
+        name: "SOME_KEY_PRESSED".into(),
+    };
+    let b = Name::B {
+        name: "SOME_KEY_PRESS_1".into(),
+    };
+    let p = profile(
+        vec![],
+        vec![event("key", h.clone(), Write::Name(b.clone()))],
+    );
+    let mut pm = Machine::logging(PM, &p);
+    pm.arrive_fired("key", None);
+    pm.frame();
+    pm.fired(&h, None);
+    pm.arrive_fired("key", None);
+    pm.wait(2 * SECOND);
+    pm.fired(&h, None);
+    assert_eq!(
+        pm.rows(),
+        vec![
+            row(
+                1,
+                "key",
+                &["arrived none", "writes B('SOME_KEY_PRESS_1')", "token used"]
+            ),
+            row(
+                2,
+                "key",
+                &[
+                    "arrived none",
+                    "writes B('SOME_KEY_PRESS_1')",
+                    "token expired"
+                ]
+            ),
+            row(3, "key", &["local change none", "sent"]),
+        ]
+    );
+}
+
+#[test]
+fn a_newer_value_that_reads_back_first_replaces_older_rows_and_a_stepping_write_lands_at_its_end() {
+    let hdg = l("HDG");
+    let p = profile(
+        vec![state("heading", hdg.clone(), Write::Name(hdg.clone()))],
+        vec![],
+    );
+    let mut pm = Machine::logging(PM, &p);
+    pm.read(&hdg, 99.0);
+    for (n, value) in [100.0, 101.0, 102.0].into_iter().enumerate() {
+        pm.arrive("heading", value, stamp(PF, n as u64 + 1, &[]));
+    }
+    pm.read(&hdg, 102.0);
+    let ends: Vec<String> = pm
+        .rows()
+        .into_iter()
+        .map(|(_, _, steps)| steps.last().cloned().unwrap_or_default())
+        .collect();
+    assert_eq!(ends, vec!["replaced", "replaced", "read back 102, landed"]);
+
+    let crs = l("CRS");
+    let write = Write::Steps(Steps {
+        inc: k("CRS_INC"),
+        dec: k("CRS_DEC"),
+        step: 1.0,
+        wrap: None,
+        range: None,
+        pace: None,
+    });
+    let p = profile(vec![state("course", crs.clone(), write)], vec![]);
+    let mut pm = Machine::logging(PM, &p);
+    pm.read(&crs, 90.0);
+    pm.arrive("course", 93.0, stamp(PF, 1, &[]));
+    pm.frame();
+    pm.read(&crs, 91.0);
+    pm.frame();
+    pm.read(&crs, 93.0);
+    assert_eq!(
+        pm.rows(),
+        vec![row(
+            1,
+            "course",
+            &[
+                "arrived 93",
+                "writes K('CRS_INC')",
+                "writes K('CRS_INC')",
+                "read back 91",
+                "writes K('CRS_INC')",
+                "read back 93, landed"
+            ]
+        )],
+        "a knob still stepping never lands"
+    );
+}
+
+#[test]
+fn a_newer_value_that_takes_over_a_stepping_write_replaces_its_row_and_lands_on_its_own() {
+    let crs = l("CRS");
+    let write = Write::Steps(Steps {
+        inc: k("CRS_INC"),
+        dec: k("CRS_DEC"),
+        step: 1.0,
+        wrap: None,
+        range: None,
+        pace: None,
+    });
+    let p = profile(vec![state("course", crs.clone(), write)], vec![]);
+    let mut pm = Machine::logging(PM, &p);
+    pm.read(&crs, 90.0);
+    pm.arrive("course", 95.0, stamp(PF, 1, &[]));
+    pm.frame();
+    pm.arrive("course", 100.0, stamp(PF, 2, &[]));
+    // Readings that lag the steps, the first step's value the older row left pending.
+    pm.read(&crs, 91.0);
+    pm.wait(SECOND / 5);
+    pm.read(&crs, 100.0);
+    let ends: Vec<(u32, String)> = pm
+        .rows()
+        .into_iter()
+        .map(|(n, _, steps)| (n, steps.last().cloned().unwrap_or_default()))
+        .collect();
+    assert_eq!(
+        ends,
+        vec![(1, "replaced".into()), (2, "read back 100, landed".into())],
+        "the older row ends replaced, and a lagging reading of its steps is the newer row's"
+    );
+}
+
+#[test]
+fn an_entry_the_aircraft_drives_logs_stopped_driven_on_its_local_change() {
+    let h = Name::H {
+        name: "SOME_KEY_PRESSED".into(),
+    };
+    let b = Name::B {
+        name: "SOME_KEY_PRESS_1".into(),
+    };
+    let p = profile(
+        vec![],
+        vec![event("key", h.clone(), Write::Name(b.clone()))],
+    );
+    let mut pm = Machine::logging(PM, &p);
+    for _ in 0..20 {
+        pm.arrive_fired("key", None);
+        pm.wait(2 * SECOND);
+        pm.fired(&h, None);
+    }
+    let rows = pm.rows();
+    assert!(
+        rows.iter()
+            .any(|(_, _, steps)| steps == &["local change none", "stopped Driven"]),
+        "{rows:?}"
+    );
+}
+
+#[test]
+fn catch_up_and_control_passing_start_rows_of_their_own() {
+    let bat = l("BAT");
+    let p = profile(
+        vec![state("battery", bat.clone(), Write::Name(bat.clone()))],
+        vec![],
+    );
+    let mut late = Machine::logging(PM, &p);
+    late.read(&bat, 0.0);
+    late.catching_up = true;
+    let out = late.engine.take(
+        &CatchUpState {
+            entries: vec![entry("battery", 1.0)],
+        },
+        late.cx(),
+    );
+    late.out.extend(out);
+    assert_eq!(
+        late.rows(),
+        vec![row(
+            1,
+            "battery",
+            &["catch-up 1", "writes L('BAT') 1", "pending 1"]
+        )]
+    );
+
+    let trim = l("ELEVATOR_TRIM");
+    let mut entry = state("elevator_trim", trim.clone(), Write::Name(trim.clone()));
+    entry.owner = Owner::PilotFlying;
+    let p = profile(vec![entry], vec![]);
+    let mut pm = Machine::logging(PM, &p);
+    pm.read(&trim, 0.0);
+    pm.arrive("elevator_trim", -5.0, stamp(PF, 1, &[]));
+    pm.read(&trim, -5.0);
+    // Its own autopilot runs the trim away while it follows.
+    pm.read(&trim, -30.0);
+    pm.pf = PM;
+    let out = pm.engine.control_passed(pm.cx());
+    pm.out.extend(out);
+    pm.read(&trim, -5.0);
+    pm.send_all();
+    let rows = pm.rows();
+    assert_eq!(
+        rows[2..],
+        [
+            row(
+                3,
+                "elevator_trim",
+                &["control passed -5", "writes L('ELEVATOR_TRIM') -5"]
+            ),
+            row(4, "elevator_trim", &["local change -5", "sent"]),
+        ],
+        "{rows:?}"
+    );
+}
+
+#[test]
+fn an_ignore_logs_its_event_on_the_row_whose_firing_started_it_and_an_unused_one_expires() {
+    let push = Name::H {
+        name: "STARTER_PUSH".into(),
+    };
+    let starter = k("TOGGLE_STARTER1");
+    let mut entry = event("starter", push.clone(), Write::Name(push.clone()));
+    entry.ignore = vec![starter.clone()];
+    let p = profile(
+        vec![],
+        vec![
+            entry,
+            event("starter_key", starter.clone(), Write::Name(starter.clone())),
+        ],
+    );
+    let mut pm = Machine::logging(PM, &p);
+    pm.fired(&push, None);
+    pm.fired(&starter, None);
+    pm.fired(&push, None);
+    pm.wait(2 * SECOND);
+    assert_eq!(
+        pm.rows(),
+        vec![
+            row(
+                1,
+                "starter",
+                &["local change none", "sent", "ignored K('TOGGLE_STARTER1')"]
+            ),
+            row(
+                2,
+                "starter",
+                &[
+                    "local change none",
+                    "sent",
+                    "ignore expired K('TOGGLE_STARTER1')"
+                ]
+            ),
+        ]
+    );
+}
+
+#[test]
+fn a_write_function_whose_value_the_cockpit_already_reads_ends_its_row_already_matches() {
+    let hdg = l("HDG");
+    let function = "(value) => { write(L('HDG'), value) }";
+    let p = profile(
+        vec![state(
+            "heading",
+            hdg.clone(),
+            Write::Function(function.into()),
+        )],
+        vec![],
+    );
+    let mut pm = Machine::logging(PM, &p);
+    pm.read(&hdg, 252.0);
+    pm.arrive("heading", 252.0, stamp(PF, 1, &[]));
+    assert_eq!(
+        pm.rows(),
+        vec![row(
+            1,
+            "heading",
+            &["arrived 252", "writes L('HDG') 252", "already matches"]
+        )],
+        "no reading comes for a check to match, so the row ends"
+    );
+}
+
+#[test]
+fn a_stop_ends_every_row_whose_write_it_cuts_off() {
+    let push = Name::H {
+        name: "AP_PUSH".into(),
+    };
+    let function = r#"(value) => {
+      if (value === 2) { while (true) {} }
+      write(K('AP_INC')).repeat(5).every('2 frames')
+    }"#;
+    let p = profile(
+        vec![],
+        vec![event("ap", push.clone(), Write::Function(function.into()))],
+    );
+    let mut pm = Machine::logging(PM, &p);
+    pm.arrive_fired("ap", Some(1.0));
+    pm.frame();
+    pm.arrive_fired("ap", Some(2.0));
+    // The first row's token outlives the stop, and expires with no step, so the row stays stopped.
+    pm.wait(2 * SECOND);
+    let rows = pm.rows();
+    let ends: Vec<(u32, String)> = rows
+        .iter()
+        .map(|(n, _, steps)| (*n, steps.last().cloned().unwrap_or_default()))
+        .collect();
+    assert_eq!(ends.len(), 2, "{rows:?}");
+    assert!(
+        ends.iter().all(|(_, end)| end.starts_with("stopped Limit")),
+        "the stepping row the stop cut off ends stopped too: {rows:?}"
+    );
 }

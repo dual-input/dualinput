@@ -7,6 +7,13 @@ Decides:     What an author sees with the sim: live values on watch lines, the D
 ```
 
 > **Note**
+> From stage 22i, a watched value takes the kit's lime for a live value, `live`, in [the box](#the-box) and in the Dual Input panel, where this design gives it our sky, since sky is our main color and green means a session's sync is on ([profiles log](log.md#2026-11-25-the-sync-logs-draft-shows-a-steps-time-only-where-time-passed-and-a-live-value-turns-lime-everywhere); user, 2026-11-25).
+
+> **Note**
+> From stage 22i, the Sync log, a view of its own in VS Code's bottom panel, lists each decision state sync's engine takes on this PC, and each entry's latest step shows after the first box of its `watch:` ([06-the-sync-log](06-the-sync-log.md); user, 2026-11-25).
+> The Dual Input panel stays for doing things, and a Run's own decisions show in it, not in the Sync log.
+
+> **Note**
 > From stage 22h, [the Dual Input panel](#the-dual-input-panel) is a surface of islands in its one webview, which [05-the-recorder](05-the-recorder.md#the-recorders-island) designs (user, 2026-11-23).
 > The status line takes an island of its own at the top, since it tells of Dual Input and the flight while Run and the picker tell of the entry under the cursor (user, 2026-11-25).
 > Run's island, holding Run or the picker, fills the height down to the recorder's island at the bottom, and holds the line "Unsaved edits run on this PC only"; with nothing to run or pick, as outside a flight, it stays empty, so the panel keeps its shape.

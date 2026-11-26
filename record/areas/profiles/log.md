@@ -8,6 +8,93 @@ TypeScript's language service answers inside a write function in about 40ms in Q
 The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and [p04-language-service.mjs](../../../experiments/areas/profiles/p04-language-service.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 None needs the sim.
 
+## 2026-11-26: In the sim, the Sync log's five cases passed on the 58P, and a step reached the extension 1.2ms after its input at p95
+
+We ran `tools/sim/sync-log.ts` on MSFS 2024, alone in the Black Square Baron 58P Professional 0.1.1, cold and dark at a stand, to see whether the log holds up against the real core and sim, and to measure [a step to the view](06-the-sync-log.md#budgets) against its 150ms at p95.
+We expected the cases to pass and the step to come well inside its budget, since state sync sends each engine call's steps in one message as the call returns.
+
+All five passed (measured on MSFS 2024, 2026-11-26, [the run's report](results/2026-11-26-sync-log-in-the-sim.txt)):
+
+- The beacon switch, flipped on and off twice by hand, gave 4 rows, one per flip, each a local change, then sent.
+- The recording, of the battery, the heading knob, and the autopilot's ALT and VS buttons, held every change the stream sent of each: `battery` 2, `heading_bug` 64, `ap_altitude_hold` 2, and `ap_vs_hold` 1.
+- Playing it back first put back the cockpit's state at Record, as 180 rows from the playback, each with a catch-up's value.
+  It then played each recorded change as a row of its own: `battery` 2 of 2, `heading_bug` 64 of 64, `ap_altitude_hold` 2 of 2, and `ap_vs_hold` 1 of 1, and 3 more of entries the recording moved with them, `flight_director` twice and `ap_altitude` once.
+  Of the playback's 252 rows, 72 landed, read back 32ms after their first step at the median and 133ms at most; 179 found the cockpit already at their value, as most of the putting back did; and 1 ended on a token used.
+- A step reached the extension 0.4ms after its input at p50, 1.2ms at p95, and 2.1ms at worst, over 1,014 steps in 438 messages, against 150ms at p95.
+- The core's replay of its recording replayed 64,553 inputs, and all 178 checkpoints matched.
+
+A first run's recording case confused the pilot running it: right after the battery came on, the Baron's heading seemed to move on its own, likely the HSI's card swinging as its gyro spun up (unverified), so it read as the script moving the knob.
+The guided prompts don't say that the recorder records only what the pilot does from Record to Stop.
+
+Nothing in the design changes.
+Docs affected: none.
+
+## 2026-11-26: The Sync log's copy pass renamed five steps, dropped `goes`, and draws a bug in the profile in red
+
+A copy pass over every word in place, on the dev page's `Every word` scene, asked whether each word and its definition reads once for an author who hasn't read the engine.
+We expected the definitions to change and the words to hold.
+Five words changed with them, and so did the look of a bug and of a value (user, 2026-11-26):
+
+- `not sent before Ready` became `not sent during preflight`, `shadow taken` became `shadow restored`, `waits behind` became `waits for`, and `brought` became `now reads`, in the engine as in the log, since the log and the code share one word for each thing; the engine's queue of waiting writes is `waiting`.
+- `unchecked` became `warning skipped`: the engine checks a following machine's write of what the pilot flying owns like any other, and only skips the `never landed` warning when it doesn't read back, so "unchecked" named something that didn't happen, and the user couldn't tell what the step meant from it.
+- `withdrawn` always names its reason after a colon, as `stopped` does: `lost`, or the new `undone`.
+  Before, only `lost` showed, after a comma, and the other reason went unnamed.
+  So `withdrawn`'s definition says what withdrawing is, and each reason's definition says why.
+  A colon comes before a second word that says why, and a comma before one that adds a further fact, as `read back 1, landed`.
+- `goes` left the log: the step after it lands at the same moment and already shows the write's turn came.
+- A bug in the profile shows in red, on the step that met it and on its row's line (user).
+  The bugs are a write function that threw, an entry stopped because its function failed to compile or ran out of time or memory, a read the sim refused, and an event entry whose write sets a variable from an event that carries no value.
+  What the aircraft or the sim did wrong stays in the kit's warning amber.
+- A value in the log takes the profile's syntax colors, teal for a number and the string color for a text, where [the draft](#2026-11-25-the-sync-logs-draft-shows-a-steps-time-only-where-time-passed-and-a-live-value-turns-lime-everywhere) gave every value lime: each is what a step saw or wrote at its time, and lime means the sim's value right now, in the box after a `watch:` line and in the Dual Input panel's Run (user).
+- The Dual Input panel's title bar has a button of VS Code's own, Show Sync log, so an author who reads the side bar doesn't miss the log in the bottom panel; the log's tab keeps the name Sync log, since a second view of ours in the bottom panel couldn't share a tab name of Dual Input with it (user).
+- `ignored` and `ignore expired` carry the event the entry's `ignore` lists, as `ignored K('TOGGLE_STARTER1')`, which the engine knew and the step left out.
+- Each word's definition is a sentence or two of what happened, in the words the profile format gives an author, at most 34 words, which the words' test checks: a step's own act in the past tense, waits included, since the log is a record, and a rule or what still holds in the present (user).
+
+Docs affected: [06-the-sync-log](06-the-sync-log.md), in a note of this entry; [05-units](../sync/05-units.md), whose note of stage 22i gives the new words; and [interface decisions](../interface/decisions.md#the-apps-take-shadcns-luma-look-at-a-4px-radius-on-neutral-grays-with-tailwinds-sky-300-as-the-main-color-and-geist), whose live-value lines give the Sync log's values the profile's syntax colors.
+
+## 2026-11-25: The Sync log's draft shows a step's time only where time passed, and a live value turns lime everywhere
+
+Refining the Sync log's view by eye with the user, on its dev page, asked whether the design's view held once drawn.
+We expected the words and the look to change, which the design leaves to the draft, and the rows and steps to hold.
+They held, as a row that opens in place to its steps in order, and two parts of the design changed (user, 2026-11-25):
+
+- **A step's time shows only where time passed.** [06-the-sync-log](06-the-sync-log.md#what-an-author-sees) gives each step its time from the row's first; the draft shows it, as `+212ms`, only on a step that came later than the one before, since most steps take no time and an author reads their order, not their milliseconds (user).
+- **A live value is lime.** [04-the-extension-in-the-sim](04-the-extension-in-the-sim.md#the-box) draws a watched value in our sky, after fsc-editor's blue box, where blue meant the sim alone; sky is our main color here, and green already means a session's sync is on, so a value read from the sim takes a lime of its own, the kit's `live` ([interface decisions](../interface/decisions.md#the-apps-take-shadcns-luma-look-at-a-4px-radius-on-neutral-grays-with-tailwinds-sky-300-as-the-main-color-and-geist)), in the box after its line, in the Dual Input panel, and in every value the Sync log shows (user).
+  Teal, the profile's color for a number, then means only a number its author wrote.
+
+The draft also settled these, which the design left to it:
+
+- Entry keys and the parts of a write's name calls take the token colors the extension's manifest gives the profile grammar's scopes, the ones VS Code paints a profile with, in the palette the profile takes (user).
+- An open row rises into a card, its steps run down a rail with a mark on each, and each row's verdict carries an icon: trouble, done, under way, or ended with nothing to do.
+- The kit gained shadcn's empty state, in its Luma style, with a compact size for a short panel, a flat look for a field over a list, and a link in the text's own color.
+
+A panel 640px wide left the verdict's column no room, since a grid shares the room out to the columns before it first, so the column keeps 8rem.
+
+Docs affected: [06-the-sync-log](06-the-sync-log.md) and [04-the-extension-in-the-sim](04-the-extension-in-the-sim.md), each in a note of this entry.
+
+## 2026-11-25: Building stage 22i's Sync log changed five parts of its design, and its log costs nothing while off
+
+Building the Sync log ([06-the-sync-log](06-the-sync-log.md)) and its code review asked whether the design held as written.
+We expected it to.
+It held in most of its parts, and these five changed, each with the user, on 2026-11-25:
+
+- **A takeover moves a run's values.** When a newer row of an entry takes over an older row's stepping write, the values the older row's steps left pending, and a counting entry's tokens, belong to the newer row from then on, whether the log is on or not. Before that fix, a reading that lagged the steps read back on the older row, which could end `landed` at a value it never reached, as a crewmate's course knob turned 90 to 95 and then to 100 showed in an engine test.
+- **Keys, not names.** A row, a step's links, and the hint name an entry by its key, since an author writes the key and the filter box matches it, so `serve` looks up no `name:` (user).
+- **The extension keeps a copy of the rows.** `serve` keeps the last 10,000 rows and sends the rows that changed; the extension keeps a copy of them too, since VS Code throws away a hidden view's page, and repaints the view from it when it opens, with no request to `serve` (user).
+- **The decisions' cases are the engine's tests.** Each of the design's cases about what the engine decides runs as a test of the engine alone, which checks each step exactly in about 2s; the bench scenario `sync-log` keeps the four that need a core: when state sync sends, whom a row names, a playback's rows, and the log's cost with a lever moving (user).
+- **The hint draws in decorations of its own.** VS Code orders two texts after a line's end by class names from a counter every extension shares, so the hint takes two decoration types of its own, made right after the boxes', which the extension makes again once if they sort out of order (read in VS Code 1.147.0's source); the code review judged that it earns its place.
+
+`serve` also keeps the session's profile files once the session ends, so an entry's link opens its line in a closed file after the flight.
+
+The log costs nothing while it's off.
+We timed the same engine calls in-process, with the log off, on the stage's starting commit, 30c50a4e, and on the stage's code: 200 entries, each round an arrival, its read back, a local change, and a frame, the best of 7 runs, alternating the two on our development machine at 5% to 9% CPU.
+The first cut took 710ns to 754ns a call against 622ns to 692ns, since some branches cloned a value for their step before the log's check and the frame's check gathered what only a step needs; with those behind the check, and the check skipping an empty list of values to compare, the stage's code took 453ns and 461ns a call against 627ns and 635ns.
+That last saving is larger than the log's own checks, so their cost can't be read apart from it.
+
+On the bench, with the log on and a lever moved for 3s, state sync sent 247 messages, the largest 253 bytes against the protocol's 64 KiB, and the slowest input took 383µs against the code map's 1ms.
+
+Docs affected: [06-the-sync-log](06-the-sync-log.md), in its note of this entry.
+
 ## 2026-11-24: The recorder's messages reached the stream within 3.8ms of their recorded times, and a recording held about 205 bytes an entry
 
 **Asked:** do the recorder's two [budgets](05-the-recorder.md#budgets) hold, a message's arrival within 20ms of its recorded time, a sample's included, and what a recording's message costs in memory; and do the stage's scenarios pass on main with the session's two restart fixes?

@@ -281,6 +281,9 @@ The one exception is the GitHub organization, `dual-input`, because GitHub would
 Dual Input was called Crosscheck until 2026-10-19.
 `experiments/` and every `results/` folder keep that name, and so does a log where it quotes what a probe ran, because they record what ran.
 
+**The pilots in a session are crew members**, never crewmates, in everything you write from 2026-11-26, since the user had to correct "crewmate" again and again in the Sync log's copy.
+Older text that says "crewmate" waits for a sweep the user will run, so leave it as it is unless you're rewriting that sentence anyway.
+
 ## Words and patterns to cut
 
 Each of these usually marks a sentence written on autopilot.
@@ -411,7 +414,7 @@ fix(sync): hold a pending write until the sim reads it back
 A flip the stand-in sim took before the core read its own write counted as the
 write never landing, so the flip was never sent.
 
-Release-Note: A switch you flip right after your crewmate's stays where you put it.
+Release-Note: A switch you flip right after your crew member flips it stays where you put it.
 ```
 
 ## Instructions for agents

@@ -5,6 +5,9 @@ import { showPress } from "../lib/press.ts"
 
 const TONES = {
   primary: "text-primary",
+  // A link that names the thing its line is about, as a log row's entry, in the text's own color, so a column of them
+  // reads as names rather than as a column of links.
+  plain: "text-foreground",
   muted: "text-muted-foreground",
   warning: "text-warning",
   destructive: "text-destructive",

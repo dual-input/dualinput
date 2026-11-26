@@ -41,11 +41,17 @@
     "viewsContainers": {
       "secondarySidebar": [
         { "id": "dualInput", "title": "Dual Input", "icon": "./icons/language-dark.svg" }
+      ],
+      "panel": [
+        { "id": "dualInputSyncLog", "title": "Sync log", "icon": "./icons/language-dark.svg" }
       ]
     },
     "views": {
       "dualInput": [
         { "type": "webview", "id": "dualInput.view", "name": "Dual Input" }
+      ],
+      "dualInputSyncLog": [
+        { "type": "webview", "id": "dualInput.syncLog", "name": "Sync log" }
       ]
     },
     "commands": [
@@ -54,9 +60,13 @@
       { "command": "dualInput.openLocalFolder", "title": "Open local folder", "category": "Dual Input" },
       { "command": "dualInput.restartServer", "title": "Restart language server", "category": "Dual Input" },
       { "command": "dualInput.runEntry", "title": "Run entry", "category": "Dual Input" },
-      { "command": "dualInput.pickDisplays", "title": "Pick displays", "category": "Dual Input" }
+      { "command": "dualInput.pickDisplays", "title": "Pick displays", "category": "Dual Input" },
+      { "command": "dualInput.showSyncLog", "title": "Show Sync log", "category": "Dual Input", "icon": "$(list-flat)" }
     ],
     "menus": {
+      "view/title": [
+        { "command": "dualInput.showSyncLog", "when": "view == dualInput.view", "group": "navigation" }
+      ],
       "commandPalette": [
         { "command": "dualInput.buildNow", "when": "editorLangId == dualinput-profile" },
         { "command": "dualInput.removeBundle", "when": "editorLangId == dualinput-profile" },

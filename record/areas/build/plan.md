@@ -1306,6 +1306,8 @@ The stage changes the sync engine, which every scenario with a profile runs on, 
 
 Exit: on our development machine, `node tools/check.ts` passes, and `node tools/bench.ts` passes, the `sync-log` scenario among it, and an engine call with the log off times within the spread of its time on the stage's starting commit; the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, and the user has seen the Sync log's dev page in each of its states; in one session in the sim on the 58P, `node tools/sim/sync-log.ts` reports each of its cases passed; and the [profiles' log](../profiles/log.md) has the budgets' measurements.
 
+Done on 2026-11-26.
+
 ## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.

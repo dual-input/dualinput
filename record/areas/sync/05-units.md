@@ -7,6 +7,19 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 ```
 
 > **Note**
+> From stage 22i, the engine, these docs, and the profile extension's Sync log use one word for each thing, and the words below take the place of the ones in this doc's text ([06-the-sync-log](../profiles/06-the-sync-log.md#the-words); user, 2026-11-25):
+>
+> - A write the engine "holds … until the entry's first reading arrives" waits for the entry's first reading, as `awaiting_reading` in the code.
+> - What stage 14c's note calls a "held arrival" or a "held write", and what "holds … behind it", waits for its turn, as `waiting` in the code, which the Sync log shows as `waits for`.
+> - "The value it holds", which a put-back writes, is the entry's synced value, as `synced` in the code.
+> - "This machine's own change" is a local change, as `local_change` in the code.
+> - A reading that matches a pending value is that write's read back, and "echo" names only the loop it guards against, a write sent back to the crew.
+> - A following machine's write of what the PF owns, which "goes unchecked", is checked like any write, and only its warning when it doesn't read back is skipped, which the Sync log shows as `warning skipped`; "unchecked" names only a write the engine never checks, as a shadow value's.
+> - The sync engine logs each decision it takes, at no cost while nobody watches, and state sync sends the steps to the profile extension while one is connected ([what the engine logs](../profiles/06-the-sync-log.md#what-the-engine-logs)).
+>
+> So "held" in sync names only the cockpit stream's holding of each key's newest message.
+
+> **Note**
 > From stage 22h, the cockpit stream serves the profile extension's recorder ([05-the-recorder](../profiles/05-the-recorder.md#what-the-cockpit-stream-gains); user, 2026-11-23): a kind can be marked recorded, as state sync's three and pointer sync's gesture are; `CockpitSent` carries the message's body and whether its kind is recorded; the stream makes each catch-up step's payload on request; and alone in a session, it takes a catch-up from a pretend sender and applies that sender's messages in the order of [applying](#applying).
 
 > **Note**

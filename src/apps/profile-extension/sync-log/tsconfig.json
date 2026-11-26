@@ -1,0 +1,21 @@
+// The Sync log runs in a VS Code webview in the bottom panel, a current Chromium, so this checks it against what that
+// has, as ../panel's does for the Dual Input panel. It draws with the kit, and esbuild bundles it apart from the
+// extension's own code in ../src, which runs on Node in the extension host, though it reads the words from ../src/words.ts.
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["es2022", "dom"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "types": []
+  },
+  "include": ["src", "dev"]
+}

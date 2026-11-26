@@ -1,0 +1,957 @@
+The Sync log's cases in the sim, from 2026-11-26_10-02-39, with the core <repo>\target\release\dualinput-core.exe
+the sim is flying bksq-aircraft-baronpropress; hosting the session
+waiting up to 75s for your aircraft to settle
+The cases run now, about two minutes of them. Each window you act in opens and closes with a short beep. Keep your hands off the controls until a step asks for them.
+
+=== A switch flipped by hand
+Next, the beacon switch. At the beep, flip it and flip it back, twice, slowly, until the second beep, about 10 seconds. Press Page Down to start, or Page Up to skip.
+PASSED: the beacon switch gave 4 rows, each a local change, then sent
+the beacon's rows, each with its steps' times from its first:
+  beacon: Sent
+    +0ms       LocalChange 1
+    +50.5ms    Sent
+  beacon: Sent
+    +0ms       LocalChange 0
+    +50.4ms    Sent
+  beacon: Sent
+    +0ms       LocalChange 1
+    +50.6ms    Sent
+  beacon: Sent
+    +0ms       LocalChange 0
+    +50.4ms    Sent
+
+=== A recording played back
+Next, the recording, about a minute and a half. Each control's name comes just before its beep, and a second beep ends its turn. Press Page Down to start, or Page Up to skip.
+Set the avionics master on and the battery off.
+The battery on.
+Turn the heading knob to the right, slowly, about 30 degrees.
+Press the autopilot's ALT button.
+Press the autopilot's VS button.
+Now move them elsewhere. Turn the heading knob back to the left, about 60 degrees.
+Press ALT.
+Hands off while the recorder puts the cockpit back and plays the recording, about 38 seconds.
+The playback ended.
+PASSED: the recording holds changes the stream sent of each entry the case moves: battery 2, heading_bug 64, ap_altitude_hold 2, ap_vs_hold 1
+PASSED: the playback's putting back gave 180 rows from the playback, each of a catch-up's value: battery, alternator_1, alternator_2, avionics_master, external_power, breaker_gear_relay, breaker_gear_motor, breaker_flap_relay, breaker_flap_motor, breaker_avionics_relay, breaker_volt_meter, breaker_starter, beacon, strobe, nav_lights, taxi_light, landing_light_1, landing_light_2, ice_light, glareshield_flood, panel_lights, flight_instrument_lights, engine_instrument_lights, glareshield_lights, subpanel_lights, cockpit_light_1, cockpit_light_2, cockpit_light_3, cockpit_light_4, cockpit_light_5, cockpit_light_6, map_light_1, map_light_2, annunciator_test, fuel_selector_1, fuel_selector_2, fuel_pump_1, fuel_pump_2, throttle_1, throttle_2, propeller_1, propeller_2, mixture_1, mixture_2, friction_lock, cowl_flap_1, cowl_flap_2, ignition_1, ignition_2, prop_sync, flaps, gear, gear_crank_handle, gear_crank_turns, parking_brake, elevator_trim, aileron_trim, rudder_trim, control_lock, ap_master, flight_director, yaw_damper, ap_heading_mode, ap_nav_mode, ap_approach_mode, ap_back_course_mode, ap_altitude_hold, ap_vs_hold, ap_vertical_speed, ap_altitude, kas_vs_adjust, kas_arm, kas_armed_vs, heading_bug, hsi_course, nav2_course, hsi_rnav_source, gyro_slave_mode, gyro_slew, altimeter_1, altimeter_2, decision_height, true_airspeed_1, true_airspeed_2, alternate_static, gps_drives_nav1, yoke_chrono_1, yoke_chrono_2, engine_monitor_mode, engine_monitor_unit, pitot_heat_1, pitot_heat_2, prop_deice, windshield_heat, fuel_vent_heat, stall_warning_heat, surface_deice, vent_blowers, air_conditioner, air_conditioning_blower, cabin_heater, cabin_heater_blower, fresh_air, cabin_temp_unit, oxygen_handle, cabin_heat_handle, pilot_air_handle, defroster_handle, air_shutoff_handle_1, air_shutoff_handle_2, copilot_air_handle, ram_air_handle, cabin_altitude_goal, cabin_climb_rate, pressurization_mode, pressurization_test, door_seal_primary, door_seal_pump_power, door_seal_standby_air, door_seal_standby, co_test, pilot_door, cabin_door, nose_door, storm_window, pilot_door_bypass, cabin_door_bypass, wheel_chocks, pitot_covers, engine_covers, pre_heater, global_failure_rate, com1_active, com1_standby, com2_active, com2_standby, nav1_active, nav1_standby, nav2_active, nav2_standby, com1_spacing, com2_spacing, com1_knob_pulled, nav1_knob_pulled, com2_knob_pulled, nav2_knob_pulled, com1_power, com2_power, transponder_code, transponder_mode, audio_source_knob, audio_marker_sensitivity, audio_marker_test, audio_com1_receive, audio_com2_receive, audio_com3_receive, audio_nav1_ident, audio_nav2_ident, cabin_intercom, crew_isolate, adf_standby, adf_power, adf_knob_pulled, adf_ant, adf_bfo, adf_mode, dme_mode, rnav_power, rnav_volume, rnav_knob_pulled, rnav_radial_mode, rnav_check, radar_mode, radar_gain, radar_tilt, radar_brightness, radar_alert, radar_profile, radar_hold, radar_track
+PASSED: each of those changes played back as a row of its own from the playback: battery 2 of 2, heading_bug 64 of 64, ap_altitude_hold 2 of 2, ap_vs_hold 1 of 1
+72 of the playback's 252 rows landed, read back 32ms after their first step at the median, and 133ms at most
+the rows from Play on, the playback's and this PC's, each with its steps' times from its first:
+  battery, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  alternator_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  alternator_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  avionics_master, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  external_power, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  breaker_gear_relay, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  breaker_gear_motor, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  breaker_flap_relay, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  breaker_flap_motor, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  breaker_avionics_relay, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  breaker_volt_meter, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  breaker_starter, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  beacon, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  strobe, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  nav_lights, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  taxi_light, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  landing_light_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  landing_light_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ice_light, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  glareshield_flood, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  panel_lights, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  flight_instrument_lights, from playback: AlreadyMatches
+    +0ms       CaughtUp 100
+    +0ms       AlreadyMatches
+  engine_instrument_lights, from playback: AlreadyMatches
+    +0ms       CaughtUp 100
+    +0ms       AlreadyMatches
+  glareshield_lights, from playback: AlreadyMatches
+    +0ms       CaughtUp 50
+    +0ms       AlreadyMatches
+  subpanel_lights, from playback: AlreadyMatches
+    +0ms       CaughtUp 100
+    +0ms       AlreadyMatches
+  cockpit_light_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cockpit_light_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cockpit_light_3, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cockpit_light_4, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cockpit_light_5, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cockpit_light_6, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  map_light_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  map_light_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  annunciator_test, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  fuel_selector_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 19
+    +0ms       AlreadyMatches
+  fuel_selector_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 20
+    +0ms       AlreadyMatches
+  fuel_pump_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  fuel_pump_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  throttle_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  throttle_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  propeller_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 16384
+    +0ms       AlreadyMatches
+  propeller_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 16384
+    +0ms       AlreadyMatches
+  mixture_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  mixture_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  friction_lock, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cowl_flap_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cowl_flap_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ignition_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ignition_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  prop_sync, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  flaps, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  gear, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  gear_crank_handle, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  gear_crank_turns, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  parking_brake, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  elevator_trim, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  aileron_trim, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  rudder_trim, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  control_lock, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ap_master, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  flight_director, from playback: ReadBack landed 0, read back 14.2ms after its first step
+    +0ms       CaughtUp 0
+    +0ms       Writes K('TOGGLE_FLIGHT_DIRECTOR')
+    +0ms       Pending 0
+    +14.2ms    ReadBack landed 0
+  yaw_damper, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ap_heading_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ap_nav_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 1.115214575429e-311
+    +0ms       AlreadyMatches
+  ap_approach_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ap_back_course_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ap_altitude_hold, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ap_vs_hold, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ap_vertical_speed, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ap_altitude, from playback: ReadBack landed 0, read back 71.2ms after its first step
+    +0ms       CaughtUp 0
+    +0ms       WaitsFor flight_director
+    +53.5ms    Writes K('AP_ALT_VAR_SET_ENGLISH') 0
+    +53.5ms    Pending 0
+    +71.2ms    ReadBack landed 0
+  kas_vs_adjust, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  kas_arm, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  kas_armed_vs, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  heading_bug, from playback: ReadBack landed 0, read back 133ms after its first step
+    +0ms       CaughtUp 0
+    +0ms       WaitsFor ap_altitude
+    +90.6ms    Writes B('INSTRUMENT_Heading_Bug_Set') 0
+    +90.6ms    Pending 0
+    +133ms     ReadBack landed 0
+  hsi_course, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  nav2_course, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  hsi_rnav_source, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  gyro_slave_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  gyro_slew, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  altimeter_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 1013.2500109386216
+    +0ms       AlreadyMatches
+  altimeter_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 1013.2500109386216
+    +0ms       AlreadyMatches
+  decision_height, from playback: AlreadyMatches
+    +0ms       CaughtUp 200
+    +0ms       AlreadyMatches
+  true_airspeed_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 10
+    +0ms       AlreadyMatches
+  true_airspeed_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 10
+    +0ms       AlreadyMatches
+  alternate_static, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  gps_drives_nav1, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  yoke_chrono_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  yoke_chrono_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  engine_monitor_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  engine_monitor_unit, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  pitot_heat_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  pitot_heat_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  prop_deice, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  windshield_heat, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  fuel_vent_heat, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  stall_warning_heat, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  surface_deice, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  vent_blowers, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  air_conditioner, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  air_conditioning_blower, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cabin_heater, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cabin_heater_blower, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  fresh_air, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cabin_temp_unit, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  oxygen_handle, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cabin_heat_handle, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  pilot_air_handle, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  defroster_handle, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  air_shutoff_handle_1, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  air_shutoff_handle_2, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  copilot_air_handle, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  ram_air_handle, from playback: AlreadyMatches
+    +0ms       CaughtUp 100
+    +0ms       AlreadyMatches
+  cabin_altitude_goal, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cabin_climb_rate, from playback: AlreadyMatches
+    +0ms       CaughtUp 500
+    +0ms       AlreadyMatches
+  pressurization_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  pressurization_test, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  door_seal_primary, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  door_seal_pump_power, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  door_seal_standby_air, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  door_seal_standby, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  co_test, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  pilot_door, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cabin_door, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  nose_door, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  storm_window, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  pilot_door_bypass, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cabin_door_bypass, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  wheel_chocks, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  pitot_covers, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  engine_covers, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  pre_heater, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  global_failure_rate, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  com1_active, from playback: AlreadyMatches
+    +0ms       CaughtUp 118300000
+    +0ms       AlreadyMatches
+  com1_standby, from playback: AlreadyMatches
+    +0ms       CaughtUp 124850000
+    +0ms       AlreadyMatches
+  com2_active, from playback: AlreadyMatches
+    +0ms       CaughtUp 124850000
+    +0ms       AlreadyMatches
+  com2_standby, from playback: AlreadyMatches
+    +0ms       CaughtUp 124850000
+    +0ms       AlreadyMatches
+  nav1_active, from playback: AlreadyMatches
+    +0ms       CaughtUp 110500000
+    +0ms       AlreadyMatches
+  nav1_standby, from playback: AlreadyMatches
+    +0ms       CaughtUp 113900000
+    +0ms       AlreadyMatches
+  nav2_active, from playback: AlreadyMatches
+    +0ms       CaughtUp 110500000
+    +0ms       AlreadyMatches
+  nav2_standby, from playback: AlreadyMatches
+    +0ms       CaughtUp 113900000
+    +0ms       AlreadyMatches
+  com1_spacing, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  com2_spacing, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  com1_knob_pulled, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  nav1_knob_pulled, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  com2_knob_pulled, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  nav2_knob_pulled, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  com1_power, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  com2_power, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  transponder_code, from playback: AlreadyMatches
+    +0ms       CaughtUp 28672
+    +0ms       AlreadyMatches
+  transponder_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 2
+    +0ms       AlreadyMatches
+  audio_source_knob, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  audio_marker_sensitivity, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  audio_marker_test, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  audio_com1_receive, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  audio_com2_receive, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  audio_com3_receive, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  audio_nav1_ident, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  audio_nav2_ident, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  cabin_intercom, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  crew_isolate, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  adf_standby, from playback: AlreadyMatches
+    +0ms       CaughtUp 335544320
+    +0ms       AlreadyMatches
+  adf_power, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  adf_knob_pulled, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  adf_ant, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  adf_bfo, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  adf_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  dme_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  rnav_power, from playback: AlreadyMatches
+    +0ms       CaughtUp 1
+    +0ms       AlreadyMatches
+  rnav_volume, from playback: AlreadyMatches
+    +0ms       CaughtUp 80
+    +0ms       AlreadyMatches
+  rnav_knob_pulled, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  rnav_radial_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  rnav_check, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  radar_mode, from playback: AlreadyMatches
+    +0ms       CaughtUp 5
+    +0ms       AlreadyMatches
+  radar_gain, from playback: AlreadyMatches
+    +0ms       CaughtUp 100
+    +0ms       AlreadyMatches
+  radar_tilt, from playback: AlreadyMatches
+    +0ms       CaughtUp 40
+    +0ms       AlreadyMatches
+  radar_brightness, from playback: AlreadyMatches
+    +0ms       CaughtUp 100
+    +0ms       AlreadyMatches
+  radar_alert, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  radar_profile, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  radar_hold, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  radar_track, from playback: AlreadyMatches
+    +0ms       CaughtUp 0
+    +0ms       AlreadyMatches
+  battery, from playback: ReadBack landed 0, read back 21.9ms after its first step
+    +0ms       Arrived 0
+    +0ms       Writes B('ELECTRICAL_Battery_1_Toggle')
+    +0ms       Pending 0
+    +21.9ms    ReadBack landed 0
+  ap_test, from playback: TokenUsed
+    +0ms       Arrived 20
+    +0ms       Writes L('var_AutopilotStartupCounter') 20
+    +3.6ms     TokenUsed
+  battery, from playback: ReadBack landed 1, read back 44.6ms after its first step
+    +0ms       Arrived 1
+    +0ms       Writes B('ELECTRICAL_Battery_1_Toggle')
+    +0ms       Pending 1
+    +44.6ms    ReadBack landed 1
+  heading_bug, from playback: ReadBack landed 4.04296875, read back 36.4ms after its first step
+    +0ms       Arrived 4.04296875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 4.04296875
+    +0ms       Pending 4.04296875
+    +36.4ms    ReadBack landed 4.04296875
+  heading_bug, from playback: ReadBack landed 5.0537109375, read back 35ms after its first step
+    +0ms       Arrived 5.0537109375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 5.0537109375
+    +0ms       Pending 5.0537109375
+    +35ms      ReadBack landed 5.0537109375
+  heading_bug, from playback: ReadBack landed 6.064453125, read back 27.3ms after its first step
+    +0ms       Arrived 6.064453125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 6.064453125
+    +0ms       Pending 6.064453125
+    +27.3ms    ReadBack landed 6.064453125
+  heading_bug, from playback: ReadBack landed 8.0859375, read back 37.7ms after its first step
+    +0ms       Arrived 8.0859375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 8.0859375
+    +0ms       Pending 8.0859375
+    +37.7ms    ReadBack landed 8.0859375
+  heading_bug, from playback: ReadBack landed 9.0966796875, read back 39.7ms after its first step
+    +0ms       Arrived 9.0966796875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 9.0966796875
+    +0ms       Pending 9.0966796875
+    +39.7ms    ReadBack landed 9.0966796875
+  heading_bug, from playback: ReadBack landed 10.107421875, read back 36.3ms after its first step
+    +0ms       Arrived 10.107421875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 10.107421875
+    +0ms       Pending 10.107421875
+    +36.3ms    ReadBack landed 10.107421875
+  heading_bug, from playback: ReadBack landed 11.1181640625, read back 32ms after its first step
+    +0ms       Arrived 11.1181640625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 11.1181640625
+    +0ms       Pending 11.1181640625
+    +32ms      ReadBack landed 11.1181640625
+  heading_bug, from playback: ReadBack landed 12.12890625, read back 29.1ms after its first step
+    +0ms       Arrived 12.12890625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 12.12890625
+    +0ms       Pending 12.12890625
+    +29.1ms    ReadBack landed 12.12890625
+  heading_bug, from playback: ReadBack landed 14.150390625, read back 24.8ms after its first step
+    +0ms       Arrived 14.150390625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 14.150390625
+    +0ms       Pending 14.150390625
+    +24.8ms    ReadBack landed 14.150390625
+  heading_bug, from playback: ReadBack landed 15.1611328125, read back 28.3ms after its first step
+    +0ms       Arrived 15.1611328125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 15.1611328125
+    +0ms       Pending 15.1611328125
+    +28.3ms    ReadBack landed 15.1611328125
+  heading_bug, from playback: ReadBack landed 17.1826171875, read back 26.8ms after its first step
+    +0ms       Arrived 17.1826171875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 17.1826171875
+    +0ms       Pending 17.1826171875
+    +26.8ms    ReadBack landed 17.1826171875
+  heading_bug, from playback: ReadBack landed 18.193359375, read back 32.5ms after its first step
+    +0ms       Arrived 18.193359375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 18.193359375
+    +0ms       Pending 18.193359375
+    +32.5ms    ReadBack landed 18.193359375
+  heading_bug, from playback: ReadBack landed 19.2041015625, read back 29.4ms after its first step
+    +0ms       Arrived 19.2041015625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 19.2041015625
+    +0ms       Pending 19.2041015625
+    +29.4ms    ReadBack landed 19.2041015625
+  heading_bug, from playback: ReadBack landed 20.21484375, read back 21.3ms after its first step
+    +0ms       Arrived 20.21484375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 20.21484375
+    +0ms       Pending 20.21484375
+    +21.3ms    ReadBack landed 20.21484375
+  heading_bug, from playback: ReadBack landed 21.2255859375, read back 35.9ms after its first step
+    +0ms       Arrived 21.2255859375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 21.2255859375
+    +0ms       Pending 21.2255859375
+    +35.9ms    ReadBack landed 21.2255859375
+  heading_bug, from playback: ReadBack landed 22.236328125, read back 33.5ms after its first step
+    +0ms       Arrived 22.236328125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 22.236328125
+    +0ms       Pending 22.236328125
+    +33.5ms    ReadBack landed 22.236328125
+  heading_bug, from playback: ReadBack landed 23.2470703125, read back 53.4ms after its first step
+    +0ms       Arrived 23.2470703125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 23.2470703125
+    +0ms       Pending 23.2470703125
+    +53.4ms    ReadBack landed 23.2470703125
+  heading_bug, from playback: ReadBack landed 24.2578125, read back 38.3ms after its first step
+    +0ms       Arrived 24.2578125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 24.2578125
+    +0ms       Pending 24.2578125
+    +38.3ms    ReadBack landed 24.2578125
+  heading_bug, from playback: ReadBack landed 25.2685546875, read back 34.1ms after its first step
+    +0ms       Arrived 25.2685546875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 25.2685546875
+    +0ms       Pending 25.2685546875
+    +34.1ms    ReadBack landed 25.2685546875
+  heading_bug, from playback: ReadBack landed 26.279296875, read back 30.9ms after its first step
+    +0ms       Arrived 26.279296875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 26.279296875
+    +0ms       Pending 26.279296875
+    +30.9ms    ReadBack landed 26.279296875
+  heading_bug, from playback: ReadBack landed 27.2900390625, read back 28.2ms after its first step
+    +0ms       Arrived 27.2900390625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 27.2900390625
+    +0ms       Pending 27.2900390625
+    +28.2ms    ReadBack landed 27.2900390625
+  heading_bug, from playback: ReadBack landed 28.30078125, read back 24.6ms after its first step
+    +0ms       Arrived 28.30078125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 28.30078125
+    +0ms       Pending 28.30078125
+    +24.6ms    ReadBack landed 28.30078125
+  heading_bug, from playback: ReadBack landed 30.322265625, read back 42.5ms after its first step
+    +0ms       Arrived 30.322265625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 30.322265625
+    +0ms       Pending 30.322265625
+    +42.5ms    ReadBack landed 30.322265625
+  heading_bug, from playback: ReadBack landed 31.3330078125, read back 43ms after its first step
+    +0ms       Arrived 31.3330078125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 31.3330078125
+    +0ms       Pending 31.3330078125
+    +43ms      ReadBack landed 31.3330078125
+  heading_bug, from playback: ReadBack landed 32.34375, read back 34.4ms after its first step
+    +0ms       Arrived 32.34375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 32.34375
+    +0ms       Pending 32.34375
+    +34.4ms    ReadBack landed 32.34375
+  heading_bug, from playback: ReadBack landed 33.3544921875, read back 28.9ms after its first step
+    +0ms       Arrived 33.3544921875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 33.3544921875
+    +0ms       Pending 33.3544921875
+    +28.9ms    ReadBack landed 33.3544921875
+  heading_bug, from playback: ReadBack landed 34.365234375, read back 23.6ms after its first step
+    +0ms       Arrived 34.365234375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 34.365234375
+    +0ms       Pending 34.365234375
+    +23.6ms    ReadBack landed 34.365234375
+  heading_bug, from playback: ReadBack landed 35.3759765625, read back 34.1ms after its first step
+    +0ms       Arrived 35.3759765625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 35.3759765625
+    +0ms       Pending 35.3759765625
+    +34.1ms    ReadBack landed 35.3759765625
+  heading_bug, from playback: ReadBack landed 37.3974609375, read back 30ms after its first step
+    +0ms       Arrived 37.3974609375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 37.3974609375
+    +0ms       Pending 37.3974609375
+    +30ms      ReadBack landed 37.3974609375
+  heading_bug, from playback: ReadBack landed 38.408203125, read back 49.3ms after its first step
+    +0ms       Arrived 38.408203125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 38.408203125
+    +0ms       Pending 38.408203125
+    +49.3ms    ReadBack landed 38.408203125
+  heading_bug, from playback: ReadBack landed 40.4296875, read back 32.5ms after its first step
+    +0ms       Arrived 40.4296875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 40.4296875
+    +0ms       Pending 40.4296875
+    +32.5ms    ReadBack landed 40.4296875
+  heading_bug, from playback: ReadBack landed 41.4404296875, read back 26.3ms after its first step
+    +0ms       Arrived 41.4404296875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 41.4404296875
+    +0ms       Pending 41.4404296875
+    +26.3ms    ReadBack landed 41.4404296875
+  heading_bug, from playback: ReadBack landed 42.451171875, read back 23.4ms after its first step
+    +0ms       Arrived 42.451171875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 42.451171875
+    +0ms       Pending 42.451171875
+    +23.4ms    ReadBack landed 42.451171875
+  heading_bug, from playback: ReadBack landed 44.47265625, read back 19.5ms after its first step
+    +0ms       Arrived 44.47265625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 44.47265625
+    +0ms       Pending 44.47265625
+    +19.5ms    ReadBack landed 44.47265625
+  heading_bug, from playback: ReadBack landed 46.494140625, read back 33.5ms after its first step
+    +0ms       Arrived 46.494140625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 46.494140625
+    +0ms       Pending 46.494140625
+    +33.5ms    ReadBack landed 46.494140625
+  heading_bug, from playback: ReadBack landed 47.5048828125, read back 29.9ms after its first step
+    +0ms       Arrived 47.5048828125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 47.5048828125
+    +0ms       Pending 47.5048828125
+    +29.9ms    ReadBack landed 47.5048828125
+  heading_bug, from playback: ReadBack landed 49.5263671875, read back 22ms after its first step
+    +0ms       Arrived 49.5263671875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 49.5263671875
+    +0ms       Pending 49.5263671875
+    +22ms      ReadBack landed 49.5263671875
+  heading_bug, from playback: ReadBack landed 50.537109375, read back 26.5ms after its first step
+    +0ms       Arrived 50.537109375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 50.537109375
+    +0ms       Pending 50.537109375
+    +26.5ms    ReadBack landed 50.537109375
+  heading_bug, from playback: ReadBack landed 53.5693359375, read back 20.7ms after its first step
+    +0ms       Arrived 53.5693359375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 53.5693359375
+    +0ms       Pending 53.5693359375
+    +20.7ms    ReadBack landed 53.5693359375
+  heading_bug, from playback: ReadBack landed 54.580078125, read back 33.3ms after its first step
+    +0ms       Arrived 54.580078125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 54.580078125
+    +0ms       Pending 54.580078125
+    +33.3ms    ReadBack landed 54.580078125
+  heading_bug, from playback: ReadBack landed 56.6015625, read back 43.5ms after its first step
+    +0ms       Arrived 56.6015625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 56.6015625
+    +0ms       Pending 56.6015625
+    +43.5ms    ReadBack landed 56.6015625
+  heading_bug, from playback: ReadBack landed 58.623046875, read back 25.8ms after its first step
+    +0ms       Arrived 58.623046875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 58.623046875
+    +0ms       Pending 58.623046875
+    +25.8ms    ReadBack landed 58.623046875
+  heading_bug, from playback: ReadBack landed 59.6337890625, read back 33.9ms after its first step
+    +0ms       Arrived 59.6337890625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 59.6337890625
+    +0ms       Pending 59.6337890625
+    +33.9ms    ReadBack landed 59.6337890625
+  heading_bug, from playback: ReadBack landed 61.6552734375, read back 31.7ms after its first step
+    +0ms       Arrived 61.6552734375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 61.6552734375
+    +0ms       Pending 61.6552734375
+    +31.7ms    ReadBack landed 61.6552734375
+  heading_bug, from playback: ReadBack landed 63.6767578125, read back 24.3ms after its first step
+    +0ms       Arrived 63.6767578125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 63.6767578125
+    +0ms       Pending 63.6767578125
+    +24.3ms    ReadBack landed 63.6767578125
+  heading_bug, from playback: ReadBack landed 64.6875, read back 21.6ms after its first step
+    +0ms       Arrived 64.6875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 64.6875
+    +0ms       Pending 64.6875
+    +21.6ms    ReadBack landed 64.6875
+  heading_bug, from playback: ReadBack landed 65.6982421875, read back 34ms after its first step
+    +0ms       Arrived 65.6982421875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 65.6982421875
+    +0ms       Pending 65.6982421875
+    +34ms      ReadBack landed 65.6982421875
+  heading_bug, from playback: ReadBack landed 67.7197265625, read back 23.8ms after its first step
+    +0ms       Arrived 67.7197265625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 67.7197265625
+    +0ms       Pending 67.7197265625
+    +23.8ms    ReadBack landed 67.7197265625
+  heading_bug, from playback: ReadBack landed 69.7412109375, read back 35.8ms after its first step
+    +0ms       Arrived 69.7412109375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 69.7412109375
+    +0ms       Pending 69.7412109375
+    +35.8ms    ReadBack landed 69.7412109375
+  heading_bug, from playback: ReadBack landed 70.751953125, read back 20ms after its first step
+    +0ms       Arrived 70.751953125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 70.751953125
+    +0ms       Pending 70.751953125
+    +20ms      ReadBack landed 70.751953125
+  heading_bug, from playback: ReadBack landed 71.7626953125, read back 34.2ms after its first step
+    +0ms       Arrived 71.7626953125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 71.7626953125
+    +0ms       Pending 71.7626953125
+    +34.2ms    ReadBack landed 71.7626953125
+  heading_bug, from playback: ReadBack landed 72.7734375, read back 32ms after its first step
+    +0ms       Arrived 72.7734375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 72.7734375
+    +0ms       Pending 72.7734375
+    +32ms      ReadBack landed 72.7734375
+  heading_bug, from playback: ReadBack landed 73.7841796875, read back 27.3ms after its first step
+    +0ms       Arrived 73.7841796875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 73.7841796875
+    +0ms       Pending 73.7841796875
+    +27.3ms    ReadBack landed 73.7841796875
+  heading_bug, from playback: ReadBack landed 74.794921875, read back 34.1ms after its first step
+    +0ms       Arrived 74.794921875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 74.794921875
+    +0ms       Pending 74.794921875
+    +34.1ms    ReadBack landed 74.794921875
+  heading_bug, from playback: ReadBack landed 75.8056640625, read back 32.7ms after its first step
+    +0ms       Arrived 75.8056640625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 75.8056640625
+    +0ms       Pending 75.8056640625
+    +32.7ms    ReadBack landed 75.8056640625
+  heading_bug, from playback: ReadBack landed 76.81640625, read back 29.9ms after its first step
+    +0ms       Arrived 76.81640625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 76.81640625
+    +0ms       Pending 76.81640625
+    +29.9ms    ReadBack landed 76.81640625
+  heading_bug, from playback: ReadBack landed 77.8271484375, read back 28.8ms after its first step
+    +0ms       Arrived 77.8271484375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 77.8271484375
+    +0ms       Pending 77.8271484375
+    +28.8ms    ReadBack landed 77.8271484375
+  heading_bug, from playback: ReadBack landed 78.837890625, read back 18.7ms after its first step
+    +0ms       Arrived 78.837890625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 78.837890625
+    +0ms       Pending 78.837890625
+    +18.7ms    ReadBack landed 78.837890625
+  heading_bug, from playback: ReadBack landed 79.8486328125, read back 32ms after its first step
+    +0ms       Arrived 79.8486328125
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 79.8486328125
+    +0ms       Pending 79.8486328125
+    +32ms      ReadBack landed 79.8486328125
+  heading_bug, from playback: ReadBack landed 80.859375, read back 29.3ms after its first step
+    +0ms       Arrived 80.859375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 80.859375
+    +0ms       Pending 80.859375
+    +29.3ms    ReadBack landed 80.859375
+  heading_bug, from playback: ReadBack landed 82.880859375, read back 25.2ms after its first step
+    +0ms       Arrived 82.880859375
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 82.880859375
+    +0ms       Pending 82.880859375
+    +25.2ms    ReadBack landed 82.880859375
+  heading_bug, from playback: ReadBack landed 83.8916015625, read back 40.6ms after its first step
+    +0ms       Arrived 83.8916015625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 83.8916015625
+    +0ms       Pending 83.8916015625
+    +40.6ms    ReadBack landed 83.8916015625
+  heading_bug, from playback: ReadBack landed 89.9560546875, read back 33.1ms after its first step
+    +0ms       Arrived 89.9560546875
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 89.9560546875
+    +0ms       Pending 89.9560546875
+    +33.1ms    ReadBack landed 89.9560546875
+  heading_bug, from playback: ReadBack landed 95.009765625, read back 30.6ms after its first step
+    +0ms       Arrived 95.009765625
+    +0ms       Writes B('INSTRUMENT_Heading_Bug_Set') 95.009765625
+    +0ms       Pending 95.009765625
+    +30.6ms    ReadBack landed 95.009765625
+  flight_director, from playback: ReadBack landed 1, read back 4ms after its first step
+    +0ms       Arrived 1
+    +0ms       Writes K('TOGGLE_FLIGHT_DIRECTOR')
+    +0ms       Pending 1
+    +4ms       ReadBack landed 1
+  ap_altitude_hold, from playback: ReadBack landed 1, read back 60.7ms after its first step
+    +0ms       Arrived 1
+    +0ms       WaitsFor flight_director
+    +23.1ms    Writes K('AP_ALT_HOLD')
+    +23.1ms    Pending 1
+    +60.7ms    ReadBack landed 1
+  ap_altitude, from playback: AlreadyMatches
+    +0ms       Arrived 1900
+    +0ms       WaitsFor ap_altitude_hold
+    +37.7ms    NowReads 1900
+    +56.1ms    Writes K('AP_ALT_VAR_SET_ENGLISH') 1900
+    +56.1ms    AlreadyMatches
+  ap_vs_hold, from playback: ReadBack landed 1, read back 33.9ms after its first step
+    +0ms       Arrived 1
+    +0ms       Writes K('AP_PANEL_VS_HOLD', 1) 1
+    +0ms       Pending 1
+    +33.9ms    ReadBack landed 1
+  ap_altitude_hold, from playback: AlreadyMatches
+    +0ms       Arrived 0
+    +0ms       WaitsFor ap_vs_hold
+    +33.9ms    NowReads 0
+    +51.5ms    Writes 
+    +51.5ms    AlreadyMatches
+
+=== A step to the view
+PASSED: a step reached the extension 0.4ms after its input at p50, 1.2ms at p95, and 2.1ms at worst, over 1014 steps in 438 messages, against 150ms at p95
+
+=== Results
+5 passed, 0 failed, 0 skipped
+the report is target\sim\runs\2026-11-26_10-02-39-sync-log\report.txt
+That's every case. Leave the flight loaded. Whoever runs the script stops it with q in its terminal, which replays the core's recording.
+the core's replay: replayed 64553 inputs, and all 178 checkpoints matched, up to the last flush of a cut recording

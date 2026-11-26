@@ -6,7 +6,9 @@
 //
 // src/package.json marks src/ as ES modules, for Node running the tests and for this check. The
 // manifest a folder up names no `type`, since VS Code loads `main` with `require`. The panel's
-// webview, in ../panel, is a project of its own, and this one reads only its types.
+// webview, in ../panel, is a project of its own, and this one reads only its types. The Sync log's
+// webview, in ../sync-log, is one too, whose types this reads and whose rows.ts the tests run, so
+// sync-log/package.json marks it as ES modules as well.
 //
 // vscode-oniguruma's declarations, which the grammar's test uses, name `WebAssembly`'s types,
 // which only the DOM's library declares, so the check skips libraries' declarations rather than

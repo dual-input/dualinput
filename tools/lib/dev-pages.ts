@@ -25,8 +25,9 @@ export const DEV_PAGES: Record<string, DevPage> = {
   // The desktop app's window runs in WebView2, so what matters here is the browser's picture, and the sim sets no rules around it.
   desktop: { entry: "src/platform/desktop-shell/dev/main.tsx", content: ["src/platform/desktop-shell/src/**/*.{ts,tsx}", "src/platform/desktop-shell/dev/**/*.{ts,tsx}"], simRules: null },
   welcome: { entry: "src/platform/desktop-shell/dev/welcome.tsx", content: ["src/platform/desktop-shell/src/**/*.{ts,tsx}", "src/platform/desktop-shell/dev/**/*.{ts,tsx}"], simRules: null },
-  // The profile extension's Dual Input panel runs in a VS Code webview, so the sim sets no rules around it either.
+  // The profile extension's Dual Input panel and Sync log run in VS Code webviews, so the sim sets no rules around them either.
   "profile-panel": { entry: "src/apps/profile-extension/panel/dev/main.tsx", content: ["src/apps/profile-extension/panel/**/*.{ts,tsx}"], simRules: null },
+  "sync-log": { entry: "src/apps/profile-extension/sync-log/dev/main.tsx", content: ["src/apps/profile-extension/sync-log/**/*.{ts,tsx}", "src/apps/profile-extension/panel/src/island.ts"], simRules: null },
 }
 
 /** esbuild's options for a page's script, which tools/dev.ts adds its watch and its hook after each build to. */

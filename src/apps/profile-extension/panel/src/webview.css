@@ -1,10 +1,13 @@
-/* The webview's page, around the kit's root. The panel sets its own inset from the view's edges, and VS Code's own
-   stylesheet for a webview pads the body 20px on each side, in a cascade layer, which any rule outside one outranks
-   (read in VS Code 1.147.0, out/vs/workbench/contrib/webview/browser/pre/index.html, `_defaultStyles`). So the page
-   gives the panel the whole view, and paints no background, so VS Code's color behind the view shows around the panel.
-   tools/lib/profile-extension.ts writes this after the kit's stylesheet, as panel/panel.css. */
-html, body, #panel {
+/* Each webview's page, the Dual Input panel's and the Sync log's, around the kit's root. Each view sets its own inset
+   from the view's edges, and VS Code's own stylesheet for a webview pads the body 20px on each side, in a cascade layer,
+   which any rule outside one outranks (read in VS Code 1.147.0, out/vs/workbench/contrib/webview/browser/pre/index.html,
+   `_defaultStyles`). So the page gives the view's script the whole view, and paints no background, so VS Code's color
+   behind the view shows around it. The page itself never scrolls, since each view's lists scroll inside their own
+   islands, and a fraction of a pixel too wide gave VS Code 1.148's Dual Input panel a horizontal scrollbar.
+   tools/lib/profile-extension.ts writes this after the kit's stylesheet, as webviews/webviews.css. */
+html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }

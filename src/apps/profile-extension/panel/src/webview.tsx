@@ -26,7 +26,7 @@ const host: PanelHost = {
   play: () => send({ kind: "play" }),
 }
 
-const root = createRoot(document.getElementById("panel") as HTMLElement)
+const root = createRoot(document.getElementById("root") as HTMLElement)
 window.addEventListener("message", (event: MessageEvent<ToPanel>) => {
   if (event.data.kind === "view") root.render(<Panel view={event.data.view} host={host} />)
 })

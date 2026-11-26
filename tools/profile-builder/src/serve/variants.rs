@@ -20,9 +20,26 @@ pub(crate) type Variant = (String, Vec<String>);
 /// The open profile's variants, in the file's order.
 pub(crate) type Variants = [Variant];
 
+/// The variant the new profile snippet writes, with its placeholders untouched. `NEW_PROFILE` in
+/// src/engines/profile-language/src/complete.rs writes the same, so change both together.
+const PLACEHOLDER: (&str, &str) = ("id", "folder");
+
+/// Whether `variants` is the snippet's placeholder alone, which adding an aircraft takes the place
+/// of, so an author who adds their first aircraft has no line of the snippet's to delete
+/// (user, 2026-11-26).
+fn placeholder(variants: &Variants) -> bool {
+    matches!(variants, [(id, paths)] if id == PLACEHOLDER.0 && paths.as_slice() == [PLACEHOLDER.1])
+}
+
+/// The profile's variants as adding an aircraft sees them, with the snippet's placeholder none.
+fn real(variants: &Variants) -> &Variants {
+    if placeholder(variants) { &[] } else { variants }
+}
+
 /// The island's view of the loaded aircraft, `path` titled `title`, in a profile with
 /// `variants`.
 pub(crate) fn view(title: &str, path: &str, variants: &Variants) -> AddView {
+    let variants = real(variants);
     let folder = folder_of(path).to_string();
     let preset = path.contains('/').then(|| path.to_string());
     AddView {
@@ -53,6 +70,7 @@ pub(crate) fn has_own(variants: &Variants, path: &str) -> bool {
 /// which variant covers it: not when a variant already names `path`, nor when `path` is the
 /// preset and `id` already covers it through its folder.
 pub(crate) fn gains_nothing(variants: &Variants, loaded: &str, path: &str, id: &str) -> bool {
+    let variants = real(variants);
     has_own(variants, path)
         || path == loaded
             && cover(variants, loaded).is_some_and(|c| c.by == By::Folder && c.variant == id)
@@ -221,7 +239,21 @@ pub(crate) fn edit(text: &str, path: &str, id: &str) -> Result<Option<Edit>, Str
                         Kind::Null => &[],
                         _ => return Err("`variants` isn't a map, so Add can't add to it".into()),
                     };
+                    let texts: Vec<Variant> = entries
+                        .iter()
+                        .map(|(k, v)| {
+                            let path = v.str().map(|t| t.text.trim().to_string());
+                            (k.text.clone(), path.into_iter().collect())
+                        })
+                        .collect();
                     match entries.iter().find(|(k, _)| k.text == id) {
+                        // The snippet's placeholder goes, and the new variant takes its line.
+                        _ if placeholder(&texts) => {
+                            let line = &lines[entries[0].0.at.line - 1];
+                            let indent = &line[..line.len() - line.trim_start().len()];
+                            let replaced = format!("{indent}{id}: {item}");
+                            lines[entries[0].0.at.line - 1] = replaced;
+                        }
                         None => {
                             let own = key.at.column - 1;
                             let end = block_end(lines, key.at.line - 1, own);
@@ -540,6 +572,29 @@ state:
         assert!(
             lines.iter().all(Option::is_some) && lines.windows(2).all(|w| w[0] < w[1]),
             "{again}"
+        );
+    }
+
+    #[test]
+    fn the_new_profile_snippets_variant_is_none_and_add_takes_its_place() {
+        let list = variants(&[("id", &["folder"])]);
+        let v = view("C172SP G1000 Passengers Skis", SKIS, &list);
+        assert!(v.variants.is_empty() && v.cover.is_none(), "{v:?}");
+        assert!(
+            !gains_nothing(&list, SKIS, SKIS, "id"),
+            "`id` is a new variant"
+        );
+        let text = "maker: M\naircraft:\n  variants:\n    id: folder\n\nstate:\n  a:\n    watch: L('A')\n    write: L('A')\n";
+        let after = applied(text, edit(text, SKIS, "skis").expect("an edit"));
+        assert!(
+            after.contains(&format!("  variants:\n    skis: {SKIS}\n\nstate:")),
+            "{after}"
+        );
+        let kept = variants(&[("id", &["folder"]), ("g1000", &["asobo_c172sp_g1000"])]);
+        assert_eq!(
+            view("", SKIS, &kept).variants,
+            ["id", "g1000"],
+            "beside another variant, it's the author's"
         );
     }
 

@@ -508,6 +508,9 @@ impl Snippet {
 }
 
 /// The checker refuses an empty `state:`, so a new file's snippet writes one entry with blanks.
+/// Its variant, `id: folder` with its placeholders untouched, is one the profile extension's Add
+/// takes the place of, as `PLACEHOLDER` in tools/profile-builder/src/serve/variants.rs has it, so
+/// change both together.
 pub(crate) const NEW_PROFILE: Snippet = Snippet {
     label: "new profile",
     detail: "A profile: its maker, name, status, authors, one variant, and one state entry",

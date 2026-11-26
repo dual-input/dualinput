@@ -80,6 +80,7 @@ Its words and layout are a draft, which the panel's dev page settles by eye with
 ## What Add writes
 
 - Into a new variant, `<id>: <path>` as the last line under `variants:`.
+- In a profile whose only variant is the new profile snippet's, `id: folder` with its placeholders untouched, the new variant's line takes that one's place, so an author's first aircraft leaves no line of the snippet's to delete; the island treats the profile as having no variants and says nothing of it, since a helper like this works best unseen (user, 2026-11-26).
 - Into an existing variant, the path after the variant's own, which turns a variant of one path into a list, as the formatter writes one ([layout](01-format-and-delivery.md#layout)).
   The variant's own lines and their comments stay as they are.
 - In a file with a map written in brackets, nothing, since the file doesn't build with one; Add says to write it out first.
@@ -114,7 +115,7 @@ The display picker's Cancel goes.
 
 ## Cases
 
-- `serve`'s own tests, for the island's view: an aircraft its folder's variant covers, one a variant names by its preset, and one nothing covers; a folder a variant names, whose choice is closed; a preset a variant names; an aircraft with no preset; each suggestion, every one an ID; and the edit into a new variant, into an existing variant of one path, and into a profile with no `aircraft:`, a join keeping the variant's comments, and none in a file with a map in brackets.
+- `serve`'s own tests, for the island's view: an aircraft its folder's variant covers, one a variant names by its preset, and one nothing covers; a folder a variant names, whose choice is closed; a preset a variant names; an aircraft with no preset; each suggestion, every one an ID; and the edit into a new variant, into an existing variant of one path, and into a profile with no `aircraft:`, a join keeping the variant's comments, none in a file with a map in brackets, and the new profile snippet's variant taken over.
 - `serve`'s own tests, through the server: the lens in a profile out of any session, its range on `variants:`, no island for a module, the island's view, Add's edit, and no lens once the profile names the aircraft's preset; and the views it sends, the island's and the new status line's among them, as the extension's types read them.
 - On the bench, in the `authoring` scenario: the status line's facts carry the stand-in sim's title, and say the session pinned a profile.
 - On the panel's dev page, by eye with the user: the island in each case above, the close button on every tool island, and the status line's new state.

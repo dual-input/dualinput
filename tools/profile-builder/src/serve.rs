@@ -72,7 +72,7 @@ const COMMANDS: [&str; 20] = [
     "dualInput.removeLocalBundle",
     "dualInput.importers",
     "dualInput.localFolder",
-    "dualInput.variantFilter",
+    "dualInput.showVariants",
     "dualInput.panel.open",
     "dualInput.panel.pick",
     "dualInput.panel.addAircraft",

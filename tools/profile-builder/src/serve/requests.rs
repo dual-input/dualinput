@@ -480,8 +480,8 @@ impl Server {
                 Err(e) => failed(id, e),
             };
         }
-        if p.command == "dualInput.variantFilter" {
-            return match self.variant_filter(&p.arguments) {
+        if p.command == "dualInput.showVariants" {
+            return match self.show_variants(&p.arguments) {
                 Ok(()) => Some(Response::new_ok(id, Value::Null)),
                 Err(e) => failed(id, e),
             };

@@ -26,7 +26,7 @@ import { isForced, type Palette, paletteFor, type Rule, palettes, uiThemeOf, wit
 import { type Build, Builds, kindOf, PATTERNS, profileName } from "./status.ts"
 import { SyncLogMirror } from "./sync-log.ts"
 import { syntaxes } from "./syntax.ts"
-import { type Fold, type Folds, foldChanges, pickItems } from "./variant-filter.ts"
+import { type Fold, type Folds, foldChanges, pickItems, shifted } from "./variant-filter.ts"
 
 /** The language's ID, which package.json's `contributes.languages` names too. */
 const LANGUAGE = "dualinput-profile"
@@ -156,10 +156,11 @@ export function activate(context: vscode.ExtensionContext): void {
   })
 
   // The client registers the server's own commands, `dualInput.build`, `dualInput.removeLocalBundle`,
-  // `dualInput.importers`, `dualInput.localFolder`, and the panel's `dualInput.panel.*`, with VS Code
-  // under those IDs, so the extension's take others, `dualInput.run`, `dualInput.pickDisplays`,
-  // `dualInput.addAircraft`, and `dualInput.filterVariants` among them, which the server's code lenses name. `COMMANDS` in tools/profile-builder/src/serve.rs
-  // lists the server's, so change both together.
+  // `dualInput.importers`, `dualInput.localFolder`, `dualInput.showVariants`, and the panel's
+  // `dualInput.panel.*`, with VS Code under those IDs, so the extension's take others, `dualInput.run`,
+  // `dualInput.pickDisplays`, `dualInput.addAircraft`, and `dualInput.filterVariants` among them, which
+  // the server's code lenses name. `COMMANDS` in tools/profile-builder/src/serve.rs lists the server's,
+  // so change both together.
   context.subscriptions.push(
     output,
     item,
@@ -210,7 +211,7 @@ export function activate(context: vscode.ExtensionContext): void {
         title: "Show the entries of these variants",
         placeHolder: "Ticking none, or every one, shows them all",
       })
-      if (picked) tell("dualInput.variantFilter", [uri, picked.map((item) => item.label)])
+      if (picked) tell("dualInput.showVariants", [uri, picked.map((item) => item.label)])
     }),
     vscode.commands.registerCommand("dualInput.buildNow", async () => {
       const file = active()
@@ -465,8 +466,13 @@ function isTexts(value: unknown): value is string[] {
 class Filtered implements vscode.Disposable {
   /** Each filtered profile's entries to fold, by its URI, which the server writes as VS Code does. */
   private readonly files = new Map<string, Fold[]>()
-  /** The key lines folded in each profile's editor, so a change unfolds only those the filter folded. */
+  /**
+   * The key lines the filter folded in each profile, kept in step with its edits, so a change unfolds only those the
+   * filter folded, and an entry an author opened stays open until the filter changes.
+   */
   private readonly folded = new Map<string, number[]>()
+  /** The folds being made, one after another, so each starts from the lines the one before it left. */
+  private folding: Promise<void> = Promise.resolve()
   private readonly dim = vscode.window.createTextEditorDecorationType({ opacity: "0.45" })
   private readonly listening: vscode.Disposable[]
 
@@ -474,6 +480,15 @@ class Filtered implements vscode.Disposable {
     this.listening = [
       vscode.window.onDidChangeActiveTextEditor((editor) => void (editor && this.fold(editor))),
       vscode.window.onDidChangeVisibleTextEditors((editors) => editors.forEach((editor) => this.shade(editor))),
+      vscode.workspace.onDidChangeTextDocument(({ document, contentChanges }) => {
+        const uri = document.uri.toString()
+        let lines = this.folded.get(uri)
+        if (!lines) return
+        for (const { range, text } of contentChanges) lines = shifted(lines, { start: range.start.line, end: range.end.line, breaks: text.split("\n").length - 1 })
+        this.folded.set(uri, lines)
+      }),
+      // A closed document's folds go with it, so it folds afresh as it opens again.
+      vscode.workspace.onDidCloseTextDocument((document) => this.folded.delete(document.uri.toString())),
     ]
   }
 
@@ -496,7 +511,12 @@ class Filtered implements vscode.Disposable {
     for (const listener of this.listening) listener.dispose()
   }
 
-  private async fold(editor: vscode.TextEditor): Promise<void> {
+  private fold(editor: vscode.TextEditor): Promise<void> {
+    this.folding = this.folding.then(() => this.foldNow(editor)).catch(() => {})
+    return this.folding
+  }
+
+  private async foldNow(editor: vscode.TextEditor): Promise<void> {
     const uri = editor.document.uri.toString()
     const lines = (this.files.get(uri) ?? []).map((f) => f.line)
     const { fold, unfold } = foldChanges(this.folded.get(uri) ?? [], lines)
@@ -516,8 +536,8 @@ class Filtered implements vscode.Disposable {
 }
 
 /**
- * Draws each open file's boxes, as `serve` sends them, into every editor that shows the file. An editor's decorations last only while VS Code shows it, so the boxes are kept by file and drawn again
- * into each editor VS Code shows.
+ * Draws each open file's boxes, as `serve` sends them, into every editor that shows the file. An editor's decorations
+ * last only while VS Code shows it, so the boxes are kept by file and drawn again into each editor VS Code shows.
  */
 class Boxes implements vscode.Disposable {
   /** Each open file's boxes, by its URI, which the server writes as VS Code does. */

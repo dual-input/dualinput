@@ -70,18 +70,34 @@ pub(super) fn filter_title(shown: &[&str]) -> String {
     }
 }
 
-/// The entries a filter showing the variants `shown` folds, each by its first line and its last,
-/// from 0: each whose `only` names none of them. An entry with no `only` is every variant's.
+/// The entries a filter showing the variants `shown` folds, each by its key's line and its own
+/// last line, from 0: each whose `only` names none of them. An entry with no `only` is every
+/// variant's.
 pub(super) fn folded(facts: &Facts, shown: &BTreeSet<String>) -> Vec<(usize, usize)> {
-    if shown.is_empty() {
-        return Vec::new();
-    }
     facts
         .entries
         .iter()
         .filter(|e| !e.only.is_empty() && !e.only.iter().any(|o| shown.contains(o)))
-        .map(|e| (e.line, e.last))
+        .map(|e| (e.line, e.end))
         .collect()
+}
+
+/// The variants a profile's filter shows as its text stands: those it names that the profile
+/// still has, or none when that's none of them or all of them, which shows every entry. A filter
+/// kept as the author set it would fold by a variant renamed or deleted since, with no lens left to
+/// clear it once the profile has one variant.
+fn shown_by(filter: Option<&BTreeSet<String>>, facts: &Facts) -> Option<BTreeSet<String>> {
+    let ids: BTreeSet<&str> = facts
+        .variants
+        .iter()
+        .flat_map(|(_, v)| v.iter().map(|(id, _)| id.as_str()))
+        .collect();
+    let shown: BTreeSet<String> = filter?
+        .iter()
+        .filter(|id| ids.contains(id.as_str()))
+        .cloned()
+        .collect();
+    (!shown.is_empty() && shown.len() < ids.len()).then_some(shown)
 }
 
 /// What `serve` holds of the sim.
@@ -131,8 +147,8 @@ pub(crate) struct Sim {
     requests: u64,
     /// The Sync log's rows, which outlast the socket, so a core that restarts keeps them.
     log: SyncLogRows,
-    /// Each profile's filter: the variants its entries show, where a profile with none shows them
-    /// all, and the entries the extension last folded for it.
+    /// Each profile's filter: the variants its entries show, as the author picked them, where a
+    /// profile with none shows them all, and the entries `serve` last sent the extension to fold.
     filters: BTreeMap<PathBuf, BTreeSet<String>>,
     folds: BTreeMap<PathBuf, Vec<(usize, usize)>>,
 }
@@ -808,33 +824,30 @@ impl Server {
         self.ask_lenses();
     }
 
-    /// `dualInput.variantFilter`: the variants a profile's entries show, from the filter's picker,
+    /// `dualInput.showVariants`: the variants a profile's entries show, from the filter's picker,
     /// where every one, or none, shows them all.
-    pub(super) fn variant_filter(&mut self, args: &[Value]) -> Result<(), String> {
-        let usage = "dualInput.variantFilter takes a profile's URI and the variants to show";
+    pub(super) fn show_variants(&mut self, args: &[Value]) -> Result<(), String> {
+        let usage = "dualInput.showVariants takes a profile's URI and the variants to show";
         let file = args
             .first()
             .and_then(Value::as_str)
             .and_then(path_of)
             .ok_or(usage)?;
-        let picked: Vec<String> = args
+        let picked: BTreeSet<String> = args
             .get(1)
             .cloned()
             .and_then(|a| serde_json::from_value(a).ok())
             .ok_or(usage)?;
         self.fresh(&file);
-        let ids: BTreeSet<String> = self
+        let filters = self
             .sim
             .facts
             .get(&file)
-            .and_then(|f| f.variants.as_ref())
-            .map(|(_, v)| v.iter().map(|(id, _)| id.clone()).collect())
-            .unwrap_or_default();
-        let shown: BTreeSet<String> = picked.into_iter().filter(|p| ids.contains(p)).collect();
-        if shown.is_empty() || shown == ids {
-            self.sim.filters.remove(&file);
+            .is_some_and(|f| shown_by(Some(&picked), f).is_some());
+        if filters {
+            self.sim.filters.insert(file, picked);
         } else {
-            self.sim.filters.insert(file, shown);
+            self.sim.filters.remove(&file);
         }
         self.show_folds();
         self.ask_lenses();
@@ -864,10 +877,10 @@ impl Server {
             if self.sim.stale.contains(&file) {
                 continue;
             }
-            let folds = match (self.sim.filters.get(&file), self.sim.facts.get(&file)) {
-                (Some(shown), Some(facts)) => folded(facts, shown),
-                _ => Vec::new(),
-            };
+            let folds = self.sim.facts.get(&file).map_or_else(Vec::new, |facts| {
+                shown_by(self.sim.filters.get(&file), facts)
+                    .map_or_else(Vec::new, |shown| folded(facts, &shown))
+            });
             if self
                 .sim
                 .folds
@@ -932,8 +945,9 @@ impl Server {
                 (None, None) => None,
             };
             if let Some((line, word)) = key.filter(|_| !variants::has_own(named, path)) {
+                let indent = lines.indentation(line).end.character as usize;
                 out.push(json!({
-                    "range": at(line, indent_of(&text, line), word.len()),
+                    "range": at(line, indent, word.len()),
                     "command": { "title": add_title(title), "command": ADD, "arguments": [uri] },
                 }));
             }
@@ -945,18 +959,19 @@ impl Server {
             .filter(|(_, v)| profile && v.len() > 1)
         {
             let ids: Vec<&str> = named.iter().map(|(id, _)| id.as_str()).collect();
-            let filter = self.sim.filters.get(&file);
+            let filter = shown_by(self.sim.filters.get(&file), &facts);
             let shown: Vec<&str> = ids
                 .iter()
                 .copied()
-                .filter(|id| filter.is_some_and(|f| f.contains(*id)))
+                .filter(|id| filter.as_ref().is_some_and(|f| f.contains(*id)))
                 .collect();
             let loaded = lenses.aircraft.as_ref().and_then(|(path, _)| {
                 let each = named.iter().map(|(id, p)| (id.as_str(), p.as_slice()));
                 profile_engine::covering(each, path).map(|(id, _)| id)
             });
+            let indent = lines.indentation(*line).end.character as usize;
             out.push(json!({
-                "range": at(*line, indent_of(&text, *line), "variants".len()),
+                "range": at(*line, indent, "variants".len()),
                 "command": {
                     "title": filter_title(&shown),
                     "command": FILTER,
@@ -1254,14 +1269,6 @@ impl Server {
 fn is_profile(file: &Path) -> bool {
     locate(file).is_some_and(|(_, rel)| rel.starts_with("aircraft/"))
 }
-
-/// How many spaces line `line` of `text`, from 0, starts with.
-fn indent_of(text: &str, line: usize) -> usize {
-    text.split('\n')
-        .nth(line)
-        .map_or(0, |l| l.chars().take_while(|c| *c == ' ').count())
-}
-
 /// The boxes of one file's watch lines, from the slice.
 fn boxes(slice: &AuthoringSlice, facts: &Facts) -> Vec<LineBox> {
     // The slice comes up to 20 times a second, each time with every name the open files watch.

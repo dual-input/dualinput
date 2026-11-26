@@ -330,7 +330,7 @@ fn the_filter_lens_shows_the_picked_variants_entries_and_folds_the_rest() {
         )],
         "with no session, in a profile of two variants"
     );
-    s.execute("dualInput.variantFilter", json!([uri, ["a"]]))
+    s.execute("dualInput.showVariants", json!([uri, ["a"]]))
         .expect("filters");
     let on_ground = line_of(&text, "  on_ground:");
     let folds = s.wait("dualInput/folds", |_| true);
@@ -340,7 +340,7 @@ fn the_filter_lens_shows_the_picked_variants_entries_and_folds_the_rest() {
         "an entry of `b` alone folds, and one of every variant stays"
     );
     assert_eq!(filter(&s.lenses(FILE))[0].0, "$(filter)\u{a0}Showing a");
-    s.execute("dualInput.variantFilter", json!([uri, ["a", "b"]]))
+    s.execute("dualInput.showVariants", json!([uri, ["a", "b"]]))
         .expect("shows all");
     let cleared = s.wait("dualInput/folds", |_| true);
     assert_eq!(cleared["folds"], json!([]), "every variant shows them all");
@@ -354,6 +354,18 @@ fn the_filter_lens_shows_the_picked_variants_entries_and_folds_the_rest() {
     assert!(
         filter(&s.lenses("aircraft/one.yaml")).is_empty(),
         "no lens in a profile of one variant"
+    );
+
+    // A filter forgets a variant renamed since, and with none of its variants left, shows all.
+    s.execute("dualInput.showVariants", json!([uri, ["a"]]))
+        .expect("filters");
+    s.wait("dualInput/folds", |f| f["folds"] != json!([]));
+    let renamed = text.replace("    a: test-aircraft\n", "    a2: test-aircraft\n");
+    s.change(FILE, &renamed, 2);
+    s.wait("dualInput/folds", |f| f["folds"] == json!([]));
+    assert_eq!(
+        filter(&s.lenses(FILE))[0].0,
+        "$(filter)\u{a0}Show all variants"
     );
 }
 

@@ -66,6 +66,9 @@ pub(crate) struct Entry {
     /// The last line it spans, from 0: the line before the next entry's key or the next
     /// top-level key, so the blank and comment lines after it are its own.
     pub(crate) last: usize,
+    /// Its own last line, from 0: `last` without the blank and comment lines at its end, which sit
+    /// above the next entry, its heading among them, as the entry's fold leaves them.
+    pub(crate) end: usize,
     /// Whether it has a write, which Run runs: a `write:` that isn't `none`.
     pub(crate) writes: bool,
     pub(crate) pilot_flying: bool,
@@ -92,7 +95,8 @@ pub(crate) fn read(text: &str) -> Option<Facts> {
     let Kind::Map(top) = &root.kind else {
         return Some(Facts::default());
     };
-    let lines = text.split('\n').count();
+    let all: Vec<&str> = text.split('\n').collect();
+    let lines = all.len();
     let mut facts = Facts::default();
     for (n, (key, node)) in top.iter().enumerate() {
         // The line before the next top-level key, from 0, or the file's last.
@@ -118,22 +122,30 @@ pub(crate) fn read(text: &str) -> Option<Facts> {
                     facts.variants = Some((key.at.line - 1, named));
                 }
             }
-            "state" => entries(&mut facts, node, false, next),
-            "events" => entries(&mut facts, node, true, next),
+            "state" => entries(&mut facts, node, false, next, &all),
+            "events" => entries(&mut facts, node, true, next, &all),
             _ => {}
         }
     }
     Some(facts)
 }
 
-fn entries(facts: &mut Facts, block: &Node, event: bool, end: usize) {
+fn entries(facts: &mut Facts, block: &Node, event: bool, end: usize, text: &[&str]) {
     let Kind::Map(entries) = &block.kind else {
         return;
     };
     for (n, (key, node)) in entries.iter().enumerate() {
         let last = entries
             .get(n + 1)
-            .map_or(end, |(k, _)| k.at.line.saturating_sub(2));
+            .map_or(end, |(k, _)| k.at.line.saturating_sub(2))
+            .max(key.at.line - 1);
+        let own = (key.at.line - 1..=last)
+            .rev()
+            .find(|&l| {
+                let t = text.get(l).map_or("", |l| l.trim());
+                !t.is_empty() && !t.starts_with('#')
+            })
+            .unwrap_or(key.at.line - 1);
         let field = |name: &str| child(node, name);
         let watch = field("watch");
         let counting = watch.is_some_and(|w| matches!(w.kind, Kind::Map(_)));
@@ -153,7 +165,8 @@ fn entries(facts: &mut Facts, block: &Node, event: bool, end: usize) {
             kind,
             line: key.at.line - 1,
             column: key.at.column - 1,
-            last: last.max(key.at.line - 1),
+            last,
+            end: own,
             writes: field("write").is_some_and(|w| text_of(w).as_deref() != Some("none")),
             pilot_flying: field("owner").and_then(text_of).as_deref() == Some("pilot_flying"),
             only: field("only").map(texts).unwrap_or_default(),
@@ -296,6 +309,22 @@ events:
         assert_eq!((ap.kind, ap.last), (EntryKind::Event, 29));
         assert_eq!(facts.entry_at(9).map(|e| e.key.as_str()), Some("battery"));
         assert_eq!(facts.entry_at(4).map(|e| e.key.as_str()), None);
+    }
+
+    #[test]
+    fn an_entrys_own_end_leaves_the_comments_above_the_next_and_its_only_reads() {
+        let text = "state:\n  battery:\n    watch: L('B')\n    only: [g1000]\n\n  # ── Lights\n  # The beacon.\n  beacon:\n    watch: L('C')\n    only: g1000\n";
+        let facts = read(text).expect("parses");
+        let battery = facts.entry("battery").expect("battery");
+        assert_eq!((battery.line, battery.end, battery.last), (1, 3, 6));
+        assert_eq!(battery.only, ["g1000"]);
+        let beacon = facts.entry("beacon").expect("beacon");
+        assert_eq!((beacon.line, beacon.end), (7, 9));
+        assert_eq!(
+            beacon.only,
+            ["g1000"],
+            "one ID on its own reads as a list of one"
+        );
     }
 
     #[test]

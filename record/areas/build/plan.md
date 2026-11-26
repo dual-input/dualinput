@@ -1379,7 +1379,9 @@ The user asked on 2026-11-26 for a way to see only the entries of the variants b
 - It opens VS Code's own picker with a box for each variant, the loaded aircraft's marked "loaded" while one is in a flight.
 - Each entry of `state` or `events` whose `only` names none of the picked variants folds to its key line and dims; an entry with no `only` applies to every variant and stays as it is.
   Picking every variant, or none, shows them all.
-- VS Code can't hide a line, so folding is the nearest, and an entry folds again as its text changes while the filter holds.
+- VS Code can't hide a line, so folding is the nearest; the folds follow the text as it changes, and an entry an author opens stays open until the filter changes.
+- The dimming runs from an entry's key to its own last line, so the comments above the next entry, its heading among them, stay as they are.
+- A filter forgets a variant the profile no longer names, and shows every entry once it names none or all of those left.
 - An editor folds only while it's the active one, so a filtered file folds as its editor becomes active.
 - A module's entries aren't in the profile's file, so the filter doesn't reach them.
 

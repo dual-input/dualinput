@@ -285,7 +285,7 @@ export const VIEWS = {
             "kind": "single",
             "row": {
               "fullKey": "WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1",
-              "key": "WasmInstrument",
+              "key": "WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1",
               "panels": 1,
               "ticked": false
             }

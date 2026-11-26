@@ -11,8 +11,12 @@ use profile_language::Edit;
 use super::view::{DisplayRow, PickerGroup};
 use super::yaml_edit::{self, scalar};
 
+/// The identifier every WASM gauge's key starts with, the query naming its module and gauge, as
+/// `WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1`.
+const WASM: &str = "WasmInstrument";
+
 /// The picker's groups: an identifier one instrument holds is one row, which writes the
-/// identifier, and one several instruments share is a heading over a row for each full key; a
+/// identifier, or a WASM gauge's full key, and one several instruments share is a heading over a row for each full key; a
 /// full key that several panels hold is one row, with their count. Each row is ticked by
 /// `ticks`, the rows the author ticked or unticked, by full key, or else by whether `displays`
 /// names it.
@@ -48,6 +52,12 @@ pub(crate) fn groups(
     by_identifier
         .into_iter()
         .map(|((_, identifier), keys)| match keys.as_slice() {
+            // A lone WASM gauge's row writes its full key, since `WasmInstrument` alone would opt in
+            // every WASM gauge in every variant, panels the sim hasn't loaded among them, and a
+            // livery leaves a WASM gauge's query as it is.
+            [(full, count)] if identifier == WASM => PickerGroup::Single {
+                row: row(full, full, *count),
+            },
             [(full, count)] => PickerGroup::Single {
                 row: row(identifier, full, *count),
             },
@@ -209,6 +219,8 @@ mod tests {
     fn an_identifier_one_instrument_holds_is_one_row_and_a_shared_one_a_heading_over_its_keys() {
         let displays = ["KAS297B_1".to_string(), "KX155B|Index=2".to_string()];
         let groups = groups(&cockpit(), &displays, &BTreeMap::new());
+        let wasm =
+            "WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1";
         assert_eq!(
             stops(&groups),
             [
@@ -218,11 +230,9 @@ mod tests {
                 "KX155B",
                 "KX155B|Index=1",
                 "KX155B|Index=2",
-                "WasmInstrument"
+                wasm
             ]
         );
-        let wasm =
-            "WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1";
         assert_eq!(
             rows(&groups),
             [
@@ -231,9 +241,22 @@ mod tests {
                 ("KAS297B_1".into(), "KAS297B_1|Index=1".into(), 1, true),
                 ("KX155B|Index=1".into(), "KX155B|Index=1".into(), 1, false),
                 ("KX155B|Index=2".into(), "KX155B|Index=2".into(), 1, true),
-                ("WasmInstrument".into(), wasm.into(), 1, false),
+                (wasm.into(), wasm.into(), 1, false),
             ]
         );
+    }
+
+    #[test]
+    fn a_lone_wasm_gauge_writes_its_full_key_in_place_of_the_bare_identifier() {
+        let wasm =
+            "WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1";
+        let displays = ["WasmInstrument".to_string()];
+        let groups = groups(&cockpit(), &displays, &BTreeMap::new());
+        assert_eq!(written(&groups, &displays), [wasm]);
+        let mut ticks = BTreeMap::new();
+        tick(&groups, wasm, &mut ticks);
+        let cleared = super::groups(&cockpit(), &displays, &ticks);
+        assert!(written(&cleared, &displays).is_empty());
     }
 
     #[test]

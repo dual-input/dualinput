@@ -99,7 +99,7 @@ const PANELS: PickerGroup[] = [
   row("KNS81_1"),
   row("KR87A"),
   shared("KX155B", ["KX155B|Index=1", "KX155B|Index=2"], ["KX155B|Index=1"]),
-  row("WasmInstrument", { fullKey: "WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1" }),
+  row("WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1"),
   row("WeatherSquare4000_int"),
   shared("WTT", ["WTT|side=1", "WTT|side=2"]),
 ]

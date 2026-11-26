@@ -20,6 +20,7 @@ So the user decided that whether a WASM instrument syncs depends on how its airc
 The change stays at level 1, since CI holds a level's files only to release tags from 1.0.0 on, and nobody flies a release before it ([01-format-and-delivery](01-format-and-delivery.md)'s note of stage 22c).
 
 Changed: the profile engine drops the error `displays-wasm`, and level 1's schemas drop the pattern that refused such a key; the display picker's rows drop `refused`, and with it the reason "Can't sync", the muted look, and the key cut to one line with the whole key in a tooltip, so a `WasmInstrument` row reads and ticks as any row does.
+A lone WASM gauge's row writes its full key rather than the identifier, which would opt in every WASM gauge the aircraft has, panels the sim hasn't loaded among them (user, 2026-11-26, from the change's code review).
 [01-format-and-delivery](01-format-and-delivery.md), [04-the-extension-in-the-sim](04-the-extension-in-the-sim.md), [03-v1-scope](../product/03-v1-scope.md), and [04-room-for-later](../product/04-room-for-later.md) gain a note of it, and [WASM instrument sync](../product/ideas.md#wasm-instrument-sync), the product plan's Later pick, and [stage 19](../build/plan.md#19-pointer-sync) say so.
 
 ## 2026-11-26: The hint at the end of a `watch:` line goes, since an author who wants a verdict opens the Sync log

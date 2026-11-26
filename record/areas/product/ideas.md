@@ -21,7 +21,7 @@ In our FS Copilot fork this drove the A220's SVG displays, which syncing the nam
 It's our leading candidate for syncing panels, pending a decision in `record/decisions/`.
 Dual Input would also show which pilot is working which display, such as "FO on the MCDU", so the other pilot keeps off it.
 
-- **Tech:** WASM displays need more than a forwarded position, which [WASM instrument sync](#wasm-instrument-sync) covers.
+- **Tech:** a WASM display that ignores a forwarded position, such as the iniBuilds A350's, needs more, which [WASM instrument sync](#wasm-instrument-sync) covers.
   When both pilots type on one display at once, each machine would apply the keys in a different order (unverified, [08-06](../../learn/foundations/08-06-divergence-and-one-screen.md#unverified-claims)).
 
 ### Bus bridge
@@ -54,6 +54,8 @@ Some displays drawn by WASM code can take a forwarded press.
 The iniBuilds A380's displays pressed at the position we sent once we told the display the mouse had entered it (measured on MSFS 2024, 2026-09-23, FS Copilot fork, `record/wasm-pointer/docs/log.md`, "2026-09-23 — The A380 presses where we say once the display is told the mouse entered it; the A350 does not").
 The A350's display ignores the position we send and presses wherever the receiving pilot's own cursor is on that display (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 — A WASM gauge presses whatever the REAL cursor hovers, ignoring the coordinates we send").
 Reaching it takes a patch to the module that nobody has written, which an A350 [plugin](#plugins) could make on the pilot's machine ([decision 001](../../decisions/001-changing-other-developers-packages.md)).
+v1's pointer sync plays presses on any WASM instrument a profile names, and the profile's author tests whether its aircraft takes them, so this idea is for the WASM displays that don't (user, 2026-11-26, [profiles log](../profiles/log.md#2026-11-26-a-wasminstrument-display-loads-and-ticks-like-any-other-and-its-profiles-author-tests-whether-it-syncs)).
+v1 fires no mouse-enter event, so a display like the A380's would press only under the receiving pilot's own cursor (unverified for Dual Input, same entry).
 
 - **Next:** design how a production version does this, and find which aircraft's displays it reaches.
 

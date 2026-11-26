@@ -1,5 +1,5 @@
-//! Pointer sync's `displays`: a module's join its profile's, a WASM instrument fails the load at
-//! its place, and the block comes back from a bundle and is named in the level's schema.
+//! Pointer sync's `displays`: a module's join its profile's, a WASM instrument is one like any
+//! other, and the block comes back from a bundle and is named in the level's schema.
 
 use std::collections::BTreeMap;
 
@@ -84,17 +84,22 @@ fn one_display_on_its_own_is_a_list_of_one() {
 }
 
 #[test]
-fn a_wasm_instrument_fails_the_load_at_its_place() {
+fn a_wasm_instrument_is_a_display_like_any_other() {
     let yaml = "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a: x\ndisplays:\n  - DisplayUnits\n  - WasmInstrument|wasm_module=ND\n";
-    let report = check(
-        &source(&tree(&[("p.yaml", yaml)]), "p.yaml").expect("loads"),
-        LEVEL,
+    let s = source(&tree(&[("p.yaml", yaml)]), "p.yaml").expect("loads");
+    let report = check(&s, LEVEL);
+    assert!(report.diagnostics.is_empty(), "{report}");
+    let bytes = write(
+        &s,
+        &Compiled {
+            scripts: program(&s, LEVEL).scripts,
+        },
     );
-    let found: Vec<(&str, usize, usize)> = report
-        .errors()
-        .map(|d| (d.code.as_str(), d.at.line, d.at.column))
-        .collect();
-    assert_eq!(found, [("displays-wasm", 9, 5)], "{report}");
+    let p = read(&bytes, LEVEL).expect("reads");
+    assert_eq!(
+        displays(&p.resolve("a")),
+        ["DisplayUnits", "WasmInstrument|wasm_module=ND"]
+    );
 }
 
 #[test]

@@ -39,6 +39,10 @@ Decides:     The scope of every v1 feature.
 > - [Avatar sync](#avatar-sync) has four switches for which figures show, and its banner says "This seat is taken" rather than naming the free seat ([the Figures tab](../interface/decisions.md#the-figures-tab-holds-the-pilots-figure-and-explains-what-its-figures-can-do)).
 > - [The recording rule](#recording-and-bug-reports) has the log replace the home folder's path alone, not the Windows username ([the core's log](../interface/decisions.md#the-cores-log-keeps-display-names-and-replaces-only-the-home-folders-path)).
 
+> **Note**
+> In [pointer sync](#pointer-sync), presses also play on the WASM instruments the aircraft's profile names, and whether one takes a replayed press depends on how its aircraft builds it, which the profile's author tests ([profiles log](../profiles/log.md#2026-11-26-a-wasminstrument-display-loads-and-ticks-like-any-other-and-its-profiles-author-tests-whether-it-syncs); user, 2026-11-26).
+> [WASM instrument sync](ideas.md#wasm-instrument-sync) stays a Later pick, for the WASM displays a replayed press doesn't reach.
+
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
 It says what Dual Input does, not how: mechanisms are for the sync design in `record/areas/sync/` and the architecture, step 7, and screens and wording for a later pass.

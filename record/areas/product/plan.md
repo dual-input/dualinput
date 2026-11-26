@@ -81,7 +81,7 @@ The picks, picked on 2026-10-02:
 - **Later:**
   - [Bus bridge](ideas.md#bus-bridge)
   - [EventBus bridge](ideas.md#eventbus-bridge)
-  - [WASM instrument sync](ideas.md#wasm-instrument-sync)
+  - [WASM instrument sync](ideas.md#wasm-instrument-sync), for the WASM displays a replayed press doesn't reach, since from 2026-11-26 a profile may name any WASM instrument in `displays` and its author tests whether it syncs (user)
   - The second pilot's mic reaching ATC, from [ATC sync](ideas.md#atc-sync)
   - Weather, from [Environment sync](ideas.md#environment-sync)
   - Home-network discovery, from [One-click invite](ideas.md#one-click-invite)

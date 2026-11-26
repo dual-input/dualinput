@@ -741,6 +741,7 @@ The stage changes nothing every scenario runs on, so it closes on the scenarios 
 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the panel module's and the bridge's tests and the `pointer-sync` scenario among them; on the bench, a tap on one core's fake panel plays as `mousedown`, `mouseup`, and `click` at the same fractions on the other's, and with the PM's link to the PF cut, the PM's displays lock until it's back and the replay has ended; and the [pointer sync log](../pointer-sync/log.md) has an entry for the cases and budgets.
 Done on 2026-10-25.
+On 2026-11-26 the user took out the profile engine's check that a `WasmInstrument|` key fails, with the display picker's refusal of such a row from [stage 22g](#22g-the-extension-in-the-sim), since whether a WASM instrument syncs depends on how its aircraft builds it, which the profile's author tests ([profiles log](../profiles/log.md#2026-11-26-a-wasminstrument-display-loads-and-ticks-like-any-other-and-its-profiles-author-tests-whether-it-syncs)).
 
 ## 20 Take-control
 

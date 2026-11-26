@@ -8,14 +8,8 @@ use messages::authoring::CockpitPanel;
 use profile_engine::key_names;
 use profile_language::Edit;
 
-use super::view::{DisplayRow, PickerGroup, RowRefusal};
+use super::view::{DisplayRow, PickerGroup};
 use super::yaml_edit::{self, scalar};
-
-/// The identifier every WASM instrument's key starts with, which v1's pointer sync can't reach,
-/// since it plays presses into HTML displays only, and a profile naming one fails its load.
-/// `WASM` in src/engines/profile-engine/src/features/pointer_sync.rs names it too, so change both
-/// together.
-const WASM: &str = "WasmInstrument";
 
 /// The picker's groups: an identifier one instrument holds is one row, which writes the
 /// identifier, and one several instruments share is a heading over a row for each full key; a
@@ -50,7 +44,6 @@ pub(crate) fn groups(
             .get(full)
             .copied()
             .unwrap_or_else(|| displays.iter().any(|d| key_names(d, full))),
-        refused: (full.split('|').next() == Some(WASM)).then_some(RowRefusal::WasmInstrument),
     };
     by_identifier
         .into_iter()
@@ -70,22 +63,21 @@ pub(crate) fn groups(
 }
 
 /// Ticks the row `id`, or unticks it once ticked; on a heading, ticks every row under it, or
-/// unticks them all once all are ticked. A row that can't be ticked stays as it is.
+/// unticks them all once all are ticked.
 pub(crate) fn tick(groups: &[PickerGroup], id: &str, ticks: &mut BTreeMap<String, bool>) {
     for group in groups {
         match group {
-            PickerGroup::Single { row } if row.key == id && row.refused.is_none() => {
+            PickerGroup::Single { row } if row.key == id => {
                 ticks.insert(row.full_key.clone(), !row.ticked);
             }
             PickerGroup::Shared { identifier, rows } if identifier == id => {
-                let open: Vec<&DisplayRow> = rows.iter().filter(|r| r.refused.is_none()).collect();
-                let all = open.iter().all(|r| r.ticked);
-                for r in open {
+                let all = rows.iter().all(|r| r.ticked);
+                for r in rows {
                     ticks.insert(r.full_key.clone(), !all);
                 }
             }
             PickerGroup::Shared { rows, .. } => {
-                for r in rows.iter().filter(|r| r.key == id && r.refused.is_none()) {
+                for r in rows.iter().filter(|r| r.key == id) {
                     ticks.insert(r.full_key.clone(), !r.ticked);
                 }
             }
@@ -105,17 +97,16 @@ pub(crate) fn written(groups: &[PickerGroup], displays: &[String]) -> Vec<String
         match group {
             PickerGroup::Single { row } => {
                 listed.push(&row.full_key);
-                if row.ticked && row.refused.is_none() {
+                if row.ticked {
                     out.push(row.key.clone());
                 }
             }
             PickerGroup::Shared { identifier, rows } => {
                 listed.extend(rows.iter().map(|r| r.full_key.as_str()));
-                let open: Vec<&DisplayRow> = rows.iter().filter(|r| r.refused.is_none()).collect();
-                if !open.is_empty() && open.iter().all(|r| r.ticked) {
+                if rows.iter().all(|r| r.ticked) {
                     out.push(identifier.clone());
                 } else {
-                    out.extend(open.iter().filter(|r| r.ticked).map(|r| r.key.clone()));
+                    out.extend(rows.iter().filter(|r| r.ticked).map(|r| r.key.clone()));
                 }
             }
         }
@@ -182,14 +173,14 @@ mod tests {
             .collect()
     }
 
-    fn rows(groups: &[PickerGroup]) -> Vec<(String, String, u32, bool, bool)> {
+    fn rows(groups: &[PickerGroup]) -> Vec<(String, String, u32, bool)> {
         groups
             .iter()
             .flat_map(|g| match g {
                 PickerGroup::Single { row } => vec![row.clone()],
                 PickerGroup::Shared { rows, .. } => rows.clone(),
             })
-            .map(|r| (r.key, r.full_key, r.panels, r.ticked, r.refused.is_some()))
+            .map(|r| (r.key, r.full_key, r.panels, r.ticked))
             .collect()
     }
 
@@ -235,42 +226,12 @@ mod tests {
         assert_eq!(
             rows(&groups),
             [
-                (
-                    "bksq_wradar1".into(),
-                    "bksq_wradar1".into(),
-                    1,
-                    false,
-                    false
-                ),
-                (
-                    "GNS_DISABLED".into(),
-                    "GNS_DISABLED".into(),
-                    2,
-                    false,
-                    false
-                ),
-                (
-                    "KAS297B_1".into(),
-                    "KAS297B_1|Index=1".into(),
-                    1,
-                    true,
-                    false
-                ),
-                (
-                    "KX155B|Index=1".into(),
-                    "KX155B|Index=1".into(),
-                    1,
-                    false,
-                    false
-                ),
-                (
-                    "KX155B|Index=2".into(),
-                    "KX155B|Index=2".into(),
-                    1,
-                    true,
-                    false
-                ),
-                ("WasmInstrument".into(), wasm.into(), 1, false, true),
+                ("bksq_wradar1".into(), "bksq_wradar1".into(), 1, false),
+                ("GNS_DISABLED".into(), "GNS_DISABLED".into(), 2, false),
+                ("KAS297B_1".into(), "KAS297B_1|Index=1".into(), 1, true),
+                ("KX155B|Index=1".into(), "KX155B|Index=1".into(), 1, false),
+                ("KX155B|Index=2".into(), "KX155B|Index=2".into(), 1, true),
+                ("WasmInstrument".into(), wasm.into(), 1, false),
             ]
         );
     }
@@ -281,7 +242,6 @@ mod tests {
         let none: [String; 0] = [];
         let first = groups(&cockpit(), &none, &ticks);
         tick(&first, "KX155B", &mut ticks);
-        tick(&first, "WasmInstrument", &mut ticks);
         tick(&first, "GNS_DISABLED", &mut ticks);
         let ticked = groups(&cockpit(), &none, &ticks);
         assert_eq!(written(&ticked, &none), ["GNS_DISABLED", "KX155B"]);

@@ -72,11 +72,11 @@ const SWITCH = entry({ name: "Prop sync", key: "prop_sync", takes: "value", live
 const LEVER = entry({ name: "Left mixture", key: "mixture_1", takes: "value", live: [{ of: null, value: "0.82" }], field: "0.5", seen: "many" })
 const IGNITION = entry({ name: "Left ignition", key: "ignition_1", takes: "value", live: [{ of: null, value: "3" }], field: "4", seen: ["0", "1", "2", "3", "4"] })
 
-const row = (key: string, rest: Partial<DisplayRow> = {}): PickerGroup => ({ kind: "single", row: { key, fullKey: key, panels: 1, ticked: false, refused: null, ...rest } })
+const row = (key: string, rest: Partial<DisplayRow> = {}): PickerGroup => ({ kind: "single", row: { key, fullKey: key, panels: 1, ticked: false, ...rest } })
 const shared = (identifier: string, keys: string[], ticked: string[] = []): PickerGroup => ({
   kind: "shared",
   identifier,
-  rows: keys.map((key) => ({ key, fullKey: key, panels: 1, ticked: ticked.includes(key), refused: null })),
+  rows: keys.map((key) => ({ key, fullKey: key, panels: 1, ticked: ticked.includes(key) })),
 })
 
 /**
@@ -99,7 +99,7 @@ const PANELS: PickerGroup[] = [
   row("KNS81_1"),
   row("KR87A"),
   shared("KX155B", ["KX155B|Index=1", "KX155B|Index=2"], ["KX155B|Index=1"]),
-  row("WasmInstrument", { fullKey: "WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1", refused: "wasm-instrument" }),
+  row("WasmInstrument", { fullKey: "WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1" }),
   row("WeatherSquare4000_int"),
   shared("WTT", ["WTT|side=1", "WTT|side=2"]),
 ]
@@ -305,17 +305,15 @@ export function standIn(view: () => Scene, show: (next: Scene) => void, heard: (
 /** What a group puts in `displays`: its ticked rows' keys, or a shared identifier alone once every key under it is ticked. */
 function writes(group: PickerGroup): string[] {
   if (group.kind === "single") return group.row.ticked ? [group.row.key] : []
-  const open = group.rows.filter((one) => !one.refused)
-  if (open.length && open.every((one) => one.ticked)) return [group.identifier]
-  return open.filter((one) => one.ticked).map((one) => one.key)
+  if (group.rows.every((one) => one.ticked)) return [group.identifier]
+  return group.rows.filter((one) => one.ticked).map((one) => one.key)
 }
 
-/** A group with `id` ticked or unticked: a row on its own, or under a heading every row the heading holds but a refused one. */
+/** A group with `id` ticked or unticked: a row on its own, or under a heading every row the heading holds. */
 function tickIn(group: PickerGroup, id: string): PickerGroup {
-  const flip = (one: DisplayRow) => (one.key === id && !one.refused ? { ...one, ticked: !one.ticked } : one)
+  const flip = (one: DisplayRow) => (one.key === id ? { ...one, ticked: !one.ticked } : one)
   if (group.kind === "single") return { ...group, row: flip(group.row) }
   if (group.identifier !== id) return { ...group, rows: group.rows.map(flip) }
-  const open = group.rows.filter((one) => !one.refused)
-  const all = open.every((one) => one.ticked)
-  return { ...group, rows: group.rows.map((one) => (one.refused ? one : { ...one, ticked: !all })) }
+  const all = group.rows.every((one) => one.ticked)
+  return { ...group, rows: group.rows.map((one) => ({ ...one, ticked: !all })) }
 }

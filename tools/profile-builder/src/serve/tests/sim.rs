@@ -721,7 +721,7 @@ fn the_picker_lists_the_cockpits_panels_and_sync_writes_the_ticked_rows_into_dis
         },
     ];
     s.slice(&picking);
-    let row = |key: &str, panels: u32, ticked: bool| json!({ "key": key, "fullKey": key, "panels": panels, "ticked": ticked, "refused": null });
+    let row = |key: &str, panels: u32, ticked: bool| json!({ "key": key, "fullKey": key, "panels": panels, "ticked": ticked });
     let view = s.view(|v| v["body"]["kind"] == "picker");
     assert_eq!(
         view["body"]["picker"],

@@ -8,6 +8,20 @@ TypeScript's language service answers inside a write function in about 40ms in Q
 The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and [p04-language-service.mjs](../../../experiments/areas/profiles/p04-language-service.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 None needs the sim.
 
+## 2026-11-26: A `WasmInstrument` display loads and ticks like any other, and its profile's author tests whether it syncs
+
+The profile engine failed a load on a `displays` key whose identifier is `WasmInstrument`, and the display picker showed such a row as "Can't sync" and wouldn't tick it.
+That rested on our FS Copilot fork's `pointer.js`, whose header says "It must never be enabled for WasmInstrument panels: the sim owns their hit-testing and discards synthetic coordinates while latching the press" (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`).
+That holds for the iniBuilds A350, where our fork measured it, and the header claims it of every WASM display, while nobody measured Dual Input's pointer sync on one.
+What our fork measured differs by aircraft: the A380's WASM displays pressed at the position sent once told the mouse had entered them, and the A350's pressed under the receiving pilot's own cursor ([WASM instrument sync](../product/ideas.md#wasm-instrument-sync)).
+v1's pointer sync fires `mousedown`, `mousemove`, `mouseup`, and `click`, and no mouse-enter event, and without one the A380's display pressed only while the receiving pilot's own cursor was on that display, or while their sim wasn't in front (measured on MSFS 2024, 2026-09-23, FS Copilot fork, `record/wasm-pointer/docs/log.md`, "2026-09-23 — The A380 presses where we say once the display is told the mouse entered it; the A350 does not").
+An author's test of a WASM display then tells only with the receiving pilot's cursor on another display and their sim in front, and whether Dual Input's module behaves as the fork's did there is unverified.
+So the user decided that whether a WASM instrument syncs depends on how its aircraft builds it, that Dual Input takes one in `displays` with no warning, and that a profile's author tests it in each aircraft (user, 2026-11-26).
+The change stays at level 1, since CI holds a level's files only to release tags from 1.0.0 on, and nobody flies a release before it ([01-format-and-delivery](01-format-and-delivery.md)'s note of stage 22c).
+
+Changed: the profile engine drops the error `displays-wasm`, and level 1's schemas drop the pattern that refused such a key; the display picker's rows drop `refused`, and with it the reason "Can't sync", the muted look, and the key cut to one line with the whole key in a tooltip, so a `WasmInstrument` row reads and ticks as any row does.
+[01-format-and-delivery](01-format-and-delivery.md), [04-the-extension-in-the-sim](04-the-extension-in-the-sim.md), [03-v1-scope](../product/03-v1-scope.md), and [04-room-for-later](../product/04-room-for-later.md) gain a note of it, and [WASM instrument sync](../product/ideas.md#wasm-instrument-sync), the product plan's Later pick, and [stage 19](../build/plan.md#19-pointer-sync) say so.
+
 ## 2026-11-26: The hint at the end of a `watch:` line goes, since an author who wants a verdict opens the Sync log
 
 After using stage 22i's Sync log, the user judged the hint after each entry's first box, its latest step as `landed 84ms`, unnecessary: it repeats the log's verdicts on every watched line, beside the live values an author reads the line for, and an author who cares about a verdict opens the log (user, 2026-11-26).

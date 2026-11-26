@@ -251,7 +251,6 @@ export const VIEWS = {
               "fullKey": "GNS_DISABLED",
               "key": "GNS_DISABLED",
               "panels": 2,
-              "refused": null,
               "ticked": true
             }
           },
@@ -261,7 +260,6 @@ export const VIEWS = {
               "fullKey": "KAS297B_1|Index=1",
               "key": "KAS297B_1",
               "panels": 1,
-              "refused": null,
               "ticked": false
             }
           },
@@ -273,14 +271,12 @@ export const VIEWS = {
                 "fullKey": "KX155B|Index=1",
                 "key": "KX155B|Index=1",
                 "panels": 1,
-                "refused": null,
                 "ticked": false
               },
               {
                 "fullKey": "KX155B|Index=2",
                 "key": "KX155B|Index=2",
                 "panels": 1,
-                "refused": null,
                 "ticked": true
               }
             ]
@@ -291,7 +287,6 @@ export const VIEWS = {
               "fullKey": "WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI750U1",
               "key": "WasmInstrument",
               "panels": 1,
-              "refused": "wasm-instrument",
               "ticked": false
             }
           }

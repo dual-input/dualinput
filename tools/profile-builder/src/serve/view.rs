@@ -321,13 +321,6 @@ pub(crate) struct DisplayRow {
     pub(crate) full_key: String,
     pub(crate) panels: u32,
     pub(crate) ticked: bool,
-    pub(crate) refused: Option<RowRefusal>,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "kebab-case")]
-pub(crate) enum RowRefusal {
-    WasmInstrument,
 }
 
 /// A number as a box shows it, as fsc-editor showed one: its trailing zeros dropped and at most 3

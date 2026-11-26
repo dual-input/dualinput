@@ -167,8 +167,6 @@ export type DisplayRow = {
   panels: number
   /** Whether it's ticked, which a row already in `displays` starts as. */
   ticked: boolean
-  /** Why it can't be ticked: a `WasmInstrument|` key fails the load, since v1's pointer sync reaches HTML displays only. */
-  refused: "wasm-instrument" | null
 }
 
 /** What the panel calls back on the extension. */

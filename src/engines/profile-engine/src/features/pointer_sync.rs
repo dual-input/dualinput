@@ -28,11 +28,6 @@ pub(crate) const MODULE: Module = Module {
     schema,
 };
 
-/// The identifier of every WASM instrument, which v1's pointer sync can't reach, since it plays
-/// presses into HTML displays only, and the sim owns a WASM instrument's hit-testing
-/// (read in the FS Copilot fork, FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js).
-const WASM: &str = "WasmInstrument";
-
 /// Pointer sync's blocks of a profile.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Blocks {
@@ -58,16 +53,6 @@ fn check_block(c: &mut Checker, _: &Key, node: &Node) {
         let Some(display) = c.text(item, "Each display") else {
             continue;
         };
-        if display.split('|').next() == Some(WASM) {
-            c.error(
-                &item.at,
-                "displays-wasm",
-                format!(
-                    "`{display}` is a WASM instrument, and pointer sync plays presses into HTML displays only"
-                ),
-            );
-            continue;
-        }
         // A module's displays join its profile's, and one named twice is one display.
         let displays = &mut c.profile.features.pointer_sync.displays;
         if !displays.contains(&display) {
@@ -96,8 +81,7 @@ fn emit_fields(_: &features::EntryFields, _: &mut Out) {}
 fn schema(key: &str) -> Value {
     match key {
         "displays" => {
-            let display =
-                json!({ "type": "string", "not": { "pattern": "^WasmInstrument(\\||$)" } });
+            let display = json!({ "type": "string" });
             json!({ "anyOf": [display, { "type": "array", "items": display }] })
         }
         _ => json!({}),

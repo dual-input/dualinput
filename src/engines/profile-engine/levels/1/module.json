@@ -9,16 +9,10 @@
     "displays": {
       "anyOf": [
         {
-          "not": {
-            "pattern": "^WasmInstrument(\\||$)"
-          },
           "type": "string"
         },
         {
           "items": {
-            "not": {
-              "pattern": "^WasmInstrument(\\||$)"
-            },
             "type": "string"
           },
           "type": "array"

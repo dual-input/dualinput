@@ -7,6 +7,9 @@ Decides:     What an author sees with the sim: live values on watch lines, the D
 ```
 
 > **Note**
+> In [the display picker](#the-display-picker), a `WasmInstrument` row ticks as any row does, with no reason beside it, since whether a WASM instrument takes a replayed press depends on how its aircraft builds it, which the profile's author tests ([profiles log](log.md#2026-11-26-a-wasminstrument-display-loads-and-ticks-like-any-other-and-its-profiles-author-tests-whether-it-syncs); user, 2026-11-26).
+
+> **Note**
 > From stage 22j, adding an aircraft, "Add" and the loaded aircraft's title above `variants:`, works in any profile, with a session or without one, where [in a session](#in-a-session) holds for Run, live values, and the display picker; every tool island's title has a close button, and the display picker's Cancel goes; and the status line has a state of its own for an aircraft no profile covers, where it said "Mismatching aircraft" ([07-adding-an-aircraft](07-adding-an-aircraft.md); user, 2026-11-26).
 
 > **Note**

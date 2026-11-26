@@ -4,15 +4,12 @@
 // rows: Up and Down move, Space ticks, Enter selects the ticked rows, Escape closes the picker as its title's button
 // does, and a click moves to a row and ticks it.
 
-import { Button, Checkbox, cx, fadeMask, NO_SCROLLBAR, Tooltip, useScroller } from "@dualinput/ui"
+import { Button, Checkbox, cx, fadeMask, NO_SCROLLBAR, useScroller } from "@dualinput/ui"
 import { useEffect } from "react"
 import type { KeyboardEvent } from "react"
 
 import { Keys } from "./keys.tsx"
-import { TOOLTIP_DELAY } from "./run.tsx"
 import type { DisplayRow, PanelHost, PickerView } from "./view.ts"
-
-const REASONS: Record<NonNullable<DisplayRow["refused"]>, string> = { "wasm-instrument": "Can't sync" }
 
 const KEYS: [string, string][] = [
   ["↑↓", "move"],
@@ -28,7 +25,6 @@ export function Picker({ picker, host }: { picker: PickerView; host: PanelHost }
   const rows = picker.groups.flatMap((group) => (group.kind === "single" ? [group.row] : group.rows))
   // The rows and headings in the order Up and Down walk them.
   const stops = picker.groups.flatMap((group) => (group.kind === "single" ? [group.row.key] : [group.identifier, ...group.rows.map((row) => row.key)]))
-  const tickable = (stop: string) => !rows.some((row) => row.key === stop && row.refused)
   const ticked = rows.filter((row) => row.ticked).length
 
   // The keys move the rows from the moment the picker opens, with no click on the list first.
@@ -41,14 +37,14 @@ export function Picker({ picker, host }: { picker: PickerView; host: PanelHost }
     const at = stops.indexOf(picker.active)
     if (event.key === "ArrowDown") host.move(stops[Math.min(at + 1, stops.length - 1)]!)
     else if (event.key === "ArrowUp") host.move(stops[Math.max(at - 1, 0)]!)
-    else if (event.key === " " && tickable(picker.active)) host.tick(picker.active)
+    else if (event.key === " ") host.tick(picker.active)
     else if (event.key === "Enter") host.write()
     else if (event.key === "Escape") host.leave()
     else return
     event.preventDefault()
   }
 
-  const stop = (id: string, refused: boolean) => ({
+  const stop = (id: string) => ({
     active: picker.active === id,
     // Hovering a row outlines its display in the sim, as moving to it with the keys does, so the mouse walks the cockpit too.
     onHover: () => {
@@ -56,7 +52,7 @@ export function Picker({ picker, host }: { picker: PickerView; host: PanelHost }
     },
     onPress: () => {
       host.move(id)
-      if (!refused) host.tick(id)
+      host.tick(id)
     },
   })
 
@@ -80,16 +76,15 @@ export function Picker({ picker, host }: { picker: PickerView; host: PanelHost }
         {picker.groups.map((group) => {
           if (group.kind === "single") {
             const { row } = group
-            return <Row key={row.key} id={row.key} checked={row.ticked} row={row} {...stop(row.key, !!row.refused)} />
+            return <Row key={row.key} id={row.key} checked={row.ticked} row={row} {...stop(row.key)} />
           }
-          const open = group.rows.filter((row) => !row.refused)
-          const all = open.length > 0 && open.every((row) => row.ticked)
-          const some = open.some((row) => row.ticked)
+          const all = group.rows.every((row) => row.ticked)
+          const some = group.rows.some((row) => row.ticked)
           return (
             <div key={group.identifier} role="group" aria-label={group.identifier}>
-              <Row id={group.identifier} checked={all ? true : some ? "mixed" : false} label={group.identifier} meta={`${group.rows.length} instruments`} {...stop(group.identifier, open.length === 0)} />
+              <Row id={group.identifier} checked={all ? true : some ? "mixed" : false} label={group.identifier} meta={`${group.rows.length} instruments`} {...stop(group.identifier)} />
               {group.rows.map((row) => (
-                <Row key={row.key} id={row.key} indent checked={row.ticked} row={row} {...stop(row.key, !!row.refused)} />
+                <Row key={row.key} id={row.key} indent checked={row.ticked} row={row} {...stop(row.key)} />
               ))}
             </div>
           )
@@ -118,32 +113,21 @@ type RowProps = {
   onPress: () => void
 }
 
-/**
- * The whole row is the target, so its checkbox takes no press of its own. A row that can't be ticked stays an ordinary
- * row, muted, with its key cut to one line, since a WASM instrument's runs past 70 characters, and whole on a hover.
- */
+/** The whole row is the target, so its checkbox takes no press of its own. */
 function Row({ id, checked, row, label = row?.key ?? "", meta, indent, active, onHover, onPress }: RowProps) {
-  const refused = row?.refused ?? null
-  const trailing = refused ? REASONS[refused] : (meta ?? (row && row.panels > 1 ? `${row.panels} panels` : null))
-  const line = (
+  const trailing = meta ?? (row && row.panels > 1 ? `${row.panels} panels` : null)
+  return (
     <div
       data-stop={id}
       role="option"
       aria-selected={checked === true}
-      aria-disabled={refused ? true : undefined}
       onMouseEnter={onHover}
       onClick={onPress}
-      className={cx("flex cursor-default items-center rounded-xl py-1.5 pr-2", indent ? "pl-8" : "pl-2", active ? "bg-accent ring-1 ring-primary/60" : "hover:bg-muted/50", refused && "text-muted-foreground")}
+      className={cx("flex cursor-default items-center rounded-xl py-1.5 pr-2", indent ? "pl-8" : "pl-2", active ? "bg-accent ring-1 ring-primary/60" : "hover:bg-muted/50")}
     >
-      <Checkbox checked={checked} disabled={!!refused} tabIndex={-1} aria-hidden className="pointer-events-none mr-2.5" />
-      <span className={cx("min-w-0 flex-1 font-mono text-[13px] leading-5", refused ? "truncate" : "break-words")}>{refused ? row!.fullKey : label}</span>
+      <Checkbox checked={checked} tabIndex={-1} aria-hidden className="pointer-events-none mr-2.5" />
+      <span className="min-w-0 flex-1 break-words font-mono text-[13px] leading-5">{label}</span>
       {trailing && <span className="ml-2 shrink-0 whitespace-nowrap text-xs text-muted-foreground">{trailing}</span>}
     </div>
-  )
-  if (!refused) return line
-  return (
-    <Tooltip content={<span className="break-all font-mono">{row!.fullKey}</span>} delay={TOOLTIP_DELAY}>
-      {line}
-    </Tooltip>
   )
 }

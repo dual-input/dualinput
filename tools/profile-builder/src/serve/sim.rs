@@ -60,13 +60,14 @@ pub(super) fn add_title(title: &str) -> String {
     format!("$(add)\u{a0}Add {title}")
 }
 
-/// The lens that filters a profile's entries by variant, naming the variants it shows, or none
-/// while it shows them all (record/areas/build/plan.md, "22k Filtering a profile by variant").
+/// The lens that filters a profile's entries by variant, saying what the file shows: every entry,
+/// or the entries of the variants the filter names (record/areas/build/plan.md, "22k Filtering a
+/// profile by variant").
 pub(super) fn filter_title(shown: &[&str]) -> String {
     if shown.is_empty() {
-        "$(filter)\u{a0}Show all variants".into()
+        "$(filter)\u{a0}Showing all entries".into()
     } else {
-        format!("$(filter)\u{a0}Showing {}", shown.join(", "))
+        format!("$(filter)\u{a0}Showing entries for {}", shown.join(", "))
     }
 }
 

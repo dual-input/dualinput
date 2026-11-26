@@ -325,7 +325,7 @@ fn the_filter_lens_shows_the_picked_variants_entries_and_folds_the_rest() {
     assert_eq!(
         filter(&s.lenses(FILE)),
         [(
-            "$(filter)\u{a0}Show all variants".to_string(),
+            "$(filter)\u{a0}Showing all entries".to_string(),
             json!([uri, ["a", "b"], [], null])
         )],
         "with no session, in a profile of two variants"
@@ -339,14 +339,17 @@ fn the_filter_lens_shows_the_picked_variants_entries_and_folds_the_rest() {
         json!([{ "line": on_ground, "last": line_of(&text, "  throttle:") - 1 }]),
         "an entry of `b` alone folds, and one of every variant stays"
     );
-    assert_eq!(filter(&s.lenses(FILE))[0].0, "$(filter)\u{a0}Showing a");
+    assert_eq!(
+        filter(&s.lenses(FILE))[0].0,
+        "$(filter)\u{a0}Showing entries for a"
+    );
     s.execute("dualInput.showVariants", json!([uri, ["a", "b"]]))
         .expect("shows all");
     let cleared = s.wait("dualInput/folds", |_| true);
     assert_eq!(cleared["folds"], json!([]), "every variant shows them all");
     assert_eq!(
         filter(&s.lenses(FILE))[0].0,
-        "$(filter)\u{a0}Show all variants"
+        "$(filter)\u{a0}Showing all entries"
     );
     let one = PROFILE;
     s.open("aircraft/one.yaml", one);
@@ -365,7 +368,7 @@ fn the_filter_lens_shows_the_picked_variants_entries_and_folds_the_rest() {
     s.wait("dualInput/folds", |f| f["folds"] == json!([]));
     assert_eq!(
         filter(&s.lenses(FILE))[0].0,
-        "$(filter)\u{a0}Show all variants"
+        "$(filter)\u{a0}Showing all entries"
     );
 }
 

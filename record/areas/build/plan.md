@@ -1329,6 +1329,8 @@ Tests:
 It changes neither the kernel nor the core's edge, so it closes on the `profiles` scenario.
 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts profiles` pass, the new cases among them.
+Done on 2026-11-26: `node tools/check.ts` passed, and the `profiles` scenario passed 14 of its 15 tests, the new case among them.
+The one that failed is the build's budget, at 2,633ms against 2,000ms, measured while MSFS 2024 flew on the same PC at 70% CPU, with the bench at below-normal priority; this stage doesn't change the build, and the case waits for a quiet PC to run again.
 
 ## 23 v1's release
 

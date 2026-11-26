@@ -208,8 +208,8 @@ export function activate(context: vscode.ExtensionContext): void {
       if (typeof uri !== "string" || !isTexts(ids) || !isTexts(shown)) return
       const picked = await vscode.window.showQuickPick(pickItems(ids, shown, typeof loaded === "string" ? loaded : null), {
         canPickMany: true,
-        title: "Show the entries of these variants",
-        placeHolder: "Ticking none, or every one, shows them all",
+        title: "Filter entries by variant",
+        placeHolder: "Selecting none or all shows every entry",
       })
       if (picked) tell("dualInput.showVariants", [uri, picked.map((item) => item.label)])
     }),

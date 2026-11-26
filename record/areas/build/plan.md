@@ -1376,7 +1376,7 @@ Done on 2026-11-26, with the sim case's second half, a session's profile loading
 The user asked on 2026-11-26 for a way to see only the entries of the variants being worked on, in a profile with many, and settled with us that it's small enough to build from this stage alone (user, 2026-11-26):
 
 - A lens above `variants:` says what the file shows, "Showing all entries", or "Showing entries for g1000, skis", in any profile under `profiles/aircraft/` with more than one variant (user, 2026-11-26).
-- It opens VS Code's own picker with a box for each variant, the loaded aircraft's marked "loaded" while one is in a flight.
+- It opens VS Code's own picker, titled "Filter entries by variant", with a box for each variant, the one that covers the aircraft loaded in the sim marked "current aircraft" (user, 2026-11-26).
 - Each entry of `state` or `events` whose `only` names none of the picked variants folds to its key line and dims; an entry with no `only` applies to every variant and stays as it is.
   Picking every variant, or none, shows them all.
 - VS Code can't hide a line, so folding is the nearest; the folds follow the text as it changes, and an entry an author opens stays open until the filter changes.

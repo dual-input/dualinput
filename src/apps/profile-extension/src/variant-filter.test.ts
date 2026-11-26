@@ -8,11 +8,11 @@ import { test } from "node:test"
 
 import { foldChanges, pickItems, shifted } from "./variant-filter.ts"
 
-test("the picker lists the variants in the profile's order, those shown ticked, and the loaded one marked", () => {
+test("the picker lists the variants in the profile's order, those shown ticked, and the current aircraft's marked", () => {
   assert.deepEqual(pickItems(["classic", "g1000", "skis"], ["g1000"], "skis"), [
     { label: "classic", picked: false },
     { label: "g1000", picked: true },
-    { label: "skis", description: "loaded", picked: false },
+    { label: "skis", description: "current aircraft", picked: false },
   ])
   assert.deepEqual(pickItems(["a", "b"], [], null), [
     { label: "a", picked: false },

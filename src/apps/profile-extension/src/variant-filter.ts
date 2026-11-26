@@ -12,11 +12,11 @@ export type Folds = { uri: string; folds: Fold[] }
 export type Item = { label: string; description?: string; picked: boolean }
 
 /**
- * The picker's variants, in the profile's order, those the filter shows ticked, and the loaded aircraft's marked, since
- * it's usually the one an author tests.
+ * The picker's variants, in the profile's order, those the filter shows ticked, and the one that covers the aircraft
+ * loaded in the sim marked as the current aircraft, since it's usually the one an author tests.
  */
 export function pickItems(ids: string[], shown: string[], loaded: string | null): Item[] {
-  return ids.map((id) => ({ label: id, ...(id === loaded ? { description: "loaded" } : {}), picked: shown.includes(id) }))
+  return ids.map((id) => ({ label: id, ...(id === loaded ? { description: "current aircraft" } : {}), picked: shown.includes(id) }))
 }
 
 /**

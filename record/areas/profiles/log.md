@@ -8,6 +8,14 @@ TypeScript's language service answers inside a write function in about 40ms in Q
 The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and [p04-language-service.mjs](../../../experiments/areas/profiles/p04-language-service.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 None needs the sim.
 
+## 2026-11-26: The hint at the end of a `watch:` line goes, since an author who wants a verdict opens the Sync log
+
+After using stage 22i's Sync log, the user judged the hint after each entry's first box, its latest step as `landed 84ms`, unnecessary: it repeats the log's verdicts on every watched line, beside the live values an author reads the line for, and an author who cares about a verdict opens the log (user, 2026-11-26).
+A stopped entry still raises state sync's notification, and every word keeps its definition in the log.
+
+Changed: `serve` sends the boxes alone, without a hint or the index of each entry's latest row that found it, and the extension draws the boxes alone, in one decoration type for each kind of box, which takes away the retry that kept the hint's types ordered after the box's.
+[06-the-sync-log](06-the-sync-log.md) gains a note of it.
+
 ## 2026-11-26: In the sim, the lens and the island added the C172 G1000 Skis' preset to a profile whose `g1000` names its folder
 
 We asked whether [adding an aircraft](07-adding-an-aircraft.md) works on a real load, out of any session, as the design's case in the sim has it.

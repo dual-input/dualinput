@@ -16,6 +16,9 @@ Decides:     What the sync engine logs, and that it costs nothing while nobody w
 > - The hint draws in two decoration types of its own beside the box's, rather than in the decoration that draws the box.
 
 > **Note**
+> The hint is gone: a `watch:` line shows its box alone, and a verdict shows only in the Sync log, so [the hint at the end of a line](#the-hint-at-the-end-of-a-line), and the hint wherever this doc names it, no longer hold ([profiles log](log.md#2026-11-26-the-hint-at-the-end-of-a-watch-line-goes-since-an-author-who-wants-a-verdict-opens-the-sync-log); user, 2026-11-26).
+
+> **Note**
 > A write function compiles at its first run, rather than as the profile loads, so one that doesn't compile stops its entry at its first write, on that write's row, where [a row is a cause](#a-row-is-a-cause) and [known limits](#known-limits) have it stop at the load with no row ([profiles log](log.md#2026-11-26-the-58ps-profile-load-took-1500µs-most-of-it-state-sync-starting-a-javascript-runtime-and-compiling-18-write-functions-and-it-takes-950µs-with-both-moved-off-the-load)).
 
 > **Note**

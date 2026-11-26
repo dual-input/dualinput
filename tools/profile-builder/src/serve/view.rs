@@ -12,15 +12,12 @@ use messages::authoring::{self as wire, Given, Got};
 use profile_engine::{Name, read_name};
 use serde::{Serialize, Serializer};
 
-/// One box, after line `line`, from 0, and on the first of an entry's lines, its latest step in
-/// the Sync log, which shows after the box.
+/// One box, after line `line`, from 0.
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub(crate) struct LineBox {
     pub(crate) line: usize,
     pub(crate) text: String,
     pub(crate) kind: BoxKind,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) hint: Option<super::sync_log::Hint>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]

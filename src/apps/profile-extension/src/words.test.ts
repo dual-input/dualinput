@@ -6,7 +6,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
-import { anchorOf, docsLink, isWord, said, textOf, type Word, WORDS } from "./words.ts"
+import { anchorOf, docsLink, isWord, type Word, WORDS } from "./words.ts"
 
 /**
  * Every word `serve` sends, copied by hand from `said()` and `verdict()` in tools/profile-builder/src/serve/sync_log.rs,
@@ -98,16 +98,4 @@ test("a key from a message is a word only if the list holds it", () => {
   assert.ok(isWord("landed"))
   assert.ok(!isWord("landd"))
   assert.ok(!isWord("toString"))
-})
-
-test("a word says its detail after a space and a second word after a comma, and an error after a colon", () => {
-  assert.equal(textOf(said("function-failed", "ReferenceError: valu is not defined")), "function failed: ReferenceError: valu is not defined")
-  assert.equal(textOf(said("read-back", "1", "landed")), "read back 1, landed")
-  assert.equal(textOf(said("pending", "1")), "pending 1")
-  assert.equal(textOf(said("withdrawn", null, "lost")), "withdrawn: lost")
-  assert.equal(textOf(said("withdrawn", null, "undone")), "withdrawn: undone")
-  assert.equal(textOf(said("already-matches", null)), "already matches")
-  assert.equal(textOf(said("stopped", null, "driven")), "stopped: driven")
-  assert.equal(textOf(said("stopped", "the write function ran past 100ms")), "stopped: the write function ran past 100ms")
-  assert.deepEqual(said("read-back", "1", "landed"), [{ word: "read-back" }, { text: " 1" }, { text: ", " }, { word: "landed" }])
 })

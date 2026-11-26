@@ -1211,7 +1211,7 @@ fn the_views_serve_sends_are_the_extensions_types() {
         "// Written by the test `the_views_serve_sends_are_the_extensions_types` in\n\
          // tools/profile-builder/src/serve/tests/sim.rs, from views `serve` sends in its `dualInput/panel`,\n\
          // so tsc checks that each is a `ServerView` as panel/src/view.ts writes one, and from the Sync log's\n\
-         // `dualInput/syncLog` and the boxes' hints in `dualInput/values`, with every step the engine logs,\n\
+         // `dualInput/syncLog` and the boxes in `dualInput/values`, with every step the engine logs,\n\
          // so tsc checks each against sync-log/src/view.ts and boxes.ts, and each word against words.ts.\n\
          // cargo test writes it again, so edit the test, not this file.\n\
          \n\
@@ -1276,8 +1276,8 @@ fn the_views_serve_sends_are_the_extensions_types() {
 }
 
 /// The Sync log's `dualInput/syncLog` with a row for each step the engine logs, every cause and
-/// both notes among them, and a file's boxes in `dualInput/values` with each row's verdict as a
-/// hint, so the extension's types are checked against every word `serve` sends.
+/// both notes among them, and a file's boxes in `dualInput/values`, so the extension's types are
+/// checked against every word `serve` sends.
 fn sync_log_views() -> (Value, Value) {
     use messages::state_sync::{Source, SyncLog};
     use messages::sync::{LogStep, Step, Stopping as Stop, Value as Synced, Withdrawal, Written};
@@ -1398,19 +1398,11 @@ fn sync_log_views() -> (Value, Value) {
     );
     let control = Step::ControlPassed { value: one() };
     rows.heard(log(1, None, cause(passed, control)), now, 0);
-    let boxes: Vec<LineBox> = (1..=passed)
-        .enumerate()
-        .map(|(line, row)| LineBox {
-            line,
-            text: "1".into(),
-            kind: BoxKind::Value,
-            hint: rows.hint(&entry(row)),
-        })
-        .collect();
-    assert!(
-        boxes.iter().all(|b| b.hint.is_some()),
-        "every row's entry has its hint"
-    );
+    let boxes = vec![LineBox {
+        line: 0,
+        text: "1".into(),
+        kind: BoxKind::Value,
+    }];
     // A newer load's step notes each older row still pending or waiting as unloaded.
     let newer = vec![step(1, "battery", Step::LocalChange { value: None })];
     rows.heard(log(2, None, newer), now, 0);

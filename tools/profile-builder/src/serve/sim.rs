@@ -691,7 +691,7 @@ impl Server {
                 continue;
             }
             let boxes = match (self.sim.ours(), self.sim.facts.get(&file)) {
-                (Some(slice), Some(facts)) => boxes(slice, facts, &self.sim.log),
+                (Some(slice), Some(facts)) => boxes(slice, facts),
                 _ => Vec::new(),
             };
             if self
@@ -1117,31 +1117,23 @@ fn is_profile(file: &Path) -> bool {
     locate(file).is_some_and(|(_, rel)| rel.starts_with("aircraft/"))
 }
 
-/// The boxes of one file's watch lines, from the slice, the first of each entry's with its hint,
-/// the entry's latest step in the Sync log (record/areas/profiles/06-the-sync-log.md, "The hint
-/// at the end of a line").
-fn boxes(slice: &AuthoringSlice, facts: &Facts, log: &SyncLogRows) -> Vec<LineBox> {
+/// The boxes of one file's watch lines, from the slice.
+fn boxes(slice: &AuthoringSlice, facts: &Facts) -> Vec<LineBox> {
     // The slice comes up to 20 times a second, each time with every name the open files watch.
     let got: BTreeMap<&str, &Got> = slice
         .names
         .iter()
         .map(|n| (n.name.as_str(), &n.got))
         .collect();
-    let mut hinted = BTreeSet::new();
     facts
         .watches
         .iter()
         .filter_map(|w| {
             let (text, kind) = box_text(got.get(w.text.as_str())?, &w.name)?;
-            let hint = match hinted.insert(w.entry.as_str()) {
-                true => log.hint(&w.entry),
-                false => None,
-            };
             Some(LineBox {
                 line: w.line,
                 text,
                 kind,
-                hint,
             })
         })
         .collect()

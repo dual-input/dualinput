@@ -1,6 +1,5 @@
-// The sync engine's words, each as the Sync log and the hint at the end of a `watch:` line show it, with a definition
-// for authors, written once here: the view shows a word's definition on hover or click, the hint's hover shows it too,
-// and the authors' docs take their glossary from this list (record/areas/profiles/06-the-sync-log.md, "The words").
+// The sync engine's words, each as the Sync log shows it, with a definition for authors, written once here: the view
+// shows a word's definition on hover or click, and the authors' docs take their glossary from this list (record/areas/profiles/06-the-sync-log.md, "The words").
 // `serve` sends each word by its key, from `said()` and `verdict()` in tools/profile-builder/src/serve/sync_log.rs, so
 // change both together. It imports nothing of VS Code's, so Node's test runner tests it alone, and the Sync log's
 // webview bundles it.
@@ -214,9 +213,14 @@ export function isWord(key: string): key is Word {
 /** A piece of a step as the log says it: one of the engine's words, which the view underlines and defines, or plain text. */
 export type Part = { word: Word } | { text: string }
 
+/** Parts as plain text, each word by its label. */
+export function textOf(parts: Part[]): string {
+  return parts.map((part) => ("word" in part ? WORDS[part.word].label : part.text)).join("")
+}
+
 /**
  * What comes between a word and its detail: a colon before an error, as `stopped: Unexpected token` and `function
- * failed: ReferenceError`, and a space before a value, as `read back 1`. The hint and the log both take it from here.
+ * failed: ReferenceError`, and a space before a value, as `read back 1`.
  */
 export function apart(word: Word): string {
   return word === "stopped" || word === "function-failed" ? ": " : " "
@@ -227,25 +231,8 @@ const REASONED = new Set<Word>(["stopped", "withdrawn"])
 
 /**
  * Whether a word's second word is its reason, which follows a colon, as `withdrawn: lost`, where any other second word
- * is a further fact after a comma, as `read back 1, landed`. The hint and the log both take it from here.
+ * is a further fact after a comma, as `read back 1, landed`.
  */
 export function reasoned(word: Word): boolean {
   return REASONED.has(word)
-}
-
-/**
- * A word with what it carries, as the hint says it: the detail after `apart`, and a second word after a colon when it's
- * the reason and after a comma otherwise, as `reasoned` decides.
- */
-export function said(word: Word, detail: string | null, also: Word | null = null): Part[] {
-  if (also && reasoned(word)) return [{ word }, { text: ": " }, { word: also }]
-  const parts: Part[] = [{ word }]
-  if (detail) parts.push({ text: `${apart(word)}${detail}` })
-  if (also) parts.push({ text: ", " }, { word: also })
-  return parts
-}
-
-/** Parts as plain text, each word by its label. */
-export function textOf(parts: Part[]): string {
-  return parts.map((part) => ("word" in part ? WORDS[part.word].label : part.text)).join("")
 }

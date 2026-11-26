@@ -1,6 +1,5 @@
-//! `serve`'s side of the Sync log: the rows it keeps of the steps state sync's engine logged, each
-//! entry's latest step for the hint at the end of its `watch:` line, and the notes beside a row
-//! (record/areas/profiles/06-the-sync-log.md).
+//! `serve`'s side of the Sync log: the rows it keeps of the steps state sync's engine logged, and
+//! the notes beside a row (record/areas/profiles/06-the-sync-log.md).
 //!
 //! State sync sends each engine call's steps once, as a `unit` message, so `serve` keeps the
 //! history: the last 10,000 rows, through a save's reload and past the session's end, until the
@@ -39,9 +38,6 @@ pub(crate) struct SyncLogRows {
     next: u64,
     /// The newest load a step came from.
     newest: Option<u64>,
-    /// Each entry's newest row in the newest load, by id, which its hint shows, so a hint finds
-    /// its row without walking every row on each message.
-    latest: BTreeMap<String, u64>,
     /// The Run `serve` last sent.
     ran: Option<Ran>,
     /// The rows that changed since the view last heard, by id.
@@ -140,16 +136,6 @@ pub(crate) struct StepView {
     pub(crate) links: Vec<String>,
 }
 
-/// The hint at the end of an entry's line: its latest row's verdict.
-#[derive(Clone, Debug, PartialEq, Serialize)]
-pub(crate) struct Hint {
-    pub(crate) word: &'static str,
-    pub(crate) detail: Option<String>,
-    /// The step's second word, as `driven` on a stop, absent when it has none.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) also: Option<&'static str>,
-}
-
 impl SyncLogRows {
     /// The steps of one engine call, as state sync sent them, which reached `serve` at `now` and
     /// `wall`, in ms since the Unix epoch.
@@ -160,7 +146,6 @@ impl SyncLogRows {
                 self.unloaded(log.load);
             }
             self.newest = Some(log.load);
-            self.latest.clear();
         }
         for step in log.steps {
             let key = (log.load, step.row);
@@ -194,9 +179,6 @@ impl SyncLogRows {
             self.next += 1;
             self.ids.insert(key, id);
             self.changed.insert(id);
-            if Some(log.load) == self.newest {
-                self.latest.insert(step.entry.clone(), id);
-            }
             self.rows.push_back(Row {
                 id,
                 load: log.load,
@@ -245,7 +227,6 @@ impl SyncLogRows {
     pub(crate) fn clear(&mut self) {
         self.rows.clear();
         self.ids.clear();
-        self.latest.clear();
         self.changed.clear();
         self.cleared = true;
     }
@@ -264,24 +245,6 @@ impl SyncLogRows {
             .collect();
         let first = self.rows.front().map_or(self.next, |r| r.id);
         Some(Update { rows, first })
-    }
-
-    /// The hint for `entry`: its latest row's verdict in the newest load, and none for an entry
-    /// with no row there.
-    pub(crate) fn hint(&self, entry: &str) -> Option<Hint> {
-        let row = self.row(*self.latest.get(entry)?)?;
-        let (at, last) = row.steps.last()?;
-        let shown = said(last);
-        // A read back that landed shows as its verdict, `landed`, with how long it took.
-        let (detail, also) = match last {
-            Step::ReadBack { landed: true, .. } => (Some(ms(*at, row.steps[0].0)), None),
-            _ => (shown.detail, shown.also),
-        };
-        Some(Hint {
-            word: verdict(last),
-            detail,
-            also,
-        })
     }
 
     fn row(&self, id: u64) -> Option<&Row> {
@@ -355,10 +318,6 @@ fn pace(every: &str) -> Duration {
         Some(profile_engine::Pace::Frames(n)) => FRAME.saturating_mul(n),
         None => FRAME,
     }
-}
-
-fn ms(at: u64, first: u64) -> String {
-    format!("{}ms", at.saturating_sub(first) / 1_000)
 }
 
 fn value(v: &Value) -> String {
@@ -620,11 +579,6 @@ mod tests {
             row.steps.last().map(|s| (s.ms, s.also)),
             Some((84, Some("landed")))
         );
-        let hint = rows.hint("battery").expect("a hint");
-        assert_eq!(
-            (hint.word, hint.detail.as_deref()),
-            ("landed", Some("84ms"))
-        );
         assert!(rows.update().is_none(), "nothing new");
     }
 
@@ -809,10 +763,6 @@ mod tests {
                 ("beacon".into(), vec![]),
             ],
             "the sent row is done, and the new load's row has no note"
-        );
-        assert!(
-            rows.hint("battery").is_none(),
-            "the hint shows the newest load alone"
         );
     }
 }

@@ -4,7 +4,7 @@
 // needs only a client of its own, and this holds what only VS Code draws: the status bar, the
 // commands, the Output panel, where the server's log and each build's report go, the palette
 // each theme needs in the author's settings, and in a session's flight, the boxes after `watch:`
-// lines with each entry's hint, the Dual Input panel, and the Sync log
+// lines, the Dual Input panel, and the Sync log
 // (record/areas/profiles/03-the-extension.md, "How it works", 04-the-extension-in-the-sim.md,
 // "The connection", and 06-the-sync-log.md, "The Sync log view").
 
@@ -19,14 +19,13 @@ import { ExecuteCommandRequest, LanguageClient, State } from "vscode-languagecli
 import type { FromPanel, ToPanel } from "../panel/src/messages.ts"
 import type { FromSyncLog, ToSyncLog } from "../sync-log/src/messages.ts"
 import type { Update } from "../sync-log/src/view.ts"
-import { type Box, type BoxKind, boxStyle, byKind, type Hint, hintStyles, hintText, KINDS, type Values } from "./boxes.ts"
+import { type Box, type BoxKind, boxStyle, byKind, KINDS, type Values } from "./boxes.ts"
 import { PanelBridge, placeOf, type ServerView } from "./bridge.ts"
 import { webviewPage } from "./page.ts"
 import { isForced, type Palette, paletteFor, type Rule, palettes, uiThemeOf, withPalette } from "./palette.ts"
 import { type Build, Builds, kindOf, PATTERNS, profileName } from "./status.ts"
 import { SyncLogMirror } from "./sync-log.ts"
 import { syntaxes } from "./syntax.ts"
-import { docsLink, WORDS } from "./words.ts"
 
 /** The language's ID, which package.json's `contributes.languages` names too. */
 const LANGUAGE = "dualinput-profile"
@@ -436,8 +435,7 @@ async function findProfile(file: string): Promise<vscode.Uri | undefined> {
 }
 
 /**
- * Draws each open file's boxes, as `serve` sends them, with each entry's hint after its first, into every editor that
- * shows the file. An editor's decorations last only while VS Code shows it, so the boxes are kept by file and drawn again
+ * Draws each open file's boxes, as `serve` sends them, into every editor that shows the file. An editor's decorations last only while VS Code shows it, so the boxes are kept by file and drawn again
  * into each editor VS Code shows.
  */
 class Boxes implements vscode.Disposable {
@@ -486,8 +484,8 @@ class Boxes implements vscode.Disposable {
   }
 
   /**
-   * Each box after the end of its line, and a hint after its box. The boxes come as typing pauses, so they can name a
-   * line past the file's end after the author deletes lines, and such a box is skipped.
+   * Each box after the end of its line. The boxes come as typing pauses, so they can name a line past the file's end after
+   * the author deletes lines, and such a box is skipped.
    */
   private draw(editor: vscode.TextEditor): void {
     const { document } = editor
@@ -499,63 +497,21 @@ class Boxes implements vscode.Disposable {
     const kinds = byKind(boxes)
     for (const kind of KINDS) {
       editor.setDecorations(
-        this.types.boxes[kind],
+        this.types[kind],
         kinds[kind].map((box) => ({ range: at(box), renderOptions: { after: { contentText: box.text } } })),
       )
     }
-    const hinted = boxes.flatMap((box) => (box.hint ? [{ range: at(box), hint: box.hint, text: hintText(box.hint) }] : []))
-    editor.setDecorations(
-      this.types.word,
-      hinted.map(({ range, hint, text }) => ({ range, renderOptions: { after: { contentText: text.word } }, hoverMessage: definitionOf(hint) })),
-    )
-    editor.setDecorations(
-      this.types.rest,
-      hinted.flatMap(({ range, text }) => (text.rest ? [{ range, renderOptions: { after: { contentText: text.rest } } }] : [])),
-    )
   }
 }
 
-/**
- * A hint's word's definition, which its hover shows, and its second word's, such as `withdrawn`'s reason `lost`, which
- * the log defines on a hover of its own and the hint's hover gives below the first.
- */
-function definitionOf(hint: Hint): vscode.MarkdownString {
-  const shown = new vscode.MarkdownString()
-  for (const [at, word] of [hint.word, ...(hint.also ? [hint.also] : [])].entries()) {
-    const { label, definition } = WORDS[word]
-    shown.appendMarkdown(at ? "\n\n**" : "**").appendText(label).appendMarkdown("**\n\n").appendText(definition)
-    const link = docsLink(word)
-    if (link) shown.appendMarkdown(`\n\n[In the authors' docs](${link})`)
-  }
-  return shown.appendMarkdown("\n\n").appendText("The entry's latest step in the Sync log.")
-}
-
-/** The decoration types for one palette: a box of each kind, then the hint's word and the rest of its text. */
-type DecorationTypes = { boxes: Record<BoxKind, vscode.TextEditorDecorationType>; word: vscode.TextEditorDecorationType; rest: vscode.TextEditorDecorationType }
+/** The decoration types for one palette, a box of each kind. */
+type DecorationTypes = Record<BoxKind, vscode.TextEditorDecorationType>
 
 function allOf(types: DecorationTypes): vscode.TextEditorDecorationType[] {
-  return [types.boxes.value, types.boxes.firing, types.boxes.error, types.word, types.rest]
+  return KINDS.map((kind) => types[kind])
 }
 
-/**
- * The decoration types for `palette`, made in the order they draw at a line's end: the box, then the hint's word, then
- * the rest of its text. VS Code draws the `after`s at one place in the order of their CSS class names, which hold each
- * type's key followed by a hyphen, as `TextEditorDecorationType12-`, from a counter every extension in the host shares
- * (read in VS Code 1.147.0, workbench.desktop.main.js, `LineDecoration.compare`, and extensionHostProcess.js, the
- * decoration type's key). So a key a digit longer than the one made before it, as 10 after 9, would draw a hint before
- * its box, and then the types are made again, once, which takes the counter past the power of ten that broke the order.
- */
 function decorationTypes(palette: Palette): DecorationTypes {
-  const hint = hintStyles(palette)
-  for (let tries = 1; ; tries++) {
-    const make = (options: vscode.DecorationRenderOptions) => vscode.window.createTextEditorDecorationType(options)
-    const types: DecorationTypes = {
-      boxes: { value: make(boxStyle("value", palette)), firing: make(boxStyle("firing", palette)), error: make(boxStyle("error", palette)) },
-      word: make(hint.word),
-      rest: make(hint.rest),
-    }
-    const made = allOf(types)
-    if (tries === 2 || made.every((type, at) => at === 0 || `${made[at - 1]!.key}-` < `${type.key}-`)) return types
-    for (const type of made) type.dispose()
-  }
+  const make = (kind: BoxKind) => vscode.window.createTextEditorDecorationType(boxStyle(kind, palette))
+  return { value: make("value"), firing: make("firing"), error: make("error") }
 }

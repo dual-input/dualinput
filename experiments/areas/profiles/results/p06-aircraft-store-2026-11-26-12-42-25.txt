@@ -1,0 +1,38 @@
+p06 aircraft store, in mainUi, filter ""
+documents open: 11, a cockpit's among them: false
+engine: object
+
+## game/aircraft/currentAircraft: ok
+{
+ "__Type": "AircraftDetails",
+ "aircraftId": 251,
+ "variationId": "7191321866673686626",
+ "variationIndex": 5,
+ "creator": "A2A Simulations",
+ "modelName": "Aerostar 600",
+ "brandName": "Piper",
+ "variation": "Default",
+ "displayName": "Piper Aerostar 600",
+ "variationDisplayName": "Default",
+ "category": "AIRPLANE",
+ "isLegacy": false,
+ "brandLogo": "",
+ "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/aerostar600/liveries/a2a/ni22pc/thumbnail/thumbnail.png",
+ "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/aerostar600/liveries/a2a/ni22pc/thumbnail/thumbnail_button.png",
+ "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/aerostar600/liveries/a2a/ni22pc/thumbnail/thumbnail_side.png",
+ "isModular": true,
+ "isFavory": false,
+ "isSelected": false,
+ "isUsable": true,
+ "isGlider": false,
+ "isValid": true,
+ "rentingData": {
+  "__Type": "RentingData",
+  "rentalState": 0,
+  "rentalDuration": -0.00027777778450399637
+ },
+ "specializations": []
+}
+
+## game/aircraft/configurator/items: resolved, 1
+{"__Type":"ConfiguratorItem","id":"7191321866673686626","title":"Default","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/aerostar600/liveries/a2a/ni22pc/thumbnail/thumbnail.png","directoryPath":"","cost":0,"isNew":false,"isSelected":true,"isDisabled":false}

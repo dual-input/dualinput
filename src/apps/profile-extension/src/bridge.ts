@@ -7,9 +7,10 @@
 import type { FromPanel, ToPanel } from "../panel/src/messages.ts"
 import type { PanelView } from "../panel/src/view.ts"
 import type { Palette } from "./palette.ts"
+import type { Syntax } from "./syntax.ts"
 
-/** The view as the server sends it, which knows nothing of VS Code's theme. A `palette` it carries is replaced. */
-export type ServerView = Omit<PanelView, "palette">
+/** The view as the server sends it, which knows nothing of VS Code's theme. A `palette` or `syntax` it carries is replaced. */
+export type ServerView = Omit<PanelView, "palette" | "syntax">
 
 /** What the panel shows until the server sends a view, and again once the server stops. */
 export const NOT_RUNNING: ServerView = { status: { kind: "not-running" }, unpinned: false, body: { kind: "nothing" }, recorder: { kind: "off", why: "no-flight", lengthMs: null } }
@@ -24,6 +25,7 @@ export const PANEL_COMMANDS = {
   move: "dualInput.panel.move",
   tick: "dualInput.panel.tick",
   write: "dualInput.panel.write",
+  add: "dualInput.panel.add",
   leave: "dualInput.panel.leave",
   record: "dualInput.panel.record",
   stop: "dualInput.panel.stop",
@@ -45,6 +47,8 @@ export function commandFor(message: FromPanel): Command | null {
     case "move":
     case "tick":
       return { command: PANEL_COMMANDS[message.kind], arguments: [message.row] }
+    case "add":
+      return { command: PANEL_COMMANDS.add, arguments: [message.adding] }
     case "write":
     case "leave":
     case "record":
@@ -63,10 +67,13 @@ export class PanelBridge {
   private post: ((message: ToPanel) => void) | null = null
   private palette: Palette
   private readonly ends: Ends
+  private readonly syntax: Record<Palette, Syntax>
 
-  constructor(palette: Palette, ends: Ends) {
+  /** `syntax` is each palette's token colors, from `syntaxes()` in syntax.ts. */
+  constructor(palette: Palette, ends: Ends, syntax: Record<Palette, Syntax>) {
     this.palette = palette
     this.ends = ends
+    this.syntax = syntax
   }
 
   /**
@@ -108,7 +115,7 @@ export class PanelBridge {
   }
 
   private send(): void {
-    this.post?.({ kind: "view", view: { ...this.view, palette: this.palette } })
+    this.post?.({ kind: "view", view: { ...this.view, palette: this.palette, syntax: this.syntax[this.palette] } })
   }
 }
 

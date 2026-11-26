@@ -3,7 +3,7 @@
 // its dev page, with the extension standing where the dev page's stand-in stands
 // (record/areas/profiles/04-the-extension-in-the-sim.md, "The connection").
 
-import type { PanelView } from "./view.ts"
+import type { Adding, PanelView } from "./view.ts"
 
 /** From the extension: the view to draw, whole. */
 export type ToPanel = { kind: "view"; view: PanelView }
@@ -20,6 +20,7 @@ export type FromPanel =
   | { kind: "move"; row: string }
   | { kind: "tick"; row: string }
   | { kind: "write" }
+  | { kind: "add"; adding: Adding }
   | { kind: "leave" }
   | { kind: "record" }
   | { kind: "stop" }

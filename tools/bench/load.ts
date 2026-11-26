@@ -71,13 +71,14 @@ const report = [
   `queue wait, p99.9\t${us(whole.wait_p999_us!)}`,
   `queue wait, most\t${us(whole.wait_max_us!)}`,
   `busy\t${whole.busy_percent}%\tbudget ${BUSY_PERCENT}%\t${verdict(Number(whole.busy_percent) < BUSY_PERCENT)}`,
-  // The input that loads the engine compiles its 100 write functions, which took 1.1ms on a
-  // quiet PC and counts against the profile's load, not a handler's 1ms (measured,
-  // record/areas/core/log.md, "2026-11-10: Beside the A350, the loop's queue keeps its budget,
-  // and the sim's share of the CPU puts about 640 inputs over a handler's 1ms").
+  // The input that loaded the engine took 1.1ms on a quiet PC while it compiled the profile's 100
+  // write functions (measured, record/areas/core/log.md, "2026-11-10: Beside the A350, the loop's
+  // queue keeps its budget, and the sim's share of the CPU puts about 640 inputs over a handler's
+  // 1ms"). Each function compiles at its first run, so the load or its first writes may put one
+  // input over 1ms, which counts against the profile's load, not a handler's 1ms.
   besideSim
-    ? `inputs over 1ms\t${whole.over_1ms}, of which the load's 100ms stops are ${stops} or ${stops - 1}, and the engine's load 1\tbeside the sim, recorded with no budget`
-    : `inputs over 1ms\t${whole.over_1ms}, of which the load's 100ms stops are ${stops} or ${stops - 1}, and the engine's load 1\tbudget 1ms but the stops and the load\t${verdict(Number(whole.over_1ms) <= stops + 1)}`,
+    ? `inputs over 1ms\t${whole.over_1ms}, of which the load's 100ms stops are ${stops} or ${stops - 1}, and the engine's load or first writes 1\tbeside the sim, recorded with no budget`
+    : `inputs over 1ms\t${whole.over_1ms}, of which the load's 100ms stops are ${stops} or ${stops - 1}, and the engine's load or first writes 1\tbudget 1ms but the stops and the load\t${verdict(Number(whole.over_1ms) <= stops + 1)}`,
   `slowest input\t${us(whole.slowest_us!)}, #${whole.slowest_seq}`,
   `replay\t${(replayed.ms / 1_000).toFixed(1)}s for ${replayed.inputs} inputs, ${replayPerHour.toFixed(1)}s an hour\tbudget ${REPLAY_S_PER_HOUR}s an hour\t${verdict(replayPerHour < REPLAY_S_PER_HOUR)}`,
   // The playback, the timer thread, and tokio's jobs push at once, and the

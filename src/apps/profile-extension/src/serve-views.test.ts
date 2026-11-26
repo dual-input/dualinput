@@ -309,6 +309,56 @@ export const VIEWS = {
     },
     "unpinned": false
   } satisfies ServerView,
+  "adding an aircraft, with no session": {
+    "body": {
+      "add": {
+        "cover": {
+          "by": "folder",
+          "variant": "a"
+        },
+        "folder": "test-aircraft",
+        "named": {
+          "folder": "a",
+          "preset": null
+        },
+        "preset": "test-aircraft/presets/test/skis",
+        "suggested": {
+          "folder": "aircraft",
+          "preset": "skis"
+        },
+        "title": "Test Aircraft Skis",
+        "variants": [
+          "a"
+        ]
+      },
+      "kind": "add"
+    },
+    "recorder": {
+      "kind": "off",
+      "lengthMs": null,
+      "why": "no-flight"
+    },
+    "status": {
+      "kind": "no-session"
+    },
+    "unpinned": false
+  } satisfies ServerView,
+  "in a flight, no profile": {
+    "body": {
+      "kind": "nothing"
+    },
+    "recorder": {
+      "kind": "off",
+      "lengthMs": null,
+      "why": "no-flight"
+    },
+    "status": {
+      "crew": false,
+      "kind": "no-profile",
+      "title": "Test Aircraft"
+    },
+    "unpinned": false
+  } satisfies ServerView,
   "recording": {
     "body": {
       "kind": "nothing"

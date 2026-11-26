@@ -17,7 +17,7 @@ use clients::{ClientJoined, ClientLeft, Clients, ClientsUnit, SettingDef, To};
 use cockpit_stream::{
     Answer, Applying, CockpitCx, CockpitSent, CockpitStream, CockpitUnit, Delivered, PRETEND,
 };
-use kernel::{Cx, Handle, Registry, TimerId, View};
+use kernel::{Cx, Handle, Registry, Started, TimerId, View};
 use messages::clients::SettingKind;
 use messages::clients::component::PROFILE_EXTENSION;
 use messages::cockpit::Origin;
@@ -54,6 +54,11 @@ pub struct StateSync {
     /// connected, the engine keeps its log for the extension's Sync log
     /// (record/areas/profiles/06-the-sync-log.md, "How it reaches the view").
     extensions: BTreeSet<u64>,
+    /// The runtime the next profile's write functions run in. A profile loads inside a
+    /// handler's 1ms, and starting a runtime took about 200µs of the 58P's load (measured on our
+    /// development machine, 2026-11-26, record/areas/profiles/log.md), so state sync starts one
+    /// in an input of its own: the core's first, and each profile's unload.
+    spare: Option<Sandbox>,
 }
 
 struct Live {
@@ -91,19 +96,22 @@ pub fn register(r: &mut Registry) {
             development: true,
         },
     );
-    me.on::<ProfileLoaded>(StateSync::load)
-        .on::<ProfileUnloaded>(StateSync::unload)
-        .on::<SimChanged>(StateSync::sim_changed)
-        .on::<CockpitSent>(StateSync::sent)
-        .on::<ControlPassed>(StateSync::control_passed)
-        .on::<ClientJoined>(StateSync::joined)
-        .on::<ClientLeft>(StateSync::left)
-        .guard::<Ready>(StateSync::settled)
-        .on_sim(StateSync::on_sim)
-        .ends_with_profile()
-        .on_variables(StateSync::on_variables)
-        .client_state(NAME, StateSync::slice)
-        .catch_up_step(STATE, StateSync::give, StateSync::take);
+    me.on::<Started>(|me: &mut StateSync, _: &Started, _: &mut Cx| {
+        me.spare = Some(Sandbox::new());
+    })
+    .on::<ProfileLoaded>(StateSync::load)
+    .on::<ProfileUnloaded>(StateSync::unload)
+    .on::<SimChanged>(StateSync::sim_changed)
+    .on::<CockpitSent>(StateSync::sent)
+    .on::<ControlPassed>(StateSync::control_passed)
+    .on::<ClientJoined>(StateSync::joined)
+    .on::<ClientLeft>(StateSync::left)
+    .guard::<Ready>(StateSync::settled)
+    .on_sim(StateSync::on_sim)
+    .ends_with_profile()
+    .on_variables(StateSync::on_variables)
+    .client_state(NAME, StateSync::slice)
+    .catch_up_step(STATE, StateSync::give, StateSync::take);
     // The profile extension's recorder records all three, so a recording holds every change and
     // firing a crewmate would receive.
     me.cockpit_kind(CHANGE, StateSync::apply)
@@ -158,9 +166,6 @@ fn checklist(profile: &Resolved) -> Vec<ChecklistRow> {
 impl StateSync {
     /// The profile loaded: an engine for it, its watches, and the catch-up step.
     fn load(me: &mut StateSync, _: &ProfileLoaded, cx: &mut Cx) {
-        let Some(profile) = cx.read::<Profiles>().loaded().map(|l| l.profile.clone()) else {
-            return;
-        };
         let stage = cx.read::<SimAwareness>().stage;
         let ready = match (stage, me.rtc_end) {
             (Stage::Flying, Some(at)) => Settling::At(at),
@@ -172,33 +177,38 @@ impl StateSync {
             .setting_as::<u64>(SETTLE_MS)
             .map_or(sync_engine::SETTLE, |ms| ms * 1_000);
         let loaded_at = cx.now();
-        let (mut engine, out) = Engine::load(
-            &profile,
-            Sandbox::new(),
-            Load {
-                at: loaded_at,
-                ready,
-                settle,
-            },
-        );
+        let load = Load {
+            at: loaded_at,
+            ready,
+            settle,
+        };
+        // The engine and the checklist read the loader's profile in place, since copying a profile
+        // the size of the 58P's adds to a load that takes most of a handler's 1ms.
+        let Some((mut engine, checklist)) = cx.read::<Profiles>().loaded().map(|loaded| {
+            let sandbox = me.spare.take().unwrap_or_default();
+            (
+                Engine::load(&loaded.profile, sandbox, load),
+                checklist(&loaded.profile),
+            )
+        }) else {
+            return;
+        };
         engine.keep_log(!me.extensions.is_empty());
         let watch = cx.variables().watch(&watch::watches(engine.watches()));
-        let mut live = Live {
+        me.live = Some(Live {
             loaded_at,
             engine,
             watch,
             frames: Some(cx.sim().frames()),
             stepping: BTreeMap::new(),
             from: BTreeMap::new(),
-            checklist: checklist(&profile),
+            checklist,
             notices: Notices::default(),
             ready_timer: Some(cx.timer(
                 Duration::from_micros(sync_engine::CHECK),
                 StateSync::catch_up_ready,
             )),
-        };
-        live.carry_out(out, cx);
-        me.live = Some(live);
+        });
     }
 
     fn unload(me: &mut StateSync, _: &ProfileUnloaded, cx: &mut Cx) {
@@ -211,6 +221,7 @@ impl StateSync {
             }
         }
         cx.cockpit().step_ready(STATE, false);
+        me.spare.get_or_insert_with(Sandbox::new);
     }
 
     /// Each move into Flying from Ready to fly is that load's `RTC_END`, and a sim found already

@@ -170,23 +170,15 @@ impl std::fmt::Display for Pace {
 }
 
 impl Profile {
-    /// The variant that covers an aircraft, given the path the sim service reports for it:
-    /// its folder, then its preset's path, as `a350/presets/inibuilds/a350-900_default_cabin`,
-    /// compared ignoring case. A variant that names the preset beats one that names only its
-    /// folder.
+    /// The variant that covers an aircraft, given the path the sim service reports for it, as
+    /// `covering` picks it.
     pub fn covers(&self, aircraft: &str) -> Option<&str> {
-        let named = |presets: bool| {
-            self.aircraft.variants.iter().find(|v| {
-                let paths: Vec<String> = v
-                    .paths
-                    .iter()
-                    .filter(|p| p.contains('/') == presets)
-                    .cloned()
-                    .collect();
-                crate::index::covers(&paths, aircraft)
-            })
-        };
-        named(true).or_else(|| named(false)).map(|v| v.id.as_str())
+        let variants = self
+            .aircraft
+            .variants
+            .iter()
+            .map(|v| (v.id.as_str(), v.paths.as_slice()));
+        crate::index::covering(variants, aircraft).map(|(id, _)| id)
     }
 
     /// Each block as one variant has it, with the entries whose `only` leaves it out gone. It

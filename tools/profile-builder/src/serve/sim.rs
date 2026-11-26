@@ -22,8 +22,8 @@ use messages::backend::{Older, older};
 use messages::clients::{CORE, CoreSlice, FromClient, Hello, ToClient, component};
 use messages::state_sync::{self, SyncLog};
 use messages::tape::{self as tape, TapeOff, TapeSlice, TapeState, TapeStopped};
-use profile_language::{Pos, Workspace, closure};
-use serde::Serialize;
+use profile_language::{Edit, Pos, Workspace, closure};
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 use super::connection::{Down, Link, Up};
@@ -31,6 +31,7 @@ use super::convert::{Lines, path_of, uri_of};
 use super::displays;
 use super::facts::{self, EntryKind, Facts};
 use super::sync_log::SyncLogRows;
+use super::variants;
 use super::view::{
     Body, LineBox, PickerView, Preview, Recorder, RecorderOff, Refusal, Revert, RunView, Seen,
     ServerView, Status, Stopped, StoppedBy, Stopping, Takes, Update, action, box_text, given,
@@ -41,9 +42,10 @@ use super::{PAUSE, Server, full, locate};
 
 /// The extension's own commands, which the server's code lenses name, and which the server
 /// doesn't list among its own, since the extension registers them. src/apps/profile-extension/
-/// src/extension.ts registers both, so change both together.
+/// src/extension.ts registers all three, so change them together.
 const RUN: &str = "dualInput.run";
 const PICK: &str = "dualInput.pickDisplays";
+const ADD: &str = "dualInput.addAircraft";
 
 // The lenses' titles take VS Code's own icons, outlined as the Dual Input panel's lucide icons
 // are, since a lens draws no other. A no-break space after each icon keeps a gap that a plain
@@ -51,6 +53,11 @@ const PICK: &str = "dualInput.pickDisplays";
 pub(super) const RUN_TITLE: &str = "$(play)\u{a0}Run";
 pub(super) const RUN_PILOT_FLYING_TITLE: &str = "$(play)\u{a0}Run · pilot flying only";
 pub(super) const PICK_TITLE: &str = "$(inspect)\u{a0}Pick displays";
+
+/// The lens that adds the loaded aircraft, named by its `A:TITLE`.
+pub(super) fn add_title(title: &str) -> String {
+    format!("$(add)\u{a0}Add {title}")
+}
 
 /// What `serve` holds of the sim.
 pub(crate) struct Sim {
@@ -122,6 +129,10 @@ pub(crate) enum PanelState {
         /// The rows the author ticked or unticked, by full key.
         ticks: BTreeMap<String, bool>,
     },
+    /// Adding the loaded aircraft to the profile `file`.
+    Add {
+        file: PathBuf,
+    },
 }
 
 /// The session's profile in the workspace, and every file its program holds.
@@ -141,6 +152,9 @@ struct Lenses {
     picks: bool,
     flying: bool,
     program: Option<(PathBuf, String)>,
+    /// The loaded aircraft's path and `A:TITLE`, while the sim is in a flight, which the lens
+    /// that adds it shows in any profile.
+    aircraft: Option<(String, String)>,
 }
 
 impl Sim {
@@ -395,6 +409,8 @@ impl Server {
             PanelState::Picker { active, .. } => Panel::Picker {
                 active: active.clone(),
             },
+            // Adding an aircraft reads only the status `authoring` already sends.
+            PanelState::Add { .. } => Panel::Nothing,
         };
         self.command(command::PANEL, &panel);
     }
@@ -576,11 +592,13 @@ impl Server {
         None
     }
 
-    /// The file the panel is about: Run's entry's or the picker's, or else the one the author
-    /// last worked in.
+    /// The file the panel is about: Run's entry's, the picker's, or the profile the aircraft is
+    /// being added to, or else the one the author last worked in.
     fn panel_file(&self) -> Option<&Path> {
         match &self.sim.panel {
-            PanelState::Run { file, .. } | PanelState::Picker { file, .. } => Some(file),
+            PanelState::Run { file, .. }
+            | PanelState::Picker { file, .. }
+            | PanelState::Add { file } => Some(file),
             PanelState::Nothing => self.sim.last_file.as_deref(),
         }
     }
@@ -734,11 +752,16 @@ impl Server {
             ),
             None => (false, false, false),
         };
+        let aircraft = self
+            .sim
+            .ours()
+            .and_then(|s| Some((s.status.aircraft.clone()?, s.status.title.clone()?)));
         Lenses {
             runs: in_flight && loaded,
             picks: in_flight,
             flying,
             program: self.program().map(|p| (p.root, p.rel)),
+            aircraft,
         }
     }
 
@@ -759,14 +782,18 @@ impl Server {
 
     /// The code lenses of a file: Run above each entry that writes, while Run can run, and
     /// Pick displays above `displays:`, each only in the session's profile and the modules it
-    /// imports.
+    /// imports; and in any profile, while an aircraft the profile doesn't name by its own path is
+    /// loaded in a flight, the lens that adds it, above `variants:`, or `aircraft:` in a profile
+    /// with no `variants:` yet (record/areas/profiles/07-adding-an-aircraft.md, "The lens").
     pub(super) fn code_lenses(&mut self, uri: &str) -> Value {
         let lenses = self.lenses();
         let Some(file) = path_of(uri) else {
             return json!([]);
         };
         let in_program = self.program().is_some_and(|p| p.files.contains(&file));
-        let Some(text) = self.text_of(&file).filter(|_| lenses.picks && in_program) else {
+        let sim = lenses.picks && in_program;
+        let adds = lenses.aircraft.as_ref().filter(|_| is_profile(&file));
+        let Some(text) = self.text_of(&file).filter(|_| sim || adds.is_some()) else {
             return json!([]);
         };
         let Some(facts) = facts::read(&text) else {
@@ -781,6 +808,27 @@ impl Server {
             })
         };
         let mut out = Vec::new();
+        if let Some((path, title)) = adds {
+            let named = facts.variants.as_ref().map_or(&[][..], |(_, v)| &v[..]);
+            let key = match (&facts.variants, facts.aircraft) {
+                (Some((line, _)), _) => Some((*line, "variants")),
+                (None, Some(line)) => Some((line, "aircraft")),
+                (None, None) => None,
+            };
+            if let Some((line, word)) = key.filter(|_| !variants::has_own(named, path)) {
+                let indent = text
+                    .split('\n')
+                    .nth(line)
+                    .map_or(0, |l| l.chars().take_while(|c| *c == ' ').count());
+                out.push(json!({
+                    "range": at(line, indent, word.len()),
+                    "command": { "title": add_title(title), "command": ADD, "arguments": [uri] },
+                }));
+            }
+        }
+        if !sim {
+            return Value::Array(out);
+        }
         for e in facts.entries.iter().filter(|e| e.writes && lenses.runs) {
             // A pilot monitoring's change to an entry the pilot flying owns, state sync puts back
             // (record/areas/sync/05-units.md, "Who sends, and putting back").
@@ -858,6 +906,21 @@ impl Server {
                 };
                 self.send_panel();
             }
+            "dualInput.panel.addAircraft" => {
+                let file = file()?;
+                // The palette offers it in a module too, which has no `aircraft:`.
+                if !is_profile(&file) {
+                    return Err(format!(
+                        "{} isn't an aircraft's profile, so an aircraft can't be added to it",
+                        file.display()
+                    ));
+                }
+                self.fresh(&file);
+                self.sim.last_file = Some(file.clone());
+                self.sim.panel = PanelState::Add { file };
+                self.send_panel();
+            }
+            "dualInput.panel.add" => self.add(args.first())?,
             "dualInput.panel.typed" => {
                 if let PanelState::Run { field, .. } = &mut self.sim.panel {
                     *field = text(0).unwrap_or_default();
@@ -956,23 +1019,102 @@ impl Server {
             .unwrap_or_default();
         let written = displays::written(&self.picker_groups(), &named);
         if let Some(edit) = displays::edit(&text, &written)? {
-            if !self.sim.apply {
-                return Err("this editor takes no edit from its language server, so Sync can't write displays".into());
-            }
-            let lines = Lines::new(&text);
-            let edit = json!({ "range": lines.range(edit.range), "newText": edit.text });
-            self.sim.requests += 1;
-            let id = RequestId::from(format!("applyEdit-{}", self.sim.requests));
-            let params = json!({
-                "label": "Sync displays",
-                "edit": { "changes": { uri_of(&file): [edit] } },
-            });
-            self.send(Request::new(id, "workspace/applyEdit".into(), params).into());
+            self.apply_edit(&file, &text, edit, "Sync displays")?;
         }
         self.sim.panel = PanelState::Nothing;
         self.send_panel();
         Ok(())
     }
+
+    /// Add's write: the loaded aircraft's preset's path or its folder into the variant the author
+    /// named, through the editor, and the island left. A path the profile already names, and a
+    /// preset into the variant that already covers it through its folder, write nothing, since
+    /// the island offers neither.
+    fn add(&mut self, adding: Option<&Value>) -> Result<(), String> {
+        #[derive(Deserialize)]
+        struct Adding {
+            what: String,
+            id: String,
+        }
+        let PanelState::Add { file } = &self.sim.panel else {
+            return Ok(());
+        };
+        let file = file.clone();
+        let adding: Adding = adding
+            .cloned()
+            .and_then(|a| serde_json::from_value(a).ok())
+            .ok_or("dualInput.panel.add takes what to add and the variant's ID")?;
+        let id = adding.id.trim().to_string();
+        if !variants::valid_id(&id) {
+            return Err(format!(
+                "`{id}` isn't a variant ID, which starts with a letter or _"
+            ));
+        }
+        let loaded = self
+            .sim
+            .ours()
+            .and_then(|s| s.status.aircraft.clone())
+            .ok_or("no aircraft is loaded to add")?;
+        let path = match adding.what.as_str() {
+            "preset" if loaded.contains('/') => loaded.clone(),
+            "folder" => variants::folder_of(&loaded).to_string(),
+            other => {
+                return Err(format!(
+                    "`{other}` isn't what Add adds: a preset or a folder"
+                ));
+            }
+        };
+        self.fresh(&file);
+        let text = self
+            .text_of(&file)
+            .ok_or_else(|| format!("couldn't read {}", file.display()))?;
+        let named = self
+            .sim
+            .facts
+            .get(&file)
+            .and_then(|f| f.variants.as_ref())
+            .map(|(_, v)| v.clone())
+            .unwrap_or_default();
+        if !variants::gains_nothing(&named, &loaded, &path, &id)
+            && let Some(edit) = variants::edit(&text, &path, &id)?
+        {
+            self.apply_edit(&file, &text, edit, "Add this aircraft")?;
+        }
+        self.sim.panel = PanelState::Nothing;
+        self.send_panel();
+        Ok(())
+    }
+
+    /// Asks the editor to make `edit` to `file`, whose text is `text`.
+    fn apply_edit(
+        &mut self,
+        file: &Path,
+        text: &str,
+        edit: Edit,
+        label: &str,
+    ) -> Result<(), String> {
+        if !self.sim.apply {
+            return Err(format!(
+                "this editor takes no edit from its language server, so {label} can't write"
+            ));
+        }
+        let lines = Lines::new(text);
+        let edit = json!({ "range": lines.range(edit.range), "newText": edit.text });
+        self.sim.requests += 1;
+        let id = RequestId::from(format!("applyEdit-{}", self.sim.requests));
+        let params = json!({
+            "label": label,
+            "edit": { "changes": { uri_of(file): [edit] } },
+        });
+        self.send(Request::new(id, "workspace/applyEdit".into(), params).into());
+        Ok(())
+    }
+}
+
+/// Whether `file` is an aircraft's profile, under `profiles/aircraft/`, the only kind of file
+/// with `aircraft:`, and so the only kind an aircraft can be added to.
+fn is_profile(file: &Path) -> bool {
+    locate(file).is_some_and(|(_, rel)| rel.starts_with("aircraft/"))
 }
 
 /// The boxes of one file's watch lines, from the slice, the first of each entry's with its hint,
@@ -1052,6 +1194,14 @@ pub(crate) fn panel_view(i: &Inputs) -> ServerView {
         Some(_) if slice.window.as_deref().is_some_and(|w| w != i.window) => Status::OtherWindow,
         Some(_) if !s.session => Status::NoSession,
         Some(_) if !s.in_flight => Status::NotInFlight,
+        Some(_) if s.uncovered => Status::NoProfile {
+            title: s
+                .title
+                .clone()
+                .or_else(|| s.aircraft.clone())
+                .unwrap_or_default(),
+            crew: s.crew,
+        },
         Some(_) => Status::InFlight {
             aircraft: s
                 .profile
@@ -1078,6 +1228,22 @@ pub(crate) fn panel_view(i: &Inputs) -> ServerView {
     let body = match (shows, i.panel, i.facts) {
         (true, PanelState::Run { key, field, .. }, Some(facts)) => {
             run_view(i, slice, facts, key, field).map_or(Body::Nothing, |run| Body::Run { run })
+        }
+        // Adding an aircraft works in any profile, with a session or without one, so it shows
+        // whatever the status line says, while an aircraft is loaded in a flight; but only in the
+        // window the slice serves, since Add reads the aircraft from this window's slice alone.
+        (_, PanelState::Add { .. }, facts) if slice.window.as_deref() == Some(i.window) => {
+            match (&s.aircraft, &s.title) {
+                (Some(path), Some(title)) => {
+                    let named = facts
+                        .and_then(|f| f.variants.as_ref())
+                        .map_or(&[][..], |(_, v)| &v[..]);
+                    Body::Add {
+                        add: variants::view(title, path, named),
+                    }
+                }
+                _ => Body::Nothing,
+            }
         }
         (true, PanelState::Picker { active, ticks, .. }, facts) => {
             let named = facts

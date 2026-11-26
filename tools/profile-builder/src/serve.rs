@@ -24,8 +24,10 @@ mod sim;
 mod sync_log;
 #[cfg(test)]
 mod tests;
+mod variants;
 mod view;
 mod worker;
+mod yaml_edit;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -65,18 +67,20 @@ const PAUSE: Duration = Duration::from_millis(300);
 /// extension.ts says, `PANEL_COMMANDS` in src/apps/profile-extension/src/bridge.ts names the
 /// panel's, and `SYNC_LOG_COMMANDS` in src/apps/profile-extension/src/sync-log.ts the Sync log's,
 /// so change all four together.
-const COMMANDS: [&str; 17] = [
+const COMMANDS: [&str; 19] = [
     "dualInput.build",
     "dualInput.removeLocalBundle",
     "dualInput.importers",
     "dualInput.localFolder",
     "dualInput.panel.open",
     "dualInput.panel.pick",
+    "dualInput.panel.addAircraft",
     "dualInput.panel.typed",
     "dualInput.panel.run",
     "dualInput.panel.move",
     "dualInput.panel.tick",
     "dualInput.panel.write",
+    "dualInput.panel.add",
     "dualInput.panel.leave",
     "dualInput.panel.record",
     "dualInput.panel.stop",

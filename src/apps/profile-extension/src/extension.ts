@@ -129,8 +129,9 @@ export function activate(context: vscode.ExtensionContext): void {
     tell(command, args)
   }
 
-  const bridge = new PanelBridge(currentPalette(), { execute: ({ command, arguments: args }) => tell(command, args), reveal: (where) => void reveal(where) })
-  const syncLog = new SyncLogMirror(currentPalette(), ({ command, arguments: args }) => tell(command, args), syntaxes(context.extension.packageJSON))
+  const syntax = syntaxes(context.extension.packageJSON)
+  const bridge = new PanelBridge(currentPalette(), { execute: ({ command, arguments: args }) => tell(command, args), reveal: (where) => void reveal(where) }, syntax)
+  const syncLog = new SyncLogMirror(currentPalette(), ({ command, arguments: args }) => tell(command, args), syntax)
   const boxes = new Boxes(currentPalette())
   const repaint = (): void => {
     const palette = currentPalette()
@@ -152,8 +153,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // The client registers the server's own commands, `dualInput.build`, `dualInput.removeLocalBundle`,
   // `dualInput.importers`, `dualInput.localFolder`, and the panel's `dualInput.panel.*`, with VS Code
-  // under those IDs, so the extension's take others, `dualInput.run` and `dualInput.pickDisplays`
-  // among them, which the server's code lenses name. `COMMANDS` in tools/profile-builder/src/serve.rs
+  // under those IDs, so the extension's take others, `dualInput.run`, `dualInput.pickDisplays`, and
+  // `dualInput.addAircraft` among them, which the server's code lenses name. `COMMANDS` in tools/profile-builder/src/serve.rs
   // lists the server's, so change both together.
   context.subscriptions.push(
     output,
@@ -187,6 +188,13 @@ export function activate(context: vscode.ExtensionContext): void {
       const document = active()?.document
       const file = typeof uri === "string" ? uri : document && server.code2ProtocolConverter.asUri(document.uri)
       if (file) void openPanel("dualInput.panel.pick", [file])
+    }),
+    // The lens that adds the loaded aircraft passes its file's URI, and from the palette, as in a profile with no
+    // `aircraft:` yet, the command takes the active editor's file.
+    vscode.commands.registerCommand("dualInput.addAircraft", (uri: unknown) => {
+      const document = active()?.document
+      const file = typeof uri === "string" ? uri : document && server.code2ProtocolConverter.asUri(document.uri)
+      if (file) void openPanel("dualInput.panel.addAircraft", [file])
     }),
     vscode.commands.registerCommand("dualInput.buildNow", async () => {
       const file = active()

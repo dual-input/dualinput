@@ -113,26 +113,23 @@ impl Machine {
         me: Origin,
         profile: &Resolved,
         ready: Ready,
-        load_engine: fn(&Resolved, Sandbox, Load) -> (Engine, Vec<Out>),
+        load_engine: fn(&Resolved, Sandbox, Load) -> Engine,
     ) -> Machine {
         let load = Load {
             at: START,
             ready,
             settle: sync_engine::SETTLE,
         };
-        let (engine, out) = load_engine(profile, Sandbox::new(), load);
-        let mut m = Machine {
-            engine,
+        Machine {
+            engine: load_engine(profile, Sandbox::new(), load),
             me,
             pf: PF,
             at: START,
             preflight_ended: true,
             catching_up: false,
-            out,
+            out: Vec::new(),
             clock: VectorClock::default(),
-        };
-        m.out.clear();
-        m
+        }
     }
 
     fn cx(&self) -> Ctx {
@@ -1325,6 +1322,38 @@ fn a_write_function_stuck_in_a_loop_stops_its_entry() {
 }
 
 #[test]
+fn a_write_function_that_doesnt_compile_loads_and_stops_its_entry_at_its_first_write() {
+    let x = l("X");
+    let y = l("Y");
+    let p = profile(
+        vec![
+            state("x", x.clone(), Write::Function("(value) => {".into())),
+            state("y", y.clone(), Write::Name(y.clone())),
+        ],
+        vec![],
+    );
+    let mut pm = Machine::new(PM, &p);
+    pm.read(&x, 0.0);
+    assert_eq!(pm.arrive("x", 1.0, stamp(PF, 1, &[])), Applied::Skipped);
+    let out = pm.take();
+    assert!(
+        out.iter().any(|o| matches!(
+            o,
+            Out::Stop {
+                why: Why::Compile(_),
+                ..
+            }
+        )),
+        "{out:?}"
+    );
+    assert!(!out.iter().any(|o| matches!(o, Out::Act(_))));
+    assert_eq!(pm.arrive("x", 2.0, stamp(PF, 2, &[])), Applied::Skipped);
+    pm.read(&y, 0.0);
+    pm.arrive("y", 1.0, stamp(PF, 3, &[]));
+    assert!(!pm.acts().is_empty(), "the other entries still write");
+}
+
+#[test]
 fn an_input_event_reported_twice_a_frame_apart_goes_out_once() {
     let b = Name::B {
         name: "ELECTRICAL_Battery_1".into(),
@@ -1528,6 +1557,7 @@ fn a_catch_up_answer_for_500_entries_takes_under_64_kb() {
 #[ignore = "a timing, measured by hand in a release build"]
 fn an_engine_call_and_compiling_300_write_functions_take_this_long() {
     // cargo test -p sync-engine --release --test engine -- --ignored --nocapture an_engine_call_and_compiling
+    // Each function compiles at its first run, so the slowest arrival holds a compile.
     let entries: Vec<StateEntry> = (0..300)
         .map(|i| {
             let name = l(&format!("SWITCH_{i}"));
@@ -1558,7 +1588,7 @@ fn an_engine_call_and_compiling_300_write_functions_take_this_long() {
         pm.take();
     }
     println!(
-        "timing: compiling 300 write functions took {:.2}ms, against 10ms; the slowest arrival and frame of 3,000 took {}µs, against 1,000µs",
+        "timing: loading 300 write functions took {:.2}ms, against 10ms; the slowest arrival and frame of 3,000, each function's first run compiling it, took {}µs, against 1,000µs",
         compile.as_secs_f64() * 1_000.0,
         slowest.as_micros()
     );

@@ -224,30 +224,24 @@ impl Engine {
         self.state.push(slot);
     }
 
-    /// Compiles every write function, after every entry is in, so `state` starts whole.
-    pub(crate) fn compile(&mut self, profile: &profile_engine::Resolved, out: &mut Vec<Out>) {
+    /// Holds every write function for its first run to compile, after every entry is in, so
+    /// `state` starts whole.
+    pub(crate) fn add_functions(&mut self, profile: &profile_engine::Resolved) {
         let functions = profile
             .state
             .iter()
             .enumerate()
-            .map(|(i, e)| (Slot::State(i), &e.key, &e.write))
+            .map(|(i, e)| (Slot::State(i), &e.write))
             .chain(
                 profile
                     .events
                     .iter()
                     .enumerate()
-                    .map(|(i, e)| (Slot::Event(i), &e.key, &e.write)),
+                    .map(|(i, e)| (Slot::Event(i), &e.write)),
             );
-        for (slot, key, write) in functions {
-            let Write::Function(js) = write else { continue };
-            if let Err(error) = self.script.compile(slot, js) {
-                tracing::info!(
-                    entry = key,
-                    error,
-                    "a write function didn't compile, so its entry stops"
-                );
-                // The builder refuses such a function first, so the Sync log gives it no row.
-                self.stop(slot, Why::Compile(error), None, out);
+        for (slot, write) in functions {
+            if let Write::Function(js) = write {
+                self.script.add(slot, js);
             }
         }
         for slot in &self.state {
@@ -945,6 +939,15 @@ impl Engine {
                         Some((row, cx.at)),
                         out,
                     );
+                    return Applied::Skipped;
+                }
+                Err(RunFailed::Compile(error)) => {
+                    tracing::info!(
+                        entry = self.state.get(i).map(|s| s.entry.key.as_str()),
+                        error,
+                        "a write function didn't compile, so its entry stops"
+                    );
+                    self.stop(slot_id, Why::Compile(error), Some((row, cx.at)), out);
                     return Applied::Skipped;
                 }
                 Err(RunFailed::Wrong(error)) => {

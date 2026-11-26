@@ -1,0 +1,59 @@
+p06 aircraft store, in mainUi, filter "pc-6"
+documents open: 19, a cockpit's among them: true
+engine: object
+
+## game/aircraft/currentAircraft: ok
+{
+ "__Type": "AircraftDetails",
+ "aircraftId": 56,
+ "variationId": "13858193872017051862",
+ "variationIndex": 16,
+ "creator": "Asobo Studio",
+ "modelName": "172 Skyhawk",
+ "brandName": "Cessna",
+ "variation": "Basic",
+ "displayName": "Cessna 172 Skyhawk",
+ "variationDisplayName": "Basic",
+ "category": "AIRPLANE",
+ "isLegacy": false,
+ "brandLogo": "",
+ "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/liveries/asobo/official_static_01/thumbnail/thumbnail.png",
+ "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/liveries/asobo/official_static_01/thumbnail/thumbnail_button.png",
+ "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/liveries/asobo/official_static_01/thumbnail/thumbnail_side.png",
+ "isModular": true,
+ "isFavory": false,
+ "isSelected": false,
+ "isUsable": true,
+ "isGlider": false,
+ "isValid": true,
+ "rentingData": {
+  "__Type": "RentingData",
+  "rentalState": 0,
+  "rentalDuration": -0.00027777778450399637
+ },
+ "specializations": []
+}
+
+## game/aircraft/configurator/items: resolved, 19
+{"__Type":"ConfiguratorItem","id":"13858193872017051862","title":"Basic","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/asobo/c172sp_classic_passengers/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":true,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"8135489122672000022","title":"G1000 Skis","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp_g1000/presets/asobo/c172sp_avionics_passengers_skis/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"14870817737261007399","title":"Skydiving","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/asobo/c172sp_classic_skydive/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"8914011529453299488","title":"G1000","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp_g1000/presets/asobo/c172sp_avionics_passengers/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"8334260925424287834","title":"Cargo","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/asobo/c172sp_classic_cargo/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"15838604910607063510","title":"Skis","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/asobo/c172sp_classic_passengers_skis/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"13920631647348868789","title":"G1000 Amphibious","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp_g1000/presets/asobo/c172sp_avionics_passengers_floats/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"9288572861759954663","title":"G1000 Cargo","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp_g1000/presets/asobo/c172sp_avionics_cargo/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"17744914973843929199","title":"G1000 Aerial Advertising","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp_g1000/presets/asobo/c172sp_avionics_aerialad/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"2999980045373765567","title":"IFD Aerial Advertising","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/workingtitle/c172sp_ifd_aerialad/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"8892498611104845134","title":"IFD Skydiving","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/workingtitle/c172sp_ifd_skydive/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"16581944063799084325","title":"IFD","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/workingtitle/c172sp_ifd_passengers/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"6138877413908966527","title":"IFD Amphibious","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/workingtitle/c172sp_ifd_passengers_floats/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"10891840290305830686","title":"G1000 Tow","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp_g1000/presets/asobo/c172sp_avionics_tow/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"17504351976301951812","title":"IFD Skis","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/workingtitle/c172sp_ifd_passengers_skis/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"3990785280810286691","title":"Amphibious","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/asobo/c172sp_classic_passengers_floats/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"5304489012486225423","title":"Aerial Advertising","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/asobo/c172sp_classic_aerialad/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"14578048269150422587","title":"IFD Cargo","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/presets/workingtitle/c172sp_ifd_cargo/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"16626729084491221747","title":"G1000 Skydiving","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp_g1000/presets/asobo/c172sp_avionics_skydive/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+
+## game/aircraft/aircraftList: resolved, 138 entries, 1 holding "pc-6"
+{"__Type":"AircraftInfo","aircraftId":21,"variationId":"3296253292570990575","variationIndex":1,"creator":"Microsoft","modelName":"PC-6/B2-H4 Turbo Porter","brandName":"Pilatus","variation":"Classic / Wheels","displayName":"Pilatus PC-6/B2-H4 Turbo Porter","variationDisplayName":"Classic / Wheels","category":"AIRPLANE","isLegacy":false,"brandLogo":"","thumbnailPath":"coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail.png","thumbnailButtonPath":"coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail_button.png","thumbnailSidePath":"coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail_side.png","isModular":true,"isFavory":false,"isSelected":false,"isUsable":true,"isGlider":false,"isValid":true,"rentingData":{"__Type":"RentingData","rentalState":0,"rentalDuration":0}}

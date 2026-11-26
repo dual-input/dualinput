@@ -143,7 +143,7 @@ function everyWord(): RowView[] {
   row(1_530, "atis", local, atis, [step(0, "local-change", atis), step(0, "too-large", `${atis.length} bytes`)])
   row(4_890, "cabin_climb_rate", local, "500", [step(0, "local-change", "500"), step(0, "stopped", null, "driven")])
   row(2_960, "cabin_climb_rate", ana, "700", [step(0, "arrived", "700"), step(0, "skipped-stopped")])
-  // A function that fails to compile stops its entry at the load, before any row, so a row stops on a limit.
+  // A row stops on a limit, as it does on a function that fails to compile at its first run.
   row(1_812, "ap_heading", ana, "270", [step(0, "arrived", "270"), step(0, "stopped", "the call reached the sandbox's time limit")])
   row(4_087, "heading_bug", playback, "270", [step(0, "arrived", "270"), step(0, "writes", "L('BKSQ_HeadingBug', 'degrees') 270"), step(0, "pending", "270"), step(16, "replaced")])
   row(2_540, "com1_volume", catchUp, "7", [step(0, "catch-up", "7"), step(0, "shadow-restored", "7")])

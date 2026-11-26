@@ -8,7 +8,7 @@ import { ArrowRightLeft, Check, Copy, Headset, Plane, PersonStanding, Search, Se
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 
-import { Badge, Button, Card, CardContent, Checkbox, Choice, CodeInput, Confirm, Dialog, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, Root, Select, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
+import { Badge, Button, Card, CardContent, Checkbox, Choice, CodeInput, Confirm, Dialog, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, Input, Kbd, Label, Link, Popover, PopoverContent, PopoverTrigger, RadioGroup, RadioGroupItem, Root, Select, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, Separator, Slider, Spinner, Switch, TabBar, toast, ToastCard, Toaster, Tooltip } from "../src/index.ts"
 import type { BadgeVariant, ButtonProps, ButtonSize, ButtonVariant } from "../src/index.ts"
 
 const SCALES = [0.72, 0.884, 1, 1.056, 1.225]
@@ -267,8 +267,9 @@ function Switches() {
   const [ticked, setTicked] = useState(true)
   const [volume, setVolume] = useState(70)
   const [choice, setChoice] = useState<"press" | "hold">("hold")
+  const [picked, setPicked] = useState<"press" | "hold">("press")
   return (
-    <Section title="Switch, checkbox, choice, and slider">
+    <Section title="Switch, checkbox, radio, choice, and slider">
       <Row>
         <State name="Live">
           <Choice value={choice} options={[["press", "Press"], ["hold", "Hold"]]} onChange={setChoice} />
@@ -315,6 +316,27 @@ function Switches() {
         </State>
         <State name="On, disabled">
           <Checkbox checked disabled />
+        </State>
+      </Row>
+      <Row>
+        <State name="Live">
+          <RadioGroup aria-label="Live" className="space-y-3">
+            {(["press", "hold"] as const).map((one) => (
+              <RadioGroupItem key={one} checked={picked === one} onPick={() => setPicked(one)} aria-label={one} />
+            ))}
+          </RadioGroup>
+        </State>
+        <State name="Off">
+          <RadioGroupItem checked={false} />
+        </State>
+        <State name="On">
+          <RadioGroupItem checked />
+        </State>
+        <State name="Off, disabled">
+          <RadioGroupItem checked={false} disabled />
+        </State>
+        <State name="On, disabled">
+          <RadioGroupItem checked disabled />
         </State>
       </Row>
       <Row>

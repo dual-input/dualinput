@@ -64,17 +64,41 @@ impl IndexBundle {
     }
 }
 
+/// How a variant covers an aircraft: by its preset's whole path, or by its folder.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Covering {
+    Preset,
+    Folder,
+}
+
+/// The variant that covers an aircraft, of `variants`' IDs and paths, and how, given the path the
+/// sim service reports for it, as `a350/presets/inibuilds/a350-900_default_cabin`, compared
+/// ignoring case: a variant that names the preset beats one that names only its folder. The core
+/// loads the variant this picks, and the profile extension's island names it.
+pub fn covering<'a, I>(variants: I, aircraft: &str) -> Option<(&'a str, Covering)>
+where
+    I: IntoIterator<Item = (&'a str, &'a [String])> + Clone,
+{
+    let folder = aircraft.split('/').next().unwrap_or(aircraft);
+    let naming = |how: Covering| {
+        variants
+            .clone()
+            .into_iter()
+            .find(|(_, paths)| {
+                paths.iter().any(|p| match how {
+                    Covering::Preset => p.contains('/') && p.eq_ignore_ascii_case(aircraft),
+                    Covering::Folder => !p.contains('/') && p.eq_ignore_ascii_case(folder),
+                })
+            })
+            .map(|(id, _)| (id, how))
+    };
+    naming(Covering::Preset).or_else(|| naming(Covering::Folder))
+}
+
 /// Whether a bundle's variants cover an aircraft, given the path the sim service reports for
 /// it, compared ignoring case: a preset by its whole path, and a bare folder every preset in it.
 pub fn covers(variants: &[String], aircraft: &str) -> bool {
-    let folder = aircraft.split('/').next().unwrap_or(aircraft);
-    variants.iter().any(|v| {
-        if v.contains('/') {
-            v.eq_ignore_ascii_case(aircraft)
-        } else {
-            v.eq_ignore_ascii_case(folder)
-        }
-    })
+    covering([("", variants)], aircraft).is_some()
 }
 
 impl Index {

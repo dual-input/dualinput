@@ -1,0 +1,38 @@
+p06 aircraft store, in mainUi, filter ""
+documents open: 9, a cockpit's among them: false
+engine: object
+
+## game/aircraft/currentAircraft: ok
+{
+ "__Type": "AircraftDetails",
+ "aircraftId": 185,
+ "variationId": "11201017699479497512",
+ "variationIndex": 4,
+ "creator": "PMDG",
+ "modelName": "777-300ER",
+ "brandName": "Boeing",
+ "variation": "General Electric GE90-115B",
+ "displayName": "Boeing 777-300ER",
+ "variationDisplayName": "General Electric GE90-115B",
+ "category": "AIRPLANE",
+ "isLegacy": false,
+ "brandLogo": "",
+ "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/PMDG 777-300ER/liveries/pmdg/cathay_pacific_bkqu_or_2020/thumbnail/thumbnail.png",
+ "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/PMDG 777-300ER/liveries/pmdg/cathay_pacific_bkqu_or_2020/thumbnail/thumbnail_button.png",
+ "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/PMDG 777-300ER/liveries/pmdg/cathay_pacific_bkqu_or_2020/thumbnail/thumbnail_side.png",
+ "isModular": true,
+ "isFavory": false,
+ "isSelected": false,
+ "isUsable": true,
+ "isGlider": false,
+ "isValid": true,
+ "rentingData": {
+  "__Type": "RentingData",
+  "rentalState": 0,
+  "rentalDuration": 0
+ },
+ "specializations": []
+}
+
+## game/aircraft/configurator/items: resolved, 1
+{"__Type":"ConfiguratorItem","id":"11201017699479497512","title":"General Electric GE90-115B","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/PMDG 777-300ER/liveries/pmdg/all_nippon_airways_ja785a_or_2019/thumbnail/thumbnail.png","directoryPath":"","cost":0,"isNew":false,"isSelected":true,"isDisabled":false}

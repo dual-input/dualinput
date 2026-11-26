@@ -7,6 +7,9 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 ```
 
 > **Note**
+> The engine compiles each write function at its first run, rather than when it loads, and a function that doesn't compile stops its entry at that run, where [the sync engine](#the-sync-engine) has the load compile them all; state sync starts the profile's runtime for the next load ahead of it, as the core starts and as each profile unloads ([profiles log](../profiles/log.md#2026-11-26-the-58ps-profile-load-took-1500µs-most-of-it-state-sync-starting-a-javascript-runtime-and-compiling-18-write-functions-and-it-takes-950µs-with-both-moved-off-the-load)).
+
+> **Note**
 > From stage 22i, the engine, these docs, and the profile extension's Sync log use one word for each thing, and the words below take the place of the ones in this doc's text ([06-the-sync-log](../profiles/06-the-sync-log.md#the-words); user, 2026-11-25):
 >
 > - A write the engine "holds … until the entry's first reading arrives" waits for the entry's first reading, as `awaiting_reading` in the code.

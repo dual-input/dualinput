@@ -1,0 +1,41 @@
+p06 aircraft store, in mainUi, filter ""
+documents open: 11, a cockpit's among them: false
+engine: object
+
+## game/aircraft/currentAircraft: ok
+{
+ "__Type": "AircraftDetails",
+ "aircraftId": 107,
+ "variationId": "8802899875039487602",
+ "variationIndex": 2,
+ "creator": "iniBuilds",
+ "modelName": "A380-800",
+ "brandName": "Airbus",
+ "variation": "A380-800 RR Basic",
+ "displayName": "Airbus A380-800",
+ "variationDisplayName": "A380-800 RR Basic",
+ "category": "AIRPLANE",
+ "isLegacy": false,
+ "brandLogo": "",
+ "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/inibuilds-a380/liveries/inibuilds/emirates old a6-evn/thumbnail/thumbnail.png",
+ "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/inibuilds-a380/liveries/inibuilds/emirates old a6-evn/thumbnail/thumbnail_button.png",
+ "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/inibuilds-a380/liveries/inibuilds/emirates old a6-evn/thumbnail/thumbnail_side.png",
+ "isModular": true,
+ "isFavory": false,
+ "isSelected": false,
+ "isUsable": true,
+ "isGlider": false,
+ "isValid": true,
+ "rentingData": {
+  "__Type": "RentingData",
+  "rentalState": 0,
+  "rentalDuration": -0.00027777778450399637
+ },
+ "specializations": []
+}
+
+## game/aircraft/configurator/items: resolved, 4
+{"__Type":"ConfiguratorItem","id":"8802899875039487602","title":"A380-800 RR Basic","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/inibuilds-a380/presets/inibuilds/a380-800_rr_basic/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":true,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"289363366178842864","title":"A380-800 EA Basic","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/inibuilds-a380/presets/inibuilds/a380-800_ea_basic/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"5928763540384631955","title":"A380-800 RR Cabin","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/inibuilds-a380/presets/inibuilds/a380-800_rr/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"9270032645335919359","title":"A380-800 EA Cabin","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/inibuilds-a380/presets/inibuilds/a380-800_ea/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}

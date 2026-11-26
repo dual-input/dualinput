@@ -3,9 +3,9 @@
 // and tick. The entries are the Black Square Baron 58P's, from profiles/aircraft/bksq-baronpro.yaml, except the counting
 // entry, which is hypothetical since that profile has none, and every reading is made up.
 
-import type { Action, DisplayRow, PanelHost, PanelView, PickerGroup, PickerView, Preview, RecorderView, RunView, Status } from "../src/view.ts"
+import type { Action, AddView, DisplayRow, PanelHost, PanelView, PickerGroup, PickerView, Preview, RecorderView, RunView, Status } from "../src/view.ts"
 
-export type Scene = Omit<PanelView, "palette">
+export type Scene = Omit<PanelView, "palette" | "syntax">
 
 const BARON = "Black Square Baron 58P Professional"
 const flying: Status = { kind: "in-flight", aircraft: BARON, runs: true, crew: false }
@@ -104,6 +104,59 @@ const PANELS: PickerGroup[] = [
   shared("WTT", ["WTT|side=1", "WTT|side=2"]),
 ]
 
+/**
+ * Adding the loaded aircraft, from aircraft loaded on 2026-11-26 and the paths and titles the core logged for them
+ * (record/areas/aircraft/results/2026-11-26-c172-and-pc-6-loads.txt), the Baron's title from 2026-11-17
+ * (record/areas/session/log.md). The profiles' variants are hypothetical, and each suggestion is what the design's rule
+ * gives: a preset's title words that its folder's name doesn't hold, separators aside, and a folder's last part.
+ */
+function adding(view: Omit<AddView, "cover" | "named" | "variants"> & Partial<AddView>, status: Status): Scene {
+  return { status, unpinned: false, body: { kind: "add", add: { cover: null, named: { preset: null, folder: null }, variants: [], ...view } }, recorder: recorderFor(status) }
+}
+
+const SKIS = {
+  title: "C172SP G1000 Passengers Skis",
+  folder: "asobo_c172sp_g1000",
+  preset: "asobo_c172sp_g1000/presets/asobo/c172sp_avionics_passengers_skis",
+  suggested: { preset: "passengers_skis", folder: "g1000" },
+}
+const C172: Status = { kind: "in-flight", aircraft: "Asobo Cessna 172 Skyhawk", runs: true, crew: false }
+const noProfile = (title: string): Status => ({ kind: "no-profile", title, crew: false })
+
+const ADDING: Record<string, Scene> = {
+  "Add, covered by its folder": adding({ ...SKIS, cover: { variant: "g1000", by: "folder" }, named: { preset: null, folder: "g1000" }, variants: ["classic", "g1000"] }, C172),
+  "Add, its preset already in the profile": adding({ ...SKIS, cover: { variant: "skis", by: "preset" }, named: { preset: "skis", folder: "g1000" }, variants: ["classic", "g1000", "skis"] }, C172),
+  "Add, nothing covers it": adding(
+    {
+      title: "C172SP Classic Skydive",
+      folder: "asobo_c172sp",
+      preset: "asobo_c172sp/presets/asobo/c172sp_classic_skydive",
+      suggested: { preset: "classic_skydive", folder: "c172sp" },
+      variants: ["g1000"],
+    },
+    noProfile("C172SP Classic Skydive"),
+  ),
+  "Add, an aircraft with no preset": adding(
+    {
+      title: "Black Square Baron 58P Professional N515MR",
+      folder: "bksq-aircraft-baronpropress",
+      preset: null,
+      suggested: { preset: "", folder: "baronpropress" },
+      variants: ["base"],
+    },
+    noProfile("Black Square Baron 58P Professional N515MR"),
+  ),
+  "Add, a profile with no variants yet": adding(
+    {
+      title: "Pilatus PC-6 Gauge Wheels",
+      folder: "microsoft-pilatus-pc6",
+      preset: "microsoft-pilatus-pc6/presets/microsoft/pc-6_gauge_wheels",
+      suggested: { preset: "gauge_wheels", folder: "pc6" },
+    },
+    noProfile("Pilatus PC-6 Gauge Wheels"),
+  ),
+}
+
 /** Each state an author looks at, by name, in the order the dev page lists them. */
 export const SCENES: Record<string, Scene> = {
   "Not running": at({ kind: "not-running" }),
@@ -111,6 +164,7 @@ export const SCENES: Record<string, Scene> = {
   "In a session, not in its flight": at({ kind: "not-in-flight" }),
   "In a flight": nothing,
   "In a flight, mismatching aircraft": at({ kind: "in-flight", aircraft: "Fenix A320", runs: false, crew: false }),
+  "In a flight, no profile": at(noProfile("C172SP Classic Skydive")),
   "Dual Input of an older release": at({ kind: "other-release", extension: "0.4.0", dualInput: "0.3.2", update: "dual-input" }),
   "Extension of an older release": at({ kind: "other-release", extension: "0.3.2", dualInput: "0.4.0", update: "extension" }),
   "Another window has the sim": at({ kind: "other-window" }),
@@ -136,6 +190,7 @@ export const SCENES: Record<string, Scene> = {
   "Run, pilot flying only": entry({ status: withJames, name: "Left mixture", key: "mixture_1", takes: "value", live: [{ of: null, value: "0.82" }], field: "0.5", seen: "many", refused: { kind: "pilot-flying-only", pilotFlying: "James" } }),
   "Run, doesn't build": entry({ name: "Left ignition", key: "ignition_1", takes: "value", live: [{ of: null, value: "3" }], field: "4", seen: ["0", "1", "2", "3", "4"], preview: { kind: "error", message: "Cannot find name 'valu'. Did you mean 'value'?", where: "bksq-baronpro.yaml:270:45" } }),
   "Pick displays": { ...nothing, body: { kind: "picker", picker: { groups: PANELS, active: "KX155B|Index=1" } } },
+  ...ADDING,
 }
 
 /** How long the 58P's stand-in takes to put a variable back after a Run of the scene that shows it. */
@@ -206,6 +261,10 @@ export function standIn(view: () => Scene, show: (next: Scene) => void, heard: (
       const { body } = view()
       const written = body.kind === "picker" ? body.picker.groups.flatMap(writes) : []
       heard(`write(), displays: ${written.join(", ") || "none"}`)
+      show({ ...view(), body: { kind: "nothing" } })
+    },
+    add(adding) {
+      heard(`add(${JSON.stringify(adding)})`)
       show({ ...view(), body: { kind: "nothing" } })
     },
     leave() {

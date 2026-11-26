@@ -1,6 +1,7 @@
 //! What the sim's features read of a profile's or a module's text: its maker and model, each name
 //! call on a `watch:` line with how its line watches it, each entry with whether it writes and
-//! who owns it, and its `displays` (record/areas/profiles/04-the-extension-in-the-sim.md).
+//! who owns it, its `displays`, and its `aircraft:` and `variants:`
+//! (record/areas/profiles/04-the-extension-in-the-sim.md, 07-adding-an-aircraft.md).
 //!
 //! It reads the engine's tree, which holds each node's place, so a file whose YAML doesn't parse
 //! has no facts, and the server keeps the ones its last text that parsed gave.
@@ -8,6 +9,8 @@
 use messages::authoring::Reads;
 use profile_engine::tree::{self, Kind, Node};
 use profile_engine::{Name, read_name};
+
+use super::variants::Variant;
 
 /// The name the tree gives the file it reads, which no fact here carries.
 const FILE: &str = "open.yaml";
@@ -20,6 +23,11 @@ pub(crate) struct Facts {
     pub(crate) entries: Vec<Entry>,
     /// The `displays:` key's line, from 0, and what it names, as written.
     pub(crate) displays: Option<(usize, Vec<String>)>,
+    /// The `aircraft:` key's line, from 0.
+    pub(crate) aircraft: Option<usize>,
+    /// The `variants:` key's line under `aircraft:`, from 0, and each variant's ID and the paths
+    /// it names, as written, in the file's order.
+    pub(crate) variants: Option<(usize, Vec<Variant>)>,
 }
 
 /// One name call on a `watch:` line, or on a counting map's line under it.
@@ -92,12 +100,21 @@ pub(crate) fn read(text: &str) -> Option<Facts> {
         match key.text.as_str() {
             "maker" => facts.maker = text_of(node),
             "name" => facts.model = text_of(node),
-            "displays" => {
-                let named = match &node.kind {
-                    Kind::Seq(items) => items.iter().filter_map(text_of).collect(),
-                    _ => text_of(node).into_iter().collect(),
-                };
-                facts.displays = Some((key.at.line - 1, named));
+            "displays" => facts.displays = Some((key.at.line - 1, texts(node))),
+            "aircraft" => {
+                facts.aircraft = Some(key.at.line - 1);
+                if let Kind::Map(fields) = &node.kind
+                    && let Some((key, variants)) = fields.iter().find(|(k, _)| k.text == "variants")
+                {
+                    let named = match &variants.kind {
+                        Kind::Map(each) => each
+                            .iter()
+                            .map(|(id, paths)| (id.text.clone(), texts(paths)))
+                            .collect(),
+                        _ => Vec::new(),
+                    };
+                    facts.variants = Some((key.at.line - 1, named));
+                }
             }
             "state" => entries(&mut facts, node, false, next),
             "events" => entries(&mut facts, node, true, next),
@@ -189,6 +206,14 @@ fn text_of(node: &Node) -> Option<String> {
     node.str().map(|t| t.text.trim().to_string())
 }
 
+/// A field that takes a list, or one item on its own, as its texts.
+fn texts(node: &Node) -> Vec<String> {
+    match &node.kind {
+        Kind::Seq(items) => items.iter().filter_map(text_of).collect(),
+        _ => text_of(node).into_iter().collect(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -268,6 +293,32 @@ events:
         assert_eq!((ap.kind, ap.last), (EntryKind::Event, 29));
         assert_eq!(facts.entry_at(9).map(|e| e.key.as_str()), Some("battery"));
         assert_eq!(facts.entry_at(4).map(|e| e.key.as_str()), None);
+    }
+
+    #[test]
+    fn a_profiles_variants_read_with_their_paths_in_either_form() {
+        let text = "maker: Asobo\nname: Cessna 172 Skyhawk\naircraft:\n  variants:\n    g1000: asobo_c172sp_g1000\n    skis:\n      - asobo_c172sp_g1000/presets/asobo/c172sp_avionics_passengers_skis\n    classic: [asobo_c172sp]\n";
+        let facts = read(text).expect("parses");
+        assert_eq!(facts.aircraft, Some(2));
+        assert_eq!(
+            facts.variants,
+            Some((
+                3,
+                vec![
+                    ("g1000".to_string(), vec!["asobo_c172sp_g1000".to_string()]),
+                    (
+                        "skis".to_string(),
+                        vec![
+                            "asobo_c172sp_g1000/presets/asobo/c172sp_avionics_passengers_skis"
+                                .to_string()
+                        ]
+                    ),
+                    ("classic".to_string(), vec!["asobo_c172sp".to_string()]),
+                ]
+            ))
+        );
+        let bare = read("maker: M\naircraft:\n  pace: 2 frames\n").expect("parses");
+        assert_eq!((bare.aircraft, bare.variants), (Some(1), None));
     }
 
     #[test]

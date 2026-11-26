@@ -8,10 +8,15 @@ import { createRoot } from "react-dom/client"
 
 import { Button, Root } from "@dualinput/ui"
 
+import manifest from "../../package.json"
+import { syntaxes } from "../../src/syntax.ts"
 import { Panel } from "../src/panel.tsx"
 import type { Palette } from "../src/view.ts"
 import { SCENES, sceneShown, standIn } from "./stand-in.ts"
 import type { Scene } from "./stand-in.ts"
+
+/** The token colors the extension posts the panel for each palette, read from the same manifest as it reads them. */
+const SYNTAX = syntaxes(manifest)
 
 /** The side bar's widths to look at: about the 300px it opens at, and narrower and wider, since an author can drag its edge. */
 const WIDTHS = [240, 300, 400]
@@ -77,7 +82,7 @@ function Page() {
     <div style={{ display: "flex", alignItems: "flex-start", padding: 24, minHeight: "100vh", boxSizing: "border-box", background: "#0a0a0a" }}>
       <SideBar palette={palette} width={width} shot={shot}>
         {/* A new key per scene, so a scene's value field starts from its own text. */}
-        <Panel key={name} view={{ ...scene, palette }} host={host} />
+        <Panel key={name} view={{ ...scene, palette, syntax: SYNTAX[palette] }} host={host} />
       </SideBar>
       <Root>
         <div className="ml-6 max-w-xl space-y-3 text-sm text-foreground">

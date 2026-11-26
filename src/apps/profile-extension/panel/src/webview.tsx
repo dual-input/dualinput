@@ -20,6 +20,7 @@ const host: PanelHost = {
   move: (row) => send({ kind: "move", row }),
   tick: (row) => send({ kind: "tick", row }),
   write: () => send({ kind: "write" }),
+  add: (adding) => send({ kind: "add", adding }),
   leave: () => send({ kind: "leave" }),
   record: () => send({ kind: "record" }),
   stop: () => send({ kind: "stop" }),

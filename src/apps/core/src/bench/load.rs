@@ -239,7 +239,7 @@ impl Load {
             ready: Ready::At(0),
             settle: SETTLE,
         };
-        let (mut engine, _) = Engine::load(&profile, Sandbox::new(), load);
+        let mut engine = Engine::load(&profile, Sandbox::new(), load);
         self.watch_of = (0..WRITES)
             .map(|place| {
                 let key = format!("e{place}");

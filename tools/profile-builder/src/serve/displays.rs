@@ -5,11 +5,11 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use messages::authoring::CockpitPanel;
-use profile_engine::tree::{self, Kind};
-use profile_engine::{LAYOUT, key_names, plain, single_quoted};
-use profile_language::{Edit, edit_between, format};
+use profile_engine::key_names;
+use profile_language::Edit;
 
 use super::view::{DisplayRow, PickerGroup, RowRefusal};
+use super::yaml_edit::{self, scalar};
 
 /// The identifier every WASM instrument's key starts with, which v1's pointer sync can't reach,
 /// since it plays presses into HTML displays only, and a profile naming one fails its load.
@@ -133,18 +133,7 @@ pub(crate) fn written(groups: &[PickerGroup], displays: &[String]) -> Vec<String
 /// added before the first top-level key the format's layout puts after it, with the comments above
 /// that key left with it; then the whole text as the formatter writes it.
 pub(crate) fn edit(text: &str, displays: &[String]) -> Result<Option<Edit>, String> {
-    let crlf = text.contains("\r\n");
-    let lf = text.replace("\r\n", "\n");
-    let (root, _) = tree::parse_keeping_brackets("profile.yaml", &lf)
-        .map_err(|_| "the file's YAML doesn't parse, so Sync can't find where displays go")?;
-    let top: Vec<(String, usize)> = match &root.kind {
-        Kind::Map(entries) => entries
-            .iter()
-            .map(|(k, _)| (k.text.clone(), k.at.line - 1))
-            .collect(),
-        _ => Vec::new(),
-    };
-    let mut lines: Vec<String> = lf.split('\n').map(str::to_string).collect();
+    let mut editing = yaml_edit::read(text, "Sync")?;
     let block: Vec<String> = if displays.is_empty() {
         Vec::new()
     } else {
@@ -152,59 +141,25 @@ pub(crate) fn edit(text: &str, displays: &[String]) -> Result<Option<Edit>, Stri
             .chain(displays.iter().map(|d| format!("  - {}", scalar(d))))
             .collect()
     };
-    if let Some(&(_, at)) = top.iter().find(|(k, _)| k == "displays") {
+    if let Some(&(_, at)) = editing.top.iter().find(|(k, _)| k == "displays") {
         // Its lines are its key's and the ones below it indented or blank; a comment at the
         // file's edge after them is the next key's.
+        let lines = &editing.lines;
         let end = (at + 1..lines.len())
             .find(|&l| !lines[l].trim().is_empty() && !lines[l].starts_with([' ', '\t']))
             .unwrap_or(lines.len());
-        lines.splice(at..end, block);
+        editing.lines.splice(at..end, block);
     } else if !block.is_empty() {
-        let place = |key: &str| {
-            LAYOUT
-                .iter()
-                .position(|k| *k == key)
-                .unwrap_or(LAYOUT.len())
-        };
-        let after = place("displays");
-        let next = top
-            .iter()
-            .find(|(k, _)| place(k) > after)
-            .map_or(lines.len(), |&(_, line)| line);
-        let mut at = next;
-        while at > 0 && is_run_line(&lines[at - 1]) {
-            at -= 1;
-        }
-        lines.splice(at..at, block);
+        let at = yaml_edit::new_key_line(&editing, "displays");
+        editing.lines.splice(at..at, block);
     }
-    let changed = lines.join("\n");
-    let formatted = format(&changed).unwrap_or(changed);
-    let formatted = if crlf {
-        formatted.replace('\n', "\r\n")
-    } else {
-        formatted
-    };
-    Ok(edit_between(text, &formatted))
-}
-
-/// A display as a list item writes it: plain where YAML reads it as the same text, or in single
-/// quotes.
-fn scalar(display: &str) -> String {
-    if plain(display) {
-        display.to_string()
-    } else {
-        single_quoted(display)
-    }
-}
-
-/// A blank line or a comment, which sits above the key below it.
-fn is_run_line(line: &str) -> bool {
-    let t = line.trim();
-    t.is_empty() || t.starts_with('#')
+    Ok(yaml_edit::finish(text, &editing.lines))
 }
 
 #[cfg(test)]
 mod tests {
+    use profile_language::format;
+
     use super::*;
 
     fn panel(name: &str, instruments: &[&str]) -> CockpitPanel {

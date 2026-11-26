@@ -1,0 +1,38 @@
+p06 aircraft store, in mainUi, filter ""
+documents open: 12, a cockpit's among them: false
+engine: object
+
+## game/aircraft/currentAircraft: ok
+{
+ "__Type": "AircraftDetails",
+ "aircraftId": 77,
+ "variationId": "16394964950724370669",
+ "variationIndex": 1,
+ "creator": "FenixSim",
+ "modelName": "A320 | IAE | WF",
+ "brandName": "Airbus",
+ "variation": "Standard",
+ "displayName": "Airbus A320 | IAE | WF",
+ "variationDisplayName": "Standard",
+ "category": "AIRPLANE",
+ "isLegacy": false,
+ "brandLogo": "",
+ "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/FNX_32X/liveries/fnx/FNX_320_Fenix_IAE_WF/thumbnail/thumbnail.png",
+ "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/FNX_32X/liveries/fnx/FNX_320_Fenix_IAE_WF/thumbnail/thumbnail_button.png",
+ "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/FNX_32X/liveries/fnx/FNX_320_Fenix_IAE_WF/thumbnail/thumbnail_side.png",
+ "isModular": true,
+ "isFavory": false,
+ "isSelected": false,
+ "isUsable": true,
+ "isGlider": false,
+ "isValid": true,
+ "rentingData": {
+  "__Type": "RentingData",
+  "rentalState": 0,
+  "rentalDuration": 0
+ },
+ "specializations": []
+}
+
+## game/aircraft/configurator/items: resolved, 1
+{"__Type":"ConfiguratorItem","id":"16394964950724370669","title":"Standard","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/FNX_32X/liveries/fnx/FNX_320_Fenix_IAE_WF/thumbnail/thumbnail.png","directoryPath":"","cost":0,"isNew":false,"isSelected":true,"isDisabled":false}

@@ -8,6 +8,43 @@ TypeScript's language service answers inside a write function in about 40ms in Q
 The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and [p04-language-service.mjs](../../../experiments/areas/profiles/p04-language-service.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 None needs the sim.
 
+## 2026-11-26: In the sim, the lens and the island added the C172 G1000 Skis' preset to a profile whose `g1000` names its folder
+
+We asked whether [adding an aircraft](07-adding-an-aircraft.md) works on a real load, out of any session, as the design's case in the sim has it.
+In MSFS 2024, with the C172 G1000 Skis loaded and the tree's core and extension, the user reported each step as the design has it: the lens read "Add C172SP G1000 Passengers Skis", the island said `g1000` covers the aircraft through its folder, and adding its preset into a new variant, `skis`, wrote `skis: asobo_c172sp_g1000/presets/asobo/c172sp_avionics_passengers_skis`.
+The case's second half, a session's profile loading on `skis`, wasn't run in the sim; the profile engine's tests cover a variant naming a preset beating one naming its folder.
+
+## 2026-11-26: The 58P's profile load took 1,500µs, most of it state sync starting a JavaScript runtime and compiling 18 write functions, and it takes 950µs with both moved off the load
+
+We asked why the `authoring` scenario's 58P case failed its handler budget twice in a row, with 2 inputs over 1ms where it allows 1.
+We expected the profile's load, which the 2026-11-24 bench had already caught at 1,505µs.
+
+A patch we didn't keep timed each handler of each input, in the 58P case's core on our development machine.
+The load's input took about 1,500µs:
+
+| Part | Time |
+| --- | --- |
+| state sync's `StateSync::load` | 860µs |
+| … starting the sandbox's runtime, `Sandbox::new` | 200µs |
+| … compiling the profile's 18 write functions | 350µs |
+| … taking in its 183 state and 41 event entries | 165µs |
+| sim variables, watching the engine's names | 240µs |
+| the sim service | 180µs |
+| the profile loader, most of it decoding the bundle | 140µs |
+
+The other input near 1ms, at 810µs, was `authoring` taking in the open file's 230 names, 460µs of it in `Names::open`.
+Checking for repeats with sets in place of lists left it at 457µs, so its time is spread over reading, formatting, and copying each name, and we kept the lists.
+
+What changed:
+
+- The sync engine compiles a write function at its first run, rather than at the load, which costs that run about 20µs.
+  A function that doesn't compile stops its entry at its first write rather than at the load, and the builder refuses such a function, so only a bundle it didn't make holds one.
+- State sync starts the runtime for the next profile in an input of its own: the core's first, and each profile's unload.
+- State sync's load reads the loader's profile in place, rather than copying it.
+
+Afterward the load's input took 949µs, with state sync's part at 271µs, and no input of the run took over 1ms; a second run's slowest took 940µs.
+[01-plugins](../plugins/01-plugins.md) says the write functions compile at their first run, and [06-the-sync-log](06-the-sync-log.md) and [05-units](../sync/05-units.md) gain a note of it.
+
 ## 2026-11-26: Two bundles that cover one aircraft let a stale one win, in the local folder by file name and in the index by path
 
 **Asked:** when two bundles cover a session's aircraft, which does the PF's loader pin, and does anything warn?
@@ -27,6 +64,52 @@ The user turned down two other fixes for the local folder: the extension deletin
 **Changed:** stage 10b ([build plan](../build/plan.md#10b-two-bundles-that-cover-one-aircraft)): of the local bundles that cover an aircraft, the one whose file changed last wins, and `publish` drops each profile whose file is gone, with two known limits the user took (user, 2026-11-26).
 
 **Affects:** [02-units](02-units.md)' note of stage 10b.
+
+## 2026-11-26: The sim's aircraft store lists an aircraft's variations with their folders, but names a preset's path for only 3 of 8 aircraft, so adding an aircraft takes its path from a load
+
+We read the world map's store in the menu's document, `mainUi`, through the inspector with [p06-aircraft-store.mjs](../../../experiments/areas/profiles/p06-aircraft-store.mjs), changing nothing, to see whether a variant picker can list an aircraft's presets before the author loads each.
+The sim reports a preset's path only when it loads one, since the core's aircraft changed at each load and never while the world map's selection did (measured on MSFS 2024, 2026-11-26, [the core's lines](../aircraft/results/2026-11-26-c172-and-pc-6-loads.txt)).
+We expected each variation's name and its folder, since p08 found that an aircraft's entry names its folder in its thumbnail's path ([interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)), and no preset's path.
+
+We read the store four times, measured on MSFS 2024, 2026-11-26, the first two by p06's first version:
+
+| Read | Where the sim was | Selected |
+| --- | --- | --- |
+| [At the world map](../../../experiments/areas/profiles/results/p06-aircraft-store-2026-11-26-12-04-17-first-version-at-the-world-map.json) | The world map, no cockpit open, on a page we didn't note | The Pilatus PC-6, "Classic / Wheels" |
+| [In the PC-6](../../../experiments/areas/profiles/results/p06-aircraft-store-2026-11-26-12-10-45-first-version-in-flight.json) | A flight in it | The same |
+| [In the C172](../../../experiments/areas/profiles/results/p06-aircraft-store-2026-11-26-12-12-35.txt) | A flight in the Cessna 172, "Basic", which loaded as `asobo_c172sp/presets/asobo/c172sp_classic_passengers` | "Basic" |
+| [At the PC-6's configuration page](../../../experiments/areas/profiles/results/p06-aircraft-store-2026-11-26-12-31-07.txt) | The world map, on the PC-6's page of variations, which the user opened for it | The PC-6, "Classic / Wheels" |
+
+Found:
+
+- `game/aircraft/configurator/items` lists the selected aircraft's variations, each a `ConfiguratorItem` with an `id`, a `title`, an `imageUrl`, and a `directoryPath`, which was empty on every item: the PC-6's 4 at the world map and in its flight, and the C172's 19 in its flight.
+- In a flight, the store still holds the loaded aircraft as `game/aircraft/currentAircraft`, and its configurator's items, with the loaded variation's `isSelected` true.
+- The store holds the C172 as one aircraft, "Cessna 172 Skyhawk", whose 19 variations span both its folders.
+  It titles them "Basic", "G1000 Skis", "IFD Amphibious", and so on, where `A:TITLE` reads "C172SP Classic Passengers".
+- Each C172 item's `imageUrl` sits in its preset's own folder, as `coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp_g1000/presets/asobo/c172sp_avionics_passengers_skis/thumbnail/thumbnail_variation.png` does, and the three C172 presets loaded that day reported exactly the paths their pictures name.
+- The PC-6's pictures sit under its liveries, as `microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail_variation.png` does for "Classic / Wheels", whose load reported `microsoft-pilatus-pc6/presets/microsoft/pc-6_gauge_wheels`.
+  So the store gives the PC-6's folder and not its presets' paths.
+  On its configuration page, the PC-6's 4 items read as they had before, pictures and all, so the page the pilot is on didn't change them.
+- On the PC-6's configuration page, `game/aircraft/aircraftList` held 1 entry, the PC-6's, where it held 138 in the first read and in both flights; the menu script's Join asks for `game/aircraft/updateAircraftList` before it reads the list, and whether that brings back all 138 on this page is unverified.
+
+The user then opened six more aircraft's configuration pages at the world map, one at a time, to see how far the pictures go:
+
+| Aircraft | Built | Its variations' pictures | Read |
+| --- | --- | --- | --- |
+| Black Square Baron 58P Professional | Not modular, `isModular` false | 1 item, its livery "N513LW", at `bksq-aircraft-baronpropress/texture.N513LW/thumbnail.png`: the folder, which is all an aircraft built this way has | [p06](../../../experiments/areas/profiles/results/p06-aircraft-store-2026-11-26-12-34-53.txt) |
+| iniBuilds A380-800 | Modular | 4, each in its preset's folder, as `inibuilds-a380/presets/inibuilds/a380-800_rr` for "A380-800 RR Cabin" | [p06](../../../experiments/areas/profiles/results/p06-aircraft-store-2026-11-26-12-37-32.txt) |
+| iniBuilds A350-900 | Modular | 2, each in its preset's folder, `A350/presets/inibuilds/a350-900_default_cabin` and `a350-900_no_cabin`, the folders [01-format-and-delivery](01-format-and-delivery.md#the-aircraft-and-its-variants) read in inibuilds-aircraft-a350 1.2.6 | [p06](../../../experiments/areas/profiles/results/p06-aircraft-store-2026-11-26-12-39-21.txt) |
+| Fenix A320 IAE WF | Modular | 1, "Standard", under its liveries, `FNX_32X/liveries/fnx/FNX_320_Fenix_IAE_WF/thumbnail/thumbnail.png`, where the folder holds 20 presets across fnx-aircraft-320 and fnx-aircraft-319-321 on disk | [p06](../../../experiments/areas/profiles/results/p06-aircraft-store-2026-11-26-12-40-09.txt) |
+| PMDG 777-300ER | Modular | 1, under its liveries, `PMDG 777-300ER/liveries/pmdg/…`, where the folder holds one preset, `PMDG 777-300ER/presets/pmdg/PMDG 777-300ER` | [p06](../../../experiments/areas/profiles/results/p06-aircraft-store-2026-11-26-12-41-32.txt) |
+| A2A Aerostar 600 | Modular | 1, "Default", under its liveries, `aerostar600/liveries/a2a/ni22pc/…`, where the folder holds one preset, `aerostar600/presets/a2a/Base` | [p06](../../../experiments/areas/profiles/results/p06-aircraft-store-2026-11-26-12-42-25.txt) |
+
+The presets on disk are read in each package's `SimObjects\Airplanes\<folder>\presets\` folder.
+
+So across the 8 aircraft, every picture named its aircraft's folder, and the pictures named presets' paths for the C172, the A380, and the A350 only, where their developers put each variation's picture in its preset's folder.
+No picture named a wrong preset, and which aircraft's pictures name one turns on where each developer put a file, so the store is no source of a preset's path.
+
+Changed: the variant picker this was for takes nothing from the store; [07-adding-an-aircraft](07-adding-an-aircraft.md) adds the loaded aircraft by the path the core matches, its folder or its preset, and an author adds each preset that needs a variant of its own by loading it (user, 2026-11-26).
+Docs affected: 07-adding-an-aircraft.
 
 ## 2026-11-26: In the sim, the Sync log's five cases passed on the 58P, and a step reached the extension 1.2ms after its input at p95
 

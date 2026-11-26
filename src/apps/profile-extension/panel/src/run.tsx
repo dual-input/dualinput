@@ -29,6 +29,12 @@ export function Run({ run, host }: { run: RunView; host: PanelHost }) {
   return (
     <section
       ref={scroller.ref}
+      // Escape closes Run, as its title's button does.
+      onKeyDown={(event) => {
+        if (event.key !== "Escape") return
+        event.preventDefault()
+        host.leave()
+      }}
       onScroll={scroller.onScroll}
       onWheel={scroller.onWheel}
       onMouseDown={scroller.onMouseDown}
@@ -46,7 +52,9 @@ export function Run({ run, host }: { run: RunView; host: PanelHost }) {
           if (canRun(text)) host.run(text)
         }}
       >
-        <Input autoFocus aria-label="Value" className="mr-2 flex-1 font-mono" placeholder={PLACEHOLDERS[run.takes]} value={text} onChange={(event) => type(event.target.value)} />
+        {/* At 13px, as the variant's field in Add this aircraft is, since a monospaced value reads larger than the kit
+            field's 14px words; a style, since the field's own class sets its size. */}
+        <Input autoFocus aria-label="Value" className="mr-2 flex-1 font-mono" style={{ fontSize: 13 }} placeholder={PLACEHOLDERS[run.takes]} value={text} onChange={(event) => type(event.target.value)} />
         <Button type="submit" disabled={!canRun(text)}>
           <Play />
           Run

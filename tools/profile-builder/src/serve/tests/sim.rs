@@ -254,12 +254,14 @@ fn flying() -> Status {
         session: true,
         in_flight: true,
         aircraft: Some("test-aircraft".into()),
+        title: Some("Test Aircraft".into()),
         profile: Some(SessionProfile {
             maker: "M".into(),
             name: "Test".into(),
             hash: PINNED.into(),
             local: true,
         }),
+        uncovered: false,
         crew: false,
         flying: true,
         pilot_flying: Some("James".into()),
@@ -755,6 +757,90 @@ fn the_picker_lists_the_cockpits_panels_and_sync_writes_the_ticked_rows_into_dis
     s.view(|v| v["body"]["kind"] == "nothing");
 }
 
+/// A status with the aircraft loaded in a flight but out of any session, as an author adding a new
+/// aircraft is: the Test profile's folder's preset `skis`, which its `a` covers through the folder.
+fn loaded_out_of_a_session() -> Status {
+    Status {
+        session: false,
+        in_flight: false,
+        aircraft: Some("test-aircraft/presets/test/skis".into()),
+        title: Some("Test Aircraft Skis".into()),
+        profile: None,
+        bundle: BundleState::None,
+        ..flying()
+    }
+}
+
+#[test]
+fn the_lens_adds_the_loaded_aircraft_in_any_profile_and_add_writes_its_preset() {
+    let (mut s, window) = connected("sim-add");
+    assert_eq!(s.lenses(FILE), json!([]), "no lens with no aircraft loaded");
+    s.slice(&slice(&window, loaded_out_of_a_session()));
+    s.asked_for("workspace/codeLens/refresh");
+    let uri = s.uri(FILE);
+    let lenses = s.lenses(FILE);
+    assert_eq!(
+        titles(&lenses),
+        [(
+            "$(add)\u{a0}Add Test Aircraft Skis".to_string(),
+            json!([uri])
+        )],
+        "only the lens that adds it, with no session"
+    );
+    let variants = line_of(PROFILE, "  variants:");
+    assert_eq!(
+        lenses[0]["range"],
+        json!({ "start": { "line": variants, "character": 2 }, "end": { "line": variants, "character": 10 } })
+    );
+    assert_eq!(lenses[0]["command"]["command"], "dualInput.addAircraft");
+
+    // The palette offers the command in a module too, which has no `aircraft:`.
+    let module = s.uri("modules/test.yaml");
+    assert!(
+        s.execute("dualInput.panel.addAircraft", json!([module]))
+            .is_err(),
+        "no island for a module"
+    );
+    s.execute("dualInput.panel.addAircraft", json!([uri]))
+        .expect("opens");
+    let view = s.view(|v| v["body"]["kind"] == "add");
+    assert_eq!(
+        view["body"]["add"],
+        json!({
+            "title": "Test Aircraft Skis",
+            "folder": "test-aircraft",
+            "preset": "test-aircraft/presets/test/skis",
+            "cover": { "variant": "a", "by": "folder" },
+            "named": { "preset": null, "folder": "a" },
+            "variants": ["a"],
+            "suggested": { "preset": "skis", "folder": "aircraft" },
+        })
+    );
+    s.execute(
+        "dualInput.panel.add",
+        json!([{ "what": "preset", "id": "skis" }]),
+    )
+    .expect("adds");
+    let edit = s.asked_for("workspace/applyEdit");
+    let after = line_of(PROFILE, "    a: test-aircraft") + 1;
+    assert_eq!(
+        edit["edit"]["changes"][uri.as_str()],
+        json!([{
+            "range": { "start": { "line": after, "character": 0 }, "end": { "line": after, "character": 0 } },
+            "newText": "    skis: test-aircraft/presets/test/skis\n",
+        }])
+    );
+    s.view(|v| v["body"]["kind"] == "nothing");
+
+    // A profile that names the aircraft's own path has nothing to add, so no lens.
+    let named = PROFILE.replace(
+        "    a: test-aircraft\n",
+        "    a: test-aircraft\n    skis: test-aircraft/presets/test/skis\n",
+    );
+    s.change(FILE, &named, 2);
+    assert_eq!(s.lenses(FILE), json!([]));
+}
+
 #[test]
 fn a_new_socket_gets_the_last_open_with_its_bundle_and_the_last_panel_again() {
     let (mut s, window) = connected("sim-again");
@@ -991,6 +1077,18 @@ fn the_views_serve_sends_are_the_extensions_types() {
     let another = slice("another", flying());
     let away = slice(window, no_session);
     let before = slice(window, waiting);
+    let skis = slice(window, loaded_out_of_a_session());
+    let adding = PanelState::Add {
+        file: Path::new("aircraft").join("test.yaml"),
+    };
+    let uncovered = slice(
+        window,
+        Status {
+            uncovered: true,
+            profile: None,
+            ..flying()
+        },
+    );
 
     let tape = |state, off, stopped| TapeSlice {
         state,
@@ -1095,6 +1193,14 @@ fn the_views_serve_sends_are_the_extensions_types() {
             "the picker",
             base(Some(Some(&core)), Some(&picking), true, &picker),
         ),
+        (
+            "adding an aircraft, with no session",
+            base(Some(Some(&core)), Some(&skis), false, &adding),
+        ),
+        (
+            "in a flight, no profile",
+            base(Some(Some(&core)), Some(&uncovered), false, &nothing),
+        ),
         ("recording", flying_with(&recording)),
         ("recorded, stopped by a join", flying_with(&recorded)),
         ("restoring", flying_with(&restoring)),
@@ -1140,6 +1246,8 @@ fn the_views_serve_sends_are_the_extensions_types() {
             ("in-flight", "run"),
             ("in-flight", "run"),
             ("in-flight", "picker"),
+            ("no-session", "add"),
+            ("no-profile", "nothing"),
             ("in-flight", "nothing"),
             ("in-flight", "nothing"),
             ("in-flight", "nothing"),

@@ -1,8 +1,8 @@
-// The colors the Sync log paints entry keys, values, and a write's name calls in: Dual Input's own token colors, the
-// ones the manifest's configurationDefaults give each scope of the profile grammar, so a key, a value, or a name in the
-// log looks as it does in the profile, in either palette (record/areas/profiles/03-the-extension.md, "Highlighting").
-// The extension and the log's dev page read the colors from the manifest with `syntaxes()`, and the extension posts the
-// active palette's to the log's webview. It imports nothing of VS Code's, so Node's test runner tests it alone, and the
+// The colors the Sync log paints entry keys, values, and a write's name calls in, and the Dual Input panel paints a
+// variant's ID and a path in: Dual Input's own token colors, the ones the manifest's configurationDefaults give each
+// scope of the profile grammar, so a part of a profile looks in either webview as it does in the profile, in either
+// palette (record/areas/profiles/03-the-extension.md, "Highlighting"). The extension and the two dev pages read the
+// colors from the manifest with `syntaxes()`, and the extension posts the active palette's to each webview. It imports nothing of VS Code's, so Node's test runner tests it alone, and the
 // webview and its dev page bundle it.
 
 import { type Palette, palettes, type Rule } from "./palette.ts"
@@ -19,6 +19,8 @@ export const SCOPES = {
   punctuation: "punctuation.name-call.dualinput-profile",
   number: "constant.numeric.dualinput-profile",
   text: "string.quoted.single.dualinput-profile",
+  variant: "constant.other.variant.dualinput-profile",
+  plain: "string.unquoted.plain.dualinput-profile",
 } as const
 
 export type SyntaxPart = keyof typeof SCOPES

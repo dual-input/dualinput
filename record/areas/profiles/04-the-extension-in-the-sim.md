@@ -7,6 +7,9 @@ Decides:     What an author sees with the sim: live values on watch lines, the D
 ```
 
 > **Note**
+> From stage 22j, adding an aircraft, "Add" and the loaded aircraft's title above `variants:`, works in any profile, with a session or without one, where [in a session](#in-a-session) holds for Run, live values, and the display picker; every tool island's title has a close button, and the display picker's Cancel goes; and the status line has a state of its own for an aircraft no profile covers, where it said "Mismatching aircraft" ([07-adding-an-aircraft](07-adding-an-aircraft.md); user, 2026-11-26).
+
+> **Note**
 > From stage 22i, a watched value takes the kit's lime for a live value, `live`, in [the box](#the-box) and in the Dual Input panel, where this design gives it our sky, since sky is our main color and green means a session's sync is on ([profiles log](log.md#2026-11-25-the-sync-logs-draft-shows-a-steps-time-only-where-time-passed-and-a-live-value-turns-lime-everywhere); user, 2026-11-25).
 
 > **Note**

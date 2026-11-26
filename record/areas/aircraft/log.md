@@ -3,6 +3,35 @@
 What the sim found about aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-11-26: The Cessna 172's 19 presets sit in two folders, the IFD's inside the Classic's, and its floats, skis, and banner presets each add cockpit controls of their own
+
+**Asked:** what does a profile's `variants` have to tell apart in MSFS 2024's stock Cessna 172, and can it?
+A profile with a `basic` variant and `g1000: asobo_c172sp_g1000` loaded `g1000` on the G1000 with skis too, since a bare folder covers every preset in it, and nothing in the editor said so ([the core's lines](results/2026-11-26-c172-and-pc-6-loads.txt), bundle `a29dbbfa…`).
+
+**Expected:** a folder for each avionics fit, Classic and G1000, with presets for floats and skis inside each.
+
+**Found:**
+
+- The sim lists 19 flyable C172 titles: the Classic, the G1000, and the IFD, each as Passengers, Passengers Floats, Passengers Skis, Cargo, Skydive, and Aerial Advertising, and the G1000 also as Tow (measured on MSFS 2024, 2026-10-01, [the object list](../../../experiments/areas/aircraft/results/run-a2a-pa24-comanche-2026-10-01-17-59-48.ndjson), its `livery` lines).
+- They sit in two folders under `SimObjects\Airplanes\`.
+  `asobo_c172sp` holds the Classic's six presets under `presets/asobo/c172sp_classic_*` and the IFD's six under `presets/workingtitle/c172sp_ifd_*`.
+  `asobo_c172sp_g1000` holds the G1000's seven under `presets/asobo/c172sp_avionics_*`.
+  The Classic's six and the IFD's six are read in the streamed package fs24-asobo-aircraft-c172sp-classic, which keeps no version on disk, in the index of its `minimal.fsarchive`, the one of its three archives that isn't encrypted ([p17's output](../../../experiments/areas/aircraft/results/p17-archive-presets-2026-11-26-12-12-27.txt)).
+  Both archives of fs24-asobo-aircraft-c172sp-as1000 are encrypted, so the G1000's paths come from the pictures in the sim's aircraft store, which sit in each preset's folder, unverified beyond the three presets loaded that day ([profiles log](../profiles/log.md#2026-11-26-the-sims-aircraft-store-lists-an-aircrafts-variations-with-their-folders-but-names-a-presets-path-for-only-3-of-8-aircraft-so-adding-an-aircraft-takes-its-path-from-a-load)).
+- Each of those 12 presets' `config\attached_objects.cfg` builds it from parts: an avionics interior, `Function_Interior_Classic` or Working Title's `Function_Interior_IFD`; a gear, `Function_Exterior_Wheels`, `Function_Exterior_Floats`, or `Function_Exterior_Skis`; and a role's parts (read in the Classic's `minimal.fsarchive`, each preset's `config\attached_objects.cfg`, the same output).
+  - The floats presets add three cockpit levers: `Asobo_Lever_LandingGearFloats_Round`, `Asobo_Lever_LandingGearSafetyPump`, and `Asobo_Lever_WaterRudder`.
+  - The skis presets add one, `Asobo_Lever_LandingGearSkis_Box`.
+  - The aerial advertising presets add `Asobo_Winch_Pole` in the cockpit and the banner hook outside.
+  - The cargo, skydive, and passengers presets add no cockpit control.
+  - The G1000's presets sit in the encrypted archives, so whether its floats, skis, and aerial advertising presets add the same controls is unverified; a flight in each settles it.
+- Each load reported its preset's own path, and the profile loader took the variant covering it, by its preset or else by its folder, as `g1000` did for `asobo_c172sp_g1000/presets/asobo/c172sp_avionics_passengers_skis`; the Classic's loads reported `asobo_c172sp/presets/asobo/c172sp_classic_passengers` and `asobo_c172sp/presets/asobo/c172sp_classic_skydive` (measured on MSFS 2024, 2026-11-26, [the core's lines](results/2026-11-26-c172-and-pc-6-loads.txt)).
+
+**Changed:** nothing in the format.
+A profile tells each C172 preset apart by its path, since a variant that names a preset beats one that names its folder, and the IFD's six presets have to be named one by one, since a bare `asobo_c172sp` covers them with the Classic's.
+A profile that tells both avionics and gear apart needs a variant for each pair of them, nine for the C172, and `only` lists every variant an entry applies to, such as the water rudder's, which the Classic's and the IFD's floats presets add, and the G1000's likely does too (unverified).
+
+**Affects:** [07-adding-an-aircraft](../profiles/07-adding-an-aircraft.md), which adds these paths one load at a time.
+
 ## 2026-11-20: The Phenom 300E's readable archive holds seat parts for its pilot, its copilot, and its passengers
 
 **Asked:** does [the 2026-10-03 entry](#2026-10-03-two-partly-encrypted-aircraft-list-seat-objects-the-phenom-300e-for-its-pilots-and-passengers-and-the-a380-for-its-pilots)'s claim hold, that the Phenom's readable files show only a passenger seat part, so SimConnect showed more than the files did?

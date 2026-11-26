@@ -361,9 +361,10 @@ pub struct Engine {
 }
 
 impl Engine {
-    /// The engine for `profile`, as one variant has it, with its write functions compiled in
-    /// `sandbox`. A function that doesn't compile stops its entry, which the outs say.
-    pub fn load(profile: &Resolved, sandbox: Sandbox, load: Load) -> (Engine, Vec<Out>) {
+    /// The engine for `profile`, as one variant has it, with its write functions to run in
+    /// `sandbox`. A function compiles at its first run, and one that doesn't compile stops its
+    /// entry then, which that run's outs say.
+    pub fn load(profile: &Resolved, sandbox: Sandbox, load: Load) -> Engine {
         Engine::loaded(profile, sandbox, load, false)
     }
 
@@ -374,16 +375,11 @@ impl Engine {
     /// steps. So this one sends, withdraws, and puts back nothing, and takes no arrival,
     /// catch-up, or pass of control: `seen` only notes the readings, and the only outs of
     /// `write_once` and `frame` are the actions of the writes it was asked for.
-    pub fn load_only_asked(profile: &Resolved, sandbox: Sandbox, load: Load) -> (Engine, Vec<Out>) {
+    pub fn load_only_asked(profile: &Resolved, sandbox: Sandbox, load: Load) -> Engine {
         Engine::loaded(profile, sandbox, load, true)
     }
 
-    fn loaded(
-        profile: &Resolved,
-        sandbox: Sandbox,
-        load: Load,
-        only_asked: bool,
-    ) -> (Engine, Vec<Out>) {
+    fn loaded(profile: &Resolved, sandbox: Sandbox, load: Load, only_asked: bool) -> Engine {
         let mut engine = Engine {
             state: Vec::new(),
             events: Vec::new(),
@@ -407,16 +403,15 @@ impl Engine {
             log: Log::default(),
             script: Script::new(sandbox),
         };
-        let mut out = Vec::new();
         for entry in &profile.state {
             engine.add_state(entry);
         }
         for entry in &profile.events {
             engine.add_event(entry);
         }
-        engine.compile(profile, &mut out);
+        engine.add_functions(profile);
         engine.settle(load.at);
-        (engine, out)
+        engine
     }
 
     /// The aircraft's `RTC_END`, when it comes after the load. The last one marks the load the

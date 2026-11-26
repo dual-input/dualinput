@@ -1,0 +1,44 @@
+p06 aircraft store, in mainUi, filter "pc-6"
+documents open: 9, a cockpit's among them: false
+engine: object
+
+## game/aircraft/currentAircraft: ok
+{
+ "__Type": "AircraftDetails",
+ "aircraftId": 21,
+ "variationId": "3296253292570990575",
+ "variationIndex": 1,
+ "creator": "Microsoft",
+ "modelName": "PC-6/B2-H4 Turbo Porter",
+ "brandName": "Pilatus",
+ "variation": "Classic / Wheels",
+ "displayName": "Pilatus PC-6/B2-H4 Turbo Porter",
+ "variationDisplayName": "Classic / Wheels",
+ "category": "AIRPLANE",
+ "isLegacy": false,
+ "brandLogo": "",
+ "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail.png",
+ "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail_button.png",
+ "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail_side.png",
+ "isModular": true,
+ "isFavory": false,
+ "isSelected": false,
+ "isUsable": true,
+ "isGlider": false,
+ "isValid": true,
+ "rentingData": {
+  "__Type": "RentingData",
+  "rentalState": 0,
+  "rentalDuration": 0
+ },
+ "specializations": []
+}
+
+## game/aircraft/configurator/items: resolved, 4
+{"__Type":"ConfiguratorItem","id":"3296253292570990575","title":"Classic / Wheels","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":true,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"9808235424190376661","title":"Classic / Skis","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_skis/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"15536496931078816321","title":"G950 / Wheels","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/g950_wheels_01/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"12882390882678620527","title":"G950 / Floats","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/g950_floats/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}
+
+## game/aircraft/aircraftList: resolved, 1 entries, 1 holding "pc-6"
+{"__Type":"AircraftInfo","aircraftId":21,"variationId":"3296253292570990575","variationIndex":1,"creator":"Microsoft","modelName":"PC-6/B2-H4 Turbo Porter","brandName":"Pilatus","variation":"Classic / Wheels","displayName":"Pilatus PC-6/B2-H4 Turbo Porter","variationDisplayName":"Classic / Wheels","category":"AIRPLANE","isLegacy":false,"brandLogo":"","thumbnailPath":"coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail.png","thumbnailButtonPath":"coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail_button.png","thumbnailSidePath":"coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail_side.png","isModular":true,"isFavory":false,"isSelected":true,"isUsable":true,"isGlider":false,"isValid":true,"rentingData":{"__Type":"RentingData","rentalState":0,"rentalDuration":0}}

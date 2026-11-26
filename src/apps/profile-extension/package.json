@@ -61,6 +61,7 @@
       { "command": "dualInput.restartServer", "title": "Restart language server", "category": "Dual Input" },
       { "command": "dualInput.runEntry", "title": "Run entry", "category": "Dual Input" },
       { "command": "dualInput.pickDisplays", "title": "Pick displays", "category": "Dual Input" },
+      { "command": "dualInput.addAircraft", "title": "Add this aircraft", "category": "Dual Input" },
       { "command": "dualInput.showSyncLog", "title": "Show Sync log", "category": "Dual Input", "icon": "$(list-flat)" }
     ],
     "menus": {
@@ -71,7 +72,8 @@
         { "command": "dualInput.buildNow", "when": "editorLangId == dualinput-profile" },
         { "command": "dualInput.removeBundle", "when": "editorLangId == dualinput-profile" },
         { "command": "dualInput.runEntry", "when": "editorLangId == dualinput-profile" },
-        { "command": "dualInput.pickDisplays", "when": "editorLangId == dualinput-profile" }
+        { "command": "dualInput.pickDisplays", "when": "editorLangId == dualinput-profile" },
+        { "command": "dualInput.addAircraft", "when": "editorLangId == dualinput-profile" }
       ]
     },
     "keybindings": [

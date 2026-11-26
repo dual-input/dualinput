@@ -133,6 +133,11 @@ pub(crate) enum Status {
         runs: bool,
         crew: bool,
     },
+    /// In the session's flight, in an aircraft no profile covers, named by its `A:TITLE`.
+    NoProfile {
+        title: String,
+        crew: bool,
+    },
 }
 
 /// The side that's behind, and updates.
@@ -149,6 +154,47 @@ pub(crate) enum Body {
     Nothing,
     Run { run: RunView },
     Picker { picker: PickerView },
+    Add { add: AddView },
+}
+
+/// The loaded aircraft, by the path the core matches a profile on, and what in the open profile
+/// covers it (record/areas/profiles/07-adding-an-aircraft.md, "The island").
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub(crate) struct AddView {
+    pub(crate) title: String,
+    pub(crate) folder: String,
+    /// Its whole path, or none for an aircraft that gives its folder alone.
+    pub(crate) preset: Option<String>,
+    pub(crate) cover: Option<AddCover>,
+    pub(crate) named: AddNamed,
+    pub(crate) variants: Vec<String>,
+    pub(crate) suggested: AddSuggested,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub(crate) struct AddCover {
+    pub(crate) variant: String,
+    pub(crate) by: By,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub(crate) enum By {
+    Preset,
+    Folder,
+}
+
+/// The variant that already names each of the aircraft's paths, if any.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub(crate) struct AddNamed {
+    pub(crate) preset: Option<String>,
+    pub(crate) folder: Option<String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub(crate) struct AddSuggested {
+    pub(crate) preset: String,
+    pub(crate) folder: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize)]

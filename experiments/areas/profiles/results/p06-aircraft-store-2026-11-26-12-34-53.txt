@@ -1,0 +1,38 @@
+p06 aircraft store, in mainUi, filter ""
+documents open: 10, a cockpit's among them: false
+engine: object
+
+## game/aircraft/currentAircraft: ok
+{
+ "__Type": "AircraftDetails",
+ "aircraftId": 10,
+ "variationId": "18070071185185781799",
+ "variationIndex": 3,
+ "creator": "Black Square",
+ "modelName": "Baron 58P Professional",
+ "brandName": "Black Square",
+ "variation": "N513LW",
+ "displayName": "Black Square Baron 58P Professional",
+ "variationDisplayName": "N513LW",
+ "category": "AIRPLANE",
+ "isLegacy": false,
+ "brandLogo": "",
+ "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/bksq-aircraft-baronpropress/texture.N513LW/thumbnail.png",
+ "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/bksq-aircraft-baronpropress/texture.N513LW/thumbnail_button.png",
+ "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/bksq-aircraft-baronpropress/texture.N513LW/thumbnail_side.png",
+ "isModular": false,
+ "isFavory": false,
+ "isSelected": false,
+ "isUsable": true,
+ "isGlider": false,
+ "isValid": true,
+ "rentingData": {
+  "__Type": "RentingData",
+  "rentalState": 0,
+  "rentalDuration": 0
+ },
+ "specializations": []
+}
+
+## game/aircraft/configurator/items: resolved, 1
+{"__Type":"ConfiguratorItem","id":"18070071185185781799","title":"N513LW","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/bksq-aircraft-baronpropress/texture.N513LW/thumbnail.png","directoryPath":"","cost":0,"isNew":false,"isSelected":true,"isDisabled":false}

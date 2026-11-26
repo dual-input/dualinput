@@ -1,23 +1,24 @@
 // The display picker, in Run's place: a row for each of the cockpit's panels, from their `hello`s, ticked for those
 // already in `displays`, with the row you're on outlined in the sim, which is how you tell which panel a key names
 // (record/areas/profiles/04-the-extension-in-the-sim.md, "The display picker"). The keys and the mouse reach the same
-// rows: Up and Down move, Space ticks, Enter selects the ticked rows, Escape cancels, and a click moves to a row and
-// ticks it.
+// rows: Up and Down move, Space ticks, Enter selects the ticked rows, Escape closes the picker as its title's button
+// does, and a click moves to a row and ticks it.
 
-import { Button, Checkbox, cx, fadeMask, Kbd, NO_SCROLLBAR, Tooltip, useScroller } from "@dualinput/ui"
+import { Button, Checkbox, cx, fadeMask, NO_SCROLLBAR, Tooltip, useScroller } from "@dualinput/ui"
 import { useEffect } from "react"
 import type { KeyboardEvent } from "react"
 
+import { Keys } from "./keys.tsx"
 import { TOOLTIP_DELAY } from "./run.tsx"
 import type { DisplayRow, PanelHost, PickerView } from "./view.ts"
 
 const REASONS: Record<NonNullable<DisplayRow["refused"]>, string> = { "wasm-instrument": "Can't sync" }
 
-const KEYS = [
+const KEYS: [string, string][] = [
   ["↑↓", "move"],
   ["Space", "tick"],
   ["Enter", "select"],
-  ["Esc", "cancel"],
+  ["Esc", "close"],
 ]
 
 export function Picker({ picker, host }: { picker: PickerView; host: PanelHost }) {
@@ -95,24 +96,10 @@ export function Picker({ picker, host }: { picker: PickerView; host: PanelHost }
         })}
       </div>
       <div className="shrink-0 border-t border-border px-4 pb-2 pt-3">
-        <div className="flex items-center">
-          <Button size="sm" onClick={() => host.write()}>
-            {`Select ${ticked} ${ticked === 1 ? "display" : "displays"}`}
-          </Button>
-          <Button size="sm" variant="ghost" className="ml-1 text-muted-foreground" onClick={() => host.leave()}>
-            Cancel
-          </Button>
-        </div>
-        <div className="mt-2.5 flex flex-wrap text-[11px] text-muted-foreground">
-          {KEYS.map(([key, does]) => (
-            <span key={key} className="mb-1 mr-2 flex items-center whitespace-nowrap last:mr-0">
-              <Kbd size="sm" className="mr-1">
-                {key}
-              </Kbd>
-              {does}
-            </span>
-          ))}
-        </div>
+        <Button size="sm" onClick={() => host.write()}>
+          {`Select ${ticked} ${ticked === 1 ? "display" : "displays"}`}
+        </Button>
+        <Keys keys={KEYS} />
       </div>
     </section>
   )

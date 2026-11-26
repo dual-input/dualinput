@@ -379,6 +379,8 @@ test("live values: each kind of name gets its value or its firings, a misspelled
   assert.equal(s.status.flying, true)
   assert.deepEqual(s.status.profile, { maker: "Black Square", name: "Baron 58P", hash: session.hash, local: true })
   assert.deepEqual(s.status.bundle, { t: "loaded", hash: session.hash })
+  assert.equal(s.status.title, "Baron 58P", "the loaded aircraft's A:TITLE, which the lens that adds it to a profile names it by")
+  assert.equal(s.status.uncovered, false, "the session pinned the scenario's profile")
 })
 
 test("Run: a name, a toggle that matches and one that differs, a stepping write at its pace, a function's chain, an event with and without a value, a counting entry's steps, and an input event's and an H: event's toggles each make their calls; the preview sends nothing; the revert notice; and the refusals", { timeout: 150_000 }, async (t) => {

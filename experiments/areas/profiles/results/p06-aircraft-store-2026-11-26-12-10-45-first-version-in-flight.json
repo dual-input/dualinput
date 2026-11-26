@@ -1,0 +1,442 @@
+{
+ "engine": "object",
+ "currentAircraft": {
+  "state": "ok",
+  "value": {
+   "__Type": "AircraftDetails",
+   "aircraftId": 21,
+   "variationId": "3296253292570990575",
+   "variationIndex": 1,
+   "creator": "Microsoft",
+   "modelName": "PC-6/B2-H4 Turbo Porter",
+   "brandName": "Pilatus",
+   "variation": "Classic / Wheels",
+   "displayName": "Pilatus PC-6/B2-H4 Turbo Porter",
+   "variationDisplayName": "Classic / Wheels",
+   "category": "AIRPLANE",
+   "isLegacy": false,
+   "brandLogo": "",
+   "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail.png",
+   "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail_button.png",
+   "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail_side.png",
+   "isModular": true,
+   "isFavory": false,
+   "isSelected": false,
+   "isUsable": true,
+   "isGlider": false,
+   "isValid": true,
+   "rentingData": {
+    "__Type": "RentingData",
+    "rentalState": 0,
+    "rentalDuration": 0
+   },
+   "specializations": [],
+   "details": [
+    {
+     "__Type": "CompareDataValue",
+     "ID": 0,
+     "icon": "",
+     "name": "TT:HELP.CAREER.SKYDIVER_CAPACITY_TITLE",
+     "valueStr": "5",
+     "value": 5,
+     "type": "",
+     "unit": "",
+     "quality": 0,
+     "html": "",
+     "userTag": 0,
+     "ttsText": "",
+     "secondary": {
+      "__Type": "DataValue",
+      "ID": 0,
+      "icon": "",
+      "name": "",
+      "valueStr": "",
+      "value": 0,
+      "type": "",
+      "unit": "",
+      "quality": 0,
+      "html": "",
+      "userTag": 0,
+      "ttsText": ""
+     },
+     "result": 0
+    },
+    {
+     "__Type": "CompareDataValue",
+     "ID": 0,
+     "icon": "",
+     "name": "TT:CAREER.HELP.BRIEF_LANDING_SURFACE",
+     "valueStr": "",
+     "value": 0,
+     "type": "ICON",
+     "unit": "",
+     "quality": 0,
+     "html": "coui://html_ui/VFS/components/shared/resources/Images/Career/ScoringCriterias/Altitude.svg",
+     "userTag": 0,
+     "ttsText": "",
+     "secondary": {
+      "__Type": "DataValue",
+      "ID": 0,
+      "icon": "",
+      "name": "",
+      "valueStr": "",
+      "value": 0,
+      "type": "",
+      "unit": "",
+      "quality": 0,
+      "html": "",
+      "userTag": 0,
+      "ttsText": ""
+     },
+     "result": 0
+    },
+    {
+     "__Type": "CompareDataValue",
+     "ID": 0,
+     "icon": "",
+     "name": "TT:GENERIC.FUEL",
+     "valueStr": "46.70",
+     "value": 46.732306653589674,
+     "type": "",
+     "unit": "TT:UNITS.GALLONS_PER_HOUR.SYMBOL.SINGULAR",
+     "quality": 0,
+     "html": "",
+     "userTag": 0,
+     "ttsText": "",
+     "secondary": {
+      "__Type": "DataValue",
+      "ID": 0,
+      "icon": "",
+      "name": "",
+      "valueStr": "",
+      "value": 0,
+      "type": "",
+      "unit": "",
+      "quality": 0,
+      "html": "",
+      "userTag": 0,
+      "ttsText": ""
+     },
+     "result": 0
+    },
+    {
+     "__Type": "CompareDataValue",
+     "ID": 0,
+     "icon": "",
+     "name": "TT:MENU.ACPROPUI_CRUISE_SPEED",
+     "valueStr": "115",
+     "value": 114.99999999999999,
+     "type": "",
+     "unit": "TT:UNITS.KTAS.SYMBOL.SINGULAR",
+     "quality": 0,
+     "html": "",
+     "userTag": 0,
+     "ttsText": "",
+     "secondary": {
+      "__Type": "DataValue",
+      "ID": 0,
+      "icon": "",
+      "name": "",
+      "valueStr": "",
+      "value": 0,
+      "type": "",
+      "unit": "",
+      "quality": 0,
+      "html": "",
+      "userTag": 0,
+      "ttsText": ""
+     },
+     "result": 0
+    },
+    {
+     "__Type": "CompareDataValue",
+     "ID": 0,
+     "icon": "",
+     "name": "TT:MENU.ACPROPUI_MAX_ALTITUDE",
+     "valueStr": "26,900",
+     "value": 26900,
+     "type": "",
+     "unit": "TT:UNITS.FOOT.SYMBOL.SINGULAR",
+     "quality": 0,
+     "html": "",
+     "userTag": 0,
+     "ttsText": "",
+     "secondary": {
+      "__Type": "DataValue",
+      "ID": 0,
+      "icon": "",
+      "name": "",
+      "valueStr": "",
+      "value": 0,
+      "type": "",
+      "unit": "",
+      "quality": 0,
+      "html": "",
+      "userTag": 0,
+      "ttsText": ""
+     },
+     "result": 0
+    },
+    {
+     "__Type": "CompareDataValue",
+     "ID": 0,
+     "icon": "",
+     "name": "TT:MENU.ACPROPUI_RANGE",
+     "valueStr": "450",
+     "value": 450,
+     "type": "",
+     "unit": "TT:UNITS.NAUTICAL_MILE.SYMBOL.SINGULAR",
+     "quality": 0,
+     "html": "",
+     "userTag": 0,
+     "ttsText": "",
+     "secondary": {
+      "__Type": "DataValue",
+      "ID": 0,
+      "icon": "",
+      "name": "",
+      "valueStr": "",
+      "value": 0,
+      "type": "",
+      "unit": "",
+      "quality": 0,
+      "html": "",
+      "userTag": 0,
+      "ttsText": ""
+     },
+     "result": 0
+    }
+   ]
+  }
+ },
+ "items": {
+  "count": 4,
+  "items": [
+   {
+    "i": 0,
+    "v": {
+     "__Type": "ConfiguratorItem",
+     "id": "3296253292570990575",
+     "title": "Classic / Wheels",
+     "desc": "",
+     "imageUrl": "coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_wheels_01/thumbnail/thumbnail_variation.png",
+     "directoryPath": "",
+     "cost": 0,
+     "isNew": false,
+     "isSelected": true,
+     "isDisabled": false
+    }
+   },
+   {
+    "i": 1,
+    "v": {
+     "__Type": "ConfiguratorItem",
+     "id": "9808235424190376661",
+     "title": "Classic / Skis",
+     "desc": "",
+     "imageUrl": "coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/gauge_skis/thumbnail/thumbnail_variation.png",
+     "directoryPath": "",
+     "cost": 0,
+     "isNew": false,
+     "isSelected": false,
+     "isDisabled": false
+    }
+   },
+   {
+    "i": 2,
+    "v": {
+     "__Type": "ConfiguratorItem",
+     "id": "15536496931078816321",
+     "title": "G950 / Wheels",
+     "desc": "",
+     "imageUrl": "coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/g950_wheels_01/thumbnail/thumbnail_variation.png",
+     "directoryPath": "",
+     "cost": 0,
+     "isNew": false,
+     "isSelected": false,
+     "isDisabled": false
+    }
+   },
+   {
+    "i": 3,
+    "v": {
+     "__Type": "ConfiguratorItem",
+     "id": "12882390882678620527",
+     "title": "G950 / Floats",
+     "desc": "",
+     "imageUrl": "coui://html_ui/VFS/SimObjects/Airplanes/microsoft-pilatus-pc6/liveries/microsoft/g950_floats/thumbnail/thumbnail_variation.png",
+     "directoryPath": "",
+     "cost": 0,
+     "isNew": false,
+     "isSelected": false,
+     "isDisabled": false
+    }
+   }
+  ]
+ },
+ "aircraft172": {
+  "count": 138,
+  "items": [
+   {
+    "i": 15,
+    "v": {
+     "__Type": "AircraftInfo",
+     "aircraftId": 24,
+     "variationId": "3371172503516243518",
+     "variationIndex": 1,
+     "creator": "FenixSim",
+     "modelName": "A321 | CFM | WF",
+     "brandName": "Airbus",
+     "variation": "Single Class",
+     "displayName": "Airbus A321 | CFM | WF",
+     "variationDisplayName": "Single Class",
+     "category": "AIRPLANE",
+     "isLegacy": false,
+     "brandLogo": "",
+     "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/FNX_32X/liveries/fnx/FNX_321_Fenix_CFM_WF/thumbnail/thumbnail.png",
+     "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/FNX_32X/liveries/fnx/FNX_321_Fenix_CFM_WF/thumbnail/thumbnail_button.png",
+     "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/FNX_32X/liveries/fnx/FNX_321_Fenix_CFM_WF/thumbnail/thumbnail_side.png",
+     "isModular": true,
+     "isFavory": false,
+     "isSelected": false,
+     "isUsable": true,
+     "isGlider": false,
+     "isValid": true,
+     "rentingData": {
+      "__Type": "RentingData",
+      "rentalState": 0,
+      "rentalDuration": 0
+     }
+    }
+   },
+   {
+    "i": 36,
+    "v": {
+     "__Type": "AircraftInfo",
+     "aircraftId": 41,
+     "variationId": "5678035670673087055",
+     "variationIndex": 5,
+     "creator": "Black Square",
+     "modelName": "A36TC Bonanza Professional",
+     "brandName": "Black Square",
+     "variation": "N5172C",
+     "displayName": "Black Square A36TC Bonanza Professional",
+     "variationDisplayName": "N5172C",
+     "category": "AIRPLANE",
+     "isLegacy": false,
+     "brandLogo": "",
+     "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/bksq-aircraft-bonanzaproturbo/texture.N5172C/thumbnail.png",
+     "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/bksq-aircraft-bonanzaproturbo/texture.N5172C/thumbnail_button.png",
+     "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/bksq-aircraft-bonanzaproturbo/texture.N5172C/thumbnail_side.png",
+     "isModular": false,
+     "isFavory": false,
+     "isSelected": false,
+     "isUsable": true,
+     "isGlider": false,
+     "isValid": true,
+     "rentingData": {
+      "__Type": "RentingData",
+      "rentalState": 0,
+      "rentalDuration": 0
+     }
+    }
+   },
+   {
+    "i": 52,
+    "v": {
+     "__Type": "AircraftInfo",
+     "aircraftId": 61,
+     "variationId": "14870817737261007399",
+     "variationIndex": 1,
+     "creator": "Asobo Studio",
+     "modelName": "172 Skyhawk",
+     "brandName": "Cessna",
+     "variation": "Skydiving",
+     "displayName": "Cessna 172 Skyhawk",
+     "variationDisplayName": "Skydiving",
+     "category": "AIRPLANE",
+     "isLegacy": false,
+     "brandLogo": "",
+     "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/liveries/asobo/skydive_adaptiveintl_01/thumbnail/thumbnail.png",
+     "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/liveries/asobo/skydive_adaptiveintl_01/thumbnail/thumbnail_button.png",
+     "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/asobo_c172sp/liveries/asobo/skydive_adaptiveintl_01/thumbnail/thumbnail_side.png",
+     "isModular": true,
+     "isFavory": false,
+     "isSelected": false,
+     "isUsable": true,
+     "isGlider": false,
+     "isValid": true,
+     "rentingData": {
+      "__Type": "RentingData",
+      "rentalState": 0,
+      "rentalDuration": -0.00027777778450399637
+     }
+    }
+   },
+   {
+    "i": 91,
+    "v": {
+     "__Type": "AircraftInfo",
+     "aircraftId": 26,
+     "variationId": "13889694000219189172",
+     "variationIndex": 0,
+     "creator": "Microsoft / FlightFX",
+     "modelName": "One",
+     "brandName": "Jetson",
+     "variation": "One",
+     "displayName": "Jetson One",
+     "variationDisplayName": "One",
+     "category": "OTHER",
+     "isLegacy": false,
+     "brandLogo": "",
+     "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/jetsonone/presets/microsoft/default/thumbnail/thumbnail.png",
+     "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/jetsonone/presets/microsoft/default/thumbnail/thumbnail_button.png",
+     "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/jetsonone/presets/microsoft/default/thumbnail/thumbnail_side.png",
+     "isModular": true,
+     "isFavory": false,
+     "isSelected": false,
+     "isUsable": true,
+     "isGlider": false,
+     "isValid": true,
+     "rentingData": {
+      "__Type": "RentingData",
+      "rentalState": 0,
+      "rentalDuration": 0
+     }
+    }
+   },
+   {
+    "i": 94,
+    "v": {
+     "__Type": "AircraftInfo",
+     "aircraftId": 28,
+     "variationId": "9942224033517294932",
+     "variationIndex": 37,
+     "creator": "IndiaFoxtEcho",
+     "modelName": "F-35B",
+     "brandName": "Joint Strike Fighter",
+     "variation": "BF-01 Prototype",
+     "displayName": "Joint Strike Fighter F-35B",
+     "variationDisplayName": "BF-01 Prototype",
+     "category": "AIRPLANE",
+     "isLegacy": true,
+     "brandLogo": "",
+     "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/indiafoxtecho_f35b/texture.bf01/thumbnail.jpg",
+     "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/indiafoxtecho_f35b/texture.bf01/thumbnail.jpg",
+     "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/indiafoxtecho_f35b/texture.bf01/thumbnail.jpg",
+     "isModular": false,
+     "isFavory": false,
+     "isSelected": false,
+     "isUsable": true,
+     "isGlider": false,
+     "isValid": true,
+     "rentingData": {
+      "__Type": "RentingData",
+      "rentalState": 0,
+      "rentalDuration": -0.00027777778450399637
+     }
+    }
+   }
+  ]
+ }
+}

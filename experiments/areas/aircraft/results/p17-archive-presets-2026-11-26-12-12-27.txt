@@ -1,0 +1,227 @@
+p17 archive presets, filter "c172", packages folder %APPDATA%\Microsoft Flight Simulator 2024\Packages
+3 packages
+
+## StreamedPackages\fs24-asobo-aircraft-c172sp-as1000
+archive content\SimObjects\prdytgew.fsarchive: no plain index
+archive content\SimObjects\zjtthuhs.fsarchive: no plain index
+0 presets in readable archives
+
+## StreamedPackages\fs24-asobo-aircraft-c172sp-classic
+archive content\minimal.fsarchive: notEncrypted, 425 files
+archive content\SimObjects\kwhhrrua.fsarchive: no plain index
+archive content\SimObjects\xiihqdgi.fsarchive: no plain index
+12 presets in readable archives
+- asobo_c172sp/presets/asobo/c172sp_classic_aerialad (18 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Passengers.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Wheels
+    attachment asobo/Part_Exterior_Door_copilot
+    merged model asobo/Part_Exterior/model/Attach_Chocks_Left.gltf
+    merged model asobo/Part_Exterior/model/Attach_Hook.gltf
+    attachment SimAttachments/Aircraft_Objects/Asobo_Banner_Hook_C172
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Part_Exterior_FUEL_Pipe
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior_Seat_Copilot/model/PAYLOAD_COPILOT.gltf
+    merged model asobo/Part_Interior/model/INTERIOR_ATTACH_TOWING.gltf
+    merged model asobo/Part_Interior_Backseats/model/PAYLOAD_PAX.gltf
+    attachment asobo/Function_Interior_Classic
+    attachment asobo/Function_Interior_Floor_Standard
+    attachment asobo/Function_Interior_Passengers
+    attachment asobo/Function_Interior_Door_Copilot
+    attachment SimAttachments/Instruments/Asobo_Winch_Pole
+    attachment asobo/Function_Interior_Copilot
+- asobo_c172sp/presets/asobo/c172sp_classic_cargo (18 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Empty.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Wheels
+    attachment asobo/Part_Exterior_Door_copilot
+    merged model asobo/Part_Exterior/model/Attach_Chocks_Left.gltf
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Part_Exterior_FUEL_Pipe
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior/model/INTERIOR_ATTACH_CARGO.gltf
+    attachment asobo/Function_Interior_Classic
+    attachment asobo/Function_Interior_Floor_Standard
+    attachment asobo/Function_Interior_Door_Copilot
+    attachment asobo/Function_Interior_Cargo
+    attachment asobo/Function_Interior_Rear_Cargo
+- asobo_c172sp/presets/asobo/c172sp_classic_passengers (19 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Passengers.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Wheels
+    attachment asobo/Part_Exterior_Door_copilot
+    merged model asobo/Part_Exterior/model/Attach_Chocks_Left.gltf
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Part_Exterior_FUEL_Pipe
+    attachment asobo/Function_Exterior_Towing
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior_Seat_Copilot/model/PAYLOAD_COPILOT.gltf
+    merged model asobo/Part_Interior_Backseats/model/PAYLOAD_PAX.gltf
+    attachment asobo/Function_Interior_Classic
+    attachment asobo/Function_Interior_Floor_Standard
+    attachment asobo/Function_Interior_Passengers
+    attachment asobo/Function_Interior_Door_Copilot
+    attachment asobo/Part_Interior_Pedestal_Organizer
+    attachment asobo/Function_Interior_Rear_Cargo
+    attachment asobo/Function_Interior_Copilot
+- asobo_c172sp/presets/asobo/c172sp_classic_passengers_floats (19 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Passengers.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Floats
+    attachment asobo/Part_Exterior_Door_copilot
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Function_Exterior_Towing
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior_Seat_Copilot/model/PAYLOAD_COPILOT.gltf
+    merged model asobo/Part_Interior_Backseats/model/PAYLOAD_PAX.gltf
+    attachment asobo/Function_Interior_Classic
+    attachment asobo/Function_Interior_Passengers
+    attachment asobo/Function_Interior_Floats
+    merged model asobo/Part_Interior_Floats/model/PANEL_CLASSIC_FLOATS_ATTACH_NODES.gltf
+    attachment SimAttachments/Instruments/Asobo_Lever_LandingGearFloats_Round
+    attachment SimAttachments/Instruments/Asobo_Lever_LandingGearSafetyPump
+    attachment SimAttachments/Instruments/Asobo_Lever_WaterRudder
+    attachment asobo/Function_Interior_Door_Copilot
+    attachment asobo/Function_Interior_Copilot
+- asobo_c172sp/presets/asobo/c172sp_classic_passengers_skis (19 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Passengers.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Skis
+    attachment asobo/Part_Exterior_Door_copilot
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Part_Exterior_FUEL_Pipe
+    attachment asobo/Function_Exterior_Towing
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior_Seat_Copilot/model/PAYLOAD_COPILOT.gltf
+    merged model asobo/Part_Interior_Backseats/model/PAYLOAD_PAX.gltf
+    attachment asobo/Function_Interior_Classic
+    attachment asobo/Function_Interior_Floor_Standard
+    attachment asobo/Function_Interior_Passengers
+    merged model asobo/Part_Interior_Panel_Classic/model/PANEL_CLASSIC_SKIS_ATTACH_NODES.gltf
+    attachment SimAttachments/Instruments/Asobo_Lever_LandingGearSkis_Box
+    attachment asobo/Function_Interior_Door_Copilot
+    attachment asobo/Part_Interior_Pedestal_Organizer
+    attachment asobo/Function_Interior_Copilot
+- asobo_c172sp/presets/asobo/c172sp_classic_skydive (17 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Empty.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Wheels
+    merged model asobo/Part_Exterior/model/Attach_Chocks_Left.gltf
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Part_Exterior_FUEL_Pipe
+    attachment asobo/Function_Exterior_Skydive
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior/model/PAYLOAD_SKYDIVER.gltf
+    attachment asobo/Function_Interior_Classic
+    attachment asobo/Function_Interior_Floor_Standard
+- asobo_c172sp/presets/workingtitle/c172sp_ifd_aerialad (18 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Passengers.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Wheels
+    attachment asobo/Part_Exterior_Door_copilot
+    merged model asobo/Part_Exterior/model/Attach_Chocks_Left.gltf
+    merged model asobo/Part_Exterior/model/Attach_Hook.gltf
+    attachment SimAttachments/Aircraft_Objects/Asobo_Banner_Hook_C172
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Part_Exterior_FUEL_Pipe
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior_Seat_Copilot/model/PAYLOAD_COPILOT.gltf
+    merged model asobo/Part_Interior/model/INTERIOR_ATTACH_TOWING.gltf
+    merged model asobo/Part_Interior_Backseats/model/PAYLOAD_PAX.gltf
+    attachment workingtitle/Function_Interior_IFD
+    attachment asobo/Function_Interior_Floor_Standard
+    attachment asobo/Function_Interior_Passengers
+    attachment asobo/Function_Interior_Door_Copilot
+    attachment SimAttachments/Instruments/Asobo_Winch_Pole
+    attachment asobo/Function_Interior_Copilot
+- asobo_c172sp/presets/workingtitle/c172sp_ifd_cargo (18 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Empty.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Wheels
+    attachment asobo/Part_Exterior_Door_copilot
+    merged model asobo/Part_Exterior/model/Attach_Chocks_Left.gltf
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Part_Exterior_FUEL_Pipe
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior/model/INTERIOR_ATTACH_CARGO.gltf
+    attachment workingtitle/Function_Interior_IFD
+    attachment asobo/Function_Interior_Floor_Standard
+    attachment asobo/Function_Interior_Door_Copilot
+    attachment asobo/Function_Interior_Cargo
+    attachment asobo/Function_Interior_Rear_Cargo
+- asobo_c172sp/presets/workingtitle/c172sp_ifd_passengers (19 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Passengers.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Wheels
+    attachment asobo/Part_Exterior_Door_copilot
+    merged model asobo/Part_Exterior/model/Attach_Chocks_Left.gltf
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Part_Exterior_FUEL_Pipe
+    attachment asobo/Function_Exterior_Towing
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior_Seat_Copilot/model/PAYLOAD_COPILOT.gltf
+    merged model asobo/Part_Interior_Backseats/model/PAYLOAD_PAX.gltf
+    attachment workingtitle/Function_Interior_IFD
+    attachment asobo/Function_Interior_Floor_Standard
+    attachment asobo/Function_Interior_Passengers
+    attachment asobo/Function_Interior_Door_Copilot
+    attachment asobo/Part_Interior_Pedestal_Organizer
+    attachment asobo/Function_Interior_Rear_Cargo
+    attachment asobo/Function_Interior_Copilot
+- asobo_c172sp/presets/workingtitle/c172sp_ifd_passengers_floats (19 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Passengers.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Floats
+    merged model asobo/Part_Exterior_Floats/model/ATTACH_NODES_CHOCKS_FLOATS.gltf
+    attachment asobo/Part_Exterior_Door_copilot
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Function_Exterior_Towing
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior_Seat_Copilot/model/PAYLOAD_COPILOT.gltf
+    merged model asobo/Part_Interior_Backseats/model/PAYLOAD_PAX.gltf
+    attachment workingtitle/Function_Interior_IFD
+    attachment asobo/Function_Interior_Passengers
+    attachment asobo/Function_Interior_Floats
+    merged model asobo/Part_Interior_Floats/model/PANEL_CLASSIC_FLOATS_ATTACH_NODES.gltf
+    attachment SimAttachments/Instruments/Asobo_Lever_LandingGearFloats_Round
+    attachment SimAttachments/Instruments/Asobo_Lever_LandingGearSafetyPump
+    attachment SimAttachments/Instruments/Asobo_Lever_WaterRudder
+    attachment asobo/Function_Interior_Door_Copilot
+    attachment asobo/Function_Interior_Copilot
+- asobo_c172sp/presets/workingtitle/c172sp_ifd_passengers_skis (19 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Passengers.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Skis
+    attachment asobo/Part_Exterior_Door_copilot
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Part_Exterior_FUEL_Pipe
+    attachment asobo/Function_Exterior_Towing
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior_Seat_Copilot/model/PAYLOAD_COPILOT.gltf
+    merged model asobo/Part_Interior_Backseats/model/PAYLOAD_PAX.gltf
+    attachment workingtitle/Function_Interior_IFD
+    attachment asobo/Function_Interior_Floor_Standard
+    attachment asobo/Function_Interior_Passengers
+    merged model asobo/Part_Interior_Panel_Classic/model/PANEL_CLASSIC_SKIS_ATTACH_NODES.gltf
+    attachment SimAttachments/Instruments/Asobo_Lever_LandingGearSkis_Box
+    attachment asobo/Function_Interior_Door_Copilot
+    attachment asobo/Part_Interior_Pedestal_Organizer
+    attachment asobo/Function_Interior_Copilot
+- asobo_c172sp/presets/workingtitle/c172sp_ifd_skydive (17 files)
+    merged model asobo/Part_Exterior/model/Drone_Collision_In_Empty.gltf
+    attachment asobo/Function_Exterior
+    attachment asobo/Function_Exterior_Wheels
+    merged model asobo/Part_Exterior/model/Attach_Chocks_Left.gltf
+    attachment asobo/Part_Exterior_GPU_Pipe
+    attachment asobo/Part_Exterior_FUEL_Pipe
+    attachment asobo/Function_Exterior_Skydive
+    merged model asobo/Part_Interior/model/PAYLOAD_PILOT.gltf
+    merged model asobo/Part_Interior/model/PAYLOAD_SKYDIVER.gltf
+    attachment workingtitle/Function_Interior_IFD
+    attachment asobo/Function_Interior_Floor_Standard
+
+## StreamedPackages\fs24-asobo-passiveaircraft-c172family
+archive content\SimObjects\hgupzstj.fsarchive: no plain index
+archive content\SimObjects\pubdwlid.fsarchive: no plain index
+0 presets in readable archives

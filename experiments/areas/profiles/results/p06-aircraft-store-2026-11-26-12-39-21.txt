@@ -1,0 +1,39 @@
+p06 aircraft store, in mainUi, filter ""
+documents open: 11, a cockpit's among them: false
+engine: object
+
+## game/aircraft/currentAircraft: ok
+{
+ "__Type": "AircraftDetails",
+ "aircraftId": 201,
+ "variationId": "14055308362344571923",
+ "variationIndex": 3,
+ "creator": "iniBuilds",
+ "modelName": "A350-900 (Default Cabin)",
+ "brandName": "Airbus",
+ "variation": "A350-900 (Default Cabin)",
+ "displayName": "Airbus A350-900 (Default Cabin)",
+ "variationDisplayName": "A350-900 (Default Cabin)",
+ "category": "AIRPLANE",
+ "isLegacy": false,
+ "brandLogo": "",
+ "thumbnailPath": "coui://html_ui/VFS/SimObjects/Airplanes/A350/liveries/inibuilds/a359_emirates_exa/thumbnail/thumbnail.png",
+ "thumbnailButtonPath": "coui://html_ui/VFS/SimObjects/Airplanes/A350/liveries/inibuilds/a359_emirates_exa/thumbnail/thumbnail_button.png",
+ "thumbnailSidePath": "coui://html_ui/VFS/SimObjects/Airplanes/A350/liveries/inibuilds/a359_emirates_exa/thumbnail/thumbnail_side.png",
+ "isModular": true,
+ "isFavory": false,
+ "isSelected": false,
+ "isUsable": true,
+ "isGlider": false,
+ "isValid": true,
+ "rentingData": {
+  "__Type": "RentingData",
+  "rentalState": 0,
+  "rentalDuration": 0
+ },
+ "specializations": []
+}
+
+## game/aircraft/configurator/items: resolved, 2
+{"__Type":"ConfiguratorItem","id":"14055308362344571923","title":"A350-900 (Default Cabin)","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/A350/presets/inibuilds/a350-900_default_cabin/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":true,"isDisabled":false}
+{"__Type":"ConfiguratorItem","id":"3654053302840870963","title":"A350-900 (No Cabin)","desc":"","imageUrl":"coui://html_ui/VFS/SimObjects/Airplanes/A350/presets/inibuilds/a350-900_no_cabin/thumbnail/thumbnail_variation.png","directoryPath":"","cost":0,"isNew":false,"isSelected":false,"isDisabled":false}

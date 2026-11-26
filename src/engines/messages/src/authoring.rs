@@ -160,8 +160,15 @@ pub struct Status {
     pub in_flight: bool,
     /// The aircraft the sim loaded, by its path, as `bksq-aircraft-baronpropress`.
     pub aircraft: Option<String>,
+    /// The loaded aircraft's `A:TITLE`, as `C172SP G1000 Passengers Skis`, while the sim is in a
+    /// flight and the sim service has read it, so adding the aircraft to a profile names it for
+    /// a person. At the world map `aircraft` still holds the flight before's, so this holds none.
+    pub title: Option<String>,
     /// The profile the session flies, once this core has loaded it.
     pub profile: Option<SessionProfile>,
+    /// Whether the session pinned no profile, since none covers its aircraft, while this pilot
+    /// is in the session's flight.
+    pub uncovered: bool,
     /// Whether anyone else is in the session.
     pub crew: bool,
     /// Whether this pilot is the pilot flying, without whom Run refuses an entry the pilot

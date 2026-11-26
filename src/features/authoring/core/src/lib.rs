@@ -21,11 +21,12 @@ use messages::authoring::{
     Panel, RunResult, RunState, SessionProfile, Status, Watched, command,
 };
 use messages::clients::component::{PANEL_BRIDGE, PROFILE_EXTENSION};
+use messages::profiles::PIN;
 use messages::sync::Value;
 use profile_engine::{Name, key_names};
 use profile_loader::{ProfileLoaded, Profiles};
 use session::{FlightChanged, Session, SessionEnded, SessionStarted};
-use sim_service::{ANNOUNCE_EVERY, SimAwareness, SimEvent, SimUnit};
+use sim_service::{ANNOUNCE_EVERY, SimAwareness, SimEvent, SimService, SimUnit};
 use sim_variables::{VariablesEvent, VariablesUnit};
 
 use crate::live::Live;
@@ -385,15 +386,25 @@ fn status(live: Option<&Live>, view: &View) -> Status {
     let session = view.read::<Session>();
     let me = session.me();
     let pf = session.pf();
+    let in_flight = me.is_some_and(|me| session.in_flight(&me));
+    let aware = view.read::<SimAwareness>();
+    let aircraft = aware.aircraft.as_ref().map(|a| a.path.clone());
+    // The facts' title is of the aircraft they name, which the sim service reads after the load
+    // that set `aircraft`, so a title the facts hold for the aircraft before shows as none.
+    let title = view
+        .read::<SimService>()
+        .aircraft_facts()
+        .filter(|f| {
+            aware.stage.in_a_flight() && f.aircraft.as_ref().map(|a| &a.path) == aircraft.as_ref()
+        })
+        .and_then(|f| f.title.clone());
     Status {
         version: messages::VERSION.into(),
         session: session.held(),
-        in_flight: me.is_some_and(|me| session.in_flight(&me)),
-        aircraft: view
-            .read::<SimAwareness>()
-            .aircraft
-            .as_ref()
-            .map(|a| a.path.clone()),
+        in_flight,
+        aircraft,
+        title,
+        uncovered: in_flight && matches!(session.key(PIN), Some(None)),
         profile: view
             .read::<Profiles>()
             .loaded()

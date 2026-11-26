@@ -3,11 +3,15 @@
 // can feed it any state by hand. A call on `PanelHost` goes back to the extension, which sends `serve` the matching
 // `authoring.panel` or `authoring.run` (record/areas/profiles/04-the-extension-in-the-sim.md, "The Dual Input panel").
 
+import type { Syntax } from "../../src/syntax.ts"
+
 /** The look of VS Code's theme, picked as the extension picks the profile's token colors, `dualInput.colors` included. */
 export type Palette = "dark" | "light"
 
 export type PanelView = {
   palette: Palette
+  /** The profile's token colors in `palette`, which the panel paints a variant's ID and a path in. */
+  syntax: Syntax
   status: Status
   /** Whether the open text differs from the bundle the session pinned, so a Run runs edits the crew's cockpits don't have until a save. */
   unpinned: boolean
@@ -53,9 +57,35 @@ export type Status =
    * Run is off. `crew` is whether anyone else is in the session, whose cockpit runs the bundle it pinned.
    */
   | { kind: "in-flight"; aircraft: string; runs: boolean; crew: boolean }
+  /** In the session's flight, in an aircraft no profile covers, named by its `A:TITLE`. */
+  | { kind: "no-profile"; title: string; crew: boolean }
 
-/** What sits under the status line: nothing, Run for one entry, or the display picker. */
-export type Body = { kind: "nothing" } | { kind: "run"; run: RunView } | { kind: "picker"; picker: PickerView }
+/** What sits under the status line: nothing, Run for one entry, the display picker, or adding the loaded aircraft. */
+export type Body = { kind: "nothing" } | { kind: "run"; run: RunView } | { kind: "picker"; picker: PickerView } | { kind: "add"; add: AddView }
+
+/**
+ * The loaded aircraft, by the path the core matches a profile on, and what in the open profile covers it
+ * (record/areas/profiles/07-adding-an-aircraft.md, "The island").
+ */
+export type AddView = {
+  /** Its `A:TITLE`, as `C172SP G1000 Passengers Skis`, which names it for a person and plays no part in a match. */
+  title: string
+  /** Its folder below `SimObjects\Airplanes\`, lowercased as the core reports it, as `asobo_c172sp_g1000`. */
+  folder: string
+  /** Its whole path, as `asobo_c172sp_g1000/presets/asobo/c172sp_avionics_passengers_skis`, or null for an aircraft built the MSFS 2020 way, which reports its folder alone. */
+  preset: string | null
+  /** The variant whose paths cover it, by its preset or by its folder, or null when none does. */
+  cover: { variant: string; by: "preset" | "folder" } | null
+  /** The variant that already names each path, if any, whose choice can't be picked. */
+  named: { preset: string | null; folder: string | null }
+  /** The profile's variants, by ID, in the file's order. */
+  variants: string[]
+  /** The ID the new variant's field starts with, for each choice. */
+  suggested: { preset: string; folder: string }
+}
+
+/** What Add writes: the aircraft's preset or its folder, into the variant `id` names, a new one or one the profile has. */
+export type Adding = { what: "preset" | "folder"; id: string }
 
 export type RunView = {
   /** The entry's `name:`, as `Left mixture`. */
@@ -158,7 +188,9 @@ export type PanelHost = {
    * identifier alone, since it then names them all, and survives liveries as an identifier does.
    */
   write(): void
-  /** Leaves the picker, and the sim clears its outline. */
+  /** Writes the loaded aircraft's preset or folder into `variants`, and the island closes. */
+  add(adding: Adding): void
+  /** Leaves the tool island open, Run, the picker, or adding an aircraft, and for the picker the sim clears its outline. */
   leave(): void
   /** Starts a recording, in place of the one there is. */
   record(): void

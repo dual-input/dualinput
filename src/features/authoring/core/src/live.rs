@@ -172,12 +172,7 @@ impl Live {
                     ready: Ready::Missed,
                     settle: 0,
                 };
-                let (engine, outs) = Engine::load_only_asked(&profile, Sandbox::new(), load);
-                for out in outs {
-                    if let Out::Stop { entry, why, .. } = out {
-                        tracing::info!(entry, ?why, "an entry of the open text can't run");
-                    }
-                }
+                let engine = Engine::load_only_asked(&profile, Sandbox::new(), load);
                 self.names.watch_engine(engine.watches(), cx);
                 tracing::info!(hash, "authoring loaded the open text's bundle");
                 self.state = BundleState::Loaded { hash: hash.clone() };

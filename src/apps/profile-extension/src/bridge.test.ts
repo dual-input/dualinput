@@ -9,15 +9,23 @@ import { test } from "node:test"
 
 import type { FromPanel, ToPanel } from "../panel/src/messages.ts"
 import { type Command, commandFor, NOT_RUNNING, PanelBridge, placeOf, type ServerView } from "./bridge.ts"
+import type { Palette } from "./palette.ts"
+import type { Syntax } from "./syntax.ts"
 
 const FLYING: ServerView = { status: { kind: "in-flight", aircraft: "Black Square Baron 58P Professional", runs: true, crew: false }, unpinned: false, body: { kind: "nothing" }, recorder: { kind: "empty" } }
+
+/** Each palette's token colors, told apart by a variant ID's color. */
+const SYNTAX: Record<Palette, Syntax> = {
+  dark: { variant: { color: "#6ecdcc", bold: false, italic: false } },
+  light: { variant: { color: "#006666", bold: false, italic: false } },
+}
 
 /** A bridge in the dark palette with a webview attached, and what it posted, sent, and revealed. */
 function bridged() {
   const posted: ToPanel[] = []
   const sent: Command[] = []
   const revealed: string[] = []
-  const bridge = new PanelBridge("dark", { execute: (command) => sent.push(command), reveal: (where) => revealed.push(where) })
+  const bridge = new PanelBridge("dark", { execute: (command) => sent.push(command), reveal: (where) => revealed.push(where) }, SYNTAX)
   const detach = bridge.attach((message) => posted.push(message))
   return { bridge, detach, posted, sent, revealed }
 }
@@ -25,7 +33,7 @@ function bridged() {
 test("until the server sends a view, the panel shows that Dual Input isn't running", () => {
   const { bridge, posted } = bridged()
   bridge.heard({ kind: "ready" })
-  assert.deepEqual(posted, [{ kind: "view", view: { ...NOT_RUNNING, palette: "dark" } }])
+  assert.deepEqual(posted, [{ kind: "view", view: { ...NOT_RUNNING, palette: "dark", syntax: SYNTAX.dark } }])
   assert.deepEqual(NOT_RUNNING.status, { kind: "not-running" })
 })
 
@@ -34,8 +42,8 @@ test("the server's view reaches the webview whole, with the extension's palette 
   bridge.show(FLYING)
   bridge.show({ ...FLYING, palette: "light" } as ServerView)
   assert.deepEqual(posted, [
-    { kind: "view", view: { ...FLYING, palette: "dark" } },
-    { kind: "view", view: { ...FLYING, palette: "dark" } },
+    { kind: "view", view: { ...FLYING, palette: "dark", syntax: SYNTAX.dark } },
+    { kind: "view", view: { ...FLYING, palette: "dark", syntax: SYNTAX.dark } },
   ])
 })
 
@@ -47,7 +55,7 @@ test("a webview that loads again after the server's view asks for it and gets it
   const again: ToPanel[] = []
   bridge.attach((message) => again.push(message))
   bridge.heard({ kind: "ready" })
-  assert.deepEqual(again, [{ kind: "view", view: { ...FLYING, palette: "dark" } }])
+  assert.deepEqual(again, [{ kind: "view", view: { ...FLYING, palette: "dark", syntax: SYNTAX.dark } }])
 })
 
 test("detaching an older webview leaves the newer one attached", () => {
@@ -65,8 +73,8 @@ test("another palette posts the view again in it, and the same palette posts not
   bridge.repaint("dark")
   bridge.repaint("light")
   assert.deepEqual(posted, [
-    { kind: "view", view: { ...FLYING, palette: "dark" } },
-    { kind: "view", view: { ...FLYING, palette: "light" } },
+    { kind: "view", view: { ...FLYING, palette: "dark", syntax: SYNTAX.dark } },
+    { kind: "view", view: { ...FLYING, palette: "light", syntax: SYNTAX.light } },
   ])
 })
 
@@ -74,7 +82,7 @@ test("a stopped server puts the panel back to Dual Input not running", () => {
   const { bridge, posted } = bridged()
   bridge.show(FLYING)
   bridge.reset()
-  assert.deepEqual(posted.at(-1), { kind: "view", view: { ...NOT_RUNNING, palette: "dark" } })
+  assert.deepEqual(posted.at(-1), { kind: "view", view: { ...NOT_RUNNING, palette: "dark", syntax: SYNTAX.dark } })
 })
 
 test("each of the panel's calls goes to the server as its command, with its value", () => {
@@ -85,6 +93,7 @@ test("each of the panel's calls goes to the server as its command, with its valu
     [{ kind: "move", row: "KX155B|Index=1" }, { command: "dualInput.panel.move", arguments: ["KX155B|Index=1"] }],
     [{ kind: "tick", row: "KX155B" }, { command: "dualInput.panel.tick", arguments: ["KX155B"] }],
     [{ kind: "write" }, { command: "dualInput.panel.write", arguments: [] }],
+    [{ kind: "add", adding: { what: "preset", id: "skis" } }, { command: "dualInput.panel.add", arguments: [{ what: "preset", id: "skis" }] }],
     [{ kind: "leave" }, { command: "dualInput.panel.leave", arguments: [] }],
     [{ kind: "record" }, { command: "dualInput.panel.record", arguments: [] }],
     [{ kind: "stop" }, { command: "dualInput.panel.stop", arguments: [] }],

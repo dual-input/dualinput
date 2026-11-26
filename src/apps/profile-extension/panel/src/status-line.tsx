@@ -29,6 +29,8 @@ function says(status: Status): { tone: Tone; label: string; title: string; detai
       return status.runs
         ? { tone: "on", label: "In a flight", title: status.aircraft, detail: null }
         : { tone: "warning", label: "Mismatching aircraft", title: status.aircraft, detail: "The loaded aircraft isn't the one this profile is for." }
+    case "no-profile":
+      return { tone: "warning", label: "No profile", title: status.title, detail: "No profile covers this aircraft." }
   }
 }
 

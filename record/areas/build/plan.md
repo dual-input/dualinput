@@ -1332,6 +1332,42 @@ Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts
 Done on 2026-11-26: `node tools/check.ts` passed, and the `profiles` scenario passed 15 of 15, the new case among them.
 A first run, while MSFS 2024 flew on the same PC at 70% CPU, missed the build's budget at 2,633ms against 2,000ms; the run on a quiet PC built in 1,819ms.
 
+## 22j Adding an aircraft
+
+Designs first: adding the loaded aircraft to a profile's `variants`, which the user asked for on 2026-11-26, so an author gets the folder or preset the core matches on into a profile without reading a path out of the core's log.
+The user designed it with us on 2026-11-26, and [07-adding-an-aircraft](../profiles/07-adding-an-aircraft.md) carries it (user):
+
+- While an aircraft is loaded in a flight, a lens above `variants:` reads "Add" and its title, in any profile, with a session or without one.
+- It opens an island in the Dual Input panel that says what in the profile covers the aircraft now, and offers its preset or its whole folder, into a new variant or an existing one, with a path a variant already names closed.
+- It takes nothing but the path the core matches on, since the sim's aircraft list named a preset's path for 3 of 8 aircraft ([profiles log](../profiles/log.md#2026-11-26-the-sims-aircraft-store-lists-an-aircrafts-variations-with-their-folders-but-names-a-presets-path-for-only-3-of-8-aircraft-so-adding-an-aircraft-takes-its-path-from-a-load)).
+- Every tool island's title gets a close button, and the status line a state for an aircraft no profile covers.
+
+The island's frames come first, on the panel's dev page, and the rest is built once the user has settled them by eye (user, 2026-11-26).
+
+Builds:
+
+- in `src/packages/ui`: a radio group, shadcn's Luma one
+- in `src/apps/profile-extension`: the island, the close button on every tool island's title in place of the display picker's Cancel, the status line's new state, and their scenes on the panel's dev page ([the island](../profiles/07-adding-an-aircraft.md#the-island))
+- in `src/features/authoring`: the loaded aircraft's `A:TITLE` in the status line's facts
+- in `tools/profile-builder`'s `serve`: the lens and its rule, the island's view, the suggestion, and the edit to `variants` ([what Add writes](../profiles/07-adding-an-aircraft.md#what-add-writes))
+- in `src/engines/profile-engine`: the rule that picks the variant covering an aircraft, which the core's loader and the island share
+- in `src/engines/sync-engine` and `src/features/state-sync`: each write function compiled at its first run, and the next profile's runtime started ahead of its load, which the `authoring` scenario's 58P case needed to keep its load under a handler's 1ms ([profiles log](../profiles/log.md#2026-11-26-the-58ps-profile-load-took-1500µs-most-of-it-state-sync-starting-a-javascript-runtime-and-compiling-18-write-functions-and-it-takes-950µs-with-both-moved-off-the-load); user, 2026-11-26)
+- in `tools/bench`: the `authoring` scenario's case
+
+Needs: 22i.
+
+Tests: [the design's cases](../profiles/07-adding-an-aircraft.md#cases), as unit tests, on the bench, by eye on the dev page, and in the sim.
+
+It changes the sync engine only where a write function first runs and where state sync starts a profile's runtime, so it closes on the scenarios that run those (user, 2026-11-26):
+
+- `authoring`, for the island and the 58P's load
+- `state-sync`, for a catch-up's first writes into the 58P
+- `sync-log`, for a function that doesn't compile stopping on its first write's row
+- `tape` and `recording`, for a replay making the same calls
+- `test-sessions`, for a save's unload and load
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts authoring state-sync sync-log tape recording test-sessions` pass; the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, and the user has seen the island's cases, the close buttons, and the status line's new state on the dev page; and in the sim, [the design's case in the sim](../profiles/07-adding-an-aircraft.md#cases) passes by hand.
+
 ## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.

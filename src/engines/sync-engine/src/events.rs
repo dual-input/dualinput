@@ -442,6 +442,15 @@ impl Engine {
                 );
                 return Applied::Skipped;
             }
+            Err(Unfired::Failed(RunFailed::Compile(error))) => {
+                tracing::info!(
+                    entry = self.events.get(i).map(|e| e.entry.key.as_str()),
+                    error,
+                    "a write function didn't compile, so its entry stops"
+                );
+                self.stop(Slot::Event(i), Why::Compile(error), Some((row, cx.at)), out);
+                return Applied::Skipped;
+            }
             Err(Unfired::Failed(RunFailed::Wrong(error))) => {
                 tracing::info!(
                     entry = self.events.get(i).map(|e| e.entry.key.as_str()),

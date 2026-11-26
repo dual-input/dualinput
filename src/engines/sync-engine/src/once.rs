@@ -224,6 +224,7 @@ fn no_entry(entry: &str) -> String {
 fn function_failed(entry: &str, failed: RunFailed) -> String {
     match failed {
         RunFailed::Limit(limit) => format!("`{entry}`'s write function stopped: {limit}"),
+        RunFailed::Compile(error) => format!("`{entry}`'s write function didn't compile: {error}"),
         RunFailed::Wrong(error) => format!("`{entry}`'s write function failed: {error}"),
     }
 }

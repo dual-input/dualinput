@@ -32,7 +32,7 @@ pub use format::{
     Aircraft, Count, EventEntry, Owner, Pace, Profile, ProfileStatus, Resolved, StateEntry, Steps,
     Variant, Watch, Write,
 };
-pub use index::{Index, IndexBundle, IndexProfile, Shown, covers};
+pub use index::{Covering, Index, IndexBundle, IndexProfile, Shown, covering, covers};
 pub use levels::{Schema, declarations, schema};
 pub use names::{Allowed, Arg, Call, Name, key_names, read_name};
 pub use program::{Compiled, Program, ProgramFile, ProgramPlace, TypeError};

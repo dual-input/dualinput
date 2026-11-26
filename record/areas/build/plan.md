@@ -1308,6 +1308,28 @@ Exit: on our development machine, `node tools/check.ts` passes, and `node tools/
 
 Done on 2026-11-26.
 
+## 10b Two bundles that cover one aircraft
+
+Designs first: which bundle a session takes when two cover its aircraft, since a stale one won in two places and nothing warned: a renamed profile's old bundle in the local folder, and a renamed or deleted profile's entry in the index ([profiles log](../profiles/log.md#2026-11-26-two-bundles-that-cover-one-aircraft-let-a-stale-one-win-in-the-local-folder-by-file-name-and-in-the-index-by-path)).
+The user settled both on 2026-11-26: of the local bundles that cover an aircraft, the one whose file changed last wins, as a test session's newest bundle already does, and `publish` drops from the index each profile whose file is gone, as [02-units](../profiles/02-units.md)' note of stage 10b has it, with two known limits (user, 2026-11-26).
+
+Builds:
+
+- in `profile-loader`: each local bundle's last-modified time, and `covering` and `status_of` taking the newest local bundle that covers the aircraft ([the local folder](../profiles/02-units.md#the-local-folder))
+- in `tools/profile-builder`'s `publish`: the index's entries for profiles no longer in `profiles/aircraft/` dropped, and one profile's file refused as its target, since the index would keep only that profile ([publishing](../profiles/02-units.md#publishing))
+
+Needs: 22b, whose listing gives each file's last-modified time.
+
+Tests:
+
+- As the profile loader's own tests: of two local bundles that cover one aircraft, the newer wins whichever name sorts first, and of two as new, the first by file name.
+- On the bench, in the `profiles` scenario: the PF's local folder also holds an older bundle under a name that sorts first, as a renamed profile leaves, and the PF pins the newer at the session's start.
+- As the builder's own tests: a profile renamed from `a.yaml` to `b.yaml` and published again leaves only `b` in the index, with `a`'s bundle still in `bundles/`; a profile that waits for a release keeps its entry; and `publish` refuses one profile's file as its target.
+
+It changes neither the kernel nor the core's edge, so it closes on the `profiles` scenario.
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts profiles` pass, the new cases among them.
+
 ## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.

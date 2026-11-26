@@ -26,6 +26,21 @@ Decides:     Which compiler builds a bundle, and where it runs; the YAML parser;
 [22d]: log.md#2026-11-22-the-profile-extensions-design-finds-what-vs-code-reads-of-a-vsix-and-a-language-what-vsce-costs-and-what-zed-allows-and-the-format-puts-seats-last-and-takes-single-quotes
 [p04]: log.md#2026-11-22-typescripts-language-service-answers-in-about-40ms-in-quickjs-ng-on-the-58ps-write-functions-against-3ms-in-node-once-quickjs-ng-has-a-stand-in-for-intl
 
+> **Note**
+> From stage 10b, after a stale bundle won in two places where two cover one aircraft ([profiles log][10b]; user, 2026-11-26):
+>
+> - In [the local folder](#the-local-folder), a renamed profile leaves its old bundle under the old name, so the folder can hold two bundles of one profile.
+>   In [the pin](#the-pin), of the local bundles that cover the aircraft, the PF's choice is the one whose file changed last, and of two as new the first by file name, as a test session pins the newest bundle that changed ([test sessions](#test-sessions)).
+> - In [publishing](#publishing), `publish` drops from the index each profile whose file is gone from `profiles/aircraft/`, so a renamed or deleted profile's old path covers nothing.
+>   A profile whose file is still there keeps its entry even when it didn't publish this run, as one waiting for the release that brings its level does.
+>   A dropped profile's bundles stay on the `pages` branch for a pin, and each core's cache deletes them at its next start with no session ([the cache](#the-cache)).
+> - Known limits:
+>   - Renaming a profile in the push that raises its level drops the old path's bundle at the lower level, so cores of a release before that level lose the aircraft; a rename in one push and the level in the next avoids it.
+>   - A profile waiting for a release keeps its entry's bundle at the lower level, so if the push that raised its level also changed what it covers, and another profile takes what it covered before, two entries cover those folders for cores below the new level, and a core takes the first by path.
+> - [Cases for the bench](#cases-for-the-bench) gain two: the PF's local folder holds two bundles that cover the session's aircraft, and the PF pins the newer; and, as the builder's own, a profile renamed and published again leaves only its new path in the index.
+
+[10b]: log.md#2026-11-26-two-bundles-that-cover-one-aircraft-let-a-stale-one-win-in-the-local-folder-by-file-name-and-in-the-index-by-path
+
 The core loads bundles and never builds one.
 A published bundle comes from our Pages site under its hash, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.
 The profile builder type-checks and compiles with TypeScript 6.0.3's own compiler inside QuickJS-ng, the same code in CI, in the `dualinput-profile-builder` program the core team runs from the repository, and later in the IDE, so `typescript.js` never ships to pilots.

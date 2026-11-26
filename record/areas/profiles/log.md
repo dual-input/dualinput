@@ -8,6 +8,26 @@ TypeScript's language service answers inside a write function in about 40ms in Q
 The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs), [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), [p03-sandbox-globals.mjs](../../../experiments/areas/profiles/p03-sandbox-globals.mjs), and [p04-language-service.mjs](../../../experiments/areas/profiles/p04-language-service.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 None needs the sim.
 
+## 2026-11-26: Two bundles that cover one aircraft let a stale one win, in the local folder by file name and in the index by path
+
+**Asked:** when two bundles cover a session's aircraft, which does the PF's loader pin, and does anything warn?
+
+**Expected:** the author's latest bundle, or the profile's latest published one, since [the local folder](02-units.md#the-local-folder) holds one bundle for each profile, and CI refuses two profiles that cover one folder or preset.
+
+**Found:** in two places a stale bundle could win, and nothing warned (read in our code, 2026-11-26):
+
+- The local folder keeps a renamed profile's old bundle, since the profile extension names each bundle for its profile's file ([writing a bundle there](02-units.md#writing-a-bundle-there)) and deletes none.
+  `Local::covering` and `Local::status_of`, in `src/platform/profile-loader/src/local.rs`, took the first bundle by file name that covered the aircraft, so at a session's start, a profile renamed from `asobo_c172sp.yaml` to `asobo_c172sp_g1000.yaml` would pin its old bundle, since `.` sorts before `_`.
+  A save during a session pinned the right one, since `test_sessions.rs` pins the newest bundle that changed.
+- `publish`, in `tools/profile-builder/src/publish.rs`, refuses two profiles in `profiles/aircraft/` that cover one folder, but `Index::add`, in `src/engines/profile-engine/src/index.rs`, never drops an entry, so a renamed or deleted profile's old path stayed in `index.json` and still covered its folders.
+  The PF's loader, `Profiles::choice` in `src/platform/profile-loader/src/lib.rs`, takes the first entry in path order that covers the aircraft, so it could take the old path's bundle, and the EFB app's list of supported aircraft showed both.
+
+The user turned down two other fixes for the local folder: the extension deleting a renamed profile's old bundle, which misses a rename made in git or Explorer, and refusing to pick between two bundles as new (user, 2026-11-26).
+
+**Changed:** stage 10b ([build plan](../build/plan.md#10b-two-bundles-that-cover-one-aircraft)): of the local bundles that cover an aircraft, the one whose file changed last wins, and `publish` drops each profile whose file is gone, with two known limits the user took (user, 2026-11-26).
+
+**Affects:** [02-units](02-units.md)' note of stage 10b.
+
 ## 2026-11-26: In the sim, the Sync log's five cases passed on the 58P, and a step reached the extension 1.2ms after its input at p95
 
 We ran `tools/sim/sync-log.ts` on MSFS 2024, alone in the Black Square Baron 58P Professional 0.1.1, cold and dark at a stand, to see whether the log holds up against the real core and sim, and to measure [a step to the view](06-the-sync-log.md#budgets) against its 150ms at p95.

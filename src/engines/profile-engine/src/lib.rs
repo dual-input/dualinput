@@ -27,7 +27,7 @@ pub mod tree;
 
 pub use blocks::{Field, LAYOUT, Table, fields};
 pub use bundle::{hash, plain, single_quoted};
-pub use check::is_entry_key;
+pub use check::{is_entry_key, is_variant_id};
 pub use format::{
     Aircraft, Count, EventEntry, Owner, Pace, Profile, ProfileStatus, Resolved, StateEntry, Steps,
     Variant, Watch, Write,

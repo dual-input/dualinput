@@ -20,7 +20,7 @@ const KEYS: [string, string][] = [
   ["Esc", "close"],
 ]
 
-/** A variant ID as the format's grammar reads one. `valid_id` in tools/profile-builder/src/serve/variants.rs holds the same rule, so change both together. */
+/** A variant ID as the checker takes one. `is_variant_id` in src/engines/profile-engine/src/check.rs holds the same rule, so change both together. */
 const ID = /^[A-Za-z_][A-Za-z0-9_-]*$/
 
 export function Add({ add, syntax, host }: { add: AddView; syntax: Syntax; host: PanelHost }) {

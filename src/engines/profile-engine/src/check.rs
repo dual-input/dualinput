@@ -375,6 +375,16 @@ impl Checker {
                         continue;
                     };
                     for (id, paths) in variants {
+                        if !is_variant_id(&id.text) {
+                            self.error(
+                                &id.at,
+                                "key-form",
+                                format!(
+                                    "`{}` is a variant's ID, so it starts with a letter or `_`, then takes letters, digits, `_`, and `-`, as `a320_cfm`",
+                                    id.text
+                                ),
+                            );
+                        }
                         let mut variant = Variant {
                             id: id.text.clone(),
                             paths: Vec::new(),
@@ -1107,6 +1117,20 @@ fn takes(field: &Field) -> Allowed {
 /// The error on text in double quotes, giving `example`, the text in single quotes.
 fn single_quotes(example: &str) -> String {
     format!("Outside a script, a profile writes text in single quotes, as `{example}`")
+}
+
+/// Whether `id` can be a variant's ID: a letter or `_`, then letters, digits, `_`, and `-`, as
+/// `a320_cfm`. One that starts with a digit, as `737`, reads as a number in a list such as
+/// `only: [737]`, and one that holds other characters would need quotes there. The profile
+/// grammar in src/apps/profile-extension/syntaxes/dualinput-profile.tmLanguage.json colors the
+/// same IDs as variants, and the Add island's `ID` in src/apps/profile-extension/panel/src/add.tsx
+/// takes the same ones, so change all three together.
+pub fn is_variant_id(id: &str) -> bool {
+    let mut chars = id.chars();
+    chars
+        .next()
+        .is_some_and(|c| c.is_ascii_alphabetic() || c == '_')
+        && chars.all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
 }
 
 /// Whether `key` can be an entry's key: lowercase snake_case that starts with a letter, as

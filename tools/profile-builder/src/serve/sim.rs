@@ -1045,7 +1045,7 @@ impl Server {
             .and_then(|a| serde_json::from_value(a).ok())
             .ok_or("dualInput.panel.add takes what to add and the variant's ID")?;
         let id = adding.id.trim().to_string();
-        if !variants::valid_id(&id) {
+        if !profile_engine::is_variant_id(&id) {
             return Err(format!(
                 "`{id}` isn't a variant ID, which starts with a letter or _"
             ));

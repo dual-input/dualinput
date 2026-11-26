@@ -182,17 +182,6 @@ fn squash(name: &str) -> String {
         .collect()
 }
 
-/// Whether `id` reads as a variant ID: a letter or `_`, then letters, digits, `_`, and `-`, as the
-/// format's grammar reads one. src/apps/profile-extension/panel/src/add.tsx holds the same rule,
-/// so change both together.
-pub(crate) fn valid_id(id: &str) -> bool {
-    let mut chars = id.chars();
-    chars
-        .next()
-        .is_some_and(|c| c.is_ascii_alphabetic() || c == '_')
-        && chars.all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
-}
-
 /// The edit that writes `path` into the variant `id`: under `variants:` as a new variant's last
 /// line, or after an existing variant's paths, which turns a variant of one path into a list; in a
 /// file with no `variants:`, a `variants:` key first under `aircraft:`, and in one with no
@@ -462,16 +451,8 @@ mod tests {
             suggest_preset("737 800", "pmdg-737"),
             suggest_folder("737-800"),
         ] {
-            assert!(valid_id(&id), "{id}");
+            assert!(profile_engine::is_variant_id(&id), "{id}");
         }
-    }
-
-    #[test]
-    fn an_id_starts_with_a_letter_or_underscore() {
-        assert!(valid_id("skis") && valid_id("_g1000") && valid_id("a-b_2"));
-        assert!(
-            !valid_id("") && !valid_id("2skis") && !valid_id("passenger skis") && !valid_id("a:b")
-        );
     }
 
     const PROFILE: &str = "maker: Asobo

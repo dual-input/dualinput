@@ -336,6 +336,7 @@ aircraft:
 
 - `variants` maps a short ID, which `only` and `location` use, to a SimObjects folder, so each folder's name is written once.
   It's a map even with one variant, so adding a second is one more line.
+  An ID starts with a letter or `_`, then takes letters, digits, `_`, and `-`, as `a320_cfm`, since one that starts with a digit, as `737`, reads as a number in `only: [737]`; the checker refuses any other (user, 2026-11-26).
 - An aircraft built the MSFS 2024 way keeps its variants as presets inside one folder, so a variant can name presets instead, each by its path below `SimObjects\Airplanes\`, written with `/`, and one ID can list several.
   A bare folder covers every preset in it.
 

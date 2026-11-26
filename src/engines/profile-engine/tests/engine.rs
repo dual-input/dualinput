@@ -443,6 +443,29 @@ fn a_variants_path_is_written_with_slashes() {
 }
 
 #[test]
+fn a_variants_id_starts_with_a_letter_or_underscore() {
+    let report = check(
+        &source(
+            &tree(&[(
+                "p.yaml",
+                "maker: M\nname: A\nstatus: complete\naircraft:\n  variants:\n    a320_cfm: x\n    320x: y\n",
+            )]),
+            "p.yaml",
+        )
+        .expect("loads"),
+        LEVEL,
+    );
+    assert_eq!(place_of(&report, "key-form"), ("p.yaml", 7, 5));
+    assert_eq!(report.errors().count(), 1, "{report}");
+    for id in ["a320_cfm", "_g1000", "a-b_2", "A320"] {
+        assert!(profile_engine::is_variant_id(id), "{id}");
+    }
+    for id in ["", "320x", "737", "passenger skis", "a:b", "café"] {
+        assert!(!profile_engine::is_variant_id(id), "{id}");
+    }
+}
+
+#[test]
 fn a_profile_needs_a_maker_a_name_and_a_status_and_a_module_holds_none() {
     let codes = |files: &[(&str, &str)]| -> Vec<String> {
         let report = check(&source(&tree(files), "p.yaml").expect("loads"), LEVEL);

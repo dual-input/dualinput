@@ -10,11 +10,11 @@ use profile_engine::{Index, IndexBundle};
 
 use crate::{Disk, print, profiles, write_whole};
 
-/// Builds each profile in `profiles`, then, if none has an error and no two cover one folder or
-/// preset, writes each new bundle at a level up to `released` as `bundles/<hash>.yaml` in
-/// `pages`, and the index. `released` is the highest level a release supports, which CI reads
-/// from the release tags; a bundle above it waits for the release that brings its level, since
-/// a level can still change before then.
+/// Builds each profile in `profiles_folder`, then, if none has an error and no two cover one
+/// folder or preset, writes each new bundle at a level up to `released` as `bundles/<hash>.yaml`
+/// in `pages`, and the index, which lists only the profiles `profiles_folder` holds. `released`
+/// is the highest level a release supports, which CI reads from the release tags; a bundle above
+/// it waits for the release that brings its level, since a level can still change before then.
 pub(crate) fn publish(
     profiles_folder: &Path,
     pages: &Path,
@@ -22,6 +22,14 @@ pub(crate) fn publish(
     now: &str,
     compiler: &mut Compiler,
 ) -> Result<(), String> {
+    // The index drops each profile the target doesn't hold, so one profile's file as the target
+    // would drop every other profile.
+    if profiles_folder.is_file() {
+        return Err(format!(
+            "publish takes the profiles' folder, not one profile, so {} isn't published",
+            profiles_folder.display()
+        ));
+    }
     let (root, paths) = profiles(profiles_folder)?;
     let disk = Disk(root);
     let mut built = Vec::new();
@@ -70,6 +78,20 @@ pub(crate) fn publish(
             .ok_or_else(|| format!("{} doesn't read as an index", index_path.display()))?,
         Err(_) => Index::default(),
     };
+    // A renamed or deleted profile's entry would still cover its folders, and a core takes the
+    // first entry that covers its aircraft, so the index drops each profile whose file is gone.
+    // One whose file is there keeps its entry though it didn't publish this run, as one waiting
+    // for the release that brings its level, and a dropped one's bundles stay for a pin.
+    index.profiles.retain(|p| {
+        let there = paths.iter().any(|path| entry_path(path) == p.path);
+        if !there {
+            println!(
+                "{}: no longer in profiles/, so the index drops it, and its bundles stay for a pin",
+                p.path
+            );
+        }
+        there
+    });
     let bundles = pages.join("bundles");
     std::fs::create_dir_all(&bundles)
         .map_err(|e| format!("couldn't make {}: {e}", bundles.display()))?;
@@ -95,7 +117,7 @@ pub(crate) fn publish(
             write_whole(&file, &bundle)?;
         }
         index.add(
-            path.trim_end_matches(".yaml"),
+            entry_path(path),
             IndexBundle {
                 level,
                 hash,
@@ -106,6 +128,12 @@ pub(crate) fn publish(
         );
     }
     write_whole(&index_path, &index.encode())
+}
+
+/// A profile's path in the index, as `aircraft/bksq-baronpro`, from its file's, as
+/// `aircraft/bksq-baronpro.yaml`.
+fn entry_path(path: &str) -> &str {
+    path.trim_end_matches(".yaml")
 }
 
 #[cfg(test)]
@@ -184,6 +212,56 @@ mod tests {
             assert_eq!(bundles[0].published, "2026-11-05T09:40:57Z");
             assert_eq!(bundles[0].variants, ["bksq-aircraft-baronpropress"]);
             assert!(pages.join(".nojekyll").exists());
+            let _ = std::fs::remove_dir_all(&dir);
+        });
+    }
+
+    #[test]
+    fn the_index_lists_only_the_profiles_the_folder_holds_waiting_ones_included() {
+        on_stack(|compiler| {
+            let dir = scratch("renamed");
+            put(&dir, "a.yaml", BARON);
+            let (profiles, pages) = (dir.join("profiles"), dir.join("pages"));
+            let index = || {
+                let bytes = std::fs::read(pages.join("index.json")).expect("an index");
+                let index = Index::parse(&bytes).expect("reads");
+                index
+                    .profiles
+                    .into_iter()
+                    .map(|p| p.path)
+                    .collect::<Vec<_>>()
+            };
+            publish(&profiles, &pages, 1, "2026-10-20T14:02:11Z", compiler).expect("publishes");
+            assert_eq!(index(), ["aircraft/a"]);
+            let first = files(&dir);
+
+            // Renamed, and edited, so b builds to a bundle of its own.
+            let aircraft = profiles.join("aircraft");
+            std::fs::rename(aircraft.join("a.yaml"), aircraft.join("b.yaml")).expect("renames");
+            put(
+                &dir,
+                "b.yaml",
+                &BARON.replace("Dual Input", "Dual Input and a friend"),
+            );
+            publish(&profiles, &pages, 1, "2026-11-05T09:40:57Z", compiler).expect("publishes");
+            assert_eq!(index(), ["aircraft/b"]);
+            let both = files(&dir);
+            assert_eq!(both.len(), 2);
+            assert!(both.contains(&first[0]), "a's bundle stays for a pin");
+
+            // A profile that waits for a release keeps its entry.
+            publish(&profiles, &pages, 0, "2026-11-06T10:00:00Z", compiler).expect("publishes");
+            assert_eq!(index(), ["aircraft/b"]);
+
+            // One profile's file as the target would drop every other profile.
+            let one = publish(
+                &aircraft.join("b.yaml"),
+                &pages,
+                1,
+                "2026-11-06T10:00:00Z",
+                compiler,
+            );
+            assert!(one.is_err());
             let _ = std::fs::remove_dir_all(&dir);
         });
     }

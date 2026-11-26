@@ -1368,6 +1368,8 @@ It changes the sync engine only where a write function first runs and where stat
 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts authoring state-sync sync-log tape recording test-sessions` pass; the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, and the user has seen the island's cases, the close buttons, and the status line's new state on the dev page; and in the sim, [the design's case in the sim](../profiles/07-adding-an-aircraft.md#cases) passes by hand.
 
+Done on 2026-11-26, with the sim case's second half, a session's profile loading on `skis`, left to the profile engine's tests (user, 2026-11-26).
+
 ## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.

@@ -386,9 +386,9 @@ impl Profiles {
         cx.ask(WriteKeys::one(PIN, &choice));
     }
 
-    /// A local bundle that covers the aircraft, this pilot's own, `me`, or else the bundle the
-    /// cached index gives this core's level for it, when the cache holds that bundle, or else
-    /// none.
+    /// The newest local bundle that covers the aircraft, as this pilot's own, from `me`, or else
+    /// the bundle the cached index gives this core's level for it, when the cache holds that
+    /// bundle, or else none.
     fn choice(&self, aircraft: &str, me: Option<PilotId>) -> Option<Pin> {
         if let Some(local) = self.local.covering(aircraft, me) {
             return Some(local);

@@ -9,6 +9,7 @@
 //! crew (record/areas/profiles/02-units.md, "Test sessions"). A file whose bytes hash as before is
 //! no change, so a program that only touches a file, such as a virus scanner, sends nothing.
 
+use std::cmp::Reverse;
 use std::collections::BTreeMap;
 use std::time::Duration;
 
@@ -73,6 +74,8 @@ struct Seen {
 pub(crate) struct Bundle {
     pub(crate) file: String,
     pub(crate) hash: String,
+    /// When its file last changed, in ms since the Unix epoch, as the listing gave it.
+    modified: u64,
     covers: Vec<String>,
     status: ProfileStatus,
 }
@@ -89,13 +92,13 @@ impl Local {
         self.listing.is_some() || !self.reads.is_empty()
     }
 
-    /// The first local bundle, by file name, that covers the aircraft, as this pilot's own.
+    /// The newest local bundle that covers the aircraft, as this pilot's own.
     pub(crate) fn covering(
         &self,
         aircraft: &str,
         me: Option<messages::net::PilotId>,
     ) -> Option<Pin> {
-        let b = self.found.iter().find(|b| b.covers(aircraft))?;
+        let b = self.newest(aircraft)?;
         Some(Pin {
             hash: unhex(&b.hash)?,
             local: true,
@@ -103,12 +106,22 @@ impl Local {
         })
     }
 
-    /// The status of the first local bundle, by file name, that covers the aircraft.
+    /// The status of the newest local bundle that covers the aircraft.
     pub(crate) fn status_of(&self, aircraft: &str) -> Option<ProfileStatus> {
+        self.newest(aircraft).map(|b| b.status)
+    }
+
+    /// A session takes the author's latest bundle, not one a rename left behind: a tool names each
+    /// bundle for its profile's file, so renaming a profile leaves the old bundle in the folder,
+    /// and its name can sort first, as `asobo_c172sp.yaml` does before `asobo_c172sp_g1000.yaml`.
+    /// So the choice is the bundle whose file changed last, as a test session pins the newest
+    /// bundle that changed, and of two as new, the first by file name, so the choice doesn't
+    /// depend on the order a listing gives.
+    fn newest(&self, aircraft: &str) -> Option<&Bundle> {
         self.found
             .iter()
-            .find(|b| b.covers(aircraft))
-            .map(|b| b.status)
+            .filter(|b| b.covers(aircraft))
+            .min_by_key(|b| (Reverse(b.modified), &b.file))
     }
 
     /// The file that holds a local bundle, by its hash.
@@ -246,6 +259,7 @@ fn read(me: &mut Profiles, job: JobId, result: Result<Vec<u8>, String>, cx: &mut
         Ok((hash, covers, status)) => Some(Bundle {
             file: listed.name.clone(),
             hash,
+            modified: listed.modified,
             covers,
             status,
         }),
@@ -298,4 +312,52 @@ fn finish(me: &mut Profiles, cx: &mut Cx) {
     l.found = found;
     l.watching = cx.read::<Session>().held();
     me.update(cx);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const BARON: &str = "bksq-aircraft-baronpropress";
+
+    /// A folder holding a profile's bundle from before its rename, `bksq-baron.yaml`, and the one
+    /// after it, `bksq-baronpro.yaml`, each last changed at the time given, in ms. `found` lists
+    /// the newer first, against its order of file names, so a tie is decided by the choice's own
+    /// order.
+    fn renamed(old: u64, new: u64) -> Local {
+        let bundle = |file: &str, modified, n, status| Bundle {
+            file: file.into(),
+            hash: messages::hex(&[n; 32]),
+            modified,
+            covers: vec![BARON.into()],
+            status,
+        };
+        Local {
+            found: vec![
+                bundle("bksq-baronpro.yaml", new, 2, ProfileStatus::Partial),
+                bundle("bksq-baron.yaml", old, 1, ProfileStatus::Experimental),
+            ],
+            ..Local::default()
+        }
+    }
+
+    fn chosen(local: &Local) -> Option<[u8; 32]> {
+        local.covering(BARON, None).map(|pin| pin.hash)
+    }
+
+    #[test]
+    fn of_two_local_bundles_that_cover_one_aircraft_the_newer_wins() {
+        let after = renamed(1_000, 2_000);
+        assert_eq!(chosen(&after), Some([2; 32]));
+        assert_eq!(after.status_of(BARON), Some(ProfileStatus::Partial));
+
+        let before = renamed(3_000, 2_000);
+        assert_eq!(chosen(&before), Some([1; 32]));
+        assert_eq!(before.status_of(BARON), Some(ProfileStatus::Experimental));
+    }
+
+    #[test]
+    fn of_two_as_new_the_first_by_file_name_wins() {
+        assert_eq!(chosen(&renamed(2_000, 2_000)), Some([1; 32]));
+    }
 }

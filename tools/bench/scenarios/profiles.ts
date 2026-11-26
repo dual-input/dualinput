@@ -171,12 +171,21 @@ test("a member offline whose cache lacks the pin shows the error, loads nothing,
   await until(a, (s) => bundleDifference(s) === undefined, "the error clearing")
 })
 
-test("the pilot flying pins a local bundle: a member with the same file loads it, and one without it fetches nothing, gets it from the pilot flying, and loads it", { timeout: 120_000 }, async (t) => {
+test("the pilot flying pins a local bundle, the newer of two that cover the aircraft: a member with the same file loads it, and one without it fetches nothing, gets it from the pilot flying, and loads it", { timeout: 120_000 }, async (t) => {
   const net = await BenchNetwork.start()
   t.after(() => net.stop())
   const run = new BenchRun("profiles-local", t)
-  const copy = edited(run, "local")
   const local = path.join(run.folder, "local-bundles")
+  // A profile renamed to bksq-baronpro.yaml leaves its older bundle under the old name, which
+  // sorts first.
+  const renamed = path.join(run.folder, "renamed-bundles")
+  runBuilder(["build", path.join(edited(run, "renamed"), "aircraft", "bksq-baronpro.yaml"), "--out", renamed])
+  fs.mkdirSync(local, { recursive: true })
+  const older = path.join(local, "bksq-baron.yaml")
+  fs.renameSync(path.join(renamed, "bksq-baronpro.yaml"), older)
+  const hourAgo = new Date(Date.now() - 3_600_000)
+  fs.utimesSync(older, hourAgo, hourAgo)
+  const copy = edited(run, "local")
   const hash = builtHashes(runBuilder(["build", path.join(copy, "aircraft", "bksq-baronpro.yaml"), "--out", local])).get(BARON_FILE)!
   const a = await pilot(run, net, "James", { settings: { "profiles.local": local } })
   const b = await pilot(run, net, "Adam", { settings: { "profiles.local": local } })

@@ -26,6 +26,7 @@ import { isForced, type Palette, paletteFor, type Rule, palettes, uiThemeOf, wit
 import { type Build, Builds, kindOf, PATTERNS, profileName } from "./status.ts"
 import { SyncLogMirror } from "./sync-log.ts"
 import { syntaxes } from "./syntax.ts"
+import { type Fold, type Folds, foldChanges, pickItems } from "./variant-filter.ts"
 
 /** The language's ID, which package.json's `contributes.languages` names too. */
 const LANGUAGE = "dualinput-profile"
@@ -132,6 +133,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const bridge = new PanelBridge(currentPalette(), { execute: ({ command, arguments: args }) => tell(command, args), reveal: (where) => void reveal(where) }, syntax)
   const syncLog = new SyncLogMirror(currentPalette(), ({ command, arguments: args }) => tell(command, args), syntax)
   const boxes = new Boxes(currentPalette())
+  const filtered = new Filtered()
   const repaint = (): void => {
     const palette = currentPalette()
     bridge.repaint(palette)
@@ -141,19 +143,22 @@ export function activate(context: vscode.ExtensionContext): void {
   server.onNotification("dualInput/panel", (view: ServerView) => bridge.show(view))
   server.onNotification("dualInput/values", (values: Values) => boxes.show(values))
   server.onNotification("dualInput/syncLog", (update: Update) => syncLog.show(update))
+  server.onNotification("dualInput/folds", (folds: Folds) => void filtered.show(folds))
   // A stopped server sends nothing more, so the panel and the boxes would show the last state they heard as the sim's,
-  // and the Sync log's rows go with it, since a new server numbers its rows afresh.
+  // and the Sync log's rows go with it, since a new server numbers its rows afresh. A new server starts with no filter,
+  // so the folds it made go too.
   server.onDidChangeState(({ newState }) => {
     if (newState !== State.Stopped) return
     bridge.reset()
     syncLog.reset()
     boxes.clear()
+    void filtered.clear()
   })
 
   // The client registers the server's own commands, `dualInput.build`, `dualInput.removeLocalBundle`,
   // `dualInput.importers`, `dualInput.localFolder`, and the panel's `dualInput.panel.*`, with VS Code
-  // under those IDs, so the extension's take others, `dualInput.run`, `dualInput.pickDisplays`, and
-  // `dualInput.addAircraft` among them, which the server's code lenses name. `COMMANDS` in tools/profile-builder/src/serve.rs
+  // under those IDs, so the extension's take others, `dualInput.run`, `dualInput.pickDisplays`,
+  // `dualInput.addAircraft`, and `dualInput.filterVariants` among them, which the server's code lenses name. `COMMANDS` in tools/profile-builder/src/serve.rs
   // lists the server's, so change both together.
   context.subscriptions.push(
     output,
@@ -161,6 +166,7 @@ export function activate(context: vscode.ExtensionContext): void {
     ...watchers,
     ...watchColors(context, output),
     boxes,
+    filtered,
     registerPanel(context, bridge),
     registerSyncLog(context, syncLog),
     vscode.window.onDidChangeActiveColorTheme(repaint),
@@ -194,6 +200,17 @@ export function activate(context: vscode.ExtensionContext): void {
       const document = active()?.document
       const file = typeof uri === "string" ? uri : document && server.code2ProtocolConverter.asUri(document.uri)
       if (file) void openPanel("dualInput.panel.addAircraft", [file])
+    }),
+    // The filter's lens passes the profile's URI, its variants, those it shows, and the loaded aircraft's, as the server
+    // wrote them, and the picker's choice goes back to the server, which sends the folds.
+    vscode.commands.registerCommand("dualInput.filterVariants", async (uri: unknown, ids: unknown, shown: unknown, loaded: unknown) => {
+      if (typeof uri !== "string" || !isTexts(ids) || !isTexts(shown)) return
+      const picked = await vscode.window.showQuickPick(pickItems(ids, shown, typeof loaded === "string" ? loaded : null), {
+        canPickMany: true,
+        title: "Show the entries of these variants",
+        placeHolder: "Ticking none, or every one, shows them all",
+      })
+      if (picked) tell("dualInput.variantFilter", [uri, picked.map((item) => item.label)])
     }),
     vscode.commands.registerCommand("dualInput.buildNow", async () => {
       const file = active()
@@ -432,6 +449,70 @@ async function findProfile(file: string): Promise<vscode.Uri | undefined> {
   const named = (uri: vscode.Uri) => uri.path.toLowerCase().endsWith(name)
   const open = vscode.workspace.textDocuments.find((document) => document.languageId === LANGUAGE && named(document.uri))
   return open?.uri ?? (await vscode.workspace.findFiles(`{${PATTERNS.join(",")}}`)).find(named)
+}
+
+/** Whether `value` is a list of texts, as a lens's arguments name variants. */
+function isTexts(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string")
+}
+
+/**
+ * Folds and dims the entries each filtered profile hides, as `serve` sends them (record/areas/build/plan.md, "22k
+ * Filtering a profile by variant"). VS Code can't hide a line, so an entry folds to its key line. Its `editor.fold`
+ * folds only in the active editor, so a profile folds as its editor becomes active, and the dimming, a decoration,
+ * shows in every editor of the file.
+ */
+class Filtered implements vscode.Disposable {
+  /** Each filtered profile's entries to fold, by its URI, which the server writes as VS Code does. */
+  private readonly files = new Map<string, Fold[]>()
+  /** The key lines folded in each profile's editor, so a change unfolds only those the filter folded. */
+  private readonly folded = new Map<string, number[]>()
+  private readonly dim = vscode.window.createTextEditorDecorationType({ opacity: "0.45" })
+  private readonly listening: vscode.Disposable[]
+
+  constructor() {
+    this.listening = [
+      vscode.window.onDidChangeActiveTextEditor((editor) => void (editor && this.fold(editor))),
+      vscode.window.onDidChangeVisibleTextEditors((editors) => editors.forEach((editor) => this.shade(editor))),
+    ]
+  }
+
+  /** The server's `dualInput/folds`, whose entries replace the profile's last, and none clears its filter. */
+  async show({ uri, folds }: Folds): Promise<void> {
+    if (folds.length > 0) this.files.set(uri, folds)
+    else this.files.delete(uri)
+    for (const editor of vscode.window.visibleTextEditors) if (editor.document.uri.toString() === uri) this.shade(editor)
+    const editor = vscode.window.activeTextEditor
+    if (editor?.document.uri.toString() === uri) await this.fold(editor)
+  }
+
+  async clear(): Promise<void> {
+    const uris = [...this.files.keys()]
+    for (const uri of uris) await this.show({ uri, folds: [] })
+  }
+
+  dispose(): void {
+    this.dim.dispose()
+    for (const listener of this.listening) listener.dispose()
+  }
+
+  private async fold(editor: vscode.TextEditor): Promise<void> {
+    const uri = editor.document.uri.toString()
+    const lines = (this.files.get(uri) ?? []).map((f) => f.line)
+    const { fold, unfold } = foldChanges(this.folded.get(uri) ?? [], lines)
+    if (unfold.length > 0) await vscode.commands.executeCommand("editor.unfold", { selectionLines: unfold, levels: 1 })
+    if (fold.length > 0) await vscode.commands.executeCommand("editor.fold", { selectionLines: fold, levels: 1 })
+    if (lines.length > 0) this.folded.set(uri, lines)
+    else this.folded.delete(uri)
+    this.shade(editor)
+  }
+
+  private shade(editor: vscode.TextEditor): void {
+    const { document } = editor
+    const folds = (this.files.get(document.uri.toString()) ?? []).filter((f) => f.line < document.lineCount)
+    const ranges = folds.map((f) => new vscode.Range(f.line, 0, Math.min(f.last, document.lineCount - 1), Number.MAX_SAFE_INTEGER))
+    editor.setDecorations(this.dim, ranges)
+  }
 }
 
 /**

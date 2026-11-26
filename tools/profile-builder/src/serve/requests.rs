@@ -480,6 +480,12 @@ impl Server {
                 Err(e) => failed(id, e),
             };
         }
+        if p.command == "dualInput.variantFilter" {
+            return match self.variant_filter(&p.arguments) {
+                Ok(()) => Some(Response::new_ok(id, Value::Null)),
+                Err(e) => failed(id, e),
+            };
+        }
         if p.command.starts_with("dualInput.syncLog.") {
             return match self.sync_log_command(&p.command, &p.arguments) {
                 Ok(()) => Some(Response::new_ok(id, Value::Null)),

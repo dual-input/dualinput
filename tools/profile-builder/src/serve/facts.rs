@@ -69,6 +69,8 @@ pub(crate) struct Entry {
     /// Whether it has a write, which Run runs: a `write:` that isn't `none`.
     pub(crate) writes: bool,
     pub(crate) pilot_flying: bool,
+    /// The variant IDs its `only` names, as written, or none for an entry of every variant.
+    pub(crate) only: Vec<String>,
 }
 
 impl Facts {
@@ -154,6 +156,7 @@ fn entries(facts: &mut Facts, block: &Node, event: bool, end: usize) {
             last: last.max(key.at.line - 1),
             writes: field("write").is_some_and(|w| text_of(w).as_deref() != Some("none")),
             pilot_flying: field("owner").and_then(text_of).as_deref() == Some("pilot_flying"),
+            only: field("only").map(texts).unwrap_or_default(),
         });
     }
 }

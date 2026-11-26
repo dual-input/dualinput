@@ -1371,6 +1371,31 @@ Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts
 
 Done on 2026-11-26, with the sim case's second half, a session's profile loading on `skis`, left to the profile engine's tests (user, 2026-11-26).
 
+## 22k Filtering a profile by variant
+
+The user asked on 2026-11-26 for a way to see only the entries of the variants being worked on, in a profile with many, and settled with us that it's small enough to build from this stage alone (user, 2026-11-26):
+
+- A lens above `variants:` reads "Show all variants", or the variants shown, as "Showing g1000, skis", in any profile under `profiles/aircraft/` with more than one variant.
+- It opens VS Code's own picker with a box for each variant, the loaded aircraft's marked "loaded" while one is in a flight.
+- Each entry of `state` or `events` whose `only` names none of the picked variants folds to its key line and dims; an entry with no `only` applies to every variant and stays as it is.
+  Picking every variant, or none, shows them all.
+- VS Code can't hide a line, so folding is the nearest, and an entry folds again as its text changes while the filter holds.
+- An editor folds only while it's the active one, so a filtered file folds as its editor becomes active.
+- A module's entries aren't in the profile's file, so the filter doesn't reach them.
+
+Builds:
+
+- in `tools/profile-builder`'s `serve`: each entry's `only` in the open text's facts, the lens, each file's filter, and the entries it folds, sent to the extension as the filter or the text changes
+- in `src/apps/profile-extension`: the picker, and the folding and dimming
+
+Needs: 22j.
+
+Tests: as `serve`'s own tests, the entries a filter folds and the lens's words; as the extension's own tests, the picker's items; and by hand, in VS Code, a profile of several variants folding to the picked ones.
+
+It changes neither the core nor the sync engine, so it closes on the `authoring` scenario.
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts authoring` pass, and the `.vsix` that `node tools/build.ts extension` writes installs in VS Code, where the user has filtered a profile of several variants.
+
 ## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.

@@ -42,10 +42,11 @@ use super::{PAUSE, Server, full, locate};
 
 /// The extension's own commands, which the server's code lenses name, and which the server
 /// doesn't list among its own, since the extension registers them. src/apps/profile-extension/
-/// src/extension.ts registers all three, so change them together.
+/// src/extension.ts registers all four, so change them together.
 const RUN: &str = "dualInput.run";
 const PICK: &str = "dualInput.pickDisplays";
 const ADD: &str = "dualInput.addAircraft";
+const FILTER: &str = "dualInput.filterVariants";
 
 // The lenses' titles take VS Code's own icons, outlined as the Dual Input panel's lucide icons
 // are, since a lens draws no other. A no-break space after each icon keeps a gap that a plain
@@ -57,6 +58,30 @@ pub(super) const PICK_TITLE: &str = "$(inspect)\u{a0}Pick displays";
 /// The lens that adds the loaded aircraft, named by its `A:TITLE`.
 pub(super) fn add_title(title: &str) -> String {
     format!("$(add)\u{a0}Add {title}")
+}
+
+/// The lens that filters a profile's entries by variant, naming the variants it shows, or none
+/// while it shows them all (record/areas/build/plan.md, "22k Filtering a profile by variant").
+pub(super) fn filter_title(shown: &[&str]) -> String {
+    if shown.is_empty() {
+        "$(filter)\u{a0}Show all variants".into()
+    } else {
+        format!("$(filter)\u{a0}Showing {}", shown.join(", "))
+    }
+}
+
+/// The entries a filter showing the variants `shown` folds, each by its first line and its last,
+/// from 0: each whose `only` names none of them. An entry with no `only` is every variant's.
+pub(super) fn folded(facts: &Facts, shown: &BTreeSet<String>) -> Vec<(usize, usize)> {
+    if shown.is_empty() {
+        return Vec::new();
+    }
+    facts
+        .entries
+        .iter()
+        .filter(|e| !e.only.is_empty() && !e.only.iter().any(|o| shown.contains(o)))
+        .map(|e| (e.line, e.last))
+        .collect()
 }
 
 /// What `serve` holds of the sim.
@@ -106,6 +131,10 @@ pub(crate) struct Sim {
     requests: u64,
     /// The Sync log's rows, which outlast the socket, so a core that restarts keeps them.
     log: SyncLogRows,
+    /// Each profile's filter: the variants its entries show, where a profile with none shows them
+    /// all, and the entries the extension last folded for it.
+    filters: BTreeMap<PathBuf, BTreeSet<String>>,
+    folds: BTreeMap<PathBuf, Vec<(usize, usize)>>,
 }
 
 /// A socket to the core, and the core's slice `core` once it comes.
@@ -199,6 +228,8 @@ impl Sim {
             apply: workspace.and_then(|w| w.apply_edit).unwrap_or(false),
             requests: 0,
             log: SyncLogRows::default(),
+            filters: BTreeMap::new(),
+            folds: BTreeMap::new(),
         }
     }
 
@@ -612,6 +643,7 @@ impl Server {
 
     pub(super) fn show_sim(&mut self) {
         self.show_boxes();
+        self.show_folds();
         self.show_view();
         self.show_lenses();
         self.show_log();
@@ -773,10 +805,93 @@ impl Server {
             return;
         }
         self.sim.lenses = now;
+        self.ask_lenses();
+    }
+
+    /// `dualInput.variantFilter`: the variants a profile's entries show, from the filter's picker,
+    /// where every one, or none, shows them all.
+    pub(super) fn variant_filter(&mut self, args: &[Value]) -> Result<(), String> {
+        let usage = "dualInput.variantFilter takes a profile's URI and the variants to show";
+        let file = args
+            .first()
+            .and_then(Value::as_str)
+            .and_then(path_of)
+            .ok_or(usage)?;
+        let picked: Vec<String> = args
+            .get(1)
+            .cloned()
+            .and_then(|a| serde_json::from_value(a).ok())
+            .ok_or(usage)?;
+        self.fresh(&file);
+        let ids: BTreeSet<String> = self
+            .sim
+            .facts
+            .get(&file)
+            .and_then(|f| f.variants.as_ref())
+            .map(|(_, v)| v.iter().map(|(id, _)| id.clone()).collect())
+            .unwrap_or_default();
+        let shown: BTreeSet<String> = picked.into_iter().filter(|p| ids.contains(p)).collect();
+        if shown.is_empty() || shown == ids {
+            self.sim.filters.remove(&file);
+        } else {
+            self.sim.filters.insert(file, shown);
+        }
+        self.show_folds();
+        self.ask_lenses();
+        Ok(())
+    }
+
+    fn ask_lenses(&mut self) {
         if self.sim.refresh {
             self.sim.requests += 1;
             let id = RequestId::from(format!("codeLens-{}", self.sim.requests));
             self.send(Request::new(id, "workspace/codeLens/refresh".into(), Value::Null).into());
+        }
+    }
+
+    /// The entries each filtered profile folds, sent to the extension as `dualInput/folds` when
+    /// they changed, and an empty list once for a profile whose filter cleared. A file edited
+    /// since typing last paused waits for the pause, as its boxes do.
+    fn show_folds(&mut self) {
+        let files: BTreeSet<PathBuf> = self
+            .sim
+            .filters
+            .keys()
+            .chain(self.sim.folds.keys())
+            .cloned()
+            .collect();
+        for file in files {
+            if self.sim.stale.contains(&file) {
+                continue;
+            }
+            let folds = match (self.sim.filters.get(&file), self.sim.facts.get(&file)) {
+                (Some(shown), Some(facts)) => folded(facts, shown),
+                _ => Vec::new(),
+            };
+            if self
+                .sim
+                .folds
+                .get(&file)
+                .map_or(folds.is_empty(), |f| *f == folds)
+            {
+                if folds.is_empty() {
+                    self.sim.folds.remove(&file);
+                }
+                continue;
+            }
+            let lines: Vec<Value> = folds
+                .iter()
+                .map(|(line, last)| json!({ "line": line, "last": last }))
+                .collect();
+            self.notify(
+                "dualInput/folds",
+                json!({ "uri": uri_of(&file), "folds": lines }),
+            );
+            if folds.is_empty() {
+                self.sim.folds.remove(&file);
+            } else {
+                self.sim.folds.insert(file, folds);
+            }
         }
     }
 
@@ -792,8 +907,9 @@ impl Server {
         };
         let in_program = self.program().is_some_and(|p| p.files.contains(&file));
         let sim = lenses.picks && in_program;
-        let adds = lenses.aircraft.as_ref().filter(|_| is_profile(&file));
-        let Some(text) = self.text_of(&file).filter(|_| sim || adds.is_some()) else {
+        let profile = is_profile(&file);
+        let adds = lenses.aircraft.as_ref().filter(|_| profile);
+        let Some(text) = self.text_of(&file).filter(|_| sim || profile) else {
             return json!([]);
         };
         let Some(facts) = facts::read(&text) else {
@@ -816,15 +932,37 @@ impl Server {
                 (None, None) => None,
             };
             if let Some((line, word)) = key.filter(|_| !variants::has_own(named, path)) {
-                let indent = text
-                    .split('\n')
-                    .nth(line)
-                    .map_or(0, |l| l.chars().take_while(|c| *c == ' ').count());
                 out.push(json!({
-                    "range": at(line, indent, word.len()),
+                    "range": at(line, indent_of(&text, line), word.len()),
                     "command": { "title": add_title(title), "command": ADD, "arguments": [uri] },
                 }));
             }
+        }
+        // A profile of more than one variant filters its entries by them.
+        if let Some((line, named)) = facts
+            .variants
+            .as_ref()
+            .filter(|(_, v)| profile && v.len() > 1)
+        {
+            let ids: Vec<&str> = named.iter().map(|(id, _)| id.as_str()).collect();
+            let filter = self.sim.filters.get(&file);
+            let shown: Vec<&str> = ids
+                .iter()
+                .copied()
+                .filter(|id| filter.is_some_and(|f| f.contains(*id)))
+                .collect();
+            let loaded = lenses.aircraft.as_ref().and_then(|(path, _)| {
+                let each = named.iter().map(|(id, p)| (id.as_str(), p.as_slice()));
+                profile_engine::covering(each, path).map(|(id, _)| id)
+            });
+            out.push(json!({
+                "range": at(*line, indent_of(&text, *line), "variants".len()),
+                "command": {
+                    "title": filter_title(&shown),
+                    "command": FILTER,
+                    "arguments": [uri, ids, shown, loaded],
+                },
+            }));
         }
         if !sim {
             return Value::Array(out);
@@ -1115,6 +1253,13 @@ impl Server {
 /// with `aircraft:`, and so the only kind an aircraft can be added to.
 fn is_profile(file: &Path) -> bool {
     locate(file).is_some_and(|(_, rel)| rel.starts_with("aircraft/"))
+}
+
+/// How many spaces line `line` of `text`, from 0, starts with.
+fn indent_of(text: &str, line: usize) -> usize {
+    text.split('\n')
+        .nth(line)
+        .map_or(0, |l| l.chars().take_while(|c| *c == ' ').count())
 }
 
 /// The boxes of one file's watch lines, from the slice.

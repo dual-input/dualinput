@@ -302,6 +302,62 @@ fn connected(name: &str) -> (Session, String) {
 }
 
 #[test]
+fn the_filter_lens_shows_the_picked_variants_entries_and_folds_the_rest() {
+    let text = PROFILE
+        .replace(
+            "    a: test-aircraft\n",
+            "    a: test-aircraft\n    b: test-aircraft-b\n",
+        )
+        .replace(
+            "    write: none\n  throttle:",
+            "    write: none\n    only: [b]\n  throttle:",
+        );
+    let mut s = Session::start("sim-filter", &[(FILE, &text)], json!({}));
+    s.open(FILE, &text);
+    s.settle();
+    let uri = s.uri(FILE);
+    let filter = |lenses: &Value| -> Vec<(String, Value)> {
+        titles(lenses)
+            .into_iter()
+            .filter(|(title, _)| title.starts_with("$(filter)"))
+            .collect()
+    };
+    assert_eq!(
+        filter(&s.lenses(FILE)),
+        [(
+            "$(filter)\u{a0}Show all variants".to_string(),
+            json!([uri, ["a", "b"], [], null])
+        )],
+        "with no session, in a profile of two variants"
+    );
+    s.execute("dualInput.variantFilter", json!([uri, ["a"]]))
+        .expect("filters");
+    let on_ground = line_of(&text, "  on_ground:");
+    let folds = s.wait("dualInput/folds", |_| true);
+    assert_eq!(
+        folds["folds"],
+        json!([{ "line": on_ground, "last": line_of(&text, "  throttle:") - 1 }]),
+        "an entry of `b` alone folds, and one of every variant stays"
+    );
+    assert_eq!(filter(&s.lenses(FILE))[0].0, "$(filter)\u{a0}Showing a");
+    s.execute("dualInput.variantFilter", json!([uri, ["a", "b"]]))
+        .expect("shows all");
+    let cleared = s.wait("dualInput/folds", |_| true);
+    assert_eq!(cleared["folds"], json!([]), "every variant shows them all");
+    assert_eq!(
+        filter(&s.lenses(FILE))[0].0,
+        "$(filter)\u{a0}Show all variants"
+    );
+    let one = PROFILE;
+    s.open("aircraft/one.yaml", one);
+    s.settle();
+    assert!(
+        filter(&s.lenses("aircraft/one.yaml")).is_empty(),
+        "no lens in a profile of one variant"
+    );
+}
+
+#[test]
 fn serve_sends_each_watch_lines_name_with_how_its_line_reads_it() {
     let mut s = Session::start("sim-names", &[(FILE, PROFILE)], json!({}));
     s.open(FILE, PROFILE);
@@ -832,13 +888,20 @@ fn the_lens_adds_the_loaded_aircraft_in_any_profile_and_add_writes_its_preset() 
     );
     s.view(|v| v["body"]["kind"] == "nothing");
 
-    // A profile that names the aircraft's own path has nothing to add, so no lens.
+    // A profile that names the aircraft's own path has nothing to add, so no lens adds it; its two
+    // variants give it the filter's lens alone.
     let named = PROFILE.replace(
         "    a: test-aircraft\n",
         "    a: test-aircraft\n    skis: test-aircraft/presets/test/skis\n",
     );
     s.change(FILE, &named, 2);
-    assert_eq!(s.lenses(FILE), json!([]));
+    let lenses = s.lenses(FILE);
+    assert!(
+        titles(&lenses)
+            .iter()
+            .all(|(title, _)| title.starts_with("$(filter)")),
+        "{lenses}"
+    );
 }
 
 #[test]

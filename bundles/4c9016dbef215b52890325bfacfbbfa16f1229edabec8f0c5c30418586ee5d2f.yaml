@@ -1,0 +1,1125 @@
+maker: Black Square
+name: Baron 58P Professional
+status: partial
+authors: Dual Input
+aircraft:
+  variants:
+    press: bksq-aircraft-baronpropress
+displays:
+  - BlackSquareTablet
+state:
+  battery:
+    name: Battery
+    watch: B('ELECTRICAL_Battery_1')
+    write:
+      toggle: B('ELECTRICAL_Battery_1_Toggle')
+  alternator_1:
+    name: Left alternator
+    watch: B('ELECTRICAL_Alternator_1')
+    write:
+      toggle: B('ELECTRICAL_Alternator_1_Toggle')
+  alternator_2:
+    name: Right alternator
+    watch: B('ELECTRICAL_Alternator_2')
+    write:
+      toggle: B('ELECTRICAL_Alternator_2_Toggle')
+  avionics_master:
+    name: Avionics master
+    watch: B('ELECTRICAL_Avionics_Bus_1')
+    write:
+      toggle: B('ELECTRICAL_Avionics_Bus_1_Toggle')
+  external_power:
+    name: External power
+    watch: A('EXTERNAL POWER ON:1', 'Bool')
+    write:
+      toggle: K('TOGGLE_EXTERNAL_POWER')
+  breaker_gear_relay:
+    name: Landing gear relay breaker
+    watch: L('var_Breaker_LandingGearRelay_readonly')
+    write:
+      toggle: K('ELECTRICAL_BUS_TO_BUS_CONNECTION_TOGGLE', 2, 6)
+  breaker_gear_motor:
+    name: Landing gear motor breaker
+    watch: L('var_Breaker_LandingGearMonitor_readonly')
+    write:
+      toggle: K('ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE', 6, 6)
+  breaker_flap_relay:
+    name: Flap relay breaker
+    watch: L('var_Breaker_FlapRelay_readonly')
+    write:
+      toggle: K('ELECTRICAL_BUS_TO_BUS_CONNECTION_TOGGLE', 2, 4)
+  breaker_flap_motor:
+    name: Flap motor breaker
+    watch: L('var_Breaker_FlapMotor_readonly')
+    write:
+      toggle: K('ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE', 4, 3)
+  breaker_avionics_relay:
+    name: Avionics relay breaker
+    watch: L('var_Breaker_AvionicsPowerRelay_readonly')
+    write:
+      toggle: K('ELECTRICAL_BUS_TO_BUS_CONNECTION_TOGGLE', 3, 5)
+  breaker_volt_meter:
+    name: Volt meter breaker
+    watch: L('var_Breaker_VoltMeter_readonly')
+    write:
+      toggle: K('ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE', 2, 17)
+  breaker_starter:
+    name: Starter relay breaker
+    watch: L('var_Breaker_Starter_readonly')
+    write: |-
+      (value) => {
+          if (value == state.breaker_starter) {
+              return;
+          }
+          write(K('ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE', 1, 1));
+          write(K('ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE', 1, 32));
+      }
+  beacon:
+    name: Beacon
+    watch: B('LIGHTING_BEACON_1')
+    write:
+      toggle: B('LIGHTING_BEACON_1_Toggle')
+  strobe:
+    name: Strobe
+    watch: B('LIGHTING_STROBE_1')
+    write:
+      toggle: B('LIGHTING_STROBE_1_Toggle')
+  nav_lights:
+    name: Navigation lights
+    watch: B('LIGHTING_NAV_1')
+    write:
+      toggle: B('LIGHTING_NAV_1_Toggle')
+  taxi_light:
+    name: Taxi light
+    watch: B('LIGHTING_TAXI_1')
+    write:
+      toggle: B('LIGHTING_TAXI_1_Toggle')
+  landing_light_1:
+    name: Left landing light
+    watch: B('LIGHTING_LANDING_1')
+    write:
+      toggle: B('LIGHTING_LANDING_1_Toggle')
+  landing_light_2:
+    name: Right landing light
+    watch: B('LIGHTING_LANDING_2')
+    write:
+      toggle: B('LIGHTING_LANDING_2_Toggle')
+  ice_light:
+    name: Ice light
+    watch: B('LIGHTING_WING_1')
+    write:
+      toggle: B('LIGHTING_WING_1_Toggle')
+  glareshield_flood:
+    name: Glareshield flood
+    watch: L('bksq_MasterGlareshieldLights')
+    write: L('bksq_MasterGlareshieldLights')
+  panel_lights:
+    name: Panel lights
+    watch: L('bksq_MasterPanelLights')
+    write: L('bksq_MasterPanelLights')
+  flight_instrument_lights:
+    name: Flight instrument lights
+    watch: L('var_FlightInstrumentsLightingKnob')
+    write: L('var_FlightInstrumentsLightingKnob')
+  engine_instrument_lights:
+    name: Engine instrument lights
+    watch: L('var_EngineInstrumentsLightingKnob')
+    write: L('var_EngineInstrumentsLightingKnob')
+  glareshield_lights:
+    name: Glareshield lights
+    watch: L('var_GlareshieldLightingKnob')
+    write: L('var_GlareshieldLightingKnob')
+  subpanel_lights:
+    name: Subpanel lights
+    watch: L('var_SubpanelLightingKnob')
+    write: L('var_SubpanelLightingKnob')
+  cockpit_light_1:
+    name: Cockpit light 1
+    watch: L('var_LIGHTING_Push_Cockpit_1')
+    write: L('var_LIGHTING_Push_Cockpit_1')
+  cockpit_light_2:
+    name: Cockpit light 2
+    watch: L('var_LIGHTING_Push_Cockpit_2')
+    write: L('var_LIGHTING_Push_Cockpit_2')
+  cockpit_light_3:
+    name: Cockpit light 3
+    watch: L('var_LIGHTING_Push_Cockpit_3')
+    write: L('var_LIGHTING_Push_Cockpit_3')
+  cockpit_light_4:
+    name: Cockpit light 4
+    watch: L('var_LIGHTING_Push_Cockpit_4')
+    write: L('var_LIGHTING_Push_Cockpit_4')
+  cockpit_light_5:
+    name: Cockpit light 5
+    watch: L('var_LIGHTING_Push_Cockpit_5')
+    write: L('var_LIGHTING_Push_Cockpit_5')
+  cockpit_light_6:
+    name: Cockpit light 6
+    watch: L('var_LIGHTING_Push_Cockpit_6')
+    write: L('var_LIGHTING_Push_Cockpit_6')
+  map_light_1:
+    name: Pilot map light
+    watch: L('var_OatMapCompassLightButton_1')
+    write: L('var_OatMapCompassLightButton_1')
+  map_light_2:
+    name: Copilot map light
+    watch: L('var_OatMapCompassLightButton_2')
+    write: L('var_OatMapCompassLightButton_2')
+  annunciator_test:
+    name: Annunciator test
+    watch: L('var_AnnunciatorTestButton')
+    write: L('var_AnnunciatorTestButton')
+  fuel_selector_1:
+    name: Left fuel selector
+    watch: A('FUEL TANK SELECTOR:1', 'Enum')
+    write: |-
+      (value) => {
+          if (value == 0) {
+              write(K('FUEL_SELECTOR_OFF'));
+          }
+          else if (value == 19) {
+              write(K('FUEL_SELECTOR_LEFT_MAIN'));
+          }
+          else if (value == 20) {
+              write(K('FUEL_SELECTOR_RIGHT_MAIN'));
+          }
+      }
+  fuel_selector_2:
+    name: Right fuel selector
+    watch: A('FUEL TANK SELECTOR:2', 'Enum')
+    write: |-
+      (value) => {
+          if (value == 0) {
+              write(K('FUEL_SELECTOR_2_OFF'));
+          }
+          else if (value == 19) {
+              write(K('FUEL_SELECTOR_2_LEFT_MAIN'));
+          }
+          else if (value == 20) {
+              write(K('FUEL_SELECTOR_2_RIGHT_MAIN'));
+          }
+      }
+  fuel_pump_1:
+    name: Left fuel pump
+    watch: L('var_FUEL_Switch_Pump_1')
+    write: L('var_FUEL_Switch_Pump_1')
+  fuel_pump_2:
+    name: Right fuel pump
+    watch: L('var_FUEL_Switch_Pump_2')
+    write: L('var_FUEL_Switch_Pump_2')
+  throttle_1:
+    name: Left throttle
+    watch: A('GENERAL ENG THROTTLE LEVER POSITION:1', 'Position 16k')
+    write: A('GENERAL ENG THROTTLE LEVER POSITION:1', 'Position 16k')
+    owner: pilot_flying
+  throttle_2:
+    name: Right throttle
+    watch: A('GENERAL ENG THROTTLE LEVER POSITION:2', 'Position 16k')
+    write: A('GENERAL ENG THROTTLE LEVER POSITION:2', 'Position 16k')
+    owner: pilot_flying
+  propeller_1:
+    name: Left propeller
+    watch: A('GENERAL ENG PROPELLER LEVER POSITION:1', 'Position 16k')
+    write: K('PROP_PITCH1_SET')
+    owner: pilot_flying
+  propeller_2:
+    name: Right propeller
+    watch: A('GENERAL ENG PROPELLER LEVER POSITION:2', 'Position 16k')
+    write: K('PROP_PITCH2_SET')
+    owner: pilot_flying
+  mixture_1:
+    name: Left mixture
+    watch: L('BKSQ_MixtureLeverPosition_1')
+    write: L('BKSQ_MixtureLeverPosition_1')
+    owner: pilot_flying
+  mixture_2:
+    name: Right mixture
+    watch: L('BKSQ_MixtureLeverPosition_2')
+    write: L('BKSQ_MixtureLeverPosition_2')
+    owner: pilot_flying
+  friction_lock:
+    name: Friction lock
+    watch: L('var_FrictionLock')
+    write: L('var_FrictionLock')
+  cowl_flap_1:
+    name: Left cowl flap
+    watch: A('RECIP ENG COWL FLAP POSITION:1', 'Position 16k')
+    write: K('COWLFLAP1_SET')
+  cowl_flap_2:
+    name: Right cowl flap
+    watch: A('RECIP ENG COWL FLAP POSITION:2', 'Position 16k')
+    write: K('COWLFLAP2_SET')
+  ignition_1:
+    name: Left ignition
+    watch: L('BKSQ_IgnitionPosition_1')
+    write: |-
+      (value) => {
+          if (value == 4) {
+              write(L('starterKnobReturnTime_L'), 1000000000);
+          }
+          write(L('BKSQ_IgnitionPosition_1'), value);
+      }
+  ignition_2:
+    name: Right ignition
+    watch: L('BKSQ_IgnitionPosition_2')
+    write: |-
+      (value) => {
+          if (value == 4) {
+              write(L('starterKnobReturnTime_R'), 1000000000);
+          }
+          write(L('BKSQ_IgnitionPosition_2'), value);
+      }
+  prop_sync:
+    name: Prop sync
+    watch: L('var_PropSyncSwitch')
+    write: L('var_PropSyncSwitch')
+  flaps:
+    name: Flaps
+    watch: A('FLAPS HANDLE PERCENT', 'Position 16k')
+    write: K('FLAPS_SET')
+  gear:
+    name: Landing gear
+    watch: A('GEAR HANDLE POSITION', 'Bool')
+    write: B('LANDING_GEAR_Gear_Set')
+  gear_crank_handle:
+    name: Gear crank handle
+    watch: L('var_manualExtensionHandleDeployed')
+    write: L('var_manualExtensionHandleDeployed')
+  gear_crank_turns:
+    name: Gear crank
+    watch: L('var_manualExtensionHandleTurns')
+    write: L('var_manualExtensionHandleTurns')
+  parking_brake:
+    name: Parking brake
+    watch: A('BRAKE PARKING POSITION', 'Bool')
+    write: B('LANDING_GEAR_ParkingBrake_Set')
+  elevator_trim:
+    name: Elevator trim
+    watch: A('ELEVATOR TRIM PCT', 'Percent')
+    write: |-
+      (value) => {
+          write(K('ELEVATOR_TRIM_SET'), Math.max(-16383, Math.min(16383, Math.round(value * 163.83))));
+      }
+    owner: pilot_flying
+  aileron_trim:
+    name: Aileron trim
+    watch: A('AILERON TRIM PCT', 'Percent')
+    write: A('AILERON TRIM PCT', 'Percent')
+    owner: pilot_flying
+  rudder_trim:
+    name: Rudder trim
+    watch: A('RUDDER TRIM PCT', 'Percent')
+    write: A('RUDDER TRIM PCT', 'Percent')
+    owner: pilot_flying
+  control_lock:
+    name: Control lock
+    watch: L('bksq_controlLocks')
+    write: L('bksq_controlLocks')
+  ap_master:
+    name: Autopilot
+    watch: A('AUTOPILOT MASTER', 'Bool')
+    write:
+      toggle: K('AP_MASTER')
+  flight_director:
+    name: Flight director
+    watch: A('AUTOPILOT FLIGHT DIRECTOR ACTIVE', 'Bool')
+    write:
+      toggle: K('TOGGLE_FLIGHT_DIRECTOR')
+  yaw_damper:
+    name: Yaw damper
+    watch: A('AUTOPILOT YAW DAMPER', 'Bool')
+    write:
+      toggle: K('YAW_DAMPER_TOGGLE')
+  ap_heading_mode:
+    name: Autopilot heading mode
+    watch: A('AUTOPILOT HEADING LOCK', 'Bool')
+    write:
+      toggle: K('AP_PANEL_HEADING_HOLD')
+  ap_nav_mode:
+    name: Autopilot nav mode
+    watch: A('AUTOPILOT NAV1 LOCK', 'Bool')
+    write:
+      toggle: K('AP_NAV1_HOLD')
+  ap_approach_mode:
+    name: Autopilot approach mode
+    watch: A('AUTOPILOT APPROACH HOLD', 'Bool')
+    write:
+      toggle: K('AP_APR_HOLD')
+  ap_back_course_mode:
+    name: Autopilot back course mode
+    watch: A('AUTOPILOT BACKCOURSE HOLD', 'Bool')
+    write:
+      toggle: K('AP_BC_HOLD')
+  ap_altitude_hold:
+    name: Autopilot altitude hold
+    watch: A('AUTOPILOT ALTITUDE LOCK', 'Bool')
+    write: |-
+      (value) => {
+          if (value == state.ap_altitude_hold) {
+              return;
+          }
+          write(value ? K('AP_ALT_HOLD') : K('AP_PITCH_LEVELER_ON'));
+      }
+  ap_vs_hold:
+    name: Autopilot vertical speed mode
+    watch: A('AUTOPILOT VERTICAL HOLD', 'Bool')
+    write:
+      toggle: K('AP_PANEL_VS_HOLD', 1)
+  ap_vertical_speed:
+    name: Autopilot vertical speed
+    watch: A('AUTOPILOT VERTICAL HOLD VAR:1', 'Feet per minute')
+    write: |-
+      (value) => {
+          write(K('AP_VS_VAR_SET_ENGLISH'), Math.round(value));
+      }
+  pms50_apga_running:
+    name: PMS50 autopilot manager
+    watch: L('PMS50_APGA_RUNNING')
+    write: none
+  pms50_apga_vertical_mode:
+    name: PMS50 vertical mode
+    watch: L('PMS50_APGA_ACTIVE_VERTICAL_MODE')
+    write: none
+  ap_altitude:
+    name: Selected altitude
+    watch: A('AUTOPILOT ALTITUDE LOCK VAR', 'Feet')
+    write: |-
+      (value) => {
+          write(K('AP_ALT_VAR_SET_ENGLISH'), Math.round(value));
+      }
+  kas_vs_adjust:
+    name: Altitude selector knob pulled
+    watch: L('var_VsAdjustMode')
+    write: L('var_VsAdjustMode')
+  kas_arm:
+    name: Altitude arm
+    watch: instrument('KAS297B_1|Index=1', 'optionalArmingMode')
+    write:
+      toggle: H('kas297b_ArmButton')
+  kas_armed_vs:
+    name: Armed vertical speed
+    watch: instrument('KAS297B_1|Index=1', 'armedVerticalSpeed')
+    write: |-
+      (value) => {
+          const vsHold = state.pms50_apga_running
+              ? state.pms50_apga_vertical_mode > 0
+              : state.ap_vs_hold == 1;
+          if (state.kas_vs_adjust != 1 || vsHold) {
+              return;
+          }
+          const steps = Math.round((value - state.kas_armed_vs) / 100);
+          if (steps > 0) {
+              write(H('kas297b_100_INC')).repeat(steps);
+          }
+          else if (steps < 0) {
+              write(H('kas297b_100_DEC')).repeat(-steps);
+          }
+      }
+  heading_bug:
+    name: Heading bug
+    watch: A('AUTOPILOT HEADING LOCK DIR:1', 'Degrees')
+    write: |-
+      (value) => {
+          write(B('INSTRUMENT_Heading_Bug_Set'), value);
+          const turn = 16384;
+          const degrees = ((value % 360) + 360) % 360;
+          return (Math.round(degrees * turn / 360) % turn) * 360 / turn;
+      }
+  hsi_course:
+    name: HSI course
+    watch: A('NAV OBS:1', 'Degrees')
+    write:
+      inc: K('VOR1_OBI_INC')
+      dec: K('VOR1_OBI_DEC')
+      wrap: true
+      range: [0, 359]
+  nav2_course:
+    name: NAV 2 course
+    watch: A('NAV OBS:2', 'Degrees')
+    write:
+      inc: K('VOR2_OBI_INC')
+      dec: K('VOR2_OBI_DEC')
+      wrap: true
+      range: [0, 359]
+  hsi_rnav_source:
+    name: HSI RNAV source
+    watch: L('var_rnavDrivesHsi')
+    write: L('var_rnavDrivesHsi')
+  gyro_slave_mode:
+    name: Gyro slave mode
+    watch: L('var_GyroSlaveModeSwitch')
+    write: L('var_GyroSlaveModeSwitch')
+  gyro_slew:
+    name: Gyro slew
+    watch: L('var_GyroRotationSwitch')
+    write: L('var_GyroRotationSwitch')
+  altimeter_1:
+    name: Pilot altimeter
+    watch: L('INSTRUMENT_Altimeter_1')
+    write: B('INSTRUMENT_Altimeter_1_Set')
+  altimeter_2:
+    name: Copilot altimeter
+    watch: L('INSTRUMENT_Altimeter_2')
+    write: B('INSTRUMENT_Altimeter_2_Set')
+  decision_height:
+    name: Decision height
+    watch: A('DECISION HEIGHT', 'Feet')
+    write:
+      inc: K('INCREASE_DECISION_HEIGHT')
+      dec: K('DECREASE_DECISION_HEIGHT')
+      step: 10
+      wrap: false
+  true_airspeed_1:
+    name: Pilot true airspeed knob
+    watch: L('var_TrueAirspeedKnob_L')
+    write: L('var_TrueAirspeedKnob_L')
+  true_airspeed_2:
+    name: Copilot true airspeed knob
+    watch: L('var_TrueAirspeedKnob_R')
+    write: L('var_TrueAirspeedKnob_R')
+  alternate_static:
+    name: Alternate static
+    watch: A('ALTERNATE STATIC SOURCE OPEN', 'Bool')
+    write:
+      toggle: K('TOGGLE_ALTERNATE_STATIC')
+  gps_drives_nav1:
+    name: NAV GPS source
+    watch: A('GPS DRIVES NAV1', 'Bool')
+    write: |-
+      (value) => {
+          if (value == state.gps_drives_nav1) {
+              return;
+          }
+          if (state.gns530_disabled) {
+              write(K('TOGGLE_GPS_DRIVES_NAV1'));
+          }
+          else {
+              write(H('AS530_CDI_Push'));
+          }
+      }
+  gns530_disabled:
+    name: GNS 530 disabled
+    watch: L('XMLVAR_GPS_DISABLED_AS530_1')
+    write: none
+  yoke_chrono_1:
+    name: Pilot chronometer mode
+    watch: L('var_yokeChronoMode_L')
+    write: L('var_yokeChronoMode_L')
+  yoke_chrono_2:
+    name: Copilot chronometer mode
+    watch: L('var_yokeChronoMode_R')
+    write: L('var_yokeChronoMode_R')
+  engine_monitor_mode:
+    name: Engine monitor mode
+    watch: L('var_JpiMode')
+    write: L('var_JpiMode')
+  engine_monitor_unit:
+    name: Engine monitor unit
+    watch: L('var_JpiTempUnit')
+    write: L('var_JpiTempUnit')
+  pitot_heat_1:
+    name: Pilot pitot heat
+    watch: A('CIRCUIT SWITCH ON:29', 'Bool')
+    write:
+      toggle: K('PITOT_HEAT_TOGGLE', 1)
+  pitot_heat_2:
+    name: Copilot pitot heat
+    watch: A('CIRCUIT SWITCH ON:37', 'Bool')
+    write:
+      toggle: K('PITOT_HEAT_TOGGLE', 2)
+  prop_deice:
+    name: Prop deice
+    watch: L('var_PropHeatSwitch')
+    write: L('var_PropHeatSwitch')
+  windshield_heat:
+    name: Windshield heat
+    watch: L('var_windshieldHeatSwitch')
+    write: L('var_windshieldHeatSwitch')
+  fuel_vent_heat:
+    name: Fuel vent heat
+    watch: L('var_FuelVentHeatSwitch')
+    write: L('var_FuelVentHeatSwitch')
+  stall_warning_heat:
+    name: Stall warning heat
+    watch: L('var_StallWarningHeatSwitch')
+    write: L('var_StallWarningHeatSwitch')
+  surface_deice:
+    name: Surface deice
+    watch: L('var_surfaceDeiceSwitch')
+    write: L('var_surfaceDeiceSwitch')
+  vent_blowers:
+    name: Vent blowers
+    watch: L('var_VentBlowersSwitch')
+    write: L('var_VentBlowersSwitch')
+  air_conditioner:
+    name: Air conditioner
+    watch: L('var_AirConditionerSwitch')
+    write: L('var_AirConditionerSwitch')
+  air_conditioning_blower:
+    name: Air conditioning blower
+    watch: L('var_AirConditioningBlowerSwitch')
+    write: L('var_AirConditioningBlowerSwitch')
+  cabin_heater:
+    name: Cabin heater
+    watch: L('var_CabinHeaterIgnitionSwitch')
+    write: L('var_CabinHeaterIgnitionSwitch')
+  cabin_heater_blower:
+    name: Cabin heater blower
+    watch: L('var_CabinHeaterBlowerSwitch')
+    write: L('var_CabinHeaterBlowerSwitch')
+  fresh_air:
+    name: Fresh air knob
+    watch: L('var_FreshAirKnob')
+    write: L('var_FreshAirKnob')
+  cabin_temp_unit:
+    name: Cabin temperature unit
+    watch: L('var_CabinTempUnitMode')
+    write: L('var_CabinTempUnitMode')
+  oxygen_handle:
+    name: Oxygen handle
+    watch: L('var_OxygenHandle')
+    write: B('PASSENGER_Cabin_Heat_1_Set')
+  cabin_heat_handle:
+    name: Cabin heat handle
+    watch: L('var_CabinHeatHandle')
+    write: B('PASSENGER_Cabin_Heat_2_Set')
+  pilot_air_handle:
+    name: Pilot air handle
+    watch: L('var_PilotAirHandle')
+    write: B('PASSENGER_Cabin_Heat_3_Set')
+  defroster_handle:
+    name: Defroster handle
+    watch: L('var_DefrosterHandle')
+    write: B('PASSENGER_Cabin_Heat_4_Set')
+  air_shutoff_handle_1:
+    name: Left air shutoff handle
+    watch: L('var_PressurizationAirShutoffHandle_L')
+    write: B('PASSENGER_Cabin_Heat_5_Set')
+  air_shutoff_handle_2:
+    name: Right air shutoff handle
+    watch: L('var_PressurizationAirShutoffHandle_R')
+    write: B('PASSENGER_Cabin_Heat_6_Set')
+  copilot_air_handle:
+    name: Copilot air handle
+    watch: L('var_CopilotAirHandle')
+    write: B('PASSENGER_Cabin_Heat_7_Set')
+  ram_air_handle:
+    name: Ram air handle
+    watch: L('var_RamAirHandle')
+    write: B('PASSENGER_Cabin_Heat_8_Set')
+  cabin_altitude_goal:
+    name: Cabin altitude
+    watch: L('var_pressurizationGoal')
+    write: L('var_pressurizationGoal')
+  cabin_climb_rate:
+    name: Cabin rate
+    watch: L('var_pressurizationClimbRate')
+    write: L('var_pressurizationClimbRate')
+  pressurization_mode:
+    name: Pressurization mode
+    watch: L('var_pressurizationPress')
+    write: L('var_pressurizationPress')
+  pressurization_test:
+    name: Pressurization test
+    watch: L('var_pressurizationTest')
+    write: L('var_pressurizationTest')
+  door_seal_primary:
+    name: Door seal
+    watch: L('var_doorSealPrimaryInflate')
+    write: L('var_doorSealPrimaryInflate')
+  door_seal_pump_power:
+    name: Door seal pump
+    watch: A('CIRCUIT SWITCH ON:34', 'Bool')
+    write:
+      toggle: K('ELECTRICAL_CIRCUIT_TOGGLE', 34)
+  door_seal_standby_air:
+    name: Standby door seal air
+    watch: L('var_doorSealStandbyAirValve')
+    write: L('var_doorSealStandbyAirValve')
+  door_seal_standby:
+    name: Standby door seal
+    watch: L('var_doorSealStandbyInflate')
+    write: L('var_doorSealStandbyInflate')
+  co_test:
+    name: CO detector test
+    watch: L('var_CoTest')
+    write: L('var_CoTest')
+  pilot_door:
+    name: Pilot door
+    watch: L('bksq_PilotDoor')
+    write: L('bksq_PilotDoor')
+  cabin_door:
+    name: Cabin door
+    watch: L('bksq_CabinDoor')
+    write: L('bksq_CabinDoor')
+  nose_door:
+    name: Nose door
+    watch: L('bksq_NoseDoor')
+    write: L('bksq_NoseDoor')
+  storm_window:
+    name: Storm window
+    watch: L('bksq_stormWindow')
+    write: L('bksq_stormWindow')
+  pilot_door_bypass:
+    name: Pilot door pressure bypass
+    watch: L('var_PilotDoorPressureBypass')
+    write: L('var_PilotDoorPressureBypass')
+  cabin_door_bypass:
+    name: Cabin door pressure bypass
+    watch: L('var_CabinDoorPressureBypass')
+    write: L('var_CabinDoorPressureBypass')
+  wheel_chocks:
+    name: Wheel chocks
+    watch: L('bksq_WheelChocks')
+    write: L('bksq_WheelChocks')
+  pitot_covers:
+    name: Pitot covers
+    watch: L('bksq_PitotCovers')
+    write: L('bksq_PitotCovers')
+  engine_covers:
+    name: Engine covers
+    watch: L('bksq_EngineCovers')
+    write: L('bksq_EngineCovers')
+  pre_heater:
+    name: Preheater
+    watch: L('bksq_PreHeater')
+    write: L('bksq_PreHeater')
+  global_failure_rate:
+    name: Failure rate
+    watch: L('var_globalFailureRate')
+    write: L('var_globalFailureRate')
+  com1_active:
+    name: COM 1 frequency
+    watch: A('COM ACTIVE FREQUENCY:1', 'Hz')
+    write: K('COM_RADIO_SET_HZ')
+  com1_standby:
+    name: COM 1 standby
+    watch: A('COM STANDBY FREQUENCY:1', 'Hz')
+    write: K('COM_STBY_RADIO_SET_HZ')
+  com2_active:
+    name: COM 2 frequency
+    watch: A('COM ACTIVE FREQUENCY:2', 'Hz')
+    write: K('COM2_RADIO_SET_HZ')
+  com2_standby:
+    name: COM 2 standby
+    watch: A('COM STANDBY FREQUENCY:2', 'Hz')
+    write: K('COM2_STBY_RADIO_SET_HZ')
+  nav1_active:
+    name: NAV 1 frequency
+    watch: A('NAV ACTIVE FREQUENCY:1', 'Hz')
+    write: K('NAV1_RADIO_SET_HZ')
+  nav1_standby:
+    name: NAV 1 standby
+    watch: A('NAV STANDBY FREQUENCY:1', 'Hz')
+    write: K('NAV1_STBY_SET_HZ')
+  nav2_active:
+    name: NAV 2 frequency
+    watch: A('NAV ACTIVE FREQUENCY:2', 'Hz')
+    write: K('NAV2_RADIO_SET_HZ')
+  nav2_standby:
+    name: NAV 2 standby
+    watch: A('NAV STANDBY FREQUENCY:2', 'Hz')
+    write: K('NAV2_STBY_SET_HZ')
+  com1_spacing:
+    name: COM 1 spacing
+    watch: A('COM SPACING MODE:1', 'Enum')
+    write:
+      toggle: H('RADIO1_COM_Freq_Spacing_PUSH')
+  com2_spacing:
+    name: COM 2 spacing
+    watch: A('COM SPACING MODE:2', 'Enum')
+    write:
+      toggle: H('RADIO2_COM_Freq_Spacing_PUSH')
+  com1_knob_pulled:
+    name: COM 1 knob pulled
+    watch: L('COM_1_KNOB_PULLED')
+    write:
+      toggle: H('RADIO1_COM_Knob_Small_PUSH')
+  nav1_knob_pulled:
+    name: NAV 1 knob pulled
+    watch: L('NAV_1_KNOB_PULLED')
+    write:
+      toggle: H('RADIO1_NAV_Knob_Small_PUSH')
+  com2_knob_pulled:
+    name: COM 2 knob pulled
+    watch: L('COM_2_KNOB_PULLED')
+    write:
+      toggle: H('RADIO2_COM_Knob_Small_PUSH')
+  nav2_knob_pulled:
+    name: NAV 2 knob pulled
+    watch: L('NAV_2_KNOB_PULLED')
+    write:
+      toggle: H('RADIO2_NAV_Knob_Small_PUSH')
+  com1_power:
+    name: COM 1 power
+    watch: A('CIRCUIT SWITCH ON:63', 'Bool')
+    write:
+      toggle: K('ELECTRICAL_CIRCUIT_TOGGLE', 63)
+  com2_power:
+    name: COM 2 power
+    watch: A('CIRCUIT SWITCH ON:64', 'Bool')
+    write:
+      toggle: K('ELECTRICAL_CIRCUIT_TOGGLE', 64)
+  transponder_code:
+    name: Transponder code
+    watch: A('TRANSPONDER CODE:1', 'Bco16')
+    write: A('TRANSPONDER CODE:1', 'Bco16')
+  transponder_mode:
+    name: Transponder mode
+    watch: A('TRANSPONDER STATE:1', 'Enum')
+    write: A('TRANSPONDER STATE:1', 'Enum')
+  audio_source_knob:
+    name: Audio source knob
+    watch: L('var_KmaSourceSelectKnob')
+    write: |-
+      (value) => {
+          write(L('var_KmaSourceSelectKnob'), value);
+          write(K('PILOT_TRANSMITTER_SET'), value == 2 ? 0 : value == 3 ? 1 : 4);
+      }
+  audio_marker_sensitivity:
+    name: Marker sensitivity
+    watch: A('MARKER BEACON SENSITIVITY HIGH', 'Bool')
+    write: K('MARKER_BEACON_SENSITIVITY_HIGH')
+  audio_marker_test:
+    name: Marker test
+    watch: L('var_KmaMarkerTest')
+    write: L('var_KmaMarkerTest')
+  audio_com1_receive:
+    name: COM 1 audio
+    watch: A('COM RECEIVE EX1:1', 'Bool')
+    write: K('COM1_RECEIVE_SELECT')
+  audio_com2_receive:
+    name: COM 2 audio
+    watch: A('COM RECEIVE EX1:2', 'Bool')
+    write: K('COM2_RECEIVE_SELECT')
+  audio_com3_receive:
+    name: COM 3 audio
+    watch: A('COM RECEIVE EX1:3', 'Bool')
+    write: K('COM3_RECEIVE_SELECT')
+  audio_nav1_ident:
+    name: NAV 1 ident
+    watch: A('NAV SOUND:1', 'Bool')
+    write:
+      toggle: K('RADIO_VOR1_IDENT_TOGGLE')
+  audio_nav2_ident:
+    name: NAV 2 ident
+    watch: A('NAV SOUND:2', 'Bool')
+    write:
+      toggle: K('RADIO_VOR2_IDENT_TOGGLE')
+  cabin_intercom:
+    name: Cabin intercom
+    watch: L('var_cabinIntercom')
+    write: L('var_cabinIntercom')
+  crew_isolate:
+    name: Crew isolate
+    watch: L('var_crewIsolate')
+    write: L('var_crewIsolate')
+  adf_standby:
+    name: ADF standby
+    watch: A('ADF STANDBY FREQUENCY:1', 'Frequency ADF BCD32')
+    write: K('ADF_STBY_SET')
+  adf_power:
+    name: ADF power
+    watch: A('CIRCUIT SWITCH ON:74', 'Bool')
+    write:
+      toggle: K('ELECTRICAL_CIRCUIT_TOGGLE', 74)
+  adf_knob_pulled:
+    name: ADF knob pulled
+    watch: L('var_adfKnobPulled')
+    write: L('var_adfKnobPulled')
+  adf_ant:
+    name: ADF ANT mode
+    watch: instrument('KR87A', 'antMode')
+    write:
+      toggle: H('adf_AntAdf')
+  adf_bfo:
+    name: ADF BFO
+    watch: instrument('KR87A', 'bfoMode')
+    write:
+      toggle: H('adf_bfo')
+  adf_mode:
+    name: ADF mode
+    watch: instrument('KR87A', 'multiMode')
+    write: |-
+      (value) => {
+          if (value == 0) {
+              if (state.adf_mode != 0) {
+                  write(H('adf_frqTransfert'));
+              }
+          }
+          else if (state.adf_mode == 0) {
+              write(H('adf_FltEt')).repeat(value);
+          }
+          else if (state.adf_mode != value) {
+              write(H('adf_FltEt'));
+          }
+      }
+  dme_mode:
+    name: DME mode
+    watch: L('var_dmeMode')
+    write: L('var_dmeMode')
+  rnav_power:
+    name: RNAV power
+    watch: A('CIRCUIT SWITCH ON:69', 'Bool')
+    write:
+      toggle: K('ELECTRICAL_CIRCUIT_TOGGLE', 69)
+  rnav_volume:
+    name: RNAV volume
+    watch: L('var_RNAV_VOLUME')
+    write: L('var_RNAV_VOLUME')
+  rnav_knob_pulled:
+    name: RNAV knob pulled
+    watch: L('var_rnavKnobPulled')
+    write: L('var_rnavKnobPulled')
+  rnav_radial_mode:
+    name: RNAV radial
+    watch: L('var_RNAV_DMERADIALMODE')
+    write: L('var_RNAV_DMERADIALMODE')
+  rnav_check:
+    name: RNAV check
+    watch: L('var_RNAV_CHECKMODE')
+    write: L('var_RNAV_CHECKMODE')
+  radar_mode:
+    name: Radar mode
+    watch: L('var_radarMode')
+    write: L('var_radarMode')
+  radar_gain:
+    name: Radar gain
+    watch: L('var_RadarGain')
+    write: L('var_RadarGain')
+  radar_tilt:
+    name: Radar tilt
+    watch: L('var_RadarTilt')
+    write: L('var_RadarTilt')
+  radar_brightness:
+    name: Radar brightness
+    watch: L('var_RadarBrightness')
+    write: L('var_RadarBrightness')
+  radar_alert:
+    name: Radar alert
+    watch: instrument('bksq_wradar1', 'weatherRadarMainMap.map.alertMode')
+    write:
+      toggle: H('bksq_wradar1_radarAlertToggle')
+  radar_profile:
+    name: Radar vertical profile
+    watch: instrument('bksq_wradar1', 'weatherRadarMainMap.map.verticalMode')
+    write: |-
+      (value) => {
+          if (state.radar_mode > 3 || value == state.radar_profile) {
+              return;
+          }
+          if (value) {
+              if (state.radar_mode == 3) {
+                  write(H('bksq_wradar1_radarProfile'));
+              }
+          }
+          else {
+              write(H('bksq_wradar1_radarMap'));
+          }
+      }
+  radar_hold:
+    name: Radar hold
+    watch: instrument('bksq_wradar1', 'weatherRadarMainMap.map.radarHold')
+    write: |-
+      (value) => {
+          if (state.radar_mode <= 3 && value != state.radar_hold) {
+              write(H('bksq_wradar1_radarHold'));
+          }
+      }
+  radar_track:
+    name: Radar track
+    watch: instrument('bksq_wradar1', 'weatherRadarMainMap.map.radarTrack')
+    write: |-
+      (value) => {
+          if (state.radar_mode > 3) {
+              return;
+          }
+          const steps = Math.round((value - state.radar_track) / 2.5);
+          if (steps > 0) {
+              write(H('bksq_wradar1_radarTrackRight')).repeat(steps);
+          }
+          else if (steps < 0) {
+              write(H('bksq_wradar1_radarTrackLeft')).repeat(-steps);
+          }
+      }
+events:
+  go_around:
+    name: Go around
+    watch: K('AUTO_THROTTLE_TO_GA')
+    write: K('AUTO_THROTTLE_TO_GA')
+  ap_pitch_up:
+    name: Autopilot pitch up
+    watch: K('AP_PITCH_REF_INC_UP')
+    write: K('AP_PITCH_REF_INC_UP')
+  ap_pitch_down:
+    name: Autopilot pitch down
+    watch: K('AP_PITCH_REF_INC_DN')
+    write: K('AP_PITCH_REF_INC_DN')
+  ap_test:
+    name: Autopilot test
+    watch: L('var_AutopilotStartupCounter')
+    write: |-
+      () => {
+          write(L('var_AutopilotStartupCounter'), 20);
+      }
+  gear_pump:
+    name: Gear crank pump
+    watch: K('GEAR_PUMP')
+    write: K('GEAR_PUMP')
+  transponder_ident:
+    name: Transponder ident
+    watch: K('XPNDR_IDENT_ON')
+    write: K('XPNDR_IDENT_ON')
+  com1_volume_up:
+    name: COM 1 volume up
+    watch: K('COM1_VOLUME_INC')
+    write: K('COM1_VOLUME_INC')
+  com1_volume_down:
+    name: COM 1 volume down
+    watch: K('COM1_VOLUME_DEC')
+    write: K('COM1_VOLUME_DEC')
+  com2_volume_up:
+    name: COM 2 volume up
+    watch: K('COM2_VOLUME_INC')
+    write: K('COM2_VOLUME_INC')
+  com2_volume_down:
+    name: COM 2 volume down
+    watch: K('COM2_VOLUME_DEC')
+    write: K('COM2_VOLUME_DEC')
+  nav1_volume_up:
+    name: NAV 1 volume up
+    watch: K('NAV1_VOLUME_INC')
+    write: K('NAV1_VOLUME_INC')
+  nav1_volume_down:
+    name: NAV 1 volume down
+    watch: K('NAV1_VOLUME_DEC')
+    write: K('NAV1_VOLUME_DEC')
+  nav2_volume_up:
+    name: NAV 2 volume up
+    watch: K('NAV2_VOLUME_INC')
+    write: K('NAV2_VOLUME_INC')
+  nav2_volume_down:
+    name: NAV 2 volume down
+    watch: K('NAV2_VOLUME_DEC')
+    write: K('NAV2_VOLUME_DEC')
+  adf_volume_up:
+    name: ADF volume up
+    watch: K('ADF_VOLUME_INC')
+    write: K('ADF_VOLUME_INC')
+  adf_volume_down:
+    name: ADF volume down
+    watch: K('ADF_VOLUME_DEC')
+    write: K('ADF_VOLUME_DEC')
+  adf_timer:
+    name: ADF timer
+    watch: H('adf_SetRst')
+    write: H('adf_SetRst')
+  adf_swap:
+    name: ADF frequency swap
+    watch: K('ADF1_RADIO_SWAP')
+    write: K('ADF1_RADIO_SWAP')
+  adf_100_up:
+    name: ADF hundreds up
+    watch: K('ADF_100_INC')
+    write: K('ADF_100_INC')
+  adf_100_down:
+    name: ADF hundreds down
+    watch: K('ADF_100_DEC')
+    write: K('ADF_100_DEC')
+  adf_10_up:
+    name: ADF tens up
+    watch: K('ADF_10_INC')
+    write: K('ADF_10_INC')
+  adf_10_down:
+    name: ADF tens down
+    watch: K('ADF_10_DEC')
+    write: K('ADF_10_DEC')
+  adf_1_up:
+    name: ADF ones up
+    watch: K('ADF_1_INC')
+    write: K('ADF_1_INC')
+  adf_1_down:
+    name: ADF ones down
+    watch: K('ADF_1_DEC')
+    write: K('ADF_1_DEC')
+  adf_decimal_up:
+    name: ADF decimal up
+    watch: H('adf_decimalInc')
+    write: H('adf_decimalInc')
+  rnav_big_up:
+    name: RNAV outer knob up
+    watch: H('KNS81_bigInc')
+    write: H('KNS81_bigInc')
+  rnav_big_down:
+    name: RNAV outer knob down
+    watch: H('KNS81_bigDec')
+    write: H('KNS81_bigDec')
+  rnav_small_up:
+    name: RNAV inner knob up
+    watch: H('KNS81_smallInc')
+    write: H('KNS81_smallInc')
+  rnav_small_down:
+    name: RNAV inner knob down
+    watch: H('KNS81_smallDec')
+    write: H('KNS81_smallDec')
+  rnav_mode_up:
+    name: RNAV mode up
+    watch: H('KNS81_modeInc')
+    write: H('KNS81_modeInc')
+  rnav_mode_down:
+    name: RNAV mode down
+    watch: H('KNS81_modeDec')
+    write: H('KNS81_modeDec')
+  rnav_waypoint_up:
+    name: RNAV waypoint up
+    watch: H('KNS81_wptInc')
+    write: H('KNS81_wptInc')
+  rnav_waypoint_down:
+    name: RNAV waypoint down
+    watch: H('KNS81_wptDec')
+    write: H('KNS81_wptDec')
+  rnav_use:
+    name: RNAV use
+    watch: H('KNS81_useButton')
+    write: H('KNS81_useButton')
+  rnav_return:
+    name: RNAV return
+    watch: H('KNS81_returnButton')
+    write: H('KNS81_returnButton')
+  rnav_data:
+    name: RNAV data
+    watch: H('KNS81_dataButton')
+    write: H('KNS81_dataButton')
+  engine_monitor_left_short:
+    name: Engine monitor left button
+    watch: H('bksq_JpiButton_1_L_Short')
+    write: H('bksq_JpiButton_1_L_Short')
+  engine_monitor_left_long:
+    name: Engine monitor left button held
+    watch: H('bksq_JpiButton_1_L_Long')
+    write: H('bksq_JpiButton_1_L_Long')
+  engine_monitor_right_short:
+    name: Engine monitor right button
+    watch: H('bksq_JpiButton_1_R_Short')
+    write: H('bksq_JpiButton_1_R_Short')
+  engine_monitor_right_long:
+    name: Engine monitor right button held
+    watch: H('bksq_JpiButton_1_R_Long')
+    write: H('bksq_JpiButton_1_R_Long')
+  engine_monitor_both_long:
+    name: Engine monitor both buttons held
+    watch: H('bksq_JpiButton_1_B_Long')
+    write: H('bksq_JpiButton_1_B_Long')
+seats:
+  copilot:
+    name: Copilot
+    hip: [-0.282, 0.212, -0.09]
+    knees: [-0.044, 0.218]
+    feet: [-0.198, 0.51]
+    eye: [0.643, -0.054]
+  pilot:
+    name: Pilot
+    hip: [0.282, 0.212, -0.09]
+    knees: [-0.044, 0.218]
+    feet: [-0.198, 0.51]
+    eye: [0.643, -0.054]

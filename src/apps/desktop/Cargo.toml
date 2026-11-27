@@ -6,7 +6,7 @@
 [package]
 name = "dualinput-desktop"
 # The root Cargo.toml's [workspace.package] names the same version, and tools/check.ts fails if they differ.
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 publish = false
 

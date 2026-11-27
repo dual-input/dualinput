@@ -25,7 +25,7 @@ resolver = "3"
 # messages. Every crate inherits this one version, so all of a build's programs agree on it, and
 # src/apps/desktop/Cargo.toml names the same one, which tools/check.ts fails if it differs from.
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 
 # A replay of the core has to visit everything in the order the run did, and a HashMap's

@@ -67,7 +67,7 @@ dependencies = [
 
 [[package]]
 name = "aircraft-model"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
  "msfs-gltf",
@@ -264,7 +264,7 @@ dependencies = [
 
 [[package]]
 name = "atc-audio"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "core-helper-service",
@@ -305,7 +305,7 @@ dependencies = [
 
 [[package]]
 name = "authoring"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "kernel",
@@ -329,7 +329,7 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
 name = "avatars"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "aircraft-model",
  "bytemuck",
@@ -351,7 +351,7 @@ dependencies = [
 
 [[package]]
 name = "avatars-routines"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
  "messages",
@@ -396,7 +396,7 @@ checksum = "2af50177e190e07a26ab74f8b1efbfe2ef87da2116221318cb1c2e82baf7de06"
 
 [[package]]
 name = "bench-droplet"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "ed25519-dalek",
@@ -414,7 +414,7 @@ dependencies = [
 
 [[package]]
 name = "bench-relay"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "iroh-relay",
  "serde",
@@ -748,7 +748,7 @@ checksum = "1c133bc6a41be0d194c306b5506d15e6feeea7b1d6604bd3f8310dfb2ca96486"
 
 [[package]]
 name = "clients"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "kernel",
  "messages",
@@ -775,7 +775,7 @@ dependencies = [
 
 [[package]]
 name = "cockpit-stream"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "kernel",
@@ -852,7 +852,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "core-helper-service"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "kernel",
@@ -1091,7 +1091,7 @@ dependencies = [
 
 [[package]]
 name = "desk"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ogg",
  "opus-rs",
@@ -1221,7 +1221,7 @@ dependencies = [
 
 [[package]]
 name = "dualinput-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "atc-audio",
  "authoring",
@@ -1275,7 +1275,7 @@ dependencies = [
 
 [[package]]
 name = "dualinput-core-helper"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "messages",
  "ogg",
@@ -1286,7 +1286,7 @@ dependencies = [
 
 [[package]]
 name = "dualinput-msfs-sdk"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "cab",
@@ -1297,7 +1297,7 @@ dependencies = [
 
 [[package]]
 name = "dualinput-profile-builder"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "crossbeam-channel",
  "futures-util",
@@ -1434,7 +1434,7 @@ checksum = "64cd1e32ddd350061ae6edb1b082d7c54915b5c672c389143b9a63403a109f24"
 
 [[package]]
 name = "figure-viewer"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "aircraft-model",
  "avatars-routines",
@@ -1463,7 +1463,7 @@ dependencies = [
 
 [[package]]
 name = "flight-model"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
  "kernel",
@@ -1477,7 +1477,7 @@ dependencies = [
 
 [[package]]
 name = "flight-model-routines"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
  "messages",
@@ -1754,7 +1754,7 @@ dependencies = [
 
 [[package]]
 name = "go-to"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "kernel",
@@ -2622,7 +2622,7 @@ dependencies = [
 
 [[package]]
 name = "kernel"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chacha20",
  "postcard",
@@ -2776,7 +2776,7 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
 name = "messages"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
  "postcard",
@@ -2816,7 +2816,7 @@ dependencies = [
 
 [[package]]
 name = "msfs-gltf"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -2824,7 +2824,7 @@ dependencies = [
 
 [[package]]
 name = "msfs-rpn"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
 ]
@@ -3119,7 +3119,7 @@ dependencies = [
 
 [[package]]
 name = "network"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "ed25519-dalek",
@@ -3379,7 +3379,7 @@ dependencies = [
 
 [[package]]
 name = "object-mirror"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "ogg"
@@ -3654,7 +3654,7 @@ dependencies = [
 
 [[package]]
 name = "pointer-sync"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "cockpit-stream",
@@ -3788,7 +3788,7 @@ dependencies = [
 
 [[package]]
 name = "profile-author"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "aircraft-model",
  "bytemuck",
@@ -3806,7 +3806,7 @@ dependencies = [
 
 [[package]]
 name = "profile-build"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "profile-engine",
  "rquickjs",
@@ -3816,7 +3816,7 @@ dependencies = [
 
 [[package]]
 name = "profile-engine"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "postcard",
  "saphyr",
@@ -3827,7 +3827,7 @@ dependencies = [
 
 [[package]]
 name = "profile-language"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dprint-plugin-typescript",
  "profile-engine",
@@ -3835,7 +3835,7 @@ dependencies = [
 
 [[package]]
 name = "profile-loader"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "kernel",
@@ -3927,7 +3927,7 @@ dependencies = [
 
 [[package]]
 name = "rate-and-pause"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "kernel",
@@ -3939,7 +3939,7 @@ dependencies = [
 
 [[package]]
 name = "ray-cast"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
 ]
@@ -3960,7 +3960,7 @@ dependencies = [
 
 [[package]]
 name = "recording"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "kernel",
@@ -3971,7 +3971,7 @@ dependencies = [
 
 [[package]]
 name = "recording-format"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "postcard",
  "serde",
@@ -4101,7 +4101,7 @@ dependencies = [
 
 [[package]]
 name = "routine-host"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
  "messages",
@@ -4109,7 +4109,7 @@ dependencies = [
 
 [[package]]
 name = "routines"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "avatars-routines",
  "bytemuck",
@@ -4317,7 +4317,7 @@ dependencies = [
 
 [[package]]
 name = "sandbox"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "rquickjs",
  "serde",
@@ -4500,7 +4500,7 @@ dependencies = [
 
 [[package]]
 name = "session"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "kernel",
@@ -4594,7 +4594,7 @@ dependencies = [
 
 [[package]]
 name = "sim-awareness"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "messages",
  "simconnect-types",
@@ -4602,7 +4602,7 @@ dependencies = [
 
 [[package]]
 name = "sim-client"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "postcard",
  "serde",
@@ -4611,7 +4611,7 @@ dependencies = [
 
 [[package]]
 name = "sim-edge"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sim-client",
  "simconnect-types",
@@ -4621,7 +4621,7 @@ dependencies = [
 
 [[package]]
 name = "sim-service"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
  "clients",
@@ -4637,7 +4637,7 @@ dependencies = [
 
 [[package]]
 name = "sim-variables"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "kernel",
@@ -4650,7 +4650,7 @@ dependencies = [
 
 [[package]]
 name = "simconnect-types"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bindgen",
 ]
@@ -4786,7 +4786,7 @@ dependencies = [
 
 [[package]]
 name = "stand-in-core-helper"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "messages",
  "serde_json",
@@ -4795,7 +4795,7 @@ dependencies = [
 
 [[package]]
 name = "stand-in-sim"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sim-client",
  "simconnect-types",
@@ -4804,7 +4804,7 @@ dependencies = [
 
 [[package]]
 name = "state-sync"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "cockpit-stream",
@@ -5028,7 +5028,7 @@ dependencies = [
 
 [[package]]
 name = "sync-engine"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "messages",
  "postcard",
@@ -5091,7 +5091,7 @@ dependencies = [
 
 [[package]]
 name = "take-control"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "core-helper-service",
@@ -5105,7 +5105,7 @@ dependencies = [
 
 [[package]]
 name = "tape"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "cockpit-stream",
@@ -5538,7 +5538,7 @@ dependencies = [
 
 [[package]]
 name = "traffic"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clients",
  "kernel",
@@ -5555,7 +5555,7 @@ dependencies = [
 
 [[package]]
 name = "traffic-routines"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
  "messages",
@@ -5565,7 +5565,7 @@ dependencies = [
 
 [[package]]
 name = "transport"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytes",
  "futures-util",
@@ -5821,7 +5821,7 @@ dependencies = [
 
 [[package]]
 name = "wasm-module"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bindgen",
  "messages",
